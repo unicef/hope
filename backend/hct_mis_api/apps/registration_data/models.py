@@ -16,7 +16,9 @@ from django.utils.translation import gettext_lazy as _
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import Household, Individual
-from hct_mis_api.apps.payment.api.dataclasses import SimilarityPair
+from hct_mis_api.apps.registration_datahub.apis.deduplication_engine import (
+    SimilarityPair,
+)
 from hct_mis_api.apps.utils.models import (
     AdminUrlMixin,
     ConcurrencyModel,
@@ -395,7 +397,7 @@ class DeduplicationEngineSimilarityPair(models.Model):
                     program=program,
                     individual1_id=individual1,
                     individual2_id=individual2,
-                    similarity_score=pair.similarity_score,
+                    similarity_score=pair.score,
                 )
             )
 

@@ -19,8 +19,3 @@ class RegistrationDataImportListSerializer(EncodedIdSerializerMixin):
             "imported_by",
             "created_at",
         )
-
-
-class DeduplicationEngineStatusSerializer(serializers.Serializer):
-    state = serializers.DecimalField(max_digits=5, decimal_places=2)
-    error = serializers.CharField(required=False, allow_blank=True)

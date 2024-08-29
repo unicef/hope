@@ -3,7 +3,6 @@ from typing import Any
 
 from django.db.models import QuerySet
 from django.http import HttpRequest
-from django.views.decorators.csrf import csrf_exempt
 
 from constance import config
 from django_filters.rest_framework import DjangoFilterBackend
@@ -26,15 +25,11 @@ from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.api.caches import RDIKeyConstructor
 from hct_mis_api.apps.registration_data.api.filters import RegistrationDataImportFilter
 from hct_mis_api.apps.registration_data.api.serializers import (
-    DeduplicationEngineStatusSerializer,
     RegistrationDataImportListSerializer,
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
     deduplication_engine_process,
-)
-from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import (
-    BiometricDeduplicationService,
 )
 
 logger = logging.getLogger(__name__)
@@ -68,24 +63,7 @@ class RegistrationDataImportViewSet(
 
 
 class WebhookDeduplicationView(APIView):
-    serializer_class = DeduplicationEngineStatusSerializer
-
-    @csrf_exempt
-    def post(self, request: HttpRequest, program_id: str) -> Response:
-        serializer = self.serializer_class(data=request.data)
+    def get(self, request: HttpRequest, business_area: str, program_id: str) -> Response:
         program = Program.objects.get(id=program_id)
-
-        if serializer.is_valid():
-            if serializer.validated_data["state"] == "CLEAN":
-                fetch_biometric_deduplication_results_and_process.delay(program.deduplication_set_id)
-            else:
-                service = BiometricDeduplicationService()
-                service.mark_rdis_as_deduplication_error(program.deduplication_set_id)
-                logger.error(
-                    f"Failed to process deduplication set {program.deduplication_set_id} {serializer.validated_data}"
-                )
-
-            return Response(status=status.HTTP_200_OK)
-
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        fetch_biometric_deduplication_results_and_process.delay(program.deduplication_set_id)
+        return Response(status=status.HTTP_200_OK)

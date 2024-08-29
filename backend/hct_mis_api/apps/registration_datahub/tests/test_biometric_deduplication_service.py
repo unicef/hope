@@ -11,7 +11,6 @@ import pytest
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import IndividualFactory
-from hct_mis_api.apps.payment.api.dataclasses import SimilarityPair
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
@@ -19,6 +18,7 @@ from hct_mis_api.apps.registration_datahub.apis.deduplication_engine import (
     DeduplicationEngineAPI,
     DeduplicationImage,
     DeduplicationSet,
+    SimilarityPair,
 )
 from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import (
     BiometricDeduplicationService,
@@ -208,16 +208,16 @@ class BiometricDeduplicationServiceTest(TestCase):
 
         service = BiometricDeduplicationService()
         similarity_pairs = [
-            SimilarityPair(similarity_score=0.5, first=ind2.id, second=ind1.id),
-            SimilarityPair(similarity_score=0.5, first=ind1.id, second=ind2.id),
+            SimilarityPair(score=0.5, first=ind2.id, second=ind1.id),
+            SimilarityPair(score=0.5, first=ind1.id, second=ind2.id),
             SimilarityPair(
-                similarity_score=0.7,
+                score=0.7,
                 first=ind1.id,
                 second=ind3.id,
             ),
-            SimilarityPair(similarity_score=0.8, first=ind3.id, second=ind2.id),
+            SimilarityPair(score=0.8, first=ind3.id, second=ind2.id),
             SimilarityPair(
-                similarity_score=0.9,
+                score=0.9,
                 first=ind3.id,
                 second=ind3.id,
             ),
@@ -251,15 +251,15 @@ class BiometricDeduplicationServiceTest(TestCase):
 
         service = BiometricDeduplicationService()
         similarity_pairs = [
-            SimilarityPair(similarity_score=0.5, first=ind1.id, second=ind2.id),
+            SimilarityPair(score=0.5, first=ind1.id, second=ind2.id),
             SimilarityPair(
-                similarity_score=0.7,
+                score=0.7,
                 first=ind1.id,
                 second=ind3.id,
             ),
-            SimilarityPair(similarity_score=0.8, first=ind2.id, second=ind3.id),
+            SimilarityPair(score=0.8, first=ind2.id, second=ind3.id),
             SimilarityPair(
-                similarity_score=0.9,
+                score=0.9,
                 first=ind1.id,
                 second=ind3.id,
             ),

@@ -19,7 +19,6 @@ from hct_mis_api.apps.core.utils import (
     send_email_notification,
     send_email_notification_on_commit,
 )
-from hct_mis_api.apps.payment.api.dataclasses import SimilarityPair
 from hct_mis_api.apps.payment.models import PaymentPlan, PaymentVerificationPlan
 from hct_mis_api.apps.payment.pdf.payment_plan_export_pdf_service import (
     PaymentPlanPDFExportService,
@@ -33,6 +32,9 @@ from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service impo
 )
 from hct_mis_api.apps.payment.xlsx.xlsx_verification_export_service import (
     XlsxVerificationExportService,
+)
+from hct_mis_api.apps.registration_datahub.apis.deduplication_engine import (
+    SimilarityPair,
 )
 from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import (
     BiometricDeduplicationService,
@@ -677,15 +679,24 @@ def periodic_sync_payment_gateway_delivery_mechanisms(self: Any) -> None:
 @sentry_tags
 def fetch_biometric_deduplication_results_and_process(deduplication_set_id: str) -> None:
     service = BiometricDeduplicationService()
-    data = service.get_deduplication_set_results(deduplication_set_id)
-    similarity_pairs = [SimilarityPair(**item) for item in data]
-    with transaction.atomic():
-        service.store_results(deduplication_set_id, similarity_pairs)
-        service.mark_rdis_as_deduplicated(deduplication_set_id)
-        transaction.on_commit(
-            lambda: create_biometric_deduplication_grievance_tickets_for_already_merged_individuals.delay(
-                deduplication_set_id
+    deduplication_set_data = service.get_deduplication_set(deduplication_set_id)
+
+    if deduplication_set_data.state == "Clean":
+        data = service.get_deduplication_set_results(deduplication_set_id)
+        similarity_pairs = [SimilarityPair(**item) for item in data]
+        with transaction.atomic():
+            service.store_results(deduplication_set_id, similarity_pairs)
+            service.mark_rdis_as_deduplicated(deduplication_set_id)
+            transaction.on_commit(
+                lambda: create_biometric_deduplication_grievance_tickets_for_already_merged_individuals.delay(
+                    deduplication_set_id
+                )
             )
+    else:
+        service.mark_rdis_as_deduplication_error(deduplication_set_id)
+        logger.error(
+            f"Failed to process deduplication set {deduplication_set_id},"
+            f" dedupe engine state: {deduplication_set_data.state} error: {deduplication_set_data.error}"
         )
 
 

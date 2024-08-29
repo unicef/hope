@@ -2,10 +2,10 @@ import logging
 import uuid
 from typing import List
 
+from django.conf import settings
 from django.db.models import Q, QuerySet
 
 from hct_mis_api.apps.household.models import Individual
-from hct_mis_api.apps.payment.api.dataclasses import SimilarityPair
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import (
     DeduplicationEngineSimilarityPair,
@@ -15,6 +15,8 @@ from hct_mis_api.apps.registration_datahub.apis.deduplication_engine import (
     DeduplicationEngineAPI,
     DeduplicationImage,
     DeduplicationSet,
+    DeduplicationSetData,
+    SimilarityPair,
 )
 
 
@@ -28,7 +30,7 @@ class BiometricDeduplicationService:
     def create_deduplication_set(self, program: Program) -> None:
         deduplication_set = DeduplicationSet(
             reference_pk=str(program.id),
-            notification_url=f"api/rest/{program.business_area.slug}/programs/{str(program.id)}/registration-data/webhookdeduplication/",
+            notification_url=f"https://{settings.DOMAIN_NAME}/api/rest/{program.business_area.slug}/programs/{str(program.id)}/registration-data/webhookdeduplication/",
             # notification_url=reverse("registration-data:webhook_deduplication", kwargs={"program_id": str(program.id), "business_area": program.business_area.slug}), # TODO MB why reverse is not working
         )
         response_data = self.api.create_deduplication_set(deduplication_set)
@@ -37,6 +39,10 @@ class BiometricDeduplicationService:
 
     def get_deduplication_set_results(self, deduplication_set_id: str) -> dict:
         return self.api.get_duplicates(deduplication_set_id)
+
+    def get_deduplication_set(self, deduplication_set_id: str) -> DeduplicationSetData:
+        response_data = self.api.get_deduplication_set(deduplication_set_id)
+        return DeduplicationSetData(state=response_data["state"], error=response_data["error"])
 
     def upload_individuals(self, deduplication_set_id: str, rdi: RegistrationDataImport) -> None:
         individuals = (

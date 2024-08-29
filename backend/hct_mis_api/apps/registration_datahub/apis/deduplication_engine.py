@@ -1,7 +1,20 @@
 import dataclasses
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 from hct_mis_api.apps.core.api.mixins import BaseAPI
+
+
+@dataclasses.dataclass
+class SimilarityPair:
+    score: float
+    first: str
+    second: str
+
+
+@dataclasses.dataclass
+class DeduplicationSetData:
+    state: str  # "Clean", "Dirty", "Processing", "Error"
+    error: Optional[str] = None
 
 
 @dataclasses.dataclass
@@ -32,6 +45,7 @@ class DeduplicationEngineAPI(BaseAPI):
 
     class Endpoints:
         GET_DEDUPLICATION_SETS = "deduplication_sets/"  # GET - List view
+        GET_DEDUPLICATION_SET = "deduplication_sets/{pk}/"  # GET - Detail view
         CREATE_DEDUPLICATION_SET = "deduplication_sets/"  # POST - Create view
         DELETE_DEDUPLICATION_SET = "deduplication_sets/{pk}/"  # DELETE - Delete view
         PROCESS_DEDUPLICATION = "deduplication_sets/{pk}/process/"  # POST - Start processing a deduplication set
@@ -47,6 +61,10 @@ class DeduplicationEngineAPI(BaseAPI):
 
     def create_deduplication_set(self, deduplication_set: DeduplicationSet) -> dict:
         response_data, _ = self._post(self.Endpoints.CREATE_DEDUPLICATION_SET, dataclasses.asdict(deduplication_set))
+        return response_data
+
+    def get_deduplication_set(self, deduplication_set_id: str) -> dict:
+        response_data, _ = self._get(self.Endpoints.GET_DEDUPLICATION_SET.format(pk=deduplication_set_id))
         return response_data
 
     def bulk_upload_images(self, deduplication_set_id: str, images: List[DeduplicationImage]) -> dict:
