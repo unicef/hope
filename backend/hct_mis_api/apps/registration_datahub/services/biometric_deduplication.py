@@ -170,14 +170,22 @@ class BiometricDeduplicationService:
             is_duplicate=True,
         ).distinct()
 
-    def create_grievance_tickets_for_duplicates(self, rdi: RegistrationDataImport) -> None:
-        # create tickets only against merged individuals
-        from hct_mis_api.apps.grievance.services.needs_adjudication_ticket_services import (
-            create_needs_adjudication_tickets_for_biometrics,
-        )
+    def get_duplicates_for_rdi_against_batch(
+        self, rdi: RegistrationDataImport
+    ) -> QuerySet[DeduplicationEngineSimilarityPair]:
+        rdi_individuals = rdi.individuals.filter(is_removed=False).only("id")
+        return DeduplicationEngineSimilarityPair.objects.filter(
+            Q(individual1__in=rdi_individuals) & Q(individual2__in=rdi_individuals),
+            program=rdi.program,
+            is_duplicate=True,
+        ).distinct()
+
+    def get_duplicates_for_rdi_against_population(
+        self, rdi: RegistrationDataImport
+    ) -> QuerySet[DeduplicationEngineSimilarityPair]:
         from hct_mis_api.apps.utils.models import MergeStatusModel
 
-        deduplication_pairs = (
+        return (
             self.get_duplicates_for_rdi(rdi)
             .filter(
                 Q(individual1__duplicate=False) & Q(individual2__duplicate=False),
@@ -187,5 +195,13 @@ class BiometricDeduplicationService:
             )
             .distinct()
         )
+
+    def create_grievance_tickets_for_duplicates(self, rdi: RegistrationDataImport) -> None:
+        # create tickets only against merged individuals
+        from hct_mis_api.apps.grievance.services.needs_adjudication_ticket_services import (
+            create_needs_adjudication_tickets_for_biometrics,
+        )
+
+        deduplication_pairs = self.get_duplicates_for_rdi_against_population(rdi)
 
         create_needs_adjudication_tickets_for_biometrics(deduplication_pairs, rdi)

@@ -7,6 +7,7 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 
 
@@ -23,6 +24,29 @@ class TestRegistrationDataImportQuery(APITestCase):
             dataSource
             numberOfIndividuals
             numberOfHouseholds
+            batchDuplicatesCountAndPercentage{
+              count
+              percentage
+            }
+            batchUniqueCountAndPercentage{
+              count
+              percentage
+            }
+            goldenRecordDuplicatesCountAndPercentage{
+              count
+              percentage
+            }
+            goldenRecordPossibleDuplicatesCountAndPercentage{
+              count
+              percentage
+            }
+            goldenRecordUniqueCountAndPercentage{
+              count
+              percentage
+            }
+            totalHouseholdsCountWithValidPhoneNo
+            isDeduplicated
+            canMerge
           }
         }
       }
@@ -46,6 +70,7 @@ class TestRegistrationDataImportQuery(APITestCase):
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.partner = PartnerFactory(name="Test1")
         cls.user = UserFactory(partner=cls.partner)
+        cls.program = ProgramFactory(status="ACTIVE")
         cls.to_create = [
             {
                 "name": "Lorem Ipsum",
@@ -73,7 +98,10 @@ class TestRegistrationDataImportQuery(APITestCase):
             },
         ]
 
-        cls.data = [RegistrationDataImportFactory(**item, business_area=cls.business_area) for item in cls.to_create]
+        cls.data = [
+            RegistrationDataImportFactory(**item, business_area=cls.business_area, program=cls.program)
+            for item in cls.to_create
+        ]
 
     @parameterized.expand(
         [
@@ -119,4 +147,17 @@ class TestRegistrationDataImportQuery(APITestCase):
                     "RegistrationDataImportNode",
                 )
             },
+        )
+
+    def test_registration_data_status_choices(self) -> None:
+        self.snapshot_graphql_request(
+            request_string="""
+            query registrationDataStatusChoices {
+              registrationDataStatusChoices {
+                name
+                value
+              }
+            }
+            """,
+            context={"user": self.user},
         )

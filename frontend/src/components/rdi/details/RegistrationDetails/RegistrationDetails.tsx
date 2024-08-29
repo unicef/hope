@@ -190,16 +190,15 @@ export function RegistrationDetails({
             <Grid item xs={'auto'}>
               <Grid container direction="column">
                 <Grid container item xs={12} spacing={3}>
-                  <Grid item xs={3}></Grid>
-                  <Grid item xs={3}>
-                    <BoldGrey>{t('Identifiers')}</BoldGrey>
-                  </Grid>
-                  <Grid item xs={3}>
+                  <Grid item xs={4}></Grid>
+                  <Grid item xs={4}>
                     <BoldGrey>{t('Biographical')}</BoldGrey>
                   </Grid>
-                  <Grid item xs={3}>
-                    <BoldGrey>{t('Biometrics')}</BoldGrey>
-                  </Grid>
+                  {registration.biometricDeduplicationEnabled && (
+                    <Grid item xs={4}>
+                      <BoldGrey>{t('Biometrics')}</BoldGrey>
+                    </Grid>
+                  )}
                 </Grid>
                 <DedupeBox label="Within Batch" options={withinBatchOptions} />
                 <DedupeBox label="In Population" options={populationOptions} />

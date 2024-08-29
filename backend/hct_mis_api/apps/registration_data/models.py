@@ -228,6 +228,10 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
         self.number_of_households = Household.objects.filter(registration_data_import=self).count()
         self.save(update_fields=("number_of_individuals", "number_of_households"))
 
+    @property
+    def biometric_deduplication_enabled(self) -> bool:
+        return self.program.biometric_deduplication_enabled
+
 
 class ImportData(TimeStampedUUIDModel):
     XLSX = "XLSX"
