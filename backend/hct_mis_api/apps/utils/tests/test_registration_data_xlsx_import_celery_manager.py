@@ -10,8 +10,6 @@ from hct_mis_api.apps.registration_data.models import ImportData, RegistrationDa
 
 
 class TestRegistrationDataXlsxImportCeleryManager(APITestCase):
-    databases = {"default", "registration_datahub"}
-
     @classmethod
     def setUpTestData(cls) -> None:
         call_command("loadbusinessareas")
