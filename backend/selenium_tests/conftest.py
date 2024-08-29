@@ -194,19 +194,15 @@ def driver() -> Chrome:
     # if not os.environ.get("STREAM"):
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
-    # chrome_options.add_argument("--disable-dev-shm-usage")
-    # chrome_options.add_argument("--enable-logging")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--enable-logging")
     chrome_options.add_argument("--window-size=1920,1080")
-    # if not os.path.exists("./report/downloads/"):
-    #     os.makedirs("./report/downloads/")
-    # prefs = {"download.default_directory": "./report/downloads/"}
-    # chrome_options.add_experimental_option("prefs", prefs)
-    # from selenium.webdriver.chrome.service import Service as ChromeService
-    # driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=chrome_options)
-    # driver = webdriver.Chrome(service=ChromiumService(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()),
-    #                           options=chrome_options)
-    # ChromeDriverManager(os_system_manager=OperationSystemManager(os_type="linux-aarch64")).install()
-    # ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()
+    chrome_options.add_argument("--disable-software-rasterizer")
+    chrome_options.add_argument("--disable-dev-tools")
+    if not os.path.exists("./report/downloads/"):
+        os.makedirs("./report/downloads/")
+    prefs = {"download.default_directory": "./report/downloads/"}
+    chrome_options.add_experimental_option("prefs", prefs)
     driver = webdriver.Chrome(options=chrome_options)
     yield driver
 
