@@ -189,24 +189,10 @@ def create_session(host: str, username: str, password: str, csrf: str = "") -> o
 @pytest.fixture
 def driver() -> Chrome:
     chrome_options = Options()
-    # chrome_headless_path = "./chromedriver-linux64"
-    # chrome_options.binary_location = chrome_headless_path
-    # if not os.environ.get("STREAM"):
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
-    # chrome_options.add_argument("--disable-dev-shm-usage")
-    # chrome_options.add_argument("--enable-logging")
+    chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--window-size=1920,1080")
-    # if not os.path.exists("./report/downloads/"):
-    #     os.makedirs("./report/downloads/")
-    # prefs = {"download.default_directory": "./report/downloads/"}
-    # chrome_options.add_experimental_option("prefs", prefs)
-    # from selenium.webdriver.chrome.service import Service as ChromeService
-    # driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=chrome_options)
-    # driver = webdriver.Chrome(service=ChromiumService(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()),
-    #                           options=chrome_options)
-    # ChromeDriverManager(os_system_manager=OperationSystemManager(os_type="linux-aarch64")).install()
-    # ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()
     driver = webdriver.Chrome(options=chrome_options)
     yield driver
 
@@ -214,7 +200,7 @@ def driver() -> Chrome:
 @pytest.fixture(autouse=True)
 def browser(driver: Chrome) -> Chrome:
     yield driver
-    driver.quit()
+    # driver.quit()
     # pytest.CSRF = ""
     # pytest.SESSION_ID = ""
 
