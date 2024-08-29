@@ -205,9 +205,9 @@ def driver() -> Chrome:
     # driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=chrome_options)
     driver = webdriver.Chrome(service=ChromiumService(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()),
                               options=chrome_options)
-    # ChromeDriverManager(os_system_manager=OperationSystemManager(os_type="linux-mips64")).install()
+    ChromeDriverManager(os_system_manager=OperationSystemManager(os_type="linux-aarch64")).install()
     # ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()
-    # driver = webdriver.Chrome(options=chrome_options)
+    driver = webdriver.Chrome(options=chrome_options)
     yield driver
 
 
