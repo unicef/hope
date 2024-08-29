@@ -194,6 +194,9 @@ def driver() -> Chrome:
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--window-size=1920,1080")
     driver = webdriver.Chrome(options=chrome_options)
+    if not os.path.exists("./report/downloads/"):
+        os.makedirs("./report/downloads/")
+    prefs = {"download.default_directory": "./report/downloads/"}
     yield driver
 
 
