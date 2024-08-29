@@ -71,7 +71,7 @@ from requests import Session
 from selenium import webdriver
 from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service as ChromiumService
+from selenium.webdriver.chrome.service import Service as ChromiumService, Service
 from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.core.os_manager import ChromeType, OperationSystemManager
 
@@ -189,36 +189,30 @@ def create_session(host: str, username: str, password: str, csrf: str = "") -> o
 @pytest.fixture
 def driver() -> Chrome:
     chrome_options = Options()
-    # chrome_headless_path = "./chrome-headless-shell-linux64"
+    # chrome_headless_path = "./chromedriver-linux64"
     # chrome_options.binary_location = chrome_headless_path
-    if not os.environ.get("STREAM"):
-        chrome_options.add_argument("--headless")
+    # if not os.environ.get("STREAM"):
+    chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--enable-logging")
+    # chrome_options.add_argument("--disable-dev-shm-usage")
+    # chrome_options.add_argument("--enable-logging")
     chrome_options.add_argument("--window-size=1920,1080")
-    if not os.path.exists("./report/downloads/"):
-        os.makedirs("./report/downloads/")
-    prefs = {"download.default_directory": "./report/downloads/"}
-    chrome_options.add_experimental_option("prefs", prefs)
-    from selenium.webdriver.chrome.service import Service as ChromeService
+    # if not os.path.exists("./report/downloads/"):
+    #     os.makedirs("./report/downloads/")
+    # prefs = {"download.default_directory": "./report/downloads/"}
+    # chrome_options.add_experimental_option("prefs", prefs)
+    # from selenium.webdriver.chrome.service import Service as ChromeService
     # driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=chrome_options)
-    driver = webdriver.Chrome(service=ChromiumService(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()),
-                              options=chrome_options)
-    ChromeDriverManager(os_system_manager=OperationSystemManager(os_type="linux-aarch64")).install()
+    # driver = webdriver.Chrome(service=ChromiumService(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()),
+    #                           options=chrome_options)
+    # ChromeDriverManager(os_system_manager=OperationSystemManager(os_type="linux-aarch64")).install()
     # ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()
     driver = webdriver.Chrome(options=chrome_options)
     yield driver
 
 
 @pytest.fixture(autouse=True)
-def browser(driver: Chrome, request: FixtureRequest) -> Chrome:
-    if request.node.get_closest_marker("mapping"):
-        driver.live_server = LiveServer("0.0.0.0:8080")
-    elif request.node.get_closest_marker("local"):
-        driver.live_server.url = "http://localhost:8080"
-    else:
-        driver.live_server = LiveServer("localhost")
+def browser(driver: Chrome) -> Chrome:
     yield driver
     driver.close()
     pytest.CSRF = ""
@@ -227,12 +221,13 @@ def browser(driver: Chrome, request: FixtureRequest) -> Chrome:
 
 @pytest.fixture
 def login(browser: Chrome) -> Chrome:
-    browser.get(f"{browser.live_server.url}/api/unicorn/")
+    live_url = LiveServer("localhost")
+    browser.get(f"{live_url.url}/api/unicorn/")
     get_cookies = browser.get_cookies()  # type: ignore
-    create_session(browser.live_server.url, "superuser", "testtest2", get_cookies[0]["value"])
+    create_session(live_url.url, "superuser", "testtest2", get_cookies[0]["value"])
     browser.add_cookie({"name": "csrftoken", "value": pytest.CSRF})
     browser.add_cookie({"name": "sessionid", "value": pytest.SESSION_ID})
-    browser.get(f"{browser.live_server.url}")
+    browser.get(f"{live_url.url}")
     yield browser
 
 
