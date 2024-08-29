@@ -166,9 +166,9 @@ def pytest_configure(config) -> None:  # type: ignore
 
     logging.disable(logging.CRITICAL)
     pytest.SELENIUM_PATH = os.path.dirname(__file__)
-    pytest.CSRF = ""
-    pytest.SESSION_ID = ""
-    pytest.session = Session()
+    # pytest.CSRF = ""
+    # pytest.SESSION_ID = ""
+    # pytest.session = Session()
 
 
 def create_session(host: str, username: str, password: str, csrf: str = "") -> object:
@@ -215,19 +215,26 @@ def driver() -> Chrome:
 def browser(driver: Chrome) -> Chrome:
     yield driver
     driver.close()
-    pytest.CSRF = ""
-    pytest.SESSION_ID = ""
+    # pytest.CSRF = ""
+    # pytest.SESSION_ID = ""
 
 
 @pytest.fixture
 def login(browser: Chrome) -> Chrome:
-    live_url = LiveServer("localhost")
-    browser.get(f"{live_url.url}/api/unicorn/")
-    get_cookies = browser.get_cookies()  # type: ignore
-    create_session(live_url.url, "superuser", "testtest2", get_cookies[0]["value"])
-    browser.add_cookie({"name": "csrftoken", "value": pytest.CSRF})
-    browser.add_cookie({"name": "sessionid", "value": pytest.SESSION_ID})
-    browser.get(f"{live_url.url}")
+    browser.live_server = LiveServer("localhost")
+    browser.get(f"{browser.live_server.url}/api/unicorn/")
+    login = "id_username"
+    password = "id_password"
+    loginButton = '//*[@id="login-form"]/div[3]/input'
+    from selenium.webdriver.common.by import By
+    from selenium.webdriver.support.wait import WebDriverWait
+    from selenium.webdriver.support import expected_conditions as EC
+    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.XPATH, loginButton)))
+    browser.find_element(By.XPATH, loginButton)
+    browser.find_element(By.ID, login).send_keys("superuser")
+    browser.find_element(By.ID, password).send_keys("testtest2")
+    browser.find_element(By.XPATH, loginButton).click()
+    browser.get(f"{browser.live_server.url}/")
     yield browser
 
 
