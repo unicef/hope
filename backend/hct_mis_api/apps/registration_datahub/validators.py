@@ -781,7 +781,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                         delivery_mechanisms_data[row_number][header.value] = value
 
                 if current_household_id and current_household_id not in self.household_ids:
-                    message = f"Sheet: Individuals, There is no household with provided id: {current_household_id}"
+                    message = f"Sheet: 'Individuals', There is no household with provided id: {current_household_id}"
                     invalid_rows.append({"row_number": row_number, "header": "relationship_i_c", "message": message})
 
                 for header_value_doc in self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING.values():
@@ -795,11 +795,11 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 for household_id, count in self.head_of_household_count.items():
                     if count == 0:
                         message = (
-                            f"Sheet: Individuals, Household with id: {household_id}, has to have a head of household"
+                            f"Sheet: 'Individuals', Household with id: {household_id} has to have a head of household"
                         )
                         invalid_rows.append({"row_number": 0, "header": "relationship_i_c", "message": message})
                     elif count > 1:
-                        message = f"Sheet: Individuals, There are multiple head of households for household with id: {household_id}"
+                        message = f"Sheet: 'Individuals', There are multiple head of households for household with id: {household_id}"
                         invalid_rows.append({"row_number": 0, "header": "relationship_i_c", "message": message})
 
             if sheet.title in ("Households", "People"):
@@ -835,10 +835,10 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 row_number, header_name, p_code = code_tuple
                 area = queryset.filter(p_code=p_code).first()
                 if not area:
-                    message = f"Sheet Households: Area with code: {p_code} does not exist"
+                    message = f"Sheet: 'Households': Area with code: {p_code} does not exist"
                 elif area.area_type.country not in business_area_countries:
                     message = (
-                        f"Sheet Households: Admin Area: {p_code} unavailable in Business Area: {business_area_slug}"
+                        f"Sheet: 'Households': Admin Area: {p_code} unavailable in Business Area: {business_area_slug}"
                     )
                 if message:
                     invalid_rows.append({"row_number": row_number, "header": header_name, "message": message})
