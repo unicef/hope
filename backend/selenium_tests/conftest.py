@@ -214,7 +214,7 @@ def driver() -> Chrome:
 @pytest.fixture(autouse=True)
 def browser(driver: Chrome) -> Chrome:
     yield driver
-    driver.close()
+    driver.quit()
     # pytest.CSRF = ""
     # pytest.SESSION_ID = ""
 
