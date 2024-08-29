@@ -1,12 +1,9 @@
 import json
-from datetime import date
 from typing import Any, Dict, List, Optional
 
 from django.db.models import Prefetch, Q, QuerySet
 
 import graphene
-from dateutil.parser import parse
-from dateutil.relativedelta import relativedelta
 from graphene import Boolean, Int, relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
@@ -47,38 +44,12 @@ from hct_mis_api.apps.registration_data.models import (
     KoboImportData,
     RegistrationDataImportDatahub,
 )
+from hct_mis_api.apps.registration_data.nodes import DeduplicationResultNode
 from hct_mis_api.apps.registration_datahub.filters import (
     ImportedHouseholdFilter,
     ImportedIndividualFilter,
 )
 from hct_mis_api.apps.utils.schema import Arg, FlexFieldsScalar
-
-
-class DeduplicationResultNode(graphene.ObjectType):
-    hit_id = graphene.ID()
-    full_name = graphene.String()
-    score = graphene.Float()
-    proximity_to_score = graphene.Float()
-    location = graphene.String()
-    age = graphene.Int()
-    duplicate = graphene.Boolean()
-    distinct = graphene.Boolean()
-
-    def resolve_age(self, info: Any) -> Optional[int]:
-        date_of_birth = self.get("dob")
-        if date_of_birth:
-            today = date.today()
-            return relativedelta(today, parse(date_of_birth)).years
-        return None
-
-    def resolve_location(self, info: Any) -> str:
-        return self.get("location", "Not provided")
-
-    def resolve_duplicate(self, info: Any) -> bool:
-        return self.get("duplicate", False)
-
-    def resolve_distinct(self, info: Any) -> bool:
-        return self.get("distinct", False)
 
 
 class ImportedDocumentNode(DjangoObjectType):

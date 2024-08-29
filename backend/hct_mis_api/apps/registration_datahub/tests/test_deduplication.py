@@ -14,17 +14,14 @@ from hct_mis_api.apps.household.models import (
     UNIQUE,
     WIFE_HUSBAND,
     Individual,
+    PendingIndividual,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.registration_data.models import ImportData
-from hct_mis_api.apps.registration_datahub.fixtures import (
-    create_imported_household_and_individuals,
-)
-from hct_mis_api.apps.registration_datahub.models import (
+from hct_mis_api.apps.registration_data.models import (
     DUPLICATE_IN_BATCH,
     UNIQUE_IN_BATCH,
-    ImportedIndividual,
+    ImportData,
 )
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hct_mis_api.apps.utils.elasticsearch_utils import populate_index
@@ -70,7 +67,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
         (
             cls.household,
             cls.individuals,
-        ) = create_imported_household_and_individuals(
+        ) = create_household_and_individuals(
             household_data={
                 "registration_data_import": cls.registration_data_import,
                 "program_id": cls.program.id,
@@ -235,10 +232,10 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
 
         with self.assertNumQueries(11):
             task.deduplicate_pending_individuals(self.registration_data_import)
-        duplicate_in_batch = ImportedIndividual.objects.order_by("full_name").filter(
+        duplicate_in_batch = PendingIndividual.objects.order_by("full_name").filter(
             deduplication_batch_status=DUPLICATE_IN_BATCH
         )
-        unique_in_batch = ImportedIndividual.objects.order_by("full_name").filter(
+        unique_in_batch = PendingIndividual.objects.order_by("full_name").filter(
             deduplication_batch_status=UNIQUE_IN_BATCH
         )
 
@@ -265,13 +262,13 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
             expected_uniques,
         )
 
-        duplicate_in_golden_record = ImportedIndividual.objects.order_by("full_name").filter(
+        duplicate_in_golden_record = PendingIndividual.objects.order_by("full_name").filter(
             deduplication_golden_record_status=DUPLICATE
         )
-        needs_adjudication_in_golden_record = ImportedIndividual.objects.order_by("full_name").filter(
+        needs_adjudication_in_golden_record = PendingIndividual.objects.order_by("full_name").filter(
             deduplication_golden_record_status=NEEDS_ADJUDICATION
         )
-        unique_in_golden_record = ImportedIndividual.objects.order_by("full_name").filter(
+        unique_in_golden_record = PendingIndividual.objects.order_by("full_name").filter(
             deduplication_golden_record_status=UNIQUE
         )
 

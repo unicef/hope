@@ -16,6 +16,7 @@ from hct_mis_api.apps.core.kobo.api import KoboAPI
 from hct_mis_api.apps.core.kobo.common import (
     KOBO_FORM_INDIVIDUALS_COLUMN_NAME,
     get_field_name,
+    get_submission_metadata,
 )
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import chunks, rename_dict_keys
@@ -44,7 +45,6 @@ from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateT
 from hct_mis_api.apps.registration_datahub.tasks.rdi_base_create import (
     RdiBaseCreateTask,
 )
-from hct_mis_api.apps.registration_datahub.tasks.utils import get_submission_metadata
 from hct_mis_api.apps.registration_datahub.utils import (
     calculate_hash_for_kobo_submission,
     find_attachment_in_kobo,
