@@ -81,7 +81,7 @@ class TestRegistrationDataImportQuery(APITestCase):
         cls.program_active_biometric_deduplication_enabled = ProgramFactory(
             status="ACTIVE", biometric_deduplication_enabled=True
         )
-        cls.program_draft = ProgramFactory(status="ACTIVE")
+        cls.program_draft = ProgramFactory(status="DRAFT")
         cls.to_create = [
             {
                 "name": "Lorem Ipsum",
