@@ -25,6 +25,7 @@ snapshots['TestRegistrationDataImportQuery::test_registration_data_import_datahu
                                 'percentage': 0.0
                             }
                         ],
+                        'biometricDeduplicationEnabled': False,
                         'canMerge': True,
                         'dataSource': 'XLS',
                         'goldenRecordDuplicatesCountAndPercentage': [
@@ -46,7 +47,7 @@ snapshots['TestRegistrationDataImportQuery::test_registration_data_import_datahu
                             }
                         ],
                         'isDeduplicated': 'NO',
-                        'name': 'Lorem Ipsum 3',
+                        'name': 'Lorem Ipsum 4',
                         'numberOfHouseholds': 184,
                         'numberOfIndividuals': 423,
                         'status': 'IN_REVIEW',
@@ -59,15 +60,24 @@ snapshots['TestRegistrationDataImportQuery::test_registration_data_import_datahu
                             {
                                 'count': 0,
                                 'percentage': 0.0
+                            },
+                            {
+                                'count': 0,
+                                'percentage': 0.0
                             }
                         ],
                         'batchUniqueCountAndPercentage': [
                             {
                                 'count': 0,
                                 'percentage': 0.0
+                            },
+                            {
+                                'count': 323,
+                                'percentage': 100.0
                             }
                         ],
-                        'canMerge': True,
+                        'biometricDeduplicationEnabled': True,
+                        'canMerge': False,
                         'dataSource': 'XLS',
                         'goldenRecordDuplicatesCountAndPercentage': [
                             {
@@ -79,15 +89,82 @@ snapshots['TestRegistrationDataImportQuery::test_registration_data_import_datahu
                             {
                                 'count': 0,
                                 'percentage': 0.0
+                            },
+                            {
+                                'count': 1,
+                                'percentage': 1.0
                             }
                         ],
                         'goldenRecordUniqueCountAndPercentage': [
                             {
                                 'count': 0,
                                 'percentage': 0.0
+                            },
+                            {
+                                'count': 1,
+                                'percentage': 1.0
                             }
                         ],
                         'isDeduplicated': 'NO',
+                        'name': 'Lorem Ipsum 3',
+                        'numberOfHouseholds': 154,
+                        'numberOfIndividuals': 323,
+                        'status': 'IN_REVIEW',
+                        'totalHouseholdsCountWithValidPhoneNo': 0
+                    }
+                },
+                {
+                    'node': {
+                        'batchDuplicatesCountAndPercentage': [
+                            {
+                                'count': 0,
+                                'percentage': 0.0
+                            },
+                            {
+                                'count': 0,
+                                'percentage': 0.0
+                            }
+                        ],
+                        'batchUniqueCountAndPercentage': [
+                            {
+                                'count': 0,
+                                'percentage': 0.0
+                            },
+                            {
+                                'count': 323,
+                                'percentage': 100.0
+                            }
+                        ],
+                        'biometricDeduplicationEnabled': True,
+                        'canMerge': False,
+                        'dataSource': 'XLS',
+                        'goldenRecordDuplicatesCountAndPercentage': [
+                            {
+                                'count': 0,
+                                'percentage': 0.0
+                            }
+                        ],
+                        'goldenRecordPossibleDuplicatesCountAndPercentage': [
+                            {
+                                'count': 0,
+                                'percentage': 0.0
+                            },
+                            {
+                                'count': 1,
+                                'percentage': 1.0
+                            }
+                        ],
+                        'goldenRecordUniqueCountAndPercentage': [
+                            {
+                                'count': 0,
+                                'percentage': 0.0
+                            },
+                            {
+                                'count': 1,
+                                'percentage': 1.0
+                            }
+                        ],
+                        'isDeduplicated': 'YES',
                         'name': 'Lorem Ipsum 2',
                         'numberOfHouseholds': 154,
                         'numberOfIndividuals': 323,
@@ -109,6 +186,7 @@ snapshots['TestRegistrationDataImportQuery::test_registration_data_import_datahu
                                 'percentage': 0.0
                             }
                         ],
+                        'biometricDeduplicationEnabled': False,
                         'canMerge': True,
                         'dataSource': 'XLS',
                         'goldenRecordDuplicatesCountAndPercentage': [
