@@ -12,6 +12,9 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import Document, Household
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.registration_datahub.apis.deduplication_engine import (
+    SimilarityPair,
+)
 from hct_mis_api.apps.registration_datahub.exceptions import (
     AlreadyRunningException,
     WrongStatusException,
@@ -472,7 +475,7 @@ def remove_old_rdi_links_task(page_count: int = 100) -> None:
         raise
 
 
-@app.task
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
 @sentry_tags
 @log_start_and_end
 def deduplication_engine_process(program_id: str) -> None:
@@ -480,9 +483,30 @@ def deduplication_engine_process(program_id: str) -> None:
     BiometricDeduplicationService().upload_and_process_deduplication_set(program)
 
 
-@app.task
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
 @sentry_tags
 @log_start_and_end
 def create_grievance_tickets_for_dedup_engine_results(rdi_id: str) -> None:
     rdi = RegistrationDataImport.objects.get(id=rdi_id)
     BiometricDeduplicationService().create_grievance_tickets_for_duplicates(rdi)
+
+
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@log_start_and_end
+@sentry_tags
+def fetch_biometric_deduplication_results_and_process(deduplication_set_id: str) -> None:
+    service = BiometricDeduplicationService()
+    deduplication_set_data = service.get_deduplication_set(deduplication_set_id)
+
+    if deduplication_set_data.state == "Clean":
+        data = service.get_deduplication_set_results(deduplication_set_id)
+        similarity_pairs = [SimilarityPair(**item) for item in data]
+        with transaction.atomic():
+            service.store_results(deduplication_set_id, similarity_pairs)
+            service.mark_rdis_as_deduplicated(deduplication_set_id)
+    else:
+        service.mark_rdis_as_deduplication_error(deduplication_set_id)
+        logger.error(
+            f"Failed to process deduplication set {deduplication_set_id},"
+            f" dedupe engine state: {deduplication_set_data.state} error: {deduplication_set_data.error}"
+        )

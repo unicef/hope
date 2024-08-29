@@ -18,9 +18,6 @@ from rest_framework_extensions.cache.decorators import cache_response
 from hct_mis_api.api.caches import etag_decorator
 from hct_mis_api.apps.account.api.permissions import RDIViewListPermission
 from hct_mis_api.apps.core.api.mixins import BusinessAreaProgramMixin
-from hct_mis_api.apps.payment.celery_tasks import (
-    fetch_biometric_deduplication_results_and_process,
-)
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.api.caches import RDIKeyConstructor
 from hct_mis_api.apps.registration_data.api.filters import RegistrationDataImportFilter
@@ -30,6 +27,7 @@ from hct_mis_api.apps.registration_data.api.serializers import (
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
     deduplication_engine_process,
+    fetch_biometric_deduplication_results_and_process,
 )
 
 logger = logging.getLogger(__name__)

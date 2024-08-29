@@ -4,13 +4,17 @@ from decimal import Decimal
 from unittest import mock
 from unittest.mock import patch
 
+from django.conf import settings
 from django.test import TestCase
 
 import pytest
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.household.fixtures import IndividualFactory
+from hct_mis_api.apps.household.fixtures import (
+    IndividualFactory,
+    PendingIndividualFactory,
+)
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
@@ -44,13 +48,17 @@ class BiometricDeduplicationServiceTest(TestCase):
     def test_create_deduplication_set(self, mock_create_deduplication_set: mock.Mock) -> None:
         service = BiometricDeduplicationService()
 
+        new_uuid = str(uuid.uuid4())
+        mock_create_deduplication_set.return_value = {"id": new_uuid}
+
         service.create_deduplication_set(self.program)
 
-        self.assertIsNotNone(self.program.deduplication_set_id)
+        self.program.refresh_from_db()
+        self.assertEqual(str(self.program.deduplication_set_id), new_uuid)
         mock_create_deduplication_set.assert_called_once_with(
             DeduplicationSet(
-                reference_pk=str(self.program.deduplication_set_id),
-                notification_url="",
+                reference_pk=str(self.program.id),
+                notification_url=f"https://{settings.DOMAIN_NAME}/api/rest/{self.program.business_area.slug}/programs/{str(self.program.id)}/registration-data/webhookdeduplication/",
             )
         )
 
@@ -158,6 +166,9 @@ class BiometricDeduplicationServiceTest(TestCase):
         rdi_2 = RegistrationDataImportFactory(
             program=self.program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS
         )
+        IndividualFactory(registration_data_import=rdi_1, photo="some_photo1.jpg")
+        PendingIndividualFactory(registration_data_import=rdi_2, photo="some_photo2.jpg")
+
         service.create_deduplication_set = mock.MagicMock()
         with self.assertRaisesMessage(
             BiometricDeduplicationService.BiometricDeduplicationServiceException,

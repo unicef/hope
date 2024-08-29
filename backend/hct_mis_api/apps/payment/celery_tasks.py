@@ -33,12 +33,6 @@ from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service impo
 from hct_mis_api.apps.payment.xlsx.xlsx_verification_export_service import (
     XlsxVerificationExportService,
 )
-from hct_mis_api.apps.registration_datahub.apis.deduplication_engine import (
-    SimilarityPair,
-)
-from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import (
-    BiometricDeduplicationService,
-)
 from hct_mis_api.apps.utils.logs import log_start_and_end
 from hct_mis_api.apps.utils.sentry import sentry_tags, set_sentry_business_area_tag
 
@@ -672,38 +666,3 @@ def periodic_sync_payment_gateway_delivery_mechanisms(self: Any) -> None:
     except Exception as e:
         logger.exception(e)
         raise self.retry(exc=e)
-
-
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
-@log_start_and_end
-@sentry_tags
-def fetch_biometric_deduplication_results_and_process(deduplication_set_id: str) -> None:
-    service = BiometricDeduplicationService()
-    deduplication_set_data = service.get_deduplication_set(deduplication_set_id)
-
-    if deduplication_set_data.state == "Clean":
-        data = service.get_deduplication_set_results(deduplication_set_id)
-        similarity_pairs = [SimilarityPair(**item) for item in data]
-        with transaction.atomic():
-            service.store_results(deduplication_set_id, similarity_pairs)
-            service.mark_rdis_as_deduplicated(deduplication_set_id)
-            transaction.on_commit(
-                lambda: create_biometric_deduplication_grievance_tickets_for_already_merged_individuals.delay(
-                    deduplication_set_id
-                )
-            )
-    else:
-        service.mark_rdis_as_deduplication_error(deduplication_set_id)
-        logger.error(
-            f"Failed to process deduplication set {deduplication_set_id},"
-            f" dedupe engine state: {deduplication_set_data.state} error: {deduplication_set_data.error}"
-        )
-
-
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
-@log_start_and_end
-@sentry_tags
-def create_biometric_deduplication_grievance_tickets_for_already_merged_individuals(deduplication_set_id: str) -> None:
-    BiometricDeduplicationService().create_biometric_deduplication_grievance_tickets_for_already_merged_individuals(
-        deduplication_set_id
-    )
