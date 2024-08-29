@@ -17,41 +17,17 @@ snapshots['TestRegistrationDataImportQuery::test_registration_data_import_datahu
                             {
                                 'count': 0,
                                 'percentage': 0.0
-                            },
-                            {
-                                'count': 0,
-                                'percentage': 0.0
-                            },
-                            {
-                                'count': 0,
-                                'percentage': 0.0
                             }
                         ],
                         'batchUniqueCountAndPercentage': [
                             {
                                 'count': 0,
                                 'percentage': 0.0
-                            },
-                            {
-                                'count': 0,
-                                'percentage': 0.0
-                            },
-                            {
-                                'count': 0,
-                                'percentage': 0.0
                             }
                         ],
-                        'canMerge': False,
+                        'canMerge': True,
                         'dataSource': 'XLS',
                         'goldenRecordDuplicatesCountAndPercentage': [
-                            {
-                                'count': 0,
-                                'percentage': 0.0
-                            },
-                            {
-                                'count': 0,
-                                'percentage': 0.0
-                            },
                             {
                                 'count': 0,
                                 'percentage': 0.0
@@ -61,25 +37,9 @@ snapshots['TestRegistrationDataImportQuery::test_registration_data_import_datahu
                             {
                                 'count': 0,
                                 'percentage': 0.0
-                            },
-                            {
-                                'count': 0,
-                                'percentage': 0.0
-                            },
-                            {
-                                'count': 0,
-                                'percentage': 0.0
                             }
                         ],
                         'goldenRecordUniqueCountAndPercentage': [
-                            {
-                                'count': 0,
-                                'percentage': 0.0
-                            },
-                            {
-                                'count': 0,
-                                'percentage': 0.0
-                            },
                             {
                                 'count': 0,
                                 'percentage': 0.0
@@ -99,41 +59,17 @@ snapshots['TestRegistrationDataImportQuery::test_registration_data_import_datahu
                             {
                                 'count': 0,
                                 'percentage': 0.0
-                            },
-                            {
-                                'count': 0,
-                                'percentage': 0.0
-                            },
-                            {
-                                'count': 0,
-                                'percentage': 0.0
                             }
                         ],
                         'batchUniqueCountAndPercentage': [
                             {
                                 'count': 0,
                                 'percentage': 0.0
-                            },
-                            {
-                                'count': 0,
-                                'percentage': 0.0
-                            },
-                            {
-                                'count': 0,
-                                'percentage': 0.0
                             }
                         ],
-                        'canMerge': False,
+                        'canMerge': True,
                         'dataSource': 'XLS',
                         'goldenRecordDuplicatesCountAndPercentage': [
-                            {
-                                'count': 0,
-                                'percentage': 0.0
-                            },
-                            {
-                                'count': 0,
-                                'percentage': 0.0
-                            },
                             {
                                 'count': 0,
                                 'percentage': 0.0
@@ -143,25 +79,9 @@ snapshots['TestRegistrationDataImportQuery::test_registration_data_import_datahu
                             {
                                 'count': 0,
                                 'percentage': 0.0
-                            },
-                            {
-                                'count': 0,
-                                'percentage': 0.0
-                            },
-                            {
-                                'count': 0,
-                                'percentage': 0.0
                             }
                         ],
                         'goldenRecordUniqueCountAndPercentage': [
-                            {
-                                'count': 0,
-                                'percentage': 0.0
-                            },
-                            {
-                                'count': 0,
-                                'percentage': 0.0
-                            },
                             {
                                 'count': 0,
                                 'percentage': 0.0
@@ -181,41 +101,17 @@ snapshots['TestRegistrationDataImportQuery::test_registration_data_import_datahu
                             {
                                 'count': 0,
                                 'percentage': 0.0
-                            },
-                            {
-                                'count': 0,
-                                'percentage': 0.0
-                            },
-                            {
-                                'count': 0,
-                                'percentage': 0.0
                             }
                         ],
                         'batchUniqueCountAndPercentage': [
                             {
                                 'count': 0,
                                 'percentage': 0.0
-                            },
-                            {
-                                'count': 0,
-                                'percentage': 0.0
-                            },
-                            {
-                                'count': 0,
-                                'percentage': 0.0
                             }
                         ],
-                        'canMerge': False,
+                        'canMerge': True,
                         'dataSource': 'XLS',
                         'goldenRecordDuplicatesCountAndPercentage': [
-                            {
-                                'count': 0,
-                                'percentage': 0.0
-                            },
-                            {
-                                'count': 0,
-                                'percentage': 0.0
-                            },
                             {
                                 'count': 0,
                                 'percentage': 0.0
@@ -225,25 +121,9 @@ snapshots['TestRegistrationDataImportQuery::test_registration_data_import_datahu
                             {
                                 'count': 0,
                                 'percentage': 0.0
-                            },
-                            {
-                                'count': 0,
-                                'percentage': 0.0
-                            },
-                            {
-                                'count': 0,
-                                'percentage': 0.0
                             }
                         ],
                         'goldenRecordUniqueCountAndPercentage': [
-                            {
-                                'count': 0,
-                                'percentage': 0.0
-                            },
-                            {
-                                'count': 0,
-                                'percentage': 0.0
-                            },
                             {
                                 'count': 0,
                                 'percentage': 0.0
