@@ -7,7 +7,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import GetAppIcon from '@mui/icons-material/GetApp';
 import UploadIcon from '@mui/icons-material/Upload';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import { Button, IconButton, TableCell, Tooltip } from '@mui/material';
+import { IconButton, TableCell, Tooltip } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import { ReactElement, useEffect, useState } from 'react';
 import { PeriodicDataUpdatesTemplateDetailsDialog } from './PeriodicDataUpdatesTemplateDetailsDialog';
@@ -19,6 +19,9 @@ import { StatusBox } from '@core/StatusBox';
 import { periodicDataUpdateTemplateStatusToColor } from '@utils/utils';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { useTranslation } from 'react-i18next';
+import { ButtonTooltip } from '@components/core/ButtonTooltip';
+import { usePermissions } from '@hooks/usePermissions';
+import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 
 export interface Template {
   id: number;
@@ -87,6 +90,7 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
   const { t } = useTranslation();
   const { businessArea: businessAreaSlug, programId } = useBaseUrl();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const permissions = usePermissions();
   const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(
     null,
   );
@@ -161,6 +165,11 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
     (template) => template.id === selectedTemplateId,
   );
 
+  const canExportOrDownloadTemplate = hasPermissions(
+    PERMISSIONS.PDU_TEMPLATE_DOWNLOAD,
+    permissions,
+  );
+
   const renderTemplateRow = (row: Template): ReactElement => (
     <ClickableTableRow key={row.id} data-cy={`template-row-${row.id}`}>
       <TableCell data-cy={`template-id-${row.id}`}>{row.id}</TableCell>
@@ -194,28 +203,31 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
             }
           >
             <span>
-              <Button
+              <ButtonTooltip
                 variant="contained"
                 color="primary"
                 onClick={() => handleDownloadClick(row.id)}
                 startIcon={<GetAppIcon />}
                 data-cy={`download-btn-${row.id}`}
-                disabled={row?.number_of_records === 0}
+                disabled={
+                  row?.number_of_records === 0 || !canExportOrDownloadTemplate
+                }
               >
                 Download
-              </Button>
+              </ButtonTooltip>
             </span>
           </Tooltip>
         ) : row.can_export ? (
-          <Button
+          <ButtonTooltip
             variant="contained"
             color="primary"
             onClick={() => handleExportClick(row.id)}
             startIcon={<UploadIcon />}
             data-cy={`export-btn-${row.id}`}
+            disabled={!canExportOrDownloadTemplate}
           >
             Export
-          </Button>
+          </ButtonTooltip>
         ) : null}
       </TableCell>
     </ClickableTableRow>

@@ -58,6 +58,8 @@ export const registrationDetailed = gql`
       percentage
     }
     canMerge
+    biometricDeduplicationEnabled
+    deduplicationEngineStatus
   }
 `;
 

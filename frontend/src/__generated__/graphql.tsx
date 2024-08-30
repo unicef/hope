@@ -6083,6 +6083,7 @@ export type Query = {
   allUsers?: Maybe<UserNodeConnection>;
   availableFspsForDeliveryMechanisms?: Maybe<Array<Maybe<FspChoices>>>;
   businessArea?: Maybe<BusinessAreaNode>;
+  canRunDeduplication?: Maybe<Scalars['Boolean']['output']>;
   cashAssistUrlPrefix?: Maybe<Scalars['String']['output']>;
   cashPlan?: Maybe<CashPlanNode>;
   cashPlanStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
@@ -6133,6 +6134,7 @@ export type Query = {
   importedHousehold?: Maybe<ImportedHouseholdNode>;
   importedIndividual?: Maybe<ImportedIndividualNode>;
   individual?: Maybe<IndividualNode>;
+  isDeduplicationDisabled?: Maybe<Scalars['Boolean']['output']>;
   koboImportData?: Maybe<KoboImportDataNode>;
   koboProject?: Maybe<KoboAssetObject>;
   logEntryActionChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
@@ -9704,7 +9706,7 @@ export type ProgramDetailsFragment = { __typename?: 'ProgramNode', id: string, n
 
 export type RegistrationMinimalFragment = { __typename?: 'RegistrationDataImportNode', id: string, createdAt: any, name: string, status: RegistrationDataImportStatus, erased: boolean, importDate: any, dataSource: RegistrationDataImportDataSource, numberOfHouseholds: number, numberOfIndividuals: number, refuseReason?: string | null, totalHouseholdsCountWithValidPhoneNo?: number | null, adminUrl?: string | null, isDeduplicated?: string | null, importedBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, program?: { __typename?: 'ProgramNode', id: string, name: string, startDate: any, endDate: any, status: ProgramStatus } | null };
 
-export type RegistrationDetailedFragment = { __typename?: 'RegistrationDataImportNode', numberOfIndividuals: number, datahubId?: any | null, errorMessage: string, canMerge?: boolean | null, id: string, createdAt: any, name: string, status: RegistrationDataImportStatus, erased: boolean, importDate: any, dataSource: RegistrationDataImportDataSource, numberOfHouseholds: number, refuseReason?: string | null, totalHouseholdsCountWithValidPhoneNo?: number | null, adminUrl?: string | null, isDeduplicated?: string | null, batchDuplicatesCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, batchUniqueCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, goldenRecordUniqueCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, goldenRecordDuplicatesCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, goldenRecordPossibleDuplicatesCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, importedBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, program?: { __typename?: 'ProgramNode', id: string, name: string, startDate: any, endDate: any, status: ProgramStatus } | null };
+export type RegistrationDetailedFragment = { __typename?: 'RegistrationDataImportNode', numberOfIndividuals: number, datahubId?: any | null, errorMessage: string, canMerge?: boolean | null, biometricDeduplicationEnabled?: boolean | null, deduplicationEngineStatus?: RegistrationDataImportDeduplicationEngineStatus | null, id: string, createdAt: any, name: string, status: RegistrationDataImportStatus, erased: boolean, importDate: any, dataSource: RegistrationDataImportDataSource, numberOfHouseholds: number, refuseReason?: string | null, totalHouseholdsCountWithValidPhoneNo?: number | null, adminUrl?: string | null, isDeduplicated?: string | null, batchDuplicatesCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, batchUniqueCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, goldenRecordUniqueCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, goldenRecordDuplicatesCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, goldenRecordPossibleDuplicatesCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, importedBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, program?: { __typename?: 'ProgramNode', id: string, name: string, startDate: any, endDate: any, status: ProgramStatus } | null };
 
 export type ImportedHouseholdMinimalFragment = { __typename?: 'ImportedHouseholdNode', id: string, importId?: string | null, size?: number | null, flexFields?: any | null, deviceid: string, start?: any | null, detailId?: string | null, firstRegistrationDate: any, lastRegistrationDate: any, hasDuplicates?: boolean | null, fchildHoh?: boolean | null, childHoh?: boolean | null, collectIndividualData: HouseholdCollectIndividualData, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string } | null, admin1?: { __typename?: 'AreaNode', pCode?: string | null, name: string } | null, admin2?: { __typename?: 'AreaNode', pCode?: string | null, name: string } | null };
 
@@ -10216,7 +10218,7 @@ export type MergeRdiMutationVariables = Exact<{
 }>;
 
 
-export type MergeRdiMutation = { __typename?: 'Mutations', mergeRegistrationDataImport?: { __typename?: 'MergeRegistrationDataImportMutation', registrationDataImport?: { __typename?: 'RegistrationDataImportNode', numberOfIndividuals: number, datahubId?: any | null, errorMessage: string, canMerge?: boolean | null, id: string, createdAt: any, name: string, status: RegistrationDataImportStatus, erased: boolean, importDate: any, dataSource: RegistrationDataImportDataSource, numberOfHouseholds: number, refuseReason?: string | null, totalHouseholdsCountWithValidPhoneNo?: number | null, adminUrl?: string | null, isDeduplicated?: string | null, batchDuplicatesCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, batchUniqueCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, goldenRecordUniqueCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, goldenRecordDuplicatesCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, goldenRecordPossibleDuplicatesCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, importedBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, program?: { __typename?: 'ProgramNode', id: string, name: string, startDate: any, endDate: any, status: ProgramStatus } | null } | null } | null };
+export type MergeRdiMutation = { __typename?: 'Mutations', mergeRegistrationDataImport?: { __typename?: 'MergeRegistrationDataImportMutation', registrationDataImport?: { __typename?: 'RegistrationDataImportNode', numberOfIndividuals: number, datahubId?: any | null, errorMessage: string, canMerge?: boolean | null, biometricDeduplicationEnabled?: boolean | null, deduplicationEngineStatus?: RegistrationDataImportDeduplicationEngineStatus | null, id: string, createdAt: any, name: string, status: RegistrationDataImportStatus, erased: boolean, importDate: any, dataSource: RegistrationDataImportDataSource, numberOfHouseholds: number, refuseReason?: string | null, totalHouseholdsCountWithValidPhoneNo?: number | null, adminUrl?: string | null, isDeduplicated?: string | null, batchDuplicatesCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, batchUniqueCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, goldenRecordUniqueCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, goldenRecordDuplicatesCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, goldenRecordPossibleDuplicatesCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, importedBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, program?: { __typename?: 'ProgramNode', id: string, name: string, startDate: any, endDate: any, status: ProgramStatus } | null } | null } | null };
 
 export type RefuseRdiMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -11187,6 +11189,11 @@ export type AllProgramsForTableQueryVariables = Exact<{
 
 export type AllProgramsForTableQuery = { __typename?: 'Query', allPrograms?: { __typename?: 'ProgramNodeConnection', totalCount?: number | null, edgeCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, endCursor?: string | null, startCursor?: string | null }, edges: Array<{ __typename?: 'ProgramNodeEdge', cursor: string, node?: { __typename?: 'ProgramNode', id: string, name: string, startDate: any, endDate: any, status: ProgramStatus, budget?: any | null, sector: ProgramSector, totalNumberOfHouseholds?: number | null } | null } | null> } | null };
 
+export type DeduplicationFlagsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type DeduplicationFlagsQuery = { __typename?: 'Query', canRunDeduplication?: boolean | null, isDeduplicationDisabled?: boolean | null };
+
 export type ProgramQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
@@ -11330,7 +11337,7 @@ export type RegistrationDataImportQueryVariables = Exact<{
 }>;
 
 
-export type RegistrationDataImportQuery = { __typename?: 'Query', registrationDataImport?: { __typename?: 'RegistrationDataImportNode', biometricDeduplicationEnabled?: boolean | null, numberOfIndividuals: number, datahubId?: any | null, errorMessage: string, canMerge?: boolean | null, id: string, createdAt: any, name: string, status: RegistrationDataImportStatus, erased: boolean, importDate: any, dataSource: RegistrationDataImportDataSource, numberOfHouseholds: number, refuseReason?: string | null, totalHouseholdsCountWithValidPhoneNo?: number | null, adminUrl?: string | null, isDeduplicated?: string | null, batchDuplicatesCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, batchUniqueCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, goldenRecordUniqueCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, goldenRecordDuplicatesCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, goldenRecordPossibleDuplicatesCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, importedBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, program?: { __typename?: 'ProgramNode', id: string, name: string, startDate: any, endDate: any, status: ProgramStatus } | null } | null };
+export type RegistrationDataImportQuery = { __typename?: 'Query', registrationDataImport?: { __typename?: 'RegistrationDataImportNode', numberOfIndividuals: number, datahubId?: any | null, errorMessage: string, canMerge?: boolean | null, biometricDeduplicationEnabled?: boolean | null, deduplicationEngineStatus?: RegistrationDataImportDeduplicationEngineStatus | null, id: string, createdAt: any, name: string, status: RegistrationDataImportStatus, erased: boolean, importDate: any, dataSource: RegistrationDataImportDataSource, numberOfHouseholds: number, refuseReason?: string | null, totalHouseholdsCountWithValidPhoneNo?: number | null, adminUrl?: string | null, isDeduplicated?: string | null, batchDuplicatesCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, batchUniqueCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, goldenRecordUniqueCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, goldenRecordDuplicatesCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, goldenRecordPossibleDuplicatesCountAndPercentage?: Array<{ __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null> | null, importedBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, program?: { __typename?: 'ProgramNode', id: string, name: string, startDate: any, endDate: any, status: ProgramStatus } | null } | null };
 
 export type XlsxImportDataQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -12623,6 +12630,8 @@ export const RegistrationDetailedFragmentDoc = gql`
     percentage
   }
   canMerge
+  biometricDeduplicationEnabled
+  deduplicationEngineStatus
 }
     ${RegistrationMinimalFragmentDoc}`;
 export const ImportedHouseholdMinimalFragmentDoc = gql`
@@ -22158,6 +22167,44 @@ export type AllProgramsForTableQueryHookResult = ReturnType<typeof useAllProgram
 export type AllProgramsForTableLazyQueryHookResult = ReturnType<typeof useAllProgramsForTableLazyQuery>;
 export type AllProgramsForTableSuspenseQueryHookResult = ReturnType<typeof useAllProgramsForTableSuspenseQuery>;
 export type AllProgramsForTableQueryResult = Apollo.QueryResult<AllProgramsForTableQuery, AllProgramsForTableQueryVariables>;
+export const DeduplicationFlagsDocument = gql`
+    query DeduplicationFlags {
+  canRunDeduplication
+  isDeduplicationDisabled
+}
+    `;
+
+/**
+ * __useDeduplicationFlagsQuery__
+ *
+ * To run a query within a React component, call `useDeduplicationFlagsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useDeduplicationFlagsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDeduplicationFlagsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useDeduplicationFlagsQuery(baseOptions?: Apollo.QueryHookOptions<DeduplicationFlagsQuery, DeduplicationFlagsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<DeduplicationFlagsQuery, DeduplicationFlagsQueryVariables>(DeduplicationFlagsDocument, options);
+      }
+export function useDeduplicationFlagsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<DeduplicationFlagsQuery, DeduplicationFlagsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<DeduplicationFlagsQuery, DeduplicationFlagsQueryVariables>(DeduplicationFlagsDocument, options);
+        }
+export function useDeduplicationFlagsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<DeduplicationFlagsQuery, DeduplicationFlagsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<DeduplicationFlagsQuery, DeduplicationFlagsQueryVariables>(DeduplicationFlagsDocument, options);
+        }
+export type DeduplicationFlagsQueryHookResult = ReturnType<typeof useDeduplicationFlagsQuery>;
+export type DeduplicationFlagsLazyQueryHookResult = ReturnType<typeof useDeduplicationFlagsLazyQuery>;
+export type DeduplicationFlagsSuspenseQueryHookResult = ReturnType<typeof useDeduplicationFlagsSuspenseQuery>;
+export type DeduplicationFlagsQueryResult = Apollo.QueryResult<DeduplicationFlagsQuery, DeduplicationFlagsQueryVariables>;
 export const ProgramDocument = gql`
     query Program($id: ID!) {
   program(id: $id) {
@@ -22924,7 +22971,6 @@ export const RegistrationDataImportDocument = gql`
     query RegistrationDataImport($id: ID!) {
   registrationDataImport(id: $id) {
     ...registrationDetailed
-    biometricDeduplicationEnabled
   }
 }
     ${RegistrationDetailedFragmentDoc}`;
@@ -28398,6 +28444,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   allUsers?: Resolver<Maybe<ResolversTypes['UserNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllUsersArgs, 'businessArea'>>;
   availableFspsForDeliveryMechanisms?: Resolver<Maybe<Array<Maybe<ResolversTypes['FspChoices']>>>, ParentType, ContextType, Partial<QueryAvailableFspsForDeliveryMechanismsArgs>>;
   businessArea?: Resolver<Maybe<ResolversTypes['BusinessAreaNode']>, ParentType, ContextType, RequireFields<QueryBusinessAreaArgs, 'businessAreaSlug'>>;
+  canRunDeduplication?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   cashAssistUrlPrefix?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType, RequireFields<QueryCashPlanArgs, 'id'>>;
   cashPlanStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
@@ -28448,6 +28495,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   importedHousehold?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNode']>, ParentType, ContextType, RequireFields<QueryImportedHouseholdArgs, 'id'>>;
   importedIndividual?: Resolver<Maybe<ResolversTypes['ImportedIndividualNode']>, ParentType, ContextType, RequireFields<QueryImportedIndividualArgs, 'id'>>;
   individual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType, RequireFields<QueryIndividualArgs, 'id'>>;
+  isDeduplicationDisabled?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   koboImportData?: Resolver<Maybe<ResolversTypes['KoboImportDataNode']>, ParentType, ContextType, RequireFields<QueryKoboImportDataArgs, 'id'>>;
   koboProject?: Resolver<Maybe<ResolversTypes['KoboAssetObject']>, ParentType, ContextType, RequireFields<QueryKoboProjectArgs, 'businessAreaSlug' | 'uid'>>;
   logEntryActionChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
