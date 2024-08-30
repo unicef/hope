@@ -53,6 +53,7 @@ from hct_mis_api.apps.registration_data.models import (
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
     create_grievance_tickets_for_dedup_engine_results,
     deduplication_engine_process,
+    fetch_biometric_deduplication_results_and_process,
     merge_registration_data_import_task,
     pull_kobo_submissions_task,
     rdi_deduplication_task,
@@ -1115,3 +1116,20 @@ class DeduplicationEngineCeleryTasksTests(TestCase):
         create_grievance_tickets_for_dedup_engine_results(str(self.registration_data_import.id))
 
         mock_create_tickets.assert_called_once_with(self.registration_data_import)
+
+    @patch.dict(
+        "os.environ",
+        {"DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key", "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com"},
+    )
+    @patch(
+        "hct_mis_api.apps.registration_datahub.services.biometric_deduplication.BiometricDeduplicationService"
+        ".fetch_biometric_deduplication_results_and_process"
+    )
+    def test_fetch_biometric_deduplication_results_and_process(
+        self,
+        mock_fetch_biometric_deduplication_results_and_process: Mock,
+    ) -> None:
+        deduplication_set_id = str(uuid.uuid4())
+        fetch_biometric_deduplication_results_and_process(deduplication_set_id)
+
+        mock_fetch_biometric_deduplication_results_and_process.assert_called_once_with(deduplication_set_id)

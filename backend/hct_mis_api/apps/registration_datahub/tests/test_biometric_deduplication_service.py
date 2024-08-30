@@ -64,6 +64,29 @@ class BiometricDeduplicationServiceTest(TestCase):
             )
         )
 
+    @patch("hct_mis_api.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI.get_duplicates")
+    def test_get_deduplication_set_results(self, mock_get_duplicates: mock.Mock) -> None:
+        service = BiometricDeduplicationService()
+        deduplication_set_id = str(uuid.uuid4())
+
+        service.get_deduplication_set_results(deduplication_set_id)
+
+        mock_get_duplicates.assert_called_once_with(deduplication_set_id)
+
+    @patch(
+        "hct_mis_api.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI.get_deduplication_set"
+    )
+    def test_get_deduplication_set(self, mock_get_deduplication_set: mock.Mock) -> None:
+        service = BiometricDeduplicationService()
+        deduplication_set_id = str(uuid.uuid4())
+
+        mock_get_deduplication_set.return_value = dict(state="Clean", error=None)
+
+        data = service.get_deduplication_set(deduplication_set_id)
+        self.assertEqual(data, DeduplicationSetData(state="Clean", error=None))
+
+        mock_get_deduplication_set.assert_called_once_with(deduplication_set_id)
+
     @patch("hct_mis_api.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI.bulk_upload_images")
     def test_upload_individuals_success(self, mock_bulk_upload_images: mock.Mock) -> None:
         self.program.deduplication_set_id = uuid.uuid4()
