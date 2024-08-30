@@ -2,6 +2,7 @@ from django.conf import settings
 from django.core.management import call_command
 
 import pytest
+from freezegun import freeze_time
 from page_object.programme_population.individuals import Individuals
 from page_object.programme_population.individuals_details import IndividualsDetails
 
@@ -40,6 +41,7 @@ class TestSmokeIndividuals:
         assert "Administrative Level 2" in pageIndividuals.getIndividualLocation().text
         assert 6 == len(pageIndividuals.getIndividualTableRow())
 
+    @freeze_time("2024-08-26")
     def test_smoke_page_individuals_details(
         self,
         create_programs: None,
@@ -56,7 +58,7 @@ class TestSmokeIndividuals:
         assert "-" in pageIndividualsDetails.getLabelMiddleName().text
         assert "Kowalska" in pageIndividualsDetails.getLabelFamilyName().text
         assert "Female" in pageIndividualsDetails.getLabelGender().text
-        assert "82" in pageIndividualsDetails.getLabelAge().text
+        assert "83" in pageIndividualsDetails.getLabelAge().text
         assert "26 Aug 1941" in pageIndividualsDetails.getLabelDateOfBirth().text
         assert "No" in pageIndividualsDetails.getLabelEstimatedDateOfBirth().text
         assert "Married" in pageIndividualsDetails.getLabelMaritalStatus().text
