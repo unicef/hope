@@ -43,12 +43,12 @@ class TestMigratePartnerPermissionsAndAccess(TestCase):
         country_ukr.business_areas.set([cls.ukraine])
         area_type_ukr = AreaTypeFactory(name="Area Type in Ukr", country=country_ukr)
 
-        cls.area_in_afg_1 = AreaFactory(name="Area in AFG 1", area_type=area_type_afg)
-        cls.area_in_afg_2 = AreaFactory(name="Area in AFG 2", area_type=area_type_afg)
-        cls.area_in_afg_3 = AreaFactory(name="Area in AFG 3", area_type=area_type_afg)
+        cls.area_in_afg_1 = AreaFactory(name="Area in AFG 1", area_type=area_type_afg, p_code="AREA-IN-AFG1")
+        cls.area_in_afg_2 = AreaFactory(name="Area in AFG 2", area_type=area_type_afg, p_code="AREA-IN-AFG2")
+        cls.area_in_afg_3 = AreaFactory(name="Area in AFG 3", area_type=area_type_afg, p_code="AREA-IN-AFG3")
 
-        cls.area_in_ukr_1 = AreaFactory(name="Area in Ukr 1", area_type=area_type_ukr)
-        cls.area_in_ukr_2 = AreaFactory(name="Area in Ukr 2", area_type=area_type_ukr)
+        cls.area_in_ukr_1 = AreaFactory(name="Area in Ukr 1", area_type=area_type_ukr, p_code="AREA-IN-UKR1")
+        cls.area_in_ukr_2 = AreaFactory(name="Area in Ukr 2", area_type=area_type_ukr, p_code="AREA-IN-UKR2")
 
         cls.partner_default_empty = PartnerFactory(name=settings.DEFAULT_EMPTY_PARTNER, permissions={})
 
