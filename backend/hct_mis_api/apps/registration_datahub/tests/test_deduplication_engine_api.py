@@ -7,10 +7,11 @@ from unittest.mock import patch
 from django.test import TestCase
 
 import pytest
+
 from hct_mis_api.apps.registration_datahub.apis.deduplication_engine import (
     DeduplicationEngineAPI,
-    DeduplicationSet,
     DeduplicationImage,
+    DeduplicationSet,
 )
 
 
@@ -97,7 +98,7 @@ class DeduplicationEngineApiTest(TestCase):
         get_mock.assert_called_once_with(f"deduplication_sets/{deduplication_set_id}/duplicates/")
 
     @patch("hct_mis_api.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI._post")
-    def test_process_deduplication(self, post_mock: mock.Mock):
+    def test_process_deduplication(self, post_mock: mock.Mock) -> None:
         api = DeduplicationEngineAPI()
         deduplication_set_id = str(uuid.uuid4())
         post_mock.return_value = {}, 200
