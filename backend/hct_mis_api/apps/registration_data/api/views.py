@@ -56,7 +56,7 @@ class RegistrationDataImportViewSet(
     @action(detail=False, methods=["POST"], url_path="run-deduplication")
     def run_deduplication(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         program = self.get_program()
-        deduplication_engine_process.delay(program.id)
+        deduplication_engine_process.delay(str(program.id))
         return Response({"message": "Deduplication process started"}, status=status.HTTP_200_OK)
 
 
