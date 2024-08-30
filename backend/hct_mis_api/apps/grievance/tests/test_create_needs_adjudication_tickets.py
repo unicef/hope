@@ -234,3 +234,9 @@ class TestCreateNeedsAdjudicationTicketsBiometrics(APITestCase):
         )
         self.assertEqual(GrievanceTicket.objects.all().count(), 2)
         self.assertEqual(TicketNeedsAdjudicationDetails.objects.all().count(), 2)
+        # run one time
+        create_needs_adjudication_tickets_for_biometrics(
+            DeduplicationEngineSimilarityPair.objects.filter(pk=self.dedup_engine_similarity_pair_2.pk), self.rdi
+        )
+        self.assertEqual(GrievanceTicket.objects.all().count(), 2)
+        self.assertEqual(TicketNeedsAdjudicationDetails.objects.all().count(), 2)
