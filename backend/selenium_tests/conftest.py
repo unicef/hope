@@ -30,6 +30,10 @@ from page_object.managerial_console.managerial_console import ManagerialConsole
 from page_object.payment_module.new_payment_plan import NewPaymentPlan
 from page_object.payment_module.payment_module import PaymentModule
 from page_object.payment_module.payment_module_details import PaymentModuleDetails
+from page_object.payment_module.program_cycle import (
+    ProgramCycleDetailsPage,
+    ProgramCyclePage,
+)
 from page_object.payment_verification.payment_record import PaymentRecord
 from page_object.payment_verification.payment_verification import PaymentVerification
 from page_object.payment_verification.payment_verification_details import (
@@ -44,6 +48,13 @@ from page_object.programme_population.households import Households
 from page_object.programme_population.households_details import HouseholdsDetails
 from page_object.programme_population.individuals import Individuals
 from page_object.programme_population.individuals_details import IndividualsDetails
+from page_object.programme_population.periodic_data_update_templates import (
+    PeriodicDatUpdateTemplates,
+    PeriodicDatUpdateTemplatesDetails,
+)
+from page_object.programme_population.periodic_data_update_uploads import (
+    PeriodicDataUpdateUploads,
+)
 from page_object.programme_users.programme_users import ProgrammeUsers
 from page_object.registration_data_import.rdi_details_page import RDIDetailsPage
 from page_object.registration_data_import.registration_data_import import (
@@ -76,7 +87,9 @@ def pytest_addoption(parser) -> None:  # type: ignore
     parser.addoption("--mapping", action="store_true", default=False, help="Enable mapping mode")
 
 
-def pytest_configure() -> None:
+def pytest_configure(config) -> None:  # type: ignore
+    config.addinivalue_line("markers", "night: This marker is intended for e2e tests conducted during the night on CI")
+
     # delete all old screenshots
     for file in os.listdir("report/screenshot"):
         os.remove(os.path.join("report/screenshot", file))
@@ -174,6 +187,7 @@ def driver() -> Chrome:
     if not os.environ.get("STREAM"):
         chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--enable-logging")
     chrome_options.add_argument("--window-size=1920,1080")
     if not os.path.exists("./report/downloads/"):
@@ -289,6 +303,24 @@ def pageIndividualsDetails(request: FixtureRequest, browser: Chrome) -> Individu
 
 
 @pytest.fixture
+def pagePeriodicDataUpdateTemplates(request: FixtureRequest, browser: Chrome) -> PeriodicDatUpdateTemplates:
+    yield PeriodicDatUpdateTemplates(browser)
+
+
+@pytest.fixture
+def pagePeriodicDataUpdateTemplatesDetails(
+    request: FixtureRequest,
+    browser: Chrome,
+) -> PeriodicDatUpdateTemplatesDetails:
+    yield PeriodicDatUpdateTemplatesDetails(browser)
+
+
+@pytest.fixture
+def pagePeriodicDataUploads(request: FixtureRequest, browser: Chrome) -> PeriodicDataUpdateUploads:
+    yield PeriodicDataUpdateUploads(browser)
+
+
+@pytest.fixture
 def pageTargeting(request: FixtureRequest, browser: Chrome) -> Targeting:
     yield Targeting(browser)
 
@@ -351,6 +383,16 @@ def pagePaymentModuleDetails(request: FixtureRequest, browser: Chrome) -> Paymen
 @pytest.fixture
 def pageNewPaymentPlan(request: FixtureRequest, browser: Chrome) -> NewPaymentPlan:
     yield NewPaymentPlan(browser)
+
+
+@pytest.fixture
+def pageProgramCycle(request: FixtureRequest, browser: Chrome) -> ProgramCyclePage:
+    yield ProgramCyclePage(browser)
+
+
+@pytest.fixture
+def pageProgramCycleDetails(request: FixtureRequest, browser: Chrome) -> ProgramCycleDetailsPage:
+    yield ProgramCycleDetailsPage(browser)
 
 
 @pytest.fixture
@@ -434,7 +476,7 @@ def create_super_user(business_area: BusinessArea) -> User:
 
     role, _ = Role.objects.update_or_create(name="Role", defaults={"permissions": permission_list})
 
-    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json")
+    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json", verbosity=0)
     country = Country.objects.get(name="Afghanistan")
     business_area.countries.add(country)
     user = UserFactory.create(

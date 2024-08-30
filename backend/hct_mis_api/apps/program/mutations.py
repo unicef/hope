@@ -21,7 +21,13 @@ from hct_mis_api.apps.core.validators import (
     DataCollectingTypeValidator,
     PartnersDataValidator,
 )
-from hct_mis_api.apps.program.celery_tasks import copy_program_task
+from hct_mis_api.apps.periodic_data_update.service.flexible_attribute_service import (
+    FlexibleAttributeForPDUService,
+)
+from hct_mis_api.apps.program.celery_tasks import (
+    copy_program_task,
+    populate_pdu_new_rounds_with_null_values_task,
+)
 from hct_mis_api.apps.program.inputs import (
     CopyProgramInput,
     CreateProgramInput,
@@ -56,6 +62,7 @@ class CreateProgram(
         program_data = CreateProgramInput(required=True)
 
     @classmethod
+    @transaction.atomic
     @is_authenticated
     def processed_mutate(cls, root: Any, info: Any, program_data: Dict) -> "CreateProgram":
         business_area_slug = program_data.pop("business_area_slug", None)
@@ -68,6 +75,7 @@ class CreateProgram(
         data_collecting_type = DataCollectingType.objects.get(code=data_collecting_type_code)
         partner_access = program_data.get("partner_access", [])
         partners_data = program_data.pop("partners", [])
+        pdu_fields = program_data.pop("pdu_fields", None)
         programme_code = program_data.get("programme_code", "")
         if programme_code:
             programme_code = programme_code.upper()
@@ -94,12 +102,16 @@ class CreateProgram(
         ProgramCycle.objects.create(
             program=program,
             start_date=program.start_date,
-            end_date=program.end_date,
-            status=ProgramCycle.ACTIVE,
+            end_date=None,
+            status=ProgramCycle.DRAFT,
+            created_by=info.context.user,
         )
         # create partner access only for SELECTED_PARTNERS_ACCESS type, since NONE and ALL are handled through signal
         if partner_access == Program.SELECTED_PARTNERS_ACCESS:
             create_program_partner_access(partners_data, program, partner_access)
+
+        if pdu_fields is not None:
+            FlexibleAttributeForPDUService(program, pdu_fields).create_pdu_flex_attributes()
 
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, None, program)
         return CreateProgram(program=program)
@@ -131,7 +143,9 @@ class UpdateProgram(
         partners_data = program_data.pop("partners", [])
         partner = info.context.user.partner
         partner_access = program_data.get("partner_access", program.partner_access)
+        pdu_fields = program_data.pop("pdu_fields", None)
         programme_code = program_data.get("programme_code", "")
+
         if programme_code:
             programme_code = programme_code.upper()
             program_data["programme_code"] = programme_code
@@ -143,6 +157,10 @@ class UpdateProgram(
                 cls.has_permission(info, Permissions.PROGRAMME_ACTIVATE, business_area)
             elif status_to_set == Program.FINISHED:
                 cls.has_permission(info, Permissions.PROGRAMME_FINISH, business_area)
+
+                # check if all cycles are finished
+                if program.cycles.exclude(status=ProgramCycle.FINISHED).count() > 0:
+                    raise ValidationError("You cannot finish program if program has not finished cycles")
 
         if status_to_set not in [Program.ACTIVE, Program.FINISHED]:
             cls.validate_partners_data(
@@ -189,6 +207,11 @@ class UpdateProgram(
             partners_data = create_program_partner_access(partners_data, program, partner_access)
             remove_program_partner_access(partners_data, program)
         program.save()
+
+        if pdu_fields is not None:
+            FlexibleAttributeForPDUService(program, pdu_fields).update_pdu_flex_attributes_in_program_update()
+            populate_pdu_new_rounds_with_null_values_task.delay(program_id)
+
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, old_program, program)
         return UpdateProgram(program=program)
 
@@ -232,6 +255,7 @@ class CopyProgram(
         partner_access = program_data.get("partner_access", [])
         business_area = Program.objects.get(id=program_id).business_area
         programme_code = program_data.get("programme_code", "")
+        pdu_fields = program_data.pop("pdu_fields", None)
         partner = info.context.user.partner
         if programme_code:
             programme_code = programme_code.upper()
@@ -247,12 +271,19 @@ class CopyProgram(
             partner_access=partner_access,
             partner=partner,
         )
-        program = copy_program_object(program_id, program_data)
+        program = copy_program_object(program_id, program_data, info.context.user)
 
         # create partner access only for SELECTED_PARTNERS_ACCESS type, since NONE and ALL are handled through signal
         if partner_access == Program.SELECTED_PARTNERS_ACCESS:
             create_program_partner_access(partners_data, program, partner_access)
-        copy_program_task.delay(copy_from_program_id=program_id, new_program_id=program.id)
+
+        transaction.on_commit(
+            lambda: copy_program_task.delay(copy_from_program_id=program_id, new_program_id=program.id)
+        )
+
+        if pdu_fields is not None:
+            FlexibleAttributeForPDUService(program, pdu_fields).create_pdu_flex_attributes()
+
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, None, program)
 
         return CopyProgram(program=program)

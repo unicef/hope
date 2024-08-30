@@ -18,6 +18,7 @@ export interface ProgramInterface {
     code: string;
     type: string;
   };
+  pduFields: { id: string }[];
 }
 
 export type ProgramContextType = ProgramInterface | null;
@@ -28,6 +29,7 @@ type ProgramContent = {
   isActiveProgram: boolean;
   isSocialDctType: boolean;
   isStandardDctType: boolean;
+  programHasPdu: boolean;
 };
 
 export const ProgramContext = createContext(null);
@@ -47,6 +49,8 @@ export function ProgramProvider({
     selectedProgram?.dataCollectingType?.type?.toUpperCase() ===
     DataCollectingTypeType.Standard;
 
+  const programHasPdu = selectedProgram?.pduFields?.length > 0;
+
   // Set isActiveProgram to true if All Programs is selected
   if (selectedProgram === null) {
     isActiveProgram = true;
@@ -59,6 +63,7 @@ export function ProgramProvider({
         isActiveProgram,
         isSocialDctType,
         isStandardDctType,
+        programHasPdu,
       }}
     >
       {children}

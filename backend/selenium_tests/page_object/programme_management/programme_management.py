@@ -53,6 +53,50 @@ class ProgrammeManagement(BaseComponents):
     buttonEditProgram = 'a[data-cy="button-edit-program"]'
     inputProgrammeCode = 'input[data-cy="input-programmeCode"]'
     tableRow = 'tr[data-cy="table-row-{}"]'
+    stepButtonDetails = 'button[data-cy="step-button-details"]'
+    stepButtonTimeSeriesFields = 'button[data-cy="step-button-time-series-fields"]'
+    stepButtonPartners = 'button[data-cy="step-button-partners"]'
+    title = 'h6[data-cy="title"]'
+    description = 'div[data-cy="description"]'
+    inputPduFieldsObjectLabel = 'input[data-cy="input-pduFields.{}.label"]'
+    selectPduFieldsObjectPduDataSubtype = 'div[data-cy="select-pduFields.{}.pduData.subtype"]'
+    selectPduFieldsObjectPduDataNumberOfRounds = 'div[data-cy="select-pduFields.{}.pduData.numberOfRounds"]'
+    inputPduFieldsRoundsNames = 'input[data-cy="input-pduFields.{}.pduData.roundsNames.{}"]'
+    buttonAddTimeSeriesField = 'button[data-cy="button-add-time-series-field"]'
+
+    def getStepButtonDetails(self) -> WebElement:
+        return self.wait_for(self.stepButtonDetails)
+
+    def getStepButtonTimeSeriesFields(self) -> WebElement:
+        return self.wait_for(self.stepButtonTimeSeriesFields)
+
+    def getStepButtonPartners(self) -> WebElement:
+        return self.wait_for(self.stepButtonPartners)
+
+    def getTitle(self) -> WebElement:
+        return self.wait_for(self.title)
+
+    def getDescription(self) -> WebElement:
+        return self.wait_for(self.description)
+
+    def getInputPduFieldsObjectLabel(self, index: int) -> WebElement:
+        locator = self.inputPduFieldsObjectLabel.format(index)
+        return self.wait_for(locator)
+
+    def getSelectPduFieldsObjectPduDataSubtype(self, index: int) -> WebElement:
+        locator = self.selectPduFieldsObjectPduDataSubtype.format(index)
+        return self.wait_for(locator)
+
+    def getSelectPduFieldsObjectPduDataNumberOfRounds(self, index: int) -> WebElement:
+        locator = self.selectPduFieldsObjectPduDataNumberOfRounds.format(index)
+        return self.wait_for(locator)
+
+    def getInputPduFieldsRoundsNames(self, pduFieldIndex: int, roundNameIndex: int) -> WebElement:
+        locator = self.inputPduFieldsRoundsNames.format(pduFieldIndex, roundNameIndex)
+        return self.wait_for(locator)
+
+    def getButtonAddTimeSeriesField(self) -> WebElement:
+        return self.wait_for(self.buttonAddTimeSeriesField)
 
     def getCalendarIcon(self) -> WebElement:
         return self.wait_for(self.calendarIcon)

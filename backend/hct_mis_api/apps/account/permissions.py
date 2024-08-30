@@ -111,6 +111,13 @@ class Permissions(Enum):
     # Payment Module Admin
     PM_ADMIN_FINANCIAL_SERVICE_PROVIDER_UPDATE = auto()
 
+    # Programme Cycle
+    PM_PROGRAMME_CYCLE_VIEW_LIST = auto()
+    PM_PROGRAMME_CYCLE_VIEW_DETAILS = auto()
+    PM_PROGRAMME_CYCLE_CREATE = auto()
+    PM_PROGRAMME_CYCLE_UPDATE = auto()
+    PM_PROGRAMME_CYCLE_DELETE = auto()
+
     # User Management
     USER_MANAGEMENT_VIEW_LIST = auto()
 
@@ -192,6 +199,12 @@ class Permissions(Enum):
     # Reporting
     REPORTING_EXPORT = auto()
 
+    # Periodic Data Update
+    PDU_VIEW_LIST_AND_DETAILS = auto()
+    PDU_TEMPLATE_CREATE = auto()
+    PDU_TEMPLATE_DOWNLOAD = auto()
+    PDU_UPLOAD = auto()
+
     # All
     ALL_VIEW_PII_DATA_ON_LISTS = auto()
 
@@ -213,6 +226,9 @@ class Permissions(Enum):
     ACCOUNTABILITY_SURVEY_VIEW_CREATE = auto()
     ACCOUNTABILITY_SURVEY_VIEW_LIST = auto()
     ACCOUNTABILITY_SURVEY_VIEW_DETAILS = auto()
+
+    # Geo
+    GEO_VIEW_LIST = auto()
 
     # Django Admin
     CAN_ADD_BUSINESS_AREA_TO_PARTNER = auto()

@@ -32,6 +32,11 @@ from hct_mis_api.apps.targeting.fixtures import (
     TargetPopulationFactory,
 )
 from hct_mis_api.apps.targeting.models import TargetPopulation
+from selenium_tests.page_object.grievance.details_grievance_page import (
+    GrievanceDetailsPage,
+)
+from selenium_tests.page_object.grievance.grievance_tickets import GrievanceTickets
+from selenium_tests.page_object.grievance.new_ticket import NewTicket
 from selenium_tests.page_object.programme_details.programme_details import (
     ProgrammeDetails,
 )
@@ -283,7 +288,7 @@ def create_programs() -> None:
 @pytest.mark.usefixtures("login")
 class TestSmokeFilters:
     def test_filters_selected_program(self, create_programs: None, filters: Filters) -> None:
-        filters.selectGlobalProgramFilter("Test Programm").click()
+        filters.selectGlobalProgramFilter("Test Programm")
 
         programs = {
             "Registration Data Import": [
@@ -310,7 +315,7 @@ class TestSmokeFilters:
                 filters.selectFilter,
                 filters.hhFiltersStatus,
             ],
-            "Individuals": [
+            "Household Members": [
                 filters.indFiltersSearch,
                 filters.selectFilter,
                 filters.filtersDocumentType,
@@ -337,7 +342,7 @@ class TestSmokeFilters:
                 filters.datePickerFilterFrom,
                 filters.datePickerFilterTo,
             ],
-            "Payment Module": [
+            "Payment Plans": [
                 filters.selectFilter,
                 filters.filtersTotalEntitledQuantityFrom,
                 filters.filtersTotalEntitledQuantityTo,
@@ -415,6 +420,8 @@ class TestSmokeFilters:
                 filters.wait_for('[data-cy="nav-Program Population"]').click()
             if nav_menu == "Surveys":
                 filters.wait_for('[data-cy="nav-Accountability"]').click()
+            if nav_menu == "Payment Plans":
+                filters.wait_for('[data-cy="nav-Payment Module"]').click()
             filters.wait_for(f'[data-cy="nav-{nav_menu}"]').click()
             for locator in programs[nav_menu]:
                 try:
@@ -502,11 +509,13 @@ class TestSmokeFilters:
     @pytest.mark.parametrize(
         "module",
         [
-            pytest.param(["Registration Data Import", "filter-search", "Test"], id="Registration Data Import"),
-            pytest.param(["Targeting", "filters-search", "Test"], id="Targeting"),
-            pytest.param(["Payment Module", "filter-search", "PP-0060-22-11223344"], id="Payment Module"),
-            pytest.param(["Payment Verification", "filter-search", "PP-0000-00-11223344"], id="Payment Verification"),
-            pytest.param(["Grievance", "filters-search", "GRV-0000123"], id="Grievance"),
+            pytest.param([["Registration Data Import"], "filter-search", "Test"], id="Registration Data Import"),
+            pytest.param([["Targeting"], "filters-search", "Test"], id="Targeting"),
+            pytest.param([["Payment Verification"], "filter-search", "PP-0000-00-11223344"], id="Payment Verification"),
+            pytest.param([["Grievance"], "filters-search", "GRV-0000123"], id="Grievance"),
+            pytest.param(
+                [["Payment Module", "Payment Plans"], "filter-search", "PP-0060-22-11223344"], id="Payment Module"
+            ),
             # ToDo: uncomment after fix bug: 206395
             # pytest.param(["Program Population", "hh-filters-search", "HH-00-0000.1380"], id="Program Population"),
         ],
@@ -524,9 +533,12 @@ class TestSmokeFilters:
         filters: Filters,
         pageProgrammeDetails: ProgrammeDetails,
     ) -> None:
-        filters.selectGlobalProgramFilter("Test Programm").click()
+        filters.selectGlobalProgramFilter("Test Programm")
         assert "Test Programm" in pageProgrammeDetails.getHeaderTitle().text
-        filters.wait_for(f'[data-cy="nav-{module[0]}').click()
+
+        for element in module[0]:
+            filters.wait_for(f'[data-cy="nav-{element}').click()
+
         assert filters.waitForNumberOfRows(2)
         filters.getFilterByLocator(module[1]).send_keys("Wrong value")
         filters.getButtonFiltersApply().click()
@@ -536,3 +548,16 @@ class TestSmokeFilters:
         filters.getFilterByLocator(module[1]).send_keys(module[2])
         filters.getButtonFiltersApply().click()
         assert filters.waitForNumberOfRows(1)
+
+    @pytest.mark.night
+    @pytest.mark.skip("ToDo")
+    def test_grievance_tickets_filters_of_households_and_individuals(
+        self,
+        pageGrievanceTickets: GrievanceTickets,
+        pageGrievanceNewTicket: NewTicket,
+        pageGrievanceDetailsPage: GrievanceDetailsPage,
+        filters: Filters,
+    ) -> None:
+        pageGrievanceTickets.getNavGrievance().click()
+        assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
+        pageGrievanceTickets.getButtonNewTicket().click()

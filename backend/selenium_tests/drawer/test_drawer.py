@@ -4,7 +4,6 @@ import pytest
 from dateutil.relativedelta import relativedelta
 from page_object.programme_details.programme_details import ProgrammeDetails
 from page_object.programme_management.programme_management import ProgrammeManagement
-from selenium.common import TimeoutException
 
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
@@ -63,7 +62,7 @@ class TestDrawer:
         pageProgrammeManagement: ProgrammeManagement,
         pageProgrammeDetails: ProgrammeDetails,
     ) -> None:
-        pageProgrammeManagement.selectGlobalProgramFilter("Worker Program").click()
+        pageProgrammeManagement.selectGlobalProgramFilter("Worker Program")
         assert "Worker Program" in pageProgrammeDetails.getHeaderTitle().text
         expected_menu_items = [
             "Country Dashboard",
@@ -87,7 +86,7 @@ class TestDrawer:
         pageProgrammeManagement: ProgrammeManagement,
         pageProgrammeDetails: ProgrammeDetails,
     ) -> None:
-        pageProgrammeManagement.selectGlobalProgramFilter("Normal Program").click()
+        pageProgrammeManagement.selectGlobalProgramFilter("Normal Program")
         assert "Normal Program" in pageProgrammeDetails.getHeaderTitle().text
         expected_menu_items = [
             "Country Dashboard",
@@ -134,16 +133,16 @@ class TestDrawer:
         active_program_name = active_program.name
         finished_program_name = finished_program.name
 
-        pageProgrammeManagement.selectGlobalProgramFilter(draft_program_name).click()
+        pageProgrammeManagement.selectGlobalProgramFilter(draft_program_name)
         assert draft_program_name in pageProgrammeDetails.getHeaderTitle().text
         assert pageProgrammeDetails.getDrawerInactiveSubheader().text == "program inactive"
 
-        pageProgrammeManagement.selectGlobalProgramFilter(active_program_name).click()
+        pageProgrammeManagement.selectGlobalProgramFilter(active_program_name)
         assert active_program_name in pageProgrammeDetails.getHeaderTitle().text
-        with pytest.raises(TimeoutException):
+        with pytest.raises(Exception):
             pageProgrammeDetails.getDrawerInactiveSubheader(timeout=0.05)
 
         # first have to search Finished program because of default filtering
-        pageProgrammeManagement.selectGlobalProgramFilter(finished_program_name).click()
+        pageProgrammeManagement.selectGlobalProgramFilter(finished_program_name)
         assert finished_program_name in pageProgrammeDetails.getHeaderTitle().text
         assert pageProgrammeDetails.getDrawerInactiveSubheader().text == "program inactive"

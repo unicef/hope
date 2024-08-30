@@ -44,6 +44,9 @@ export const FormikDateField = ({
             size: 'small',
             error: isInvalid,
             helperText: isInvalid && get(form.errors, field.name),
+            inputProps: {
+              'data-cy': `date-input-${field.name}`,
+            },
           },
         }}
         sx={{
@@ -71,9 +74,8 @@ export const FormikDateField = ({
                 ),
               }}
               required={required}
-              // https://github.com/mui-org/material-ui/issues/12805
-              // eslint-disable-next-line react/jsx-no-duplicate-props
               inputProps={{
+                ...props.inputProps,
                 'data-cy': `date-input-${field.name}`,
               }}
             />

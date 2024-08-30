@@ -17,6 +17,7 @@ from hct_mis_api.apps.core.models import BusinessArea, CountryCodeMap
 from hct_mis_api.apps.core.utils import build_arg_dict, clear_cache_for_dashboard_totals
 from hct_mis_api.apps.payment.models import (
     CashPlan,
+    DeliveryMechanism,
     PaymentRecord,
     PaymentVerificationSummary,
     ServiceProvider,
@@ -57,7 +58,7 @@ class PullFromDatahubTask:
         "coverage_duration": "coverage_duration",
         "coverage_unit": "coverage_unit",
         "dispersion_date": "dispersion_date",
-        "end_date": "end_date",
+        "end_date": "end_date",  # TODO: what with CashPlan and ProgramCycle ???
         "start_date": "start_date",
         "distribution_level": "distribution_level",
         "name": "name",
@@ -219,6 +220,9 @@ class PullFromDatahubTask:
                 ca_id=dh_payment_record.service_provider_ca_id
             )
             payment_record_args["parent"] = CashPlan.objects.get(ca_id=dh_payment_record.cash_plan_ca_id)
+            payment_record_args["delivery_type"] = DeliveryMechanism.objects.get(
+                name=payment_record_args["delivery_type"]
+            )
             (
                 payment_record,
                 created,

@@ -9,12 +9,12 @@ import { usePermissions } from '@hooks/usePermissions';
 import { usePaymentPlanQuery } from '@generated/graphql';
 
 export function EditSetUpFspPage(): React.ReactElement {
-  const { id } = useParams();
+  const { paymentPlanId } = useParams();
 
   const { data: paymentPlanData, loading: paymentPlanLoading } =
     usePaymentPlanQuery({
       variables: {
-        id,
+        id: paymentPlanId,
       },
       fetchPolicy: 'cache-and-network',
     });
@@ -29,7 +29,7 @@ export function EditSetUpFspPage(): React.ReactElement {
 
   const mappedInitialDeliveryMechanisms =
     paymentPlanData.paymentPlan.deliveryMechanisms.map((el) => ({
-      deliveryMechanism: el.name,
+      deliveryMechanism: el.code,
       fsp: el.fsp?.id || '',
       chosenConfiguration: el.chosenConfiguration || '',
     }));

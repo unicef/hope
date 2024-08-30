@@ -19,7 +19,10 @@ from hct_mis_api.apps.household.models import (
     DocumentType,
     PendingHousehold,
 )
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.fixtures import (
+    ProgramFactory,
+    get_program_with_dct_type_and_name,
+)
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
@@ -134,12 +137,14 @@ class PushToRDITests(HOPEApiTestCase):
         self.assertEqual(data["individuals"], 2)
 
     def test_push_fail_if_not_loading(self) -> None:
+        program = get_program_with_dct_type_and_name()
         rdi = RegistrationDataImport.objects.create(
             name="test_push_fail_if_not_loading",
             business_area=self.business_area,
             number_of_individuals=0,
             number_of_households=0,
             status=RegistrationDataImport.IN_REVIEW,
+            program=program,
         )
         url = reverse("api:rdi-push", args=[self.business_area.slug, str(rdi.id)])
         response = self.client.post(url, [], format="json")

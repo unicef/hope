@@ -29,9 +29,9 @@ from hct_mis_api.apps.core.utils import (
     is_valid_uuid,
 )
 from hct_mis_api.apps.household.models import ROLE_NO_ROLE
-from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.models import (
     CashPlan,
+    DeliveryMechanism,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     Payment,
@@ -222,7 +222,7 @@ class FinancialServiceProviderXlsxTemplateFilter(FilterSet):
 
 class FinancialServiceProviderFilter(FilterSet):
     delivery_mechanisms = MultipleChoiceFilter(
-        field_name="delivery_mechanisms", choices=DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES
+        field_name="delivery_mechanisms", choices=DeliveryMechanism.get_choices()
     )
 
     class Meta:
@@ -251,9 +251,7 @@ class FinancialServiceProviderFilter(FilterSet):
 
 class CashPlanFilter(FilterSet):
     search = CharFilter(method="search_filter")
-    delivery_type = MultipleChoiceFilter(
-        field_name="delivery_type", choices=DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES
-    )
+    delivery_type = MultipleChoiceFilter(field_name="delivery_type", choices=DeliveryMechanism.get_choices())
     verification_status = MultipleChoiceFilter(
         field_name="payment_verification_summary__status", choices=PaymentVerificationPlan.STATUS_CHOICES
     )
@@ -318,6 +316,7 @@ class PaymentPlanFilter(FilterSet):
     is_follow_up = BooleanFilter(field_name="is_follow_up")
     source_payment_plan_id = CharFilter(method="source_payment_plan_filter")
     program = CharFilter(method="filter_by_program")
+    program_cycle = CharFilter(method="filter_by_program_cycle")
 
     class Meta:
         fields = tuple()
@@ -353,6 +352,9 @@ class PaymentPlanFilter(FilterSet):
 
     def filter_by_program(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[PaymentPlan]":
         return qs.filter(program_id=decode_id_string_required(value))
+
+    def filter_by_program_cycle(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[PaymentPlan]":
+        return qs.filter(program_cycle_id=decode_id_string_required(value))
 
 
 class PaymentFilter(FilterSet):

@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import List
 
 from django.db import transaction
 
@@ -6,6 +7,7 @@ import pytest
 from dateutil.relativedelta import relativedelta
 from page_object.people.people import People
 
+from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.household.fixtures import (
@@ -13,8 +15,15 @@ from hct_mis_api.apps.household.fixtures import (
     create_individual_document,
 )
 from hct_mis_api.apps.household.models import HOST, SEEING, Individual
+from hct_mis_api.apps.payment.fixtures import CashPlanFactory, PaymentRecordFactory
+from hct_mis_api.apps.payment.models import GenericPayment, PaymentRecord
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.targeting.fixtures import (
+    TargetingCriteriaFactory,
+    TargetPopulationFactory,
+)
+from selenium_tests.page_object.filters import Filters
 from selenium_tests.page_object.people.people_details import PeopleDetails
 
 pytestmark = pytest.mark.django_db(transaction=True)
@@ -26,7 +35,7 @@ def social_worker_program() -> Program:
 
 
 @pytest.fixture
-def add_people(social_worker_program: Program) -> None:
+def add_people(social_worker_program: Program) -> List:
     ba = social_worker_program.business_area
     with transaction.atomic():
         household, individuals = create_household(
@@ -42,6 +51,40 @@ def add_people(social_worker_program: Program) -> None:
         )
         individual = individuals[0]
         create_individual_document(individual)
+    yield [individual, household]
+
+
+@pytest.fixture
+def add_people_with_payment_record(add_people: List) -> PaymentRecord:
+    program = Program.objects.filter(name="Worker Program").first()
+
+    cash_plan = CashPlanFactory(
+        name="TEST",
+        program=program,
+        business_area=BusinessArea.objects.first(),
+        start_date=datetime.now() - relativedelta(months=1),
+        end_date=datetime.now() + relativedelta(months=1),
+    )
+
+    targeting_criteria = TargetingCriteriaFactory()
+
+    target_population = TargetPopulationFactory(
+        created_by=User.objects.first(),
+        targeting_criteria=targeting_criteria,
+        business_area=BusinessArea.objects.first(),
+    )
+    payment_record = PaymentRecordFactory(
+        household=add_people[1],
+        parent=cash_plan,
+        target_population=target_population,
+        entitlement_quantity="21.36",
+        delivered_quantity="21.36",
+        currency="PLN",
+        status=GenericPayment.STATUS_DISTRIBUTION_SUCCESS,
+    )
+    add_people[1].total_cash_received_usd = "21.36"
+    add_people[1].save()
+    return payment_record
 
 
 def get_program_with_dct_type_and_name(
@@ -63,7 +106,7 @@ def get_program_with_dct_type_and_name(
 @pytest.mark.usefixtures("login")
 class TestSmokePeople:
     def test_smoke_page_people(self, social_worker_program: Program, pagePeople: People) -> None:
-        pagePeople.selectGlobalProgramFilter("Worker Program").click()
+        pagePeople.selectGlobalProgramFilter("Worker Program")
         pagePeople.getNavPeople().click()
         assert "People" in pagePeople.getTableTitle().text
         assert "Individual ID" in pagePeople.getIndividualId().text
@@ -78,17 +121,19 @@ class TestSmokePeople:
         add_people: None,
         pagePeople: People,
         pagePeopleDetails: PeopleDetails,
+        filters: Filters,
     ) -> None:
-        pagePeople.selectGlobalProgramFilter("Worker Program").click()
+        pagePeople.selectGlobalProgramFilter("Worker Program")
         pagePeople.getNavPeople().click()
+        assert "People" in pagePeople.getTableTitle().text
         unicef_id = pagePeople.getIndividualTableRow(0).text.split(" ")[0]
         pagePeople.getIndividualTableRow(0).click()
         individual = Individual.objects.filter(unicef_id=unicef_id).first()
         assert f"Individual ID: {individual.unicef_id}" in pagePeopleDetails.getPageHeaderTitle().text
-        assert "Stacey Freeman" in pagePeopleDetails.getLabelFullName().text
-        assert "Stacey" in pagePeopleDetails.getLabelGivenName().text
-        assert "-" in pagePeopleDetails.getLabelMiddleName().text
-        assert "Freeman" in pagePeopleDetails.getLabelFamilyName().text
+        assert individual.full_name in pagePeopleDetails.getLabelFullName().text
+        assert individual.given_name in pagePeopleDetails.getLabelGivenName().text
+        assert individual.middle_name if individual.middle_name else "-" in pagePeopleDetails.getLabelMiddleName().text
+        assert individual.family_name in pagePeopleDetails.getLabelFamilyName().text
         assert individual.sex.lower() in pagePeopleDetails.getLabelGender().text.lower()
         assert pagePeopleDetails.getLabelAge().text
         assert individual.birth_date.strftime("%-d %b %Y") in pagePeopleDetails.getLabelDateOfBirth().text
@@ -175,3 +220,23 @@ class TestSmokePeople:
         assert pagePeopleDetails.getLabelImportName().text
         assert pagePeopleDetails.getLabelRegistrationDate().text
         assert pagePeopleDetails.getLabelUserName().text
+
+    def test_people_happy_path(
+        self,
+        add_people_with_payment_record: PaymentRecord,
+        pagePeople: People,
+        pagePeopleDetails: PeopleDetails,
+    ) -> None:
+        pagePeople.selectGlobalProgramFilter("Worker Program")
+        pagePeople.getNavPeople().click()
+        pagePeople.getIndividualTableRow(0).click()
+        assert "21.36" in pagePeopleDetails.getLabelTotalCashReceived().text
+        pagePeopleDetails.waitForRows()
+        assert 1 == len(pagePeopleDetails.getRows())
+        assert "21.36" in pagePeopleDetails.getRows()[0].text
+        assert "DELIVERED FULLY" in pagePeopleDetails.getRows()[0].text
+        assert add_people_with_payment_record.unicef_id in pagePeopleDetails.getRows()[0].text
+
+    @pytest.mark.skip(reason="ToDo")
+    def test_check_data_after_grievance_ticket_processed(self) -> None:
+        pass

@@ -33,3 +33,51 @@ class ProgrammeViewListAndDetailsPermission(BaseRestPermission):
 
 class PaymentViewListManagerialPermission(BaseRestPermission):
     PERMISSIONS = [Permissions.PAYMENT_VIEW_LIST_MANAGERIAL]
+
+
+class PDUViewListAndDetailsPermission(BaseRestPermission):
+    PERMISSIONS = [Permissions.PDU_VIEW_LIST_AND_DETAILS]
+
+
+class PDUTemplateCreatePermission(BaseRestPermission):
+    PERMISSIONS = [Permissions.PDU_TEMPLATE_CREATE]
+
+
+class PDUTemplateDownloadPermission(BaseRestPermission):
+    PERMISSIONS = [Permissions.PDU_TEMPLATE_DOWNLOAD]
+
+
+class PDUUploadPermission(BaseRestPermission):
+    PERMISSIONS = [Permissions.PDU_UPLOAD]
+
+
+class RDIViewListPermission(BaseRestPermission):
+    PERMISSIONS = [Permissions.RDI_VIEW_LIST]
+
+
+class TargetingViewListPermission(BaseRestPermission):
+    PERMISSIONS = [Permissions.TARGETING_VIEW_LIST]
+
+
+class GeoViewListPermission(BaseRestPermission):
+    PERMISSIONS = [Permissions.GEO_VIEW_LIST]
+
+
+class ProgramCycleViewListPermission(BaseRestPermission):
+    PERMISSIONS = [Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST]
+
+
+class ProgramCycleViewDetailsPermission(BaseRestPermission):
+    PERMISSIONS = [Permissions.PM_PROGRAMME_CYCLE_VIEW_DETAILS]
+
+
+class ProgramCycleCreatePermission(BaseRestPermission):
+    PERMISSIONS = [Permissions.PM_PROGRAMME_CYCLE_CREATE]
+
+
+class ProgramCycleUpdatePermission(BaseRestPermission):
+    PERMISSIONS = [Permissions.PM_PROGRAMME_CYCLE_UPDATE]
+
+
+class ProgramCycleDeletePermission(BaseRestPermission):
+    PERMISSIONS = [Permissions.PM_PROGRAMME_CYCLE_DELETE]

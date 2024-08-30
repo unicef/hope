@@ -481,8 +481,8 @@ def payment_plan_exclude_beneficiaries(
                         parent__program_cycle_id=payment_plan.program_cycle_id
                     )  # check only Payments in the same program cycle
                     .filter(
-                        Q(parent__start_date__lte=payment_plan.end_date)
-                        & Q(parent__end_date__gte=payment_plan.start_date),
+                        Q(parent__program_cycle__start_date__lte=payment_plan.program_cycle.end_date)
+                        & Q(parent__program_cycle__end_date__gte=payment_plan.program_cycle.start_date),
                         ~Q(parent__status=PaymentPlan.Status.OPEN),
                         Q(household__unicef_id=hh_unicef_id) & Q(conflicted=False),
                     )
@@ -647,3 +647,22 @@ def send_payment_notification_emails(
         PaymentNotification(payment_plan, action, action_user, action_date_formatted).send_email_notification()
     except Exception as e:
         logger.exception(e)
+
+
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@log_start_and_end
+@sentry_tags
+def periodic_sync_payment_gateway_delivery_mechanisms(self: Any) -> None:
+    from hct_mis_api.apps.payment.services.payment_gateway import PaymentGatewayAPI
+
+    try:
+        from hct_mis_api.apps.payment.services.payment_gateway import (
+            PaymentGatewayService,
+        )
+
+        PaymentGatewayService().sync_delivery_mechanisms()
+    except PaymentGatewayAPI.PaymentGatewayMissingAPICredentialsException:
+        return
+    except Exception as e:
+        logger.exception(e)
+        raise self.retry(exc=e)

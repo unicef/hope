@@ -1,8 +1,10 @@
 import json
 from datetime import datetime
 from typing import Any
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
+from django import forms
+from django.db import models
 from django.db.utils import IntegrityError
 from django.test import TestCase
 
@@ -19,6 +21,7 @@ from hct_mis_api.apps.household.fixtures import (
     IndividualFactory,
     create_household,
 )
+from hct_mis_api.apps.payment.fields import DynamicChoiceArrayField, DynamicChoiceField
 from hct_mis_api.apps.payment.fixtures import (
     DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
@@ -119,8 +122,6 @@ class TestPaymentPlanModel(TestCase):
 
         # create hard conflicted payment
         pp1_conflicted = PaymentPlanFactory(
-            start_date=pp1.start_date,
-            end_date=pp1.end_date,
             status=PaymentPlan.Status.LOCKED,
             program=program,
             program_cycle=program_cycle,
@@ -154,8 +155,16 @@ class TestPaymentPlanModel(TestCase):
         p2 = PaymentFactory(parent=pp, currency="PLN", status=Payment.STATUS_SENT_TO_PG)
         self.assertEqual(pp.is_reconciled, False)
 
+        p1.status = Payment.STATUS_SENT_TO_FSP
+        p1.save()
+        self.assertEqual(pp.is_reconciled, False)
+
         p1.status = Payment.STATUS_DISTRIBUTION_SUCCESS
         p1.save()
+        self.assertEqual(pp.is_reconciled, False)
+
+        p2.status = Payment.STATUS_SENT_TO_FSP
+        p2.save()
         self.assertEqual(pp.is_reconciled, False)
 
         p2.status = Payment.STATUS_DISTRIBUTION_PARTIAL
@@ -181,7 +190,7 @@ class TestPaymentModel(TestCase):
         with self.assertRaises(IntegrityError):
             PaymentFactory(parent=pp, household=hh1, currency="PLN")
 
-    def test_manager_annotations__pp_conflicts(self) -> None:
+    def test_manager_annotations_pp_conflicts(self) -> None:
         program = RealProgramFactory()
         program_cycle = program.cycles.first()
 
@@ -189,23 +198,17 @@ class TestPaymentModel(TestCase):
 
         # create hard conflicted payment
         pp2 = PaymentPlanFactory(
-            start_date=pp1.start_date,
-            end_date=pp1.end_date,
             status=PaymentPlan.Status.LOCKED,
             program=program,
             program_cycle=program_cycle,
         )
         # create soft conflicted payments
         pp3 = PaymentPlanFactory(
-            start_date=pp1.start_date,
-            end_date=pp1.end_date,
             status=PaymentPlan.Status.OPEN,
             program=program,
             program_cycle=program_cycle,
         )
         pp4 = PaymentPlanFactory(
-            start_date=pp1.start_date,
-            end_date=pp1.end_date,
             status=PaymentPlan.Status.OPEN,
             program=program,
             program_cycle=program_cycle,
@@ -215,8 +218,8 @@ class TestPaymentModel(TestCase):
         p3 = PaymentFactory(parent=pp3, household=p1.household, conflicted=False, currency="PLN")
         p4 = PaymentFactory(parent=pp4, household=p1.household, conflicted=False, currency="PLN")
 
-        for _ in [pp1, pp2, pp3, pp4, p1, p2, p3, p4]:
-            _.refresh_from_db()  # update unicef_id from trigger
+        for obj in [pp1, pp2, pp3, pp4, p1, p2, p3, p4]:
+            obj.refresh_from_db()  # update unicef_id from trigger
 
         p1_data = Payment.objects.filter(id=p1.id).values()[0]
         self.assertEqual(p1_data["payment_plan_hard_conflicted"], True)
@@ -229,8 +232,8 @@ class TestPaymentModel(TestCase):
                 "payment_id": str(p2.id),
                 "payment_plan_id": str(pp2.id),
                 "payment_plan_status": str(pp2.status),
-                "payment_plan_start_date": pp2.start_date.strftime("%Y-%m-%d"),
-                "payment_plan_end_date": pp2.end_date.strftime("%Y-%m-%d"),
+                "payment_plan_start_date": program_cycle.start_date.strftime("%Y-%m-%d"),
+                "payment_plan_end_date": program_cycle.end_date.strftime("%Y-%m-%d"),
                 "payment_plan_unicef_id": str(pp2.unicef_id),
                 "payment_unicef_id": str(p2.unicef_id),
             },
@@ -243,8 +246,8 @@ class TestPaymentModel(TestCase):
                     "payment_id": str(p3.id),
                     "payment_plan_id": str(pp3.id),
                     "payment_plan_status": str(pp3.status),
-                    "payment_plan_start_date": pp3.start_date.strftime("%Y-%m-%d"),
-                    "payment_plan_end_date": pp3.end_date.strftime("%Y-%m-%d"),
+                    "payment_plan_start_date": program_cycle.start_date.strftime("%Y-%m-%d"),
+                    "payment_plan_end_date": program_cycle.end_date.strftime("%Y-%m-%d"),
                     "payment_plan_unicef_id": str(pp3.unicef_id),
                     "payment_unicef_id": str(p3.unicef_id),
                 },
@@ -252,8 +255,8 @@ class TestPaymentModel(TestCase):
                     "payment_id": str(p4.id),
                     "payment_plan_id": str(pp4.id),
                     "payment_plan_status": str(pp4.status),
-                    "payment_plan_start_date": pp4.start_date.strftime("%Y-%m-%d"),
-                    "payment_plan_end_date": pp4.end_date.strftime("%Y-%m-%d"),
+                    "payment_plan_start_date": program_cycle.start_date.strftime("%Y-%m-%d"),
+                    "payment_plan_end_date": program_cycle.end_date.strftime("%Y-%m-%d"),
                     "payment_plan_unicef_id": str(pp4.unicef_id),
                     "payment_unicef_id": str(p4.unicef_id),
                 },
@@ -265,16 +268,12 @@ class TestPaymentModel(TestCase):
         pp1 = PaymentPlanFactory(program_cycle=program_cycle)
         # create follow up pp
         pp2 = PaymentPlanFactory(
-            start_date=pp1.start_date,
-            end_date=pp1.end_date,
             status=PaymentPlan.Status.LOCKED,
             is_follow_up=True,
             source_payment_plan=pp1,
             program_cycle=program_cycle,
         )
         pp3 = PaymentPlanFactory(
-            start_date=pp1.start_date,
-            end_date=pp1.end_date,
             status=PaymentPlan.Status.OPEN,
             is_follow_up=True,
             source_payment_plan=pp1,
@@ -439,3 +438,43 @@ class TestFinancialServiceProviderModel(TestCase):
         self.assertEqual(blockchain_name, individuals[0].blockchain_name)
         wallet_address = fsp_xlsx_template.get_column_from_core_field(payment, "wallet_address")
         self.assertEqual(wallet_address, individuals[0].wallet_address)
+
+
+class TestDynamicChoiceArrayField(TestCase):
+    def setUp(self) -> None:
+        self.mock_choices = [("field1", "Field 1"), ("field2", "Field 2")]
+        self.mock_choices_callable = MagicMock(return_value=self.mock_choices)
+
+    def test_choices(self) -> None:
+        field = DynamicChoiceArrayField(
+            base_field=models.CharField(max_length=255), choices_callable=self.mock_choices_callable
+        )
+        form_field = field.formfield()
+
+        # Check if the choices_callable is passed to the form field
+        self.assertEqual(list(form_field.choices), self.mock_choices)
+        self.mock_choices_callable.assert_called_once()
+
+        # Check the form field class and choices
+        self.assertIsInstance(form_field, DynamicChoiceField)
+
+
+class TestForm(forms.ModelForm):
+    class Meta:
+        model = FinancialServiceProviderXlsxTemplate
+        fields = ["core_fields"]
+
+
+class TestFinancialServiceProviderXlsxTemplate(TestCase):
+    def test_model_form_integration(self) -> None:
+        form = TestForm(data={"core_fields": ["age", "residence_status"]})  # real existing core fields
+        self.assertTrue(form.is_valid())
+        template = form.save()
+        self.assertEqual(template.core_fields, ["age", "residence_status"])
+
+        form = TestForm(data={"core_fields": ["field1"]})  # fake core fields
+        self.assertFalse(form.is_valid())
+        self.assertEqual(
+            form.errors,
+            {"core_fields": ["Select a valid choice. field1 is not one of the available choices."]},
+        )
