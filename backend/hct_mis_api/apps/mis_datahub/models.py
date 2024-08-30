@@ -256,7 +256,7 @@ class FundsCommitment(models.Model):
     percentage = models.DecimalField(decimal_places=2, max_digits=5, null=True, blank=True)
 
     def __str__(self) -> str:
-        return self.funds_commitment_number
+        return self.funds_commitment_number if self.funds_commitment_number else "N/A"
 
 
 class DownPayment(models.Model):

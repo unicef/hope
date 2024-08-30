@@ -54,6 +54,7 @@ from hct_mis_api.apps.payment.models import (
 from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_import_service import (
     PeriodicDataUpdateImportService,
 )
+from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hct_mis_api.apps.registration_data.models import ImportData, RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hct_mis_api.apps.registration_datahub.tasks.rdi_base_create import (
@@ -518,7 +519,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             PeriodicFieldData.DATE: self._handle_date_field,
             PeriodicFieldData.DECIMAL: self._handle_decimal_field,
             PeriodicFieldData.STRING: self._handle_string_field,
-            PeriodicFieldData.BOOLEAN: self._handle_bool_field,
+            PeriodicFieldData.BOOL: self._handle_bool_field,
         }
         for flexible_attribute in self.pdu_flexible_attributes:
             column_value = f"{flexible_attribute.name}_round_1_value"
@@ -533,7 +534,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             collection_date_cell = row_dict.get(column_collection_date)
             subtype = flexible_attribute.pdu_data.subtype
             handle_subtype = handle_subtype_mapping[subtype]
-            value = handle_subtype(value_cell)
+            value = handle_subtype(value_cell, is_flex_field=True)
             if not collection_date_cell.value:
                 collection_date = self.registration_data_import.created_at.date()
             else:
@@ -748,6 +749,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                     obj_to_create.age_at_registration = calculate_age_at_registration(
                         registration_data_import.created_at, str(obj_to_create.birth_date)
                     )
+                    populate_pdu_with_null_values(registration_data_import.program, obj_to_create.flex_fields)
                     self.handle_pdu_fields(row, first_row, obj_to_create)
                     self.individuals.append(obj_to_create)
             except Exception as e:  # pragma: no cover

@@ -7,7 +7,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import GetAppIcon from '@mui/icons-material/GetApp';
 import UploadIcon from '@mui/icons-material/Upload';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import { Button, IconButton, TableCell } from '@mui/material';
+import { Button, IconButton, TableCell, Tooltip } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import { ReactElement, useEffect, useState } from 'react';
 import { PeriodicDataUpdatesTemplateDetailsDialog } from './PeriodicDataUpdatesTemplateDetailsDialog';
@@ -18,7 +18,7 @@ import {
 import { StatusBox } from '@core/StatusBox';
 import { periodicDataUpdateTemplateStatusToColor } from '@utils/utils';
 import { useSnackbar } from '@hooks/useSnackBar';
-import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 
 export interface Template {
   id: number;
@@ -84,6 +84,7 @@ const templatesHeadCells: HeadCell<Template>[] = [
 ];
 
 export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
+  const { t } = useTranslation();
   const { businessArea: businessAreaSlug, programId } = useBaseUrl();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(
@@ -129,55 +130,6 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
     setSelectedTemplateId(null);
   };
 
-  const renderTemplateRow = (row: Template): ReactElement => (
-    <ClickableTableRow key={row.id} data-cy={`template-row-${row.id}`}>
-      <TableCell data-cy={`template-id-${row.id}`}>{row.id}</TableCell>
-      <TableCell data-cy={`template-records-${row.id}`} align="right">
-        {row.number_of_records}
-      </TableCell>
-      <TableCell data-cy={`template-created-at-${row.id}`}>
-        <UniversalMoment>{row.created_at}</UniversalMoment>
-      </TableCell>
-      <TableCell data-cy={`template-created-by-${row.id}`}>
-        {row.created_by}
-      </TableCell>
-      <TableCell data-cy={`template-details-btn-${row.id}`}>
-        <IconButton color="primary" onClick={() => handleDialogOpen(row)}>
-          <VisibilityIcon />
-        </IconButton>
-      </TableCell>
-      <TableCell data-cy={`template-status-${row.id}`}>
-        <StatusBox
-          status={row.status}
-          statusToColor={periodicDataUpdateTemplateStatusToColor}
-        />
-      </TableCell>
-      <TableCell data-cy={`template-action-${row.id}`}>
-        {row.status === 'EXPORTED' ? (
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => handleDownloadClick(row.id)}
-            startIcon={<GetAppIcon />}
-            data-cy={`download-btn-${row.id}`}
-          >
-            Download
-          </Button>
-        ) : row.can_export ? (
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => handleExportClick(row.id)}
-            startIcon={<UploadIcon />}
-            data-cy={`export-btn-${row.id}`}
-          >
-            Export
-          </Button>
-        ) : null}
-      </TableCell>
-    </ClickableTableRow>
-  );
-
   const initialQueryVariables = {
     page: 1,
     page_size: 10,
@@ -207,6 +159,66 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
 
   const selectedTemplate = templatesData?.results?.find(
     (template) => template.id === selectedTemplateId,
+  );
+
+  const renderTemplateRow = (row: Template): ReactElement => (
+    <ClickableTableRow key={row.id} data-cy={`template-row-${row.id}`}>
+      <TableCell data-cy={`template-id-${row.id}`}>{row.id}</TableCell>
+      <TableCell data-cy={`template-records-${row.id}`} align="right">
+        {row.number_of_records}
+      </TableCell>
+      <TableCell data-cy={`template-created-at-${row.id}`}>
+        <UniversalMoment>{row.created_at}</UniversalMoment>
+      </TableCell>
+      <TableCell data-cy={`template-created-by-${row.id}`}>
+        {row.created_by}
+      </TableCell>
+      <TableCell data-cy={`template-details-btn-${row.id}`}>
+        <IconButton color="primary" onClick={() => handleDialogOpen(row)}>
+          <VisibilityIcon />
+        </IconButton>
+      </TableCell>
+      <TableCell data-cy={`template-status-${row.id}`}>
+        <StatusBox
+          status={row.status}
+          statusToColor={periodicDataUpdateTemplateStatusToColor}
+        />
+      </TableCell>
+      <TableCell data-cy={`template-action-${row.id}`}>
+        {row.status === 'EXPORTED' ? (
+          <Tooltip
+            title={
+              row?.number_of_records === 0
+                ? t('There are no records available')
+                : ''
+            }
+          >
+            <span>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => handleDownloadClick(row.id)}
+                startIcon={<GetAppIcon />}
+                data-cy={`download-btn-${row.id}`}
+                disabled={row?.number_of_records === 0}
+              >
+                Download
+              </Button>
+            </span>
+          </Tooltip>
+        ) : row.can_export ? (
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => handleExportClick(row.id)}
+            startIcon={<UploadIcon />}
+            data-cy={`export-btn-${row.id}`}
+          >
+            Export
+          </Button>
+        ) : null}
+      </TableCell>
+    </ClickableTableRow>
   );
 
   return (

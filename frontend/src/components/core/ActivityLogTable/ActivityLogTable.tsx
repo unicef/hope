@@ -97,7 +97,7 @@ export function ActivityLogTable({
           </Row>
           {logEntries.map((value) => (
             <LogRow
-              data-cy={`log-row-${value.id}`}
+              data-cy="log-row"
               key={value.id}
               logEntry={value}
             />

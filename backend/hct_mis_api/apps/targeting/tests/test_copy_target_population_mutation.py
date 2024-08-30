@@ -33,7 +33,7 @@ class TestCopyTargetPopulationMutation(APITestCase):
                         filters{
                           comparisonMethod
                           fieldName
-                          isFlexField
+                          flexFieldClassification
                           arguments
                         }
                       }
@@ -63,6 +63,7 @@ class TestCopyTargetPopulationMutation(APITestCase):
         )
         cls.household = household
         cls.program = ProgramFactory(status=Program.ACTIVE, business_area=cls.business_area)
+        cls.cycle = cls.program.cycles.first()
         cls.update_partner_access_to_program(partner, cls.program)
         tp = TargetPopulation(
             name="Original Target Population", status="LOCKED", business_area=cls.business_area, program=cls.program
@@ -106,6 +107,7 @@ class TestCopyTargetPopulationMutation(APITestCase):
                     "targetPopulationData": {
                         "id": self.id_to_base64(self.target_population.id, "TargetPopulationNode"),
                         "name": "Test New Copy Name",
+                        "programCycleId": self.id_to_base64(self.cycle.id, "ProgramCycleNode"),
                     }
                 }
             },
@@ -127,6 +129,7 @@ class TestCopyTargetPopulationMutation(APITestCase):
                     "targetPopulationData": {
                         "id": self.id_to_base64(self.target_population.id, "TargetPopulationNode"),
                         "name": "Test New Copy Name 1",
+                        "programCycleId": self.id_to_base64(self.cycle.id, "ProgramCycleNode"),
                     }
                 }
             },
@@ -176,6 +179,7 @@ class TestCopyTargetPopulationMutation(APITestCase):
                             "TargetPopulationNode",
                         ),
                         "name": "test_copy_empty_target_1",
+                        "programCycleId": self.id_to_base64(self.cycle.id, "ProgramCycleNode"),
                     }
                 }
             },
@@ -195,6 +199,7 @@ class TestCopyTargetPopulationMutation(APITestCase):
                             "TargetPopulationNode",
                         ),
                         "name": self.empty_target_population_1.name,
+                        "programCycleId": self.id_to_base64(self.cycle.id, "ProgramCycleNode"),
                     }
                 }
             },

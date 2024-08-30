@@ -1,8 +1,14 @@
 import { gql } from '@apollo/client';
 
 export const ImportedIndividualFields = gql`
-  query ImportedIndividualFields($businessAreaSlug: String, $programId: String) {
-    allFieldsAttributes(businessAreaSlug: $businessAreaSlug, programId: $programId) {
+  query ImportedIndividualFields(
+    $businessAreaSlug: String
+    $programId: String
+  ) {
+    allFieldsAttributes(
+      businessAreaSlug: $businessAreaSlug
+      programId: $programId
+    ) {
       isFlexField
       id
       type
@@ -23,6 +29,12 @@ export const ImportedIndividualFields = gql`
         value
         admin
         listName
+      }
+      pduData {
+        id
+        subtype
+        numberOfRounds
+        roundsNames
       }
     }
   }

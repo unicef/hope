@@ -28,8 +28,8 @@ class PartnerAccessChangeSignal(TestCase):
         )
         cls.area_type_other = AreaTypeFactory(name="Area Type Other", country=country_other)
 
-        cls.area_in_afg_1 = AreaFactory(name="Area in AFG 1", area_type=cls.area_type_afg)
-        cls.area_in_afg_2 = AreaFactory(name="Area in AFG 2", area_type=cls.area_type_afg)
+        cls.area_in_afg_1 = AreaFactory(name="Area in AFG 1", area_type=cls.area_type_afg, p_code="AREA-IN-AFG1")
+        cls.area_in_afg_2 = AreaFactory(name="Area in AFG 2", area_type=cls.area_type_afg, p_code="AREA-IN-AFG2")
 
         cls.program = ProgramFactory.create(
             status=Program.DRAFT, business_area=cls.business_area, partner_access=Program.SELECTED_PARTNERS_ACCESS
@@ -64,8 +64,10 @@ class PartnerAccessChangeSignal(TestCase):
 
         self.assertEqual(self.program_other_unicef_through.areas.count(), 2)
 
-        self.new_area_in_afg = AreaFactory(name="Area in AFG", area_type=self.area_type_afg)
-        self.new_area_not_in_afg = AreaFactory(name="Area not in AFG", area_type=self.area_type_other)
+        self.new_area_in_afg = AreaFactory(name="Area in AFG", area_type=self.area_type_afg, p_code="AREA-IN-AFG")
+        self.new_area_not_in_afg = AreaFactory(
+            name="Area not in AFG", area_type=self.area_type_other, p_code="AREA-NOT-IN-AFG"
+        )
 
         self.assertEqual(self.program_partner_through.areas.count(), 2)
         self.assertEqual(self.program_unicef_through.areas.count(), 3)

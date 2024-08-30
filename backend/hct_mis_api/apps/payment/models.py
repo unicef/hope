@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Un
 from django import forms
 from django.conf import settings
 from django.contrib.admin.options import get_content_type_for_model
+from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.fields import ArrayField, IntegerRangeField
@@ -64,7 +65,7 @@ from hct_mis_api.apps.core.field_attributes.fields_types import (
     Scope,
 )
 from hct_mis_api.apps.core.mixins import LimitBusinessAreaModelMixin
-from hct_mis_api.apps.core.models import BusinessArea, FileTemp
+from hct_mis_api.apps.core.models import BusinessArea, FileTemp, FlexibleAttribute
 from hct_mis_api.apps.core.utils import nested_getattr
 from hct_mis_api.apps.household.models import (
     FEMALE,
@@ -129,8 +130,16 @@ class GenericPaymentPlan(TimeStampedUUIDModel):
 
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     status_date = models.DateTimeField()
-    start_date = models.DateTimeField(db_index=True)
-    end_date = models.DateTimeField(db_index=True)
+    start_date = models.DateTimeField(
+        db_index=True,
+        blank=True,
+        null=True,
+    )
+    end_date = models.DateTimeField(
+        db_index=True,
+        blank=True,
+        null=True,
+    )
     program = models.ForeignKey("program.Program", on_delete=models.CASCADE)
     exchange_rate = models.DecimalField(decimal_places=8, blank=True, null=True, max_digits=14)
 
@@ -496,7 +505,9 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
         FINISH = "FINISH", "Finish"
         SEND_TO_PAYMENT_GATEWAY = "SEND_TO_PAYMENT_GATEWAY", "Send to Payment Gateway"
 
-    program_cycle = models.ForeignKey("program.ProgramCycle", null=True, blank=True, on_delete=models.CASCADE)
+    program_cycle = models.ForeignKey(
+        "program.ProgramCycle", related_name="payment_plans", null=True, blank=True, on_delete=models.CASCADE
+    )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
@@ -1090,6 +1101,21 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
             )
 
 
+class FlexFieldArrayField(ArrayField):
+    def formfield(self, form_class: Optional[Any] = ..., choices_form_class: Optional[Any] = ..., **kwargs: Any) -> Any:
+        widget = FilteredSelectMultiple(self.verbose_name, False)
+        # TODO exclude PDU here
+        flexible_attributes = FlexibleAttribute.objects.values_list("name", flat=True)
+        flexible_choices = ((x, x) for x in flexible_attributes)
+        defaults = {
+            "form_class": forms.MultipleChoiceField,
+            "widget": widget,
+            "choices": flexible_choices,
+        }
+        defaults.update(kwargs)
+        return super(ArrayField, self).formfield(**defaults)
+
+
 class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
     COLUMNS_CHOICES = (
         ("payment_id", _("Payment ID")),
@@ -1144,6 +1170,12 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
     core_fields = DynamicChoiceArrayField(
         models.CharField(max_length=255, blank=True),
         choices_callable=FieldFactory.get_all_core_fields_choices,
+        default=list,
+        blank=True,
+    )
+
+    flex_fields = FlexFieldArrayField(
+        models.CharField(max_length=255, blank=True),
         default=list,
         blank=True,
     )
