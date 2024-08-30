@@ -22,6 +22,7 @@ from hct_mis_api.apps.registration_datahub.apis.deduplication_engine import (
     DeduplicationEngineAPI,
     DeduplicationImage,
     DeduplicationSet,
+    DeduplicationSetData,
     SimilarityPair,
 )
 from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import (
@@ -467,3 +468,38 @@ class BiometricDeduplicationServiceTest(TestCase):
 
         service.create_grievance_tickets_for_duplicates(rdi1)
         create_needs_adjudication_tickets_for_biometrics_mock.assert_called_once_with([], rdi1)
+
+    def test_fetch_biometric_deduplication_results_and_process_success(self) -> None:
+        deduplication_set_id = str(uuid.uuid4())
+        service = BiometricDeduplicationService()
+
+        service.get_deduplication_set = mock.Mock(return_value=DeduplicationSetData(state="Clean", error=None))
+
+        results_data = [
+            {"first": 1, "second": 2, "score": 0.9},
+            {"first": 3, "second": 4, "score": 0.8},
+        ]
+        service.get_deduplication_set_results = mock.Mock(return_value=results_data)
+        service.store_results = mock.Mock()
+        service.mark_rdis_as_deduplicated = mock.Mock()
+
+        service.fetch_biometric_deduplication_results_and_process(deduplication_set_id)
+
+        service.get_deduplication_set.assert_called_once_with(deduplication_set_id)
+        service.get_deduplication_set_results.assert_called_once_with(deduplication_set_id)
+        service.store_results.assert_called_once_with(
+            deduplication_set_id, [SimilarityPair(**item) for item in results_data]
+        )
+        service.mark_rdis_as_deduplicated.assert_called_once_with(deduplication_set_id)
+
+    def test_fetch_biometric_deduplication_results_and_process_fail(self) -> None:
+        deduplication_set_id = str(uuid.uuid4())
+        service = BiometricDeduplicationService()
+
+        service.get_deduplication_set = mock.Mock(return_value=DeduplicationSetData(state="Error", error="error"))
+        service.mark_rdis_as_deduplication_error = mock.Mock()
+
+        service.fetch_biometric_deduplication_results_and_process(deduplication_set_id)
+
+        service.get_deduplication_set.assert_called_once_with(deduplication_set_id)
+        service.mark_rdis_as_deduplication_error.assert_called_once_with(deduplication_set_id)

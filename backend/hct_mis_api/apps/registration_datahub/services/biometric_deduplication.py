@@ -3,6 +3,7 @@ import uuid
 from typing import List
 
 from django.conf import settings
+from django.db import transaction
 from django.db.models import Q, QuerySet
 
 from hct_mis_api.apps.household.models import Individual, PendingIndividual
@@ -18,6 +19,8 @@ from hct_mis_api.apps.registration_datahub.apis.deduplication_engine import (
     DeduplicationSetData,
     SimilarityPair,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class BiometricDeduplicationService:
@@ -232,3 +235,19 @@ class BiometricDeduplicationService:
         deduplication_pairs = self.get_duplicates_for_merged_rdi_against_population(rdi)
 
         create_needs_adjudication_tickets_for_biometrics(deduplication_pairs, rdi)
+
+    def fetch_biometric_deduplication_results_and_process(self, deduplication_set_id: str) -> None:
+        deduplication_set_data = self.get_deduplication_set(deduplication_set_id)
+
+        if deduplication_set_data.state == "Clean":
+            data = self.get_deduplication_set_results(deduplication_set_id)
+            similarity_pairs = [SimilarityPair(**item) for item in data]
+            with transaction.atomic():
+                self.store_results(deduplication_set_id, similarity_pairs)
+                self.mark_rdis_as_deduplicated(deduplication_set_id)
+        else:
+            self.mark_rdis_as_deduplication_error(deduplication_set_id)
+            logger.error(
+                f"Failed to process deduplication set {deduplication_set_id},"
+                f" dedupe engine state: {deduplication_set_data.state} error: {deduplication_set_data.error}"
+            )
