@@ -91,12 +91,27 @@ export const HouseholdMembersPage = (): React.ReactElement => {
             }}
           >
             <Tab data-cy="tab-individuals" label="Individuals" />
-            {!programHasPdu || !canViewPDUListAndDetails ? (
+            {programHasPdu ? (
+              canViewPDUListAndDetails ? (
+                <Tab
+                  data-cy="tab-periodic-data-updates"
+                  label="Periodic Data Updates"
+                />
+              ) : (
+                <Tooltip title={t('Permission Denied')}>
+                  <span>
+                    <Tab
+                      disabled
+                      data-cy="tab-periodic-data-updates"
+                      label="Periodic Data Updates"
+                    />
+                  </span>
+                </Tooltip>
+              )
+            ) : (
               <Tooltip
                 title={t(
-                  !programHasPdu
-                    ? 'Programme does not have defined fields for periodic updates'
-                    : 'Permission Denied',
+                  'Programme does not have defined fields for periodic updates',
                 )}
               >
                 <span>
@@ -107,11 +122,6 @@ export const HouseholdMembersPage = (): React.ReactElement => {
                   />
                 </span>
               </Tooltip>
-            ) : (
-              <Tab
-                data-cy="tab-periodic-data-updates"
-                label="Periodic Data Updates"
-              />
             )}
           </Tabs>
         }
