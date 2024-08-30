@@ -11085,6 +11085,26 @@ export type AllProgramsForChoicesQueryVariables = Exact<{
 
 export type AllProgramsForChoicesQuery = { __typename?: 'Query', allPrograms?: { __typename?: 'ProgramNodeConnection', totalCount?: number | null, edgeCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, endCursor?: string | null, startCursor?: string | null }, edges: Array<{ __typename?: 'ProgramNodeEdge', cursor: string, node?: { __typename?: 'ProgramNode', id: string, name: string, status: ProgramStatus, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, type?: DataCollectingTypeType | null, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean, description: string } | null, pduFields?: Array<{ __typename?: 'PeriodicFieldNode', id: string } | null> | null } | null } | null> } | null };
 
+export type AllProgramsForTableQueryVariables = Exact<{
+  before?: InputMaybe<Scalars['String']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  status?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
+  sector?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
+  businessArea: Scalars['String']['input'];
+  search?: InputMaybe<Scalars['String']['input']>;
+  numberOfHouseholds?: InputMaybe<Scalars['String']['input']>;
+  budget?: InputMaybe<Scalars['String']['input']>;
+  startDate?: InputMaybe<Scalars['Date']['input']>;
+  endDate?: InputMaybe<Scalars['Date']['input']>;
+  orderBy?: InputMaybe<Scalars['String']['input']>;
+  dataCollectingType?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type AllProgramsForTableQuery = { __typename?: 'Query', allPrograms?: { __typename?: 'ProgramNodeConnection', totalCount?: number | null, edgeCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, endCursor?: string | null, startCursor?: string | null }, edges: Array<{ __typename?: 'ProgramNodeEdge', cursor: string, node?: { __typename?: 'ProgramNode', id: string, name: string, startDate: any, endDate: any, status: ProgramStatus, budget?: any | null, sector: ProgramSector, totalNumberOfHouseholds?: number | null } | null } | null> } | null };
+
 export type ProgramQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
@@ -21956,6 +21976,94 @@ export type AllProgramsForChoicesQueryHookResult = ReturnType<typeof useAllProgr
 export type AllProgramsForChoicesLazyQueryHookResult = ReturnType<typeof useAllProgramsForChoicesLazyQuery>;
 export type AllProgramsForChoicesSuspenseQueryHookResult = ReturnType<typeof useAllProgramsForChoicesSuspenseQuery>;
 export type AllProgramsForChoicesQueryResult = Apollo.QueryResult<AllProgramsForChoicesQuery, AllProgramsForChoicesQueryVariables>;
+export const AllProgramsForTableDocument = gql`
+    query AllProgramsForTable($before: String, $after: String, $first: Int, $last: Int, $status: [String], $sector: [String], $businessArea: String!, $search: String, $numberOfHouseholds: String, $budget: String, $startDate: Date, $endDate: Date, $orderBy: String, $dataCollectingType: String) {
+  allPrograms(
+    before: $before
+    after: $after
+    first: $first
+    last: $last
+    status: $status
+    sector: $sector
+    businessArea: $businessArea
+    search: $search
+    numberOfHouseholds: $numberOfHouseholds
+    budget: $budget
+    orderBy: $orderBy
+    startDate: $startDate
+    endDate: $endDate
+    dataCollectingType: $dataCollectingType
+  ) {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      endCursor
+      startCursor
+    }
+    totalCount
+    edgeCount
+    edges {
+      cursor
+      node {
+        id
+        name
+        startDate
+        endDate
+        status
+        budget
+        sector
+        totalNumberOfHouseholds
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useAllProgramsForTableQuery__
+ *
+ * To run a query within a React component, call `useAllProgramsForTableQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllProgramsForTableQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllProgramsForTableQuery({
+ *   variables: {
+ *      before: // value for 'before'
+ *      after: // value for 'after'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      status: // value for 'status'
+ *      sector: // value for 'sector'
+ *      businessArea: // value for 'businessArea'
+ *      search: // value for 'search'
+ *      numberOfHouseholds: // value for 'numberOfHouseholds'
+ *      budget: // value for 'budget'
+ *      startDate: // value for 'startDate'
+ *      endDate: // value for 'endDate'
+ *      orderBy: // value for 'orderBy'
+ *      dataCollectingType: // value for 'dataCollectingType'
+ *   },
+ * });
+ */
+export function useAllProgramsForTableQuery(baseOptions: Apollo.QueryHookOptions<AllProgramsForTableQuery, AllProgramsForTableQueryVariables> & ({ variables: AllProgramsForTableQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<AllProgramsForTableQuery, AllProgramsForTableQueryVariables>(AllProgramsForTableDocument, options);
+      }
+export function useAllProgramsForTableLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllProgramsForTableQuery, AllProgramsForTableQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<AllProgramsForTableQuery, AllProgramsForTableQueryVariables>(AllProgramsForTableDocument, options);
+        }
+export function useAllProgramsForTableSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AllProgramsForTableQuery, AllProgramsForTableQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<AllProgramsForTableQuery, AllProgramsForTableQueryVariables>(AllProgramsForTableDocument, options);
+        }
+export type AllProgramsForTableQueryHookResult = ReturnType<typeof useAllProgramsForTableQuery>;
+export type AllProgramsForTableLazyQueryHookResult = ReturnType<typeof useAllProgramsForTableLazyQuery>;
+export type AllProgramsForTableSuspenseQueryHookResult = ReturnType<typeof useAllProgramsForTableSuspenseQuery>;
+export type AllProgramsForTableQueryResult = Apollo.QueryResult<AllProgramsForTableQuery, AllProgramsForTableQueryVariables>;
 export const ProgramDocument = gql`
     query Program($id: ID!) {
   program(id: $id) {
