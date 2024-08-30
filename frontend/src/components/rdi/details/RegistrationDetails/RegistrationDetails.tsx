@@ -8,7 +8,10 @@ import { OverviewContainer } from '@core/OverviewContainer';
 import { StatusBox } from '@core/StatusBox';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { MiśTheme } from '../../../../theme';
-import { registrationDataImportStatusToColor } from '@utils/utils';
+import {
+  registrationDataImportDeduplicationEngineStatusToColor,
+  registrationDataImportStatusToColor,
+} from '@utils/utils';
 import {
   RegistrationDataImportQuery,
   RegistrationDataImportStatus,
@@ -152,6 +155,23 @@ export function RegistrationDetails({
                   )}
                 </Box>
               </Grid>
+              {registration?.biometricDeduplicationEnabled && (
+                <Grid item xs={6}>
+                  <Box display="flex" flexDirection="column">
+                    <LabelizedField label={t('status')}>
+                      <StatusBox
+                        status={registration?.deduplicationEngineStatus}
+                        statusToColor={
+                          registrationDataImportDeduplicationEngineStatusToColor
+                        }
+                      />
+                    </LabelizedField>
+                    {registration?.errorMessage && (
+                      <Error>{registration.errorMessage}</Error>
+                    )}
+                  </Box>
+                </Grid>
+              )}
               <Grid item xs={6}>
                 <LabelizedField
                   label={t('Source of Data')}

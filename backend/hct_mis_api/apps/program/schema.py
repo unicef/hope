@@ -43,6 +43,7 @@ from hct_mis_api.apps.core.schema import (
 from hct_mis_api.apps.core.utils import (
     chart_filters_decoder,
     chart_permission_decorator,
+    decode_id_string,
     to_choice_object,
 )
 from hct_mis_api.apps.payment.filters import (
@@ -63,6 +64,7 @@ from hct_mis_api.apps.payment.schema import (
 from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
 from hct_mis_api.apps.program.filters import ProgramCycleFilter, ProgramFilter
 from hct_mis_api.apps.program.models import Program, ProgramCycle
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.utils.schema import ChartDetailedDatasetsNode
 
 
@@ -249,6 +251,22 @@ class Query(graphene.ObjectType):
     )
     # ProgramCycle
     program_cycle = relay.Node.Field(ProgramCycleNode)
+
+    can_run_deduplication = graphene.Boolean()
+    is_deduplication_disabled = graphene.Boolean()
+
+    def resolve_can_run_deduplication(self, info: Any, **kwargs: Any) -> bool:
+        encoded_program_id = info.context.headers.get("Program")
+        program = Program.objects.only("biometric_deduplication_enabled").get(id=decode_id_string(encoded_program_id))
+        return program.biometric_deduplication_enabled
+
+    def resolve_is_deduplication_disabled(self, info: Any, **kwargs: Any) -> bool:
+        encoded_program_id = info.context.headers.get("Program")
+        program = Program.objects.only("id").get(id=decode_id_string(encoded_program_id))
+        is_still_processing = RegistrationDataImport.objects.filter(
+            program=program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS
+        ).exists()
+        return is_still_processing
 
     def resolve_all_programs(self, info: Any, **kwargs: Any) -> QuerySet[Program]:
         user = info.context.user

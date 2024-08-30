@@ -5,8 +5,6 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-//TODO MS: display errors
-// import { ImportErrors } from '@containers/tables/payments/VerificationRecordsTable/errors/ImportErrors';
 import { useSnackbar } from '@hooks/useSnackBar';
 
 import { DropzoneField } from '@core/DropzoneField';
@@ -14,6 +12,9 @@ import { LoadingButton } from '@core/LoadingButton';
 import { useProgramContext } from 'src/programContext';
 import { useUploadPeriodicDataUpdateTemplate } from './PeriodicDataUpdatesTemplatesListActions';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
+import { ButtonTooltip } from '@components/core/ButtonTooltip';
 
 const Error = styled.div`
   color: ${({ theme }) => theme.palette.error.dark};
@@ -31,12 +32,14 @@ const DisabledUploadIcon = styled(Publish)`
 export const PeriodDataUpdatesUploadDialog = (): React.ReactElement => {
   const { showMessage } = useSnackbar();
   const { businessArea, programId } = useBaseUrl();
+  const permissions = usePermissions();
   const [open, setOpenImport] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [fileToImport, setFileToImport] = useState<File | null>(null);
   const { isActiveProgram } = useProgramContext();
   const { t } = useTranslation();
   const { mutate, error } = useUploadPeriodicDataUpdateTemplate();
+  const canPDUUpload = hasPermissions(PERMISSIONS.PDU_UPLOAD, permissions);
 
   const handleFileUpload = (): void => {
     if (fileToImport) {
@@ -65,11 +68,7 @@ export const PeriodDataUpdatesUploadDialog = (): React.ReactElement => {
     }
   };
   let errorMessage = null;
-  // @ts-ignore
-  if (error && error?.data?.error) {
-    // @ts-ignore
-    errorMessage = <Error data-cy="pdu-upload-error">{error?.data?.error}</Error>;
-  } else if (error) {
+  if (error) {
     errorMessage = (
       <Error data-cy="pdu-upload-error">
         {t('Error uploading file:')} {error.message}
@@ -80,15 +79,15 @@ export const PeriodDataUpdatesUploadDialog = (): React.ReactElement => {
   return (
     <>
       <Box key="import">
-        <Button
+        <ButtonTooltip
           startIcon={!isActiveProgram ? <DisabledUploadIcon /> : <UploadIcon />}
           color="primary"
           data-cy="button-import"
           onClick={() => setOpenImport(true)}
-          disabled={!isActiveProgram}
+          disabled={!isActiveProgram || !canPDUUpload}
         >
           {t('Upload Data')}
-        </Button>
+        </ButtonTooltip>
       </Box>
       <Dialog
         open={open}

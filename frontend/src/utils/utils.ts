@@ -244,6 +244,27 @@ export function registrationDataImportStatusToColor(
   }
 }
 
+export function registrationDataImportDeduplicationEngineStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  switch (status) {
+    case 'PENDING':
+      return theme.hctPalette.gray;
+    case 'UPLOADED':
+      return theme.hctPalette.orange;
+    case 'IN_PROGRESS':
+      return theme.hctPalette.orange;
+    case 'FINISHED':
+      return theme.hctPalette.green;
+    case 'UPLOAD_ERROR':
+    case 'ERROR':
+      return theme.palette.error.main;
+    default:
+      return theme.hctPalette.orange;
+  }
+}
+
 export const registrationDataImportErasedColor = (): string =>
   themeObj.palette.error.main;
 
