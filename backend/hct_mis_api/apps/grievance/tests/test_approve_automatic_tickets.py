@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Any, Dict, List
 
+from django.core.files.base import ContentFile
 from django.core.management import call_command
 from django.utils import timezone
 
@@ -21,6 +22,7 @@ from hct_mis_api.apps.grievance.fixtures import (
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.registration_data.models import DeduplicationEngineSimilarityPair
 from hct_mis_api.apps.sanction_list.models import SanctionListIndividual
 
 
@@ -102,6 +104,16 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
                 selectedDuplicates {
                   unicefId
                 }
+                dedupEngineSimilarityPair {
+                  individual1 {
+                    fullName
+                  }
+                  individual2 {
+                    fullName
+                  }
+                  similarityScore
+                  isDuplicate
+                }
               }
             }
           }
@@ -115,6 +127,8 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
         cls.generate_document_types_for_all_countries()
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.business_area.biometric_deduplication_threshold = 33.33
+        cls.business_area.save()
 
         country = geo_models.Country.objects.get(name="Afghanistan")
         area_type = AreaTypeFactory(
@@ -150,6 +164,7 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
                 "phone_no": "(953)682-4596",
                 "birth_date": "1943-07-30",
                 "unicef_id": "IND-123-123",
+                "photo": ContentFile(b"111", name="foo1.png"),
             },
             {
                 "id": "94b09ff2-9e6d-4f34-a72c-c319e1db7115",
@@ -159,6 +174,7 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
                 "phone_no": "+18663567905",
                 "birth_date": "1946-02-15",
                 "unicef_id": "IND-222-222",
+                "photo": ContentFile(b"222", name="foo2.png"),
             },
         ]
 
@@ -168,6 +184,7 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
         ]
         first_individual = cls.individuals[0]
         second_individual = cls.individuals[1]
+        ind1, ind2 = sorted(cls.individuals, key=lambda x: x.id)
 
         household_one.head_of_household = first_individual
         household_one.save()
@@ -221,12 +238,18 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
             business_area=cls.business_area,
             status=GrievanceTicket.STATUS_FOR_APPROVAL,
         )
-
+        dedup_engine_similarity_pair = DeduplicationEngineSimilarityPair.objects.create(
+            program=program_one,
+            individual1=ind1,
+            individual2=ind2,
+            similarity_score=55.55,
+        )
         ticket_details = TicketNeedsAdjudicationDetailsFactory(
             ticket=cls.needs_adjudication_grievance_ticket,
             golden_records_individual=first_individual,
             possible_duplicate=second_individual,
             selected_individual=None,
+            dedup_engine_similarity_pair=dedup_engine_similarity_pair,
         )
         ticket_details.possible_duplicates.add(first_individual, second_individual)
 

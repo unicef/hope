@@ -26,7 +26,7 @@ snapshots['TestRegistrationDataImportQuery::test_registration_data_import_datahu
                             }
                         ],
                         'biometricDeduplicationEnabled': False,
-                        'canMerge': True,
+                        'canMerge': False,
                         'dataSource': 'XLS',
                         'goldenRecordDuplicatesCountAndPercentage': [
                             {
