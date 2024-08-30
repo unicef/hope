@@ -67,7 +67,7 @@ from pytest_django.live_server_helper import LiveServer
 from pytest_html_reporter import attach
 from requests import Session
 from selenium import webdriver
-from selenium.webdriver import Chrome
+from selenium.webdriver import Chrome, DesiredCapabilities
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.service import Service as ChromiumService
@@ -191,9 +191,11 @@ def create_session(host: str, username: str, password: str, csrf: str = "") -> o
 
 @pytest.fixture
 def driver() -> Chrome:
-    chrome_options = Options()
-    # chrome_headless_path = "./chromedriver-linux64"
-    # chrome_options.binary_location = chrome_headless_path
+    chrome_options = webdriver.ChromeOptions()
+    chrome = "./chrome-linux64"
+    chromedriver = "./chromedriver-linux64"
+    chrome_options.binary_location = chrome
+    service = webdriver.ChromeService(executable_path=chromedriver)
     # if not os.environ.get("STREAM"):
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
@@ -202,11 +204,13 @@ def driver() -> Chrome:
     chrome_options.add_argument("--window-size=1920,1080")
     chrome_options.add_argument("--disable-software-rasterizer")
     chrome_options.add_argument("--disable-dev-tools")
+    chrome_options.add_argument("--disable-gpu")
     if not os.path.exists("./report/downloads/"):
         os.makedirs("./report/downloads/")
     prefs = {"download.default_directory": "./report/downloads/"}
     chrome_options.add_experimental_option("prefs", prefs)
-    driver = webdriver.Chrome(options=chrome_options)
+    # chrome_options.enable_downloads = True
+    driver = webdriver.Chrome(service=service, options=chrome_options)
     yield driver
 
 

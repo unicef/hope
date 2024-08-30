@@ -74,14 +74,34 @@ FROM builder AS dev
 
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
-    chromium-driver \
-    chromium \
     ffmpeg \
     xorg \
     x11-apps \
     dbus \
+    wget \
+    unzip \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
+
+# RUN wget https://storage.googleapis.com/chrome-for-testing-public/126.0.6478.63/linux64/chrome-linux64.zip
+# RUN unzip ./chrome-linux64.zip -d ~/
+# RUN mv ~/chrome-linux64 ~/chrome
+# RUN ln -s ~/chrome/chrome /usr/local/bin/chrome
+# RUN chmod +x ~/chrome
+# RUN rm ./chrome-linux64.zip
+
+# Pobieramy i instalujemy Chrome w wersji 120
+# RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_arm64.deb
+# RUN dpkg -i google-chrome-stable_current_arm64.deb
+# RUN apt-get -fy install
+# RUN rm google-chrome-stable_current_amd64.deb
+# RUN chrome --version
+
+# Pobieramy i instalujemy ChromeDriver kompatybilny z wersją Chrome 120
+# RUN CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+') && \
+#     wget -O /tmp/chromedriver.zip "https://chromedriver.storage.googleapis.com/$CHROME_VERSION/chromedriver_linux64.zip" && \
+#     unzip /tmp/chromedriver.zip -d /usr/local/bin/ && \
+#     rm /tmp/chromedriver.zip
 
 RUN pdm sync --no-editable --no-self --no-isolation
 
