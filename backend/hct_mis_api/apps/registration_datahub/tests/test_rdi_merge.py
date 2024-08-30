@@ -587,6 +587,8 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         )
         role = PendingIndividualRoleInHousehold(individual=external_collector, household=household, role=ROLE_ALTERNATE)
         role.save()
+        self.rdi.program.biometric_deduplication_enabled = True
+        self.rdi.program.save()
         with capture_on_commit_callbacks(execute=True):
             RdiMergeTask().execute(self.rdi.pk)
 
