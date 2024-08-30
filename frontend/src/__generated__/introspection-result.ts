@@ -44,6 +44,7 @@
       "PaymentVerificationPlanNode",
       "PaymentVerificationSummaryNode",
       "PeriodicFieldNode",
+      "ProgramCycleNode",
       "ProgramNode",
       "RecipientNode",
       "RegistrationDataImportDatahubNode",

@@ -68,6 +68,11 @@ export const targetPopulationDetailed = gql`
       endDate
       isSocialWorkerProgram
     }
+    programCycle {
+      __typename
+      id
+      title
+    }
     createdBy {
       __typename
       id
@@ -94,7 +99,8 @@ export const targetPopulationDetailed = gql`
 
             id
             fieldName
-            isFlexField
+            flexFieldClassification
+            roundNumber
             arguments
             comparisonMethod
             fieldAttribute {
@@ -107,6 +113,12 @@ export const targetPopulationDetailed = gql`
                 value
                 labelEn
               }
+              pduData {
+                id
+                subtype
+                numberOfRounds
+                roundsNames
+              }
             }
           }
         }
@@ -114,7 +126,7 @@ export const targetPopulationDetailed = gql`
           __typename
           id
           fieldName
-          isFlexField
+          flexFieldClassification
           arguments
           comparisonMethod
           fieldAttribute {
@@ -126,6 +138,12 @@ export const targetPopulationDetailed = gql`
             choices {
               value
               labelEn
+            }
+            pduData {
+              id
+              subtype
+              numberOfRounds
+              roundsNames
             }
           }
         }

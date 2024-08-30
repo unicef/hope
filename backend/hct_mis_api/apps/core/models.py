@@ -211,8 +211,8 @@ class FlexibleAttribute(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDMode
     ASSOCIATED_WITH_HOUSEHOLD = 0
     ASSOCIATED_WITH_INDIVIDUAL = 1
     ASSOCIATED_WITH_CHOICES: Any = (
-        (0, _("Household")),
-        (1, _("Individual")),
+        (ASSOCIATED_WITH_HOUSEHOLD, _("Household")),
+        (ASSOCIATED_WITH_INDIVIDUAL, _("Individual")),
     )
 
     type = models.CharField(max_length=16, choices=TYPE_CHOICE)
@@ -235,11 +235,7 @@ class FlexibleAttribute(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDMode
     label = JSONField(default=dict)
     hint = JSONField(default=dict)
     group = models.ForeignKey(
-        "core.FlexibleAttributeGroup",
-        on_delete=models.CASCADE,
-        related_name="flex_attributes",
-        null=True,
-        blank=True,
+        "core.FlexibleAttributeGroup", on_delete=models.CASCADE, related_name="flex_attributes", null=True, blank=True
     )
     associated_with = models.SmallIntegerField(choices=ASSOCIATED_WITH_CHOICES)
 
@@ -250,6 +246,22 @@ class FlexibleAttribute(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDMode
                 fields=("name",), condition=Q(program__isnull=True), name="unique_name_without_program"
             ),
         ]
+
+    def clean(self) -> None:
+        if (
+            self.program
+            and FlexibleAttribute.objects.filter(name=self.name, program__isnull=True).exclude(id=self.id).exists()
+        ):
+            raise ValidationError(f'Flex field with name "{self.name}" already exists without a program.')
+        elif (
+            not self.program
+            and FlexibleAttribute.objects.filter(name=self.name, program__isnull=False).exclude(id=self.id).exists()
+        ):
+            raise ValidationError(f'Flex field with name "{self.name}" already exists inside a program.')
+
+    def save(self, *args: Any, **kwargs: Any) -> None:
+        self.clean()
+        super().save(*args, **kwargs)
 
     @property
     def is_flex_field(self) -> bool:
@@ -312,13 +324,13 @@ class PeriodicFieldData(models.Model):
     STRING = "STRING"
     DECIMAL = "DECIMAL"
     DATE = "DATE"
-    BOOLEAN = "BOOLEAN"
+    BOOL = "BOOL"
 
     TYPE_CHOICES = Choices(
         (DATE, _("Date")),
         (DECIMAL, _("Number")),
         (STRING, _("Text")),
-        (BOOLEAN, _("Boolean (true/false)")),
+        (BOOL, _("Boolean (true/false)")),
     )
 
     subtype = models.CharField(max_length=16, choices=TYPE_CHOICES)

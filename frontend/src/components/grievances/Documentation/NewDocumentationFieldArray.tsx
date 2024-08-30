@@ -34,6 +34,7 @@ export function NewDocumentationFieldArray({
             ))}
             <Grid item xs={12}>
               <Button
+                data-cy="add-documentation"
                 color="primary"
                 onClick={() => {
                   arrayHelpers.push({

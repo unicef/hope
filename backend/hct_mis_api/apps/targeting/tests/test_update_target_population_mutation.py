@@ -10,8 +10,8 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
+from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.targeting.models import (
     TargetingCriteria,
     TargetingCriteriaRule,
@@ -35,7 +35,7 @@ mutation UpdateTargetPopulation($updateTargetPopulationInput: UpdateTargetPopula
                     comparisonMethod
                     fieldName
                     arguments
-                    isFlexField
+                    flexFieldClassification
                 }
             }
         }
@@ -55,7 +55,7 @@ VARIABLES: Dict = {
                             "comparisonMethod": "EQUALS",
                             "fieldName": "size",
                             "arguments": [3],
-                            "isFlexField": False,
+                            "flexFieldClassification": "NOT_FLEX_FIELD",
                         }
                     ]
                 }
@@ -74,7 +74,7 @@ VARIABLES_WRONG_ARGS_COUNT = {
                             "comparisonMethod": "EQUALS",
                             "fieldName": "size",
                             "arguments": [3, 3],
-                            "isFlexField": False,
+                            "flexFieldClassification": "NOT_FLEX_FIELD",
                         }
                     ]
                 }
@@ -92,7 +92,7 @@ VARIABLES_WRONG_COMPARISON_METHOD = {
                             "comparisonMethod": "CONTAINS",
                             "fieldName": "size",
                             "arguments": [3],
-                            "isFlexField": False,
+                            "flexFieldClassification": "NOT_FLEX_FIELD",
                         }
                     ]
                 }
@@ -110,7 +110,7 @@ VARIABLES_UNKNOWN_COMPARISON_METHOD = {
                             "comparisonMethod": "BLABLA",
                             "fieldName": "size",
                             "arguments": [3],
-                            "isFlexField": False,
+                            "flexFieldClassification": "NOT_FLEX_FIELD",
                         }
                     ]
                 }
@@ -128,7 +128,7 @@ VARIABLES_UNKNOWN_FLEX_FIELD_NAME = {
                             "comparisonMethod": "EQUALS",
                             "fieldName": "foo_bar",
                             "arguments": [3],
-                            "isFlexField": True,
+                            "flexFieldClassification": "FLEX_FIELD_BASIC",
                         }
                     ]
                 }
@@ -146,7 +146,7 @@ VARIABLES_UNKNOWN_CORE_FIELD_NAME = {
                             "comparisonMethod": "EQUALS",
                             "fieldName": "foo_bar",
                             "arguments": [3],
-                            "isFlexField": False,
+                            "flexFieldClassification": "NOT_FLEX_FIELD",
                         }
                     ]
                 }
@@ -191,6 +191,7 @@ class TestUpdateTargetPopulationMutation(APITestCase):
         cls.approved_target_population.save()
         cls.approved_target_population.households.set(Household.objects.all())
         cls.target_populations = [cls.draft_target_population, cls.approved_target_population]
+        cls.program_cycle = cls.program.cycles.first()
 
     @staticmethod
     def get_targeting_criteria_for_rule(rule_filter: Dict) -> TargetingCriteria:
@@ -308,3 +309,42 @@ class TestUpdateTargetPopulationMutation(APITestCase):
             "Finalized Target Population can't be changed",
             response_error["errors"][0]["message"],
         )
+
+    def test_update_program_cycle_finished(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.TARGETING_UPDATE], self.business_area)
+        self.program_cycle.status = Program.FINISHED
+        self.program_cycle.save()
+
+        variables = copy.deepcopy(VARIABLES)
+        variables["updateTargetPopulationInput"]["id"] = self.id_to_base64(
+            self.draft_target_population.id, "TargetPopulationNode"
+        )
+        variables["updateTargetPopulationInput"]["name"] = "Some Random Name Here"
+        variables["updateTargetPopulationInput"]["programCycleId"] = self.id_to_base64(
+            self.program_cycle.id, "ProgramCycleNode"
+        )
+
+        response_error = self.graphql_request(
+            request_string=MUTATION_QUERY,
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            variables=variables,
+        )
+        assert "errors" in response_error
+        self.assertIn(
+            "Not possible to assign Finished Program Cycle to Targeting",
+            response_error["errors"][0]["message"],
+        )
+
+        program_cycle = ProgramCycleFactory(program=self.program, status=ProgramCycle.ACTIVE)
+        variables["updateTargetPopulationInput"]["programCycleId"] = self.id_to_base64(
+            program_cycle.id, "ProgramCycleNode"
+        )
+        response_ok = self.graphql_request(
+            request_string=MUTATION_QUERY,
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            variables=variables,
+        )
+        assert "errors" not in response_ok
+
+        self.draft_target_population.refresh_from_db()
+        self.assertEqual(str(self.draft_target_population.program_cycle.pk), str(program_cycle.pk))

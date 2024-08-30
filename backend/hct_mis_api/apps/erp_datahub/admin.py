@@ -125,6 +125,7 @@ class FundsCommitmentAdmin(HOPEModelAdminBase):
     )
     date_hierarchy = "create_date"
     form = FundsCommitmentAddForm
+    search_fields = ("rec_serial_number", "vendor_id", "wbs_element", "funds_commitment_number")
 
     @atomic(using="cash_assist_datahub_erp")
     @atomic(using="default")
