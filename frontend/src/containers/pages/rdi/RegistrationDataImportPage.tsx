@@ -10,11 +10,13 @@ import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { RegistrationDataImportTable } from '../../tables/rdi/RegistrationDataImportTable';
-import { Box, Button } from '@mui/material';
+import { Box } from '@mui/material';
 import { useMutation } from '@tanstack/react-query';
 import { runDeduplicationDataImports } from '@api/rdiApi';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
+import { useDeduplicationFlagsQuery } from '@generated/graphql';
+import { ButtonTooltip } from '@core/ButtonTooltip';
 
 const initialFilter = {
   search: '',
@@ -32,6 +34,9 @@ export function RegistrationDataImportPage(): React.ReactElement {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
   const { showMessage } = useSnackbar();
+  const { data: deduplicationFlags, loading } = useDeduplicationFlagsQuery({
+    fetchPolicy: 'cache-and-network',
+  });
 
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
@@ -56,7 +61,7 @@ export function RegistrationDataImportPage(): React.ReactElement {
     }
   };
 
-  if (permissions === null) return null;
+  if (permissions === null || loading) return null;
 
   if (!hasPermissions(PERMISSIONS.RDI_VIEW_LIST, permissions))
     return <PermissionDenied />;
@@ -64,15 +69,19 @@ export function RegistrationDataImportPage(): React.ReactElement {
   const toolbar = (
     <PageHeader title={t('Registration Data Import')}>
       <Box display="flex" alignItems="center">
-        <Box mr={3}>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={runDeduplication}
-          >
-            {t('RUN DEDUPLICATION')}
-          </Button>
-        </Box>
+        {deduplicationFlags.canRunDeduplication && (
+          <Box mr={3}>
+            <ButtonTooltip
+              variant="contained"
+              color="primary"
+              onClick={runDeduplication}
+              disabled={deduplicationFlags.isDeduplicationDisabled}
+              title={t('Deduplication engine already in progress')}
+            >
+              {t('RUN DEDUPLICATION ENGINE')}
+            </ButtonTooltip>
+          </Box>
+        )}
         {hasPermissions(PERMISSIONS.RDI_IMPORT_DATA, permissions) && (
           <Box>
             <RegistrationDataImportCreateDialog />
