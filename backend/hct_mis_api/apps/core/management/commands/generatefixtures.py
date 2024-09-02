@@ -37,12 +37,7 @@ from hct_mis_api.apps.payment.fixtures import (
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.fixtures import (
-    RegistrationDataImportDatahubFactory,
-    RegistrationDataImportFactory,
-)
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.fixtures import create_imported_household
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
     TargetingCriteriaRuleFactory,
@@ -209,7 +204,6 @@ class Command(BaseCommand):
             call_command("flush", "--noinput", database="cash_assist_datahub_mis")
             call_command("flush", "--noinput", database="cash_assist_datahub_ca")
             call_command("flush", "--noinput", database="cash_assist_datahub_erp")
-            call_command("flush", "--noinput", database="registration_datahub")
             call_command(
                 "loaddata",
                 "hct_mis_api/apps/account/fixtures/superuser.json",
@@ -251,19 +245,6 @@ class Command(BaseCommand):
             for _ in range(programs_amount):
                 self._generate_program_with_dependencies(options, index)
 
-        # Data imports generation
-
-        for rdi in RegistrationDataImport.objects.all():
-            rdi_datahub = RegistrationDataImportDatahubFactory(
-                name=rdi.name, hct_id=rdi.id, business_area_slug=rdi.business_area.slug
-            )
-            rdi.datahub_id = rdi_datahub.id
-            rdi.save()
-            for _ in range(10):
-                create_imported_household(
-                    {"registration_data_import": rdi_datahub},
-                    {"registration_data_import": rdi_datahub},
-                )
         session = Session(source=Session.SOURCE_CA, status=Session.STATUS_READY)
         session.save()
         cash_assist_datahub_fixtures.ServiceProviderFactory.create_batch(10, session=session)
