@@ -10,8 +10,6 @@ from _pytest.fixtures import FixtureRequest
 from _pytest.nodes import Item
 from _pytest.runner import CallInfo
 from flags.models import FlagState
-# from selenium.webdriver.chrome.service import Service
-
 from page_object.accountability.communication import AccountabilityCommunication
 from page_object.accountability.comunication_details import (
     AccountabilityCommunicationDetails,
@@ -67,13 +65,11 @@ from page_object.targeting.targeting_create import TargetingCreate
 from page_object.targeting.targeting_details import TargetingDetails
 from pytest_django.live_server_helper import LiveServer
 from pytest_html_reporter import attach
-from requests import Session
+
+# from requests import Session
 from selenium import webdriver
 from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service as ChromiumService, Service
-from webdriver_manager.chrome import ChromeDriverManager
-from webdriver_manager.core.os_manager import ChromeType, OperationSystemManager
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.models import Partner, Role, User, UserRole
@@ -86,6 +82,14 @@ from hct_mis_api.apps.core.models import (
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.household.fixtures import DocumentTypeFactory
 from hct_mis_api.apps.household.models import DocumentType
+
+# from selenium.webdriver.chrome.service import Service
+# from selenium.webdriver.chrome.service import Service as ChromiumService
+# from webdriver_manager.chrome import ChromeDriverManager
+# from webdriver_manager.core.os_manager import ChromeType, OperationSystemManager
+
+
+# from selenium.webdriver.chrome.service import Service
 
 
 def pytest_addoption(parser) -> None:  # type: ignore
@@ -204,7 +208,7 @@ def driver() -> Chrome:
 @pytest.fixture(autouse=True)
 def browser(driver: Chrome) -> Chrome:
     yield driver
-    # driver.quit()
+    driver.quit()
     # pytest.CSRF = ""
     # pytest.SESSION_ID = ""
 
@@ -217,8 +221,9 @@ def login(browser: Chrome) -> Chrome:
     password = "id_password"
     loginButton = '//*[@id="login-form"]/div[3]/input'
     from selenium.webdriver.common.by import By
-    from selenium.webdriver.support.wait import WebDriverWait
     from selenium.webdriver.support import expected_conditions as EC
+    from selenium.webdriver.support.wait import WebDriverWait
+
     WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.XPATH, loginButton)))
     browser.find_element(By.XPATH, loginButton)
     browser.find_element(By.ID, login).send_keys("superuser")
