@@ -10,22 +10,21 @@ if TYPE_CHECKING:
 
 
 def get_household_status(household: Household) -> Tuple[str, datetime]:
-    if isinstance(household, Household):
-        payment_records = PaymentRecord.objects.filter(household=household)
-        if payment_records.exists():
-            return "paid", payment_records.first().updated_at
+    if household.rdi_merge_status == Household.PENDING:
+        return "imported", household.updated_at
 
-        selections = HouseholdSelection.objects.filter(household=household)
-        if selections.exists():
-            selection = selections.order_by("updated_at").first()
-            if selection.target_population.status == TargetPopulation.STATUS_PROCESSING:
-                return "sent to cash assist", selection.updated_at
-            return "targeted", selection.updated_at
+    payment_records = PaymentRecord.objects.filter(household=household)
+    if payment_records.exists():
+        return "paid", payment_records.first().updated_at
 
-        return "merged to population", household.created_at
+    selections = HouseholdSelection.objects.filter(household=household)
+    if selections.exists():
+        selection = selections.order_by("updated_at").first()
+        if selection.target_population.status == TargetPopulation.STATUS_PROCESSING:
+            return "sent to cash assist", selection.updated_at
+        return "targeted", selection.updated_at
 
-    # if is not Household, then must be ImportedHousehold, so it was imported
-    return "imported", household.updated_at
+    return "merged to population", household.created_at
 
 
 def get_individual_info(individual: "Individual", tax_id: Optional[str]) -> Dict:

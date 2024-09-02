@@ -34,7 +34,6 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 class TestCloseGrievanceTicketAndDisableDeduplication(BaseElasticSearchTestCase, APITestCase):
-    databases = {"default", "registration_datahub"}
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     UPDATE_GRIEVANCE_TICKET_STATUS_CHANGE_MUTATION = """

@@ -55,7 +55,7 @@ class ExportUsersXlsx:
         for i in range(1, len(self.FIELDS_TO_COLUMNS_MAPPING) + 1):
             self.ws.column_dimensions[get_column_letter(i)].width = 20
 
-    @transaction.atomic(using="default")
+    @transaction.atomic()
     def get_exported_users_file(self) -> Optional[Workbook]:
         fields = self.FIELDS_TO_COLUMNS_MAPPING.values()
         users = (

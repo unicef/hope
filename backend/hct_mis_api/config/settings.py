@@ -148,17 +148,12 @@ if env("POSTGRES_SSL", default=False):
         "sslrootcert": "/code/psql-cert.crt",
         "options": "-c search_path=erp",
     }
-    DATABASES["registration_datahub"]["OPTIONS"] = {
-        "sslmode": "verify-full",
-        "sslrootcert": "/code/psql-cert.crt",
-    }
 
 # If app is not specified here it will use default db
 DATABASE_APPS_MAPPING: Dict[str, str] = {
     "cash_assist_datahub": "cash_assist_datahub_ca",
     "mis_datahub": "cash_assist_datahub_mis",
     "erp_datahub": "cash_assist_datahub_erp",
-    "registration_datahub": "registration_datahub",
 }
 
 DATABASE_ROUTERS = ("hct_mis_api.apps.core.dbrouters.DbRouter",)
@@ -423,7 +418,7 @@ def filter_environment(key: str, config: Dict, request: HttpRequest) -> bool:
 def masker(key: str, value: Any, config: Dict, request: HttpRequest) -> Any:
     from django_sysinfo.utils import cleanse_setting
 
-    from .apps.utils.security import is_root  # noqa: ABS101
+    from ..apps.utils.security import is_root  # noqa: ABS101
 
     if key in ["PATH", "PYTHONPATH"]:
         return mark_safe(value.replace(":", r":<br>"))
@@ -453,7 +448,6 @@ EXPLORER_CONNECTIONS = {
     "HUB MIS": "cash_assist_datahub_mis",
     "HUB CA": "cash_assist_datahub_ca",
     "HUB ERP": "cash_assist_datahub_erp",
-    "HUB Reg": "registration_datahub",
 }
 EXPLORER_DEFAULT_CONNECTION = "default"
 EXPLORER_PERMISSION_VIEW = lambda r: r.user.has_perm("explorer.view_query")

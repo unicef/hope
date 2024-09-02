@@ -33,10 +33,6 @@ from hct_mis_api.apps.utils.models import MergeStatusModel
 
 
 class TestRdiXlsxPeople(BaseElasticSearchTestCase):
-    databases = {
-        "default",
-        "registration_datahub",
-    }
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
