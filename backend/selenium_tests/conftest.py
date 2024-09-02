@@ -66,7 +66,6 @@ from page_object.targeting.targeting_details import TargetingDetails
 from pytest_django.live_server_helper import LiveServer
 from pytest_html_reporter import attach
 
-# from requests import Session
 from selenium import webdriver
 from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
@@ -82,14 +81,6 @@ from hct_mis_api.apps.core.models import (
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.household.fixtures import DocumentTypeFactory
 from hct_mis_api.apps.household.models import DocumentType
-
-# from selenium.webdriver.chrome.service import Service
-# from selenium.webdriver.chrome.service import Service as ChromiumService
-# from webdriver_manager.chrome import ChromeDriverManager
-# from webdriver_manager.core.os_manager import ChromeType, OperationSystemManager
-
-
-# from selenium.webdriver.chrome.service import Service
 
 
 def pytest_addoption(parser) -> None:  # type: ignore
@@ -170,9 +161,6 @@ def pytest_configure(config) -> None:  # type: ignore
 
     logging.disable(logging.CRITICAL)
     pytest.SELENIUM_PATH = os.path.dirname(__file__)
-    # pytest.CSRF = ""
-    # pytest.SESSION_ID = ""
-    # pytest.session = Session()
 
 
 def create_session(host: str, username: str, password: str, csrf: str = "") -> object:
@@ -209,8 +197,6 @@ def driver() -> Chrome:
 def browser(driver: Chrome) -> Chrome:
     yield driver
     driver.quit()
-    # pytest.CSRF = ""
-    # pytest.SESSION_ID = ""
 
 
 @pytest.fixture
