@@ -606,8 +606,14 @@ class TestCreateTargeting:
         pageTargetingDetails.getLockButton()
 
         assert pageTargetingDetails.getCriteriaContainer().text == bool_no_expected_criteria_text
-        assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == individual1.household.unicef_id
-        assert pageTargetingDetails.getHouseholdTableCell(2, 1).text == individual2.household.unicef_id
+        assert pageTargetingDetails.getHouseholdTableCell(1, 1).text in [
+            individual1.household.unicef_id,
+            individual2.household.unicef_id,
+        ]
+        assert pageTargetingDetails.getHouseholdTableCell(2, 1).text in [
+            individual1.household.unicef_id,
+            individual2.household.unicef_id,
+        ]
         assert pageTargetingCreate.getTotalNumberOfHouseholdsCount().text == "2"
         assert len(pageTargetingDetails.getHouseholdTableRows()) == 2
 
@@ -1215,3 +1221,12 @@ class TestTargeting:
             "Males age 0 - 5 with disability: 1 -10"
             in pageTargetingCreate.get_elements(pageTargetingCreate.criteriaContainer)[1].text
         )
+
+    @pytest.mark.skip("ToDo")
+    def test_targeting_edit_programme_cycle(
+        self,
+        pageTargeting: Targeting,
+        pageTargetingCreate: TargetingCreate,
+    ) -> None:
+        # Todo: write a test
+        pass

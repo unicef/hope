@@ -167,7 +167,7 @@ export const EditProgramCycle = ({
                       required
                     />
                   </Grid>
-                  <Grid item xs={6}>
+                  <Grid item xs={6} data-cy="start-date-cycle">
                     <Field
                       name="start_date"
                       label={t('Start Date')}
@@ -179,7 +179,7 @@ export const EditProgramCycle = ({
                       }
                     />
                   </Grid>
-                  <Grid item xs={6}>
+                  <Grid item xs={6} data-cy="end-date-cycle">
                     <Field
                       name="end_date"
                       label={t('End Date')}
