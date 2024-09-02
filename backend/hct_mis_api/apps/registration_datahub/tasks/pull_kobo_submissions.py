@@ -18,8 +18,7 @@ from hct_mis_api.apps.registration_datahub.validators import (
 
 
 class PullKoboSubmissions:
-    @transaction.atomic(using="default")
-    @transaction.atomic(using="registration_datahub")
+    @transaction.atomic()
     def execute(self, kobo_import_data: KoboImportData, program: Program) -> Dict:
         kobo_import_data.status = KoboImportData.STATUS_RUNNING
         kobo_import_data.save()

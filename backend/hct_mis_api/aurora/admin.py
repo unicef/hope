@@ -1,10 +1,11 @@
 import base64
-from typing import Any, Generator, Optional, Type
+from typing import Any, Dict, Generator, Optional, Type
 from uuid import UUID
 
 from django import forms
 from django.contrib import admin, messages
 from django.contrib.admin.views.main import ChangeList
+from django.core.signing import BadSignature, Signer
 from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
@@ -28,7 +29,6 @@ from smart_admin.decorators import smart_register
 
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.admin import FetchForm
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 from hct_mis_api.apps.utils.security import is_root
 from hct_mis_api.aurora import models
@@ -385,3 +385,35 @@ class RecordMixinAdmin(ExtraButtonsMixin, admin.ModelAdmin):
 @admin.register(Record)
 class RecordDatahubAdmin(RecordMixinAdmin, HOPEModelAdminBase):
     pass
+
+
+class RemeberDataForm(forms.Form):
+    SYNC_COOKIE = "fetch"
+    remember = forms.BooleanField(label="Remember me", required=False)
+
+    def get_signed_cookie(self, request: HttpRequest) -> Any:
+        signer = Signer(str(request.user.password))
+        return signer.sign_object(self.cleaned_data)
+
+    @classmethod
+    def get_saved_config(cls, request: HttpRequest) -> Dict:
+        try:
+            signer = Signer(str(request.user.password))
+            obj: Dict = signer.unsign_object(request.COOKIES.get(cls.SYNC_COOKIE, ""))
+            return obj
+        except BadSignature:
+            return {}
+
+
+class FetchForm(RemeberDataForm):
+    SYNC_COOKIE = "fetch"
+
+    host = forms.URLField()
+    username = forms.CharField()
+    password = forms.CharField(widget=forms.PasswordInput)
+    registration = forms.IntegerField()
+    start = forms.IntegerField()
+    end = forms.IntegerField()
+
+    def clean(self) -> Optional[Dict[str, Any]]:
+        return super().clean()
