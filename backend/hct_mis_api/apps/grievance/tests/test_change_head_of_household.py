@@ -22,8 +22,6 @@ from hct_mis_api.apps.household.models import (
 
 
 class TestChangeHeadOfHousehold(BaseElasticSearchTestCase, APITestCase):
-    databases = {"default", "registration_datahub"}
-
     STATUS_CHANGE_MUTATION = """
     mutation GrievanceStatusChange($grievanceTicketId: ID!, $status: Int) {
       grievanceStatusChange(grievanceTicketId: $grievanceTicketId, status: $status) {

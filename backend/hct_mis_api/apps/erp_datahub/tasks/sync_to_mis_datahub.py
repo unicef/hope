@@ -21,7 +21,7 @@ class SyncToMisDatahubTask:
         return model_dict
 
     @atomic(using="cash_assist_datahub_erp")
-    @atomic(using="default")
+    @atomic()
     def execute(self) -> None:
         # have to be list because it used in another database
 

@@ -23,159 +23,6 @@ from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_CHOICE
 from hct_mis_api.apps.utils.phone import calculate_phone_numbers_validity
 
 
-def remove_duplicates(apps, schema_editor):
-    ImportedDocument = apps.get_model("registration_datahub", "ImportedDocument")
-
-    master_qs_docs = ImportedDocument.objects.annotate(
-        concat_id_doc_num=Concat(
-            F("type__id"),
-            F("document_number"),
-            output_field=models.CharField(),
-        ),
-    ).distinct("concat_id_doc_num")
-
-    for master in master_qs_docs:
-        ImportedDocument.objects.filter(
-            type=master.type, document_number=master.document_number
-        ).exclude(pk=master.pk).delete()
-
-
-def remove_duplicates_2nd(apps, schema_editor):
-    ImportedDocumentType = apps.get_model(
-        "registration_datahub", "ImportedDocumentType"
-    )
-
-    master_qs_types = ImportedDocumentType.objects.annotate(
-        concat_country_type=F("type")
-    ).distinct("concat_country_type")
-
-    for master in master_qs_types:
-        ImportedDocumentType.objects.filter(type=master.type).exclude(
-            pk=master.pk
-        ).delete()
-
-
-def set_document_types(apps, schema_editor):
-    choices = {
-        "Driving License": "DRIVERS_LICENSE",
-        "Birth Certificate": "BIRTH_CERTIFICATE",
-        "National ID": "NATIONAL_ID",
-        "National Passport": "NATIONAL_PASSPORT",
-    }
-    ImportedDocumentType = apps.get_model(
-        "registration_datahub", "ImportedDocumentType"
-    )
-    imported_doc_types = ImportedDocumentType.objects.all()
-    for obj in imported_doc_types:
-        obj.type = choices.get(obj.label)
-        obj.save()
-
-
-def cast_flex_field_values(apps, schema_editor):
-    pass
-
-
-def empty_reverse(apps, schema_editor):
-    pass
-
-
-def round_muac(apps, schema_editor):
-    ImportedIndividual = apps.get_model("registration_datahub", "ImportedIndividual")
-    individuals_with_muac = ImportedIndividual.objects.filter(
-        flex_fields__muac_i_f__isnull=False
-    )
-
-    for individual in individuals_with_muac:
-        individual.flex_fields["muac_i_f"] = "{:.2f}".format(
-            float(individual.flex_fields["muac_i_f"])
-        )
-
-    ImportedIndividual.objects.bulk_update(
-        individuals_with_muac, ("flex_fields",), 1000
-    )
-
-
-def fix_fields_individuals(apps, schema_editor):
-    ImportedIndividual = apps.get_model("registration_datahub", "ImportedIndividual")
-    individuals = ImportedIndividual.objects.all()
-
-    all_flex_fields = serialize_flex_attributes().get("individuals", {})
-    if all_flex_fields and individuals:
-        decimal_flex_fields = [
-            key
-            for key, value in all_flex_fields.items()
-            if value["type"] == TYPE_DECIMAL
-        ]
-
-        individuals = fix_flex_type_fields(individuals, decimal_flex_fields)
-        ImportedIndividual.objects.bulk_update(individuals, ("flex_fields",), 1000)
-
-
-def fix_fields_households(apps, schema_editor):
-    ImportedHousehold = apps.get_model("registration_datahub", "ImportedHousehold")
-    households = ImportedHousehold.objects.all()
-
-    all_flex_fields = serialize_flex_attributes().get("households", {})
-    if all_flex_fields and households:
-        decimal_flex_fields = [
-            key
-            for key, value in all_flex_fields.items()
-            if value["type"] == TYPE_DECIMAL
-        ]
-
-        households = fix_flex_type_fields(households, decimal_flex_fields)
-        ImportedHousehold.objects.bulk_update(households, ("flex_fields",), 1000)
-
-
-def migrate_doc_type(apps, schema_editor):
-    ImportedDocument = apps.get_model("registration_datahub", "ImportedDocument")
-    ImportedDocumentType = apps.get_model(
-        "registration_datahub", "ImportedDocumentType"
-    )
-
-    countries = (
-        ImportedDocumentType.objects.order_by("country")
-        .values_list("country", flat=True)
-        .distinct()
-    )
-
-    for country in countries:
-        ImportedDocument.objects.filter(type__country=country).update(country=country)
-
-    tostay = countries.first()
-    if tostay:
-        for code, _ in IDENTIFICATION_TYPE_CHOICE:
-            new_type, _ = ImportedDocumentType.objects.get_or_create(
-                type=code, country=tostay
-            )
-            ImportedDocument.objects.filter(type__type=code).update(type=new_type)
-        ImportedDocumentType.objects.exclude(country=tostay).delete()
-
-
-@transaction.atomic
-def update_each_phone_numbers_validity(apps, schema_editor):
-    ImportedIndividual = apps.get_model("registration_datahub", "ImportedIndividual")
-    for individual in ImportedIndividual.objects.only(
-        "phone_no",
-        "phone_no_alternative",
-        "phone_no_valid",
-        "phone_no_alternative_valid",
-    ).iterator():
-        individual = calculate_phone_numbers_validity(individual)
-        individual.save(update_fields=["phone_no_valid", "phone_no_alternative_valid"])
-
-
-def populate_partner_and_country(apps, schema_editor):
-    IndividualIdentity = apps.get_model(
-        "registration_datahub", "ImportedIndividualIdentity"
-    )
-
-    for identity in IndividualIdentity.objects.prefetch_related("agency").all():
-        identity.partner = identity.agency.type
-        identity.country = identity.agency.country
-        identity.save(update_fields=("partner", "country"))
-
-
 class Migration(migrations.Migration):
     dependencies = []
 
@@ -756,7 +603,6 @@ class Migration(migrations.Migration):
                 max_length=255,
             ),
         ),
-        migrations.RunPython(remove_duplicates, migrations.RunPython.noop),
         migrations.AddField(
             model_name="importeddocumenttype",
             name="type",
@@ -775,7 +621,6 @@ class Migration(migrations.Migration):
             ),
             preserve_default=False,
         ),
-        migrations.RunPython(set_document_types, migrations.RunPython.noop),
         migrations.AlterField(
             model_name="importeddocumenttype",
             name="type",
@@ -791,7 +636,6 @@ class Migration(migrations.Migration):
                 max_length=50,
             ),
         ),
-        migrations.RunPython(remove_duplicates_2nd, migrations.RunPython.noop),
         migrations.AlterUniqueTogether(
             name="importeddocumenttype",
             unique_together={("country", "type")},
@@ -1750,8 +1594,6 @@ class Migration(migrations.Migration):
             name="admin2_title",
             field=models.CharField(blank=True, default="", max_length=255),
         ),
-        migrations.RunPython(cast_flex_field_values, empty_reverse),
-        migrations.RunPython(round_muac, empty_reverse),
         migrations.AlterField(
             model_name="importedindividual",
             name="disability",
@@ -1856,8 +1698,6 @@ class Migration(migrations.Migration):
             old_name="male_age_group_6_11_disabled_count",
             new_name="male_age_group_5_12_disabled_count",
         ),
-        migrations.RunPython(fix_fields_individuals, migrations.RunPython.noop),
-        migrations.RunPython(fix_fields_households, migrations.RunPython.noop),
         migrations.RenameField(
             model_name="importedhousehold",
             old_name="female_age_group_0_4_count",
@@ -2783,7 +2623,6 @@ class Migration(migrations.Migration):
             name="importeddocumenttype",
             unique_together=set(),
         ),
-        migrations.RunPython(migrate_doc_type, migrations.RunPython.noop),
         migrations.RemoveField(
             model_name="importeddocumenttype",
             name="country",
@@ -2798,9 +2637,6 @@ class Migration(migrations.Migration):
             name="phone_no_valid",
             field=models.BooleanField(default=False),
         ),
-        migrations.RunPython(
-            update_each_phone_numbers_validity, migrations.RunPython.noop
-        ),
         migrations.AddField(
             model_name="importedindividualidentity",
             name="country",
@@ -2811,7 +2647,6 @@ class Migration(migrations.Migration):
             name="partner",
             field=models.CharField(max_length=100, null=True),
         ),
-        migrations.RunPython(populate_partner_and_country, migrations.RunPython.noop),
         migrations.RemoveField(
             model_name="importedindividualidentity",
             name="agency",

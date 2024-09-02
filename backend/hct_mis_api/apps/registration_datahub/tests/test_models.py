@@ -7,8 +7,6 @@ from hct_mis_api.apps.registration_datahub.fixtures import ImportedHouseholdFact
 
 
 class TestImportedHousehold(TestCase):
-    databases = {"default", "registration_datahub"}
-
     @classmethod
     def setUpTestData(cls) -> None:
         create_afghanistan()

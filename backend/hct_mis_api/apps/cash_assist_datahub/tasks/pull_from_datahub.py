@@ -139,7 +139,7 @@ class PullFromDatahubTask:
             session.save(update_fields=("status",))
             self.clear_cache(session)
             try:
-                with transaction.atomic(using="default"), transaction.atomic(using="cash_assist_datahub_ca"):
+                with transaction.atomic(), transaction.atomic(using="cash_assist_datahub_ca"):
                     self.copy_service_providers(session)
                     self.copy_programs(session)
                     self.copy_target_population(session)
