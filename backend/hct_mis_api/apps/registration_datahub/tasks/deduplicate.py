@@ -823,8 +823,7 @@ class HardDocumentDeduplication:
 
             # update RDI statistics with needs_adjudication tickets count
             registration_data_import.golden_record_possible_duplicates = GrievanceTicket.objects.filter(
-                category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
-                registration_data_import=registration_data_import
+                category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION, registration_data_import=registration_data_import
             ).count()
             registration_data_import.save(update_fields=["golden_record_possible_duplicates"])
 
