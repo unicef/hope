@@ -210,7 +210,10 @@ def driver() -> Chrome:
     prefs = {"download.default_directory": "./report/downloads/"}
     chrome_options.add_experimental_option("prefs", prefs)
     # chrome_options.enable_downloads = True
-    driver = webdriver.Chrome(service=service, options=chrome_options)
+    # options = webdriver.ChromeOptions()
+    chrome_options.enable_downloads = True
+    driver = webdriver.Remote(command_executor="http://localhost:4444", options=chrome_options)
+    # driver = webdriver.Chrome(service=service, options=chrome_options)
     yield driver
 
 

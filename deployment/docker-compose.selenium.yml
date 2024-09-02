@@ -2,6 +2,33 @@ version: '3.7'
 volumes:
   backend-web-app:
 services:
+  selenium-hub:
+    image: selenium/hub:4.16.0
+    container_name: selenium-hub
+    ports:
+      - "4444:4444"
+
+  chrome:
+    image: selenium/node-chrome:4.16.0
+    container_name: chrome
+    volumes:
+      - /dev/shm:/dev/shm
+    depends_on:
+      - selenium-hub
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      - SE_NODE_HOST=chrome
+      - SE_NODE_PORT=5555
+      - SE_NODE_CHROME_MAX_SESSION=5
+      - SE_NODE_REGISTER=true
+      - SE_NODE_REGISTER_CYCLE=5000
+      - SE_NODE_MAX_SESSION=5
+      - SE_NODE_DOWNLOADER=webdriver.chrome.driver
+      - SE_NODE_HUB_HOST=selenium-hub
+      - SE_NODE_HUB_PORT=4444
+
   selenium:
     stdin_open: true
     environment:
@@ -33,9 +60,13 @@ services:
     command: |
       bash -c "
         waitforit -host=db -port=5432 -timeout=30
-        pytest -svvv -x -m 'not night' selenium_tests --cov-report xml:./coverage.xml --html-report=./report/report.html --randomly-seed=42
+        pytest -svvv selenium_tests --cov-report xml:./coverage.xml --html-report=./report/report.html --randomly-seed=42
       "
     depends_on:
+      selenium-hub:
+        condition: service_started
+      chrome:
+        condition: service_started
       db:
         condition: service_started
       redis:
