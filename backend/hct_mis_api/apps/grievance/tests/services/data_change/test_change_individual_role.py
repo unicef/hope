@@ -23,8 +23,6 @@ from hct_mis_api.apps.utils.models import MergeStatusModel
 
 
 class TestChangeIndividualRole(BaseElasticSearchTestCase, TestCase):
-    databases = {"default", "registration_datahub"}
-
     @classmethod
     def setUpTestData(cls) -> None:
         business_area = BusinessAreaFactory()

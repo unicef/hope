@@ -127,8 +127,6 @@ INDIVIDUAL_FIELDS = (
 
 
 class TestProgramPopulationToPendingObjects(APITestCase):
-    databases = {"default", "registration_datahub"}
-
     @classmethod
     def setUpTestData(cls) -> None:
         cls.afghanistan = create_afghanistan()

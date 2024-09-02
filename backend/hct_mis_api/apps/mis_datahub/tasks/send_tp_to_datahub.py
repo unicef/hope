@@ -88,7 +88,7 @@ class SendTPToDatahubTask:
         target_population.save(update_fields=["status"])
         return self.send_target_population(target_population)
 
-    @transaction.atomic(using="default")
+    @transaction.atomic()
     @transaction.atomic(using="cash_assist_datahub_mis")
     def send_target_population(self, target_population: "TargetPopulation") -> Dict:
         households_to_bulk_create = []

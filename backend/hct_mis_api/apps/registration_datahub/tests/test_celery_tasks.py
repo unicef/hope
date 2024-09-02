@@ -559,7 +559,6 @@ class TestAutomatingRDICreationTask(TestCase):
         "cash_assist_datahub_ca",
         "cash_assist_datahub_erp",
         "cash_assist_datahub_mis",
-        "registration_datahub",
     }
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
