@@ -821,6 +821,13 @@ class HardDocumentDeduplication:
             for created_ticket in created_tickets:
                 created_ticket.populate_cross_area_flag()
 
+            # update RDI statistics with needs_adjudication tickets count
+            registration_data_import.golden_record_possible_duplicates = GrievanceTicket.objects.filter(
+                category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+                registration_data_import=registration_data_import
+            ).count()
+            registration_data_import.save(update_fields=["golden_record_possible_duplicates"])
+
     def _generate_signature(self, document: Document) -> str:
         if document.type.valid_for_deduplication:
             return f"{document.type_id}--{document.document_number}--{document.country_id}"
