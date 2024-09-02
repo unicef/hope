@@ -253,7 +253,6 @@ jobs:
 
       - name: E2E tests
         run: |
-          exit 0 # TODO: remove this line when the e2e tests are working again
           compose_file=./deployment/docker-compose.selenium-night.yml
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             compose_file=./deployment/docker-compose.selenium.yml
