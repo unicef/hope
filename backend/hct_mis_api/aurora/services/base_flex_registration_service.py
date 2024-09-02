@@ -63,9 +63,10 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
             status=status,
             program=programme,
             import_data=import_data,
+            deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_PENDING
+            if programme.biometric_deduplication_enabled
+            else None,
         )
-        if programme.biometric_deduplication_enabled:
-            rdi.deduplication_engine_status = RegistrationDataImport.DEDUP_ENGINE_PENDING
         return rdi
 
     @abc.abstractmethod

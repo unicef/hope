@@ -1,6 +1,4 @@
 from typing import Any, List
-from unittest import mock
-from unittest.mock import MagicMock, patch
 
 from parameterized import parameterized
 
@@ -11,10 +9,7 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.registration_data.models import (
-    DeduplicationEngineSimilarityPair,
-    RegistrationDataImport,
-)
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 
 class TestRegistrationDataImportQuery(APITestCase):
@@ -137,30 +132,11 @@ class TestRegistrationDataImportQuery(APITestCase):
             ),
         ]
     )
-    @patch.dict(
-        "os.environ",
-        {"DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key", "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com"},
-    )
-    @patch("hct_mis_api.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI")
-    @patch(
-        "hct_mis_api.apps.registration_datahub.services.biometric_deduplication.BiometricDeduplicationService.get_duplicates_for_rdi_against_batch"
-    )
-    @patch(
-        "hct_mis_api.apps.registration_datahub.services.biometric_deduplication.BiometricDeduplicationService.get_duplicates_for_rdi_against_population"
-    )
     def test_registration_data_import_datahub_query_all(
         self,
         _: Any,
         permissions: List[Permissions],
-        mock_deduplication_api: mock.Mock,
-        mock_get_duplicates_for_rdi_against_batch: mock.Mock,
-        mock_get_duplicates_for_rdi_against_population: mock.Mock,
     ) -> None:
-        mock_deduplication_api_instance = MagicMock()
-        mock_deduplication_api.return_value = mock_deduplication_api_instance
-        mock_get_duplicates_for_rdi_against_batch.return_value = DeduplicationEngineSimilarityPair.objects.all()
-        mock_get_duplicates_for_rdi_against_population.return_value = DeduplicationEngineSimilarityPair.objects.all()
-
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.snapshot_graphql_request(
             request_string=self.ALL_REGISTRATION_DATA_IMPORT_DATAHUB_QUERY,

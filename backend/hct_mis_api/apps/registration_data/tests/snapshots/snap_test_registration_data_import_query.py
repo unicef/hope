@@ -91,8 +91,8 @@ snapshots['TestRegistrationDataImportQuery::test_registration_data_import_datahu
                                 'percentage': 0.0
                             },
                             {
-                                'count': 1,
-                                'percentage': 1.0
+                                'count': 0,
+                                'percentage': 0.0
                             }
                         ],
                         'goldenRecordUniqueCountAndPercentage': [
@@ -101,8 +101,8 @@ snapshots['TestRegistrationDataImportQuery::test_registration_data_import_datahu
                                 'percentage': 0.0
                             },
                             {
-                                'count': 1,
-                                'percentage': 1.0
+                                'count': 323,
+                                'percentage': 100.0
                             }
                         ],
                         'isDeduplicated': 'NO',
@@ -150,8 +150,8 @@ snapshots['TestRegistrationDataImportQuery::test_registration_data_import_datahu
                                 'percentage': 0.0
                             },
                             {
-                                'count': 1,
-                                'percentage': 1.0
+                                'count': 0,
+                                'percentage': 0.0
                             }
                         ],
                         'goldenRecordUniqueCountAndPercentage': [
@@ -160,8 +160,8 @@ snapshots['TestRegistrationDataImportQuery::test_registration_data_import_datahu
                                 'percentage': 0.0
                             },
                             {
-                                'count': 1,
-                                'percentage': 1.0
+                                'count': 323,
+                                'percentage': 100.0
                             }
                         ],
                         'isDeduplicated': 'YES',

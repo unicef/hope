@@ -41,6 +41,7 @@ from hct_mis_api.apps.registration_data.models import (
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
     create_grievance_tickets_for_dedup_engine_results,
     deduplicate_documents,
+    update_rdis_deduplication_engine_statistics,
 )
 from hct_mis_api.apps.registration_datahub.signals import rdi_merged
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
@@ -366,6 +367,9 @@ class RdiMergeTask:
                     if obj_hct.program.biometric_deduplication_enabled:
                         transaction.on_commit(
                             lambda: create_grievance_tickets_for_dedup_engine_results.delay(obj_hct.id)
+                        )
+                        transaction.on_commit(
+                            lambda: update_rdis_deduplication_engine_statistics.delay(obj_hct.program.id)
                         )
 
                     rdi_merged.send(sender=obj_hct.__class__, instance=obj_hct)

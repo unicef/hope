@@ -271,7 +271,7 @@ class BiometricDeduplicationServiceTest(TestCase):
             ),
         ]
 
-        service.store_results(str(self.program.deduplication_set_id), similarity_pairs)
+        service.store_similarity_pairs(str(self.program.deduplication_set_id), similarity_pairs)
 
         assert self.program.deduplication_engine_similarity_pairs.count() == 3
         assert self.program.deduplication_engine_similarity_pairs.filter(
@@ -349,7 +349,7 @@ class BiometricDeduplicationServiceTest(TestCase):
             SimilarityPair(score=0.7, first=ind4.id, second=ind5.id),  # across rdi2 and population
             SimilarityPair(score=0.8, first=ind5.id, second=ind6.id),  # within population
         ]
-        service.store_results(str(self.program.deduplication_set_id), similarity_pairs)
+        service.store_similarity_pairs(str(self.program.deduplication_set_id), similarity_pairs)
 
         duplicates = service.get_duplicates_for_rdi_against_population(rdi1)
 
@@ -406,7 +406,7 @@ class BiometricDeduplicationServiceTest(TestCase):
             SimilarityPair(score=0.7, first=ind4.id, second=ind5.id),  # across pending rdi2 and population
             SimilarityPair(score=0.8, first=ind5.id, second=ind6.id),  # within population
         ]
-        service.store_results(str(self.program.deduplication_set_id), similarity_pairs)
+        service.store_similarity_pairs(str(self.program.deduplication_set_id), similarity_pairs)
 
         duplicates = service.get_duplicates_for_merged_rdi_against_population(rdi1)
 
@@ -464,7 +464,7 @@ class BiometricDeduplicationServiceTest(TestCase):
             SimilarityPair(score=0.7, first=ind4.id, second=ind5.id),  # across rdi2 and population
             SimilarityPair(score=0.8, first=ind5.id, second=ind6.id),  # within population
         ]
-        service.store_results(str(self.program.deduplication_set_id), similarity_pairs)
+        service.store_similarity_pairs(str(self.program.deduplication_set_id), similarity_pairs)
 
         duplicates = service.get_duplicates_for_rdi_against_batch(rdi1)
 
@@ -503,16 +503,18 @@ class BiometricDeduplicationServiceTest(TestCase):
             {"first": 3, "second": 4, "score": 0.8},
         ]
         service.get_deduplication_set_results = mock.Mock(return_value=results_data)
-        service.store_results = mock.Mock()
+        service.store_similarity_pairs = mock.Mock()
+        service.store_rdis_deduplication_statistics = mock.Mock()
         service.mark_rdis_as_deduplicated = mock.Mock()
 
         service.fetch_biometric_deduplication_results_and_process(deduplication_set_id)
 
         service.get_deduplication_set.assert_called_once_with(deduplication_set_id)
         service.get_deduplication_set_results.assert_called_once_with(deduplication_set_id)
-        service.store_results.assert_called_once_with(
+        service.store_similarity_pairs.assert_called_once_with(
             deduplication_set_id, [SimilarityPair(**item) for item in results_data]
         )
+        service.store_rdis_deduplication_statistics.assert_called_once_with(deduplication_set_id)
         service.mark_rdis_as_deduplicated.assert_called_once_with(deduplication_set_id)
 
     def test_fetch_biometric_deduplication_results_and_process_fail(self) -> None:

@@ -515,3 +515,18 @@ def fetch_biometric_deduplication_results_and_process(self: Any, deduplication_s
     except Exception as e:
         logger.exception(e)
         raise
+
+
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@sentry_tags
+@log_start_and_end
+def update_rdis_deduplication_engine_statistics(self: Any, program_id: str) -> None:
+    from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import (
+        BiometricDeduplicationService,
+    )
+
+    try:
+        BiometricDeduplicationService().update_rdis_deduplication_statistics(program_id)
+    except Exception as e:
+        logger.exception(e)
+        raise

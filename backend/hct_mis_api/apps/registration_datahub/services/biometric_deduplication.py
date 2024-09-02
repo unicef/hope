@@ -149,7 +149,7 @@ class BiometricDeduplicationService:
             status=RegistrationDataImport.DEDUP_ENGINE_PENDING
         )
 
-    def store_results(self, deduplication_set_id: str, similarity_pairs: List[SimilarityPair]) -> None:
+    def store_similarity_pairs(self, deduplication_set_id: str, similarity_pairs: List[SimilarityPair]) -> None:
         DeduplicationEngineSimilarityPair.bulk_add_pairs(deduplication_set_id, similarity_pairs)
 
     def mark_rdis_as_deduplicated(self, deduplication_set_id: str) -> None:
@@ -157,6 +157,32 @@ class BiometricDeduplicationService:
         RegistrationDataImport.objects.filter(
             program=program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS
         ).update(deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED)
+
+    def store_rdis_deduplication_statistics(self, deduplication_set_id: str) -> None:
+        program = Program.objects.get(deduplication_set_id=deduplication_set_id)
+        rdis = RegistrationDataImport.objects.filter(
+            program=program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS
+        )
+        for rdi in rdis:
+            rdi.dedup_engine_batch_duplicates = self.get_duplicates_for_rdi_against_batch(rdi).count()
+            rdi.parent.dedup_engine_golden_record_duplicates = self.get_duplicates_for_rdi_against_population(
+                rdi
+            ).count()
+            rdi.save(update_fields=["dedup_engine_batch_duplicates", "dedup_engine_golden_record_duplicates"])
+
+    def update_rdis_deduplication_statistics(self, program_id: str) -> None:
+        program = Program.objects.get(id=program_id)
+        rdis = RegistrationDataImport.objects.filter(
+            program=program,
+            deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED,
+            status=RegistrationDataImport.IN_REVIEW,
+        )
+        for rdi in rdis:
+            rdi.dedup_engine_batch_duplicates = self.get_duplicates_for_rdi_against_batch(rdi).count()
+            rdi.parent.dedup_engine_golden_record_duplicates = self.get_duplicates_for_rdi_against_population(
+                rdi
+            ).count()
+            rdi.save(update_fields=["dedup_engine_batch_duplicates", "dedup_engine_golden_record_duplicates"])
 
     @classmethod
     def mark_rdis_as_deduplication_error(cls, deduplication_set_id: str) -> None:
@@ -243,7 +269,8 @@ class BiometricDeduplicationService:
             data = self.get_deduplication_set_results(deduplication_set_id)
             similarity_pairs = [SimilarityPair(**item) for item in data]
             with transaction.atomic():
-                self.store_results(deduplication_set_id, similarity_pairs)
+                self.store_similarity_pairs(deduplication_set_id, similarity_pairs)
+                self.store_rdis_deduplication_statistics(deduplication_set_id)
                 self.mark_rdis_as_deduplicated(deduplication_set_id)
         else:
             self.mark_rdis_as_deduplication_error(deduplication_set_id)

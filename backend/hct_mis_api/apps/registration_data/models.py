@@ -160,6 +160,9 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
     golden_record_possible_duplicates = models.PositiveIntegerField(default=0)
     golden_record_unique = models.PositiveIntegerField(default=0)
 
+    dedup_engine_batch_duplicates = models.PositiveIntegerField(default=0)
+    dedup_engine_golden_record_duplicates = models.PositiveIntegerField(default=0)
+
     datahub_id = models.UUIDField(null=True, default=None, db_index=True, blank=True)
     error_message = models.TextField(blank=True)
     sentry_id = models.CharField(max_length=100, default="", blank=True, null=True)

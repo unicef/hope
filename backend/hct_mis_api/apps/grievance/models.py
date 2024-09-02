@@ -810,7 +810,6 @@ class TicketSystemFlaggingDetails(TimeStampedUUIDModel):
 
 
 class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
-    # TODO MB new permission view biometric dedup results
     STATUS_FLOW = GENERAL_STATUS_FLOW
 
     ticket = models.OneToOneField(

@@ -37,4 +37,14 @@ class Migration(migrations.Migration):
             name='deduplicationenginesimilaritypair',
             unique_together={('individual1', 'individual2')},
         ),
+        migrations.AddField(
+            model_name='registrationdataimport',
+            name='dedup_engine_batch_duplicates',
+            field=models.PositiveIntegerField(default=0),
+        ),
+        migrations.AddField(
+            model_name='registrationdataimport',
+            name='dedup_engine_golden_record_duplicates',
+            field=models.PositiveIntegerField(default=0),
+        ),
     ]

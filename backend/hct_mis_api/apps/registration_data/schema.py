@@ -21,9 +21,6 @@ from hct_mis_api.apps.registration_data.models import (
     DeduplicationEngineSimilarityPair,
     RegistrationDataImport,
 )
-from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import (
-    BiometricDeduplicationService,
-)
 
 
 class DeduplicationEngineSimilarityPairIndividualNode(graphene.ObjectType):
@@ -87,8 +84,7 @@ class RegistrationDataImportNode(BaseNodePermissionMixin, AdminUrlNodeMixin, Dja
             get_count_and_percentage(parent.batch_duplicates, parent.number_of_individuals),  # biographical
         ]
         if parent.biometric_deduplication_enabled:
-            biometric_duplicates = BiometricDeduplicationService().get_duplicates_for_rdi_against_batch(parent).count()
-            result.append(get_count_and_percentage(biometric_duplicates, parent.number_of_individuals))
+            result.append(get_count_and_percentage(parent.dedup_engine_batch_duplicates, parent.number_of_individuals))
         return result
 
     @staticmethod
@@ -99,8 +95,7 @@ class RegistrationDataImportNode(BaseNodePermissionMixin, AdminUrlNodeMixin, Dja
             get_count_and_percentage(parent.batch_unique, parent.number_of_individuals),  # biographical
         ]
         if parent.biometric_deduplication_enabled:
-            biometric_duplicates = BiometricDeduplicationService().get_duplicates_for_rdi_against_batch(parent).count()
-            biometric_unique = parent.number_of_individuals - biometric_duplicates
+            biometric_unique = parent.number_of_individuals - parent.dedup_engine_batch_duplicates
             result.append(get_count_and_percentage(biometric_unique, parent.number_of_individuals))
         return result
 
@@ -122,10 +117,9 @@ class RegistrationDataImportNode(BaseNodePermissionMixin, AdminUrlNodeMixin, Dja
             ),  # biographical
         ]
         if parent.biometric_deduplication_enabled:
-            biometric_duplicates = (
-                BiometricDeduplicationService().get_duplicates_for_rdi_against_population(parent).count()
+            result.append(
+                get_count_and_percentage(parent.dedup_engine_golden_record_duplicates, parent.number_of_individuals)
             )
-            result.append(get_count_and_percentage(biometric_duplicates, parent.number_of_individuals))
         return result
 
     @staticmethod
@@ -136,10 +130,7 @@ class RegistrationDataImportNode(BaseNodePermissionMixin, AdminUrlNodeMixin, Dja
             get_count_and_percentage(parent.golden_record_unique, parent.number_of_individuals),  # biographical
         ]
         if parent.biometric_deduplication_enabled:
-            biometric_duplicates = (
-                BiometricDeduplicationService().get_duplicates_for_rdi_against_population(parent).count()
-            )
-            biometric_unique = parent.number_of_individuals - biometric_duplicates
+            biometric_unique = parent.number_of_individuals - parent.dedup_engine_golden_record_duplicates
             result.append(get_count_and_percentage(biometric_unique, parent.number_of_individuals))
         return result
 
