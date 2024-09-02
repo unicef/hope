@@ -33,8 +33,6 @@ from hct_mis_api.apps.registration_datahub.celery_tasks import (
 
 
 class TestRegistrationProgramPopulationImportTask(BaseElasticSearchTestCase):
-    databases = {"default", "registration_datahub"}
-
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
