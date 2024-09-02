@@ -1,11 +1,9 @@
 import logging
-from typing import Any, Dict, Generator, Iterable, List, Optional, Tuple, Union
+from typing import Any, Generator, Iterable, List, Optional, Tuple, Union
 from uuid import UUID
 
-from django import forms
 from django.contrib import admin, messages
 from django.contrib.admin import ModelAdmin, SimpleListFilter
-from django.core.signing import BadSignature, Signer
 from django.db.models import F, QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
@@ -105,44 +103,6 @@ class KoboImportedSubmissionAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase)
         "registration_data_import_id",
     )
     raw_id_fields = ("registration_data_import", "imported_household")
-
-
-class RemeberDataForm(forms.Form):
-    SYNC_COOKIE = "fetch"
-    remember = forms.BooleanField(label="Remember me", required=False)
-
-    def get_signed_cookie(self, request: HttpRequest) -> Any:
-        signer = Signer(str(request.user.password))
-        return signer.sign_object(self.cleaned_data)
-
-    @classmethod
-    def get_saved_config(cls, request: HttpRequest) -> Dict:
-        try:
-            signer = Signer(str(request.user.password))
-            obj: Dict = signer.unsign_object(request.COOKIES.get(cls.SYNC_COOKIE, ""))
-            return obj
-        except BadSignature:
-            return {}
-
-
-class FetchForm(RemeberDataForm):
-    SYNC_COOKIE = "fetch"
-
-    host = forms.URLField()
-    username = forms.CharField()
-    password = forms.CharField(widget=forms.PasswordInput)
-    registration = forms.IntegerField()
-    start = forms.IntegerField()
-    end = forms.IntegerField()
-
-    def clean(self) -> Optional[Dict[str, Any]]:
-        return super().clean()
-
-
-class ValidateForm(RemeberDataForm):
-    SYNC_COOKIE = "ocr"
-    picture_field = forms.CharField()
-    number_field = forms.CharField()
 
 
 class AlexisFilter(SimpleListFilter):

@@ -112,7 +112,7 @@ def create_target_population_task(self: Any, storage_id: str, program_id: str, t
     set_sentry_business_area_tag(program.business_area.name)
 
     try:
-        with transaction.atomic(), transaction.atomic("registration_datahub"):
+        with transaction.atomic():
             registration_data_import = RegistrationDataImport.objects.create(
                 name=f"{storage_obj.file.name}_{program.name}",
                 number_of_individuals=0,

@@ -14,7 +14,6 @@ from hct_mis_api.apps.registration_datahub.validators import (
 
 
 class TestKoboSaveValidatorsMethods(TestCase):
-    databases = {"default", "registration_datahub"}
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     VALID_JSON = [

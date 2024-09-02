@@ -71,9 +71,6 @@ def count_population(results: list, business_area: BusinessArea) -> tuple[int, i
 
     from hct_mis_api.apps.core.utils import rename_dict_keys
     from hct_mis_api.apps.registration_data.models import KoboImportedSubmission
-    from hct_mis_api.apps.registration_datahub.tasks.utils import (
-        get_submission_metadata,
-    )
 
     total_households_count = 0
     total_individuals_count = 0
@@ -119,3 +116,16 @@ def filter_by_owner(data: List, business_area: BusinessArea) -> List:
     if data:
         return [element for element in data if element["owner__username"] == kobo_username]
     return []
+
+
+def get_submission_metadata(household_data_dict: Dict) -> Dict:
+    meta_fields_mapping = {
+        "_uuid": "kobo_submission_uuid",
+        "_xform_id_string": "kobo_asset_id",
+        "_submission_time": "kobo_submission_time",
+    }
+    submission_meta_data = {}
+    for meta_field, model_field_name in meta_fields_mapping.items():
+        submission_meta_data[model_field_name] = household_data_dict.get(meta_field)
+
+    return submission_meta_data

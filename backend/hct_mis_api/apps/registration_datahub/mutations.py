@@ -63,8 +63,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-@transaction.atomic(using="default")
-@transaction.atomic(using="registration_datahub")
+@transaction.atomic()
 def create_registration_data_import_objects(
     registration_data_import_data: Dict,
     user: "User",
@@ -106,8 +105,7 @@ def create_registration_data_import_objects(
     )
 
 
-@transaction.atomic(using="default")
-@transaction.atomic(using="registration_datahub")
+@transaction.atomic()
 def create_registration_data_import_for_import_program_population(
     registration_data_import_data: Dict,
     user: "User",
@@ -168,8 +166,7 @@ class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, Validati
             raise ValidationError("Cannot import empty form")
 
     @classmethod
-    @transaction.atomic(using="default")
-    @transaction.atomic(using="registration_datahub")
+    @transaction.atomic()
     @is_authenticated
     def processed_mutate(
         cls, root: Any, info: Any, registration_data_import_data: Dict
@@ -233,8 +230,7 @@ class RegistrationProgramPopulationImportMutation(BaseValidator, PermissionMutat
         registration_data_import_data = RegistrationProgramPopulationImportMutationInput(required=True)
 
     @classmethod
-    @transaction.atomic(using="default")
-    @transaction.atomic(using="registration_datahub")
+    @transaction.atomic()
     @is_authenticated
     def processed_mutate(
         cls, root: Any, info: Any, registration_data_import_data: Dict
@@ -339,8 +335,7 @@ class RegistrationKoboImportMutation(BaseValidator, PermissionMutation, Validati
         registration_data_import_data = RegistrationKoboImportMutationInput(required=True)
 
     @classmethod
-    @transaction.atomic(using="default")
-    @transaction.atomic(using="registration_datahub")
+    @transaction.atomic()
     @is_authenticated
     def processed_mutate(
         cls, root: Any, info: Any, registration_data_import_data: Dict
@@ -402,8 +397,7 @@ class MergeRegistrationDataImportMutation(BaseValidator, PermissionMutation):
         version = BigInt(required=False)
 
     @classmethod
-    @transaction.atomic(using="default")
-    @transaction.atomic(using="registration_datahub")
+    @transaction.atomic()
     @is_authenticated
     @raise_program_status_is(Program.FINISHED)
     def mutate(cls, root: Any, info: Any, id: Optional[str], **kwargs: Any) -> "MergeRegistrationDataImportMutation":
@@ -451,7 +445,7 @@ class RefuseRegistrationDataImportMutation(BaseValidator, PermissionMutation):
             raise ValidationError("Only In Review Registration Data Import can be refused")
 
     @classmethod
-    @transaction.atomic(using="default")
+    @transaction.atomic()
     @is_authenticated
     @raise_program_status_is(Program.FINISHED)
     def mutate(cls, root: Any, info: Any, id: Optional[str], **kwargs: Any) -> "RefuseRegistrationDataImportMutation":
@@ -496,7 +490,7 @@ class EraseRegistrationDataImportMutation(PermissionMutation):
         version = BigInt(required=False)
 
     @classmethod
-    @transaction.atomic(using="default")
+    @transaction.atomic()
     @is_authenticated
     @raise_program_status_is(Program.FINISHED)
     def mutate(cls, root: Any, info: Any, id: Optional[str], **kwargs: Any) -> "EraseRegistrationDataImportMutation":
@@ -542,8 +536,7 @@ class UploadImportDataXLSXFileAsync(PermissionMutation):
         business_area_slug = graphene.String(required=True)
 
     @classmethod
-    @transaction.atomic(using="default")
-    @transaction.atomic(using="registration_datahub")
+    @transaction.atomic()
     @is_authenticated
     def mutate(cls, root: Any, info: Any, file: IO, business_area_slug: str) -> "UploadImportDataXLSXFileAsync":
         cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area_slug)

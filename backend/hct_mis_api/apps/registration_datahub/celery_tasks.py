@@ -296,7 +296,7 @@ def rdi_deduplication_task(self: Any, registration_data_import_id: str) -> None:
         rdi_obj = RegistrationDataImport.objects.get(id=registration_data_import_id)
         program_id = rdi_obj.program.id
         set_sentry_business_area_tag(rdi_obj.business_area.slug)
-        with transaction.atomic(using="default"), transaction.atomic(using="registration_datahub"):
+        with transaction.atomic():
             DeduplicateTask(rdi_obj.business_area.slug, program_id).deduplicate_pending_individuals(
                 registration_data_import=rdi_obj
             )

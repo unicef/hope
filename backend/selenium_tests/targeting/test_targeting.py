@@ -45,7 +45,7 @@ from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory
 from hct_mis_api.apps.targeting.models import TargetPopulation
 from selenium_tests.page_object.filters import Filters
 
-pytestmark = pytest.mark.django_db(transaction=True, databases=["registration_datahub", "default"])
+pytestmark = pytest.mark.django_db(transaction=True)
 
 
 @pytest.fixture

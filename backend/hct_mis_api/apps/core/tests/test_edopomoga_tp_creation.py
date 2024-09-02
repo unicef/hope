@@ -19,7 +19,7 @@ from hct_mis_api.apps.targeting.models import TargetPopulation
 
 
 class TestEdopomogaCreation(APITestCase):
-    databases = ("default", "registration_datahub", "cash_assist_datahub_mis")
+    databases = ("default", "cash_assist_datahub_mis")
 
     @classmethod
     def setUpTestData(cls) -> None:
