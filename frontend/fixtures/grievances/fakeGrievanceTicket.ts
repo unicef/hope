@@ -1,8 +1,7 @@
 import { GrievanceTicketQuery } from '../../src/__generated__/graphql';
 
 export const fakeGrievanceTicket = {
-  id:
-    'R3JpZXZhbmNlVGlja2V0Tm9kZTo2MWU4Y2UwMC05NTU2LTQ1NjEtODc4Mi1kZjUxYTU0ZDEzZjE=',
+  id: 'R3JpZXZhbmNlVGlja2V0Tm9kZTo2MWU4Y2UwMC05NTU2LTQ1NjEtODc4Mi1kZjUxYTU0ZDEzZjE=',
   unicefId: 'GRV-000004',
   status: 3,
   category: 2,
@@ -53,8 +52,7 @@ export const fakeGrievanceTicket = {
       edges: [
         {
           node: {
-            id:
-              'RG9jdW1lbnROb2RlOjg5ZTE2YzQ4LWYwOWMtNGVlMC1iYWYyLTZiOWFiYjZjMjVlNg==',
+            id: 'RG9jdW1lbnROb2RlOjg5ZTE2YzQ4LWYwOWMtNGVlMC1iYWYyLTZiOWFiYjZjMjVlNg==',
             country: 'Poland',
             countryIso3: 'POL',
             documentNumber: 'TSH221375',
@@ -73,21 +71,18 @@ export const fakeGrievanceTicket = {
     },
     identities: { edges: [], __typename: 'IndividualIdentityNodeConnection' },
     household: {
-      id:
-        'SG91c2Vob2xkTm9kZTo3NjExNzM2Ny0yYWFiLTRmNTEtODUwOC1mMzBmODliYWUzYzE=',
+      id: 'SG91c2Vob2xkTm9kZTo3NjExNzM2Ny0yYWFiLTRmNTEtODUwOC1mMzBmODliYWUzYzE=',
       unicefId: 'HH-20-0000.0001',
       status: 'ACTIVE',
       admin1: {
-        id:
-          'QWRtaW5BcmVhTm9kZTo3NmU0MDRlYS1mYjVhLTRkMDktODVkMS1hNTA3MjU4OThmNzk=',
+        id: 'QWRtaW5BcmVhTm9kZTo3NmU0MDRlYS1mYjVhLTRkMDktODVkMS1hNTA3MjU4OThmNzk=',
         name: 'Nangarhar',
         level: 1,
         pCode: 'AF06',
         __typename: 'AreaNode',
       },
       admin2: {
-        id:
-          'QWRtaW5BcmVhTm9kZTpkMTU1MjA2MC05NWExLTQ5ODItODY3MC0yMzg4NDcxZDUxYTA=',
+        id: 'QWRtaW5BcmVhTm9kZTpkMTU1MjA2MC05NWExLTQ5ODItODY3MC0yMzg4NDcxZDUxYTA=',
         name: 'Achin',
         level: 2,
         pCode: 'AF0617',
@@ -97,8 +92,7 @@ export const fakeGrievanceTicket = {
         edges: [
           {
             node: {
-              id:
-                'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
+              id: 'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
               name: 'Surface campaign practice actually about about will what.',
               __typename: 'ProgramNode',
             },
@@ -111,8 +105,7 @@ export const fakeGrievanceTicket = {
       address: '938 Luna Cliffs Apt. 551\nJameschester, SC 24934',
       countryOrigin: 'San Marino',
       adminArea: {
-        id:
-          'QWRtaW5BcmVhTm9kZTpkMTU1MjA2MC05NWExLTQ5ODItODY3MC0yMzg4NDcxZDUxYTA=',
+        id: 'QWRtaW5BcmVhTm9kZTpkMTU1MjA2MC05NWExLTQ5ODItODY3MC0yMzg4NDcxZDUxYTA=',
         name: 'Achin',
         level: 2,
         __typename: 'AreaNode',
@@ -145,11 +138,9 @@ export const fakeGrievanceTicket = {
     enrolledInNutritionProgramme: null,
     administrationOfRutf: null,
     headingHousehold: {
-      id:
-        'SG91c2Vob2xkTm9kZTo3NjExNzM2Ny0yYWFiLTRmNTEtODUwOC1mMzBmODliYWUzYzE=',
+      id: 'SG91c2Vob2xkTm9kZTo3NjExNzM2Ny0yYWFiLTRmNTEtODUwOC1mMzBmODliYWUzYzE=',
       headOfHousehold: {
-        id:
-          'SW5kaXZpZHVhbE5vZGU6ZjVmMzgwN2ItYTBjOS00Mjk0LTg0Y2QtNDhkMjllMjZhODU3',
+        id: 'SW5kaXZpZHVhbE5vZGU6ZjVmMzgwN2ItYTBjOS00Mjk0LTg0Y2QtNDhkMjllMjZhODU3',
         givenName: 'Agata',
         familyName: 'Kowalska',
         fullName: 'Agata Kowalska',
@@ -167,15 +158,13 @@ export const fakeGrievanceTicket = {
         id: 'fe0e26a2-8db0-485d-942c-3a1333561db1',
         role: 'PRIMARY',
         household: {
-          id:
-            'SG91c2Vob2xkTm9kZTo3NjExNzM2Ny0yYWFiLTRmNTEtODUwOC1mMzBmODliYWUzYzE=',
+          id: 'SG91c2Vob2xkTm9kZTo3NjExNzM2Ny0yYWFiLTRmNTEtODUwOC1mMzBmODliYWUzYzE=',
           unicefId: 'HH-20-0000.0001',
           __typename: 'HouseholdNode',
         },
         __typename: 'IndividualRoleInHouseholdNode',
         individual: {
-          id:
-            'SW5kaXZpZHVhbE5vZGU6ZjVmMzgwN2ItYTBjOS00Mjk0LTg0Y2QtNDhkMjllMjZhODU3',
+          id: 'SW5kaXZpZHVhbE5vZGU6ZjVmMzgwN2ItYTBjOS00Mjk0LTg0Y2QtNDhkMjllMjZhODU3',
           unicefId: 'IND-88-0000.0005',
           __typename: 'IndividualNode',
         },
@@ -203,24 +192,21 @@ export const fakeGrievanceTicket = {
     village: '',
     adminAreaTitle: 'Achin',
     admin1: {
-      id:
-        'QWRtaW5BcmVhTm9kZTo3NmU0MDRlYS1mYjVhLTRkMDktODVkMS1hNTA3MjU4OThmNzk=',
+      id: 'QWRtaW5BcmVhTm9kZTo3NmU0MDRlYS1mYjVhLTRkMDktODVkMS1hNTA3MjU4OThmNzk=',
       name: 'Nangarhar',
       level: 1,
       pCode: 'AF06',
       __typename: 'AreaNode',
     },
     admin2: {
-      id:
-        'QWRtaW5BcmVhTm9kZTpkMTU1MjA2MC05NWExLTQ5ODItODY3MC0yMzg4NDcxZDUxYTA=',
+      id: 'QWRtaW5BcmVhTm9kZTpkMTU1MjA2MC05NWExLTQ5ODItODY3MC0yMzg4NDcxZDUxYTA=',
       name: 'Achin',
       level: 2,
       pCode: 'AF0617',
       __typename: 'AreaNode',
     },
     headOfHousehold: {
-      id:
-        'SW5kaXZpZHVhbE5vZGU6ZjVmMzgwN2ItYTBjOS00Mjk0LTg0Y2QtNDhkMjllMjZhODU3',
+      id: 'SW5kaXZpZHVhbE5vZGU6ZjVmMzgwN2ItYTBjOS00Mjk0LTg0Y2QtNDhkMjllMjZhODU3',
       fullName: 'Agata Kowalska',
       givenName: 'Agata',
       familyName: 'Kowalska',
@@ -233,8 +219,7 @@ export const fakeGrievanceTicket = {
       edges: [
         {
           node: {
-            id:
-              'SW5kaXZpZHVhbE5vZGU6YTI2ODYyMTAtYjBhNi00NTI1LWI4YTAtYTFmY2FlMWIwMjE5',
+            id: 'SW5kaXZpZHVhbE5vZGU6YTI2ODYyMTAtYjBhNi00NTI1LWI4YTAtYTFmY2FlMWIwMjE5',
             age: 80,
             lastRegistrationDate: '1942-12-12',
             createdAt: '2022-02-07T11:46:27.919328',
@@ -256,8 +241,7 @@ export const fakeGrievanceTicket = {
               edges: [
                 {
                   node: {
-                    id:
-                      'RG9jdW1lbnROb2RlOjYzYjM1NzA4LWZhNzYtNDExMy1iMmIyLWE5MGU1YWE2OTZiOA==',
+                    id: 'RG9jdW1lbnROb2RlOjYzYjM1NzA4LWZhNzYtNDExMy1iMmIyLWE5MGU1YWE2OTZiOA==',
                     country: 'Poland',
                     countryIso3: 'POL',
                     documentNumber: 'BSH221315',
@@ -285,8 +269,7 @@ export const fakeGrievanceTicket = {
         },
         {
           node: {
-            id:
-              'SW5kaXZpZHVhbE5vZGU6ZjVmMzgwN2ItYTBjOS00Mjk0LTg0Y2QtNDhkMjllMjZhODU3',
+            id: 'SW5kaXZpZHVhbE5vZGU6ZjVmMzgwN2ItYTBjOS00Mjk0LTg0Y2QtNDhkMjllMjZhODU3',
             age: 58,
             lastRegistrationDate: '1988-06-15',
             createdAt: '2022-02-07T11:46:27.922172',
@@ -308,8 +291,7 @@ export const fakeGrievanceTicket = {
               edges: [
                 {
                   node: {
-                    id:
-                      'RG9jdW1lbnROb2RlOjg5ZTE2YzQ4LWYwOWMtNGVlMC1iYWYyLTZiOWFiYjZjMjVlNg==',
+                    id: 'RG9jdW1lbnROb2RlOjg5ZTE2YzQ4LWYwOWMtNGVlMC1iYWYyLTZiOWFiYjZjMjVlNg==',
                     country: 'Poland',
                     countryIso3: 'POL',
                     documentNumber: 'TSH221375',
@@ -331,21 +313,18 @@ export const fakeGrievanceTicket = {
               __typename: 'IndividualIdentityNodeConnection',
             },
             household: {
-              id:
-                'SG91c2Vob2xkTm9kZTo3NjExNzM2Ny0yYWFiLTRmNTEtODUwOC1mMzBmODliYWUzYzE=',
+              id: 'SG91c2Vob2xkTm9kZTo3NjExNzM2Ny0yYWFiLTRmNTEtODUwOC1mMzBmODliYWUzYzE=',
               unicefId: 'HH-20-0000.0001',
               status: 'ACTIVE',
               admin1: {
-                id:
-                  'QWRtaW5BcmVhTm9kZTo3NmU0MDRlYS1mYjVhLTRkMDktODVkMS1hNTA3MjU4OThmNzk=',
+                id: 'QWRtaW5BcmVhTm9kZTo3NmU0MDRlYS1mYjVhLTRkMDktODVkMS1hNTA3MjU4OThmNzk=',
                 name: 'Nangarhar',
                 level: 1,
                 pCode: 'AF06',
                 __typename: 'AreaNode',
               },
               admin2: {
-                id:
-                  'QWRtaW5BcmVhTm9kZTpkMTU1MjA2MC05NWExLTQ5ODItODY3MC0yMzg4NDcxZDUxYTA=',
+                id: 'QWRtaW5BcmVhTm9kZTpkMTU1MjA2MC05NWExLTQ5ODItODY3MC0yMzg4NDcxZDUxYTA=',
                 name: 'Achin',
                 level: 2,
                 pCode: 'AF0617',
@@ -355,10 +334,8 @@ export const fakeGrievanceTicket = {
                 edges: [
                   {
                     node: {
-                      id:
-                        'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
-                      name:
-                        'Surface campaign practice actually about about will what.',
+                      id: 'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
+                      name: 'Surface campaign practice actually about about will what.',
                       __typename: 'ProgramNode',
                     },
                     __typename: 'ProgramNodeEdge',
@@ -374,8 +351,7 @@ export const fakeGrievanceTicket = {
         },
         {
           node: {
-            id:
-              'SW5kaXZpZHVhbE5vZGU6YWI5YWZhNzUtMTg0Yy00NDIxLWJmMGUtNTIzZGUxNWMyOGFm',
+            id: 'SW5kaXZpZHVhbE5vZGU6YWI5YWZhNzUtMTg0Yy00NDIxLWJmMGUtNTIzZGUxNWMyOGFm',
             age: 22,
             lastRegistrationDate: '1988-06-15',
             createdAt: '2022-02-07T11:46:27.922555',
@@ -397,8 +373,7 @@ export const fakeGrievanceTicket = {
               edges: [
                 {
                   node: {
-                    id:
-                      'RG9jdW1lbnROb2RlOjM0NjQwYmU2LTc4ZTgtNDc2Zi1iYWM2LWFjOTIwZTIwYmExOQ==',
+                    id: 'RG9jdW1lbnROb2RlOjM0NjQwYmU2LTc4ZTgtNDc2Zi1iYWM2LWFjOTIwZTIwYmExOQ==',
                     country: 'Poland',
                     countryIso3: 'POL',
                     documentNumber: 'CSH221395',
@@ -420,21 +395,18 @@ export const fakeGrievanceTicket = {
               __typename: 'IndividualIdentityNodeConnection',
             },
             household: {
-              id:
-                'SG91c2Vob2xkTm9kZTo3NjExNzM2Ny0yYWFiLTRmNTEtODUwOC1mMzBmODliYWUzYzE=',
+              id: 'SG91c2Vob2xkTm9kZTo3NjExNzM2Ny0yYWFiLTRmNTEtODUwOC1mMzBmODliYWUzYzE=',
               unicefId: 'HH-20-0000.0001',
               status: 'ACTIVE',
               admin1: {
-                id:
-                  'QWRtaW5BcmVhTm9kZTo3NmU0MDRlYS1mYjVhLTRkMDktODVkMS1hNTA3MjU4OThmNzk=',
+                id: 'QWRtaW5BcmVhTm9kZTo3NmU0MDRlYS1mYjVhLTRkMDktODVkMS1hNTA3MjU4OThmNzk=',
                 name: 'Nangarhar',
                 level: 1,
                 pCode: 'AF06',
                 __typename: 'AreaNode',
               },
               admin2: {
-                id:
-                  'QWRtaW5BcmVhTm9kZTpkMTU1MjA2MC05NWExLTQ5ODItODY3MC0yMzg4NDcxZDUxYTA=',
+                id: 'QWRtaW5BcmVhTm9kZTpkMTU1MjA2MC05NWExLTQ5ODItODY3MC0yMzg4NDcxZDUxYTA=',
                 name: 'Achin',
                 level: 2,
                 pCode: 'AF0617',
@@ -444,10 +416,8 @@ export const fakeGrievanceTicket = {
                 edges: [
                   {
                     node: {
-                      id:
-                        'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
-                      name:
-                        'Surface campaign practice actually about about will what.',
+                      id: 'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
+                      name: 'Surface campaign practice actually about about will what.',
                       __typename: 'ProgramNode',
                     },
                     __typename: 'ProgramNodeEdge',
@@ -467,8 +437,7 @@ export const fakeGrievanceTicket = {
       edges: [
         {
           node: {
-            id:
-              'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
+            id: 'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
             name: 'Surface campaign practice actually about about will what.',
             __typename: 'ProgramNode',
           },
@@ -537,18 +506,14 @@ export const fakeGrievanceTicket = {
       edges: [
         {
           node: {
-            id:
-              'UGF5bWVudFJlY29yZE5vZGU6ZGViY2E5YWQtNzBhNS00MDk2LTkxYjctMmU3MGRkZjRhYmMy',
+            id: 'UGF5bWVudFJlY29yZE5vZGU6ZGViY2E5YWQtNzBhNS00MDk2LTkxYjctMmU3MGRkZjRhYmMy',
             fullName: 'Brian Morgan',
             parent: {
-              id:
-                'Q2FzaFBsYW5Ob2RlOjI1ZTNkODA0LTAzMzEtNDhkOC1iYTk2LWVmZjEzYmU3ZDdiYQ==',
+              id: 'Q2FzaFBsYW5Ob2RlOjI1ZTNkODA0LTAzMzEtNDhkOC1iYTk2LWVmZjEzYmU3ZDdiYQ==',
               totalPersonsCovered: 2,
               program: {
-                id:
-                  'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
-                name:
-                  'Surface campaign practice actually about about will what.',
+                id: 'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
+                name: 'Surface campaign practice actually about about will what.',
                 __typename: 'ProgramNode',
               },
               totalDeliveredQuantity: 88608141.04,
@@ -561,18 +526,14 @@ export const fakeGrievanceTicket = {
         },
         {
           node: {
-            id:
-              'UGF5bWVudFJlY29yZE5vZGU6ODZhZmQ4NjQtYmNlNS00N2Q0LWE5YmEtYzlkZTVjZGYwMDJm',
+            id: 'UGF5bWVudFJlY29yZE5vZGU6ODZhZmQ4NjQtYmNlNS00N2Q0LWE5YmEtYzlkZTVjZGYwMDJm',
             fullName: 'Jennifer Weber MD',
             parent: {
-              id:
-                'Q2FzaFBsYW5Ob2RlOjI1ZTNkODA0LTAzMzEtNDhkOC1iYTk2LWVmZjEzYmU3ZDdiYQ==',
+              id: 'Q2FzaFBsYW5Ob2RlOjI1ZTNkODA0LTAzMzEtNDhkOC1iYTk2LWVmZjEzYmU3ZDdiYQ==',
               totalPersonsCovered: 2,
               program: {
-                id:
-                  'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
-                name:
-                  'Surface campaign practice actually about about will what.',
+                id: 'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
+                name: 'Surface campaign practice actually about about will what.',
                 __typename: 'ProgramNode',
               },
               totalDeliveredQuantity: 88608141.04,
@@ -585,18 +546,14 @@ export const fakeGrievanceTicket = {
         },
         {
           node: {
-            id:
-              'UGF5bWVudFJlY29yZE5vZGU6ZDJiMTAzNjUtMDBlMy00ZjMyLTg2MTUtN2UyMDUxM2YyZmQ1',
+            id: 'UGF5bWVudFJlY29yZE5vZGU6ZDJiMTAzNjUtMDBlMy00ZjMyLTg2MTUtN2UyMDUxM2YyZmQ1',
             fullName: 'Jason Jacobs',
             parent: {
-              id:
-                'Q2FzaFBsYW5Ob2RlOmUwZGUxMGMyLTMxNWUtNDhjYS1hNDU5LWM2NTQyZDc1MmJlNw==',
+              id: 'Q2FzaFBsYW5Ob2RlOmUwZGUxMGMyLTMxNWUtNDhjYS1hNDU5LWM2NTQyZDc1MmJlNw==',
               totalPersonsCovered: 3,
               program: {
-                id:
-                  'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
-                name:
-                  'Surface campaign practice actually about about will what.',
+                id: 'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
+                name: 'Surface campaign practice actually about about will what.',
                 __typename: 'ProgramNode',
               },
               totalDeliveredQuantity: 2058088.16,
@@ -609,18 +566,14 @@ export const fakeGrievanceTicket = {
         },
         {
           node: {
-            id:
-              'UGF5bWVudFJlY29yZE5vZGU6NGM4ZGYyYjQtNTI5Ni00YmJhLTgzOTQtNGNkMGI0M2MyZjEy',
+            id: 'UGF5bWVudFJlY29yZE5vZGU6NGM4ZGYyYjQtNTI5Ni00YmJhLTgzOTQtNGNkMGI0M2MyZjEy',
             fullName: 'Micheal Massey',
             parent: {
-              id:
-                'Q2FzaFBsYW5Ob2RlOmUwZGUxMGMyLTMxNWUtNDhjYS1hNDU5LWM2NTQyZDc1MmJlNw==',
+              id: 'Q2FzaFBsYW5Ob2RlOmUwZGUxMGMyLTMxNWUtNDhjYS1hNDU5LWM2NTQyZDc1MmJlNw==',
               totalPersonsCovered: 3,
               program: {
-                id:
-                  'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
-                name:
-                  'Surface campaign practice actually about about will what.',
+                id: 'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
+                name: 'Surface campaign practice actually about about will what.',
                 __typename: 'ProgramNode',
               },
               totalDeliveredQuantity: 2058088.16,
@@ -633,18 +586,14 @@ export const fakeGrievanceTicket = {
         },
         {
           node: {
-            id:
-              'UGF5bWVudFJlY29yZE5vZGU6YzZlYzMwMDUtZWUzZC00MjI3LWI2YzctM2MxZDcxNzQwYTA4',
+            id: 'UGF5bWVudFJlY29yZE5vZGU6YzZlYzMwMDUtZWUzZC00MjI3LWI2YzctM2MxZDcxNzQwYTA4',
             fullName: 'Stephen Smith',
             parent: {
-              id:
-                'Q2FzaFBsYW5Ob2RlOjkyZDc0NTRiLWVlNWEtNDM3Yy1hNTJiLWVmZjI0NGQyZjYyZA==',
+              id: 'Q2FzaFBsYW5Ob2RlOjkyZDc0NTRiLWVlNWEtNDM3Yy1hNTJiLWVmZjI0NGQyZjYyZA==',
               totalPersonsCovered: 4,
               program: {
-                id:
-                  'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
-                name:
-                  'Surface campaign practice actually about about will what.',
+                id: 'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
+                name: 'Surface campaign practice actually about about will what.',
                 __typename: 'ProgramNode',
               },
               totalDeliveredQuantity: 17600499.7,
@@ -657,18 +606,14 @@ export const fakeGrievanceTicket = {
         },
         {
           node: {
-            id:
-              'UGF5bWVudFJlY29yZE5vZGU6OThjMzVmNzEtOWY1Ni00NjMwLWJjNWItOWFlODkxNmU0OThh',
+            id: 'UGF5bWVudFJlY29yZE5vZGU6OThjMzVmNzEtOWY1Ni00NjMwLWJjNWItOWFlODkxNmU0OThh',
             fullName: 'Jessica Thornton',
             parent: {
-              id:
-                'Q2FzaFBsYW5Ob2RlOjkyZDc0NTRiLWVlNWEtNDM3Yy1hNTJiLWVmZjI0NGQyZjYyZA==',
+              id: 'Q2FzaFBsYW5Ob2RlOjkyZDc0NTRiLWVlNWEtNDM3Yy1hNTJiLWVmZjI0NGQyZjYyZA==',
               totalPersonsCovered: 4,
               program: {
-                id:
-                  'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
-                name:
-                  'Surface campaign practice actually about about will what.',
+                id: 'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
+                name: 'Surface campaign practice actually about about will what.',
                 __typename: 'ProgramNode',
               },
               totalDeliveredQuantity: 17600499.7,
@@ -681,18 +626,14 @@ export const fakeGrievanceTicket = {
         },
         {
           node: {
-            id:
-              'UGF5bWVudFJlY29yZE5vZGU6MDVkNDkyNjctMjhhNy00ZDU5LTllOTgtYmRjMjJjNGRlNzg3',
+            id: 'UGF5bWVudFJlY29yZE5vZGU6MDVkNDkyNjctMjhhNy00ZDU5LTllOTgtYmRjMjJjNGRlNzg3',
             fullName: 'Bethany Rodriguez',
             parent: {
-              id:
-                'Q2FzaFBsYW5Ob2RlOjkyZDc0NTRiLWVlNWEtNDM3Yy1hNTJiLWVmZjI0NGQyZjYyZA==',
+              id: 'Q2FzaFBsYW5Ob2RlOjkyZDc0NTRiLWVlNWEtNDM3Yy1hNTJiLWVmZjI0NGQyZjYyZA==',
               totalPersonsCovered: 4,
               program: {
-                id:
-                  'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
-                name:
-                  'Surface campaign practice actually about about will what.',
+                id: 'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
+                name: 'Surface campaign practice actually about about will what.',
                 __typename: 'ProgramNode',
               },
               totalDeliveredQuantity: 17600499.7,
@@ -705,18 +646,14 @@ export const fakeGrievanceTicket = {
         },
         {
           node: {
-            id:
-              'UGF5bWVudFJlY29yZE5vZGU6MjEwMWVmNmUtODZjYi00MDI2LWI1MmUtMzdjMmQyNWQzZmE0',
+            id: 'UGF5bWVudFJlY29yZE5vZGU6MjEwMWVmNmUtODZjYi00MDI2LWI1MmUtMzdjMmQyNWQzZmE0',
             fullName: 'Melanie Haley MD',
             parent: {
-              id:
-                'Q2FzaFBsYW5Ob2RlOjkyZDc0NTRiLWVlNWEtNDM3Yy1hNTJiLWVmZjI0NGQyZjYyZA==',
+              id: 'Q2FzaFBsYW5Ob2RlOjkyZDc0NTRiLWVlNWEtNDM3Yy1hNTJiLWVmZjI0NGQyZjYyZA==',
               totalPersonsCovered: 4,
               program: {
-                id:
-                  'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
-                name:
-                  'Surface campaign practice actually about about will what.',
+                id: 'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
+                name: 'Surface campaign practice actually about about will what.',
                 __typename: 'ProgramNode',
               },
               totalDeliveredQuantity: 17600499.7,
@@ -729,18 +666,14 @@ export const fakeGrievanceTicket = {
         },
         {
           node: {
-            id:
-              'UGF5bWVudFJlY29yZE5vZGU6NWRhNGFjZjYtYjc5My00ZThkLWJlYzktMDRiMTI4ZTJkOGNi',
+            id: 'UGF5bWVudFJlY29yZE5vZGU6NWRhNGFjZjYtYjc5My00ZThkLWJlYzktMDRiMTI4ZTJkOGNi',
             fullName: 'Greg Cohen',
             parent: {
-              id:
-                'Q2FzaFBsYW5Ob2RlOjkyZDc0NTRiLWVlNWEtNDM3Yy1hNTJiLWVmZjI0NGQyZjYyZA==',
+              id: 'Q2FzaFBsYW5Ob2RlOjkyZDc0NTRiLWVlNWEtNDM3Yy1hNTJiLWVmZjI0NGQyZjYyZA==',
               totalPersonsCovered: 4,
               program: {
-                id:
-                  'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
-                name:
-                  'Surface campaign practice actually about about will what.',
+                id: 'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
+                name: 'Surface campaign practice actually about about will what.',
                 __typename: 'ProgramNode',
               },
               totalDeliveredQuantity: 17600499.7,
@@ -761,8 +694,7 @@ export const fakeGrievanceTicket = {
   individualDataUpdateTicketDetails: null,
   householdDataUpdateTicketDetails: null,
   deleteIndividualTicketDetails: {
-    id:
-      'VGlja2V0RGVsZXRlSW5kaXZpZHVhbERldGFpbHNOb2RlOjVhZWE2YTEzLTVkZGItNGY5My04NGM0LWExOGM1NmQxMzI1OA==',
+    id: 'VGlja2V0RGVsZXRlSW5kaXZpZHVhbERldGFpbHNOb2RlOjVhZWE2YTEzLTVkZGItNGY5My04NGM0LWExOGM1NmQxMzI1OA==',
     roleReassignData: '{}',
     approveStatus: false,
     __typename: 'TicketDeleteIndividualDetailsNode',
@@ -773,4 +705,4 @@ export const fakeGrievanceTicket = {
   issueType: 15,
   ticketNotes: { edges: [], __typename: 'TicketNoteNodeConnection' },
   __typename: 'GrievanceTicketNode',
-} as GrievanceTicketQuery['grievanceTicket'];
+} as unknown as GrievanceTicketQuery['grievanceTicket'];

@@ -23,8 +23,7 @@ export const fakeIndividual = {
     edges: [
       {
         node: {
-          id:
-            'RG9jdW1lbnROb2RlOjBlYjYwZmY5LWRhMDYtNGYwMC1iMzQwLTFhOTU5Y2NjMjQyMw==',
+          id: 'RG9jdW1lbnROb2RlOjBlYjYwZmY5LWRhMDYtNGYwMC1iMzQwLTFhOTU5Y2NjMjQyMw==',
           country: 'Poland',
           countryIso3: 'POL',
           documentNumber: 'WSH221365',
@@ -47,16 +46,14 @@ export const fakeIndividual = {
     unicefId: 'HH-20-0000.0002',
     status: 'INACTIVE',
     admin1: {
-      id:
-        'QWRtaW5BcmVhTm9kZTo1MDIzZDBlNS03OGY5LTQ0NWItYWJlNi03N2FkYzBhZTBmYmU=',
+      id: 'QWRtaW5BcmVhTm9kZTo1MDIzZDBlNS03OGY5LTQ0NWItYWJlNi03N2FkYzBhZTBmYmU=',
       name: 'Ghazni',
       level: 1,
       pCode: 'AF11',
       __typename: 'AreaNode',
     },
     admin2: {
-      id:
-        'QWRtaW5BcmVhTm9kZTpiOWQwZTU3ZS02NGVhLTQ3MGEtOTllMC01YTQyOTc2NjAxNWM=',
+      id: 'QWRtaW5BcmVhTm9kZTpiOWQwZTU3ZS02NGVhLTQ3MGEtOTllMC01YTQyOTc2NjAxNWM=',
       name: 'Abband',
       level: 2,
       pCode: 'AF1115',
@@ -66,8 +63,7 @@ export const fakeIndividual = {
       edges: [
         {
           node: {
-            id:
-              'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
+            id: 'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
             name: 'Surface campaign practice actually about about will what.',
             __typename: 'ProgramNode',
           },
@@ -80,8 +76,7 @@ export const fakeIndividual = {
     address: '938 Luna Cliffs Apt. 551\nJameschester, SC 24934',
     countryOrigin: 'San Marino',
     adminArea: {
-      id:
-        'QWRtaW5BcmVhTm9kZTpiOWQwZTU3ZS02NGVhLTQ3MGEtOTllMC01YTQyOTc2NjAxNWM=',
+      id: 'QWRtaW5BcmVhTm9kZTpiOWQwZTU3ZS02NGVhLTQ3MGEtOTllMC01YTQyOTc2NjAxNWM=',
       name: 'Abband',
       level: 2,
       __typename: 'AreaNode',
@@ -120,4 +115,4 @@ export const fakeIndividual = {
     school_enrolled_before_i_f: '0',
   },
   householdsAndRoles: [],
-} as IndividualNode;
+} as unknown as IndividualNode;

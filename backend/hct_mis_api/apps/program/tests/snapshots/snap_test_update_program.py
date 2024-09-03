@@ -19,7 +19,7 @@ snapshots['TestUpdateProgram::test_finish_active_program_with_not_finished_progr
                     'line': 3
                 }
             ],
-            'message': "['You cannot finish program if program has not finished cycles']",
+            'message': "['You cannot finish program if program has active cycles']",
             'path': [
                 'updateProgram'
             ]
