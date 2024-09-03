@@ -1074,7 +1074,7 @@ type DocumentNode implements Node {
   documentNumber: String!
   photo: String
   individual: IndividualNode!
-  type: DocumentTypeNode!
+  type: ImportedDocumentTypeNode!
   country: String
   status: DocumentStatus!
   cleared: Boolean!
@@ -1111,18 +1111,6 @@ enum DocumentStatus {
   VALID
   NEED_INVESTIGATION
   INVALID
-}
-
-type DocumentTypeNode {
-  id: UUID!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  label: String!
-  key: String!
-  isIdentityDocument: Boolean!
-  uniqueForIndividual: Boolean!
-  validForDeduplication: Boolean!
-  documents(offset: Int, before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
 }
 
 input EditBankTransferObjectType {
@@ -1806,6 +1794,7 @@ type HouseholdNode implements Node {
   admin3: AreaNode
   admin4: AreaNode
   geopoint: GeoJSON
+  representatives(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   femaleAgeGroup05Count: Int
   femaleAgeGroup611Count: Int
   femaleAgeGroup1217Count: Int
@@ -1834,6 +1823,7 @@ type HouseholdNode implements Node {
   maleChildrenDisabledCount: Int
   femaleChildrenDisabledCount: Int
   registrationDataImport: RegistrationDataImportNode
+  programs(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
   returnee: Boolean
   flexFields: FlexFieldsScalar
   firstRegistrationDate: DateTime!
@@ -1870,8 +1860,6 @@ type HouseholdNode implements Node {
   enumeratorRecId: Int
   misUnicefId: String
   flexRegistrationsRecordId: Int
-  representatives(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
-  programs(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
   copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individualsAndRoles: [IndividualRoleInHouseholdNode!]!
   individuals(offset: Int, before: String, after: String, first: Int, last: Int, household_Id: UUID, businessArea: String, fullName: String, fullName_Startswith: String, fullName_Endswith: String, sex: [String], household_AdminArea: ID, withdrawn: Boolean, program: ID, age: String, programs: [ID], search: String, documentType: String, documentNumber: String, lastRegistrationDate: String, admin1: [ID], admin2: [ID], status: [String], excludedId: String, flags: [String], isActiveProgram: Boolean, orderBy: String): IndividualNodeConnection
@@ -2061,7 +2049,7 @@ type ImportedDocumentNode implements Node {
   documentNumber: String!
   photo: String
   individual: IndividualNode!
-  type: DocumentTypeNode!
+  type: ImportedDocumentTypeNode!
   country: String
   status: DocumentStatus!
   cleared: Boolean!
@@ -2084,6 +2072,18 @@ type ImportedDocumentNodeConnection {
 type ImportedDocumentNodeEdge {
   node: ImportedDocumentNode
   cursor: String!
+}
+
+type ImportedDocumentTypeNode {
+  id: UUID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  label: String!
+  key: String!
+  isIdentityDocument: Boolean!
+  uniqueForIndividual: Boolean!
+  validForDeduplication: Boolean!
+  documents(offset: Int, before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
 }
 
 type ImportedHouseholdNode implements Node {
@@ -2209,7 +2209,6 @@ type ImportedIndividualIdentityNode implements Node {
   country: String
   isMigrationHandled: Boolean!
   copiedFrom: IndividualIdentityNode
-  copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): IndividualIdentityNodeConnection!
 }
 
 type ImportedIndividualIdentityNodeConnection {
