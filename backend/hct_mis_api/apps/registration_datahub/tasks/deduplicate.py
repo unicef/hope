@@ -650,10 +650,8 @@ class DeduplicateTask:
 
 class HardDocumentDeduplication:
     @transaction.atomic
-    def deduplicate(
-        self, new_documents: QuerySet[Document], registration_data_import: Optional[RegistrationDataImport] = None
-    ) -> None:
-        if registration_data_import and registration_data_import.program_id:
+    def deduplicate(self, new_documents: QuerySet[Document], registration_data_import: RegistrationDataImport) -> None:
+        if registration_data_import.program_id:
             program_ids = [str(registration_data_import.program_id)]
         else:
             # can remove filter after refactoring Individual.program null=False
@@ -822,9 +820,14 @@ class HardDocumentDeduplication:
                 created_ticket.populate_cross_area_flag()
 
             # update RDI statistics with needs_adjudication tickets count
-            registration_data_import.golden_record_possible_duplicates = GrievanceTicket.objects.filter(
-                category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION, registration_data_import=registration_data_import
-            ).count()
+            registration_data_import.golden_record_possible_duplicates = (
+                GrievanceTicket.objects.filter(
+                    category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+                    registration_data_import=registration_data_import,
+                )
+                .exclude(status=GrievanceTicket.STATUS_CLOSED)
+                .count()
+            )
             registration_data_import.save(update_fields=["golden_record_possible_duplicates"])
 
     def _generate_signature(self, document: Document) -> str:
