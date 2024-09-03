@@ -280,7 +280,7 @@ class TestCopyTargetPopulationMutation(APITestCase):
                 "input": {
                     "targetPopulationData": {
                         "id": self.id_to_base64(self.target_population_with_individual_ids.id, "TargetPopulationNode"),
-                        "name": "Test New Copy Name",
+                        "name": " Test New Copy Name ",
                         "programCycleId": self.id_to_base64(self.cycle.id, "ProgramCycleNode"),
                     }
                 }
