@@ -396,6 +396,7 @@ def deduplicate_documents() -> bool:
             )
             HardDocumentDeduplication().deduplicate(
                 documents_query,
+                registration_data_import=rdi,
             )
     return True
 
