@@ -32,7 +32,6 @@ from hct_mis_api.apps.household.models import (
     ROLE_NO_ROLE,
     ROLE_PRIMARY,
     DocumentType,
-    IndividualIdentity,
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
@@ -80,7 +79,7 @@ class ImportedIndividualIdentityNode(DjangoObjectType):
         return getattr(parent.country, "name", "")
 
     class Meta:
-        model = IndividualIdentity
+        model = PendingIndividualIdentity
         filter_fields = []
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
