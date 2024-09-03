@@ -1,4 +1,4 @@
-import { ImportedIndividualDetailedFragment } from '../../src/__generated__/graphql';
+import { ImportedIndividualDetailedFragment } from '@generated/graphql';
 
 export const fakeImportedIndividualDetailedFragment = {
   id: 'SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTphODQ0OTY3OS0wNzcxLTQwODAtYjlhMy05ZTUxNDVjNGRiZmE=',
@@ -51,7 +51,7 @@ export const fakeImportedIndividualDetailedFragment = {
           type: {
             label: 'National ID',
             key: 'NATIONAL_ID',
-            __typename: 'DocumentTypeNode',
+            __typename: 'ImportedDocumentTypeNode',
           },
           __typename: 'ImportedDocumentNode',
         },
