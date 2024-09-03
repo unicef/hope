@@ -63,7 +63,6 @@ services:
 
   init_fe:
     image: unicef/hct-mis-backend-dist
-    platform: linux/amd64
     build:
       context: ./
       dockerfile: docker/Dockerfile
@@ -78,11 +77,9 @@ services:
 
   redis:
     restart: always
-    platform: linux/amd64
     image: redis:4.0.11-alpine3.8
 
   db_selenium:
-    platform: linux/amd64
     image: kartoza/postgis:14-3
     volumes:
       - db-selenium-data:/var/lib/postgresql/data
@@ -97,7 +94,6 @@ services:
       - POSTGRES_SSL_MODE=off
 
   elasticsearch:
-    platform: linux/amd64
     image: unicef/hct-elasticsearch
     container_name: elasticsearch
     build:
