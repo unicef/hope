@@ -1145,6 +1145,8 @@ class TestUpdateProgram(APITestCase):
         self.program.refresh_from_db()
         self.assertEqual(self.program.status, Program.ACTIVE)
         program_cycle = self.program.cycles.first()
+        program_cycle.status = ProgramCycle.ACTIVE
+        program_cycle.save()
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
@@ -1157,7 +1159,7 @@ class TestUpdateProgram(APITestCase):
                 "version": self.program.version,
             },
         )
-        program_cycle.status = ProgramCycle.FINISHED
+        program_cycle.status = ProgramCycle.DRAFT
         program_cycle.save()
         # add deduplication_set_id
         Program.objects.filter(id=self.program.id).update(deduplication_set_id="12bc7994-9467-4f27-9954-d75a67d0e909")
