@@ -15,7 +15,7 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area, AreaType, Country
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 
-pytestmark = pytest.mark.django_db(transaction=True, databases=["registration_datahub", "default"])
+pytestmark = pytest.mark.django_db(transaction=True)
 
 
 @pytest.fixture
