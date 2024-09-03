@@ -12,7 +12,6 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 class TestHouseholdWithdraw(TestCase):
-    databases = {"registration_datahub", "default"}
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod

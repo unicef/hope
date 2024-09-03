@@ -22,8 +22,6 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 class TestAddIndividualService(BaseElasticSearchTestCase, TestCase):
-    databases = {"default", "registration_datahub"}
-
     @classmethod
     def setUpTestData(cls) -> None:
         create_afghanistan()

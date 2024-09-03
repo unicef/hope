@@ -550,6 +550,9 @@ class CopyTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
                     ind_filter.pk = None
                     ind_filter.individuals_filters_block = ind_filter_block_copy
                     ind_filter.save()
+        targeting_criteria_copy.household_ids = targeting_criteria.household_ids
+        targeting_criteria_copy.individual_ids = targeting_criteria.individual_ids
+        targeting_criteria_copy.save()
 
         return targeting_criteria_copy
 

@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 
 class DeduplicateAndCheckAgainstSanctionsListTask:
-    @transaction.atomic(using="default")
+    @transaction.atomic()
     def execute(self, should_populate_index: bool, individuals_ids: List[str]) -> None:
         individuals = Individual.objects.filter(id__in=individuals_ids)
         business_area = individuals.first().business_area
