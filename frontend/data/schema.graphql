@@ -4158,6 +4158,8 @@ type RegistrationDataImportNode implements Node {
   goldenRecordDuplicates: Int!
   goldenRecordPossibleDuplicates: Int!
   goldenRecordUnique: Int!
+  dedupEngineBatchDuplicates: Int!
+  dedupEngineGoldenRecordDuplicates: Int!
   datahubId: UUID
   errorMessage: String!
   sentryId: String
