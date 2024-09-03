@@ -389,14 +389,15 @@ def deduplicate_documents() -> bool:
                     documents_query,
                     registration_data_import=rdi,
                 )
+                rdi.update_needs_adjudication_tickets_statistic()
 
+        # TODO: have to be remove after PR#4125 individual__registration_data_import will be not nullable
         with transaction.atomic():
             documents_query = Document.objects.filter(
                 status=Document.STATUS_PENDING, individual__registration_data_import__isnull=True
             )
             HardDocumentDeduplication().deduplicate(
                 documents_query,
-                registration_data_import=rdi,
             )
     return True
 
