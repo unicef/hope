@@ -31,7 +31,6 @@ class DeduplicateAndCheckAgainstSanctionsListTask:
     def execute(self, should_populate_index: bool, individuals_ids: List[str]) -> None:
         individuals = Individual.objects.filter(id__in=individuals_ids)
         business_area = individuals.first().business_area
-        rdi = individuals.first().registration_data_import
 
         if should_populate_index is True:
             populate_index(individuals, get_individual_doc(business_area.slug))
@@ -40,7 +39,6 @@ class DeduplicateAndCheckAgainstSanctionsListTask:
             logger.info("Postponing deduplication for business area %s", business_area)
             HardDocumentDeduplication().deduplicate(
                 Document.objects.filter(individual_id__in=individuals_ids),
-                rdi,
             )
             return
 
@@ -71,5 +69,4 @@ class DeduplicateAndCheckAgainstSanctionsListTask:
 
         HardDocumentDeduplication().deduplicate(
             Document.objects.filter(individual_id__in=individuals_ids),
-            rdi,
         )
