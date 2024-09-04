@@ -16,6 +16,8 @@ from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
 from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program, ProgramPartnerThrough
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 
 class TestAllProgramsQuery(APITestCase):
@@ -282,4 +284,49 @@ class TestAllProgramsQuery(APITestCase):
                 "cycleOrderBy": "title",
                 "cycleTotalDeliveredQuantityUsdTo": None,
             },
+        )
+
+    def test_program_can_run_deduplication_and_is_deduplication_disabled(self) -> None:
+        program1 = ProgramFactory.create(
+            name="Program for dct filter",
+            status=Program.ACTIVE,
+            business_area=self.business_area,
+            biometric_deduplication_enabled=True,
+        )
+        self.snapshot_graphql_request(
+            request_string="""
+            query canRunDeduplicationAndIsDeduplicationDisabled {
+              canRunDeduplication
+              isDeduplicationDisabled
+            }
+            """,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                    "Program": self.id_to_base64(program1.id, "ProgramNode"),
+                },
+            },
+            variables={},
+        )
+        RegistrationDataImportFactory(
+            deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS,
+            data_source=RegistrationDataImport.XLS,
+            program=program1,
+        )
+        self.snapshot_graphql_request(
+            request_string="""
+                    query canRunDeduplicationAndIsDeduplicationDisabled {
+                      canRunDeduplication
+                      isDeduplicationDisabled
+                    }
+                    """,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                    "Program": self.id_to_base64(program1.id, "ProgramNode"),
+                },
+            },
+            variables={},
         )

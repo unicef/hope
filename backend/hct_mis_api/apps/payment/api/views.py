@@ -1,3 +1,4 @@
+import logging
 from typing import Any, Optional
 
 from django.db import transaction
@@ -34,6 +35,8 @@ from hct_mis_api.apps.payment.api.serializers import (
 )
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
+
+logger = logging.getLogger(__name__)
 
 
 class PaymentPlanMixin:

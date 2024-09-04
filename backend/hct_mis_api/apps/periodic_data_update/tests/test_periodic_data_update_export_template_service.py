@@ -424,6 +424,7 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
             business_area=self.business_area,
             category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
             status=GrievanceTicket.STATUS_NEW,
+            issue_type=GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
         )
         details = TicketNeedsAdjudicationDetails.objects.create(
             ticket=grievance, golden_records_individual_id=individual_with_ticket.pk

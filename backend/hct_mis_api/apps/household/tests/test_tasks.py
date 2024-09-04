@@ -1,5 +1,6 @@
 from django.test import TestCase
 
+from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.celery_tasks import enroll_households_to_program_task
 from hct_mis_api.apps.household.fixtures import (
@@ -18,6 +19,8 @@ class TestEnrollHouseholdsToProgramTask(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         cls.business_area = create_afghanistan()
+        user = UserFactory()
+        cls.str_user_id = str(user.pk)
         cls.program_source = ProgramFactory(
             status=Program.ACTIVE, name="Program source", business_area=cls.business_area
         )
@@ -94,7 +97,9 @@ class TestEnrollHouseholdsToProgramTask(TestCase):
         self.assertEqual(Household.objects.filter(unicef_id=self.household2.unicef_id).count(), 2)
 
         enroll_households_to_program_task(
-            households_ids=[self.household1.id, self.household2.id], program_for_enroll_id=str(self.program_target.id)
+            households_ids=[self.household1.id, self.household2.id],
+            program_for_enroll_id=str(self.program_target.id),
+            user_id=self.str_user_id,
         )
         self.household1.refresh_from_db()
         self.household2.refresh_from_db()
