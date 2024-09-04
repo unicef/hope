@@ -236,6 +236,7 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
 
     def update_needs_adjudication_tickets_statistic(self) -> None:
         from hct_mis_api.apps.grievance.models import GrievanceTicket
+
         # AB#201950
         self.golden_record_possible_duplicates = (
             self.grievanceticket_set.filter(
