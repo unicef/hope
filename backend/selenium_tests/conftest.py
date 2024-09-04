@@ -112,7 +112,8 @@ def pytest_configure(config) -> None:  # type: ignore
     settings.SECURE_HSTS_SECONDS = False
     settings.SECURE_CONTENT_TYPE_NOSNIFF = True
     settings.SECURE_REFERRER_POLICY = "same-origin"
-
+    settings.GDAL_LIBRARY_PATH = "/opt/homebrew/opt/gdal/lib/libgdal.dylib"
+    settings.GEOS_LIBRARY_PATH = "/opt/homebrew/opt/geos/lib/libgeos_c.dylib"
     settings.CACHE_ENABLED = False
     settings.CACHES = {
         "default": {
