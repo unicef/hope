@@ -14,13 +14,10 @@ def assign_individual_to_rdi(apps, schema_editor):
     for program in Program.objects.all():
         # create RDI only if exists any individual without RDI
         individual_qs = Individual.objects.filter(
-            program=program,
-            registration_data_import__isnull=True,
-            household__registration_data_import__isnull=True
+            program=program, registration_data_import__isnull=True, household__registration_data_import__isnull=True
         )
         aggregated_data = individual_qs.aggregate(
-            individual_count=Count("id"),
-            household_count=Count("household", distinct=True)
+            individual_count=Count("id"), household_count=Count("household", distinct=True)
         )
         if aggregated_data["individual_count"] > 0:
             rdi = RegistrationDataImport.objects.create(
@@ -39,16 +36,12 @@ def assign_individual_to_rdi(apps, schema_editor):
 
     # assign RDI from Household
     household_rdi_subquery = Household.objects.filter(
-        id=OuterRef("household_id"),
-        registration_data_import__isnull=False
+        id=OuterRef("household_id"), registration_data_import__isnull=False
     ).values("registration_data_import_id")[:1]
 
     individual_qs = Individual.objects.filter(
-        registration_data_import__isnull=True,
-        household__registration_data_import__isnull=False
-    ).annotate(
-        household_rdi_id=Subquery(household_rdi_subquery)
-    )
+        registration_data_import__isnull=True, household__registration_data_import__isnull=False
+    ).annotate(household_rdi_id=Subquery(household_rdi_subquery))
     individual_qs.update(registration_data_import_id=F("household_rdi_id"))
 
     rdi_ids = individual_qs.values_list("household_rdi_id", flat=True).distinct()
@@ -60,15 +53,28 @@ def assign_individual_to_rdi(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('registration_data', '0038_migration'),
-        ('household', '0184_migration'),
+        ("registration_data", "0038_migration"),
+        ("household", "0184_migration"),
     ]
 
     operations = [
-        migrations.RunPython(assign_individual_to_rdi, migrations.RunPython.noop,),
-        migrations.AlterField(
-            model_name='individual',
-            name='registration_data_import',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='individuals', to='registration_data.registrationdataimport'),
+        migrations.SeparateDatabaseAndState(
+            database_operations=[
+                migrations.RunPython(
+                    assign_individual_to_rdi,
+                    migrations.RunPython.noop,
+                ),
+            ],
+            state_operations=[
+                migrations.AlterField(
+                    model_name="individual",
+                    name="registration_data_import",
+                    field=models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="individuals",
+                        to="registration_data.registrationdataimport",
+                    ),
+                ),
+            ],
         ),
     ]
