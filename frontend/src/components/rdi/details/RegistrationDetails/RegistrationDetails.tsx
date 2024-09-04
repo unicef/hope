@@ -158,7 +158,9 @@ export function RegistrationDetails({
               {registration?.biometricDeduplicationEnabled && (
                 <Grid item xs={6}>
                   <Box display="flex" flexDirection="column">
-                    <LabelizedField label={t('status')}>
+                    <LabelizedField
+                      label={t('Biometrics Deduplication Status')}
+                    >
                       <StatusBox
                         status={registration?.deduplicationEngineStatus}
                         statusToColor={
