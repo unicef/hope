@@ -130,6 +130,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         grievance_ticket = GrievanceTicket.objects.create(
             description="Test",
             category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+            issue_type=GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
             consent=True,
             language="PL",
             status=GrievanceTicket.STATUS_NEW,

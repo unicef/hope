@@ -275,3 +275,17 @@ snapshots['TestAllProgramsQuery::test_all_programs_with_cycles_filter 5'] = {
         }
     }
 }
+
+snapshots['TestAllProgramsQuery::test_program_can_run_deduplication_and_is_deduplication_disabled 1'] = {
+    'data': {
+        'canRunDeduplication': True,
+        'isDeduplicationDisabled': False
+    }
+}
+
+snapshots['TestAllProgramsQuery::test_program_can_run_deduplication_and_is_deduplication_disabled 2'] = {
+    'data': {
+        'canRunDeduplication': True,
+        'isDeduplicationDisabled': True
+    }
+}

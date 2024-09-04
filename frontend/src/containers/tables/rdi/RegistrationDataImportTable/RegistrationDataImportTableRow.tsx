@@ -83,6 +83,9 @@ export function RegistrationDataImportTableRow({
           {registrationDataImport.importDate}
         </UniversalMoment>
       </TableCell>
+      <TableCell align="center">
+        {registrationDataImport.isDeduplicated}
+      </TableCell>
       <TableCell align="right">
         {registrationDataImport.numberOfIndividuals}
       </TableCell>

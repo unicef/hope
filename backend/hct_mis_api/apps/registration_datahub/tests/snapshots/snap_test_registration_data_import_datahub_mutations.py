@@ -11,6 +11,7 @@ snapshots['TestRegistrationDataImportDatahubMutations::test_registration_data_im
     'data': {
         'registrationXlsxImport': {
             'registrationDataImport': {
+                'deduplicationEngineStatus': 'PENDING',
                 'name': 'New Import of Data 123',
                 'numberOfHouseholds': 3,
                 'numberOfIndividuals': 6,

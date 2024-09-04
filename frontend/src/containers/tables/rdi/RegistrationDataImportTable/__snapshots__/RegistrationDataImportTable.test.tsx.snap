@@ -119,6 +119,17 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render loading
                   </span>
                 </th>
                 <th
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
+                  scope="col"
+                >
+                  <span
+                    class="sc-iBdnpw jMIPuq"
+                    data-cy="table-label"
+                  >
+                    Is Deduplicated?
+                  </span>
+                </th>
+                <th
                   class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight MuiTableCell-paddingNone MuiTableCell-sizeMedium css-m1xwsv-MuiTableCell-root"
                   scope="col"
                 >
@@ -224,8 +235,8 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render loading
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq doTCko css-1ex1afd-MuiTableCell-root"
-                  colspan="7"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq XqjWj css-1ex1afd-MuiTableCell-root"
+                  colspan="8"
                 >
                   <span
                     class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
@@ -238,8 +249,8 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render loading
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq doTCko css-1ex1afd-MuiTableCell-root"
-                  colspan="7"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq XqjWj css-1ex1afd-MuiTableCell-root"
+                  colspan="8"
                 >
                   <span
                     class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
@@ -252,8 +263,8 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render loading
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq doTCko css-1ex1afd-MuiTableCell-root"
-                  colspan="7"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq XqjWj css-1ex1afd-MuiTableCell-root"
+                  colspan="8"
                 >
                   <span
                     class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
@@ -266,8 +277,8 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render loading
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq doTCko css-1ex1afd-MuiTableCell-root"
-                  colspan="7"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq XqjWj css-1ex1afd-MuiTableCell-root"
+                  colspan="8"
                 >
                   <span
                     class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
@@ -280,8 +291,8 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render loading
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq doTCko css-1ex1afd-MuiTableCell-root"
-                  colspan="7"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq XqjWj css-1ex1afd-MuiTableCell-root"
+                  colspan="8"
                 >
                   <span
                     class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
@@ -294,8 +305,8 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render loading
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq doTCko css-1ex1afd-MuiTableCell-root"
-                  colspan="7"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq XqjWj css-1ex1afd-MuiTableCell-root"
+                  colspan="8"
                 >
                   <span
                     class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
@@ -308,8 +319,8 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render loading
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq doTCko css-1ex1afd-MuiTableCell-root"
-                  colspan="7"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq XqjWj css-1ex1afd-MuiTableCell-root"
+                  colspan="8"
                 >
                   <span
                     class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
@@ -322,8 +333,8 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render loading
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq doTCko css-1ex1afd-MuiTableCell-root"
-                  colspan="7"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq XqjWj css-1ex1afd-MuiTableCell-root"
+                  colspan="8"
                 >
                   <span
                     class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
@@ -336,8 +347,8 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render loading
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq doTCko css-1ex1afd-MuiTableCell-root"
-                  colspan="7"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq XqjWj css-1ex1afd-MuiTableCell-root"
+                  colspan="8"
                 >
                   <span
                     class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
@@ -350,8 +361,8 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render loading
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq doTCko css-1ex1afd-MuiTableCell-root"
-                  colspan="7"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq XqjWj css-1ex1afd-MuiTableCell-root"
+                  colspan="8"
                 >
                   <span
                     class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
@@ -586,6 +597,17 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render with da
                   </span>
                 </th>
                 <th
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
+                  scope="col"
+                >
+                  <span
+                    class="sc-iBdnpw jMIPuq"
+                    data-cy="table-label"
+                  >
+                    Is Deduplicated?
+                  </span>
+                </th>
+                <th
                   class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight MuiTableCell-paddingNone MuiTableCell-sizeMedium css-m1xwsv-MuiTableCell-root"
                   scope="col"
                 >
@@ -691,8 +713,8 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render with da
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq doTCko css-1ex1afd-MuiTableCell-root"
-                  colspan="7"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq XqjWj css-1ex1afd-MuiTableCell-root"
+                  colspan="8"
                 >
                   <span
                     class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
@@ -705,8 +727,8 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render with da
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq doTCko css-1ex1afd-MuiTableCell-root"
-                  colspan="7"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq XqjWj css-1ex1afd-MuiTableCell-root"
+                  colspan="8"
                 >
                   <span
                     class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
@@ -719,8 +741,8 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render with da
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq doTCko css-1ex1afd-MuiTableCell-root"
-                  colspan="7"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq XqjWj css-1ex1afd-MuiTableCell-root"
+                  colspan="8"
                 >
                   <span
                     class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
@@ -733,8 +755,8 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render with da
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq doTCko css-1ex1afd-MuiTableCell-root"
-                  colspan="7"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq XqjWj css-1ex1afd-MuiTableCell-root"
+                  colspan="8"
                 >
                   <span
                     class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
@@ -747,8 +769,8 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render with da
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq doTCko css-1ex1afd-MuiTableCell-root"
-                  colspan="7"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq XqjWj css-1ex1afd-MuiTableCell-root"
+                  colspan="8"
                 >
                   <span
                     class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
@@ -761,8 +783,8 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render with da
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq doTCko css-1ex1afd-MuiTableCell-root"
-                  colspan="7"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq XqjWj css-1ex1afd-MuiTableCell-root"
+                  colspan="8"
                 >
                   <span
                     class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
@@ -775,8 +797,8 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render with da
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq doTCko css-1ex1afd-MuiTableCell-root"
-                  colspan="7"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq XqjWj css-1ex1afd-MuiTableCell-root"
+                  colspan="8"
                 >
                   <span
                     class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
@@ -789,8 +811,8 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render with da
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq doTCko css-1ex1afd-MuiTableCell-root"
-                  colspan="7"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq XqjWj css-1ex1afd-MuiTableCell-root"
+                  colspan="8"
                 >
                   <span
                     class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
@@ -803,8 +825,8 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render with da
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq doTCko css-1ex1afd-MuiTableCell-root"
-                  colspan="7"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq XqjWj css-1ex1afd-MuiTableCell-root"
+                  colspan="8"
                 >
                   <span
                     class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
@@ -850,6 +872,9 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render with da
                   </time>
                 </td>
                 <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignCenter MuiTableCell-sizeMedium css-1yhpg23-MuiTableCell-root"
+                />
+                <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-177gid-MuiTableCell-root"
                 >
                   3
@@ -875,8 +900,8 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render with da
                 style="height: 70px;"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq doTCko css-1ex1afd-MuiTableCell-root"
-                  colspan="7"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq XqjWj css-1ex1afd-MuiTableCell-root"
+                  colspan="8"
                 />
               </tr>
             </tbody>

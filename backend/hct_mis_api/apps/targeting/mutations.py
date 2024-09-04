@@ -470,7 +470,7 @@ class CopyTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
         try:
             user = info.context.user
             target_population_data = kwargs["target_population_data"]
-            name = target_population_data.pop("name")
+            name = target_population_data.pop("name").strip()
             target_id = utils.decode_id_string(target_population_data.pop("id"))
             target_population = TargetPopulation.objects.get(id=target_id)
             program = target_population.program
