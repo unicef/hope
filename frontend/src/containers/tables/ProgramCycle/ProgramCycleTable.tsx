@@ -1,4 +1,4 @@
-import { ProgramQuery } from '@generated/graphql';
+import { ProgramQuery, ProgramStatus } from '@generated/graphql';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import React, { ReactElement, useState } from 'react';
 import { ClickableTableRow } from '@core/Table/ClickableTableRow';
@@ -30,7 +30,7 @@ export const ProgramCycleTable = ({ program }: ProgramCycleTableProps) => {
   const { businessArea, baseUrl, programId } = useBaseUrl();
   const permissions = usePermissions();
   const canCreateProgramCycle =
-    program.status !== 'DRAFT' &&
+    program.status === ProgramStatus.Active &&
     hasPermissions(PERMISSIONS.PM_PROGRAMME_CYCLE_CREATE, permissions);
 
   const { data, error, isLoading } = useQuery({
@@ -69,9 +69,7 @@ export const ProgramCycleTable = ({ program }: ProgramCycleTableProps) => {
         <TableCell data-cy="program-cycle-total-entitled-quantity">
           {row.total_entitled_quantity_usd || '-'}
         </TableCell>
-        <TableCell
-          data-cy="program-cycle-total-undelivered-quantity"
-        >
+        <TableCell data-cy="program-cycle-total-undelivered-quantity">
           {row.total_undelivered_quantity_usd || '-'}
         </TableCell>
         <TableCell data-cy="program-cycle-total-delivered-quantity">
