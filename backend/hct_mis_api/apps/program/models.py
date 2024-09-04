@@ -275,6 +275,11 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
             )
         super(Program, self).validate_unique()
 
+    @property
+    def can_finish(self) -> bool:
+        has_active_cycles = self.cycles.filter(status=ProgramCycle.ACTIVE).exists()
+        return False if has_active_cycles else True
+
 
 class ProgramCycle(AdminUrlMixin, SoftDeletableModel, TimeStampedUUIDModel, UnicefIdentifiedModel, ConcurrencyModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(

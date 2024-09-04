@@ -5691,6 +5691,7 @@ export type ProgramNode = Node & {
   businessArea: UserBusinessAreaNode;
   caHashId?: Maybe<Scalars['String']['output']>;
   caId?: Maybe<Scalars['String']['output']>;
+  canFinish?: Maybe<Scalars['Boolean']['output']>;
   cashPlus: Scalars['Boolean']['output'];
   cashplanSet: CashPlanNodeConnection;
   createdAt: Scalars['DateTime']['output'];
@@ -28148,6 +28149,7 @@ export type ProgramNodeResolvers<ContextType = any, ParentType extends Resolvers
   businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>;
   caHashId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   caId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  canFinish?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   cashPlus?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   cashplanSet?: Resolver<ResolversTypes['CashPlanNodeConnection'], ParentType, ContextType, Partial<ProgramNodeCashplanSetArgs>>;
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
