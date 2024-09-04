@@ -57,7 +57,7 @@ export function Selection({
       <Grid item xs={6}>
         <Field
           name="category"
-          label="Category*"
+          label="Category"
           onChange={(e) => {
             setFieldValue('issueType', null);
             handleChange(e);
@@ -66,13 +66,14 @@ export function Selection({
           choices={choicesData.grievanceTicketManualCategoryChoices}
           component={FormikSelectField}
           disabled={redirectedFromRelatedTicket}
+          required
         />
       </Grid>
       {showIssueType(values) && (
         <Grid item xs={6}>
           <Field
             name="issueType"
-            label="Issue Type*"
+            label="Issue Type"
             variant="outlined"
             choices={
               redirectedFromRelatedTicket
@@ -80,6 +81,7 @@ export function Selection({
                 : issueTypeDict[values.category].subCategories
             }
             component={FormikSelectField}
+            required
           />
         </Grid>
       )}
