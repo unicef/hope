@@ -146,7 +146,7 @@ class BiometricDeduplicationService:
     @classmethod
     def mark_rdis_as_pending(cls, program: Program) -> None:
         RegistrationDataImport.objects.filter(program=program, deduplication_engine_status__isnull=True).update(
-            status=RegistrationDataImport.DEDUP_ENGINE_PENDING
+            deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_PENDING
         )
 
     def store_similarity_pairs(self, deduplication_set_id: str, similarity_pairs: List[SimilarityPair]) -> None:

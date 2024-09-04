@@ -14,7 +14,7 @@ def migrate_needs_adjudication_tickets_issue_type(apps, schema_editor):
     )  # need to use property has_duplicated_document
 
     qs_tickets = (
-        TicketNeedsAdjudicationDetails.objects.filter(ticket__issue_type__isnull=False)
+        TicketNeedsAdjudicationDetails.objects.filter(ticket__issue_type__isnull=True)
         .select_related("ticket")
         .order_by("id")
     )
@@ -45,14 +45,20 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(migrate_needs_adjudication_tickets_issue_type, migrations.RunPython.noop),
-        migrations.AddField(
-            model_name="ticketneedsadjudicationdetails",
-            name="dedup_engine_similarity_pair",
-            field=models.ForeignKey(
-                null=True,
-                on_delete=django.db.models.deletion.CASCADE,
-                to="registration_data.deduplicationenginesimilaritypair",
-            ),
+        migrations.SeparateDatabaseAndState(
+            database_operations=[
+                migrations.RunPython(migrate_needs_adjudication_tickets_issue_type, migrations.RunPython.noop),
+            ],
+            state_operations=[
+                migrations.AddField(
+                    model_name="ticketneedsadjudicationdetails",
+                    name="dedup_engine_similarity_pair",
+                    field=models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="registration_data.deduplicationenginesimilaritypair",
+                    ),
+                ),
+            ],
         ),
     ]
