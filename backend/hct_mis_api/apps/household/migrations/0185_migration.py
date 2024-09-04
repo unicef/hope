@@ -33,7 +33,6 @@ def assign_individual_to_rdi(apps, schema_editor):
                 business_area=program.business_area,
                 program_id=program.id,
                 import_data=None,
-                deduplication_engine_status="PENDING" if program.biometric_deduplication_enabled else None,
             )
 
             individual_qs.update(registration_data_import_id=rdi.id)
