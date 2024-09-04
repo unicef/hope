@@ -28,6 +28,8 @@ from hct_mis_api.apps.program.api.serializers import (
 from hct_mis_api.apps.program.api.views import ProgramCycleViewSet
 from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program, ProgramCycle
+from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
+from hct_mis_api.apps.targeting.models import TargetPopulation
 
 
 class ProgramCycleAPITestCase(HOPEApiTestCase):
@@ -142,15 +144,27 @@ class ProgramCycleAPITestCase(HOPEApiTestCase):
             program=self.program,
             status=ProgramCycle.DRAFT,
         )
+        # create TP and check if TP will be deleted
+        tp = TargetPopulationFactory(program_cycle=cycle3, status=TargetPopulation.STATUS_LOCKED)
+        self.assertEqual(TargetPopulation.objects.count(), 1)
         self.client.force_authenticate(user=self.user)
         url = reverse(
             "api:programs:cycles-detail",
             kwargs={"business_area": "afghanistan", "program_id": self.program_id_base64, "pk": str(cycle3.id)},
         )
+
+        bad_response = self.client.delete(url)
+        self.assertEqual(bad_response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("Don’t allow to delete Cycle with assigned Target Population", bad_response.data)
+
+        tp.status = TargetPopulation.STATUS_OPEN
+        tp.save()
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(ProgramCycle.objects.count(), 3)
         self.assertEqual(ProgramCycle.all_objects.count(), 4)
+        self.assertEqual(TargetPopulation.objects.count(), 0)
+        self.assertTrue(TargetPopulation.all_objects.filter(name=tp.name).exists())
 
     def test_filter_by_status(self) -> None:
         self.client.force_authenticate(user=self.user)

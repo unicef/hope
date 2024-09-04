@@ -32,6 +32,7 @@ from hct_mis_api.apps.program.api.serializers import (
     ProgramCycleUpdateSerializer,
 )
 from hct_mis_api.apps.program.models import Program, ProgramCycle
+from hct_mis_api.apps.targeting.models import TargetPopulation
 
 logger = logging.getLogger(__name__)
 
@@ -86,6 +87,10 @@ class ProgramCycleViewSet(
         if program_cycle.program.cycles.count() == 1:
             raise ValidationError("Don’t allow to delete last Cycle.")
 
+        if program_cycle.target_populations.exclude(status=TargetPopulation.STATUS_OPEN).exists():
+            raise ValidationError("Don’t allow to delete Cycle with assigned Target Population")
+
+        program_cycle.target_populations.all().delete()
         program_cycle.delete()
 
     @action(detail=True, methods=["post"], permission_classes=[ProgramCycleUpdatePermission])
