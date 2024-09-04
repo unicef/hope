@@ -36,20 +36,14 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.SeparateDatabaseAndState(
-            database_operations=[
-                migrations.RunPython(migrate_needs_adjudication_tickets_issue_type, migrations.RunPython.noop),
-            ],
-            state_operations=[
-                migrations.AddField(
-                    model_name="ticketneedsadjudicationdetails",
-                    name="dedup_engine_similarity_pair",
-                    field=models.ForeignKey(
-                        null=True,
-                        on_delete=django.db.models.deletion.CASCADE,
-                        to="registration_data.deduplicationenginesimilaritypair",
-                    ),
-                ),
-            ],
+        migrations.AddField(
+            model_name="ticketneedsadjudicationdetails",
+            name="dedup_engine_similarity_pair",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="registration_data.deduplicationenginesimilaritypair",
+            ),
         ),
+        migrations.RunPython(migrate_needs_adjudication_tickets_issue_type, migrations.RunPython.noop),
     ]
