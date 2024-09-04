@@ -57,5 +57,6 @@ export const programDetails = gql`
         roundsNames
       }
     }
+    canFinish
   }
 `;
