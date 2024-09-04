@@ -148,12 +148,17 @@ if env("POSTGRES_SSL", default=False):
         "sslrootcert": "/code/psql-cert.crt",
         "options": "-c search_path=erp",
     }
+    DATABASES["registration_datahub"]["OPTIONS"] = {
+        "sslmode": "verify-full",
+        "sslrootcert": "/code/psql-cert.crt",
+    }
 
 # If app is not specified here it will use default db
 DATABASE_APPS_MAPPING: Dict[str, str] = {
     "cash_assist_datahub": "cash_assist_datahub_ca",
     "mis_datahub": "cash_assist_datahub_mis",
     "erp_datahub": "cash_assist_datahub_erp",
+    "registration_datahub": "registration_datahub",
 }
 
 DATABASE_ROUTERS = ("hct_mis_api.apps.core.dbrouters.DbRouter",)

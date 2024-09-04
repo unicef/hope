@@ -91,6 +91,10 @@ def create_registration_data_import_objects(
         import_data=import_data_obj,
         **registration_data_import_data,
     )
+    program = Program.objects.get(id=program_id)
+    if program.biometric_deduplication_enabled:
+        created_obj_hct.deduplication_engine_status = RegistrationDataImport.DEDUP_ENGINE_PENDING
+
     created_obj_hct.full_clean()
     created_obj_hct.save()
 

@@ -58,6 +58,7 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
           status
           numberOfHouseholds
           numberOfIndividuals
+          deduplicationEngineStatus
         }
       }
     }
@@ -199,7 +200,7 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
         ]
     )
     def test_registration_data_import_create(self, _: Any, permissions: List[Permissions]) -> None:
-        program = ProgramFactory(status=Program.ACTIVE)
+        program = ProgramFactory(status=Program.ACTIVE, biometric_deduplication_enabled=True)
 
         import_data_obj = ImportData.objects.create(
             file=self.valid_file,

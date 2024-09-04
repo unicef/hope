@@ -40,7 +40,11 @@ class UploadRDITests(HOPEApiTestCase):
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE], label="--"
         )
         cls.url = reverse("api:rdi-upload", args=[cls.business_area.slug])
-        cls.program = ProgramFactory.create(status=Program.DRAFT, business_area=cls.business_area)
+        cls.program = ProgramFactory.create(
+            status=Program.DRAFT,
+            business_area=cls.business_area,
+            biometric_deduplication_enabled=True,
+        )
 
     def test_upload_single_household(self) -> None:
         data = {
@@ -79,6 +83,7 @@ class UploadRDITests(HOPEApiTestCase):
         rdi = RegistrationDataImport.objects.filter(id=data["id"]).first()
         self.assertIsNotNone(rdi)
         self.assertEqual(rdi.program, self.program)
+        self.assertEqual(rdi.deduplication_engine_status, RegistrationDataImport.DEDUP_ENGINE_PENDING)
 
         hh = PendingHousehold.objects.filter(registration_data_import=rdi).first()
         self.assertIsNotNone(hh)

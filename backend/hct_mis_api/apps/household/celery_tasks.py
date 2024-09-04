@@ -203,10 +203,10 @@ def revalidate_phone_number_task(individual_ids: List[UUID]) -> None:
 @app.task()
 @log_start_and_end
 @sentry_tags
-def enroll_households_to_program_task(households_ids: List, program_for_enroll_id: str) -> None:
+def enroll_households_to_program_task(households_ids: List, program_for_enroll_id: str, user_id: str) -> None:
     households = Household.objects.filter(pk__in=households_ids)
     program_for_enroll = Program.objects.get(id=program_for_enroll_id)
-    enroll_households_to_program(households, program_for_enroll)
+    enroll_households_to_program(households, program_for_enroll, user_id)
     populate_index(
         Individual.objects.filter(program=program_for_enroll),
         get_individual_doc(program_for_enroll.business_area.slug),
