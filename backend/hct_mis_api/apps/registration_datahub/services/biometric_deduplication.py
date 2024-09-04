@@ -139,7 +139,8 @@ class BiometricDeduplicationService:
             raise self.BiometricDeduplicationServiceException("Failed to upload images for all RDIs")
 
     def delete_deduplication_set(self, program: Program) -> None:
-        self.api.delete_deduplication_set(str(program.deduplication_set_id))
+        if program.deduplication_set_id:
+            self.api.delete_deduplication_set(str(program.deduplication_set_id))
         program.deduplication_set_id = None
         program.save(update_fields=["deduplication_set_id"])
 
