@@ -121,6 +121,8 @@ def create_target_population_task(self: Any, storage_id: str, program_id: str, t
                 data_source=RegistrationDataImport.EDOPOMOGA,
                 program=program,
             )
+            if program.biometric_deduplication_enabled:
+                registration_data_import.deduplication_engine_status = RegistrationDataImport.DEDUP_ENGINE_PENDING
 
             business_area = storage_obj.business_area
             country = business_area.countries.first()
@@ -169,6 +171,7 @@ def create_target_population_task(self: Any, storage_id: str, program_id: str, t
                         "relationship": HEAD,
                         "rdi_merge_status": MergeStatusModel.MERGED,
                         "flex_fields": populate_pdu_with_null_values(program),
+                        "registration_data_import": registration_data_import,
                     }
                     if family_id in families:
                         individual = Individual(**individual_data, household_id=families.get(family_id))

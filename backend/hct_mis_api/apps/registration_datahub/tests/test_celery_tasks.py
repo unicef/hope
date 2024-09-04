@@ -1,7 +1,6 @@
 import base64
 import datetime
 import json
-import unittest
 import uuid
 from abc import ABC, abstractmethod
 from contextlib import contextmanager
@@ -52,6 +51,9 @@ from hct_mis_api.apps.registration_data.models import (
     RegistrationDataImport,
 )
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
+    create_grievance_tickets_for_dedup_engine_results,
+    deduplication_engine_process,
+    fetch_biometric_deduplication_results_and_process,
     merge_registration_data_import_task,
     pull_kobo_submissions_task,
     rdi_deduplication_task,
@@ -962,7 +964,7 @@ class TestRegistrationImportCeleryTasks(APITestCase):
         super().setUpTestData()
 
     @patch("hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create.RdiKoboCreateTask")
-    def test_registration_kobo_import_task_execute_called_once(self, MockRdiKoboCreateTask: unittest.mock.Mock) -> None:
+    def test_registration_kobo_import_task_execute_called_once(self, MockRdiKoboCreateTask: Mock) -> None:
         mock_task_instance = MockRdiKoboCreateTask.return_value
         registration_data_import_id = self.registration_data_import.id
         import_data_id = self.import_data.id
@@ -980,9 +982,7 @@ class TestRegistrationImportCeleryTasks(APITestCase):
         )
 
     @patch("hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create.RdiKoboCreateTask")
-    def test_registration_kobo_import_hourly_task_execute_called_once(
-        self, MockRdiKoboCreateTask: unittest.mock.Mock
-    ) -> None:
+    def test_registration_kobo_import_hourly_task_execute_called_once(self, MockRdiKoboCreateTask: Mock) -> None:
         self.registration_data_import.status = RegistrationDataImport.LOADING
         self.registration_data_import.save()
         mock_task_instance = MockRdiKoboCreateTask.return_value
@@ -990,9 +990,7 @@ class TestRegistrationImportCeleryTasks(APITestCase):
         mock_task_instance.execute.assert_called_once()
 
     @patch("hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create.RdiXlsxCreateTask")
-    def test_registration_xlsx_import_hourly_task_execute_called_once(
-        self, MockRdiXlsxCreateTask: unittest.mock.Mock
-    ) -> None:
+    def test_registration_xlsx_import_hourly_task_execute_called_once(self, MockRdiXlsxCreateTask: Mock) -> None:
         self.registration_data_import.status = RegistrationDataImport.LOADING
         self.registration_data_import.save()
         mock_task_instance = MockRdiXlsxCreateTask.return_value
@@ -1002,7 +1000,7 @@ class TestRegistrationImportCeleryTasks(APITestCase):
     @patch("hct_mis_api.apps.registration_datahub.tasks.rdi_merge.RdiMergeTask")
     def test_merge_registration_data_import_task_exception(
         self,
-        MockRdiMergeTask: unittest.mock.Mock,
+        MockRdiMergeTask: Mock,
     ) -> None:
         mock_rdi_merge_task_instance = MockRdiMergeTask.return_value
         mock_rdi_merge_task_instance.execute.side_effect = Exception("Test Exception")
@@ -1014,7 +1012,7 @@ class TestRegistrationImportCeleryTasks(APITestCase):
     @patch("hct_mis_api.apps.registration_datahub.tasks.rdi_merge.RdiMergeTask")
     def test_merge_registration_data_import_task(
         self,
-        MockRdiMergeTask: unittest.mock.Mock,
+        MockRdiMergeTask: Mock,
     ) -> None:
         mock_rdi_merge_task_instance = MockRdiMergeTask.return_value
         self.assertEqual(self.registration_data_import.status, RegistrationDataImport.IN_REVIEW)
@@ -1024,7 +1022,7 @@ class TestRegistrationImportCeleryTasks(APITestCase):
     @patch("hct_mis_api.apps.registration_datahub.tasks.deduplicate.DeduplicateTask")
     def test_rdi_deduplication_task_exception(
         self,
-        MockDeduplicateTask: unittest.mock.Mock,
+        MockDeduplicateTask: Mock,
     ) -> None:
         mock_deduplicate_task_task_instance = MockDeduplicateTask.return_value
         mock_deduplicate_task_task_instance.deduplicate_pending_individuals.side_effect = Exception("Test Exception")
@@ -1036,7 +1034,7 @@ class TestRegistrationImportCeleryTasks(APITestCase):
     @patch("hct_mis_api.apps.registration_datahub.tasks.pull_kobo_submissions.PullKoboSubmissions")
     def test_pull_kobo_submissions_task(
         self,
-        PullKoboSubmissionsTask: unittest.mock.Mock,
+        PullKoboSubmissionsTask: Mock,
     ) -> None:
         kobo_import_data = KoboImportData.objects.create(kobo_asset_id="1234", pull_pictures=True)
         mock_task_instance = PullKoboSubmissionsTask.return_value
@@ -1046,14 +1044,14 @@ class TestRegistrationImportCeleryTasks(APITestCase):
     @patch("hct_mis_api.apps.registration_datahub.tasks.validate_xlsx_import.ValidateXlsxImport")
     def test_validate_xlsx_import_task(
         self,
-        ValidateXlsxImportTask: unittest.mock.Mock,
+        ValidateXlsxImportTask: Mock,
     ) -> None:
         mock_task_instance = ValidateXlsxImportTask.return_value
         validate_xlsx_import_task.delay(self.import_data.id, self.program.id)
         mock_task_instance.execute.assert_called_once()
 
     @patch("hct_mis_api.apps.core.kobo.api.KoboAPI.get_project_submissions")
-    def test_pull_kobo_submissions_execute(self, mock_get_project_submissions: unittest.mock.Mock) -> None:
+    def test_pull_kobo_submissions_execute(self, mock_get_project_submissions: Mock) -> None:
         kobo_import_data_with_pics = KoboImportData.objects.create(
             kobo_asset_id="1111",
             business_area_slug=self.business_area.slug,
@@ -1071,3 +1069,66 @@ class TestRegistrationImportCeleryTasks(APITestCase):
         mock_get_project_submissions.return_value = VALID_JSON
         resp_2 = PullKoboSubmissions().execute(kobo_import_data_without_pics, self.program)
         self.assertEqual(str(resp_2["kobo_import_data_id"]), str(kobo_import_data_without_pics.id))
+
+
+class DeduplicationEngineCeleryTasksTests(TestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        cls.business_area = create_afghanistan()
+        cls.program = ProgramFactory(status=Program.ACTIVE, biometric_deduplication_enabled=True)
+        cls.registration_data_import = RegistrationDataImportFactory(
+            business_area=cls.business_area,
+            program=cls.program,
+            import_data=None,
+        )
+        super().setUpTestData()
+
+    @patch.dict(
+        "os.environ",
+        {"DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key", "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com"},
+    )
+    @patch(
+        "hct_mis_api.apps.registration_datahub.services.biometric_deduplication.BiometricDeduplicationService"
+        ".upload_and_process_deduplication_set"
+    )
+    def test_deduplication_engine_process_task(
+        self,
+        mock_upload_and_process: Mock,
+    ) -> None:
+        self.assertIsNone(self.program.deduplication_set_id)
+        deduplication_engine_process(str(self.program.id))
+
+        mock_upload_and_process.assert_called_once_with(self.program)
+
+    @patch.dict(
+        "os.environ",
+        {"DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key", "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com"},
+    )
+    @patch(
+        "hct_mis_api.apps.registration_datahub.services.biometric_deduplication.BiometricDeduplicationService"
+        ".create_grievance_tickets_for_duplicates"
+    )
+    def test_create_grievance_tickets_for_dedup_engine_results_task(
+        self,
+        mock_create_tickets: Mock,
+    ) -> None:
+        create_grievance_tickets_for_dedup_engine_results(str(self.registration_data_import.id))
+
+        mock_create_tickets.assert_called_once_with(self.registration_data_import)
+
+    @patch.dict(
+        "os.environ",
+        {"DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key", "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com"},
+    )
+    @patch(
+        "hct_mis_api.apps.registration_datahub.services.biometric_deduplication.BiometricDeduplicationService"
+        ".fetch_biometric_deduplication_results_and_process"
+    )
+    def test_fetch_biometric_deduplication_results_and_process(
+        self,
+        mock_fetch_biometric_deduplication_results_and_process: Mock,
+    ) -> None:
+        deduplication_set_id = str(uuid.uuid4())
+        fetch_biometric_deduplication_results_and_process(deduplication_set_id)
+
+        mock_fetch_biometric_deduplication_results_and_process.assert_called_once_with(deduplication_set_id)

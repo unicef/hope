@@ -102,6 +102,12 @@ CONSTANCE_CONFIG = {
         "If amount of duplicates for single individual exceeds this limit deduplication is aborted",
         "positive_integers",
     ),
+    # DEDUP ENGINE SETTINGS
+    "BIOMETRIC_DEDUPLICATION_THRESHOLD": (
+        0.0,
+        "Results equal or above this score are considered duplicates",
+        "percentages",
+    ),
     # SANCTION LIST
     "SANCTION_LIST_MATCH_SCORE": (
         4.8,

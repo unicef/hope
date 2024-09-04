@@ -11,3 +11,13 @@ export const fetchRegistrationDataImports = async (
   );
   return response;
 };
+
+export const runDeduplicationDataImports = async (
+  businessAreaSlug: string,
+  programId: string,
+): Promise<any> => {
+  return api.post(
+    `${businessAreaSlug}/programs/${programId}/registration-data/registration-data-imports/run-deduplication/`,
+    {},
+  );
+};

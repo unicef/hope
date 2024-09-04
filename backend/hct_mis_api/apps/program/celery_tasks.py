@@ -12,10 +12,10 @@ from hct_mis_api.apps.utils.sentry import sentry_tags, set_sentry_business_area_
 @app.task()
 @sentry_tags
 @log_start_and_end
-def copy_program_task(copy_from_program_id: str, new_program_id: str) -> None:
+def copy_program_task(copy_from_program_id: str, new_program_id: str, user_id: str) -> None:
     program = Program.objects.get(id=new_program_id)
     set_sentry_business_area_tag(program.business_area.name)
-    copy_program_related_data(copy_from_program_id, program)
+    copy_program_related_data(copy_from_program_id, program, user_id)
     program_copied.send(sender=Program, instance=program)
 
 

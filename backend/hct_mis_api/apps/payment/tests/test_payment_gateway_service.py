@@ -564,7 +564,7 @@ class TestPaymentGatewayService(APITestCase):
                 "1": self.payments[0].id,
             },
             "errors": None,
-        }
+        }, 200
 
         self.dm.delivery_mechanism = self.dm_cash_over_the_counter
         self.dm.save()
@@ -622,7 +622,7 @@ class TestPaymentGatewayService(APITestCase):
                 "1": self.payments[0].id,
             },
             "errors": None,
-        }
+        }, 200
 
         DeliveryMechanismDataFactory(
             individual=self.payments[0].collector,

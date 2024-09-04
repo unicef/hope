@@ -45,6 +45,9 @@ from hct_mis_api.apps.program.validators import (
     ProgrammeCodeValidator,
     ProgramValidator,
 )
+from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import (
+    BiometricDeduplicationService,
+)
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 
 
@@ -188,8 +191,7 @@ class UpdateProgram(
         )
         if program.status == Program.FINISHED:
             # Only reactivation is possible
-            status = program_data.get("status")
-            if status != Program.ACTIVE or len(program_data) > 1:
+            if status_to_set != Program.ACTIVE or len(program_data) > 1:
                 raise ValidationError("You cannot change finished program")
 
         if data_collecting_type_code:
@@ -207,6 +209,9 @@ class UpdateProgram(
             partners_data = create_program_partner_access(partners_data, program, partner_access)
             remove_program_partner_access(partners_data, program)
         program.save()
+
+        if status_to_set == Program.FINISHED and program.biometric_deduplication_enabled:
+            BiometricDeduplicationService().delete_deduplication_set(program)
 
         if pdu_fields is not None:
             FlexibleAttributeForPDUService(program, pdu_fields).update_pdu_flex_attributes_in_program_update()
@@ -278,7 +283,9 @@ class CopyProgram(
             create_program_partner_access(partners_data, program, partner_access)
 
         transaction.on_commit(
-            lambda: copy_program_task.delay(copy_from_program_id=program_id, new_program_id=program.id)
+            lambda: copy_program_task.delay(
+                copy_from_program_id=program_id, new_program_id=program.id, user_id=str(info.context.user.id)
+            )
         )
 
         if pdu_fields is not None:
