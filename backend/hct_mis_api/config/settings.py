@@ -159,20 +159,20 @@ DATABASE_APPS_MAPPING: Dict[str, str] = {
 DATABASE_ROUTERS = ("hct_mis_api.apps.core.dbrouters.DbRouter",)
 
 MIDDLEWARE = [
-    # "hct_mis_api.middlewares.deployment.DisableTrafficDuringMigrationsMiddleware",
-] + [
-    "corsheaders.middleware.CorsMiddleware",
-    "django.middleware.common.CommonMiddleware",
-    "django.middleware.security.SecurityMiddleware",
-    "django.contrib.sessions.middleware.SessionMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
-    "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "hijack.middleware.HijackUserMiddleware",
-    "django.contrib.messages.middleware.MessageMiddleware",
-    "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "hct_mis_api.middlewares.sentry.SentryScopeMiddleware",
-    "hct_mis_api.middlewares.version.VersionMiddleware",
-]
+                 # "hct_mis_api.middlewares.deployment.DisableTrafficDuringMigrationsMiddleware",
+             ] + [
+                 "corsheaders.middleware.CorsMiddleware",
+                 "django.middleware.common.CommonMiddleware",
+                 "django.middleware.security.SecurityMiddleware",
+                 "django.contrib.sessions.middleware.SessionMiddleware",
+                 "django.middleware.csrf.CsrfViewMiddleware",
+                 "django.contrib.auth.middleware.AuthenticationMiddleware",
+                 "hijack.middleware.HijackUserMiddleware",
+                 "django.contrib.messages.middleware.MessageMiddleware",
+                 "django.middleware.clickjacking.XFrameOptionsMiddleware",
+                 "hct_mis_api.middlewares.sentry.SentryScopeMiddleware",
+                 "hct_mis_api.middlewares.version.VersionMiddleware",
+             ]
 if not DEBUG:
     MIDDLEWARE.append("csp.contrib.rate_limiting.RateLimitedCSPMiddleware")
 
@@ -537,3 +537,6 @@ from hct_mis_api.config.fragments.sentry import *  # noqa: F403, F401, E402
 from hct_mis_api.config.fragments.smart_admin import *  # noqa: F403, F401, E402
 from hct_mis_api.config.fragments.social_auth import *  # noqa: F403, F401, E402
 from hct_mis_api.config.fragments.storages import *  # noqa: F403, F401, E402
+
+# GDAL_LIBRARY_PATH = '/opt/homebrew/opt/gdal/lib/libgdal.dylib'
+# GEOS_LIBRARY_PATH = '/opt/homebrew/opt/geos/lib/libgeos_c.dylib'
