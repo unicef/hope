@@ -235,13 +235,14 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
         return self.program.biometric_deduplication_enabled
 
     def update_needs_adjudication_tickets_statistic(self) -> None:
+        from hct_mis_api.apps.grievance.models import GrievanceTicket
         # AB#201950
         self.golden_record_possible_duplicates = (
             self.grievanceticket_set.filter(
-                category=8,  # GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION just hardcoded because of circular import
+                category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
                 registration_data_import=self,
             )
-            .exclude(status=6)  # GrievanceTicket.STATUS_CLOSED just hardcoded because of circular import
+            .exclude(status=GrievanceTicket.STATUS_CLOSED)
             .count()
         )
         self.save(update_fields=["golden_record_possible_duplicates"])
