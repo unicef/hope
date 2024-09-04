@@ -29,6 +29,7 @@ class RdiProgramPopulationCreateTask:
             import_to_program_id,
             old_rdi_mis,
         )
+        old_rdi_mis.bulk_update_household_size()
 
         if not business_area.postpone_deduplication:
             logger.info("Starting deduplication of %s", registration_data_import_id)

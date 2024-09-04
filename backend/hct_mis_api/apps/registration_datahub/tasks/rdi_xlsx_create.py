@@ -13,7 +13,7 @@ from django.core.files import File
 from django.core.files.storage import default_storage
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import transaction
-from django.db.models import Count, OuterRef, QuerySet, Subquery
+from django.db.models import QuerySet
 from django.utils import timezone
 
 import openpyxl
@@ -513,17 +513,6 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
         return obj_to_create
 
-    @staticmethod
-    def _bulk_update_household_size(rdi: RegistrationDataImport) -> None:
-        households = PendingHousehold.all_objects.filter(registration_data_import=rdi)
-        size_subquery = Subquery(
-            PendingIndividual.all_objects.filter(household=OuterRef("pk"))
-            .values("household")
-            .annotate(count=Count("pk"))
-            .values("count")
-        )
-        households.update(size=size_subquery)
-
     def handle_pdu_fields(self, row: list[Any], header: list[Any], individual: PendingIndividual) -> None:
         row_dict = {header[index].value: row_cell for index, row_cell in enumerate(row)}
         handle_subtype_mapping = {
@@ -781,8 +770,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             self._create_collectors()
             self._create_bank_accounts_infos()
             self._create_delivery_mechanisms_data()
-            if self.program.data_collecting_type.recalculate_composition:
-                self._bulk_update_household_size(rdi)
+            rdi.bulk_update_household_size()
 
     def execute_individuals_additional_steps(self, individuals: list[PendingIndividual]) -> None:
         for individual in individuals:

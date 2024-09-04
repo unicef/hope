@@ -51,6 +51,7 @@ class TestRegistrationDataModels(TestCase):
             head_of_household=IndividualFactory(),
             registration_data_import=cls.registration_data_import,
             rdi_merge_status=Household.PENDING,
+            size=99,
         )
 
         # ImportedIndividual
@@ -59,6 +60,7 @@ class TestRegistrationDataModels(TestCase):
             birth_date=datetime.datetime(1991, 3, 4),
             registration_data_import=cls.registration_data_import,
             rdi_merge_status=Individual.PENDING,
+            household=cls.imported_household,
         )
 
         # ImportedDocumentType
@@ -92,6 +94,22 @@ class TestRegistrationDataModels(TestCase):
         self.assertEqual(
             str(self.imported_individual_identity), f"UNICEF {self.imported_individual_3.unicef_id} 123456789"
         )
+
+    def test_bulk_update_household_size(self) -> None:
+        self.imported_household.refresh_from_db(fields=["size"])
+        self.assertEqual(self.imported_household.size, 99)
+
+        self.registration_data_import.bulk_update_household_size()
+        self.imported_household.refresh_from_db(fields=["size"])
+        self.assertEqual(self.imported_household.size, 99)
+
+        # upd DCT recalculate_composition
+        self.program.data_collecting_type.recalculate_composition = True
+        self.program.data_collecting_type.save()
+
+        self.registration_data_import.bulk_update_household_size()
+        self.imported_household.refresh_from_db(fields=["size"])
+        self.assertEqual(self.imported_household.size, 1)
 
 
 class TestRegistrationDataImportDatahub(TestCase):
