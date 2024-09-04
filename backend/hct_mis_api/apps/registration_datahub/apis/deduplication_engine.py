@@ -30,7 +30,6 @@ class DeduplicationImage:
 
 
 class DeduplicationEngineAPI(BaseAPI):
-    # TODO MB add to envs
     API_KEY_ENV_NAME = "DEDUPLICATION_ENGINE_API_KEY"
     API_URL_ENV_NAME = "DEDUPLICATION_ENGINE_API_URL"
 
