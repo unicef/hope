@@ -5,6 +5,7 @@ import {
   AllRegistrationDataImportsQueryVariables,
   RegistrationDataImportNode,
   useAllRegistrationDataImportsQuery,
+  useDeduplicationFlagsQuery,
 } from '@generated/graphql';
 import { TableWrapper } from '@components/core/TableWrapper';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -40,6 +41,9 @@ export function RegistrationDataImportTable({
   noTitle,
 }: RegistrationDataImportProps): ReactElement {
   const { t } = useTranslation();
+  const { data: deduplicationFlags } = useDeduplicationFlagsQuery({
+    fetchPolicy: 'cache-and-network',
+  });
   const { businessArea, programId } = useBaseUrl();
   const initialVariables = {
     search: filter.search,
@@ -60,21 +64,39 @@ export function RegistrationDataImportTable({
     handleChange(id);
   };
 
+  const prepareHeadCells = () => {
+    let header = headCells.slice();
+    if (deduplicationFlags.canRunDeduplication) {
+      header.splice(4, 0, {
+        disablePadding: false,
+        label: 'Is Deduplicated?',
+        id: 'isDeduplicated',
+        numeric: false,
+        disableSort: true,
+      });
+    }
+
+    if (!enableRadioButton) {
+      header = header.slice(1);
+    }
+    return header;
+  };
+
   const renderTable = (): React.ReactElement => (
     <TableWrapper>
       <UniversalTable<
-      RegistrationDataImportNode,
-      AllRegistrationDataImportsQueryVariables
+        RegistrationDataImportNode,
+        AllRegistrationDataImportsQueryVariables
       >
         title={noTitle ? null : t('List of Imports')}
         getTitle={(data) =>
           noTitle
             ? null
             : `${t('List of Imports')} (${
-              data?.allRegistrationDataImports?.totalCount || 0
-            })`
+                data?.allRegistrationDataImports?.totalCount || 0
+              })`
         }
-        headCells={enableRadioButton ? headCells : headCells.slice(1)}
+        headCells={prepareHeadCells()}
         defaultOrderBy="importDate"
         defaultOrderDirection="desc"
         rowsPerPageOptions={[10, 15, 20]}
@@ -88,6 +110,9 @@ export function RegistrationDataImportTable({
             selectedRDI={selectedRDI}
             registrationDataImport={row}
             canViewDetails={canViewDetails}
+            biometricDeduplicationEnabled={
+              deduplicationFlags.canRunDeduplication
+            }
           />
         )}
       />

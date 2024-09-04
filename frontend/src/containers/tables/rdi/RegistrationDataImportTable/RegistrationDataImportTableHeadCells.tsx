@@ -28,13 +28,6 @@ export const headCells: HeadCell<RegistrationDataImportNode>[] = [
     numeric: false,
   },
   {
-    disablePadding: false,
-    label: 'Is Deduplicated?',
-    id: 'isDeduplicated',
-    numeric: false,
-    disableSort: true,
-  },
-  {
     disablePadding: true,
     label: 'Num. of Individuals',
     id: 'numberOfIndividuals',
