@@ -66,7 +66,7 @@ export function RegistrationDataImportTable({
 
   const prepareHeadCells = () => {
     let header = headCells.slice();
-    if (deduplicationFlags.canRunDeduplication) {
+    if (deduplicationFlags?.canRunDeduplication) {
       header.splice(4, 0, {
         disablePadding: false,
         label: 'Is Deduplicated?',
@@ -111,7 +111,7 @@ export function RegistrationDataImportTable({
             registrationDataImport={row}
             canViewDetails={canViewDetails}
             biometricDeduplicationEnabled={
-              deduplicationFlags.canRunDeduplication
+              deduplicationFlags?.canRunDeduplication
             }
           />
         )}
