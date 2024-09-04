@@ -167,8 +167,13 @@ class BiometricDeduplicationServiceTest(TestCase):
         service = BiometricDeduplicationService()
 
         service.delete_deduplication_set(self.program)
+        mock_delete_deduplication_set.assert_not_called()
 
-        mock_delete_deduplication_set.assert_called_once_with(str(self.program.deduplication_set_id))
+        deduplication_set_id = uuid.uuid4()
+        self.program.deduplication_set_id = deduplication_set_id
+        self.program.save()
+        service.delete_deduplication_set(self.program)
+        mock_delete_deduplication_set.assert_called_once_with(str(deduplication_set_id))
         self.program.refresh_from_db()
         self.assertIsNone(self.program.deduplication_set_id)
 

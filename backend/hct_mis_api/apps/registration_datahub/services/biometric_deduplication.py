@@ -139,14 +139,15 @@ class BiometricDeduplicationService:
             raise self.BiometricDeduplicationServiceException("Failed to upload images for all RDIs")
 
     def delete_deduplication_set(self, program: Program) -> None:
-        self.api.delete_deduplication_set(str(program.deduplication_set_id))
+        if program.deduplication_set_id:
+            self.api.delete_deduplication_set(str(program.deduplication_set_id))
         program.deduplication_set_id = None
         program.save(update_fields=["deduplication_set_id"])
 
     @classmethod
     def mark_rdis_as_pending(cls, program: Program) -> None:
         RegistrationDataImport.objects.filter(program=program, deduplication_engine_status__isnull=True).update(
-            status=RegistrationDataImport.DEDUP_ENGINE_PENDING
+            deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_PENDING
         )
 
     def store_similarity_pairs(self, deduplication_set_id: str, similarity_pairs: List[SimilarityPair]) -> None:
