@@ -119,6 +119,8 @@ class FundsCommitmentAdmin(HOPEModelAdminBase):
     list_display = ("rec_serial_number", "business_area", "funds_commitment_number", "posting_date")
     list_filter = (
         SplitBusinessAreaFilter,
+        "business_area",
+        "posting_date",
         "mis_sync_date",
         "ca_sync_date",
         ("business_area", ValueFilter),
