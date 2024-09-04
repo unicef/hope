@@ -4,6 +4,7 @@ from typing import Any
 from unittest.mock import MagicMock, patch
 
 from django import forms
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.utils import IntegrityError
 from django.test import TestCase
@@ -21,16 +22,20 @@ from hct_mis_api.apps.household.fixtures import (
     IndividualFactory,
     create_household,
 )
+from hct_mis_api.apps.payment.admin import FspXlsxTemplatePerDeliveryMechanismForm
 from hct_mis_api.apps.payment.fields import DynamicChoiceArrayField, DynamicChoiceField
 from hct_mis_api.apps.payment.fixtures import (
     DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
+    FinancialServiceProviderXlsxTemplateFactory,
     PaymentFactory,
     PaymentPlanFactory,
     PaymentPlanSplitFactory,
     RealProgramFactory,
+    generate_delivery_mechanisms,
 )
 from hct_mis_api.apps.payment.models import (
+    DeliveryMechanism,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     Payment,
@@ -393,6 +398,8 @@ class TestFinancialServiceProviderModel(TestCase):
     def setUpTestData(cls) -> None:
         super().setUpTestData()
         create_afghanistan()
+        generate_delivery_mechanisms()
+        cls.dm_transfer_to_account = DeliveryMechanism.objects.get(code="transfer_to_account")
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
     def test_properties(self) -> None:
@@ -492,6 +499,79 @@ class TestFinancialServiceProviderModel(TestCase):
         wallet_address = fsp_xlsx_template.get_column_from_core_field(payment, "wallet_address")
         self.assertEqual(wallet_address, individuals[0].wallet_address)
 
+    def test_admin_form_clean(self) -> None:
+        fsp_xls_template = FinancialServiceProviderXlsxTemplateFactory(
+            core_fields=["bank_name__transfer_to_account", "bank_account_number__transfer_to_account"]
+        )
+
+        fsp = FinancialServiceProviderFactory(
+            name="Test FSP",
+            vision_vendor_number="123",
+            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+        )
+        fsp.delivery_mechanisms.add(self.dm_transfer_to_account)
+
+        # test valid form
+        form_data_standalone = {
+            "financial_service_provider": fsp.id,
+            "delivery_mechanism": self.dm_transfer_to_account.id,
+            "xlsx_template": fsp_xls_template.id,
+        }
+        form = FspXlsxTemplatePerDeliveryMechanismForm(data=form_data_standalone)
+        self.assertTrue(form.is_valid())
+        form.clean()
+
+        # test inline form data valid
+        form_data_inline = {
+            "financial_service_provider": fsp.id,
+            "delivery_mechanism": self.dm_transfer_to_account.id,
+            "xlsx_template": fsp_xls_template.id,
+            "delivery_mechanisms": [str(self.dm_transfer_to_account.id)],
+        }
+        form = FspXlsxTemplatePerDeliveryMechanismForm(data=form_data_inline)
+        self.assertTrue(form.is_valid())
+        form.clean()
+
+        # test missing required core fields
+        fsp_xls_template.core_fields = []
+        fsp_xls_template.save()
+
+        form = FspXlsxTemplatePerDeliveryMechanismForm(data=form_data_standalone)
+        self.assertFalse(form.is_valid())
+        with self.assertRaisesMessage(
+            ValidationError,
+            "[\"['bank_name__transfer_to_account', 'bank_account_number__transfer_to_account'] fields are required by delivery mechanism Transfer to Account and must be present in the template core fields\"]",
+        ):
+            form.clean()
+
+        fsp_xls_template.core_fields = ["bank_name__transfer_to_account", "bank_account_number__transfer_to_account"]
+        fsp_xls_template.save()
+
+        # test delivery mechanism not supported
+        fsp.delivery_mechanisms.remove(self.dm_transfer_to_account)
+        form = FspXlsxTemplatePerDeliveryMechanismForm(data=form_data_standalone)
+        self.assertFalse(form.is_valid())
+        with self.assertRaisesMessage(
+            ValidationError,
+            "['Delivery Mechanism Transfer to Account is not supported by Financial Service Provider Test FSP (123): API']",
+        ):
+            form.clean()
+
+        # test inline form data invalid
+        form_data_inline = {
+            "financial_service_provider": fsp.id,
+            "delivery_mechanism": self.dm_transfer_to_account.id,
+            "xlsx_template": fsp_xls_template.id,
+            "delivery_mechanisms": ["12313213123"],
+        }
+        form = FspXlsxTemplatePerDeliveryMechanismForm(data=form_data_inline)
+        self.assertFalse(form.is_valid())
+        with self.assertRaisesMessage(
+            ValidationError,
+            "['Delivery Mechanism Transfer to Account is not supported by Financial Service Provider Test FSP (123): API']",
+        ):
+            form.clean()
+
 
 class TestDynamicChoiceArrayField(TestCase):
     def setUp(self) -> None:
@@ -512,22 +592,19 @@ class TestDynamicChoiceArrayField(TestCase):
         self.assertIsInstance(form_field, DynamicChoiceField)
 
 
-class FinancialServiceProviderXlsxTemplateForm(forms.ModelForm):
-    class Meta:
-        model = FinancialServiceProviderXlsxTemplate
-        fields = ["core_fields"]
-
-
 class TestFinancialServiceProviderXlsxTemplate(TestCase):
+    class FinancialServiceProviderXlsxTemplateForm(forms.ModelForm):
+        class Meta:
+            model = FinancialServiceProviderXlsxTemplate
+            fields = ["core_fields"]
+
     def test_model_form_integration(self) -> None:
-        form = FinancialServiceProviderXlsxTemplateForm(
-            data={"core_fields": ["age", "residence_status"]}
-        )  # real existing core fields
+        form = self.FinancialServiceProviderXlsxTemplateForm(data={"core_fields": ["age", "residence_status"]})  # real existing core fields
         self.assertTrue(form.is_valid())
         template = form.save()
         self.assertEqual(template.core_fields, ["age", "residence_status"])
 
-        form = FinancialServiceProviderXlsxTemplateForm(data={"core_fields": ["field1"]})  # fake core fields
+        form = self.FinancialServiceProviderXlsxTemplateForm(data={"core_fields": ["field1"]})  # fake core fields
         self.assertFalse(form.is_valid())
         self.assertEqual(
             form.errors,
