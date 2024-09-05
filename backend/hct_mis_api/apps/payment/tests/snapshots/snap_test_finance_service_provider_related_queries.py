@@ -8,7 +8,6 @@ from snapshottest import Snapshot
 snapshots = Snapshot()
 
 
-
 snapshots['TestFSPRelatedSchema::test_query_all_financial_service_provider_xlsx_templates 1'] = {
     'data': {
         'allFinancialServiceProviderXlsxTemplates': {
