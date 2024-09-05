@@ -5,7 +5,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.gis.db import models
 from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
-from django.core.validators import MinValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db.models import JSONField, Q, UniqueConstraint
 from django.utils.translation import gettext_lazy as _
 
@@ -128,6 +128,11 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
     )
     screen_beneficiary = models.BooleanField(default=False, help_text="Enable screen beneficiary against sanction list")
     deduplication_ignore_withdraw = models.BooleanField(default=False)
+    biometric_deduplication_threshold = models.FloatField(
+        default=0.0,
+        help_text="Threshold for Face Image Deduplication",
+        validators=[MinValueValidator(0.0), MaxValueValidator(100.0)],
+    )
 
     is_payment_plan_applicable = models.BooleanField(default=False)
     is_accountability_applicable = models.BooleanField(default=False)

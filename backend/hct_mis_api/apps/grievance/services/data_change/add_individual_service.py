@@ -120,6 +120,7 @@ class AddIndividualService(DataChangeService):
             business_area=self.grievance_ticket.business_area,
             program_id=household.program_id,
             rdi_merge_status=MergeStatusModel.MERGED,
+            registration_data_import=household.registration_data_import,
             **individual_data,
         )
         individual.refresh_from_db()

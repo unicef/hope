@@ -3,7 +3,6 @@ from collections import OrderedDict
 from enum import Enum, auto, unique
 from functools import partial
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Type, Union
-from urllib.parse import urlparse
 
 from django.core.exceptions import PermissionDenied
 from django.db.models import Model
@@ -19,14 +18,16 @@ from graphene_django.filter.utils import (
 
 from hct_mis_api.apps.core.extended_connection import DjangoFastConnectionField
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import decode_id_string, get_program_id_from_headers
+from hct_mis_api.apps.core.utils import get_program_id_from_headers
 
 logger = logging.getLogger(__name__)
 
 
 @unique
 class Permissions(Enum):
-    def _generate_next_value_(name: str, start: int, count: int, last_values: List[Any]) -> Any:  # type: ignore # https://github.com/python/mypy/issues/7591
+    def _generate_next_value_(  # type: ignore # https://github.com/python/mypy/issues/7591
+        name: str, start: int, count: int, last_values: List[Any]
+    ) -> Any:
         return name
 
     # RDI
@@ -188,6 +189,7 @@ class Permissions(Enum):
     GRIEVANCE_ASSIGN = auto()
     GRIEVANCE_DOCUMENTS_UPLOAD = auto()
     GRIEVANCES_CROSS_AREA_FILTER = auto()
+    GRIEVANCES_VIEW_BIOMETRIC_RESULTS = auto()
 
     # Feedback
     GRIEVANCES_FEEDBACK_VIEW_CREATE = auto()
@@ -306,17 +308,6 @@ class AllowAuthenticated(BasePermission):
         return info.context.user.is_authenticated
 
 
-def compare_program_id_with_url(
-    user: Any, business_area: BusinessArea, business_area_arg: str, url: Optional[Any]
-) -> bool:
-    url = urlparse(url)
-    url_elements = str(url.path).rsplit("/", 1)
-    if url_elements[0] == f"/{business_area_arg}/programs/all/details":
-        program_id = decode_id_string(url_elements[1])
-        return user.partner.has_program_access(program_id)
-    return True
-
-
 def check_permissions(user: Any, permissions: Iterable[Permissions], **kwargs: Any) -> bool:
     if not user.is_authenticated:
         return False
@@ -332,13 +323,7 @@ def check_permissions(user: Any, permissions: Iterable[Permissions], **kwargs: A
     if business_area is None:
         return False
     program_id = get_program_id_from_headers(kwargs)
-    # is_unicef has access to all Programs
-    if user.partner.is_unicef:
-        return any(user.has_permission(permission.name, business_area) for permission in permissions)
-    else:
-        if not compare_program_id_with_url(user, business_area, business_area_arg, kwargs.get("Referer")):
-            return False
-        return any(user.has_permission(permission.name, business_area, program_id) for permission in permissions)
+    return any(user.has_permission(permission.name, business_area, program_id) for permission in permissions)
 
 
 def hopePermissionClass(permission: Permissions) -> Type[BasePermission]:

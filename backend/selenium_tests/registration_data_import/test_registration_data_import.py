@@ -97,10 +97,11 @@ class TestSmokeRegistrationDataImport:
         assert "Title" in pageRegistrationDataImport.getTableLabel()[0].text
         assert "Status" in pageRegistrationDataImport.getTableLabel()[1].text
         assert "Import Date" in pageRegistrationDataImport.getTableLabel()[2].text
-        assert "Num. of Individuals" in pageRegistrationDataImport.getTableLabel()[3].text
-        assert "Num. of Households" in pageRegistrationDataImport.getTableLabel()[4].text
-        assert "Imported by" in pageRegistrationDataImport.getTableLabel()[5].text
-        assert "Data Source" in pageRegistrationDataImport.getTableLabel()[6].text
+        assert "Is Deduplicated?" in pageRegistrationDataImport.getTableLabel()[3].text
+        assert "Num. of Individuals" in pageRegistrationDataImport.getTableLabel()[4].text
+        assert "Num. of Households" in pageRegistrationDataImport.getTableLabel()[5].text
+        assert "Imported by" in pageRegistrationDataImport.getTableLabel()[6].text
+        assert "Data Source" in pageRegistrationDataImport.getTableLabel()[7].text
 
     def test_smoke_registration_data_import_select_file(
         self, create_programs: None, pageRegistrationDataImport: RegistrationDataImport

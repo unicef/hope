@@ -105,6 +105,8 @@ export const PeopleRegistrationDataImportDetailsPage =
       RegistrationDataImportStatus.Merged ===
       data.registrationDataImport.status;
 
+    const canMerge = hasPermissions(PERMISSIONS.RDI_MERGE_IMPORT, permissions);
+
     function RegistrationContainer({
       isErased,
     }: {
@@ -157,7 +159,7 @@ export const PeopleRegistrationDataImportDetailsPage =
       <div>
         <RegistrationDataImportDetailsPageHeader
           registration={data.registrationDataImport}
-          canMerge={hasPermissions(PERMISSIONS.RDI_MERGE_IMPORT, permissions)}
+          canMerge={canMerge}
           canRerunDedupe={hasPermissions(
             PERMISSIONS.RDI_RERUN_DEDUPE,
             permissions,

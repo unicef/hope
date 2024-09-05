@@ -198,6 +198,10 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
     ISSUE_TYPE_OTHER_COMPLAINT = 21
     ISSUE_TYPE_PARTNER_COMPLAINT = 22
 
+    ISSUE_TYPE_UNIQUE_IDENTIFIERS_SIMILARITY = 23
+    ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY = 24
+    ISSUE_TYPE_BIOMETRICS_SIMILARITY = 25
+
     ISSUE_TYPES_CHOICES = {
         CATEGORY_DATA_CHANGE: {
             ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL: _("Add Individual"),
@@ -226,6 +230,11 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
             ISSUE_TYPE_REGISTRATION_COMPLAINT: _("Registration Related Complaint"),
             ISSUE_TYPE_OTHER_COMPLAINT: _("Other Complaint"),
             ISSUE_TYPE_PARTNER_COMPLAINT: _("Partner Related Complaint"),
+        },
+        CATEGORY_NEEDS_ADJUDICATION: {
+            ISSUE_TYPE_UNIQUE_IDENTIFIERS_SIMILARITY: _("Unique Identifiers Similarity"),
+            ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY: _("Biographical Data Similarity"),
+            ISSUE_TYPE_BIOMETRICS_SIMILARITY: _("Biometrics Similarity"),
         },
     }
     ALL_ISSUE_TYPES = [choice for choices_group in ISSUE_TYPES_CHOICES.values() for choice in choices_group.items()]
@@ -825,6 +834,9 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
     score_min = models.FloatField(default=0.0)
     score_max = models.FloatField(default=0.0)
     is_cross_area = models.BooleanField(default=False)
+    dedup_engine_similarity_pair = models.ForeignKey(
+        "registration_data.DeduplicationEngineSimilarityPair", on_delete=models.CASCADE, null=True
+    )
 
     # deprecated and will remove soon
     selected_individual = models.ForeignKey(

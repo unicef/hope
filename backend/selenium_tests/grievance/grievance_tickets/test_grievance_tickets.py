@@ -1,7 +1,7 @@
 import base64
 from datetime import datetime
 from time import sleep
-from typing import Generator
+from typing import Generator, Optional
 
 from django.conf import settings
 from django.core.management import call_command
@@ -171,9 +171,9 @@ def generate_grievance(
     unicef_id: str = "GRV-0000001",
     status: int = GrievanceTicket.STATUS_NEW,
     category: int = GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
-    created_by: User | None = None,
-    assigned_to: User | None = None,
-    business_area: BusinessArea | None = None,
+    created_by: Optional[User] = None,
+    assigned_to: Optional[User] = None,
+    business_area: Optional[BusinessArea] = None,
     priority: int = 1,
     urgency: int = 1,
     household_unicef_id: str = "HH-20-0000.0001",
@@ -199,6 +199,7 @@ def generate_grievance(
             "household_unicef_id": household_unicef_id,
             "priority": priority,
             "urgency": urgency,
+            "issue_type": GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
         }
     )
 
