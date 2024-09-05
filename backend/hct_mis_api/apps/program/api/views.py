@@ -32,7 +32,6 @@ from hct_mis_api.apps.program.api.serializers import (
     ProgramCycleUpdateSerializer,
 )
 from hct_mis_api.apps.program.models import Program, ProgramCycle
-from hct_mis_api.apps.targeting.models import TargetPopulation
 
 logger = logging.getLogger(__name__)
 
