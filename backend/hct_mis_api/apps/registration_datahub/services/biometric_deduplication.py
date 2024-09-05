@@ -166,9 +166,7 @@ class BiometricDeduplicationService:
         )
         for rdi in rdis:
             rdi.dedup_engine_batch_duplicates = self.get_duplicates_for_rdi_against_batch(rdi).count()
-            rdi.parent.dedup_engine_golden_record_duplicates = self.get_duplicates_for_rdi_against_population(
-                rdi
-            ).count()
+            rdi.dedup_engine_golden_record_duplicates = self.get_duplicates_for_rdi_against_population(rdi).count()
             rdi.save(update_fields=["dedup_engine_batch_duplicates", "dedup_engine_golden_record_duplicates"])
 
     def update_rdis_deduplication_statistics(self, program_id: str) -> None:
@@ -180,9 +178,7 @@ class BiometricDeduplicationService:
         )
         for rdi in rdis:
             rdi.dedup_engine_batch_duplicates = self.get_duplicates_for_rdi_against_batch(rdi).count()
-            rdi.parent.dedup_engine_golden_record_duplicates = self.get_duplicates_for_rdi_against_population(
-                rdi
-            ).count()
+            rdi.dedup_engine_golden_record_duplicates = self.get_duplicates_for_rdi_against_population(rdi).count()
             rdi.save(update_fields=["dedup_engine_batch_duplicates", "dedup_engine_golden_record_duplicates"])
 
     @classmethod
