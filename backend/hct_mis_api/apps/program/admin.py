@@ -32,7 +32,7 @@ from mptt.forms import TreeNodeMultipleChoiceField
 
 
 @admin.register(ProgramCycle)
-class ProgramCycleAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, HOPEModelAdminBase):
+class ProgramCycleAdmin(LastSyncDateResetMixin, HOPEModelAdminBase):
     list_display = ("program", "status", "start_date", "end_date")
     date_hierarchy = "start_date"
     list_filter = (
