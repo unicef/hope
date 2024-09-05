@@ -77,10 +77,6 @@ class CellMock:
 
 
 class TestRdiXlsxCreateTask(BaseElasticSearchTestCase):
-    databases = {
-        "default",
-        "registration_datahub",
-    }
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod

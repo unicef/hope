@@ -423,9 +423,9 @@ class DeduplicationEngineSimilarityPair(models.Model):
                     similarity_score=pair.score,
                 )
             )
-
-        with transaction.atomic():
-            cls.objects.bulk_create(duplicates, ignore_conflicts=True)
+        if duplicates:
+            with transaction.atomic():
+                cls.objects.bulk_create(duplicates, ignore_conflicts=True)
 
     @property
     def _is_duplicate(self) -> bool:
