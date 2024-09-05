@@ -154,8 +154,10 @@ class ProgramCycleUpdateSerializer(EncodedIdSerializerMixin):
         )
         # program end date can be empty
         program_end_date = (
-            parse_date(program.end_date) if isinstance(program.end_date, str) else program.end_date
-        ) if program.end_date else None
+            (parse_date(program.end_date) if isinstance(program.end_date, str) else program.end_date)
+            if program.end_date
+            else None
+        )
 
         if program.status != Program.ACTIVE:
             raise serializers.ValidationError("Updating Programme Cycle is only possible for Active Programmes.")
@@ -184,9 +186,7 @@ class ProgramCycleUpdateSerializer(EncodedIdSerializerMixin):
                     )
 
             if start_date and end_date < start_date:
-                raise serializers.ValidationError(
-                    {"end_date": "End date cannot be earlier than the start date."}
-                )
+                raise serializers.ValidationError({"end_date": "End date cannot be earlier than the start date."})
 
         validate_cycle_timeframes_overlapping(program, start_date, end_date, str(self.instance.pk))
         return data
