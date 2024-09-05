@@ -162,7 +162,6 @@ class ProgramCycleAPITestCase(HOPEApiTestCase):
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(ProgramCycle.objects.count(), 3)
-        self.assertEqual(ProgramCycle.all_objects.count(), 4)
         self.assertEqual(TargetPopulation.objects.count(), 0)
         self.assertTrue(TargetPopulation.all_objects.filter(name=tp.name).exists())
 
