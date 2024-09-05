@@ -39,3 +39,4 @@ export USE_DUMMY_EXCHANGE_RATES=yes
 export ELASTICSEARCH_HOST=http://localhost:9200
 export CELERY_TASK_ALWAYS_EAGER=true
 export DATA_VOLUME="./data1"
+export LIBRARY_PATHS=true

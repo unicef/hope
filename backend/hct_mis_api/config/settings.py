@@ -538,5 +538,7 @@ from hct_mis_api.config.fragments.smart_admin import *  # noqa: F403, F401, E402
 from hct_mis_api.config.fragments.social_auth import *  # noqa: F403, F401, E402
 from hct_mis_api.config.fragments.storages import *  # noqa: F403, F401, E402
 
-# GDAL_LIBRARY_PATH = '/opt/homebrew/opt/gdal/lib/libgdal.dylib'
-# GEOS_LIBRARY_PATH = '/opt/homebrew/opt/geos/lib/libgeos_c.dylib'
+LIBRARY_PATHS: bool = env("LIBRARY_PATHS", default=False)
+if LIBRARY_PATHS:
+    GDAL_LIBRARY_PATH = '/opt/homebrew/opt/gdal/lib/libgdal.dylib'
+    GEOS_LIBRARY_PATH = '/opt/homebrew/opt/geos/lib/libgeos_c.dylib'
