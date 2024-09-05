@@ -146,33 +146,48 @@ class ProgramCycleUpdateSerializer(EncodedIdSerializerMixin):
 
     def validate(self, data: Dict[str, Any]) -> Dict[str, Any]:
         program = self.instance.program
+        start_date = data.get("start_date")
+        end_date = data.get("end_date")
+
         program_start_date = (
             parse_date(program.start_date) if isinstance(program.start_date, str) else program.start_date
         )
-        program_end_date = parse_date(program.end_date) if isinstance(program.end_date, str) else program.end_date
-        start_date = data.get("start_date")
-        end_date = data.get("end_date")
+        # program end date can be empty
+        program_end_date = (
+            parse_date(program.end_date) if isinstance(program.end_date, str) else program.end_date
+        ) if program.end_date else None
+
         if program.status != Program.ACTIVE:
-            raise serializers.ValidationError("Update Programme Cycle is possible only for Active Programme.")
+            raise serializers.ValidationError("Updating Programme Cycle is only possible for Active Programmes.")
 
         if self.instance.end_date and "end_date" in data and end_date is None:
             raise serializers.ValidationError(
-                {
-                    "end_date": "Not possible leave the Programme Cycle end date empty if it was not empty upon starting the edit."
-                }
+                {"end_date": "Cannot clear the Programme Cycle end date if it was previously set."}
             )
+
         if start_date:
-            if not (program_start_date <= start_date <= program_end_date):
+            if program_end_date:
+                if not (program_start_date <= start_date <= program_end_date):
+                    raise serializers.ValidationError(
+                        {"start_date": "Programme Cycle start date must be within the programme's start and end dates."}
+                    )
+            elif start_date < program_start_date:
                 raise serializers.ValidationError(
-                    {"start_date": "Programme Cycle start date must be between programme start and end dates."}
+                    {"start_date": "Programme Cycle start date must be after the programme start date."}
                 )
-            if end_date and end_date < start_date:
-                raise serializers.ValidationError({"end_date": "End date cannot be before start date."})
+
         if end_date:
-            if not (program_start_date <= end_date <= program_end_date):
+            if program_end_date:
+                if not (program_start_date <= end_date <= program_end_date):
+                    raise serializers.ValidationError(
+                        {"end_date": "Programme Cycle end date must be within the programme's start and end dates."}
+                    )
+
+            if start_date and end_date < start_date:
                 raise serializers.ValidationError(
-                    {"end_date": "Programme Cycle end date must be between programme start and end dates."}
+                    {"end_date": "End date cannot be earlier than the start date."}
                 )
+
         validate_cycle_timeframes_overlapping(program, start_date, end_date, str(self.instance.pk))
         return data
 

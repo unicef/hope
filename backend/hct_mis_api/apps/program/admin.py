@@ -51,6 +51,7 @@ class ProgramCycleAdminInline(admin.TabularInline):
         "updated_at",
     )
     exclude = ("unicef_id",)
+    ordering = ["-start_date"]
 
 
 class PartnerAreaForm(forms.Form):

@@ -281,7 +281,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         return False if has_active_cycles else True
 
 
-class ProgramCycle(AdminUrlMixin, SoftDeletableModel, TimeStampedUUIDModel, UnicefIdentifiedModel, ConcurrencyModel):
+class ProgramCycle(AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentifiedModel, ConcurrencyModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "title",
@@ -316,13 +316,12 @@ class ProgramCycle(AdminUrlMixin, SoftDeletableModel, TimeStampedUUIDModel, Unic
     class Meta:
         constraints = [
             UniqueConstraint(
-                fields=["title", "program", "is_removed"],
-                condition=Q(is_removed=False),
-                name="program_cycle_name_unique_if_not_removed",
+                fields=["title", "program"],
+                name="program_cycle_title_unique_per_program",
             ),
         ]
         ordering = ["start_date"]
-        verbose_name = "ProgrammeCycle"
+        verbose_name = "Programme Cycle"
 
     def clean(self) -> None:
         start_date = parse_date(self.start_date) if isinstance(self.start_date, str) else self.start_date

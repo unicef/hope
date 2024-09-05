@@ -19,6 +19,8 @@ class ProgramValidator(BaseValidator):
     def validate_status_change(cls, *args: Any, **kwargs: Any) -> Optional[None]:
         status_to_set = kwargs.get("program_data").get("status")
         program = kwargs.get("program")
+        start_date = kwargs.get("start_date")
+        end_date = kwargs.get("end_date")
         current_status = program.status
         if status_to_set is None or status_to_set == current_status:
             return None
@@ -34,6 +36,16 @@ class ProgramValidator(BaseValidator):
         elif current_status == Program.FINISHED and status_to_set != Program.ACTIVE:
             logger.error("Finished status can only be changed to Active")
             raise ValidationError("Finished status can only be changed to Active")
+
+        # validation for start and end dates
+        if (start_date and end_date) and (end_date < start_date):
+            raise ValidationError("End date cannot be before start date.")
+
+        if program.cycles.filter(end_date__gt=end_date).exists():
+            raise ValidationError("End date must be equal or after the latest cycle.")
+
+        if program.cycles.filter(start_date__lt=start_date).exists():
+            raise ValidationError("Start date must be equal or before the earliest cycle.")
 
         # Finish Program -> check all Payment Plans
         if status_to_set == Program.FINISHED and current_status == Program.ACTIVE:

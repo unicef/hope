@@ -85,7 +85,9 @@ class CreateProgram(
 
         cls.validate(
             start_date=datetime.combine(program_data["start_date"], datetime.min.time()),
-            end_date=datetime.combine(program_data["end_date"], datetime.min.time()),
+            end_date=datetime.combine(program_data["end_date"], datetime.min.time())
+            if program_data.get("end_date")
+            else None,
             data_collecting_type=data_collecting_type,
             business_area=business_area,
             programme_code=programme_code,
