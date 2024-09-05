@@ -34,10 +34,6 @@ from hct_mis_api.apps.utils.models import MergeStatusModel
 
 
 class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
-    databases = {
-        "default",
-        "registration_datahub",
-    }
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @staticmethod
