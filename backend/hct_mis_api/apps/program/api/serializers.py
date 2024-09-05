@@ -136,7 +136,7 @@ class ProgramCycleUpdateSerializer(EncodedIdSerializerMixin):
 
     def validate_title(self, value: str) -> str:
         if (
-            ProgramCycle.objects.filter(title=value, program=self.instance.program, is_removed=False)
+            ProgramCycle.objects.filter(title=value, program=self.instance.program)
             .exclude(id=self.instance.id)
             .exists()
         ):
@@ -160,7 +160,7 @@ class ProgramCycleUpdateSerializer(EncodedIdSerializerMixin):
         )
 
         if program.status != Program.ACTIVE:
-            raise serializers.ValidationError("Updating Programme Cycle is only possible for Active Programmes.")
+            raise serializers.ValidationError("Updating Programme Cycle is only possible for Active Programme.")
 
         if self.instance.end_date and "end_date" in data and end_date is None:
             raise serializers.ValidationError(

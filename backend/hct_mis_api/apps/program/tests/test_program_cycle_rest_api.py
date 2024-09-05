@@ -144,9 +144,11 @@ class ProgramCycleAPITestCase(HOPEApiTestCase):
             program=self.program,
             status=ProgramCycle.DRAFT,
         )
-        # create TP and check if TP will be deleted
-        tp = TargetPopulationFactory(program_cycle=cycle3, status=TargetPopulation.STATUS_LOCKED)
+        # create TP and PP
+        tp = TargetPopulationFactory(program_cycle=cycle3, program=self.program)
+        pp = PaymentPlanFactory(program_cycle=cycle3, target_population=tp, program=self.program)
         self.assertEqual(TargetPopulation.objects.count(), 1)
+        self.assertEqual(ProgramCycle.objects.count(), 4)
         self.client.force_authenticate(user=self.user)
         url = reverse(
             "api:programs:cycles-detail",
@@ -156,14 +158,17 @@ class ProgramCycleAPITestCase(HOPEApiTestCase):
         bad_response = self.client.delete(url)
         self.assertEqual(bad_response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("Don’t allow to delete Cycle with assigned Target Population", bad_response.data)
+        tp.delete()
 
-        tp.status = TargetPopulation.STATUS_OPEN
-        tp.save()
+        bad_response = self.client.delete(url)
+        self.assertEqual(bad_response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("Don’t allow to delete Cycle with assigned Payment Plan", bad_response.data)
+        pp.delete()
+
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(ProgramCycle.objects.count(), 3)
         self.assertEqual(TargetPopulation.objects.count(), 0)
-        self.assertTrue(TargetPopulation.all_objects.filter(name=tp.name).exists())
 
     def test_filter_by_status(self) -> None:
         self.client.force_authenticate(user=self.user)
@@ -373,7 +378,7 @@ class ProgramCycleUpdateSerializerTest(TestCase):
         serializer = ProgramCycleUpdateSerializer(instance=self.cycle, data=data, context=self.get_serializer_context())
         with self.assertRaises(ValidationError) as error:
             serializer.is_valid(raise_exception=True)
-        self.assertIn("Update Programme Cycle is possible only for Active Programme.", str(error.exception))
+        self.assertIn("Updating Programme Cycle is only possible for Active Programme.", str(error.exception))
 
     def test_validate_start_date(self) -> None:
         cycle_2 = ProgramCycleFactory(
@@ -383,7 +388,7 @@ class ProgramCycleUpdateSerializerTest(TestCase):
         serializer = ProgramCycleUpdateSerializer(instance=cycle_2, data=data, context=self.get_serializer_context())
         with self.assertRaises(ValidationError) as error:
             serializer.is_valid(raise_exception=True)
-        self.assertIn("End date cannot be before start date", str(error.exception))
+        self.assertIn("End date cannot be earlier than the start date.", str(error.exception))
 
         data = {"start_date": parse_date("2023-12-10"), "end_date": parse_date("2023-12-26")}
         serializer = ProgramCycleUpdateSerializer(instance=cycle_2, data=data, context=self.get_serializer_context())
@@ -398,14 +403,18 @@ class ProgramCycleUpdateSerializerTest(TestCase):
         )
         with self.assertRaises(ValidationError) as error:
             serializer.is_valid(raise_exception=True)
-        self.assertIn("Programme Cycle start date must be between programme start and end dates.", str(error.exception))
+        self.assertIn(
+            "Programme Cycle start date must be within the programme's start and end dates", str(error.exception)
+        )
         # after program end date
         serializer = ProgramCycleUpdateSerializer(
             instance=cycle_2, data={"start_date": parse_date("2100-01-01")}, context=self.get_serializer_context()
         )
         with self.assertRaises(ValidationError) as error:
             serializer.is_valid(raise_exception=True)
-        self.assertIn("Programme Cycle start date must be between programme start and end dates.", str(error.exception))
+        self.assertIn(
+            "Programme Cycle start date must be within the programme's start and end dates.", str(error.exception)
+        )
 
     def test_validate_end_date(self) -> None:
         self.cycle.end_date = datetime.strptime("2023-02-03", "%Y-%m-%d").date()
@@ -425,7 +434,7 @@ class ProgramCycleUpdateSerializerTest(TestCase):
         with self.assertRaises(ValidationError) as error:
             serializer.is_valid(raise_exception=True)
         self.assertIn(
-            "Programme Cycle end date must be between programme start and end dates.",
+            "Programme Cycle end date must be within the programme's start and end dates.",
             str(error.exception),
         )
         # end date after program end date
@@ -435,7 +444,7 @@ class ProgramCycleUpdateSerializerTest(TestCase):
         with self.assertRaises(ValidationError) as error:
             serializer.is_valid(raise_exception=True)
         self.assertIn(
-            "Programme Cycle end date must be between programme start and end dates.",
+            "Programme Cycle end date must be within the programme's start and end dates.",
             str(error.exception),
         )
 

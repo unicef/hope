@@ -98,6 +98,7 @@ class TestUpdateProgram(APITestCase):
             business_area=cls.business_area,
             data_collecting_type=data_collecting_type,
             partner_access=Program.NONE_PARTNERS_ACCESS,
+            version=123,
         )
         unicef_program, _ = ProgramPartnerThrough.objects.get_or_create(
             program=cls.program,

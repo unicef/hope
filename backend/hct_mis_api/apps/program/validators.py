@@ -41,10 +41,10 @@ class ProgramValidator(BaseValidator):
         if (start_date and end_date) and (end_date < start_date):
             raise ValidationError("End date cannot be before start date.")
 
-        if program.cycles.filter(end_date__gt=end_date).exists():
+        if end_date and program.cycles.filter(end_date__gt=end_date).exists():
             raise ValidationError("End date must be equal or after the latest cycle.")
 
-        if program.cycles.filter(start_date__lt=start_date).exists():
+        if start_date and program.cycles.filter(start_date__lt=start_date).exists():
             raise ValidationError("Start date must be equal or before the earliest cycle.")
 
         # Finish Program -> check all Payment Plans
