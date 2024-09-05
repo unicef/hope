@@ -31,7 +31,7 @@ export const PaymentVerificationRoutes = (): React.ReactElement => {
       element: <CashPlanVerificationDetailsPage />,
     },
     {
-      path: 'payment-verification/payment-plan/:id',
+      path: 'payment-verification/payment-plan/:paymentPlanId',
       element: <PaymentPlanVerificationDetailsPage />,
     },
     {
