@@ -87,10 +87,12 @@ class ProgramCycleViewSet(
         if program_cycle.program.cycles.count() == 1:
             raise ValidationError("Don’t allow to delete last Cycle.")
 
-        if program_cycle.target_populations.exclude(status=TargetPopulation.STATUS_OPEN).exists():
+        if program_cycle.target_populations.exists():
             raise ValidationError("Don’t allow to delete Cycle with assigned Target Population")
 
-        program_cycle.target_populations.all().delete()
+        if program_cycle.payment_plans.exists():
+            raise ValidationError("Don’t allow to delete Cycle with assigned Payment Plan")
+
         program_cycle.delete()
 
     @action(detail=True, methods=["post"], permission_classes=[ProgramCycleUpdatePermission])
