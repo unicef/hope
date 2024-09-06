@@ -239,7 +239,6 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
     def biometric_deduplication_enabled(self) -> bool:
         return self.program.biometric_deduplication_enabled
 
-
     def update_needs_adjudication_tickets_statistic(self) -> None:
         from hct_mis_api.apps.grievance.models import GrievanceTicket
 
@@ -254,7 +253,6 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
         )
         self.save(update_fields=["golden_record_possible_duplicates"])
 
-        
     def bulk_update_household_size(self) -> None:
         # AB#208387
         if self.program and self.program.data_collecting_type.recalculate_composition:
