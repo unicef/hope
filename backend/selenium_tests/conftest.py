@@ -65,7 +65,6 @@ from page_object.targeting.targeting_create import TargetingCreate
 from page_object.targeting.targeting_details import TargetingDetails
 from pytest_django.live_server_helper import LiveServer
 from pytest_html_reporter import attach
-from requests import Session
 from selenium import webdriver
 from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
@@ -113,7 +112,6 @@ def pytest_configure(config) -> None:  # type: ignore
     settings.SECURE_HSTS_SECONDS = False
     settings.SECURE_CONTENT_TYPE_NOSNIFF = True
     settings.SECURE_REFERRER_POLICY = "same-origin"
-
     settings.CACHE_ENABLED = False
     settings.CACHES = {
         "default": {
@@ -161,9 +159,6 @@ def pytest_configure(config) -> None:  # type: ignore
 
     logging.disable(logging.CRITICAL)
     pytest.SELENIUM_PATH = os.path.dirname(__file__)
-    pytest.CSRF = ""
-    pytest.SESSION_ID = ""
-    pytest.session = Session()
 
 
 def create_session(host: str, username: str, password: str, csrf: str = "") -> object:
@@ -184,41 +179,45 @@ def create_session(host: str, username: str, password: str, csrf: str = "") -> o
 @pytest.fixture
 def driver() -> Chrome:
     chrome_options = Options()
-    if not os.environ.get("STREAM"):
-        chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--enable-logging")
+    chrome_options.add_argument("--disable-extensions")
+    chrome_options.add_argument("--disable-plugins")
+    chrome_options.add_argument("--disable-images")
+    chrome_options.add_argument("--disable-notifications")
+    chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--window-size=1920,1080")
     if not os.path.exists("./report/downloads/"):
         os.makedirs("./report/downloads/")
     prefs = {"download.default_directory": "./report/downloads/"}
     chrome_options.add_experimental_option("prefs", prefs)
-    yield webdriver.Chrome(options=chrome_options)
+    driver = webdriver.Chrome(options=chrome_options)
+    yield driver
 
 
 @pytest.fixture(autouse=True)
-def browser(driver: Chrome, request: FixtureRequest) -> Chrome:
-    if request.node.get_closest_marker("mapping"):
-        driver.live_server = LiveServer("0.0.0.0:8080")
-    elif request.node.get_closest_marker("local"):
-        driver.live_server.url = "http://localhost:8080"
-    else:
-        driver.live_server = LiveServer("localhost")
+def browser(driver: Chrome) -> Chrome:
     yield driver
-    driver.close()
-    pytest.CSRF = ""
-    pytest.SESSION_ID = ""
+    driver.quit()
 
 
 @pytest.fixture
 def login(browser: Chrome) -> Chrome:
+    browser.live_server = LiveServer("localhost")
     browser.get(f"{browser.live_server.url}/api/unicorn/")
-    get_cookies = browser.get_cookies()  # type: ignore
-    create_session(browser.live_server.url, "superuser", "testtest2", get_cookies[0]["value"])
-    browser.add_cookie({"name": "csrftoken", "value": pytest.CSRF})
-    browser.add_cookie({"name": "sessionid", "value": pytest.SESSION_ID})
-    browser.get(f"{browser.live_server.url}")
+    login = "id_username"
+    password = "id_password"
+    loginButton = '//*[@id="login-form"]/div[3]/input'
+    from selenium.webdriver.common.by import By
+    from selenium.webdriver.support import expected_conditions as EC
+    from selenium.webdriver.support.wait import WebDriverWait
+
+    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.XPATH, loginButton)))
+    browser.find_element(By.XPATH, loginButton)
+    browser.find_element(By.ID, login).send_keys("superuser")
+    browser.find_element(By.ID, password).send_keys("testtest2")
+    browser.find_element(By.XPATH, loginButton).click()
+    browser.get(f"{browser.live_server.url}/")
     yield browser
 
 
