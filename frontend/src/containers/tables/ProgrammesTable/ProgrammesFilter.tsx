@@ -120,7 +120,7 @@ export function ProgrammesFilters({
         <Grid item xs={2}>
           <NumberTextField
             data-cy="filters-number-of-households-min"
-            topLabel="Program Size"
+            topLabel="Programme Size"
             placeholder="From"
             value={filter.numberOfHouseholdsMin}
             onChange={(e) =>
