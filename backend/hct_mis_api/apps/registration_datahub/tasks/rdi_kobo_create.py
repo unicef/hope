@@ -256,6 +256,8 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         rdi_mis.status = RegistrationDataImport.IN_REVIEW
         rdi_mis.save()
 
+        rdi_mis.bulk_update_household_size()
+
         log_create(
             RegistrationDataImport.ACTIVITY_LOG_MAPPING,
             "business_area",
