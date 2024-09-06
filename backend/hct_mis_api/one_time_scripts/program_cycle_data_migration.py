@@ -90,7 +90,7 @@ def processing_with_finished_program(program: Program) -> None:
             cycle.end_date = cycle.start_date
             cycle.save(update_fields=["start_date", "end_date", "status"])
     else:
-        cycle = create_new_program_cycle(str(program.id), ProgramCycle.FINISHED, start_date, end_date)
+        cycle = create_new_program_cycle(program_id_str, ProgramCycle.FINISHED, start_date, end_date)
 
     # update TP
     TargetPopulation.objects.filter(program_id=program_id_str).update(program_cycle=cycle)
@@ -187,6 +187,13 @@ def program_cycle_data_migration() -> None:
 
                     if default_cycle and payment_plan_qs_ids:
                         default_cycle.delete()
+
+                    # we can have TP without PaymentPlans
+                    if default_cycle and not payment_plan_qs_ids:
+                        # if payment_plans_list_ids empty just assign default cycle to TP
+                        TargetPopulation.objects.filter(program_id=program.id, program_cycle__isnull=True).update(
+                            program_cycle=default_cycle
+                        )
 
                     # after create all Cycles let's adjust dates to find any overlapping
                     adjust_cycles_start_and_end_dates_for_active_program(program)
