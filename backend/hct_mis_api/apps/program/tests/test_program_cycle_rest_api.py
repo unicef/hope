@@ -291,7 +291,7 @@ class ProgramCycleCreateSerializerTest(TestCase):
         serializer = ProgramCycleCreateSerializer(data=data, context=self.get_serializer_context())
         with self.assertRaises(ValidationError) as error:
             serializer.is_valid(raise_exception=True)
-        self.assertIn("All Programme Cycles should have end date for creation new one.", str(error.exception))
+        self.assertIn("All Programme Cycles must have an end date before creating a new one.", str(error.exception))
 
     def test_validate_program_status(self) -> None:
         self.program.status = Program.DRAFT
@@ -300,7 +300,7 @@ class ProgramCycleCreateSerializerTest(TestCase):
         serializer = ProgramCycleCreateSerializer(data=data, context=self.get_serializer_context())
         with self.assertRaises(ValidationError) as error:
             serializer.is_valid(raise_exception=True)
-        self.assertIn("Create Programme Cycle is possible only for Active Programme.", str(error.exception))
+        self.assertIn("Programme Cycle can only be created for an Active Programme.", str(error.exception))
 
     def test_validate_start_date(self) -> None:
         # before program start date
@@ -320,7 +320,7 @@ class ProgramCycleCreateSerializerTest(TestCase):
         serializer = ProgramCycleCreateSerializer(data=data, context=self.get_serializer_context())
         with self.assertRaises(ValidationError) as error:
             serializer.is_valid(raise_exception=True)
-        self.assertIn("Start date must be after the latest cycle.", str(error.exception))
+        self.assertIn("Start date must be after the latest cycle end date.", str(error.exception))
 
     def test_validate_end_date(self) -> None:
         # after program end date
@@ -334,7 +334,7 @@ class ProgramCycleCreateSerializerTest(TestCase):
         serializer = ProgramCycleCreateSerializer(data=data, context=self.get_serializer_context())
         with self.assertRaises(ValidationError) as error:
             serializer.is_valid(raise_exception=True)
-        self.assertIn("Programme Cycle end date must be between programme start and end dates", str(error.exception))
+        self.assertIn("End date cannot be before start date.", str(error.exception))
         # end before start date
         data = {"title": "Cycle", "start_date": parse_date("2023-02-22"), "end_date": parse_date("2023-02-11")}
         serializer = ProgramCycleCreateSerializer(data=data, context=self.get_serializer_context())
