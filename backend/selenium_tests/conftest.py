@@ -197,13 +197,13 @@ def driver() -> Chrome:
 
 @pytest.fixture(autouse=True)
 def browser(driver: Chrome) -> Chrome:
+    driver.live_server = LiveServer("localhost")
     yield driver
     driver.quit()
 
 
 @pytest.fixture
 def login(browser: Chrome) -> Chrome:
-    browser.live_server = LiveServer("localhost")
     browser.get(f"{browser.live_server.url}/api/unicorn/")
     login = "id_username"
     password = "id_password"

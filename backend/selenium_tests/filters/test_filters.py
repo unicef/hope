@@ -225,7 +225,7 @@ def create_targeting() -> None:
 
 @pytest.fixture
 def create_rdi() -> None:
-    DocumentType.objects.create(key="tax_id", label="Tax ID")
+    # DocumentType.objects.create(key="tax_id", label="Tax ID")
     business_area = BusinessArea.objects.get(slug="afghanistan")
     programme = Program.objects.filter(name="Test Programm").first()
     imported_by = User.objects.first()
@@ -493,7 +493,6 @@ class TestSmokeFilters:
                 except BaseException:
                     raise Exception(f"Element {locator} not found on the {nav_menu} page.")
 
-    @pytest.mark.skip("Failed with new selenium")
     @pytest.mark.parametrize(
         "module",
         [
