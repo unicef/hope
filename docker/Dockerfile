@@ -22,7 +22,6 @@ RUN apt-get update \
     libpq-dev \
     python3-psycopg2 \
     python3-gdal \
-    python3-dev \
     gdal-bin \
     libcairo2 \
     libcairo2-dev \
@@ -74,6 +73,7 @@ FROM builder AS dev
 
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
+    python3-dev \
     chromium-driver \
     chromium \
     ffmpeg \
