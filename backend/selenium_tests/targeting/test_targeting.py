@@ -936,7 +936,7 @@ class TestTargeting:
                     "type": "STANDARD",
                     "text": "Exclude Households with Active Adjudication Ticket",
                 },
-                id="Program population",
+                id="Programme population",
             ),
         ],
     )
@@ -1005,7 +1005,7 @@ class TestTargeting:
                     "type": "STANDARD",
                     "text": "Exclude Households with an active sanction screen flag",
                 },
-                id="Program population",
+                id="Programme population",
             ),
         ],
     )
