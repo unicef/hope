@@ -105,9 +105,14 @@ class ProgramCycleCreateSerializer(EncodedIdSerializerMixin):
 
         if program.status != Program.ACTIVE:
             raise serializers.ValidationError("Create Programme Cycle is possible only for Active Programme.")
-        if not (program.start_date <= start_date <= program.end_date):
+        if program.end_date:
+            if not (program.start_date <= start_date <= program.end_date):
+                raise serializers.ValidationError(
+                    {"start_date": "Programme Cycle start date must be between programme start and end dates."}
+                )
+        elif not program.end_date and (start_date < program.start_date):
             raise serializers.ValidationError(
-                {"start_date": "Programme Cycle start date must be between programme start and end dates."}
+                {"start_date": "Programme Cycle start date cannot be before programme start date."}
             )
         if end_date:
             if program.end_date:
