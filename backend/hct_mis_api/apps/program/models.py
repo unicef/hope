@@ -277,8 +277,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
 
     @property
     def can_finish(self) -> bool:
-        has_active_cycles = self.cycles.filter(status=ProgramCycle.ACTIVE).exists()
-        return False if has_active_cycles else True
+        return not self.cycles.filter(status=ProgramCycle.ACTIVE).exists()
 
 
 class ProgramCycle(AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentifiedModel, ConcurrencyModel):
