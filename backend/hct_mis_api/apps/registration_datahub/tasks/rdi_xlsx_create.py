@@ -770,6 +770,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             self._create_collectors()
             self._create_bank_accounts_infos()
             self._create_delivery_mechanisms_data()
+            rdi.bulk_update_household_size()
 
     def execute_individuals_additional_steps(self, individuals: list[PendingIndividual]) -> None:
         for individual in individuals:

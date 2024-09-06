@@ -84,8 +84,8 @@ const BoxWithBorders = styled.div`
 
 export const validationSchemaWithSteps = (currentStep: number): unknown => {
   const datum = {
-    category: Yup.string().required('Category is required').nullable(),
-    issueType: Yup.string().required('Issue Type is required').nullable(),
+    category: Yup.string().required('Category is required'),
+    issueType: Yup.string().required('Issue Type is required'),
     admin: Yup.string().nullable(),
     description: Yup.string().nullable(),
     consent: Yup.bool().nullable(),
