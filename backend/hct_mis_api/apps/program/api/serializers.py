@@ -110,9 +110,14 @@ class ProgramCycleCreateSerializer(EncodedIdSerializerMixin):
                 {"start_date": "Programme Cycle start date must be between programme start and end dates."}
             )
         if end_date:
-            if not (program.start_date <= end_date <= program.end_date):
+            if program.end_date:
+                if not (program.start_date <= end_date <= program.end_date):
+                    raise serializers.ValidationError(
+                        {"end_date": "Programme Cycle end date must be between programme start and end dates."}
+                    )
+            elif not program.end_date and end_date < program.start_date:
                 raise serializers.ValidationError(
-                    {"end_date": "Programme Cycle end date must be between programme start and end dates."}
+                    {"end_date": "Programme Cycle end date cannot be before programme start date."}
                 )
             if end_date < start_date:
                 raise serializers.ValidationError({"end_date": "End date cannot be before start date."})
