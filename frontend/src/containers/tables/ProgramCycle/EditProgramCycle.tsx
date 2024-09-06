@@ -96,9 +96,8 @@ export const EditProgramCycle = ({
   };
 
   const endDateValidationSchema = () => {
-    const validation = Yup.date()
+    let validation = Yup.date()
       .min(today, t('End Date cannot be in the past'))
-      .max(program.endDate, t('End Date cannot be after Programme End Date'))
       .when(
         'start_date',
         ([start_date], schema) =>
@@ -111,8 +110,15 @@ export const EditProgramCycle = ({
           ),
       );
 
+    if (program.endDate) {
+      validation = validation.max(
+        program.endDate,
+        t('End Date cannot be after Programme End Date'),
+      );
+    }
+
     if (isEndDateRequired) {
-      return validation.required(t('End Date is required'));
+      validation = validation.required(t('End Date is required'));
     }
 
     return validation;
