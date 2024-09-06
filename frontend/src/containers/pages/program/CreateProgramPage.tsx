@@ -167,7 +167,7 @@ export const CreateProgramPage = (): ReactElement => {
     name: '',
     programmeCode: '',
     startDate: '',
-    endDate: '',
+    endDate: undefined,
     sector: '',
     dataCollectingTypeCode: '',
     description: '',
