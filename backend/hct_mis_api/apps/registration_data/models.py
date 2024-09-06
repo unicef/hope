@@ -9,12 +9,17 @@ from django.core.validators import (
     ProhibitNullCharactersValidator,
 )
 from django.db import models, transaction
-from django.db.models import ExpressionWrapper, Q
+from django.db.models import Count, ExpressionWrapper, OuterRef, Q, Subquery
 from django.utils.translation import gettext_lazy as _
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.household.models import Household, Individual
+from hct_mis_api.apps.household.models import (
+    Household,
+    Individual,
+    PendingHousehold,
+    PendingIndividual,
+)
 from hct_mis_api.apps.registration_datahub.apis.deduplication_engine import (
     SimilarityPair,
 )
@@ -171,7 +176,7 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
     business_area = models.ForeignKey(BusinessArea, null=True, on_delete=models.CASCADE)
     screen_beneficiary = models.BooleanField(default=False)
     excluded = models.BooleanField(default=False, help_text="Exclude RDI in UI")
-    # TODO: in future will use one program per RDI after migration
+    # TODO: set to not nullable Program and on_delete=models.PROTECT
     program = models.ForeignKey(
         "program.Program",
         null=True,
@@ -234,6 +239,7 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
     def biometric_deduplication_enabled(self) -> bool:
         return self.program.biometric_deduplication_enabled
 
+
     def update_needs_adjudication_tickets_statistic(self) -> None:
         from hct_mis_api.apps.grievance.models import GrievanceTicket
 
@@ -247,6 +253,19 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
             .count()
         )
         self.save(update_fields=["golden_record_possible_duplicates"])
+
+        
+    def bulk_update_household_size(self) -> None:
+        # AB#208387
+        if self.program and self.program.data_collecting_type.recalculate_composition:
+            households = PendingHousehold.all_objects.filter(registration_data_import=self)
+            size_subquery = Subquery(
+                PendingIndividual.all_objects.filter(household=OuterRef("pk"))
+                .values("household")
+                .annotate(count=Count("pk"))
+                .values("count")
+            )
+            households.update(size=size_subquery)
 
 
 class ImportData(TimeStampedUUIDModel):

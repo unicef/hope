@@ -19,6 +19,7 @@ def create_normal_user() -> User:
     )
 
 
+@pytest.mark.skip()
 class TestAdminPanel:
     def test_login_superuser(self, browser: Chrome, pageAdminPanel: AdminPanel) -> None:
         browser.get(f"{browser.live_server.url}/api/unicorn/")

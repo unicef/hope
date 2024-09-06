@@ -484,6 +484,7 @@ def enroll_households_to_program(households: QuerySet, program: Program, user_id
                     error_message = error_message[:detail_index].strip()
             error_messages.append(f"{household.unicef_id}: {error_message}")
     rdi.refresh_population_statistics()
+    rdi.bulk_update_household_size()
     if error_messages:
         raise Exception("Following households failed to be enrolled: \n" + "\n".join(error_messages))
 
