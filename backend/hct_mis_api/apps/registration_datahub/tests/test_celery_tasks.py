@@ -863,8 +863,6 @@ class TestAutomatingRDICreationTask(TestCase):
 
 
 class RemoveOldRDIDatahubLinksTest(TestCase):
-    databases = {"default", "registration_datahub"}
-
     @classmethod
     def setUpTestData(cls) -> None:
         call_command("loadbusinessareas")
@@ -933,11 +931,6 @@ class RemoveOldRDIDatahubLinksTest(TestCase):
 
 
 class TestRegistrationImportCeleryTasks(APITestCase):
-    databases = {
-        "default",
-        "registration_datahub",
-    }
-
     @classmethod
     def setUpTestData(cls) -> None:
         cls.business_area = create_afghanistan()
