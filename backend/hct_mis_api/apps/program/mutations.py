@@ -160,10 +160,6 @@ class UpdateProgram(
             elif status_to_set == Program.FINISHED:
                 cls.has_permission(info, Permissions.PROGRAMME_FINISH, business_area)
 
-                # check if any ACTIVE cycles there
-                if program.cycles.filter(status=ProgramCycle.ACTIVE).exists():
-                    raise ValidationError("You cannot finish program if program has active cycles")
-
         if status_to_set not in [Program.ACTIVE, Program.FINISHED]:
             cls.validate_partners_data(
                 partners_data=partners_data,

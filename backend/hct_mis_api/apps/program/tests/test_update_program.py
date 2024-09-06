@@ -1,3 +1,4 @@
+from datetime import timedelta
 from typing import Any, List
 
 from parameterized import parameterized
@@ -1130,15 +1131,16 @@ class TestUpdateProgram(APITestCase):
             },
         )
 
-    def test_finish_active_program_with_not_finished_program_cycle(self) -> None:
+    def test_finish_active_program_with_not_finished_program_cycle_or_end_date(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_FINISH], self.business_area)
         Program.objects.filter(id=self.program.id).update(status=Program.ACTIVE)
         self.program.refresh_from_db()
         self.assertEqual(self.program.status, Program.ACTIVE)
+        self.assertEqual(self.program.cycles.count(), 1)
         program_cycle = self.program.cycles.first()
         program_cycle.status = ProgramCycle.ACTIVE
         program_cycle.save()
-
+        # has active cycle
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
             context={"user": self.user},
@@ -1152,6 +1154,11 @@ class TestUpdateProgram(APITestCase):
         )
         program_cycle.status = ProgramCycle.DRAFT
         program_cycle.save()
+        self.program.end_date = None
+        self.program.save()
+        self.program.refresh_from_db()
+        self.assertIsNone(self.program.end_date)
+        # no program end date
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
             context={"user": self.user},
@@ -1159,6 +1166,52 @@ class TestUpdateProgram(APITestCase):
                 "programData": {
                     "id": self.id_to_base64(self.program.id, "ProgramNode"),
                     "status": Program.FINISHED,
+                },
+                "version": self.program.version,
+            },
+        )
+
+    def test_update_program_end_date_validation(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
+        Program.objects.filter(id=self.program.id).update(status=Program.ACTIVE, end_date=None)
+        self.program.refresh_from_db()
+        self.assertEqual(self.program.status, Program.ACTIVE)
+        self.assertIsNone(self.program.end_date)
+        program_cycle = self.program.cycles.first()
+
+        # end date before program start date
+        self.snapshot_graphql_request(
+            request_string=self.UPDATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables={
+                "programData": {
+                    "id": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "endDate": self.program.start_date - timedelta(days=5),
+                },
+                "version": self.program.version,
+            },
+        )
+
+        # end date before last cycle
+        self.snapshot_graphql_request(
+            request_string=self.UPDATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables={
+                "programData": {
+                    "id": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "endDate": program_cycle.end_date - timedelta(days=5),
+                },
+                "version": self.program.version,
+            },
+        )
+        # start date after cycle start date
+        self.snapshot_graphql_request(
+            request_string=self.UPDATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables={
+                "programData": {
+                    "id": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "startDate": program_cycle.start_date + timedelta(days=5),
                 },
                 "version": self.program.version,
             },
