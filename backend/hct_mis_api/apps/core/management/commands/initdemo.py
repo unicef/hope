@@ -13,6 +13,7 @@ import elasticsearch
 from hct_mis_api.apps.account.models import Partner, Role, User, UserRole
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.payment.fixtures import (
+    generate_delivery_mechanisms,
     generate_payment_plan,
     generate_real_cash_plans,
     generate_reconciled_payment_plan,
@@ -53,7 +54,6 @@ class Command(BaseCommand):
         call_command("flush", "--noinput", database="cash_assist_datahub_mis")
         call_command("flush", "--noinput", database="cash_assist_datahub_ca")
         call_command("flush", "--noinput", database="cash_assist_datahub_erp")
-        call_command("flush", "--noinput", database="registration_datahub")
 
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/core/fixtures/data.json")
@@ -63,14 +63,7 @@ class Command(BaseCommand):
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/registration_data/fixtures/data.json")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/household/fixtures/documenttype.json")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/household/fixtures/data.json")
-        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/grievance/fixtures/data.json")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/accountability/fixtures/data.json")
-
-        call_command(
-            "loaddata",
-            f"{settings.PROJECT_ROOT}/apps/registration_datahub/fixtures/data.json",
-            database="registration_datahub",
-        )
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/steficon/fixtures/data.json")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/aurora/fixtures/data.json")
 
@@ -79,12 +72,15 @@ class Command(BaseCommand):
         except elasticsearch.exceptions.RequestError as e:
             logger.error(e)
 
+        generate_delivery_mechanisms()
         generate_payment_plan()
         generate_real_cash_plans()
         generate_reconciled_payment_plan()
         update_fsps()
 
+        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/core/fixtures/pdu.json")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/program/fixtures/programpartnerthrough.json")
+        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/grievance/fixtures/data.json")
 
         email_list = [
             "jan.romaniak@kellton.com",

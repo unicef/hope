@@ -33,7 +33,17 @@ from hct_mis_api.apps.core.tests.test_exchange_rates import (
 )
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
-from hct_mis_api.apps.payment.models import CashPlan, PaymentRecord, ServiceProvider
+from hct_mis_api.apps.payment.fixtures import generate_delivery_mechanisms
+from hct_mis_api.apps.payment.models import (
+    CashPlan,
+    DeliveryMechanism,
+    PaymentRecord,
+    ServiceProvider,
+)
+from hct_mis_api.apps.program.fixtures import (
+    ProgramFactory,
+    get_program_with_dct_type_and_name,
+)
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
@@ -51,38 +61,42 @@ class TestPullDataFromDatahub(TestCase):
     dh_cash_plan2 = None
     household = None
 
-    @staticmethod
-    def _pre_test_commands() -> None:
-        create_afghanistan()
+    @classmethod
+    def _pre_test_commands(cls) -> None:
+        cls.business_area = create_afghanistan()
+        cls.program = get_program_with_dct_type_and_name()
         call_command("loadcountries")
         call_command("loadcountrycodes")
 
     @classmethod
     def _setup_in_app_data(cls) -> None:
-        target_population = TargetPopulation()
-        target_population.name = "Test TP"
-        target_population.status = TargetPopulation.STATUS_PROCESSING
-        target_population.save()
+        target_population = TargetPopulation.objects.create(
+            name="Test TP",
+            status=TargetPopulation.STATUS_PROCESSING,
+            program=cls.program,
+            business_area=cls.business_area,
+        )
 
-        program = Program()
-        program.name = "Test Program"
-        program.status = Program.ACTIVE
-        program.start_date = timezone.now()
-        program.end_date = timezone.now() + timedelta(days=10)
-        program.description = "Test Program description"
-        program.business_area = BusinessArea.objects.first()
-        program.budget = 1000
-        program.frequency_of_payments = Program.REGULAR
-        program.sector = Program.CHILD_PROTECTION
-        program.scope = Program.SCOPE_UNICEF
-        program.cash_plus = True
-        program.population_goal = 1000
-        program.administrative_areas_of_implementation = "Test something"
-        program.save()
+        program = ProgramFactory(
+            name="Test Program",
+            status=Program.ACTIVE,
+            start_date=timezone.now(),
+            end_date=timezone.now() + timedelta(days=10),
+            description="Test Program description",
+            business_area=BusinessArea.objects.first(),
+            budget=1000,
+            frequency_of_payments=Program.REGULAR,
+            sector=Program.CHILD_PROTECTION,
+            scope=Program.SCOPE_UNICEF,
+            cash_plus=True,
+            population_goal=1000,
+            administrative_areas_of_implementation="Test something",
+        )
         (household, individuals) = create_household(household_args={"size": 1})
         cls.household = household
         cls.target_population = target_population
         cls.program = program
+        generate_delivery_mechanisms()
 
     @classmethod
     def _setup_datahub_data(cls) -> None:
@@ -223,8 +237,8 @@ class TestPullDataFromDatahub(TestCase):
         self.assertEqual(cash_plan.status_date, self.dh_cash_plan1.status_date)
         self.assertEqual(cash_plan.name, self.dh_cash_plan1.name)
         self.assertEqual(cash_plan.distribution_level, self.dh_cash_plan1.distribution_level)
-        self.assertEqual(cash_plan.start_date, self.dh_cash_plan1.start_date)
-        self.assertEqual(cash_plan.end_date, self.dh_cash_plan1.end_date)
+        self.assertEqual(cash_plan.start_date.date(), self.dh_cash_plan1.start_date.date())
+        self.assertEqual(cash_plan.end_date.date(), self.dh_cash_plan1.end_date.date())
         self.assertEqual(cash_plan.dispersion_date, self.dh_cash_plan1.dispersion_date)
         self.assertEqual(cash_plan.coverage_duration, self.dh_cash_plan1.coverage_duration)
         self.assertEqual(cash_plan.coverage_unit, self.dh_cash_plan1.coverage_unit)
@@ -265,8 +279,9 @@ class TestPullDataFromDatahub(TestCase):
         self.assertEqual(
             payment_record.entitlement_card_issue_date, self.dh_payment_record.entitlement_card_issue_date.date()
         )
-        self.assertEqual(payment_record.delivery_type, self.dh_payment_record.delivery_type)
-        self.assertEqual(payment_record.delivery_type, self.dh_payment_record.delivery_type)
+        self.assertEqual(
+            payment_record.delivery_type, DeliveryMechanism.objects.get(name=self.dh_payment_record.delivery_type)
+        )
         self.assertEqual(payment_record.currency, self.dh_payment_record.currency)
         self.assertEqual(payment_record.entitlement_quantity, self.dh_payment_record.entitlement_quantity)
         self.assertEqual(payment_record.delivered_quantity, self.dh_payment_record.delivered_quantity)

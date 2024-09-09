@@ -16,6 +16,7 @@ from hct_mis_api.apps.core.kobo.api import KoboAPI
 from hct_mis_api.apps.core.kobo.common import (
     KOBO_FORM_INDIVIDUALS_COLUMN_NAME,
     get_field_name,
+    get_submission_metadata,
 )
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import chunks, rename_dict_keys
@@ -34,6 +35,7 @@ from hct_mis_api.apps.household.models import (
     PendingIndividualIdentity,
     PendingIndividualRoleInHousehold,
 )
+from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hct_mis_api.apps.registration_data.models import (
     ImportData,
     KoboImportedSubmission,
@@ -43,7 +45,6 @@ from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateT
 from hct_mis_api.apps.registration_datahub.tasks.rdi_base_create import (
     RdiBaseCreateTask,
 )
-from hct_mis_api.apps.registration_datahub.tasks.utils import get_submission_metadata
 from hct_mis_api.apps.registration_datahub.utils import (
     calculate_hash_for_kobo_submission,
     find_attachment_in_kobo,
@@ -255,6 +256,8 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         rdi_mis.status = RegistrationDataImport.IN_REVIEW
         rdi_mis.save()
 
+        rdi_mis.bulk_update_household_size()
+
         log_create(
             RegistrationDataImport.ACTIVITY_LOG_MAPPING,
             "business_area",
@@ -353,6 +356,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                     individual_obj.age_at_registration = calculate_age_at_registration(
                         self.registration_data_import.created_at, str(individual_obj.birth_date)
                     )
+                    populate_pdu_with_null_values(self.registration_data_import.program, individual_obj.flex_fields)
 
                     if individual_obj.relationship == HEAD:
                         head_of_households_mapping[household_obj] = individual_obj

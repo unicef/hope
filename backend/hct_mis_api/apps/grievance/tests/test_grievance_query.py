@@ -173,6 +173,23 @@ class TestGrievanceQuery(APITestCase):
             needsAdjudicationTicketDetails {
               scoreMin
               scoreMax
+              selectedDistinct {
+                duplicate
+              }
+              extraData{
+                goldenRecords {
+                  fullName
+                  score
+                  duplicate
+                  distinct
+                }
+                possibleDuplicate {
+                  fullName
+                  score
+                  duplicate
+                  distinct
+                }
+              }
             }
             status
             category
@@ -253,10 +270,11 @@ class TestGrievanceQuery(APITestCase):
                     "language": "Polish",
                     "consent": True,
                     "description": "Ticket with program, in admin area 1, new",
-                    "category": GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
+                    "category": GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
                     "status": GrievanceTicket.STATUS_NEW,
                     "created_by": cls.user,
                     "assigned_to": cls.user,
+                    "issue_type": GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
                 }
             ),
             GrievanceTicket(
@@ -339,6 +357,32 @@ class TestGrievanceQuery(APITestCase):
             possible_duplicate=cls.individual_2,
             score_min=100,
             score_max=150,
+            extra_data={
+                "golden_records": [
+                    {
+                        "dob": "date_of_birth",
+                        "full_name": "full_name",
+                        "hit_id": str(cls.individual_1.pk),
+                        "location": "location",
+                        "proximity_to_score": "proximity_to_score",
+                        "score": 1.2,
+                        "duplicate": False,
+                        "distinct": True,
+                    }
+                ],
+                "possible_duplicate": [
+                    {
+                        "dob": "date_of_birth",
+                        "full_name": "full_name",
+                        "hit_id": str(cls.individual_2.pk),
+                        "location": "location",
+                        "proximity_to_score": "proximity_to_score",
+                        "score": 2.0,
+                        "duplicate": True,
+                        "distinct": False,
+                    }
+                ],
+            },
         )
 
         cls.grievance_tickets[0].programs.add(cls.program)

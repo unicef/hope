@@ -13,6 +13,7 @@ on:
     - staging
     - master
     - ephemeral-*
+    - long-term/*
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -58,16 +59,30 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Determine Branch Name
+        id: branch_name
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "BRANCH_NAME=${GITHUB_REF##*/}" >> $GITHUB_ENV
+          fi
+
       - name: Push dev
         run: |
           docker buildx create --use
+
+          tags="-t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev \
+            -t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-latest-dev"
+
+          if [ -n "${{ env.BRANCH_NAME }}" ]; then
+            tags="$tags -t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ env.BRANCH_NAME }}-latest-dev"
+          fi
+
           docker buildx build \
             --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-${{ github.sha }}-dev \
             --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-latest-dev \
             --cache-to ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-${{ github.sha }}-dev \
             --cache-to ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-latest-dev \
-            -t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev \
-            -t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-latest-dev \
+            $tags \
             -f ./docker/Dockerfile \
             --target dev \
             --push \
@@ -159,9 +174,23 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Determine Branch Name
+        id: branch_name
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "BRANCH_NAME=${GITHUB_REF##*/}" >> $GITHUB_ENV
+          fi
+
       - name: Push dist
         run: |
           docker buildx create --use
+
+          tags="-t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dist \
+            -t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}"
+
+          if [ -n "${{ env.BRANCH_NAME }}" ]; then
+            tags="$tags -t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ env.BRANCH_NAME }}-latest-dist"
+          fi
 
           # Base part of the command
           build_command="docker buildx build \
@@ -172,8 +201,7 @@ jobs:
             --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-latest-dist \
             --cache-to ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-${{ github.sha }}-dist \
             --cache-to ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-latest-dist \
-            -t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dist \
-            -t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }} \
+            $tags \
             -f ./docker/Dockerfile \
             --target dist \
             --push ./"
@@ -225,8 +253,12 @@ jobs:
 
       - name: E2E tests
         run: |
+          compose_file=./deployment/docker-compose.selenium-night.yml
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            compose_file=./deployment/docker-compose.selenium.yml
+          fi
           dist_backend_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dist dev_backend_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev docker compose \
-            -f ./deployment/docker-compose.selenium.yml \
+            -f $compose_file \
             run selenium
       - name: Upload Artifact
         uses: actions/upload-artifact@v4

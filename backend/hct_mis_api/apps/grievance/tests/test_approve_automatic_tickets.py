@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Any, Dict, List
 
+from django.core.files.base import ContentFile
 from django.core.management import call_command
 from django.utils import timezone
 
@@ -21,6 +22,7 @@ from hct_mis_api.apps.grievance.fixtures import (
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.registration_data.models import DeduplicationEngineSimilarityPair
 from hct_mis_api.apps.sanction_list.models import SanctionListIndividual
 
 
@@ -39,12 +41,14 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
     """
     APPROVE_NEEDS_ADJUDICATION_MUTATION = """
     mutation ApproveNeedsAdjudicationTicket(
-    $grievanceTicketId: ID!, $selectedIndividualId: ID, $selectedIndividualIds: [ID]
+    $grievanceTicketId: ID!, $selectedIndividualId: ID, $duplicateIndividualIds: [ID], $distinctIndividualIds: [ID], $clearIndividualIds: [ID]
     ) {
       approveNeedsAdjudication(
       grievanceTicketId: $grievanceTicketId,
       selectedIndividualId: $selectedIndividualId,
-      selectedIndividualIds: $selectedIndividualIds
+      duplicateIndividualIds: $duplicateIndividualIds,
+      distinctIndividualIds: $distinctIndividualIds,
+      clearIndividualIds: $clearIndividualIds,
       ) {
         grievanceTicket {
           id
@@ -59,17 +63,17 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
     """
     APPROVE_MULTIPLE_NEEDS_ADJUDICATION_MUTATION = """
     mutation ApproveNeedsAdjudicationTicket(
-    $grievanceTicketId: ID!, $selectedIndividualId: ID, $selectedIndividualIds: [ID]
+    $grievanceTicketId: ID!, $selectedIndividualId: ID, $duplicateIndividualIds: [ID]
     ) {
       approveNeedsAdjudication(
       grievanceTicketId: $grievanceTicketId,
       selectedIndividualId: $selectedIndividualId,
-      selectedIndividualIds: $selectedIndividualIds
+      duplicateIndividualIds: $duplicateIndividualIds
       ) {
         grievanceTicket {
           id
           needsAdjudicationTicketDetails {
-            selectedIndividuals {
+            possibleDuplicates {
               id
             }
           }
@@ -77,6 +81,44 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
       }
     }
     """
+    APPROVE_NEEDS_ADJUDICATION_MUTATION_NEW_FIELDS = """
+        mutation ApproveNeedsAdjudicationTicket(
+        $grievanceTicketId: ID!, $selectedIndividualId: ID, $duplicateIndividualIds: [ID], $distinctIndividualIds: [ID], $clearIndividualIds: [ID]
+        ) {
+          approveNeedsAdjudication(
+          grievanceTicketId: $grievanceTicketId,
+          selectedIndividualId: $selectedIndividualId,
+          duplicateIndividualIds: $duplicateIndividualIds,
+          distinctIndividualIds: $distinctIndividualIds,
+          clearIndividualIds: $clearIndividualIds,
+          ) {
+            grievanceTicket {
+              id
+              needsAdjudicationTicketDetails {
+                selectedIndividual {
+                  id
+                }
+                selectedDistinct {
+                  unicefId
+                }
+                selectedDuplicates {
+                  unicefId
+                }
+                dedupEngineSimilarityPair {
+                  individual1 {
+                    fullName
+                  }
+                  individual2 {
+                    fullName
+                  }
+                  similarityScore
+                  isDuplicate
+                }
+              }
+            }
+          }
+        }
+        """
 
     @classmethod
     def setUpTestData(cls) -> None:
@@ -85,6 +127,8 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
         cls.generate_document_types_for_all_countries()
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.business_area.biometric_deduplication_threshold = 33.33
+        cls.business_area.save()
 
         country = geo_models.Country.objects.get(name="Afghanistan")
         area_type = AreaTypeFactory(
@@ -119,6 +163,8 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
                 "family_name": "Butler",
                 "phone_no": "(953)682-4596",
                 "birth_date": "1943-07-30",
+                "unicef_id": "IND-123-123",
+                "photo": ContentFile(b"111", name="foo1.png"),
             },
             {
                 "id": "94b09ff2-9e6d-4f34-a72c-c319e1db7115",
@@ -127,6 +173,8 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
                 "family_name": "Ford",
                 "phone_no": "+18663567905",
                 "birth_date": "1946-02-15",
+                "unicef_id": "IND-222-222",
+                "photo": ContentFile(b"222", name="foo2.png"),
             },
         ]
 
@@ -136,6 +184,7 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
         ]
         first_individual = cls.individuals[0]
         second_individual = cls.individuals[1]
+        ind1, ind2 = sorted(cls.individuals, key=lambda x: x.id)
 
         household_one.head_of_household = first_individual
         household_one.save()
@@ -171,7 +220,6 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
         cls.system_flagging_grievance_ticket = GrievanceTicketFactory(
             id="43c59eda-6664-41d6-9339-05efcb11da82",
             category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING,
-            issue_type=None,
             admin2=cls.admin_area_1,
             business_area=cls.business_area,
         )
@@ -186,17 +234,24 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
         cls.needs_adjudication_grievance_ticket = GrievanceTicketFactory(
             id="2b419ce3-3297-47ee-a47f-43442abac73e",
             category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
-            issue_type=None,
             admin2=cls.admin_area_1,
             business_area=cls.business_area,
+            status=GrievanceTicket.STATUS_FOR_APPROVAL,
         )
-
-        TicketNeedsAdjudicationDetailsFactory(
+        dedup_engine_similarity_pair = DeduplicationEngineSimilarityPair.objects.create(
+            program=program_one,
+            individual1=ind1,
+            individual2=ind2,
+            similarity_score=55.55,
+        )
+        ticket_details = TicketNeedsAdjudicationDetailsFactory(
             ticket=cls.needs_adjudication_grievance_ticket,
             golden_records_individual=first_individual,
             possible_duplicate=second_individual,
             selected_individual=None,
+            dedup_engine_similarity_pair=dedup_engine_similarity_pair,
         )
+        ticket_details.possible_duplicates.add(first_individual, second_individual)
 
     @parameterized.expand(
         [
@@ -284,7 +339,7 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
         response = self.approve_multiple_needs_adjudication_ticket(grievance_ticket_id)
 
         response_data = response["data"]["approveNeedsAdjudication"]["grievanceTicket"]
-        selected_individuals = response_data["needsAdjudicationTicketDetails"]["selectedIndividuals"]
+        selected_individuals = response_data["needsAdjudicationTicketDetails"]["possibleDuplicates"]
         selected_individuals_ids = list(map(lambda d: d["id"], selected_individuals))
 
         self.assertEqual(grievance_ticket_id, response_data["id"])
@@ -297,9 +352,84 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
             context={"user": self.user},
             variables={
                 "grievanceTicketId": grievance_ticket_id,
-                "selectedIndividualIds": [
+                "duplicateIndividualIds": [
                     self.id_to_base64(self.individuals[0].id, "IndividualNode"),
                     self.id_to_base64(self.individuals[1].id, "IndividualNode"),
                 ],
             },
         )
+
+    def test_approve_needs_adjudication_new_input_fields(self) -> None:
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE], self.business_area
+        )
+
+        self.needs_adjudication_grievance_ticket.refresh_from_db()
+        self.assertEqual(self.needs_adjudication_grievance_ticket.ticket_details.selected_distinct.count(), 0)
+        self.assertEqual(self.needs_adjudication_grievance_ticket.ticket_details.selected_individuals.count(), 0)
+
+        self.snapshot_graphql_request(
+            request_string=self.APPROVE_NEEDS_ADJUDICATION_MUTATION_NEW_FIELDS,
+            context={"user": self.user},
+            variables={
+                "grievanceTicketId": self.id_to_base64(
+                    self.needs_adjudication_grievance_ticket.id, "GrievanceTicketNode"
+                ),
+                "duplicateIndividualIds": self.id_to_base64(self.individuals[1].id, "IndividualNode"),
+                "distinctIndividualIds": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
+            },
+        )
+
+        # wrong grievance ticket status
+        self.needs_adjudication_grievance_ticket.status = GrievanceTicket.STATUS_ASSIGNED
+        self.needs_adjudication_grievance_ticket.save()
+        self.snapshot_graphql_request(
+            request_string=self.APPROVE_NEEDS_ADJUDICATION_MUTATION_NEW_FIELDS,
+            context={"user": self.user},
+            variables={
+                "grievanceTicketId": self.id_to_base64(
+                    self.needs_adjudication_grievance_ticket.id, "GrievanceTicketNode"
+                ),
+                "duplicateIndividualIds": self.id_to_base64(self.individuals[1].id, "IndividualNode"),
+            },
+        )
+        self.needs_adjudication_grievance_ticket.status = GrievanceTicket.STATUS_FOR_APPROVAL
+        self.needs_adjudication_grievance_ticket.save()
+
+        self.snapshot_graphql_request(
+            request_string=self.APPROVE_NEEDS_ADJUDICATION_MUTATION_NEW_FIELDS,
+            context={"user": self.user},
+            variables={
+                "grievanceTicketId": self.id_to_base64(
+                    self.needs_adjudication_grievance_ticket.id, "GrievanceTicketNode"
+                ),
+                "duplicateIndividualIds": self.id_to_base64(self.individuals[1].id, "IndividualNode"),
+            },
+        )
+        self.snapshot_graphql_request(
+            request_string=self.APPROVE_NEEDS_ADJUDICATION_MUTATION_NEW_FIELDS,
+            context={"user": self.user},
+            variables={
+                "grievanceTicketId": self.id_to_base64(
+                    self.needs_adjudication_grievance_ticket.id, "GrievanceTicketNode"
+                ),
+                "distinctIndividualIds": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
+            },
+        )
+
+        self.assertEqual(self.needs_adjudication_grievance_ticket.ticket_details.selected_distinct.count(), 1)
+        self.assertEqual(self.needs_adjudication_grievance_ticket.ticket_details.selected_individuals.count(), 1)
+
+        self.snapshot_graphql_request(
+            request_string=self.APPROVE_NEEDS_ADJUDICATION_MUTATION_NEW_FIELDS,
+            context={"user": self.user},
+            variables={
+                "grievanceTicketId": self.id_to_base64(
+                    self.needs_adjudication_grievance_ticket.id, "GrievanceTicketNode"
+                ),
+                "clearIndividualIds": self.id_to_base64(self.individuals[0].id, "IndividualNode"),
+            },
+        )
+
+        self.assertEqual(self.needs_adjudication_grievance_ticket.ticket_details.selected_distinct.count(), 0)
+        self.assertEqual(self.needs_adjudication_grievance_ticket.ticket_details.selected_individuals.count(), 1)

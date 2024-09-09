@@ -10,6 +10,7 @@ from django.utils import timezone
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import Document, Household
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.exceptions import (
     AlreadyRunningException,
@@ -295,7 +296,7 @@ def rdi_deduplication_task(self: Any, registration_data_import_id: str) -> None:
         rdi_obj = RegistrationDataImport.objects.get(id=registration_data_import_id)
         program_id = rdi_obj.program.id
         set_sentry_business_area_tag(rdi_obj.business_area.slug)
-        with transaction.atomic(using="default"), transaction.atomic(using="registration_datahub"):
+        with transaction.atomic():
             DeduplicateTask(rdi_obj.business_area.slug, program_id).deduplicate_pending_individuals(
                 registration_data_import=rdi_obj
             )
@@ -307,17 +308,18 @@ def rdi_deduplication_task(self: Any, registration_data_import_id: str) -> None:
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def pull_kobo_submissions_task(self: Any, import_data_id: "UUID") -> Dict:
+def pull_kobo_submissions_task(self: Any, import_data_id: "UUID", program_id: "UUID") -> Dict:
     from hct_mis_api.apps.registration_data.models import KoboImportData
 
     kobo_import_data = KoboImportData.objects.get(id=import_data_id)
+    program = Program.objects.get(id=program_id)
     set_sentry_business_area_tag(kobo_import_data.business_area_slug)
     from hct_mis_api.apps.registration_datahub.tasks.pull_kobo_submissions import (
         PullKoboSubmissions,
     )
 
     try:
-        return PullKoboSubmissions().execute(kobo_import_data)
+        return PullKoboSubmissions().execute(kobo_import_data, program)
     except Exception as e:  # pragma: no cover
         KoboImportData.objects.filter(
             id=kobo_import_data.id,
@@ -337,10 +339,9 @@ def validate_xlsx_import_task(self: Any, import_data_id: "UUID", program_id: "UU
 
     import_data = ImportData.objects.get(id=import_data_id)
     program = Program.objects.get(id=program_id)
-    is_social_worker_program = program.is_social_worker_program
     set_sentry_business_area_tag(import_data.business_area_slug)
     try:
-        return ValidateXlsxImport().execute(import_data, is_social_worker_program)
+        return ValidateXlsxImport().execute(import_data, program)
     except Exception as e:  # pragma: no cover
         ImportData.objects.filter(
             id=import_data.id,
@@ -465,4 +466,67 @@ def remove_old_rdi_links_task(page_count: int = 100) -> None:
         logger.info(f"Data links for RDI(s): {''.join([str(_id) for _id in unmerged_rdi_ids])} removed successfully")
     except Exception:  # pragma: no cover
         logger.error("Removing old RDI objects failed")
+        raise
+
+
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@sentry_tags
+@log_start_and_end
+def deduplication_engine_process(self: Any, program_id: str) -> None:
+    from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import (
+        BiometricDeduplicationService,
+    )
+
+    try:
+        program = Program.objects.get(id=program_id)
+        BiometricDeduplicationService().upload_and_process_deduplication_set(program)
+    except Exception as e:
+        logger.exception(e)
+        raise
+
+
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@sentry_tags
+@log_start_and_end
+def create_grievance_tickets_for_dedup_engine_results(self: Any, rdi_id: str) -> None:
+    from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import (
+        BiometricDeduplicationService,
+    )
+
+    try:
+        rdi = RegistrationDataImport.objects.get(id=rdi_id)
+        BiometricDeduplicationService().create_grievance_tickets_for_duplicates(rdi)
+    except Exception as e:
+        logger.exception(e)
+        raise
+
+
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@log_start_and_end
+@sentry_tags
+def fetch_biometric_deduplication_results_and_process(self: Any, deduplication_set_id: str) -> None:
+    from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import (
+        BiometricDeduplicationService,
+    )
+
+    try:
+        service = BiometricDeduplicationService()
+        service.fetch_biometric_deduplication_results_and_process(deduplication_set_id)
+    except Exception as e:
+        logger.exception(e)
+        raise
+
+
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@sentry_tags
+@log_start_and_end
+def update_rdis_deduplication_engine_statistics(self: Any, program_id: str) -> None:
+    from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import (
+        BiometricDeduplicationService,
+    )
+
+    try:
+        BiometricDeduplicationService().update_rdis_deduplication_statistics(program_id)
+    except Exception as e:
+        logger.exception(e)
         raise

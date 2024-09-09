@@ -1,21 +1,20 @@
 from datetime import datetime
 
 from django.test import TestCase
-from django.utils import timezone
 
 from freezegun import freeze_time
-from pytz import utc
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
-from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.fixtures import (
     DeliveryMechanismDataFactory,
     PaymentFactory,
     PaymentPlanFactory,
     RealProgramFactory,
+    generate_delivery_mechanisms,
 )
+from hct_mis_api.apps.payment.models import DeliveryMechanism
 from hct_mis_api.apps.payment.services import payment_household_snapshot_service
 from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
@@ -28,6 +27,8 @@ class TestBuildSnapshot(TestCase):
     def setUpTestData(cls) -> None:
         cls.maxDiff = None
         create_afghanistan()
+        generate_delivery_mechanisms()
+        cls.dm_atm_card = DeliveryMechanism.objects.get(code="atm_card")
 
         with freeze_time("2020-10-10"):
             program = RealProgramFactory()
@@ -37,8 +38,8 @@ class TestBuildSnapshot(TestCase):
                 program_cycle=program_cycle,
                 dispersion_start_date=datetime(2020, 8, 10),
                 dispersion_end_date=datetime(2020, 12, 10),
-                start_date=timezone.datetime(2020, 9, 10, tzinfo=utc),
-                end_date=timezone.datetime(2020, 11, 10, tzinfo=utc),
+                # start_date=timezone.datetime(2020, 9, 10, tzinfo=utc),
+                # end_date=timezone.datetime(2020, 11, 10, tzinfo=utc),
                 is_follow_up=False,
             )
             cls.pp.unicef_id = "PP-01"
@@ -56,11 +57,11 @@ class TestBuildSnapshot(TestCase):
             )
             DeliveryMechanismDataFactory(
                 individual=cls.hoh1,
-                delivery_mechanism=DeliveryMechanismChoices.DELIVERY_TYPE_ATM_CARD,
+                delivery_mechanism=cls.dm_atm_card,
                 data={
-                    "card_number_atm_card": "123",
-                    "card_expiry_date_atm_card": "2022-01-01",
-                    "name_of_cardholder_atm_card": "Marek",
+                    "card_number__atm_card": "123",
+                    "card_expiry_date__atm_card": "2022-01-01",
+                    "name_of_cardholder__atm_card": "Marek",
                 },
             )
             cls.p1 = PaymentFactory(
@@ -100,11 +101,11 @@ class TestBuildSnapshot(TestCase):
         self.assertEqual(
             self.p1.household_snapshot.snapshot_data["primary_collector"]["delivery_mechanisms_data"],
             {
-                "ATM Card": {
-                    "card_expiry_date_atm_card": "2022-01-01",
-                    "card_number_atm_card": "123",
+                "atm_card": {
+                    "card_expiry_date__atm_card": "2022-01-01",
+                    "card_number__atm_card": "123",
                     "full_name": self.hoh1.full_name,
-                    "name_of_cardholder_atm_card": "Marek",
+                    "name_of_cardholder__atm_card": "Marek",
                 }
             },
         )
@@ -117,8 +118,8 @@ class TestBuildSnapshot(TestCase):
             program_cycle=program_cycle,
             dispersion_start_date=datetime(2020, 8, 10),
             dispersion_end_date=datetime(2020, 12, 10),
-            start_date=timezone.datetime(2020, 9, 10, tzinfo=utc),
-            end_date=timezone.datetime(2020, 11, 10, tzinfo=utc),
+            # start_date=timezone.datetime(2020, 9, 10, tzinfo=utc),
+            # end_date=timezone.datetime(2020, 11, 10, tzinfo=utc),
             is_follow_up=False,
         )
         pp.unicef_id = "PP-02"

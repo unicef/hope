@@ -44,6 +44,7 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.household.services.household_recalculate_data import (
     recalculate_data,
 )
+from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hct_mis_api.apps.utils.models import MergeStatusModel
 from hct_mis_api.apps.utils.querysets import evaluate_qs
 
@@ -108,6 +109,9 @@ class AddIndividualService(DataChangeService):
         identities = individual_data.pop("identities", [])
         payment_channels = individual_data.pop("payment_channels", [])
         role = individual_data.pop("role", ROLE_NO_ROLE)
+        individual_data["flex_fields"] = populate_pdu_with_null_values(
+            household.program, individual_data.get("flex_fields", None)
+        )
         first_registration_date = timezone.now()
         individual = Individual.objects.create(
             household=household,
@@ -116,6 +120,7 @@ class AddIndividualService(DataChangeService):
             business_area=self.grievance_ticket.business_area,
             program_id=household.program_id,
             rdi_merge_status=MergeStatusModel.MERGED,
+            registration_data_import=household.registration_data_import,
             **individual_data,
         )
         individual.refresh_from_db()

@@ -141,6 +141,7 @@ export const PAYMENT_PLAN_QUERY = gql`
       deliveryMechanisms {
         id
         name
+        code
         order
         sentToPaymentGateway
         chosenConfiguration

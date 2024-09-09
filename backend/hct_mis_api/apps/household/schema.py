@@ -84,7 +84,7 @@ from hct_mis_api.apps.household.services.household_programs_with_delivered_quant
 )
 from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
+from hct_mis_api.apps.registration_data.nodes import DeduplicationResultNode
 from hct_mis_api.apps.targeting.models import HouseholdSelection
 from hct_mis_api.apps.utils.graphql import does_path_exist_in_query
 from hct_mis_api.apps.utils.schema import (
@@ -668,7 +668,7 @@ class Query(graphene.ObjectType):
     def resolve_all_individuals_flex_fields_attributes(self, info: Any, **kwargs: Any) -> Iterable:
         yield from FlexibleAttribute.objects.filter(
             associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL
-        ).prefetch_related("choices").order_by("created_at")
+        ).exclude(type=FlexibleAttribute.PDU).prefetch_related("choices").order_by("created_at")
 
     def resolve_all_households(self, info: Any, **kwargs: Any) -> QuerySet:
         user = info.context.user

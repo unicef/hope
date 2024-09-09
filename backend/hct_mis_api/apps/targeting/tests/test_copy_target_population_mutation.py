@@ -6,7 +6,6 @@ from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.program.fixtures import ProgramFactory
@@ -33,10 +32,12 @@ class TestCopyTargetPopulationMutation(APITestCase):
                         filters{
                           comparisonMethod
                           fieldName
-                          isFlexField
+                          flexFieldClassification
                           arguments
                         }
                       }
+                      householdIds
+                      individualIds
                     }
                 }
               }
@@ -56,13 +57,22 @@ class TestCopyTargetPopulationMutation(APITestCase):
     def setUpTestData(cls) -> None:
         partner = PartnerFactory(name="Partner")
         cls.user = UserFactory.create(partner=partner)
-        create_afghanistan()
-        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
-        (household, individuals) = create_household(
-            {"size": 1, "residence_status": "HOST", "business_area": cls.business_area},
-        )
-        cls.household = household
+        cls.business_area = create_afghanistan()
         cls.program = ProgramFactory(status=Program.ACTIVE, business_area=cls.business_area)
+        cls.cycle = cls.program.cycles.first()
+        (household, individuals) = create_household(
+            {
+                "size": 1,
+                "residence_status": "HOST",
+                "business_area": cls.business_area,
+                "program": cls.program,
+                "unicef_id": "HH-1",
+            },
+        )
+        individual = individuals[0]
+        individual.unicef_id = "IND-1"
+        individual.save()
+        cls.household = household
         cls.update_partner_access_to_program(partner, cls.program)
         tp = TargetPopulation(
             name="Original Target Population", status="LOCKED", business_area=cls.business_area, program=cls.program
@@ -78,6 +88,28 @@ class TestCopyTargetPopulationMutation(APITestCase):
             name="emptyTargetPopulation1", status="LOCKED", business_area=cls.business_area, program=cls.program
         )
         cls.empty_target_population_1.save()
+
+        cls.target_population_with_household_ids = TargetPopulation(
+            name="Target Population with household ids",
+            status="LOCKED",
+            business_area=cls.business_area,
+            program=cls.program,
+        )
+        targeting_criteria_hh_ids = TargetingCriteria(household_ids=[cls.household.unicef_id])
+        targeting_criteria_hh_ids.save()
+        cls.target_population_with_household_ids.targeting_criteria = targeting_criteria_hh_ids
+        cls.target_population_with_household_ids.save()
+
+        cls.target_population_with_individual_ids = TargetPopulation(
+            name="Target Population with individual ids",
+            status="LOCKED",
+            business_area=cls.business_area,
+            program=cls.program,
+        )
+        targeting_criteria_hh_ids = TargetingCriteria(individual_ids=[individual.unicef_id])
+        targeting_criteria_hh_ids.save()
+        cls.target_population_with_individual_ids.targeting_criteria = targeting_criteria_hh_ids
+        cls.target_population_with_individual_ids.save()
 
     @staticmethod
     def get_targeting_criteria_for_rule(rule_filter: Dict) -> TargetingCriteria:
@@ -106,6 +138,7 @@ class TestCopyTargetPopulationMutation(APITestCase):
                     "targetPopulationData": {
                         "id": self.id_to_base64(self.target_population.id, "TargetPopulationNode"),
                         "name": "Test New Copy Name",
+                        "programCycleId": self.id_to_base64(self.cycle.id, "ProgramCycleNode"),
                     }
                 }
             },
@@ -127,6 +160,7 @@ class TestCopyTargetPopulationMutation(APITestCase):
                     "targetPopulationData": {
                         "id": self.id_to_base64(self.target_population.id, "TargetPopulationNode"),
                         "name": "Test New Copy Name 1",
+                        "programCycleId": self.id_to_base64(self.cycle.id, "ProgramCycleNode"),
                     }
                 }
             },
@@ -176,6 +210,7 @@ class TestCopyTargetPopulationMutation(APITestCase):
                             "TargetPopulationNode",
                         ),
                         "name": "test_copy_empty_target_1",
+                        "programCycleId": self.id_to_base64(self.cycle.id, "ProgramCycleNode"),
                     }
                 }
             },
@@ -195,6 +230,7 @@ class TestCopyTargetPopulationMutation(APITestCase):
                             "TargetPopulationNode",
                         ),
                         "name": self.empty_target_population_1.name,
+                        "programCycleId": self.id_to_base64(self.cycle.id, "ProgramCycleNode"),
                     }
                 }
             },
@@ -203,4 +239,50 @@ class TestCopyTargetPopulationMutation(APITestCase):
         self.assertIn(
             f"Target population with name: {self.empty_target_population_1.name} and program: {self.program.name} already exists.",
             response_error["errors"][0]["message"],
+        )
+
+    @parameterized.expand(
+        [
+            ("with_permission", [Permissions.TARGETING_DUPLICATE]),
+            ("without_permission", []),
+        ]
+    )
+    def test_copy_with_household_ids(self, _: Any, permissions: List[Permissions]) -> None:
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=self.COPY_TARGET_MUTATION,
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            variables={
+                "input": {
+                    "targetPopulationData": {
+                        "id": self.id_to_base64(self.target_population_with_household_ids.id, "TargetPopulationNode"),
+                        "name": "Test New Copy Name",
+                        "programCycleId": self.id_to_base64(self.cycle.id, "ProgramCycleNode"),
+                    }
+                }
+            },
+        )
+
+    @parameterized.expand(
+        [
+            ("with_permission", [Permissions.TARGETING_DUPLICATE]),
+            ("without_permission", []),
+        ]
+    )
+    def test_copy_with_individual_ids(self, _: Any, permissions: List[Permissions]) -> None:
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=self.COPY_TARGET_MUTATION,
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            variables={
+                "input": {
+                    "targetPopulationData": {
+                        "id": self.id_to_base64(self.target_population_with_individual_ids.id, "TargetPopulationNode"),
+                        "name": " Test New Copy Name ",
+                        "programCycleId": self.id_to_base64(self.cycle.id, "ProgramCycleNode"),
+                    }
+                }
+            },
         )

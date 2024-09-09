@@ -19,26 +19,20 @@ from hct_mis_api.apps.targeting.models import TargetPopulation
 
 
 class TestEdopomogaCreation(APITestCase):
-    databases = ("default", "registration_datahub", "cash_assist_datahub_mis")
+    databases = ("default", "cash_assist_datahub_mis")
 
     @classmethod
     def setUpTestData(cls) -> None:
-        create_afghanistan()
+        cls.business_area = create_afghanistan()
         call_command("loadcountries")
         cls.generate_document_types_for_all_countries()
         cls.user = UserFactory.create()
-        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
-
-        country = geo_models.Country.objects.get(name="Afghanistan")
-        cls.business_area.countries.add(country)
-
+        cls.business_area.countries.add(geo_models.Country.objects.get(name="Afghanistan"))
         cls.program = ProgramFactory(
             name="Test program ONE",
             business_area=BusinessArea.objects.first(),
         )
-
         content = Path(f"{settings.PROJECT_ROOT}/apps/core/tests/test_files/edopomoga_sample.csv")
-
         cls.storage_file = StorageFile.objects.create(
             created_by=cls.user,
             business_area=cls.business_area,

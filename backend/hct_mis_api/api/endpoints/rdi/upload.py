@@ -234,6 +234,9 @@ class RDINestedSerializer(HouseholdUploadMixin, serializers.ModelSerializer):
             business_area=self.business_area,
             program=program,
         )
+        if program.biometric_deduplication_enabled:
+            rdi.deduplication_engine_status = RegistrationDataImport.DEDUP_ENGINE_PENDING
+
         info = self.save_households(rdi, households)
         rdi.number_of_households = info.households
         rdi.number_of_individuals = info.individuals

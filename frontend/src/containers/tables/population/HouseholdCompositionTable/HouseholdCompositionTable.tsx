@@ -46,7 +46,7 @@ export function HouseholdCompositionTable({
           </TableRow>
         </TableHead>
         <TableBody>
-          <TableRow>
+          <TableRow data-cy="row05">
             <TableCell align="left">0 - 5</TableCell>
             <GreyTableCell align="left">
               {household?.femaleAgeGroup05Count}

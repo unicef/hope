@@ -32,7 +32,7 @@ class BusinessAreaFactory(DjangoModelFactory):
 class UserFactory(DjangoModelFactory):
     class Meta:
         model = get_user_model()
-        django_get_or_create = ("username", "email")
+        django_get_or_create = ("username", "email", "pk")
 
     first_name = factory.Faker("first_name")
     last_name = factory.Faker("last_name")

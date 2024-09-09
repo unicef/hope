@@ -62,7 +62,9 @@ class TestCzechRepublicRegistrationService(TestCase):
         cls.data_collecting_type = DataCollectingType.objects.create(label="someLabel", code="some_label")
         cls.data_collecting_type.limit_to.add(cls.business_area)
 
-        cls.program = ProgramFactory(status="ACTIVE", data_collecting_type=cls.data_collecting_type)
+        cls.program = ProgramFactory(
+            status="ACTIVE", data_collecting_type=cls.data_collecting_type, biometric_deduplication_enabled=True
+        )
         cls.organization = OrganizationFactory(business_area=cls.business_area, slug=cls.business_area.slug)
         cls.project = ProjectFactory(name="fake_project", organization=cls.organization, programme=cls.program)
         cls.registration = RegistrationFactory(name="fake_registration", project=cls.project)
@@ -223,6 +225,7 @@ class TestCzechRepublicRegistrationService(TestCase):
             Record.objects.filter(id__in=records_ids, ignored=False, status=Record.STATUS_IMPORTED).count(), 1
         )
         self.assertEqual(PendingHousehold.objects.count(), 1)
+        self.assertEqual(PendingHousehold.objects.filter(program=rdi.program).count(), 1)
 
         household = PendingHousehold.objects.first()
         self.assertEqual(household.consent, True)

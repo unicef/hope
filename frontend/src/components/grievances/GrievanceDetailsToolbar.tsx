@@ -182,15 +182,6 @@ export const GrievanceDetailsToolbar = ({
       isSystemFlaggingCategory &&
       ticket.systemFlaggingTicketDetails?.approveStatus === false;
 
-    const noDuplicatesFound =
-      isDeduplicationCategory &&
-      !ticket.needsAdjudicationTicketDetails?.selectedIndividual &&
-      !ticket.needsAdjudicationTicketDetails?.isMultipleDuplicatesVersion;
-    const noDuplicatesFoundMultiple =
-      isDeduplicationCategory &&
-      ticket.needsAdjudicationTicketDetails?.isMultipleDuplicatesVersion &&
-      !ticket.needsAdjudicationTicketDetails?.selectedIndividuals.length;
-
     let confirmationMessage = '';
     if (notApprovedDeleteIndividualChanges) {
       confirmationMessage = t(
@@ -200,9 +191,9 @@ export const GrievanceDetailsToolbar = ({
       confirmationMessage = t('You did not approve any changes.');
     } else if (notApprovedSystemFlaggingChanges) {
       confirmationMessage = '';
-    } else if (noDuplicatesFound || noDuplicatesFoundMultiple) {
+    } else if (isDeduplicationCategory) {
       confirmationMessage = t(
-        'By continuing you acknowledge that individuals in this ticket were reviewed and all were deemed unique to the system. No duplicates were found',
+        'By continuing you acknowledge that individuals in this ticket were reviewed and all were deemed either distinct or duplicates in the system.',
       );
     }
     return confirmationMessage;
@@ -288,7 +279,7 @@ export const GrievanceDetailsToolbar = ({
   const selectedIndividual =
     ticket?.needsAdjudicationTicketDetails?.selectedIndividual;
   const selectedIndividualsLength =
-    ticket?.needsAdjudicationTicketDetails?.selectedIndividuals.length;
+    ticket?.needsAdjudicationTicketDetails?.selectedDuplicates.length;
 
   const shouldShowButtonDialog =
     isDeduplicationCategory &&

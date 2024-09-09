@@ -67,9 +67,6 @@ class TestAttributesGetQueries(APITestCase):
     def test_age_to_birth_date_query_equals(self) -> None:
         q = age_to_birth_date_query("EQUALS", [30])
         expected_date = self.today - relativedelta(years=30)
-        print("*" * 399)
-        print(q)
-        print(Q(birth_date__lte=expected_date, birth_date__gt=expected_date - relativedelta(years=1)))
         self.assertEqual(q, Q(birth_date__lte=expected_date, birth_date__gt=expected_date - relativedelta(years=1)))
 
     def test_age_to_birth_date_query_not_equals(self) -> None:

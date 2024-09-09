@@ -38,7 +38,6 @@ from hct_mis_api.apps.utils.models import (
 if TYPE_CHECKING:
     from hct_mis_api.apps.household.models import Household, Individual
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -199,6 +198,10 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
     ISSUE_TYPE_OTHER_COMPLAINT = 21
     ISSUE_TYPE_PARTNER_COMPLAINT = 22
 
+    ISSUE_TYPE_UNIQUE_IDENTIFIERS_SIMILARITY = 23
+    ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY = 24
+    ISSUE_TYPE_BIOMETRICS_SIMILARITY = 25
+
     ISSUE_TYPES_CHOICES = {
         CATEGORY_DATA_CHANGE: {
             ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL: _("Add Individual"),
@@ -227,6 +230,11 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
             ISSUE_TYPE_REGISTRATION_COMPLAINT: _("Registration Related Complaint"),
             ISSUE_TYPE_OTHER_COMPLAINT: _("Other Complaint"),
             ISSUE_TYPE_PARTNER_COMPLAINT: _("Partner Related Complaint"),
+        },
+        CATEGORY_NEEDS_ADJUDICATION: {
+            ISSUE_TYPE_UNIQUE_IDENTIFIERS_SIMILARITY: _("Unique Identifiers Similarity"),
+            ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY: _("Biographical Data Similarity"),
+            ISSUE_TYPE_BIOMETRICS_SIMILARITY: _("Biometrics Similarity"),
         },
     }
     ALL_ISSUE_TYPES = [choice for choices_group in ISSUE_TYPES_CHOICES.values() for choice in choices_group.items()]
@@ -809,23 +817,34 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
         related_name="needs_adjudication_ticket_details",
         on_delete=models.CASCADE,
     )
+    is_multiple_duplicates_version = models.BooleanField(default=False)
+    # probably unique Individual
     golden_records_individual = models.ForeignKey(
         "household.Individual", related_name="ticket_golden_records", on_delete=models.CASCADE
     )
-    is_multiple_duplicates_version = models.BooleanField(default=False)
-    possible_duplicate = models.ForeignKey(
-        "household.Individual", related_name="+", on_delete=models.CASCADE, null=True
-    )  # this field will be deprecated
+    # list of possible duplicates in the ticket
     possible_duplicates = models.ManyToManyField("household.Individual", related_name="ticket_duplicates")
-    selected_individual = models.ForeignKey(
-        "household.Individual", null=True, related_name="+", on_delete=models.CASCADE
-    )  # this field will be deprecated
+    # list of unique Individuals
+    selected_distinct = models.ManyToManyField("household.Individual", related_name="selected_distinct")
+    # list of duplicate Individuals
+    # maybe rename to 'selected_duplicates'
     selected_individuals = models.ManyToManyField("household.Individual", related_name="ticket_selected")
     role_reassign_data = JSONField(default=dict)
     extra_data = JSONField(default=dict)
     score_min = models.FloatField(default=0.0)
     score_max = models.FloatField(default=0.0)
     is_cross_area = models.BooleanField(default=False)
+    dedup_engine_similarity_pair = models.ForeignKey(
+        "registration_data.DeduplicationEngineSimilarityPair", on_delete=models.CASCADE, null=True
+    )
+
+    # deprecated and will remove soon
+    selected_individual = models.ForeignKey(
+        "household.Individual", null=True, related_name="+", on_delete=models.CASCADE
+    )  # this field will be deprecated
+    possible_duplicate = models.ForeignKey(
+        "household.Individual", related_name="+", on_delete=models.CASCADE, null=True
+    )  # this field will be deprecated
 
     @property
     def has_duplicated_document(self) -> bool:

@@ -3,28 +3,11 @@ version: '3.7'
 volumes:
   backend-data:
   db:
-  db_ca:
-  db_mis:
-  db_erp:
-  db_reg:
   data_es:
-  data_es_test:
   ipython_data_local:
 
 
 services:
-  proxy:
-    image: tivix/docker-nginx:v17
-    environment:
-      - UPSTREAMS=/:localhost:8000
-    ports:
-      - "8082:80"
-    depends_on:
-      backend:
-        condition: service_started
-    volumes:
-      - backend-data:/data
-
   redis:
     restart: always
     image: redis:4.0.11-alpine3.8
@@ -54,6 +37,8 @@ services:
     volumes:
       - ./backend:/code/
       - backend-data:/data
+      - ./backend/pyproject.toml:/packages/pyproject.toml
+      - ./backend/pdm.lock:/packages/pdm.lock
       - ipython_data_local:/root/.ipython
     command: "dev"
     depends_on:

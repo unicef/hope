@@ -74,7 +74,6 @@ from hct_mis_api.apps.core.field_attributes.lookup_functions import (
 )
 from hct_mis_api.apps.core.field_attributes.payment_channel_fields_attributes import (
     PAYMENT_CHANNEL_FIELDS_ATTRIBUTES,
-    DeliveryMechanismChoices,
 )
 from hct_mis_api.apps.core.languages import Languages
 from hct_mis_api.apps.geo.models import Area, Country
@@ -93,8 +92,10 @@ from hct_mis_api.apps.household.models import (
     SEX_CHOICE,
     WORK_STATUS_CHOICE,
 )
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.models import COLLECT_TYPES
+from hct_mis_api.apps.registration_data.models import (
+    COLLECT_TYPES,
+    RegistrationDataImport,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -364,9 +365,6 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "full_name_i_c",
-        "required_for_payment": False,
-        "unique_for_payment": False,
-        "delivery_mechanisms": [dm[0] for dm in DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES],
         "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT, Scope.INDIVIDUAL_UPDATE, Scope.XLSX_PEOPLE],
     },
     {
@@ -1874,15 +1872,21 @@ CORE_FIELDS_ATTRIBUTES = [
 ] + PAYMENT_CHANNEL_FIELDS_ATTRIBUTES
 
 
+def get_core_fields_attributes() -> List[Dict[str, Any]]:
+    from hct_mis_api.apps.payment.models import DeliveryMechanism
+
+    return CORE_FIELDS_ATTRIBUTES + DeliveryMechanism.get_all_core_fields_definitions()
+
+
 class FieldFactory(list):
     def __init__(
         self, fields: Optional[Any] = None, scopes: Optional[Set[Scope]] = None, *args: Any, **kwargs: Any
     ) -> None:
         super().__init__(*args, **kwargs)
         self.scopes: Set = scopes or set()
+        self.all_fields = copy.deepcopy(get_core_fields_attributes())
         if fields:
             self.extend(copy.deepcopy(fields))
-        self.all_fields = copy.deepcopy(CORE_FIELDS_ATTRIBUTES)
 
     def extend(self, __iterable: Iterable[dict]) -> None:
         items = list(__iterable)
@@ -1996,3 +2000,9 @@ class FieldFactory(list):
             if callable(choices):
                 field["choices"] = choices(business_area_slug=business_area_slug, program_id=program_id)
         return factory
+
+    @classmethod
+    def get_all_core_fields_choices(cls) -> List:
+        factory = cls()
+        factory.extend(factory.all_fields)
+        return factory.to_choices()

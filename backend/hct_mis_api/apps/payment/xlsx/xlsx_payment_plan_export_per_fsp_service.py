@@ -11,8 +11,9 @@ import openpyxl
 from openpyxl import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
-from hct_mis_api.apps.core.models import FileTemp
+from hct_mis_api.apps.core.models import FileTemp, FlexibleAttribute
 from hct_mis_api.apps.payment.models import (
+    DeliveryMechanism,
     DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
@@ -61,6 +62,10 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         self.is_social_worker_program = self.payment_plan.program.is_social_worker_program
         # TODO: in future will be per BA or program flag?
         self.payment_generate_token_and_order_numbers = True
+        flexible_attributes = FlexibleAttribute.objects.all()
+        self.flexible_attributes = {
+            flexible_attribute.name: flexible_attribute for flexible_attribute in flexible_attributes
+        }
 
     def open_workbook(self, title: str) -> tuple[Workbook, Worksheet]:
         wb = openpyxl.Workbook()
@@ -70,7 +75,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         return wb, ws
 
     def get_template(
-        self, fsp: "FinancialServiceProvider", delivery_mechanism: str
+        self, fsp: "FinancialServiceProvider", delivery_mechanism: DeliveryMechanism
     ) -> FinancialServiceProviderXlsxTemplate:
         fsp_xlsx_template_per_delivery_mechanism = FspXlsxTemplatePerDeliveryMechanism.objects.filter(
             delivery_mechanism=delivery_mechanism,
@@ -114,6 +119,8 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
 
         for core_field in fsp_xlsx_template.core_fields:
             column_list.append(core_field)
+        for flex_field in fsp_xlsx_template.flex_fields:
+            column_list.append(flex_field)
 
         column_list = self._remove_column_for_people(column_list)
         column_list = self._remove_core_fields_for_people(column_list)
@@ -152,7 +159,20 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
             for column_name in fsp_template_core_fields
         ]
         payment_row.extend(core_fields_row)
+        flex_field_row = [
+            self._get_flex_field_by_name(column_name, payment) for column_name in fsp_xlsx_template.flex_fields
+        ]
+        payment_row.extend(flex_field_row)
         return list(map(self.right_format_for_xlsx, payment_row))
+
+    def _get_flex_field_by_name(self, name: str, payment: Payment) -> FlexibleAttribute:
+        attribute: FlexibleAttribute = self.flexible_attributes[name]
+        individual = payment.collector
+        household = payment.household
+        if attribute.associated_with == FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL:
+            return individual.flex_fields.get(name, "")
+        else:
+            return household.flex_fields.get(name, "")
 
     def save_workbook(self, zip_file: zipfile.ZipFile, wb: "Workbook", filename: str) -> None:
         with NamedTemporaryFile() as tmp:
@@ -168,7 +188,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
     ) -> None:
         for delivery_mechanism_per_payment_plan in delivery_mechanism_per_payment_plan_list:
             fsp: FinancialServiceProvider = delivery_mechanism_per_payment_plan.financial_service_provider
-            delivery_mechanism: str = delivery_mechanism_per_payment_plan.delivery_mechanism
+            delivery_mechanism: DeliveryMechanism = delivery_mechanism_per_payment_plan.delivery_mechanism
             wb, ws_fsp = self.open_workbook(fsp.name)
             fsp_xlsx_template = self.get_template(fsp, delivery_mechanism)
             payment_ids = list(
@@ -197,7 +217,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
             delivery_mechanism_per_payment_plan_list.first()  # type: ignore
         )
         fsp: FinancialServiceProvider = delivery_mechanism_per_payment_plan.financial_service_provider
-        delivery_mechanism: str = delivery_mechanism_per_payment_plan.delivery_mechanism
+        delivery_mechanism: DeliveryMechanism = delivery_mechanism_per_payment_plan.delivery_mechanism
         for i, split in enumerate(self.payment_plan.splits.all().order_by("order")):
             wb, ws_fsp = self.open_workbook(f"{fsp.name}-chunk{i + 1}")
             fsp_xlsx_template = self.get_template(fsp, delivery_mechanism)

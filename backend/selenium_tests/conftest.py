@@ -30,6 +30,10 @@ from page_object.managerial_console.managerial_console import ManagerialConsole
 from page_object.payment_module.new_payment_plan import NewPaymentPlan
 from page_object.payment_module.payment_module import PaymentModule
 from page_object.payment_module.payment_module_details import PaymentModuleDetails
+from page_object.payment_module.program_cycle import (
+    ProgramCycleDetailsPage,
+    ProgramCyclePage,
+)
 from page_object.payment_verification.payment_record import PaymentRecord
 from page_object.payment_verification.payment_verification import PaymentVerification
 from page_object.payment_verification.payment_verification_details import (
@@ -44,6 +48,13 @@ from page_object.programme_population.households import Households
 from page_object.programme_population.households_details import HouseholdsDetails
 from page_object.programme_population.individuals import Individuals
 from page_object.programme_population.individuals_details import IndividualsDetails
+from page_object.programme_population.periodic_data_update_templates import (
+    PeriodicDatUpdateTemplates,
+    PeriodicDatUpdateTemplatesDetails,
+)
+from page_object.programme_population.periodic_data_update_uploads import (
+    PeriodicDataUpdateUploads,
+)
 from page_object.programme_users.programme_users import ProgrammeUsers
 from page_object.registration_data_import.rdi_details_page import RDIDetailsPage
 from page_object.registration_data_import.registration_data_import import (
@@ -54,7 +65,6 @@ from page_object.targeting.targeting_create import TargetingCreate
 from page_object.targeting.targeting_details import TargetingDetails
 from pytest_django.live_server_helper import LiveServer
 from pytest_html_reporter import attach
-from requests import Session
 from selenium import webdriver
 from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
@@ -76,7 +86,9 @@ def pytest_addoption(parser) -> None:  # type: ignore
     parser.addoption("--mapping", action="store_true", default=False, help="Enable mapping mode")
 
 
-def pytest_configure() -> None:
+def pytest_configure(config) -> None:  # type: ignore
+    config.addinivalue_line("markers", "night: This marker is intended for e2e tests conducted during the night on CI")
+
     # delete all old screenshots
     for file in os.listdir("report/screenshot"):
         os.remove(os.path.join("report/screenshot", file))
@@ -100,7 +112,6 @@ def pytest_configure() -> None:
     settings.SECURE_HSTS_SECONDS = False
     settings.SECURE_CONTENT_TYPE_NOSNIFF = True
     settings.SECURE_REFERRER_POLICY = "same-origin"
-
     settings.CACHE_ENABLED = False
     settings.CACHES = {
         "default": {
@@ -148,9 +159,6 @@ def pytest_configure() -> None:
 
     logging.disable(logging.CRITICAL)
     pytest.SELENIUM_PATH = os.path.dirname(__file__)
-    pytest.CSRF = ""
-    pytest.SESSION_ID = ""
-    pytest.session = Session()
 
 
 def create_session(host: str, username: str, password: str, csrf: str = "") -> object:
@@ -171,40 +179,45 @@ def create_session(host: str, username: str, password: str, csrf: str = "") -> o
 @pytest.fixture
 def driver() -> Chrome:
     chrome_options = Options()
-    if not os.environ.get("STREAM"):
-        chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--enable-logging")
+    chrome_options.add_argument("--disable-extensions")
+    chrome_options.add_argument("--disable-plugins")
+    chrome_options.add_argument("--disable-images")
+    chrome_options.add_argument("--disable-notifications")
+    chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--window-size=1920,1080")
     if not os.path.exists("./report/downloads/"):
         os.makedirs("./report/downloads/")
     prefs = {"download.default_directory": "./report/downloads/"}
     chrome_options.add_experimental_option("prefs", prefs)
-    yield webdriver.Chrome(options=chrome_options)
+    driver = webdriver.Chrome(options=chrome_options)
+    yield driver
 
 
 @pytest.fixture(autouse=True)
-def browser(driver: Chrome, request: FixtureRequest) -> Chrome:
-    if request.node.get_closest_marker("mapping"):
-        driver.live_server = LiveServer("0.0.0.0:8080")
-    elif request.node.get_closest_marker("local"):
-        driver.live_server.url = "http://localhost:8080"
-    else:
-        driver.live_server = LiveServer("localhost")
+def browser(driver: Chrome) -> Chrome:
     yield driver
-    driver.close()
-    pytest.CSRF = ""
-    pytest.SESSION_ID = ""
+    driver.quit()
 
 
 @pytest.fixture
 def login(browser: Chrome) -> Chrome:
+    browser.live_server = LiveServer("localhost")
     browser.get(f"{browser.live_server.url}/api/unicorn/")
-    get_cookies = browser.get_cookies()  # type: ignore
-    create_session(browser.live_server.url, "superuser", "testtest2", get_cookies[0]["value"])
-    browser.add_cookie({"name": "csrftoken", "value": pytest.CSRF})
-    browser.add_cookie({"name": "sessionid", "value": pytest.SESSION_ID})
-    browser.get(f"{browser.live_server.url}")
+    login = "id_username"
+    password = "id_password"
+    loginButton = '//*[@id="login-form"]/div[3]/input'
+    from selenium.webdriver.common.by import By
+    from selenium.webdriver.support import expected_conditions as EC
+    from selenium.webdriver.support.wait import WebDriverWait
+
+    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.XPATH, loginButton)))
+    browser.find_element(By.XPATH, loginButton)
+    browser.find_element(By.ID, login).send_keys("superuser")
+    browser.find_element(By.ID, password).send_keys("testtest2")
+    browser.find_element(By.XPATH, loginButton).click()
+    browser.get(f"{browser.live_server.url}/")
     yield browser
 
 
@@ -289,6 +302,24 @@ def pageIndividualsDetails(request: FixtureRequest, browser: Chrome) -> Individu
 
 
 @pytest.fixture
+def pagePeriodicDataUpdateTemplates(request: FixtureRequest, browser: Chrome) -> PeriodicDatUpdateTemplates:
+    yield PeriodicDatUpdateTemplates(browser)
+
+
+@pytest.fixture
+def pagePeriodicDataUpdateTemplatesDetails(
+    request: FixtureRequest,
+    browser: Chrome,
+) -> PeriodicDatUpdateTemplatesDetails:
+    yield PeriodicDatUpdateTemplatesDetails(browser)
+
+
+@pytest.fixture
+def pagePeriodicDataUploads(request: FixtureRequest, browser: Chrome) -> PeriodicDataUpdateUploads:
+    yield PeriodicDataUpdateUploads(browser)
+
+
+@pytest.fixture
 def pageTargeting(request: FixtureRequest, browser: Chrome) -> Targeting:
     yield Targeting(browser)
 
@@ -351,6 +382,16 @@ def pagePaymentModuleDetails(request: FixtureRequest, browser: Chrome) -> Paymen
 @pytest.fixture
 def pageNewPaymentPlan(request: FixtureRequest, browser: Chrome) -> NewPaymentPlan:
     yield NewPaymentPlan(browser)
+
+
+@pytest.fixture
+def pageProgramCycle(request: FixtureRequest, browser: Chrome) -> ProgramCyclePage:
+    yield ProgramCyclePage(browser)
+
+
+@pytest.fixture
+def pageProgramCycleDetails(request: FixtureRequest, browser: Chrome) -> ProgramCycleDetailsPage:
+    yield ProgramCycleDetailsPage(browser)
 
 
 @pytest.fixture
@@ -434,7 +475,7 @@ def create_super_user(business_area: BusinessArea) -> User:
 
     role, _ = Role.objects.update_or_create(name="Role", defaults={"permissions": permission_list})
 
-    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json")
+    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json", verbosity=0)
     country = Country.objects.get(name="Afghanistan")
     business_area.countries.add(country)
     user = UserFactory.create(

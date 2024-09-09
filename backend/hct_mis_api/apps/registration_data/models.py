@@ -8,12 +8,21 @@ from django.core.validators import (
     MinLengthValidator,
     ProhibitNullCharactersValidator,
 )
-from django.db import models
-from django.db.models import Q
+from django.db import models, transaction
+from django.db.models import Count, ExpressionWrapper, OuterRef, Q, Subquery
 from django.utils.translation import gettext_lazy as _
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.household.models import (
+    Household,
+    Individual,
+    PendingHousehold,
+    PendingIndividual,
+)
+from hct_mis_api.apps.registration_datahub.apis.deduplication_engine import (
+    SimilarityPair,
+)
 from hct_mis_api.apps.utils.models import (
     AdminUrlMixin,
     ConcurrencyModel,
@@ -96,13 +105,31 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
     FLEX_REGISTRATION = "FLEX_REGISTRATION"
     EDOPOMOGA = "EDOPOMOGA"
     PROGRAM_POPULATION = "PROGRAM_POPULATION"
+    ENROLL_FROM_PROGRAM = "ENROLL_FROM_PROGRAM"
     DATA_SOURCE_CHOICE = (
         (XLS, "Excel"),
         (KOBO, "KoBo"),
         (FLEX_REGISTRATION, "Flex Registration"),
         (API, "Flex API"),
         (EDOPOMOGA, "eDopomoga"),
-        (PROGRAM_POPULATION, "Program Population"),
+        (PROGRAM_POPULATION, "Programme Population"),
+        (ENROLL_FROM_PROGRAM, "Enroll From Programme"),
+    )
+
+    DEDUP_ENGINE_PENDING = "PENDING"
+    DEDUP_ENGINE_UPLOADED = "UPLOADED"
+    DEDUP_ENGINE_IN_PROGRESS = "IN_PROGRESS"
+    DEDUP_ENGINE_FINISHED = "FINISHED"
+    DEDUP_ENGINE_UPLOAD_ERROR = "UPLOAD_ERROR"
+    DEDUP_ENGINE_ERROR = "ERROR"
+
+    DEDUP_ENGINE_STATUS_CHOICE = (
+        (DEDUP_ENGINE_PENDING, _("Pending")),
+        (DEDUP_ENGINE_UPLOADED, _("Uploaded")),
+        (DEDUP_ENGINE_IN_PROGRESS, _("In Progress")),
+        (DEDUP_ENGINE_FINISHED, _("Finished")),
+        (DEDUP_ENGINE_ERROR, _("Error")),
+        (DEDUP_ENGINE_UPLOAD_ERROR, _("Upload Error")),
     )
     name = CICharField(
         max_length=255,
@@ -138,6 +165,9 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
     golden_record_possible_duplicates = models.PositiveIntegerField(default=0)
     golden_record_unique = models.PositiveIntegerField(default=0)
 
+    dedup_engine_batch_duplicates = models.PositiveIntegerField(default=0)
+    dedup_engine_golden_record_duplicates = models.PositiveIntegerField(default=0)
+
     datahub_id = models.UUIDField(null=True, default=None, db_index=True, blank=True)
     error_message = models.TextField(blank=True)
     sentry_id = models.CharField(max_length=100, default="", blank=True, null=True)
@@ -146,7 +176,7 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
     business_area = models.ForeignKey(BusinessArea, null=True, on_delete=models.CASCADE)
     screen_beneficiary = models.BooleanField(default=False)
     excluded = models.BooleanField(default=False, help_text="Exclude RDI in UI")
-    # TODO: in future will use one program per RDI after migration
+    # TODO: set to not nullable Program and on_delete=models.PROTECT
     program = models.ForeignKey(
         "program.Program",
         null=True,
@@ -164,6 +194,9 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
         on_delete=models.CASCADE,
         null=True,
         blank=True,
+    )
+    deduplication_engine_status = models.CharField(
+        max_length=255, choices=DEDUP_ENGINE_STATUS_CHOICE, blank=True, null=True, default=None
     )
 
     def __str__(self) -> str:
@@ -196,6 +229,27 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
 
     def can_be_merged(self) -> bool:
         return self.status in (self.IN_REVIEW, self.MERGE_ERROR)
+
+    def refresh_population_statistics(self) -> None:
+        self.number_of_individuals = Individual.objects.filter(registration_data_import=self).count()
+        self.number_of_households = Household.objects.filter(registration_data_import=self).count()
+        self.save(update_fields=("number_of_individuals", "number_of_households"))
+
+    @property
+    def biometric_deduplication_enabled(self) -> bool:
+        return self.program.biometric_deduplication_enabled
+
+    def bulk_update_household_size(self) -> None:
+        # AB#208387
+        if self.program and self.program.data_collecting_type.recalculate_composition:
+            households = PendingHousehold.all_objects.filter(registration_data_import=self)
+            size_subquery = Subquery(
+                PendingIndividual.all_objects.filter(household=OuterRef("pk"))
+                .values("household")
+                .annotate(count=Count("pk"))
+                .values("count")
+            )
+            households.update(size=size_subquery)
 
 
 class ImportData(TimeStampedUUIDModel):
@@ -294,3 +348,88 @@ class KoboImportedSubmission(models.Model):
         blank=True,
         on_delete=models.CASCADE,
     )
+
+
+class DeduplicationEngineSimilarityPairManager(models.Manager):
+    def get_queryset(self) -> models.QuerySet:
+        return (
+            super()
+            .get_queryset()
+            .annotate(
+                is_duplicate=ExpressionWrapper(
+                    models.Case(
+                        models.When(
+                            similarity_score__gte=models.F("program__business_area__biometric_deduplication_threshold"),
+                            then=models.Value(True),
+                        ),
+                        default=models.Value(False),
+                        output_field=models.BooleanField(),
+                    ),
+                    output_field=models.BooleanField(),
+                )
+            )
+        )
+
+    def duplicates(self) -> models.QuerySet:
+        return self.get_queryset().filter(is_duplicate=True)
+
+
+class DeduplicationEngineSimilarityPair(models.Model):
+    program = models.ForeignKey(
+        "program.Program", related_name="deduplication_engine_similarity_pairs", on_delete=models.CASCADE
+    )
+    individual1 = models.ForeignKey(
+        "household.Individual", related_name="biometric_duplicates_1", on_delete=models.CASCADE
+    )
+    individual2 = models.ForeignKey(
+        "household.Individual", related_name="biometric_duplicates_2", on_delete=models.CASCADE
+    )
+    similarity_score = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+    )
+
+    objects = DeduplicationEngineSimilarityPairManager()
+
+    class Meta:
+        unique_together = ("individual1", "individual2")
+        constraints = [
+            # Prevent an Individual from being marked as a duplicate of itself
+            # Enforce a consistent ordering to avoid duplicate entries in reverse
+            models.CheckConstraint(
+                check=models.Q(individual1__lt=models.F("individual2")), name="individual1_lt_individual2"
+            ),
+        ]
+
+    @classmethod
+    def bulk_add_pairs(cls, deduplication_set_id: str, duplicates_data: List[SimilarityPair]) -> None:
+        from hct_mis_api.apps.program.models import Program
+
+        program = Program.objects.get(deduplication_set_id=deduplication_set_id)
+        duplicates = []
+        for pair in duplicates_data:
+            # Ensure consistent ordering of individual1 and individual2
+            individual1, individual2 = sorted([pair.first, pair.second])
+
+            if individual1 == individual2:
+                logger.warning(f"Skipping duplicate pair ({individual1}, {individual2})")
+                continue
+
+            duplicates.append(
+                cls(
+                    program=program,
+                    individual1_id=individual1,
+                    individual2_id=individual2,
+                    similarity_score=pair.score,
+                )
+            )
+        if duplicates:
+            with transaction.atomic():
+                cls.objects.bulk_create(duplicates, ignore_conflicts=True)
+
+    @property
+    def _is_duplicate(self) -> bool:
+        from hct_mis_api.apps.registration_datahub.tasks.deduplicate import Thresholds
+
+        thresholds = Thresholds.from_business_area(self.program.business_area)
+        return self.similarity_score >= thresholds.BIOMETRIC_DEDUPLICATION_THRESHOLD

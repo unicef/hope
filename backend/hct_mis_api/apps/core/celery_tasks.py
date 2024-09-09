@@ -29,6 +29,7 @@ from hct_mis_api.apps.household.models import (
     Individual,
     IndividualRoleInHousehold,
 )
+from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.targeting.models import TargetPopulation
@@ -111,14 +112,17 @@ def create_target_population_task(self: Any, storage_id: str, program_id: str, t
     set_sentry_business_area_tag(program.business_area.name)
 
     try:
-        with transaction.atomic(), transaction.atomic("registration_datahub"):
+        with transaction.atomic():
             registration_data_import = RegistrationDataImport.objects.create(
                 name=f"{storage_obj.file.name}_{program.name}",
                 number_of_individuals=0,
                 number_of_households=0,
                 business_area=program.business_area,
                 data_source=RegistrationDataImport.EDOPOMOGA,
+                program=program,
             )
+            if program.biometric_deduplication_enabled:
+                registration_data_import.deduplication_engine_status = RegistrationDataImport.DEDUP_ENGINE_PENDING
 
             business_area = storage_obj.business_area
             country = business_area.countries.first()
@@ -166,6 +170,8 @@ def create_target_population_task(self: Any, storage_id: str, program_id: str, t
                         "sex": MALE,
                         "relationship": HEAD,
                         "rdi_merge_status": MergeStatusModel.MERGED,
+                        "flex_fields": populate_pdu_with_null_values(program),
+                        "registration_data_import": registration_data_import,
                     }
                     if family_id in families:
                         individual = Individual(**individual_data, household_id=families.get(family_id))

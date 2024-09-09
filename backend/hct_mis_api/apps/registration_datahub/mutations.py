@@ -63,8 +63,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-@transaction.atomic(using="default")
-@transaction.atomic(using="registration_datahub")
+@transaction.atomic()
 def create_registration_data_import_objects(
     registration_data_import_data: Dict,
     user: "User",
@@ -92,6 +91,10 @@ def create_registration_data_import_objects(
         import_data=import_data_obj,
         **registration_data_import_data,
     )
+    program = Program.objects.get(id=program_id)
+    if program.biometric_deduplication_enabled:
+        created_obj_hct.deduplication_engine_status = RegistrationDataImport.DEDUP_ENGINE_PENDING
+
     created_obj_hct.full_clean()
     created_obj_hct.save()
 
@@ -102,8 +105,7 @@ def create_registration_data_import_objects(
     )
 
 
-@transaction.atomic(using="default")
-@transaction.atomic(using="registration_datahub")
+@transaction.atomic()
 def create_registration_data_import_for_import_program_population(
     registration_data_import_data: Dict,
     user: "User",
@@ -164,8 +166,7 @@ class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, Validati
             raise ValidationError("Cannot import empty form")
 
     @classmethod
-    @transaction.atomic(using="default")
-    @transaction.atomic(using="registration_datahub")
+    @transaction.atomic()
     @is_authenticated
     def processed_mutate(
         cls, root: Any, info: Any, registration_data_import_data: Dict
@@ -229,8 +230,7 @@ class RegistrationProgramPopulationImportMutation(BaseValidator, PermissionMutat
         registration_data_import_data = RegistrationProgramPopulationImportMutationInput(required=True)
 
     @classmethod
-    @transaction.atomic(using="default")
-    @transaction.atomic(using="registration_datahub")
+    @transaction.atomic()
     @is_authenticated
     def processed_mutate(
         cls, root: Any, info: Any, registration_data_import_data: Dict
@@ -335,8 +335,7 @@ class RegistrationKoboImportMutation(BaseValidator, PermissionMutation, Validati
         registration_data_import_data = RegistrationKoboImportMutationInput(required=True)
 
     @classmethod
-    @transaction.atomic(using="default")
-    @transaction.atomic(using="registration_datahub")
+    @transaction.atomic()
     @is_authenticated
     def processed_mutate(
         cls, root: Any, info: Any, registration_data_import_data: Dict
@@ -398,8 +397,7 @@ class MergeRegistrationDataImportMutation(BaseValidator, PermissionMutation):
         version = BigInt(required=False)
 
     @classmethod
-    @transaction.atomic(using="default")
-    @transaction.atomic(using="registration_datahub")
+    @transaction.atomic()
     @is_authenticated
     @raise_program_status_is(Program.FINISHED)
     def mutate(cls, root: Any, info: Any, id: Optional[str], **kwargs: Any) -> "MergeRegistrationDataImportMutation":
@@ -447,7 +445,7 @@ class RefuseRegistrationDataImportMutation(BaseValidator, PermissionMutation):
             raise ValidationError("Only In Review Registration Data Import can be refused")
 
     @classmethod
-    @transaction.atomic(using="default")
+    @transaction.atomic()
     @is_authenticated
     @raise_program_status_is(Program.FINISHED)
     def mutate(cls, root: Any, info: Any, id: Optional[str], **kwargs: Any) -> "RefuseRegistrationDataImportMutation":
@@ -492,7 +490,7 @@ class EraseRegistrationDataImportMutation(PermissionMutation):
         version = BigInt(required=False)
 
     @classmethod
-    @transaction.atomic(using="default")
+    @transaction.atomic()
     @is_authenticated
     @raise_program_status_is(Program.FINISHED)
     def mutate(cls, root: Any, info: Any, id: Optional[str], **kwargs: Any) -> "EraseRegistrationDataImportMutation":
@@ -538,8 +536,7 @@ class UploadImportDataXLSXFileAsync(PermissionMutation):
         business_area_slug = graphene.String(required=True)
 
     @classmethod
-    @transaction.atomic(using="default")
-    @transaction.atomic(using="registration_datahub")
+    @transaction.atomic()
     @is_authenticated
     def mutate(cls, root: Any, info: Any, file: IO, business_area_slug: str) -> "UploadImportDataXLSXFileAsync":
         cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area_slug)
@@ -576,6 +573,7 @@ class SaveKoboProjectImportDataAsync(PermissionMutation):
         pull_pictures: bool,
     ) -> "SaveKoboProjectImportDataAsync":
         cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area_slug)
+        program_id: str = decode_id_string_required(info.context.headers.get("Program"))
 
         import_data = KoboImportData.objects.create(
             data_type=ImportData.JSON,
@@ -586,7 +584,7 @@ class SaveKoboProjectImportDataAsync(PermissionMutation):
             created_by_id=info.context.user.id,
             pull_pictures=pull_pictures,
         )
-        pull_kobo_submissions_task.delay(import_data.id)
+        pull_kobo_submissions_task.delay(import_data.id, program_id)
         return SaveKoboProjectImportDataAsync(import_data=import_data)
 
 

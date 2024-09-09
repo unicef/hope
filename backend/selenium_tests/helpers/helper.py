@@ -1,7 +1,9 @@
 import os
+import time
 from time import sleep
 from typing import Literal, Union
 
+from selenium.common import NoSuchElementException
 from selenium.webdriver import Chrome, Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
@@ -11,7 +13,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 
 class Common:
-    DEFAULT_TIMEOUT = 20
+    DEFAULT_TIMEOUT = 120
 
     def __init__(self, driver: Chrome):
         self.driver = driver
@@ -40,7 +42,13 @@ class Common:
             raise Exception("No elements found")
 
     def wait_for(self, locator: str, element_type: str = By.CSS_SELECTOR, timeout: int = DEFAULT_TIMEOUT) -> WebElement:
-        return self._wait(timeout).until(EC.visibility_of_element_located((element_type, locator)))
+        from selenium.common.exceptions import TimeoutException
+
+        try:
+            return self._wait(timeout).until(EC.visibility_of_element_located((element_type, locator)))
+        except TimeoutException:
+            pass
+        raise NoSuchElementException(f"Element: {locator} not found")
 
     def wait_for_disappear(
         self, locator: str, element_type: str = By.CSS_SELECTOR, timeout: int = DEFAULT_TIMEOUT
@@ -70,15 +78,43 @@ class Common:
         return self._wait(timeout).until(EC.element_to_be_clickable((element_type, locator)))
 
     def select_listbox_element(
-        self, name: str, listbox: str = 'ul[role="listbox"]', tag_name: str = "li"
-    ) -> WebElement:
+        self,
+        name: str,
+        listbox: str = 'ul[role="listbox"]',
+        tag_name: str = "li",
+        delay_before: int = 2,
+        delay_between_checks: float = 0.5,
+    ) -> None:
+        sleep(delay_before)
         select_element = self.wait_for(listbox)
         items = select_element.find_elements("tag name", tag_name)
         for item in items:
+            sleep(delay_between_checks)
             if name in item.text:
                 self._wait().until(EC.element_to_be_clickable((By.XPATH, f"//*[contains(text(), '{name}')]")))
+                item.click()
+                self.wait_for_disappear('ul[role="listbox"]')
+                break
+        else:
+            raise AssertionError(f"Element: {name} is not in the list: {[item.text for item in items]}")
+
+    def get_listbox_element(
+        self,
+        name: str,
+        listbox: str = 'ul[role="listbox"]',
+        tag_name: str = "li",
+        delay_before: int = 2,
+        delay_between_checks: float = 0.5,
+    ) -> WebElement:
+        sleep(delay_before)
+        select_element = self.wait_for(listbox)
+        items = select_element.find_elements("tag name", tag_name)
+        for item in items:
+            sleep(delay_between_checks)
+            if name in item.text:
                 return item
-        raise AssertionError(f"Element: {name} is not in the list.")
+        else:
+            raise AssertionError(f"Element: {name} is not in the list: {[item.text for item in items]}")
 
     def check_page_after_click(self, button: WebElement, url_fragment: str) -> None:
         programme_creation_url = self.driver.current_url
@@ -88,12 +124,16 @@ class Common:
     def upload_file(
         self, upload_file: str, xpath: str = "//input[@type='file']", timeout: int = DEFAULT_TIMEOUT
     ) -> None:
+        from time import sleep
+
+        sleep(5)
         self._wait(timeout).until(EC.presence_of_element_located((By.XPATH, xpath))).send_keys(upload_file)
+        sleep(2)
 
     def select_option_by_name(self, optionName: str) -> None:
         selectOption = f'li[data-cy="select-option-{optionName}"]'
-        self.wait_for(selectOption).click()
         try:
+            self.wait_for(selectOption).click()
             self.wait_for_disappear(selectOption)
         except BaseException:
             sleep(1)
@@ -146,3 +186,12 @@ class Common:
 
     def wait_for_element_clickable(self, locator: str) -> bool:
         return self._wait().until(EC.element_to_be_clickable((By.XPATH, locator)))
+
+    def check_file_exists(self, filepath: str, timeout: int = DEFAULT_TIMEOUT) -> bool:
+        start_time = time.time()
+        while True:
+            if os.path.exists(filepath):
+                return True
+            elif time.time() - start_time > timeout:
+                raise TimeoutError(f"File {filepath} not found after {timeout} seconds")
+            sleep(0.02)

@@ -43,5 +43,19 @@ export const programDetails = gql`
         level
       }
     }
+    registrationImports {
+      totalCount
+    }
+    targetPopulationsCount
+    pduFields {
+      id
+      label
+      pduData {
+        id
+        subtype
+        numberOfRounds
+        roundsNames
+      }
+    }
   }
 `;

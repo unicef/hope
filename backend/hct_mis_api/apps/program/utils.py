@@ -1,12 +1,13 @@
 import re
+from random import randint
 from typing import Dict, List, Optional
 
 from django.conf import settings
 from django.db import transaction
 from django.db.models import Q, QuerySet
 
-from hct_mis_api.apps.account.models import Partner
-from hct_mis_api.apps.core.models import DataCollectingType
+from hct_mis_api.apps.account.models import Partner, User
+from hct_mis_api.apps.core.models import DataCollectingType, FlexibleAttribute
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
 from hct_mis_api.apps.household.models import (
@@ -20,6 +21,7 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
+from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hct_mis_api.apps.program.models import Program, ProgramCycle, ProgramPartnerThrough
 from hct_mis_api.apps.program.validators import validate_data_collecting_type
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
@@ -27,7 +29,7 @@ from hct_mis_api.apps.utils.elasticsearch_utils import populate_index
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
 
-def copy_program_object(copy_from_program_id: str, program_data: dict) -> Program:
+def copy_program_object(copy_from_program_id: str, program_data: dict, user: User) -> Program:
     program = Program.objects.get(id=copy_from_program_id)
     admin_areas = program.admin_areas.all()
     program.pk = None
@@ -50,6 +52,14 @@ def copy_program_object(copy_from_program_id: str, program_data: dict) -> Progra
     program.save()
     program.admin_areas.set(admin_areas)
     program.refresh_from_db()
+
+    # create default cycle
+    ProgramCycle.objects.create(
+        program_id=program.id,
+        start_date=program.start_date,
+        end_date=None,
+        created_by=user,
+    )
     return program
 
 
@@ -59,9 +69,9 @@ class CopyProgramPopulation:
         copy_from_individuals: QuerySet[Individual],
         copy_from_households: QuerySet[Household],
         program: Program,
+        rdi: RegistrationDataImport,
         rdi_merge_status: str = MergeStatusModel.MERGED,
         create_collection: bool = True,
-        rdi: Optional[RegistrationDataImport] = None,
     ):
         """
         copy_from_individuals: QuerySet of Individuals to copy
@@ -87,12 +97,15 @@ class CopyProgramPopulation:
             else:
                 individuals = self.copy_individuals_without_collections()
                 households = self.copy_households_without_collections(individuals)
+
             self.copy_household_related_data(households, individuals)
             self.copy_individual_related_data(individuals)
 
     def copy_individual(self, individual: Individual) -> Individual:
         copied_from_pk = individual.pk
         individual.pk = None
+        copied_flex_fields = get_flex_fields_without_pdu_values(individual)
+        individual.flex_fields = populate_pdu_with_null_values(self.program, copied_flex_fields)
         individual.program = self.program
         individual.copied_from_id = copied_from_pk
         individual.registration_data_import = self.rdi
@@ -173,13 +186,8 @@ class CopyProgramPopulation:
             role.pk = None
             role.household = new_household
             role.rdi_merge_status = self.rdi_merge_status
-            role.individual = (
-                getattr(Individual, self.manager)
-                .filter(id__in=[ind.pk for ind in new_individuals])
-                .get(
-                    program=self.program,
-                    copied_from=role.individual,
-                )
+            role.individual = next(
+                filter(lambda ind: ind.program == self.program and ind.copied_from == role.individual, new_individuals)
             )
             roles_in_household.append(role)
         return roles_in_household
@@ -299,17 +307,31 @@ class CopyProgramPopulation:
         return bank_accounts_info_list
 
 
-def copy_program_related_data(copy_from_program_id: str, new_program: Program) -> None:
+def copy_program_related_data(copy_from_program_id: str, new_program: Program, user_id: str) -> None:
     copy_from_individuals = Individual.objects.filter(program_id=copy_from_program_id, withdrawn=False, duplicate=False)
     copy_from_households = Household.objects.filter(
         program_id=copy_from_program_id,
         withdrawn=False,
     )
-
+    rdi = RegistrationDataImport.objects.create(
+        name=f"Default RDI for Programme: {new_program.name}",
+        status=RegistrationDataImport.MERGED,
+        deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_PENDING
+        if new_program.biometric_deduplication_enabled
+        else None,
+        imported_by=User.objects.get(id=user_id),
+        data_source=RegistrationDataImport.PROGRAM_POPULATION,
+        number_of_individuals=copy_from_individuals.count(),
+        number_of_households=copy_from_households.count(),
+        business_area=new_program.business_area,
+        program_id=new_program.id,
+        import_data=None,
+    )
     CopyProgramPopulation(
         copy_from_individuals,
         copy_from_households,
         new_program,
+        rdi,
     ).copy_program_population()
 
     populate_index(
@@ -318,19 +340,10 @@ def copy_program_related_data(copy_from_program_id: str, new_program: Program) -
     )
     populate_index(Household.objects.filter(program=new_program), HouseholdDocument)
 
-    create_program_cycle(new_program)
 
-
-def create_program_cycle(program: Program) -> None:
-    ProgramCycle.objects.create(
-        program=program,
-        start_date=program.start_date,
-        end_date=program.end_date,
-        status=ProgramCycle.ACTIVE,
-    )
-
-
-def create_roles_for_new_representation(new_household: Household, program: Program) -> None:
+def create_roles_for_new_representation(
+    new_household: Household, program: Program, rdi: RegistrationDataImport
+) -> None:
     old_roles = IndividualRoleInHousehold.objects.filter(
         household=new_household.copied_from,
     )
@@ -350,7 +363,7 @@ def create_roles_for_new_representation(new_household: Household, program: Progr
                 documents_to_create_batch,
                 identities_to_create_batch,
                 bank_account_info_to_create_batch,
-            ) = copy_individual(role.individual, program)
+            ) = copy_individual(role.individual, program, rdi)
 
             individuals_to_create.append(individual_representation)
             documents_to_create.extend(documents_to_create_batch)
@@ -369,13 +382,27 @@ def create_roles_for_new_representation(new_household: Household, program: Progr
     IndividualRoleInHousehold.objects.bulk_create(roles_to_create)
 
 
-def enroll_households_to_program(households: QuerySet, program: Program) -> None:
+def enroll_households_to_program(households: QuerySet, program: Program, user_id: str) -> None:
     households_to_exclude = Household.objects.filter(
         program=program,
         unicef_id__in=households.values_list("unicef_id", flat=True),
     ).values_list("unicef_id", flat=True)
     households = households.exclude(unicef_id__in=households_to_exclude).prefetch_related("entitlement_cards")
     error_messages = []
+    rdi = RegistrationDataImport.objects.create(
+        status=RegistrationDataImport.MERGED,
+        deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_PENDING
+        if program.biometric_deduplication_enabled
+        else None,
+        imported_by=User.objects.get(id=user_id),
+        data_source=RegistrationDataImport.ENROLL_FROM_PROGRAM,
+        number_of_individuals=0,
+        number_of_households=0,
+        business_area=program.business_area,
+        pull_pictures=False,
+        program_id=program.id,
+        name=generate_rdi_unique_name(program),
+    )
     for household in households:
         try:
             with transaction.atomic():
@@ -407,7 +434,7 @@ def enroll_households_to_program(households: QuerySet, program: Program) -> None
                         documents_to_create_batch,
                         identities_to_create_batch,
                         bank_account_info_to_create_batch,
-                    ) = copy_individual(individual, program)
+                    ) = copy_individual(individual, program, rdi)
                     documents_to_create.extend(documents_to_create_batch)
                     identities_to_create.extend(identities_to_create_batch)
                     bank_account_info_to_create.extend(bank_account_info_to_create_batch)
@@ -425,7 +452,7 @@ def enroll_households_to_program(households: QuerySet, program: Program) -> None
                 household.pk = None
                 household.program = program
                 household.is_original = False
-                household.registration_data_import = None
+                household.registration_data_import = rdi
                 household.total_cash_received = None
                 household.total_cash_received_usd = None
 
@@ -442,7 +469,7 @@ def enroll_households_to_program(households: QuerySet, program: Program) -> None
                 ids_to_update = [x.pk for x in individuals_to_create] + external_collectors_id_to_update
                 Individual.objects.filter(id__in=ids_to_update).update(household=household)
 
-                create_roles_for_new_representation(household, program)
+                create_roles_for_new_representation(household, program, rdi)
         except Exception as e:
             error_message = str(e)
             if "unique_if_not_removed_and_valid_for_representations" in error_message:
@@ -456,11 +483,13 @@ def enroll_households_to_program(households: QuerySet, program: Program) -> None
                 if detail_index != -1:
                     error_message = error_message[:detail_index].strip()
             error_messages.append(f"{household.unicef_id}: {error_message}")
+    rdi.refresh_population_statistics()
+    rdi.bulk_update_household_size()
     if error_messages:
         raise Exception("Following households failed to be enrolled: \n" + "\n".join(error_messages))
 
 
-def copy_individual(individual: Individual, program: Program) -> tuple:
+def copy_individual(individual: Individual, program: Program, rdi: RegistrationDataImport) -> tuple:
     documents = list(individual.documents.all())
     identities = list(individual.identities.all())
     bank_accounts_info = list(individual.bank_account_info.all())
@@ -471,9 +500,11 @@ def copy_individual(individual: Individual, program: Program) -> tuple:
     original_individual_id = individual.id
     individual.copied_from_id = original_individual_id
     individual.pk = None
+    individual.flex_fields = get_flex_fields_without_pdu_values(individual)
+    populate_pdu_with_null_values(program, individual.flex_fields)
     individual.program = program
     individual.household = None
-    individual.registration_data_import = None
+    individual.registration_data_import = rdi
 
     documents_to_create = CopyProgramPopulation.copy_document_per_individual(documents, individual)
     identities_to_create = CopyProgramPopulation.copy_individual_identity_per_individual(identities, individual)
@@ -517,3 +548,24 @@ def remove_program_partner_access(partners_data: List, program: Program) -> None
         Q(partner_id__in=partner_ids) | Q(partner__name="UNICEF")
     )
     removed_partner_access.delete()
+
+
+def get_flex_fields_without_pdu_values(individual: Individual) -> dict:
+    flex_fields = individual.flex_fields
+    flex_fields_without_pdu = {}
+    for flex_field in flex_fields:
+        if FlexibleAttribute.objects.filter(
+            name=flex_field, program=individual.program, type=FlexibleAttribute.PDU
+        ).exists():
+            continue
+        else:
+            flex_fields_without_pdu[flex_field] = flex_fields[flex_field]
+    return flex_fields_without_pdu
+
+
+def generate_rdi_unique_name(program: Program) -> str:
+    # add random 4 digits if needed and check if exists RDI name
+    default_name = f"RDI for enroll households to Programme: {program.name}"
+    while RegistrationDataImport.objects.filter(business_area=program.business_area, name=default_name).exists():
+        default_name = f"{default_name} ({randint(1000, 9999)})"
+    return default_name

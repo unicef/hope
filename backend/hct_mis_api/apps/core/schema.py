@@ -37,6 +37,7 @@ from hct_mis_api.apps.core.models import (
     FlexibleAttribute,
     FlexibleAttributeChoice,
     FlexibleAttributeGroup,
+    PeriodicFieldData,
 )
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.program.models import Program
@@ -61,6 +62,11 @@ class DataCollectingTypeChoiceObject(graphene.ObjectType):
     name = String()
     value = String()
     description = String()
+
+
+class PDUSubtypeChoiceObject(graphene.ObjectType):
+    value = String()
+    display_name = String()
 
 
 class BusinessAreaNode(DjangoObjectType):
@@ -112,6 +118,7 @@ class FlexibleAttributeNode(DjangoObjectType):
             "label",
             "hint",
             "required",
+            "pdu_data",
         ]
 
 
@@ -159,6 +166,17 @@ def sort_by_attr(options: Iterable, attrs: str) -> List:
     return list(sorted(options, key=key_extractor))
 
 
+class PeriodicFieldDataNode(DjangoObjectType):
+    class Meta:
+        model = PeriodicFieldData
+        fields = (
+            "id",
+            "subtype",
+            "number_of_rounds",
+            "rounds_names",
+        )
+
+
 class FieldAttributeNode(graphene.ObjectType):
     class Meta:
         default_resolver = _custom_dict_or_attr_resolver
@@ -173,6 +191,13 @@ class FieldAttributeNode(graphene.ObjectType):
     choices = graphene.List(CoreFieldChoiceObject)
     associated_with = graphene.String()
     is_flex_field = graphene.Boolean()
+    pdu_data = graphene.Field(PeriodicFieldDataNode, required=False)
+
+    @staticmethod
+    def resolve_pdu_data(parent: Union[Dict, FlexibleAttribute], info: Any) -> Optional[PeriodicFieldData]:
+        if isinstance(parent, FlexibleAttribute):
+            return parent.pdu_data
+        return None
 
     def resolve_choices(parent, info: Any) -> List:
         choices = _custom_dict_or_attr_resolver("choices", None, parent, info)
@@ -267,7 +292,9 @@ def get_fields_attr_generators(
     flex_field: Optional[bool] = None, business_area_slug: Optional[str] = None, program_id: Optional[str] = None
 ) -> Generator:
     if flex_field is not False:
-        yield from FlexibleAttribute.objects.order_by("created_at")
+        yield from FlexibleAttribute.objects.filter(Q(program__isnull=True) | Q(program__id=program_id)).order_by(
+            "created_at"
+        )
     if flex_field is not True:
         if program_id and Program.objects.get(id=program_id).is_social_worker_program:
             yield from FieldFactory.from_only_scopes([Scope.XLSX_PEOPLE, Scope.TARGETING]).filtered_by_types(
@@ -330,6 +357,12 @@ class Query(graphene.ObjectType):
         program_id=graphene.String(required=False, description="program id"),
         description="All field datatype meta.",
     )
+    all_pdu_fields = graphene.List(
+        FieldAttributeNode,
+        business_area_slug=graphene.String(required=True, description="The business area slug"),
+        program_id=graphene.String(required=True, description="program id"),
+        description="All pdu fields.",
+    )
     all_groups_with_fields = graphene.List(
         GroupAttributeNode,
         description="Get all groups that contains flex fields",
@@ -352,12 +385,20 @@ class Query(graphene.ObjectType):
     )
     data_collecting_type = relay.Node.Field(DataCollectingTypeNode)
     data_collection_type_choices = graphene.List(DataCollectingTypeChoiceObject)
+    pdu_subtype_choices = graphene.List(PDUSubtypeChoiceObject)
 
     def resolve_business_area(parent, info: Any, business_area_slug: str) -> BusinessArea:
         return BusinessArea.objects.get(slug=business_area_slug)
 
     def resolve_cash_assist_url_prefix(parent, info: Any) -> str:
         return config.CASH_ASSIST_URL_PREFIX
+
+    def resolve_all_pdu_fields(parent, info: Any, business_area_slug: str, program_id: str) -> Dict:
+        return FlexibleAttribute.objects.filter(
+            program__business_area__slug=business_area_slug,
+            program_id=decode_id_string(program_id),
+            type=FlexibleAttribute.PDU,
+        )
 
     def resolve_all_fields_attributes(
         parent,
@@ -436,3 +477,13 @@ class Query(graphene.ObjectType):
                 }
             )
         return result
+
+    def resolve_pdu_subtype_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+        return [{"value": choice[0], "display_name": choice[1]} for choice in PeriodicFieldData.TYPE_CHOICES]
+
+
+class PeriodicFieldNode(DjangoObjectType):
+    class Meta:
+        model = FlexibleAttribute
+        fields = ["name", "label", "pdu_data"]
+        interfaces = (relay.Node,)

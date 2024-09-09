@@ -11,6 +11,7 @@ snapshots['TestRegistrationDataImportDatahubMutations::test_registration_data_im
     'data': {
         'registrationXlsxImport': {
             'registrationDataImport': {
+                'deduplicationEngineStatus': 'PENDING',
                 'name': 'New Import of Data 123',
                 'numberOfHouseholds': 3,
                 'numberOfIndividuals': 6,
@@ -105,6 +106,40 @@ snapshots['TestRegistrationDataImportDatahubMutations::test_registration_data_im
             'message': 'Permission Denied: User does not have correct permission.',
             'path': [
                 'uploadImportDataXlsxFileAsync'
+            ]
+        }
+    ]
+}
+
+snapshots['TestRegistrationDataImportDatahubMutations::test_save_kobo_project_import_data_async_0_with_permission 1'] = {
+    'data': {
+        'saveKoboImportDataAsync': {
+            'importData': {
+                'koboAssetId': '123',
+                'koboValidationErrors': [
+                ],
+                'onlyActiveSubmissions': True,
+                'pullPictures': False
+            }
+        }
+    }
+}
+
+snapshots['TestRegistrationDataImportDatahubMutations::test_save_kobo_project_import_data_async_1_without_permission 1'] = {
+    'data': {
+        'saveKoboImportDataAsync': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 8
+                }
+            ],
+            'message': 'Permission Denied: User does not have correct permission.',
+            'path': [
+                'saveKoboImportDataAsync'
             ]
         }
     ]

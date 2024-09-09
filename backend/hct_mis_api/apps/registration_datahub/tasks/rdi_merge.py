@@ -38,7 +38,11 @@ from hct_mis_api.apps.registration_data.models import (
     KoboImportedSubmission,
     RegistrationDataImport,
 )
-from hct_mis_api.apps.registration_datahub.celery_tasks import deduplicate_documents
+from hct_mis_api.apps.registration_datahub.celery_tasks import (
+    create_grievance_tickets_for_dedup_engine_results,
+    deduplicate_documents,
+    update_rdis_deduplication_engine_statistics,
+)
 from hct_mis_api.apps.registration_datahub.signals import rdi_merged
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
@@ -205,7 +209,7 @@ class RdiMergeTask:
                 if not delivery_mechanism_data.is_valid:
                     description = (
                         f"Fields not unique {list(delivery_mechanism_data.validation_errors.keys())} across program"
-                        f" for delivery mechanism {delivery_mechanism_data.delivery_mechanism}, possible duplicate of {delivery_mechanism_data.possible_duplicate_of}"
+                        f" for delivery mechanism {delivery_mechanism_data.delivery_mechanism.name}, possible duplicate of {delivery_mechanism_data.possible_duplicate_of}"
                     )
                     (
                         grievance_ticket,
@@ -237,7 +241,7 @@ class RdiMergeTask:
             individual_ids = list(individuals.values_list("id", flat=True))
             household_ids = list(households.values_list("id", flat=True))
             try:
-                with transaction.atomic(using="default"):
+                with transaction.atomic():
                     old_obj_hct = copy_model_object(obj_hct)
 
                     transaction.on_commit(lambda: recalculate_population_fields_task(household_ids, obj_hct.program_id))
@@ -289,6 +293,7 @@ class RdiMergeTask:
                             "duplicates",
                             obj_hct.business_area,
                             registration_data_import=obj_hct,
+                            issue_type=GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
                         )
                         logger.info(
                             f"RDI:{registration_data_import_id} Created tickets for {len(golden_record_duplicates)} duplicates"
@@ -306,6 +311,7 @@ class RdiMergeTask:
                             "possible_duplicates",
                             obj_hct.business_area,
                             registration_data_import=obj_hct,
+                            issue_type=GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
                         )
                         logger.info(
                             f"RDI:{registration_data_import_id} Created tickets for {len(needs_adjudication)} needs adjudication"
@@ -356,7 +362,16 @@ class RdiMergeTask:
                     )
                     populate_index(Household.objects.filter(registration_data_import=obj_hct), HouseholdDocument)
                     logger.info(f"RDI:{registration_data_import_id} Saved registration data import")
+
                     transaction.on_commit(lambda: deduplicate_documents.delay())
+                    if obj_hct.program.biometric_deduplication_enabled:
+                        transaction.on_commit(
+                            lambda: create_grievance_tickets_for_dedup_engine_results.delay(obj_hct.id)
+                        )
+                        transaction.on_commit(
+                            lambda: update_rdis_deduplication_engine_statistics.delay(obj_hct.program.id)
+                        )
+
                     rdi_merged.send(sender=obj_hct.__class__, instance=obj_hct)
                     log_create(
                         RegistrationDataImport.ACTIVITY_LOG_MAPPING,

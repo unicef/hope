@@ -1,5 +1,6 @@
 from typing import Any, List
 
+import freezegun
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import (
@@ -9,13 +10,22 @@ from hct_mis_api.apps.account.fixtures import (
 )
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
+from hct_mis_api.apps.core.fixtures import (
+    FlexibleAttributeForPDUFactory,
+    PeriodicFieldDataFactory,
+    create_afghanistan,
+)
+from hct_mis_api.apps.core.models import (
+    BusinessArea,
+    DataCollectingType,
+    PeriodicFieldData,
+)
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
 
+@freezegun.freeze_time("2019-01-01")
 class TestCreateProgram(APITestCase):
     CREATE_PROGRAM_MUTATION = """
     mutation CreateProgram($programData: CreateProgramInput!) {
@@ -48,6 +58,15 @@ class TestCreateProgram(APITestCase):
             areaAccess
           }
           partnerAccess
+          pduFields {
+            name
+            label
+            pduData {
+              subtype
+              numberOfRounds
+              roundsNames
+            }
+          }
         }
         validationErrors
       }
@@ -107,9 +126,11 @@ class TestCreateProgram(APITestCase):
         )
         cls.area_type_other = AreaTypeFactory(name="Area Type Other", country=country_other)
 
-        cls.area_in_afg_1 = AreaFactory(name="Area in AFG 1", area_type=area_type_afg)
-        cls.area_in_afg_2 = AreaFactory(name="Area in AFG 2", area_type=area_type_afg)
-        cls.area_not_in_afg = AreaFactory(name="Area not in AFG", area_type=cls.area_type_other)
+        cls.area_in_afg_1 = AreaFactory(name="Area in AFG 1", area_type=area_type_afg, p_code="AREA-IN-AFG1")
+        cls.area_in_afg_2 = AreaFactory(name="Area in AFG 2", area_type=area_type_afg, p_code="AREA-IN-AFG2")
+        cls.area_not_in_afg = AreaFactory(
+            name="Area not in AFG", area_type=cls.area_type_other, p_code="AREA-NOT-IN-AFG"
+        )
 
     def test_create_program_not_authenticated(self) -> None:
         self.snapshot_graphql_request(request_string=self.CREATE_PROGRAM_MUTATION, variables=self.program_data)
@@ -242,8 +263,8 @@ class TestCreateProgram(APITestCase):
     )
     def test_create_program_with_partners(self, _: Any, partner_access: str) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
-        area1 = AreaFactory(name="North Brianmouth", area_type=self.area_type_other)
-        area2 = AreaFactory(name="South Catherine", area_type=self.area_type_other)
+        area1 = AreaFactory(name="North Brianmouth", area_type=self.area_type_other, p_code="NORTH-B")
+        area2 = AreaFactory(name="South Catherine", area_type=self.area_type_other, p_code="SOUTH-C")
         partner2 = PartnerFactory(name="New Partner")
         self.program_data["programData"]["partners"] = [
             {
@@ -360,6 +381,128 @@ class TestCreateProgram(APITestCase):
     def test_create_program_with_programme_code_greater_than_4_chars(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
         self.program_data["programData"]["programmeCode"] = "AbCd2"
+
+        self.snapshot_graphql_request(
+            request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=self.program_data
+        )
+
+    def test_create_program_with_pdu_fields(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
+        self.program_data["programData"]["pduFields"] = [
+            {
+                "label": "PDU Field 1",
+                "pduData": {
+                    "subtype": "DECIMAL",
+                    "numberOfRounds": 3,
+                    "roundsNames": ["Round 1", "Round 2", "Round 3"],
+                },
+            },
+            {
+                "label": "PDU Field 2",
+                "pduData": {
+                    "subtype": "STRING",
+                    "numberOfRounds": 1,
+                    "roundsNames": ["Round *"],
+                },
+            },
+            {
+                "label": "PDU Field 3",
+                "pduData": {
+                    "subtype": "DATE",
+                    "numberOfRounds": 2,
+                    "roundsNames": ["Round A", "Round B"],
+                },
+            },
+            {
+                "label": "PDU Field 4",
+                "pduData": {
+                    "subtype": "BOOL",
+                    "numberOfRounds": 4,
+                    "roundsNames": ["Round 1A", "Round 2B", "Round 3C", "Round 4D"],
+                },
+            },
+        ]
+
+        self.snapshot_graphql_request(
+            request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=self.program_data
+        )
+
+    def test_create_program_with_pdu_fields_invalid_data(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
+        # pdu data with mismatched number of rounds and rounds names
+        self.program_data["programData"]["pduFields"] = [
+            {
+                "label": "PDU Field 1",
+                "pduData": {
+                    "subtype": "DECIMAL",
+                    "numberOfRounds": 3,
+                    "roundsNames": ["Round 1", "Round 2", "Round 3"],
+                },
+            },
+            {
+                "label": "PDU Field 2 Invalid",
+                "pduData": {
+                    "subtype": "STRING",
+                    "numberOfRounds": 1,
+                    "roundsNames": ["Round *", "Round 2*"],
+                },
+            },
+        ]
+
+        self.snapshot_graphql_request(
+            request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=self.program_data
+        )
+
+    def test_create_program_with_pdu_fields_duplicated_field_names_in_input(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
+        # pdu data with duplicated field names in the input
+        self.program_data["programData"]["pduFields"] = [
+            {
+                "label": "PDU Field 1",
+                "pduData": {
+                    "subtype": "DECIMAL",
+                    "numberOfRounds": 3,
+                    "roundsNames": ["Round 1", "Round 2", "Round 3"],
+                },
+            },
+            {
+                "label": "PDU Field 1",
+                "pduData": {
+                    "subtype": "STRING",
+                    "numberOfRounds": 2,
+                    "roundsNames": ["Round *", "Round 2*"],
+                },
+            },
+        ]
+
+        self.snapshot_graphql_request(
+            request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=self.program_data
+        )
+
+    def test_create_program_with_pdu_fields_existing_field_name_in_different_program(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
+        # pdu data with field name that already exists in the database but in different program -> no fail
+        pdu_data = PeriodicFieldDataFactory(
+            subtype=PeriodicFieldData.DATE,
+            number_of_rounds=1,
+            rounds_names=["Round 1"],
+        )
+        program = ProgramFactory(business_area=self.business_area, name="Test Program 1")
+        FlexibleAttributeForPDUFactory(
+            program=program,
+            label="PDU Field 1",
+            pdu_data=pdu_data,
+        )
+        self.program_data["programData"]["pduFields"] = [
+            {
+                "label": "PDU Field 1",
+                "pduData": {
+                    "subtype": "DECIMAL",
+                    "numberOfRounds": 3,
+                    "roundsNames": ["Round 1", "Round 2", "Round 3"],
+                },
+            },
+        ]
 
         self.snapshot_graphql_request(
             request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=self.program_data

@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Any, Optional, Union
 
 from django import forms
 from django.contrib import admin, messages
@@ -16,8 +16,13 @@ from adminfilters.mixin import AdminAutoCompleteSearchMixin
 
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.geo.models import Area
+from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
 from hct_mis_api.apps.household.forms import CreateTargetPopulationTextForm
+from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.program.models import Program, ProgramCycle, ProgramPartnerThrough
+from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import (
+    BiometricDeduplicationService,
+)
 from hct_mis_api.apps.targeting.celery_tasks import create_tp_from_list
 from hct_mis_api.apps.targeting.models import TargetingCriteria
 from hct_mis_api.apps.utils.admin import (
@@ -25,15 +30,20 @@ from hct_mis_api.apps.utils.admin import (
     LastSyncDateResetMixin,
     SoftDeletableAdminMixin,
 )
+from hct_mis_api.apps.utils.elasticsearch_utils import populate_index
 from mptt.forms import TreeNodeMultipleChoiceField
 
 
 @admin.register(ProgramCycle)
 class ProgramCycleAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, HOPEModelAdminBase):
-    list_display = ("program", "iteration", "status", "start_date", "end_date")
-    date_hierarchy = "program__start_date"
-    list_filter = (("status", ChoicesFieldComboFilter),)
-    raw_id_fields = ("program",)
+    list_display = ("program", "status", "start_date", "end_date")
+    date_hierarchy = "start_date"
+    list_filter = (
+        ("status", ChoicesFieldComboFilter),
+        ("program", AutoCompleteFilter),
+    )
+    raw_id_fields = ("program", "created_by")
+    exclude = ("unicef_id",)
 
 
 class ProgramCycleAdminInline(admin.TabularInline):
@@ -43,6 +53,7 @@ class ProgramCycleAdminInline(admin.TabularInline):
         "created_at",
         "updated_at",
     )
+    exclude = ("unicef_id",)
 
 
 class PartnerAreaForm(forms.Form):
@@ -66,6 +77,17 @@ class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, AdminAutoCom
 
     inlines = (ProgramCycleAdminInline,)
     ordering = ("name",)
+
+    def save_model(self, request: HttpRequest, obj: Program, *args: Any) -> None:
+        if obj.pk:
+            original = Program.objects.get(pk=obj.pk)
+            if original.biometric_deduplication_enabled != obj.biometric_deduplication_enabled:
+                service = BiometricDeduplicationService()
+                if obj.biometric_deduplication_enabled:
+                    service.mark_rdis_as_pending(obj)
+                else:
+                    service.delete_deduplication_set(obj)
+        super().save_model(request, obj, *args)
 
     def get_queryset(self, request: HttpRequest) -> QuerySet[Program]:
         return super().get_queryset(request).select_related("data_collecting_type", "business_area")
@@ -159,3 +181,14 @@ class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, AdminAutoCom
             return TemplateResponse(request, "admin/program/program/program_partner_access.html", context)
         else:
             return TemplateResponse(request, "admin/program/program/program_partner_access_readonly.html", context)
+
+    @button(permission="account.can_reindex_programs")
+    def reindex_program(self, request: HttpRequest, pk: int) -> HttpResponseRedirect:
+        program = Program.objects.get(pk=pk)
+        populate_index(
+            Individual.all_merge_status_objects.filter(program=program),
+            get_individual_doc(program.business_area.slug),
+        )
+        populate_index(Household.all_merge_status_objects.filter(program=program), HouseholdDocument)
+        messages.success(request, f"Program {program.name} reindexed.")
+        return HttpResponseRedirect(reverse("admin:program_program_changelist"))

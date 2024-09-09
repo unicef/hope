@@ -7,14 +7,21 @@ from django.core.management import call_command
 
 import openpyxl
 import pytest
+from parameterized import parameterized
 
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
-    CORE_FIELDS_ATTRIBUTES,
+    get_core_fields_attributes,
 )
-from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.fixtures import (
+    create_afghanistan,
+    create_pdu_flexible_attribute,
+)
+from hct_mis_api.apps.core.models import DataCollectingType, PeriodicFieldData
 from hct_mis_api.apps.core.utils import SheetImageLoader
 from hct_mis_api.apps.geo.fixtures import CountryFactory
+from hct_mis_api.apps.payment.fixtures import generate_delivery_mechanisms
+from hct_mis_api.apps.program.fixtures import get_program_with_dct_type_and_name
 from hct_mis_api.apps.registration_datahub.validators import UploadXLSXInstanceValidator
 
 
@@ -27,17 +34,20 @@ class TestXLSXValidatorsMethods(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         call_command("loadflexfieldsattributes")
+        generate_delivery_mechanisms()
 
         cls.business_area = create_afghanistan()
+        cls.program = get_program_with_dct_type_and_name()
+        cls.social_worker_program = get_program_with_dct_type_and_name(dct_type=DataCollectingType.Type.SOCIAL)
         cls.country = CountryFactory()
         cls.business_area.countries.add(cls.country)
 
     def test_string_validator(self) -> None:
-        validator = UploadXLSXInstanceValidator()
+        validator = UploadXLSXInstanceValidator(self.program)
         self.assertTrue(validator.string_validator("Marek", "full_name_i_c"))
 
     def test_float_validator(self) -> None:
-        validator = UploadXLSXInstanceValidator()
+        validator = UploadXLSXInstanceValidator(self.program)
         self.assertFalse(validator.float_validator(None, "estimated_birth_date_i_c"))
         self.assertTrue(validator.float_validator(None, "age_at_registration"))
         self.assertTrue(validator.float_validator(1.1, "estimated_birth_date_i_c"))
@@ -50,7 +60,7 @@ class TestXLSXValidatorsMethods(APITestCase):
             "0.0, 0.0",
             "54.1234252, 67.535232",
         )
-        upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
+        upload_xlsx_instance_validator = UploadXLSXInstanceValidator(self.program)
         for value in correct_values:
             self.assertTrue(upload_xlsx_instance_validator.geolocation_validator(value, "hh_geopoint_h_c"))
 
@@ -61,7 +71,7 @@ class TestXLSXValidatorsMethods(APITestCase):
             "52.124.124, 1241.242",
             "24.121a, bcd421.222",
         )
-        upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
+        upload_xlsx_instance_validator = UploadXLSXInstanceValidator(self.program)
         for value in incorrect_values:
             self.assertFalse(upload_xlsx_instance_validator.geolocation_validator(value, "hh_geopoint_h_c"))
 
@@ -75,7 +85,7 @@ class TestXLSXValidatorsMethods(APITestCase):
             "27.12.2020",
             "27.12.2020",
         )
-        upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
+        upload_xlsx_instance_validator = UploadXLSXInstanceValidator(self.program)
         for value in correct_values:
             self.assertTrue(upload_xlsx_instance_validator.date_validator(value, "birth_date_i_c"))
 
@@ -87,7 +97,7 @@ class TestXLSXValidatorsMethods(APITestCase):
             "24",
             "-24",
         )
-        upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
+        upload_xlsx_instance_validator = UploadXLSXInstanceValidator(self.program)
         for value in incorrect_values:
             self.assertFalse(upload_xlsx_instance_validator.date_validator(value, "birth_date_i_c"))
 
@@ -101,7 +111,7 @@ class TestXLSXValidatorsMethods(APITestCase):
             12345,
             -12,
         )
-        upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
+        upload_xlsx_instance_validator = UploadXLSXInstanceValidator(self.program)
         for value in correct_values:
             self.assertTrue(upload_xlsx_instance_validator.integer_validator(value, "size_h_c"))
 
@@ -114,7 +124,7 @@ class TestXLSXValidatorsMethods(APITestCase):
             "12,242",
         )
 
-        upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
+        upload_xlsx_instance_validator = UploadXLSXInstanceValidator(self.program)
         for value in incorrect_values:
             self.assertFalse(upload_xlsx_instance_validator.integer_validator(value, "size_h_c"))
 
@@ -129,7 +139,7 @@ class TestXLSXValidatorsMethods(APITestCase):
             "+353 20 915 8245",
             "+48 69 563 7300",
         )
-        upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
+        upload_xlsx_instance_validator = UploadXLSXInstanceValidator(self.program)
         for value in correct_values:
             self.assertTrue(upload_xlsx_instance_validator.phone_validator(value, "phone_no_i_c"))
 
@@ -145,7 +155,7 @@ class TestXLSXValidatorsMethods(APITestCase):
             12,
         )
 
-        upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
+        upload_xlsx_instance_validator = UploadXLSXInstanceValidator(self.program)
         for value in incorrect_values:
             self.assertFalse(upload_xlsx_instance_validator.phone_validator(value, "phone_no_i_c"))
 
@@ -157,11 +167,11 @@ class TestXLSXValidatorsMethods(APITestCase):
             ("Hearing Problems", "disability"),
             ("Option 37", "assistance_type_h_f"),
         )
-        upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
+        upload_xlsx_instance_validator = UploadXLSXInstanceValidator(self.program)
         for value, header in test_correct_values:
             self.assertTrue(upload_xlsx_instance_validator.choice_validator(value, header))
 
-        upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
+        upload_xlsx_instance_validator = UploadXLSXInstanceValidator(self.program)
         for value, header in test_incorrect_values:
             self.assertFalse(upload_xlsx_instance_validator.choice_validator(value, header))
 
@@ -170,7 +180,7 @@ class TestXLSXValidatorsMethods(APITestCase):
             f"{self.FILES_DIR_PATH}/error-xlsx.xlsx",
             data_only=True,
         )
-        upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
+        upload_xlsx_instance_validator = UploadXLSXInstanceValidator(self.program)
         upload_xlsx_instance_validator.rows_validator(wb["Households"])
         upload_xlsx_instance_validator.errors = []
         upload_xlsx_instance_validator.rows_validator(wb["Individuals"])
@@ -443,7 +453,7 @@ class TestXLSXValidatorsMethods(APITestCase):
         )
         files = (invalid_file, valid_file)
         for file in files:
-            upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
+            upload_xlsx_instance_validator = UploadXLSXInstanceValidator(self.program)
             for sheet, expected_values in file:
                 upload_xlsx_instance_validator.image_loader = SheetImageLoader(sheet)
                 upload_xlsx_instance_validator.errors = []
@@ -456,12 +466,12 @@ class TestXLSXValidatorsMethods(APITestCase):
             [{"row_number": 1, "message": "Only .xlsx files are accepted for import"}],
         )
         with open(file_path, "rb") as file:
-            upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
+            upload_xlsx_instance_validator = UploadXLSXInstanceValidator(self.program)
             upload_xlsx_instance_validator.validate_file_extension(file)
             self.assertEqual(upload_xlsx_instance_validator.errors[0]["row_number"], expected_values[0]["row_number"])
             self.assertEqual(upload_xlsx_instance_validator.errors[0]["message"], expected_values[0]["message"])
 
-            upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
+            upload_xlsx_instance_validator = UploadXLSXInstanceValidator(self.program)
             errors, delivery_mechanisms_errors = upload_xlsx_instance_validator.validate_everything(file, "afghanistan")
             self.assertEqual(errors[0]["row_number"], expected_values[0]["row_number"])
             self.assertEqual(errors[0]["message"], expected_values[0]["message"])
@@ -473,7 +483,7 @@ class TestXLSXValidatorsMethods(APITestCase):
             [{"row_number": 1, "message": "Invalid .xlsx file"}],
         )
         with open(file_path, "rb") as file:
-            upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
+            upload_xlsx_instance_validator = UploadXLSXInstanceValidator(self.program)
             result, _ = upload_xlsx_instance_validator.validate_everything(file, "afghanistan")
             self.assertEqual(result[0]["row_number"], expected_values[0]["row_number"])
             self.assertEqual(result[0]["message"], expected_values[0]["message"])
@@ -481,7 +491,7 @@ class TestXLSXValidatorsMethods(APITestCase):
     def test_validate_file_with_template(self) -> None:
         invalid_cols_file_path = f"{self.FILES_DIR_PATH}/new_reg_data_import.xlsx"
         with open(invalid_cols_file_path, "rb") as file:
-            upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
+            upload_xlsx_instance_validator = UploadXLSXInstanceValidator(self.program)
             wb = openpyxl.load_workbook(file, data_only=True)
             upload_xlsx_instance_validator.validate_file_with_template(wb)
             errors = upload_xlsx_instance_validator.errors
@@ -493,7 +503,7 @@ class TestXLSXValidatorsMethods(APITestCase):
             "hct_mis_api.apps.registration_datahub.validators.UploadXLSXInstanceValidator.get_all_fields",
             lambda *args: {"test": {"required": True}},
         ):
-            upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
+            upload_xlsx_instance_validator = UploadXLSXInstanceValidator(self.program)
             result = upload_xlsx_instance_validator.required_validator(value="tak", header="test")
             self.assertTrue(result)
 
@@ -501,7 +511,7 @@ class TestXLSXValidatorsMethods(APITestCase):
             "hct_mis_api.apps.registration_datahub.validators.UploadXLSXInstanceValidator.get_all_fields",
             lambda *args: {"test": {"required": True}},
         ):
-            upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
+            upload_xlsx_instance_validator = UploadXLSXInstanceValidator(self.program)
             result = upload_xlsx_instance_validator.required_validator(value="", header="test")
             self.assertFalse(result)
 
@@ -509,7 +519,7 @@ class TestXLSXValidatorsMethods(APITestCase):
             "hct_mis_api.apps.registration_datahub.validators.UploadXLSXInstanceValidator.get_all_fields",
             lambda *args: {"test": {"required": False}},
         ):
-            upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
+            upload_xlsx_instance_validator = UploadXLSXInstanceValidator(self.program)
             result = upload_xlsx_instance_validator.required_validator(value="", header="test")
             self.assertTrue(result)
 
@@ -519,7 +529,7 @@ class TestXLSXValidatorsMethods(APITestCase):
             empty_file_path,
             data_only=True,
         )
-        upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
+        upload_xlsx_instance_validator = UploadXLSXInstanceValidator(self.program)
 
         expected_result = [
             {
@@ -554,7 +564,7 @@ class TestXLSXValidatorsMethods(APITestCase):
         ]
 
         with open(file_path, "rb") as file:
-            upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
+            upload_xlsx_instance_validator = UploadXLSXInstanceValidator(self.program)
             result, _ = upload_xlsx_instance_validator.validate_everything(file, "afghanistan")
         self.assertEqual(result, expected_result)
 
@@ -595,7 +605,7 @@ class TestXLSXValidatorsMethods(APITestCase):
         ]
 
         with open(file_path, "rb") as file:
-            upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
+            upload_xlsx_instance_validator = UploadXLSXInstanceValidator(self.program)
             result, _ = upload_xlsx_instance_validator.validate_everything(file, "afghanistan")
         self.assertEqual(result, expected_result)
 
@@ -635,7 +645,7 @@ class TestXLSXValidatorsMethods(APITestCase):
             },
         ]
         with open(file_path, "rb") as file:
-            upload_xlsx_instance_validator = UploadXLSXInstanceValidator(is_social_worker_program=True)
+            upload_xlsx_instance_validator = UploadXLSXInstanceValidator(self.social_worker_program)
             result, _ = upload_xlsx_instance_validator.validate_everything(file, "afghanistan")
         self.assertEqual(result, expected_result)
 
@@ -643,37 +653,37 @@ class TestXLSXValidatorsMethods(APITestCase):
         file_path = f"{self.FILES_DIR_PATH}/rdi_people_test.xlsx"
 
         with open(file_path, "rb") as file:
-            upload_xlsx_instance_validator = UploadXLSXInstanceValidator(is_social_worker_program=True)
+            upload_xlsx_instance_validator = UploadXLSXInstanceValidator(self.social_worker_program)
             result, _ = upload_xlsx_instance_validator.validate_everything(file, "afghanistan")
         self.assertEqual(result, [])
 
     def test_validate_delivery_mechanism_data(self) -> None:
         file_path = f"{self.FILES_DIR_PATH}/rdi_import_3_hh_missing_required_delivery_fields.xlsx"
         with open(file_path, "rb") as file:
-            upload_xlsx_instance_validator = UploadXLSXInstanceValidator(is_social_worker_program=False)
+            upload_xlsx_instance_validator = UploadXLSXInstanceValidator(self.program)
             result, delivery_mechanisms_errors = upload_xlsx_instance_validator.validate_everything(file, "afghanistan")
         self.assertEqual(result, [])
         self.assertEqual(
             delivery_mechanisms_errors,
             [
                 {
-                    "header": "name_of_cardholder_atm_card_i_c",
-                    "message": "Field name_of_cardholder_atm_card_i_c is required for delivery " "mechanism ATM Card",
+                    "header": "name_of_cardholder__atm_card_i_c",
+                    "message": "Field name_of_cardholder__atm_card_i_c is required for delivery mechanism atm_card",
                     "row_number": 3,
                 },
                 {
-                    "header": "name_of_cardholder_atm_card_i_c",
-                    "message": "Field name_of_cardholder_atm_card_i_c is required for delivery " "mechanism ATM Card",
+                    "header": "name_of_cardholder__atm_card_i_c",
+                    "message": "Field name_of_cardholder__atm_card_i_c is required for delivery mechanism atm_card",
                     "row_number": 14,
                 },
                 {
-                    "header": "card_expiry_date_atm_card_i_c",
-                    "message": "Field card_expiry_date_atm_card_i_c is required for delivery mechanism ATM Card",
+                    "header": "card_expiry_date__atm_card_i_c",
+                    "message": "Field card_expiry_date__atm_card_i_c is required for delivery mechanism atm_card",
                     "row_number": 15,
                 },
                 {
-                    "header": "name_of_cardholder_atm_card_i_c",
-                    "message": "Field name_of_cardholder_atm_card_i_c is required for delivery " "mechanism ATM Card",
+                    "header": "name_of_cardholder__atm_card_i_c",
+                    "message": "Field name_of_cardholder__atm_card_i_c is required for delivery mechanism atm_card",
                     "row_number": 15,
                 },
             ],
@@ -683,27 +693,27 @@ class TestXLSXValidatorsMethods(APITestCase):
     def test_validate_delivery_mechanism_data_people(self) -> None:
         file_path = f"{self.FILES_DIR_PATH}/rdi_import_1_hh_10_people_missing_required_delivery_fields.xlsx"
         with open(file_path, "rb") as file:
-            upload_xlsx_instance_validator = UploadXLSXInstanceValidator(is_social_worker_program=True)
+            upload_xlsx_instance_validator = UploadXLSXInstanceValidator(self.social_worker_program)
             result, delivery_mechanisms_errors = upload_xlsx_instance_validator.validate_everything(file, "afghanistan")
         self.assertEqual(result, [])
         self.assertEqual(
             delivery_mechanisms_errors,
             [
                 {
-                    "header": "pp_card_expiry_date_atm_card_i_c",
-                    "message": "Field pp_card_expiry_date_atm_card_i_c is required for delivery " "mechanism ATM Card",
+                    "header": "pp_card_expiry_date__atm_card_i_c",
+                    "message": "Field pp_card_expiry_date__atm_card_i_c is required for delivery mechanism atm_card",
                     "row_number": 4,
                 },
                 {
-                    "header": "pp_name_of_cardholder_atm_card_i_c",
-                    "message": "Field pp_name_of_cardholder_atm_card_i_c is required for "
-                    "delivery mechanism ATM Card",
+                    "header": "pp_name_of_cardholder__atm_card_i_c",
+                    "message": "Field pp_name_of_cardholder__atm_card_i_c is required for "
+                    "delivery mechanism atm_card",
                     "row_number": 4,
                 },
                 {
-                    "header": "pp_name_of_cardholder_atm_card_i_c",
-                    "message": "Field pp_name_of_cardholder_atm_card_i_c is required for "
-                    "delivery mechanism ATM Card",
+                    "header": "pp_name_of_cardholder__atm_card_i_c",
+                    "message": "Field pp_name_of_cardholder__atm_card_i_c is required for "
+                    "delivery mechanism atm_card",
                     "row_number": 5,
                 },
             ],
@@ -717,19 +727,19 @@ class TestXLSXValidatorsMethods(APITestCase):
         """
         self.maxDiff = None
 
-        core_fields_attributes = CORE_FIELDS_ATTRIBUTES.copy()
+        core_fields_attributes = get_core_fields_attributes().copy()
         full_name = [field for field in core_fields_attributes if field["name"] == "full_name"][0]
         full_name["required"] = False
         full_name["required_for_payment"] = True
         core_fields_attributes.append(full_name)
 
         with mock.patch(
-            "hct_mis_api.apps.core.field_attributes.core_fields_attributes.CORE_FIELDS_ATTRIBUTES",
-            core_fields_attributes,
+            "hct_mis_api.apps.core.field_attributes.core_fields_attributes.get_core_fields_attributes",
+            lambda: core_fields_attributes,
         ):
             file_path = f"{self.FILES_DIR_PATH}/rdi_import_3_hh_missing_required_delivery_fields.xlsx"
             with open(file_path, "rb") as file:
-                upload_xlsx_instance_validator = UploadXLSXInstanceValidator(is_social_worker_program=False)
+                upload_xlsx_instance_validator = UploadXLSXInstanceValidator(self.program)
                 result, delivery_mechanisms_errors = upload_xlsx_instance_validator.validate_everything(
                     file, "afghanistan"
                 )
@@ -738,27 +748,130 @@ class TestXLSXValidatorsMethods(APITestCase):
                 delivery_mechanisms_errors,
                 [
                     {
-                        "header": "name_of_cardholder_atm_card_i_c",
-                        "message": "Field name_of_cardholder_atm_card_i_c is required for delivery "
-                        "mechanism ATM Card",
+                        "header": "name_of_cardholder__atm_card_i_c",
+                        "message": "Field name_of_cardholder__atm_card_i_c is required for delivery "
+                        "mechanism atm_card",
                         "row_number": 3,
                     },
                     {
-                        "header": "name_of_cardholder_atm_card_i_c",
-                        "message": "Field name_of_cardholder_atm_card_i_c is required for delivery "
-                        "mechanism ATM Card",
+                        "header": "name_of_cardholder__atm_card_i_c",
+                        "message": "Field name_of_cardholder__atm_card_i_c is required for delivery "
+                        "mechanism atm_card",
                         "row_number": 14,
                     },
                     {
-                        "header": "card_expiry_date_atm_card_i_c",
-                        "message": "Field card_expiry_date_atm_card_i_c is required for delivery mechanism ATM Card",
+                        "header": "card_expiry_date__atm_card_i_c",
+                        "message": "Field card_expiry_date__atm_card_i_c is required for delivery mechanism atm_card",
                         "row_number": 15,
                     },
                     {
-                        "header": "name_of_cardholder_atm_card_i_c",
-                        "message": "Field name_of_cardholder_atm_card_i_c is required for delivery "
-                        "mechanism ATM Card",
+                        "header": "name_of_cardholder__atm_card_i_c",
+                        "message": "Field name_of_cardholder__atm_card_i_c is required for delivery "
+                        "mechanism atm_card",
                         "row_number": 15,
                     },
                 ],
             )
+
+    @parameterized.expand(
+        [
+            (PeriodicFieldData.STRING, ["Test", "2021-05-01"]),
+            (PeriodicFieldData.DECIMAL, ["12.3", "2021-05-01"]),
+            (PeriodicFieldData.BOOL, ["True", "2021-05-01"]),
+            (PeriodicFieldData.DATE, ["1996-06-21", "2021-05-01"]),
+        ]
+    )
+    def test_validate_pdu_string_valid(self, subtype: str, data_row: list) -> None:
+        create_pdu_flexible_attribute(
+            label="PDU Flex Attribute",
+            subtype=subtype,
+            number_of_rounds=1,
+            rounds_names=["May"],
+            program=self.program,
+        )
+        header_row = ["pdu_flex_attribute_round_1_value", "pdu_flex_attribute_round_1_collection_date"]
+        workbook = openpyxl.Workbook()
+        sheet = workbook.active
+        sheet.append(header_row)
+        sheet.append(data_row)
+        validator = UploadXLSXInstanceValidator(self.program)
+        errors = validator._validate_pdu(sheet[2], sheet[1], 3)
+        self.assertEqual(errors, [])
+
+    @parameterized.expand(
+        [
+            (PeriodicFieldData.DECIMAL, ["foo", "2021-05-01"]),
+            (PeriodicFieldData.BOOL, ["foo", "2021-05-01"]),
+            (PeriodicFieldData.DATE, ["foo", "2021-05-01"]),
+        ]
+    )
+    def test_validate_pdu_string_value_error(self, subtype: str, data_row: list) -> None:
+        create_pdu_flexible_attribute(
+            label="PDU Flex Attribute",
+            subtype=subtype,
+            number_of_rounds=1,
+            rounds_names=["May"],
+            program=self.program,
+        )
+        header_row = ["pdu_flex_attribute_round_1_value", "pdu_flex_attribute_round_1_collection_date"]
+        workbook = openpyxl.Workbook()
+        sheet = workbook.active
+        sheet.append(header_row)
+        sheet.append(data_row)
+        validator = UploadXLSXInstanceValidator(self.program)
+        errors = validator._validate_pdu(sheet[2], sheet[1], 3)
+        self.assertEqual(
+            errors,
+            [
+                {
+                    "row_number": 3,
+                    "header": "pdu_flex_attribute_round_1_value",
+                    "message": "Invalid value foo for field pdu_flex_attribute_round_1_value",
+                }
+            ],
+        )
+
+    def test_validate_pdu_wrong_collection_date(self) -> None:
+        data_row = ["Test", "bar"]
+        create_pdu_flexible_attribute(
+            label="PDU Flex Attribute",
+            subtype=PeriodicFieldData.STRING,
+            number_of_rounds=1,
+            rounds_names=["May"],
+            program=self.program,
+        )
+        header_row = ["pdu_flex_attribute_round_1_value", "pdu_flex_attribute_round_1_collection_date"]
+        workbook = openpyxl.Workbook()
+        sheet = workbook.active
+        sheet.append(header_row)
+        sheet.append(data_row)
+        validator = UploadXLSXInstanceValidator(self.program)
+        errors = validator._validate_pdu(sheet[2], sheet[1], 3)
+        self.assertEqual(
+            errors,
+            [
+                {
+                    "row_number": 3,
+                    "header": "pdu_flex_attribute_round_1_collection_date",
+                    "message": "Invalid value bar for field pdu_flex_attribute_round_1_collection_date",
+                }
+            ],
+        )
+
+    def test_validate_pdu_empty_row(self) -> None:
+        data_row = ["Test", "bar"]
+        create_pdu_flexible_attribute(
+            label="PDU Flex Attribute",
+            subtype=PeriodicFieldData.STRING,
+            number_of_rounds=1,
+            rounds_names=["May"],
+            program=self.program,
+        )
+        header_row = []
+        workbook = openpyxl.Workbook()
+        sheet = workbook.active
+        sheet.append(header_row)
+        sheet.append(data_row)
+        validator = UploadXLSXInstanceValidator(self.program)
+        errors = validator._validate_pdu(sheet[2], sheet[1], 3)
+        self.assertEqual(errors, [])

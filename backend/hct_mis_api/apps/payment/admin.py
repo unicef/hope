@@ -22,6 +22,7 @@ from smart_admin.mixins import LinkedObjectsMixin
 from hct_mis_api.apps.payment.forms import ImportPaymentRecordsForm
 from hct_mis_api.apps.payment.models import (
     CashPlan,
+    DeliveryMechanism,
     DeliveryMechanismData,
     DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
@@ -295,6 +296,7 @@ class PaymentAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
         "financial_service_provider",
     )
     inlines = [PaymentHouseholdSnapshotInline]
+    exclude = ("delivery_type_choice",)
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).select_related("household", "parent", "business_area")
@@ -307,6 +309,7 @@ class PaymentAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
 class DeliveryMechanismPerPaymentPlanAdmin(HOPEModelAdminBase):
     list_display = ("delivery_mechanism_order", "delivery_mechanism", "payment_plan", "status")
     raw_id_fields = ("payment_plan", "financial_service_provider", "created_by", "sent_by")
+    exclude = ("delivery_mechanism_choice",)
 
 
 @admin.register(FinancialServiceProviderXlsxTemplate)
@@ -318,7 +321,7 @@ class FinancialServiceProviderXlsxTemplateAdmin(HOPEModelAdminBase):
     )
     list_filter = (("created_by", AutoCompleteFilter),)
     search_fields = ("name",)
-    fields = ("name", "columns", "core_fields")
+    fields = ("name", "columns", "core_fields", "flex_fields")
 
     def total_selected_columns(self, obj: Any) -> str:
         return f"{len(obj.columns)} of {len(FinancialServiceProviderXlsxTemplate.COLUMNS_CHOICES)}"
@@ -350,6 +353,7 @@ class FspXlsxTemplatePerDeliveryMechanismAdmin(HOPEModelAdminBase):
     list_display = ("financial_service_provider", "delivery_mechanism", "xlsx_template", "created_by")
     fields = ("financial_service_provider", "delivery_mechanism", "xlsx_template")
     autocomplete_fields = ("financial_service_provider", "xlsx_template")
+    exclude = ("delivery_mechanism_choice",)
 
     def save_model(
         self, request: HttpRequest, obj: FspXlsxTemplatePerDeliveryMechanism, form: "Form", change: bool
@@ -405,6 +409,7 @@ class FspXlsxTemplatePerDeliveryMechanismAdminInline(admin.TabularInline):
     extra = 0
     readonly_fields = ("created_by",)
     raw_id_fields = ("financial_service_provider",)
+    exclude = ("delivery_mechanism_choice",)
 
 
 @admin.register(FinancialServiceProvider)
@@ -433,6 +438,7 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
     )
     readonly_fields = ("fsp_xlsx_templates", "data_transfer_configuration")
     inlines = (FspXlsxTemplatePerDeliveryMechanismAdminInline,)
+    exclude = ("delivery_mechanisms_choices",)
 
     def fsp_xlsx_templates(self, obj: FinancialServiceProvider) -> str:
         return format_html(
@@ -465,3 +471,8 @@ class DeliveryMechanismDataAdmin(HOPEModelAdminBase):
     list_display = ("individual", "delivery_mechanism", "is_valid")
     raw_id_fields = ("individual", "possible_duplicate_of")
     readonly_fields = ("possible_duplicate_of", "unique_key", "signature_hash", "validation_errors")
+
+
+@admin.register(DeliveryMechanism)
+class DeliveryMechanismAdmin(HOPEModelAdminBase):
+    list_display = ("code", "name", "is_active", "transfer_type")

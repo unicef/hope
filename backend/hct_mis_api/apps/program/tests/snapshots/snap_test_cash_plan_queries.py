@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
 snapshots['TestCashPlanQueries::test_cash_plans_0_all_with_permission 1'] = {
@@ -19,9 +20,7 @@ snapshots['TestCashPlanQueries::test_cash_plans_0_all_with_permission 1'] = {
                         'coverageUnit': 'Week(s)',
                         'deliveryType': 'Deposit to Card',
                         'dispersionDate': '2020-02-22T00:00:00+00:00',
-                        'endDate': '2028-03-31T18:44:15+00:00',
                         'name': 'Despite action TV after.',
-                        'startDate': '2041-06-14T10:15:44+00:00',
                         'status': 'TRANSACTION_COMPLETED',
                         'totalDeliveredQuantity': 41935107.03,
                         'totalEntitledQuantity': 38204833.92,
@@ -38,9 +37,7 @@ snapshots['TestCashPlanQueries::test_cash_plans_0_all_with_permission 1'] = {
                         'coverageUnit': 'Day(s)',
                         'deliveryType': 'Deposit to Card',
                         'dispersionDate': '2020-04-25T00:00:00+00:00',
-                        'endDate': '2064-03-14T22:52:54+00:00',
                         'name': 'Far yet reveal area bar almost dinner.',
-                        'startDate': '2051-11-30T00:02:09+00:00',
                         'status': 'TRANSACTION_COMPLETED',
                         'totalDeliveredQuantity': 53477453.27,
                         'totalEntitledQuantity': 56657648.82,
@@ -83,9 +80,7 @@ snapshots['TestCashPlanQueries::test_cash_plans_2_single_with_permission 1'] = {
             'coverageUnit': 'Day(s)',
             'deliveryType': 'Deposit to Card',
             'dispersionDate': '2020-04-25T00:00:00+00:00',
-            'endDate': '2064-03-14T22:52:54+00:00',
             'name': 'Far yet reveal area bar almost dinner.',
-            'startDate': '2051-11-30T00:02:09+00:00',
             'status': 'TRANSACTION_COMPLETED',
             'totalDeliveredQuantity': 53477453.27,
             'totalEntitledQuantity': 56657648.82,

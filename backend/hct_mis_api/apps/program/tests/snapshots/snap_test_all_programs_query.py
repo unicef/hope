@@ -126,3 +126,166 @@ snapshots['TestAllProgramsQuery::test_all_programs_query_user_not_authenticated 
         }
     ]
 }
+
+snapshots['TestAllProgramsQuery::test_all_programs_with_cycles_filter 1'] = {
+    'data': {
+        'allPrograms': {
+            'edges': [
+                {
+                    'node': {
+                        'cycles': {
+                            'edges': [
+                                {
+                                    'node': {
+                                        'status': 'ACTIVE',
+                                        'title': 'Default Cycle',
+                                        'totalDeliveredQuantityUsd': 0.0
+                                    }
+                                }
+                            ],
+                            'totalCount': 1
+                        },
+                        'name': 'Program with all partners access'
+                    }
+                }
+            ],
+            'totalCount': 1
+        }
+    }
+}
+
+snapshots['TestAllProgramsQuery::test_all_programs_with_cycles_filter 2'] = {
+    'data': {
+        'allPrograms': {
+            'edges': [
+                {
+                    'node': {
+                        'cycles': {
+                            'edges': [
+                                {
+                                    'node': {
+                                        'status': 'ACTIVE',
+                                        'title': 'Second CYCLE with total_delivered_quantity_usd',
+                                        'totalDeliveredQuantityUsd': 999.0
+                                    }
+                                }
+                            ],
+                            'totalCount': 1
+                        },
+                        'name': 'Program with all partners access'
+                    }
+                }
+            ],
+            'totalCount': 1
+        }
+    }
+}
+
+snapshots['TestAllProgramsQuery::test_all_programs_with_cycles_filter 3'] = {
+    'data': {
+        'allPrograms': {
+            'edges': [
+                {
+                    'node': {
+                        'cycles': {
+                            'edges': [
+                                {
+                                    'node': {
+                                        'status': 'ACTIVE',
+                                        'title': 'Default Cycle',
+                                        'totalDeliveredQuantityUsd': 0.0
+                                    }
+                                },
+                                {
+                                    'node': {
+                                        'status': 'ACTIVE',
+                                        'title': 'Second CYCLE with total_delivered_quantity_usd',
+                                        'totalDeliveredQuantityUsd': 999.0
+                                    }
+                                }
+                            ],
+                            'totalCount': 2
+                        },
+                        'name': 'Program with all partners access'
+                    }
+                }
+            ],
+            'totalCount': 1
+        }
+    }
+}
+
+snapshots['TestAllProgramsQuery::test_all_programs_with_cycles_filter 4'] = {
+    'data': {
+        'allPrograms': {
+            'edges': [
+                {
+                    'node': {
+                        'cycles': {
+                            'edges': [
+                                {
+                                    'node': {
+                                        'status': 'ACTIVE',
+                                        'title': 'Second CYCLE with total_delivered_quantity_usd',
+                                        'totalDeliveredQuantityUsd': 999.0
+                                    }
+                                }
+                            ],
+                            'totalCount': 1
+                        },
+                        'name': 'Program with all partners access'
+                    }
+                }
+            ],
+            'totalCount': 1
+        }
+    }
+}
+
+snapshots['TestAllProgramsQuery::test_all_programs_with_cycles_filter 5'] = {
+    'data': {
+        'allPrograms': {
+            'edges': [
+                {
+                    'node': {
+                        'cycles': {
+                            'edges': [
+                                {
+                                    'node': {
+                                        'status': 'ACTIVE',
+                                        'title': 'Default Cycle',
+                                        'totalDeliveredQuantityUsd': 0.0
+                                    }
+                                },
+                                {
+                                    'node': {
+                                        'status': 'ACTIVE',
+                                        'title': 'Second CYCLE with total_delivered_quantity_usd',
+                                        'totalDeliveredQuantityUsd': 999.0
+                                    }
+                                }
+                            ],
+                            'totalCount': 2
+                        },
+                        'name': 'Program with all partners access'
+                    }
+                }
+            ],
+            'totalCount': 1
+        }
+    }
+}
+
+snapshots['TestAllProgramsQuery::test_program_can_run_deduplication_and_is_deduplication_disabled 1'] = {
+    'data': {
+        'canRunDeduplication': True,
+        'isDeduplicationDisabled': False
+    }
+}
+
+snapshots['TestAllProgramsQuery::test_program_can_run_deduplication_and_is_deduplication_disabled 2'] = {
+    'data': {
+        'canRunDeduplication': True,
+        'isDeduplicationDisabled': True
+    }
+}

@@ -33,9 +33,10 @@ export function FormikSelectField({
   onChange,
   ...otherProps
 }): React.ReactElement {
-  const isInvalid =
+  const isInvalid = Boolean(
     get(form.errors, field.name) &&
-    (get(form.touched, field.name) || form.submitCount > 0);
+      (get(form.touched, field.name) || form.submitCount > 0 || form.errors),
+  );
   const value = multiple
     ? field.value || otherProps.value || []
     : field.value || otherProps.value || '';
@@ -52,7 +53,13 @@ export function FormikSelectField({
   const showX = isValue && !disableClearable && !otherProps.disabled;
 
   return (
-    <FormControl variant="outlined" size="small" fullWidth {...otherProps}>
+    <FormControl
+      variant="outlined"
+      size="small"
+      fullWidth
+      {...otherProps}
+      error={isInvalid}
+    >
       <InputLabel error={isInvalid}>{otherProps.label}</InputLabel>
       <Select
         {...field}
@@ -144,7 +151,7 @@ export function FormikSelectField({
         ))}
       </Select>
       {isInvalid && (
-        <FormHelperText error>{get(form.errors, field.name)}</FormHelperText>
+        <FormHelperText>{get(form.errors, field.name)}</FormHelperText>
       )}
     </FormControl>
   );

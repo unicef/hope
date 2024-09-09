@@ -75,7 +75,7 @@ from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
 from hct_mis_api.apps.payment.schema import PaymentRecordAndPaymentNode
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.program.schema import ProgramNode
-from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
+from hct_mis_api.apps.registration_data.nodes import DeduplicationResultNode
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 from hct_mis_api.apps.utils.schema import Arg, ChartDatasetNode
 
@@ -407,7 +407,8 @@ class TicketNeedsAdjudicationDetailsNode(DjangoObjectType):
     has_duplicated_document = graphene.Boolean()
     extra_data = graphene.Field(TicketNeedsAdjudicationDetailsExtraDataNode)
     possible_duplicates = graphene.List(IndividualNode)
-    selected_individuals = graphene.List(IndividualNode)
+    selected_duplicates = graphene.List(IndividualNode)
+    selected_distinct = graphene.List(IndividualNode)
 
     class Meta:
         model = TicketNeedsAdjudicationDetails
@@ -423,8 +424,11 @@ class TicketNeedsAdjudicationDetailsNode(DjangoObjectType):
     def resolve_possible_duplicates(self, info: Any) -> QuerySet:
         return self.possible_duplicates.all()
 
-    def resolve_selected_individuals(self, info: Any) -> QuerySet:
+    def resolve_selected_duplicates(self, info: Any) -> QuerySet:
         return self.selected_individuals.all()
+
+    def resolve_selected_distinct(self, info: Any) -> QuerySet:
+        return self.selected_distinct.all()
 
 
 class TicketSystemFlaggingDetailsNode(DjangoObjectType):
@@ -634,9 +638,9 @@ class Query(graphene.ObjectType):
             .apply_business_area(business_area_slug)
         )
         all_options = list(fields) + list(
-            FlexibleAttribute.objects.filter(
-                associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL
-            ).prefetch_related("choices")
+            FlexibleAttribute.objects.filter(associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL)
+            .exclude(type=FlexibleAttribute.PDU)
+            .prefetch_related("choices")
         )
         return sort_by_attr(all_options, "label.English(EN)")
 

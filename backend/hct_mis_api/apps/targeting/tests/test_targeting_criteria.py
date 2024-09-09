@@ -71,7 +71,7 @@ class TestTargetingCriteriaQuery(APITestCase):
                         "comparison_method": "EQUALS",
                         "arguments": [2],
                         "field_name": "size",
-                        "is_flex_field": False,
+                        "flex_field_classification": "NOT_FLEX_FIELD",
                     }
                 ).get_query()
             )
@@ -88,7 +88,7 @@ class TestTargetingCriteriaQuery(APITestCase):
                         "comparison_method": "EQUALS",
                         "arguments": ["REFUGEE"],
                         "field_name": "residence_status",
-                        "is_flex_field": False,
+                        "flex_field_classification": "NOT_FLEX_FIELD",
                     }
                 ).get_query()
             )
@@ -105,7 +105,7 @@ class TestTargetingCriteriaQuery(APITestCase):
                         "comparison_method": "EQUALS",
                         "arguments": ["0"],
                         "field_name": "unaccompanied_child_h_f",
-                        "is_flex_field": True,
+                        "flex_field_classification": "FLEX_FIELD_BASIC",
                     }
                 ).get_query()
             )
@@ -122,7 +122,7 @@ class TestTargetingCriteriaQuery(APITestCase):
                         "comparison_method": "CONTAINS",
                         "arguments": ["other_public", "pharmacy", "other_private"],
                         "field_name": "treatment_facility_h_f",
-                        "is_flex_field": True,
+                        "flex_field_classification": "FLEX_FIELD_BASIC",
                     }
                 ).get_query()
             )
@@ -214,13 +214,13 @@ class TestTargetingCriteriaIndividualRules(APITestCase):
                             "comparison_method": "EQUALS",
                             "arguments": ["MARRIED"],
                             "field_name": "marital_status",
-                            "is_flex_field": False,
+                            "flex_field_classification": "NOT_FLEX_FIELD",
                         },
                         {
                             "comparison_method": "EQUALS",
                             "arguments": ["MALE"],
                             "field_name": "sex",
-                            "is_flex_field": False,
+                            "flex_field_classification": "NOT_FLEX_FIELD",
                         },
                     ]
                 ).get_query()
@@ -239,7 +239,7 @@ class TestTargetingCriteriaIndividualRules(APITestCase):
                             "comparison_method": "CONTAINS",
                             "arguments": ["COMMUNICATING", "HEARING", "MEMORY", "SEEING", "WALKING", "SELF_CARE"],
                             "field_name": "observed_disability",
-                            "is_flex_field": False,
+                            "flex_field_classification": "NOT_FLEX_FIELD",
                         },
                     ]
                 ).get_query()
@@ -258,7 +258,7 @@ class TestTargetingCriteriaIndividualRules(APITestCase):
                             "comparison_method": "RANGE",
                             "arguments": [20, 25],
                             "field_name": "age",
-                            "is_flex_field": False,
+                            "flex_field_classification": "NOT_FLEX_FIELD",
                         },
                     ]
                 ).get_query()
@@ -276,7 +276,7 @@ class TestTargetingCriteriaIndividualRules(APITestCase):
                             "comparison_method": "RANGE",
                             "arguments": [22, 26],
                             "field_name": "age",
-                            "is_flex_field": False,
+                            "flex_field_classification": "NOT_FLEX_FIELD",
                         },
                     ]
                 ).get_query()
@@ -294,7 +294,7 @@ class TestTargetingCriteriaIndividualRules(APITestCase):
                             "comparison_method": "LESS_THAN",
                             "arguments": [20],
                             "field_name": "age",
-                            "is_flex_field": False,
+                            "flex_field_classification": "NOT_FLEX_FIELD",
                         },
                     ]
                 ).get_query()
@@ -312,7 +312,7 @@ class TestTargetingCriteriaIndividualRules(APITestCase):
                             "comparison_method": "LESS_THAN",
                             "arguments": [24],
                             "field_name": "age",
-                            "is_flex_field": False,
+                            "flex_field_classification": "NOT_FLEX_FIELD",
                         },
                     ]
                 ).get_query()
@@ -330,7 +330,7 @@ class TestTargetingCriteriaIndividualRules(APITestCase):
                             "comparison_method": "GREATER_THAN",
                             "arguments": [20],
                             "field_name": "age",
-                            "is_flex_field": False,
+                            "flex_field_classification": "NOT_FLEX_FIELD",
                         },
                     ]
                 ).get_query()

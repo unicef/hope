@@ -20,7 +20,10 @@ from hct_mis_api.apps.registration_data.fixtures import (
     RegistrationDataImportDatahubFactory,
     RegistrationDataImportFactory,
 )
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.registration_data.models import (
+    DeduplicationEngineSimilarityPair,
+    RegistrationDataImport,
+)
 
 
 class TestRegistrationDataModels(TestCase):
@@ -48,6 +51,7 @@ class TestRegistrationDataModels(TestCase):
             head_of_household=IndividualFactory(),
             registration_data_import=cls.registration_data_import,
             rdi_merge_status=Household.PENDING,
+            size=99,
         )
 
         # ImportedIndividual
@@ -56,6 +60,7 @@ class TestRegistrationDataModels(TestCase):
             birth_date=datetime.datetime(1991, 3, 4),
             registration_data_import=cls.registration_data_import,
             rdi_merge_status=Individual.PENDING,
+            household=cls.imported_household,
         )
 
         # ImportedDocumentType
@@ -90,6 +95,22 @@ class TestRegistrationDataModels(TestCase):
             str(self.imported_individual_identity), f"UNICEF {self.imported_individual_3.unicef_id} 123456789"
         )
 
+    def test_bulk_update_household_size(self) -> None:
+        self.imported_household.refresh_from_db(fields=["size"])
+        self.assertEqual(self.imported_household.size, 99)
+
+        self.registration_data_import.bulk_update_household_size()
+        self.imported_household.refresh_from_db(fields=["size"])
+        self.assertEqual(self.imported_household.size, 99)
+
+        # upd DCT recalculate_composition
+        self.program.data_collecting_type.recalculate_composition = True
+        self.program.data_collecting_type.save()
+
+        self.registration_data_import.bulk_update_household_size()
+        self.imported_household.refresh_from_db(fields=["size"])
+        self.assertEqual(self.imported_household.size, 1)
+
 
 class TestRegistrationDataImportDatahub(TestCase):
     @classmethod
@@ -121,3 +142,34 @@ class TestRegistrationDataImportDatahub(TestCase):
             self.rdi_datahub.linked_rdi,
             self.rdi,
         )
+
+
+class TestDeduplicationEngineSimilarityPair(TestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        cls.ba = create_afghanistan()
+        cls.program = ProgramFactory(business_area=cls.ba, status=Program.ACTIVE)
+
+    def test_is_duplicate(self) -> None:
+        self.ba.biometric_deduplication_threshold = 50.55
+        self.ba.save()
+        ind1, ind2 = sorted([IndividualFactory(), IndividualFactory()], key=lambda x: x.id)
+        ind3, ind4 = sorted([IndividualFactory(), IndividualFactory()], key=lambda x: x.id)
+
+        desp1 = DeduplicationEngineSimilarityPair.objects.create(
+            program=self.program,
+            individual1=ind1,
+            individual2=ind2,
+            similarity_score=90.55,
+        )
+        desp2 = DeduplicationEngineSimilarityPair.objects.create(
+            program=self.program,
+            individual1=ind3,
+            individual2=ind4,
+            similarity_score=40.55,
+        )
+
+        self.assertEqual(desp1._is_duplicate, True)
+        self.assertEqual(desp2._is_duplicate, False)
+        self.assertEqual(DeduplicationEngineSimilarityPair.objects.duplicates().count(), 1)
+        self.assertEqual(DeduplicationEngineSimilarityPair.objects.duplicates().first(), desp1)
