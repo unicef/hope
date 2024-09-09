@@ -2,20 +2,24 @@ from typing import Any, List
 
 from django.conf import settings
 
+import pytest
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.base_test_case import APITestCase, BaseElasticSearchTestCase
+from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
+
+pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 
-class TestRefuseRdiMutation(BaseElasticSearchTestCase, APITestCase):
+class TestRefuseRdiMutation(APITestCase):
     databases = "__all__"
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
@@ -39,7 +43,7 @@ class TestRefuseRdiMutation(BaseElasticSearchTestCase, APITestCase):
 
         cls.rdi = RegistrationDataImportFactory()
 
-        super().setUpTestData()
+        rebuild_search_index()
 
     @parameterized.expand(
         [

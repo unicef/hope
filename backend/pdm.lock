@@ -1123,15 +1123,15 @@ files = [
 
 [[package]]
 name = "django-multiselectfield"
-version = "0.1.13"
+version = "0.1.12"
 summary = "Django multiple select field"
 groups = ["default"]
 dependencies = [
     "django>=1.4",
 ]
 files = [
-    {file = "django_multiselectfield-0.1.13-py3-none-any.whl", hash = "sha256:f146ef568c823a409f4021b98781666ec2debabfceca9176116d749dc39cb8b3"},
-    {file = "django_multiselectfield-0.1.13.tar.gz", hash = "sha256:437d72632f4c0ca416951917632529c3d1d42b62bb6c3c03e3396fa50265be94"},
+    {file = "django-multiselectfield-0.1.12.tar.gz", hash = "sha256:d0a4c71568fb2332c71478ffac9f8708e01314a35cf923dfd7a191343452f9f9"},
+    {file = "django_multiselectfield-0.1.12-py3-none-any.whl", hash = "sha256:c270faa7f80588214c55f2d68cbddb2add525c2aa830c216b8a198de914eb470"},
 ]
 
 [[package]]
@@ -1514,7 +1514,7 @@ files = [
 
 [[package]]
 name = "elastic-transport"
-version = "8.13.1"
+version = "8.13.0"
 requires_python = ">=3.7"
 summary = "Transport classes and utilities shared among Python Elastic client libraries"
 groups = ["default"]
@@ -1523,8 +1523,8 @@ dependencies = [
     "urllib3<3,>=1.26.2",
 ]
 files = [
-    {file = "elastic_transport-8.13.1-py3-none-any.whl", hash = "sha256:5d4bb6b8e9d74a9c16de274e91a5caf65a3a8d12876f1e99152975e15b2746fe"},
-    {file = "elastic_transport-8.13.1.tar.gz", hash = "sha256:16339d392b4bbe86ad00b4bdeecff10edf516d32bc6c16053846625f2c6ea250"},
+    {file = "elastic-transport-8.13.0.tar.gz", hash = "sha256:2410ec1ff51221e8b3a01c0afa9f0d0498e1386a269283801f5c12f98e42dc45"},
+    {file = "elastic_transport-8.13.0-py3-none-any.whl", hash = "sha256:aec890afdddd057762b27ff3553b0be8fa4673ec1a4fd922dfbd00325874bb3d"},
 ]
 
 [[package]]
@@ -2733,13 +2733,13 @@ files = [
 
 [[package]]
 name = "pydyf"
-version = "0.11.0"
+version = "0.10.0"
 requires_python = ">=3.8"
 summary = "A low-level PDF generator."
 groups = ["default"]
 files = [
-    {file = "pydyf-0.11.0-py3-none-any.whl", hash = "sha256:0aaf9e2ebbe786ec7a78ec3fbffa4cdcecde53fd6f563221d53c6bc1328848a3"},
-    {file = "pydyf-0.11.0.tar.gz", hash = "sha256:394dddf619cca9d0c55715e3c55ea121a9bf9cbc780cdc1201a2427917b86b64"},
+    {file = "pydyf-0.10.0-py3-none-any.whl", hash = "sha256:ef76b6c0976a091a9e15827fb5800e5e37e7cd1a3ca4d4bd19d10a14ea8c0ae3"},
+    {file = "pydyf-0.10.0.tar.gz", hash = "sha256:357194593efaf61d7b48ab97c3d59722114934967c3df3d7878ca6dd25b04c30"},
 ]
 
 [[package]]
