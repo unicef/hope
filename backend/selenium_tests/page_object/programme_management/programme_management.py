@@ -14,7 +14,7 @@ class ProgrammeManagement(BaseComponents):
     inputStartDate = 'input[name="startDate"]'
     labelStartDate = 'div[data-cy="date-picker-filter"]'
     inputEndDate = 'input[name="endDate"]'
-    labelEndDate = 'div[data-cy="date-picker-filter"]'
+    labelEndDate = 'input[data-cy="date-input-endDate"]'
     selectSelector = 'div[data-cy="select-sector"]'
     labelSelector = 'div[data-cy="input-sector"]'
     inputDataCollectingType = 'div[data-cy="input-data-collecting-type"]'
@@ -36,17 +36,13 @@ class ProgrammeManagement(BaseComponents):
     buttonDelete = 'button[data-cy="button-delete"]'
     labelAdminArea = '//*[@id="radioGroup-partners[0].areaAccess"]/div[2]/div/span'
     calendarIcon = 'button[data-cy="calendar-icon"]'
-    calendar = 'div[data-popper-placement="bottom-start"]'
+    calendar = 'div[data-popper-placement="top-start"]'
     calendarMonthYear = (
-        '//*[@class="MuiPickersSlideTransition-transitionContainer ' 'MuiPickersCalendarHeader-transitionContainer"]'
+        'div[role="presentation"]'
     )
-    calendarChangeMonth = '//*[@class="MuiButtonBase-root MuiIconButton-root MuiPickersCalendarHeader-iconButton"]'
+    calendarChangeMonth = 'button[title="Next month"]'
     calendarDays = (
-        '//*[@class="MuiButtonBase-root MuiIconButton-root MuiPickersDay-day" '
-        'or @class="MuiButtonBase-root MuiIconButton-root MuiPickersDay-day MuiPickersDay-current '
-        'MuiPickersDay-daySelected" '
-        'or @class="MuiButtonBase-root MuiIconButton-root MuiPickersDay-day '
-        'MuiPickersDay-dayDisabled"]'
+        '//*[@data-timestamp]'
     )
     filtersSearch = '//*[@data-cy="filters-search"]/div/input'
     buttonApply = 'button[data-cy="button-filters-clear"]'
@@ -162,13 +158,14 @@ class ProgrammeManagement(BaseComponents):
         self.wait_for_disappear(self.calendar)
 
     def chooseInputEndDateViaCalendar(self, day: int) -> None:
-        self.find_in_element(self.getLabelEndDate(), self.calendarIcon)[0].click()
+        self.getLabelEndDate().find_element(By.XPATH, "./..").find_element(By.TAG_NAME, "button").click()
         self.getCalendar()
-        month = self.get(self.calendarMonthYear, By.XPATH).text
-        self.get_elements(self.calendarChangeMonth, By.XPATH)[0].click()
-        for _ in range(5):
-            next_month = self.get(self.calendarMonthYear, By.XPATH).text
-            sleep(1)
+        month = self.wait_for(self.calendarMonthYear).text
+        print(month)
+        self.wait_for(self.calendarChangeMonth).click()
+        for _ in range(50):
+            next_month = self.wait_for(self.calendarMonthYear).text
+            sleep(0.1)
             if month != next_month:
                 break
         self.get_elements(self.calendarDays, By.XPATH)[day - 1].click()
@@ -181,7 +178,7 @@ class ProgrammeManagement(BaseComponents):
         return self.wait_for(self.inputEndDate)
 
     def getLabelEndDate(self) -> WebElement:
-        return self.get_elements(self.labelEndDate)[1]
+        return self.wait_for(self.labelEndDate)
 
     def getButtonNext(self) -> WebElement:
         return self.wait_for(self.buttonNext)
@@ -217,9 +214,10 @@ class ProgrammeManagement(BaseComponents):
         self.driver.execute_script(
             """
             container = document.querySelector("div[data-cy='main-content']")
-            container.scrollBy(0,600)
+            container.scrollBy(0,-600)
             """
         )
+        sleep(2)
         return self.wait_for(self.buttonNewProgram)
 
     def fillFiltersSearch(self, filterText: str) -> None:

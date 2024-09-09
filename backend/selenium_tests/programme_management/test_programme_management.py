@@ -1,5 +1,6 @@
 import random
 from datetime import datetime
+from freezegun import freeze_time
 
 from django.conf import settings
 from django.core.management import call_command
@@ -659,7 +660,7 @@ class TestComeBackScenarios:
 @pytest.mark.night
 @pytest.mark.usefixtures("login")
 class TestManualCalendar:
-    @pytest.mark.skip("Failed with new selenium")
+    @freeze_time("2024-09-09")
     @pytest.mark.parametrize(
         "test_data",
         [

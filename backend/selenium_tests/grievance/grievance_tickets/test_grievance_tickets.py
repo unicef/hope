@@ -1102,7 +1102,6 @@ class TestGrievanceTickets:
         assert "grievance_ticket_1" in pageAdminPanel.getUnicefID().text
         assert GrievanceTicket.objects.first().unicef_id in pageAdminPanel.getUnicefID().text
 
-    @pytest.mark.skip("Failed with new selenium")
     def test_grievance_tickets_needs_adjudication(
         self,
         add_grievance_needs_adjudication: None,
