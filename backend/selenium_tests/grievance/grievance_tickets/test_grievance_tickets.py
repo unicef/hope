@@ -1005,7 +1005,6 @@ class TestGrievanceTickets:
         for str_row in pageGrievanceTickets.getRows():
             assert "Urgent" in str_row.text.replace("\n", " ").split(" ")
 
-    @pytest.mark.skip("Failed with new selenium")
     def test_grievance_tickets_process_tickets(
         self,
         pageGrievanceTickets: GrievanceTickets,
