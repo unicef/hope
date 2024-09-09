@@ -13,7 +13,6 @@ from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.household.models import DocumentType
 from hct_mis_api.apps.payment.fixtures import (
     CashPlanFactory,
     PaymentRecordFactory,
@@ -225,7 +224,6 @@ def create_targeting() -> None:
 
 @pytest.fixture
 def create_rdi() -> None:
-    # DocumentType.objects.create(key="tax_id", label="Tax ID")
     business_area = BusinessArea.objects.get(slug="afghanistan")
     programme = Program.objects.filter(name="Test Programm").first()
     imported_by = User.objects.first()

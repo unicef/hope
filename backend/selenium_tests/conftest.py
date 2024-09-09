@@ -189,7 +189,11 @@ def driver() -> Chrome:
     chrome_options.add_argument("--window-size=1920,1080")
     if not os.path.exists("./report/downloads/"):
         os.makedirs("./report/downloads/")
-    prefs = {"download.default_directory": "./report/downloads/"}
+    prefs = {
+        "download.default_directory": "./report/downloads/",
+        "download.prompt_for_download": False,
+        "download.directory_upgrade": True,
+    }
     chrome_options.add_experimental_option("prefs", prefs)
     driver = webdriver.Chrome(options=chrome_options)
     yield driver

@@ -702,7 +702,6 @@ class TestGrievanceTickets:
         assert "Female Age Group 12 17" in pageGrievanceDetailsPage.getRows()[0].text
         assert "- 1" in pageGrievanceDetailsPage.getRows()[0].text
 
-    @pytest.mark.skip("Failed with new selenium")
     @pytest.mark.parametrize(
         "test_data",
         [
