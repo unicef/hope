@@ -449,7 +449,7 @@ def payment_plan_exclude_beneficiaries(
 
         from hct_mis_api.apps.payment.models import Payment, PaymentPlan
 
-        payment_plan = PaymentPlan.objects.select_related('program').get(id=payment_plan_id)
+        payment_plan = PaymentPlan.objects.select_related("program").get(id=payment_plan_id)
         # for social worker program exclude Individual unicef_id
         is_social_worker_program = payment_plan.program.is_social_worker_program
         set_sentry_business_area_tag(payment_plan.business_area.name)
@@ -505,7 +505,9 @@ def payment_plan_exclude_beneficiaries(
                 )
                 raise ValidationError("Payment Plan Exclude Beneficiaries Validation Error with Beneficiaries List")
 
-            payments_for_exclude = payment_plan.eligible_payments.filter(**{f"{filter_key}__in": excluding_hh_or_ind_ids})
+            payments_for_exclude = payment_plan.eligible_payments.filter(
+                **{f"{filter_key}__in": excluding_hh_or_ind_ids}
+            )
 
             payments_for_exclude.update(excluded=True)
             payments_for_undo_exclude.update(excluded=False)
