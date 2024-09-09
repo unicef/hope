@@ -85,7 +85,9 @@ class CreateProgram(
 
         cls.validate(
             start_date=datetime.combine(program_data["start_date"], datetime.min.time()),
-            end_date=datetime.combine(program_data["end_date"], datetime.min.time()),
+            end_date=datetime.combine(program_data["end_date"], datetime.min.time())
+            if program_data.get("end_date")
+            else None,
             data_collecting_type=data_collecting_type,
             business_area=business_area,
             programme_code=programme_code,
@@ -157,10 +159,6 @@ class UpdateProgram(
                 cls.has_permission(info, Permissions.PROGRAMME_ACTIVATE, business_area)
             elif status_to_set == Program.FINISHED:
                 cls.has_permission(info, Permissions.PROGRAMME_FINISH, business_area)
-
-                # check if any ACTIVE cycles there
-                if program.cycles.filter(status=ProgramCycle.ACTIVE).exists():
-                    raise ValidationError("You cannot finish program if program has active cycles")
 
         if status_to_set not in [Program.ACTIVE, Program.FINISHED]:
             cls.validate_partners_data(

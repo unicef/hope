@@ -80,7 +80,7 @@ export const PaymentModuleRoutes = (): React.ReactElement => {
         ],
       },
       {
-        path: 'payments/:id',
+        path: 'payments/:paymentId',
         element: <PeoplePaymentDetailsPage />,
       },
       {
@@ -178,7 +178,7 @@ export const PaymentModuleRoutes = (): React.ReactElement => {
         ],
       },
       {
-        path: 'payments/:id',
+        path: 'payments/:paymentId',
         element: <PaymentDetailsPage />,
       },
       {

@@ -56,22 +56,29 @@ export const UpdateProgramCycle = ({
   const { businessArea } = useBaseUrl();
   const { showMessage } = useSnackbar();
 
+  let endDate = Yup.date()
+    .required(t('End Date is required'))
+    .min(today, t('End Date cannot be in the past'))
+    .when(
+      'start_date',
+      (start_date, schema) =>
+        start_date &&
+        schema.min(
+          start_date,
+          `${t('End date have to be greater than')} ${moment(start_date).format(
+            'YYYY-MM-DD',
+          )}`,
+        ),
+    );
+
+  if (program.endDate) {
+    endDate = endDate.max(
+      program.endDate,
+      t('End Date cannot be after Programme End Date'),
+    );
+  }
   const validationSchema = Yup.object().shape({
-    end_date: Yup.date()
-      .required(t('End Date is required'))
-      .min(today, t('End Date cannot be in the past'))
-      .max(program.endDate, t('End Date cannot be after Programme End Date'))
-      .when(
-        'start_date',
-        (start_date, schema) =>
-          start_date &&
-          schema.min(
-            start_date,
-            `${t('End date have to be greater than')} ${moment(
-              start_date,
-            ).format('YYYY-MM-DD')}`,
-          ),
-      ),
+    end_date: endDate,
   });
 
   const initialValues: {
