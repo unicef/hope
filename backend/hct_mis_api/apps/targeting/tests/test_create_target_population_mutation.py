@@ -12,6 +12,7 @@ from hct_mis_api.apps.core.fixtures import (
 )
 from hct_mis_api.apps.core.models import (
     BusinessArea,
+    DataCollectingType,
     FlexibleAttribute,
     PeriodicFieldData,
 )
@@ -65,7 +66,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         cls.user = UserFactory.create()
-        create_afghanistan()
+        cls.business_area = create_afghanistan()
         business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.program = ProgramFactory.create(
             name="program1", status=Program.ACTIVE, business_area=business_area, cycle__status=ProgramCycle.ACTIVE
@@ -361,6 +362,58 @@ class TestCreateTargetPopulationMutation(APITestCase):
                                     ]
                                 }
                             ],
+                        }
+                    ]
+                },
+            }
+        }
+        self.snapshot_graphql_request(
+            request_string=TestCreateTargetPopulationMutation.MUTATION_QUERY,
+            context={"user": self.user},
+            variables=variables,
+        )
+
+    def test_create_mutation_with_pdu_flex_field_for_sw_program(self) -> None:
+        program_sw = ProgramFactory(
+            data_collecting_type__type=DataCollectingType.Type.SOCIAL,
+            business_area=self.business_area,
+            status=Program.ACTIVE,
+        )
+        self.create_user_role_with_permissions(self.user, [Permissions.TARGETING_CREATE], self.business_area)
+
+        pdu_data = PeriodicFieldDataFactory(
+            subtype=PeriodicFieldData.DECIMAL,
+            number_of_rounds=1,
+            rounds_names=["Round 1"],
+        )
+        FlexibleAttributeForPDUFactory(
+            program=program_sw,
+            label="PDU Field 1 SW",
+            pdu_data=pdu_data,
+        )
+
+        program_cycle = program_sw.cycles.first()
+
+        variables = {
+            "createTargetPopulationInput": {
+                "name": "Example name 10 ",
+                "businessAreaSlug": "afghanistan",
+                "programId": self.id_to_base64(program_sw.id, "ProgramNode"),
+                "excludedIds": "",
+                "programCycleId": self.id_to_base64(program_cycle.id, "ProgramCycleNode"),
+                "targetingCriteria": {
+                    "rules": [
+                        {
+                            "filters": [
+                                {
+                                    "comparisonMethod": "RANGE",
+                                    "arguments": ["2", "3.5"],
+                                    "fieldName": "pdu_field_1_sw",
+                                    "flexFieldClassification": "FLEX_FIELD_PDU",
+                                    "roundNumber": "1",
+                                }
+                            ],
+                            "individualsFiltersBlocks": [],
                         }
                     ]
                 },
