@@ -330,7 +330,6 @@ class PaymentPlanService:
                 logging.exception(msg)
                 raise GraphQLError(msg)
 
-            print("===> ", household["unicef_id"], household["collector"], household["collector"].unicef_id)
             payments_to_create.append(
                 Payment(
                     parent=payment_plan,
