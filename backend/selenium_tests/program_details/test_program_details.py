@@ -286,7 +286,7 @@ class TestSmokeProgrammeDetails:
         pageProgrammeManagement.getInputStartDate().send_keys(str(FormatTime(1, 1, 2022).numerically_formatted_date))
         pageProgrammeManagement.getInputEndDate().click()
         pageProgrammeManagement.getInputEndDate().send_keys(Keys.CONTROL + "a")
-        pageProgrammeManagement.getInputEndDate().send_keys(FormatTime(1, 10, 2022).numerically_formatted_date)
+        pageProgrammeManagement.getInputEndDate().send_keys(FormatTime(1, 10, 2099).numerically_formatted_date)
         pageProgrammeManagement.getButtonNext().click()
         pageProgrammeManagement.getButtonAddTimeSeriesField()
         pageProgrammeManagement.getButtonNext().click()
@@ -298,7 +298,7 @@ class TestSmokeProgrammeDetails:
         assert "details" in pageProgrammeDetails.wait_for_new_url(programme_creation_url).split("/")
         assert "New name after Edit" in pageProgrammeDetails.getHeaderTitle().text
         assert FormatTime(1, 1, 2022).date_in_text_format in pageProgrammeDetails.getLabelStartDate().text
-        assert FormatTime(1, 10, 2022).date_in_text_format in pageProgrammeDetails.getLabelEndDate().text
+        assert FormatTime(1, 10, 2099).date_in_text_format in pageProgrammeDetails.getLabelEndDate().text
 
     def test_program_details_happy_path(
         self, create_payment_plan: Program, pageProgrammeDetails: ProgrammeDetails
@@ -646,7 +646,7 @@ class TestProgrammeDetails:
             if "Start date must be after the latest cycle." in pageProgrammeDetails.getStartDateCycleDiv().text:
                 break
             sleep(0.1)
-        assert "Start date must be after the latest cycle." in pageProgrammeDetails.getStartDateCycleDiv().text
+        assert "Start Date*\nStart date must be after the latest cycle end date." in pageProgrammeDetails.getStartDateCycleDiv().text
         pageProgrammeDetails.getStartDateCycle().click()
         pageProgrammeDetails.getStartDateCycle().send_keys(
             (datetime.now() + relativedelta(days=1)).strftime("%Y-%m-%d")

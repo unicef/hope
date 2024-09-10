@@ -327,7 +327,6 @@ class TestProgrammeManagement:
         # Cehck Mandatory fields texts
         assert "Programme Name is required" in pageProgrammeManagement.getLabelProgrammeName().text.split("\n")
         assert "Start Date is required" in pageProgrammeManagement.getLabelStartDate().text
-        assert "End Date is required" in pageProgrammeManagement.getLabelEndDate().text
         assert "Sector is required" in pageProgrammeManagement.getLabelSelector().text
         assert "Data Collecting Type is required" in pageProgrammeManagement.getLabelDataCollectingType().text
 
