@@ -12,12 +12,12 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface AddNewProgramCycleProps {
   program: ProgramQuery['program'];
-  programCycles?: ProgramCycle[];
+  lastProgramCycle?: ProgramCycle;
 }
 
 export const AddNewProgramCycle = ({
   program,
-  programCycles,
+  lastProgramCycle,
 }: AddNewProgramCycleProps): React.ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -30,6 +30,7 @@ export const AddNewProgramCycle = ({
       queryKey: ['programCycles', businessArea, program.id],
     });
     setOpen(false);
+    setStep(0);
   };
 
   const handleNext = (): void => {
@@ -38,9 +39,8 @@ export const AddNewProgramCycle = ({
 
   const handleSubmit = (): void => {
     setOpen(false);
+    setStep(0);
   };
-
-  const lastProgramCycle = programCycles[programCycles.length - 1];
 
   const stepsToRender = [];
   if (lastProgramCycle.end_date) {
