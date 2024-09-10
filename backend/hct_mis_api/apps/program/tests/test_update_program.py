@@ -1141,7 +1141,9 @@ class TestUpdateProgram(APITestCase):
         "hct_mis_api.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI"
         ".delete_deduplication_set"
     )
-    def test_finish_active_program_with_not_finished_program_cycle_or_end_date(self, mock_delete_deduplication_set: Mock) -> None:
+    def test_finish_active_program_with_not_finished_program_cycle_or_end_date(
+        self, mock_delete_deduplication_set: Mock
+    ) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_FINISH], self.business_area)
         Program.objects.filter(id=self.program.id).update(status=Program.ACTIVE)
         self.program.refresh_from_db()
@@ -1168,9 +1170,25 @@ class TestUpdateProgram(APITestCase):
         self.program.save()
         self.program.refresh_from_db()
         self.assertIsNone(self.program.end_date)
-        # add deduplication_set_id
-        Program.objects.filter(id=self.program.id).update(deduplication_set_id="12bc7994-9467-4f27-9954-d75a67d0e909")
         # no program end date
+        self.snapshot_graphql_request(
+            request_string=self.UPDATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables={
+                "programData": {
+                    "id": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "status": Program.FINISHED,
+                },
+                "version": self.program.version,
+            },
+        )
+        # finish program
+        self.program.deduplication_set_id = "12bc7994-9467-4f27-9954-d75a67d0e909"
+        self.program.end_date = self.program.start_date + timedelta(days=999)
+        self.program.save()
+        self.program.refresh_from_db()
+        self.assertIsNotNone(self.program.end_date)
+        self.assertEqual(str(self.program.deduplication_set_id), "12bc7994-9467-4f27-9954-d75a67d0e909")
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
             context={"user": self.user},
