@@ -352,7 +352,7 @@ export const GlobalProgramSelect = () => {
             renderInput={(params) => (
               <StyledTextField
                 {...params}
-                placeholder="Search programs"
+                placeholder="Search programmes"
                 variant="outlined"
                 size="small"
                 ref={params.InputProps.ref}

@@ -30,7 +30,7 @@ export const headCells: HeadCell<
   },
   {
     disablePadding: false,
-    label: 'Program Size',
+    label: 'Programme Size',
     // disabled because number_of_households is not a field in the program model
     id: 'number_of_households',
     numeric: true,

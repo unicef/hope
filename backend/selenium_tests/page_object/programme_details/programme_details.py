@@ -13,7 +13,7 @@ class ProgrammeDetails(BaseComponents):
     labelFreqOfPayment = 'div[data-cy="label-Frequency of Payment"]'
     labelAdministrativeAreas = 'div[data-cy="label-Administrative Areas of implementation"]'
     labelCashPlus = 'div[data-cy="label-CASH+"]'
-    labelProgramSize = 'div[data-cy="label-Program size"]'
+    labelProgramSize = 'div[data-cy="label-Programme size"]'
     labelDescription = 'div[data-cy="label-Description"]'
     labelAreaAccess = 'div[data-cy="label-Area Access"]'
     labelAdminArea1 = 'div[data-cy="labelized-field-container-admin-area-1-total-count"]'
