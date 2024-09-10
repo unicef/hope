@@ -207,6 +207,14 @@ class GrievanceDetailsPage(BaseComponents):
         return self.wait_for(self.buttonCloseTicket)
 
     def getButtonAssignToMe(self) -> WebElement:
+        # Workaround because elements overlapped even though Selenium saw that they were available:
+        self.driver.execute_script(
+            """
+            container = document.querySelector("div[data-cy='main-content']")
+            container.scrollBy(0,-600)
+            """
+        )
+        sleep(2)
         return self.wait_for(self.buttonAssignToMe)
 
     def getButtonSendForApproval(self) -> WebElement:
