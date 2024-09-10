@@ -6,13 +6,14 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
-import {
-  GrievanceTicketDocument,
-  GrievanceTicketQuery,
-  useApproveNeedsAdjudicationMutation,
-} from '@generated/graphql';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { useSnackbar } from '@hooks/useSnackBar';
+import { BiometricsResults } from './BiometricsResults';
+import {
+  GrievanceTicketQuery,
+  useApproveNeedsAdjudicationMutation,
+  GrievanceTicketDocument,
+} from '@generated/graphql';
 
 interface NeedsAdjudicationActionsProps {
   ticket: GrievanceTicketQuery['grievanceTicket'];
@@ -51,6 +52,7 @@ export const NeedsAdjudicationActions: React.FC<
   const { isActiveProgram } = useProgramContext();
   const actionsDisabled =
     !isTicketForApproval || !isActiveProgram || !selectedIndividualIds.length;
+  const { dedupEngineSimilarityPair } = ticket.needsAdjudicationTicketDetails;
 
   return (
     <Box
@@ -83,6 +85,18 @@ export const NeedsAdjudicationActions: React.FC<
           >
             {t('Edit')}
           </Button>
+        )}
+        {dedupEngineSimilarityPair && (
+          <BiometricsResults
+            similarityScore={dedupEngineSimilarityPair.similarityScore}
+            faceMatchResult={
+              dedupEngineSimilarityPair.isDuplicate
+                ? t('Duplicates')
+                : t('Uniqueness')
+            }
+            individual1={dedupEngineSimilarityPair.individual1}
+            individual2={dedupEngineSimilarityPair.individual2}
+          />
         )}
         {isEditable && canApprove && (
           <>

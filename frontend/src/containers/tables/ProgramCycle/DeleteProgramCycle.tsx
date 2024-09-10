@@ -68,7 +68,7 @@ export const DeleteProgramCycle = ({
 
   return (
     <>
-      <IconButton color="primary" onClick={() => setOpen(true)}>
+      <IconButton color="primary" data-cy="delete-programme-cycle" onClick={() => setOpen(true)}>
         <DeleteIcon />
       </IconButton>
       <Dialog open={open} onClose={() => setOpen(false)} scroll="paper">

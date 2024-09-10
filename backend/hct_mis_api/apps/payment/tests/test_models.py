@@ -459,7 +459,7 @@ class TestDynamicChoiceArrayField(TestCase):
         self.assertIsInstance(form_field, DynamicChoiceField)
 
 
-class TestForm(forms.ModelForm):
+class FinancialServiceProviderXlsxTemplateForm(forms.ModelForm):
     class Meta:
         model = FinancialServiceProviderXlsxTemplate
         fields = ["core_fields"]
@@ -467,12 +467,14 @@ class TestForm(forms.ModelForm):
 
 class TestFinancialServiceProviderXlsxTemplate(TestCase):
     def test_model_form_integration(self) -> None:
-        form = TestForm(data={"core_fields": ["age", "residence_status"]})  # real existing core fields
+        form = FinancialServiceProviderXlsxTemplateForm(
+            data={"core_fields": ["age", "residence_status"]}
+        )  # real existing core fields
         self.assertTrue(form.is_valid())
         template = form.save()
         self.assertEqual(template.core_fields, ["age", "residence_status"])
 
-        form = TestForm(data={"core_fields": ["field1"]})  # fake core fields
+        form = FinancialServiceProviderXlsxTemplateForm(data={"core_fields": ["field1"]})  # fake core fields
         self.assertFalse(form.is_valid())
         self.assertEqual(
             form.errors,

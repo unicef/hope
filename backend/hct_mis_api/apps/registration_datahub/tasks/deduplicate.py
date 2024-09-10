@@ -56,6 +56,8 @@ class Thresholds:
     DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_PERCENTAGE: int = 0
     DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_ALLOWED: int = 0
 
+    BIOMETRIC_DEDUPLICATION_THRESHOLD: float = 0.0
+
     def __post_init__(self) -> None:
         for f in fields(self):
             setattr(self, f.name, getattr(config, f.name))
@@ -855,6 +857,7 @@ class HardDocumentDeduplication:
             area=area,
             registration_data_import=registration_data_import,
             household_unicef_id=household.unicef_id if household else None,
+            issue_type=GrievanceTicket.ISSUE_TYPE_UNIQUE_IDENTIFIERS_SIMILARITY,
         )
         ticket_details = TicketNeedsAdjudicationDetails(
             ticket=ticket,

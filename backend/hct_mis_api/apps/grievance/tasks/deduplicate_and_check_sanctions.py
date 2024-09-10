@@ -3,6 +3,7 @@ from typing import List
 
 from django.db import transaction
 
+from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.grievance.services.needs_adjudication_ticket_services import (
     create_needs_adjudication_tickets,
 )
@@ -26,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 
 class DeduplicateAndCheckAgainstSanctionsListTask:
-    @transaction.atomic(using="default")
+    @transaction.atomic()
     def execute(self, should_populate_index: bool, individuals_ids: List[str]) -> None:
         individuals = Individual.objects.filter(id__in=individuals_ids)
         business_area = individuals.first().business_area
@@ -45,11 +46,21 @@ class DeduplicateAndCheckAgainstSanctionsListTask:
 
         golden_record_duplicates = individuals.filter(deduplication_golden_record_status=DUPLICATE)
 
-        create_needs_adjudication_tickets(golden_record_duplicates, "duplicates", business_area)
+        create_needs_adjudication_tickets(
+            golden_record_duplicates,
+            "duplicates",
+            business_area,
+            issue_type=GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
+        )
 
         needs_adjudication = individuals.filter(deduplication_golden_record_status=NEEDS_ADJUDICATION)
 
-        create_needs_adjudication_tickets(needs_adjudication, "possible_duplicates", business_area)
+        create_needs_adjudication_tickets(
+            needs_adjudication,
+            "possible_duplicates",
+            business_area,
+            issue_type=GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
+        )
 
         if business_area.screen_beneficiary:
             CheckAgainstSanctionListPreMergeTask.execute()

@@ -1,4 +1,5 @@
 from typing import Any, List
+from unittest.mock import Mock, patch
 
 from parameterized import parameterized
 
@@ -98,6 +99,7 @@ class TestUpdateProgram(APITestCase):
             business_area=cls.business_area,
             data_collecting_type=data_collecting_type,
             partner_access=Program.NONE_PARTNERS_ACCESS,
+            biometric_deduplication_enabled=True,
         )
         unicef_program, _ = ProgramPartnerThrough.objects.get_or_create(
             program=cls.program,
@@ -130,9 +132,11 @@ class TestUpdateProgram(APITestCase):
         )
         cls.area_type_other = AreaTypeFactory(name="Area Type Other", country=country_other)
 
-        cls.area_in_afg_1 = AreaFactory(name="Area in AFG 1", area_type=area_type_afg)
-        cls.area_in_afg_2 = AreaFactory(name="Area in AFG 2", area_type=area_type_afg)
-        cls.area_not_in_afg = AreaFactory(name="Area not in AFG", area_type=cls.area_type_other)
+        cls.area_in_afg_1 = AreaFactory(name="Area in AFG 1", area_type=area_type_afg, p_code="AREA-IN-AFG1")
+        cls.area_in_afg_2 = AreaFactory(name="Area in AFG 2", area_type=area_type_afg, p_code="AREA-IN-AFG2")
+        cls.area_not_in_afg = AreaFactory(
+            name="Area not in AFG", area_type=cls.area_type_other, p_code="AREA-NOT-IN-AFG2"
+        )
 
         unicef_program.areas.set([cls.area_in_afg_1, cls.area_in_afg_2])
 
@@ -229,9 +233,11 @@ class TestUpdateProgram(APITestCase):
         ]
     )
     def test_update_program_partners(self, _: Any, partner_access: str) -> None:
-        area1 = AreaFactory(name="Area1", area_type=self.area_type_other)
-        area2 = AreaFactory(name="Area2", area_type=self.area_type_other)
-        area_to_be_unselected = AreaFactory(name="AreaToBeUnselected", area_type=self.area_type_other)
+        area1 = AreaFactory(name="Area1", area_type=self.area_type_other, p_code="AREA1")
+        area2 = AreaFactory(name="Area2", area_type=self.area_type_other, p_code="AREA2")
+        area_to_be_unselected = AreaFactory(
+            name="AreaToBeUnselected", area_type=self.area_type_other, p_code="AREA-TO-BE-UNSELECTED"
+        )
         program_partner = ProgramPartnerThrough.objects.create(
             program=self.program,
             partner=self.partner,
@@ -274,9 +280,11 @@ class TestUpdateProgram(APITestCase):
         )
 
     def test_update_program_partners_invalid_access_type_from_object(self) -> None:
-        area1 = AreaFactory(name="Area1", area_type=self.area_type_other)
-        area2 = AreaFactory(name="Area2", area_type=self.area_type_other)
-        area_to_be_unselected = AreaFactory(name="AreaToBeUnselected", area_type=self.area_type_other)
+        area1 = AreaFactory(name="Area1", area_type=self.area_type_other, p_code="AREA1")
+        area2 = AreaFactory(name="Area2", area_type=self.area_type_other, p_code="AREA2")
+        area_to_be_unselected = AreaFactory(
+            name="AreaToBeUnselected", area_type=self.area_type_other, p_code="AREA-TO-BE-UNSELECTED"
+        )
         program_partner = ProgramPartnerThrough.objects.create(
             program=self.program,
             partner=self.partner,
@@ -1123,12 +1131,22 @@ class TestUpdateProgram(APITestCase):
             },
         )
 
-    def test_finish_active_program_with_not_finished_program_cycle(self) -> None:
+    @patch.dict(
+        "os.environ",
+        {"DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key", "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com"},
+    )
+    @patch(
+        "hct_mis_api.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI"
+        ".delete_deduplication_set"
+    )
+    def test_finish_active_program_with_not_finished_program_cycle(self, mock_delete_deduplication_set: Mock) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_FINISH], self.business_area)
         Program.objects.filter(id=self.program.id).update(status=Program.ACTIVE)
         self.program.refresh_from_db()
         self.assertEqual(self.program.status, Program.ACTIVE)
         program_cycle = self.program.cycles.first()
+        program_cycle.status = ProgramCycle.ACTIVE
+        program_cycle.save()
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
@@ -1141,8 +1159,11 @@ class TestUpdateProgram(APITestCase):
                 "version": self.program.version,
             },
         )
-        program_cycle.status = ProgramCycle.FINISHED
+        program_cycle.status = ProgramCycle.DRAFT
         program_cycle.save()
+        # add deduplication_set_id
+        Program.objects.filter(id=self.program.id).update(deduplication_set_id="12bc7994-9467-4f27-9954-d75a67d0e909")
+
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
             context={"user": self.user},
@@ -1154,3 +1175,7 @@ class TestUpdateProgram(APITestCase):
                 "version": self.program.version,
             },
         )
+        # check if deduplication_set_id is null
+        self.program.refresh_from_db()
+        self.assertIsNone(self.program.deduplication_set_id)
+        mock_delete_deduplication_set.assert_called_once_with("12bc7994-9467-4f27-9954-d75a67d0e909")

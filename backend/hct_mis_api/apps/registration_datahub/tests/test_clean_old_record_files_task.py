@@ -7,8 +7,6 @@ from hct_mis_api.aurora.models import Record
 
 
 class TestClearRecordFilesTask(APITestCase):
-    databases = {"default", "registration_datahub"}
-
     @classmethod
     def setUpTestData(cls) -> None:
         cls.record_1 = Record.objects.create(

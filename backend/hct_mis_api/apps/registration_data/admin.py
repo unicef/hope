@@ -13,9 +13,9 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 
 from admin_extra_buttons.api import confirm_action
-from admin_extra_buttons.decorators import button, link
+from admin_extra_buttons.decorators import button
 from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.filters import ChoicesFieldComboFilter
+from adminfilters.filters import ChoicesFieldComboFilter, ValueFilter
 from adminfilters.mixin import AdminAutoCompleteSearchMixin
 from adminfilters.querystring import QueryStringFilter
 
@@ -25,7 +25,10 @@ from hct_mis_api.apps.household.documents import get_individual_doc
 from hct_mis_api.apps.household.forms import MassEnrollForm
 from hct_mis_api.apps.household.models import Individual, PendingIndividual
 from hct_mis_api.apps.payment.models import PaymentRecord
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.registration_data.models import (
+    DeduplicationEngineSimilarityPair,
+    RegistrationDataImport,
+)
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
     merge_registration_data_import_task,
 )
@@ -61,19 +64,6 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).select_related("business_area")
-
-    @link(
-        label="HUB RDI",
-        # permission=lambda r, o: r.user.is_superuser,
-        # visible=lambda btn: btn.original.status == RegistrationDataImport.IMPORT_ERROR,
-    )
-    def hub(self, button: button) -> Optional[str]:
-        obj = button.context.get("original")
-        if obj:
-            return reverse("admin:registration_data_registrationdataimportdatahub_change", args=[obj.datahub_id])
-
-        button.visible = False
-        return None
 
     @button(
         label="Re-run RDI",
@@ -266,12 +256,6 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
         url = reverse("admin:household_household_changelist")
         return HttpResponseRedirect(f"{url}?&qs=registration_data_import__exact={obj.id}")
 
-    @button()
-    def hub_rdi(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
-        obj = self.get_object(request, str(pk))
-        url = reverse("admin:registration_datahub_registrationdataimportdatahub_change", args=[obj.datahub_id])
-        return HttpResponseRedirect(url)
-
     @button(permission="program.enroll_beneficiaries")
     def enroll_to_program(self, request: HttpRequest, pk: UUID) -> Optional[HttpResponse]:
         url = reverse("admin:registration_data_registrationdataimport_change", args=[pk])
@@ -287,7 +271,9 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
                 program_for_enroll = form.cleaned_data["program_for_enroll"]
                 households_ids = list(qs.distinct("unicef_id").values_list("id", flat=True))
                 enroll_households_to_program_task.delay(
-                    households_ids=households_ids, program_for_enroll_id=str(program_for_enroll.id)
+                    households_ids=households_ids,
+                    program_for_enroll_id=str(program_for_enroll.id),
+                    user_id=str(request.user.id),
                 )
                 self.message_user(
                     request,
@@ -300,3 +286,16 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
         context["action"] = "mass_enroll_to_another_program"
         context["enroll_from"] = "RDI"
         return TemplateResponse(request, "admin/household/household/enroll_households_to_program.html", context)
+
+
+@admin.register(DeduplicationEngineSimilarityPair)
+class DeduplicationEngineSimilarityPairAdmin(HOPEModelAdminBase):
+    list_display = ("program", "individual1", "individual2", "similarity_score", "is_duplicate")
+    list_filter = (("program__name", ValueFilter),)
+    raw_id_fields = ("program", "individual1", "individual2")
+    search_fields = ("individual1", "individual2")
+
+    def is_duplicate(self, obj: DeduplicationEngineSimilarityPair) -> bool:
+        return obj._is_duplicate
+
+    is_duplicate.boolean = True

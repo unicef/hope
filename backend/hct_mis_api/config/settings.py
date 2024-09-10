@@ -423,7 +423,7 @@ def filter_environment(key: str, config: Dict, request: HttpRequest) -> bool:
 def masker(key: str, value: Any, config: Dict, request: HttpRequest) -> Any:
     from django_sysinfo.utils import cleanse_setting
 
-    from .apps.utils.security import is_root  # noqa: ABS101
+    from ..apps.utils.security import is_root  # noqa: ABS101
 
     if key in ["PATH", "PYTHONPATH"]:
         return mark_safe(value.replace(":", r":<br>"))
@@ -453,7 +453,6 @@ EXPLORER_CONNECTIONS = {
     "HUB MIS": "cash_assist_datahub_mis",
     "HUB CA": "cash_assist_datahub_ca",
     "HUB ERP": "cash_assist_datahub_erp",
-    "HUB Reg": "registration_datahub",
 }
 EXPLORER_DEFAULT_CONNECTION = "default"
 EXPLORER_PERMISSION_VIEW = lambda r: r.user.has_perm("explorer.view_query")
@@ -543,3 +542,8 @@ from hct_mis_api.config.fragments.sentry import *  # noqa: F403, F401, E402
 from hct_mis_api.config.fragments.smart_admin import *  # noqa: F403, F401, E402
 from hct_mis_api.config.fragments.social_auth import *  # noqa: F403, F401, E402
 from hct_mis_api.config.fragments.storages import *  # noqa: F403, F401, E402
+
+LIBRARY_PATHS: bool = env("LIBRARY_PATHS", default=False)
+if LIBRARY_PATHS:
+    GDAL_LIBRARY_PATH = "/opt/homebrew/opt/gdal/lib/libgdal.dylib"
+    GEOS_LIBRARY_PATH = "/opt/homebrew/opt/geos/lib/libgeos_c.dylib"

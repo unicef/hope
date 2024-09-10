@@ -76,18 +76,6 @@ class Command(BaseCommand):
                 "targetpopulation",
             ],
             "erp_datahub": ["downpayment", "fundscommitment"],
-            "registration_datahub": [
-                "importdata",
-                "importedindividualidentity",
-                "importeddocumenttype",
-                "importeddocument",
-                "importedhousehold",
-                "importedindividualroleinhousehold",
-                "importedindividual",
-                "koboimportedsubmission",
-                "record",
-                "registrationdataimportdatahub",
-            ],
             "mis_datahub": [
                 "document",
                 "downpayment",

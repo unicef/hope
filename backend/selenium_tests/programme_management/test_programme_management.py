@@ -659,7 +659,7 @@ class TestComeBackScenarios:
 @pytest.mark.night
 @pytest.mark.usefixtures("login")
 class TestManualCalendar:
-    @pytest.mark.skip(reason="ToDo")
+    @pytest.mark.skip("Failed with new selenium")
     @pytest.mark.parametrize(
         "test_data",
         [

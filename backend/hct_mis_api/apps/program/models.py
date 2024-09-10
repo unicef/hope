@@ -26,7 +26,6 @@ from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.core.querysets import ExtendedQuerySetSequence
 from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.targeting.models import TargetPopulation
 from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
@@ -201,6 +200,11 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
     )
     partners = models.ManyToManyField(to="account.Partner", through=ProgramPartnerThrough, related_name="programs")
 
+    biometric_deduplication_enabled = models.BooleanField(
+        default=False, help_text="Enable Deduplication of Face Images"
+    )
+    deduplication_set_id = models.UUIDField(blank=True, null=True)
+
     objects = SoftDeletableIsVisibleManager()
 
     def save(self, *args: Any, **kwargs: Any) -> None:
@@ -274,6 +278,9 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
                 f"Program for name: {self.name} and business_area: {self.business_area.slug} already exists."
             )
         super(Program, self).validate_unique()
+
+    def is_active(self) -> bool:
+        return self.status == self.ACTIVE
 
 
 class ProgramCycle(AdminUrlMixin, SoftDeletableModel, TimeStampedUUIDModel, UnicefIdentifiedModel, ConcurrencyModel):
@@ -375,6 +382,8 @@ class ProgramCycle(AdminUrlMixin, SoftDeletableModel, TimeStampedUUIDModel, Unic
             raise DRFValidationError("Program should be within Active status.")
 
     def validate_payment_plan_status(self) -> None:
+        from hct_mis_api.apps.payment.models import PaymentPlan
+
         if (
             PaymentPlan.objects.filter(program_cycle=self)
             .exclude(

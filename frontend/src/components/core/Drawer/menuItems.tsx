@@ -58,7 +58,7 @@ export const menuItems: MenuItem[] = [
     scopes: [SCOPE_PROGRAM],
   },
   {
-    name: 'Program Population',
+    name: 'Programme Population',
     href: '/population/household',
     selectedRegexp: /^\/population.*$/,
     icon: <PeopleIcon />,
@@ -95,7 +95,7 @@ export const menuItems: MenuItem[] = [
     isSocialWorker: true,
   },
   {
-    name: 'Programs',
+    name: 'Programmes',
     href: '/list',
     selectedRegexp: /^\/programs.*$/,
     icon: <Assignment />,
@@ -115,7 +115,7 @@ export const menuItems: MenuItem[] = [
     permissions: [PERMISSIONS.PAYMENT_VIEW_LIST_MANAGERIAL],
   },
   {
-    name: 'Program Details',
+    name: 'Programme Details',
     href: '/programs',
     selectedRegexp: /^\/programs.*$/,
     icon: <Assignment />,
@@ -269,7 +269,7 @@ export const menuItems: MenuItem[] = [
     scopes: [SCOPE_ALL_PROGRAMS],
   },
   {
-    name: 'Program Log',
+    name: 'Programme Log',
     href: '/activity-log',
     selectedRegexp: /^\/activity-log.*$/,
     icon: <TrackChangesIcon />,

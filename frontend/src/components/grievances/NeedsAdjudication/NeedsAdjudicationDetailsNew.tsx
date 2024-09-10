@@ -1,5 +1,4 @@
 import { Title } from '@core/Title';
-import { GrievanceTicketQuery } from '@generated/graphql';
 import { Box, Typography } from '@mui/material';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { useState } from 'react';
@@ -7,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { ApproveBox } from '../GrievancesApproveSection/ApproveSectionStyles';
 import { NeedsAdjudicationActions } from './NeedsAdjudicationActions';
 import { NeedsAdjudicationTable } from './NeedsAdjudicationTable';
+import { GrievanceTicketQuery } from '@generated/graphql';
 
 export const NeedsAdjudicationDetailsNew = ({
   ticket,

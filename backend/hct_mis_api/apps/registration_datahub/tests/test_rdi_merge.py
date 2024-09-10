@@ -77,7 +77,6 @@ def capture_on_commit_callbacks(
 
 
 class TestRdiMergeTask(BaseElasticSearchTestCase):
-    databases = {"default", "registration_datahub"}
     fixtures = [
         f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",
         f"{settings.PROJECT_ROOT}/apps/core/fixtures/data.json",
@@ -587,13 +586,13 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         )
         role = PendingIndividualRoleInHousehold(individual=external_collector, household=household, role=ROLE_ALTERNATE)
         role.save()
+        self.rdi.program.biometric_deduplication_enabled = True
+        self.rdi.program.save()
         with capture_on_commit_callbacks(execute=True):
             RdiMergeTask().execute(self.rdi.pk)
 
 
 class TestRdiMergeTaskDeliveryMechanismData(TestCase):
-    databases = {"default", "registration_datahub"}
-
     fixtures = [
         f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",
         f"{settings.PROJECT_ROOT}/apps/core/fixtures/data.json",

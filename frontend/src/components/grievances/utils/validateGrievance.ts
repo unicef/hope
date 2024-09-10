@@ -264,6 +264,19 @@ export function validateUsingSteps(
   //   'sex',
   // ];
 
+  if (!category) {
+    errors.category = 'Category is Required';
+  }
+  if (
+    category === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
+    category === GRIEVANCE_CATEGORIES.DATA_CHANGE ||
+    category === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT
+  ) {
+    if (!issueType) {
+      errors.issueType = 'Issue Type is required';
+    }
+  }
+
   if (category === GRIEVANCE_CATEGORIES.DATA_CHANGE) {
     if (issueType === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL) {
       if (!values.selectedHousehold && activeStep === GrievanceSteps.Lookup) {
@@ -413,15 +426,6 @@ export function validateUsingSteps(
           },
         );
       }
-    }
-  }
-  if (
-    category === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
-    category === GRIEVANCE_CATEGORIES.DATA_CHANGE ||
-    category === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT
-  ) {
-    if (!issueType) {
-      errors.issueType = 'Issue Type is required';
     }
   }
 
