@@ -8,21 +8,13 @@ volumes:
 
 
 services:
-  redis:
-    restart: always
-    image: redis:4.0.11-alpine3.8
-    expose:
-      - "6379"
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 10s
-      retries: 5
 
   backend:
-    stdin_open: true
-    entrypoint: entrypoint.sh
     image: unicef/hct-mis-backend
+    profiles:
+      - default
+    entrypoint: entrypoint.sh
+    stdin_open: true
     env_file:
       - .env
     environment:
@@ -64,6 +56,8 @@ services:
       retries: 10
 
   celery_worker:
+    profiles:
+      - default
     stdin_open: true
     tty: true
     image: unicef/hct-mis-backend
@@ -74,7 +68,6 @@ services:
     volumes:
       - ./backend:/code/
       - backend-data:/data
-    restart: always
     command: "celery-worker"
     depends_on:
       backend:
@@ -86,12 +79,14 @@ services:
       elasticsearch:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "celery", "status"]
+      test: [ "CMD", "celery", "status" ]
       interval: 10s
       timeout: 10s
       retries: 5
 
   celery-beat:
+    profiles:
+      - default
     stdin_open: true
     tty: true
     image: unicef/hct-mis-backend
@@ -102,7 +97,6 @@ services:
     volumes:
       - ./backend:/code/
       - backend-data:/data
-    restart: always
     command: "celery-beat"
     depends_on:
       backend:
@@ -114,13 +108,16 @@ services:
       elasticsearch:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "celery", "status"]
+      test: [ "CMD", "celery", "status" ]
       interval: 10s
       timeout: 10s
       retries: 5
 
   db:
     image: kartoza/postgis:14-3
+    profiles:
+      - default
+      - services
     volumes:
       - db:/var/lib/postgresql/data
       - ./postgres/init:/docker-entrypoint-initdb.d
@@ -131,13 +128,30 @@ services:
     ports:
       - "5433:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+
+  redis:
+    image: redis:4.0.11-alpine3.8
+    profiles:
+      - default
+      - services
+    expose:
+      - "6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
       interval: 10s
       timeout: 10s
       retries: 5
 
   elasticsearch:
     image: unicef/hct-elasticsearch
+    profiles:
+      - default
+      - services
     container_name: elasticsearch
     build:
       context: elasticsearch
@@ -159,7 +173,21 @@ services:
     ports:
       - 9200:9200
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      test: [ "CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1" ]
       interval: 10s
       timeout: 10s
       retries: 3
+
+  celery-flower:
+    image: johniak/flower:1.6
+    profiles:
+      - flower
+    command: [ "flower", "--broker=redis://redis:6379/0", "--port=5555" ]
+    environment:
+      - FLOWER_AUTH_PROVIDER=""
+      - FLOWER_DEBUG="1"
+      - FLOWER_ADDRESS=0.0.0.0
+    ports:
+      - "5555:5555"
+    depends_on:
+      - redis
