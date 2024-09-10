@@ -376,7 +376,7 @@ export const matchGrievanceUrlByCategory = (category: number): string => {
   const categoryString = category.toString();
   const systemGeneratedGrievanceCategories = [
     GRIEVANCE_CATEGORIES.PAYMENT_VERIFICATION,
-    GRIEVANCE_CATEGORIES.DEDUPLICATION,
+    GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION,
     GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING,
   ];
   if (systemGeneratedGrievanceCategories.includes(categoryString)) {

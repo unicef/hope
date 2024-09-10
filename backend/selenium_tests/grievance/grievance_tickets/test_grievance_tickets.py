@@ -702,7 +702,6 @@ class TestGrievanceTickets:
         assert "Female Age Group 12 17" in pageGrievanceDetailsPage.getRows()[0].text
         assert "- 1" in pageGrievanceDetailsPage.getRows()[0].text
 
-    @pytest.mark.skip("Failed with new selenium")
     @pytest.mark.parametrize(
         "test_data",
         [
@@ -1006,7 +1005,6 @@ class TestGrievanceTickets:
         for str_row in pageGrievanceTickets.getRows():
             assert "Urgent" in str_row.text.replace("\n", " ").split(" ")
 
-    @pytest.mark.skip("Failed with new selenium")
     def test_grievance_tickets_process_tickets(
         self,
         pageGrievanceTickets: GrievanceTickets,
@@ -1104,7 +1102,6 @@ class TestGrievanceTickets:
         assert "grievance_ticket_1" in pageAdminPanel.getUnicefID().text
         assert GrievanceTicket.objects.first().unicef_id in pageAdminPanel.getUnicefID().text
 
-    @pytest.mark.skip("Failed with new selenium")
     def test_grievance_tickets_needs_adjudication(
         self,
         add_grievance_needs_adjudication: None,
