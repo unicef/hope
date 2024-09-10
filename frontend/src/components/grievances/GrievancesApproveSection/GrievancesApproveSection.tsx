@@ -35,7 +35,7 @@ export function GrievancesApproveSection({
         />
       );
     }
-    if (ticket?.category?.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION) {
+    if (ticket?.category?.toString() === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION) {
       if (ticket.needsAdjudicationTicketDetails.isMultipleDuplicatesVersion) {
         return (
           <NeedsAdjudicationDetailsNew
