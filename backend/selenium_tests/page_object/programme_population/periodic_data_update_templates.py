@@ -3,9 +3,9 @@ from selenium.webdriver.remote.webelement import WebElement
 
 
 class PeriodicDatUpdateTemplates(BaseComponents):
-    navProgramPopulation = 'a[data-cy="nav-Program Population"]'
+    navProgramPopulation = 'a[data-cy="nav-Programme Population"]'
     navHouseholdMembers = 'a[data-cy="nav-Household Members"]'
-    navProgramDetails = 'a[data-cy="nav-Program Details"]'
+    navProgramDetails = 'a[data-cy="nav-Programme Details"]'
     pageHeaderContainer = 'div[data-cy="page-header-container"]'
     pageHeaderTitle = 'h5[data-cy="page-header-title"]'
     tabIndividuals = 'button[data-cy="tab-individuals"]'
@@ -157,9 +157,9 @@ class PeriodicDatUpdateTemplates(BaseComponents):
 
 
 class PeriodicDatUpdateTemplatesDetails(BaseComponents):
-    navProgramPopulation = 'a[data-cy="nav-Program Population"]'
+    navProgramPopulation = 'a[data-cy="nav-Programme Population"]'
     navHouseholdMembers = 'a[data-cy="nav-Household members"]'
-    navProgramDetails = 'a[data-cy="nav-Program Details"]'
+    navProgramDetails = 'a[data-cy="nav-Programme Details"]'
     pageHeaderContainer = 'div[data-cy="page-header-container"]'
     arrow_back = 'div[data-cy="arrow_back"]'
     breadcrumbsContainer = 'div[data-cy="breadcrumbs-container"]'

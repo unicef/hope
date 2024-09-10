@@ -46,7 +46,7 @@ export function DeleteProgramPartner({
         <DialogTitleWrapper>
           <DialogTitle>
             {t(
-              'Are you sure you want to remove the partner from this program?',
+              'Are you sure you want to remove the partner from this programme?',
             )}
           </DialogTitle>
         </DialogTitleWrapper>
