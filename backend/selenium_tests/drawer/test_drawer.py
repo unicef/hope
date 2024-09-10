@@ -68,14 +68,14 @@ class TestDrawer:
             "Country Dashboard",
             "Registration Data Import",
             "People",
-            "Program Details",
+            "Programme Details",
             "Targeting",
             "Payment Module",
             "Payment Verification",
             "Grievance",
             "Accountability",
             "Programme Users",
-            "Program Log",
+            "Programme Log",
         ]
         actual_menu_items = pageProgrammeManagement.getDrawerItems().text.split("\n")
         assert expected_menu_items == actual_menu_items
@@ -91,15 +91,15 @@ class TestDrawer:
         expected_menu_items = [
             "Country Dashboard",
             "Registration Data Import",
-            "Program Population",
-            "Program Details",
+            "Programme Population",
+            "Programme Details",
             "Targeting",
             "Payment Module",
             "Payment Verification",
             "Grievance",
             "Accountability",
             "Programme Users",
-            "Program Log",
+            "Programme Log",
         ]
         actual_menu_items = pageProgrammeManagement.getDrawerItems().text.split("\n")
         assert expected_menu_items == actual_menu_items
@@ -112,7 +112,7 @@ class TestDrawer:
     ) -> None:
         expected_menu_items = [
             "Country Dashboard",
-            "Programs",
+            "Programmes",
             "Managerial Console",
             "Grievance",
             "Reporting",
@@ -135,7 +135,7 @@ class TestDrawer:
 
         pageProgrammeManagement.selectGlobalProgramFilter(draft_program_name)
         assert draft_program_name in pageProgrammeDetails.getHeaderTitle().text
-        assert pageProgrammeDetails.getDrawerInactiveSubheader().text == "program inactive"
+        assert pageProgrammeDetails.getDrawerInactiveSubheader().text == "programme inactive"
 
         pageProgrammeManagement.selectGlobalProgramFilter(active_program_name)
         assert active_program_name in pageProgrammeDetails.getHeaderTitle().text
@@ -145,4 +145,4 @@ class TestDrawer:
         # first have to search Finished program because of default filtering
         pageProgrammeManagement.selectGlobalProgramFilter(finished_program_name)
         assert finished_program_name in pageProgrammeDetails.getHeaderTitle().text
-        assert pageProgrammeDetails.getDrawerInactiveSubheader().text == "program inactive"
+        assert pageProgrammeDetails.getDrawerInactiveSubheader().text == "programme inactive"

@@ -20,7 +20,7 @@ import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/Program
 const validationSchema = Yup.object().shape({
   name: Yup.string().required('Name is required'),
   programCycleId: Yup.object().shape({
-    value: Yup.string().required('Program Cycle is required'),
+    value: Yup.string().required('Programme Cycle is required'),
   }),
 });
 

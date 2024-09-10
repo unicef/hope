@@ -144,7 +144,7 @@ exports[`containers/tables/ProgrammesTable should render loading 1`] = `
                     class="sc-iBdnpw jMIPuq"
                     data-cy="table-label"
                   >
-                    Program Size
+                    Programme Size
                   </span>
                 </th>
                 <th
@@ -498,7 +498,7 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
                     class="sc-iBdnpw jMIPuq"
                     data-cy="table-label"
                   >
-                    Program Size
+                    Programme Size
                   </span>
                 </th>
                 <th
