@@ -167,7 +167,7 @@ export const Drawer = ({
   if (!isAllPrograms && !isActive && isDefined) {
     notActiveBar = (
       <ProgramNotActiveBar data-cy="program-inactive-subheader">
-        program inactive
+        programme inactive
       </ProgramNotActiveBar>
     );
   }

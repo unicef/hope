@@ -225,7 +225,7 @@ export const PopulationHouseholdDetailsPage = (): React.ReactElement => {
             </Grid>
             {household?.programRegistrationId && (
               <Grid item xs={3}>
-                <LabelizedField label={t('Program registration id')}>
+                <LabelizedField label={t('Programme registration id')}>
                   {household.programRegistrationId}
                 </LabelizedField>
               </Grid>

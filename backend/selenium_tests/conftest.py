@@ -189,7 +189,9 @@ def driver() -> Chrome:
     chrome_options.add_argument("--window-size=1920,1080")
     if not os.path.exists("./report/downloads/"):
         os.makedirs("./report/downloads/")
-    prefs = {"download.default_directory": "./report/downloads/"}
+    prefs = {
+        "download.default_directory": "./report/downloads/",
+    }
     chrome_options.add_experimental_option("prefs", prefs)
     driver = webdriver.Chrome(options=chrome_options)
     yield driver
@@ -197,13 +199,13 @@ def driver() -> Chrome:
 
 @pytest.fixture(autouse=True)
 def browser(driver: Chrome) -> Chrome:
+    driver.live_server = LiveServer("localhost")
     yield driver
     driver.quit()
 
 
 @pytest.fixture
 def login(browser: Chrome) -> Chrome:
-    browser.live_server = LiveServer("localhost")
     browser.get(f"{browser.live_server.url}/api/unicorn/")
     login = "id_username"
     password = "id_password"
