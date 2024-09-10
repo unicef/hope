@@ -105,7 +105,7 @@ export const DrawerItems = ({
     let updatedMenuItems = [...items];
     const getIndexByName = (name: string): number =>
       updatedMenuItems.findIndex((item) => item?.name === name);
-    const programDetailsIndex = getIndexByName('Program Details');
+    const programDetailsIndex = getIndexByName('Programme Details');
     const reportingIndex = getIndexByName('Reporting');
 
     // Remove 'Reporting' item when program is selected

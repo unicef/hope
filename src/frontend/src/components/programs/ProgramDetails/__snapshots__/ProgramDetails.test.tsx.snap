@@ -278,10 +278,10 @@ exports[`components/ProgramDetails should render 1`] = `
             class="sc-guDLey RwNuC"
             color="textSecondary"
           >
-            Program size
+            Programme size
           </span>
           <div
-            data-cy="label-Program size"
+            data-cy="label-Programme size"
           >
             <span
               class="sc-dmyCSP bGPBYf"
