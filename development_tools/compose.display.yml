@@ -1,9 +1,15 @@
 version: '3.7'
+
 volumes:
-  backend-web-app:
+  backend-data-selenium:
+  backend-web-app-selenium:
+  db-selenium:
+  data_es-selenium:
+
 services:
   selenium:
     stdin_open: true
+    image: unicef/hct-mis-backend-dev
     environment:
       - REDIS_INSTANCE=redis:6379
       - PYTHONUNBUFFERED=1
@@ -20,21 +26,35 @@ services:
       - DATABASE_URL_HUB_REGISTRATION=postgis://postgres:postgres@db:5432/rdi_datahub
       - USE_DUMMY_EXCHANGE_RATES=yes
       - CELERY_TASK_ALWAYS_EAGER=true
-    image: ${dev_backend_image}
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      - DISPLAY=host.docker.internal:0
+      - STREAM=true
+    build:
+      context: ..
+      dockerfile: ../docker/Dockerfile
+      target: dev
     volumes:
-      - ../backend:/code/
-      - ../backend/report/screenshot/:/code/screenshot/
-      - ../backend/report/:/code/report/
+      - ./backend/report/screenshot/:/code/screenshot/
+      - ./backend/report/:/code/report/
+      - backend-data:/data
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - $HOME/.Xauthority:/root/.Xauthority:rw
+      - backend-data-selenium:/data
+      - ./backend/selenium_tests:/code/selenium_tests
       - type: volume
-        source: backend-web-app
-        target: /code/hct_mis_api/apps/web
+        source: backend-web-app-selenium
+        target: /code/hct_mis_api/apps/web/static
         volume:
           nocopy: false
     command: |
-      bash -c "
-        waitforit -host=db -port=5432 -timeout=30
-        pytest -svvv -m 'not night' selenium_tests --cov-report xml:./coverage.xml --html-report=./report/report.html --randomly-seed=42
+      sh -c "
+        waitforit -host=db -port=5432 -timeout=30 &&
+        pytest -svvv selenium_tests --html-report=./report/report.html
       "
+    ports:
+      - "8080:8080"
     depends_on:
       db:
         condition: service_started
@@ -44,14 +64,20 @@ services:
         condition: service_started
       init_fe:
         condition: service_completed_successfully
+      selenium-hub:
+        condition: service_started
 
   init_fe:
-    image: ${dist_backend_image}
+    image: unicef/hct-mis-backend-dist
+    build:
+      context: ..
+      dockerfile: ../docker/Dockerfile
+      target: dist
     volumes:
-      - backend-web-app:/tmp/
+      - backend-web-app-selenium:/tmp
     command: |
       sh -c "
-        cp -r ./hct_mis_api/apps/web/* /tmp/
+        cp -r ./hct_mis_api/apps/web/static/* /tmp/
       "
     restart: "no"
 
@@ -65,6 +91,7 @@ services:
   db:
     image: kartoza/postgis:14-3
     volumes:
+      - db-selenium:/var/lib/postgresql/data
       - ./postgres/init:/docker-entrypoint-initdb.d
     environment:
       - POSTGRES_MULTIPLE_DATABASES=unicef_hct_mis_cashassist,rdi_datahub,mis_datahub,erp_datahub,ca_datahub
@@ -81,8 +108,8 @@ services:
     image: unicef/hct-elasticsearch
     container_name: elasticsearch
     build:
-      context: ../development_tools/elasticsearch
-      dockerfile: Dockerfile
+      context: elasticsearch
+      dockerfile: elasticsearch/Dockerfile
     environment:
       - node.name=es01
       - cluster.name=es-docker-cluster
@@ -94,5 +121,14 @@ services:
       memlock:
         soft: -1
         hard: -1
+    volumes:
+      - data_es-selenium:/usr/share/elasticsearch/data
     ports:
       - 9200:9200
+
+  selenium-hub:
+    image: selenium/hub:latest
+    ports:
+      - "4442:4442"
+      - "4443:4443"
+      - "4444:4444"

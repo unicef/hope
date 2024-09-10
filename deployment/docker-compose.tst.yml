@@ -69,7 +69,7 @@ services:
     <<: *django_envs
     image: unicef/hct-elasticsearch
     build:
-      context: ../elasticsearch
+      context: ../development_tools/elasticsearch
     environment:
       - node.name=es01
       - cluster.name=es-docker-cluster

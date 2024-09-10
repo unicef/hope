@@ -81,7 +81,7 @@ services:
     image: unicef/hct-elasticsearch
     container_name: elasticsearch
     build:
-      context: ../elasticsearch
+      context: ../development_tools/elasticsearch
       dockerfile: Dockerfile
     environment:
       - node.name=es01

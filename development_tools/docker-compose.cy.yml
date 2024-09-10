@@ -37,7 +37,9 @@ volumes:
 
 services:
   cypress:
-    image: ${CYPRESS_IMAGE}
+    build:
+      context: ../cypress
+      dockerfile: ../cypress/Dockerfile
     command: "ci-test"
     depends_on:
       - proxy
@@ -46,8 +48,9 @@ services:
       - BRANCH_NAME=${BRANCH_NAME}
       - BUILD_ID=${BUILD_ID}
     volumes:
-      - ../cypress-results:/code/cypress/results
-      - ../cypress-reports:/code/cypress/reports
+      - ./cypress-results:/code/cypress/results
+      - ./cypress-reports:/code/cypress/reports
+
 
   proxy:
     image: tivix/docker-nginx:v17
@@ -64,8 +67,12 @@ services:
 
   backend:
     <<: *django_envs
-    image: ${BACKEND_IMAGE}
-    command: "cy"
+    build:
+      context: ..
+      dockerfile: ../docker/Dockerfile
+    command: cy
+    ports:
+      - "8000:8000"
     volumes:
       - backend-data:/data
 
@@ -100,7 +107,9 @@ services:
 
   celery_worker:
     <<: *django_envs
-    image: ${BACKEND_IMAGE}
+    build:
+      context: ..
+      dockerfile: ../docker/Dockerfile
     restart: unless-stopped
     command: "celery -A hct_mis_api.apps.core.celery worker -E -l info"
     volumes:
@@ -112,7 +121,7 @@ services:
     <<: *django_envs
     image: unicef/hct-elasticsearch
     build:
-      context: ../development_tools/elasticsearch
+      context: elasticsearch
     environment:
       - node.name=es01
       - cluster.name=es-docker-cluster
