@@ -13,7 +13,7 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 
 from admin_extra_buttons.api import confirm_action
-from admin_extra_buttons.decorators import button, link
+from admin_extra_buttons.decorators import button
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import ChoicesFieldComboFilter, ValueFilter
 from adminfilters.mixin import AdminAutoCompleteSearchMixin
@@ -64,19 +64,6 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).select_related("business_area")
-
-    @link(
-        label="HUB RDI",
-        # permission=lambda r, o: r.user.is_superuser,
-        # visible=lambda btn: btn.original.status == RegistrationDataImport.IMPORT_ERROR,
-    )
-    def hub(self, button: button) -> Optional[str]:
-        obj = button.context.get("original")
-        if obj:
-            return reverse("admin:registration_data_registrationdataimportdatahub_change", args=[obj.datahub_id])
-
-        button.visible = False
-        return None
 
     @button(
         label="Re-run RDI",
@@ -268,12 +255,6 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
         obj = self.get_object(request, str(pk))
         url = reverse("admin:household_household_changelist")
         return HttpResponseRedirect(f"{url}?&qs=registration_data_import__exact={obj.id}")
-
-    @button()
-    def hub_rdi(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
-        obj = self.get_object(request, str(pk))
-        url = reverse("admin:registration_datahub_registrationdataimportdatahub_change", args=[obj.datahub_id])
-        return HttpResponseRedirect(url)
 
     @button(permission="program.enroll_beneficiaries")
     def enroll_to_program(self, request: HttpRequest, pk: UUID) -> Optional[HttpResponse]:

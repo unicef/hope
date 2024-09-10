@@ -62,7 +62,7 @@ export function FeedbackPage(): React.ReactElement {
           component={Link}
           to={`/${baseUrl}/grievance/feedback/create`}
           data-cy="button-submit-new-feedback"
-          title={t('Program has to be active to create a new Feedback')}
+          title={t('Programme has to be active to create a new Feedback')}
           disabled={!isActiveProgram}
         >
           {t('Submit New Feedback')}
