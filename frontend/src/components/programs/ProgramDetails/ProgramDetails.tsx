@@ -171,7 +171,7 @@ export const ProgramDetails = ({
           </Grid>
         </Grid>
         <NumberOfHouseHolds>
-          <LabelizedField label={t('Program size')}>
+          <LabelizedField label={t('Programme size')}>
             <NumberOfHouseHoldsValue>
               {program.totalNumberOfHouseholds}
             </NumberOfHouseHoldsValue>

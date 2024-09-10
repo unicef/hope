@@ -48,7 +48,7 @@ export function CreateSurveyMenu(): React.ReactElement {
   return (
     <>
       {!isActiveProgram ? (
-        <Tooltip title={t('Program has to be active to create a Survey')}>
+        <Tooltip title={t('Programme has to be active to create a Survey')}>
           <span>
             <Button
               aria-controls="customized-menu"
