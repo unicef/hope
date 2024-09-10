@@ -20,7 +20,7 @@ export function GrievancesSidebar({
   const shouldShowReassignBoxDataChange = (): boolean => {
     let { individual, household } = ticket;
     const { category, issueType, status } = ticket;
-    if (category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION) {
+    if (category.toString() === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION) {
       individual = ticket.needsAdjudicationTicketDetails.selectedIndividual;
       household =
         ticket.needsAdjudicationTicketDetails.selectedIndividual?.household;
@@ -35,7 +35,7 @@ export function GrievancesSidebar({
         issueType.toString() === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL) ||
       (category.toString() === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING &&
         ticket?.systemFlaggingTicketDetails?.approveStatus) ||
-      (category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION &&
+      (category.toString() === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION &&
         ticket?.needsAdjudicationTicketDetails?.selectedIndividual);
 
     if (!isRightCategory) return false;
@@ -67,7 +67,7 @@ export function GrievancesSidebar({
   };
 
   const shouldShowReassignMultipleBoxDataChange = (): boolean =>
-    ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION &&
+    ticket.category.toString() === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION &&
     ticket.needsAdjudicationTicketDetails.isMultipleDuplicatesVersion;
 
   const renderRightSection = (): React.ReactElement => {

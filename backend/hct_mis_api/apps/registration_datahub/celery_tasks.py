@@ -477,6 +477,9 @@ def deduplication_engine_process(self: Any, program_id: str) -> None:
         BiometricDeduplicationService,
     )
 
+    program = Program.objects.get(id=program_id)
+    set_sentry_business_area_tag(program.business_area.name)
+
     try:
         program = Program.objects.get(id=program_id)
         BiometricDeduplicationService().upload_and_process_deduplication_set(program)
@@ -492,6 +495,10 @@ def create_grievance_tickets_for_dedup_engine_results(self: Any, rdi_id: str) ->
     from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import (
         BiometricDeduplicationService,
     )
+
+    rdi = RegistrationDataImport.objects.get(id=rdi_id)
+    program = Program.objects.get(id=rdi.program_id)
+    set_sentry_business_area_tag(program.business_area.name)
 
     try:
         rdi = RegistrationDataImport.objects.get(id=rdi_id)
@@ -509,6 +516,9 @@ def fetch_biometric_deduplication_results_and_process(self: Any, deduplication_s
         BiometricDeduplicationService,
     )
 
+    program = Program.objects.get(deduplication_set_id=deduplication_set_id)
+    set_sentry_business_area_tag(program.business_area.name)
+
     try:
         service = BiometricDeduplicationService()
         service.fetch_biometric_deduplication_results_and_process(deduplication_set_id)
@@ -525,6 +535,8 @@ def update_rdis_deduplication_engine_statistics(self: Any, program_id: str) -> N
         BiometricDeduplicationService,
     )
 
+    program = Program.objects.get(id=program_id)
+    set_sentry_business_area_tag(program.business_area.name)
     try:
         BiometricDeduplicationService().update_rdis_deduplication_statistics(program_id)
     except Exception as e:

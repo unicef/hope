@@ -10,6 +10,8 @@ export function isEmpty(value): boolean {
   return value === undefined || value === null || value === '';
 }
 
+// TODO MB ADD NEEDS ADJ TICKETS REQUIRED CATEGORY
+
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function validate(
   values,
@@ -179,7 +181,8 @@ export function validate(
   if (
     category === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
     category === GRIEVANCE_CATEGORIES.DATA_CHANGE ||
-    category === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT
+    category === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT  ||
+    category === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION
   ) {
     if (!issueType) {
       errors.issueType = 'Issue Type is required';
@@ -263,19 +266,6 @@ export function validateUsingSteps(
   //   'relationship',
   //   'sex',
   // ];
-
-  if (!category) {
-    errors.category = 'Category is Required';
-  }
-  if (
-    category === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
-    category === GRIEVANCE_CATEGORIES.DATA_CHANGE ||
-    category === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT
-  ) {
-    if (!issueType) {
-      errors.issueType = 'Issue Type is required';
-    }
-  }
 
   if (category === GRIEVANCE_CATEGORIES.DATA_CHANGE) {
     if (issueType === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL) {
