@@ -37,13 +37,9 @@ class ProgrammeManagement(BaseComponents):
     labelAdminArea = '//*[@id="radioGroup-partners[0].areaAccess"]/div[2]/div/span'
     calendarIcon = 'button[data-cy="calendar-icon"]'
     calendar = 'div[data-popper-placement="top-start"]'
-    calendarMonthYear = (
-        'div[role="presentation"]'
-    )
+    calendarMonthYear = 'div[role="presentation"]'
     calendarChangeMonth = 'button[title="Next month"]'
-    calendarDays = (
-        '//*[@data-timestamp]'
-    )
+    calendarDays = "//*[@data-timestamp]"
     filtersSearch = '//*[@data-cy="filters-search"]/div/input'
     buttonApply = 'button[data-cy="button-filters-clear"]'
     buttonEditProgram = 'a[data-cy="button-edit-program"]'

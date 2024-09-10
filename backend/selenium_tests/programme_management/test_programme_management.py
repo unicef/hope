@@ -1,12 +1,12 @@
 import random
 from datetime import datetime
-from freezegun import freeze_time
 
 from django.conf import settings
 from django.core.management import call_command
 
 import pytest
 from dateutil.relativedelta import relativedelta
+from freezegun import freeze_time
 from helpers.date_time_format import FormatTime
 from page_object.programme_details.programme_details import ProgrammeDetails
 from page_object.programme_management.programme_management import ProgrammeManagement
