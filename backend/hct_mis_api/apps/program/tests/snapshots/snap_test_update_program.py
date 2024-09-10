@@ -7,7 +7,7 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots['TestUpdateProgram::test_finish_active_program_with_not_finished_program_cycle 1'] = {
+snapshots['TestUpdateProgram::test_finish_active_program_with_not_finished_program_cycle_or_end_date 1'] = {
     'data': {
         'updateProgram': None
     },
@@ -19,7 +19,7 @@ snapshots['TestUpdateProgram::test_finish_active_program_with_not_finished_progr
                     'line': 3
                 }
             ],
-            'message': "['You cannot finish program if program has active cycles']",
+            'message': 'Cannot finish programme with active cycles',
             'path': [
                 'updateProgram'
             ]
@@ -27,72 +27,24 @@ snapshots['TestUpdateProgram::test_finish_active_program_with_not_finished_progr
     ]
 }
 
-snapshots['TestUpdateProgram::test_finish_active_program_with_not_finished_program_cycle 2'] = {
+snapshots['TestUpdateProgram::test_finish_active_program_with_not_finished_program_cycle_or_end_date 2'] = {
     'data': {
-        'updateProgram': {
-            'program': {
-                'dataCollectingType': {
-                    'code': 'full_collection',
-                    'label': 'Full'
-                },
-                'name': 'initial name',
-                'partnerAccess': 'NONE_PARTNERS_ACCESS',
-                'partners': [
-                    {
-                        'areaAccess': 'BUSINESS_AREA',
-                        'areas': [
-                            {
-                                'name': 'Area in AFG 1'
-                            },
-                            {
-                                'name': 'Area in AFG 2'
-                            }
-                        ],
-                        'name': 'UNICEF'
-                    }
-                ],
-                'pduFields': [
-                    {
-                        'label': '{"English(EN)": "PDU Field To Be Preserved"}',
-                        'name': 'pdu_field_to_be_preserved',
-                        'pduData': {
-                            'numberOfRounds': 1,
-                            'roundsNames': [
-                                'Round To Be Preserved'
-                            ],
-                            'subtype': 'DATE'
-                        }
-                    },
-                    {
-                        'label': '{"English(EN)": "PDU Field To Be Removed"}',
-                        'name': 'pdu_field_to_be_removed',
-                        'pduData': {
-                            'numberOfRounds': 3,
-                            'roundsNames': [
-                                'Round 1 To Be Removed',
-                                'Round 2 To Be Removed',
-                                'Round 3 To Be Removed'
-                            ],
-                            'subtype': 'DECIMAL'
-                        }
-                    },
-                    {
-                        'label': '{"English(EN)": "PDU Field To Be Updated"}',
-                        'name': 'pdu_field_to_be_updated',
-                        'pduData': {
-                            'numberOfRounds': 2,
-                            'roundsNames': [
-                                'Round 1 To Be Updated',
-                                'Round 2 To Be Updated'
-                            ],
-                            'subtype': 'STRING'
-                        }
-                    }
-                ],
-                'status': 'FINISHED'
-            }
+        'updateProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Cannot finish programme without end date',
+            'path': [
+                'updateProgram'
+            ]
         }
-    }
+    ]
 }
 
 snapshots['TestUpdateProgram::test_update_active_program_with_dct 1'] = {
@@ -405,6 +357,66 @@ snapshots['TestUpdateProgram::test_update_program_authenticated_2_without_permis
                 }
             ],
             'message': 'Permission Denied: User does not have correct permission.',
+            'path': [
+                'updateProgram'
+            ]
+        }
+    ]
+}
+
+snapshots['TestUpdateProgram::test_update_program_end_date_validation 1'] = {
+    'data': {
+        'updateProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'End date cannot be before start date.',
+            'path': [
+                'updateProgram'
+            ]
+        }
+    ]
+}
+
+snapshots['TestUpdateProgram::test_update_program_end_date_validation 2'] = {
+    'data': {
+        'updateProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'End date cannot be before start date.',
+            'path': [
+                'updateProgram'
+            ]
+        }
+    ]
+}
+
+snapshots['TestUpdateProgram::test_update_program_end_date_validation 3'] = {
+    'data': {
+        'updateProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Start date must be equal or before the earliest cycle.',
             'path': [
                 'updateProgram'
             ]
