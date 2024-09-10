@@ -462,7 +462,7 @@ def payment_plan_exclude_beneficiaries(
             for unicef_id in excluding_hh_or_ind_ids:
                 if not pp_payment_items.filter(**{f"{filter_key}": unicef_id}).exists():
                     # add only notice for user and ignore this id
-                    info_msg.append(f"Beneficiary with ID:{unicef_id} is not part of this {payment_plan_title}.")
+                    info_msg.append(f"Beneficiary with ID {unicef_id} is not part of this {payment_plan_title}.")
                     # remove wrong ID from the list because later will compare number of HHs with .eligible_payments()
                     excluding_hh_or_ind_ids.remove(unicef_id)
 

@@ -154,11 +154,11 @@ class TestExcludeHouseholds(APITestCase):
 
         payment_plan_exclude_beneficiaries(
             payment_plan_id=self.payment_plan.pk,
-            excluding_hh_ids=[hh_unicef_id_1, wrong_hh_id],
+            excluding_hh_or_ind_ids=[hh_unicef_id_1, wrong_hh_id],
             exclusion_reason="reason exclusion Error 123",
         )
         self.payment_plan.refresh_from_db()
-        error_msg = f"['Household {wrong_hh_id} is not part of this Follow-up Payment Plan.']"
+        error_msg = f"['Beneficiary with ID {wrong_hh_id} is not part of this Follow-up Payment Plan.']"
 
         self.assertEqual(self.payment_plan.exclusion_reason, "reason exclusion Error 123")
         self.assertEqual(self.payment_plan.exclude_household_error, error_msg)
@@ -180,7 +180,7 @@ class TestExcludeHouseholds(APITestCase):
 
         payment_plan_exclude_beneficiaries(
             payment_plan_id=self.payment_plan.pk,
-            excluding_hh_ids=[hh_unicef_id_1, hh_unicef_id_2, hh_unicef_id_3],
+            excluding_hh_or_ind_ids=[hh_unicef_id_1, hh_unicef_id_2, hh_unicef_id_3],
             exclusion_reason="reason exclude_all_households",
         )
         self.payment_plan.refresh_from_db()
@@ -210,7 +210,7 @@ class TestExcludeHouseholds(APITestCase):
         self.assertEqual(self.payment_plan.exclusion_reason, "")
 
         payment_plan_exclude_beneficiaries(
-            payment_plan_id=self.payment_plan.pk, excluding_hh_ids=[], exclusion_reason="Undo HH_1"
+            payment_plan_id=self.payment_plan.pk, excluding_hh_or_ind_ids=[], exclusion_reason="Undo HH_1"
         )
 
         self.assertEqual(set(self.payment_plan.excluded_beneficiaries_ids), {self.payment_1.household.unicef_id})
@@ -221,7 +221,7 @@ class TestExcludeHouseholds(APITestCase):
             self.payment_plan.background_action_status, PaymentPlan.BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR
         )
 
-        error_msg = f"['It is not possible to undo exclude Household(s) with ID {self.household_1.unicef_id} because of hard conflict(s) with other Follow-up Payment Plan(s).']"
+        error_msg = f"['It is not possible to undo exclude Beneficiary with ID {self.household_1.unicef_id} because of hard conflict(s) with other Follow-up Payment Plan(s).']"
         self.assertEqual(self.payment_plan.exclude_household_error, error_msg)
 
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
@@ -236,7 +236,7 @@ class TestExcludeHouseholds(APITestCase):
 
         payment_plan_exclude_beneficiaries(
             payment_plan_id=self.payment_plan.pk,
-            excluding_hh_ids=[hh_unicef_id_1, hh_unicef_id_2],
+            excluding_hh_or_ind_ids=[hh_unicef_id_1, hh_unicef_id_2],
             exclusion_reason="Nice Job!",
         )
 
