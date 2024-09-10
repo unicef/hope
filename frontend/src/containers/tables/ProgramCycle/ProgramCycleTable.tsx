@@ -110,7 +110,7 @@ export const ProgramCycleTable = ({ program }: ProgramCycleTableProps) => {
       <AddNewProgramCycle
         key="add-new"
         program={program}
-        lastProgramCycle={data.results[data.results.length - 1]}
+        programCycles={data.results}
       />,
     );
   }
