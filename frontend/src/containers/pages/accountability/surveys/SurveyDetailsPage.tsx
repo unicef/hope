@@ -81,7 +81,7 @@ export function SurveyDetailsPage(): React.ReactElement {
             pathname: survey?.rapidProUrl,
           }}
           target="_blank"
-          title={t('Program has to be active to export Survey sample')}
+          title={t('Programme has to be active to export Survey sample')}
           disabled={!isActiveProgram}
         >
           {t('Check Answers')}

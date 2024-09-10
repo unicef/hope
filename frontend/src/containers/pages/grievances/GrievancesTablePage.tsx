@@ -128,7 +128,7 @@ export const GrievancesTablePage = (): React.ReactElement => {
             color="primary"
             component={Link}
             title={t(
-              'Program has to be active to create a new Grievance Ticket',
+              'Programme has to be active to create a new Grievance Ticket',
             )}
             to={`/${baseUrl}/grievance/new-ticket`}
             data-cy="button-new-ticket"
