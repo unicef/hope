@@ -61,7 +61,7 @@ export function CommunicationPage(): React.ReactElement {
           component={Link}
           to={`/${baseUrl}/accountability/communication/create`}
           data-cy="button-communication-create-new"
-          title={t('Program has to be active to create new Message')}
+          title={t('Programme has to be active to create new Message')}
           disabled={!isActiveProgram}
         >
           {t('New message')}
