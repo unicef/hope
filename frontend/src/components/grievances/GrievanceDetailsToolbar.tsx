@@ -154,7 +154,7 @@ export const GrievanceDetailsToolbar = ({
     const isDataChangeCategory =
       ticket.category?.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE;
     const isDeduplicationCategory =
-      ticket.category?.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION;
+      ticket.category?.toString() === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION;
     const isSystemFlaggingCategory =
       ticket.category?.toString() === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING;
 
@@ -237,7 +237,7 @@ export const GrievanceDetailsToolbar = ({
 
   const getClosingConfirmationText = (): string => {
     const isDeduplicationCategory =
-      ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION;
+      ticket.category.toString() === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION;
     const isSystemFlaggingCategory =
       ticket.category?.toString() === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING;
 
@@ -271,7 +271,7 @@ export const GrievanceDetailsToolbar = ({
   };
 
   const isDeduplicationCategory =
-    ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION;
+    ticket.category.toString() === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION;
   const hasDuplicatedDocument =
     ticket?.needsAdjudicationTicketDetails?.hasDuplicatedDocument;
   const isMultipleDuplicatesVersion =
