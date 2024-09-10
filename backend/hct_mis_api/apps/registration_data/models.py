@@ -420,7 +420,7 @@ class DeduplicationEngineSimilarityPair(models.Model):
                     program=program,
                     individual1_id=individual1,
                     individual2_id=individual2,
-                    similarity_score=pair.score,
+                    similarity_score=(1 - pair.score) * 100,  # scale 0-1 to 0-100%
                 )
             )
         if duplicates:

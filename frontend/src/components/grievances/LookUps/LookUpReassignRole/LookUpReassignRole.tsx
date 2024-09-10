@@ -81,7 +81,7 @@ export function LookUpReassignRole({
         roleReassignData =
           ticket?.systemFlaggingTicketDetails?.roleReassignData;
         break;
-      case GRIEVANCE_CATEGORIES.DEDUPLICATION:
+      case GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION:
         roleReassignData =
           ticket?.needsAdjudicationTicketDetails?.roleReassignData;
         setShouldUseMultiple(

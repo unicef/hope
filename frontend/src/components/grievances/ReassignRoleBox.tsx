@@ -49,7 +49,7 @@ export const ReassignRoleBox = ({
   let reassignData;
   let uniqueIndividual;
 
-  if (ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION) {
+  if (ticket.category.toString() === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION) {
     individual = ticket.needsAdjudicationTicketDetails.selectedIndividual;
     household =
       ticket.needsAdjudicationTicketDetails.selectedIndividual?.household;
@@ -113,7 +113,7 @@ export const ReassignRoleBox = ({
           />
         ) : null}
         {shouldDisplayButton &&
-        ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION &&
+        ticket.category.toString() === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION &&
         reassignData[el.id]?.individual !== uniqueIndividual.id ? (
           <ReassignRoleUnique
             individualRole={{ role: el.role, id: el.id }}
