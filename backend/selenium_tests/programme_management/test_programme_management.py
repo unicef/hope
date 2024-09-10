@@ -12,6 +12,7 @@ from page_object.programme_details.programme_details import ProgrammeDetails
 from page_object.programme_management.programme_management import ProgrammeManagement
 from selenium import webdriver
 from selenium.webdriver import Keys
+from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
@@ -328,7 +329,9 @@ class TestProgrammeManagement:
         # Cehck Mandatory fields texts
         assert "Programme Name is required" in pageProgrammeManagement.getLabelProgrammeName().text.split("\n")
         assert "Start Date is required" in pageProgrammeManagement.getLabelStartDate().text
-        assert "End Date is required" in pageProgrammeManagement.getLabelEndDate().text
+        assert (
+            "End Date is required" in pageProgrammeManagement.getLabelEndDate().find_element(By.XPATH, "./../..").text
+        )
         assert "Sector is required" in pageProgrammeManagement.getLabelSelector().text
         assert "Data Collecting Type is required" in pageProgrammeManagement.getLabelDataCollectingType().text
 
