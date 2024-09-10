@@ -9,6 +9,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormHelperText,
   IconButton,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/EditRounded';
@@ -35,6 +36,10 @@ import { ProgramQuery } from '@generated/graphql';
 import type { DefaultError } from '@tanstack/query-core';
 import { useSnackbar } from '@hooks/useSnackBar';
 
+interface MutationError extends DefaultError {
+  data: any;
+}
+
 interface EditProgramCycleProps {
   programCycle: ProgramCycle;
   program: ProgramQuery['program'];
@@ -50,9 +55,9 @@ export const EditProgramCycle = ({
   const { showMessage } = useSnackbar();
   const queryClient = useQueryClient();
 
-  const { mutateAsync, isPending } = useMutation<
+  const { mutateAsync, isPending, error } = useMutation<
     ProgramCycleUpdateResponse,
-    DefaultError,
+    MutationError,
     ProgramCycleUpdate
   >({
     mutationFn: async (body) => {
@@ -78,7 +83,7 @@ export const EditProgramCycle = ({
       await mutateAsync(values);
       showMessage(t('Programme Cycle Updated'));
     } catch (e) {
-      e.data?.forEach((message: string) => showMessage(message));
+      /* empty */
     }
   };
 
@@ -91,9 +96,8 @@ export const EditProgramCycle = ({
   };
 
   const endDateValidationSchema = () => {
-    const validation = Yup.date()
+    let validation = Yup.date()
       .min(today, t('End Date cannot be in the past'))
-      .max(program.endDate, t('End Date cannot be after Programme End Date'))
       .when(
         'start_date',
         ([start_date], schema) =>
@@ -106,8 +110,15 @@ export const EditProgramCycle = ({
           ),
       );
 
+    if (program.endDate) {
+      validation = validation.max(
+        program.endDate,
+        t('End Date cannot be after Programme End Date'),
+      );
+    }
+
     if (isEndDateRequired) {
-      return validation.required(t('End Date is required'));
+      validation = validation.required(t('End Date is required'));
     }
 
     return validation;
@@ -166,6 +177,9 @@ export const EditProgramCycle = ({
                       component={FormikTextField}
                       required
                     />
+                    {error?.data?.title && (
+                      <FormHelperText error>{error.data.title}</FormHelperText>
+                    )}
                   </Grid>
                   <Grid item xs={6} data-cy="start-date-cycle">
                     <Field
@@ -178,6 +192,11 @@ export const EditProgramCycle = ({
                         <CalendarTodayRoundedIcon color="disabled" />
                       }
                     />
+                    {error?.data?.start_date && (
+                      <FormHelperText error>
+                        {error.data.start_date}
+                      </FormHelperText>
+                    )}
                   </Grid>
                   <Grid item xs={6} data-cy="end-date-cycle">
                     <Field
@@ -190,6 +209,11 @@ export const EditProgramCycle = ({
                         <CalendarTodayRoundedIcon color="disabled" />
                       }
                     />
+                    {error?.data?.end_date && (
+                      <FormHelperText error>
+                        {error.data.end_date}
+                      </FormHelperText>
+                    )}
                   </Grid>
                 </Grid>
               </DialogContent>

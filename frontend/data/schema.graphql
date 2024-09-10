@@ -3794,6 +3794,7 @@ type ProgramNode implements Node {
   totalNumberOfHouseholdsWithTpInProgram: Int
   isSocialWorkerProgram: Boolean
   targetPopulationsCount: Int
+  canFinish: Boolean
 }
 
 type ProgramNodeConnection {
