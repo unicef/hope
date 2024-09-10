@@ -59,20 +59,21 @@ export const UpdateProgramCycle = ({
   let endDate = Yup.date()
     .required(t('End Date is required'))
     .min(today, t('End Date cannot be in the past'))
-    .when('start_date', ([start_date], schema) =>
-      start_date
-        ? schema.min(
-            new Date(start_date),
-            `${t('End date have to be greater than')} ${moment(
-              start_date,
-            ).format('YYYY-MM-DD')}`,
-          )
-        : schema,
+    .when(
+      'start_date',
+      (start_date, schema) =>
+        start_date &&
+        schema.min(
+          start_date,
+          `${t('End date have to be greater than')} ${moment(start_date).format(
+            'YYYY-MM-DD',
+          )}`,
+        ),
     );
 
   if (program.endDate) {
     endDate = endDate.max(
-      new Date(program.endDate),
+      program.endDate,
       t('End Date cannot be after Programme End Date'),
     );
   }
