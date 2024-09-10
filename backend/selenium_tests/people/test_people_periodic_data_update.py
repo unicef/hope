@@ -3,21 +3,28 @@ from datetime import datetime
 from time import sleep
 from typing import List
 
+from django.db import transaction
+
 import pytest
 from dateutil.relativedelta import relativedelta
-from django.db import transaction
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
-from hct_mis_api.apps.core.models import FlexibleAttribute, PeriodicFieldData, BusinessArea, DataCollectingType
-from hct_mis_api.apps.household.fixtures import create_individual_document, \
-    create_household, create_household_and_individuals
-from hct_mis_api.apps.household.models import Individual, SEEING, HOST
+from hct_mis_api.apps.core.models import (
+    BusinessArea,
+    DataCollectingType,
+    FlexibleAttribute,
+    PeriodicFieldData,
+)
+from hct_mis_api.apps.household.fixtures import (
+    create_household,
+    create_household_and_individuals,
+    create_individual_document,
+)
+from hct_mis_api.apps.household.models import HOST, SEEING, Individual
 from hct_mis_api.apps.payment.fixtures import CashPlanFactory, PaymentRecordFactory
 from hct_mis_api.apps.payment.models import GenericPayment
-from hct_mis_api.apps.periodic_data_update.models import (
-    PeriodicDataUpdateUpload,
-)
+from hct_mis_api.apps.periodic_data_update.models import PeriodicDataUpdateUpload
 from hct_mis_api.apps.periodic_data_update.utils import (
     field_label_to_field_name,
     populate_pdu_with_null_values,
@@ -25,11 +32,16 @@ from hct_mis_api.apps.periodic_data_update.utils import (
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory, TargetPopulationFactory
+from hct_mis_api.apps.targeting.fixtures import (
+    TargetingCriteriaFactory,
+    TargetPopulationFactory,
+)
 from selenium_tests.page_object.people.people import People
 from selenium_tests.page_object.people.people_details import PeopleDetails
 from selenium_tests.page_object.programme_population.individuals import Individuals
-from selenium_tests.programme_population.test_periodic_data_update_upload import prepare_xlsx_file
+from selenium_tests.programme_population.test_periodic_data_update_upload import (
+    prepare_xlsx_file,
+)
 
 pytestmark = pytest.mark.django_db(transaction=True)
 
@@ -45,9 +57,12 @@ def clear_downloaded_files() -> None:
 def program() -> Program:
     business_area = create_afghanistan()
     dct = DataCollectingTypeFactory(type=DataCollectingType.Type.SOCIAL)
-    return ProgramFactory(name="Test Program", status=Program.ACTIVE, business_area=business_area,
-                          data_collecting_type=dct,
-                          )
+    return ProgramFactory(
+        name="Test Program",
+        status=Program.ACTIVE,
+        business_area=business_area,
+        data_collecting_type=dct,
+    )
 
 
 @pytest.fixture
@@ -89,9 +104,10 @@ def add_people(program: Program) -> Individual:
     rdi = RegistrationDataImportFactory()
     household, individuals = create_household_and_individuals(
         household_data={
-            "business_area": business_area, "program": program, "residence_status": HOST,
+            "business_area": business_area,
+            "program": program,
+            "residence_status": HOST,
             "registration_data_import": rdi,
-
         },
         individuals_data=[
             {
@@ -109,7 +125,7 @@ def add_people(program: Program) -> Individual:
 
 
 def create_flexible_attribute(
-        label: str, subtype: str, number_of_rounds: int, rounds_names: list[str], program: Program
+    label: str, subtype: str, number_of_rounds: int, rounds_names: list[str], program: Program
 ) -> FlexibleAttribute:
     name = field_label_to_field_name(label)
     flexible_attribute = FlexibleAttribute.objects.create(
@@ -141,13 +157,13 @@ def string_attribute() -> FlexibleAttribute:
 @pytest.mark.usefixtures("login")
 class TestPeoplePeriodicDataUpdateUpload:
     def test_people_periodic_data_update_upload_success(
-            self,
-            clear_downloaded_files: None,
-            pagePeople: People,
-            pagePeopleDetails: PeopleDetails,
-            individual: Individual,
-            string_attribute: FlexibleAttribute,
-            pageIndividuals: Individuals,
+        self,
+        clear_downloaded_files: None,
+        pagePeople: People,
+        pagePeopleDetails: PeopleDetails,
+        individual: Individual,
+        string_attribute: FlexibleAttribute,
+        pageIndividuals: Individuals,
     ) -> None:
         program = Program.objects.filter(name="Test Program").first()
         populate_pdu_with_null_values(program, individual.flex_fields)
