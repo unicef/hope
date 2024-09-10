@@ -58,6 +58,7 @@ class TargetingCreate(BaseComponents):
     selectIndividualsFiltersBlocksRoundNumber = (
         'div[data-cy="select-individualsFiltersBlocks[{}].individualBlockFilters[{}].roundNumber"]'
     )
+    selectFiltersRoundNumber = 'div[data-cy="select-filters[{}].roundNumber"]'
     selectRoundOption = 'li[data-cy="select-option-{}"]'
     selectIndividualsFiltersBlocksIsNull = (
         'span[data-cy="input-individualsFiltersBlocks[{}].individualBlockFilters[{}].isNull"]'
@@ -81,6 +82,7 @@ class TargetingCreate(BaseComponents):
         'div[data-cy="select-individualsFiltersBlocks[{}].individualBlockFilters[{}].value"]'
     )
     totalNumberOfHouseholdsCount = 'div[data-cy="total-number-of-households-count"]'
+    totalNumberOfPeopleCount = 'div[data-cy="label-Total Number of People"]'
     selectProgramCycleAutocomplete = 'div[data-cy="filters-program-cycle-autocomplete"]'
     programmeCycleInput = 'div[data-cy="Programme Cycle-input"]'
 
@@ -214,7 +216,7 @@ class TargetingCreate(BaseComponents):
     def getInputFiltersValueTo(self, fiter_number: int = 0) -> WebElement:
         return self.wait_for(self.inputFiltersValueTo.format(fiter_number))
 
-    def getInputFiltersValue(self, fiter_number: str) -> WebElement:
+    def getInputFiltersValue(self, fiter_number: int = 0) -> WebElement:
         return self.wait_for(self.inputFiltersValue.format(fiter_number))
 
     def getAutocompleteTargetCriteriaValues(self) -> WebElement:
@@ -243,6 +245,9 @@ class TargetingCreate(BaseComponents):
                 individuals_filters_blocks_number, individual_block_filters_number
             )
         )
+
+    def getSelectFiltersRoundNumber(self, round_number: int = 0) -> WebElement:
+        return self.wait_for(self.selectFiltersRoundNumber.format(round_number))
 
     def getSelectRoundOption(self, round_number: int = 0) -> WebElement:
         return self.wait_for(self.selectRoundOption.format(round_number))
@@ -312,6 +317,9 @@ class TargetingCreate(BaseComponents):
 
     def getTotalNumberOfHouseholdsCount(self) -> WebElement:
         return self.wait_for(self.totalNumberOfHouseholdsCount)
+
+    def getTotalNumberOfPeopleCount(self) -> WebElement:
+        return self.wait_for(self.totalNumberOfPeopleCount)
 
     def getFiltersProgramCycleAutocomplete(self) -> WebElement:
         return self.wait_for(self.selectProgramCycleAutocomplete)
