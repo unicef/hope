@@ -288,7 +288,7 @@ class TestSmokeFilters:
                 filters.filterImportDateRangeMin,
                 filters.filterImportDateRangeMax,
             ],
-            "Program Population": [
+            "Programme Population": [
                 filters.selectFilter,
                 filters.filtersDocumentType,
                 filters.filtersDocumentNumber,
@@ -392,7 +392,7 @@ class TestSmokeFilters:
                 filters.filtersCreationDateTo,
             ],
             "Programme Users": [],
-            "Program Log": [
+            "Programme Log": [
                 filters.filtersSearch,
                 filters.selectFilter,
                 filters.filtersResidenceStatus,
@@ -404,7 +404,7 @@ class TestSmokeFilters:
             if nav_menu == "Feedback":
                 filters.wait_for('[data-cy="nav-Grievance"]').click()
             if nav_menu == "Individuals":
-                filters.wait_for('[data-cy="nav-Program Population"]').click()
+                filters.wait_for('[data-cy="nav-Programme Population"]').click()
             if nav_menu == "Surveys":
                 filters.wait_for('[data-cy="nav-Accountability"]').click()
             if nav_menu == "Payment Plans":
@@ -419,7 +419,7 @@ class TestSmokeFilters:
     def test_filters_all_programs(self, create_programs: None, filters: Filters) -> None:
         all_programs = {
             "Country Dashboard": [filters.globalProgramFilter, filters.globalProgramFilterContainer],
-            "Programs": [
+            "Programmes": [
                 filters.filtersDataCollectingType,
                 filters.filtersBudgetMax,
                 filters.filtersBudgetMin,
@@ -505,7 +505,7 @@ class TestSmokeFilters:
                 [["Payment Module", "Payment Plans"], "filter-search", "PP-0060-22-11223344"], id="Payment Module"
             ),
             # ToDo: uncomment after fix bug: 206395
-            # pytest.param(["Program Population", "hh-filters-search", "HH-00-0000.1380"], id="Program Population"),
+            # pytest.param(["Programme Population", "hh-filters-search", "HH-00-0000.1380"], id="Programme Population"),
         ],
     )
     def test_filters_happy_path_search_filter(

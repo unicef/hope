@@ -3,9 +3,9 @@ from selenium.webdriver.remote.webelement import WebElement
 
 
 class PeriodicDataUpdateUploads(BaseComponents):
-    navProgramPopulation = 'a[data-cy="nav-Program Population"]'
+    navProgramPopulation = 'a[data-cy="nav-Programme Population"]'
     navHouseholdMembers = 'a[data-cy="nav-Household Members"]'
-    navProgramDetails = 'a[data-cy="nav-Program Details"]'
+    navProgramDetails = 'a[data-cy="nav-Programme Details"]'
     pageHeaderContainer = 'div[data-cy="page-header-container"]'
     pageHeaderTitle = 'h5[data-cy="page-header-title"]'
     tabIndividuals = 'button[data-cy="tab-individuals"]'

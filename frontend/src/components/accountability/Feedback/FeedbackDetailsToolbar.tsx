@@ -54,7 +54,7 @@ export function FeedbackDetailsToolbar({
               to={`/${baseUrl}/grievance/feedback/edit-ticket/${id}`}
               startIcon={<EditIcon />}
               data-cy="button-edit"
-              title={t('Program has to be active to edit a Feedback')}
+              title={t('Programme has to be active to edit a Feedback')}
               disabled={!isActiveProgram}
             >
               {t('Edit')}
@@ -78,7 +78,7 @@ export function FeedbackDetailsToolbar({
               color="primary"
               data-cy="button-create-linked-ticket"
               title={t(
-                'Program has to be active to create a Linked Ticket to Feedback',
+                'Programme has to be active to create a Linked Ticket to Feedback',
               )}
               disabled={!isActiveProgram}
             >
