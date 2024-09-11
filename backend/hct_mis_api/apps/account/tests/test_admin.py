@@ -12,6 +12,7 @@ from hct_mis_api.apps.account.models import User
 class RoleTest(WebTest):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.superuser: User = UserFactory(is_superuser=True, is_staff=True)
 
     def test_role_perm_matrix(self) -> None:

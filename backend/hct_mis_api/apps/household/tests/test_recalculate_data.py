@@ -30,6 +30,7 @@ from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFa
 class TestRecalculateData(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
 
         business_area = BusinessArea.objects.first()

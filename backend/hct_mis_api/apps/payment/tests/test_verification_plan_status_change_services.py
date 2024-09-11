@@ -32,6 +32,7 @@ from hct_mis_api.apps.targeting.fixtures import (
 class TestPhoneNumberVerification(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         cls.payment_record_amount = 110
         user = UserFactory()

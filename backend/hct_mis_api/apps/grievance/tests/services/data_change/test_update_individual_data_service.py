@@ -26,6 +26,7 @@ pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 class TestUpdateIndividualDataService(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.business_area = BusinessAreaFactory()
         cls.program = ProgramFactory()
         cls.country_afg = CountryFactory(iso_code3="AFG")

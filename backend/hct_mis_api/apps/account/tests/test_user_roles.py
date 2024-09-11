@@ -21,6 +21,7 @@ from hct_mis_api.apps.core.models import BusinessArea
 class UserRolesTest(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.role_1 = Role.objects.create(name="Role_1")
         cls.role_2 = Role.objects.create(name="Role_2")
         create_afghanistan()

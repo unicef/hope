@@ -57,6 +57,7 @@ class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         call_command("loadcountries")
         partner = PartnerFactory(name="Partner")

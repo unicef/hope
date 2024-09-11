@@ -269,6 +269,7 @@ class TestPaymentPlanReconciliation(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan(
             is_payment_plan_applicable=True,
         )

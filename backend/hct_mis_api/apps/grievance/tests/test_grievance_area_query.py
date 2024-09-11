@@ -35,6 +35,7 @@ ALL_GRIEVANCE_QUERY = """
 class TestGrievanceAreaQuery(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.business_area = create_afghanistan()
         call_command("loadcountries")
 

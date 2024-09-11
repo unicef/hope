@@ -16,6 +16,7 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 class TestDeduplicateAndCheckAgainstSanctionsListTask(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.user = UserFactory.create()
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")

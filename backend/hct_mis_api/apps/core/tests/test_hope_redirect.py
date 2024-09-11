@@ -19,6 +19,7 @@ from hct_mis_api.apps.targeting.fixtures import (
 class TestHopeRedirect(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.user = UserFactory.create()
         business_area = BusinessAreaFactory(
             code="0060",
@@ -86,7 +87,6 @@ class TestHopeRedirect(APITestCase):
         )
 
         cls.create_user_role_with_permissions(cls.user, [], business_area)
-        super().setUpTestData()
 
     def test_redirect_to_household_list(self) -> None:
         hope_redirect: HopeRedirect = get_hope_redirect(self.user, "progres_registrationgroup")

@@ -51,6 +51,7 @@ class TestDiscardVerificationMutation(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.user = UserFactory.create()
         create_afghanistan()
         payment_record_amount = 10

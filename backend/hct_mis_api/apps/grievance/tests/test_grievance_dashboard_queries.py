@@ -66,6 +66,7 @@ class TestGrievanceDashboardQuery(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         call_command("loadcountries")
         create_afghanistan()
         cls.user = UserFactory.create()

@@ -31,6 +31,7 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 class TestDeliveryMechanismDataModel(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         cls.program1 = ProgramFactory()
         cls.user = UserFactory.create()

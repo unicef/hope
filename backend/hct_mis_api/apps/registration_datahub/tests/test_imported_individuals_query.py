@@ -83,6 +83,7 @@ class TestImportedIndividualQuery(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.partner = PartnerFactory(name="Test1")
         cls.user = UserFactory.create(partner=cls.partner)
         create_afghanistan()

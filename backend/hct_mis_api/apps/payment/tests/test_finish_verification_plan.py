@@ -35,6 +35,7 @@ class TestFinishVerificationPlan(TestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         business_area = create_afghanistan()
         payment_record_amount = 10
         user = UserFactory()

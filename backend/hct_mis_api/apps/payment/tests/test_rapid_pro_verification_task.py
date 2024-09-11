@@ -78,6 +78,7 @@ class TestRapidProVerificationTask(TestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         payment_record_amount = 10
 
