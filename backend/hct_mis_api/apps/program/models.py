@@ -340,6 +340,10 @@ class ProgramCycle(AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentifiedModel, C
         return f"{self.title} ({self.status})"
 
     @property
+    def can_remove_cycle(self) -> bool:
+        return not self.target_populations.exists() and not self.payment_plans.exists()
+
+    @property
     def total_entitled_quantity_usd(self) -> Decimal:
         total_entitled = self.payment_plans.aggregate(total_entitled=Sum("total_entitled_quantity_usd"))[
             "total_entitled"
