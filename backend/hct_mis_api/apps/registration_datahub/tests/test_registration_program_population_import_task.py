@@ -1,8 +1,11 @@
 from typing import Any, Optional
 from unittest.mock import patch
 
+from django.test import TestCase
+
+import pytest
+
 from hct_mis_api.apps.account.fixtures import PartnerFactory
-from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.geo.fixtures import AreaFactory, CountryFactory
 from hct_mis_api.apps.household.fixtures import (
@@ -30,9 +33,12 @@ from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
     registration_program_population_import_task,
 )
+from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
+
+pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 
-class TestRegistrationProgramPopulationImportTask(BaseElasticSearchTestCase):
+class TestRegistrationProgramPopulationImportTask(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
@@ -100,6 +106,8 @@ class TestRegistrationProgramPopulationImportTask(BaseElasticSearchTestCase):
         cls.bank_account_info = BankAccountInfoFactory(
             individual=cls.individuals[0],
         )
+
+        rebuild_search_index()
 
     def _run_task(self, rdi_id: Optional[str] = None) -> None:
         registration_program_population_import_task(

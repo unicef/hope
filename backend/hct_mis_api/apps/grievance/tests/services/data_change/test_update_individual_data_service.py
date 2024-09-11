@@ -1,8 +1,9 @@
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
+import pytest
+
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
-from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.geo.fixtures import CountryFactory
 from hct_mis_api.apps.grievance.fixtures import TicketIndividualDataUpdateDetailsFactory
@@ -17,9 +18,12 @@ from hct_mis_api.apps.household.fixtures import (
 )
 from hct_mis_api.apps.household.models import Document
 from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
+
+pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 
-class TestUpdateIndividualDataService(BaseElasticSearchTestCase, TestCase):
+class TestUpdateIndividualDataService(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         cls.business_area = BusinessAreaFactory()
@@ -47,7 +51,7 @@ class TestUpdateIndividualDataService(BaseElasticSearchTestCase, TestCase):
 
         cls.ticket = ticket_details.ticket
         cls.ticket.save()
-        super().setUpTestData()
+        rebuild_search_index()
 
     def test_add_document_of_same_type_not_unique_per_individual_valid(self) -> None:
         DocumentFactory(
