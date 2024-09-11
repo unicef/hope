@@ -4,12 +4,13 @@ from typing import Any, List
 
 from django.core.management import call_command
 
+import pytest
 from flaky import flaky
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.base_test_case import APITestCase, BaseElasticSearchTestCase
+from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
@@ -49,11 +50,14 @@ from hct_mis_api.apps.payment.fixtures import (
 from hct_mis_api.apps.payment.models import DeliveryMechanism
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 from hct_mis_api.apps.utils.models import MergeStatusModel
+
+pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 
 @flaky
-class TestCloseDataChangeTickets(BaseElasticSearchTestCase, APITestCase):
+class TestCloseDataChangeTickets(APITestCase):
     STATUS_CHANGE_MUTATION = """
     mutation GrievanceStatusChange($grievanceTicketId: ID!, $status: Int) {
       grievanceStatusChange(grievanceTicketId: $grievanceTicketId, status: $status) {
@@ -325,7 +329,7 @@ class TestCloseDataChangeTickets(BaseElasticSearchTestCase, APITestCase):
         )
         cls.dm_atm_card = DeliveryMechanism.objects.get(code="atm_card")
 
-        super().setUpTestData()
+        rebuild_search_index()
 
     @parameterized.expand(
         [

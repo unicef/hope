@@ -11,11 +11,9 @@ from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.handlers.wsgi import WSGIRequest
-from django.test import RequestFactory, TestCase
+from django.test import RequestFactory
 
 import factory
-import pytest
-from elasticsearch_dsl import connections
 from graphene.test import Client
 from snapshottest.django import TestCase as SnapshotTestTestCase
 
@@ -25,7 +23,6 @@ from hct_mis_api.apps.core.models import BusinessAreaPartnerThrough
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_CHOICE, DocumentType
 from hct_mis_api.apps.program.models import ProgramPartnerThrough
-from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 
 if TYPE_CHECKING:  # pragma: no_cover
     from hct_mis_api.apps.account.models import Partner, User
@@ -180,26 +177,6 @@ class APITestCase(SnapshotTestTestCase):
         if program:
             cls.update_partner_access_to_program(user.partner, program, areas)
         return user_role
-
-
-class BaseElasticSearchTestCase(TestCase):
-    @classmethod
-    def setUpTestData(cls) -> None:
-        connections.create_connection(hosts=[settings.ELASTICSEARCH_HOST], timeout=20)  # pragma: no cover
-        cls.rebuild_search_index()
-
-    @classmethod
-    def tearDownClass(cls) -> None:
-        super().tearDownClass()
-
-    @classmethod
-    def rebuild_search_index(cls) -> None:
-        rebuild_search_index()
-
-    @pytest.fixture(autouse=True)
-    def _setup_elasticsearch(self, django_elasticsearch_setup: None) -> None:
-        # Setup elasticsearch to work in parallel
-        yield
 
 
 class UploadDocumentsBase(APITestCase):

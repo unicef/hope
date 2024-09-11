@@ -1,16 +1,18 @@
 from datetime import datetime
 
 from django.conf import settings
+from django.test import TestCase
 from django.utils import timezone
 
-from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
+import pytest
+
 from hct_mis_api.apps.sanction_list.models import SanctionListIndividual
 from hct_mis_api.apps.sanction_list.tasks.load_xml import LoadSanctionListXMLTask
-from hct_mis_api.conftest import disabled_locally_test
+
+pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 
-@disabled_locally_test
-class TestLoadXML(BaseElasticSearchTestCase):
+class TestLoadXML(TestCase):
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     def test_execute(self) -> None:

@@ -1,5 +1,7 @@
 from django.core.files.base import ContentFile
 
+import pytest
+
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -16,6 +18,9 @@ from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFact
 from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.models import DeduplicationEngineSimilarityPair
+from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
+
+pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 
 class TestCreateNeedsAdjudicationTickets(APITestCase):
@@ -60,6 +65,8 @@ class TestCreateNeedsAdjudicationTickets(APITestCase):
         ]
         cls.household.head_of_household = individuals[0]
         cls.household.save()
+
+        rebuild_search_index()
 
     def test_create_needs_adjudication_ticket_with_the_same_ind(self) -> None:
         self.assertEqual(Individual.objects.count(), 2)

@@ -10,13 +10,14 @@ from django.conf import settings
 from django.contrib.gis.geos import Point
 from django.core.files import File
 from django.forms import model_to_dict
+from django.test import TestCase
 from django.utils.dateparse import parse_datetime
 
+import pytest
 from django_countries.fields import Country
 from PIL import Image
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory
-from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.core.fixtures import (
     create_afghanistan,
     create_pdu_flexible_attribute,
@@ -51,7 +52,10 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import ImportData
+from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 from hct_mis_api.apps.utils.models import MergeStatusModel
+
+pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 
 def create_document_image() -> File:
@@ -76,7 +80,7 @@ class CellMock:
         self.coordinate = coordinate
 
 
-class TestRdiXlsxCreateTask(BaseElasticSearchTestCase):
+class TestRdiXlsxCreateTask(TestCase):
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
@@ -140,7 +144,7 @@ class TestRdiXlsxCreateTask(BaseElasticSearchTestCase):
             label="Tax Number Identification",
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID],
         )
-        super().setUpTestData()
+        rebuild_search_index()
 
     def test_execute_xd(self) -> None:
         task = self.RdiXlsxCreateTask()
