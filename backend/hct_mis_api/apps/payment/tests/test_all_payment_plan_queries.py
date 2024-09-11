@@ -108,6 +108,12 @@ class TestPaymentPlanQueries(APITestCase):
             totalUndeliveredQuantity
             totalUndeliveredQuantityUsd
             unicefId
+            excludedHouseholds{
+              id
+            }
+            excludedIndividuals{
+              id
+            }
           }
         }
       }
