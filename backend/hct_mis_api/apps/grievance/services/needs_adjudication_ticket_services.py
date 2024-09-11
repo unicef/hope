@@ -49,7 +49,7 @@ def _clear_deduplication_individuals_fields(individuals: Sequence[Individual]) -
         individual.deduplication_batch_status = UNIQUE_IN_BATCH
         individual.deduplication_golden_record_results = {}
         individual.deduplication_batch_results = {}
-        HardDocumentDeduplication().deduplicate(individual.documents.all())
+        HardDocumentDeduplication().deduplicate(individual.documents.all(), individual.registration_data_import)
     Individual.objects.bulk_update(
         individuals,
         [
