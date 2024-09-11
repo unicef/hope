@@ -45,7 +45,7 @@ class ProgramCycleListSerializer(EncodedIdSerializerMixin):
     program_start_date = serializers.DateField(format="%Y-%m-%d")
     program_end_date = serializers.DateField(format="%Y-%m-%d")
     admin_url = serializers.SerializerMethodField()
-    can_remove_cycle = serializers.BooleanField(source="can_remove_cycle")
+    can_remove_cycle = serializers.BooleanField()
 
     class Meta:
         model = ProgramCycle
