@@ -31,7 +31,7 @@ from hct_mis_api.apps.periodic_data_update.fixtures import (
 from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_export_template_service import (
     PeriodicDataUpdateExportTemplateService,
 )
-from hct_mis_api.apps.periodic_data_update.tests.test_periodic_data_update_import_service import (
+from tests.unit.apps.periodic_data_update.test_periodic_data_update_import_service import (
     add_pdu_data_to_xlsx,
 )
 from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
