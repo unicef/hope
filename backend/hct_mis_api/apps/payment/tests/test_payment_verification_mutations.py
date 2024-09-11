@@ -56,9 +56,7 @@ mutation EditPaymentVerificationPlan($input: EditPaymentVerificationInput!) {
 class TestPaymentVerificationMutations(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
-        create_afghanistan()
-        payment_record_amount = 1
-        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.business_area = create_afghanistan()
 
         cls.user = UserFactory()
         cls.create_user_role_with_permissions(
@@ -78,36 +76,35 @@ class TestPaymentVerificationMutations(APITestCase):
         payment_verification_plan = PaymentVerificationPlanFactory(
             generic_fk_obj=cash_plan, verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL
         )
-        for _ in range(payment_record_amount):
-            registration_data_import = RegistrationDataImportFactory(
-                imported_by=cls.user, business_area=BusinessArea.objects.first()
-            )
-            household, individuals = create_household(
-                {
-                    "registration_data_import": registration_data_import,
-                    "admin_area": Area.objects.order_by("?").first(),
-                },
-                {"registration_data_import": registration_data_import},
-            )
+        registration_data_import = RegistrationDataImportFactory(
+            imported_by=cls.user, business_area=BusinessArea.objects.first()
+        )
+        household, individuals = create_household(
+            {
+                "registration_data_import": registration_data_import,
+                "admin_area": Area.objects.order_by("?").first(),
+            },
+            {"registration_data_import": registration_data_import},
+        )
 
-            household.programs.add(program)
+        household.programs.add(program)
 
-            payment_record = PaymentRecordFactory(
-                parent=cash_plan,
-                household=household,
-                head_of_household=household.head_of_household,
-                target_population=target_population,
-                entitlement_quantity="21.36",
-                delivered_quantity="21.36",
-                currency="PLN",
-            )
+        payment_record = PaymentRecordFactory(
+            parent=cash_plan,
+            household=household,
+            head_of_household=household.head_of_household,
+            target_population=target_population,
+            entitlement_quantity="21.36",
+            delivered_quantity="21.36",
+            currency="PLN",
+        )
 
-            PaymentVerificationFactory(
-                generic_fk_obj=payment_record,
-                payment_verification_plan=payment_verification_plan,
-                status=PaymentVerification.STATUS_PENDING,
-            )
-            EntitlementCardFactory(household=household)
+        PaymentVerificationFactory(
+            generic_fk_obj=payment_record,
+            payment_verification_plan=payment_verification_plan,
+            status=PaymentVerification.STATUS_PENDING,
+        )
+        EntitlementCardFactory(household=household)
         cls.cash_plan = cash_plan
         cls.verification = cash_plan.payment_verification_plan.first()
         VerificationPlanStatusChangeServices(payment_verification_plan).activate()
@@ -116,6 +113,7 @@ class TestPaymentVerificationMutations(APITestCase):
         request.user = cls.user
         info.context = request
         cls.info = info
+        super().setUpTestData()
 
     @parameterized.expand(
         [
