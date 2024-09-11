@@ -1,4 +1,4 @@
-from hct_mis_api.apps.household.tests.test_admin import BaseTest
+from tests.unit.apps.household.test_admin import BaseTest
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 
 

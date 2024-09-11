@@ -28,7 +28,7 @@ from hct_mis_api.apps.cash_assist_datahub.tasks.pull_from_datahub import (
 )
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.tests.test_exchange_rates import (
+from tests.unit.apps.core.test_exchange_rates import (
     EXCHANGE_RATES_WITH_HISTORICAL_DATA,
 )
 from hct_mis_api.apps.household.fixtures import create_household

@@ -28,6 +28,7 @@ services:
       - "8080:8000"
     volumes:
       - ../src:/code/
+      - ../tests:/tests/
       - backend-data:/data
       - ../src/pyproject.toml:/packages/pyproject.toml
       - ../src/pdm.lock:/packages/pdm.lock
