@@ -440,3 +440,58 @@ snapshots['TestTargetPopulationQuery::test_simple_target_query_pdu_1_without_per
         }
     ]
 }
+
+snapshots['TestTargetPopulationQuery::test_simple_target_query_pdu_for_sw_program_0_with_permission 1'] = {
+    'data': {
+        'targetPopulation': {
+            'hasEmptyCriteria': False,
+            'hasEmptyIdsCriteria': True,
+            'name': 'target_population_with_pdu_filter_for_sw',
+            'status': 'LOCKED',
+            'targetingCriteria': {
+                'rules': [
+                    {
+                        'filters': [
+                            {
+                                'arguments': [
+                                    'Test'
+                                ],
+                                'comparisonMethod': 'EQUALS',
+                                'fieldAttribute': {
+                                    'labelEn': 'PDU Field STRING for SW',
+                                    'type': 'PDU'
+                                },
+                                'fieldName': 'pdu_field_string_for_sw',
+                                'flexFieldClassification': 'FLEX_FIELD_PDU'
+                            }
+                        ],
+                        'individualsFiltersBlocks': [
+                        ]
+                    }
+                ]
+            },
+            'totalHouseholdsCount': 0,
+            'totalIndividualsCount': 0
+        }
+    }
+}
+
+snapshots['TestTargetPopulationQuery::test_simple_target_query_pdu_for_sw_program_1_without_permission 1'] = {
+    'data': {
+        'targetPopulation': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 11,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'targetPopulation'
+            ]
+        }
+    ]
+}
