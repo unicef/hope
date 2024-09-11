@@ -36,7 +36,7 @@ class ProgrammeManagement(BaseComponents):
     buttonDelete = 'button[data-cy="button-delete"]'
     labelAdminArea = '//*[@id="radioGroup-partners[0].areaAccess"]/div[2]/div/span'
     calendarIcon = 'button[data-cy="calendar-icon"]'
-    calendar = '//*[@data-popper-placement]'
+    calendar = "//*[@data-popper-placement]"
     calendarMonthYear = 'div[role="presentation"]'
     calendarChangeMonth = 'button[title="Next month"]'
     calendarDays = "//*[@data-timestamp]"
