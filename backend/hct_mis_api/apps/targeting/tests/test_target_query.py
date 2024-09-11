@@ -353,6 +353,7 @@ class TestTargetPopulationQuery(APITestCase):
     )
     def test_simple_target_query(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
+
         self.snapshot_graphql_request(
             request_string=TestTargetPopulationQuery.TARGET_POPULATION_QUERY,
             context={"user": self.user},
@@ -404,6 +405,7 @@ class TestTargetPopulationQuery(APITestCase):
     )
     def test_simple_target_query_pdu(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
+
         self.snapshot_graphql_request(
             request_string=TestTargetPopulationQuery.TARGET_POPULATION_QUERY,
             context={
@@ -435,7 +437,6 @@ class TestTargetPopulationQuery(APITestCase):
     )
     def test_simple_target_query_pdu_for_sw_program(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program_sw)
-        print("pduduuu")
         self.snapshot_graphql_request(
             request_string=TestTargetPopulationQuery.TARGET_POPULATION_QUERY,
             context={
@@ -467,6 +468,7 @@ class TestTargetPopulationQuery(APITestCase):
     )
     def test_simple_target_query_individual_filter(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
+
         self.snapshot_graphql_request(
             request_string=TestTargetPopulationQuery.TARGET_POPULATION_QUERY,
             context={
