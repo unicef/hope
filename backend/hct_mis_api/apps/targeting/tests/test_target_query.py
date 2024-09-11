@@ -276,7 +276,7 @@ class TestTargetPopulationQuery(APITestCase):
         )
         targeting_criteria = cls.get_targeting_criteria_for_rule(
             {
-                "field_name": cls.pdu_field_string.name,
+                "field_name": cls.pdu_field_string_for_sw.name,
                 "arguments": ["Test"],
                 "comparison_method": "EQUALS",
                 "flex_field_classification": "FLEX_FIELD_PDU",
