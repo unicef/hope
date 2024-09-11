@@ -1,8 +1,9 @@
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
+import pytest
+
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
-from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.grievance.fixtures import (
     GrievanceTicketFactory,
     TicketIndividualDataUpdateDetailsFactory,
@@ -19,10 +20,13 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
+pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
-class TestChangeIndividualRole(BaseElasticSearchTestCase, TestCase):
+
+class TestChangeIndividualRole(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         business_area = BusinessAreaFactory()
@@ -52,7 +56,7 @@ class TestChangeIndividualRole(BaseElasticSearchTestCase, TestCase):
             business_area=business_area,
             status=GrievanceTicket.STATUS_FOR_APPROVAL,
         )
-        super().setUpTestData()
+        rebuild_search_index()
 
     def test_change_role_from_none_to_alternate(self) -> None:
         IndividualRoleInHousehold.objects.create(

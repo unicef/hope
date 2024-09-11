@@ -389,14 +389,8 @@ def deduplicate_documents() -> bool:
                     documents_query,
                     registration_data_import=rdi,
                 )
+                rdi.update_needs_adjudication_tickets_statistic()
 
-        with transaction.atomic():
-            documents_query = Document.objects.filter(
-                status=Document.STATUS_PENDING, individual__registration_data_import__isnull=True
-            )
-            HardDocumentDeduplication().deduplicate(
-                documents_query,
-            )
     return True
 
 
