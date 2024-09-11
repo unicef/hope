@@ -8,10 +8,10 @@ from django.db import DEFAULT_DB_ALIAS, connections
 from django.forms import model_to_dict
 from django.test import TestCase
 
+import pytest
 from freezegun import freeze_time
 from parameterized import parameterized
 
-from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.grievance.models import (
@@ -52,7 +52,10 @@ from hct_mis_api.apps.registration_data.models import (
     RegistrationDataImport,
 )
 from hct_mis_api.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
+from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 from hct_mis_api.apps.utils.models import MergeStatusModel
+
+pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 
 @contextmanager
@@ -76,7 +79,7 @@ def capture_on_commit_callbacks(
             start_count = callback_count
 
 
-class TestRdiMergeTask(BaseElasticSearchTestCase):
+class TestRdiMergeTask(TestCase):
     fixtures = [
         f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",
         f"{settings.PROJECT_ROOT}/apps/core/fixtures/data.json",
@@ -111,7 +114,7 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
         cls.area3 = AreaFactory(name="City Test3", area_type=area_type_level_3, p_code="area3", parent=cls.area2)
         cls.area4 = AreaFactory(name="City Test4", area_type=area_type_level_4, p_code="area4", parent=cls.area3)
 
-        super().setUpTestData()
+        rebuild_search_index()
 
     @classmethod
     def set_imported_individuals(cls, household: PendingHousehold) -> None:

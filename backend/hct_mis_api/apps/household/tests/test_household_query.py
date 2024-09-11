@@ -2,6 +2,7 @@ from typing import Any, List
 
 from django.conf import settings
 
+import pytest
 from constance.test import override_config
 from parameterized import parameterized
 
@@ -12,7 +13,7 @@ from hct_mis_api.apps.account.fixtures import (
     UserFactory,
 )
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.base_test_case import APITestCase, BaseElasticSearchTestCase
+from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import (
     create_afghanistan,
     generate_data_collecting_types,
@@ -24,9 +25,13 @@ from hct_mis_api.apps.household.fixtures import DocumentFactory, create_househol
 from hct_mis_api.apps.household.models import DocumentType
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 from hct_mis_api.one_time_scripts.migrate_data_to_representations import (
     migrate_data_to_representations_per_business_area,
 )
+
+pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
+
 
 ALL_HOUSEHOLD_QUERY = """
       query AllHouseholds($search: String, $documentType: String, $documentNumber: String, $program: ID) {
@@ -127,7 +132,7 @@ HOUSEHOLD_QUERY = """
 
 
 @override_config(USE_ELASTICSEARCH_FOR_HOUSEHOLDS_SEARCH=True)
-class TestHouseholdQuery(BaseElasticSearchTestCase, APITestCase):
+class TestHouseholdQuery(APITestCase):
     databases = "__all__"
     fixtures = (
         f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",
@@ -246,7 +251,7 @@ class TestHouseholdQuery(BaseElasticSearchTestCase, APITestCase):
         BusinessAreaFactory(name="Slovakia")
         BusinessAreaFactory(name="Sri Lanka")
         migrate_data_to_representations_per_business_area(business_area=cls.business_area)
-        super().setUpTestData()
+        rebuild_search_index()
 
     @parameterized.expand(
         [

@@ -365,8 +365,6 @@ GRAPHENE = {
 
 LOGIN_URL = "/api/login/azuread-tenant-oauth2/"
 
-TEST_RUNNER = "hct_mis_api.apps.core.mis_test_runner.PostgresTestRunner"
-
 GRAPH_MODELS = {
     "all_applications": True,
     "group_models": True,
