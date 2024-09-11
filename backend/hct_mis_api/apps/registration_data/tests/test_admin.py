@@ -1,5 +1,7 @@
 from django.test import TestCase
 
+import pytest
+
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory
 from hct_mis_api.apps.grievance.models import (
@@ -28,7 +30,10 @@ from hct_mis_api.apps.targeting.fixtures import (
     TargetPopulationFactory,
 )
 from hct_mis_api.apps.targeting.models import HouseholdSelection
+from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 from hct_mis_api.apps.utils.models import MergeStatusModel
+
+pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 
 class RegistrationDataImportAdminDeleteTest(TestCase):
@@ -70,6 +75,8 @@ class RegistrationDataImportAdminDeleteTest(TestCase):
             program=program,
             rdi_merge_status=MergeStatusModel.PENDING,
         )
+
+        rebuild_search_index()
 
     def test_delete_rdi(self) -> None:
         self.assertEqual(RegistrationDataImport.objects.count(), 1)
@@ -142,6 +149,7 @@ class RegistrationDataImportAdminDeleteMergedTest(TestCase):
         cls.household_selection = HouseholdSelectionFactory(
             household=cls.household, target_population=cls.target_population
         )
+        rebuild_search_index()
 
     def test_delete_merged_rdi(self) -> None:
         self.assertEqual(GrievanceTicket.objects.count(), 2)

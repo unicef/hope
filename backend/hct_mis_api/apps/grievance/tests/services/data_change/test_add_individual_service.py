@@ -3,8 +3,9 @@ from datetime import date
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
+import pytest
+
 from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.geo.fixtures import CountryFactory
 from hct_mis_api.apps.grievance.fixtures import TicketAddIndividualDetailsFactory
@@ -19,9 +20,12 @@ from hct_mis_api.apps.household.fixtures import (
 )
 from hct_mis_api.apps.household.models import SINGLE, Document, Individual
 from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
+
+pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 
-class TestAddIndividualService(BaseElasticSearchTestCase, TestCase):
+class TestAddIndividualService(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         create_afghanistan()
@@ -46,7 +50,7 @@ class TestAddIndividualService(BaseElasticSearchTestCase, TestCase):
         cls.household = household
         cls.ticket = ticket
 
-        super().setUpTestData()
+        rebuild_search_index()
 
     def test_increase_household_size_on_close_ticket(self) -> None:
         self.household.size = 3

@@ -1,13 +1,12 @@
 from unittest.mock import patch
 
-from django.test import override_settings
+from django.test import TestCase, override_settings
 
 import pytest
 from faker.generator import random
 from flaky import flaky
 
 from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.constants import (
@@ -19,11 +18,14 @@ from hct_mis_api.apps.grievance.constants import (
 from hct_mis_api.apps.grievance.documents import GrievanceTicketDocument
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.grievance.services.bulk_action_service import BulkActionService
+from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
+
+pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 
 @override_settings(ELASTICSEARCH_DSL_AUTOSYNC=True)
 @pytest.mark.skip("Too flaky, hard to pass, need to fix")
-class TestGrievanceApproveAutomaticMutation(BaseElasticSearchTestCase):
+class TestGrievanceApproveAutomaticMutation(TestCase):
     databases = "__all__"
 
     @classmethod
@@ -77,7 +79,7 @@ class TestGrievanceApproveAutomaticMutation(BaseElasticSearchTestCase):
             business_area=cls.business_area,
             issue_type=None,
         )
-        super().setUpTestData()
+        rebuild_search_index()
 
     @flaky(max_runs=3, min_passes=1)
     def test_bulk_update_assignee(self) -> None:
