@@ -52,6 +52,7 @@ class APITestCase(SnapshotTestTestCase):
     def tearDown(self) -> None:
         with open(f"{settings.PROJECT_ROOT}/../test_times.txt", "a") as f:
             f.write(f"{time.time() - self.start_time:.3f} {self.id()}" + os.linesep)
+        super().tearDown()
 
     def snapshot_graphql_request(
         self, request_string: str, context: Optional[Dict] = None, variables: Optional[Dict] = None
