@@ -65,7 +65,7 @@ RUN pip install --upgrade pip &&\
     pdm config check_update false
 
 WORKDIR $PDM_PACKAGES
-COPY backend/pyproject.toml backend/pdm.lock ./
+COPY src/pyproject.toml src/pdm.lock ./
 RUN pdm sync --prod --no-editable --no-self --no-isolation
 
 # Dev image
@@ -86,7 +86,9 @@ RUN apt-get update \
 RUN pdm sync --no-editable --no-self --no-isolation
 
 WORKDIR $CODE
-COPY ./backend ./
+COPY ./src/data ./src/hct_mis_api ./src/static ./src/.coveragerc ./src/.flake8 ./src/gunicorn_config.py ./src/pytest.ini ./
+
+
 
 COPY ./docker/entrypoint.sh /bin/
 ENTRYPOINT ["entrypoint.sh"]
@@ -94,7 +96,7 @@ ENTRYPOINT ["entrypoint.sh"]
 ## Dist (backend only) image
 FROM base AS be-dist
 
-COPY --chown=hope:hope ./backend ./
+COPY --chown=hope:hope ./src/data ./src/hct_mis_api ./src/static ./src/.coveragerc ./src/.flake8 ./src/gunicorn_config.py ./src/pytest.ini ./
 COPY --chown=hope:hope --from=builder $PDM_PACKAGES $PDM_PACKAGES
 COPY --chown=hope:hope --from=certs /data/psql-cert.crt /code/psql-cert.crt
 

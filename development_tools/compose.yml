@@ -22,15 +22,15 @@ services:
       - PYTHONUNBUFFERED=1
     build:
       context: ..
-      dockerfile: ../docker/Dockerfile
+      dockerfile: ./docker/Dockerfile
       target: dev
     ports:
       - "8080:8000"
     volumes:
-      - ./backend:/code/
+      - ../src:/code/
       - backend-data:/data
-      - ./backend/pyproject.toml:/packages/pyproject.toml
-      - ./backend/pdm.lock:/packages/pdm.lock
+      - ../src/pyproject.toml:/packages/pyproject.toml
+      - ../src/pdm.lock:/packages/pdm.lock
       - ipython_data_local:/root/.ipython
     command: "dev"
     depends_on:
@@ -66,7 +66,7 @@ services:
     environment:
       - REDIS_INSTANCE=redis:6379
     volumes:
-      - ./backend:/code/
+      - ../src:/code/
       - backend-data:/data
     command: "celery-worker"
     depends_on:
@@ -95,7 +95,7 @@ services:
     environment:
       - REDIS_INSTANCE=redis:6379
     volumes:
-      - ./backend:/code/
+      - ../src:/code/
       - backend-data:/data
     command: "celery-beat"
     depends_on:
@@ -155,7 +155,7 @@ services:
     container_name: elasticsearch
     build:
       context: elasticsearch
-      dockerfile: elasticsearch/Dockerfile
+      dockerfile: ./Dockerfile
     environment:
       - node.name=es01
       - cluster.name=es-docker-cluster
