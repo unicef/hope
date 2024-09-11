@@ -36,7 +36,7 @@ class ProgrammeManagement(BaseComponents):
     buttonDelete = 'button[data-cy="button-delete"]'
     labelAdminArea = '//*[@id="radioGroup-partners[0].areaAccess"]/div[2]/div/span'
     calendarIcon = 'button[data-cy="calendar-icon"]'
-    calendar = 'div[data-popper-placement="top-start"]'
+    calendar = '//*[@data-popper-placement]'
     calendarMonthYear = 'div[role="presentation"]'
     calendarChangeMonth = 'button[title="Next month"]'
     calendarDays = "//*[@data-timestamp]"
@@ -94,7 +94,7 @@ class ProgrammeManagement(BaseComponents):
         return self.wait_for(self.calendarIcon)
 
     def getCalendar(self) -> WebElement:
-        return self.wait_for(self.calendar)
+        return self.wait_for(self.calendar, By.XPATH)
 
     def chooseAreaAdmin1ByName(self, name: str) -> WebElement:
         return self.wait_for(f"//*[contains(text(), '{name}')]/span", By.XPATH)
@@ -151,13 +151,12 @@ class ProgrammeManagement(BaseComponents):
         # ToDo: Create additional waiting mechanism
         sleep(1)
         self.get_elements(self.calendarDays, By.XPATH)[day - 1].click()
-        self.wait_for_disappear(self.calendar)
+        self.wait_for_disappear(self.calendar, By.XPATH)
 
     def chooseInputEndDateViaCalendar(self, day: int) -> None:
         self.getLabelEndDate().find_element(By.XPATH, "./..").find_element(By.TAG_NAME, "button").click()
         self.getCalendar()
         month = self.wait_for(self.calendarMonthYear).text
-        print(month)
         self.wait_for(self.calendarChangeMonth).click()
         for _ in range(50):
             next_month = self.wait_for(self.calendarMonthYear).text
@@ -165,7 +164,7 @@ class ProgrammeManagement(BaseComponents):
             if month != next_month:
                 break
         self.get_elements(self.calendarDays, By.XPATH)[day - 1].click()
-        self.wait_for_disappear(self.calendar)
+        self.wait_for_disappear(self.calendar, By.XPATH)
 
     def getLabelStartDate(self) -> WebElement:
         return self.get_elements(self.labelStartDate)[0]
