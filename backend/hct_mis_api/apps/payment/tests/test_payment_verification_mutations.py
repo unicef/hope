@@ -56,6 +56,7 @@ mutation EditPaymentVerificationPlan($input: EditPaymentVerificationInput!) {
 class TestPaymentVerificationMutations(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.business_area = create_afghanistan()
 
         cls.user = UserFactory()
@@ -113,7 +114,6 @@ class TestPaymentVerificationMutations(APITestCase):
         request.user = cls.user
         info.context = request
         cls.info = info
-        super().setUpTestData()
 
     @parameterized.expand(
         [
