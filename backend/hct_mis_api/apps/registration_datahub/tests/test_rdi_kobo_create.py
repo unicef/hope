@@ -10,10 +10,11 @@ from django.contrib.gis.geos import Point
 from django.core.files import File
 from django.db.models.fields.files import ImageFieldFile
 from django.forms import model_to_dict
+from django.test import TestCase
 
+import pytest
 from django_countries.fields import Country
 
-from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
@@ -30,10 +31,13 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import ImportData
+from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
+pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
-class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
+
+class TestRdiKoboCreateTask(TestCase):
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @staticmethod
@@ -93,7 +97,7 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         cls.registration_data_import = RegistrationDataImportFactory(
             business_area=cls.business_area, program=cls.program, import_data=cls.import_data
         )
-        super().setUpTestData()
+        rebuild_search_index()
 
     @mock.patch(
         "hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",

@@ -3,9 +3,11 @@ from typing import List
 from django.conf import settings
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.db.models import QuerySet
+from django.test import TestCase
 from django.test.utils import CaptureQueriesContext
 
-from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
+import pytest
+
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.grievance.models import GrievanceTicket
@@ -27,10 +29,13 @@ from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFa
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
     HardDocumentDeduplication,
 )
+from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
+pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
-class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
+
+class TestGoldenRecordDeduplication(TestCase):
     databases = "__all__"
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
@@ -219,7 +224,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             cls.document8,
             cls.document9,
         ]
-        super().setUpTestData()
+        rebuild_search_index()
 
     def get_documents_query(self, documents: List[Document]) -> QuerySet[Document]:
         return Document.objects.filter(id__in=[document.id for document in documents])

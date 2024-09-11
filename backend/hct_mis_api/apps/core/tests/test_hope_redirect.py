@@ -86,6 +86,7 @@ class TestHopeRedirect(APITestCase):
         )
 
         cls.create_user_role_with_permissions(cls.user, [], business_area)
+        super().setUpTestData()
 
     def test_redirect_to_household_list(self) -> None:
         hope_redirect: HopeRedirect = get_hope_redirect(self.user, "progres_registrationgroup")

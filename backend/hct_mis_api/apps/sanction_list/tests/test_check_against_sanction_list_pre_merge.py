@@ -1,8 +1,9 @@
 from django.conf import settings
+from django.test import TestCase
 
+import pytest
 from constance.test import override_config
 
-from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo import models as geo_models
@@ -22,12 +23,13 @@ from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge 
     CheckAgainstSanctionListPreMergeTask,
 )
 from hct_mis_api.apps.sanction_list.tasks.load_xml import LoadSanctionListXMLTask
-from hct_mis_api.conftest import disabled_locally_test
+from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
+
+pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 
-@disabled_locally_test
 @override_config(SANCTION_LIST_MATCH_SCORE=3.5)
-class TestSanctionListPreMerge(BaseElasticSearchTestCase):
+class TestSanctionListPreMerge(TestCase):
     databases = "__all__"
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
@@ -124,7 +126,7 @@ class TestSanctionListPreMerge(BaseElasticSearchTestCase):
             label="National ID", key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID]
         )
         DocumentFactory(document_number="55130", individual=ind, type=doc_type, country=country, program=ind.program)
-        super().setUpTestData()
+        rebuild_search_index()
 
     def test_execute(self) -> None:
         CheckAgainstSanctionListPreMergeTask.execute()
