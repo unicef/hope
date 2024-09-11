@@ -64,6 +64,7 @@ class ProgramCycleListSerializer(EncodedIdSerializerMixin):
             "frequency_of_payments",
             "created_by",
             "admin_url",
+            "can_remove_cycle",
         )
 
     def get_created_by(self, obj: ProgramCycle) -> str:
