@@ -329,6 +329,10 @@ class ProgramCycleCreateSerializerTest(TestCase):
         with self.assertRaises(ValidationError) as error:
             serializer.is_valid(raise_exception=True)
         self.assertIn("Programme Cycle start date cannot be before programme start date.", str(error.exception))
+        # no error
+        data = {"title": "Cycle new", "start_date": parse_date("2055-01-01"), "end_date": parse_date("2055-11-11")}
+        serializer = ProgramCycleCreateSerializer(data=data, context=self.get_serializer_context())
+        self.assertTrue(serializer.is_valid(raise_exception=True))
 
     def test_validate_end_date(self) -> None:
         # after program end date
@@ -349,6 +353,14 @@ class ProgramCycleCreateSerializerTest(TestCase):
         with self.assertRaises(ValidationError) as error:
             serializer.is_valid(raise_exception=True)
         self.assertIn("End date cannot be before start date", str(error.exception))
+        # no program end date and end date before program end date
+        self.program.end_date = None
+        self.program.save()
+        data = {"title": "Cycle", "start_date": parse_date("2055-01-01"), "end_date": parse_date("2000-01-02")}
+        serializer = ProgramCycleCreateSerializer(data=data, context=self.get_serializer_context())
+        with self.assertRaises(ValidationError) as error:
+            serializer.is_valid(raise_exception=True)
+        self.assertIn("Programme Cycle end date cannot be before programme start date.", str(error.exception))
 
 
 class ProgramCycleUpdateSerializerTest(TestCase):
@@ -432,6 +444,11 @@ class ProgramCycleUpdateSerializerTest(TestCase):
         with self.assertRaises(ValidationError) as error:
             serializer.is_valid(raise_exception=True)
         self.assertIn("Programme Cycle start date must be after the programme start date.", str(error.exception))
+        # no error
+        serializer = ProgramCycleUpdateSerializer(
+            instance=cycle_2, data={"start_date": parse_date("2023-12-24")}, context=self.get_serializer_context()
+        )
+        self.assertTrue(serializer.is_valid())
 
     def test_validate_end_date(self) -> None:
         self.cycle.end_date = datetime.strptime("2023-02-03", "%Y-%m-%d").date()
