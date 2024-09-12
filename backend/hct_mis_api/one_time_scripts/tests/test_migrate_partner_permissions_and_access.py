@@ -14,6 +14,7 @@ from hct_mis_api.one_time_scripts.migrate_partner_permissions_and_access import 
 class TestMigratePartnerPermissionsAndAccess(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.partner_unicef = PartnerFactory(name="UNICEF", permissions={})
         cls.afghanistan = create_afghanistan()
         cls.ukraine = create_ukraine()

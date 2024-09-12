@@ -62,6 +62,7 @@ class TestDataSendTpToDatahub(TestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls._pre_test_commands()
 
         business_area_with_data_sharing = BusinessArea.objects.first()

@@ -28,6 +28,7 @@ pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 class TestAddIndividualService(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         cls.program = ProgramFactory()
         household, _ = create_household({"program": cls.program})

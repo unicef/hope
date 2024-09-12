@@ -78,6 +78,7 @@ class TestRapidProVerificationTask(TestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         payment_record_amount = 10
 
@@ -100,7 +101,7 @@ class TestRapidProVerificationTask(TestCase):
         payment_verification_plan = PaymentVerificationPlanFactory(
             status=PaymentVerificationPlan.STATUS_ACTIVE,
             verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_RAPIDPRO,
-            generic_fk_obj=cash_plan,
+            payment_plan_obj=cash_plan,
         )
         cls.individuals = []
         for _ in range(payment_record_amount):
@@ -129,7 +130,7 @@ class TestRapidProVerificationTask(TestCase):
 
             PaymentVerificationFactory(
                 payment_verification_plan=payment_verification_plan,
-                generic_fk_obj=payment_record,
+                payment_obj=payment_record,
                 status=PaymentVerification.STATUS_PENDING,
             )
             EntitlementCardFactory(household=household)

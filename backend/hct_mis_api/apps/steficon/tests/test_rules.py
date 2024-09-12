@@ -33,6 +33,7 @@ s = s.upper()
 class TestBasicRule(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.user = get_user_model().objects.create_superuser(username="test", password="test")
         cls.household = HouseholdFactory.build()
 

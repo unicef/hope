@@ -24,6 +24,7 @@ class TestPowerQuery(TestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.superuser = UserFactory(is_superuser=True, is_staff=True, is_active=True)
 
         # code should be unique but the test depends on both BAs having the same, empty code

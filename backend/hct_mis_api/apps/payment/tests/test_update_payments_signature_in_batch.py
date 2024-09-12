@@ -13,6 +13,7 @@ from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanS
 class TestUpdatePaymentsSignatureInBatch(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.business_area = create_afghanistan()
         cls.user = UserFactory.create()
 

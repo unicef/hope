@@ -75,6 +75,7 @@ class TestCopyProgram(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.business_area = create_afghanistan()
         cls.partner = PartnerFactory(name="WFP")
         cls.user = UserFactory.create(partner=cls.partner)

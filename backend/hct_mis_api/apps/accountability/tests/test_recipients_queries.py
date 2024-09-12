@@ -24,6 +24,7 @@ class TestSurveyQueries(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.business_area = create_afghanistan()
         cls.partner = PartnerFactory(name="TestPartner")
         cls.user = UserFactory.create(first_name="John", last_name="Wick", partner=cls.partner)

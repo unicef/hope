@@ -89,6 +89,7 @@ class TestPullDataFromErpDatahub(TestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls._pre_test_commands()
         cls._setup_in_app_data()
         cls._setup_datahub_data()

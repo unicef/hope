@@ -12,6 +12,7 @@ from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFa
 class BaseTest(WebTest):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         business_area = BusinessAreaFactory(name="Test")
         program = ProgramFactory(business_area=business_area)
         registration_data_import = RegistrationDataImportFactory()

@@ -11,6 +11,7 @@ from hct_mis_api.one_time_scripts.calculate_age_at_registration import (
 class TestCalculatingAgeAtRegistrationMigration(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
 
         cls.registration_1 = RegistrationDataImportFactory(created_at="2019-01-12 16:15:31.864423+00:00")

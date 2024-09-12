@@ -41,6 +41,7 @@ class TestRdiXlsxPeople(TestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         PartnerFactory(name="UNHCR")
         content = Path(
             f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/rdi_people_test.xlsx"

@@ -27,6 +27,7 @@ from hct_mis_api.one_time_scripts.migrate_data_to_representations import (
 class TestHousehold(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
@@ -117,6 +118,7 @@ class TestHousehold(TestCase):
 class TestDocument(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         call_command("loadcountries")
         business_area = create_afghanistan()
         afghanistan = Country.objects.get(name="Afghanistan")
@@ -506,6 +508,7 @@ class TestDocument(TestCase):
 class TestIndividualModel(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         ProgramFactory()
 

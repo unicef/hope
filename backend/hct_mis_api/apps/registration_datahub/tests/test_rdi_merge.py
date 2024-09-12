@@ -87,6 +87,7 @@ class TestRdiMergeTask(TestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.business_area = create_afghanistan()
         program = ProgramFactory()
         cls.rdi = RegistrationDataImportFactory(program=program)
@@ -603,6 +604,7 @@ class TestRdiMergeTaskDeliveryMechanismData(TestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.program = ProgramFactory()
         cls.rdi = RegistrationDataImportFactory(program=cls.program)
         generate_delivery_mechanisms()

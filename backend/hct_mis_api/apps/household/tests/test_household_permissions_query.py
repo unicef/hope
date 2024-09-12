@@ -31,6 +31,7 @@ class TestHouseholdPermissionsQuery(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.unicef_partner = PartnerFactory(name="UNICEF")
         cls.not_unicef_partner = PartnerFactory(name="NOT_UNICEF")
         cls.user = UserFactory()

@@ -10,6 +10,7 @@ from hct_mis_api.apps.core.models import MigrationStatus
 class TestMaintenancePage(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.user = UserFactory()
         cls.api_client = APIClient()
         cls.api_client.force_authenticate(user=cls.user)

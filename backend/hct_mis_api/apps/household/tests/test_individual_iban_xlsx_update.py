@@ -67,6 +67,7 @@ class TestIndividualXlsxUpdate(TestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         registration_data_import = RegistrationDataImportFactory(business_area=cls.business_area)

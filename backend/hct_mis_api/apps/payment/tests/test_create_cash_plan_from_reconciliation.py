@@ -13,6 +13,7 @@ from hct_mis_api.apps.payment.services.create_cash_plan_from_reconciliation impo
 class TestCreateCashPlanFromReconciliation(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.business_area = create_afghanistan()
         generate_delivery_mechanisms()
 
