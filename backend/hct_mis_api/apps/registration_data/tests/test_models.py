@@ -31,6 +31,7 @@ class TestRegistrationDataModels(TestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         cls.program = ProgramFactory(status=Program.ACTIVE)
         partner = PartnerFactory()
@@ -115,6 +116,7 @@ class TestRegistrationDataModels(TestCase):
 class TestRegistrationDataImportDatahub(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         cls.name = "RDI datahub name"
         cls.business_area_slug = "RDI business_area slug"
@@ -147,6 +149,7 @@ class TestRegistrationDataImportDatahub(TestCase):
 class TestDeduplicationEngineSimilarityPair(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.ba = create_afghanistan()
         cls.program = ProgramFactory(business_area=cls.ba, status=Program.ACTIVE)
 

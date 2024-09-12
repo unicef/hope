@@ -35,6 +35,7 @@ from hct_mis_api.apps.targeting.models import (
 class TargetingCriteriaRuleFilterTestCase(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         households = []
         business_area = create_afghanistan()
         (household, individuals) = create_household_and_individuals(
@@ -304,6 +305,7 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
 class TargetingCriteriaFlexRuleFilterTestCase(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         call_command("loadflexfieldsattributes")
         business_area = create_afghanistan()
         (household, individuals) = create_household(
@@ -394,6 +396,7 @@ class TargetingCriteriaFlexRuleFilterTestCase(TestCase):
 class TargetingCriteriaPDUFlexRuleFilterTestCase(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         call_command("loadflexfieldsattributes")
         business_area = create_afghanistan()
         cls.program = ProgramFactory(name="Test Program for PDU Flex Rule Filter", business_area=business_area)

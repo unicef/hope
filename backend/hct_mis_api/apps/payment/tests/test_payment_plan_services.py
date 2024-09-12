@@ -53,6 +53,7 @@ class TestPaymentPlanServices(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         generate_delivery_mechanisms()
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")

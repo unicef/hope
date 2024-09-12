@@ -61,6 +61,7 @@ query AllCashPlans {
 class TestCashPlanQueries(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         cls.partner = PartnerFactory(name="Test1")
         cls.user = UserFactory(partner=cls.partner)

@@ -41,6 +41,7 @@ class TestGoldenRecordDeduplication(TestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.business_area = BusinessArea.objects.create(
             code="0060",
             name="Afghanistan",

@@ -22,6 +22,7 @@ class TestDeleteProgram(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.program = ProgramFactory.create(status=Program.DRAFT, business_area=cls.business_area)

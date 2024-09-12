@@ -33,6 +33,7 @@ class TestRegistrationDataProgramPopulationImportMutations(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.partner = PartnerFactory(name="Partner")
         cls.afghanistan = create_afghanistan()
         cls.import_from_program = ProgramFactory(status=Program.ACTIVE)

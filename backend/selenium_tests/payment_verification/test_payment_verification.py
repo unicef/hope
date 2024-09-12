@@ -98,7 +98,7 @@ def add_payment_verification() -> PV:
         status=GenericPayment.STATUS_DISTRIBUTION_SUCCESS,
     )
     payment_verification_plan = PaymentVerificationPlanFactory(
-        generic_fk_obj=cash_plan,
+        payment_plan_obj=cash_plan,
         verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL,
     )
 
@@ -107,7 +107,7 @@ def add_payment_verification() -> PV:
     pv_summary.save()
 
     pv = PaymentVerificationFactory(
-        generic_fk_obj=payment_record,
+        payment_obj=payment_record,
         payment_verification_plan=payment_verification_plan,
         status=PV.STATUS_PENDING,
     )

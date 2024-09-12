@@ -9,6 +9,7 @@ from hct_mis_api.apps.account.models import Role, User
 class RoleTest(WebTest):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.role_1 = Role.objects.create(name="Role_1")
         cls.user = UserFactory()
         cls.superuser: User = UserFactory(is_superuser=True, is_staff=True)

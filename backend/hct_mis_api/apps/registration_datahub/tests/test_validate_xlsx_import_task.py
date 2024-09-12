@@ -20,6 +20,7 @@ class TestValidateXlsxImportTask(TestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.business_area = create_afghanistan()
         cls.program = get_program_with_dct_type_and_name()
         cls.program_with_social_worker = get_program_with_dct_type_and_name(dct_type=DataCollectingType.Type.SOCIAL)

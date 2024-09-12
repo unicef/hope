@@ -85,6 +85,7 @@ class TestRdiXlsxCreateTask(TestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         generate_delivery_mechanisms()
         FlexibleAttribute.objects.create(
             type=FlexibleAttribute.INTEGER,

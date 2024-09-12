@@ -35,6 +35,7 @@ class TestFinishVerificationPlan(TestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         business_area = create_afghanistan()
         payment_record_amount = 10
         user = UserFactory()
@@ -61,7 +62,7 @@ class TestFinishVerificationPlan(TestCase):
         cash_plan_payment_verification = PaymentVerificationPlanFactory(
             status=PaymentVerificationPlan.STATUS_PENDING,
             verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_RAPIDPRO,
-            generic_fk_obj=cash_plan,
+            payment_plan_obj=cash_plan,
         )
         for i in range(payment_record_amount):
             registration_data_import = RegistrationDataImportFactory(
@@ -93,7 +94,7 @@ class TestFinishVerificationPlan(TestCase):
 
             PaymentVerificationFactory(
                 payment_verification_plan=cash_plan_payment_verification,
-                generic_fk_obj=payment_record,
+                payment_obj=payment_record,
                 status=PaymentVerification.STATUS_RECEIVED_WITH_ISSUES,
             )
             EntitlementCardFactory(household=household)

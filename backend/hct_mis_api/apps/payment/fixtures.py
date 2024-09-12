@@ -6,7 +6,6 @@ from random import choice, randint
 from typing import Any, Optional, Union
 from uuid import UUID
 
-from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
 
 import factory
@@ -83,26 +82,8 @@ def update_kwargs_with_usd_currency(kwargs: Any) -> Any:
     return kwargs
 
 
-class PaymentGFKFactory(DjangoModelFactory):
-    payment_object_id = factory.SelfAttribute("generic_fk_obj.id")
-    payment_content_type = factory.LazyAttribute(lambda o: ContentType.objects.get_for_model(o.generic_fk_obj))
-
-    class Meta:
-        exclude = ["generic_fk_obj"]
-        abstract = True
-
-
-class PaymentPlanGFKFactory(DjangoModelFactory):
-    payment_plan_object_id = factory.SelfAttribute("generic_fk_obj.id")
-    payment_plan_content_type = factory.LazyAttribute(lambda o: ContentType.objects.get_for_model(o.generic_fk_obj))
-
-    class Meta:
-        exclude = ["generic_fk_obj"]
-        abstract = True
-
-
-class PaymentVerificationSummaryFactory(PaymentPlanGFKFactory):
-    generic_fk_obj = factory.SubFactory("payment.fixtures.CashPlanFactory")
+class PaymentVerificationSummaryFactory(DjangoModelFactory):
+    payment_plan_obj = factory.SubFactory("payment.fixtures.CashPlanFactory")
 
     class Meta:
         model = PaymentVerificationSummary
@@ -178,7 +159,7 @@ class CashPlanFactory(DjangoModelFactory):
         if not create:
             return
 
-        PaymentVerificationSummaryFactory(generic_fk_obj=self)
+        PaymentVerificationSummaryFactory(payment_plan_obj=self)
 
 
 class ServiceProviderFactory(DjangoModelFactory):
@@ -294,8 +275,8 @@ class PaymentRecordFactory(DjangoModelFactory):
         return instance
 
 
-class PaymentVerificationPlanFactory(PaymentPlanGFKFactory):
-    generic_fk_obj = factory.SubFactory(CashPlanFactory)
+class PaymentVerificationPlanFactory(DjangoModelFactory):
+    payment_plan_obj = factory.SubFactory(CashPlanFactory)
     status = factory.fuzzy.FuzzyChoice(
         ((PaymentVerificationPlan.STATUS_PENDING, "pending"),),
         getter=lambda c: c[0],
@@ -319,8 +300,8 @@ class PaymentVerificationPlanFactory(PaymentPlanGFKFactory):
         model = PaymentVerificationPlan
 
 
-class PaymentVerificationFactory(PaymentGFKFactory):
-    generic_fk_obj = factory.SubFactory(PaymentRecordFactory)
+class PaymentVerificationFactory(DjangoModelFactory):
+    payment_obj = factory.SubFactory(PaymentRecordFactory)
     payment_verification_plan = factory.Iterator(PaymentVerificationPlan.objects.all())
     status = factory.fuzzy.FuzzyChoice(
         PaymentVerification.STATUS_CHOICES,
@@ -462,7 +443,7 @@ class RealCashPlanFactory(DjangoModelFactory):
         if not create:
             return
 
-        PaymentVerificationSummaryFactory(generic_fk_obj=self)
+        PaymentVerificationSummaryFactory(payment_plan_obj=self)
 
     @factory.post_generation
     def cycle(self, create: bool, extracted: bool, **kwargs: Any) -> None:
@@ -694,7 +675,7 @@ def create_payment_verification_plan_with_status(
         PaymentVerificationSummary.objects.create(
             payment_plan_obj=cash_plan,
         )
-    payment_verification_plan = PaymentVerificationPlanFactory(generic_fk_obj=cash_plan)
+    payment_verification_plan = PaymentVerificationPlanFactory(payment_plan_obj=cash_plan)
     payment_verification_plan.status = status
     if verification_channel:
         payment_verification_plan.verification_channel = verification_channel
@@ -746,7 +727,7 @@ def create_payment_verification_plan_with_status(
 
         pv = PaymentVerificationFactory(
             payment_verification_plan=payment_verification_plan,
-            generic_fk_obj=payment_record,
+            payment_obj=payment_record,
             status=PaymentVerification.STATUS_PENDING,
         )
         pv.set_pending()
