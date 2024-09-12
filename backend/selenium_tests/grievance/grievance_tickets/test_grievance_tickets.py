@@ -741,11 +741,11 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getDescription().send_keys("Add Individual - TEST")
         pageGrievanceNewTicket.getButtonAddNewField().click()
         pageGrievanceNewTicket.getIndividualFieldName(0).click()
-        pageGrievanceNewTicket.select_option_by_name("Gender")
+        pageGrievanceNewTicket.select_listbox_element("Gender")
         pageGrievanceNewTicket.getInputIndividualData("Gender").click()
         pageGrievanceNewTicket.select_listbox_element("Female")
         pageGrievanceNewTicket.getIndividualFieldName(1).click()
-        pageGrievanceNewTicket.select_option_by_name("Preferred language")
+        pageGrievanceNewTicket.select_listbox_element("Preferred language")
         pageGrievanceNewTicket.getInputIndividualData("Preferred language").click()
         pageGrievanceNewTicket.select_listbox_element("English | English")
 
