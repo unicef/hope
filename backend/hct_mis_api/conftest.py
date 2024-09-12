@@ -1,6 +1,8 @@
 import logging
 import os
+import re
 import sys
+from time import sleep
 
 from django.conf import settings
 
@@ -8,6 +10,7 @@ import pytest
 from _pytest.config import Config
 from _pytest.config.argparsing import Parser
 from django_elasticsearch_dsl.registries import registry
+from django_elasticsearch_dsl.test import is_es_online
 from elasticsearch_dsl import connections
 
 
@@ -109,17 +112,49 @@ disabled_locally_test = pytest.mark.skip(
 @pytest.fixture(scope="session")
 def django_elasticsearch_setup(request: pytest.FixtureRequest) -> None:
     xdist_suffix = getattr(request.config, "workerinput", {}).get("workerid")
-    if xdist_suffix:  # pragma: no cover
+    suffix = "_test"
+    if xdist_suffix:
         # Put a suffix like _gw0, _gw1 etc on xdist processes
-        _set_suffix_to_test_elasticsearch(suffix=xdist_suffix)
+        suffix += f"_{xdist_suffix}"
+
+    _setup_test_elasticsearch(suffix=suffix)
+    yield
+    _teardown_test_elasticsearch(suffix=suffix)
 
 
-def _set_suffix_to_test_elasticsearch(suffix: str) -> None:
+def _wait_for_es(connection_alias: str) -> None:
+    max_tries = 12
+    sleep_time = 5
+
+    for _ in range(max_tries):
+        if is_es_online(connection_alias):
+            break
+        sleep(sleep_time)
+    else:
+        raise Exception("Elasticsearch not available")
+
+
+def _setup_test_elasticsearch(suffix: str) -> None:
     worker_connection_postfix = f"default_worker_{suffix}"
     connections.create_connection(alias=worker_connection_postfix, **settings.ELASTICSEARCH_DSL["default"])
 
+    _wait_for_es(connection_alias=worker_connection_postfix)
+
     # Update index names and connections
     for doc in registry.get_documents():
-        doc._index._name += f"_{suffix}"
+        doc._index._name += suffix
         # Use the worker-specific connection
         doc._index._using = worker_connection_postfix
+        doc._index.delete(ignore=[404, 400])
+        doc._index.create()
+
+
+def _teardown_test_elasticsearch(suffix: str) -> None:
+    pattern = re.compile(f"{suffix}$")
+
+    for index in registry.get_indices():
+        index.delete(ignore=[404, 400])
+        index._name = pattern.sub("", index._name)
+
+    for doc in registry.get_documents():
+        doc._index._name = pattern.sub("", doc._index._name)

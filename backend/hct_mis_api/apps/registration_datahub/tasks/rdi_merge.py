@@ -323,6 +323,7 @@ class RdiMergeTask:
                         CheckAgainstSanctionListPreMergeTask.execute(registration_data_import=obj_hct)
                         logger.info(f"RDI:{registration_data_import_id} Checked against sanction list")
 
+                    obj_hct.update_needs_adjudication_tickets_statistic()
                     obj_hct.status = RegistrationDataImport.MERGED
                     obj_hct.save()
 

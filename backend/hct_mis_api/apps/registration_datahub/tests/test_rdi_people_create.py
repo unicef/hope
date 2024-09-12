@@ -6,11 +6,12 @@ from pathlib import Path
 from django.conf import settings
 from django.core.files import File
 from django.forms import model_to_dict
+from django.test import TestCase
 
+import pytest
 from django_countries.fields import Country
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory
-from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.core.fixtures import (
     create_afghanistan,
     create_pdu_flexible_attribute,
@@ -29,10 +30,13 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import ImportData
+from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
+pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
-class TestRdiXlsxPeople(BaseElasticSearchTestCase):
+
+class TestRdiXlsxPeople(TestCase):
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
@@ -67,7 +71,7 @@ class TestRdiXlsxPeople(BaseElasticSearchTestCase):
         )
         generate_delivery_mechanisms()
 
-        super().setUpTestData()
+        rebuild_search_index()
 
     def test_execute(self) -> None:
         self.RdiXlsxPeopleCreateTask().execute(
