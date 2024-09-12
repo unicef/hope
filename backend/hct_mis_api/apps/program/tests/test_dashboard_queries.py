@@ -68,6 +68,7 @@ query chartTotalTransferredByMonth(
 class TestDashboardQueries(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.user = UserFactory()

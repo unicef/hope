@@ -9,6 +9,7 @@ from hct_mis_api.apps.program.models import Program
 class TestSignalChangeAllowedBusinessAreas(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.business_area_afg = create_afghanistan()
         cls.business_area_ukr = create_ukraine()
         cls.program_afg = ProgramFactory.create(

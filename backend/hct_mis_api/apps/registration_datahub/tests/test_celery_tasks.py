@@ -566,6 +566,7 @@ class TestAutomatingRDICreationTask(TestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         organization = OrganizationFactory.create(slug="ukraine")
         cls.project = ProjectFactory.create(organization=organization)
         cls.registration = RegistrationFactory.create(project=cls.project)
@@ -865,6 +866,7 @@ class TestAutomatingRDICreationTask(TestCase):
 class RemoveOldRDIDatahubLinksTest(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         call_command("loadbusinessareas")
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         geo_models.Country.objects.create(name="Afghanistan")
@@ -933,6 +935,7 @@ class RemoveOldRDIDatahubLinksTest(TestCase):
 class TestRegistrationImportCeleryTasks(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.business_area = create_afghanistan()
 
         from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import (
@@ -953,8 +956,6 @@ class TestRegistrationImportCeleryTasks(APITestCase):
             program=cls.program,
             import_data=cls.import_data,
         )
-
-        super().setUpTestData()
 
     @patch("hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create.RdiKoboCreateTask")
     def test_registration_kobo_import_task_execute_called_once(self, MockRdiKoboCreateTask: Mock) -> None:
@@ -1067,6 +1068,7 @@ class TestRegistrationImportCeleryTasks(APITestCase):
 class DeduplicationEngineCeleryTasksTests(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.business_area = create_afghanistan()
         cls.program = ProgramFactory(status=Program.ACTIVE, biometric_deduplication_enabled=True)
         cls.registration_data_import = RegistrationDataImportFactory(
@@ -1074,7 +1076,6 @@ class DeduplicationEngineCeleryTasksTests(TestCase):
             program=cls.program,
             import_data=None,
         )
-        super().setUpTestData()
 
     @patch.dict(
         "os.environ",

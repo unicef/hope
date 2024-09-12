@@ -95,6 +95,7 @@ class TestUpdateGrievanceTickets(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         generate_delivery_mechanisms()
         cls.generate_document_types_for_all_countries()

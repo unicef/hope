@@ -36,6 +36,7 @@ ALL_HOUSEHOLD_QUERY = """
 class TestHouseholdAreaQuery(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.business_area_afghanistan = BusinessAreaFactory(slug="afghanistan")
         cls.business_area_ukraine = BusinessAreaFactory(slug="ukraine")
 
@@ -121,8 +122,6 @@ class TestHouseholdAreaQuery(APITestCase):
         cls.household_6.address = "address_6"
         cls.household_6.program = cls.program
         cls.household_6.save()
-
-        super().setUpTestData()
 
     @parameterized.expand(
         [

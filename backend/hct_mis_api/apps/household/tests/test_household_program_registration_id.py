@@ -33,6 +33,7 @@ class TestHouseholdRegistrationId(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         generate_data_collecting_types()
 
         cls.business_area = create_afghanistan()
@@ -51,7 +52,6 @@ class TestHouseholdRegistrationId(APITestCase):
                 "program": cls.program,
             },
         )
-        super().setUpTestData()
 
     @parameterized.expand(
         [

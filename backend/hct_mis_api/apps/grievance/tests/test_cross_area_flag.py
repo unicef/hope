@@ -9,6 +9,7 @@ from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFact
 class TestCrossAreaTickets(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         admin_area1 = AreaFactory()
         admin_area2 = AreaFactory()
         business_area = BusinessAreaFactory()

@@ -24,6 +24,7 @@ class TestPowerQueryViews(TestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         from power_query.models import Query, Report
 
         cls.superuser = UserFactory(is_superuser=True, is_staff=True, is_active=True)
@@ -106,6 +107,7 @@ class TestPowerQueryBasicAuth(TestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.superuser = UserFactory(is_superuser=True, is_staff=True, is_active=True)
         cls.user1 = UserFactory(is_superuser=False, is_staff=False, is_active=True)
         cls.user2 = UserFactory(is_superuser=False, is_staff=False, is_active=True)

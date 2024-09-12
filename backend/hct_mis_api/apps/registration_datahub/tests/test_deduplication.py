@@ -42,6 +42,7 @@ class TestBatchDeduplication(TestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         import_data = ImportData.objects.create(
             file="test_file/x.xlsx",
             number_of_households=10,
@@ -309,6 +310,7 @@ class TestGoldenRecordDeduplication(TestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.business_area = BusinessArea.objects.create(
             code="0060",
             name="Afghanistan",

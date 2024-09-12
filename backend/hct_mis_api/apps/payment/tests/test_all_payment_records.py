@@ -22,6 +22,7 @@ class TestAllPaymentRecords(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         cls.user = UserFactory.create()
         (cls.household1, _) = create_household(household_args={"size": 1})

@@ -24,6 +24,7 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 class TestHouseholdWithdrawFromListMixin(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         business_area = create_afghanistan()
         cls.program = ProgramFactory(business_area=business_area)
         cls.program_other = ProgramFactory(business_area=business_area)

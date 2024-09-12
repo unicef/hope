@@ -24,6 +24,7 @@ from hct_mis_api.one_time_scripts.assign_program_to_grievance_tickets import (
 class TestAssignProgramToGrievanceTickets(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         business_area = create_afghanistan()
         cls.program = ProgramFactory(business_area=business_area)
         cls.household, cls.individuals = create_household_and_individuals(
@@ -129,6 +130,7 @@ class TestAssignProgramToGrievanceTickets(TestCase):
 class TestAssignProgramToFeedback(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         business_area = create_afghanistan()
         cls.program = ProgramFactory(business_area=business_area)
         cls.household, cls.individuals = create_household_and_individuals(

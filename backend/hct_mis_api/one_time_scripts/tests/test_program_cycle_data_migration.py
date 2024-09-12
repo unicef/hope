@@ -16,6 +16,7 @@ from hct_mis_api.one_time_scripts.program_cycle_data_migration import (
 class TestProgramCycleDataMigration(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         ba = create_afghanistan()
         start_date = "2022-10-10"
         end_date = "2023-10-10"

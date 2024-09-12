@@ -64,6 +64,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.user = UserFactory.create()
         create_afghanistan()
         business_area = BusinessArea.objects.get(slug="afghanistan")
