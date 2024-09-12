@@ -785,7 +785,6 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getButtonNext().click()
         assert "UNICEF" in pageGrievanceDetailsPage.getLabelPartner().text
 
-    @pytest.mark.skip("Unskip after fix: 212619")
     def test_grievance_tickets_create_new_tickets_Grievance_Complaint_Payment_Related_Complaint(
         self,
         pageGrievanceTickets: GrievanceTickets,
@@ -815,7 +814,6 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getButtonSubmit().click()
         assert hh_with_payment_record.unicef_id in pageGrievanceDetailsPage.getPaymentRecord().text
         pageGrievanceNewTicket.getButtonNext().click()
-        # ToDo check before unskip
         assert payment_id in pageGrievanceDetailsPage.getLabelTickets().text
 
     def test_grievance_tickets_look_up_linked_ticket(
