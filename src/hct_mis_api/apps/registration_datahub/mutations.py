@@ -306,6 +306,7 @@ class RegistrationDeduplicationMutation(BaseValidator, PermissionMutation):
     def mutate(
         cls, root: Any, info: Any, registration_data_import_id: Optional[str], **kwargs: Any
     ) -> "RegistrationDeduplicationMutation":
+        registration_data_import_id = decode_id_string(registration_data_import_id)
         old_rdi_obj = RegistrationDataImport.objects.get(id=registration_data_import_id)
         rdi_obj = RegistrationDataImport.objects.get(id=registration_data_import_id)
         check_concurrency_version_in_mutation(kwargs.get("version"), rdi_obj)

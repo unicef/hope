@@ -5,12 +5,13 @@ from unittest import mock
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 
+import pytest
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.base_test_case import APITestCase, BaseElasticSearchTestCase
+from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
@@ -37,9 +38,12 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
+
+pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 
-class TestGrievanceCreateDataChangeMutation(BaseElasticSearchTestCase, APITestCase):
+class TestGrievanceCreateDataChangeMutation(APITestCase):
     CREATE_DATA_CHANGE_GRIEVANCE_MUTATION = """
     mutation createGrievanceTicket($input:CreateGrievanceTicketInput!){
       createGrievanceTicket(input:$input){
@@ -226,7 +230,7 @@ class TestGrievanceCreateDataChangeMutation(BaseElasticSearchTestCase, APITestCa
         area_type_level_1 = AreaTypeFactory(name="State1", area_level=1)
         cls.area = AreaFactory(name="City Test1", area_type=area_type_level_1, p_code="area1")
 
-        super().setUpTestData()
+        rebuild_search_index()
 
     @parameterized.expand(
         [
