@@ -250,7 +250,7 @@ class TestPeople:
         [
             pytest.param(
                 {"category": "Data Change", "type": "Individual Data Update"},
-                id="Data Change Individual Data Update",
+                id="Data Change People Data Update",
             )
         ],
     )
@@ -308,6 +308,7 @@ class TestPeople:
         pageGrievanceDetailsPage.getButtonSetInProgress().click()
         pageGrievanceDetailsPage.getButtonSendForApproval().click()
         pageGrievanceDetailsPage.getButtonApproval().click()
+        pageGrievanceDetailsPage.getButtonCloseTicket()
         pageGrievanceDetailsPage.getCheckboxRequestedDataChange()[0].click()
         pageGrievanceDetailsPage.getCheckboxRequestedDataChange()[1].click()
         pageGrievanceDetailsPage.getButtonCloseTicket().click()
@@ -316,4 +317,3 @@ class TestPeople:
         pagePeople.selectGlobalProgramFilter("Worker Program")
         pagePeople.getNavPeople().click()
         pagePeople.getIndividualTableRow(0).click()
-        pagePeople.screenshot("0")
