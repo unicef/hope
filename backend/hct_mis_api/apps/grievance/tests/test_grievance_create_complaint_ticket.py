@@ -83,6 +83,7 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
             parent=cash_plan,
             currency="PLN",
         )
+        super().setUpTestData()
 
     @parameterized.expand(
         [

@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useCachedMe } from '@hooks/useCachedMe';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useApolloClient } from '@apollo/client';
 
 const CountrySelect = styled(Select)`
   && {
@@ -46,9 +47,13 @@ export function BusinessAreaSelect(): React.ReactElement {
   const { data } = useCachedMe();
   const { businessArea } = useBaseUrl();
   const navigate = useNavigate();
-  const onChange = (e): void => {
+  const client = useApolloClient();
+
+  const onChange = async (e): Promise<void> => {
+    await client.cache.reset();
     navigate(`/${e.target.value}/programs/all/list`);
   };
+
   if (!data) {
     return null;
   }
