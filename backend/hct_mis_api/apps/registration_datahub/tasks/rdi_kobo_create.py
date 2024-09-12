@@ -254,7 +254,9 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
 
         rdi_mis = RegistrationDataImport.objects.get(id=self.registration_data_import.id)
         rdi_mis.status = RegistrationDataImport.IN_REVIEW
-        rdi_mis.save()
+        rdi_mis.number_of_individuals = PendingIndividual.objects.filter(registration_data_import=rdi_mis)
+        rdi_mis.number_of_households = PendingHousehold.objects.filter(registration_data_import=rdi_mis)
+        rdi_mis.save(update_fields=["status", "number_of_individuals", "number_of_households"])
 
         rdi_mis.bulk_update_household_size()
 

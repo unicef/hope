@@ -95,7 +95,11 @@ class TestRdiKoboCreateTask(TestCase):
 
         cls.program = ProgramFactory(status="ACTIVE")
         cls.registration_data_import = RegistrationDataImportFactory(
-            business_area=cls.business_area, program=cls.program, import_data=cls.import_data
+            business_area=cls.business_area,
+            program=cls.program,
+            import_data=cls.import_data,
+            number_of_individuals=99,
+            number_of_households=33,
         )
         rebuild_search_index()
 
@@ -572,3 +576,13 @@ class TestRdiKoboCreateTask(TestCase):
         self.assertEqual(hh.detail_id, "kobo_asset_id_string_OR_detail_id")
         self.assertEqual(hh.kobo_submission_time.isoformat(), "2022-02-22T12:22:22")
         self.assertEqual(hh.kobo_submission_uuid, "123123-411d-85f1-123123")
+
+    def test_rdi_kobo_recalculate_hh_ind_numbers_after_import(self) -> None:
+        self.assertEqual(self.registration_data_import.number_of_households, 33)
+        self.assertEqual(self.registration_data_import.number_of_individuals, 99)
+
+        task = self.RdiKoboCreateTask(self.registration_data_import.id, self.business_area.id)
+        task.execute(self.import_data.id, self.program.id)
+
+        self.assertEqual(self.registration_data_import.number_of_households, 1)
+        self.assertEqual(self.registration_data_import.number_of_individuals, 2)
