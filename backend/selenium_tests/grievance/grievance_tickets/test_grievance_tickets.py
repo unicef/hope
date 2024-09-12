@@ -695,7 +695,7 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getDescription().send_keys("Add Individual - TEST")
         pageGrievanceNewTicket.getButtonAddNewField()
         pageGrievanceNewTicket.getSelectFieldName().click()
-        pageGrievanceNewTicket.select_option_by_name("Females age 12 - 17 with disability")
+        pageGrievanceNewTicket.select_listbox_element("Females age 12 - 17 with disability")
         pageGrievanceNewTicket.getInputValue().send_keys("1")
         pageGrievanceNewTicket.getButtonNext().click()
         pageGrievanceDetailsPage.getCheckboxHouseholdData()
