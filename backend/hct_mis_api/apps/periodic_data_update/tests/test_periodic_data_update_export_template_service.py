@@ -4,6 +4,7 @@ import openpyxl
 from freezegun import freeze_time
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory
 from hct_mis_api.apps.grievance.models import (
@@ -198,7 +199,9 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
         individual = self.individuals[0]
         individual.registration_data_import = rdi1
         individual.save()
-        self.periodic_data_update_template.filters = {"registration_data_import_id": str(rdi1.pk)}
+        self.periodic_data_update_template.filters = {
+            "registration_data_import_id": encode_id_base64(str(rdi1.pk), "RegistrationDataImport")
+        }
         self.periodic_data_update_template.save()
         service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
         queryset = service._get_individuals_queryset()
@@ -226,7 +229,9 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
             ],
         )
         tp = TargetPopulationFactory()
-        self.periodic_data_update_template.filters = {"target_population_id": str(tp.pk)}
+        self.periodic_data_update_template.filters = {
+            "target_population_id": encode_id_base64(str(tp.pk), "TargetPopulation")
+        }
         tp.households.add(self.household)
         self.periodic_data_update_template.save()
         service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
@@ -313,7 +318,7 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
         )
         self.household.admin1 = area1a
         self.household.save()
-        self.periodic_data_update_template.filters = {"admin1": [str(area1a.pk)]}
+        self.periodic_data_update_template.filters = {"admin1": [encode_id_base64(str(area1a.pk), "Area")]}
         self.periodic_data_update_template.save()
         service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
         queryset = service._get_individuals_queryset()
@@ -322,7 +327,7 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
 
         self.household.admin2 = area2a
         self.household.save()
-        self.periodic_data_update_template.filters = {"admin2": [str(area2a.pk)]}
+        self.periodic_data_update_template.filters = {"admin2": [encode_id_base64(str(area2a.pk), "Area")]}
         self.periodic_data_update_template.save()
         service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
         queryset = service._get_individuals_queryset()
