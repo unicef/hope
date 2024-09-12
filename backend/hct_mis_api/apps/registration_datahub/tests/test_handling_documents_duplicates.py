@@ -426,7 +426,9 @@ class TestGoldenRecordDeduplication(TestCase):
         new_document_from_other_program.refresh_from_db()
         self.assertEqual(new_document_from_other_program.status, Document.STATUS_PENDING)
 
-        HardDocumentDeduplication().deduplicate(self.get_documents_query([new_document_from_other_program]))
+        HardDocumentDeduplication().deduplicate(
+            self.get_documents_query([new_document_from_other_program]), self.registration_data_import
+        )
         new_document_from_other_program.refresh_from_db()
         self.assertEqual(new_document_from_other_program.status, Document.STATUS_VALID)
 
