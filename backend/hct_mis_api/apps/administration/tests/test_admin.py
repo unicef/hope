@@ -58,6 +58,7 @@ class TestAdminSite(WebTest):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.superuser: User = UserFactory(is_superuser=True, is_staff=True)
         cls.business_area = create_afghanistan()
 

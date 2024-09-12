@@ -24,6 +24,7 @@ class TestDataCollectionTypeSchema(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.business_area = create_afghanistan()
         cls.user = UserFactory()
 
@@ -59,6 +60,7 @@ class TestPDUSubtypeChoices(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.business_area = create_afghanistan()
         cls.user = UserFactory()
 
@@ -87,6 +89,7 @@ class TestAllPduFields(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.business_area = create_afghanistan()
         cls.program = ProgramFactory(
             business_area=cls.business_area, status=Program.ACTIVE, name="Test Program For PDU Fields"

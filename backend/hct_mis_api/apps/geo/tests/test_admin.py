@@ -21,6 +21,7 @@ class TestGeoApp(WebTest):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.factory = RequestFactory()
         cls.area_types = AreaTypeFactory.create_batch(2)
         cls.areas = AreaFactory.create_batch(5, area_type=fuzzy.FuzzyChoice(AreaType.objects.all()))

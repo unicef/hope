@@ -20,6 +20,7 @@ from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFa
 class TestOptionalRecalculationOfIndividuals(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.user = UserFactory.create()
         cls.business_area = BusinessAreaFactory(
             code="0060",

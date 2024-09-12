@@ -55,6 +55,7 @@ class TestCopyTargetPopulationMutation(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         partner = PartnerFactory(name="Partner")
         cls.user = UserFactory.create(partner=partner)
         cls.business_area = create_afghanistan()

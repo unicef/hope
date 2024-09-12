@@ -26,6 +26,7 @@ pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 class TestCreateNeedsAdjudicationTickets(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
@@ -120,6 +121,7 @@ class TestCreateNeedsAdjudicationTickets(APITestCase):
 class TestCreateNeedsAdjudicationTicketsBiometrics(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")

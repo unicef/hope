@@ -40,6 +40,7 @@ def mock_deduplication_engine_env_vars() -> None:
 class BiometricDeduplicationServiceTest(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         cls.user = UserFactory.create()
         cls.program = ProgramFactory.create(biometric_deduplication_enabled=True)

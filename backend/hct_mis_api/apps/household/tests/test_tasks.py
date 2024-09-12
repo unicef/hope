@@ -18,6 +18,7 @@ from hct_mis_api.apps.program.models import Program
 class TestEnrollHouseholdsToProgramTask(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.business_area = create_afghanistan()
         user = UserFactory()
         cls.str_user_id = str(user.pk)

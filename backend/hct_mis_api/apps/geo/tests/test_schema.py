@@ -25,6 +25,7 @@ class TestSchema(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.business_area = create_afghanistan()
         country = Country.objects.get(name="Afghanistan")
         cls.business_area.countries.add(country)

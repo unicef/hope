@@ -43,6 +43,7 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 class TestPaymentPlanModel(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
@@ -175,6 +176,7 @@ class TestPaymentPlanModel(TestCase):
 class TestPaymentModel(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
@@ -313,6 +315,7 @@ class TestPaymentModel(TestCase):
 class TestPaymentPlanSplitModel(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
@@ -339,6 +342,7 @@ class TestPaymentPlanSplitModel(TestCase):
 class TestFinancialServiceProviderModel(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 

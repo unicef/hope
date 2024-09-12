@@ -8,6 +8,7 @@ from hct_mis_api.apps.steficon.models import Rule
 class TestRuleForm(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.business_area = create_afghanistan()
 
     def test_clean_method(self) -> None:

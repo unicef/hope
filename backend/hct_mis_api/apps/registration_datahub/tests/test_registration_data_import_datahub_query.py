@@ -19,6 +19,7 @@ class TestRegistrationDataImportDatahubQuery(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.user = UserFactory.create()
         cls.to_create = [
             {"name": "Lorem Ipsum", "hct_id": "42191234-5a31-11ea-82b4-0242ac130003"},

@@ -20,6 +20,7 @@ class TestCheckPermissions(TestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.user = UserFactory()
         cls.business_area = create_afghanistan()
         cls.program = ProgramFactory(status=Program.DRAFT, business_area=cls.business_area)
