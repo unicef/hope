@@ -143,12 +143,12 @@ export const NewTemplatePage = (): React.ReactElement => {
       return null;
     };
     const filters = {
-      registration_data_import_id: filter.registration_data_import_id,
-      target_population_id: filter.target_population_id,
+      registration_data_import_id: filter.registrationDataImportId?.value || null,
+      target_population_id: filter.targetPopulationId?.value || null,
       gender: filter.gender,
       age: {
         from: filter.ageFrom ? Number(filter.ageFrom) : null,
-        to: filter.ageFrom ? Number(filter.ageTo) : null,
+        to: filter.ageTo ? Number(filter.ageTo) : null,
       },
       registration_date: {
         from: filter.registrationDateFrom
