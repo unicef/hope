@@ -11,24 +11,28 @@ class ProgramConfig(AppConfig):
         from hct_mis_api.apps.program.signals import adjust_program_size
         from hct_mis_api.apps.registration_datahub import signals as rdi_signals
 
-        rdi_signals.rdi_merged.connect(lambda sender, instance, **kwargs: adjust_program_size(instance.program))
-        grievance_signals.individual_added.connect(
-            lambda sender, instance, **kwargs: adjust_program_size(instance.program)
+        rdi_signals.rdi_merged.connect(
+            lambda sender, instance, **kwargs: adjust_program_size(instance.program), weak=False
         )
-        program_signals.program_copied.connect(lambda sender, instance, **kwargs: adjust_program_size(instance))
+        grievance_signals.individual_added.connect(
+            lambda sender, instance, **kwargs: adjust_program_size(instance.program), weak=False
+        )
+        program_signals.program_copied.connect(
+            lambda sender, instance, **kwargs: adjust_program_size(instance), weak=False
+        )
 
         household_signals.household_deleted.connect(
-            lambda sender, instance, **kwargs: adjust_program_size(instance.program)
+            lambda sender, instance, **kwargs: adjust_program_size(instance.program), weak=False
         )
         household_signals.household_withdrawn.connect(
-            lambda sender, instance, **kwargs: adjust_program_size(instance.program)
+            lambda sender, instance, **kwargs: adjust_program_size(instance.program), weak=False
         )
         household_signals.individual_withdrawn.connect(
-            lambda sender, instance, **kwargs: adjust_program_size(instance.program)
+            lambda sender, instance, **kwargs: adjust_program_size(instance.program), weak=False
         )
         household_signals.individual_deleted.connect(
-            lambda sender, instance, **kwargs: adjust_program_size(instance.program)
+            lambda sender, instance, **kwargs: adjust_program_size(instance.program), weak=False
         )
         grievance_signals.individual_marked_as_duplicated.connect(
-            lambda sender, instance, **kwargs: adjust_program_size(instance.program)
+            lambda sender, instance, **kwargs: adjust_program_size(instance.program), weak=False
         )
