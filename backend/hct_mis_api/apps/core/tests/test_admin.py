@@ -39,6 +39,7 @@ class TestAcceptanceProcessThreshold(TestCase):
 class TestDataCollectingTypeForm(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.form_data = {
             "label": "dct",
             "code": "dct",

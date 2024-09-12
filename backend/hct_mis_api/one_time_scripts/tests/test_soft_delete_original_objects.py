@@ -19,6 +19,7 @@ from hct_mis_api.one_time_scripts.soft_delete_original_objects import (
 class TestSoftDeleteOriginalObjects(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         program = ProgramFactory(business_area=cls.business_area)

@@ -28,6 +28,7 @@ class TestChangeProgramStatus(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         call_command("loadcountries")
         cls.partner = PartnerFactory(name="WFP")

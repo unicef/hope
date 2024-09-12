@@ -122,6 +122,7 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         partner = PartnerFactory(name="Partner")
         cls.user = UserFactory(partner=partner)
         create_afghanistan()

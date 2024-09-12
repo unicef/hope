@@ -23,6 +23,7 @@ class TestAccountabilitySampleSizeQueries(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.business_area = create_afghanistan()
         cls.user = UserFactory(first_name="John", last_name="Wick")
         cls.target_population = TargetPopulationFactory(business_area=cls.business_area)

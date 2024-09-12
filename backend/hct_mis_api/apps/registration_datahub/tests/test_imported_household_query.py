@@ -49,6 +49,7 @@ class TestImportedHouseholdQuery(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         call_command("loadbusinessareas")
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.partner = PartnerFactory(name="Test1")

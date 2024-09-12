@@ -1,6 +1,7 @@
 from time import sleep
 
 from page_object.base_components import BaseComponents
+from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 
 
@@ -87,7 +88,9 @@ class GrievanceDetailsPage(BaseComponents):
     labelPartner = 'div[data-cy="label-Partner"]'
     labelAdministrativeLevel2 = 'div[data-cy="label-Administrative Level 2"]'
     checkboxHouseholdData = 'span[data-cy="checkbox-household-data"]'
+    checkboxApprove = '//*[contains(@data, "checkbox")]'
     checkboxIndividualData = 'span[data-cy="checkbox-requested-data-change"]'
+    checkboxRequestedDataChange = 'span[data-cy="checkbox-requested-data-change"]'
     approveBoxNeedsAdjudicationTitle = 'h6[data-cy="approve-box-needs-adjudication-title"]'
     buttonCreateLinkedTicket = 'button[data-cy="button-create-linked-ticket"]'
     buttonMarkDistinct = 'button[data-cy="button-mark-distinct"]'
@@ -458,8 +461,16 @@ class GrievanceDetailsPage(BaseComponents):
     def getCheckboxHouseholdData(self) -> WebElement:
         return self.wait_for(self.checkboxHouseholdData)
 
+    def getCheckboxApprove(self) -> [WebElement]:
+        self.wait_for(self.checkboxApprove, By.XPATH)
+        return self.get_elements(self.checkboxApprove, By.XPATH)
+
     def getCheckboxIndividualData(self) -> WebElement:
         return self.wait_for(self.checkboxIndividualData)
+
+    def getCheckboxRequestedDataChange(self) -> [WebElement]:
+        self.wait_for(self.checkboxRequestedDataChange)
+        return self.get_elements(self.checkboxRequestedDataChange)
 
     def getButtonCreateLinkedTicket(self) -> WebElement:
         return self.wait_for(self.buttonCreateLinkedTicket)

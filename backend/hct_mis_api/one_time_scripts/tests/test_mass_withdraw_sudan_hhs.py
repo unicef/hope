@@ -19,6 +19,7 @@ from hct_mis_api.one_time_scripts.mass_withdraw_sudan_hhs import mass_withdraw_s
 class TestMassWithdrawSudanHhs(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         business_area = create_afghanistan()
         cls.program = ProgramFactory(business_area=business_area)
         cls.household, cls.individuals = create_household_and_individuals(

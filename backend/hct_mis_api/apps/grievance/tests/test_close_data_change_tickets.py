@@ -73,6 +73,7 @@ class TestCloseDataChangeTickets(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         generate_delivery_mechanisms()
         call_command("loadcountries")

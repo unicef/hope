@@ -197,10 +197,10 @@ def add_payment_verification() -> None:
         currency="PLN",
     )
     PaymentVerificationPlanFactory(
-        generic_fk_obj=cash_plan, verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL
+        payment_plan_obj=cash_plan, verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL
     )
     PaymentVerificationPlanFactory(
-        generic_fk_obj=cash_plan2, verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL
+        payment_plan_obj=cash_plan2, verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL
     )
 
 

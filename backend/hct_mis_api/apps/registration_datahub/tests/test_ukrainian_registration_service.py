@@ -54,6 +54,7 @@ class BaseTestUkrainianRegistrationService(TestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         DocumentType.objects.create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID],
             label=IDENTIFICATION_TYPE_TAX_ID,

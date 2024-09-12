@@ -324,6 +324,7 @@ class TestGrievanceQueryElasticSearch(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.es = cls.create_es_db()
 
         cls.business_area = create_afghanistan()
