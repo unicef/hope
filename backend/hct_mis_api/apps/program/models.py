@@ -345,7 +345,9 @@ class ProgramCycle(AdminUrlMixin, SoftDeletableModel, TimeStampedUUIDModel, Unic
 
     @property
     def can_remove_cycle(self) -> bool:
-        return not self.target_populations.exists() and not self.payment_plans.exists()
+        return (
+            not self.target_populations.exists() and not self.payment_plans.exists() and self.program.cycles.count() > 1
+        )
 
     @property
     def total_entitled_quantity_usd(self) -> Decimal:
