@@ -239,6 +239,20 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
     def biometric_deduplication_enabled(self) -> bool:
         return self.program.biometric_deduplication_enabled
 
+    def update_needs_adjudication_tickets_statistic(self) -> None:
+        from hct_mis_api.apps.grievance.models import GrievanceTicket
+
+        # AB#201950
+        self.golden_record_possible_duplicates = (
+            self.grievanceticket_set.filter(
+                category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+                registration_data_import=self,
+            )
+            .exclude(status=GrievanceTicket.STATUS_CLOSED)
+            .count()
+        )
+        self.save(update_fields=["golden_record_possible_duplicates"])
+
     def bulk_update_household_size(self) -> None:
         # AB#208387
         if self.program and self.program.data_collecting_type.recalculate_composition:
@@ -420,7 +434,7 @@ class DeduplicationEngineSimilarityPair(models.Model):
                     program=program,
                     individual1_id=individual1,
                     individual2_id=individual2,
-                    similarity_score=pair.score,
+                    similarity_score=(1 - pair.score) * 100,  # scale 0-1 to 0-100%
                 )
             )
         if duplicates:

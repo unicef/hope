@@ -1,6 +1,8 @@
 from django.conf import settings
+from django.test import TestCase
 
-from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
+import pytest
+
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.documents import get_individual_doc
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
@@ -24,13 +26,18 @@ from hct_mis_api.apps.registration_data.models import (
     ImportData,
 )
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
-from hct_mis_api.apps.utils.elasticsearch_utils import populate_index
+from hct_mis_api.apps.utils.elasticsearch_utils import (
+    populate_index,
+    rebuild_search_index,
+)
 from hct_mis_api.apps.utils.querysets import evaluate_qs
 from hct_mis_api.conftest import disabled_locally_test
 
+pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
+
 
 @disabled_locally_test
-class TestBatchDeduplication(BaseElasticSearchTestCase):
+class TestBatchDeduplication(TestCase):
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
@@ -225,7 +232,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
             ],
         )
 
-        super().setUpTestData()
+        rebuild_search_index()
 
     def test_batch_deduplication(self) -> None:
         task = DeduplicateTask(self.business_area.slug, self.program.id)
@@ -297,7 +304,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
 
 
 @disabled_locally_test
-class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
+class TestGoldenRecordDeduplication(TestCase):
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
@@ -408,7 +415,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                 },
             ],
         )
-        super().setUpTestData()
+        rebuild_search_index()
 
     def test_golden_record_deduplication(self) -> None:
         task = DeduplicateTask(self.business_area.slug, self.program.id)
