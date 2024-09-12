@@ -3696,7 +3696,6 @@ input PositiveFeedbackTicketExtras {
 }
 
 type ProgramCycleNode implements Node {
-  isRemoved: Boolean!
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
@@ -3747,7 +3746,7 @@ type ProgramNode implements Node {
   name: String!
   status: ProgramStatus!
   startDate: Date!
-  endDate: Date!
+  endDate: Date
   description: String!
   caId: String
   caHashId: String
@@ -4808,6 +4807,7 @@ type TargetingCriteriaRuleFilterNode {
   flexFieldClassification: TargetingCriteriaRuleFilterFlexFieldClassification!
   fieldName: String!
   arguments: [Arg]
+  roundNumber: Int
   fieldAttribute: FieldAttributeNode
 }
 

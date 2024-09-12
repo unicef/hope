@@ -127,6 +127,7 @@ export const targetPopulationDetailed = gql`
           id
           fieldName
           flexFieldClassification
+          roundNumber
           arguments
           comparisonMethod
           fieldAttribute {

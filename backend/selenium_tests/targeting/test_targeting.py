@@ -76,8 +76,8 @@ def program() -> Program:
 
 
 @pytest.fixture
-def individual(program: Program) -> Callable:
-    def _individual() -> Individual:
+def individual() -> Callable:
+    def _individual(program: Program) -> Individual:
         business_area = create_afghanistan()
         rdi = RegistrationDataImportFactory()
         household, individuals = create_household_and_individuals(
@@ -443,13 +443,13 @@ class TestCreateTargeting:
         individual: Callable,
         string_attribute: FlexibleAttribute,
     ) -> None:
-        individual1 = individual()
+        individual1 = individual(program)
         individual1.flex_fields[string_attribute.name]["1"]["value"] = "Text"
         individual1.save()
-        individual2 = individual()
+        individual2 = individual(program)
         individual2.flex_fields[string_attribute.name]["1"]["value"] = "Test"
         individual2.save()
-        individual()
+        individual(program)
         pageTargeting.navigate_to_page("afghanistan", program.id)
         pageTargeting.getButtonCreateNew().click()
         pageTargeting.getButtonCreateNewByFilters().click()
@@ -488,13 +488,13 @@ class TestCreateTargeting:
         individual: Callable,
         bool_attribute: FlexibleAttribute,
     ) -> None:
-        individual1 = individual()
+        individual1 = individual(program)
         individual1.flex_fields[bool_attribute.name]["2"]["value"] = True
         individual1.save()
-        individual2 = individual()
+        individual2 = individual(program)
         individual2.flex_fields[bool_attribute.name]["2"]["value"] = False
         individual2.save()
-        individual()
+        individual(program)
         pageTargeting.navigate_to_page("afghanistan", program.id)
         pageTargeting.getButtonCreateNew().click()
         pageTargeting.getButtonCreateNewByFilters().click()
@@ -555,13 +555,13 @@ class TestCreateTargeting:
         individual: Callable,
         decimal_attribute: FlexibleAttribute,
     ) -> None:
-        individual1 = individual()
+        individual1 = individual(program)
         individual1.flex_fields[decimal_attribute.name]["1"]["value"] = 2.5
         individual1.save()
-        individual2 = individual()
+        individual2 = individual(program)
         individual2.flex_fields[decimal_attribute.name]["1"]["value"] = 5.0
         individual2.save()
-        individual()
+        individual(program)
         pageTargeting.navigate_to_page("afghanistan", program.id)
         pageTargeting.getButtonCreateNew().click()
         pageTargeting.getButtonCreateNewByFilters().click()
@@ -626,13 +626,13 @@ class TestCreateTargeting:
         individual: Callable,
         date_attribute: FlexibleAttribute,
     ) -> None:
-        individual1 = individual()
+        individual1 = individual(program)
         individual1.flex_fields[date_attribute.name]["1"]["value"] = "2022-02-02"
         individual1.save()
-        individual2 = individual()
+        individual2 = individual(program)
         individual2.flex_fields[date_attribute.name]["1"]["value"] = "2022-10-02"
         individual2.save()
-        individual()
+        individual(program)
         pageTargeting.navigate_to_page("afghanistan", program.id)
         pageTargeting.getButtonCreateNew().click()
         pageTargeting.getButtonCreateNewByFilters().click()
@@ -674,13 +674,13 @@ class TestCreateTargeting:
         individual: Callable,
         string_attribute: FlexibleAttribute,
     ) -> None:
-        individual1 = individual()
+        individual1 = individual(program)
         individual1.flex_fields[string_attribute.name]["1"]["value"] = "Text"
         individual1.save()
-        individual2 = individual()
+        individual2 = individual(program)
         individual2.flex_fields[string_attribute.name]["1"]["value"] = "Test"
         individual2.save()
-        individual3 = individual()
+        individual3 = individual(program)
         pageTargeting.navigate_to_page("afghanistan", program.id)
         pageTargeting.getButtonCreateNew().click()
         pageTargeting.getButtonCreateNewByFilters().click()
@@ -710,6 +710,60 @@ class TestCreateTargeting:
         assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == individual3.household.unicef_id
         assert pageTargetingCreate.getTotalNumberOfHouseholdsCount().text == "1"
         assert len(pageTargetingDetails.getHouseholdTableRows()) == 1
+
+    def test_create_targeting_for_people_with_pdu(
+        self,
+        sw_program: Program,
+        pageTargeting: Targeting,
+        pageTargetingCreate: TargetingCreate,
+        pageTargetingDetails: TargetingDetails,
+        individual: Callable,
+    ) -> None:
+        string_attribute_for_sw = create_flexible_attribute(
+            label="Test String Attribute SW",
+            subtype=PeriodicFieldData.STRING,
+            number_of_rounds=1,
+            rounds_names=["Test Round String 1"],
+            program=sw_program,
+        )
+        individual1 = individual(sw_program)
+        individual1.flex_fields[string_attribute_for_sw.name]["1"]["value"] = "Text"
+        individual1.save()
+        individual2 = individual(sw_program)
+        individual2.flex_fields[string_attribute_for_sw.name]["1"]["value"] = "Test"
+        individual2.save()
+        individual(sw_program)
+        pageTargeting.navigate_to_page("afghanistan", sw_program.id)
+        pageTargeting.getButtonCreateNew().click()
+        pageTargeting.getButtonCreateNewByFilters().click()
+        assert "New Target Population" in pageTargetingCreate.getTitlePage().text
+        pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
+        pageTargetingCreate.select_listbox_element("First Cycle In Programme")
+        pageTargetingCreate.getAddCriteriaButton().click()
+        assert pageTargetingCreate.getAddPeopleRuleButton().text.upper() == "ADD PEOPLE RULE"
+        pageTargetingCreate.getAddPeopleRuleButton().click()
+        pageTargetingCreate.getTargetingCriteriaAutoComplete().click()
+        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys("Test String Attribute SW")
+        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys(Keys.ARROW_DOWN)
+        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys(Keys.ENTER)
+        pageTargetingCreate.getSelectFiltersRoundNumber().click()
+        pageTargetingCreate.getSelectRoundOption(1).click()
+        pageTargetingCreate.getInputFiltersValue().send_keys("Text")
+        pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
+        expected_criteria_text = "Test String Attribute SW: Text\nRound 1 (Test Round String 1)"
+        assert pageTargetingCreate.getCriteriaContainer().text == expected_criteria_text
+        targeting_name = "Test Targeting SW PDU string"
+        pageTargetingCreate.getFieldName().send_keys(targeting_name)
+        pageTargetingCreate.getTargetPopulationSaveButton().click()
+        pageTargetingDetails.getLockButton()
+        pageTargetingCreate.screenshot("asdasddas111")
+
+        assert pageTargetingDetails.getTitlePage().text == targeting_name
+        assert pageTargetingDetails.getCriteriaContainer().text == expected_criteria_text
+        assert Household.objects.count() == 3
+        assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == individual1.unicef_id
+        assert pageTargetingCreate.getTotalNumberOfPeopleCount().text == "1"
+        assert len(pageTargetingDetails.getPeopleTableRows()) == 1
 
 
 @pytest.mark.night

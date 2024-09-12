@@ -469,6 +469,7 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterB
             Array of arguments
             """
     )
+    round_number = models.PositiveIntegerField(null=True, blank=True)
 
     @property
     def is_social_worker_program(self) -> bool:
