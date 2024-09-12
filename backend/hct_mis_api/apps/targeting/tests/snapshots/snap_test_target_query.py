@@ -43,6 +43,18 @@ snapshots['TestTargetPopulationQuery::test_all_targets_query_order_by_created_by
                 {
                     'node': {
                         'createdBy': {
+                            'firstName': 'PDU',
+                            'lastName': 'User'
+                        },
+                        'name': 'target_population_with_pdu_filter',
+                        'status': 'LOCKED',
+                        'totalHouseholdsCount': 1,
+                        'totalIndividualsCount': 3
+                    }
+                },
+                {
+                    'node': {
+                        'createdBy': {
                             'firstName': 'Second',
                             'lastName': 'User'
                         },
@@ -62,18 +74,6 @@ snapshots['TestTargetPopulationQuery::test_all_targets_query_order_by_created_by
                         'status': 'OPEN',
                         'totalHouseholdsCount': 1,
                         'totalIndividualsCount': 2
-                    }
-                },
-                {
-                    'node': {
-                        'createdBy': {
-                            'firstName': 'Third',
-                            'lastName': 'User'
-                        },
-                        'name': 'target_population_with_pdu_filter',
-                        'status': 'LOCKED',
-                        'totalHouseholdsCount': 1,
-                        'totalIndividualsCount': 3
                     }
                 },
                 {

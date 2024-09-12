@@ -134,6 +134,7 @@ class TestTargetPopulationQuery(APITestCase):
         user_first = UserFactory(partner=cls.partner, first_name="First", last_name="User")
         user_second = UserFactory(partner=cls.partner, first_name="Second", last_name="User")
         user_third = UserFactory(partner=cls.partner, first_name="Third", last_name="User")
+        user_for_pdu = UserFactory(partner=cls.partner, first_name="PDU", last_name="User")
         targeting_criteria = cls.get_targeting_criteria_for_rule(
             {"field_name": "size", "arguments": [2], "comparison_method": "EQUALS"}
         )
@@ -213,7 +214,7 @@ class TestTargetPopulationQuery(APITestCase):
         rule_filter.save()
         cls.target_population_with_pdu_filter = TargetPopulation(
             name="target_population_with_pdu_filter",
-            created_by=user_third,
+            created_by=user_for_pdu,
             targeting_criteria=targeting_criteria,
             status=TargetPopulation.STATUS_LOCKED,
             business_area=cls.business_area,
