@@ -16,6 +16,7 @@ class TestHouseholdWithdraw(TestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
 
     def test_withdraw(self) -> None:

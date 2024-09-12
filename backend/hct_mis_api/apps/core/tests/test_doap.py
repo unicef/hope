@@ -15,6 +15,7 @@ from hct_mis_api.apps.core.models import BusinessArea
 class TestDOAP(WebTest):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.user = UserFactory(is_superuser=True, is_staff=True)

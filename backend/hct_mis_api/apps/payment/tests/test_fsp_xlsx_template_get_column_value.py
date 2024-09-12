@@ -21,6 +21,7 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 class FinancialServiceProviderXlsxTemplateTest(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.program = ProgramFactory(business_area=cls.business_area)

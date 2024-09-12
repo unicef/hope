@@ -55,6 +55,7 @@ class TestKoboTemplateUpload(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.factory = RequestFactory()
         cls.site = AdminSite()
         cls.admin = XLSXKoboTemplateAdmin(XLSXKoboTemplate, cls.site)

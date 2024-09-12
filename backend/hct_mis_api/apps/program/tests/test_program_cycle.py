@@ -18,6 +18,7 @@ from hct_mis_api.apps.program.models import Program, ProgramCycle
 class TestProgramCycleMethods(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")

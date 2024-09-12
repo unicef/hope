@@ -300,8 +300,7 @@ class BaseGrievanceTestCase:
         self.complaint_ticket_with_payment = GrievanceComplaintTicketWithoutExtrasFactory(
             household=self.household_complaint_ticket_with_payment,
             individual=self.individual_complaint_ticket_with_payment,
-            payment_object_id=payment.id,
-            payment_content_type_id=self.PAYMENT_CT_ID,
+            payment_obj=payment,
         )
 
         # ComplaintTicketDetails with payment_record in pr2, with HH in p2 and pr3
@@ -316,10 +315,7 @@ class BaseGrievanceTestCase:
         )
 
         self.complaint_ticket_with_payment_record = GrievanceComplaintTicketWithoutExtrasFactory(
-            household=self.household_complaint_ticket_with_payment_record,
-            individual=None,
-            payment_object_id=payment_record.id,
-            payment_content_type_id=self.PAYMENT_RECORD_CT_ID,
+            household=self.household_complaint_ticket_with_payment_record, individual=None, payment_obj=payment_record
         )
 
         # ComplaintTicketDetails without payment_obj
@@ -327,8 +323,7 @@ class BaseGrievanceTestCase:
         self.complaint_ticket_no_payment_no_hh_no_ind_closed_gt = GrievanceComplaintTicketWithoutExtrasFactory(
             household=None,
             individual=None,
-            payment_object_id=None,
-            payment_content_type_id=None,
+            payment_obj=None,
         )
         self.complaint_ticket_no_payment_no_hh_no_ind_closed_gt.ticket.status = GrievanceTicket.STATUS_CLOSED
         self.complaint_ticket_no_payment_no_hh_no_ind_closed_gt.ticket.save()
@@ -343,8 +338,7 @@ class BaseGrievanceTestCase:
         self.complaint_ticket_no_payment_closed_gt = GrievanceComplaintTicketWithoutExtrasFactory(
             household=self.household_complaint_ticket_no_payment_closed_gt,
             individual=self.individual_complaint_ticket_no_payment_closed_gt,
-            payment_object_id=None,
-            payment_content_type_id=None,
+            payment_obj=None,
         )
         self.complaint_ticket_no_payment_closed_gt.ticket.status = GrievanceTicket.STATUS_CLOSED
         self.complaint_ticket_no_payment_closed_gt.ticket.save()
@@ -356,8 +350,7 @@ class BaseGrievanceTestCase:
         self.complaint_ticket_no_payment_closed_gt_only_hh = GrievanceComplaintTicketWithoutExtrasFactory(
             household=self.household_complaint_ticket_no_payment_closed_gt_only_hh,
             individual=None,
-            payment_object_id=None,
-            payment_content_type_id=None,
+            payment_obj=None,
         )
         self.complaint_ticket_no_payment_closed_gt_only_hh.ticket.status = GrievanceTicket.STATUS_CLOSED
         self.complaint_ticket_no_payment_closed_gt_only_hh.ticket.save()
@@ -369,8 +362,7 @@ class BaseGrievanceTestCase:
         self.complaint_ticket_no_payment_only_hh = GrievanceComplaintTicketWithoutExtrasFactory(
             household=self.household_complaint_ticket_no_payment_only_hh,
             individual=None,
-            payment_object_id=None,
-            payment_content_type_id=None,
+            payment_obj=None,
         )
         self.complaint_ticket_no_payment_only_hh.ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
         self.complaint_ticket_no_payment_only_hh.ticket.save()
@@ -386,8 +378,7 @@ class BaseGrievanceTestCase:
         self.complaint_ticket_no_payment_not_closed_gt = GrievanceComplaintTicketWithoutExtrasFactory(
             household=self.household_complaint_ticket_no_payment_not_closed_gt,
             individual=self.individual_complaint_ticket_no_payment_not_closed_gt,
-            payment_object_id=None,
-            payment_content_type_id=None,
+            payment_obj=None,
         )
         grievance_ticket = self.complaint_ticket_no_payment_not_closed_gt.ticket
         grievance_ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
@@ -401,8 +392,7 @@ class BaseGrievanceTestCase:
         self.complaint_ticket_no_payment_not_closed_gt_no_hh_no_ind = GrievanceComplaintTicketWithoutExtrasFactory(
             household=None,
             individual=None,
-            payment_object_id=None,
-            payment_content_type_id=None,
+            payment_obj=None,
         )
         grievance_ticket = self.complaint_ticket_no_payment_not_closed_gt_no_hh_no_ind.ticket
         grievance_ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
@@ -507,9 +497,7 @@ class BaseGrievanceTestCase:
             household=self.household_payment_verification_ticket_with_payment_record,
         )
         payment_verification1 = PaymentVerificationFactory(
-            generic_fk_obj=payment_record,
-            payment_object_id=payment_record.id,
-            payment_content_type=ContentType.objects.get_for_model(payment_record),
+            payment_obj=payment_record,
             payment_verification_plan=payment_verification_plan,
         )
         self.payment_verification_ticket_with_payment_record = TicketPaymentVerificationDetailsFactory(
@@ -524,9 +512,7 @@ class BaseGrievanceTestCase:
         payment_plan = PaymentPlanFactory(target_population=target_population2)
         payment = PaymentFactory(parent=payment_plan)
         payment_verification2 = PaymentVerificationFactory(
-            generic_fk_obj=payment,
-            payment_object_id=payment.id,
-            payment_content_type=ContentType.objects.get_for_model(payment),
+            payment_obj=payment,
         )
         self.payment_verification_ticket_with_payment = TicketPaymentVerificationDetailsFactory(
             payment_verification=payment_verification2,

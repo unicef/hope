@@ -25,6 +25,7 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 class TestPaymentNotification(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.user_payment_plan_creator = UserFactory.create()

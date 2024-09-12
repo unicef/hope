@@ -246,6 +246,7 @@ query AvailableFspsForDeliveryMechanisms($input: AvailableFspsForDeliveryMechani
 class TestFSPSetup(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         base_setup(cls)
 
     def test_choosing_delivery_mechanism_order(self) -> None:
@@ -398,6 +399,7 @@ class TestFSPSetup(APITestCase):
 class TestFSPAssignment(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         base_setup(cls)
         payment_plan_setup(cls)
 
@@ -817,6 +819,7 @@ class TestFSPAssignment(APITestCase):
 class TestVolumeByDeliveryMechanism(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         base_setup(cls)
         payment_plan_setup(cls)
 
@@ -1060,6 +1063,7 @@ class TestVolumeByDeliveryMechanism(APITestCase):
 class TestValidateFSPPerDeliveryMechanism(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         base_setup(cls)
         payment_plan_setup(cls)
 

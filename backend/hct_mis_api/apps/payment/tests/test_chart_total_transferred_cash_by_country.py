@@ -34,6 +34,7 @@ class TestChartTotalTransferredCashByCountry(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         call_command("loadbusinessareas")
         generate_delivery_mechanisms()
         dm_cash = DeliveryMechanism.objects.get(code="cash")

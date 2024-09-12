@@ -131,6 +131,7 @@ class TestDashboardQueries(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         call_command("loadbusinessareas")
         call_command("loadcountries")
         generate_delivery_mechanisms()

@@ -37,6 +37,7 @@ class TestTargetingCriteriaQuery(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         call_command("loadflexfieldsattributes")
         create_afghanistan()
         cls.user = UserFactory.create()
@@ -160,6 +161,7 @@ class TestTargetingCriteriaIndividualRules(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         call_command("loadflexfieldsattributes")
         create_afghanistan()
         cls.user = UserFactory.create()
@@ -344,6 +346,7 @@ class TestTargetingCriteriaIndividualRules(APITestCase):
 class TestTargetingCriteriaByIdQuery(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.first()

@@ -36,6 +36,7 @@ query AllGrievanceTickets($isCrossArea: Boolean) {
 class TestCrossAreaFilter(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.business_area = create_afghanistan()
         partner_unicef = PartnerFactory(name="UNICEF")
         cls.user = UserFactory(partner=partner_unicef)
