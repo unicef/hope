@@ -30,8 +30,8 @@ export const NewTemplatePage = (): React.ReactElement => {
   const { showMessage } = useSnackbar();
 
   const initialFilter = {
-    registration_data_import_id: null,
-    target_population_id: null,
+    registrationDataImportId: null,
+    targetPopulationId: null,
     gender: '',
     ageFrom: '',
     ageTo: '',
