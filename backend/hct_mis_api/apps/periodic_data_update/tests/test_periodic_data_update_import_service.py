@@ -53,6 +53,7 @@ class TestPeriodicDataUpdateImportService(TestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.business_area = create_afghanistan()
         cls.program = ProgramFactory(name="Test Program", status=Program.DRAFT, business_area=cls.business_area)
         cls.rdi = RegistrationDataImportFactory()

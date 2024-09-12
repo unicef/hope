@@ -208,7 +208,7 @@ class TestPaymentPlanQueries(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
-        cls.maxDiff = None
+        super().setUpTestData()
         create_afghanistan()
         cls.user = UserFactory.create(username="qazxsw321")
         cls.create_user_role_with_permissions(

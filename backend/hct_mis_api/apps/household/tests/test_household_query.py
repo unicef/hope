@@ -141,6 +141,7 @@ class TestHouseholdQuery(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.partner = PartnerFactory(name="NOT_UNICEF")
         cls.user = UserFactory.create(partner=cls.partner)
         cls.business_area = create_afghanistan()

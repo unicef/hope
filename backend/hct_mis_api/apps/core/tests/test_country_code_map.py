@@ -14,6 +14,7 @@ class TestCountryCodeMap(TestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         call_command("loadcountrycodes")
 
     @parameterized.expand(

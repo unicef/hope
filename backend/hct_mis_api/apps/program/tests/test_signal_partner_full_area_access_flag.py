@@ -10,6 +10,7 @@ from hct_mis_api.apps.program.models import Program, ProgramPartnerThrough
 class TestPartnerFullAreaAccessSignal(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.business_area = create_afghanistan()
 
         cls.unicef_partner = PartnerFactory(name="UNICEF")

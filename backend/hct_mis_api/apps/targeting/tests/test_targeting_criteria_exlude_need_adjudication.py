@@ -21,6 +21,7 @@ from hct_mis_api.apps.targeting.services.targeting_service import (
 class TestTargetingCriteriaFlags(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.business_area = create_afghanistan()
         cls.household1, cls.individuals1 = create_household_and_individuals(
             household_data={

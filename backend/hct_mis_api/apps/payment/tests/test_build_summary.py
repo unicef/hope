@@ -22,6 +22,7 @@ from hct_mis_api.apps.targeting.fixtures import (
 class TestBuildSummary(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.user = UserFactory.create()
         cls.business_area = create_afghanistan()
 

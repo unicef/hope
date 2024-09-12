@@ -15,6 +15,7 @@ class TestBackend(TestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         from power_query.fixtures import ReportFactory
         from power_query.models import Report
 

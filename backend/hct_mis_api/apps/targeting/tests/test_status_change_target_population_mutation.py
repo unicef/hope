@@ -40,6 +40,7 @@ class TestApproveTargetPopulationMutation(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         partner = PartnerFactory(name="Partner")
@@ -165,6 +166,7 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         partner = PartnerFactory(name="Partner")
         cls.user = UserFactory.create(partner=partner)
         cls.households = []
@@ -294,6 +296,7 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         partner = PartnerFactory(name="Partner")
         cls.user = UserFactory.create(partner=partner)
         cls.households = []

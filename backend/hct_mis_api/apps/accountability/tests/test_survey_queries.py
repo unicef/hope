@@ -43,6 +43,7 @@ class TestSurveyQueries(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.business_area = create_afghanistan()
         cls.program = ProgramFactory(status=Program.ACTIVE)
         cls.partner = PartnerFactory(name="TestPartner")

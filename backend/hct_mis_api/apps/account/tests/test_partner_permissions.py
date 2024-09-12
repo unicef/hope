@@ -13,6 +13,7 @@ from hct_mis_api.apps.program.models import Program, ProgramPartnerThrough
 class UserPartnerTest(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.role_1 = Role.objects.create(name="Create_program", permissions=["PROGRAMME_CREATE"])
         cls.role_2 = Role.objects.create(name="Finish_program", permissions=["PROGRAMME_FINISH"])
         cls.area_1 = AreaFactory(name="Area 1", p_code="AREA1")

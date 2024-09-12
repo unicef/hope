@@ -26,6 +26,7 @@ from hct_mis_api.apps.targeting.models import (
 class TestIndividualBlockFilter(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         call_command("loadflexfieldsattributes")
         cls.business_area = create_afghanistan()
         cls.program = ProgramFactory(business_area=cls.business_area, name="Test Program")

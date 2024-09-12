@@ -17,6 +17,7 @@ from hct_mis_api.apps.sanction_list.fixtures import SanctionListIndividualFactor
 class TestSystemTickets(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         cls.user = UserFactory.create()
         _, individuals = create_household({"size": 1})

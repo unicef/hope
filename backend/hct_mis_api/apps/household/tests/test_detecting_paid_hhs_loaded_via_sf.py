@@ -18,6 +18,7 @@ class TestDetectingAlreadyPaidHouseholds(TestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.storage_file = StorageFileFactory()
 
         cls.business_area = BusinessArea.objects.create(

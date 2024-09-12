@@ -29,6 +29,7 @@ pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 class TestChangeIndividualRole(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         business_area = BusinessAreaFactory()
         program = ProgramFactory()
 
