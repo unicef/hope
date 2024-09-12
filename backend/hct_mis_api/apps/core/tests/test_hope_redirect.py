@@ -63,7 +63,7 @@ class TestHopeRedirect(APITestCase):
             business_area=business_area,
         )
         payment_verification_plan = PaymentVerificationPlanFactory(
-            generic_fk_obj=cash_plan, status=PaymentVerificationPlan.STATUS_ACTIVE
+            payment_plan_obj=cash_plan, status=PaymentVerificationPlan.STATUS_ACTIVE
         )
 
         target_population = TargetPopulationFactory(
@@ -82,7 +82,7 @@ class TestHopeRedirect(APITestCase):
         PaymentVerificationFactory(
             id="a76bfe6f-c767-4b7f-9671-6df10b8095cc",
             payment_verification_plan=payment_verification_plan,
-            generic_fk_obj=payment_record,
+            payment_obj=payment_record,
             status=PaymentVerification.STATUS_PENDING,
         )
 

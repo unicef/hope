@@ -106,16 +106,16 @@ class TestGenerateReportService(TestCase):
         PaymentVerificationSummary.objects.create(payment_plan_obj=self.payment_plan_1)
         PaymentVerificationSummary.objects.create(payment_plan_obj=self.payment_plan_2)
         self.cash_plan_verification_1 = PaymentVerificationPlanFactory(
-            generic_fk_obj=self.cash_plan_1, completion_date="2020-01-01T14:30+00:00"
+            payment_plan_obj=self.cash_plan_1, completion_date="2020-01-01T14:30+00:00"
         )
         self.cash_plan_verification_2 = PaymentVerificationPlanFactory(
-            generic_fk_obj=self.cash_plan_2, completion_date="2020-01-01T14:30+00:00"
+            payment_plan_obj=self.cash_plan_2, completion_date="2020-01-01T14:30+00:00"
         )
         self.payment_plan_verification_1 = PaymentVerificationPlanFactory(
-            generic_fk_obj=self.payment_plan_1, completion_date="2020-01-01T14:30+00:00"
+            payment_plan_obj=self.payment_plan_1, completion_date="2020-01-01T14:30+00:00"
         )
         self.payment_plan_verification_2 = PaymentVerificationPlanFactory(
-            generic_fk_obj=self.payment_plan_2, completion_date="2020-01-01T14:30+00:00"
+            payment_plan_obj=self.payment_plan_2, completion_date="2020-01-01T14:30+00:00"
         )
         record_1 = PaymentRecordFactory(
             household=self.households[0],
@@ -147,19 +147,19 @@ class TestGenerateReportService(TestCase):
         )
         PaymentVerificationFactory(
             payment_verification_plan=self.cash_plan_verification_1,
-            generic_fk_obj=record_1,
+            payment_obj=record_1,
         )
         PaymentVerificationFactory(
             payment_verification_plan=self.cash_plan_verification_2,
-            generic_fk_obj=record_2,
+            payment_obj=record_2,
         )
         PaymentVerificationFactory(
             payment_verification_plan=self.payment_plan_verification_1,
-            generic_fk_obj=payment_1,
+            payment_obj=payment_1,
         )
         PaymentVerificationFactory(
             payment_verification_plan=self.payment_plan_verification_2,
-            generic_fk_obj=payment_2,
+            payment_obj=payment_2,
         )
 
     @parameterized.expand(

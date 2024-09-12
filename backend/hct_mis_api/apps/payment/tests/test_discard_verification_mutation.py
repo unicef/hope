@@ -72,7 +72,7 @@ class TestDiscardVerificationMutation(APITestCase):
             business_area=cls.business_area,
         )
         payment_verification_plan = PaymentVerificationPlanFactory(
-            generic_fk_obj=cash_plan, verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL
+            payment_plan_obj=cash_plan, verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL
         )
         payment_verification_plan.status = PaymentVerificationPlan.STATUS_ACTIVE
         payment_verification_plan.save()
@@ -98,7 +98,7 @@ class TestDiscardVerificationMutation(APITestCase):
             )
             PaymentVerificationFactory(
                 payment_verification_plan=payment_verification_plan,
-                generic_fk_obj=payment_record,
+                payment_obj=payment_record,
                 status=PaymentVerification.STATUS_PENDING,
             )
             EntitlementCardFactory(household=household)

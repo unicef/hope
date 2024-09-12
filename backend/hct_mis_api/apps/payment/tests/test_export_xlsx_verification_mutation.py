@@ -51,7 +51,7 @@ class TestXlsxVerificationExport(APITestCase):
         cash_plan = CashPlanFactory(program=program, business_area=cls.business_area)
         cash_plan.save()
         cls.payment_verification_plan = PaymentVerificationPlanFactory(
-            generic_fk_obj=cash_plan,
+            payment_plan_obj=cash_plan,
             verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX,
             status=PaymentVerificationPlan.STATUS_ACTIVE,
         )
