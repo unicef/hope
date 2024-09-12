@@ -1213,6 +1213,8 @@ class TestUpdateProgram(APITestCase):
         self.assertEqual(self.program.status, Program.ACTIVE)
         self.assertIsNone(self.program.end_date)
         program_cycle = self.program.cycles.first()
+        program_cycle.end_date = self.program.start_date + timedelta(days=5)
+        program_cycle.save()
 
         # end date before program start date
         self.snapshot_graphql_request(
@@ -1234,7 +1236,7 @@ class TestUpdateProgram(APITestCase):
             variables={
                 "programData": {
                     "id": self.id_to_base64(self.program.id, "ProgramNode"),
-                    "endDate": program_cycle.end_date - timedelta(days=5),
+                    "endDate": program_cycle.end_date - timedelta(days=2),
                 },
                 "version": self.program.version,
             },

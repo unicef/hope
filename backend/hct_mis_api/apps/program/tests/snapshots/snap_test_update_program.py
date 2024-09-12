@@ -464,7 +464,7 @@ snapshots['TestUpdateProgram::test_update_program_end_date_validation 2'] = {
                     'line': 3
                 }
             ],
-            'message': 'End date cannot be before start date.',
+            'message': 'End date must be equal or after the latest cycle.',
             'path': [
                 'updateProgram'
             ]

@@ -73,5 +73,5 @@ class TestRemoveOldPDUTemplateFilesTask:
         assert self.pdu_template3.file is None  # Older than 30 days
 
         assert self.pdu_template1.status == PeriodicDataUpdateTemplate.Status.EXPORTED
-        assert self.pdu_template2.status == PeriodicDataUpdateTemplate.Status.EXPORTING
-        assert self.pdu_template3.status == PeriodicDataUpdateTemplate.Status.EXPORTING
+        assert self.pdu_template2.status == PeriodicDataUpdateTemplate.Status.TO_EXPORT
+        assert self.pdu_template3.status == PeriodicDataUpdateTemplate.Status.TO_EXPORT
