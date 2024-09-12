@@ -469,6 +469,7 @@ class GrievanceDetailsPage(BaseComponents):
         return self.wait_for(self.checkboxIndividualData)
 
     def getCheckboxRequestedDataChange(self) -> [WebElement]:
+        self.wait_for(self.checkboxRequestedDataChange)
         return self.get_elements(self.checkboxRequestedDataChange)
 
     def getButtonCreateLinkedTicket(self) -> WebElement:

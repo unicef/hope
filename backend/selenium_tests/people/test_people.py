@@ -6,6 +6,7 @@ from django.db import transaction
 import pytest
 from dateutil.relativedelta import relativedelta
 from page_object.people.people import People
+from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
@@ -254,7 +255,7 @@ class TestPeople:
             )
         ],
     )
-    def test_check_data_after_grievance_ticket_processed(
+    def test_check_people_data_after_grievance_ticket_processed(
         self,
         pageGrievanceTickets: GrievanceTickets,
         pageGrievanceNewTicket: NewTicket,
@@ -307,10 +308,12 @@ class TestPeople:
         pageGrievanceDetailsPage.getButtonAssignToMe().click()
         pageGrievanceDetailsPage.getButtonSetInProgress().click()
         pageGrievanceDetailsPage.getButtonSendForApproval().click()
-        pageGrievanceDetailsPage.getButtonApproval().click()
         pageGrievanceDetailsPage.getButtonCloseTicket()
-        pageGrievanceDetailsPage.getCheckboxRequestedDataChange()[0].click()
-        pageGrievanceDetailsPage.getCheckboxRequestedDataChange()[1].click()
+        pageGrievanceDetailsPage.getCheckboxRequestedDataChange()
+        pageGrievanceDetailsPage.getCheckboxRequestedDataChange()[0].find_element(By.TAG_NAME, "input").click()
+        pageGrievanceDetailsPage.getCheckboxRequestedDataChange()[1].find_element(By.TAG_NAME, "input").click()
+        pageGrievanceDetailsPage.getButtonApproval().click()
+        pageGrievanceDetailsPage.getButtonConfirm().click()
         pageGrievanceDetailsPage.getButtonCloseTicket().click()
         pageGrievanceDetailsPage.getButtonConfirm().click()
         assert "Ticket ID" in pageGrievanceDetailsPage.getTitle().text
