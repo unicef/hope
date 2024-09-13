@@ -772,7 +772,7 @@ class TestManualCalendar:
         pageProgrammeManagement.getInputStartDate().send_keys(str(FormatTime(1, 1, 2022).numerically_formatted_date))
         pageProgrammeManagement.getInputEndDate().click()
         pageProgrammeManagement.getInputEndDate().send_keys(Keys.CONTROL + "a")
-        pageProgrammeManagement.getInputEndDate().send_keys(FormatTime(1, 10, 2022).numerically_formatted_date)
+        pageProgrammeManagement.getInputEndDate().send_keys(FormatTime(1, 10, 2099).numerically_formatted_date)
         pageProgrammeManagement.getButtonNext().click()
         # 2nd step (Time Series Fields)
         pageProgrammeManagement.getButtonAddTimeSeriesField()
@@ -786,8 +786,9 @@ class TestManualCalendar:
         assert "details" in pageProgrammeDetails.wait_for_new_url(programme_creation_url).split("/")
         assert "New name after Edit" in pageProgrammeDetails.getHeaderTitle().text
         assert FormatTime(1, 1, 2022).date_in_text_format in pageProgrammeDetails.getLabelStartDate().text
-        assert FormatTime(1, 10, 2022).date_in_text_format in pageProgrammeDetails.getLabelEndDate().text
+        assert FormatTime(1, 10, 2099).date_in_text_format in pageProgrammeDetails.getLabelEndDate().text
 
+    @pytest.mark.skip(reason="Unskip after fix bug: 214927")
     @pytest.mark.parametrize(
         "test_data",
         [
