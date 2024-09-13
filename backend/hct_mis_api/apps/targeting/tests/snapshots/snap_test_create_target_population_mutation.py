@@ -395,3 +395,42 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_with_pdu_fle
         }
     }
 }
+
+snapshots['TestCreateTargetPopulationMutation::test_create_mutation_with_pdu_flex_field_for_sw_program 1'] = {
+    'data': {
+        'createTargetPopulation': {
+            'targetPopulation': {
+                'hasEmptyCriteria': False,
+                'hasEmptyIdsCriteria': True,
+                'name': 'Example name 10',
+                'programCycle': {
+                    'status': 'ACTIVE'
+                },
+                'status': 'OPEN',
+                'targetingCriteria': {
+                    'householdIds': '',
+                    'individualIds': '',
+                    'rules': [
+                        {
+                            'filters': [
+                                {
+                                    'arguments': [
+                                        '2',
+                                        '3.5'
+                                    ],
+                                    'comparisonMethod': 'RANGE',
+                                    'fieldName': 'pdu_field_1_sw',
+                                    'flexFieldClassification': 'FLEX_FIELD_PDU'
+                                }
+                            ],
+                            'individualsFiltersBlocks': [
+                            ]
+                        }
+                    ]
+                },
+                'totalHouseholdsCount': None,
+                'totalIndividualsCount': None
+            }
+        }
+    }
+}

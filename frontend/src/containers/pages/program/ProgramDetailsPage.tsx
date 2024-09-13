@@ -69,6 +69,9 @@ export function ProgramDetailsPage(): React.ReactElement {
     return null;
 
   const { program } = data;
+  const canFinish =
+    program.canFinish &&
+    hasPermissions(PERMISSIONS.PROGRAMME_FINISH, permissions);
   return (
     <div>
       <ProgramDetailsPageHeader
@@ -79,7 +82,7 @@ export function ProgramDetailsPage(): React.ReactElement {
         )}
         canEdit={hasPermissions(PERMISSIONS.PROGRAMME_UPDATE, permissions)}
         canRemove={hasPermissions(PERMISSIONS.PROGRAMME_REMOVE, permissions)}
-        canFinish={hasPermissions(PERMISSIONS.PROGRAMME_FINISH, permissions)}
+        canFinish={canFinish}
         canDuplicate={hasPermissions(
           PERMISSIONS.PROGRAMME_DUPLICATE,
           permissions,
