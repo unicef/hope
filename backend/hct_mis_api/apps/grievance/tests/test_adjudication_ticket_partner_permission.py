@@ -61,6 +61,7 @@ GRIEVANCE_TICKET_STATUS_CHANGE = """
 class TestAdjudicationTicketPartnerPermission(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.user = UserFactory()
 
         cls.business_area = BusinessAreaFactory(slug="afghanistan")

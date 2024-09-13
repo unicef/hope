@@ -61,7 +61,7 @@ class TestXlsxVerificationImport(APITestCase):
         )
         cash_plan = CashPlanFactory(program=program, business_area=self.business_area)
         cash_plan.save()
-        payment_verification_plan = PaymentVerificationPlanFactory(generic_fk_obj=cash_plan)
+        payment_verification_plan = PaymentVerificationPlanFactory(payment_plan_obj=cash_plan)
         for _ in range(payment_record_amount):
             registration_data_import = RegistrationDataImportFactory(
                 imported_by=self.user, business_area=BusinessArea.objects.first()
@@ -85,7 +85,7 @@ class TestXlsxVerificationImport(APITestCase):
             )
 
             PaymentVerificationFactory(
-                generic_fk_obj=payment_record,
+                payment_obj=payment_record,
                 payment_verification_plan=payment_verification_plan,
                 status=PaymentVerification.STATUS_PENDING,
             )
@@ -392,15 +392,15 @@ class TestXlsxVerificationImport(APITestCase):
             currency="PLN",
         )
 
-        payment_verification_plan = PaymentVerificationPlanFactory(generic_fk_obj=cash_plan)
+        payment_verification_plan = PaymentVerificationPlanFactory(payment_plan_obj=cash_plan)
 
         PaymentVerificationFactory(
-            generic_fk_obj=payment_1,
+            payment_obj=payment_1,
             payment_verification_plan=payment_verification_plan,
             status=PaymentVerification.STATUS_PENDING,
         )
         PaymentVerificationFactory(
-            generic_fk_obj=payment_2,
+            payment_obj=payment_2,
             payment_verification_plan=payment_verification_plan,
             status=PaymentVerification.STATUS_PENDING,
         )

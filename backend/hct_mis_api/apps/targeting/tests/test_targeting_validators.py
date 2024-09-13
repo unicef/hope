@@ -13,6 +13,7 @@ from hct_mis_api.apps.targeting.validators import TargetingCriteriaInputValidato
 class TestTargetingCriteriaInputValidator(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         cls.program_standard = ProgramFactory(
             data_collecting_type=DataCollectingTypeFactory(

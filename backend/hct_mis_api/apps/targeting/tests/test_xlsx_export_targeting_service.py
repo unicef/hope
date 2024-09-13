@@ -10,6 +10,7 @@ from hct_mis_api.apps.targeting.services.xlsx_export_targeting_service import (
 class TestXlsxExportTargetingService(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.business_area = create_afghanistan()
         cls.target_population = TargetPopulationFactory(
             business_area=cls.business_area, status=TargetPopulation.STATUS_OPEN

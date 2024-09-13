@@ -19,6 +19,7 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 class TestPaymentTokenAndOrderNumbers(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         business_area = create_afghanistan()
         country_origin = Country.objects.filter(iso_code2="UA").first()
 

@@ -56,6 +56,7 @@ mutation EditPaymentVerificationPlan($input: EditPaymentVerificationInput!) {
 class TestPaymentVerificationMutations(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.business_area = create_afghanistan()
 
         cls.user = UserFactory()
@@ -74,7 +75,7 @@ class TestPaymentVerificationMutations(APITestCase):
         cash_plan = CashPlanFactory(program=program, business_area=cls.business_area)
         cash_plan.save()
         payment_verification_plan = PaymentVerificationPlanFactory(
-            generic_fk_obj=cash_plan, verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL
+            payment_plan_obj=cash_plan, verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL
         )
         registration_data_import = RegistrationDataImportFactory(
             imported_by=cls.user, business_area=BusinessArea.objects.first()
@@ -100,7 +101,7 @@ class TestPaymentVerificationMutations(APITestCase):
         )
 
         PaymentVerificationFactory(
-            generic_fk_obj=payment_record,
+            payment_obj=payment_record,
             payment_verification_plan=payment_verification_plan,
             status=PaymentVerification.STATUS_PENDING,
         )
@@ -113,7 +114,6 @@ class TestPaymentVerificationMutations(APITestCase):
         request.user = cls.user
         info.context = request
         cls.info = info
-        super().setUpTestData()
 
     @parameterized.expand(
         [
@@ -230,10 +230,10 @@ class TestPaymentVerificationMutations(APITestCase):
 
     def test_edit_payment_verification_plan_mutation(self) -> None:
         payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.FINISHED, business_area=self.business_area)
-        PaymentVerificationSummaryFactory(generic_fk_obj=payment_plan)
+        PaymentVerificationSummaryFactory(payment_plan_obj=payment_plan)
         PaymentFactory(parent=payment_plan, currency="PLN", status=GenericPayment.STATUS_SUCCESS)
         payment_verification_plan = PaymentVerificationPlanFactory(
-            generic_fk_obj=payment_plan,
+            payment_plan_obj=payment_plan,
             status=PaymentVerificationPlan.STATUS_PENDING,
         )
         input_dict = {

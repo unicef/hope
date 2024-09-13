@@ -84,6 +84,7 @@ class TestActionPaymentPlanMutation(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         generate_delivery_mechanisms()
         cls.user = UserFactory.create(first_name="Rachel", last_name="Walker")
         create_afghanistan()

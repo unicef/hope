@@ -15,6 +15,7 @@ class TestDocumentConstraint(TestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
 
         cls.programs = ProgramFactory.create_batch(2)

@@ -129,6 +129,7 @@ INDIVIDUAL_FIELDS = (
 class TestProgramPopulationToPendingObjects(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.afghanistan = create_afghanistan()
         country = CountryFactory()
         country_origin = CountryFactory(

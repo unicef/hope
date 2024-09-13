@@ -6,6 +6,7 @@ from django.db import transaction
 import pytest
 from dateutil.relativedelta import relativedelta
 from page_object.people.people import People
+from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
@@ -24,6 +25,11 @@ from hct_mis_api.apps.targeting.fixtures import (
     TargetPopulationFactory,
 )
 from selenium_tests.page_object.filters import Filters
+from selenium_tests.page_object.grievance.details_grievance_page import (
+    GrievanceDetailsPage,
+)
+from selenium_tests.page_object.grievance.grievance_tickets import GrievanceTickets
+from selenium_tests.page_object.grievance.new_ticket import NewTicket
 from selenium_tests.page_object.people.people_details import PeopleDetails
 
 pytestmark = pytest.mark.django_db(transaction=True)
@@ -237,6 +243,80 @@ class TestSmokePeople:
         assert "DELIVERED FULLY" in pagePeopleDetails.getRows()[0].text
         assert add_people_with_payment_record.unicef_id in pagePeopleDetails.getRows()[0].text
 
-    @pytest.mark.skip(reason="ToDo")
-    def test_check_data_after_grievance_ticket_processed(self) -> None:
-        pass
+
+@pytest.mark.usefixtures("login")
+class TestPeople:
+    @pytest.mark.parametrize(
+        "test_data",
+        [
+            pytest.param(
+                {"category": "Data Change", "type": "Individual Data Update"},
+                id="Data Change People Data Update",
+            )
+        ],
+    )
+    def test_check_people_data_after_grievance_ticket_processed(
+        self,
+        pageGrievanceTickets: GrievanceTickets,
+        pageGrievanceNewTicket: NewTicket,
+        pageGrievanceDetailsPage: GrievanceDetailsPage,
+        add_people: List,
+        test_data: dict,
+        pagePeople: People,
+        pagePeopleDetails: PeopleDetails,
+    ) -> None:
+        pageGrievanceTickets.getNavGrievance().click()
+        assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
+        pageGrievanceTickets.getButtonNewTicket().click()
+        pageGrievanceNewTicket.getSelectCategory().click()
+        pageGrievanceNewTicket.select_option_by_name(str(test_data["category"]))
+        pageGrievanceNewTicket.getIssueType().click()
+        pageGrievanceNewTicket.element_clickable(f'li[data-cy="select-option-{test_data["type"]}"]')
+        pageGrievanceNewTicket.select_listbox_element(str(test_data["type"]))
+        assert test_data["category"] in pageGrievanceNewTicket.getSelectCategory().text
+        assert test_data["type"] in pageGrievanceNewTicket.getIssueType().text
+        pageGrievanceNewTicket.getButtonNext().click()
+        pageGrievanceNewTicket.getHouseholdTab()
+        pageGrievanceNewTicket.getIndividualTab().click()
+        pageGrievanceNewTicket.getIndividualTableRows(0).click()
+        pageGrievanceDetailsPage.screenshot("0")
+        pageGrievanceNewTicket.getButtonNext().click()
+        pageGrievanceNewTicket.getReceivedConsent().click()
+        pageGrievanceNewTicket.getButtonNext().click()
+
+        pageGrievanceNewTicket.getDescription().send_keys("Add Individual - TEST")
+        pageGrievanceNewTicket.getButtonAddNewField().click()
+        pageGrievanceNewTicket.getIndividualFieldName(0).click()
+        pageGrievanceNewTicket.select_option_by_name("Gender")
+        pageGrievanceNewTicket.getInputIndividualData("Gender").click()
+        pageGrievanceNewTicket.select_listbox_element("Female")
+        pageGrievanceNewTicket.getIndividualFieldName(1).click()
+        pageGrievanceNewTicket.select_option_by_name("Preferred language")
+        pageGrievanceNewTicket.getInputIndividualData("Preferred language").click()
+        pageGrievanceNewTicket.select_listbox_element("English | English")
+
+        pageGrievanceNewTicket.getButtonNext().click()
+        pageGrievanceDetailsPage.getCheckboxIndividualData()
+        row0 = pageGrievanceDetailsPage.getRows()[0].text.split(" ")
+        assert "Gender" in row0[0]
+        assert "Female" in row0[-1]
+
+        row1 = pageGrievanceDetailsPage.getRows()[1].text.split(" ")
+        assert "Preferred Language" in f"{row1[0]} {row1[1]}"
+        assert "English" in row1[-1]
+
+        pageGrievanceDetailsPage.getButtonAssignToMe().click()
+        pageGrievanceDetailsPage.getButtonSetInProgress().click()
+        pageGrievanceDetailsPage.getButtonSendForApproval().click()
+        pageGrievanceDetailsPage.getButtonCloseTicket()
+        pageGrievanceDetailsPage.getCheckboxRequestedDataChange()
+        pageGrievanceDetailsPage.getCheckboxRequestedDataChange()[0].find_element(By.TAG_NAME, "input").click()
+        pageGrievanceDetailsPage.getCheckboxRequestedDataChange()[1].find_element(By.TAG_NAME, "input").click()
+        pageGrievanceDetailsPage.getButtonApproval().click()
+        pageGrievanceDetailsPage.getButtonConfirm().click()
+        pageGrievanceDetailsPage.getButtonCloseTicket().click()
+        pageGrievanceDetailsPage.getButtonConfirm().click()
+        assert "Ticket ID" in pageGrievanceDetailsPage.getTitle().text
+        pagePeople.selectGlobalProgramFilter("Worker Program")
+        pagePeople.getNavPeople().click()
+        pagePeople.getIndividualTableRow(0).click()

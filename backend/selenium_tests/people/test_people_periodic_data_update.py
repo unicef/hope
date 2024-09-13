@@ -1,24 +1,22 @@
 import os
-from tempfile import NamedTemporaryFile, _TemporaryFileWrapper
-from typing import Any
+from datetime import datetime
+from time import sleep
 
-import openpyxl
 import pytest
-from page_object.programme_population.periodic_data_update_templates import (
-    PeriodicDatUpdateTemplates,
-)
-from page_object.programme_population.periodic_data_update_uploads import (
-    PeriodicDataUpdateUploads,
-)
+from dateutil.relativedelta import relativedelta
 
+from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
 from hct_mis_api.apps.core.models import (
+    BusinessArea,
     DataCollectingType,
     FlexibleAttribute,
     PeriodicFieldData,
 )
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
-from hct_mis_api.apps.household.models import Individual
+from hct_mis_api.apps.household.models import HOST, SEEING, Individual
+from hct_mis_api.apps.payment.fixtures import CashPlanFactory, PaymentRecordFactory
+from hct_mis_api.apps.payment.models import GenericPayment
 from hct_mis_api.apps.periodic_data_update.fixtures import (
     PeriodicDataUpdateTemplateFactory,
     PeriodicDataUpdateUploadFactory,
@@ -27,9 +25,6 @@ from hct_mis_api.apps.periodic_data_update.models import (
     PeriodicDataUpdateTemplate,
     PeriodicDataUpdateUpload,
 )
-from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_export_template_service import (
-    PeriodicDataUpdateExportTemplateService,
-)
 from hct_mis_api.apps.periodic_data_update.utils import (
     field_label_to_field_name,
     populate_pdu_with_null_values,
@@ -37,7 +32,22 @@ from hct_mis_api.apps.periodic_data_update.utils import (
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.targeting.fixtures import (
+    TargetingCriteriaFactory,
+    TargetPopulationFactory,
+)
+from selenium_tests.page_object.people.people import People
+from selenium_tests.page_object.people.people_details import PeopleDetails
 from selenium_tests.page_object.programme_population.individuals import Individuals
+from selenium_tests.page_object.programme_population.periodic_data_update_templates import (
+    PeriodicDatUpdateTemplates,
+)
+from selenium_tests.page_object.programme_population.periodic_data_update_uploads import (
+    PeriodicDataUpdateUploads,
+)
+from selenium_tests.programme_population.test_periodic_data_update_upload import (
+    prepare_xlsx_file,
+)
 
 pytestmark = pytest.mark.django_db(transaction=True)
 
@@ -62,38 +72,6 @@ def program() -> Program:
 
 
 @pytest.fixture
-def individual(program: Program) -> Individual:
-    business_area = create_afghanistan()
-    rdi = RegistrationDataImportFactory()
-    household, individuals = create_household_and_individuals(
-        household_data={
-            "business_area": business_area,
-            "program_id": program.pk,
-            "registration_data_import": rdi,
-        },
-        individuals_data=[
-            {
-                "business_area": business_area,
-                "program_id": program.pk,
-                "registration_data_import": rdi,
-            },
-        ],
-    )
-    return individuals[0]
-
-
-@pytest.fixture
-def string_attribute(program: Program) -> FlexibleAttribute:
-    return create_flexible_attribute(
-        label="Test String Attribute",
-        subtype=FlexibleAttribute.STRING,
-        number_of_rounds=1,
-        rounds_names=["Test Round"],
-        program=program,
-    )
-
-
-@pytest.fixture
 def date_attribute(program: Program) -> FlexibleAttribute:
     return create_flexible_attribute(
         label="Test Date Attribute",
@@ -102,6 +80,65 @@ def date_attribute(program: Program) -> FlexibleAttribute:
         rounds_names=["Test Round"],
         program=program,
     )
+
+
+@pytest.fixture
+def individual(add_people: Individual) -> Individual:
+    program = Program.objects.filter(name="Test Program").first()
+
+    cash_plan = CashPlanFactory(
+        name="TEST",
+        program=program,
+        business_area=BusinessArea.objects.first(),
+        start_date=datetime.now() - relativedelta(months=1),
+        end_date=datetime.now() + relativedelta(months=1),
+    )
+
+    targeting_criteria = TargetingCriteriaFactory()
+
+    target_population = TargetPopulationFactory(
+        created_by=User.objects.first(),
+        targeting_criteria=targeting_criteria,
+        business_area=BusinessArea.objects.first(),
+    )
+    PaymentRecordFactory(
+        household=add_people.household,
+        parent=cash_plan,
+        target_population=target_population,
+        entitlement_quantity="21.36",
+        delivered_quantity="21.36",
+        currency="PLN",
+        status=GenericPayment.STATUS_DISTRIBUTION_SUCCESS,
+    )
+    add_people.total_cash_received_usd = "21.36"
+    add_people.save()
+    return add_people
+
+
+@pytest.fixture
+def add_people(program: Program) -> Individual:
+    business_area = program.business_area
+    rdi = RegistrationDataImportFactory()
+    household, individuals = create_household_and_individuals(
+        household_data={
+            "business_area": business_area,
+            "program": program,
+            "residence_status": HOST,
+            "registration_data_import": rdi,
+        },
+        individuals_data=[
+            {
+                "full_name": "Stacey Freeman",
+                "given_name": "Stacey",
+                "middle_name": "",
+                "family_name": "Freeman",
+                "business_area": business_area,
+                "observed_disability": [SEEING],
+                "registration_data_import": rdi,
+            },
+        ],
+    )
+    yield individuals[0]
 
 
 def create_flexible_attribute(
@@ -122,46 +159,30 @@ def create_flexible_attribute(
     return flexible_attribute
 
 
-def add_pdu_data_to_xlsx(
-    periodic_data_update_template: PeriodicDataUpdateTemplate, rows: list[list[Any]]
-) -> _TemporaryFileWrapper:
-    wb = openpyxl.load_workbook(periodic_data_update_template.file.file)
-    ws_pdu = wb[PeriodicDataUpdateExportTemplateService.PDU_SHEET]
-    for row_index, row in enumerate(rows):
-        for col_index, value in enumerate(row):
-            ws_pdu.cell(row=row_index + 2, column=col_index + 7, value=value)
-    tmp_file = NamedTemporaryFile(delete=False, suffix=".xlsx")
-    wb.save(tmp_file.name)
-    tmp_file.seek(0)
-    return tmp_file
-
-
-def prepare_xlsx_file(rounds_data: list, rows: list, program: Program) -> _TemporaryFileWrapper:
-    periodic_data_update_template = PeriodicDataUpdateTemplate.objects.create(
+@pytest.fixture
+def string_attribute() -> FlexibleAttribute:
+    program = Program.objects.filter(name="Test Program").first()
+    return create_flexible_attribute(
+        label="Test String Attribute",
+        subtype=FlexibleAttribute.STRING,
+        number_of_rounds=1,
+        rounds_names=["Test Round"],
         program=program,
-        business_area=program.business_area,
-        filters=dict(),
-        rounds_data=rounds_data,
     )
-    service = PeriodicDataUpdateExportTemplateService(periodic_data_update_template)
-    service.generate_workbook()
-    service.save_xlsx_file()
-    tmp_file = add_pdu_data_to_xlsx(periodic_data_update_template, rows)
-    tmp_file.seek(0)
-    return tmp_file
 
 
 @pytest.mark.usefixtures("login")
-class TestPeriodicDataUpdateUpload:
-    # @flaky(max_runs=5, min_passes=1)
-    def test_periodic_data_update_upload_success(
+class TestPeoplePeriodicDataUpdateUpload:
+    def test_people_periodic_data_update_upload_success(
         self,
         clear_downloaded_files: None,
-        program: Program,
+        pagePeople: People,
+        pagePeopleDetails: PeopleDetails,
         individual: Individual,
         string_attribute: FlexibleAttribute,
         pageIndividuals: Individuals,
     ) -> None:
+        program = Program.objects.filter(name="Test Program").first()
         populate_pdu_with_null_values(program, individual.flex_fields)
         individual.save()
         flexible_attribute = string_attribute
@@ -177,8 +198,8 @@ class TestPeriodicDataUpdateUpload:
             [["Test Value", "2021-05-02"]],
             program,
         )
-        pageIndividuals.selectGlobalProgramFilter(program.name)
-        pageIndividuals.getNavPeople().click()
+        pagePeople.selectGlobalProgramFilter(program.name)
+        pagePeople.getNavPeople().click()
         pageIndividuals.getTabPeriodicDataUpdates().click()
         pageIndividuals.getButtonImport().click()
         pageIndividuals.getDialogImport()
@@ -186,22 +207,31 @@ class TestPeriodicDataUpdateUpload:
         pageIndividuals.upload_file(tmp_file.name)
         pageIndividuals.getButtonImportSubmit().click()
         pageIndividuals.getPduUpdates().click()
-        periodic_data_update_upload = PeriodicDataUpdateUpload.objects.first()
-        assert periodic_data_update_upload.status == PeriodicDataUpdateUpload.Status.SUCCESSFUL
+        for i in range(5):
+            periodic_data_update_upload = PeriodicDataUpdateUpload.objects.first()
+            if periodic_data_update_upload.status == PeriodicDataUpdateUpload.Status.SUCCESSFUL:
+                break
+            pageIndividuals.screenshot(i)
+            sleep(1)
+        else:
+            assert periodic_data_update_upload.status == PeriodicDataUpdateUpload.Status.SUCCESSFUL
         assert periodic_data_update_upload.error_message is None
         individual.refresh_from_db()
         assert individual.flex_fields[flexible_attribute.name]["1"]["value"] == "Test Value"
         assert individual.flex_fields[flexible_attribute.name]["1"]["collection_date"] == "2021-05-02"
         assert pageIndividuals.getUpdateStatus(periodic_data_update_upload.pk).text == "SUCCESSFUL"
+        pageIndividuals.screenshot("0")
 
     @pytest.mark.night
-    def test_periodic_data_update_upload_form_error(
+    def test_people_periodic_data_update_upload_form_error(
         self,
         clear_downloaded_files: None,
         program: Program,
         individual: Individual,
         date_attribute: FlexibleAttribute,
         pageIndividuals: Individuals,
+        pagePeople: People,
+        pagePeopleDetails: PeopleDetails,
     ) -> None:
         populate_pdu_with_null_values(program, individual.flex_fields)
         individual.save()
@@ -218,9 +248,8 @@ class TestPeriodicDataUpdateUpload:
             [["Test Value", "2021-05-02"]],
             program,
         )
-        pageIndividuals.selectGlobalProgramFilter(program.name)
-        pageIndividuals.getNavProgrammePopulation().click()
-        pageIndividuals.getNavIndividuals().click()
+        pagePeople.selectGlobalProgramFilter(program.name)
+        pagePeople.getNavPeople().click()
         pageIndividuals.getTabPeriodicDataUpdates().click()
         pageIndividuals.getButtonImport().click()
         pageIndividuals.getDialogImport()
@@ -236,54 +265,8 @@ class TestPeriodicDataUpdateUpload:
         error_text = "Row: 2\ntest_date_attribute__round_value\nEnter a valid date."
         assert pageIndividuals.getPduFormErrors().text == error_text
 
-    @pytest.mark.skip("Unskip after fix: 214341")
     @pytest.mark.night
-    def test_periodic_data_update_upload_error(
-        self,
-        clear_downloaded_files: None,
-        program: Program,
-        individual: Individual,
-        string_attribute: FlexibleAttribute,
-        pageIndividuals: Individuals,
-    ) -> None:
-        populate_pdu_with_null_values(program, individual.flex_fields)
-        individual.save()
-        periodic_data_update_template = PeriodicDataUpdateTemplate.objects.create(
-            program=program,
-            business_area=program.business_area,
-            filters=dict(),
-            rounds_data=[
-                {
-                    "field": string_attribute.name,
-                    "round": 1,
-                    "round_name": string_attribute.pdu_data.rounds_names[0],
-                    "number_of_records": 0,
-                }
-            ],
-        )
-        service = PeriodicDataUpdateExportTemplateService(periodic_data_update_template)
-        service.generate_workbook()
-        service.save_xlsx_file()
-        wb = openpyxl.load_workbook(periodic_data_update_template.file.file)
-        del wb.custom_doc_props[PeriodicDataUpdateExportTemplateService.PROPERTY_ID_NAME]
-        ws_meta = wb[PeriodicDataUpdateExportTemplateService.META_SHEET]
-        ws_meta[PeriodicDataUpdateExportTemplateService.META_ID_ADDRESS] = "-1"
-        with NamedTemporaryFile(delete=False, suffix=".xlsx") as tmp_file:
-            wb.save(tmp_file.name)
-            tmp_file.seek(0)
-            pageIndividuals.selectGlobalProgramFilter(program.name)
-            pageIndividuals.getNavProgrammePopulation().click()
-            pageIndividuals.getNavIndividuals().click()
-            pageIndividuals.getTabPeriodicDataUpdates().click()
-            pageIndividuals.getButtonImport().click()
-            pageIndividuals.getDialogImport()
-            pageIndividuals.upload_file(tmp_file.name)
-            pageIndividuals.getButtonImportSubmit().click()
-            error_text = pageIndividuals.getPduUploadError().text
-            assert error_text == "Periodic Data Update Template with ID -1 not found"
-
-    @pytest.mark.night
-    def test_periodic_data_uploads_list(
+    def test_people_periodic_data_uploads_list(
         self,
         clear_downloaded_files: None,
         program: Program,
@@ -291,6 +274,8 @@ class TestPeriodicDataUpdateUpload:
         pageIndividuals: Individuals,
         pagePeriodicDataUpdateTemplates: PeriodicDatUpdateTemplates,
         pagePeriodicDataUploads: PeriodicDataUpdateUploads,
+        pagePeople: People,
+        pagePeopleDetails: PeopleDetails,
     ) -> None:
         periodic_data_update_template = PeriodicDataUpdateTemplateFactory(
             program=program,
@@ -310,9 +295,8 @@ class TestPeriodicDataUpdateUpload:
             template=periodic_data_update_template,
             status=PeriodicDataUpdateUpload.Status.SUCCESSFUL,
         )
-        pageIndividuals.selectGlobalProgramFilter(program.name)
-        pageIndividuals.getNavProgrammePopulation().click()
-        pageIndividuals.getNavIndividuals().click()
+        pagePeople.selectGlobalProgramFilter(program.name)
+        pagePeople.getNavPeople().click()
         pageIndividuals.getTabPeriodicDataUpdates().click()
         pagePeriodicDataUpdateTemplates.getPduUpdatesBtn().click()
 

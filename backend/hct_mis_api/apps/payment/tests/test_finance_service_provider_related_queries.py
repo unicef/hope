@@ -112,6 +112,7 @@ allFinancialServiceProviders(
 class TestFSPRelatedSchema(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         generate_delivery_mechanisms()
         cls.dm_cash = DeliveryMechanism.objects.get(code="cash")
         cls.dm_voucher = DeliveryMechanism.objects.get(code="voucher")

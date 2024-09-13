@@ -47,6 +47,7 @@ class TargetPopulationHouseholdsQueryTestCase(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.business_area = create_afghanistan()
         _ = create_household(
             {"size": 1, "residence_status": "HOST", "business_area": cls.business_area},

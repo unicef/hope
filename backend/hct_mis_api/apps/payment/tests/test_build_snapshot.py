@@ -25,7 +25,7 @@ from hct_mis_api.apps.utils.models import MergeStatusModel
 class TestBuildSnapshot(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
-        cls.maxDiff = None
+        super().setUpTestData()
         create_afghanistan()
         generate_delivery_mechanisms()
         cls.dm_atm_card = DeliveryMechanism.objects.get(code="atm_card")

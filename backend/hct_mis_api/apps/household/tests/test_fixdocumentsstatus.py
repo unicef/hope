@@ -15,6 +15,7 @@ from hct_mis_api.apps.household.models import Document, Household, Individual
 class TestDocumentStatusFixer(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         call_command("generatedocumenttypes")
 

@@ -14,6 +14,7 @@ class TestCashPlanChoices(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.user = UserFactory()
 
     def test_status_choices_query(self) -> None:

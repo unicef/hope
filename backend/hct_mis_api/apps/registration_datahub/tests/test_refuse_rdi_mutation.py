@@ -36,6 +36,7 @@ class TestRefuseRdiMutation(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.user = UserFactory()
         create_afghanistan()
         cls.business_area_slug = "afghanistan"

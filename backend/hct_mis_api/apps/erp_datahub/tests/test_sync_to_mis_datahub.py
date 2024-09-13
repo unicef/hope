@@ -43,6 +43,7 @@ class TestSyncToMisDatahubTask(TestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls._prepare_business_areas()
 
     def test_dont_sync_parent(self) -> None:

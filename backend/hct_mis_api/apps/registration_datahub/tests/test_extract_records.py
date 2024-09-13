@@ -13,6 +13,7 @@ from hct_mis_api.aurora.models import Record
 class TestExtractRecords(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         content = Path(f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/image.jpeg").read_bytes()
 
         fields = {

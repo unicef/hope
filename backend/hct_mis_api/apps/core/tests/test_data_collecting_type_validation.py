@@ -9,6 +9,7 @@ from hct_mis_api.apps.core.models import DataCollectingType
 class TestDCTValidation(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.business_area = BusinessAreaFactory()
 
     def test_change_type_without_compatible_with_different_type(self) -> None:

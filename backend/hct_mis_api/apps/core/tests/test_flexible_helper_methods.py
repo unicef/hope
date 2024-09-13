@@ -13,6 +13,7 @@ from hct_mis_api.apps.core.flex_fields_importer import FlexibleAttributeImporter
 class TestFlexibleHelperMethods(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.importer = FlexibleAttributeImporter()
         wb = xlrd.open_workbook(filename=f"{settings.PROJECT_ROOT}/apps/core/tests/test_files/flex_init.xls")
         cls.survey_sheet = wb.sheet_by_name("survey")

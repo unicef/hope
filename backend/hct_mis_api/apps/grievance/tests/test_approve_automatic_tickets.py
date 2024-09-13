@@ -122,6 +122,7 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         call_command("loadcountries")
         cls.generate_document_types_for_all_countries()
