@@ -54,6 +54,24 @@ export const CreateProgramCycle = ({
   const queryClient = useQueryClient();
   const { showMessage } = useSnackbar();
 
+  let endDate = Yup.date()
+    .min(today, t('End Date cannot be in the past'))
+    .when('start_date', ([start_date], schema) =>
+      start_date
+        ? schema.min(
+            new Date(start_date),
+            `${t('End date have to be greater than')} ${moment(
+              start_date,
+            ).format('YYYY-MM-DD')}`,
+          )
+        : schema,
+    );
+  if (program.endDate) {
+    endDate = endDate.max(
+      new Date(program.endDate),
+      t('End Date cannot be after Programme End Date'),
+    );
+  }
   const validationSchema = Yup.object().shape({
     title: Yup.string()
       .required(t('Programme Cycle Title is required'))
@@ -65,20 +83,7 @@ export const CreateProgramCycle = ({
         program.startDate,
         t('Start Date cannot be before Programme Start Date'),
       ),
-    end_date: Yup.date()
-      .min(today, t('End Date cannot be in the past'))
-      .max(program.endDate, t('End Date cannot be after Programme End Date'))
-      .when(
-        'start_date',
-        ([start_date], schema) =>
-          start_date &&
-          schema.min(
-            start_date,
-            `${t('End date have to be greater than')} ${moment(
-              start_date,
-            ).format('YYYY-MM-DD')}`,
-          ),
-      ),
+    end_date: endDate,
   });
 
   const initialValues: {

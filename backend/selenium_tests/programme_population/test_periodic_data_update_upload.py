@@ -52,7 +52,7 @@ def clear_downloaded_files() -> None:
 @pytest.fixture
 def program() -> Program:
     business_area = create_afghanistan()
-    dct = DataCollectingTypeFactory(type=DataCollectingType.Type.SOCIAL)
+    dct = DataCollectingTypeFactory(type=DataCollectingType.Type.STANDARD)
     return ProgramFactory(
         name="Test Program",
         status=Program.ACTIVE,
@@ -178,7 +178,8 @@ class TestPeriodicDataUpdateUpload:
             program,
         )
         pageIndividuals.selectGlobalProgramFilter(program.name)
-        pageIndividuals.getNavPeople().click()
+        pageIndividuals.getNavProgrammePopulation().click()
+        pageIndividuals.getNavIndividuals().click()
         pageIndividuals.getTabPeriodicDataUpdates().click()
         pageIndividuals.getButtonImport().click()
         pageIndividuals.getDialogImport()
@@ -220,7 +221,11 @@ class TestPeriodicDataUpdateUpload:
         )
         pageIndividuals.selectGlobalProgramFilter(program.name)
         pageIndividuals.getNavProgrammePopulation().click()
-        pageIndividuals.getNavIndividuals().click()
+        try:
+            pageIndividuals.getNavIndividuals().click()
+        except BaseException:
+            pageIndividuals.getNavProgrammePopulation().click()
+            pageIndividuals.getNavIndividuals().click()
         pageIndividuals.getTabPeriodicDataUpdates().click()
         pageIndividuals.getButtonImport().click()
         pageIndividuals.getDialogImport()
@@ -312,7 +317,11 @@ class TestPeriodicDataUpdateUpload:
         )
         pageIndividuals.selectGlobalProgramFilter(program.name)
         pageIndividuals.getNavProgrammePopulation().click()
-        pageIndividuals.getNavIndividuals().click()
+        try:
+            pageIndividuals.getNavIndividuals().click()
+        except BaseException:
+            pageIndividuals.getNavProgrammePopulation().click()
+            pageIndividuals.getNavIndividuals().click()
         pageIndividuals.getTabPeriodicDataUpdates().click()
         pagePeriodicDataUpdateTemplates.getPduUpdatesBtn().click()
 

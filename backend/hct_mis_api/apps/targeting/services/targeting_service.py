@@ -370,9 +370,10 @@ class TargetingCriteriaFilterBase:
 
     def get_query_for_flex_field(self) -> Q:
         if self.flex_field_classification == FlexFieldClassification.FLEX_FIELD_PDU:
-            program = (
-                self.individuals_filters_block.targeting_criteria_rule.targeting_criteria.target_population.program
+            targeting_criteria_rule = (
+                getattr(self, "targeting_criteria_rule", None) or self.individuals_filters_block.targeting_criteria_rule
             )
+            program = targeting_criteria_rule.targeting_criteria.target_population.program
             flex_field_attr = FlexibleAttribute.objects.filter(name=self.field_name, program=program).first()
             if not flex_field_attr:
                 logger.error(
