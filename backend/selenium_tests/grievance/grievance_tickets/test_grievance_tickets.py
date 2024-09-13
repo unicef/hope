@@ -695,7 +695,7 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getDescription().send_keys("Add Individual - TEST")
         pageGrievanceNewTicket.getButtonAddNewField()
         pageGrievanceNewTicket.getSelectFieldName().click()
-        pageGrievanceNewTicket.select_option_by_name("Females age 12 - 17 with disability")
+        pageGrievanceNewTicket.select_listbox_element("Females age 12 - 17 with disability")
         pageGrievanceNewTicket.getInputValue().send_keys("1")
         pageGrievanceNewTicket.getButtonNext().click()
         pageGrievanceDetailsPage.getCheckboxHouseholdData()
@@ -741,11 +741,11 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getDescription().send_keys("Add Individual - TEST")
         pageGrievanceNewTicket.getButtonAddNewField().click()
         pageGrievanceNewTicket.getIndividualFieldName(0).click()
-        pageGrievanceNewTicket.select_option_by_name("Gender")
+        pageGrievanceNewTicket.select_listbox_element("Gender")
         pageGrievanceNewTicket.getInputIndividualData("Gender").click()
         pageGrievanceNewTicket.select_listbox_element("Female")
         pageGrievanceNewTicket.getIndividualFieldName(1).click()
-        pageGrievanceNewTicket.select_option_by_name("Preferred language")
+        pageGrievanceNewTicket.select_listbox_element("Preferred language")
         pageGrievanceNewTicket.getInputIndividualData("Preferred language").click()
         pageGrievanceNewTicket.select_listbox_element("English | English")
 
@@ -786,7 +786,6 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getButtonNext().click()
         assert "UNICEF" in pageGrievanceDetailsPage.getLabelPartner().text
 
-    @pytest.mark.skip("Unskip after fix: 212619")
     def test_grievance_tickets_create_new_tickets_Grievance_Complaint_Payment_Related_Complaint(
         self,
         pageGrievanceTickets: GrievanceTickets,
@@ -816,7 +815,6 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getButtonSubmit().click()
         assert hh_with_payment_record.unicef_id in pageGrievanceDetailsPage.getPaymentRecord().text
         pageGrievanceNewTicket.getButtonNext().click()
-        # ToDo check before unskip
         assert payment_id in pageGrievanceDetailsPage.getLabelTickets().text
 
     def test_grievance_tickets_look_up_linked_ticket(

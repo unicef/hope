@@ -77,9 +77,11 @@ class TargetingCriteriaRuleFilterNode(DjangoObjectType):
             return filter_choices(
                 field_attribute, parent.arguments  # type: ignore # can't convert graphene list to list
             )
-
-        else:  # FlexFieldClassification.FLEX_FIELD_BASIC
-            return FlexibleAttribute.objects.get(name=parent.field_name)
+        program = None
+        if parent.flex_field_classification == FlexFieldClassification.FLEX_FIELD_PDU:
+            encoded_program_id = info.context.headers.get("Program")
+            program = Program.objects.get(id=decode_id_string(encoded_program_id))
+        return FlexibleAttribute.objects.get(name=parent.field_name, program=program)
 
     class Meta:
         model = target_models.TargetingCriteriaRuleFilter

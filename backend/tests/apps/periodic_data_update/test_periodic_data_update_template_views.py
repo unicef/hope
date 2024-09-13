@@ -389,8 +389,6 @@ class TestPeriodicDataUpdateTemplateViews:
                 },
             ],
             "filters": {
-                "registration_data_import_id": 1,
-                "target_population_id": 1,
                 "received_assistance": True,
             },
         }
@@ -429,8 +427,6 @@ class TestPeriodicDataUpdateTemplateViews:
                 },
             ],
             "filters": {
-                "registration_data_import_id": 1,
-                "target_population_id": 1,
                 "received_assistance": True,
             },
         }
@@ -484,8 +480,6 @@ class TestPeriodicDataUpdateTemplateViews:
                 },
             ],
             "filters": {
-                "registration_data_import_id": 1,
-                "target_population_id": 1,
                 "received_assistance": True,
             },
         }
