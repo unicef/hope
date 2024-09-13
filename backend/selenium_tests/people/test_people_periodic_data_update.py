@@ -299,7 +299,6 @@ class TestPeoplePeriodicDataUpdateUpload:
         pagePeople.getNavPeople().click()
         pageIndividuals.getTabPeriodicDataUpdates().click()
         pagePeriodicDataUpdateTemplates.getPduUpdatesBtn().click()
-
         index = pdu_upload.id
         assert str(index) in pagePeriodicDataUploads.getUpdateId(index).text
         assert str(pdu_upload.template.id) in pagePeriodicDataUploads.getUpdateTemplate(index).text
