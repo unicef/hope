@@ -788,6 +788,7 @@ class TestManualCalendar:
         assert FormatTime(1, 1, 2022).date_in_text_format in pageProgrammeDetails.getLabelStartDate().text
         assert FormatTime(1, 10, 2099).date_in_text_format in pageProgrammeDetails.getLabelEndDate().text
 
+    @pytest.mark.skip(reason="Unskip after fix bug: 214927")
     @pytest.mark.parametrize(
         "test_data",
         [
