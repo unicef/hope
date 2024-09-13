@@ -23,6 +23,7 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchProgramCycle } from '@api/programCycleApi';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useParams } from 'react-router-dom';
+import {AdminButton} from "@core/AdminButton";
 
 const StatusWrapper = styled(Box)`
   width: 150px;
@@ -227,6 +228,7 @@ export const PaymentPlanDetailsHeader = ({
           ? breadCrumbsItems
           : null
       }
+      flags={<AdminButton adminUrl={paymentPlan.adminUrl} />}
     >
       {buttons}
     </PageHeader>
