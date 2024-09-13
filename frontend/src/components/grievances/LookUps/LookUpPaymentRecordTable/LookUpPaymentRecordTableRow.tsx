@@ -5,7 +5,7 @@ import { PaymentRecordAndPaymentNode } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import {
   formatCurrencyWithSymbol,
-  verificationRecordsStatusToColor,
+  paymentStatusToColor,
 } from '@utils/utils';
 import { BlackLink } from '@core/BlackLink';
 import { StatusBox } from '@core/StatusBox';
@@ -68,7 +68,7 @@ export function LookUpPaymentRecordTableRow({
         {paymentRecord.status ? (
           <StatusBox
             status={paymentRecord.status}
-            statusToColor={verificationRecordsStatusToColor}
+            statusToColor={paymentStatusToColor}
           />
         ) : (
           '-'

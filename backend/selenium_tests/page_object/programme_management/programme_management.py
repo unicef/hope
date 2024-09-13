@@ -164,7 +164,7 @@ class ProgrammeManagement(BaseComponents):
             if month != next_month:
                 break
         self.get_elements(self.calendarDays, By.XPATH)[day - 1].click()
-        self.wait_for_disappear(self.calendar, By.XPATH)
+        self.wait_for_disappear(self.calendar, By.XPATH, timeout=120)
 
     def getLabelStartDate(self) -> WebElement:
         return self.get_elements(self.labelStartDate)[0]
