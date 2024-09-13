@@ -111,12 +111,6 @@ def count_population(results: list, business_area: BusinessArea) -> tuple[int, i
     return total_households_count, total_individuals_count
 
 
-def filter_by_owner(data: List, kobo_username: str) -> List:
-    if data:
-        return [element for element in data if element["owner__username"] == kobo_username]
-    return []
-
-
 def get_submission_metadata(household_data_dict: Dict) -> Dict:
     meta_fields_mapping = {
         "_uuid": "kobo_submission_uuid",
