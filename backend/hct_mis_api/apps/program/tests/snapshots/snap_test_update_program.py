@@ -7,7 +7,7 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots['TestUpdateProgram::test_finish_active_program_with_not_finished_program_cycle 1'] = {
+snapshots['TestUpdateProgram::test_finish_active_program_with_not_finished_program_cycle_or_end_date 1'] = {
     'data': {
         'updateProgram': None
     },
@@ -19,7 +19,7 @@ snapshots['TestUpdateProgram::test_finish_active_program_with_not_finished_progr
                     'line': 3
                 }
             ],
-            'message': "['You cannot finish program if program has active cycles']",
+            'message': 'Cannot finish programme with active cycles',
             'path': [
                 'updateProgram'
             ]
@@ -27,7 +27,27 @@ snapshots['TestUpdateProgram::test_finish_active_program_with_not_finished_progr
     ]
 }
 
-snapshots['TestUpdateProgram::test_finish_active_program_with_not_finished_program_cycle 2'] = {
+snapshots['TestUpdateProgram::test_finish_active_program_with_not_finished_program_cycle_or_end_date 2'] = {
+    'data': {
+        'updateProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Cannot finish programme without end date',
+            'path': [
+                'updateProgram'
+            ]
+        }
+    ]
+}
+
+snapshots['TestUpdateProgram::test_finish_active_program_with_not_finished_program_cycle_or_end_date 3'] = {
     'data': {
         'updateProgram': {
             'program': {
@@ -405,6 +425,66 @@ snapshots['TestUpdateProgram::test_update_program_authenticated_2_without_permis
                 }
             ],
             'message': 'Permission Denied: User does not have correct permission.',
+            'path': [
+                'updateProgram'
+            ]
+        }
+    ]
+}
+
+snapshots['TestUpdateProgram::test_update_program_end_date_validation 1'] = {
+    'data': {
+        'updateProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'End date cannot be before start date.',
+            'path': [
+                'updateProgram'
+            ]
+        }
+    ]
+}
+
+snapshots['TestUpdateProgram::test_update_program_end_date_validation 2'] = {
+    'data': {
+        'updateProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'End date must be equal or after the latest cycle.',
+            'path': [
+                'updateProgram'
+            ]
+        }
+    ]
+}
+
+snapshots['TestUpdateProgram::test_update_program_end_date_validation 3'] = {
+    'data': {
+        'updateProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Start date must be equal or before the earliest cycle.',
             'path': [
                 'updateProgram'
             ]

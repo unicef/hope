@@ -20,6 +20,7 @@ PROGRAM_QUERY = """
       program(id: $id) {
         name
         status
+        canFinish
         targetPopulationsCount
         pduFields {
           label
