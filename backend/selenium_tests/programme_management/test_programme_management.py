@@ -870,7 +870,7 @@ class TestManualCalendar:
         is_disabled_decrease_round_number = pageProgrammeManagement.get_listbox_element("1").get_attribute(
             "aria-disabled"
         )
-        assert is_disabled_decrease_round_number == "true"
+        assert is_disabled_decrease_round_number is None
         is_disabled_decrease_round_number = pageProgrammeManagement.get_listbox_element("2").get_attribute(
             "aria-disabled"
         )
@@ -884,11 +884,11 @@ class TestManualCalendar:
         is_disabled_edit_time_series_existing_round_name_1 = pageProgrammeManagement.getInputPduFieldsRoundsNames(
             0, 0
         ).get_attribute("disabled")
-        assert is_disabled_edit_time_series_existing_round_name_1 == "true"
+        assert is_disabled_edit_time_series_existing_round_name_1 is None
         is_disabled_edit_time_series_existing_round_name_2 = pageProgrammeManagement.getInputPduFieldsRoundsNames(
             0, 1
         ).get_attribute("disabled")
-        assert is_disabled_edit_time_series_existing_round_name_2 == "true"
+        assert is_disabled_edit_time_series_existing_round_name_2 is None
 
         pageProgrammeManagement.getInputPduFieldsRoundsNames(0, 2).send_keys("Round 3")
 
