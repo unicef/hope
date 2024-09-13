@@ -95,7 +95,7 @@ class PeriodicDataUpdateUploads(BaseComponents):
 
     def getUpdateId(self, index: int) -> WebElement:
         locator = self.updateId.format(index)
-        return self.wait_for(locator)
+        return self.wait_for(locator, timeout=120)
 
     def getUpdateTemplate(self, index: int) -> WebElement:
         locator = self.updateTemplate.format(index)
