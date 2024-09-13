@@ -94,8 +94,17 @@ export const api = {
     });
 
     if (!response.ok) {
-      throw new Error(`Error puting data to ${url}`);
+      const error = Error(`Error puting data to ${url}`);
+      try {
+        // @ts-ignore
+        error.data = await response.json();
+      } catch (e) {
+        // @ts-ignore
+        error.data = null;
+      }
+      throw error;
     }
+
     const text = await response.text();
     if (!text) {
       return { data: null };
