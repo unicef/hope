@@ -35,7 +35,7 @@ from mptt.forms import TreeNodeMultipleChoiceField
 
 
 @admin.register(ProgramCycle)
-class ProgramCycleAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, HOPEModelAdminBase):
+class ProgramCycleAdmin(LastSyncDateResetMixin, HOPEModelAdminBase):
     list_display = ("program", "status", "start_date", "end_date")
     date_hierarchy = "start_date"
     list_filter = (
@@ -54,6 +54,7 @@ class ProgramCycleAdminInline(admin.TabularInline):
         "updated_at",
     )
     exclude = ("unicef_id",)
+    ordering = ["-start_date"]
 
 
 class PartnerAreaForm(forms.Form):

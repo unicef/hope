@@ -118,6 +118,7 @@ class ProgramNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     pdu_fields = graphene.List(PeriodicFieldNode)
     target_populations_count = graphene.Int()
     cycles = DjangoFilterConnectionField(ProgramCycleNode, filterset_class=ProgramCycleFilter)
+    can_finish = graphene.Boolean()
 
     class Meta:
         model = Program
@@ -157,6 +158,10 @@ class ProgramNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     @staticmethod
     def resolve_target_populations_count(program: Program, info: Any, **kwargs: Any) -> int:
         return program.targetpopulation_set.count()
+
+    @staticmethod
+    def resolve_can_finish(program: Program, info: Any, **kwargs: Any) -> bool:
+        return program.can_finish
 
 
 class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
