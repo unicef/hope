@@ -151,7 +151,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
     )
     status = models.CharField(max_length=10, choices=STATUS_CHOICE, db_index=True)
     start_date = models.DateField(db_index=True)
-    end_date = models.DateField(db_index=True)
+    end_date = models.DateField(null=True, blank=True, db_index=True)
     description = models.CharField(
         blank=True,
         max_length=255,
@@ -282,8 +282,12 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
     def is_active(self) -> bool:
         return self.status == self.ACTIVE
 
+    @property
+    def can_finish(self) -> bool:
+        return not self.cycles.filter(status=ProgramCycle.ACTIVE).exists()
 
-class ProgramCycle(AdminUrlMixin, SoftDeletableModel, TimeStampedUUIDModel, UnicefIdentifiedModel, ConcurrencyModel):
+
+class ProgramCycle(AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentifiedModel, ConcurrencyModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "title",
@@ -318,13 +322,12 @@ class ProgramCycle(AdminUrlMixin, SoftDeletableModel, TimeStampedUUIDModel, Unic
     class Meta:
         constraints = [
             UniqueConstraint(
-                fields=["title", "program", "is_removed"],
-                condition=Q(is_removed=False),
-                name="program_cycle_name_unique_if_not_removed",
+                fields=["title", "program"],
+                name="program_cycle_title_unique_per_program",
             ),
         ]
         ordering = ["start_date"]
-        verbose_name = "ProgrammeCycle"
+        verbose_name = "Programme Cycle"
 
     def clean(self) -> None:
         start_date = parse_date(self.start_date) if isinstance(self.start_date, str) else self.start_date
