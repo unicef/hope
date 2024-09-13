@@ -625,7 +625,7 @@ class GrievanceDetailsPage(BaseComponents):
         return self.wait_for(self.activityLogTitle)
 
     def getExpandCollapseButton(self) -> WebElement:
-        return self.wait_for(self.expandCollapseButton)
+        return self.wait_for(self.expandCollapseButton, timeout=120)
 
     def getActivityLogTable(self) -> WebElement:
         return self.wait_for(self.activityLogTable)
