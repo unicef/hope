@@ -20,7 +20,33 @@ const InlineField = styled.div`
   width: 48%;
 `;
 
+interface FieldAttribute {
+  labelEn: string;
+  type: string;
+  choices: any;
+}
+
+interface PduData {
+  __typename: string;
+  id: string;
+  subtype: string;
+  numberOfRounds: number;
+  roundsNames: string[];
+}
+
+interface Filter {
+  flexFieldClassification: string;
+  associatedWith: string;
+  fieldAttribute: FieldAttribute;
+  value: any;
+  pduData: PduData;
+  fieldName: string;
+  type: string;
+  isNull: boolean;
+}
+
 interface Values {
+  filters?: Filter[];
   individualsFiltersBlocks?: {
     individualBlockFilters?: {
       isNull?: boolean;
@@ -54,10 +80,11 @@ export const SubField: React.FC<SubFieldProps> = ({
   }
 
   const isNullSelected =
-    blockIndex !== undefined && index !== undefined
+    (blockIndex !== undefined && index !== undefined
       ? values?.individualsFiltersBlocks?.[blockIndex]
           ?.individualBlockFilters?.[index]?.isNull ?? false
-      : false;
+      : false) ||
+    (values.filters?.some((filter) => filter.isNull) ?? false);
 
   useEffect(() => {
     if (isNullSelected) {
@@ -70,7 +97,6 @@ export const SubField: React.FC<SubFieldProps> = ({
   if (!field) {
     return null;
   }
-
   const renderFieldByType = (type: string) => {
     switch (type) {
       case 'DECIMAL':
