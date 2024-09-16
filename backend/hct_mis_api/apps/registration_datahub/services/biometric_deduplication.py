@@ -264,7 +264,14 @@ class BiometricDeduplicationService:
 
         if deduplication_set_data.state == "Clean":
             data = self.get_deduplication_set_results(deduplication_set_id)
-            similarity_pairs = [SimilarityPair(**item) for item in data]
+            similarity_pairs = [
+                SimilarityPair(
+                    score=item["score"],
+                    first=item["first"]["reference_pk"],
+                    second=item["second"]["reference_pk"],
+                )
+                for item in data
+            ]
             with transaction.atomic():
                 self.store_similarity_pairs(deduplication_set_id, similarity_pairs)
                 self.store_rdis_deduplication_statistics(deduplication_set_id)
