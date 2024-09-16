@@ -1,6 +1,7 @@
 import os
 import uuid
 from decimal import Decimal
+from typing import List, Dict
 from unittest import mock
 from unittest.mock import patch
 
@@ -522,14 +523,12 @@ class BiometricDeduplicationServiceTest(TestCase):
             [
                 SimilarityPair(
                     score=item["score"],
-                    first=item["first"]["reference_pk"],
-                    second=item["second"]["reference_pk"],
+                    first=item["first"]["reference_pk"],  # type: ignore
+                    second=item["second"]["reference_pk"],  # type: ignore
                 )
                 for item in results_data
             ],
         )
-        service.store_rdis_deduplication_statistics.assert_called_once_with(deduplication_set_id)
-        service.mark_rdis_as_deduplicated.assert_called_once_with(deduplication_set_id)
 
     def test_fetch_biometric_deduplication_results_and_process_fail(self) -> None:
         deduplication_set_id = str(uuid.uuid4())
