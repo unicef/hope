@@ -465,6 +465,9 @@ class ProgramCycleUpdateSerializerTest(TestCase):
             str(error.exception),
         )
 
+    def test_update_cycle_dates_and_payment_plan(self) -> None:
+        pass
+
 
 class ProgramCycleViewSetTestCase(TestCase):
     def setUp(self) -> None:

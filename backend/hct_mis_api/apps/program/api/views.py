@@ -23,6 +23,7 @@ from hct_mis_api.apps.account.api.permissions import (
     ProgramCycleViewListPermission,
 )
 from hct_mis_api.apps.core.api.mixins import ActionMixin, BusinessAreaProgramMixin
+from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.api.caches import ProgramCycleKeyConstructor
 from hct_mis_api.apps.program.api.filters import ProgramCycleFilter
 from hct_mis_api.apps.program.api.serializers import (
@@ -75,6 +76,18 @@ class ProgramCycleViewSet(
     @cache_response(timeout=config.REST_API_TTL, key_func=ProgramCycleKeyConstructor())
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
+
+    def perform_update(self, serializer: ProgramCycleUpdateSerializer) -> None:
+        cycle = self.get_object()
+        previous_start_date = cycle.start_date
+        previous_end_date = cycle.end_date
+
+        updated_cycle = serializer.save()
+        # update PaymentPlan start and end dates
+        if previous_start_date != updated_cycle.start_date:
+            PaymentPlan.objects.filter(program_cycle=cycle).update(start_date=updated_cycle.start_date)
+        if previous_end_date != updated_cycle.end_date:
+            PaymentPlan.objects.filter(program_cycle=cycle).update(end_date=updated_cycle.end_date)
 
     def perform_destroy(self, program_cycle: ProgramCycle) -> None:
         if program_cycle.program.status != Program.ACTIVE:
