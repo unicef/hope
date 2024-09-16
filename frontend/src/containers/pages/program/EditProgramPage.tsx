@@ -149,8 +149,11 @@ export const EditProgramPage = (): ReactElement => {
       }));
 
     try {
-      const { pduFields: pduFieldsFromValues, ...requestValuesWithoutPdu } =
-        values;
+      const {
+        editMode,
+        pduFields: pduFieldsFromValues,
+        ...requestValuesWithoutPdu
+      } = values;
 
       const response = await mutate({
         variables: {
@@ -181,6 +184,7 @@ export const EditProgramPage = (): ReactElement => {
   });
 
   const initialValues = {
+    editMode: true,
     name,
     programmeCode,
     startDate,
