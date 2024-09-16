@@ -11,6 +11,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.filters import OrderingFilter
 from rest_framework.request import Request
 from rest_framework.response import Response
+from rest_framework.serializers import BaseSerializer
 from rest_framework.viewsets import GenericViewSet
 from rest_framework_extensions.cache.decorators import cache_response
 
@@ -77,7 +78,7 @@ class ProgramCycleViewSet(
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 
-    def perform_update(self, serializer: ProgramCycleUpdateSerializer) -> None:
+    def perform_update(self, serializer: BaseSerializer[Any]) -> None:
         cycle = self.get_object()
         previous_start_date = cycle.start_date
         previous_end_date = cycle.end_date
