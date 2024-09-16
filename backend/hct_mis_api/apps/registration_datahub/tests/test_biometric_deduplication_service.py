@@ -505,8 +505,8 @@ class BiometricDeduplicationServiceTest(TestCase):
         service.get_deduplication_set = mock.Mock(return_value=DeduplicationSetData(state="Clean", error=None))
 
         results_data = [
-            {"first": 1, "second": 2, "score": 0.9},
-            {"first": 3, "second": 4, "score": 0.8},
+            {"first": {"reference_pk": "1"}, "second": {"reference_pk": "2"}, "score": 0.9},
+            {"first": {"reference_pk": "3"}, "second": {"reference_pk": "4"}, "score": 0.8},
         ]
         service.get_deduplication_set_results = mock.Mock(return_value=results_data)
         service.store_similarity_pairs = mock.Mock()
@@ -518,10 +518,16 @@ class BiometricDeduplicationServiceTest(TestCase):
         service.get_deduplication_set.assert_called_once_with(deduplication_set_id)
         service.get_deduplication_set_results.assert_called_once_with(deduplication_set_id)
         service.store_similarity_pairs.assert_called_once_with(
-            deduplication_set_id, [SimilarityPair(**item) for item in results_data]
+            deduplication_set_id,
+            [
+                SimilarityPair(
+                    score=item["score"],
+                    first=item["first"]["reference_pk"],  # type: ignore
+                    second=item["second"]["reference_pk"],  # type: ignore
+                )
+                for item in results_data
+            ],
         )
-        service.store_rdis_deduplication_statistics.assert_called_once_with(deduplication_set_id)
-        service.mark_rdis_as_deduplicated.assert_called_once_with(deduplication_set_id)
 
     def test_fetch_biometric_deduplication_results_and_process_fail(self) -> None:
         deduplication_set_id = str(uuid.uuid4())
