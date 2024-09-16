@@ -139,6 +139,27 @@ class ProgramCycleAPITestCase(HOPEApiTestCase):
         self.assertEqual(self.cycle1.title, "Title Title New")
         self.assertEqual(self.cycle1.start_date.strftime("%Y-%m-%d"), "2023-02-11")
 
+    def test_update_cycle_dates_and_payment_plan(self) -> None:
+        payment_plan = PaymentPlanFactory(program_cycle=self.cycle1, start_date=None, end_date=None)
+        self.assertIsNone(payment_plan.start_date)
+        self.assertIsNone(payment_plan.end_date)
+        self.client.force_authenticate(user=self.user)
+
+        # update only end_date
+        data = {"end_date": parse_date("2023-02-22")}
+        response = self.client.patch(self.cycle_1_detail_url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        payment_plan.refresh_from_db()
+        self.assertEqual(payment_plan.end_date.strftime("%Y-%m-%d"), "2023-02-22")
+        self.assertIsNone(payment_plan.start_date)
+
+        # update only start_date
+        data = {"start_date": parse_date("2023-02-02")}
+        response = self.client.patch(self.cycle_1_detail_url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        payment_plan.refresh_from_db()
+        self.assertEqual(payment_plan.start_date.strftime("%Y-%m-%d"), "2023-02-02")
+
     def test_delete_program_cycle(self) -> None:
         cycle3 = ProgramCycleFactory(
             program=self.program,
