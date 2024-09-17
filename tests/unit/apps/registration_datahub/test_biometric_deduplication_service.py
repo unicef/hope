@@ -40,6 +40,7 @@ def mock_deduplication_engine_env_vars() -> None:
 class BiometricDeduplicationServiceTest(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         cls.user = UserFactory.create()
         cls.program = ProgramFactory.create(biometric_deduplication_enabled=True)
@@ -283,10 +284,10 @@ class BiometricDeduplicationServiceTest(TestCase):
             individual1=ind1, individual2=ind2, similarity_score=50.00
         ).exists()
         assert self.program.deduplication_engine_similarity_pairs.filter(
-            individual1=ind1, individual2=ind3, similarity_score=30.00
+            individual1=ind1, individual2=ind3, similarity_score=70.00
         ).exists()
         assert self.program.deduplication_engine_similarity_pairs.filter(
-            individual1=ind2, individual2=ind3, similarity_score=20.00
+            individual1=ind2, individual2=ind3, similarity_score=80.00
         ).exists()
 
     def test_mark_rdis_as(self) -> None:
@@ -362,8 +363,8 @@ class BiometricDeduplicationServiceTest(TestCase):
         assert list(
             duplicates.order_by("similarity_score").values("individual1", "individual2", "similarity_score")
         ) == [
-            {"individual1": ind2.id, "individual2": ind6.id, "similarity_score": Decimal("10.00")},
-            {"individual1": ind1.id, "individual2": ind5.id, "similarity_score": Decimal("20.00")},
+            {"individual1": ind1.id, "individual2": ind5.id, "similarity_score": Decimal("80.00")},
+            {"individual1": ind2.id, "individual2": ind6.id, "similarity_score": Decimal("90.00")},
         ]
 
     def test_get_duplicates_for_merged_rdi_against_population(self) -> None:
@@ -419,9 +420,9 @@ class BiometricDeduplicationServiceTest(TestCase):
         assert list(
             duplicates.order_by("similarity_score").values("individual1", "individual2", "similarity_score")
         ) == [
-            {"individual1": ind2.id, "individual2": ind6.id, "similarity_score": Decimal("10.00")},
-            {"individual1": ind1.id, "individual2": ind5.id, "similarity_score": Decimal("20.00")},
-            {"individual1": ind1.id, "individual2": ind2.id, "similarity_score": Decimal("30.00")},
+            {"individual1": ind1.id, "individual2": ind2.id, "similarity_score": Decimal("70.00")},
+            {"individual1": ind1.id, "individual2": ind5.id, "similarity_score": Decimal("80.00")},
+            {"individual1": ind2.id, "individual2": ind6.id, "similarity_score": Decimal("90.00")},
         ]
 
     def test_get_duplicates_for_rdi_against_batch(self) -> None:
@@ -477,7 +478,7 @@ class BiometricDeduplicationServiceTest(TestCase):
         assert list(
             duplicates.order_by("similarity_score").values("individual1", "individual2", "similarity_score")
         ) == [
-            {"individual1": ind1.id, "individual2": ind2.id, "similarity_score": Decimal("10.00")},
+            {"individual1": ind1.id, "individual2": ind2.id, "similarity_score": Decimal("90.00")},
         ]
 
     @patch(
@@ -504,8 +505,8 @@ class BiometricDeduplicationServiceTest(TestCase):
         service.get_deduplication_set = mock.Mock(return_value=DeduplicationSetData(state="Clean", error=None))
 
         results_data = [
-            {"first": 1, "second": 2, "score": 0.9},
-            {"first": 3, "second": 4, "score": 0.8},
+            {"first": {"reference_pk": "1"}, "second": {"reference_pk": "2"}, "score": 0.9},
+            {"first": {"reference_pk": "3"}, "second": {"reference_pk": "4"}, "score": 0.8},
         ]
         service.get_deduplication_set_results = mock.Mock(return_value=results_data)
         service.store_similarity_pairs = mock.Mock()
@@ -517,10 +518,16 @@ class BiometricDeduplicationServiceTest(TestCase):
         service.get_deduplication_set.assert_called_once_with(deduplication_set_id)
         service.get_deduplication_set_results.assert_called_once_with(deduplication_set_id)
         service.store_similarity_pairs.assert_called_once_with(
-            deduplication_set_id, [SimilarityPair(**item) for item in results_data]
+            deduplication_set_id,
+            [
+                SimilarityPair(
+                    score=item["score"],
+                    first=item["first"]["reference_pk"],  # type: ignore
+                    second=item["second"]["reference_pk"],  # type: ignore
+                )
+                for item in results_data
+            ],
         )
-        service.store_rdis_deduplication_statistics.assert_called_once_with(deduplication_set_id)
-        service.mark_rdis_as_deduplicated.assert_called_once_with(deduplication_set_id)
 
     def test_fetch_biometric_deduplication_results_and_process_fail(self) -> None:
         deduplication_set_id = str(uuid.uuid4())

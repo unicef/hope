@@ -36,6 +36,7 @@ class TestHouseholdDeliveredQuantitiesQuery(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         partner = PartnerFactory(name="TestPartner")
         cls.user = UserFactory(partner=partner)
 

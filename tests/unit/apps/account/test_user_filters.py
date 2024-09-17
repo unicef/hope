@@ -118,6 +118,7 @@ class TestUserFilter(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         User.objects.all().delete()
         business_area = create_afghanistan()
         partner_unicef = PartnerFactory(name="UNICEF")

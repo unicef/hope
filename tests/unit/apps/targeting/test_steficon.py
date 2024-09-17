@@ -14,6 +14,7 @@ from hct_mis_api.apps.targeting.models import TargetPopulation
 class TestTargetingSteficon(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         rule, __ = Rule.objects.update_or_create(

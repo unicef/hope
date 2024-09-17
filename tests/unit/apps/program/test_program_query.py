@@ -20,6 +20,7 @@ PROGRAM_QUERY = """
       program(id: $id) {
         name
         status
+        canFinish
         targetPopulationsCount
         pduFields {
           label
@@ -38,6 +39,7 @@ PROGRAM_QUERY = """
 class TestProgramQuery(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.partner = PartnerFactory(name="WFP")
         cls.user = UserFactory.create(partner=cls.partner)
 

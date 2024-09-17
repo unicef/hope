@@ -37,6 +37,7 @@ class TestIndividualFlagQuery(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         partner = PartnerFactory(name="Partner")
         cls.user = UserFactory(partner=partner)
@@ -105,7 +106,6 @@ class TestIndividualFlagQuery(APITestCase):
         cls.create_user_role_with_permissions(
             cls.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST], cls.business_area
         )
-        super().setUpTestData()
 
     @parameterized.expand(
         [

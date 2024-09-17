@@ -33,6 +33,7 @@ class TestXLSXValidatorsMethods(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         call_command("loadflexfieldsattributes")
         generate_delivery_mechanisms()
 

@@ -9,6 +9,7 @@ from hct_mis_api.aurora.models import Record
 class TestClearRecordFilesTask(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.record_1 = Record.objects.create(
             registration=1,
             status=Record.STATUS_IMPORTED,

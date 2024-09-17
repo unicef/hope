@@ -25,6 +25,7 @@ from hct_mis_api.apps.utils.models import MergeStatusModel
 class TestReassignRolesOnDisableIndividual(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.program_one = ProgramFactory(name="Test program ONE", business_area=cls.business_area)

@@ -76,6 +76,7 @@ class TestIndividualQuery(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.partner = PartnerFactory(name="Test123")
         cls.user = UserFactory(partner=cls.partner)
 
@@ -655,6 +656,7 @@ class TestIndividualWithFlexFieldsQuery(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.user = UserFactory()
         cls.business_area = create_afghanistan()
 

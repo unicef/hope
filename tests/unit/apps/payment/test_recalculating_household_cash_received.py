@@ -103,6 +103,7 @@ class TestRecalculatingCash(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         payment_fixtures.generate_delivery_mechanisms()
         cls.user = UserFactory.create()

@@ -19,6 +19,7 @@ CROSS_AREA_FILTER_AVAILABLE_QUERY = """
 class TestCrossAreaFilterAvailable(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.business_area = BusinessAreaFactory()
         cls.program = ProgramFactory(business_area=cls.business_area, status=Program.ACTIVE)
         cls.area = AreaFactory()

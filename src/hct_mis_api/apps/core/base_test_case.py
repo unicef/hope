@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional
 
 from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
+from django.contrib.contenttypes.models import ContentType
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.handlers.wsgi import WSGIRequest
 from django.test import RequestFactory
@@ -35,6 +36,7 @@ class APITestCase(SnapshotTestTestCase):
     def setUp(self) -> None:
         from hct_mis_api.schema import schema
 
+        ContentType.objects.clear_cache()
         super().setUp()
         self.client: Client = Client(schema)
 
@@ -52,6 +54,7 @@ class APITestCase(SnapshotTestTestCase):
     def tearDown(self) -> None:
         with open(f"{settings.PROJECT_ROOT}/../test_times.txt", "a") as f:
             f.write(f"{time.time() - self.start_time:.3f} {self.id()}" + os.linesep)
+        super().tearDown()
 
     def snapshot_graphql_request(
         self, request_string: str, context: Optional[Dict] = None, variables: Optional[Dict] = None

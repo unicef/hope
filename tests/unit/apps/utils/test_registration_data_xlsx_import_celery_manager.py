@@ -12,6 +12,7 @@ from hct_mis_api.apps.registration_data.models import ImportData, RegistrationDa
 class TestRegistrationDataXlsxImportCeleryManager(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         call_command("loadbusinessareas")
 
     @mock.patch("hct_mis_api.apps.utils.celery_manager.get_all_celery_tasks")

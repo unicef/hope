@@ -30,6 +30,7 @@ class TestGrievanceApproveAutomaticMutation(TestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         cls.user = UserFactory(first_name="user")
         cls.user_two = UserFactory.create(first_name="user_two")
