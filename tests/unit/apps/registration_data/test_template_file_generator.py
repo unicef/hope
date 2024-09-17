@@ -15,6 +15,7 @@ from hct_mis_api.apps.registration_data.services.template_generator_service impo
 class TestTemplateFileGenerator(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         cls.program = get_program_with_dct_type_and_name()
         create_pdu_flexible_attribute(

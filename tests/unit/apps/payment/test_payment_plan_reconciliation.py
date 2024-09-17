@@ -269,6 +269,7 @@ class TestPaymentPlanReconciliation(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan(
             is_payment_plan_applicable=True,
         )
@@ -888,9 +889,9 @@ class TestPaymentPlanReconciliation(APITestCase):
     def test_xlsx_payment_plan_import_per_fsp_service_import_row(self) -> None:
         pp = PaymentPlanFactory(status=PaymentPlan.Status.FINISHED)
         pp.refresh_from_db()
-        PaymentVerificationSummaryFactory(generic_fk_obj=pp)
+        PaymentVerificationSummaryFactory(payment_plan_obj=pp)
         pvp = PaymentVerificationPlanFactory(
-            generic_fk_obj=pp,
+            payment_plan_obj=pp,
             verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL,
             status=PaymentVerificationPlan.STATUS_ACTIVE,
         )
@@ -936,19 +937,19 @@ class TestPaymentPlanReconciliation(APITestCase):
         )
         verification_1 = PaymentVerificationFactory(
             payment_verification_plan=pvp,
-            generic_fk_obj=payment_1,
+            payment_obj=payment_1,
             status=PaymentVerification.STATUS_RECEIVED_WITH_ISSUES,
             received_amount=999,
         )
         verification_2 = PaymentVerificationFactory(
             payment_verification_plan=pvp,
-            generic_fk_obj=payment_2,
+            payment_obj=payment_2,
             status=PaymentVerification.STATUS_RECEIVED,
             received_amount=500,
         )
         verification_3 = PaymentVerificationFactory(
             payment_verification_plan=pvp,
-            generic_fk_obj=payment_3,
+            payment_obj=payment_3,
             status=PaymentVerification.STATUS_PENDING,
             received_amount=None,
         )

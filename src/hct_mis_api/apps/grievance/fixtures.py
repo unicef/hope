@@ -151,8 +151,6 @@ class GrievanceComplaintTicketWithoutExtrasFactory(DjangoModelFactory):
     )
     household = None
     individual = None
-    payment_object_id = None
-    payment_content_type_id = None
 
 
 class TicketNoteFactory(DjangoModelFactory):

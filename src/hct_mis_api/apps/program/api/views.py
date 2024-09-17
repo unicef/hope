@@ -11,6 +11,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.filters import OrderingFilter
 from rest_framework.request import Request
 from rest_framework.response import Response
+from rest_framework.serializers import BaseSerializer
 from rest_framework.viewsets import GenericViewSet
 from rest_framework_extensions.cache.decorators import cache_response
 
@@ -23,6 +24,7 @@ from hct_mis_api.apps.account.api.permissions import (
     ProgramCycleViewListPermission,
 )
 from hct_mis_api.apps.core.api.mixins import ActionMixin, BusinessAreaProgramMixin
+from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.api.caches import ProgramCycleKeyConstructor
 from hct_mis_api.apps.program.api.filters import ProgramCycleFilter
 from hct_mis_api.apps.program.api.serializers import (
@@ -76,6 +78,18 @@ class ProgramCycleViewSet(
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 
+    def perform_update(self, serializer: BaseSerializer[Any]) -> None:
+        cycle = self.get_object()
+        previous_start_date = cycle.start_date
+        previous_end_date = cycle.end_date
+
+        updated_cycle = serializer.save()
+        # update PaymentPlan start and end dates
+        if previous_start_date != updated_cycle.start_date:
+            PaymentPlan.objects.filter(program_cycle=cycle).update(start_date=updated_cycle.start_date)
+        if previous_end_date != updated_cycle.end_date:
+            PaymentPlan.objects.filter(program_cycle=cycle).update(end_date=updated_cycle.end_date)
+
     def perform_destroy(self, program_cycle: ProgramCycle) -> None:
         if program_cycle.program.status != Program.ACTIVE:
             raise ValidationError("Only Programme Cycle for Active Programme can be deleted.")
@@ -85,6 +99,12 @@ class ProgramCycleViewSet(
 
         if program_cycle.program.cycles.count() == 1:
             raise ValidationError("Don’t allow to delete last Cycle.")
+
+        if program_cycle.target_populations.exists():
+            raise ValidationError("Don’t allow to delete Cycle with assigned Target Population")
+
+        if program_cycle.payment_plans.exists():
+            raise ValidationError("Don’t allow to delete Cycle with assigned Payment Plan")
 
         program_cycle.delete()
 

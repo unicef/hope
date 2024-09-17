@@ -39,6 +39,7 @@ pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 class RegistrationDataImportAdminDeleteTest(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         afghanistan = create_afghanistan()
         program = ProgramFactory(name="Test program For RDI", business_area=afghanistan)
         cls.rdi = RegistrationDataImportFactory(
@@ -99,6 +100,7 @@ class RegistrationDataImportAdminDeleteTest(TestCase):
 class RegistrationDataImportAdminDeleteMergedTest(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         afghanistan = create_afghanistan()
         program = ProgramFactory(name="Test program For RDI", business_area=afghanistan)
         cls.rdi = RegistrationDataImportFactory(

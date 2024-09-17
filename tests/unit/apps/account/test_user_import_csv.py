@@ -22,6 +22,7 @@ from hct_mis_api.apps.core.models import BusinessArea
 class UserImportCSVTest(WebTest):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.superuser: User = UserFactory(is_superuser=True, is_staff=True)
@@ -112,6 +113,7 @@ class UserImportCSVTest(WebTest):
 class UserKoboActionsTest(WebTest):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.superuser: User = UserFactory(is_superuser=True, is_staff=True)

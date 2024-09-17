@@ -25,6 +25,7 @@ from hct_mis_api.apps.utils.models import MergeStatusModel
 class TestReassignRolesOnUpdate(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         call_command("loadbusinessareas")
 
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")

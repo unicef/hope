@@ -17,6 +17,7 @@ from hct_mis_api.apps.registration_datahub.celery_tasks import (
 class TestRegistrationXlsxImportTask(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.business_area = BusinessAreaFactory()
         cls.program = ProgramFactory()
 

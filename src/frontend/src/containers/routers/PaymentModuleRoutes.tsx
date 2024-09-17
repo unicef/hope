@@ -21,6 +21,7 @@ import { ProgramCyclePage } from '@containers/pages/paymentmodule/ProgramCycle/P
 import { ProgramCycleDetailsPage } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/ProgramCycleDetailsPage';
 import { PaymentPlanDetailsPage } from '@containers/pages/paymentmodule/ProgramCycle/PaymentPlanDetails/PaymentPlanDetailsPage';
 import { CreatePaymentPlanPage } from '@containers/pages/paymentmodule/ProgramCycle/CreatePaymentPlanPage';
+import { EditPeoplePaymentPlanPage } from '@containers/pages/paymentmodulepeople/EditPeoplePaymentPlanPage';
 
 export const PaymentModuleRoutes = (): React.ReactElement => {
   const { isSocialDctType } = useProgramContext();
@@ -80,7 +81,7 @@ export const PaymentModuleRoutes = (): React.ReactElement => {
         ],
       },
       {
-        path: 'payments/:id',
+        path: 'payments/:paymentId',
         element: <PeoplePaymentDetailsPage />,
       },
       {
@@ -109,11 +110,11 @@ export const PaymentModuleRoutes = (): React.ReactElement => {
                     children: [
                       {
                         path: '',
-                        element: <PaymentPlanDetailsPage />,
+                        element: <PeoplePaymentPlanDetailsPage />,
                       },
                       {
                         path: 'edit',
-                        element: <EditPaymentPlanPage />,
+                        element: <EditPeoplePaymentPlanPage />,
                       },
                     ],
                   },
@@ -178,7 +179,7 @@ export const PaymentModuleRoutes = (): React.ReactElement => {
         ],
       },
       {
-        path: 'payments/:id',
+        path: 'payments/:paymentId',
         element: <PaymentDetailsPage />,
       },
       {

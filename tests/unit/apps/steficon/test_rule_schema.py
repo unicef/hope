@@ -26,6 +26,7 @@ query AllSteficonRules(
 class TestRuleSchema(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.business_area = create_afghanistan()
 
         cls.rule_1 = RuleFactory(

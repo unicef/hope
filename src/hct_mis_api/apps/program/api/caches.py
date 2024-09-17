@@ -12,11 +12,11 @@ class ProgramCycleListVersionsKeyBit(KeyBitBase):
         self, params: Any, view_instance: Any, view_method: Any, request: Any, args: tuple, kwargs: dict
     ) -> str:
         program_id = decode_id_string(kwargs.get("program_id"))
-        program_cycle_updated_at = (
-            ProgramCycle.all_objects.filter(program_id=program_id).latest("updated_at").updated_at
-        )
+        program_cycle_qs = ProgramCycle.objects.filter(program_id=program_id)
+        program_cycle_updated_at = program_cycle_qs.latest("updated_at").updated_at
+        program_cycle_count = program_cycle_qs.count()
 
-        version_key = f"{program_id}:{program_cycle_updated_at}"
+        version_key = f"{program_id}:{program_cycle_updated_at}:{program_cycle_count}"
         return str(version_key)
 
 

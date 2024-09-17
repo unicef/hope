@@ -38,6 +38,7 @@ class TestAllHouseholdFlexFieldsAttributes(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.partner = PartnerFactory(name="Partner")
         cls.user = UserFactory(partner=cls.partner)
         cls.business_area = create_afghanistan()

@@ -10,7 +10,7 @@ export const headCells: HeadCell<PaymentRecordAndPaymentNode>[] = [
   },
   {
     disablePadding: false,
-    label: 'Verification Status',
+    label: 'Payment Record Status',
     id: 'status',
     numeric: false,
   },

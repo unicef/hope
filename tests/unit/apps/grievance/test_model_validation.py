@@ -17,6 +17,7 @@ from hct_mis_api.apps.payment.models import DeliveryMechanism
 class TestGrievanceModelValidation(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         cls.user = UserFactory.create()
         cls.base_model_data = {
@@ -79,6 +80,7 @@ class TestGrievanceModelValidation(TestCase):
 class TestFspXlsxTemplatePerDeliveryMechanismValidation(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         cls.user = UserFactory.create()
         generate_delivery_mechanisms()

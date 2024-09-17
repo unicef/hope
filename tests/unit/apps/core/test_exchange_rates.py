@@ -230,6 +230,7 @@ class TestExchangeRates(TestCase):
 class TestFixExchangeRatesCommand(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         business_area = BusinessArea.objects.create(
             code="0060",
             name="Afghanistan",

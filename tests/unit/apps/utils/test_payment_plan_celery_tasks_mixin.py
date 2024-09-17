@@ -14,6 +14,7 @@ from hct_mis_api.apps.payment.models import PaymentPlan
 class TestPaymentPlanCeleryTasksMixin(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.business_area = create_afghanistan()
 
         cls.user = UserFactory()

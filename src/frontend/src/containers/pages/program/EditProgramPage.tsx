@@ -119,7 +119,6 @@ export const EditProgramPage = (): ReactElement => {
           }))
         : [];
 
-    const { editMode, ...requestValues } = values;
     const pduFieldsToSend = values.pduFields
       .filter((item) => item.label !== '')
       .map(({ __typename, pduData, ...rest }) => ({
@@ -150,8 +149,11 @@ export const EditProgramPage = (): ReactElement => {
       }));
 
     try {
-      const { pduFields: pduFieldsFromValues, ...requestValuesWithoutPdu } =
-        requestValues;
+      const {
+        editMode,
+        pduFields: pduFieldsFromValues,
+        ...requestValuesWithoutPdu
+      } = values;
 
       const response = await mutate({
         variables: {
@@ -245,7 +247,7 @@ export const EditProgramPage = (): ReactElement => {
       onSubmit={(values) => {
         handleSubmit(values);
       }}
-      validationSchema={editProgramValidationSchema(t)}
+      validationSchema={editProgramValidationSchema(t, initialValues)}
     >
       {({
         submitForm,

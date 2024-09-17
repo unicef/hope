@@ -38,11 +38,13 @@ from hct_mis_api.apps.payment.models import (
     PaymentPlanSplit,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.models import ProgramCycle
 
 
 class TestPaymentPlanModel(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
@@ -175,6 +177,7 @@ class TestPaymentPlanModel(TestCase):
 class TestPaymentModel(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
@@ -263,6 +266,54 @@ class TestPaymentModel(TestCase):
             ],
         )
 
+        # the same conflicts when Cycle without end date
+        program_cycle = program.cycles.first()
+        ProgramCycle.objects.filter(pk=program_cycle.id).update(end_date=None)
+        program_cycle.refresh_from_db()
+        self.assertIsNone(program_cycle.end_date)
+
+        payment_data = Payment.objects.filter(id=p1.id).values()[0]
+        self.assertEqual(payment_data["payment_plan_hard_conflicted"], True)
+        self.assertEqual(payment_data["payment_plan_soft_conflicted"], True)
+
+        self.assertEqual(len(payment_data["payment_plan_hard_conflicted_data"]), 1)
+        self.assertEqual(
+            json.loads(payment_data["payment_plan_hard_conflicted_data"][0]),
+            {
+                "payment_id": str(p2.id),
+                "payment_plan_id": str(pp2.id),
+                "payment_plan_status": str(pp2.status),
+                "payment_plan_start_date": program_cycle.start_date.strftime("%Y-%m-%d"),
+                "payment_plan_end_date": None,
+                "payment_plan_unicef_id": str(pp2.unicef_id),
+                "payment_unicef_id": str(p2.unicef_id),
+            },
+        )
+        self.assertEqual(len(payment_data["payment_plan_soft_conflicted_data"]), 2)
+        self.assertCountEqual(
+            [json.loads(conflict_data) for conflict_data in payment_data["payment_plan_soft_conflicted_data"]],
+            [
+                {
+                    "payment_id": str(p3.id),
+                    "payment_plan_id": str(pp3.id),
+                    "payment_plan_status": str(pp3.status),
+                    "payment_plan_start_date": program_cycle.start_date.strftime("%Y-%m-%d"),
+                    "payment_plan_end_date": None,
+                    "payment_plan_unicef_id": str(pp3.unicef_id),
+                    "payment_unicef_id": str(p3.unicef_id),
+                },
+                {
+                    "payment_id": str(p4.id),
+                    "payment_plan_id": str(pp4.id),
+                    "payment_plan_status": str(pp4.status),
+                    "payment_plan_start_date": program_cycle.start_date.strftime("%Y-%m-%d"),
+                    "payment_plan_end_date": None,
+                    "payment_plan_unicef_id": str(pp4.unicef_id),
+                    "payment_unicef_id": str(p4.unicef_id),
+                },
+            ],
+        )
+
     def test_manager_annotations_pp_no_conflicts_for_follow_up(self) -> None:
         program_cycle = RealProgramFactory().cycles.first()
         pp1 = PaymentPlanFactory(program_cycle=program_cycle)
@@ -313,6 +364,7 @@ class TestPaymentModel(TestCase):
 class TestPaymentPlanSplitModel(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
@@ -339,6 +391,7 @@ class TestPaymentPlanSplitModel(TestCase):
 class TestFinancialServiceProviderModel(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 

@@ -47,6 +47,7 @@ class TestRoleReassignMutation(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         call_command("loadcountries")
         cls.user = UserFactory.create()
@@ -169,6 +170,7 @@ class TestRoleReassignMutationNewTicket(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         create_afghanistan()
         cls.user = UserFactory.create()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")

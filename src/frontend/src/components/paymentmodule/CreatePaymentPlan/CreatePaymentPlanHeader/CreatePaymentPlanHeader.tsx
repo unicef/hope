@@ -72,7 +72,7 @@ export function CreatePaymentPlanHeader({
     >
       <Box display="flex" mt={2} mb={2}>
         <Box mr={3}>
-          <Button component={Link} to={'..'}>
+          <Button component={Link} to={'../..'}>
             {t('Cancel')}
           </Button>
         </Box>

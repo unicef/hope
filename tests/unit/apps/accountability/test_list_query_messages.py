@@ -57,6 +57,7 @@ class TestListQueryMessage(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         cls.partner = PartnerFactory(name="TestPartner")
         cls.user = UserFactory(first_name="John", last_name="Wick", partner=cls.partner)
         cls.business_area = create_afghanistan()
