@@ -63,12 +63,12 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 def valid_file() -> File:
-    content = Path(f"{settings.PROJECT_ROOT}/apps/payment/tests/test_file/pp_payment_list_valid.xlsx").read_bytes()
+    content = Path(f"{settings.TESTS_ROOT}/apps/payment/test_file/pp_payment_list_valid.xlsx").read_bytes()
     return File(BytesIO(content), name="pp_payment_list_valid.xlsx")
 
 
 def invalid_file() -> File:
-    content = Path(f"{settings.PROJECT_ROOT}/apps/payment/tests/test_file/pp_payment_list_invalid.xlsx").read_bytes()
+    content = Path(f"{settings.TESTS_ROOT}/apps/payment/test_file/pp_payment_list_invalid.xlsx").read_bytes()
     return File(BytesIO(content), name="pp_payment_list_invalid.xlsx")
 
 
@@ -151,7 +151,7 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
     def test_import_invalid_file_with_unexpected_column(self) -> None:
         error_msg = XlsxError(sheet="Payment Plan - Payment List", coordinates="M3", message="Unexpected value")
         content = Path(
-            f"{settings.PROJECT_ROOT}/apps/payment/tests/test_file/pp_payment_list_unexpected_column.xlsx"
+            f"{settings.TESTS_ROOT}/apps/payment/test_file/pp_payment_list_unexpected_column.xlsx"
         ).read_bytes()
         file = BytesIO(content)
 

@@ -14,7 +14,7 @@ class TestExtractRecords(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        content = Path(f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/image.jpeg").read_bytes()
+        content = Path(f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file/image.jpeg").read_bytes()
 
         fields = {
             "household": [

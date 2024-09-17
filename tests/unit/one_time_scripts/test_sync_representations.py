@@ -43,10 +43,10 @@ from hct_mis_api.one_time_scripts.sync_representations import (
     ONE_TO_ONE_GREVIANCE_MODELS,
     sync_representations_per_business_area,
 )
-from hct_mis_api.one_time_scripts.tests.test_migrate_data_to_representations import (
+from tests.unit.one_time_scripts.test_migrate_data_to_representations import (
     BaseMigrateDataTestCase,
 )
-from hct_mis_api.one_time_scripts.tests.test_migrate_grievance_to_representations import (
+from tests.unit.one_time_scripts.test_migrate_grievance_to_representations import (
     BaseGrievanceTestCase,
 )
 

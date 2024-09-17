@@ -8,8 +8,8 @@ from rest_framework.exceptions import AuthenticationFailed
 
 from hct_mis_api.api.auth import HOPEAuthentication, HOPEPermission
 from hct_mis_api.api.models import APIToken, Grant
-from hct_mis_api.api.tests.base import HOPEApiTestCase
-from hct_mis_api.api.tests.factories import APITokenFactory
+from tests.unit.api.base import HOPEApiTestCase
+from tests.unit.api.factories import APITokenFactory
 from hct_mis_api.apps.account.fixtures import (
     BusinessAreaFactory,
     RoleFactory,

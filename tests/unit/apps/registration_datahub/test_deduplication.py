@@ -31,7 +31,7 @@ from hct_mis_api.apps.utils.elasticsearch_utils import (
     rebuild_search_index,
 )
 from hct_mis_api.apps.utils.querysets import evaluate_qs
-from hct_mis_api.conftest import disabled_locally_test
+from tests.unit.conftest import disabled_locally_test
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 

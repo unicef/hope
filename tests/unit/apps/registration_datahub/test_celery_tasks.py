@@ -459,7 +459,7 @@ VALID_JSON = [
 
 def create_record(fields: Dict, registration: int, status: str, files: Optional[Dict] = None) -> Any:  # Record
     # based on backend/hct_mis_api/apps/registration_datahub/tests/test_extract_records.py
-    content = Path(f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/image.jpeg").read_bytes()
+    content = Path(f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file/image.jpeg").read_bytes()
 
     # need files for each Individual
     files = files or {

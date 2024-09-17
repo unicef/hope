@@ -33,7 +33,7 @@ class TestEdopomogaCreation(APITestCase):
             name="Test program ONE",
             business_area=BusinessArea.objects.first(),
         )
-        content = Path(f"{settings.PROJECT_ROOT}/apps/core/tests/test_files/edopomoga_sample.csv")
+        content = Path(f"{settings.TESTS_ROOT}/apps/core/test_files/edopomoga_sample.csv")
         cls.storage_file = StorageFile.objects.create(
             created_by=cls.user,
             business_area=cls.business_area,

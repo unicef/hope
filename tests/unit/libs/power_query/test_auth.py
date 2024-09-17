@@ -13,7 +13,7 @@ from power_query.models import Formatter, Query, Report
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.libs.power_query.defaults import hope_create_defaults
-from hct_mis_api.libs.power_query.tests.utils import user_grant_office_permission
+from tests.unit.libs.power_query.utils import user_grant_office_permission
 
 
 @pytest.mark.skip(reason="This test is not working")

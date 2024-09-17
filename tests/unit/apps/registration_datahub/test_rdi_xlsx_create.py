@@ -59,7 +59,7 @@ pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 
 def create_document_image() -> File:
-    content = Path(f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/image.png").read_bytes()
+    content = Path(f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file/image.png").read_bytes()
     return File(BytesIO(content), name="image.png")
 
 
@@ -98,7 +98,7 @@ class TestRdiXlsxCreateTask(TestCase):
             associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
         )
         content = Path(
-            f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/new_reg_data_import.xlsx"
+            f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file/new_reg_data_import.xlsx"
         ).read_bytes()
         file = File(BytesIO(content), name="new_reg_data_import.xlsx")
         business_area = create_afghanistan()
@@ -235,7 +235,7 @@ class TestRdiXlsxCreateTask(TestCase):
 
     def test_execute_with_flex_field_and_pdu(self) -> None:
         content = Path(
-            f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/new_reg_data_import_flex_field.xlsx"
+            f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file/new_reg_data_import_flex_field.xlsx"
         ).read_bytes()
         file = File(BytesIO(content), name="new_reg_data_import_flex_field.xlsx")
 

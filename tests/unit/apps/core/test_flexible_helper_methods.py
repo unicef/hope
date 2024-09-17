@@ -15,7 +15,7 @@ class TestFlexibleHelperMethods(TestCase):
     def setUpTestData(cls) -> None:
         super().setUpTestData()
         cls.importer = FlexibleAttributeImporter()
-        wb = xlrd.open_workbook(filename=f"{settings.PROJECT_ROOT}/apps/core/tests/test_files/flex_init.xls")
+        wb = xlrd.open_workbook(filename=f"{settings.TESTS_ROOT}/apps/core/test_files/flex_init.xls")
         cls.survey_sheet = wb.sheet_by_name("survey")
         cls.choices_sheet = wb.sheet_by_name("choices")
         cls.importer._reset_model_fields_variables()

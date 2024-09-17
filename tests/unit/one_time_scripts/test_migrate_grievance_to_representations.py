@@ -69,7 +69,7 @@ from hct_mis_api.one_time_scripts.migrate_grievance_to_representations import (
     handle_payment_related_tickets,
     migrate_grievance_to_representations,
 )
-from hct_mis_api.one_time_scripts.tests.test_migrate_data_to_representations_performance import (
+from tests.unit.one_time_scripts.test_migrate_data_to_representations_performance import (
     _AssertNumQueriesContext,
 )
 

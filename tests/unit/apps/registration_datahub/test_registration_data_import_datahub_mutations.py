@@ -143,10 +143,10 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
         )
 
         xlsx_valid_file_path = (
-            f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/new_reg_data_import.xlsx"
+            f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file/new_reg_data_import.xlsx"
         )
 
-        xlsx_invalid_file_path = f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/rdi_import_3_hh_missing_required_delivery_fields.xlsx"
+        xlsx_invalid_file_path = f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file/rdi_import_3_hh_missing_required_delivery_fields.xlsx"
 
         with open(xlsx_valid_file_path, "rb") as file:
             cls.valid_file = SimpleUploadedFile(file.name, file.read())

@@ -6,7 +6,7 @@ from power_query.models import Formatter, Query
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
 from hct_mis_api.libs.power_query.backends import PowerQueryBackend
 from hct_mis_api.libs.power_query.defaults import hope_create_defaults
-from hct_mis_api.libs.power_query.tests.utils import user_grant_office_permission
+from tests.unit.libs.power_query.utils import user_grant_office_permission
 
 
 @override_settings(POWER_QUERY_DB_ALIAS="default")

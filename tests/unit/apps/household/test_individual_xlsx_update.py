@@ -25,20 +25,20 @@ from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFa
 
 
 def valid_file() -> File:
-    content = Path(f"{settings.PROJECT_ROOT}/apps/household/tests/test_file/valid_updated_test_file.xlsx").read_bytes()
+    content = Path(f"{settings.TESTS_ROOT}/apps/household/test_file/valid_updated_test_file.xlsx").read_bytes()
     return File(BytesIO(content), name="valid_updated_test_file.xlsx")
 
 
 def valid_file_complex() -> File:
     content = Path(
-        f"{settings.PROJECT_ROOT}/apps/household/tests/test_file/valid_updated_test_file_complex.xlsx"
+        f"{settings.TESTS_ROOT}/apps/household//test_file/valid_updated_test_file_complex.xlsx"
     ).read_bytes()
     return File(BytesIO(content), name="valid_updated_test_file_complex.xlsx")
 
 
 def invalid_file() -> File:
     content = Path(
-        f"{settings.PROJECT_ROOT}/apps/household/tests/test_file/invalid_updated_test_file.xlsx"
+        f"{settings.TESTS_ROOT}/apps/household/test_file/invalid_updated_test_file.xlsx"
     ).read_bytes()
     return File(BytesIO(content), name="invalid_updated_test_file.xlsx")
 

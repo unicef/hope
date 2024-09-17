@@ -43,7 +43,7 @@ class TestRdiKoboCreateTask(TestCase):
     @staticmethod
     def _return_test_image(*args: Any, **kwargs: Any) -> BytesIO:
         return BytesIO(
-            Path(f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/image.png").read_bytes()
+            Path(f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file/image.png").read_bytes()
         )
 
     @classmethod
@@ -63,7 +63,7 @@ class TestRdiKoboCreateTask(TestCase):
         DocumentType.objects.bulk_create(document_types, ignore_conflicts=True)
 
         content = Path(
-            f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/kobo_submissions.json"
+            f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file/kobo_submissions.json"
         ).read_bytes()
         file = File(BytesIO(content), name="kobo_submissions.json")
         cls.import_data = ImportData.objects.create(
@@ -73,7 +73,7 @@ class TestRdiKoboCreateTask(TestCase):
         )
 
         content = Path(
-            f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/kobo_submissions_collectors.json"
+            f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file/kobo_submissions_collectors.json"
         ).read_bytes()
         file = File(BytesIO(content), name="kobo_submissions_collectors.json")
         cls.import_data_collectors = ImportData.objects.create(
@@ -519,7 +519,7 @@ class TestRdiKoboCreateTask(TestCase):
             result.append(copy)
 
         with open(
-            f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/big_json.json",
+            f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file/big_json.json",
             "w+",
         ) as json_file:
             json_file.write(json.dumps(result))

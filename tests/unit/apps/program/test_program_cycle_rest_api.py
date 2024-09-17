@@ -11,7 +11,7 @@ from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.test import APIClient, APIRequestFactory
 
-from hct_mis_api.api.tests.base import HOPEApiTestCase
+from tests.unit.api.base import HOPEApiTestCase
 from hct_mis_api.apps.account.fixtures import (
     BusinessAreaFactory,
     PartnerFactory,

@@ -25,7 +25,7 @@ class TestSettingTypesForCalculateFields(TestCase):
     @staticmethod
     def load_xls_file(name: str) -> None:
         task = FlexibleAttributeImporter()
-        task.import_xls(f"{settings.PROJECT_ROOT}/apps/core/tests/test_files/{name}")
+        task.import_xls(f"{settings.TESTS_ROOT}/apps/core/test_files/{name}")
 
     @parameterized.expand(
         [

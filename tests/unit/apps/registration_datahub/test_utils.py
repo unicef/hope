@@ -12,17 +12,17 @@ class TestRdiUtils(TestCase):
     def test_calculate_hash_for_kobo_submission(self) -> None:
         test_data1 = json.load(
             open(
-                f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/test_calculate_hash_for_kobo_submission1.json"
+                f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file/test_calculate_hash_for_kobo_submission1.json"
             )
         )
         test_data2 = json.load(
             open(
-                f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/test_calculate_hash_for_kobo_submission2.json"
+                f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file/test_calculate_hash_for_kobo_submission2.json"
             )
         )
         test_data3 = json.load(
             open(
-                f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/test_calculate_hash_for_kobo_submission3.json"
+                f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file/test_calculate_hash_for_kobo_submission3.json"
             )
         )
         hash1 = calculate_hash_for_kobo_submission(test_data1)

@@ -8,7 +8,7 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 
 from hct_mis_api.api.models import Grant
-from hct_mis_api.api.tests.base import HOPEApiTestCase
+from tests.unit.api.base import HOPEApiTestCase
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.models import (
     COLLECT_TYPE_FULL,
