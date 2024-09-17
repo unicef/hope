@@ -581,6 +581,8 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
     can_send_to_payment_gateway = graphene.Boolean()
     can_split = graphene.Boolean()
 
+    # TODO: add list of supporting documents
+
     class Meta:
         model = PaymentPlan
         interfaces = (relay.Node,)

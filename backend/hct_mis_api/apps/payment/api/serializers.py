@@ -1,9 +1,9 @@
-from typing import Optional
+from typing import Any, Dict, Optional
 
 from rest_framework import serializers
 
 from hct_mis_api.apps.account.api.fields import Base64ModelField
-from hct_mis_api.apps.payment.models import PaymentPlan
+from hct_mis_api.apps.payment.models import PaymentPlan, PaymentPlanSupportingDocument
 
 
 class FollowUpPaymentPlanSerializer(serializers.ModelSerializer):
@@ -56,3 +56,31 @@ class PaymentPlanBulkActionSerializer(serializers.Serializer):
     ids = serializers.ListField(child=serializers.CharField())
     action = serializers.ChoiceField(PaymentPlan.Action.choices)
     comment = serializers.CharField(required=False, allow_blank=True)
+
+
+class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PaymentPlanSupportingDocument
+        fields = ["id", "title", "file", "uploaded_at", "created_by"]
+
+    def validate_file(self, file: Any) -> Any:
+        if file.size > PaymentPlanSupportingDocument.FILE_SIZE_LIMIT:
+            raise serializers.ValidationError("File size must be ≤ 10MB.")
+
+        allowed_extensions = ["pdf", "xlsx", "jpg", "jpeg", "png"]
+        extension = file.name.split(".")[-1].lower()
+        if extension not in allowed_extensions:
+            raise serializers.ValidationError("Unsupported file type.")
+
+        return file
+
+    def validate(self, data: Dict) -> Dict:
+        payment_plan = self.context["payment_plan"]
+        if payment_plan.status not in [PaymentPlan.Status.OPEN, PaymentPlan.Status.LOCKED]:
+            raise serializers.ValidationError("Payment plan must be within status OPEN or LOCKED.")
+
+        if payment_plan.documents.count() >= PaymentPlanSupportingDocument.FILE_LIMIT:
+            raise serializers.ValidationError(
+                f"Payment plan already has the maximum of {PaymentPlanSupportingDocument.FILE_LIMIT} supporting documents."
+            )
+        return data
