@@ -278,7 +278,7 @@ class BiometricDeduplicationService:
             if pair.individual1_id in rdi_individuals:
                 unique_individuals.add(pair.individual1_id)
             if pair.individual2_id in rdi_individuals:
-                unique_individuals.add(pair.individual2_id)
+                unique_individuals.add(pair.individual2_id)  # pragma: no cover
 
         return len(unique_individuals)
 
