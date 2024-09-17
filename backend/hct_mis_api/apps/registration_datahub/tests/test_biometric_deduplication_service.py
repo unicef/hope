@@ -545,3 +545,51 @@ class BiometricDeduplicationServiceTest(TestCase):
 
         service.get_deduplication_set.assert_called_once_with(deduplication_set_id)
         service.mark_rdis_as_deduplication_error.assert_called_once_with(deduplication_set_id)
+
+    def test_store_rdis_deduplication_statistics(self) -> None:
+        deduplication_set_id = str(uuid.uuid4())
+        self.program.deduplication_set_id = deduplication_set_id
+        self.program.save()
+
+        service = BiometricDeduplicationService()
+
+        rdi1 = RegistrationDataImportFactory(
+            program=self.program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS
+        )
+
+        service.get_duplicate_individuals_for_rdi_against_batch_count = mock.Mock(return_value=8)
+        service.get_duplicate_individuals_for_rdi_against_population_count = mock.Mock(return_value=9)
+
+        service.store_rdis_deduplication_statistics(deduplication_set_id)
+
+        service.get_duplicate_individuals_for_rdi_against_batch_count.assert_called_once_with(rdi1)
+        service.get_duplicate_individuals_for_rdi_against_population_count.assert_called_once_with(rdi1)
+
+        rdi1.refresh_from_db()
+        assert rdi1.dedup_engine_batch_duplicates == 8
+        assert rdi1.dedup_engine_golden_record_duplicates == 9
+
+    def test_update_rdis_deduplication_statistics(self) -> None:
+        deduplication_set_id = str(uuid.uuid4())
+        self.program.deduplication_set_id = deduplication_set_id
+        self.program.save()
+
+        service = BiometricDeduplicationService()
+
+        rdi1 = RegistrationDataImportFactory(
+            program=self.program,
+            deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED,
+            status=RegistrationDataImport.IN_REVIEW,
+        )
+
+        service.get_duplicate_individuals_for_rdi_against_batch_count = mock.Mock(return_value=8)
+        service.get_duplicate_individuals_for_rdi_against_population_count = mock.Mock(return_value=9)
+
+        service.update_rdis_deduplication_statistics(self.program.id)
+
+        service.get_duplicate_individuals_for_rdi_against_batch_count.assert_called_once_with(rdi1)
+        service.get_duplicate_individuals_for_rdi_against_population_count.assert_called_once_with(rdi1)
+
+        rdi1.refresh_from_db()
+        assert rdi1.dedup_engine_batch_duplicates == 8
+        assert rdi1.dedup_engine_golden_record_duplicates == 9
