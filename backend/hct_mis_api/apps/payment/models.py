@@ -227,9 +227,9 @@ class GenericPaymentPlan(TimeStampedUUIDModel):
         return payment_verification_plans
 
     def available_payment_records(
-            self,
-            payment_verification_plan: Optional["PaymentVerificationPlan"] = None,
-            extra_validation: Optional[Callable] = None,
+        self,
+        payment_verification_plan: Optional["PaymentVerificationPlan"] = None,
+        extra_validation: Optional[Callable] = None,
     ) -> QuerySet:
         params = Q(status__in=GenericPayment.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0)
 
@@ -613,7 +613,7 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
         target=BackgroundActionStatus.XLSX_EXPORTING,
         conditions=[
             lambda obj: obj.status
-                        in [PaymentPlan.Status.LOCKED, PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]
+            in [PaymentPlan.Status.LOCKED, PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]
         ],
     )
     def background_action_status_xlsx_exporting(self) -> None:
@@ -625,7 +625,7 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
         target=BackgroundActionStatus.XLSX_EXPORT_ERROR,
         conditions=[
             lambda obj: obj.status
-                        in [PaymentPlan.Status.LOCKED, PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]
+            in [PaymentPlan.Status.LOCKED, PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]
         ],
     )
     def background_action_status_xlsx_export_error(self) -> None:
@@ -664,7 +664,7 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
         target=BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION,
         conditions=[
             lambda obj: obj.status
-                        in [PaymentPlan.Status.LOCKED, PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]
+            in [PaymentPlan.Status.LOCKED, PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]
         ],
     )
     def background_action_status_xlsx_importing_reconciliation(self) -> None:
@@ -680,7 +680,7 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
         target=BackgroundActionStatus.XLSX_IMPORT_ERROR,
         conditions=[
             lambda obj: obj.status
-                        in [PaymentPlan.Status.LOCKED, PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]
+            in [PaymentPlan.Status.LOCKED, PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]
         ],
     )
     def background_action_status_xlsx_import_error(self) -> None:
@@ -853,7 +853,7 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
         self.male_adults_count = targeted_individuals.get("male_adults_count", 0)
         self.total_households_count = households_ids.count()
         self.total_individuals_count = (
-                self.female_children_count + self.male_children_count + self.female_adults_count + self.male_adults_count
+            self.female_children_count + self.male_children_count + self.female_adults_count + self.male_adults_count
         )
 
         self.save(
@@ -946,8 +946,8 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
             return False
 
         return (
-                self.eligible_payments.exclude(status__in=GenericPayment.PENDING_STATUSES).count()
-                == self.eligible_payments.count()
+            self.eligible_payments.exclude(status__in=GenericPayment.PENDING_STATUSES).count()
+            == self.eligible_payments.count()
         )
 
     def remove_export_file_entitlement(self) -> None:
@@ -1056,16 +1056,16 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
                     return ModifiedData(approval.created_at, approval.created_by)
             if self.status == PaymentPlan.Status.IN_REVIEW:
                 if (
-                        approval := approval_process.approvals.filter(type=Approval.AUTHORIZATION)
-                                .order_by("created_at")
-                                .last()
+                    approval := approval_process.approvals.filter(type=Approval.AUTHORIZATION)
+                    .order_by("created_at")
+                    .last()
                 ):
                     return ModifiedData(approval.created_at, approval.created_by)
             if self.status == PaymentPlan.Status.ACCEPTED:
                 if (
-                        approval := approval_process.approvals.filter(type=Approval.FINANCE_RELEASE)
-                                .order_by("created_at")
-                                .last()
+                    approval := approval_process.approvals.filter(type=Approval.FINANCE_RELEASE)
+                    .order_by("created_at")
+                    .last()
                 ):
                     return ModifiedData(approval.created_at, approval.created_by)
         return ModifiedData(self.updated_at)
@@ -1092,12 +1092,12 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
             return status_accepted and has_payment_gateway_fsp and has_not_sent_to_payment_gateway_splits
         else:
             return (
-                    status_accepted
-                    and self.delivery_mechanisms.filter(
-                sent_to_payment_gateway=False,
-                financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-                financial_service_provider__payment_gateway_id__isnull=False,
-            ).exists()
+                status_accepted
+                and self.delivery_mechanisms.filter(
+                    sent_to_payment_gateway=False,
+                    financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+                    financial_service_provider__payment_gateway_id__isnull=False,
+                ).exists()
             )
 
 
@@ -1182,10 +1182,10 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
 
     @classmethod
     def get_column_from_core_field(
-            cls,
-            payment: "Payment",
-            core_field_name: str,
-            delivery_mechanism_data: Optional["DeliveryMechanismData"] = None,
+        cls,
+        payment: "Payment",
+        core_field_name: str,
+        delivery_mechanism_data: Optional["DeliveryMechanismData"] = None,
     ) -> Any:
         def parse_admin_area(obj: "Area") -> str:
             if not obj:
@@ -1235,7 +1235,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         )
         if column_name in alternate_collector_column_names:
             if ind_role := IndividualRoleInHousehold.objects.filter(
-                    household=payment.household, role=ROLE_ALTERNATE
+                household=payment.household, role=ROLE_ALTERNATE
             ).first():
                 alternate_collector = ind_role.individual
 
@@ -1283,12 +1283,12 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             return str(payment.delivery_date)
         if column_name == "alternate_collector_document_numbers" and alternate_collector:
             return (
-                    list(
-                        alternate_collector.documents.filter(status=Document.STATUS_VALID).values_list(
-                            "document_number", flat=True
-                        )
+                list(
+                    alternate_collector.documents.filter(status=Document.STATUS_VALID).values_list(
+                        "document_number", flat=True
                     )
-                    or ""
+                )
+                or ""
             )
         obj, nested_field = map_obj_name_column[column_name]
         return getattr(obj, nested_field, None) or ""
@@ -1408,16 +1408,16 @@ class FinancialServiceProvider(LimitBusinessAreaModelMixin, TimeStampedUUIDModel
 
     def can_accept_any_volume(self) -> bool:
         if (
-                self.distribution_limit is not None
-                and self.delivery_mechanisms_per_payment_plan.filter(
-            payment_plan__status__in=[
-                PaymentPlan.Status.LOCKED_FSP,
-                PaymentPlan.Status.IN_APPROVAL,
-                PaymentPlan.Status.IN_AUTHORIZATION,
-                PaymentPlan.Status.IN_REVIEW,
-                PaymentPlan.Status.ACCEPTED,
-            ]
-        ).exists()
+            self.distribution_limit is not None
+            and self.delivery_mechanisms_per_payment_plan.filter(
+                payment_plan__status__in=[
+                    PaymentPlan.Status.LOCKED_FSP,
+                    PaymentPlan.Status.IN_APPROVAL,
+                    PaymentPlan.Status.IN_AUTHORIZATION,
+                    PaymentPlan.Status.IN_REVIEW,
+                    PaymentPlan.Status.ACCEPTED,
+                ]
+            ).exists()
         ):
             return False
 
@@ -2009,7 +2009,7 @@ def update_verification_status_in_cash_plan(sender: Any, instance: PaymentVerifi
     dispatch_uid="update_verification_status_in_cash_plan_on_delete",
 )
 def update_verification_status_in_cash_plan_on_delete(
-        sender: Any, instance: PaymentVerificationPlan, **kwargs: Any
+    sender: Any, instance: PaymentVerificationPlan, **kwargs: Any
 ) -> None:
     build_summary(instance.payment_plan_obj)
 
@@ -2463,8 +2463,8 @@ class DeliveryMechanism(TimeStampedUUIDModel):
 
     def get_label_for_field(self, field: str) -> str:
         return (
-                " ".join(word.capitalize() for word in field.replace("__", "_").split("_"))
-                + f" ({self.name} Delivery Mechanism)"
+            " ".join(word.capitalize() for word in field.replace("__", "_").split("_"))
+            + f" ({self.name} Delivery Mechanism)"
         )
 
     @property
