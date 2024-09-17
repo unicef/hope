@@ -33,18 +33,18 @@ jobs:
         uses: actions/cache@v2
         with:
           path: |
-            frontend/node_modules
-            frontend/.yarn
-            frontend/.yarn/cache
+            src/frontend/node_modules
+            src/frontend/.yarn
+            src/frontend/.yarn/cache
           key: ${{ runner.os }}-node-${{ hashFiles('frontend/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-node-
       - run: yarn install --frozen-lockfile
-        working-directory: frontend
+        working-directory: src/frontend
       - run: yarn lint
-        working-directory: frontend
+        working-directory: src/frontend
       - run: yarn test --watchAll=false
-        working-directory: frontend
+        working-directory: src/frontend
 
   build_and_push_dev:
     runs-on: ubuntu-latest
