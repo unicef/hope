@@ -425,8 +425,8 @@ class BiometricDeduplicationServiceTest(TestCase):
             {"individual1": ind2.id, "individual2": ind6.id, "similarity_score": Decimal("90.00")},
         ]
 
-        duplicates_count = service.get_duplicates_for_merged_rdi_against_population_count(rdi1)
-        assert duplicates_count == 3
+        duplicate_individuals_count = service.get_duplicate_individuals_for_rdi_against_population_count(rdi1)
+        assert duplicate_individuals_count == 3
 
     def test_get_duplicates_for_rdi_against_batch(self) -> None:
         self.program.deduplication_set_id = uuid.uuid4()
@@ -483,8 +483,8 @@ class BiometricDeduplicationServiceTest(TestCase):
         ) == [
             {"individual1": ind1.id, "individual2": ind2.id, "similarity_score": Decimal("90.00")},
         ]
-        duplicates_count = service.get_duplicates_for_rdi_against_batch_count(rdi1)
-        assert duplicates_count == 1
+        duplicate_individuals_count = service.get_duplicate_individuals_for_rdi_against_batch_count(rdi1)
+        assert duplicate_individuals_count == 2
 
     @patch(
         "hct_mis_api.apps.grievance.services.needs_adjudication_ticket_services.create_needs_adjudication_tickets_for_biometrics"
