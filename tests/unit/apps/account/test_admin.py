@@ -24,6 +24,7 @@ class RoleTest(WebTest):
         url = reverse("admin:account_role_dumpdata_qs")
         res = self.app.get(url, user=self.superuser)
         assert res.status_code == 200
+        print(res.json)
         jres = json.loads(unquote(res.json["data"]))
         models = set([item["model"] for item in jres])
         assert len(models) == 1

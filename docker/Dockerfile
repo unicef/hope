@@ -86,7 +86,7 @@ RUN apt-get update \
 RUN pdm sync --no-editable --no-self --no-isolation
 
 WORKDIR $CODE
-COPY ./src/data ./src/hct_mis_api ./src/static ./src/.coveragerc ./src/.flake8 ./src/gunicorn_config.py ./
+COPY ./src/data ./src/hct_mis_api ./src/.flake8 ./src/gunicorn_config.py ./
 
 
 
@@ -96,7 +96,7 @@ ENTRYPOINT ["entrypoint.sh"]
 ## Dist (backend only) image
 FROM base AS be-dist
 
-COPY --chown=hope:hope ./src/data ./src/hct_mis_api ./src/static ./src/.coveragerc ./src/.flake8 ./src/gunicorn_config.py ./src/pytest.ini ./
+COPY --chown=hope:hope ./src/data ./src/hct_mis_api ./src/.flake8 ./src/gunicorn_config.py ./src/pytest.ini ./
 COPY ./tests /tests
 COPY --chown=hope:hope --from=builder $PDM_PACKAGES $PDM_PACKAGES
 COPY --chown=hope:hope --from=certs /data/psql-cert.crt /code/psql-cert.crt
