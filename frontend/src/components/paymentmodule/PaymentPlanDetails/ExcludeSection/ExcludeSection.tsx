@@ -37,6 +37,8 @@ export function ExcludeSection({
   initialOpen = false,
   paymentPlan,
 }: ExcludeSectionProps): React.ReactElement {
+  const { isSocialDctType } = useProgramContext();
+
   const {
     status,
     backgroundActionStatus,
@@ -124,15 +126,18 @@ export function ExcludeSection({
   };
 
   const handleApply = (): void => {
-    const idRegex =
-      /^(\s*HH-\d{2}-\d{4}\.\d{4}\s*)(,\s*HH-\d{2}-\d{4}\.\d{4}\s*)*$/;
+    const regexPattern = isSocialDctType
+      ? /^(\s*IND-\d{2}-\d{4}\.\d{4}\s*)(,\s*IND-\d{2}-\d{4}\.\d{4}\s*)*$/
+      : /^(\s*HH-\d{2}-\d{4}\.\d{4}\s*)(,\s*HH-\d{2}-\d{4}\.\d{4}\s*)*$/;
+
+    const regex = new RegExp(regexPattern);
     const ids = idsValue.trim().split(/,\s*|\s+/);
     const invalidIds: string[] = [];
     const alreadyExcludedIds: string[] = [];
     const newExcludedIds: string[] = [];
 
     for (const id of ids) {
-      if (!idRegex.test(id)) {
+      if (!regex.test(id)) {
         invalidIds.push(id);
       } else if (excludedIds.includes(id.trim())) {
         alreadyExcludedIds.push(id);
@@ -311,7 +316,9 @@ export function ExcludeSection({
             <Grid item xs={6}>
               <Box mr={2}>
                 <StyledTextField
-                  label={t('Household Ids')}
+                  label={
+                    isSocialDctType ? t('Individual Ids') : t('Household Ids')
+                  }
                   value={idsValue}
                   onChange={handleIdsChange}
                   fullWidth
@@ -368,7 +375,13 @@ export function ExcludeSection({
               <Box mt={2} mb={2}>
                 <GreyText>
                   {`${numberOfExcluded} ${
-                    numberOfExcluded === 1 ? 'Household' : 'Households'
+                    numberOfExcluded === 1
+                      ? isSocialDctType
+                        ? 'Individual'
+                        : 'Household'
+                      : isSocialDctType
+                        ? 'Individuals'
+                        : 'Households'
                   } excluded`}
                 </GreyText>
               </Box>
