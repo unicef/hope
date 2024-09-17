@@ -284,10 +284,10 @@ class BiometricDeduplicationServiceTest(TestCase):
             individual1=ind1, individual2=ind2, similarity_score=50.00
         ).exists()
         assert self.program.deduplication_engine_similarity_pairs.filter(
-            individual1=ind1, individual2=ind3, similarity_score=30.00
+            individual1=ind1, individual2=ind3, similarity_score=70.00
         ).exists()
         assert self.program.deduplication_engine_similarity_pairs.filter(
-            individual1=ind2, individual2=ind3, similarity_score=20.00
+            individual1=ind2, individual2=ind3, similarity_score=80.00
         ).exists()
 
     def test_mark_rdis_as(self) -> None:
@@ -363,8 +363,8 @@ class BiometricDeduplicationServiceTest(TestCase):
         assert list(
             duplicates.order_by("similarity_score").values("individual1", "individual2", "similarity_score")
         ) == [
-            {"individual1": ind2.id, "individual2": ind6.id, "similarity_score": Decimal("10.00")},
-            {"individual1": ind1.id, "individual2": ind5.id, "similarity_score": Decimal("20.00")},
+            {"individual1": ind1.id, "individual2": ind5.id, "similarity_score": Decimal("80.00")},
+            {"individual1": ind2.id, "individual2": ind6.id, "similarity_score": Decimal("90.00")},
         ]
 
     def test_get_duplicates_for_merged_rdi_against_population(self) -> None:
@@ -420,9 +420,9 @@ class BiometricDeduplicationServiceTest(TestCase):
         assert list(
             duplicates.order_by("similarity_score").values("individual1", "individual2", "similarity_score")
         ) == [
-            {"individual1": ind2.id, "individual2": ind6.id, "similarity_score": Decimal("10.00")},
-            {"individual1": ind1.id, "individual2": ind5.id, "similarity_score": Decimal("20.00")},
-            {"individual1": ind1.id, "individual2": ind2.id, "similarity_score": Decimal("30.00")},
+            {"individual1": ind1.id, "individual2": ind2.id, "similarity_score": Decimal("70.00")},
+            {"individual1": ind1.id, "individual2": ind5.id, "similarity_score": Decimal("80.00")},
+            {"individual1": ind2.id, "individual2": ind6.id, "similarity_score": Decimal("90.00")},
         ]
 
     def test_get_duplicates_for_rdi_against_batch(self) -> None:
@@ -478,7 +478,7 @@ class BiometricDeduplicationServiceTest(TestCase):
         assert list(
             duplicates.order_by("similarity_score").values("individual1", "individual2", "similarity_score")
         ) == [
-            {"individual1": ind1.id, "individual2": ind2.id, "similarity_score": Decimal("10.00")},
+            {"individual1": ind1.id, "individual2": ind2.id, "similarity_score": Decimal("90.00")},
         ]
 
     @patch(
