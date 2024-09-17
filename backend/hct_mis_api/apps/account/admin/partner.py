@@ -49,12 +49,13 @@ class ProgramAreaForm(forms.Form):
 class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
     list_filter = ("is_un", "parent")
     search_fields = ("name",)
-    readonly_fields = ("permissions", "sub_partners")
+    readonly_fields = ("sub_partners",)
     list_display = (
         "__str__",
         "sub_partners",
         "is_un",
     )
+    filter_horizontal = ("allowed_business_areas",)
 
     def sub_partners(self, obj: Any) -> Optional[str]:
         return self.links_to_objects(obj.get_children()) if obj else None
@@ -74,6 +75,8 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
         additional_fields = []
         if obj and obj.is_unicef:
             additional_fields.append("name")
+        if not request.user.has_perm('account.can_change_allowed_business_areas'):
+            additional_fields.append('allowed_business_areas')
         return list(super().get_readonly_fields(request, obj)) + additional_fields
 
     def get_form(
