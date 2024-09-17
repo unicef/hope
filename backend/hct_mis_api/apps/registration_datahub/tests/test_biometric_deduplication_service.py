@@ -367,6 +367,9 @@ class BiometricDeduplicationServiceTest(TestCase):
             {"individual1": ind2.id, "individual2": ind6.id, "similarity_score": Decimal("90.00")},
         ]
 
+        duplicate_individuals_count = service.get_duplicate_individuals_for_rdi_against_population_count(rdi1)
+        assert duplicate_individuals_count == 2
+
     def test_get_duplicates_for_merged_rdi_against_population(self) -> None:
         self.program.deduplication_set_id = uuid.uuid4()
         self.program.business_area.biometric_deduplication_threshold = 0.6
@@ -424,9 +427,6 @@ class BiometricDeduplicationServiceTest(TestCase):
             {"individual1": ind1.id, "individual2": ind5.id, "similarity_score": Decimal("80.00")},
             {"individual1": ind2.id, "individual2": ind6.id, "similarity_score": Decimal("90.00")},
         ]
-
-        duplicate_individuals_count = service.get_duplicate_individuals_for_rdi_against_population_count(rdi1)
-        assert duplicate_individuals_count == 3
 
     def test_get_duplicates_for_rdi_against_batch(self) -> None:
         self.program.deduplication_set_id = uuid.uuid4()
