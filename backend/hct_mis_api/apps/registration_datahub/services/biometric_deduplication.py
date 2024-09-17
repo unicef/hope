@@ -274,11 +274,7 @@ class BiometricDeduplicationService:
 
         unique_individuals = set()
 
-        print("rdi_individuals", rdi_individuals)
-        print("duplicates", duplicates)
-
         for pair in duplicates:
-            print(pair.individual1_id, pair.individual2_id)
             if pair.individual1_id in rdi_individuals:
                 unique_individuals.add(pair.individual1_id)
             if pair.individual2_id in rdi_individuals:

@@ -350,7 +350,7 @@ class BiometricDeduplicationServiceTest(TestCase):
             SimilarityPair(score=0.9, first=ind1.id, second=ind2.id),  # within rdi1
             SimilarityPair(score=0.7, first=ind1.id, second=ind3.id),  # across rdi1 and rdi2
             SimilarityPair(score=0.8, first=ind1.id, second=ind5.id),  # across rdi1 and population
-            SimilarityPair(score=0.9, first=ind2.id, second=ind6.id),  # across rdi1 and population
+            SimilarityPair(score=0.9, first=ind6.id, second=ind2.id),  # across rdi1 and population
             SimilarityPair(score=0.9, first=ind3.id, second=ind4.id),  # within rdi2
             SimilarityPair(score=0.7, first=ind4.id, second=ind5.id),  # across rdi2 and population
             SimilarityPair(score=0.8, first=ind5.id, second=ind6.id),  # within population
