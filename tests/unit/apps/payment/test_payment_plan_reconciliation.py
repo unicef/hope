@@ -1095,7 +1095,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             )
 
     def test_follow_up_pp_entitlements_updated_with_file(self) -> None:
-        content = Path(f"{settings.PROJECT_ROOT}/apps/payment/tests/test_file/pp_payment_list_valid.xlsx").read_bytes()
+        content = Path(f"{settings.TESTS_ROOT}/apps/payment/test_file/pp_payment_list_valid.xlsx").read_bytes()
         pp = PaymentPlanFactory(is_follow_up=True, status=PaymentPlan.Status.LOCKED)
 
         self.snapshot_graphql_request(
@@ -1108,7 +1108,7 @@ class TestPaymentPlanReconciliation(APITestCase):
         )
 
     def test_correct_message_displayed_when_file_is_protected(self) -> None:
-        content = Path(f"{settings.PROJECT_ROOT}/apps/payment/tests/test_file/import_file_protected.xlsx").read_bytes()
+        content = Path(f"{settings.TESTS_ROOT}/apps/payment/test_file/import_file_protected.xlsx").read_bytes()
         pp = PaymentPlanFactory(status=PaymentPlan.Status.ACCEPTED)
 
         self.snapshot_graphql_request(

@@ -29,7 +29,7 @@ class TestXLSXValidatorsMethods(APITestCase):
     databases = {"default"}
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
-    FILES_DIR_PATH = f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file"
+    FILES_DIR_PATH = f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file"
 
     @classmethod
     def setUpTestData(cls) -> None:

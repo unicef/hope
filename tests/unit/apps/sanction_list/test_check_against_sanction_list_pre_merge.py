@@ -33,7 +33,7 @@ class TestSanctionListPreMerge(TestCase):
     databases = "__all__"
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
-    TEST_FILES_PATH = f"{settings.PROJECT_ROOT}/apps/sanction_list/tests/test_files"
+    TEST_FILES_PATH = f"{settings.TESTS_ROOT}/apps/sanction_list/test_files"
 
     @classmethod
     def setUpTestData(cls) -> None:

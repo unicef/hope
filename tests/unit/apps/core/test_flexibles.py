@@ -22,7 +22,7 @@ class MockSuperUser:
 class TestFlexibles(TestCase):
     def load_xls(self, name: str) -> None:
         task = FlexibleAttributeImporter()
-        task.import_xls(f"{settings.PROJECT_ROOT}/apps/core/tests/test_files/{name}")
+        task.import_xls(f"{settings.TESTS_ROOT}/apps/core/test_files/{name}")
 
     def test_flexible_init_update_delete(self) -> None:
         self.load_xls("flex_init.xls")

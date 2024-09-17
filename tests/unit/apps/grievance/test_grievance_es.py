@@ -22,7 +22,7 @@ from hct_mis_api.apps.grievance.constants import (
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.conftest import disabled_locally_test
+from tests.unit.conftest import disabled_locally_test
 
 
 def execute_test_es_query(query_dict: Dict) -> List[str]:

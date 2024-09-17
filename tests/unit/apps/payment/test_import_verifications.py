@@ -405,7 +405,7 @@ class TestXlsxVerificationImport(APITestCase):
             status=PaymentVerification.STATUS_PENDING,
         )
 
-        content = Path(f"{settings.PROJECT_ROOT}/apps/payment/tests/test_file/{file_name}.xlsx").read_bytes()
+        content = Path(f"{settings.TESTS_ROOT}/apps/payment/test_file/{file_name}.xlsx").read_bytes()
         xlsx_verification_import_service = XlsxVerificationImportService(payment_verification_plan, io.BytesIO(content))
         xlsx_verification_import_service.open_workbook()
         xlsx_verification_import_service.validate()

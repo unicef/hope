@@ -16,7 +16,7 @@ class TestLoadXML(TestCase):
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     def test_execute(self) -> None:
-        main_test_files_path = f"{settings.PROJECT_ROOT}/apps/sanction_list/tests/test_files"
+        main_test_files_path = f"{settings.TESTS_ROOT}/apps/sanction_list/test_files"
 
         task = LoadSanctionListXMLTask(file_path=f"{main_test_files_path}/original-consolidated.xml")
         task.execute()

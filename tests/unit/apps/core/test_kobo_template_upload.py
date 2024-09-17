@@ -63,7 +63,7 @@ class TestKoboTemplateUpload(APITestCase):
 
     def prepare_request(self, name: str) -> WSGIRequest:
         with open(
-            f"{settings.PROJECT_ROOT}/apps/core/tests/test_files/{name}",
+            f"{settings.TESTS_ROOT}/apps/core/test_files/{name}",
             "rb",
         ) as f:
             data = {"xls_file": f}

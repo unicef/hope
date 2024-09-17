@@ -26,7 +26,7 @@ class TestValidateXlsxImportTask(TestCase):
         cls.program_with_social_worker = get_program_with_dct_type_and_name(dct_type=DataCollectingType.Type.SOCIAL)
 
         content = Path(
-            f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/new_reg_data_import.xlsx"
+            f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file/new_reg_data_import.xlsx"
         ).read_bytes()
         file = File(BytesIO(content), name="new_reg_data_import.xlsx")
         cls.import_data = ImportData.objects.create(
@@ -38,7 +38,7 @@ class TestValidateXlsxImportTask(TestCase):
     )
     def test_people(self, validate_everything_mock: Mock) -> None:
         content = Path(
-            f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/rdi_people_test.xlsx"
+            f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file/rdi_people_test.xlsx"
         ).read_bytes()
         file = File(BytesIO(content), name="rdi_people_test.xlsx")
         import_data = ImportData.objects.create(

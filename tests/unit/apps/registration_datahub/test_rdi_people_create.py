@@ -44,7 +44,7 @@ class TestRdiXlsxPeople(TestCase):
         super().setUpTestData()
         PartnerFactory(name="UNHCR")
         content = Path(
-            f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/rdi_people_test.xlsx"
+            f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file/rdi_people_test.xlsx"
         ).read_bytes()
         file = File(BytesIO(content), name="rdi_people_test.xlsx")
         cls.business_area = create_afghanistan()
