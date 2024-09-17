@@ -75,3 +75,7 @@ class TestRemoveOldPDUTemplateFilesTask:
         assert self.pdu_template1.status == PeriodicDataUpdateTemplate.Status.EXPORTED
         assert self.pdu_template2.status == PeriodicDataUpdateTemplate.Status.TO_EXPORT
         assert self.pdu_template3.status == PeriodicDataUpdateTemplate.Status.TO_EXPORT
+
+        assert self.pdu_template1.can_export is False
+        assert self.pdu_template2.can_export is True
+        assert self.pdu_template3.can_export is True
