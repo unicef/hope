@@ -165,8 +165,10 @@ class BiometricDeduplicationService:
             program=program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS
         )
         for rdi in rdis:
-            rdi.dedup_engine_batch_duplicates = self.get_duplicates_for_rdi_against_batch(rdi).count()
-            rdi.dedup_engine_golden_record_duplicates = self.get_duplicates_for_rdi_against_population(rdi).count()
+            rdi.dedup_engine_batch_duplicates = self.get_duplicate_individuals_for_rdi_against_batch_count(rdi)
+            rdi.dedup_engine_golden_record_duplicates = self.get_duplicate_individuals_for_rdi_against_population_count(
+                rdi
+            )
             rdi.save(update_fields=["dedup_engine_batch_duplicates", "dedup_engine_golden_record_duplicates"])
 
     def update_rdis_deduplication_statistics(self, program_id: str) -> None:
@@ -177,8 +179,10 @@ class BiometricDeduplicationService:
             status=RegistrationDataImport.IN_REVIEW,
         )
         for rdi in rdis:
-            rdi.dedup_engine_batch_duplicates = self.get_duplicates_for_rdi_against_batch(rdi).count()
-            rdi.dedup_engine_golden_record_duplicates = self.get_duplicates_for_rdi_against_population(rdi).count()
+            rdi.dedup_engine_batch_duplicates = self.get_duplicate_individuals_for_rdi_against_batch_count(rdi)
+            rdi.dedup_engine_golden_record_duplicates = self.get_duplicate_individuals_for_rdi_against_population_count(
+                rdi
+            )
             rdi.save(update_fields=["dedup_engine_batch_duplicates", "dedup_engine_golden_record_duplicates"])
 
     @classmethod
@@ -201,6 +205,18 @@ class BiometricDeduplicationService:
             )
             .distinct()
         )
+
+    def get_duplicate_individuals_for_rdi_against_batch_count(self, rdi: RegistrationDataImport) -> int:
+        """Used in RDI statistics"""
+        duplicates = self.get_duplicates_for_rdi_against_batch(rdi)
+
+        unique_individuals = set()
+
+        for pair in duplicates:
+            unique_individuals.add(pair.individual1_id)
+            unique_individuals.add(pair.individual2_id)
+
+        return len(unique_individuals)
 
     def get_duplicates_for_merged_rdi_against_population(
         self, rdi: RegistrationDataImport
@@ -248,6 +264,23 @@ class BiometricDeduplicationService:
             .exclude(Q(individual1__in=other_pending_individuals) | Q(individual2__in=other_pending_individuals))
             .distinct()
         )
+
+    def get_duplicate_individuals_for_rdi_against_population_count(self, rdi: RegistrationDataImport) -> int:
+        """Used in RDI statistics"""
+        duplicates = self.get_duplicates_for_rdi_against_population(rdi)
+        rdi_individuals = PendingIndividual.objects.filter(is_removed=False, registration_data_import=rdi).values_list(
+            "id", flat=True
+        )
+
+        unique_individuals = set()
+
+        for pair in duplicates:
+            if pair.individual1_id in rdi_individuals:
+                unique_individuals.add(pair.individual1_id)
+            if pair.individual2_id in rdi_individuals:
+                unique_individuals.add(pair.individual2_id)  # pragma: no cover
+
+        return len(unique_individuals)
 
     def create_grievance_tickets_for_duplicates(self, rdi: RegistrationDataImport) -> None:
         # create tickets only against merged individuals
