@@ -22,12 +22,12 @@ import { AdminButton } from '@core/AdminButton';
 
 export function PaymentDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
-  const { id } = useParams();
+  const { paymentId } = useParams();
   const { data: caData, loading: caLoading } = useCashAssistUrlPrefixQuery({
     fetchPolicy: 'cache-first',
   });
   const { data, loading } = usePaymentQuery({
-    variables: { id },
+    variables: { id: paymentId },
     fetchPolicy: 'cache-and-network',
   });
   const paymentPlanStatus = data?.payment?.parent?.status;
@@ -44,7 +44,7 @@ export function PaymentDetailsPage(): React.ReactElement {
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Payment Module'),
-      to: `/${baseUrl}/payment-module/`,
+      to: `/${baseUrl}/payment-module/payment-plans`,
     },
     {
       title: ` ${paymentPlanIsFollowUp ? 'Follow-up ' : ''} Payment Plan ${

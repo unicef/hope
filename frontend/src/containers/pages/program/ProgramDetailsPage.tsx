@@ -15,9 +15,9 @@ import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError } from '@utils/utils';
-import { CashPlanTable } from '../../tables/payments/CashPlanTable';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { ProgramDetailsPageHeader } from '../headers/ProgramDetailsPageHeader';
+import { ProgramCycleTable } from '@containers/tables/ProgramCycle/ProgramCycleTable';
 
 const Container = styled.div`
   && {
@@ -31,8 +31,7 @@ const TableWrapper = styled.div`
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  padding: 20px;
-  padding-bottom: 0;
+  padding: 20px 20px 0;
 `;
 
 const NoCashPlansContainer = styled.div`
@@ -42,12 +41,6 @@ const NoCashPlansTitle = styled.div`
   color: rgba(0, 0, 0, 0.38);
   font-size: 24px;
   line-height: 28px;
-  text-align: center;
-`;
-const NoCashPlansSubTitle = styled.div`
-  color: rgba(0, 0, 0, 0.38);
-  font-size: 16px;
-  line-height: 19px;
   text-align: center;
 `;
 
@@ -76,6 +69,9 @@ export function ProgramDetailsPage(): React.ReactElement {
     return null;
 
   const { program } = data;
+  const canFinish =
+    program.canFinish &&
+    hasPermissions(PERMISSIONS.PROGRAMME_FINISH, permissions);
   return (
     <div>
       <ProgramDetailsPageHeader
@@ -86,7 +82,7 @@ export function ProgramDetailsPage(): React.ReactElement {
         )}
         canEdit={hasPermissions(PERMISSIONS.PROGRAMME_UPDATE, permissions)}
         canRemove={hasPermissions(PERMISSIONS.PROGRAMME_REMOVE, permissions)}
-        canFinish={hasPermissions(PERMISSIONS.PROGRAMME_FINISH, permissions)}
+        canFinish={canFinish}
         canDuplicate={hasPermissions(
           PERMISSIONS.PROGRAMME_DUPLICATE,
           permissions,
@@ -100,17 +96,12 @@ export function ProgramDetailsPage(): React.ReactElement {
         {program.status === ProgramStatus.Draft ? (
           <NoCashPlansContainer>
             <NoCashPlansTitle>
-              {t('To see more details please Activate your Programme')}
+              {t('Activate the Programme to create a Cycle')}
             </NoCashPlansTitle>
-            <NoCashPlansSubTitle>
-              {t(
-                'All data will be pushed to CashAssist. You can edit this plan even if it is active.',
-              )}
-            </NoCashPlansSubTitle>
           </NoCashPlansContainer>
         ) : (
           <TableWrapper>
-            <CashPlanTable program={program} />
+            <ProgramCycleTable program={program} />
           </TableWrapper>
         )}
         {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (

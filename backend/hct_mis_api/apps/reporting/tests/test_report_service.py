@@ -1,4 +1,3 @@
-import datetime
 from typing import Any
 from unittest.mock import patch
 
@@ -89,18 +88,20 @@ class TestGenerateReportService(TestCase):
         self.cash_plan_1 = CashPlanFactory(
             business_area=self.business_area,
             program=self.program_1,
-            end_date=datetime.datetime.fromisoformat("2020-01-01 00:01:11+00:00"),
+            # end_date=datetime.datetime.fromisoformat("2020-01-01 00:01:11+00:00"),
         )
         self.cash_plan_2 = CashPlanFactory(
-            business_area=self.business_area, end_date=datetime.datetime.fromisoformat("2020-01-01 00:01:11+00:00")
+            business_area=self.business_area,
+            # end_date=datetime.datetime.fromisoformat("2020-01-01 00:01:11+00:00")
         )
         self.payment_plan_1 = PaymentPlanFactory(
             business_area=self.business_area,
             program=self.program_1,
-            end_date=datetime.datetime.fromisoformat("2020-01-01 00:01:11+00:00"),
+            # end_date=datetime.datetime.fromisoformat("2020-01-01 00:01:11+00:00"),
         )
         self.payment_plan_2 = PaymentPlanFactory(
-            business_area=self.business_area, end_date=datetime.datetime.fromisoformat("2020-01-01 00:01:11+00:00")
+            business_area=self.business_area,
+            # end_date=datetime.datetime.fromisoformat("2020-01-01 00:01:11+00:00")
         )
         PaymentVerificationSummary.objects.create(payment_plan_obj=self.payment_plan_1)
         PaymentVerificationSummary.objects.create(payment_plan_obj=self.payment_plan_2)

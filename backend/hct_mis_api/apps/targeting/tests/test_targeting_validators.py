@@ -47,14 +47,14 @@ class TestTargetingCriteriaInputValidator(TestCase):
         validator = TargetingCriteriaInputValidator
         create_household({"unicef_id": "HH-1", "size": 1}, {"unicef_id": "IND-1"})
         with self.assertRaisesMessage(
-            ValidationError, "Target criteria can has only filters or ids, not possible to has both"
+            ValidationError, "Target criteria can only have filters or ids, not possible to have both"
         ):
             self._update_program(self.program_standard)
             validator.validate(
                 {"rules": ["Rule1"], "household_ids": "HH-1", "individual_ids": "IND-1"}, self.program_standard
             )
 
-        with self.assertRaisesMessage(ValidationError, "Target criteria can has only individual ids"):
+        with self.assertRaisesMessage(ValidationError, "Target criteria can only have individual ids"):
             self._update_program(self.program_social)
             validator.validate({"rules": [], "household_ids": "HH-1", "individual_ids": "IND-1"}, self.program_social)
 
@@ -63,7 +63,7 @@ class TestTargetingCriteriaInputValidator(TestCase):
                 {"rules": [], "household_ids": "HH-1", "individual_ids": "IND-1"}, self.program_standard_ind_only
             )
 
-        with self.assertRaisesMessage(ValidationError, "Target criteria can has only household ids"):
+        with self.assertRaisesMessage(ValidationError, "Target criteria can only have household ids"):
             self._update_program(self.program_standard_hh_only)
             validator.validate(
                 {"rules": [], "household_ids": "HH-1", "individual_ids": "IND-1"}, self.program_standard_hh_only

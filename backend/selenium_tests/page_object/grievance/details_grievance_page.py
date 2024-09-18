@@ -14,6 +14,8 @@ class GrievanceDetailsPage(BaseComponents):
     buttonCloseTicket = 'button[data-cy="button-close-ticket"]'
     buttonConfirm = 'button[data-cy="button-confirm"]'
     buttonAssignToMe = 'button[data-cy="button-assign-to-me"]'
+    buttonSendForApproval = 'button[data-cy="button-send-for-approval"]'
+    buttonApproval = 'button[data-cy="button-approve"]'
     ticketStatus = 'div[data-cy="label-Status"]'
     ticketPriority = 'div[data-cy="label-Priority"]'
     ticketUrgency = 'div[data-cy="label-Urgency"]'
@@ -34,6 +36,7 @@ class GrievanceDetailsPage(BaseComponents):
     languagesSpoken = 'div[data-cy="label-Languages Spoken"]'
     documentation = 'div[data-cy="label-Documentation"]'
     ticketDescription = 'div[data-cy="label-Description"]'
+    labelCreatedBy = 'div[data-cy="label-Created By"]'
     comments = 'div[data-cy="label-Comments"]'
     createLinkedTicket = 'button[data-cy="button-create-linked-ticket"]'
     markDuplicate = 'button[data-cy="button-mark-duplicate"]'
@@ -50,6 +53,11 @@ class GrievanceDetailsPage(BaseComponents):
     cellVillage = 'th[data-cy="table-cell-village"]'
     newNoteField = 'textarea[data-cy="input-newNote"]'
     buttonNewNote = 'button[data-cy="button-add-note"]'
+    labelLanguagesSpoken = 'div[data-cy="label-Languages Spoken"]'
+    labelDocumentation = 'div[data-cy="label-Documentation"]'
+    labelDescription = 'div[data-cy="label-Description"]'
+    noteRow = '[data-cy="note-row"]'
+    noteName = '[data-cy="note-name"]'
     labelGENDER = 'div[data-cy="label-GENDER"]'
     labelRole = 'div[data-cy="label-role"]'
     labelPhoneNo = 'div[data-cy="label-phone no"]'
@@ -77,6 +85,9 @@ class GrievanceDetailsPage(BaseComponents):
     labelTickets = 'div[data-cy="label-Tickets"]'
     checkbox = 'tr[role="checkbox"]'
     labelPartner = 'div[data-cy="label-Partner"]'
+    labelAdministrativeLevel2 = 'div[data-cy="label-Administrative Level 2"]'
+    checkboxHouseholdData = 'span[data-cy="checkbox-household-data"]'
+    checkboxIndividualData = 'span[data-cy="checkbox-requested-data-change"]'
     approveBoxNeedsAdjudicationTitle = 'h6[data-cy="approve-box-needs-adjudication-title"]'
     buttonCreateLinkedTicket = 'button[data-cy="button-create-linked-ticket"]'
     buttonMarkDistinct = 'button[data-cy="button-mark-distinct"]'
@@ -133,6 +144,11 @@ class GrievanceDetailsPage(BaseComponents):
     headingCellChange_from = 'div[data-cy="heading-cell-change_from"]'
     headingCellChange_to = 'div[data-cy="heading-cell-change_to"]'
     pagination = 'div[data-cy="pagination"]'
+    buttonAdmin = 'div[data-cy="button-admin"]'
+    logRow = 'div[data-cy="log-row"]'
+    paymentRecord = 'span[data-cy="payment-record"]'
+    labelGender = 'div[data-cy="label-GENDER"]'
+
     # Texts
     textTitle = "Ticket ID: "
     textStatusNew = "New"
@@ -151,9 +167,18 @@ class GrievanceDetailsPage(BaseComponents):
     possibleDuplicateGoldenRow = 'tr[data-cy="possible-duplicate-golden-row"]'
     peopleIcon = 'svg[data-cy="people-icon"]'
     personIcon = 'svg[data-cy="person-icon"]'
+    buttonRotateImage = 'button[data-cy="button-rotate-image"]'
+    buttonCancel = 'button[data-cy="button-cancel"]'
+    linkShowPhoto = 'a[data-cy="link-show-photo"]'
+
+    def getLabelGender(self) -> WebElement:
+        return self.wait_for(self.labelGender)
 
     def getPersonIcon(self) -> WebElement:
         return self.wait_for(self.personIcon)
+
+    def getLabelAdministrativeLevel2(self) -> WebElement:
+        return self.wait_for(self.labelAdministrativeLevel2)
 
     def getPeopleIcon(self) -> WebElement:
         return self.wait_for(self.peopleIcon)
@@ -183,6 +208,12 @@ class GrievanceDetailsPage(BaseComponents):
 
     def getButtonAssignToMe(self) -> WebElement:
         return self.wait_for(self.buttonAssignToMe)
+
+    def getButtonSendForApproval(self) -> WebElement:
+        return self.wait_for(self.buttonSendForApproval)
+
+    def getButtonApproval(self) -> WebElement:
+        return self.wait_for(self.buttonApproval)
 
     def getButtonSetInProgress(self) -> WebElement:
         return self.wait_for(self.buttonSetInProgress)
@@ -247,6 +278,9 @@ class GrievanceDetailsPage(BaseComponents):
     def getAdministrativeLevel(self) -> WebElement:
         return self.wait_for(self.administrativeLevel)
 
+    def getLabelLastModifiedDate(self) -> WebElement:
+        return self.wait_for(self.lastModifiedDate)
+
     def getAreaVillage(self) -> WebElement:
         return self.wait_for(self.areaVillage)
 
@@ -258,6 +292,12 @@ class GrievanceDetailsPage(BaseComponents):
 
     def getTicketDescription(self) -> WebElement:
         return self.wait_for(self.ticketDescription)
+
+    def getLabelCreatedBy(self) -> WebElement:
+        return self.wait_for(self.labelCreatedBy)
+
+    def getLabelDateCreation(self) -> WebElement:
+        return self.wait_for(self.dateCreation)
 
     def getLabelComments(self) -> WebElement:
         return self.wait_for(self.comments)
@@ -309,6 +349,22 @@ class GrievanceDetailsPage(BaseComponents):
 
     def getButtonNewNote(self) -> WebElement:
         return self.wait_for(self.buttonNewNote)
+
+    def getNoteRows(self) -> [WebElement]:
+        self.wait_for(self.noteRow)
+        return self.get_elements(self.noteRow)
+
+    def getLabelLanguagesSpoken(self) -> WebElement:
+        return self.wait_for(self.labelLanguagesSpoken)
+
+    def getLabelDocumentation(self) -> WebElement:
+        return self.wait_for(self.labelDocumentation)
+
+    def getLabelDescription(self) -> WebElement:
+        return self.wait_for(self.labelDescription)
+
+    def getNoteName(self) -> WebElement:
+        return self.wait_for(self.noteName)
 
     def getLabelGENDER(self) -> WebElement:
         return self.wait_for(self.labelGENDER)
@@ -390,6 +446,12 @@ class GrievanceDetailsPage(BaseComponents):
 
     def getApproveBoxNeedsAdjudicationTitle(self) -> WebElement:
         return self.wait_for(self.approveBoxNeedsAdjudicationTitle)
+
+    def getCheckboxHouseholdData(self) -> WebElement:
+        return self.wait_for(self.checkboxHouseholdData)
+
+    def getCheckboxIndividualData(self) -> WebElement:
+        return self.wait_for(self.checkboxIndividualData)
 
     def getButtonCreateLinkedTicket(self) -> WebElement:
         return self.wait_for(self.buttonCreateLinkedTicket)
@@ -569,3 +631,19 @@ class GrievanceDetailsPage(BaseComponents):
 
     def getButtonCancel(self) -> WebElement:
         return self.wait_for(self.buttonCancel)
+
+    def getButtonAdmin(self) -> WebElement:
+        return self.wait_for(self.buttonAdmin)
+
+    def getLogRow(self) -> [WebElement]:
+        self.wait_for(self.logRow)
+        return self.get_elements(self.logRow)
+
+    def getPaymentRecord(self) -> WebElement:
+        return self.wait_for(self.paymentRecord)
+
+    def getButtonRotateImage(self) -> WebElement:
+        return self.wait_for(self.buttonRotateImage)
+
+    def getLinkShowPhoto(self) -> WebElement:
+        return self.wait_for(self.linkShowPhoto)

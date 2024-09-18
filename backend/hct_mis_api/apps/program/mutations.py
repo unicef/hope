@@ -85,7 +85,9 @@ class CreateProgram(
 
         cls.validate(
             start_date=datetime.combine(program_data["start_date"], datetime.min.time()),
-            end_date=datetime.combine(program_data["end_date"], datetime.min.time()),
+            end_date=datetime.combine(program_data["end_date"], datetime.min.time())
+            if program_data.get("end_date")
+            else None,
             data_collecting_type=data_collecting_type,
             business_area=business_area,
             programme_code=programme_code,
@@ -102,8 +104,9 @@ class CreateProgram(
         ProgramCycle.objects.create(
             program=program,
             start_date=program.start_date,
-            end_date=program.end_date,
-            status=ProgramCycle.ACTIVE,
+            end_date=None,
+            status=ProgramCycle.DRAFT,
+            created_by=info.context.user,
         )
         # create partner access only for SELECTED_PARTNERS_ACCESS type, since NONE and ALL are handled through signal
         if partner_access == Program.SELECTED_PARTNERS_ACCESS:
@@ -144,6 +147,7 @@ class UpdateProgram(
         partner_access = program_data.get("partner_access", program.partner_access)
         pdu_fields = program_data.pop("pdu_fields", None)
         programme_code = program_data.get("programme_code", "")
+
         if programme_code:
             programme_code = programme_code.upper()
             program_data["programme_code"] = programme_code
@@ -265,12 +269,15 @@ class CopyProgram(
             partner_access=partner_access,
             partner=partner,
         )
-        program = copy_program_object(program_id, program_data)
+        program = copy_program_object(program_id, program_data, info.context.user)
 
         # create partner access only for SELECTED_PARTNERS_ACCESS type, since NONE and ALL are handled through signal
         if partner_access == Program.SELECTED_PARTNERS_ACCESS:
             create_program_partner_access(partners_data, program, partner_access)
-        copy_program_task.delay(copy_from_program_id=program_id, new_program_id=program.id)
+
+        transaction.on_commit(
+            lambda: copy_program_task.delay(copy_from_program_id=program_id, new_program_id=program.id)
+        )
 
         if pdu_fields is not None:
             FlexibleAttributeForPDUService(program, pdu_fields).create_pdu_flex_attributes()

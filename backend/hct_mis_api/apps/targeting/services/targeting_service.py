@@ -19,6 +19,7 @@ from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.core.utils import get_attr_value
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.models import Household, Individual
+from hct_mis_api.apps.targeting.choices import FlexFieldClassification
 
 logger = logging.getLogger(__name__)
 
@@ -243,6 +244,12 @@ class TargetingCriteriaFilterBase:
             "negative": False,
             "supported_types": ["INTEGER", "DECIMAL", "DATE"],
         },
+        "IS_NULL": {
+            "arguments": 1,
+            "lookup": "",
+            "negative": False,
+            "supported_types": ["DECIMAL", "DATE", "STRING", "BOOL"],
+        },
     }
 
     COMPARISON_CHOICES = Choices(
@@ -254,10 +261,15 @@ class TargetingCriteriaFilterBase:
         ("NOT_IN_RANGE", _("Not in between <>")),
         ("GREATER_THAN", _("Greater than")),
         ("LESS_THAN", _("Less than")),
+        ("IS_NULL", _("Is null")),
     )
 
+    @property
+    def field_name_combined(self) -> str:
+        return f"{self.field_name}__{self.round_number}" if self.round_number else self.field_name
+
     def get_criteria_string(self) -> str:
-        return f"{{{self.field_name} {self.comparison_method} ({','.join([str(x) for x in self.arguments])})}}"
+        return f"{{{self.field_name_combined} {self.comparison_method} ({','.join([str(x) for x in self.arguments])})}}"
 
     def get_lookup_prefix(self, associated_with: str) -> str:
         return "individuals__" if associated_with == _INDIVIDUAL else ""
@@ -267,6 +279,10 @@ class TargetingCriteriaFilterBase:
         if not is_flex_field:
             return arguments
         type = get_attr_value("type", field_attr, None)
+        if type == FlexibleAttribute.PDU:
+            if arguments == [None]:
+                return arguments
+            type = field_attr.pdu_data.subtype
         if type == TYPE_DECIMAL:
             return [float(arg) for arg in arguments]
         if type == TYPE_INTEGER:
@@ -316,6 +332,13 @@ class TargetingCriteriaFilterBase:
             query = Q(**{f"{lookup}{comparison_attribute.get('lookup')}": argument})
         if comparison_attribute.get("negative"):
             return ~query
+        # ignore null values for PDU flex fields
+        if (
+            self.comparison_method != "IS_NULL"
+            and self.flex_field_classification == FlexFieldClassification.FLEX_FIELD_PDU
+        ):
+            query &= ~Q(**{f"{lookup}": None})
+
         return query
 
     def get_query_for_core_field(self) -> Q:
@@ -346,18 +369,45 @@ class TargetingCriteriaFilterBase:
         return self.get_query_for_lookup(f"{lookup_prefix}{lookup}", core_field_attr)
 
     def get_query_for_flex_field(self) -> Q:
-        flex_field_attr = FlexibleAttribute.objects.get(name=self.field_name)
-        if not flex_field_attr:
-            logger.error(f"There are no Flex Field Attributes associated with this fieldName {self.field_name}")
-            raise ValidationError(
-                f"There are no Flex Field Attributes associated with this fieldName {self.field_name}"
+        if self.flex_field_classification == FlexFieldClassification.FLEX_FIELD_PDU:
+            targeting_criteria_rule = (
+                getattr(self, "targeting_criteria_rule", None) or self.individuals_filters_block.targeting_criteria_rule
             )
+            program = targeting_criteria_rule.targeting_criteria.target_population.program
+            flex_field_attr = FlexibleAttribute.objects.filter(name=self.field_name, program=program).first()
+            if not flex_field_attr:
+                logger.error(
+                    f"There is no PDU Flex Field Attribute associated with this fieldName {self.field_name} in program {program.name}"
+                )
+                raise ValidationError(
+                    f"There is no PDU Flex Field Attribute associated with this fieldName {self.field_name} in program {program.name}"
+                )
+            if not self.round_number:
+                logger.error(f"Round number is missing for PDU Flex Field Attribute {self.field_name}")
+                raise ValidationError(f"Round number is missing for PDU Flex Field Attribute {self.field_name}")
+            flex_field_attr_rounds_number = flex_field_attr.pdu_data.number_of_rounds
+            if self.round_number > flex_field_attr_rounds_number:
+                logger.error(
+                    f"Round number {self.round_number} is greater than the number of rounds for PDU Flex Field Attribute {self.field_name}"
+                )
+                raise ValidationError(
+                    f"Round number {self.round_number} is greater than the number of rounds for PDU Flex Field Attribute {self.field_name}"
+                )
+            field_name_combined = f"{flex_field_attr.name}__{self.round_number}__value"
+        else:
+            flex_field_attr = FlexibleAttribute.objects.filter(name=self.field_name, program=None).first()
+            if not flex_field_attr:
+                logger.error(f"There is no Flex Field Attributes associated with this fieldName {self.field_name}")
+                raise ValidationError(
+                    f"There is no Flex Field Attributes associated with this fieldName {self.field_name}"
+                )
+            field_name_combined = flex_field_attr.name
         lookup_prefix = self.get_lookup_prefix(_INDIVIDUAL if flex_field_attr.associated_with == 1 else _HOUSEHOLD)
-        lookup = f"{lookup_prefix}flex_fields__{flex_field_attr.name}"
+        lookup = f"{lookup_prefix}flex_fields__{field_name_combined}"
         return self.get_query_for_lookup(lookup, flex_field_attr)
 
     def get_query(self) -> Q:
-        if not self.is_flex_field:
+        if self.flex_field_classification == FlexFieldClassification.NOT_FLEX_FIELD:
             return self.get_query_for_core_field()
         return self.get_query_for_flex_field()
 

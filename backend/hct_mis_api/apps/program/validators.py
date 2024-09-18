@@ -5,7 +5,8 @@ from typing import TYPE_CHECKING, Any, Optional
 from django.core.exceptions import ValidationError
 
 from hct_mis_api.apps.core.validators import BaseValidator
-from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.payment.models import PaymentPlan
+from hct_mis_api.apps.program.models import Program, ProgramCycle
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
@@ -33,6 +34,39 @@ class ProgramValidator(BaseValidator):
         elif current_status == Program.FINISHED and status_to_set != Program.ACTIVE:
             logger.error("Finished status can only be changed to Active")
             raise ValidationError("Finished status can only be changed to Active")
+
+        # Finish Program -> check all Payment Plans
+        if status_to_set == Program.FINISHED and current_status == Program.ACTIVE:
+            if (
+                PaymentPlan.objects.filter(program_cycle__in=program.cycles.all())
+                .exclude(
+                    status__in=[PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED],
+                )
+                .exists()
+            ):
+                raise ValidationError("All Payment Plans and Follow-Up Payment Plans have to be Reconciled.")
+
+            # check if any ACTIVE cycles there
+            if program.cycles.filter(status=ProgramCycle.ACTIVE).exists():
+                raise ValidationError("Cannot finish programme with active cycles")
+
+            if program.end_date is None:
+                raise ValidationError("Cannot finish programme without end date")
+
+    @classmethod
+    def validate_end_date(cls, *args: Any, **kwargs: Any) -> Optional[None]:
+        program = kwargs.get("program")
+        start_date = kwargs.get("start_date")
+        end_date = kwargs.get("end_date")
+
+        if ((start_date and end_date) and (end_date < start_date)) or (end_date and end_date < program.start_date):
+            raise ValidationError("End date cannot be before start date.")
+
+        if end_date and program.cycles.filter(end_date__gt=end_date).exists():
+            raise ValidationError("End date must be equal or after the latest cycle.")
+
+        if start_date and program.cycles.filter(start_date__lt=start_date).exists():
+            raise ValidationError("Start date must be equal or before the earliest cycle.")
 
 
 class ProgramDeletionValidator(BaseValidator):

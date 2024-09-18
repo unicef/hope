@@ -52,6 +52,39 @@ class TargetingCreate(BaseComponents):
     autocompleteTargetCriteriaValues = 'div[data-cy="autocomplete-target-criteria-values"]'
     selectMany = 'div[data-cy="select-many"]'
     buttonEdit = 'button[data-cy="button-edit"]'
+    datePickerFilter = 'div[data-cy="date-picker-filter"]'
+    boolField = 'div[data-cy="bool-field"]'
+    textField = 'div[data-cy="string-textfield"]'
+    selectIndividualsFiltersBlocksRoundNumber = (
+        'div[data-cy="select-individualsFiltersBlocks[{}].individualBlockFilters[{}].roundNumber"]'
+    )
+    selectFiltersRoundNumber = 'div[data-cy="select-filters[{}].roundNumber"]'
+    selectRoundOption = 'li[data-cy="select-option-{}"]'
+    selectIndividualsFiltersBlocksIsNull = (
+        'span[data-cy="input-individualsFiltersBlocks[{}].individualBlockFilters[{}].isNull"]'
+    )
+    inputIndividualsFiltersBlocksValueFrom = (
+        'input[data-cy="input-individualsFiltersBlocks[{}].individualBlockFilters[{}].value.from"]'
+    )
+    inputIndividualsFiltersBlocksValueTo = (
+        'input[data-cy="input-individualsFiltersBlocks[{}].individualBlockFilters[{}].value.to"]'
+    )
+    inputDateIndividualsFiltersBlocksValueFrom = (
+        'input[data-cy="date-input-individualsFiltersBlocks[{}].individualBlockFilters[{}].value.from"]'
+    )
+    inputDateIndividualsFiltersBlocksValueTo = (
+        'input[data-cy="date-input-individualsFiltersBlocks[{}].individualBlockFilters[{}].value.to"]'
+    )
+    inputIndividualsFiltersBlocksValue = (
+        'input[data-cy="input-individualsFiltersBlocks[{}].individualBlockFilters[{}].value"]'
+    )
+    selectIndividualsFiltersBlocksValue = (
+        'div[data-cy="select-individualsFiltersBlocks[{}].individualBlockFilters[{}].value"]'
+    )
+    totalNumberOfHouseholdsCount = 'div[data-cy="total-number-of-households-count"]'
+    totalNumberOfPeopleCount = 'div[data-cy="label-Total Number of People"]'
+    selectProgramCycleAutocomplete = 'div[data-cy="filters-program-cycle-autocomplete"]'
+    programmeCycleInput = 'div[data-cy="Programme Cycle-input"]'
 
     # Texts
     textTargetingCriteria = "Targeting Criteria"
@@ -183,7 +216,7 @@ class TargetingCreate(BaseComponents):
     def getInputFiltersValueTo(self, fiter_number: int = 0) -> WebElement:
         return self.wait_for(self.inputFiltersValueTo.format(fiter_number))
 
-    def getInputFiltersValue(self, fiter_number: str) -> WebElement:
+    def getInputFiltersValue(self, fiter_number: int = 0) -> WebElement:
         return self.wait_for(self.inputFiltersValue.format(fiter_number))
 
     def getAutocompleteTargetCriteriaValues(self) -> WebElement:
@@ -194,3 +227,102 @@ class TargetingCreate(BaseComponents):
 
     def getButtonEdit(self) -> WebElement:
         return self.wait_for(self.buttonEdit)
+
+    def getTextField(self) -> WebElement:
+        return self.wait_for(self.textField)
+
+    def getBoolField(self) -> WebElement:
+        return self.wait_for(self.boolField)
+
+    def getDatePickerFilter(self) -> WebElement:
+        return self.wait_for(self.datePickerFilter)
+
+    def getSelectIndividualsiFltersBlocksRoundNumber(
+        self, individuals_filters_blocks_number: int = 0, individual_block_filters_number: int = 0
+    ) -> WebElement:
+        return self.wait_for(
+            self.selectIndividualsFiltersBlocksRoundNumber.format(
+                individuals_filters_blocks_number, individual_block_filters_number
+            )
+        )
+
+    def getSelectFiltersRoundNumber(self, round_number: int = 0) -> WebElement:
+        return self.wait_for(self.selectFiltersRoundNumber.format(round_number))
+
+    def getSelectRoundOption(self, round_number: int = 0) -> WebElement:
+        return self.wait_for(self.selectRoundOption.format(round_number))
+
+    def getSelectIndividualsiFltersBlocksIsNull(
+        self, individuals_filters_blocks_number: int = 0, individual_block_filters_number: int = 0
+    ) -> WebElement:
+        return self.wait_for(
+            self.selectIndividualsFiltersBlocksIsNull.format(
+                individuals_filters_blocks_number, individual_block_filters_number
+            )
+        )
+
+    def getInputIndividualsFiltersBlocksValueFrom(
+        self, individuals_filters_blocks_number: int = 0, individual_block_filters_number: int = 0
+    ) -> WebElement:
+        return self.wait_for(
+            self.inputIndividualsFiltersBlocksValueFrom.format(
+                individuals_filters_blocks_number, individual_block_filters_number
+            )
+        )
+
+    def getInputIndividualsFiltersBlocksValueTo(
+        self, individuals_filters_blocks_number: int = 0, individual_block_filters_number: int = 0
+    ) -> WebElement:
+        return self.wait_for(
+            self.inputIndividualsFiltersBlocksValueTo.format(
+                individuals_filters_blocks_number, individual_block_filters_number
+            )
+        )
+
+    def getInputDateIndividualsFiltersBlocksValueFrom(
+        self, individuals_filters_blocks_number: int = 0, individual_block_filters_number: int = 0
+    ) -> WebElement:
+        return self.wait_for(
+            self.inputDateIndividualsFiltersBlocksValueFrom.format(
+                individuals_filters_blocks_number, individual_block_filters_number
+            )
+        )
+
+    def getInputDateIndividualsFiltersBlocksValueTo(
+        self, individuals_filters_blocks_number: int = 0, individual_block_filters_number: int = 0
+    ) -> WebElement:
+        return self.wait_for(
+            self.inputDateIndividualsFiltersBlocksValueTo.format(
+                individuals_filters_blocks_number, individual_block_filters_number
+            )
+        )
+
+    def getInputIndividualsFiltersBlocksValue(
+        self, individuals_filters_blocks_number: int = 0, individual_block_filters_number: int = 0
+    ) -> WebElement:
+        return self.wait_for(
+            self.inputIndividualsFiltersBlocksValue.format(
+                individuals_filters_blocks_number, individual_block_filters_number
+            )
+        )
+
+    def getSelectIndividualsFiltersBlocksValue(
+        self, individuals_filters_blocks_number: int = 0, individual_block_filters_number: int = 0
+    ) -> WebElement:
+        return self.wait_for(
+            self.selectIndividualsFiltersBlocksValue.format(
+                individuals_filters_blocks_number, individual_block_filters_number
+            )
+        )
+
+    def getTotalNumberOfHouseholdsCount(self) -> WebElement:
+        return self.wait_for(self.totalNumberOfHouseholdsCount)
+
+    def getTotalNumberOfPeopleCount(self) -> WebElement:
+        return self.wait_for(self.totalNumberOfPeopleCount)
+
+    def getFiltersProgramCycleAutocomplete(self) -> WebElement:
+        return self.wait_for(self.selectProgramCycleAutocomplete)
+
+    def getProgrammeCycleInput(self) -> WebElement:
+        return self.wait_for(self.programmeCycleInput)
