@@ -96,7 +96,7 @@ ENTRYPOINT ["entrypoint.sh"]
 ## Dist (backend only) image
 FROM base AS be-dist
 
-COPY --chown=hope:hope ./src/data ./src/hct_mis_api ./src/.flake8 ./src/gunicorn_config.py ./src/pytest.ini ./
+COPY ./src/ ./
 COPY ./tests /tests
 COPY --chown=hope:hope --from=builder $PDM_PACKAGES $PDM_PACKAGES
 COPY --chown=hope:hope --from=certs /data/psql-cert.crt /code/psql-cert.crt
