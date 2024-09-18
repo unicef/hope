@@ -88,6 +88,7 @@ export const NeedsAdjudicationActions: React.FC<
         )}
         {dedupEngineSimilarityPair && (
           <BiometricsResults
+            ticketId={ticket.id}
             similarityScore={dedupEngineSimilarityPair.similarityScore}
             faceMatchResult={
               dedupEngineSimilarityPair.isDuplicate
