@@ -3,6 +3,10 @@ import { DialogActions } from '@containers/dialogs/DialogActions';
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import {
+  useGrievanceTicketLazyQuery,
+  useGrievanceTicketQuery,
+} from '@generated/graphql';
 import { usePermissions } from '@hooks/usePermissions';
 import PersonIcon from '@mui/icons-material/Person';
 import {
@@ -25,6 +29,7 @@ export interface Individual {
 }
 
 export interface BiometricsResultsProps {
+  ticketId: string;
   similarityScore: string;
   faceMatchResult: 'Duplicates' | 'Uniqueness';
   individual1?: Individual;
@@ -46,6 +51,7 @@ const Placeholder: React.FC = () => (
 );
 
 export const BiometricsResults = ({
+  ticketId,
   similarityScore,
   faceMatchResult,
   individual1,
@@ -59,12 +65,22 @@ export const BiometricsResults = ({
     permissions,
   );
 
+  const [loadData] = useGrievanceTicketLazyQuery({
+    variables: {
+      id: ticketId,
+    },
+    fetchPolicy: 'cache-and-network',
+  });
+
   return (
     <>
       {canViewBiometricsResults && (
         <Box p={2}>
           <Button
-            onClick={() => setDialogOpen(true)}
+            onClick={() => {
+              setDialogOpen(true);
+              loadData();
+            }}
             data-cy="button-open-biometrics-results"
           >
             {t('Open Biometrics Results')}
