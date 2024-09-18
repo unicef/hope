@@ -20,8 +20,7 @@ else
         --cov-report xml:coverage.xml \
         --randomly-seed=42 \
         --create-db \
-        hct_mis_api/ \
-        tests/
+        tests/unit/
       ;;
     "lint")
       mkdir -p ./lint-results
