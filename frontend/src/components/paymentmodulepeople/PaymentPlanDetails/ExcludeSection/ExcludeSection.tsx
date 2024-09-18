@@ -44,7 +44,7 @@ export function ExcludeSection({
     excludeHouseholdError,
   } = paymentPlan;
 
-  const initialExcludedIds = paymentPlan?.excludedHouseholds?.map(
+  const initialExcludedIds = paymentPlan?.excludedIndividuals?.map(
     (el) => el.unicefId,
   );
   const [isExclusionsOpen, setExclusionsOpen] = useState(initialOpen);
