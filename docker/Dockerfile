@@ -87,6 +87,7 @@ RUN pdm sync --no-editable --no-self --no-isolation
 
 WORKDIR $CODE
 COPY ./src/ ./
+COPY ./tests /tests
 
 
 
@@ -97,7 +98,6 @@ ENTRYPOINT ["entrypoint.sh"]
 FROM base AS be-dist
 
 COPY ./src/ ./
-COPY ./tests /tests
 COPY --chown=hope:hope --from=builder $PDM_PACKAGES $PDM_PACKAGES
 COPY --chown=hope:hope --from=certs /data/psql-cert.crt /code/psql-cert.crt
 
