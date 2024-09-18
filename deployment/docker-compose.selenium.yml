@@ -25,6 +25,7 @@ services:
       - ../backend:/code/
       - ../backend/report/screenshot/:/code/screenshot/
       - ../backend/report/:/code/report/
+      - ../tests:/tests/
       - type: volume
         source: backend-web-app
         target: /code/hct_mis_api/apps/web
