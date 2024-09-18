@@ -24,8 +24,16 @@ from hct_mis_api.apps.core.models import (
     FlexibleAttribute,
 )
 from hct_mis_api.apps.geo import models as geo_models
-from hct_mis_api.apps.household.fixtures import BankAccountInfoFactory, create_household
-from hct_mis_api.apps.household.models import Household
+from hct_mis_api.apps.household.fixtures import (
+    BankAccountInfoFactory,
+    DocumentFactory,
+    create_household,
+)
+from hct_mis_api.apps.household.models import (
+    IDENTIFICATION_TYPE_NATIONAL_ID,
+    Document,
+    Household,
+)
 from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.fixtures import (
     DeliveryMechanismPerPaymentPlanFactory,
@@ -188,17 +196,30 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         self.assertEqual(to_decimal(wb.active["J3"].value), payment_2.entitlement_quantity)
 
     def test_export_payment_plan_payment_list(self) -> None:
+        payment = self.payment_plan.eligible_payments.order_by("unicef_id").first()
+        collector = payment.household.head_of_household
+        # add national_id
+        DocumentFactory(
+            status=Document.STATUS_VALID,
+            program=self.payment_plan.program,
+            type__key=IDENTIFICATION_TYPE_NATIONAL_ID.lower(),
+            document_number="Test_Number_National_Id_123",
+            individual=collector,
+        )
+
         export_service = XlsxPaymentPlanExportService(self.payment_plan)
         export_service.save_xlsx_file(self.user)
 
         self.assertTrue(self.payment_plan.has_export_file)
 
         wb = export_service.generate_workbook()
-        payment = self.payment_plan.eligible_payments.order_by("unicef_id").first()
+
         self.assertEqual(wb.active["A2"].value, str(payment.unicef_id))
         self.assertEqual(wb.active["J2"].value, payment.entitlement_quantity)
         self.assertEqual(wb.active["K2"].value, payment.entitlement_quantity_usd)
         self.assertEqual(wb.active["E2"].value, "TEST_VILLAGE")
+        self.assertEqual(wb.active["M1"].value, "national_id")
+        self.assertEqual(wb.active["M2"].value, "TEST_VILLAGE")
 
     def test_export_payment_plan_payment_list_per_fsp(self) -> None:
         financial_service_provider1 = FinancialServiceProviderFactory()

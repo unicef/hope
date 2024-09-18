@@ -1305,7 +1305,9 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
     @staticmethod
     def get_national_id_doc_number(payment: "Payment") -> str:
         doc = Document.objects.filter(
-            individual=payment.collector, type__key=IDENTIFICATION_TYPE_NATIONAL_ID.lower()
+            individual=payment.collector,
+            type__key=IDENTIFICATION_TYPE_NATIONAL_ID.lower(),
+            status=Document.STATUS_VALID,
         ).first()
         return doc.document_number if doc else ""
 
