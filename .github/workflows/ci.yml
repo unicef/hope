@@ -207,7 +207,7 @@ jobs:
             --push ./"
           
           if [ "${{ github.ref }}" = "refs/heads/master" ]; then
-            version=$(python3 -c "import sys; version=None; [version:=line.split('=')[1].strip().strip('\"') for line in open('backend/pyproject.toml', 'r') if line.strip().startswith('version =')]; print(version if version else sys.exit(1))")
+            version=$(python3 -c "import sys; version=None; [version:=line.split('=')[1].strip().strip('\"') for line in open('src/pyproject.toml', 'r') if line.strip().startswith('version =')]; print(version if version else sys.exit(1))")
             tagged_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-$version
             build_command="$build_command -t $tagged_image"
           fi
@@ -229,12 +229,12 @@ jobs:
       - name: Unit tests
         run: |
           backend_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev docker compose \
-            -f ./deployment/docker-compose.tst.yml \
+            -f ./.github/helpers/docker-compose.tst.yml \
             run backend ./dev.sh test
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
-          files: ./backend/coverage.xml
+          files: ./src/coverage.xml
           flags: unittests
           token: ${{ secrets.CODECOV_TOKEN }}
           verbose: true
@@ -253,9 +253,9 @@ jobs:
 
       - name: E2E tests
         run: |
-          compose_file=./deployment/docker-compose.selenium-night.yml
+          compose_file=./.github/helpers/docker-compose.selenium-night.yml
           if [ "${{ github.event_name }}" = "pull_request" ]; then
-            compose_file=./deployment/docker-compose.selenium.yml
+            compose_file=./.github/helpers/docker-compose.selenium.yml
           fi
           dist_backend_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dist dev_backend_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev docker compose \
             -f $compose_file \
@@ -266,14 +266,14 @@ jobs:
         continue-on-error: true
         with:
           name: report
-          path: ./backend/report/
+          path: ./src/report/
           retention-days: 5
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         if: always()
         continue-on-error: true
         with:
-          files: ./backend/coverage.xml
+          files: ./src/coverage.xml
           flags: e2e
           token: ${{ secrets.CODECOV_TOKEN }}
           verbose: true

@@ -32,9 +32,9 @@ services:
     image: ${backend_image}
     command: "test"
     volumes:
-      - ../src:/code/
-      - ../src/test-coverage:/code/backend/test-coverage
-      - ../tests:/tests/
+      - ../../src:/code/
+      - ../../src/test-coverage:/code/backend/test-coverage
+      - ../../tests:/tests/
       - ./dev.sh:/code/dev.sh
     depends_on:
       - db
