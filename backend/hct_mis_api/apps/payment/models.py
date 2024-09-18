@@ -69,6 +69,7 @@ from hct_mis_api.apps.core.models import BusinessArea, FileTemp, FlexibleAttribu
 from hct_mis_api.apps.core.utils import nested_getattr
 from hct_mis_api.apps.household.models import (
     FEMALE,
+    IDENTIFICATION_TYPE_NATIONAL_ID,
     MALE,
     ROLE_ALTERNATE,
     Document,
@@ -1270,7 +1271,10 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             "status": (payment, "payment_status"),
             "transaction_status_blockchain_link": (payment, "transaction_status_blockchain_link"),
         }
-        additional_columns = {"registration_token": cls.get_registration_token_doc_number}
+        additional_columns = {
+            "registration_token": cls.get_registration_token_doc_number,
+            "national_id": cls.get_national_id_doc_number,
+        }
         if column_name in additional_columns:
             method = additional_columns[column_name]
             return method(payment)
@@ -1296,6 +1300,13 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
     @staticmethod
     def get_registration_token_doc_number(payment: "Payment") -> str:
         doc = Document.objects.filter(individual=payment.collector, type__key="registration_token").first()
+        return doc.document_number if doc else ""
+
+    @staticmethod
+    def get_national_id_doc_number(payment: "Payment") -> str:
+        doc = Document.objects.filter(
+            individual=payment.collector, type__key=IDENTIFICATION_TYPE_NATIONAL_ID.lower()
+        ).first()
         return doc.document_number if doc else ""
 
     def __str__(self) -> str:
