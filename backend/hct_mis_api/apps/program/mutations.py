@@ -31,7 +31,8 @@ from hct_mis_api.apps.program.celery_tasks import (
 from hct_mis_api.apps.program.inputs import (
     CopyProgramInput,
     CreateProgramInput,
-    UpdateProgramInput, UpdateProgramPartnersInput,
+    UpdateProgramInput,
+    UpdateProgramPartnersInput,
 )
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.program.schema import ProgramNode
@@ -225,7 +226,8 @@ class UpdateProgramPartners(
         business_area = program.business_area
         partners_data = program_data.pop("partners", [])
         partner = info.context.user.partner
-        partner_access = program_data.get("partner_access", program.partner_access)
+        partner_access = program_data.get("partner_access", None)
+        old_partner_access = old_program.partner_access
 
         cls.has_permission(info, Permissions.PROGRAMME_UPDATE, business_area)
 
@@ -235,18 +237,13 @@ class UpdateProgramPartners(
             partner=partner,
         )
 
-        for attrib, value in program_data.items():
-            if hasattr(program, attrib):
-                setattr(program, attrib, value)
-        program.full_clean()
+        program.partner_access = partner_access
 
-        # zmienic i zobaczyc czy na pewno nie dla all partners acces tez nie trzeba usuunąć tych które może nie będą już potrzebne
-
-
-        # update partner access only for SELECTED_PARTNERS_ACCESS type, since NONE and ALL are handled through signal
-        if (
-            partner_access == Program.SELECTED_PARTNERS_ACCESS
-        ):
+        # update partner access for ALL_PARTNERS_ACCESS type if it was not changed but the partners need to be refetched
+        if partner_access == old_partner_access and partner_access == Program.ALL_PARTNERS_ACCESS:
+            create_program_partner_access([], program, partner_access)
+        # update partner access only for SELECTED_PARTNERS_ACCESS type, since update to NONE and ALL are handled through signal
+        if partner_access == Program.SELECTED_PARTNERS_ACCESS:
             partners_data = create_program_partner_access(partners_data, program, partner_access)
             remove_program_partner_access(partners_data, program)
         program.save()

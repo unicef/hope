@@ -7,7 +7,7 @@ from django.utils import timezone
 
 from hct_mis_api.apps.account.models import Partner, Role, User, UserRole
 from hct_mis_api.apps.core.models import BusinessArea, BusinessAreaPartnerThrough
-from hct_mis_api.apps.program.models import Program, ProgramPartnerThrough
+from hct_mis_api.apps.program.models import Program
 
 
 @receiver(post_save, sender=UserRole)
@@ -59,6 +59,4 @@ def allowed_business_areas_changed(sender: Any, instance: Partner, action: str, 
 
     elif action == "post_clear":
         removed_business_areas = getattr(instance, "_removed_business_areas", [])
-        BusinessAreaPartnerThrough.objects.filter(
-            partner=instance, business_area__in=removed_business_areas
-        ).delete()
+        BusinessAreaPartnerThrough.objects.filter(partner=instance, business_area__in=removed_business_areas).delete()

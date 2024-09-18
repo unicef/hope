@@ -2876,6 +2876,7 @@ type Mutations {
   targetPopulationRebuild(id: ID!): RebuildTargetPopulationMutation
   createProgram(programData: CreateProgramInput!): CreateProgram
   updateProgram(programData: UpdateProgramInput, version: BigInt): UpdateProgram
+  updateProgramPartners(programData: UpdateProgramPartnersInput, version: BigInt): UpdateProgramPartners
   deleteProgram(programId: String!): DeleteProgram
   copyProgram(programData: CopyProgramInput!): CopyProgram
   uploadImportDataXlsxFileAsync(businessAreaSlug: String!, file: Upload!): UploadImportDataXLSXFileAsync
@@ -2947,7 +2948,6 @@ type PartnerNode {
   name: String
   parent: PartnerNode
   isUn: Boolean!
-  permissions: JSONString!
   lft: Int!
   rght: Int!
   treeId: Int!
@@ -2977,7 +2977,6 @@ type PartnerType {
   name: String!
   parent: PartnerNode
   isUn: Boolean!
-  permissions: JSONString!
   lft: Int!
   rght: Int!
   treeId: Int!
@@ -5333,10 +5332,19 @@ input UpdateProgramInput {
   populationGoal: Int
   administrativeAreasOfImplementation: String
   dataCollectingTypeCode: String
-  partners: [ProgramPartnerThroughInput]
-  partnerAccess: String
   programmeCode: String
   pduFields: [PDUFieldInput]
+}
+
+type UpdateProgramPartners {
+  validationErrors: Arg
+  program: ProgramNode
+}
+
+input UpdateProgramPartnersInput {
+  id: String!
+  partners: [ProgramPartnerThroughInput]
+  partnerAccess: String
 }
 
 input UpdateTargetPopulationInput {

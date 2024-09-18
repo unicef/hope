@@ -75,8 +75,8 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
         additional_fields = []
         if obj and obj.is_unicef:
             additional_fields.append("name")
-        if not request.user.has_perm('account.can_change_allowed_business_areas'):
-            additional_fields.append('allowed_business_areas')
+        if not request.user.has_perm("account.can_change_allowed_business_areas"):
+            additional_fields.append("allowed_business_areas")
         return list(super().get_readonly_fields(request, obj)) + additional_fields
 
     def get_form(
