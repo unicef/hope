@@ -1,45 +1,43 @@
 version: '3.7'
-x-django-envs: &django_envs
-  environment:
-    - ENV=dev
-    - SECRET_KEY=31283012-38dasda
-    - POSTGRES_DB=postgres
-    - POSTGRES_USER=postgres
-    - POSTGRES_PASSWORD=postgres
-    - DATABASE_URL=postgis://postgres:postgres@db:5432/postgres
-    - DATABASE_URL_HUB_MIS=postgis://postgres:postgres@db:5432/mis_datahub
-    - DATABASE_URL_HUB_CA=postgis://postgres:postgres@db:5432/ca_datahub
-    - DATABASE_URL_HUB_ERP=postgis://postgres:postgres@db:5432/erp_datahub
-    - DATABASE_URL_HUB_REGISTRATION=postgis://postgres:postgres@db:5432/rdi_datahub
-    - POSTGRES_SSL_MODE=off
-    - EMAIL_HOST=TBD
-    - EMAIL_HOST_USER=TBD
-    - EMAIL_HOST_PASSWORD=TBD
-    - KOBO_KF_URL=https://kobo.humanitarianresponse.info
-    - KOBO_KC_URL=https://kobo.humanitarianresponse.info
-    - KOBO_MASTER_API_TOKEN=token
-    - EXCHANGE_RATES_API_KEY=token
-    - REDIS_INSTANCE=redis:6379
-    - PYTHONUNBUFFERED=1
 
 services:
-  redis:
-    restart: unless-stopped
-    image: redis:4.0.11-alpine3.8
 
   backend:
-    <<: *django_envs
     image: ${backend_image}
-    command: "test"
     volumes:
-      - ../../src:/code/
       - ../../src/test-coverage:/code/backend/test-coverage
-      - ../../tests:/tests/
       - ./dev.sh:/code/dev.sh
     depends_on:
       - db
       - redis
       - elasticsearch
+    profiles:
+      - unit
+      - selenium
+
+  init_fe:
+    image: ${dist_backend_image}
+    volumes:
+      - backend-web-app:/tmp/
+    command: |
+      sh -c "
+        cp -r ./hct_mis_api/apps/web/* /tmp/
+      "
+    restart: "no"
+    profiles:
+      - selenium
+
+  celery_worker:
+    image: ${backend_image}
+    restart: unless-stopped
+    command: "celery -A hct_mis_api.apps.core.celery worker -E -l info"
+    depends_on:
+      - backend
+      - db
+      - redis
+      - elasticsearch
+    profiles:
+      - selenium
 
   db:
     image: kartoza/postgis:14-3
@@ -55,20 +53,18 @@ services:
       - POSTGRES_SSL_MODE=off
     ports:
       - "5433:5432"
+    profiles:
+      - unit
+      - selenium
 
-  celery_worker:
-    <<: *django_envs
-    image: ${backend_image}
+  redis:
     restart: unless-stopped
-    command: "celery -A hct_mis_api.apps.core.celery worker -E -l info"
-    depends_on:
-      - backend
-      - db
-      - redis
-      - elasticsearch
+    image: redis:4.0.11-alpine3.8
+    profiles:
+      - unit
+      - selenium
 
   elasticsearch:
-    <<: *django_envs
     image: unicef/hct-elasticsearch
     build:
       context: ../development_tools/elasticsearch
@@ -83,3 +79,6 @@ services:
       memlock:
         soft: -1
         hard: -1
+    profiles:
+      - unit
+      - selenium
