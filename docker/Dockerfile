@@ -86,7 +86,7 @@ RUN apt-get update \
 RUN pdm sync --no-editable --no-self --no-isolation
 
 WORKDIR $CODE
-COPY ./src/data ./src/hct_mis_api ./src/.flake8 ./src/gunicorn_config.py ./
+COPY ./src/ ./
 
 
 
