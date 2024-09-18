@@ -156,7 +156,7 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         self.assertEqual(service.errors, error_msg)
 
     def test_import_invalid_file_with_unexpected_column(self) -> None:
-        error_msg = XlsxError(sheet="Payment Plan - Payment List", coordinates="M3", message="Unexpected value")
+        error_msg = XlsxError(sheet="Payment Plan - Payment List", coordinates="N3", message="Unexpected value")
         content = Path(
             f"{settings.PROJECT_ROOT}/apps/payment/tests/test_file/pp_payment_list_unexpected_column.xlsx"
         ).read_bytes()
@@ -197,14 +197,13 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
 
     def test_export_payment_plan_payment_list(self) -> None:
         payment = self.payment_plan.eligible_payments.order_by("unicef_id").first()
-        collector = payment.household.head_of_household
         # add national_id
         DocumentFactory(
             status=Document.STATUS_VALID,
             program=self.payment_plan.program,
             type__key=IDENTIFICATION_TYPE_NATIONAL_ID.lower(),
             document_number="Test_Number_National_Id_123",
-            individual=collector,
+            individual=payment.collector,
         )
 
         export_service = XlsxPaymentPlanExportService(self.payment_plan)
@@ -219,7 +218,7 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         self.assertEqual(wb.active["K2"].value, payment.entitlement_quantity_usd)
         self.assertEqual(wb.active["E2"].value, "TEST_VILLAGE")
         self.assertEqual(wb.active["M1"].value, "national_id")
-        self.assertEqual(wb.active["M2"].value, "TEST_VILLAGE")
+        self.assertEqual(wb.active["M2"].value, "Test_Number_National_Id_123")
 
     def test_export_payment_plan_payment_list_per_fsp(self) -> None:
         financial_service_provider1 = FinancialServiceProviderFactory()
