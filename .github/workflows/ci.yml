@@ -230,6 +230,8 @@ jobs:
         run: |
           backend_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev docker compose \
             -f ./.github/helpers/docker-compose.tst.yml \
+            --profile unit \
+            --env-file ./.github/helpers/.env-unit \
             run backend ./dev.sh test
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
@@ -253,13 +255,19 @@ jobs:
 
       - name: E2E tests
         run: |
-          compose_file=./.github/helpers/docker-compose.selenium-night.yml
+          extra_options=""
+          
           if [ "${{ github.event_name }}" = "pull_request" ]; then
-            compose_file=./.github/helpers/docker-compose.selenium.yml
+            extra_options="-m 'not night'"
           fi
           dist_backend_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dist dev_backend_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev docker compose \
-            -f $compose_file \
-            run selenium
+            -f ./.github/helpers/docker-compose.tst.yml \
+            --profile selenium \
+            --env-file ./.github/helpers/.env-selenium \
+            run selenium bash -c "
+              waitforit -host=db -port=5432 -timeout=30
+              pytest -svvv $extra_options selenium_tests --cov-report xml:./coverage.xml --html-report=./report/report.html --randomly-seed=42
+            "
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         if: always()
