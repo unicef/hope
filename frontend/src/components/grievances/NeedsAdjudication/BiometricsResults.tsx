@@ -3,10 +3,7 @@ import { DialogActions } from '@containers/dialogs/DialogActions';
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import {
-  useGrievanceTicketLazyQuery,
-  useGrievanceTicketQuery,
-} from '@generated/graphql';
+import { useGrievanceTicketLazyQuery } from '@generated/graphql';
 import { usePermissions } from '@hooks/usePermissions';
 import PersonIcon from '@mui/icons-material/Person';
 import {
