@@ -34,6 +34,7 @@ services:
     volumes:
       - ../backend:/code/
       - ../backend/test-coverage:/code/backend/test-coverage
+      - ../tests:/tests/
       - ./dev.sh:/code/dev.sh
     depends_on:
       - db
