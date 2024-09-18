@@ -26,7 +26,7 @@ import { decodeIdString } from '@utils/utils';
 import { Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { ALL_LOG_ENTRIES_QUERY } from '../../../apollo/queries/core/AllLogEntries';
 import { hasPermissionInModule } from '../../../config/permissions';
 import { editProgramValidationSchema } from '@components/programs/CreateProgram/editProgramValidationSchema';
@@ -36,6 +36,8 @@ export const EditProgramPage = (): ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
   const permissions = usePermissions();
+  const location = useLocation();
+  const option = location.state?.option;
 
   const [step, setStep] = useState(0);
   const { showMessage } = useSnackbar();
@@ -330,54 +332,60 @@ export const EditProgramPage = (): ReactElement => {
               }
             >
               <Box p={3}>
-                <Fade in={step === 0} timeout={600}>
-                  <div>
-                    {step === 0 && (
-                      <DetailsStep
-                        values={values}
-                        handleNext={handleNextStep}
-                        programId={id}
-                      />
-                    )}
-                  </div>
-                </Fade>
-                <Fade in={step === 1} timeout={600}>
-                  <div>
-                    {step === 1 && (
-                      <ProgramFieldSeriesStep
-                        values={values}
-                        handleNext={handleNextStep}
-                        step={step}
-                        setStep={setStep}
-                        pdusubtypeChoicesData={pdusubtypeChoicesData}
-                        errors={errors}
-                        setErrors={setErrors}
-                        setFieldTouched={setFieldTouched}
-                        programHasRdi={programHasRdi}
-                        programHasTp={programHasTp}
-                        programId={id}
-                        program={data.program}
-                        setFieldValue={setFieldValue}
-                      />
-                    )}
-                  </div>
-                </Fade>
-                <Fade in={step === 2} timeout={600}>
-                  <div>
-                    {step === 2 && (
-                      <PartnersStep
-                        values={values}
-                        allAreasTreeData={allAreasTree}
-                        partnerChoices={mappedPartnerChoices}
-                        step={step}
-                        setStep={setStep}
-                        submitForm={submitForm}
-                        setFieldValue={setFieldValue}
-                        programId={id}
-                      />
-                    )}
-                  </div>
-                </Fade>
+                {option === 'details' && (
+                  <>
+                    <Fade in={step === 0} timeout={600}>
+                      <div>
+                        {step === 0 && (
+                          <DetailsStep
+                            values={values}
+                            handleNext={handleNextStep}
+                            programId={id}
+                          />
+                        )}
+                      </div>
+                    </Fade>
+                    <Fade in={step === 1} timeout={600}>
+                      <div>
+                        {step === 1 && (
+                          <ProgramFieldSeriesStep
+                            values={values}
+                            handleNext={handleNextStep}
+                            step={step}
+                            setStep={setStep}
+                            pdusubtypeChoicesData={pdusubtypeChoicesData}
+                            errors={errors}
+                            setErrors={setErrors}
+                            setFieldTouched={setFieldTouched}
+                            programHasRdi={programHasRdi}
+                            programHasTp={programHasTp}
+                            programId={id}
+                            program={data.program}
+                            setFieldValue={setFieldValue}
+                          />
+                        )}
+                      </div>
+                    </Fade>
+                  </>
+                )}
+                {option === 'partners' && (
+                  <Fade in={step === 2} timeout={600}>
+                    <div>
+                      {step === 2 && (
+                        <PartnersStep
+                          values={values}
+                          allAreasTreeData={allAreasTree}
+                          partnerChoices={mappedPartnerChoices}
+                          step={step}
+                          setStep={setStep}
+                          submitForm={submitForm}
+                          setFieldValue={setFieldValue}
+                          programId={id}
+                        />
+                      )}
+                    </div>
+                  </Fade>
+                )}
               </Box>
             </BaseSection>
           </>
