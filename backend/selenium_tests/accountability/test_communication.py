@@ -51,7 +51,7 @@ class TestSmokeAccountabilityCommunication:
         add_accountability_communication_message: Message,
         pageAccountabilityCommunication: AccountabilityCommunication,
     ) -> None:
-        pageAccountabilityCommunication.selectGlobalProgramFilter("Test Program").click()
+        pageAccountabilityCommunication.selectGlobalProgramFilter("Test Program")
         pageAccountabilityCommunication.getNavAccountability().click()
         assert "Communication" in pageAccountabilityCommunication.getPageHeaderTitle().text
         assert "NEW MESSAGE" in pageAccountabilityCommunication.getButtonCommunicationCreateNew().text
@@ -81,7 +81,7 @@ class TestSmokeAccountabilityCommunication:
         pageAccountabilityCommunication: AccountabilityCommunication,
         pageAccountabilityCommunicationDetails: AccountabilityCommunicationDetails,
     ) -> None:
-        pageAccountabilityCommunication.selectGlobalProgramFilter("Test Program").click()
+        pageAccountabilityCommunication.selectGlobalProgramFilter("Test Program")
         pageAccountabilityCommunication.getNavAccountability().click()
         pageAccountabilityCommunication.getRows()[0].click()
         assert "MSG-24-0666" in pageAccountabilityCommunicationDetails.getPageHeaderTitle().text

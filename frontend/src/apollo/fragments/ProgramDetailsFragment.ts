@@ -46,6 +46,7 @@ export const programDetails = gql`
     registrationImports {
       totalCount
     }
+    targetPopulationsCount
     pduFields {
       id
       label
@@ -56,5 +57,6 @@ export const programDetails = gql`
         roundsNames
       }
     }
+    canFinish
   }
 `;

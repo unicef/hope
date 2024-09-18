@@ -2,6 +2,7 @@ from django.conf import settings
 from django.core.management import call_command
 
 import pytest
+from freezegun import freeze_time
 from page_object.programme_population.individuals import Individuals
 from page_object.programme_population.individuals_details import IndividualsDetails
 
@@ -27,7 +28,7 @@ class TestSmokeIndividuals:
     def test_smoke_page_individuals(
         self, create_programs: None, add_households: None, pageIndividuals: Individuals
     ) -> None:
-        pageIndividuals.selectGlobalProgramFilter("Test Programm").click()
+        pageIndividuals.selectGlobalProgramFilter("Test Programm")
         pageIndividuals.getNavProgrammePopulation().click()
         pageIndividuals.getNavIndividuals().click()
         assert "Individuals" in pageIndividuals.getTableTitle().text
@@ -40,6 +41,7 @@ class TestSmokeIndividuals:
         assert "Administrative Level 2" in pageIndividuals.getIndividualLocation().text
         assert 6 == len(pageIndividuals.getIndividualTableRow())
 
+    @freeze_time("2024-08-26")
     def test_smoke_page_individuals_details(
         self,
         create_programs: None,
@@ -47,7 +49,7 @@ class TestSmokeIndividuals:
         pageIndividuals: Individuals,
         pageIndividualsDetails: IndividualsDetails,
     ) -> None:
-        pageIndividuals.selectGlobalProgramFilter("Test Programm").click()
+        pageIndividuals.selectGlobalProgramFilter("Test Programm")
         pageIndividuals.getNavProgrammePopulation().click()
         pageIndividuals.getNavIndividuals().click()
         pageIndividuals.getIndividualTableRow()[0].click()
@@ -56,7 +58,7 @@ class TestSmokeIndividuals:
         assert "-" in pageIndividualsDetails.getLabelMiddleName().text
         assert "Kowalska" in pageIndividualsDetails.getLabelFamilyName().text
         assert "Female" in pageIndividualsDetails.getLabelGender().text
-        assert "82" in pageIndividualsDetails.getLabelAge().text
+        assert "83" in pageIndividualsDetails.getLabelAge().text
         assert "26 Aug 1941" in pageIndividualsDetails.getLabelDateOfBirth().text
         assert "No" in pageIndividualsDetails.getLabelEstimatedDateOfBirth().text
         assert "Married" in pageIndividualsDetails.getLabelMaritalStatus().text
@@ -82,3 +84,7 @@ class TestSmokeIndividuals:
         assert "0048503123555" in pageIndividualsDetails.getLabelPhoneNumber().text
         assert "-" in pageIndividualsDetails.getLabelAlternativePhoneNumber().text
         assert "-" in pageIndividualsDetails.getLabelDateOfLastScreeningAgainstSanctionsList().text
+
+    @pytest.mark.skip(reason="ToDo")
+    def test_check_data_after_grievance_ticket_processed(self) -> None:
+        pass

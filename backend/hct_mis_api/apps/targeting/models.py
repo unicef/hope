@@ -23,6 +23,7 @@ from hct_mis_api.apps.core.models import StorageFile
 from hct_mis_api.apps.core.utils import map_unicef_ids_to_households_unicef_ids
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.steficon.models import Rule, RuleCommit
+from hct_mis_api.apps.targeting.choices import FlexFieldClassification
 from hct_mis_api.apps.targeting.services.targeting_service import (
     TargetingCriteriaFilterBase,
     TargetingCriteriaQueryingBase,
@@ -177,6 +178,9 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         help_text="""Set only when the target population moves from draft to
             candidate list frozen state (approved)""",
         on_delete=models.SET_NULL,
+    )
+    program_cycle = models.ForeignKey(
+        "program.ProgramCycle", on_delete=models.CASCADE, related_name="target_populations", null=True, blank=True
     )
     targeting_criteria = models.OneToOneField(
         "TargetingCriteria",
@@ -445,6 +449,28 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterB
         :Residential Status != Refugee
     """
 
+    comparison_method = models.CharField(
+        max_length=20,
+        choices=TargetingCriteriaFilterBase.COMPARISON_CHOICES,
+    )
+    targeting_criteria_rule = models.ForeignKey(
+        "TargetingCriteriaRule",
+        related_name="filters",
+        on_delete=models.CASCADE,
+    )
+    flex_field_classification = models.CharField(
+        max_length=20,
+        choices=FlexFieldClassification.choices,
+        default=FlexFieldClassification.NOT_FLEX_FIELD,
+    )
+    field_name = models.CharField(max_length=50)
+    arguments = JSONField(
+        help_text="""
+            Array of arguments
+            """
+    )
+    round_number = models.PositiveIntegerField(null=True, blank=True)
+
     @property
     def is_social_worker_program(self) -> bool:
         try:
@@ -460,23 +486,6 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterB
             return FieldFactory.from_only_scopes([Scope.TARGETING, Scope.XLSX_PEOPLE])
         return FieldFactory.from_scope(Scope.TARGETING).associated_with_household()
 
-    comparison_method = models.CharField(
-        max_length=20,
-        choices=TargetingCriteriaFilterBase.COMPARISON_CHOICES,
-    )
-    targeting_criteria_rule = models.ForeignKey(
-        "TargetingCriteriaRule",
-        related_name="filters",
-        on_delete=models.CASCADE,
-    )
-    is_flex_field = models.BooleanField(default=False)
-    field_name = models.CharField(max_length=50)
-    arguments = JSONField(
-        help_text="""
-            Array of arguments
-            """
-    )
-
 
 class TargetingIndividualBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterBase):
     """
@@ -485,13 +494,6 @@ class TargetingIndividualBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteria
         :Residential Status = Refugee
         :Residential Status != Refugee
     """
-
-    @property
-    def is_social_worker_program(self) -> bool:
-        return False
-
-    def get_core_fields(self) -> List:
-        return FieldFactory.from_scope(Scope.TARGETING).associated_with_individual()
 
     comparison_method = models.CharField(
         max_length=20,
@@ -502,13 +504,25 @@ class TargetingIndividualBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteria
         related_name="individual_block_filters",
         on_delete=models.CASCADE,
     )
-    is_flex_field = models.BooleanField(default=False)
+    flex_field_classification = models.CharField(
+        max_length=20,
+        choices=FlexFieldClassification.choices,
+        default=FlexFieldClassification.NOT_FLEX_FIELD,
+    )
     field_name = models.CharField(max_length=50)
     arguments = JSONField(
         help_text="""
             Array of arguments
             """
     )
+    round_number = models.PositiveIntegerField(null=True, blank=True)
+
+    @property
+    def is_social_worker_program(self) -> bool:
+        return False
+
+    def get_core_fields(self) -> List:
+        return FieldFactory.from_scope(Scope.TARGETING).associated_with_individual()
 
     def get_lookup_prefix(self, associated_with: Any) -> str:
         return ""

@@ -6,6 +6,25 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
+snapshots['TestProgramChoices::test_program_cycle_status_choices 1'] = {
+    'data': {
+        'programCycleStatusChoices': [
+            {
+                'name': 'Active',
+                'value': 'ACTIVE'
+            },
+            {
+                'name': 'Draft',
+                'value': 'DRAFT'
+            },
+            {
+                'name': 'Finished',
+                'value': 'FINISHED'
+            }
+        ]
+    }
+}
+
 snapshots['TestProgramChoices::test_program_frequency_of_payments_choices 1'] = {
     'data': {
         'programFrequencyOfPaymentsChoices': [

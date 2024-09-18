@@ -72,10 +72,10 @@ export const individualDataRow = (
             : row[0].replaceAll('_i_f', '').replaceAll('_', ' ')}
         </Capitalize>
       </TableCell>
-      <TableCell align="left">
+      <TableCell align="left" data-cy="current-value">
         <CurrentValue field={field} value={currentValue} />
       </TableCell>
-      <TableCell align="left">
+      <TableCell align="left" data-cy="new-value">
         <NewValue field={field} value={valueDetails.value} />
       </TableCell>
     </TableRow>

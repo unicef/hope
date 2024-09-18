@@ -1,6 +1,7 @@
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.db.models import (
+    Case,
     Exists,
     F,
     Func,
@@ -10,6 +11,7 @@ from django.db.models import (
     QuerySet,
     Subquery,
     Value,
+    When,
 )
 
 from model_utils.managers import SoftDeletableManager, SoftDeletableQuerySet
@@ -27,15 +29,22 @@ class PaymentQuerySet(SoftDeletableQuerySet):
         def _annotate_conflict_data(qs: QuerySet) -> QuerySet:
             return qs.annotate(
                 formatted_pp_start_date=Func(
-                    F("parent__start_date"),
+                    F("parent__program_cycle__start_date"),
                     Value("YYYY-MM-DD"),
                     function="to_char",
                     output_field=models.CharField(),
                 ),
-                formatted_pp_end_date=Func(
-                    F("parent__end_date"),
-                    Value("YYYY-MM-DD"),
-                    function="to_char",
+                formatted_pp_end_date=Case(
+                    When(
+                        parent__program_cycle__end_date__isnull=False,
+                        then=Func(
+                            F("parent__program_cycle__end_date"),
+                            Value("YYYY-MM-DD"),
+                            function="to_char",
+                            output_field=models.CharField(),
+                        ),
+                    ),
+                    default=Value(None),
                     output_field=models.CharField(),
                 ),
             ).annotate(
@@ -67,8 +76,10 @@ class PaymentQuerySet(SoftDeletableQuerySet):
             .exclude(is_follow_up=True)
             .filter(parent__program_cycle_id=OuterRef("parent__program_cycle_id"))
             .filter(
-                Q(parent__start_date__lte=OuterRef("parent__end_date"))
-                & Q(parent__end_date__gte=OuterRef("parent__start_date")),
+                Q(parent__program_cycle__start_date__lte=OuterRef("parent__program_cycle__end_date"))
+                | Q(parent__program_cycle__end_date__isnull=True),
+                Q(parent__program_cycle__end_date__gte=OuterRef("parent__program_cycle__start_date"))
+                | Q(parent__program_cycle__end_date__isnull=True),
                 ~Q(status=Payment.STATUS_ERROR),
                 ~Q(status=Payment.STATUS_NOT_DISTRIBUTED),
                 ~Q(status=Payment.STATUS_FORCE_FAILED),
@@ -86,8 +97,10 @@ class PaymentQuerySet(SoftDeletableQuerySet):
             .exclude(is_follow_up=True)
             .filter(parent__program_cycle_id=OuterRef("parent__program_cycle_id"))
             .filter(
-                Q(parent__start_date__lte=OuterRef("parent__end_date"))
-                & Q(parent__end_date__gte=OuterRef("parent__start_date")),
+                Q(parent__program_cycle__start_date__lte=OuterRef("parent__program_cycle__end_date"))
+                | Q(parent__program_cycle__end_date__isnull=True),
+                Q(parent__program_cycle__end_date__gte=OuterRef("parent__program_cycle__start_date"))
+                | Q(parent__program_cycle__end_date__isnull=True),
                 Q(household=OuterRef("household")) & Q(conflicted=False),
                 ~Q(parent__status=PaymentPlan.Status.OPEN),
                 ~Q(status=Payment.STATUS_ERROR),

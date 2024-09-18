@@ -37,6 +37,7 @@ class HouseholdsDetails(BaseComponents):
     labelImportName = 'div[data-cy="label-Import name"]'
     labelRegistrationDate = 'div[data-cy="label-Registration Date"]'
     labelUserName = 'div[data-cy="label-User name"]'
+    row05 = '[data-cy="row05"]'
 
     def getPageHeaderContainer(self) -> WebElement:
         return self.wait_for(self.pageHeaderContainer)
@@ -139,3 +140,6 @@ class HouseholdsDetails(BaseComponents):
 
     def getLabelUserName(self) -> WebElement:
         return self.wait_for(self.labelUserName)
+
+    def getRow05(self) -> WebElement:
+        return self.wait_for(self.row05)
