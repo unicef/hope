@@ -1,6 +1,6 @@
 from time import sleep
 
-from helpers.helper import Common
+from tests.selenium.helpers.helper import Common
 from selenium.webdriver.remote.webelement import WebElement
 
 
