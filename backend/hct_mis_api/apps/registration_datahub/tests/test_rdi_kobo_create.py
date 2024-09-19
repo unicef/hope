@@ -30,7 +30,7 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.registration_data.models import ImportData
+from hct_mis_api.apps.registration_data.models import ImportData, RegistrationDataImport
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
@@ -96,7 +96,11 @@ class TestRdiKoboCreateTask(TestCase):
 
         cls.program = ProgramFactory(status="ACTIVE")
         cls.registration_data_import = RegistrationDataImportFactory(
-            business_area=cls.business_area, program=cls.program, import_data=cls.import_data
+            business_area=cls.business_area,
+            program=cls.program,
+            import_data=cls.import_data,
+            number_of_individuals=99,
+            number_of_households=33,
         )
         rebuild_search_index()
 
@@ -105,8 +109,21 @@ class TestRdiKoboCreateTask(TestCase):
         _return_test_image,
     )
     def test_execute(self) -> None:
+        self.business_area.postpone_deduplication = True
+        self.business_area.save()
+        # just random number of HH and Ind
+        self.assertEqual(self.registration_data_import.number_of_households, 33)
+        self.assertEqual(self.registration_data_import.number_of_individuals, 99)
+
         task = self.RdiKoboCreateTask(self.registration_data_import.id, self.business_area.id)
         task.execute(self.import_data.id, self.program.id)
+
+        self.registration_data_import.refresh_from_db(
+            fields=["status", "number_of_households", "number_of_individuals"]
+        )
+        self.assertEqual(self.registration_data_import.status, RegistrationDataImport.IN_REVIEW)
+        self.assertEqual(self.registration_data_import.number_of_households, 1)
+        self.assertEqual(self.registration_data_import.number_of_individuals, 2)
 
         households = PendingHousehold.objects.all()
         individuals = PendingIndividual.objects.all()
