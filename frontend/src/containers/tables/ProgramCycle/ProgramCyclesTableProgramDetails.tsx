@@ -17,11 +17,13 @@ import { BlackLink } from '@core/BlackLink';
 import { usePermissions } from '@hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 
-interface ProgramCycleTableProps {
+interface ProgramCyclesTableProgramDetailsProps {
   program: ProgramQuery['program'];
 }
 
-export const ProgramCycleTable = ({ program }: ProgramCycleTableProps) => {
+export const ProgramCyclesTableProgramDetails = ({
+  program,
+}: ProgramCyclesTableProgramDetailsProps) => {
   const [queryVariables, setQueryVariables] = useState({
     offset: 0,
     limit: 5,
@@ -66,13 +68,22 @@ export const ProgramCycleTable = ({ program }: ProgramCycleTableProps) => {
             statusToColor={programCycleStatusToColor}
           />
         </TableCell>
-        <TableCell data-cy="program-cycle-total-entitled-quantity">
+        <TableCell
+          align="right"
+          data-cy="program-cycle-total-entitled-quantity"
+        >
           {row.total_entitled_quantity_usd || '-'}
         </TableCell>
-        <TableCell data-cy="program-cycle-total-undelivered-quantity">
+        <TableCell
+          align="right"
+          data-cy="program-cycle-total-undelivered-quantity"
+        >
           {row.total_undelivered_quantity_usd || '-'}
         </TableCell>
-        <TableCell data-cy="program-cycle-total-delivered-quantity">
+        <TableCell
+          align="right"
+          data-cy="program-cycle-total-delivered-quantity"
+        >
           {row.total_delivered_quantity_usd || '-'}
         </TableCell>
         <TableCell data-cy="program-cycle-start-date">

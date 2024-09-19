@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import { PageHeader } from '@core/PageHeader';
 import { useTranslation } from 'react-i18next';
-import { ProgramCyclesFilters } from '@containers/tables/ProgramCyclesTable/ProgramCyclesFilters';
+import { ProgramCyclesFilters } from '@containers/tables/ProgramCyclesTablePaymentModule/ProgramCyclesFilters';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { useLocation } from 'react-router-dom';
 import { usePermissions } from '@hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { PermissionDenied } from '@core/PermissionDenied';
-import { ProgramCyclesTable } from '@containers/tables/ProgramCyclesTable/ProgramCyclesTable';
 import { useProgramContext } from '../../../../programContext';
 import { TableWrapper } from '@core/TableWrapper';
+import { ProgramCyclesTablePaymentModule } from '@containers/tables/ProgramCyclesTablePaymentModule/ProgramCyclesTablePaymentModule';
 
 const initialFilter = {
   search: '',
@@ -49,7 +49,10 @@ export const ProgramCyclePage = (): React.ReactElement => {
         setAppliedFilter={setAppliedFilter}
       />
       <TableWrapper>
-        <ProgramCyclesTable program={selectedProgram} filters={appliedFilter} />
+        <ProgramCyclesTablePaymentModule
+          program={selectedProgram}
+          filters={appliedFilter}
+        />
       </TableWrapper>
     </>
   );
