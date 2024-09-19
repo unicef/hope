@@ -113,7 +113,6 @@ class TestPaymentPlanQueries(APITestCase):
             unicefId
             supportingDocuments{
               title
-              file
             }
           }
         }

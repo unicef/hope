@@ -5,7 +5,6 @@ import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import {
   useGrievanceTicketLazyQuery,
-  useGrievanceTicketQuery,
 } from '@generated/graphql';
 import { usePermissions } from '@hooks/usePermissions';
 import PersonIcon from '@mui/icons-material/Person';
