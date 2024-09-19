@@ -88,6 +88,7 @@ class TestUpdateProgram(APITestCase):
     def setUpTestData(cls) -> None:
         super().setUpTestData()
         create_afghanistan()
+
         generate_data_collecting_types()
         data_collecting_type = DataCollectingType.objects.get(code="full_collection")
 
