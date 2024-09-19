@@ -3,9 +3,9 @@ from django.core.management import call_command
 
 import pytest
 from elasticsearch_dsl import connections
-from page_object.programme_population.households_details import HouseholdsDetails
-from page_object.registration_data_import.rdi_details_page import RDIDetailsPage
-from page_object.registration_data_import.registration_data_import import (
+from tests.selenium.page_object.programme_population.households_details import HouseholdsDetails
+from tests.selenium.page_object.registration_data_import.rdi_details_page import RDIDetailsPage
+from tests.selenium.page_object.registration_data_import.registration_data_import import (
     RegistrationDataImport,
 )
 

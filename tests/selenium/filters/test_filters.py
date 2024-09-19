@@ -5,7 +5,7 @@ from django.core.management import call_command
 
 import pytest
 from dateutil.relativedelta import relativedelta
-from page_object.filters import Filters
+from tests.selenium.page_object.filters import Filters
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.models import BusinessArea
@@ -27,12 +27,12 @@ from hct_mis_api.apps.targeting.fixtures import (
     TargetPopulationFactory,
 )
 from hct_mis_api.apps.targeting.models import TargetPopulation
-from selenium_tests.page_object.grievance.details_grievance_page import (
+from tests.selenium.page_object.grievance.details_grievance_page import (
     GrievanceDetailsPage,
 )
-from selenium_tests.page_object.grievance.grievance_tickets import GrievanceTickets
-from selenium_tests.page_object.grievance.new_ticket import NewTicket
-from selenium_tests.page_object.programme_details.programme_details import (
+from tests.selenium.page_object.grievance.grievance_tickets import GrievanceTickets
+from tests.selenium.page_object.grievance.new_ticket import NewTicket
+from tests.selenium.page_object.programme_details.programme_details import (
     ProgrammeDetails,
 )
 

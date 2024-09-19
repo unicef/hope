@@ -4,7 +4,7 @@ from django.utils import timezone
 
 import pytest
 from dateutil.relativedelta import relativedelta
-from page_object.managerial_console.managerial_console import ManagerialConsole
+from tests.selenium.page_object.managerial_console.managerial_console import ManagerialConsole
 from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.account.fixtures import UserFactory

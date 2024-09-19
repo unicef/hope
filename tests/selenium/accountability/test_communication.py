@@ -1,7 +1,7 @@
 import pytest
-from helpers.fixtures import get_program_with_dct_type_and_name
-from page_object.accountability.communication import AccountabilityCommunication
-from page_object.accountability.comunication_details import (
+from tests.selenium.helpers.fixtures import get_program_with_dct_type_and_name
+from tests.selenium.page_object.accountability.communication import AccountabilityCommunication
+from tests.selenium.page_object.accountability.comunication_details import (
     AccountabilityCommunicationDetails,
 )
 

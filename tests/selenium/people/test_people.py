@@ -5,7 +5,7 @@ from django.db import transaction
 
 import pytest
 from dateutil.relativedelta import relativedelta
-from page_object.people.people import People
+from tests.selenium.page_object.people.people import People
 from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.account.models import User
@@ -24,13 +24,13 @@ from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
     TargetPopulationFactory,
 )
-from selenium_tests.page_object.filters import Filters
-from selenium_tests.page_object.grievance.details_grievance_page import (
+from tests.selenium.page_object.filters import Filters
+from tests.selenium.page_object.grievance.details_grievance_page import (
     GrievanceDetailsPage,
 )
-from selenium_tests.page_object.grievance.grievance_tickets import GrievanceTickets
-from selenium_tests.page_object.grievance.new_ticket import NewTicket
-from selenium_tests.page_object.people.people_details import PeopleDetails
+from tests.selenium.page_object.grievance.grievance_tickets import GrievanceTickets
+from tests.selenium.page_object.grievance.new_ticket import NewTicket
+from tests.selenium.page_object.people.people_details import PeopleDetails
 
 pytestmark = pytest.mark.django_db(transaction=True)
 

@@ -3,9 +3,9 @@ from time import sleep
 
 import pytest
 from dateutil.relativedelta import relativedelta
-from page_object.payment_verification.payment_record import PaymentRecord
-from page_object.payment_verification.payment_verification import PaymentVerification
-from page_object.payment_verification.payment_verification_details import (
+from tests.selenium.page_object.payment_verification.payment_record import PaymentRecord
+from tests.selenium.page_object.payment_verification.payment_verification import PaymentVerification
+from tests.selenium.page_object.payment_verification.payment_verification_details import (
     PaymentVerificationDetails,
 )
 from selenium.webdriver.common.by import By

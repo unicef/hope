@@ -1,6 +1,6 @@
 from selenium.webdriver.remote.webelement import WebElement
 
-from selenium_tests.page_object.base_components import BaseComponents
+from tests.selenium.page_object.base_components import BaseComponents
 
 
 class PeopleDetails(BaseComponents):

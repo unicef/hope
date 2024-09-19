@@ -4,21 +4,21 @@ from django.conf import settings
 from django.core.management import call_command
 
 import pytest
-from page_object.grievance.details_feedback_page import FeedbackDetailsPage
-from page_object.grievance.feedback import Feedback
-from page_object.grievance.new_feedback import NewFeedback
-from page_object.programme_details.programme_details import ProgrammeDetails
+from tests.selenium.page_object.grievance.details_feedback_page import FeedbackDetailsPage
+from tests.selenium.page_object.grievance.feedback import Feedback
+from tests.selenium.page_object.grievance.new_feedback import NewFeedback
+from tests.selenium.page_object.programme_details.programme_details import ProgrammeDetails
 from pytest_django import DjangoDbBlocker
 from selenium.webdriver import Keys
 
 from hct_mis_api.apps.geo.models import Area, Country
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.household.models import HOST, Household
-from selenium_tests.helpers.fixtures import get_program_with_dct_type_and_name
-from selenium_tests.page_object.grievance.details_grievance_page import (
+from tests.selenium.helpers.fixtures import get_program_with_dct_type_and_name
+from tests.selenium.page_object.grievance.details_grievance_page import (
     GrievanceDetailsPage,
 )
-from selenium_tests.page_object.grievance.new_ticket import NewTicket
+from tests.selenium.page_object.grievance.new_ticket import NewTicket
 
 pytestmark = pytest.mark.django_db(transaction=True)
 

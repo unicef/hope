@@ -1,5 +1,5 @@
 import pytest
-from page_object.admin_panel.admin_panel import AdminPanel
+from tests.selenium.page_object.admin_panel.admin_panel import AdminPanel
 from selenium.webdriver import Chrome
 from selenium.webdriver.common.by import By
 

@@ -1,5 +1,5 @@
 import pytest
-from page_object.country_dashboard.country_dashboard import CountryDashboard
+from tests.selenium.page_object.country_dashboard.country_dashboard import CountryDashboard
 
 pytestmark = pytest.mark.django_db(transaction=True)
 

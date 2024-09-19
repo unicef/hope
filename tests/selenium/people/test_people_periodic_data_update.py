@@ -36,16 +36,16 @@ from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
     TargetPopulationFactory,
 )
-from selenium_tests.page_object.people.people import People
-from selenium_tests.page_object.people.people_details import PeopleDetails
-from selenium_tests.page_object.programme_population.individuals import Individuals
-from selenium_tests.page_object.programme_population.periodic_data_update_templates import (
+from tests.selenium.page_object.people.people import People
+from tests.selenium.page_object.people.people_details import PeopleDetails
+from tests.selenium.page_object.programme_population.individuals import Individuals
+from tests.selenium.page_object.programme_population.periodic_data_update_templates import (
     PeriodicDatUpdateTemplates,
 )
-from selenium_tests.page_object.programme_population.periodic_data_update_uploads import (
+from tests.selenium.page_object.programme_population.periodic_data_update_uploads import (
     PeriodicDataUpdateUploads,
 )
-from selenium_tests.programme_population.test_periodic_data_update_upload import (
+from tests.selenium.programme_population.test_periodic_data_update_upload import (
     prepare_xlsx_file,
 )
 

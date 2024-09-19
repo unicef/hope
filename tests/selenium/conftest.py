@@ -10,59 +10,59 @@ from _pytest.fixtures import FixtureRequest
 from _pytest.nodes import Item
 from _pytest.runner import CallInfo
 from flags.models import FlagState
-from page_object.accountability.communication import AccountabilityCommunication
-from page_object.accountability.comunication_details import (
+from tests.selenium.page_object.accountability.communication import AccountabilityCommunication
+from tests.selenium.page_object.accountability.comunication_details import (
     AccountabilityCommunicationDetails,
 )
-from page_object.accountability.surveys import AccountabilitySurveys
-from page_object.accountability.surveys_details import AccountabilitySurveysDetails
-from page_object.admin_panel.admin_panel import AdminPanel
-from page_object.country_dashboard.country_dashboard import CountryDashboard
-from page_object.filters import Filters
-from page_object.grievance.details_feedback_page import FeedbackDetailsPage
-from page_object.grievance.details_grievance_page import GrievanceDetailsPage
-from page_object.grievance.feedback import Feedback
-from page_object.grievance.grievance_dashboard import GrievanceDashboard
-from page_object.grievance.grievance_tickets import GrievanceTickets
-from page_object.grievance.new_feedback import NewFeedback
-from page_object.grievance.new_ticket import NewTicket
-from page_object.managerial_console.managerial_console import ManagerialConsole
-from page_object.payment_module.new_payment_plan import NewPaymentPlan
-from page_object.payment_module.payment_module import PaymentModule
-from page_object.payment_module.payment_module_details import PaymentModuleDetails
-from page_object.payment_module.program_cycle import (
+from tests.selenium.page_object.accountability.surveys import AccountabilitySurveys
+from tests.selenium.page_object.accountability.surveys_details import AccountabilitySurveysDetails
+from tests.selenium.page_object.admin_panel.admin_panel import AdminPanel
+from tests.selenium.page_object.country_dashboard.country_dashboard import CountryDashboard
+from tests.selenium.page_object.filters import Filters
+from tests.selenium.page_object.grievance.details_feedback_page import FeedbackDetailsPage
+from tests.selenium.page_object.grievance.details_grievance_page import GrievanceDetailsPage
+from tests.selenium.page_object.grievance.feedback import Feedback
+from tests.selenium.page_object.grievance.grievance_dashboard import GrievanceDashboard
+from tests.selenium.page_object.grievance.grievance_tickets import GrievanceTickets
+from tests.selenium.page_object.grievance.new_feedback import NewFeedback
+from tests.selenium.page_object.grievance.new_ticket import NewTicket
+from tests.selenium.page_object.managerial_console.managerial_console import ManagerialConsole
+from tests.selenium.page_object.payment_module.new_payment_plan import NewPaymentPlan
+from tests.selenium.page_object.payment_module.payment_module import PaymentModule
+from tests.selenium.page_object.payment_module.payment_module_details import PaymentModuleDetails
+from tests.selenium.page_object.payment_module.program_cycle import (
     ProgramCycleDetailsPage,
     ProgramCyclePage,
 )
-from page_object.payment_verification.payment_record import PaymentRecord
-from page_object.payment_verification.payment_verification import PaymentVerification
-from page_object.payment_verification.payment_verification_details import (
+from tests.selenium.page_object.payment_verification.payment_record import PaymentRecord
+from tests.selenium.page_object.payment_verification.payment_verification import PaymentVerification
+from tests.selenium.page_object.payment_verification.payment_verification_details import (
     PaymentVerificationDetails,
 )
-from page_object.people.people import People
-from page_object.people.people_details import PeopleDetails
-from page_object.program_log.payment_log import ProgramLog
-from page_object.programme_details.programme_details import ProgrammeDetails
-from page_object.programme_management.programme_management import ProgrammeManagement
-from page_object.programme_population.households import Households
-from page_object.programme_population.households_details import HouseholdsDetails
-from page_object.programme_population.individuals import Individuals
-from page_object.programme_population.individuals_details import IndividualsDetails
-from page_object.programme_population.periodic_data_update_templates import (
+from tests.selenium.page_object.people.people import People
+from tests.selenium.page_object.people.people_details import PeopleDetails
+from tests.selenium.page_object.program_log.payment_log import ProgramLog
+from tests.selenium.page_object.programme_details.programme_details import ProgrammeDetails
+from tests.selenium.page_object.programme_management.programme_management import ProgrammeManagement
+from tests.selenium.page_object.programme_population.households import Households
+from tests.selenium.page_object.programme_population.households_details import HouseholdsDetails
+from tests.selenium.page_object.programme_population.individuals import Individuals
+from tests.selenium.page_object.programme_population.individuals_details import IndividualsDetails
+from tests.selenium.page_object.programme_population.periodic_data_update_templates import (
     PeriodicDatUpdateTemplates,
     PeriodicDatUpdateTemplatesDetails,
 )
-from page_object.programme_population.periodic_data_update_uploads import (
+from tests.selenium.page_object.programme_population.periodic_data_update_uploads import (
     PeriodicDataUpdateUploads,
 )
-from page_object.programme_users.programme_users import ProgrammeUsers
-from page_object.registration_data_import.rdi_details_page import RDIDetailsPage
-from page_object.registration_data_import.registration_data_import import (
+from tests.selenium.page_object.programme_users.programme_users import ProgrammeUsers
+from tests.selenium.page_object.registration_data_import.rdi_details_page import RDIDetailsPage
+from tests.selenium.page_object.registration_data_import.registration_data_import import (
     RegistrationDataImport,
 )
-from page_object.targeting.targeting import Targeting
-from page_object.targeting.targeting_create import TargetingCreate
-from page_object.targeting.targeting_details import TargetingDetails
+from tests.selenium.page_object.targeting.targeting import Targeting
+from tests.selenium.page_object.targeting.targeting_create import TargetingCreate
+from tests.selenium.page_object.targeting.targeting_details import TargetingDetails
 from pytest_django.live_server_helper import LiveServer
 from pytest_html_reporter import attach
 from selenium import webdriver

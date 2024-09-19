@@ -2,7 +2,7 @@ from datetime import datetime
 
 import pytest
 from dateutil.relativedelta import relativedelta
-from page_object.payment_module.program_cycle import ProgramCyclePage
+from tests.selenium.page_object.payment_module.program_cycle import ProgramCyclePage
 from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
