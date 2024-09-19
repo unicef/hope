@@ -31,6 +31,7 @@ from hct_mis_api.apps.payment.models import (
     Payment,
     PaymentHouseholdSnapshot,
     PaymentPlan,
+    PaymentPlanSupportingDocument,
     PaymentRecord,
     PaymentVerification,
     PaymentVerificationPlan,
@@ -476,3 +477,8 @@ class DeliveryMechanismDataAdmin(HOPEModelAdminBase):
 @admin.register(DeliveryMechanism)
 class DeliveryMechanismAdmin(HOPEModelAdminBase):
     list_display = ("code", "name", "is_active", "transfer_type")
+
+
+@admin.register(PaymentPlanSupportingDocument)
+class PaymentPlanSupportingDocumentAdmin(HOPEModelAdminBase):
+    list_display = ("title", "created_by", "uploaded_at")

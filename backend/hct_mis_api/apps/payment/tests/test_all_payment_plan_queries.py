@@ -1,6 +1,8 @@
 from datetime import datetime
+from io import BytesIO
 from unittest.mock import patch
 
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.utils import timezone
 
 from dateutil.relativedelta import relativedelta
@@ -25,6 +27,7 @@ from hct_mis_api.apps.payment.models import (
     ApprovalProcess,
     PaymentHouseholdSnapshot,
     PaymentPlan,
+    PaymentPlanSupportingDocument,
 )
 from hct_mis_api.apps.program.fixtures import ProgramCycleFactory
 
@@ -108,6 +111,10 @@ class TestPaymentPlanQueries(APITestCase):
             totalUndeliveredQuantity
             totalUndeliveredQuantityUsd
             unicefId
+            supportingDocuments{
+              title
+              file
+            }
           }
         }
       }
@@ -313,6 +320,18 @@ class TestPaymentPlanQueries(APITestCase):
                 approval_number_required=cls.pp.approval_number_required,
                 authorization_number_required=cls.pp.authorization_number_required,
                 finance_release_number_required=cls.pp.finance_release_number_required,
+            )
+            PaymentPlanSupportingDocument.objects.create(
+                payment_plan=cls.pp,
+                title="Test File 123",
+                file=InMemoryUploadedFile(
+                    name="Test123.jpg",
+                    file=BytesIO(b"abc"),
+                    charset=None,
+                    field_name="0",
+                    size=10,
+                    content_type="image/jpeg",
+                ),
             )
 
             with patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0):

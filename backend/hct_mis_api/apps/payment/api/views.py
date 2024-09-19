@@ -174,8 +174,9 @@ class PaymentPlanManagerialViewSet(BusinessAreaMixin, PaymentPlanMixin, mixins.L
 class PaymentPlanSupportingDocumentUploadView(APIView):
     permission_classes = [PaymentPlanSupportingDocumentUploadPermission]
 
-    def post(self, request: Request, payment_plan_id: str) -> Response:
-        payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
+    def post(self, request: Request, business_area: str, program_id: str, payment_plan_id: str) -> Response:
+        payment_decode_id = decode_id_string(payment_plan_id)
+        payment_plan = get_object_or_404(PaymentPlan, id=payment_decode_id)
 
         serializer = PaymentPlanSupportingDocumentSerializer(data=request.data, context={"payment_plan": payment_plan})
         if serializer.is_valid():
@@ -187,17 +188,22 @@ class PaymentPlanSupportingDocumentUploadView(APIView):
 class PaymentPlanSupportingDocumentView(APIView):
     permission_classes = []
 
-    def delete(self, request: Request, payment_plan_id: str, file_id: str) -> Response:
+    def delete(
+        self, request: Request, business_area: str, program_id: str, payment_plan_id: str, file_id: str
+    ) -> Response:
         self.permission_classes = [PaymentPlanSupportingDocumentDeletePermission]
-        payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
+        payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
+
         document = get_object_or_404(PaymentPlanSupportingDocument, id=file_id, payment_plan=payment_plan)
         document.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def get(self, request: Request, payment_plan_id: str, file_id: str) -> FileResponse:
+    def get(
+        self, request: Request, business_area: str, program_id: str, payment_plan_id: str, file_id: str
+    ) -> FileResponse:
         self.permission_classes = [PaymentPlanSupportingDocumentDownloadPermission]
-        payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
-        document = get_object_or_404(PaymentPlanSupportingDocument, id=file_id, payment_plan=payment_plan)
-        response = FileResponse(document.file.open(), as_attachment=True, filename=document.file.name)
+        payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
 
-        return response
+        document = get_object_or_404(PaymentPlanSupportingDocument, id=file_id, payment_plan=payment_plan)
+
+        return FileResponse(document.file.open(), as_attachment=True, filename=document.file.name)

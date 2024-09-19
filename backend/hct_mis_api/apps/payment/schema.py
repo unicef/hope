@@ -89,6 +89,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentHouseholdSnapshot,
     PaymentPlan,
     PaymentPlanSplit,
+    PaymentPlanSupportingDocument,
     PaymentRecord,
     PaymentVerification,
     PaymentVerificationPlan,
@@ -546,6 +547,13 @@ class ReconciliationSummaryNode(graphene.ObjectType):
     reconciled = graphene.Int()
 
 
+class PaymentPlanSupportingDocumentNode(DjangoObjectType):
+    class Meta:
+        model = PaymentPlanSupportingDocument
+        interfaces = (relay.Node,)
+        # connection_class = ExtendedConnection
+
+
 class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.PM_VIEW_DETAILS),)
     dispersion_start_date = graphene.Date()
@@ -580,6 +588,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
     name = graphene.String()
     can_send_to_payment_gateway = graphene.Boolean()
     can_split = graphene.Boolean()
+    supporting_documents = graphene.List(PaymentPlanSupportingDocumentNode)
 
     class Meta:
         model = PaymentPlan
@@ -700,6 +709,9 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
             return False
 
         return True
+
+    def resolve_supporting_documents(self, info: Any) -> "QuerySet":
+        return self.documents.all()
 
 
 class PaymentVerificationNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
