@@ -263,9 +263,9 @@ jobs:
           dist_backend_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dist dev_backend_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev docker compose \
             -f ./.github/helpers/docker-compose.tst.yml \
             -f ./.github/helpers/docker-compose.selenium.yml \
-            run selenium bash -c "
+            run backend bash -c "
               waitforit -host=db -port=5432 -timeout=30
-              pytest -svvv $extra_options selenium_tests --cov-report xml:./coverage.xml --html-report=./report/report.html --randomly-seed=42
+              pytest -svvv $extra_options /tests/selenium --cov-report xml:./coverage.xml --html-report=./report/report.html --randomly-seed=42
             "
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
