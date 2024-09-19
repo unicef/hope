@@ -11,37 +11,8 @@ services:
       - db
       - redis
       - elasticsearch
-    profiles:
-      - unit
-      - selenium
     env_file:
-      - .env
-
-  init_fe:
-    image: ${dist_backend_image}
-    volumes:
-      - backend-web-app:/tmp/
-    command: |
-      sh -c "
-        cp -r ./hct_mis_api/apps/web/* /tmp/
-      "
-    restart: "no"
-    profiles:
-      - selenium
-
-  celery_worker:
-    image: ${dev_backend_image}
-    restart: unless-stopped
-    command: "celery -A hct_mis_api.apps.core.celery worker -E -l info"
-    depends_on:
-      - backend
-      - db
-      - redis
-      - elasticsearch
-    profiles:
-      - selenium
-    env_file:
-      - .env
+      - .env-unit
 
   db:
     image: kartoza/postgis:14-3
@@ -57,16 +28,10 @@ services:
       - POSTGRES_SSL_MODE=off
     ports:
       - "5433:5432"
-    profiles:
-      - unit
-      - selenium
 
   redis:
     restart: unless-stopped
     image: redis:4.0.11-alpine3.8
-    profiles:
-      - unit
-      - selenium
 
   elasticsearch:
     image: unicef/hct-elasticsearch
@@ -83,6 +48,3 @@ services:
       memlock:
         soft: -1
         hard: -1
-    profiles:
-      - unit
-      - selenium
