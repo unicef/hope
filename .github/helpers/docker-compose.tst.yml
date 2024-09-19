@@ -14,6 +14,8 @@ services:
     profiles:
       - unit
       - selenium
+    env_file:
+      - .env
 
   init_fe:
     image: ${dist_backend_image}
@@ -38,6 +40,8 @@ services:
       - elasticsearch
     profiles:
       - selenium
+    env_file:
+      - .env
 
   db:
     image: kartoza/postgis:14-3
