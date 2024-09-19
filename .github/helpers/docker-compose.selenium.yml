@@ -6,6 +6,8 @@ volumes:
 services:
   backend:
     volumes:
+      - ../src/report/screenshot/:/code/screenshot/
+      - ../src/report/:/code/report/
       - type: volume
         source: backend-web-app
         target: /code/hct_mis_api/apps/web
