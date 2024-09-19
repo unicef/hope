@@ -284,10 +284,10 @@ class BiometricDeduplicationServiceTest(TestCase):
             individual1=ind1, individual2=ind2, similarity_score=50.00
         ).exists()
         assert self.program.deduplication_engine_similarity_pairs.filter(
-            individual1=ind1, individual2=ind3, similarity_score=30.00
+            individual1=ind1, individual2=ind3, similarity_score=70.00
         ).exists()
         assert self.program.deduplication_engine_similarity_pairs.filter(
-            individual1=ind2, individual2=ind3, similarity_score=20.00
+            individual1=ind2, individual2=ind3, similarity_score=80.00
         ).exists()
 
     def test_mark_rdis_as(self) -> None:
@@ -350,7 +350,7 @@ class BiometricDeduplicationServiceTest(TestCase):
             SimilarityPair(score=0.9, first=ind1.id, second=ind2.id),  # within rdi1
             SimilarityPair(score=0.7, first=ind1.id, second=ind3.id),  # across rdi1 and rdi2
             SimilarityPair(score=0.8, first=ind1.id, second=ind5.id),  # across rdi1 and population
-            SimilarityPair(score=0.9, first=ind2.id, second=ind6.id),  # across rdi1 and population
+            SimilarityPair(score=0.9, first=ind6.id, second=ind2.id),  # across rdi1 and population
             SimilarityPair(score=0.9, first=ind3.id, second=ind4.id),  # within rdi2
             SimilarityPair(score=0.7, first=ind4.id, second=ind5.id),  # across rdi2 and population
             SimilarityPair(score=0.8, first=ind5.id, second=ind6.id),  # within population
@@ -363,9 +363,12 @@ class BiometricDeduplicationServiceTest(TestCase):
         assert list(
             duplicates.order_by("similarity_score").values("individual1", "individual2", "similarity_score")
         ) == [
-            {"individual1": ind2.id, "individual2": ind6.id, "similarity_score": Decimal("10.00")},
-            {"individual1": ind1.id, "individual2": ind5.id, "similarity_score": Decimal("20.00")},
+            {"individual1": ind1.id, "individual2": ind5.id, "similarity_score": Decimal("80.00")},
+            {"individual1": ind2.id, "individual2": ind6.id, "similarity_score": Decimal("90.00")},
         ]
+
+        duplicate_individuals_count = service.get_duplicate_individuals_for_rdi_against_population_count(rdi1)
+        assert duplicate_individuals_count == 2
 
     def test_get_duplicates_for_merged_rdi_against_population(self) -> None:
         self.program.deduplication_set_id = uuid.uuid4()
@@ -420,9 +423,9 @@ class BiometricDeduplicationServiceTest(TestCase):
         assert list(
             duplicates.order_by("similarity_score").values("individual1", "individual2", "similarity_score")
         ) == [
-            {"individual1": ind2.id, "individual2": ind6.id, "similarity_score": Decimal("10.00")},
-            {"individual1": ind1.id, "individual2": ind5.id, "similarity_score": Decimal("20.00")},
-            {"individual1": ind1.id, "individual2": ind2.id, "similarity_score": Decimal("30.00")},
+            {"individual1": ind1.id, "individual2": ind2.id, "similarity_score": Decimal("70.00")},
+            {"individual1": ind1.id, "individual2": ind5.id, "similarity_score": Decimal("80.00")},
+            {"individual1": ind2.id, "individual2": ind6.id, "similarity_score": Decimal("90.00")},
         ]
 
     def test_get_duplicates_for_rdi_against_batch(self) -> None:
@@ -478,8 +481,10 @@ class BiometricDeduplicationServiceTest(TestCase):
         assert list(
             duplicates.order_by("similarity_score").values("individual1", "individual2", "similarity_score")
         ) == [
-            {"individual1": ind1.id, "individual2": ind2.id, "similarity_score": Decimal("10.00")},
+            {"individual1": ind1.id, "individual2": ind2.id, "similarity_score": Decimal("90.00")},
         ]
+        duplicate_individuals_count = service.get_duplicate_individuals_for_rdi_against_batch_count(rdi1)
+        assert duplicate_individuals_count == 2
 
     @patch(
         "hct_mis_api.apps.grievance.services.needs_adjudication_ticket_services.create_needs_adjudication_tickets_for_biometrics"
@@ -540,3 +545,51 @@ class BiometricDeduplicationServiceTest(TestCase):
 
         service.get_deduplication_set.assert_called_once_with(deduplication_set_id)
         service.mark_rdis_as_deduplication_error.assert_called_once_with(deduplication_set_id)
+
+    def test_store_rdis_deduplication_statistics(self) -> None:
+        deduplication_set_id = str(uuid.uuid4())
+        self.program.deduplication_set_id = deduplication_set_id
+        self.program.save()
+
+        service = BiometricDeduplicationService()
+
+        rdi1 = RegistrationDataImportFactory(
+            program=self.program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS
+        )
+
+        service.get_duplicate_individuals_for_rdi_against_batch_count = mock.Mock(return_value=8)
+        service.get_duplicate_individuals_for_rdi_against_population_count = mock.Mock(return_value=9)
+
+        service.store_rdis_deduplication_statistics(deduplication_set_id)
+
+        service.get_duplicate_individuals_for_rdi_against_batch_count.assert_called_once_with(rdi1)
+        service.get_duplicate_individuals_for_rdi_against_population_count.assert_called_once_with(rdi1)
+
+        rdi1.refresh_from_db()
+        assert rdi1.dedup_engine_batch_duplicates == 8
+        assert rdi1.dedup_engine_golden_record_duplicates == 9
+
+    def test_update_rdis_deduplication_statistics(self) -> None:
+        deduplication_set_id = str(uuid.uuid4())
+        self.program.deduplication_set_id = deduplication_set_id
+        self.program.save()
+
+        service = BiometricDeduplicationService()
+
+        rdi1 = RegistrationDataImportFactory(
+            program=self.program,
+            deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED,
+            status=RegistrationDataImport.IN_REVIEW,
+        )
+
+        service.get_duplicate_individuals_for_rdi_against_batch_count = mock.Mock(return_value=8)
+        service.get_duplicate_individuals_for_rdi_against_population_count = mock.Mock(return_value=9)
+
+        service.update_rdis_deduplication_statistics(self.program.id)
+
+        service.get_duplicate_individuals_for_rdi_against_batch_count.assert_called_once_with(rdi1)
+        service.get_duplicate_individuals_for_rdi_against_population_count.assert_called_once_with(rdi1)
+
+        rdi1.refresh_from_db()
+        assert rdi1.dedup_engine_batch_duplicates == 8
+        assert rdi1.dedup_engine_golden_record_duplicates == 9
