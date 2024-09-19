@@ -17,7 +17,7 @@ import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError } from '@utils/utils';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { ProgramDetailsPageHeader } from '../headers/ProgramDetailsPageHeader';
-import { ProgramCycleTable } from '@containers/tables/ProgramCycle/ProgramCycleTable';
+import { ProgramCyclesTableProgramDetails } from '@containers/tables/ProgramCycle/ProgramCyclesTableProgramDetails';
 
 const Container = styled.div`
   && {
@@ -101,7 +101,7 @@ export function ProgramDetailsPage(): React.ReactElement {
           </NoCashPlansContainer>
         ) : (
           <TableWrapper>
-            <ProgramCycleTable program={program} />
+            <ProgramCyclesTableProgramDetails program={program} />
           </TableWrapper>
         )}
         {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
