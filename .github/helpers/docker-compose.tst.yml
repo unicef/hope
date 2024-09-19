@@ -3,7 +3,7 @@ version: '3.7'
 services:
 
   backend:
-    image: ${backend_image}
+    image: ${dev_backend_image}
     volumes:
       - ../../src/test-coverage:/code/backend/test-coverage
       - ./dev.sh:/code/dev.sh
@@ -30,7 +30,7 @@ services:
       - selenium
 
   celery_worker:
-    image: ${backend_image}
+    image: ${dev_backend_image}
     restart: unless-stopped
     command: "celery -A hct_mis_api.apps.core.celery worker -E -l info"
     depends_on:
