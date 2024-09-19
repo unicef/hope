@@ -2,8 +2,8 @@ from datetime import datetime
 
 import pytest
 from helpers.fixtures import get_program_with_dct_type_and_name
-from page_object.program_log.payment_log import ProgramLog
-from page_object.programme_details.programme_details import ProgrammeDetails
+from tests.selenium.page_object.program_log.payment_log import ProgramLog
+from tests.selenium.page_object.programme_details.programme_details import ProgrammeDetails
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.program.models import Program

@@ -1,4 +1,4 @@
-from page_object.base_components import BaseComponents
+from tests.selenium.page_object.base_components import BaseComponents
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 

@@ -8,8 +8,8 @@ import pytest
 from dateutil.relativedelta import relativedelta
 from freezegun import freeze_time
 from helpers.date_time_format import FormatTime
-from page_object.programme_details.programme_details import ProgrammeDetails
-from page_object.programme_management.programme_management import ProgrammeManagement
+from tests.selenium.page_object.programme_details.programme_details import ProgrammeDetails
+from tests.selenium.page_object.programme_management.programme_management import ProgrammeManagement
 from selenium import webdriver
 from selenium.webdriver import Keys
 

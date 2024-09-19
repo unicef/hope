@@ -2,8 +2,8 @@ from datetime import datetime
 
 import pytest
 from dateutil.relativedelta import relativedelta
-from page_object.programme_details.programme_details import ProgrammeDetails
-from page_object.programme_management.programme_management import ProgrammeManagement
+from tests.selenium.page_object.programme_details.programme_details import ProgrammeDetails
+from tests.selenium.page_object.programme_management.programme_management import ProgrammeManagement
 
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
