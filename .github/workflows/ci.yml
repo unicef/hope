@@ -229,8 +229,6 @@ jobs:
       - name: Unit tests
         run: |
           # a little hack to allow to have 1 compose file running 2 different test suites because --env-file didn't work as docs suggested it should
-          cp .github/helpers/.env-unit .github/helpers/.env
-
           dev_backend_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev docker compose \
             -f ./.github/helpers/docker-compose.tst.yml \
             --profile unit \
@@ -257,9 +255,6 @@ jobs:
 
       - name: E2E tests
         run: |
-          # a little hack to allow to have 1 compose file running 2 different test suites because --env-file didn't work as docs suggested it should
-          cp .github/helpers/.env-selenium .github/helpers/.env
-
           extra_options=""
           
           if [ "${{ github.event_name }}" = "pull_request" ]; then
@@ -267,7 +262,7 @@ jobs:
           fi
           dist_backend_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dist dev_backend_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev docker compose \
             -f ./.github/helpers/docker-compose.tst.yml \
-            --profile selenium \
+            -f ./.github/helpers/docker-compose.selenium.yml \
             run selenium bash -c "
               waitforit -host=db -port=5432 -timeout=30
               pytest -svvv $extra_options selenium_tests --cov-report xml:./coverage.xml --html-report=./report/report.html --randomly-seed=42
