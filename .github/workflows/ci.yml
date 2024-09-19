@@ -231,7 +231,7 @@ jobs:
           # a little hack to allow to have 1 compose file running 2 different test suites because --env-file didn't work as docs suggested it should
           cp .github/helpers/.env-unit .github/helpers/.env
 
-          backend_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev docker compose \
+          dev_backend_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev docker compose \
             -f ./.github/helpers/docker-compose.tst.yml \
             --profile unit \
             run backend ./dev.sh test
