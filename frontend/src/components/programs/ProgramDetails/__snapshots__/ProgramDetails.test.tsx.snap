@@ -264,7 +264,7 @@ exports[`components/ProgramDetails should render 1`] = `
                 class="sc-dmyCSP bGPBYf"
                 color="textSecondary"
               >
-                Only selected partners within the business area
+                Only Selected Partners within the business area
               </span>
             </div>
           </div>

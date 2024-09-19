@@ -128,21 +128,6 @@ export const PartnersStep: React.FC<PartnersStepProps> = ({
                       {t('Add Partner')}
                     </ButtonTooltip>
                   </Box>
-                  {values.partnerAccess ===
-                    ProgramPartnerAccess.AllPartnersAccess && (
-                    <Grid container>
-                      <Grid item xs={6}>
-                        <Field
-                          name={`partners[${0}].id`}
-                          label={t('Partner')}
-                          color="primary"
-                          choices={partnerChoices}
-                          component={FormikSelectField}
-                          required
-                        />
-                      </Grid>
-                    </Grid>
-                  )}
                 </>
               );
             }}
