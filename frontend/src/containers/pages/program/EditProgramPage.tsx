@@ -1,11 +1,10 @@
-// @ts-nocheck
 import { BaseSection } from '@components/core/BaseSection';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
-import { DetailsStep } from '@components/programs/CreateProgram/DetailsStep';
-import { PartnersStep } from '@components/programs/CreateProgram/PartnersStep';
-import { ProgramFieldSeriesStep } from '@components/programs/CreateProgram/ProgramFieldSeriesStep';
+import { DetailsStep } from '@components/programs/EditProgram/DetailsStep';
+import { PartnersStep } from '@components/programs/EditProgram/PartnersStep';
+import { ProgramFieldSeriesStep } from '@components/programs/EditProgram/ProgramFieldSeriesStep';
 import {
   handleNext,
   ProgramStepper,
@@ -16,6 +15,7 @@ import {
   usePduSubtypeChoicesDataQuery,
   useProgramQuery,
   useUpdateProgramMutation,
+  useUpdateProgramPartnersMutation,
   useUserPartnerChoicesQuery,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -29,7 +29,10 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { ALL_LOG_ENTRIES_QUERY } from '../../../apollo/queries/core/AllLogEntries';
 import { hasPermissionInModule } from '../../../config/permissions';
-import { editProgramValidationSchema } from '@components/programs/CreateProgram/editProgramValidationSchema';
+import {
+  editPartnersValidationSchema,
+  editProgramDetailsValidationSchema,
+} from '@components/programs/CreateProgram/editProgramValidationSchema';
 
 export const EditProgramPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -55,7 +58,20 @@ export const EditProgramPage = (): ReactElement => {
   const { data: pdusubtypeChoicesData, loading: pdusubtypeChoicesLoading } =
     usePduSubtypeChoicesDataQuery();
 
-  const [mutate] = useUpdateProgramMutation({
+  const [updateProgramDetails] = useUpdateProgramMutation({
+    refetchQueries: [
+      {
+        query: ALL_LOG_ENTRIES_QUERY,
+        variables: {
+          objectId: decodeIdString(id),
+          count: 5,
+          businessArea,
+        },
+      },
+    ],
+  });
+
+  const [updateProgramPartners] = useUpdateProgramPartnersMutation({
     refetchQueries: [
       {
         query: ALL_LOG_ENTRIES_QUERY,
@@ -103,7 +119,7 @@ export const EditProgramPage = (): ReactElement => {
   const programHasRdi = registrationImports?.totalCount > 0;
   const programHasTp = targetPopulationsCount > 0;
 
-  const handleSubmit = async (values): Promise<void> => {
+  const handleSubmitProgramDetails = async (values): Promise<void> => {
     const budgetValue = parseFloat(values.budget) ?? 0;
     const budgetToFixed = !Number.isNaN(budgetValue)
       ? budgetValue.toFixed(2)
@@ -112,14 +128,6 @@ export const EditProgramPage = (): ReactElement => {
     const populationGoalParsed = !Number.isNaN(populationGoalValue)
       ? populationGoalValue
       : 0;
-    const partnersToSet =
-      values.partnerAccess === ProgramPartnerAccess.SelectedPartnersAccess
-        ? values.partners.map(({ id: partnerId, areas, areaAccess }) => ({
-            partner: partnerId,
-            areas: areaAccess === 'ADMIN_AREA' ? areas : [],
-            areaAccess,
-          }))
-        : [];
 
     const pduFieldsToSend = values.pduFields
       .filter((item) => item.label !== '')
@@ -153,18 +161,19 @@ export const EditProgramPage = (): ReactElement => {
     try {
       const {
         editMode,
-        pduFields: pduFieldsFromValues,
-        ...requestValuesWithoutPdu
+        partners: _partners,
+        partnerAccess: _partnerAccess,
+        pduFields: _pduFields,
+        ...requestValuesDetails
       } = values;
 
-      const response = await mutate({
+      const response = await updateProgramDetails({
         variables: {
           programData: {
             id,
-            ...requestValuesWithoutPdu,
+            ...requestValuesDetails,
             budget: budgetToFixed,
             populationGoal: populationGoalParsed,
-            partners: partnersToSet,
             pduFields: pduFieldsToSend,
           },
           version,
@@ -172,6 +181,36 @@ export const EditProgramPage = (): ReactElement => {
       });
       showMessage(t('Programme edited.'));
       navigate(`/${baseUrl}/details/${response.data.updateProgram.program.id}`);
+    } catch (e) {
+      e.graphQLErrors.map((x) => showMessage(x.message));
+    }
+  };
+
+  const handleSubmitPartners = async (values): Promise<void> => {
+    const partnersToSet =
+      values.partnerAccess === ProgramPartnerAccess.SelectedPartnersAccess
+        ? values.partners.map(({ id: partnerId, areas, areaAccess }) => ({
+            partner: partnerId,
+            areas: areaAccess === 'ADMIN_AREA' ? areas : [],
+            areaAccess,
+          }))
+        : [];
+
+    try {
+      const response = await updateProgramPartners({
+        variables: {
+          programData: {
+            id,
+            partners: partnersToSet,
+            partnerAccess: values.partnerAccess,
+          },
+          version,
+        },
+      });
+      showMessage(t('Programme Partners updated.'));
+      navigate(
+        `/${baseUrl}/details/${response.data.updateProgramPartners.program.id}`,
+      );
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
     }
@@ -185,7 +224,7 @@ export const EditProgramPage = (): ReactElement => {
     };
   });
 
-  const initialValues = {
+  const initialValuesProgramDetails = {
     editMode: true,
     name,
     programmeCode,
@@ -199,21 +238,27 @@ export const EditProgramPage = (): ReactElement => {
     populationGoal,
     cashPlus,
     frequencyOfPayments,
-    partners: partners
-      .filter((partner) => partner.name !== 'UNICEF')
-      .map((partner) => ({
-        id: partner.id,
-        areas: partner.areas.map((area) => decodeIdString(area.id)),
-        areaAccess: partner.areaAccess,
-      })),
-    partnerAccess,
     pduFields: mappedPduFields,
   };
 
-  initialValues.budget =
+  initialValuesProgramDetails.budget =
     data.program.budget === '0.00' ? '' : data.program.budget;
-  initialValues.populationGoal =
+  initialValuesProgramDetails.populationGoal =
     data.program.populationGoal === 0 ? '' : data.program.populationGoal;
+
+  const initialValuesPartners = {
+    partners:
+      partners.length > 0
+        ? partners
+            .filter((partner) => partner.name !== 'UNICEF')
+            .map((partner) => ({
+              id: partner.id,
+              areas: partner.areas.map((area) => decodeIdString(area.id)),
+              areaAccess: partner.areaAccess,
+            }))
+        : [],
+    partnerAccess,
+  };
 
   const stepFields = [
     [
@@ -242,97 +287,77 @@ export const EditProgramPage = (): ReactElement => {
       to: `/${baseUrl}/details/${id}`,
     },
   ];
+  const stepsData = [
+    {
+      title: t('Details'),
+      description: t(
+        'To create a new Programme, please complete all required fields on the form below and save.',
+      ),
+      dataCy: 'step-button-details',
+    },
+    {
+      title: t('Programme Time Series Fields'),
+      description: t(
+        'The Time Series Fields feature allows serial updating of individual data through an XLSX file.',
+      ),
+      dataCy: 'step-button-time-series-fields',
+    },
+  ];
 
   return (
-    <Formik
-      initialValues={initialValues}
-      onSubmit={(values) => {
-        handleSubmit(values);
-      }}
-      validationSchema={editProgramValidationSchema(t, initialValues)}
-    >
-      {({
-        submitForm,
-        values,
-        validateForm,
-        setFieldTouched,
-        setFieldValue,
-        errors,
-        setErrors,
-      }) => {
-        const mappedPartnerChoices = userPartnerChoices
-          .filter((partner) => partner.name !== 'UNICEF')
-          .map((partner) => ({
-            value: partner.value,
-            label: partner.name,
-            disabled: values.partners.some((p) => p.id === partner.value),
-          }));
-
-        const handleNextStep = async () => {
-          await handleNext({
-            validateForm,
-            stepFields,
-            step,
-            setStep,
-            setFieldTouched,
+    <>
+      <PageHeader
+        title={`${t('Edit Programme')}: (${name})`}
+        breadCrumbs={
+          hasPermissionInModule('PROGRAMME_VIEW_LIST_AND_DETAILS', permissions)
+            ? breadCrumbsItems
+            : null
+        }
+      />
+      {option === 'details' && (
+        <Formik
+          initialValues={initialValuesProgramDetails}
+          onSubmit={(values) => {
+            handleSubmitProgramDetails(values);
+          }}
+          validationSchema={editProgramDetailsValidationSchema(
+            t,
+            initialValuesProgramDetails,
+          )}
+        >
+          {({
+            submitForm,
             values,
+            validateForm,
+            setFieldTouched,
+            setFieldValue,
+            errors,
             setErrors,
-          });
-        };
-
-        const stepsData = [
-          {
-            title: t('Details'),
-            description: t(
-              'To create a new Programme, please complete all required fields on the form below and save.',
-            ),
-            dataCy: 'step-button-details',
-          },
-          {
-            title: t('Programme Time Series Fields'),
-            description: t(
-              'The Time Series Fields feature allows serial updating of individual data through an XLSX file.',
-            ),
-            dataCy: 'step-button-time-series-fields',
-          },
-          {
-            title: t('Programme Partners'),
-            description: '',
-            dataCy: 'step-button-partners',
-          },
-        ];
-
-        const stepTitle = stepsData[step].title;
-        const stepDescription = stepsData[step].description
-          ? stepsData[step].description
-          : undefined;
-
-        return (
-          <>
-            <PageHeader
-              title={`${t('Edit Programme')}: (${name})`}
-              breadCrumbs={
-                hasPermissionInModule(
-                  'PROGRAMME_VIEW_LIST_AND_DETAILS',
-                  permissions,
-                )
-                  ? breadCrumbsItems
-                  : null
-              }
-            />
-            <BaseSection
-              title={stepTitle}
-              description={stepDescription}
-              stepper={
-                <ProgramStepper
-                  step={step}
-                  setStep={setStep}
-                  stepsData={stepsData}
-                />
-              }
-            >
-              <Box p={3}>
-                {option === 'details' && (
+          }) => {
+            const handleNextStep = async () => {
+              await handleNext({
+                validateForm,
+                stepFields,
+                step,
+                setStep,
+                setFieldTouched,
+                values,
+                setErrors,
+              });
+            };
+            return (
+              <BaseSection
+                title={stepsData[step].title}
+                description={stepsData[step].description}
+                stepper={
+                  <ProgramStepper
+                    step={step}
+                    setStep={setStep}
+                    stepsData={stepsData}
+                  />
+                }
+              >
+                <Box p={3}>
                   <>
                     <Fade in={step === 0} timeout={600}>
                       <div>
@@ -341,6 +366,7 @@ export const EditProgramPage = (): ReactElement => {
                             values={values}
                             handleNext={handleNextStep}
                             programId={id}
+                            errors={errors}
                           />
                         )}
                       </div>
@@ -350,47 +376,63 @@ export const EditProgramPage = (): ReactElement => {
                         {step === 1 && (
                           <ProgramFieldSeriesStep
                             values={values}
-                            handleNext={handleNextStep}
                             step={step}
                             setStep={setStep}
                             pdusubtypeChoicesData={pdusubtypeChoicesData}
-                            errors={errors}
-                            setErrors={setErrors}
-                            setFieldTouched={setFieldTouched}
                             programHasRdi={programHasRdi}
                             programHasTp={programHasTp}
                             programId={id}
                             program={data.program}
                             setFieldValue={setFieldValue}
+                            submitForm={submitForm}
                           />
                         )}
                       </div>
                     </Fade>
                   </>
-                )}
-                {option === 'partners' && (
-                  <Fade in={step === 2} timeout={600}>
-                    <div>
-                      {step === 2 && (
-                        <PartnersStep
-                          values={values}
-                          allAreasTreeData={allAreasTree}
-                          partnerChoices={mappedPartnerChoices}
-                          step={step}
-                          setStep={setStep}
-                          submitForm={submitForm}
-                          setFieldValue={setFieldValue}
-                          programId={id}
-                        />
-                      )}
-                    </div>
-                  </Fade>
-                )}
-              </Box>
-            </BaseSection>
-          </>
-        );
-      }}
-    </Formik>
+                </Box>
+              </BaseSection>
+            );
+          }}
+        </Formik>
+      )}
+
+      {option === 'partners' && (
+        <Formik
+          initialValues={initialValuesPartners}
+          onSubmit={(values) => {
+            handleSubmitPartners(values);
+          }}
+          validationSchema={editPartnersValidationSchema(t)}
+        >
+          {({ submitForm, values, setFieldValue }) => {
+            const mappedPartnerChoices = userPartnerChoices
+              .filter((partner) => partner.name !== 'UNICEF')
+              .map((partner) => ({
+                value: partner.value,
+                label: partner.name,
+                disabled: values.partners.some((p) => p.id === partner.value),
+              }));
+
+            return (
+              <BaseSection title={t('Programme Partners')}>
+                <Fade in={option === 'partners'} timeout={600}>
+                  <div>
+                    <PartnersStep
+                      values={values}
+                      allAreasTreeData={allAreasTree}
+                      partnerChoices={mappedPartnerChoices}
+                      submitForm={submitForm}
+                      setFieldValue={setFieldValue}
+                      programId={id}
+                    />
+                  </div>
+                </Fade>
+              </BaseSection>
+            );
+          }}
+        </Formik>
+      )}
+    </>
   );
 };

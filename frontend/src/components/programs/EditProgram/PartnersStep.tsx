@@ -8,17 +8,15 @@ import { Link } from 'react-router-dom';
 import { AllAreasTreeQuery, ProgramPartnerAccess } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ButtonTooltip } from '@core/ButtonTooltip';
-import { ProgramPartnerCard } from './ProgramPartnerCard';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { DividerLine } from '@core/DividerLine';
 import { partnerAccessChoices } from '@components/programs/constants';
+import { ProgramPartnerCard } from '../CreateProgram/ProgramPartnerCard';
 
 interface PartnersStepProps {
   values;
   allAreasTreeData: AllAreasTreeQuery['allAreasTree'];
   partnerChoices;
-  step: number;
-  setStep: (step: number) => void;
   submitForm: () => void;
   setFieldValue;
   programId?: string;
@@ -28,8 +26,6 @@ export const PartnersStep: React.FC<PartnersStepProps> = ({
   values,
   allAreasTreeData,
   partnerChoices,
-  step,
-  setStep,
   submitForm,
   setFieldValue,
   programId: formProgramId,
@@ -86,31 +82,32 @@ export const PartnersStep: React.FC<PartnersStepProps> = ({
           />
         </Grid>
       </Box>
-      {values.partnerAccess === ProgramPartnerAccess.SelectedPartnersAccess && (
-        <>
-          <DividerLine />
-          <FieldArray
-            name="partners"
-            render={(arrayHelpers) => {
-              const {
-                form: { setFieldValue: setArrayFieldValue },
-              } = arrayHelpers;
-              return (
-                <>
-                  {values.partners.map((partner, index) => (
-                    <ProgramPartnerCard
-                      key={partner.id}
-                      partner={partner}
-                      index={index}
-                      values={values}
-                      arrayHelpers={arrayHelpers}
-                      allAreasTreeData={allAreasTreeData}
-                      partnerChoices={partnerChoices}
-                      setFieldValue={setArrayFieldValue}
-                      canDeleteProgramPartner={values.partners.length > 1}
-                    />
-                  ))}
-                  <Box display="flex">
+      <>
+        <DividerLine />
+        <FieldArray
+          name="partners"
+          render={(arrayHelpers) => {
+            const {
+              form: { setFieldValue: setArrayFieldValue },
+            } = arrayHelpers;
+            return (
+              <>
+                {values.partners.map((partner, index) => (
+                  <ProgramPartnerCard
+                    key={partner.id}
+                    partner={partner}
+                    index={index}
+                    values={values}
+                    arrayHelpers={arrayHelpers}
+                    allAreasTreeData={allAreasTreeData}
+                    partnerChoices={partnerChoices}
+                    setFieldValue={setArrayFieldValue}
+                    canDeleteProgramPartner={values.partners.length > 1}
+                  />
+                ))}
+                <Box display="flex">
+                  {values.partnerAccess ===
+                    ProgramPartnerAccess.SelectedPartnersAccess && (
                     <ButtonTooltip
                       disabled={addPartnerDisabled}
                       data-cy="button-add-partner"
@@ -127,29 +124,29 @@ export const PartnersStep: React.FC<PartnersStepProps> = ({
                     >
                       {t('Add Partner')}
                     </ButtonTooltip>
-                  </Box>
-                  {values.partnerAccess ===
-                    ProgramPartnerAccess.AllPartnersAccess && (
-                    <Grid container>
-                      <Grid item xs={6}>
-                        <Field
-                          name={`partners[${0}].id`}
-                          label={t('Partner')}
-                          color="primary"
-                          choices={partnerChoices}
-                          component={FormikSelectField}
-                          required
-                        />
-                      </Grid>
-                    </Grid>
                   )}
-                </>
-              );
-            }}
-          />
-        </>
-      )}
-      <Box display="flex" justifyContent="space-between">
+                </Box>
+                {values.partnerAccess ===
+                  ProgramPartnerAccess.AllPartnersAccess && (
+                  <Grid container>
+                    <Grid item xs={6}>
+                      <Field
+                        name={`partners[${0}].id`}
+                        label={t('Partner')}
+                        color="primary"
+                        choices={partnerChoices}
+                        component={FormikSelectField}
+                        required
+                      />
+                    </Grid>
+                  </Grid>
+                )}
+              </>
+            );
+          }}
+        />
+      </>
+      <Box mt={1} display="flex" justifyContent="space-between">
         <Box mr={2}>
           <Button
             data-cy="button-cancel"
@@ -164,15 +161,6 @@ export const PartnersStep: React.FC<PartnersStepProps> = ({
           </Button>
         </Box>
         <Box display="flex">
-          <Box mr={2}>
-            <Button
-              data-cy="button-back"
-              variant="outlined"
-              onClick={() => setStep(step - 1)}
-            >
-              {t('Back')}
-            </Button>
-          </Box>
           <Button
             data-cy="button-save"
             variant="contained"

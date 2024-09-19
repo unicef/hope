@@ -10193,6 +10193,14 @@ export type UpdateProgramMutationVariables = Exact<{
 
 export type UpdateProgramMutation = { __typename?: 'Mutations', updateProgram?: { __typename?: 'UpdateProgram', validationErrors?: any | null, program?: { __typename?: 'ProgramNode', id: string, name: string, programmeCode?: string | null, startDate: any, endDate?: any | null, status: ProgramStatus, caId?: string | null, caHashId?: string | null, description: string, budget?: any | null, frequencyOfPayments: ProgramFrequencyOfPayments, cashPlus: boolean, populationGoal: number, scope?: ProgramScope | null, sector: ProgramSector, totalNumberOfHouseholds?: number | null, totalNumberOfHouseholdsWithTpInProgram?: number | null, administrativeAreasOfImplementation: string, isSocialWorkerProgram?: boolean | null, version: any, adminUrl?: string | null, partnerAccess: ProgramPartnerAccess, targetPopulationsCount?: number | null, canFinish?: boolean | null, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean, description: string, type?: DataCollectingTypeType | null } | null, partners?: Array<{ __typename?: 'PartnerNode', id: string, name?: string | null, areaAccess?: string | null, areas?: Array<{ __typename?: 'AreaNode', id: string, level: number } | null> | null } | null> | null, registrationImports: { __typename?: 'RegistrationDataImportNodeConnection', totalCount?: number | null }, pduFields?: Array<{ __typename?: 'PeriodicFieldNode', id: string, label: any, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null> | null } | null } | null };
 
+export type UpdateProgramPartnersMutationVariables = Exact<{
+  programData?: InputMaybe<UpdateProgramPartnersInput>;
+  version?: InputMaybe<Scalars['BigInt']['input']>;
+}>;
+
+
+export type UpdateProgramPartnersMutation = { __typename?: 'Mutations', updateProgramPartners?: { __typename?: 'UpdateProgramPartners', program?: { __typename?: 'ProgramNode', id: string, name: string, programmeCode?: string | null, startDate: any, endDate?: any | null, status: ProgramStatus, caId?: string | null, caHashId?: string | null, description: string, budget?: any | null, frequencyOfPayments: ProgramFrequencyOfPayments, cashPlus: boolean, populationGoal: number, scope?: ProgramScope | null, sector: ProgramSector, totalNumberOfHouseholds?: number | null, totalNumberOfHouseholdsWithTpInProgram?: number | null, administrativeAreasOfImplementation: string, isSocialWorkerProgram?: boolean | null, version: any, adminUrl?: string | null, partnerAccess: ProgramPartnerAccess, targetPopulationsCount?: number | null, canFinish?: boolean | null, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean, description: string, type?: DataCollectingTypeType | null } | null, partners?: Array<{ __typename?: 'PartnerNode', id: string, name?: string | null, areaAccess?: string | null, areas?: Array<{ __typename?: 'AreaNode', id: string, level: number } | null> | null } | null> | null, registrationImports: { __typename?: 'RegistrationDataImportNodeConnection', totalCount?: number | null }, pduFields?: Array<{ __typename?: 'PeriodicFieldNode', id: string, label: any, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null> | null } | null } | null };
+
 export type CreateRegistrationKoboImportMutationVariables = Exact<{
   registrationDataImportData: RegistrationKoboImportMutationInput;
 }>;
@@ -15591,6 +15599,42 @@ export function useUpdateProgramMutation(baseOptions?: Apollo.MutationHookOption
 export type UpdateProgramMutationHookResult = ReturnType<typeof useUpdateProgramMutation>;
 export type UpdateProgramMutationResult = Apollo.MutationResult<UpdateProgramMutation>;
 export type UpdateProgramMutationOptions = Apollo.BaseMutationOptions<UpdateProgramMutation, UpdateProgramMutationVariables>;
+export const UpdateProgramPartnersDocument = gql`
+    mutation UpdateProgramPartners($programData: UpdateProgramPartnersInput, $version: BigInt) {
+  updateProgramPartners(programData: $programData, version: $version) {
+    program {
+      ...programDetails
+    }
+  }
+}
+    ${ProgramDetailsFragmentDoc}`;
+export type UpdateProgramPartnersMutationFn = Apollo.MutationFunction<UpdateProgramPartnersMutation, UpdateProgramPartnersMutationVariables>;
+
+/**
+ * __useUpdateProgramPartnersMutation__
+ *
+ * To run a mutation, you first call `useUpdateProgramPartnersMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateProgramPartnersMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateProgramPartnersMutation, { data, loading, error }] = useUpdateProgramPartnersMutation({
+ *   variables: {
+ *      programData: // value for 'programData'
+ *      version: // value for 'version'
+ *   },
+ * });
+ */
+export function useUpdateProgramPartnersMutation(baseOptions?: Apollo.MutationHookOptions<UpdateProgramPartnersMutation, UpdateProgramPartnersMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateProgramPartnersMutation, UpdateProgramPartnersMutationVariables>(UpdateProgramPartnersDocument, options);
+      }
+export type UpdateProgramPartnersMutationHookResult = ReturnType<typeof useUpdateProgramPartnersMutation>;
+export type UpdateProgramPartnersMutationResult = Apollo.MutationResult<UpdateProgramPartnersMutation>;
+export type UpdateProgramPartnersMutationOptions = Apollo.BaseMutationOptions<UpdateProgramPartnersMutation, UpdateProgramPartnersMutationVariables>;
 export const CreateRegistrationKoboImportDocument = gql`
     mutation CreateRegistrationKoboImport($registrationDataImportData: RegistrationKoboImportMutationInput!) {
   registrationKoboImport(registrationDataImportData: $registrationDataImportData) {
