@@ -5,7 +5,7 @@ import { StatusBox } from '@core/StatusBox';
 import { decodeIdString, programCycleStatusToColor } from '@utils/utils';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
-import { headCells } from '@containers/tables/ProgramCyclesTable/HeadCells';
+import { headCells } from '@containers/tables/ProgramCyclesTablePaymentModule/HeadCells';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -20,15 +20,15 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@mui/material';
 import { useSnackbar } from '@hooks/useSnackBar';
 
-interface ProgramCyclesTableProps {
+interface ProgramCyclesTablePaymentModuleProps {
   program;
   filters;
 }
 
-export const ProgramCyclesTable = ({
+export const ProgramCyclesTablePaymentModule = ({
   program,
   filters,
-}: ProgramCyclesTableProps) => {
+}: ProgramCyclesTablePaymentModuleProps) => {
   const { showMessage } = useSnackbar();
   const [queryVariables, setQueryVariables] = useState<ProgramCyclesQuery>({
     offset: 0,
@@ -111,7 +111,7 @@ export const ProgramCyclesTable = ({
           statusToColor={programCycleStatusToColor}
         />
       </TableCell>
-      <TableCell data-cy="program-cycle-total-entitled-quantity">
+      <TableCell align="right" data-cy="program-cycle-total-entitled-quantity">
         {row.total_entitled_quantity_usd || '-'}
       </TableCell>
       <TableCell data-cy="program-cycle-start-date">
