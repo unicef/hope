@@ -1,36 +1,22 @@
-from datetime import timedelta
 from typing import Any, List
-from unittest.mock import Mock, patch
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import (
-    BusinessAreaFactory,
-    PartnerFactory,
-    UserFactory, RoleFactory,
-)
+from hct_mis_api.apps.account.fixtures import PartnerFactory, RoleFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import (
-    FlexibleAttributeForPDUFactory,
-    PeriodicFieldDataFactory,
     create_afghanistan,
     generate_data_collecting_types,
 )
 from hct_mis_api.apps.core.models import (
     BusinessArea,
+    BusinessAreaPartnerThrough,
     DataCollectingType,
-    FlexibleAttribute,
-    PeriodicFieldData, BusinessAreaPartnerThrough,
 )
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
-from hct_mis_api.apps.household.fixtures import (
-    create_household,
-    create_household_and_individuals,
-)
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import Program, ProgramCycle, ProgramPartnerThrough
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.program.models import Program, ProgramPartnerThrough
 
 
 class TestUpdateProgramPartners(APITestCase):
@@ -112,7 +98,6 @@ class TestUpdateProgramPartners(APITestCase):
 
         unicef_program.areas.set([cls.area_in_afg_1, cls.area_in_afg_2])
 
-
     def test_update_program_partners_not_authenticated(self) -> None:
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_PARTNERS_MUTATION,
@@ -132,7 +117,9 @@ class TestUpdateProgramPartners(APITestCase):
         ]
     )
     def test_update_program_partners_authenticated(
-        self, _: Any, permissions: List[Permissions],
+        self,
+        _: Any,
+        permissions: List[Permissions],
     ) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
@@ -365,9 +352,7 @@ class TestUpdateProgramPartners(APITestCase):
             },
         )
 
-        self.assertEqual(
-            ProgramPartnerThrough.objects.filter(program=self.program).count(), 2
-        )
+        self.assertEqual(ProgramPartnerThrough.objects.filter(program=self.program).count(), 2)
 
         self.program.refresh_from_db()
         # new partner has a role in this BA
@@ -390,6 +375,4 @@ class TestUpdateProgramPartners(APITestCase):
             },
         )
 
-        self.assertEqual(
-            ProgramPartnerThrough.objects.filter(program=self.program).count(), 3
-        )
+        self.assertEqual(ProgramPartnerThrough.objects.filter(program=self.program).count(), 3)
