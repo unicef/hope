@@ -21,6 +21,10 @@ export const EXCLUDE_HOUSEHOLDS_PP = gql`
           id
           unicefId
         }
+        excludedIndividuals {
+          id
+          unicefId
+        }
       }
     }
   }

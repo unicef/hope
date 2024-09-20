@@ -55,8 +55,13 @@ from hct_mis_api.apps.core.utils import (
     encode_id_base64,
     to_choice_object,
 )
-from hct_mis_api.apps.household.models import STATUS_ACTIVE, STATUS_INACTIVE, Household
-from hct_mis_api.apps.household.schema import HouseholdNode
+from hct_mis_api.apps.household.models import (
+    STATUS_ACTIVE,
+    STATUS_INACTIVE,
+    Household,
+    Individual,
+)
+from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
 from hct_mis_api.apps.payment.filters import (
     FinancialServiceProviderFilter,
     FinancialServiceProviderXlsxTemplateFilter,
@@ -573,7 +578,8 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
     can_create_payment_verification_plan = graphene.Boolean()
     available_payment_records_count = graphene.Int()
     reconciliation_summary = graphene.Field(ReconciliationSummaryNode)
-    excluded_households = graphene.List(HouseholdNode)
+    excluded_households = graphene.List(HouseholdNode, description="For non-social worker DCT, returns Household IDs")
+    excluded_individuals = graphene.List(IndividualNode, description="For social worker DCT, returns Individual IDs")
     can_create_follow_up = graphene.Boolean()
     total_withdrawn_households_count = graphene.Int()
     unsuccessful_payments_count = graphene.Int()
@@ -668,7 +674,18 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
         )
 
     def resolve_excluded_households(self, info: Any) -> "QuerySet":
-        return Household.objects.filter(unicef_id__in=self.excluded_households_ids)
+        return (
+            Household.objects.filter(unicef_id__in=self.excluded_beneficiaries_ids)
+            if not self.is_social_worker_program
+            else Household.objects.none()
+        )
+
+    def resolve_excluded_individuals(self, info: Any) -> "QuerySet":
+        return (
+            Individual.objects.filter(unicef_id__in=self.excluded_beneficiaries_ids)
+            if self.is_social_worker_program
+            else Individual.objects.none()
+        )
 
     def resolve_can_create_follow_up(self, info: Any) -> bool:
         # Check there are payments in error/not distributed status and excluded withdrawn households

@@ -457,6 +457,7 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
             "export_file",
             "steficon_rule",
             "steficon_applied_date",
+            "exclusion_reason",
         ]
     )
 
@@ -604,8 +605,18 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
         return self.payment_items.filter(status=Payment.STATUS_ERROR).count()
 
     @property
-    def excluded_households_ids(self) -> List[str]:
-        return list(self.payment_items.filter(excluded=True).values_list("household__unicef_id", flat=True))
+    def is_social_worker_program(self) -> bool:
+        return self.program.is_social_worker_program
+
+    @property
+    def excluded_beneficiaries_ids(self) -> List[str]:
+        """based on Program DCT return HH or Ind IDs"""
+        beneficiaries_ids = (
+            list(self.payment_items.filter(excluded=True).values_list("household__individuals__unicef_id", flat=True))
+            if self.is_social_worker_program
+            else list(self.payment_items.filter(excluded=True).values_list("household__unicef_id", flat=True))
+        )
+        return beneficiaries_ids
 
     @transition(
         field=background_action_status,

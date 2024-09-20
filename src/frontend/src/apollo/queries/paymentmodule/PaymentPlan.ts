@@ -236,6 +236,10 @@ export const PAYMENT_PLAN_QUERY = gql`
         id
         unicefId
       }
+      excludedIndividuals {
+        id
+        unicefId
+      }
       exclusionReason
       excludeHouseholdError
       isFollowUp
