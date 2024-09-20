@@ -3346,6 +3346,7 @@ type PaymentPlanNode implements Node {
   availablePaymentRecordsCount: Int
   reconciliationSummary: ReconciliationSummaryNode
   excludedHouseholds: [HouseholdNode]
+  excludedIndividuals: [IndividualNode]
   canCreateFollowUp: Boolean
   totalWithdrawnHouseholdsCount: Int
   unsuccessfulPaymentsCount: Int
