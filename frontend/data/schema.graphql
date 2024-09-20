@@ -4184,7 +4184,7 @@ type RegistrationDataImportNode implements Node {
   goldenRecordPossibleDuplicatesCountAndPercentage: [CountAndPercentageNode]
   goldenRecordUniqueCountAndPercentage: [CountAndPercentageNode]
   totalHouseholdsCountWithValidPhoneNo: Int
-  isDeduplicated: String
+  biometricDeduplicated: String
   canMerge: Boolean
   biometricDeduplicationEnabled: Boolean
 }

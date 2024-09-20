@@ -29,8 +29,8 @@ export const headCells: HeadCell<RegistrationDataImportNode>[] = [
   },
   {
     disablePadding: false,
-    label: 'Is Deduplicated?',
-    id: 'isDeduplicated',
+    label: 'Biometric Deduplicated',
+    id: 'biometricDeduplicated',
     numeric: false,
     disableSort: true,
   },

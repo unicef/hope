@@ -64,15 +64,21 @@ class BiometricDeduplicationService:
             for individual in individuals
         ]
 
-        try:
-            self.api.bulk_upload_images(deduplication_set_id, images)
-            rdi.deduplication_engine_status = RegistrationDataImport.DEDUP_ENGINE_UPLOADED
-            rdi.save(update_fields=["deduplication_engine_status"])
+        if rdi.deduplication_engine_status in [
+            RegistrationDataImport.DEDUP_ENGINE_UPLOAD_ERROR,
+            RegistrationDataImport.DEDUP_ENGINE_PENDING,
+        ]:
+            try:
+                self.api.bulk_upload_images(deduplication_set_id, images)
 
-        except DeduplicationEngineAPI.DeduplicationEngineAPIException:
-            logging.exception(f"Failed to upload images for RDI {rdi} to deduplication set {deduplication_set_id}")
-            rdi.deduplication_engine_status = RegistrationDataImport.DEDUP_ENGINE_UPLOAD_ERROR
-            rdi.save(update_fields=["deduplication_engine_status"])
+            except DeduplicationEngineAPI.DeduplicationEngineAPIException:
+                logging.exception(f"Failed to upload images for RDI {rdi} to deduplication set {deduplication_set_id}")
+                rdi.deduplication_engine_status = RegistrationDataImport.DEDUP_ENGINE_UPLOAD_ERROR
+                rdi.save(update_fields=["deduplication_engine_status"])
+                return
+
+        rdi.deduplication_engine_status = RegistrationDataImport.DEDUP_ENGINE_UPLOADED
+        rdi.save(update_fields=["deduplication_engine_status"])
 
     def process_deduplication_set(self, deduplication_set_id: str, rdis: QuerySet[RegistrationDataImport]) -> None:
         response_data, status = self.api.process_deduplication(deduplication_set_id)
@@ -108,13 +114,10 @@ class BiometricDeduplicationService:
             deduplication_engine_status__in=[
                 RegistrationDataImport.DEDUP_ENGINE_PENDING,
                 RegistrationDataImport.DEDUP_ENGINE_UPLOAD_ERROR,
+                RegistrationDataImport.DEDUP_ENGINE_ERROR,
             ],
         ).exclude(
             status__in=[
-                RegistrationDataImport.MERGE_SCHEDULED,
-                RegistrationDataImport.MERGED,
-                RegistrationDataImport.MERGING,
-                RegistrationDataImport.MERGE_ERROR,
                 RegistrationDataImport.REFUSED_IMPORT,
             ]
         )
@@ -127,10 +130,6 @@ class BiometricDeduplicationService:
                 deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_UPLOADED
             ).exclude(
                 status__in=[
-                    RegistrationDataImport.MERGE_SCHEDULED,
-                    RegistrationDataImport.MERGED,
-                    RegistrationDataImport.MERGING,
-                    RegistrationDataImport.MERGE_ERROR,
                     RegistrationDataImport.REFUSED_IMPORT,
                 ]
             )
@@ -162,7 +161,9 @@ class BiometricDeduplicationService:
     def store_rdis_deduplication_statistics(self, deduplication_set_id: str) -> None:
         program = Program.objects.get(deduplication_set_id=deduplication_set_id)
         rdis = RegistrationDataImport.objects.filter(
-            program=program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS
+            status=RegistrationDataImport.IN_REVIEW,
+            program=program,
+            deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS,
         )
         for rdi in rdis:
             rdi.dedup_engine_batch_duplicates = self.get_duplicate_individuals_for_rdi_against_batch_count(rdi)
@@ -174,9 +175,9 @@ class BiometricDeduplicationService:
     def update_rdis_deduplication_statistics(self, program_id: str) -> None:
         program = Program.objects.get(id=program_id)
         rdis = RegistrationDataImport.objects.filter(
+            status=RegistrationDataImport.IN_REVIEW,
             program=program,
             deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED,
-            status=RegistrationDataImport.IN_REVIEW,
         )
         for rdi in rdis:
             rdi.dedup_engine_batch_duplicates = self.get_duplicate_individuals_for_rdi_against_batch_count(rdi)

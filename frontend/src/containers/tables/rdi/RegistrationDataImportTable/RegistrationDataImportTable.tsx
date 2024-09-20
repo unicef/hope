@@ -69,8 +69,8 @@ export function RegistrationDataImportTable({
     if (deduplicationFlags?.canRunDeduplication) {
       header.splice(4, 0, {
         disablePadding: false,
-        label: 'Is Deduplicated?',
-        id: 'isDeduplicated',
+        label: 'Biometric Deduplicated',
+        id: 'biometricDeduplicated',
         numeric: false,
         disableSort: true,
       });

@@ -268,10 +268,28 @@ class Query(graphene.ObjectType):
     def resolve_is_deduplication_disabled(self, info: Any, **kwargs: Any) -> bool:
         encoded_program_id = info.context.headers.get("Program")
         program = Program.objects.only("id").get(id=decode_id_string(encoded_program_id))
+        # deduplication engine in progress
         is_still_processing = RegistrationDataImport.objects.filter(
             program=program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS
         ).exists()
-        return is_still_processing
+        # all rdis are deduplicated
+        all_rdis_deduplicated = (
+            RegistrationDataImport.objects.filter(program=program).all().count()
+            == RegistrationDataImport.objects.filter(
+                deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED,
+                program=program,
+            ).count()
+        )
+        # rdi merge in progress
+        rdi_merging = RegistrationDataImport.objects.filter(
+            program=program,
+            status__in=[
+                RegistrationDataImport.MERGE_SCHEDULED,
+                RegistrationDataImport.MERGING,
+                RegistrationDataImport.MERGE_ERROR,
+            ],
+        ).exists()
+        return is_still_processing or all_rdis_deduplicated or rdi_merging
 
     def resolve_all_programs(self, info: Any, **kwargs: Any) -> QuerySet[Program]:
         user = info.context.user

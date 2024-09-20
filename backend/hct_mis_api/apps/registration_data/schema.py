@@ -65,7 +65,7 @@ class RegistrationDataImportNode(BaseNodePermissionMixin, AdminUrlNodeMixin, Dja
     golden_record_possible_duplicates_count_and_percentage = graphene.List(CountAndPercentageNode)
     golden_record_unique_count_and_percentage = graphene.List(CountAndPercentageNode)
     total_households_count_with_valid_phone_no = graphene.Int()
-    is_deduplicated = graphene.String()
+    biometric_deduplicated = graphene.String()
 
     can_merge = graphene.Boolean()
     biometric_deduplication_enabled = graphene.Boolean()
@@ -142,11 +142,8 @@ class RegistrationDataImportNode(BaseNodePermissionMixin, AdminUrlNodeMixin, Dja
         ).count()
 
     @staticmethod
-    def resolve_is_deduplicated(parent: RegistrationDataImport, info: Any, **kwargs: Any) -> str:
-        if parent.deduplication_engine_status in [
-            RegistrationDataImport.DEDUP_ENGINE_FINISHED,
-            RegistrationDataImport.DEDUP_ENGINE_ERROR,
-        ]:
+    def resolve_biometric_deduplicated(parent: RegistrationDataImport, info: Any, **kwargs: Any) -> str:
+        if parent.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_FINISHED:
             return "YES"
         return "NO"
 

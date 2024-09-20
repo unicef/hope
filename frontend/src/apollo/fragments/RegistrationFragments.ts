@@ -27,7 +27,7 @@ export const registrationMinimal = gql`
     refuseReason
     totalHouseholdsCountWithValidPhoneNo
     adminUrl
-    isDeduplicated
+    biometricDeduplicated
   }
 `;
 
