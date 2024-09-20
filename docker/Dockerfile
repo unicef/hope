@@ -65,7 +65,7 @@ RUN pip install --upgrade pip &&\
     pdm config check_update false
 
 WORKDIR $PDM_PACKAGES
-COPY src/pyproject.toml src/pdm.lock ./
+COPY pyproject.toml pdm.lock ./
 RUN pdm sync --prod --no-editable --no-self --no-isolation
 
 # Dev image
@@ -86,11 +86,9 @@ RUN apt-get update \
 RUN pdm sync --no-editable --no-self --no-isolation
 
 WORKDIR $CODE
-COPY ./src/ ./
+COPY ./src/ ./src/
 COPY ./tests /tests
-
-
-
+COPY .flake8 pyproject.toml pdm.lock ./
 COPY ./docker/entrypoint.sh /bin/
 ENTRYPOINT ["entrypoint.sh"]
 
