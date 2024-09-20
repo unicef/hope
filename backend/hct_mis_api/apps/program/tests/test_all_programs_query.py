@@ -5,7 +5,7 @@ from django.contrib.auth.models import AnonymousUser
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
+from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory, RoleFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import (
@@ -72,6 +72,9 @@ class TestAllProgramsQuery(APITestCase):
 
         cls.partner = PartnerFactory(name="WFP")
         cls.partner.allowed_business_areas.add(cls.business_area)
+        role = RoleFactory.create(name="Role for WFP")
+        cls.add_partner_role_in_business_area(cls.partner, cls.business_area, [role])
+
         cls.user = UserFactory.create(partner=cls.partner)
 
         cls.unicef_partner = PartnerFactory(name="UNICEF")
@@ -127,6 +130,7 @@ class TestAllProgramsQuery(APITestCase):
     )
     def test_all_programs_query(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        print(Program.objects.filter(business_area=self.business_area).values_list("name", flat=True))
         self.snapshot_graphql_request(
             request_string=self.ALL_PROGRAMS_QUERY,
             context={

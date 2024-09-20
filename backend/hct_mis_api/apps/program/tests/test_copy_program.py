@@ -3,7 +3,7 @@ from typing import Any
 from flaky import flaky
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
+from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory, RoleFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import (
@@ -193,9 +193,11 @@ class TestCopyProgram(APITestCase):
         # create UNICEF partner - it will always be granted access while creating program
         PartnerFactory(name="UNICEF")
 
-        # partner allowed within BA - will be granted access for ALL_PARTNERS_ACCESS type
+        # partner with role in BA - will be granted access for ALL_PARTNERS_ACCESS type
         partner_allowed_in_BA = PartnerFactory(name="Other Partner")
         partner_allowed_in_BA.allowed_business_areas.set([cls.business_area])
+        role = RoleFactory.create(name="Role for WFP")
+        cls.add_partner_role_in_business_area(partner_allowed_in_BA, cls.business_area, [role])
 
         PartnerFactory(name="Partner not allowed in BA")
 
