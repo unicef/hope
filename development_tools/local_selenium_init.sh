@@ -14,7 +14,6 @@ export DATABASE_URL=postgis://postgres:postgres@localhost:5432/postgres
 export DATABASE_URL_HUB_MIS=postgis://postgres:postgres@localhost:5432/mis_datahub
 export DATABASE_URL_HUB_CA=postgis://postgres:postgres@localhost:5432/ca_datahub
 export DATABASE_URL_HUB_ERP=postgis://postgres:postgres@localhost:5432/erp_datahub
-export DATABASE_URL_HUB_REGISTRATION=postgis://postgres:postgres@localhost:5432/rdi_datahub
 export POSTGRES_SSL_MODE=off
 export EMAIL_HOST=TBD
 export EMAIL_HOST_USER=TBD
