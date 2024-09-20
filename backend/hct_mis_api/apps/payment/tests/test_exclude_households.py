@@ -4,11 +4,11 @@ from unittest import mock
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
+from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
-from hct_mis_api.apps.household.models import Household
+from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.payment.celery_tasks import payment_plan_exclude_beneficiaries
 from hct_mis_api.apps.payment.fixtures import (
     PaymentFactory,
@@ -23,11 +23,11 @@ mutation excludeHouseholds($paymentPlanId: ID!, $excludedHouseholdsIds: [String]
     paymentPlanId: $paymentPlanId,
     excludedHouseholdsIds: $excludedHouseholdsIds,
     exclusionReason: $exclusionReason
-) {
-    paymentPlan {
+  ) {
+      paymentPlan {
         id
+      }
     }
-}
 }
 """
 
@@ -75,6 +75,9 @@ class TestExcludeHouseholds(APITestCase):
         cls.payment_3 = PaymentFactory(
             parent=cls.payment_plan, household=cls.household_3, excluded=False, currency="PLN"
         )
+        cls.individual_1 = IndividualFactory(household=cls.household_1, program=cls.program)
+        cls.individual_2 = IndividualFactory(household=cls.household_2, program=cls.program)
+        cls.individual_3 = IndividualFactory(household=cls.household_3, program=cls.program)
 
         hoh4 = IndividualFactory(household=None)
         cls.household_4 = HouseholdFactory(id="7e14efa4-3ff3-4947-aecc-b517c659ebda", head_of_household=hoh4)
@@ -155,11 +158,11 @@ class TestExcludeHouseholds(APITestCase):
 
         payment_plan_exclude_beneficiaries(
             payment_plan_id=self.payment_plan.pk,
-            excluding_hh_ids=[hh_unicef_id_1, wrong_hh_id],
+            excluding_hh_or_ind_ids=[hh_unicef_id_1, wrong_hh_id],
             exclusion_reason="reason exclusion Error 123",
         )
         self.payment_plan.refresh_from_db()
-        error_msg = f"['Household {wrong_hh_id} is not part of this Follow-up Payment Plan.']"
+        error_msg = f"['Beneficiary with ID {wrong_hh_id} is not part of this Follow-up Payment Plan.']"
 
         self.assertEqual(self.payment_plan.exclusion_reason, "reason exclusion Error 123")
         self.assertEqual(self.payment_plan.exclude_household_error, error_msg)
@@ -181,7 +184,7 @@ class TestExcludeHouseholds(APITestCase):
 
         payment_plan_exclude_beneficiaries(
             payment_plan_id=self.payment_plan.pk,
-            excluding_hh_ids=[hh_unicef_id_1, hh_unicef_id_2, hh_unicef_id_3],
+            excluding_hh_or_ind_ids=[hh_unicef_id_1, hh_unicef_id_2, hh_unicef_id_3],
             exclusion_reason="reason exclude_all_households",
         )
         self.payment_plan.refresh_from_db()
@@ -211,10 +214,10 @@ class TestExcludeHouseholds(APITestCase):
         self.assertEqual(self.payment_plan.exclusion_reason, "")
 
         payment_plan_exclude_beneficiaries(
-            payment_plan_id=self.payment_plan.pk, excluding_hh_ids=[], exclusion_reason="Undo HH_1"
+            payment_plan_id=self.payment_plan.pk, excluding_hh_or_ind_ids=[], exclusion_reason="Undo HH_1"
         )
 
-        self.assertEqual(set(self.payment_plan.excluded_households_ids), {self.payment_1.household.unicef_id})
+        self.assertEqual(set(self.payment_plan.excluded_beneficiaries_ids), {self.payment_1.household.unicef_id})
         self.payment_plan.refresh_from_db()
 
         self.assertEqual(self.payment_plan.exclusion_reason, "Undo HH_1")
@@ -222,7 +225,7 @@ class TestExcludeHouseholds(APITestCase):
             self.payment_plan.background_action_status, PaymentPlan.BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR
         )
 
-        error_msg = f"['It is not possible to undo exclude Household(s) with ID {self.household_1.unicef_id} because of hard conflict(s) with other Follow-up Payment Plan(s).']"
+        error_msg = f"['It is not possible to undo exclude Beneficiary with ID {self.household_1.unicef_id} because of hard conflict(s) with other Follow-up Payment Plan(s).']"
         self.assertEqual(self.payment_plan.exclude_household_error, error_msg)
 
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
@@ -237,7 +240,7 @@ class TestExcludeHouseholds(APITestCase):
 
         payment_plan_exclude_beneficiaries(
             payment_plan_id=self.payment_plan.pk,
-            excluding_hh_ids=[hh_unicef_id_1, hh_unicef_id_2],
+            excluding_hh_or_ind_ids=[hh_unicef_id_1, hh_unicef_id_2],
             exclusion_reason="Nice Job!",
         )
 
@@ -248,4 +251,33 @@ class TestExcludeHouseholds(APITestCase):
         self.assertEqual(self.payment_plan.background_action_status, None)
 
         # excluded hh_1, hh_2
-        self.assertEqual(set(self.payment_plan.excluded_households_ids), {hh_unicef_id_1, hh_unicef_id_2})
+        self.assertEqual(set(self.payment_plan.excluded_beneficiaries_ids), {hh_unicef_id_1, hh_unicef_id_2})
+
+    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    def test_exclude_individuals_people_program(self, get_exchange_rate_mock: Any) -> None:
+        people_dct = DataCollectingTypeFactory(label="Social DCT", type=DataCollectingType.Type.SOCIAL)
+        self.program.data_collecting_type = people_dct
+        self.program.save(update_fields=["data_collecting_type"])
+        self.payment_plan.background_action_status = PaymentPlan.BackgroundActionStatus.EXCLUDE_BENEFICIARIES
+        self.payment_plan.program = self.program
+        self.payment_plan.save(update_fields=["background_action_status", "program"])
+
+        ind_unicef_id_1 = Individual.objects.get(id=self.individual_1.id).unicef_id
+        ind_unicef_id_2 = Individual.objects.get(id=self.individual_2.id).unicef_id
+
+        self.assertEqual(self.payment_plan.exclusion_reason, "")
+
+        payment_plan_exclude_beneficiaries(
+            payment_plan_id=self.payment_plan.pk,
+            excluding_hh_or_ind_ids=[ind_unicef_id_1, ind_unicef_id_2],
+            exclusion_reason="Just Test For People",
+        )
+
+        self.payment_plan.refresh_from_db()
+
+        self.assertEqual(self.payment_plan.exclusion_reason, "Just Test For People")
+        self.assertEqual(self.payment_plan.exclude_household_error, "")
+        self.assertEqual(self.payment_plan.background_action_status, None)
+
+        # excluded ind_1, ind_2
+        self.assertEqual(set(self.payment_plan.excluded_beneficiaries_ids), {ind_unicef_id_1, ind_unicef_id_2})

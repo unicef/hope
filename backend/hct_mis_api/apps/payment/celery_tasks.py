@@ -442,39 +442,42 @@ def prepare_follow_up_payment_plan_task(self: Any, payment_plan_id: str) -> bool
 @log_start_and_end
 @sentry_tags
 def payment_plan_exclude_beneficiaries(
-    self: Any, payment_plan_id: str, excluding_hh_ids: List[Optional[str]], exclusion_reason: Optional[str] = ""
+    self: Any, payment_plan_id: str, excluding_hh_or_ind_ids: List[Optional[str]], exclusion_reason: Optional[str] = ""
 ) -> None:
     try:
         from django.db.models import Q
 
         from hct_mis_api.apps.payment.models import Payment, PaymentPlan
 
-        payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
+        payment_plan = PaymentPlan.objects.select_related("program").get(id=payment_plan_id)
+        # for social worker program exclude Individual unicef_id
+        is_social_worker_program = payment_plan.program.is_social_worker_program
         set_sentry_business_area_tag(payment_plan.business_area.name)
-        pp_payment_items = payment_plan.payment_items
+        pp_payment_items = payment_plan.payment_items.select_related("household")
         payment_plan_title = "Follow-up Payment Plan" if payment_plan.is_follow_up else "Payment Plan"
         error_msg, info_msg = [], []
+        filter_key = "household__individuals__unicef_id" if is_social_worker_program else "household__unicef_id"
 
         try:
-            for hh_unicef_id in excluding_hh_ids:
-                if not pp_payment_items.filter(household__unicef_id=hh_unicef_id).exists():
+            for unicef_id in excluding_hh_or_ind_ids:
+                if not pp_payment_items.filter(**{f"{filter_key}": unicef_id}).exists():
                     # add only notice for user and ignore this id
-                    info_msg.append(f"Household {hh_unicef_id} is not part of this {payment_plan_title}.")
-                    # remove wrong HH_id from the list because later will compare number of HHs with .eligible_payments()
-                    excluding_hh_ids.remove(hh_unicef_id)
+                    info_msg.append(f"Beneficiary with ID {unicef_id} is not part of this {payment_plan_title}.")
+                    # remove wrong ID from the list because later will compare number of HHs with .eligible_payments()
+                    excluding_hh_or_ind_ids.remove(unicef_id)
 
             if payment_plan.status == PaymentPlan.Status.LOCKED:
                 # for Locked PaymentPlan we check if all HHs are not removed from PP
-                if len(excluding_hh_ids) >= pp_payment_items.count():
+                if len(excluding_hh_or_ind_ids) >= pp_payment_items.count():
                     error_msg.append(f"Households cannot be entirely excluded from the {payment_plan_title}.")
 
             payments_for_undo_exclude = pp_payment_items.filter(excluded=True).exclude(
-                household__unicef_id__in=excluding_hh_ids
+                **{f"{filter_key}__in": excluding_hh_or_ind_ids}
             )
-            undo_exclude_hh_ids = payments_for_undo_exclude.values_list("household__unicef_id", flat=True)
+            undo_exclude_hh_ids = payments_for_undo_exclude.values_list(filter_key, flat=True)
 
             # check if hard conflicts exists in other Payments for undo exclude HH
-            for hh_unicef_id in undo_exclude_hh_ids:
+            for unicef_id in undo_exclude_hh_ids:
                 if (
                     Payment.objects.exclude(parent__id=payment_plan.pk)
                     .filter(
@@ -484,12 +487,12 @@ def payment_plan_exclude_beneficiaries(
                         Q(parent__program_cycle__start_date__lte=payment_plan.program_cycle.end_date)
                         & Q(parent__program_cycle__end_date__gte=payment_plan.program_cycle.start_date),
                         ~Q(parent__status=PaymentPlan.Status.OPEN),
-                        Q(household__unicef_id=hh_unicef_id) & Q(conflicted=False),
+                        Q(**{filter_key: unicef_id}) & Q(conflicted=False),
                     )
                     .exists()
                 ):
                     error_msg.append(
-                        f"It is not possible to undo exclude Household(s) with ID {hh_unicef_id} because of hard conflict(s) with other {payment_plan_title}(s)."
+                        f"It is not possible to undo exclude Beneficiary with ID {unicef_id} because of hard conflict(s) with other {payment_plan_title}(s)."
                     )
 
             payment_plan.exclusion_reason = exclusion_reason
@@ -502,7 +505,9 @@ def payment_plan_exclude_beneficiaries(
                 )
                 raise ValidationError("Payment Plan Exclude Beneficiaries Validation Error with Beneficiaries List")
 
-            payments_for_exclude = payment_plan.eligible_payments.filter(household__unicef_id__in=excluding_hh_ids)
+            payments_for_exclude = payment_plan.eligible_payments.filter(
+                **{f"{filter_key}__in": excluding_hh_or_ind_ids}
+            )
 
             payments_for_exclude.update(excluded=True)
             payments_for_undo_exclude.update(excluded=False)
