@@ -1159,7 +1159,6 @@ class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
         return cls(payment_plan=payment_plan)
 
 
-# TODO: Depending on the designation of the Program we can exclude Ind or HH
 class ExcludeHouseholdsMutation(PermissionMutation):
     payment_plan = graphene.Field(PaymentPlanNode)
 
