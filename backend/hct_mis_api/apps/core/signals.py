@@ -19,11 +19,11 @@ def validate_compatible_types(
 
 
 @receiver(post_delete, sender=BusinessAreaPartnerThrough)
-def partner_permission_removed(sender: Any, instance: BusinessAreaPartnerThrough, **kwargs: Any) -> None:
+def partner_role_removed(sender: Any, instance: BusinessAreaPartnerThrough, **kwargs: Any) -> None:
     """
-    If permissions are revoked for a Partner from a whole Business Area, Partner looses access to all Programs in this Business Area
+    If roles are revoked for a Partner from a whole Business Area, Partner looses access to all Programs in this Business Area
     """
-    partner = instance.partner  # The partner being removed
-    business_area = instance.business_area  # The business area involved
+    partner = instance.partner
+    business_area = instance.business_area
     programs_in_business_area = business_area.program_set.all()
     ProgramPartnerThrough.objects.filter(partner=partner, program__in=programs_in_business_area).delete()

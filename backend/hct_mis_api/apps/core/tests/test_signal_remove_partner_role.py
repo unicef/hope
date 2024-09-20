@@ -7,7 +7,7 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program, ProgramPartnerThrough
 
 
-class TestSignalChangeAllowedBusinessAreas(TestCase):
+class TestSignalRemovePartnerRole(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
@@ -38,14 +38,12 @@ class TestSignalChangeAllowedBusinessAreas(TestCase):
             status=Program.DRAFT, business_area=cls.business_area_ukr, partner_access=Program.SELECTED_PARTNERS_ACCESS
         )
 
-    def test_signal_change_allowed_business_areas(self) -> None:
+    def test_signal_remove_partner_role(self) -> None:
         self.assertEqual(
             self.program_afg.partners.count(), 2
         )  # ALL_PARTNERS_ACCESS - UNICEF and Partner that has access to AFG (signal on program)
         self.assertEqual(self.program_ukr.partners.count(), 1)  # SELECTED_PARTNERS_ACCESS - only UNICEF
         self.assertEqual(self.partner.programs.count(), 1)
-
-        self.assertEqual(self.partner.program_partner_through.first().full_area_access, True)
 
         # grant access to program in ukr
         ProgramPartnerThrough.objects.create(
@@ -55,26 +53,17 @@ class TestSignalChangeAllowedBusinessAreas(TestCase):
         self.assertEqual(self.program_ukr.partners.count(), 2)
         self.assertEqual(self.partner.programs.count(), 2)
 
-        self.assertEqual(self.partner.program_partner_through.get(program=self.program_ukr).full_area_access, False)
-
-        self.partner.allowed_business_areas.remove(self.business_area_afg)
-        # removing from allowed BA -> removing roles in this BA
-        self.assertIsNone(
-            self.partner.business_area_partner_through.filter(business_area=self.business_area_afg).first()
-        )
-        self.assertIsNotNone(
-            self.partner.business_area_partner_through.filter(business_area=self.business_area_ukr).first()
-        )
+        # remove role in afg
+        BusinessAreaPartnerThrough.objects.filter(business_area=self.business_area_afg, partner=self.partner).delete()
         # removing the role -> removing access to the program
+        self.assertIsNone(self.partner.program_partner_through.filter(program=self.program_afg).first())
         self.assertEqual(self.program_afg.partners.count(), 1)  # only UNICEF left
         self.assertEqual(self.partner.programs.count(), 1)
 
-        self.partner.allowed_business_areas.remove(self.business_area_ukr)
-        # removing from allowed BA -> removing roles in this BA
-        self.assertIsNone(
-            self.partner.business_area_partner_through.filter(business_area=self.business_area_ukr).first()
-        )
+        # remove role in ukr
+        BusinessAreaPartnerThrough.objects.filter(business_area=self.business_area_ukr, partner=self.partner).delete()
         # removing the role -> removing access to the program
+        self.assertIsNone(self.partner.program_partner_through.filter(program=self.program_ukr).first())
         self.assertEqual(self.program_ukr.partners.count(), 1)  # only UNICEF left
 
         self.assertEqual(self.partner.programs.count(), 0)

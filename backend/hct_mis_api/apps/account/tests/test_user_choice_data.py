@@ -1,4 +1,4 @@
-from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory, RoleFactory
+from hct_mis_api.apps.account.fixtures import PartnerFactory, RoleFactory, UserFactory
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -31,7 +31,7 @@ class UserRolesTest(APITestCase):
 
         for partner in Partner.objects.exclude(name="UNICEF"):  # unicef partner should be available everywhere
             partner.allowed_business_areas.add(cls.business_area)
-            role = RoleFactory.create(name=f"Role for {partner.name}")
+            role = RoleFactory(name=f"Role for {partner.name}")
             cls.add_partner_role_in_business_area(partner, cls.business_area, [role])
 
         # partner allowed in BA but without role -> is not listed
@@ -40,7 +40,6 @@ class UserRolesTest(APITestCase):
 
         # partner not allowed in BA
         PartnerFactory(name="Partner Not Allowed in BA")
-
 
     def test_user_choice_data(self) -> None:
         self.snapshot_graphql_request(
