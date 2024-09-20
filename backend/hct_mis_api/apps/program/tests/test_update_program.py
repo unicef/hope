@@ -998,6 +998,7 @@ class TestUpdateProgram(APITestCase):
         self.assertEqual(self.program.status, Program.ACTIVE)
         self.assertIsNone(self.program.end_date)
         program_cycle = self.program.cycles.first()
+        program_cycle.start_date = self.program.start_date
         program_cycle.end_date = self.program.start_date + timedelta(days=5)
         program_cycle.save()
 
