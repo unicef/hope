@@ -29,6 +29,10 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans 1'] = {
                         'dispersionEndDate': '2020-12-10',
                         'dispersionStartDate': '2020-08-10',
                         'exchangeRate': 2.0,
+                        'excludedHouseholds': [
+                        ],
+                        'excludedIndividuals': [
+                        ],
                         'femaleAdultsCount': 0,
                         'femaleChildrenCount': 1,
                         'maleAdultsCount': 0,
@@ -66,6 +70,10 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans 1'] = {
                         'dispersionEndDate': '2020-10-10',
                         'dispersionStartDate': '2020-10-10',
                         'exchangeRate': 2.0,
+                        'excludedHouseholds': [
+                        ],
+                        'excludedIndividuals': [
+                        ],
                         'femaleAdultsCount': 1,
                         'femaleChildrenCount': 0,
                         'maleAdultsCount': 1,
