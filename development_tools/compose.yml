@@ -1,5 +1,3 @@
-version: '3.7'
-
 volumes:
   backend-data:
   db:
@@ -181,7 +179,7 @@ services:
   celery-flower:
     image: johniak/flower:1.6
     profiles:
-      - flower
+      - default
     command: [ "flower", "--broker=redis://redis:6379/0", "--port=5555" ]
     environment:
       - FLOWER_AUTH_PROVIDER=""
