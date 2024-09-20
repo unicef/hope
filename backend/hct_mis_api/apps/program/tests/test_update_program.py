@@ -45,14 +45,6 @@ class TestUpdateProgram(APITestCase):
             label
             code
           }
-          partners {
-            name
-            areas {
-              name
-            }
-            areaAccess
-          }
-          partnerAccess
           pduFields {
             name
             label
@@ -93,7 +85,6 @@ class TestUpdateProgram(APITestCase):
 
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.business_area.data_collecting_types.set(DataCollectingType.objects.all().values_list("id", flat=True))
-        cls.unicef_partner = PartnerFactory(name="UNICEF")
 
         cls.program = ProgramFactory.create(
             name="initial name",
@@ -104,10 +95,6 @@ class TestUpdateProgram(APITestCase):
             version=123,
             biometric_deduplication_enabled=True,
         )
-        unicef_program, _ = ProgramPartnerThrough.objects.get_or_create(
-            program=cls.program,
-            partner=cls.unicef_partner,
-        )
         cls.program_finished = ProgramFactory.create(
             status=Program.FINISHED,
             business_area=cls.business_area,
@@ -117,30 +104,16 @@ class TestUpdateProgram(APITestCase):
         cls.partner = PartnerFactory(name="WFP")
         cls.user = UserFactory.create(partner=cls.partner)
 
-        # partner allowed within BA - will be granted access for ALL_PARTNERS_ACCESS type
-        cls.other_partner = PartnerFactory(name="Other Partner")
-        cls.other_partner.allowed_business_areas.set([cls.business_area])
-
-        cls.partner_not_allowed_in_BA = PartnerFactory(name="Partner not allowed in BA")
-
+        cls.unicef_partner = PartnerFactory(name="UNICEF")
+        unicef_program, _ = ProgramPartnerThrough.objects.get_or_create(
+            program=cls.program,
+            partner=cls.unicef_partner,
+        )
         country_afg = CountryFactory(name="Afghanistan")
         country_afg.business_areas.set([cls.business_area])
         area_type_afg = AreaTypeFactory(name="Area Type in Afg", country=country_afg)
-        country_other = CountryFactory(
-            name="Other Country",
-            short_name="Oth",
-            iso_code2="O",
-            iso_code3="OTH",
-            iso_num="111",
-        )
-        cls.area_type_other = AreaTypeFactory(name="Area Type Other", country=country_other)
-
         cls.area_in_afg_1 = AreaFactory(name="Area in AFG 1", area_type=area_type_afg, p_code="AREA-IN-AFG1")
         cls.area_in_afg_2 = AreaFactory(name="Area in AFG 2", area_type=area_type_afg, p_code="AREA-IN-AFG2")
-        cls.area_not_in_afg = AreaFactory(
-            name="Area not in AFG", area_type=cls.area_type_other, p_code="AREA-NOT-IN-AFG2"
-        )
-
         unicef_program.areas.set([cls.area_in_afg_1, cls.area_in_afg_2])
 
         # pdu fields
