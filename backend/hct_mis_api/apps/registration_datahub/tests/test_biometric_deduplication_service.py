@@ -92,6 +92,7 @@ class BiometricDeduplicationServiceTest(TestCase):
     def test_upload_individuals_success(self, mock_bulk_upload_images: mock.Mock) -> None:
         self.program.deduplication_set_id = uuid.uuid4()
         self.program.save()
+
         rdi = RegistrationDataImportFactory(
             program=self.program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_PENDING
         )
@@ -104,6 +105,12 @@ class BiometricDeduplicationServiceTest(TestCase):
             [DeduplicationImage(reference_pk=str(individual.id), filename="some_photo.jpg")],
         )
 
+        rdi.refresh_from_db()
+        assert rdi.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_UPLOADED
+
+        rdi.deduplication_engine_status = RegistrationDataImport.DEDUP_ENGINE_ERROR
+        rdi.save()
+        service.upload_individuals(str(self.program.deduplication_set_id), rdi)
         rdi.refresh_from_db()
         assert rdi.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_UPLOADED
 
