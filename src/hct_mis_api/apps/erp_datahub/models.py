@@ -2,7 +2,7 @@ from django.db import models
 
 
 class FundsCommitment(models.Model):
-    rec_serial_number = models.CharField(max_length=10, blank=True, null=True)
+    rec_serial_number = models.CharField(max_length=10, unique=True)
     business_area = models.CharField(max_length=4, blank=True, null=True)
     funds_commitment_number = models.CharField(max_length=10, blank=True, null=True)
     document_type = models.CharField(max_length=2, blank=True, null=True)
@@ -59,6 +59,9 @@ class FundsCommitment(models.Model):
 
     def __str__(self) -> str:
         return self.funds_commitment_number
+
+    class Meta:
+        unique_together = ("funds_commitment_number", "funds_commitment_item")
 
 
 class DownPayment(models.Model):
