@@ -1,9 +1,17 @@
+### Master badges
 ![ci status](https://github.com/unicef/hope/actions/workflows/ci.yml/badge.svg?branch=master)
+[![codecov](https://codecov.io/gh/unicef/hope/branch/master/graph/badge.svg?token=ETHR78G5AM)](https://codecov.io/gh/unicef/hope)
+### Develop badges
+![ci status](https://github.com/unicef/hope/actions/workflows/ci.yml/badge.svg?branch=develop)
 [![codecov](https://codecov.io/gh/unicef/hope/graph/badge.svg?token=ETHR78G5AM)](https://codecov.io/gh/unicef/hope)
 # UNICEF Humanitarian cash Operations and Programme Ecosystem (HOPE)
+
+
+
 [previously known as Humanitarian Cash Transfer (HCT) Management Information System (MIS)]
 
-#### [Documentation](https://unicef.github.io/hope-documentation/)
+## Documentation
+#### [Click here to see the complete documentation](https://unicef.github.io/hope-documentation/)
 
 ## Overview
 
