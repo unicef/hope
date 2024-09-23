@@ -116,7 +116,13 @@ class SplitBusinessAreaFilter(SimpleListFilter):
 
 @admin.register(FundsCommitment)
 class FundsCommitmentAdmin(HOPEModelAdminBase):
-    list_display = ("rec_serial_number", "business_area", "funds_commitment_number", "posting_date")
+    list_display = (
+        "rec_serial_number",
+        "business_area",
+        "funds_commitment_item",
+        "funds_commitment_number",
+        "posting_date",
+    )
     list_filter = (
         SplitBusinessAreaFilter,
         "business_area",
