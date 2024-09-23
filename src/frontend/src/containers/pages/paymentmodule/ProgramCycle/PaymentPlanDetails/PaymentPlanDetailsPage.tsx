@@ -22,6 +22,7 @@ import { PaymentPlanDetailsResults } from '@components/paymentmodule/PaymentPlan
 import { PaymentsTable } from '@containers/tables/paymentmodule/PaymentsTable';
 import { ReconciliationSummary } from '@components/paymentmodule/PaymentPlanDetails/ReconciliationSummary';
 import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityLogTable';
+import { SupportingDocumentsSection } from '@components/paymentmodule/PaymentPlanDetails/SupportingDocumentsSection/SupportingDocumentsSection';
 
 export const PaymentPlanDetailsPage = (): React.ReactElement => {
   const { paymentPlanId } = useParams();
@@ -88,6 +89,7 @@ export const PaymentPlanDetailsPage = (): React.ReactElement => {
             <FspSection baseUrl={baseUrl} paymentPlan={paymentPlan} />
           )}
           <ExcludeSection paymentPlan={paymentPlan} />
+          <SupportingDocumentsSection paymentPlan={paymentPlan} />
           <PaymentPlanDetailsResults paymentPlan={paymentPlan} />
           <PaymentsTable
             businessArea={businessArea}
