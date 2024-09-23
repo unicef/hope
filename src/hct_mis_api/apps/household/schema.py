@@ -309,16 +309,16 @@ class IndividualNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTyp
     def resolve_phone_no_alternative_valid(parent, info: Any) -> Boolean:
         return parent.phone_no_alternative_valid
 
-    def resolve_delivery_mechanisms_data(self, info) -> QuerySet[DeliveryMechanismData]:
+    def resolve_delivery_mechanisms_data(parent, info: Any) -> QuerySet[DeliveryMechanismData]:
         program_id = get_program_id_from_headers(info.context.headers)
         if not info.context.user.has_permission(
             Permissions.POPULATION_VIEW_INDIVIDUAL_DELIVERY_MECHANISMS_SECTION.value,
-            self.business_area,
+            parent.business_area,
             program_id,
         ):
-            return self.delivery_mechanisms_data.none()
+            return parent.delivery_mechanisms_data.none()
 
-        return self.delivery_mechanisms_data.all()
+        return parent.delivery_mechanisms_data.all()
 
     @classmethod
     def check_node_permission(cls, info: Any, object_instance: Individual) -> None:
