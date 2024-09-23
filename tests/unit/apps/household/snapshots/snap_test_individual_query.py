@@ -812,6 +812,44 @@ snapshots['TestIndividualQuery::test_query_individuals_by_search_without_search_
     ]
 }
 
+snapshots['TestIndividualWithDeliveryMechanismsDataQuery::test_individual_query_delivery_mechanisms_data_0_with_permissions 1'] = {
+    'data': {
+        'individual': {
+            'birthDate': '1943-07-30',
+            'deliveryMechanismsData': [
+                {
+                    'individualTabData': '{"card_number__atm_card": "123", "card_expiry_date__atm_card": "2022-01-01", "name_of_cardholder__atm_card": "Marek"}',
+                    'isValid': True,
+                    'name': 'ATM Card'
+                },
+                {
+                    'individualTabData': '{"delivery_phone_number__mobile_money": "123456789", "provider__mobile_money": "Provider", "service_provider_code__mobile_money": "ABC"}',
+                    'isValid': False,
+                    'name': 'Mobile Money'
+                }
+            ],
+            'familyName': 'Butler',
+            'fullName': 'Benjamin Butler',
+            'givenName': 'Benjamin',
+            'phoneNo': '(953)682-4596'
+        }
+    }
+}
+
+snapshots['TestIndividualWithDeliveryMechanismsDataQuery::test_individual_query_delivery_mechanisms_data_1_without_permissions 1'] = {
+    'data': {
+        'individual': {
+            'birthDate': '1943-07-30',
+            'deliveryMechanismsData': [
+            ],
+            'familyName': 'Butler',
+            'fullName': 'Benjamin Butler',
+            'givenName': 'Benjamin',
+            'phoneNo': '(953)682-4596'
+        }
+    }
+}
+
 snapshots['TestIndividualWithFlexFieldsQuery::test_individual_query_single_with_flex_fields 1'] = {
     'data': {
         'individual': {
