@@ -13,4 +13,5 @@ class XlsxPaymentPlanBaseService:
         "entitlement_quantity",
         "entitlement_quantity_usd",
         "status",
+        "national_id",
     )
