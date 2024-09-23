@@ -309,7 +309,7 @@ class IndividualNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTyp
     def resolve_phone_no_alternative_valid(parent, info: Any) -> Boolean:
         return parent.phone_no_alternative_valid
 
-    def resolve_delivery_mechanisms_data(self, info):
+    def resolve_delivery_mechanisms_data(self, info) -> QuerySet[DeliveryMechanismData]:
         program_id = get_program_id_from_headers(info.context.headers)
         if not info.context.user.has_permission(
             Permissions.POPULATION_VIEW_INDIVIDUAL_DELIVERY_MECHANISMS_SECTION.value,
