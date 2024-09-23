@@ -257,6 +257,11 @@ export const PAYMENT_PLAN_QUERY = gql`
         unicefId
       }
       unsuccessfulPaymentsCount
+      supportingDocuments {
+        id
+        title
+        file
+      }
     }
   }
 `;

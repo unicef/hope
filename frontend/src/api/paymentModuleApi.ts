@@ -38,3 +38,38 @@ export const bulkActionPaymentPlansManagerial = async (
   );
   return response.data;
 };
+export const deleteSupportingDocument = async (
+  businessArea: string,
+  programId: string,
+  paymentPlanId: string,
+  fileId: string,
+) => {
+  try {
+    await api.delete(
+      `/api/rest/${businessArea}/programs/${programId}/payment-plans/${paymentPlanId}/supporting-documents/${fileId}/`,
+    );
+    return { success: true };
+  } catch (error) {
+    throw new Error(`Failed to delete supporting document: ${error.message}`);
+  }
+};
+
+export const uploadSupportingDocument = async (
+  businessArea: string,
+  programId: string,
+  paymentPlanId: string,
+  file: File,
+) => {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  try {
+    await api.post(
+      `/api/rest/${businessArea}/programs/${programId}/payment-plans/${paymentPlanId}/supporting-documents-upload/`,
+      formData,
+    );
+    return { success: true };
+  } catch (error) {
+    throw new Error(`Failed to upload supporting document: ${error.message}`);
+  }
+};

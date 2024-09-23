@@ -899,5 +899,7 @@
   "Only Empty Values": "Only Empty Values",
   "Open Biometrics Results": "Open Biometrics Results",
   "Algorithm similarity score:": "Algorithm similarity score:",
-  "Face images matching suggests:": "Face images matching suggests:"
+  "Face images matching suggests:": "Face images matching suggests:",
+  "Select Files to Upload": "Select Files to Upload",
+  "The system accepts the following file extensions: XLSX, PDF, images (jpg, jpeg, png). File size must be ≤ 10MB.": "The system accepts the following file extensions: XLSX, PDF, images (jpg, jpeg, png). File size must be ≤ 10MB."
 }
