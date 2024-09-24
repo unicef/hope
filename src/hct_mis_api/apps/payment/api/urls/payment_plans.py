@@ -14,6 +14,6 @@ urlpatterns = [
         name="supporting_documents_upload",
     ),
     path(
-        "supporting-documents/<int:file_id>/", PaymentPlanSupportingDocumentView.as_view(), name="supporting_documents"
+        "supporting-documents/<str:file_id>/", PaymentPlanSupportingDocumentView.as_view(), name="supporting_documents"
     ),
 ]

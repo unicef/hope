@@ -1,6 +1,7 @@
 import base64
+from io import BytesIO
 
-from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.files.uploadedfile import SimpleUploadedFile, InMemoryUploadedFile
 from django.http import FileResponse
 from django.test import TestCase
 from django.urls import reverse
@@ -67,17 +68,29 @@ class PaymentPlanSupportingDocumentSerializerTests(TestCase):
         self.assertIn("non_field_errors", serializer.errors)
         self.assertEqual(serializer.errors["non_field_errors"][0], "Payment plan must be within status OPEN or LOCKED.")
 
-    # TODO: have to fix it
-    # def test_validate_file_limit_failure(self) -> None:
-    #     # mock the document count limit
-    #     with patch.object(self.payment_plan.documents, "count", return_value=PaymentPlanSupportingDocument.FILE_LIMIT):
-    #         serializer = PaymentPlanSupportingDocumentSerializer(data={"file": self.file, "title": "test"}, context=self.context)
-    #         self.assertFalse(serializer.is_valid())
-    #         self.assertIn("non_field_errors", serializer.errors)
-    #         self.assertEqual(
-    #             serializer.errors["non_field_errors"][0],
-    #             f"Payment plan already has the maximum of {PaymentPlanSupportingDocument.FILE_LIMIT} supporting documents.",
-    #         )
+    def test_validate_file_limit_failure(self) -> None:
+        # create 10 documents
+        for _ in range(11):
+            PaymentPlanSupportingDocument.objects.create(
+                payment_plan=self.payment_plan,
+                title="Test 1",
+                file=InMemoryUploadedFile(
+                    name="Test123.jpg",
+                    file=BytesIO(b"abc"),
+                    charset=None,
+                    field_name="0",
+                    size=10,
+                    content_type="image/jpeg",
+                ),
+            )
+
+        serializer = PaymentPlanSupportingDocumentSerializer(data={"file": self.file, "title": "test"}, context=self.context)
+        self.assertFalse(serializer.is_valid())
+        self.assertIn("non_field_errors", serializer.errors)
+        self.assertEqual(
+            serializer.errors["non_field_errors"][0],
+            f"Payment plan already has the maximum of {PaymentPlanSupportingDocument.FILE_LIMIT} supporting documents.",
+        )
 
 
 class PaymentPlanSupportingDocumentUploadViewTests(TestCase):
@@ -147,6 +160,7 @@ class PaymentPlanSupportingDocumentViewTests(TestCase):
         )
         program_id_base64 = base64.b64encode(f"ProgramNode:{str(cls.payment_plan.program.id)}".encode()).decode()
         payment_plan_id_base64 = base64.b64encode(f"PaymentPlanNode:{str(cls.payment_plan.id)}".encode()).decode()
+        supporting_document_id_base64 = base64.b64encode(f"PaymentPlanSupportingDocumentNode:{str(cls.document.id)}".encode()).decode()
 
         cls.url = reverse(
             "api:payment-plan:supporting_documents",
@@ -154,7 +168,7 @@ class PaymentPlanSupportingDocumentViewTests(TestCase):
                 "business_area": "afghanistan",
                 "program_id": program_id_base64,
                 "payment_plan_id": payment_plan_id_base64,
-                "file_id": int(cls.document.id),
+                "file_id": supporting_document_id_base64,
             },
         )
 

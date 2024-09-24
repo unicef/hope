@@ -194,7 +194,9 @@ class PaymentPlanSupportingDocumentView(APIView):
         self.permission_classes = [PaymentPlanSupportingDocumentDeletePermission]
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
 
-        document = get_object_or_404(PaymentPlanSupportingDocument, id=file_id, payment_plan=payment_plan)
+        document = get_object_or_404(
+            PaymentPlanSupportingDocument, id=decode_id_string(file_id), payment_plan=payment_plan
+        )
         document.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -204,6 +206,8 @@ class PaymentPlanSupportingDocumentView(APIView):
         self.permission_classes = [PaymentPlanSupportingDocumentDownloadPermission]
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
 
-        document = get_object_or_404(PaymentPlanSupportingDocument, id=file_id, payment_plan=payment_plan)
+        document = get_object_or_404(
+            PaymentPlanSupportingDocument, id=decode_id_string(file_id), payment_plan=payment_plan
+        )
 
         return FileResponse(document.file.open(), as_attachment=True, filename=document.file.name)
