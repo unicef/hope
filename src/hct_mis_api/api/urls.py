@@ -42,7 +42,7 @@ urlpatterns = [
         "<slug:business_area>/",
         include(
             [
-                path("payments/", include("hct_mis_api.apps.payment.api.urls", namespace="payments")),
+                path("payments/", include("hct_mis_api.apps.payment.api.urls.payments", namespace="payments")),
                 path("program/", endpoints.rdi.ProgramViewSet.as_view({"get": "list"}), name="program-list"),
                 path(
                     "program/create/",
@@ -70,6 +70,10 @@ urlpatterns = [
                     "programs/<str:program_id>/",
                     include(
                         [
+                            path(
+                                "payment-plans/<str:payment_plan_id>/",
+                                include("hct_mis_api.apps.payment.api.urls.payment_plans", namespace="payment-plan"),
+                            ),
                             path(
                                 "periodic-data-update/",
                                 include(

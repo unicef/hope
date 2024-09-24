@@ -34,7 +34,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentRecord,
     PaymentVerification,
     PaymentVerificationPlan,
-    ServiceProvider,
+    ServiceProvider, PaymentPlanSupportingDocument,
 )
 from hct_mis_api.apps.payment.services.create_cash_plan_from_reconciliation import (
     CreateCashPlanReconciliationService,
@@ -476,3 +476,8 @@ class DeliveryMechanismDataAdmin(HOPEModelAdminBase):
 @admin.register(DeliveryMechanism)
 class DeliveryMechanismAdmin(HOPEModelAdminBase):
     list_display = ("code", "name", "is_active", "transfer_type")
+
+
+@admin.register(PaymentPlanSupportingDocument)
+class PaymentPlanSupportingDocumentAdmin(HOPEModelAdminBase):
+    list_display = ("title", "created_by", "uploaded_at")

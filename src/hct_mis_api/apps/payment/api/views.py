@@ -13,13 +13,15 @@ from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.generics import get_object_or_404
 from rest_framework.request import Request
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 from rest_framework_extensions.cache.decorators import cache_response
 
 from hct_mis_api.api.caches import etag_decorator
 from hct_mis_api.apps.account.api.permissions import (
     PaymentViewListManagerialPermission,
-    PMViewListPermission,
+    PMViewListPermission, PaymentPlanSupportingDocumentUploadPermission, PaymentPlanSupportingDocumentDeletePermission,
+    PaymentPlanSupportingDocumentDownloadPermission,
 )
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.activity_log.models import log_create
@@ -31,9 +33,9 @@ from hct_mis_api.apps.payment.api.caches import PaymentPlanKeyConstructor
 from hct_mis_api.apps.payment.api.filters import PaymentPlanFilter
 from hct_mis_api.apps.payment.api.serializers import (
     PaymentPlanBulkActionSerializer,
-    PaymentPlanSerializer,
+    PaymentPlanSerializer, PaymentPlanSupportingDocumentSerializer,
 )
-from hct_mis_api.apps.payment.models import PaymentPlan
+from hct_mis_api.apps.payment.models import PaymentPlan, PaymentPlanSupportingDocument
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 
 logger = logging.getLogger(__name__)
@@ -163,3 +165,45 @@ class PaymentPlanManagerialViewSet(BusinessAreaMixin, PaymentPlanMixin, mixins.L
             PaymentPlan.Action.REVIEW.name: Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW.name,
         }
         return action_to_permissions_map.get(action_name)
+
+
+class PaymentPlanSupportingDocumentUploadView(APIView):
+    permission_classes = [PaymentPlanSupportingDocumentUploadPermission]
+
+    def post(self, request: Request, business_area: str, program_id: str, payment_plan_id: str) -> Response:
+        payment_decode_id = decode_id_string(payment_plan_id)
+        payment_plan = get_object_or_404(PaymentPlan, id=payment_decode_id)
+
+        serializer = PaymentPlanSupportingDocumentSerializer(data=request.data, context={"payment_plan": payment_plan})
+        if serializer.is_valid():
+            serializer.save(payment_plan=payment_plan)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class FileResponse:
+    pass
+
+
+class PaymentPlanSupportingDocumentView(APIView):
+    permission_classes = []
+
+    def delete(
+        self, request: Request, business_area: str, program_id: str, payment_plan_id: str, file_id: str
+    ) -> Response:
+        self.permission_classes = [PaymentPlanSupportingDocumentDeletePermission]
+        payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
+
+        document = get_object_or_404(PaymentPlanSupportingDocument, id=file_id, payment_plan=payment_plan)
+        document.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def get(
+        self, request: Request, business_area: str, program_id: str, payment_plan_id: str, file_id: str
+    ) -> FileResponse:
+        self.permission_classes = [PaymentPlanSupportingDocumentDownloadPermission]
+        payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
+
+        document = get_object_or_404(PaymentPlanSupportingDocument, id=file_id, payment_plan=payment_plan)
+
+        return FileResponse(document.file.open(), as_attachment=True, filename=document.file.name)
