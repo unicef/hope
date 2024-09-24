@@ -18,6 +18,7 @@ import {
   Box,
   Grid,
   DialogContent,
+  FormHelperText,
 } from '@mui/material';
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
@@ -26,9 +27,14 @@ import { useTranslation } from 'react-i18next';
 import { PaymentPlanQuery } from '@generated/graphql';
 import { DropzoneField } from '@components/core/DropzoneField';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { uploadSupportingDocument } from '@api/paymentModuleApi';
+import {
+  deleteSupportingDocument,
+  uploadSupportingDocument,
+} from '@api/paymentModuleApi';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useConfirmation } from '@components/core/ConfirmationDialog';
+import { GreyBox } from '@components/core/GreyBox';
 
 interface SupportingDocumentsSectionProps {
   initialOpen?: boolean;
@@ -40,6 +46,7 @@ export const SupportingDocumentsSection = ({
   paymentPlan,
 }: SupportingDocumentsSectionProps): React.ReactElement => {
   const permissions = usePermissions();
+  const confirm = useConfirmation();
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const { businessArea, programId } = useBaseUrl();
@@ -68,7 +75,13 @@ export const SupportingDocumentsSection = ({
 
   const uploadMutation = useMutation({
     mutationFn: (file: File) =>
-      uploadSupportingDocument(businessArea, programId, paymentPlan.id, file),
+      uploadSupportingDocument(
+        businessArea,
+        programId,
+        paymentPlan.id,
+        file,
+        title,
+      ),
     onSuccess: () => {
       setDocuments([
         ...documents,
@@ -125,9 +138,31 @@ export const SupportingDocumentsSection = ({
     });
   };
 
-  const handleRemove = (id) => {
-    setDocuments(documents.filter((doc) => doc.id !== id));
+  const handleRemove = async (
+    _businessArea,
+    _programId,
+    paymentPlanId,
+    fileId,
+  ) => {
+    try {
+      await deleteSupportingDocument(
+        _businessArea,
+        _programId,
+        paymentPlanId,
+        fileId,
+      );
+      setDocuments(documents.filter((doc) => doc.id !== fileId));
+    } catch (error) {
+      setErrorMessage(
+        t(`Failed to delete supporting document: ${error.message}`),
+      );
+    }
   };
+
+  const confirmationModalTitle = t('Deleting Supporting Document');
+  const confirmationText = t(
+    'Are you sure you want to delete this file? This action cannot be reversed.',
+  );
 
   const handleDownload = (file) => {
     const url = URL.createObjectURL(file);
@@ -179,27 +214,51 @@ export const SupportingDocumentsSection = ({
       )}
 
       <Collapse in={isExpanded}>
-        {documents.map((doc) => (
-          <div key={doc.id} data-cy="document-item">
-            <Typography>{doc.title}</Typography>
-            {canDownloadFile && (
-              <IconButton
-                onClick={() => handleDownload(doc.file)}
-                data-cy="download-button"
-              >
-                <DownloadIcon />
-              </IconButton>
-            )}
-            {canRemoveFile && (
-              <IconButton
-                onClick={() => handleRemove(doc.id)}
-                data-cy="delete-button"
-              >
-                <DeleteIcon />
-              </IconButton>
-            )}
-          </div>
-        ))}
+        <Grid container spacing={3}>
+          {documents.map((doc) => (
+            <Grid key={doc.id} item xs={3}>
+              <GreyBox p={3} key={doc.id} data-cy="document-item">
+                <Box
+                  display="flex"
+                  justifyContent="space-between"
+                  alignItems="center"
+                >
+                  <Typography>{doc.title}</Typography>
+                  <Box>
+                    {canDownloadFile && (
+                      <IconButton
+                        onClick={() => handleDownload(doc.file)}
+                        data-cy="download-button"
+                      >
+                        <DownloadIcon />
+                      </IconButton>
+                    )}
+                    {canRemoveFile && (
+                      <IconButton
+                        onClick={() =>
+                          confirm({
+                            title: confirmationModalTitle,
+                            content: confirmationText,
+                            type: 'error',
+                          }).then(() =>
+                            handleRemove(
+                              businessArea,
+                              programId,
+                              paymentPlan.id,
+                              doc.id,
+                            ),
+                          )
+                        }
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    )}
+                  </Box>
+                </Box>
+              </GreyBox>
+            </Grid>
+          ))}
+        </Grid>
       </Collapse>
       {canUploadFile && (
         <Dialog
@@ -240,7 +299,7 @@ export const SupportingDocumentsSection = ({
                 }}
                 data-cy="dropzone-field"
               />
-              {errorMessage}
+              <FormHelperText error>{errorMessage}</FormHelperText>
               <Grid container>
                 <Grid item xs={12}>
                   <TextField
