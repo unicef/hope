@@ -3,6 +3,7 @@ from typing import Any, Optional
 
 from django.db import transaction
 from django.db.models import QuerySet
+from django.http import FileResponse
 
 from constance import config
 from django_filters import rest_framework as filters
@@ -19,9 +20,11 @@ from rest_framework_extensions.cache.decorators import cache_response
 
 from hct_mis_api.api.caches import etag_decorator
 from hct_mis_api.apps.account.api.permissions import (
-    PaymentViewListManagerialPermission,
-    PMViewListPermission, PaymentPlanSupportingDocumentUploadPermission, PaymentPlanSupportingDocumentDeletePermission,
+    PaymentPlanSupportingDocumentDeletePermission,
     PaymentPlanSupportingDocumentDownloadPermission,
+    PaymentPlanSupportingDocumentUploadPermission,
+    PaymentViewListManagerialPermission,
+    PMViewListPermission,
 )
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.activity_log.models import log_create
@@ -33,7 +36,8 @@ from hct_mis_api.apps.payment.api.caches import PaymentPlanKeyConstructor
 from hct_mis_api.apps.payment.api.filters import PaymentPlanFilter
 from hct_mis_api.apps.payment.api.serializers import (
     PaymentPlanBulkActionSerializer,
-    PaymentPlanSerializer, PaymentPlanSupportingDocumentSerializer,
+    PaymentPlanSerializer,
+    PaymentPlanSupportingDocumentSerializer,
 )
 from hct_mis_api.apps.payment.models import PaymentPlan, PaymentPlanSupportingDocument
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
@@ -179,10 +183,6 @@ class PaymentPlanSupportingDocumentUploadView(APIView):
             serializer.save(payment_plan=payment_plan)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class FileResponse:
-    pass
 
 
 class PaymentPlanSupportingDocumentView(APIView):
