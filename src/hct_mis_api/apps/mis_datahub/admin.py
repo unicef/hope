@@ -128,7 +128,22 @@ class IndividualAdmin(HUBAdminMixin):
 
 @admin.register(FundsCommitment)
 class FundsCommitmentAdmin(HUBAdminMixin):
-    filters = (BusinessAreaFilter,)
+    list_display = (
+        "rec_serial_number",
+        "business_area",
+        "funds_commitment_item",
+        "funds_commitment_number",
+        "posting_date",
+    )
+    list_filter = (
+        BusinessAreaFilter,
+        "business_area",
+        "posting_date",
+        "mis_sync_date",
+        "ca_sync_date",
+        ("business_area", ValueFilter),
+    )
+    date_hierarchy = "create_date"
     search_fields = ("rec_serial_number", "vendor_id", "wbs_element", "funds_commitment_number")
 
 
