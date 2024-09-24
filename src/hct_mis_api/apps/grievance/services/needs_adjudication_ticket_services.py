@@ -1,3 +1,4 @@
+import logging
 from typing import TYPE_CHECKING, Dict, List, Optional, Sequence, Tuple
 
 from django.contrib.auth.models import AbstractUser
@@ -41,6 +42,9 @@ from hct_mis_api.apps.utils.elasticsearch_utils import (
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.program.models import Program
+
+
+logger = logging.getLogger(__name__)
 
 
 def _clear_deduplication_individuals_fields(individuals: Sequence[Individual]) -> None:
@@ -96,6 +100,22 @@ def close_needs_adjudication_new_ticket(ticket_details: TicketNeedsAdjudicationD
         for individual_to_distinct in distinct_individuals:
             mark_as_distinct_individual(individual_to_distinct, user, ticket_details.ticket.programs.all())
         _clear_deduplication_individuals_fields(distinct_individuals)
+
+    if ticket_details.ticket.issue_type == GrievanceTicket.ISSUE_TYPE_BIOMETRICS_SIMILARITY:
+        # both individuals are distinct, report false positive
+        if not duplicate_individuals and distinct_individuals:
+            from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import (
+                BiometricDeduplicationService,
+            )
+
+            ids = [str(individual.id) for individual in distinct_individuals]
+            service = BiometricDeduplicationService()
+            try:
+                service.report_false_positive_duplicate(
+                    ids[0], ids[1], ticket_details.ticket.registration_data_import.program.deduplication_set_id
+                )
+            except service.api.API_EXCEPTION_CLASS:
+                logger.exception("Failed to report false positive duplicate to Deduplication Engine")
 
 
 def close_needs_adjudication_ticket_service(grievance_ticket: GrievanceTicket, user: AbstractUser) -> None:

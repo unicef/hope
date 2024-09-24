@@ -16,7 +16,9 @@ from hct_mis_api.apps.registration_datahub.apis.deduplication_engine import (
     DeduplicationEngineAPI,
     DeduplicationImage,
     DeduplicationSet,
+    DeduplicationSetConfig,
     DeduplicationSetData,
+    IgnoredKeysPair,
     SimilarityPair,
 )
 
@@ -35,6 +37,9 @@ class BiometricDeduplicationService:
             reference_pk=str(program.id),
             notification_url=f"https://{settings.DOMAIN_NAME}/api/rest/{program.business_area.slug}/programs/{str(program.id)}/registration-data/webhookdeduplication/",
             # notification_url=reverse("registration-data:webhook_deduplication", kwargs={"program_id": str(program.id), "business_area": program.business_area.slug}), # TODO MB why reverse is not working
+            config=DeduplicationSetConfig(
+                face_distance_threshold=program.business_area.biometric_deduplication_threshold / 100
+            ),
         )
         response_data = self.api.create_deduplication_set(deduplication_set)
         program.deduplication_set_id = uuid.UUID(response_data["id"])
@@ -45,7 +50,7 @@ class BiometricDeduplicationService:
 
     def get_deduplication_set(self, deduplication_set_id: str) -> DeduplicationSetData:
         response_data = self.api.get_deduplication_set(deduplication_set_id)
-        return DeduplicationSetData(state=response_data["state"], error=response_data["error"])
+        return DeduplicationSetData(state=response_data["state"])
 
     def upload_individuals(self, deduplication_set_id: str, rdi: RegistrationDataImport) -> None:
         individuals = (
@@ -316,3 +321,9 @@ class BiometricDeduplicationService:
                 f"Failed to process deduplication set {deduplication_set_id},"
                 f" dedupe engine state: {deduplication_set_data.state} error: {deduplication_set_data.error}"
             )
+
+    def report_false_positive_duplicate(
+        self, individual1_id: str, individual2_id: str, deduplication_set_id: str
+    ) -> None:
+        false_positive_pair = IgnoredKeysPair(first_reference_pk=individual1_id, second_reference_pk=individual2_id)
+        self.api.report_false_positive_duplicate(false_positive_pair, deduplication_set_id)
