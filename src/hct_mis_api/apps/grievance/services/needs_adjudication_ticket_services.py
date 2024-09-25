@@ -189,7 +189,7 @@ def create_grievance_ticket_with_details(
         "possible_duplicate": possible_duplicate.get_deduplication_golden_record(),
     }
     if dedup_engine_similarity_pair:
-        extra_data["dedup_engine_similarity_pair"] = dedup_engine_similarity_pair.serialize_for_ticket()
+        extra_data["dedup_engine_similarity_pair"] = dedup_engine_similarity_pair.serialize_for_ticket()  # type: ignore
     score_min, score_max = _get_min_max_score(golden_records)
     ticket_details = TicketNeedsAdjudicationDetails.objects.create(
         ticket=ticket,
