@@ -3330,6 +3330,7 @@ type PaymentPlanNode implements Node {
   deliveryMechanisms: [DeliveryMechanismPerPaymentPlanNode]
   paymentItems(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   approvalProcess(offset: Int, before: String, after: String, first: Int, last: Int): ApprovalProcessNodeConnection!
+  documents(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanSupportingDocumentNodeConnection!
   adminUrl: String
   currencyName: String
   hasPaymentListExportFile: Boolean
@@ -3352,6 +3353,7 @@ type PaymentPlanNode implements Node {
   unsuccessfulPaymentsCount: Int
   canSendToPaymentGateway: Boolean
   canSplit: Boolean
+  supportingDocuments: [PaymentPlanSupportingDocumentNode]
 }
 
 type PaymentPlanNodeConnection {
@@ -3376,6 +3378,25 @@ enum PaymentPlanStatus {
   IN_REVIEW
   ACCEPTED
   FINISHED
+}
+
+type PaymentPlanSupportingDocumentNode implements Node {
+  id: ID!
+  paymentPlan: PaymentPlanNode!
+  title: String!
+  file: String!
+  uploadedAt: DateTime!
+  createdBy: UserNode
+}
+
+type PaymentPlanSupportingDocumentNodeConnection {
+  pageInfo: PageInfo!
+  edges: [PaymentPlanSupportingDocumentNodeEdge]!
+}
+
+type PaymentPlanSupportingDocumentNodeEdge {
+  node: PaymentPlanSupportingDocumentNode
+  cursor: String!
 }
 
 type PaymentRecordAndPaymentNode {
