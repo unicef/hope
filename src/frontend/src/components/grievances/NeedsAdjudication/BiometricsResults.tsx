@@ -19,7 +19,7 @@ import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 
 export interface Individual {
-  __typename?: 'IndividualNode';
+  __typename?: 'DeduplicationEngineSimilarityPairIndividualNode';
   unicefId?: string;
   fullName: string;
   photo?: string;
