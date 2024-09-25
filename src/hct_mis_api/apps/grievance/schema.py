@@ -398,7 +398,7 @@ class TicketHouseholdDataUpdateDetailsNode(DjangoObjectType):
 class TicketNeedsAdjudicationDetailsExtraDataNode(graphene.ObjectType):
     golden_records = graphene.List(DeduplicationResultNode)
     possible_duplicate = graphene.List(DeduplicationResultNode)
-    dedup_engine_similarity_pairs = graphene.List(DeduplicationEngineSimilarityPairNode)
+    dedup_engine_similarity_pair = graphene.Field(DeduplicationEngineSimilarityPairNode)
 
     def resolve_golden_records(self, info: Any) -> List[Dict]:
         return encode_ids(self.golden_records, "Individual", "hit_id")

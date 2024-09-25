@@ -48,6 +48,6 @@ class DeduplicationEngineSimilarityPairIndividualNode(graphene.ObjectType):
 class DeduplicationEngineSimilarityPairNode(BaseNodePermissionMixin, graphene.ObjectType):
     permission_classes = (hopePermissionClass(Permissions.GRIEVANCES_VIEW_BIOMETRIC_RESULTS),)
 
-    individual1 = DeduplicationEngineSimilarityPairIndividualNode()
-    individual2 = DeduplicationEngineSimilarityPairIndividualNode()
+    individual1 = graphene.Field(DeduplicationEngineSimilarityPairIndividualNode)
+    individual2 = graphene.Field(DeduplicationEngineSimilarityPairIndividualNode)
     similarity_score = graphene.String()

@@ -104,14 +104,16 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
                 selectedDuplicates {
                   unicefId
                 }
-                dedupEngineSimilarityPair {
-                  individual1 {
-                    fullName
-                  }
-                  individual2 {
-                    fullName
-                  }
-                  similarityScore
+                extraData{
+                    dedupEngineSimilarityPair {
+                      individual1 {
+                        fullName
+                      }
+                      individual2 {
+                        fullName
+                      }
+                      similarityScore
+                    }
                 }
               }
             }

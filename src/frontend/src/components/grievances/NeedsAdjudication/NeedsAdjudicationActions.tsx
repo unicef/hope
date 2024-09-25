@@ -52,7 +52,7 @@ export const NeedsAdjudicationActions: React.FC<
   const { isActiveProgram } = useProgramContext();
   const actionsDisabled =
     !isTicketForApproval || !isActiveProgram || !selectedIndividualIds.length;
-  const { dedupEngineSimilarityPair } = ticket.needsAdjudicationTicketDetails;
+  const { dedupEngineSimilarityPair } = ticket.needsAdjudicationTicketDetails.extraData;
 
   return (
     <Box
