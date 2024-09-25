@@ -35,6 +35,7 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useConfirmation } from '@components/core/ConfirmationDialog';
 import { GreyBox } from '@components/core/GreyBox';
+import { BlueText } from '@components/grievances/LookUps/LookUpStyles';
 
 interface SupportingDocumentsSectionProps {
   initialOpen?: boolean;
@@ -65,10 +66,12 @@ export const SupportingDocumentsSection = ({
     hasPermissions(PERMISSIONS.PM_UPLOAD_SUPPORTING_DOCUMENT, permissions) &&
     (paymentPlan.status === PaymentPlanStatus.Locked ||
       paymentPlan.status === PaymentPlanStatus.Open);
-  const canRemoveFile = hasPermissions(
-    PERMISSIONS.PM_DELETE_SUPPORTING_DOCUMENT,
-    permissions,
-  );
+
+  const canRemoveFile =
+    hasPermissions(PERMISSIONS.PM_DELETE_SUPPORTING_DOCUMENT, permissions) &&
+    (paymentPlan.status === PaymentPlanStatus.Locked ||
+      paymentPlan.status === PaymentPlanStatus.Open);
+
   const canDownloadFile = hasPermissions(
     PERMISSIONS.PM_DOWNLOAD_SUPPORTING_DOCUMENT,
     permissions,
@@ -237,7 +240,10 @@ export const SupportingDocumentsSection = ({
                     justifyContent="space-between"
                     alignItems="center"
                   >
-                    <Typography>{doc.title}</Typography>
+                    <Box display="flex" flexDirection="column">
+                      <BlueText>{doc.title}</BlueText>
+                      <BlueText>{doc.file}</BlueText>
+                    </Box>
                     <Box>
                       {canDownloadFile && (
                         <IconButton
@@ -283,7 +289,7 @@ export const SupportingDocumentsSection = ({
           aria-labelledby="form-dialog-title"
         >
           <DialogTitleWrapper data-cy="dialog-import">
-            <DialogTitle>{t('Select Files to Upload')}</DialogTitle>
+            <DialogTitle>{t('Select File to Upload')}</DialogTitle>
           </DialogTitleWrapper>
           <DialogContent>
             <Box pb={2}>
