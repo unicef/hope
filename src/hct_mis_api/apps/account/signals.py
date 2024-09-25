@@ -7,7 +7,6 @@ from django.utils import timezone
 
 from hct_mis_api.apps.account.models import Partner, Role, User, UserRole
 from hct_mis_api.apps.core.models import BusinessArea, BusinessAreaPartnerThrough
-from hct_mis_api.apps.program.models import Program
 
 
 @receiver(post_save, sender=UserRole)
