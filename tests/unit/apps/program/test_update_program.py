@@ -912,7 +912,6 @@ class TestUpdateProgram(APITestCase):
         self.assertEqual(self.program.status, Program.ACTIVE)
         self.assertEqual(self.program.cycles.count(), 1)
         program_cycle = self.program.cycles.first()
-        program_cycle.start_date = self.program.start_date
         program_cycle.status = ProgramCycle.ACTIVE
         program_cycle.save()
         # has active cycle

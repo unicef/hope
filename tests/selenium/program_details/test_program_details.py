@@ -266,7 +266,7 @@ class TestSmokeProgrammeDetails:
         assert program.administrative_areas_of_implementation in pageProgrammeDetails.getLabelAdministrativeAreas().text
         assert program.description in pageProgrammeDetails.getLabelDescription().text
         assert "Yes" if program.cash_plus else "No" in pageProgrammeDetails.getLabelCashPlus().text
-        assert "Only selected partners within the business area" in pageProgrammeDetails.getLabelPartnerAccess().text
+        assert "Only Selected Partners within the business area" in pageProgrammeDetails.getLabelPartnerAccess().text
         assert "0" in pageProgrammeDetails.getLabelProgramSize().text
 
     def test_edit_programme_from_details(
