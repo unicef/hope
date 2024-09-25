@@ -46,7 +46,7 @@ pip-delete-this-directory.txt
 # Unit test / coverage reports
 htmlcov/
 .tox/
-.coverage
+.coveragep
 .coverage.*
 .cache
 nosetests.xml
@@ -91,6 +91,7 @@ celerybeat-schedule
 *.sage.py
 
 # Environments
+development_tools/.env
 .env
 .envrc
 .venv
