@@ -22,7 +22,6 @@ RUN apt-get update \
     libpq-dev \
     python3-psycopg2 \
     python3-gdal \
-    python3-dev \
     gdal-bin \
     libcairo2 \
     libcairo2-dev \
@@ -66,7 +65,7 @@ RUN pip install --upgrade pip &&\
     pdm config check_update false
 
 WORKDIR $PDM_PACKAGES
-COPY backend/pyproject.toml backend/pdm.lock ./
+COPY src/pyproject.toml src/pdm.lock ./
 RUN pdm sync --prod --no-editable --no-self --no-isolation
 
 # Dev image
@@ -74,6 +73,7 @@ FROM builder AS dev
 
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
+    python3-dev \
     chromium-driver \
     chromium \
     ffmpeg \
@@ -86,7 +86,10 @@ RUN apt-get update \
 RUN pdm sync --no-editable --no-self --no-isolation
 
 WORKDIR $CODE
-COPY ./backend ./
+COPY ./src/ ./
+COPY ./tests /tests
+
+
 
 COPY ./docker/entrypoint.sh /bin/
 ENTRYPOINT ["entrypoint.sh"]
@@ -94,7 +97,7 @@ ENTRYPOINT ["entrypoint.sh"]
 ## Dist (backend only) image
 FROM base AS be-dist
 
-COPY --chown=hope:hope ./backend ./
+COPY ./src/ ./
 COPY --chown=hope:hope --from=builder $PDM_PACKAGES $PDM_PACKAGES
 COPY --chown=hope:hope --from=certs /data/psql-cert.crt /code/psql-cert.crt
 
@@ -108,10 +111,10 @@ ENTRYPOINT ["entrypoint.sh"]
 FROM node:18.19.0-buster-slim AS frontend-builder
 
 WORKDIR /fe-build
-COPY ./frontend/package.json ./frontend/yarn.lock ./
+COPY ./src/frontend/package.json ./src/frontend/yarn.lock ./
 # Network timeout is needed by the cross-platform build
 RUN yarn install --frozen-lockfile --network-timeout 600000
-COPY ./frontend ./
+COPY ./src/frontend ./
 RUN NODE_ENV="production" NODE_OPTIONS="--max-old-space-size=4096" yarn build
 
 

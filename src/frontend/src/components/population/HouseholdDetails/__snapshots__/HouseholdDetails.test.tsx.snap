@@ -1,0 +1,540 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`components/population/HouseholdDetails should render 1`] = `
+<div>
+  <div
+    class="sc-fLseNd ikoaob"
+  >
+    <div
+      class="sc-hLQSwg iuGfmc"
+    >
+      <h6
+        class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
+      >
+        Details
+      </h6>
+    </div>
+    <div
+      class="sc-bBkKde jJMthr"
+    >
+      <div
+        class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-3 css-acctgf-MuiGrid-root"
+      >
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+        >
+          <div>
+            <span
+              class="sc-guDLey RwNuC"
+              color="textSecondary"
+            >
+              Household Size
+            </span>
+            <div
+              data-cy="label-Household Size"
+            >
+              <span
+                class="sc-dmyCSP bGPBYf"
+                color="textSecondary"
+              >
+                4
+              </span>
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+        >
+          <div>
+            <span
+              class="sc-guDLey RwNuC"
+              color="textSecondary"
+            >
+              Residence Status
+            </span>
+            <div
+              data-cy="label-Residence Status"
+            >
+              <span
+                class="sc-dmyCSP bGPBYf"
+                color="textSecondary"
+              >
+                None
+              </span>
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+        >
+          <div>
+            <span
+              class="sc-guDLey RwNuC"
+              color="textSecondary"
+            >
+              Head of Household
+            </span>
+            <div
+              data-cy="label-Head of Household"
+            >
+              <span
+                class="sc-dmyCSP bGPBYf"
+                color="textSecondary"
+              >
+                <a
+                  class="sc-beySPh hDnmZE"
+                  href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/population/individuals/SW5kaXZpZHVhbE5vZGU6Y2MwMDAwMDAtMDAwMC0wMDAwLTAwMDAtMDAwMDAwMDAwMDAx"
+                >
+                  Jan Kowalski
+                </a>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+        >
+          <div>
+            <span
+              class="sc-guDLey RwNuC"
+              color="textSecondary"
+            >
+              FEMALE CHILD HEADED HOUSEHOLD
+            </span>
+            <div
+              data-cy="label-FEMALE CHILD HEADED HOUSEHOLD"
+            >
+              <span
+                class="sc-dmyCSP bGPBYf"
+                color="textSecondary"
+              >
+                No
+              </span>
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+        >
+          <div>
+            <span
+              class="sc-guDLey RwNuC"
+              color="textSecondary"
+            >
+              CHILD HEADED HOUSEHOLD
+            </span>
+            <div
+              data-cy="label-CHILD HEADED HOUSEHOLD"
+            >
+              <span
+                class="sc-dmyCSP bGPBYf"
+                color="textSecondary"
+              >
+                No
+              </span>
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+        >
+          <div>
+            <span
+              class="sc-guDLey RwNuC"
+              color="textSecondary"
+            >
+              Country
+            </span>
+            <div
+              data-cy="label-Country"
+            >
+              -
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+        >
+          <div>
+            <span
+              class="sc-guDLey RwNuC"
+              color="textSecondary"
+            >
+              Country of Origin
+            </span>
+            <div
+              data-cy="label-Country of Origin"
+            >
+              -
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+        >
+          <div>
+            <span
+              class="sc-guDLey RwNuC"
+              color="textSecondary"
+            >
+              Address
+            </span>
+            <div
+              data-cy="label-Address"
+            >
+              <span
+                class="sc-dmyCSP bGPBYf"
+                color="textSecondary"
+              >
+                Ohio
+              </span>
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+        >
+          <div>
+            <span
+              class="sc-guDLey RwNuC"
+              color="textSecondary"
+            >
+              Village
+            </span>
+            <div
+              data-cy="label-Village"
+            >
+              -
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+        >
+          <div>
+            <span
+              class="sc-guDLey RwNuC"
+              color="textSecondary"
+            >
+              Zip code
+            </span>
+            <div
+              data-cy="label-Zip code"
+            >
+              -
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+        >
+          <div>
+            <span
+              class="sc-guDLey RwNuC"
+              color="textSecondary"
+            >
+              Administrative Level 1
+            </span>
+            <div
+              data-cy="label-Administrative Level 1"
+            >
+              -
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+        >
+          <div>
+            <span
+              class="sc-guDLey RwNuC"
+              color="textSecondary"
+            >
+              Administrative Level 2
+            </span>
+            <div
+              data-cy="label-Administrative Level 2"
+            >
+              -
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+        >
+          <div>
+            <span
+              class="sc-guDLey RwNuC"
+              color="textSecondary"
+            >
+              Administrative Level 3
+            </span>
+            <div
+              data-cy="label-Administrative Level 3"
+            >
+              -
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+        >
+          <div>
+            <span
+              class="sc-guDLey RwNuC"
+              color="textSecondary"
+            >
+              Administrative Level 4
+            </span>
+            <div
+              data-cy="label-Administrative Level 4"
+            >
+              -
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+        >
+          <div>
+            <span
+              class="sc-guDLey RwNuC"
+              color="textSecondary"
+            >
+              Geolocation
+            </span>
+            <div
+              data-cy="label-Geolocation"
+            >
+              <span
+                class="sc-dmyCSP bGPBYf"
+                color="textSecondary"
+              >
+                -
+              </span>
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+        >
+          <div>
+            <span
+              class="sc-guDLey RwNuC"
+              color="textSecondary"
+            >
+              UNHCR CASE ID
+            </span>
+            <div
+              data-cy="label-UNHCR CASE ID"
+            >
+              -
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+        >
+          <div>
+            <span
+              class="sc-guDLey RwNuC"
+              color="textSecondary"
+            >
+              LENGTH OF TIME SINCE ARRIVAL
+            </span>
+            <div
+              data-cy="label-LENGTH OF TIME SINCE ARRIVAL"
+            >
+              -
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+        >
+          <div>
+            <span
+              class="sc-guDLey RwNuC"
+              color="textSecondary"
+            >
+              NUMBER OF TIMES DISPLACED
+            </span>
+            <div
+              data-cy="label-NUMBER OF TIMES DISPLACED"
+            >
+              -
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+        >
+          <div>
+            <span
+              class="sc-guDLey RwNuC"
+              color="textSecondary"
+            >
+              IS THIS A RETURNEE HOUSEHOLD?
+            </span>
+            <div
+              data-cy="label-IS THIS A RETURNEE HOUSEHOLD?"
+            >
+              <span
+                class="sc-dmyCSP bGPBYf"
+                color="textSecondary"
+              >
+                No
+              </span>
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+        >
+          <div>
+            <span
+              class="sc-guDLey RwNuC"
+              color="textSecondary"
+            >
+              Linked Grievances
+            </span>
+            <div
+              data-cy="label-Linked Grievances"
+            >
+              <span
+                class="sc-dmyCSP bGPBYf"
+                color="textSecondary"
+              >
+                <span>
+                  -
+                </span>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+        >
+          <div>
+            <span
+              class="sc-guDLey RwNuC"
+              color="textSecondary"
+            >
+              Data Collecting Type
+            </span>
+            <div
+              data-cy="label-Data Collecting Type"
+            >
+              <span
+                class="sc-dmyCSP bGPBYf"
+                color="textSecondary"
+              >
+                data collecting type
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-iuOOrT bhocpf css-1ps6pg7-MuiPaper-root"
+  >
+    <div
+      class="sc-hLQSwg iuGfmc"
+    >
+      <h6
+        class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
+      >
+        Benefits
+      </h6>
+    </div>
+    <div
+      class="MuiGrid-root MuiGrid-container css-11lq3yg-MuiGrid-root"
+    >
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+      >
+        <div>
+          <span
+            class="sc-guDLey RwNuC"
+            color="textSecondary"
+          >
+            Cash received
+          </span>
+          <div
+            data-cy="label-Cash received"
+          >
+            <span
+              class="sc-dmyCSP bGPBYf"
+              color="textSecondary"
+            >
+              <div
+                class="MuiBox-root css-19idom"
+              >
+                <div
+                  class="MuiGrid-root MuiGrid-container css-11lq3yg-MuiGrid-root"
+                >
+                  <div
+                    class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
+                  >
+                    <div
+                      class="MuiBox-root css-j7qwjs"
+                    >
+                      <div
+                        class="MuiBox-root css-0"
+                      >
+                        USD 5,755.00
+                      </div>
+                      <div
+                        class="MuiBox-root css-0"
+                      >
+                        (AZN 92.00)
+                      </div>
+                      <div
+                        class="MuiBox-root css-0"
+                      >
+                        (COP 3,177.00)
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </span>
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+      >
+        <div
+          class="sc-csKJxZ hOFubx"
+        >
+          <div>
+            <span
+              class="sc-guDLey RwNuC"
+              color="textSecondary"
+            >
+              Total Cash Received
+            </span>
+            <div
+              data-cy="label-Total Cash Received"
+            >
+              <span
+                class="sc-dmyCSP bGPBYf"
+                color="textSecondary"
+              >
+                <div
+                  class="sc-eTNRI iQIAhw"
+                >
+                  USD 0.00
+                </div>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
