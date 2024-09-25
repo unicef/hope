@@ -427,12 +427,12 @@ class DeduplicationEngineSimilarityPair(models.Model):
             "individual1": {
                 "unicef_id": str(self.individual1.unicef_id),
                 "full_name": self.individual1.full_name,
-                "photo": self.individual1.photo and self.individual1.photo.url,
+                "photo": str(self.individual1.photo.url) if self.individual1.photo else None,
             },
             "individual2": {
                 "unicef_id": str(self.individual2.unicef_id),
                 "full_name": self.individual2.full_name,
-                "photo": self.individual2.photo and self.individual2.photo.url,
+                "photo": str(self.individual2.photo.url) if self.individual2.photo else None,
             },
             "similarity_score": float(self.similarity_score),
         }
