@@ -308,6 +308,7 @@ export const SupportingDocumentsSection = ({
               <Grid container>
                 <Grid item xs={12}>
                   <TextField
+                    size="small"
                     label={t('Title')}
                     value={title}
                     onChange={(e) => {
