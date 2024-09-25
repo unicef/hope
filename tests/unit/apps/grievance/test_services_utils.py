@@ -519,6 +519,13 @@ class TestGrievanceUtils(TestCase):
 
         close_needs_adjudication_ticket_service(gr, user)
 
+    @patch.dict(
+        "os.environ",
+        {
+            "DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key",
+            "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com",
+        },
+    )
     @patch(
         "hct_mis_api.apps.registration_datahub.services.biometric_deduplication.BiometricDeduplicationService.report_false_positive_duplicate"
     )
