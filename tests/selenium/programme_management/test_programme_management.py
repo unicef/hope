@@ -372,7 +372,7 @@ class TestProgrammeManagement:
         pageProgrammeManagement.getButtonNext().click()
         # 3rd step (Partners)
         pageProgrammeManagement.getAccessToProgram().click()
-        pageProgrammeManagement.selectWhoAccessToProgram("Only selected partners within the business area")
+        pageProgrammeManagement.selectWhoAccessToProgram("Only Selected Partners within the business area")
         pageProgrammeManagement.choosePartnerOption("UNHCR")
         pageProgrammeManagement.getButtonAddPartner().click()
         pageProgrammeManagement.getButtonDelete().click()
@@ -438,7 +438,7 @@ class TestBusinessAreas:
         pageProgrammeManagement.getButtonNext().click()
         # 3rd step (Partners)
         pageProgrammeManagement.getAccessToProgram().click()
-        pageProgrammeManagement.selectWhoAccessToProgram("Only selected partners within the business area")
+        pageProgrammeManagement.selectWhoAccessToProgram("Only Selected Partners within the business area")
         pageProgrammeManagement.choosePartnerOption("UNHCR")
         programme_creation_url = pageProgrammeManagement.driver.current_url
         pageProgrammeManagement.getButtonSave().click()
@@ -496,7 +496,7 @@ class TestBusinessAreas:
         pageProgrammeManagement.getButtonNext().click()
         # 3rd step (Partners)
         pageProgrammeManagement.getAccessToProgram().click()
-        pageProgrammeManagement.selectWhoAccessToProgram("None of the partners should have access")
+        pageProgrammeManagement.selectWhoAccessToProgram("None of the Partners should have access")
         pageProgrammeManagement.getButtonSave().click()
         pageProgrammeDetails.getCopyProgram().click()
         # 1st step (Details)
@@ -566,7 +566,7 @@ class TestAdminAreas:
         pageProgrammeManagement.getButtonNext().click()
         # 3rd step (Partners)
         pageProgrammeManagement.getAccessToProgram().click()
-        pageProgrammeManagement.selectWhoAccessToProgram("Only selected partners within the business area")
+        pageProgrammeManagement.selectWhoAccessToProgram("Only Selected Partners within the business area")
         pageProgrammeManagement.choosePartnerOption("UNHCR")
         pageProgrammeManagement.getLabelAdminArea().click()
         pageProgrammeManagement.chooseAreaAdmin1ByName("Baghlan").click()
@@ -627,7 +627,7 @@ class TestComeBackScenarios:
         pageProgrammeManagement.getButtonNext().click()
         # 3rd step (Partners)
         pageProgrammeManagement.getAccessToProgram().click()
-        pageProgrammeManagement.selectWhoAccessToProgram("Only selected partners within the business area")
+        pageProgrammeManagement.selectWhoAccessToProgram("Only Selected Partners within the business area")
         pageProgrammeManagement.choosePartnerOption("UNHCR")
         pageProgrammeManagement.getButtonBack().click()
         pageProgrammeManagement.getButtonBack().click()
@@ -711,7 +711,7 @@ class TestManualCalendar:
                     "startDate": FormatTime(1, 1, 2022),
                     "endDate": FormatTime(1, 2, 2032),
                     "dataCollectingType": "Partial",
-                    "partners_access": "None of the partners should have access",
+                    "partners_access": "None of the Partners should have access",
                 },
                 id="none_of_the_partners_should_have_access",
             ),
@@ -722,7 +722,7 @@ class TestManualCalendar:
                     "startDate": FormatTime(1, 1, 2022),
                     "endDate": FormatTime(1, 2, 2032),
                     "dataCollectingType": "Partial",
-                    "partners_access": "All partners within the business area",
+                    "partners_access": "All Partners within the business area",
                 },
                 id="all_partners_within_the_business_area",
             ),
@@ -919,7 +919,7 @@ class TestManualCalendar:
         pageProgrammeManagement.getButtonNext().click()
         # 3rd step (Partners)
         pageProgrammeManagement.getAccessToProgram().click()
-        pageProgrammeManagement.selectWhoAccessToProgram("All partners within the business area")
+        pageProgrammeManagement.selectWhoAccessToProgram("All Partners within the business area")
         pageProgrammeManagement.getButtonSave().click()
         pageProgrammeManagement.getButtonEditProgram()
         program_name = pageProgrammeDetails.getHeaderTitle().text
