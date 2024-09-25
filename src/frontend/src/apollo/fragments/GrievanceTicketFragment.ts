@@ -208,7 +208,6 @@ export const grievanceTicketDetailed = gql`
     needsAdjudicationTicketDetails {
       id
       dedupEngineSimilarityPair {
-        isDuplicate
         similarityScore
         individual1 {
           unicefId

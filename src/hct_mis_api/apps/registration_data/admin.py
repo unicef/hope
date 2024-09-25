@@ -290,12 +290,7 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
 
 @admin.register(DeduplicationEngineSimilarityPair)
 class DeduplicationEngineSimilarityPairAdmin(HOPEModelAdminBase):
-    list_display = ("program", "individual1", "individual2", "similarity_score", "is_duplicate")
+    list_display = ("program", "individual1", "individual2", "similarity_score")
     list_filter = (("program__name", ValueFilter),)
     raw_id_fields = ("program", "individual1", "individual2")
     search_fields = ("individual1", "individual2")
-
-    def is_duplicate(self, obj: DeduplicationEngineSimilarityPair) -> bool:
-        return obj._is_duplicate
-
-    is_duplicate.boolean = True

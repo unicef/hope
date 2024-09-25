@@ -112,7 +112,6 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
                     fullName
                   }
                   similarityScore
-                  isDuplicate
                 }
               }
             }

@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Union
 
 import graphene
 from graphene_django import DjangoObjectType
@@ -15,40 +15,8 @@ from hct_mis_api.apps.account.permissions import (
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import get_count_and_percentage, to_choice_object
-from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.registration_data.filters import RegistrationDataImportFilter
-from hct_mis_api.apps.registration_data.models import (
-    DeduplicationEngineSimilarityPair,
-    RegistrationDataImport,
-)
-
-
-class DeduplicationEngineSimilarityPairIndividualNode(graphene.ObjectType):
-    photo = graphene.String()
-    full_name = graphene.String()
-    unicef_id = graphene.String()
-
-    @staticmethod
-    def resolve_photo(individual: Individual, info: Any) -> Optional[str]:
-        return individual.photo and individual.photo.url
-
-
-class DeduplicationEngineSimilarityPairNode(BaseNodePermissionMixin, DjangoObjectType):
-    permission_classes = (hopePermissionClass(Permissions.GRIEVANCES_VIEW_BIOMETRIC_RESULTS),)
-
-    is_duplicate = graphene.Boolean()
-    individual1 = DeduplicationEngineSimilarityPairIndividualNode()
-    individual2 = DeduplicationEngineSimilarityPairIndividualNode()
-    similarity_score = graphene.String()
-
-    @staticmethod
-    def resolve_is_duplicate(similarity_pair: DeduplicationEngineSimilarityPair, info: Any) -> bool:
-        return similarity_pair._is_duplicate
-
-    class Meta:
-        model = DeduplicationEngineSimilarityPair
-        interfaces = (graphene.relay.Node,)
-        connection_class = ExtendedConnection
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 
 class CountAndPercentageNode(graphene.ObjectType):

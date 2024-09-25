@@ -90,11 +90,6 @@ export const NeedsAdjudicationActions: React.FC<
           <BiometricsResults
             ticketId={ticket.id}
             similarityScore={dedupEngineSimilarityPair.similarityScore}
-            faceMatchResult={
-              dedupEngineSimilarityPair.isDuplicate
-                ? t('Duplicates')
-                : t('Uniqueness')
-            }
             individual1={dedupEngineSimilarityPair.individual1}
             individual2={dedupEngineSimilarityPair.individual2}
           />

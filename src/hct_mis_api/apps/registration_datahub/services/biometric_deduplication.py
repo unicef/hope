@@ -145,6 +145,8 @@ class BiometricDeduplicationService:
     def delete_deduplication_set(self, program: Program) -> None:
         if program.deduplication_set_id:
             self.api.delete_deduplication_set(str(program.deduplication_set_id))
+            DeduplicationEngineSimilarityPair.objects.filter(program=program).delete()
+
         program.deduplication_set_id = None
         program.save(update_fields=["deduplication_set_id"])
 
@@ -155,6 +157,7 @@ class BiometricDeduplicationService:
         )
 
     def store_similarity_pairs(self, deduplication_set_id: str, similarity_pairs: List[SimilarityPair]) -> None:
+        DeduplicationEngineSimilarityPair.remove_pairs(deduplication_set_id)
         DeduplicationEngineSimilarityPair.bulk_add_pairs(deduplication_set_id, similarity_pairs)
 
     def mark_rdis_as_deduplicated(self, deduplication_set_id: str) -> None:
@@ -203,14 +206,10 @@ class BiometricDeduplicationService:
     ) -> QuerySet[DeduplicationEngineSimilarityPair]:
         """Used in RDI statistics"""
         rdi_individuals = PendingIndividual.objects.filter(registration_data_import=rdi).only("id")
-        return (
-            DeduplicationEngineSimilarityPair.objects.duplicates()
-            .filter(
-                Q(individual1__in=rdi_individuals) & Q(individual2__in=rdi_individuals),
-                program=rdi.program,
-            )
-            .distinct()
-        )
+        return DeduplicationEngineSimilarityPair.objects.filter(
+            Q(individual1__in=rdi_individuals) & Q(individual2__in=rdi_individuals),
+            program=rdi.program,
+        ).distinct()
 
     def get_duplicate_individuals_for_rdi_against_batch_count(self, rdi: RegistrationDataImport) -> int:
         """Used in RDI statistics"""
@@ -231,18 +230,14 @@ class BiometricDeduplicationService:
         from hct_mis_api.apps.utils.models import MergeStatusModel
 
         rdi_individuals = rdi.individuals.filter(is_removed=False).only("id")
-        return (
-            DeduplicationEngineSimilarityPair.objects.duplicates()
-            .filter(
-                Q(individual1__in=rdi_individuals) | Q(individual2__in=rdi_individuals),
-                Q(individual1__duplicate=False) & Q(individual2__duplicate=False),
-                Q(individual1__withdrawn=False) & Q(individual2__withdrawn=False),
-                Q(individual1__rdi_merge_status=MergeStatusModel.MERGED)
-                & Q(individual2__rdi_merge_status=MergeStatusModel.MERGED),
-                program=rdi.program,
-            )
-            .distinct()
-        )
+        return DeduplicationEngineSimilarityPair.objects.filter(
+            Q(individual1__in=rdi_individuals) | Q(individual2__in=rdi_individuals),
+            Q(individual1__duplicate=False) & Q(individual2__duplicate=False),
+            Q(individual1__withdrawn=False) & Q(individual2__withdrawn=False),
+            Q(individual1__rdi_merge_status=MergeStatusModel.MERGED)
+            & Q(individual2__rdi_merge_status=MergeStatusModel.MERGED),
+            program=rdi.program,
+        ).distinct()
 
     def get_duplicates_for_rdi_against_population(
         self, rdi: RegistrationDataImport
@@ -258,8 +253,7 @@ class BiometricDeduplicationService:
         from hct_mis_api.apps.utils.models import MergeStatusModel
 
         return (
-            DeduplicationEngineSimilarityPair.objects.duplicates()
-            .filter(
+            DeduplicationEngineSimilarityPair.objects.filter(
                 Q(individual1__in=rdi_pending_individuals) | Q(individual2__in=rdi_pending_individuals),
                 Q(individual1__duplicate=False) & Q(individual2__duplicate=False),
                 Q(individual1__withdrawn=False) & Q(individual2__withdrawn=False),

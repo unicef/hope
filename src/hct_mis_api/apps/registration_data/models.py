@@ -9,7 +9,7 @@ from django.core.validators import (
     ProhibitNullCharactersValidator,
 )
 from django.db import models, transaction
-from django.db.models import Count, ExpressionWrapper, OuterRef, Q, Subquery
+from django.db.models import Count, OuterRef, Q, Subquery
 from django.utils.translation import gettext_lazy as _
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
@@ -364,30 +364,6 @@ class KoboImportedSubmission(models.Model):
     )
 
 
-class DeduplicationEngineSimilarityPairManager(models.Manager):
-    def get_queryset(self) -> models.QuerySet:
-        return (
-            super()
-            .get_queryset()
-            .annotate(
-                is_duplicate=ExpressionWrapper(
-                    models.Case(
-                        models.When(
-                            similarity_score__gte=models.F("program__business_area__biometric_deduplication_threshold"),
-                            then=models.Value(True),
-                        ),
-                        default=models.Value(False),
-                        output_field=models.BooleanField(),
-                    ),
-                    output_field=models.BooleanField(),
-                )
-            )
-        )
-
-    def duplicates(self) -> models.QuerySet:
-        return self.get_queryset().filter(is_duplicate=True)
-
-
 class DeduplicationEngineSimilarityPair(models.Model):
     program = models.ForeignKey(
         "program.Program", related_name="deduplication_engine_similarity_pairs", on_delete=models.CASCADE
@@ -403,8 +379,6 @@ class DeduplicationEngineSimilarityPair(models.Model):
         decimal_places=2,
     )
 
-    objects = DeduplicationEngineSimilarityPairManager()
-
     class Meta:
         unique_together = ("individual1", "individual2")
         constraints = [
@@ -414,6 +388,13 @@ class DeduplicationEngineSimilarityPair(models.Model):
                 check=models.Q(individual1__lt=models.F("individual2")), name="individual1_lt_individual2"
             ),
         ]
+
+    @classmethod
+    def remove_pairs(cls, deduplication_set_id: str) -> None:
+        from hct_mis_api.apps.program.models import Program
+
+        program = Program.objects.get(deduplication_set_id=deduplication_set_id)
+        cls.objects.filter(program=program).delete()
 
     @classmethod
     def bulk_add_pairs(cls, deduplication_set_id: str, duplicates_data: List[SimilarityPair]) -> None:
@@ -441,9 +422,17 @@ class DeduplicationEngineSimilarityPair(models.Model):
             with transaction.atomic():
                 cls.objects.bulk_create(duplicates, ignore_conflicts=True)
 
-    @property
-    def _is_duplicate(self) -> bool:
-        from hct_mis_api.apps.registration_datahub.tasks.deduplicate import Thresholds
-
-        thresholds = Thresholds.from_business_area(self.program.business_area)
-        return self.similarity_score >= thresholds.BIOMETRIC_DEDUPLICATION_THRESHOLD
+    def serialize_for_ticket(self) -> Dict[str, Any]:
+        return {
+            "individual1": {
+                "unicef_id": str(self.individual1.unicef_id),
+                "full_name": self.individual1.full_name,
+                "photo": self.individual1.photo and self.individual1.photo.url,
+            },
+            "individual2": {
+                "unicef_id": str(self.individual2.unicef_id),
+                "full_name": self.individual2.full_name,
+                "photo": self.individual2.photo and self.individual2.photo.url,
+            },
+            "similarity_score": float(self.similarity_score),
+        }

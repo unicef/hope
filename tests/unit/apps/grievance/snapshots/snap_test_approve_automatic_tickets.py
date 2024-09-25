@@ -95,7 +95,6 @@ snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudicatio
                         'individual2': {
                             'fullName': 'Benjamin Butler'
                         },
-                        'isDuplicate': True,
                         'similarityScore': '55.55'
                     },
                     'selectedDistinct': [
@@ -125,7 +124,6 @@ snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudicatio
                         'individual2': {
                             'fullName': 'Benjamin Butler'
                         },
-                        'isDuplicate': True,
                         'similarityScore': '55.55'
                     },
                     'selectedDistinct': [
@@ -158,7 +156,6 @@ snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudicatio
                         'individual2': {
                             'fullName': 'Benjamin Butler'
                         },
-                        'isDuplicate': True,
                         'similarityScore': '55.55'
                     },
                     'selectedDistinct': [

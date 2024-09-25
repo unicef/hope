@@ -28,7 +28,6 @@ export interface Individual {
 export interface BiometricsResultsProps {
   ticketId: string;
   similarityScore: string;
-  faceMatchResult: 'Duplicates' | 'Uniqueness';
   individual1?: Individual;
   individual2?: Individual;
 }
@@ -50,7 +49,6 @@ const Placeholder: React.FC = () => (
 export const BiometricsResults = ({
   ticketId,
   similarityScore,
-  faceMatchResult,
   individual1,
   individual2,
 }: BiometricsResultsProps): React.ReactElement => {
@@ -146,7 +144,7 @@ export const BiometricsResults = ({
                 </strong>
               </div>
               <div>
-                {t('Face images matching suggests:')} {faceMatchResult}
+                {t('Face images matching suggests: Duplicates')}
               </div>
             </Box>
           </DialogContainer>
