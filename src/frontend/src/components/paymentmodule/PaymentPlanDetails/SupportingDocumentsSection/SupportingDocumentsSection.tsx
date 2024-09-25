@@ -164,6 +164,7 @@ export const SupportingDocumentsSection = ({
         fileId,
       );
       setDocuments(documents.filter((doc) => doc.id !== fileId));
+      showMessage(t('File deleted successfully.'));
     } catch (error) {
       setErrorMessage(
         t(`Failed to delete supporting document: ${error.message}`),
@@ -226,51 +227,53 @@ export const SupportingDocumentsSection = ({
       )}
 
       <Collapse in={isExpanded}>
-        <Grid container spacing={3}>
-          {documents.map((doc) => (
-            <Grid key={doc.id} item xs={3}>
-              <GreyBox p={3} key={doc.id} data-cy="document-item">
-                <Box
-                  display="flex"
-                  justifyContent="space-between"
-                  alignItems="center"
-                >
-                  <Typography>{doc.title}</Typography>
-                  <Box>
-                    {canDownloadFile && (
-                      <IconButton
-                        onClick={() => handleDownload(doc.file)}
-                        data-cy="download-button"
-                      >
-                        <DownloadIcon />
-                      </IconButton>
-                    )}
-                    {canRemoveFile && (
-                      <IconButton
-                        onClick={() =>
-                          confirm({
-                            title: confirmationModalTitle,
-                            content: confirmationText,
-                            type: 'error',
-                          }).then(() =>
-                            handleRemove(
-                              businessArea,
-                              programId,
-                              paymentPlan.id,
-                              doc.id,
-                            ),
-                          )
-                        }
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    )}
+        <Box mt={2}>
+          <Grid container spacing={3}>
+            {documents.map((doc) => (
+              <Grid key={doc.id} item xs={3}>
+                <GreyBox p={3} key={doc.id} data-cy="document-item">
+                  <Box
+                    display="flex"
+                    justifyContent="space-between"
+                    alignItems="center"
+                  >
+                    <Typography>{doc.title}</Typography>
+                    <Box>
+                      {canDownloadFile && (
+                        <IconButton
+                          onClick={() => handleDownload(doc.file)}
+                          data-cy="download-button"
+                        >
+                          <DownloadIcon />
+                        </IconButton>
+                      )}
+                      {canRemoveFile && (
+                        <IconButton
+                          onClick={() =>
+                            confirm({
+                              title: confirmationModalTitle,
+                              content: confirmationText,
+                              type: 'error',
+                            }).then(() =>
+                              handleRemove(
+                                businessArea,
+                                programId,
+                                paymentPlan.id,
+                                doc.id,
+                              ),
+                            )
+                          }
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      )}
+                    </Box>
                   </Box>
-                </Box>
-              </GreyBox>
-            </Grid>
-          ))}
-        </Grid>
+                </GreyBox>
+              </Grid>
+            ))}
+          </Grid>
+        </Box>
       </Collapse>
       {canUploadFile && (
         <Dialog
