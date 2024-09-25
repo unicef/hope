@@ -541,7 +541,7 @@ class TestGrievanceUtils(TestCase):
             },
         )
         hh2, individuals_2 = create_household(
-            {"size": 1, "business_area": ba, "program": program},
+            {"size": 2, "business_area": ba, "program": program},
             {
                 "given_name": "John",
                 "family_name": "Doe",
@@ -549,7 +549,7 @@ class TestGrievanceUtils(TestCase):
                 "full_name": "John Doe",
             },
         )
-        ind_1, ind_2 = sorted([individuals_1[0], individuals_2[0]], key=lambda x: x.id)
+        ind_1, ind_2 = sorted([individuals_1[1], individuals_2[1]], key=lambda x: x.id)
 
         ticket, ticket_details = create_grievance_ticket_with_details(
             main_individual=ind_1,
