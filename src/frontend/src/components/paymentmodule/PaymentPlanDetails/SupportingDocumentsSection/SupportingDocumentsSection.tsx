@@ -59,6 +59,7 @@ export const SupportingDocumentsSection = ({
   const [isLoading, setIsLoading] = useState(false);
   const [openImport, setOpenImport] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [titleError, setTitleError] = useState('');
 
   const canUploadFile = hasPermissions(
     PERMISSIONS.PM_UPLOAD_SUPPORTING_DOCUMENT,
@@ -102,6 +103,9 @@ export const SupportingDocumentsSection = ({
   const handleUpload = () => {
     if (!fileToImport || !title) {
       setErrorMessage(t('Please select a file and enter a title.'));
+      if (!title) {
+        setTitleError(t('Title is required.'));
+      }
       return;
     }
     if (fileToImport.size > 10 * 1024 * 1024) {
@@ -130,6 +134,7 @@ export const SupportingDocumentsSection = ({
         setIsLoading(false);
         setOpenImport(false);
         setErrorMessage('');
+        setTitleError('');
       },
       onError: (err) => {
         setErrorMessage(err ? err.message : t('File upload failed.'));
@@ -305,10 +310,15 @@ export const SupportingDocumentsSection = ({
                   <TextField
                     label={t('Title')}
                     value={title}
-                    onChange={(e) => setTitle(e.target.value)}
+                    onChange={(e) => {
+                      setTitle(e.target.value);
+                      setTitleError('');
+                    }}
                     fullWidth
                     margin="normal"
                     data-cy="title-input"
+                    error={!!titleError}
+                    helperText={titleError}
                   />
                 </Grid>
               </Grid>
