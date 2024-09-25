@@ -24,7 +24,7 @@ import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { usePermissions } from '@hooks/usePermissions';
 import { useTranslation } from 'react-i18next';
-import { PaymentPlanQuery } from '@generated/graphql';
+import { PaymentPlanQuery, PaymentPlanStatus } from '@generated/graphql';
 import { DropzoneField } from '@components/core/DropzoneField';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import {
@@ -61,10 +61,10 @@ export const SupportingDocumentsSection = ({
   const [errorMessage, setErrorMessage] = useState('');
   const [titleError, setTitleError] = useState('');
 
-  const canUploadFile = hasPermissions(
-    PERMISSIONS.PM_UPLOAD_SUPPORTING_DOCUMENT,
-    permissions,
-  );
+  const canUploadFile =
+    hasPermissions(PERMISSIONS.PM_UPLOAD_SUPPORTING_DOCUMENT, permissions) &&
+    (paymentPlan.status === PaymentPlanStatus.Locked ||
+      paymentPlan.status === PaymentPlanStatus.Open);
   const canRemoveFile = hasPermissions(
     PERMISSIONS.PM_DELETE_SUPPORTING_DOCUMENT,
     permissions,
@@ -100,7 +100,14 @@ export const SupportingDocumentsSection = ({
     },
   });
 
-  const handleUpload = () => {
+  const handleUpload = (): void => {
+    const maxFiles = 10;
+    const currentFileCount = documents.length;
+
+    if (currentFileCount >= maxFiles) {
+      setErrorMessage(t('You cannot upload more than 10 files.'));
+      return;
+    }
     if (!fileToImport || !title) {
       setErrorMessage(t('Please select a file and enter a title.'));
       if (!title) {
@@ -192,7 +199,7 @@ export const SupportingDocumentsSection = ({
       <Box display="flex" justifyContent="space-between" alignItems="center">
         <Typography variant="h6">{t('Supporting Documents')}</Typography>
         <Box display="flex">
-          {!isExpanded && canUploadFile && (
+          {canUploadFile && (
             <Box mr={1}>
               <Button
                 variant="contained"
@@ -286,6 +293,13 @@ export const SupportingDocumentsSection = ({
             <>
               <DropzoneField
                 dontShowFilename={false}
+                accepts={{
+                  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+                    ['.xlsx'],
+                  'application/pdf': ['.pdf'],
+                  'image/jpeg': ['.jpeg', '.jpg'],
+                  'image/png': ['.png'],
+                }}
                 loading={isLoading}
                 onChange={(files) => {
                   if (files.length === 0) {
@@ -331,6 +345,8 @@ export const SupportingDocumentsSection = ({
               onClick={() => {
                 setOpenImport(false);
                 setFileToImport(null);
+                setErrorMessage(null);
+                setTitle('');
               }}
             >
               {t('CANCEL')}

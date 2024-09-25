@@ -902,5 +902,6 @@
   "Face images matching suggests:": "Face images matching suggests:",
   "Select Files to Upload": "Select Files to Upload",
   "The system accepts the following file extensions: XLSX, PDF, images (jpg, jpeg, png). File size must be ≤ 10MB.": "The system accepts the following file extensions: XLSX, PDF, images (jpg, jpeg, png). File size must be ≤ 10MB.",
-  "Deleting Supporting Document": "Deleting Supporting Document"
+  "Deleting Supporting Document": "Deleting Supporting Document",
+  "You cannot upload more than 10 files.": "You cannot upload more than 10 files."
 }
