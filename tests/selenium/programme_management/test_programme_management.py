@@ -373,6 +373,7 @@ class TestProgrammeManagement:
         # 3rd step (Partners)
         pageProgrammeManagement.getAccessToProgram().click()
         pageProgrammeManagement.selectWhoAccessToProgram("Only Selected Partners within the business area")
+        assert Partner.objects.get(name="UNHCR").business_areas.all() == 1
         pageProgrammeManagement.choosePartnerOption("UNHCR")
         pageProgrammeManagement.getButtonAddPartner().click()
         pageProgrammeManagement.getButtonDelete().click()
@@ -394,7 +395,6 @@ class TestProgrammeManagement:
 
 
 # ToDo: Check Unicef partner! and delete classes
-@pytest.mark.night
 @pytest.mark.usefixtures("login")
 class TestBusinessAreas:
     @pytest.mark.parametrize(
@@ -522,7 +522,6 @@ class TestBusinessAreas:
         assert "New Programme" in pageProgrammeDetails.getHeaderTitle().text
 
 
-@pytest.mark.night
 @pytest.mark.usefixtures("login")
 class TestAdminAreas:
     @pytest.mark.parametrize(
@@ -722,7 +721,7 @@ class TestManualCalendar:
                     "startDate": FormatTime(1, 1, 2022),
                     "endDate": FormatTime(1, 2, 2032),
                     "dataCollectingType": "Partial",
-                    "partners_access": "All Partners within the business area",
+                    "partners_access": "All Current Partners within the business area",
                 },
                 id="all_partners_within_the_business_area",
             ),
@@ -919,7 +918,7 @@ class TestManualCalendar:
         pageProgrammeManagement.getButtonNext().click()
         # 3rd step (Partners)
         pageProgrammeManagement.getAccessToProgram().click()
-        pageProgrammeManagement.selectWhoAccessToProgram("All Partners within the business area")
+        pageProgrammeManagement.selectWhoAccessToProgram("All Current Partners within the business area")
         pageProgrammeManagement.getButtonSave().click()
         pageProgrammeManagement.getButtonEditProgram()
         program_name = pageProgrammeDetails.getHeaderTitle().text
