@@ -7,17 +7,16 @@ from django.core.management import call_command
 import pytest
 from dateutil.relativedelta import relativedelta
 from freezegun import freeze_time
-from selenium.webdriver.common.by import By
-
-from hct_mis_api.apps.account.fixtures import RoleFactory
-from hct_mis_api.apps.account.models import Partner
-from hct_mis_api.apps.core.models import BusinessAreaPartnerThrough, BusinessArea
 from helpers.date_time_format import FormatTime
 from page_object.programme_details.programme_details import ProgrammeDetails
 from page_object.programme_management.programme_management import ProgrammeManagement
 from selenium import webdriver
 from selenium.webdriver import Keys
+from selenium.webdriver.common.by import By
 
+from hct_mis_api.apps.account.fixtures import RoleFactory
+from hct_mis_api.apps.account.models import Partner
+from hct_mis_api.apps.core.models import BusinessArea, BusinessAreaPartnerThrough
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 
