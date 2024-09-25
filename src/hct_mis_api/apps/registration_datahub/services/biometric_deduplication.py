@@ -319,7 +319,7 @@ class BiometricDeduplicationService:
             self.mark_rdis_as_deduplication_error(deduplication_set_id)
             logger.error(
                 f"Failed to process deduplication set {deduplication_set_id},"
-                f" dedupe engine state: {deduplication_set_data.state} error: {deduplication_set_data.error}"
+                f" dedupe engine state: {deduplication_set_data.state}"
             )
 
     def report_false_positive_duplicate(

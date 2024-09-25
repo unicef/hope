@@ -549,8 +549,7 @@ class TestGrievanceUtils(TestCase):
                 "full_name": "John Doe",
             },
         )
-        ind_1 = individuals_1[0]
-        ind_2 = individuals_2[0]
+        ind_1, ind_2 = sorted([individuals_1[0], individuals_2[0]], key=lambda x: x.id)
 
         ticket, ticket_details = create_grievance_ticket_with_details(
             main_individual=ind_1,
