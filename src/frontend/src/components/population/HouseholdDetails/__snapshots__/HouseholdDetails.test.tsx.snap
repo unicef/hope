@@ -484,17 +484,17 @@ exports[`components/population/HouseholdDetails should render 1`] = `
                       <div
                         class="MuiBox-root css-0"
                       >
-                        USD 5,755.00
+                        5755,00 USD
                       </div>
                       <div
                         class="MuiBox-root css-0"
                       >
-                        (AZN 92.00)
+                        (92,00 AZN)
                       </div>
                       <div
                         class="MuiBox-root css-0"
                       >
-                        (COP 3,177.00)
+                        (3177,00 COP)
                       </div>
                     </div>
                   </div>
@@ -527,7 +527,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
                 <div
                   class="sc-eTNRI iQIAhw"
                 >
-                  USD 0.00
+                  0,00 USD
                 </div>
               </span>
             </div>
