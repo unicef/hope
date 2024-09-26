@@ -88,6 +88,9 @@ snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudicatio
             'grievanceTicket': {
                 'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZToyYjQxOWNlMy0zMjk3LTQ3ZWUtYTQ3Zi00MzQ0MmFiYWM3M2U=',
                 'needsAdjudicationTicketDetails': {
+                    'extraData': {
+                        'dedupEngineSimilarityPair': None
+                    },
                     'selectedDistinct': [
                     ],
                     'selectedDuplicates': [
@@ -108,6 +111,9 @@ snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudicatio
             'grievanceTicket': {
                 'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZToyYjQxOWNlMy0zMjk3LTQ3ZWUtYTQ3Zi00MzQ0MmFiYWM3M2U=',
                 'needsAdjudicationTicketDetails': {
+                    'extraData': {
+                        'dedupEngineSimilarityPair': None
+                    },
                     'selectedDistinct': [
                         {
                             'unicefId': 'IND-123-123'
@@ -131,6 +137,9 @@ snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudicatio
             'grievanceTicket': {
                 'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZToyYjQxOWNlMy0zMjk3LTQ3ZWUtYTQ3Zi00MzQ0MmFiYWM3M2U=',
                 'needsAdjudicationTicketDetails': {
+                    'extraData': {
+                        'dedupEngineSimilarityPair': None
+                    },
                     'selectedDistinct': [
                     ],
                     'selectedDuplicates': [
