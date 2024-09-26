@@ -90,6 +90,7 @@ export const GrievancesFilters = ({
   const showIssueType =
     filter.category === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
     filter.category === GRIEVANCE_CATEGORIES.DATA_CHANGE ||
+    filter.category === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION ||
     filter.category === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT;
 
   const updatedPriorityChoices = useMemo(() => {

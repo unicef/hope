@@ -1,5 +1,5 @@
 import dataclasses
-from typing import List, Optional, Tuple
+from typing import List, Tuple
 
 from hct_mis_api.apps.core.api.mixins import BaseAPI
 
@@ -14,19 +14,30 @@ class SimilarityPair:
 @dataclasses.dataclass
 class DeduplicationSetData:
     state: str  # "Clean", "Dirty", "Processing", "Error"
-    error: Optional[str] = None
+
+
+@dataclasses.dataclass
+class DeduplicationSetConfig:
+    face_distance_threshold: float  # 0.0 - 1.0
 
 
 @dataclasses.dataclass
 class DeduplicationSet:
     reference_pk: str  # program.id
     notification_url: str  # webhook url
+    config: DeduplicationSetConfig
 
 
 @dataclasses.dataclass
 class DeduplicationImage:
     reference_pk: str  # individual.id
     filename: str  # individual.photo.name
+
+
+@dataclasses.dataclass
+class IgnoredKeysPair:
+    first_reference_pk: str  # individual.id
+    second_reference_pk: str  # individual.id
 
 
 class DeduplicationEngineAPI(BaseAPI):
@@ -53,6 +64,7 @@ class DeduplicationEngineAPI(BaseAPI):
         BULK_DELETE_IMAGES = "deduplication_sets/{deduplication_set_pk}/images_bulk/clear/"  # DELETE - Delete all images for a deduplication set
 
         GET_DUPLICATES = "deduplication_sets/{deduplication_set_pk}/duplicates/"  # GET - List view
+        IGNORED_KEYS = "deduplication_sets/{deduplication_set_pk}/ignored_keys/"  # POST/GET
 
     def delete_deduplication_set(self, deduplication_set_id: str) -> dict:
         response_data, _ = self._delete(self.Endpoints.DELETE_DEDUPLICATION_SET.format(pk=deduplication_set_id))
@@ -88,3 +100,9 @@ class DeduplicationEngineAPI(BaseAPI):
             self.Endpoints.PROCESS_DEDUPLICATION.format(pk=deduplication_set_id), validate_response=False
         )
         return response_data, status
+
+    def report_false_positive_duplicate(self, false_positive_pair: IgnoredKeysPair, deduplication_set_id: str) -> None:
+        self._post(
+            self.Endpoints.IGNORED_KEYS.format(deduplication_set_pk=deduplication_set_id),
+            dataclasses.asdict(false_positive_pair),
+        )
