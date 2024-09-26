@@ -95,7 +95,7 @@ export function RegistrationDetails({
           <Grid item xs={6}>
             <BigValueContainer>
               <LabelizedField
-                label={t('Total Number of People')}
+                label={t('Total Number of Registered People')}
                 dataCy="individuals"
               >
                 <BigValue>{registration?.numberOfIndividuals}</BigValue>
@@ -122,7 +122,7 @@ export function RegistrationDetails({
           <Grid item xs={6}>
             <BigValueContainer>
               <LabelizedField
-                label={t('Total Number of Individuals')}
+                label={t('Total Number of Registered Individuals')}
                 dataCy="individuals"
               >
                 <BigValue>{registration?.numberOfIndividuals}</BigValue>

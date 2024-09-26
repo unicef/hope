@@ -16,7 +16,7 @@ class RDIDetailsPage(BaseComponents):
     labelizedFieldContainerHouseholds = 'div[data-cy="labelized-field-container-households"]'
     labelTotalNumberOfHouseholds = 'div[data-cy="label-Total Number of Households"]'
     labelizedFieldContainerIndividuals = 'div[data-cy="labelized-field-container-individuals"]'
-    labelTotalNumberOfIndividuals = 'div[data-cy="label-Total Number of Individuals"]'
+    labelTotalNumberOfIndividuals = 'div[data-cy="label-Total Number of Registered Individuals"]'
     tableLabel = 'span[data-cy="table-label"]'
     tablePagination = 'div[data-cy="table-pagination"]'
     importedIndividualsTable = 'div[data-cy="imported-individuals-table"]'
