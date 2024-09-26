@@ -834,6 +834,8 @@ class TestManualCalendar:
         options = select_options_container.find_elements(By.TAG_NAME, "li")
         assert any("Test Partner 1" == li.text for li in options) is True
         assert any("Test Partner 2" == li.text for li in options) is False
+        assert any("UNHCR" == li.text for li in options) is True
+        assert any("TEST" == li.text for li in options) is True
 
         pageProgrammeManagement.driver.find_element(By.CSS_SELECTOR, "body").click()
 
@@ -863,14 +865,16 @@ class TestManualCalendar:
         pageProgrammeManagement.getButtonSave().click()
 
         # Check Details page
-        assert "details" in pageProgrammeDetails.wait_for_new_url(programme_edit_url).split("/")
+        assert "details" in pageProgrammeDetails.wait_for_new_url(programme_edit_url, 20).split("/")
 
         partner_name_elements_new = pageProgrammeManagement.driver.find_elements(
             By.CSS_SELECTOR, "[data-cy='label-partner-name']"
         )
-        assert len(partner_name_elements_new) == 2
+        assert len(partner_name_elements_new) == 3
+        pageProgrammeDetails.screenshot("partner_name_elements_new.png")
         assert any("UNHCR" in partner.text.strip() for partner in partner_name_elements_new)
         assert any("Test Partner 1" in partner.text.strip() for partner in partner_name_elements_new)
+        assert any("TEST" in partner.text.strip() for partner in partner_name_elements_new)
 
     @pytest.mark.parametrize(
         "test_data",
