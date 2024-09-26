@@ -42,6 +42,12 @@
       <td>{{ payment_plan.target_population.name }}</td>
     </tr>
     <tr>
+    <tr>
+      <td></td>
+      <td></td>
+      <td>FX Rate Applied</td>
+      <td>{{ payment_plan.exchange_rate|default_if_none:"-"|floatformat:8 }}</td>
+    </tr>
       <td colspan="4" class="header">SUMMARY</td>
     </tr>
     <tr>
