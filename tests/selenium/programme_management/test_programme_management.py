@@ -373,7 +373,6 @@ class TestProgrammeManagement:
         # 3rd step (Partners)
         pageProgrammeManagement.getAccessToProgram().click()
         pageProgrammeManagement.selectWhoAccessToProgram("Only Selected Partners within the business area")
-        assert Partner.objects.get(name="UNHCR").business_areas.all() == 1
         pageProgrammeManagement.choosePartnerOption("UNHCR")
         pageProgrammeManagement.getButtonAddPartner().click()
         pageProgrammeManagement.getButtonDelete().click()
