@@ -838,9 +838,10 @@ class TestManualCalendar:
         pageProgrammeManagement.driver.find_element(By.CSS_SELECTOR, "body").click()
 
         pageProgrammeManagement.choosePartnerOption("UNHCR")
-        pageProgrammeManagement.getButtonSave().click()
 
         programme_creation_url = pageProgrammeManagement.driver.current_url
+        pageProgrammeManagement.getButtonSave().click()
+
         # Check Details page
         assert "details" in pageProgrammeDetails.wait_for_new_url(programme_creation_url).split("/")
         assert "Test Program Partners" in pageProgrammeDetails.getHeaderTitle().text
@@ -857,11 +858,12 @@ class TestManualCalendar:
         pageProgrammeManagement.getSelectEditProgramPartners().click()
         pageProgrammeManagement.getAccessToProgram().click()
         pageProgrammeManagement.selectWhoAccessToProgram("All Current Partners within the business area")
+
+        programme_edit_url = pageProgrammeManagement.driver.current_url
         pageProgrammeManagement.getButtonSave().click()
 
-        programme_details_url = pageProgrammeManagement.driver.current_url
         # Check Details page
-        assert "details" in pageProgrammeDetails.wait_for_new_url(programme_details_url).split("/")
+        assert "details" in pageProgrammeDetails.wait_for_new_url(programme_edit_url).split("/")
 
         partner_name_elements_new = pageProgrammeManagement.driver.find_elements(
             By.CSS_SELECTOR, "[data-cy='label-partner-name']"
