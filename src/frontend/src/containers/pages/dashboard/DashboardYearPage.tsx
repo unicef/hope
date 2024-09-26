@@ -4,7 +4,7 @@ import * as dc from 'dc';
 import * as d3 from 'd3';
 import crossfilter from 'crossfilter2';
 
-export function DashboardYearPage({ year, data }) {
+export function DashboardYearPage({ data }) {
   dc.config.defaultColors(d3.schemeTableau10);
   const numberFormatter = d3.format(",.2f");
 

@@ -13,7 +13,6 @@ class DashReportAPITestCase(APITestCase):
         self.superuser = User.objects.create_superuser(username="admin", password="admin123")
         self.client.login(username="admin", password="admin123")
 
-        # Create DashReport instances
         self.business_area = BusinessAreaFactory.create()
         self.dash_report = DashReportFactory.create(business_area=self.business_area)
 

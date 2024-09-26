@@ -4,40 +4,12 @@ import { useTranslation } from 'react-i18next';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { DashboardYearPage } from './DashboardYearPage'; 
 import styled from 'styled-components'; 
-import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { useDashboardYearsChoiceDataQuery } from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { DashboardFilters } from '@components/dashboard/DashboardFilters';
-
-const StyledPaper = styled(
-  ({ noMarginTop, extraPaddingLeft, color, ...props }) => <Paper {...props} />,
-)`
-  padding: 18px 24px;
-  padding-left: ${(props) => (props.extraPaddingLeft ? '46px' : '24px')};
-  margin-top: ${(props) => (props.noMarginTop ? '0' : '20px')};
-  font-size: 18px;
-  font-weight: normal;
-  
-  && > p {
-    color: ${(props) => props.color || 'inherit'}
-  }
-
-  /* Add chart deselection styles here */
-  .dc-chart path.deselected,
-  .dc-chart rect.deselected,
-  .dc-chart .pie-slice.deselected {
-    opacity: 0.2;
-  }
-
-  .dc-chart path.selected,
-  .dc-chart rect.selected,
-  .dc-chart .pie-slice.selected {
-    opacity: 1;
-  }
-`;
 
 export function DashboardPage(): React.ReactElement {
   const { t } = useTranslation();
