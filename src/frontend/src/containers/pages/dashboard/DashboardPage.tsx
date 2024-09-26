@@ -1,6 +1,9 @@
-import { Typography } from '@mui/material';
-import * as React from 'react';
-import { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { Typography, Box, Tabs, Tab, Paper } from '@mui/material'; 
+import { useTranslation } from 'react-i18next';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { DashboardYearPage } from './DashboardYearPage'; 
+import styled from 'styled-components'; 
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { useDashboardYearsChoiceDataQuery } from '@generated/graphql';
@@ -8,102 +11,101 @@ import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { DashboardFilters } from '@components/dashboard/DashboardFilters';
-import { DashboardPaper } from '@components/dashboard/DashboardPaper';
-import { ExportModal } from '@components/dashboard/ExportModal';
-import { Tabs, Tab } from '@core/Tabs';
-import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { usePermissions } from '@hooks/usePermissions';
-import { getFilterFromQueryParams } from '@utils/utils';
-import { DashboardYearPage } from './DashboardYearPage';
-import { TabPanel } from '@components/core/TabPanel';
+
+const StyledPaper = styled(
+  ({ noMarginTop, extraPaddingLeft, color, ...props }) => <Paper {...props} />,
+)`
+  padding: 18px 24px;
+  padding-left: ${(props) => (props.extraPaddingLeft ? '46px' : '24px')};
+  margin-top: ${(props) => (props.noMarginTop ? '0' : '20px')};
+  font-size: 18px;
+  font-weight: normal;
+  
+  && > p {
+    color: ${(props) => props.color || 'inherit'}
+  }
+
+  /* Add chart deselection styles here */
+  .dc-chart path.deselected,
+  .dc-chart rect.deselected,
+  .dc-chart .pie-slice.deselected {
+    opacity: 0.2;
+  }
+
+  .dc-chart path.selected,
+  .dc-chart rect.selected,
+  .dc-chart .pie-slice.selected {
+    opacity: 1;
+  }
+`;
 
 export function DashboardPage(): React.ReactElement {
   const { t } = useTranslation();
-  const location = useLocation();
-  const permissions = usePermissions();
-  const { businessArea, isGlobal } = useBaseUrl();
-  const [selectedTab, setSelectedTab] = useState(0);
-  const initialFilter = {
-    administrativeArea: '',
-    program: '',
+  const { businessArea } = useBaseUrl();
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState([]);
+  const [selectedYear, setSelectedYear] = useState<string | null>(null); // Manage selected year
+  const [availableYears, setAvailableYears] = useState<string[]>([]); // Store available years
+
+  // Fetch data from REST API
+  const fetchData = async () => {
+    try {
+      const response = await fetch(`/api/dashboard/${businessArea}`);
+      const result = await response.json();
+      setData(result);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      setLoading(false);
+    }
   };
-  const [filter, setFilter] = useState(
-    getFilterFromQueryParams(location, initialFilter),
-  );
-  const [appliedFilter, setAppliedFilter] = useState(
-    getFilterFromQueryParams(location, initialFilter),
-  );
 
-  const { data, loading } = useDashboardYearsChoiceDataQuery({
-    variables: { businessArea },
-  });
-  if (loading) return <LoadingComponent />;
-  if (!permissions || !data) return null;
+  useEffect(() => {
+    fetchData();
+  }, [businessArea]);
 
-  const hasPermissionToView = hasPermissions(
-    PERMISSIONS.DASHBOARD_VIEW_COUNTRY,
-    permissions,
-  );
-  const hasPermissionToExport = hasPermissions(
-    PERMISSIONS.DASHBOARD_EXPORT,
-    permissions,
-  );
+  useEffect(() => {
+    if (data.length === 0) return;
 
-  const years = data.dashboardYearsChoices;
+    // Extract unique years from the data
+    const years = Array.from(
+      new Set(
+        data
+          .map(household => household.payments.map(payment => new Date(payment.delivery_date).getFullYear()))
+          .flat()
+      )
+    ).sort((a, b) => b - a); // Sort years in descending order
 
-  const mappedTabs = years.map((el) => <Tab key={el} label={el} />);
-  const tabs = (
-    <Tabs
-      value={selectedTab}
-      onChange={(_event: React.ChangeEvent<object>, newValue: number) => {
-        setSelectedTab(newValue);
-      }}
-      indicatorColor="primary"
-      textColor="primary"
-      variant="scrollable"
-      scrollButtons="auto"
-      aria-label="tabs"
-    >
-      {mappedTabs}
-    </Tabs>
-  );
+    setAvailableYears(years);
+    setSelectedYear(years[0] || null); // Set the highest year (first in the sorted array) as default
+  }, [data]);
+
+  if (loading) return <Typography>Loading...</Typography>;
+  if (!selectedYear) return <Typography>No data available</Typography>;
+
   return (
-    <>
-      <PageHeader tabs={tabs} title={t('Dashboard')}>
-        {hasPermissionToExport && (
-          <ExportModal filter={appliedFilter} year={years[selectedTab]} />
+    <Box p={4}>
+      <Typography variant="h4">{t('Dashboard')}</Typography>
+
+      {/* Year selection Tabs */}
+      <Tabs
+        value={selectedYear}
+        onChange={(event, newValue) => setSelectedYear(newValue)}
+        indicatorColor="primary"
+        textColor="primary"
+      >
+        {availableYears.map((year) => (
+          <Tab key={year} value={year} label={year} />
+        ))}
+      </Tabs>
+
+      {/* Render year-specific data in DashboardYearPage */}
+      <DashboardYearPage
+        year={selectedYear}
+        data={data.filter(household =>
+          household.payments.some(payment => new Date(payment.delivery_date).getFullYear() === selectedYear)
         )}
-      </PageHeader>
-      {hasPermissionToView ? (
-        <>
-          {!isGlobal ? (
-            <DashboardFilters
-              filter={filter}
-              setFilter={setFilter}
-              initialFilter={initialFilter}
-              appliedFilter={appliedFilter}
-              setAppliedFilter={setAppliedFilter}
-            />
-          ) : (
-            <DashboardPaper noMarginTop extraPaddingLeft color="#6f6f6f">
-              <Typography variant="body2">
-                {t(
-                  'All charts below show total numbers for the selected year.',
-                )}
-              </Typography>
-            </DashboardPaper>
-          )}
-          <TabPanel value={selectedTab} index={selectedTab}>
-            <DashboardYearPage
-              year={years[selectedTab]}
-              filter={appliedFilter}
-            />
-          </TabPanel>
-        </>
-      ) : (
-        <PermissionDenied />
-      )}
-    </>
+      />
+    </Box>
   );
 }

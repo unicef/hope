@@ -109,7 +109,12 @@ if ENV != "prod":
 else:
     EMAIL_SUBJECT_PREFIX = ""
 
-RO_CONN = dict(**env.db("DATABASE_URL")).copy()
+REPLICA_DB = env("REP_DATABASE_URL", default=None)
+
+if REPLICA_DB:
+    RO_CONN = dict(**env.db("REP_DATABASE_URL")).copy()
+else:
+    RO_CONN = dict(**env.db("DATABASE_URL")).copy()
 RO_CONN.update(
     {
         "OPTIONS": {"options": "-c default_transaction_read_only=on"},

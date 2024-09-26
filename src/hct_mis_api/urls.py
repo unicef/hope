@@ -70,6 +70,10 @@ api_patterns = [
         hct_mis_api.apps.sanction_list.views.download_sanction_template,
     ),
     path(
+        "dashboard",
+        hct_mis_api.apps.dashboard.urls,
+    ),
+    path(
         "dashboard-report/<uuid:report_id>",
         hct_mis_api.apps.core.views.download_dashboard_report,
         name="dashboard_report",
