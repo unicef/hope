@@ -13,6 +13,7 @@ export const PAYMENT_PLAN_QUERY = gql`
       availablePaymentRecordsCount
       bankReconciliationSuccess
       bankReconciliationError
+      exchangeRate
       createdBy {
         id
         firstName

@@ -207,20 +207,6 @@ export const grievanceTicketDetailed = gql`
     }
     needsAdjudicationTicketDetails {
       id
-      dedupEngineSimilarityPair {
-        isDuplicate
-        similarityScore
-        individual1 {
-          unicefId
-          fullName
-          photo
-        }
-        individual2 {
-          unicefId
-          fullName
-          photo
-        }
-      }
       hasDuplicatedDocument
       extraData {
         goldenRecords {
@@ -232,6 +218,19 @@ export const grievanceTicketDetailed = gql`
           hitId
           proximityToScore
           score
+        }
+        dedupEngineSimilarityPair {
+          similarityScore
+          individual1 {
+            unicefId
+            fullName
+            photo
+          }
+          individual2 {
+            unicefId
+            fullName
+            photo
+          }
         }
       }
       goldenRecordsIndividual {
