@@ -240,18 +240,11 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
             business_area=cls.business_area,
             status=GrievanceTicket.STATUS_FOR_APPROVAL,
         )
-        dedup_engine_similarity_pair = DeduplicationEngineSimilarityPair.objects.create(
-            program=program_one,
-            individual1=ind1,
-            individual2=ind2,
-            similarity_score=55.55,
-        )
         ticket_details = TicketNeedsAdjudicationDetailsFactory(
             ticket=cls.needs_adjudication_grievance_ticket,
             golden_records_individual=first_individual,
             possible_duplicate=second_individual,
             selected_individual=None,
-            dedup_engine_similarity_pair=dedup_engine_similarity_pair,
         )
         ticket_details.possible_duplicates.add(first_individual, second_individual)
 
