@@ -864,6 +864,7 @@ class TestManualCalendar:
 
         programme_edit_url = pageProgrammeManagement.driver.current_url
         pageProgrammeManagement.getButtonSave().click()
+        pageProgrammeManagement.getButtonSave().click()
 
         # Check Details page
         sleep(20)
