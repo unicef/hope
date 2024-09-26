@@ -16,7 +16,9 @@ from hct_mis_api.apps.registration_datahub.apis.deduplication_engine import (
     DeduplicationEngineAPI,
     DeduplicationImage,
     DeduplicationSet,
+    DeduplicationSetConfig,
     DeduplicationSetData,
+    IgnoredKeysPair,
     SimilarityPair,
 )
 
@@ -35,6 +37,9 @@ class BiometricDeduplicationService:
             reference_pk=str(program.id),
             notification_url=f"https://{settings.DOMAIN_NAME}/api/rest/{program.business_area.slug}/programs/{str(program.id)}/registration-data/webhookdeduplication/",
             # notification_url=reverse("registration-data:webhook_deduplication", kwargs={"program_id": str(program.id), "business_area": program.business_area.slug}), # TODO MB why reverse is not working
+            config=DeduplicationSetConfig(
+                face_distance_threshold=program.business_area.biometric_deduplication_threshold / 100
+            ),
         )
         response_data = self.api.create_deduplication_set(deduplication_set)
         program.deduplication_set_id = uuid.UUID(response_data["id"])
@@ -45,7 +50,7 @@ class BiometricDeduplicationService:
 
     def get_deduplication_set(self, deduplication_set_id: str) -> DeduplicationSetData:
         response_data = self.api.get_deduplication_set(deduplication_set_id)
-        return DeduplicationSetData(state=response_data["state"], error=response_data["error"])
+        return DeduplicationSetData(state=response_data["state"])
 
     def upload_individuals(self, deduplication_set_id: str, rdi: RegistrationDataImport) -> None:
         individuals = (
@@ -64,15 +69,21 @@ class BiometricDeduplicationService:
             for individual in individuals
         ]
 
-        try:
-            self.api.bulk_upload_images(deduplication_set_id, images)
-            rdi.deduplication_engine_status = RegistrationDataImport.DEDUP_ENGINE_UPLOADED
-            rdi.save(update_fields=["deduplication_engine_status"])
+        if rdi.deduplication_engine_status in [
+            RegistrationDataImport.DEDUP_ENGINE_UPLOAD_ERROR,
+            RegistrationDataImport.DEDUP_ENGINE_PENDING,
+        ]:
+            try:
+                self.api.bulk_upload_images(deduplication_set_id, images)
 
-        except DeduplicationEngineAPI.DeduplicationEngineAPIException:
-            logging.exception(f"Failed to upload images for RDI {rdi} to deduplication set {deduplication_set_id}")
-            rdi.deduplication_engine_status = RegistrationDataImport.DEDUP_ENGINE_UPLOAD_ERROR
-            rdi.save(update_fields=["deduplication_engine_status"])
+            except DeduplicationEngineAPI.DeduplicationEngineAPIException:
+                logging.exception(f"Failed to upload images for RDI {rdi} to deduplication set {deduplication_set_id}")
+                rdi.deduplication_engine_status = RegistrationDataImport.DEDUP_ENGINE_UPLOAD_ERROR
+                rdi.save(update_fields=["deduplication_engine_status"])
+                return
+
+        rdi.deduplication_engine_status = RegistrationDataImport.DEDUP_ENGINE_UPLOADED
+        rdi.save(update_fields=["deduplication_engine_status"])
 
     def process_deduplication_set(self, deduplication_set_id: str, rdis: QuerySet[RegistrationDataImport]) -> None:
         response_data, status = self.api.process_deduplication(deduplication_set_id)
@@ -108,13 +119,10 @@ class BiometricDeduplicationService:
             deduplication_engine_status__in=[
                 RegistrationDataImport.DEDUP_ENGINE_PENDING,
                 RegistrationDataImport.DEDUP_ENGINE_UPLOAD_ERROR,
+                RegistrationDataImport.DEDUP_ENGINE_ERROR,
             ],
         ).exclude(
             status__in=[
-                RegistrationDataImport.MERGE_SCHEDULED,
-                RegistrationDataImport.MERGED,
-                RegistrationDataImport.MERGING,
-                RegistrationDataImport.MERGE_ERROR,
                 RegistrationDataImport.REFUSED_IMPORT,
             ]
         )
@@ -127,10 +135,6 @@ class BiometricDeduplicationService:
                 deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_UPLOADED
             ).exclude(
                 status__in=[
-                    RegistrationDataImport.MERGE_SCHEDULED,
-                    RegistrationDataImport.MERGED,
-                    RegistrationDataImport.MERGING,
-                    RegistrationDataImport.MERGE_ERROR,
                     RegistrationDataImport.REFUSED_IMPORT,
                 ]
             )
@@ -141,6 +145,8 @@ class BiometricDeduplicationService:
     def delete_deduplication_set(self, program: Program) -> None:
         if program.deduplication_set_id:
             self.api.delete_deduplication_set(str(program.deduplication_set_id))
+            DeduplicationEngineSimilarityPair.objects.filter(program=program).delete()
+
         program.deduplication_set_id = None
         program.save(update_fields=["deduplication_set_id"])
 
@@ -151,6 +157,7 @@ class BiometricDeduplicationService:
         )
 
     def store_similarity_pairs(self, deduplication_set_id: str, similarity_pairs: List[SimilarityPair]) -> None:
+        DeduplicationEngineSimilarityPair.remove_pairs(deduplication_set_id)
         DeduplicationEngineSimilarityPair.bulk_add_pairs(deduplication_set_id, similarity_pairs)
 
     def mark_rdis_as_deduplicated(self, deduplication_set_id: str) -> None:
@@ -162,7 +169,9 @@ class BiometricDeduplicationService:
     def store_rdis_deduplication_statistics(self, deduplication_set_id: str) -> None:
         program = Program.objects.get(deduplication_set_id=deduplication_set_id)
         rdis = RegistrationDataImport.objects.filter(
-            program=program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS
+            status=RegistrationDataImport.IN_REVIEW,
+            program=program,
+            deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS,
         )
         for rdi in rdis:
             rdi.dedup_engine_batch_duplicates = self.get_duplicate_individuals_for_rdi_against_batch_count(rdi)
@@ -174,9 +183,9 @@ class BiometricDeduplicationService:
     def update_rdis_deduplication_statistics(self, program_id: str) -> None:
         program = Program.objects.get(id=program_id)
         rdis = RegistrationDataImport.objects.filter(
+            status=RegistrationDataImport.IN_REVIEW,
             program=program,
             deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED,
-            status=RegistrationDataImport.IN_REVIEW,
         )
         for rdi in rdis:
             rdi.dedup_engine_batch_duplicates = self.get_duplicate_individuals_for_rdi_against_batch_count(rdi)
@@ -197,14 +206,10 @@ class BiometricDeduplicationService:
     ) -> QuerySet[DeduplicationEngineSimilarityPair]:
         """Used in RDI statistics"""
         rdi_individuals = PendingIndividual.objects.filter(registration_data_import=rdi).only("id")
-        return (
-            DeduplicationEngineSimilarityPair.objects.duplicates()
-            .filter(
-                Q(individual1__in=rdi_individuals) & Q(individual2__in=rdi_individuals),
-                program=rdi.program,
-            )
-            .distinct()
-        )
+        return DeduplicationEngineSimilarityPair.objects.filter(
+            Q(individual1__in=rdi_individuals) & Q(individual2__in=rdi_individuals),
+            program=rdi.program,
+        ).distinct()
 
     def get_duplicate_individuals_for_rdi_against_batch_count(self, rdi: RegistrationDataImport) -> int:
         """Used in RDI statistics"""
@@ -225,18 +230,14 @@ class BiometricDeduplicationService:
         from hct_mis_api.apps.utils.models import MergeStatusModel
 
         rdi_individuals = rdi.individuals.filter(is_removed=False).only("id")
-        return (
-            DeduplicationEngineSimilarityPair.objects.duplicates()
-            .filter(
-                Q(individual1__in=rdi_individuals) | Q(individual2__in=rdi_individuals),
-                Q(individual1__duplicate=False) & Q(individual2__duplicate=False),
-                Q(individual1__withdrawn=False) & Q(individual2__withdrawn=False),
-                Q(individual1__rdi_merge_status=MergeStatusModel.MERGED)
-                & Q(individual2__rdi_merge_status=MergeStatusModel.MERGED),
-                program=rdi.program,
-            )
-            .distinct()
-        )
+        return DeduplicationEngineSimilarityPair.objects.filter(
+            Q(individual1__in=rdi_individuals) | Q(individual2__in=rdi_individuals),
+            Q(individual1__duplicate=False) & Q(individual2__duplicate=False),
+            Q(individual1__withdrawn=False) & Q(individual2__withdrawn=False),
+            Q(individual1__rdi_merge_status=MergeStatusModel.MERGED)
+            & Q(individual2__rdi_merge_status=MergeStatusModel.MERGED),
+            program=rdi.program,
+        ).distinct()
 
     def get_duplicates_for_rdi_against_population(
         self, rdi: RegistrationDataImport
@@ -252,8 +253,7 @@ class BiometricDeduplicationService:
         from hct_mis_api.apps.utils.models import MergeStatusModel
 
         return (
-            DeduplicationEngineSimilarityPair.objects.duplicates()
-            .filter(
+            DeduplicationEngineSimilarityPair.objects.filter(
                 Q(individual1__in=rdi_pending_individuals) | Q(individual2__in=rdi_pending_individuals),
                 Q(individual1__duplicate=False) & Q(individual2__duplicate=False),
                 Q(individual1__withdrawn=False) & Q(individual2__withdrawn=False),
@@ -313,5 +313,11 @@ class BiometricDeduplicationService:
             self.mark_rdis_as_deduplication_error(deduplication_set_id)
             logger.error(
                 f"Failed to process deduplication set {deduplication_set_id},"
-                f" dedupe engine state: {deduplication_set_data.state} error: {deduplication_set_data.error}"
+                f" dedupe engine state: {deduplication_set_data.state}"
             )
+
+    def report_false_positive_duplicate(
+        self, individual1_id: str, individual2_id: str, deduplication_set_id: str
+    ) -> None:
+        false_positive_pair = IgnoredKeysPair(first_reference_pk=individual1_id, second_reference_pk=individual2_id)
+        self.api.report_false_positive_duplicate(false_positive_pair, deduplication_set_id)

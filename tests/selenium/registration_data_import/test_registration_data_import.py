@@ -145,7 +145,7 @@ class TestSmokeRegistrationDataImport:
         )
         assert "3" in pageDetailsRegistrationDataImport.getLabelTotalNumberOfHouseholds().text
         assert (
-            "TOTAL NUMBER OF INDIVIDUALS"
+            "TOTAL NUMBER OF REGISTERED INDIVIDUALS"
             in pageDetailsRegistrationDataImport.getLabelizedFieldContainerIndividuals().text
         )
         assert "9" in pageDetailsRegistrationDataImport.getLabelTotalNumberOfIndividuals().text
