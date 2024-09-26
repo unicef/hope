@@ -1,4 +1,4 @@
-import { Grid, Typography } from '@mui/material';
+import { Box, Grid, IconButton, Tooltip, Typography } from '@mui/material';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { renderUserName } from '@utils/utils';
@@ -11,6 +11,7 @@ import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { FieldBorder } from '@core/FieldBorder';
 import { RelatedFollowUpPaymentPlans } from './RelatedFollowUpPaymentPlans';
+import { Info } from '@mui/icons-material';
 
 interface PaymentPlanDetailsProps {
   baseUrl: string;
@@ -32,6 +33,7 @@ export const PaymentPlanDetails = ({
     dispersionStartDate,
     dispersionEndDate,
     followUps,
+    exchangeRate,
   } = paymentPlan;
 
   return (
@@ -88,6 +90,26 @@ export const PaymentPlanDetails = ({
                 <LabelizedField label={t('Dispersion End Date')}>
                   <UniversalMoment>{dispersionEndDate}</UniversalMoment>
                 </LabelizedField>
+              </Grid>
+              <Grid item xs={3}>
+                <Box mr={1}>
+                  <LabelizedField label={t('FX Rate Applied')}>
+                    {exchangeRate}
+                  </LabelizedField>
+                </Box>
+                <Tooltip
+                  title={t(
+                    'If displayed exchange rate differs from Vision, please contact your designated focal point for resolution',
+                  )}
+                >
+                  <IconButton
+                    color="primary"
+                    aria-label="exchange-rate"
+                    data-cy="info-exchange-rate"
+                  >
+                    <Info />
+                  </IconButton>
+                </Tooltip>
               </Grid>
             </Grid>
             <Grid container direction="column" item xs={3} spacing={6}>
