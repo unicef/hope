@@ -16,7 +16,6 @@
       "CommunicationMessageNode",
       "CommunicationMessageRecipientMapNode",
       "DataCollectingTypeNode",
-      "DeduplicationEngineSimilarityPairNode",
       "DeliveryMechanismNode",
       "DeliveryMechanismPerPaymentPlanNode",
       "DocumentNode",
