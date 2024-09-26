@@ -21,7 +21,7 @@ import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 export interface Individual {
   __typename?: 'DeduplicationEngineSimilarityPairIndividualNode';
   unicefId?: string;
-  fullName: string;
+  fullName?: string;
   photo?: string;
 }
 
