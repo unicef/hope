@@ -201,7 +201,7 @@ export const SupportingDocumentsSection = ({
   return (
     <PaperContainer>
       <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Typography variant="h6">{t('Supporting Documents')}</Typography>
+        <Typography variant="h6" data-cy="supporting-documents-title">{t('Supporting Documents')}</Typography>
         <Box display="flex">
           {canUploadFile && (
             <Box mr={1}>
@@ -226,7 +226,7 @@ export const SupportingDocumentsSection = ({
       </Box>
 
       {documents.length === 0 && (
-        <GreyText>{t('No documents uploaded')}</GreyText>
+        <GreyText data-cy="supporting-documents-empty">{t('No documents uploaded')}</GreyText>
       )}
 
       <Collapse in={isExpanded}>
