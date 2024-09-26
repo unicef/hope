@@ -953,6 +953,52 @@ type DeliveredQuantityNode {
   currency: String
 }
 
+enum DeliveryMechanismDataDeliveryMechanismChoice {
+  CARDLESS_CASH_WITHDRAWAL
+  CASH
+  CASH_BY_FSP
+  CHEQUE
+  DEPOSIT_TO_CARD
+  MOBILE_MONEY
+  PRE_PAID_CARD
+  REFERRAL
+  TRANSFER
+  TRANSFER_TO_ACCOUNT
+  VOUCHER
+  ATM_CARD
+  CASH_OVER_THE_COUNTER
+  TRANSFER_TO_DIGITAL_WALLET
+}
+
+type DeliveryMechanismDataNode implements Node {
+  id: ID!
+  rdiMergeStatus: DeliveryMechanismDataRdiMergeStatus!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  individual: IndividualNode!
+  deliveryMechanismChoice: DeliveryMechanismDataDeliveryMechanismChoice
+  deliveryMechanism: DeliveryMechanismNode!
+  data: JSONString!
+  isValid: Boolean
+  validationErrors: JSONString!
+  possibleDuplicateOf: DeliveryMechanismDataNode
+  possibleDuplicates(offset: Int, before: String, after: String, first: Int, last: Int): DeliveryMechanismDataNodeConnection!
+  name: String
+  individualTabData: JSONString
+}
+
+type DeliveryMechanismDataNodeConnection {
+  pageInfo: PageInfo!
+  edges: [DeliveryMechanismDataNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type DeliveryMechanismDataNodeEdge {
+  node: DeliveryMechanismDataNode
+  cursor: String!
+}
+
 input DeliveryMechanismDataObjectType {
   label: String!
   approveStatus: Boolean!
@@ -963,6 +1009,11 @@ input DeliveryMechanismDataPayloadFieldObjectType {
   name: String!
   value: String!
   previousValue: String
+}
+
+enum DeliveryMechanismDataRdiMergeStatus {
+  PENDING
+  MERGED
 }
 
 type DeliveryMechanismNode implements Node {
@@ -981,6 +1032,7 @@ type DeliveryMechanismNode implements Node {
   deliverymechanismperpaymentplanSet(offset: Int, before: String, after: String, first: Int, last: Int): DeliveryMechanismPerPaymentPlanNodeConnection!
   paymentrecordSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
+  deliverymechanismdataSet(offset: Int, before: String, after: String, first: Int, last: Int): DeliveryMechanismDataNodeConnection!
 }
 
 type DeliveryMechanismNodeConnection {
@@ -2511,6 +2563,7 @@ type IndividualNode implements Node {
   paymentrecordSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   collectorPayments(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
+  deliveryMechanismsData: [DeliveryMechanismDataNode]
   complaintTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
   sensitiveTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketSensitiveDetailsNodeConnection!
   individualDataUpdateTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketIndividualDataUpdateDetailsNodeConnection!
