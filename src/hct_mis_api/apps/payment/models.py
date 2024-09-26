@@ -2255,7 +2255,11 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
         "household.Individual", on_delete=models.CASCADE, related_name="delivery_mechanisms_data"
     )
     delivery_mechanism_choice = models.CharField(
-        max_length=255, verbose_name=_("Delivery Mechanism"), choices=DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES
+        max_length=255,
+        verbose_name=_("Delivery Mechanism"),
+        choices=DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES,
+        null=True,
+        blank=True,
     )  # TODO MB drop later
     delivery_mechanism = models.ForeignKey("DeliveryMechanism", on_delete=models.PROTECT)
     data = JSONField(default=dict, blank=True)
@@ -2300,9 +2304,13 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
         associated_objects = {
             _INDIVIDUAL: self.individual,
             _HOUSEHOLD: self.individual.household,
-            _DELIVERY_MECHANISM_DATA: json.loads(self.data) if not isinstance(self.data, dict) else self.data,
+            _DELIVERY_MECHANISM_DATA: self._data,
         }
         return associated_objects.get(associated_with)
+
+    @property
+    def _data(self) -> Dict:
+        return json.loads(self.data) if not isinstance(self.data, dict) else self.data
 
     @cached_property
     def delivery_data(self) -> Dict:
@@ -2372,6 +2380,10 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
     @property
     def all_fields(self) -> List[dict]:
         return self.delivery_mechanism.all_fields
+
+    @property
+    def all_dm_fields(self) -> List[dict]:
+        return self.delivery_mechanism.all_dm_fields
 
     @property
     def unique_fields(self) -> List[str]:

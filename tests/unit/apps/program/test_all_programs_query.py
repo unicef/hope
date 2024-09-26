@@ -314,6 +314,27 @@ class TestAllProgramsQuery(APITestCase):
             variables={},
         )
         RegistrationDataImportFactory(
+            deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_PENDING,
+            data_source=RegistrationDataImport.XLS,
+            program=program1,
+        )
+        self.snapshot_graphql_request(
+            request_string="""
+                    query canRunDeduplicationAndIsDeduplicationDisabled {
+                      canRunDeduplication
+                      isDeduplicationDisabled
+                    }
+                    """,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                    "Program": self.id_to_base64(program1.id, "ProgramNode"),
+                },
+            },
+            variables={},
+        )
+        RegistrationDataImportFactory(
             deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS,
             data_source=RegistrationDataImport.XLS,
             program=program1,

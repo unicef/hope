@@ -145,34 +145,3 @@ class TestRegistrationDataImportDatahub(TestCase):
             self.rdi,
         )
 
-
-class TestDeduplicationEngineSimilarityPair(TestCase):
-    @classmethod
-    def setUpTestData(cls) -> None:
-        super().setUpTestData()
-        cls.ba = create_afghanistan()
-        cls.program = ProgramFactory(business_area=cls.ba, status=Program.ACTIVE)
-
-    def test_is_duplicate(self) -> None:
-        self.ba.biometric_deduplication_threshold = 50.55
-        self.ba.save()
-        ind1, ind2 = sorted([IndividualFactory(), IndividualFactory()], key=lambda x: x.id)
-        ind3, ind4 = sorted([IndividualFactory(), IndividualFactory()], key=lambda x: x.id)
-
-        desp1 = DeduplicationEngineSimilarityPair.objects.create(
-            program=self.program,
-            individual1=ind1,
-            individual2=ind2,
-            similarity_score=90.55,
-        )
-        desp2 = DeduplicationEngineSimilarityPair.objects.create(
-            program=self.program,
-            individual1=ind3,
-            individual2=ind4,
-            similarity_score=40.55,
-        )
-
-        self.assertEqual(desp1._is_duplicate, True)
-        self.assertEqual(desp2._is_duplicate, False)
-        self.assertEqual(DeduplicationEngineSimilarityPair.objects.duplicates().count(), 1)
-        self.assertEqual(DeduplicationEngineSimilarityPair.objects.duplicates().first(), desp1)

@@ -126,7 +126,7 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render loading
                     class="sc-iBdnpw jMIPuq"
                     data-cy="table-label"
                   >
-                    Is Deduplicated?
+                    Biometric Deduplicated
                   </span>
                 </th>
                 <th
@@ -580,7 +580,7 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render with da
                     class="sc-iBdnpw jMIPuq"
                     data-cy="table-label"
                   >
-                    Is Deduplicated?
+                    Biometric Deduplicated
                   </span>
                 </th>
                 <th

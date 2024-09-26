@@ -12,17 +12,27 @@ from hct_mis_api.apps.registration_datahub.apis.deduplication_engine import (
     DeduplicationEngineAPI,
     DeduplicationImage,
     DeduplicationSet,
+    DeduplicationSetConfig,
+    IgnoredKeysPair,
 )
 
 
 @pytest.fixture(autouse=True)
 def mock_deduplication_engine_env_vars() -> None:
-    with mock.patch.dict(os.environ, {"DEDUPLICATION_ENGINE_API_KEY": "TEST", "DEDUPLICATION_ENGINE_API_URL": "TEST"}):
+    with mock.patch.dict(
+        os.environ,
+        {
+            "DEDUPLICATION_ENGINE_API_KEY": "TEST",
+            "DEDUPLICATION_ENGINE_API_URL": "TEST",
+        },
+    ):
         yield
 
 
 class DeduplicationEngineApiTest(TestCase):
-    @patch("hct_mis_api.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI._delete")
+    @patch(
+        "hct_mis_api.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI._delete"
+    )
     def test_delete_deduplication_set(self, mock_delete: mock.Mock) -> None:
         api = DeduplicationEngineAPI()
 
@@ -31,23 +41,32 @@ class DeduplicationEngineApiTest(TestCase):
 
         api.delete_deduplication_set(deduplication_set_id)
 
-        mock_delete.assert_called_once_with(f"deduplication_sets/{deduplication_set_id}/")
+        mock_delete.assert_called_once_with(
+            f"deduplication_sets/{deduplication_set_id}/"
+        )
 
-    @patch("hct_mis_api.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI._post")
+    @patch(
+        "hct_mis_api.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI._post"
+    )
     def test_create_deduplication_set(self, mock_post: mock.Mock) -> None:
         api = DeduplicationEngineAPI()
 
         deduplication_set = DeduplicationSet(
             reference_pk=str(uuid.uuid4()),
             notification_url="http://test.com",
+            config=DeduplicationSetConfig(face_distance_threshold=0.5),
         )
         mock_post.return_value = {}, 200
 
         api.create_deduplication_set(deduplication_set)
+        print(dataclasses.asdict(deduplication_set))
+        mock_post.assert_called_once_with(
+            "deduplication_sets/", dataclasses.asdict(deduplication_set)
+        )
 
-        mock_post.assert_called_once_with("deduplication_sets/", dataclasses.asdict(deduplication_set))
-
-    @patch("hct_mis_api.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI._get")
+    @patch(
+        "hct_mis_api.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI._get"
+    )
     def test_get_deduplication_set(self, get_mock: mock.Mock) -> None:
         api = DeduplicationEngineAPI()
         deduplication_set_id = str(uuid.uuid4())
@@ -57,7 +76,9 @@ class DeduplicationEngineApiTest(TestCase):
 
         get_mock.assert_called_once_with(f"deduplication_sets/{deduplication_set_id}/")
 
-    @patch("hct_mis_api.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI._post")
+    @patch(
+        "hct_mis_api.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI._post"
+    )
     def test_bulk_upload_images(self, mock_post: mock.Mock) -> None:
         api = DeduplicationEngineAPI()
         deduplication_set_id = str(uuid.uuid4())
@@ -77,7 +98,9 @@ class DeduplicationEngineApiTest(TestCase):
             [dataclasses.asdict(image) for image in images],
         )
 
-    @patch("hct_mis_api.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI._delete")
+    @patch(
+        "hct_mis_api.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI._delete"
+    )
     def test_bulk_delete_images(self, mock_delete: mock.Mock) -> None:
         api = DeduplicationEngineAPI()
         deduplication_set_id = str(uuid.uuid4())
@@ -85,9 +108,13 @@ class DeduplicationEngineApiTest(TestCase):
 
         api.bulk_delete_images(deduplication_set_id)
 
-        mock_delete.assert_called_once_with(f"deduplication_sets/{deduplication_set_id}/images_bulk/")
+        mock_delete.assert_called_once_with(
+            f"deduplication_sets/{deduplication_set_id}/images_bulk/"
+        )
 
-    @patch("hct_mis_api.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI._get")
+    @patch(
+        "hct_mis_api.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI._get"
+    )
     def test_get_duplicates(self, get_mock: mock.Mock) -> None:
         api = DeduplicationEngineAPI()
         deduplication_set_id = str(uuid.uuid4())
@@ -95,9 +122,13 @@ class DeduplicationEngineApiTest(TestCase):
 
         api.get_duplicates(deduplication_set_id)
 
-        get_mock.assert_called_once_with(f"deduplication_sets/{deduplication_set_id}/duplicates/")
+        get_mock.assert_called_once_with(
+            f"deduplication_sets/{deduplication_set_id}/duplicates/"
+        )
 
-    @patch("hct_mis_api.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI._post")
+    @patch(
+        "hct_mis_api.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI._post"
+    )
     def test_process_deduplication(self, post_mock: mock.Mock) -> None:
         api = DeduplicationEngineAPI()
         deduplication_set_id = str(uuid.uuid4())
@@ -106,5 +137,27 @@ class DeduplicationEngineApiTest(TestCase):
         api.process_deduplication(deduplication_set_id)
 
         post_mock.assert_called_once_with(
-            f"deduplication_sets/{deduplication_set_id}/process/", validate_response=False
+            f"deduplication_sets/{deduplication_set_id}/process/",
+            validate_response=False,
+        )
+
+    @patch(
+        "hct_mis_api.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI._post"
+    )
+    def test_report_false_positive_duplicate(self, post_mock: mock.Mock) -> None:
+        api = DeduplicationEngineAPI()
+        deduplication_set_id = str(uuid.uuid4())
+        post_mock.return_value = {}, 200
+
+        api.report_false_positive_duplicate(
+            IgnoredKeysPair(first_reference_pk="123", second_reference_pk="456"),
+            deduplication_set_id,
+        )
+
+        post_mock.assert_called_once_with(
+            f"deduplication_sets/{deduplication_set_id}/ignored_keys/",
+            {
+                "first_reference_pk": "123",
+                "second_reference_pk": "456",
+            },
         )
