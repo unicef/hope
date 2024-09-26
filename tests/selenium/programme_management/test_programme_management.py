@@ -1,5 +1,6 @@
 import random
 from datetime import datetime
+from time import sleep
 
 from django.conf import settings
 from django.core.management import call_command
@@ -865,6 +866,9 @@ class TestManualCalendar:
         pageProgrammeManagement.getButtonSave().click()
 
         # Check Details page
+        sleep(20)
+        new_url = pageProgrammeDetails.wait_for_new_url(programme_edit_url, 20)
+        assert new_url == programme_edit_url
         assert "details" in pageProgrammeDetails.wait_for_new_url(programme_edit_url, 20).split("/")
 
         partner_name_elements_new = pageProgrammeManagement.driver.find_elements(
