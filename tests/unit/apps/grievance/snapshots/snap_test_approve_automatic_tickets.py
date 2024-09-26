@@ -88,15 +88,6 @@ snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudicatio
             'grievanceTicket': {
                 'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZToyYjQxOWNlMy0zMjk3LTQ3ZWUtYTQ3Zi00MzQ0MmFiYWM3M2U=',
                 'needsAdjudicationTicketDetails': {
-                    'dedupEngineSimilarityPair': {
-                        'individual1': {
-                            'fullName': 'Robin Ford'
-                        },
-                        'individual2': {
-                            'fullName': 'Benjamin Butler'
-                        },
-                        'similarityScore': '55.55'
-                    },
                     'selectedDistinct': [
                     ],
                     'selectedDuplicates': [
@@ -117,15 +108,6 @@ snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudicatio
             'grievanceTicket': {
                 'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZToyYjQxOWNlMy0zMjk3LTQ3ZWUtYTQ3Zi00MzQ0MmFiYWM3M2U=',
                 'needsAdjudicationTicketDetails': {
-                    'dedupEngineSimilarityPair': {
-                        'individual1': {
-                            'fullName': 'Robin Ford'
-                        },
-                        'individual2': {
-                            'fullName': 'Benjamin Butler'
-                        },
-                        'similarityScore': '55.55'
-                    },
                     'selectedDistinct': [
                         {
                             'unicefId': 'IND-123-123'
@@ -149,15 +131,6 @@ snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudicatio
             'grievanceTicket': {
                 'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZToyYjQxOWNlMy0zMjk3LTQ3ZWUtYTQ3Zi00MzQ0MmFiYWM3M2U=',
                 'needsAdjudicationTicketDetails': {
-                    'dedupEngineSimilarityPair': {
-                        'individual1': {
-                            'fullName': 'Robin Ford'
-                        },
-                        'individual2': {
-                            'fullName': 'Benjamin Butler'
-                        },
-                        'similarityScore': '55.55'
-                    },
                     'selectedDistinct': [
                     ],
                     'selectedDuplicates': [
