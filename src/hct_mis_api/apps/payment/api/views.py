@@ -14,7 +14,6 @@ from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.generics import get_object_or_404
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 from rest_framework_extensions.cache.decorators import cache_response
 
@@ -29,7 +28,11 @@ from hct_mis_api.apps.account.api.permissions import (
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
-from hct_mis_api.apps.core.api.mixins import BusinessAreaMixin, BusinessAreaProgramMixin
+from hct_mis_api.apps.core.api.mixins import (
+    ActionMixin,
+    BusinessAreaMixin,
+    BusinessAreaProgramMixin,
+)
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.payment.api.caches import PaymentPlanKeyConstructor
@@ -171,43 +174,51 @@ class PaymentPlanManagerialViewSet(BusinessAreaMixin, PaymentPlanMixin, mixins.L
         return action_to_permissions_map.get(action_name)
 
 
-class PaymentPlanSupportingDocumentUploadView(APIView):
-    permission_classes = [PaymentPlanSupportingDocumentUploadPermission]
+class PaymentPlanSupportingDocumentViewSet(
+    ActionMixin, mixins.CreateModelMixin, mixins.DestroyModelMixin, GenericViewSet
+):
+    serializer_class = PaymentPlanSupportingDocumentSerializer
+    lookup_field = "file_id"
 
-    def post(self, request: Request, business_area: str, program_id: str, payment_plan_id: str) -> Response:
-        payment_decode_id = decode_id_string(payment_plan_id)
-        payment_plan = get_object_or_404(PaymentPlan, id=payment_decode_id)
+    serializer_classes_by_action = {
+        "create": PaymentPlanSupportingDocumentSerializer,
+        "delete": PaymentPlanSupportingDocumentSerializer,
+    }
+    permission_classes_by_action = {
+        "create": [PaymentPlanSupportingDocumentUploadPermission],
+        "delete": [PaymentPlanSupportingDocumentDeletePermission],
+    }
 
-        serializer = PaymentPlanSupportingDocumentSerializer(data=request.data, context={"payment_plan": payment_plan})
+    def get_queryset(self) -> QuerySet:
+        payment_plan_id = decode_id_string(self.kwargs.get("payment_plan_id"))
+        return PaymentPlanSupportingDocument.objects.filter(payment_plan_id=payment_plan_id)
+
+    def get_object(self) -> PaymentPlanSupportingDocument:
+        payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(self.kwargs.get("payment_plan_id")))
+        return get_object_or_404(
+            PaymentPlanSupportingDocument, id=decode_id_string(self.kwargs.get("file_id")), payment_plan=payment_plan
+        )
+
+    def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(kwargs.get("payment_plan_id")))
+        serializer = self.get_serializer(data=request.data, context={"payment_plan": payment_plan})
         if serializer.is_valid():
             serializer.save(payment_plan=payment_plan)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-class PaymentPlanSupportingDocumentView(APIView):
-    permission_classes = []
-
-    def delete(
-        self, request: Request, business_area: str, program_id: str, payment_plan_id: str, file_id: str
-    ) -> Response:
+    def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         self.permission_classes = [PaymentPlanSupportingDocumentDeletePermission]
-        payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
-
-        document = get_object_or_404(
-            PaymentPlanSupportingDocument, id=decode_id_string(file_id), payment_plan=payment_plan
-        )
+        document = self.get_object()
         document.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def get(
-        self, request: Request, business_area: str, program_id: str, payment_plan_id: str, file_id: str
-    ) -> FileResponse:
-        self.permission_classes = [PaymentPlanSupportingDocumentDownloadPermission]
-        payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
-
-        document = get_object_or_404(
-            PaymentPlanSupportingDocument, id=decode_id_string(file_id), payment_plan=payment_plan
-        )
-
+    @action(
+        detail=True,
+        methods=["get"],
+        url_path="download",
+        permission_classes=[PaymentPlanSupportingDocumentDownloadPermission],
+    )
+    def download(self, request: Request, *args: Any, **kwargs: Any) -> FileResponse:
+        document = self.get_object()
         return FileResponse(document.file.open(), as_attachment=True, filename=document.file.name)

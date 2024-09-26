@@ -109,7 +109,7 @@ class PaymentPlanSupportingDocumentUploadViewTests(TestCase):
         payment_plan_id_base64 = base64.b64encode(f"PaymentPlanNode:{str(cls.payment_plan.id)}".encode()).decode()
 
         cls.url = reverse(
-            "api:payment-plan:supporting_documents_upload",
+            "api:payment-plan:supporting_documents",
             kwargs={
                 "business_area": "afghanistan",
                 "program_id": program_id_base64,
@@ -158,17 +158,17 @@ class PaymentPlanSupportingDocumentViewTests(TestCase):
         cls.document = PaymentPlanSupportingDocument.objects.create(
             payment_plan=cls.payment_plan, title="Test Document333", file=SimpleUploadedFile("test.pdf", b"aaa")
         )
-        program_id_base64 = base64.b64encode(f"ProgramNode:{str(cls.payment_plan.program.id)}".encode()).decode()
-        payment_plan_id_base64 = base64.b64encode(f"PaymentPlanNode:{str(cls.payment_plan.id)}".encode()).decode()
-        supporting_document_id_base64 = base64.b64encode(f"PaymentPlanSupportingDocumentNode:{str(cls.document.id)}".encode()).decode()
+        cls.program_id_base64 = base64.b64encode(f"ProgramNode:{str(cls.payment_plan.program.id)}".encode()).decode()
+        cls.payment_plan_id_base64 = base64.b64encode(f"PaymentPlanNode:{str(cls.payment_plan.id)}".encode()).decode()
+        cls.supporting_document_id_base64 = base64.b64encode(f"PaymentPlanSupportingDocumentNode:{str(cls.document.id)}".encode()).decode()
 
         cls.url = reverse(
-            "api:payment-plan:supporting_documents",
+            "api:payment-plan:supporting_documents-detail",
             kwargs={
                 "business_area": "afghanistan",
-                "program_id": program_id_base64,
-                "payment_plan_id": payment_plan_id_base64,
-                "file_id": supporting_document_id_base64,
+                "program_id": cls.program_id_base64,
+                "payment_plan_id": cls.payment_plan_id_base64,
+                "file_id": cls.supporting_document_id_base64,
             },
         )
 
@@ -178,6 +178,16 @@ class PaymentPlanSupportingDocumentViewTests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
     def test_get_document_success(self) -> None:
+        url = reverse(
+            "api:payment-plan:supporting_documents-download",
+            kwargs={
+                "business_area": "afghanistan",
+                "program_id": self.program_id_base64,
+                "payment_plan_id": self.payment_plan_id_base64,
+                "file_id": self.supporting_document_id_base64,
+            },
+        )
+
         self.client.force_authenticate(user=self.user)
         response = self.client.get(self.url)
 
