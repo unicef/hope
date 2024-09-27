@@ -1354,23 +1354,6 @@ class FspXlsxTemplatePerDeliveryMechanism(TimeStampedUUIDModel):
     def __str__(self) -> str:
         return f"{self.financial_service_provider.name} - {self.xlsx_template} - {self.delivery_mechanism}"  # pragma: no cover
 
-    def clean(self) -> None:
-        missing_required_core_fields = [
-            required_field
-            for required_field in self.delivery_mechanism.required_fields
-            if required_field not in self.xlsx_template.core_fields
-        ]
-        if missing_required_core_fields:
-            raise ValidationError(
-                f"{missing_required_core_fields} fields are required by delivery mechanism "
-                f"{self.delivery_mechanism} and must be present in the template core fields"
-            )
-
-        if self.delivery_mechanism not in self.financial_service_provider.delivery_mechanisms.all():
-            raise ValidationError(
-                f"Delivery Mechanism {self.delivery_mechanism} is not supported by Financial Service Provider {self.financial_service_provider}"
-            )
-
 
 class FinancialServiceProvider(LimitBusinessAreaModelMixin, TimeStampedUUIDModel):
     COMMUNICATION_CHANNEL_API = "API"

@@ -349,12 +349,50 @@ class FinancialServiceProviderXlsxTemplateAdmin(HOPEModelAdminBase):
         return request.user.can_change_fsp()
 
 
+class FspXlsxTemplatePerDeliveryMechanismForm(forms.ModelForm):
+    class Meta:
+        model = FspXlsxTemplatePerDeliveryMechanism
+        fields = ("financial_service_provider", "delivery_mechanism", "xlsx_template")
+
+    def clean(self) -> Optional[Dict[str, Any]]:
+        cleaned_data = super().clean()
+        delivery_mechanism = cleaned_data.get("delivery_mechanism")
+        financial_service_provider = cleaned_data.get("financial_service_provider")
+        xlsx_template = cleaned_data.get("xlsx_template")
+
+        if not delivery_mechanism or not financial_service_provider:
+            return cleaned_data
+
+        missing_required_core_fields = [
+            required_field
+            for required_field in delivery_mechanism.required_fields
+            if required_field not in xlsx_template.core_fields
+        ]
+        if missing_required_core_fields:
+            raise ValidationError(
+                f"{missing_required_core_fields} fields are required by delivery mechanism "
+                f"{delivery_mechanism} and must be present in the template core fields"
+            )
+
+        error_message = f"Delivery Mechanism {delivery_mechanism} is not supported by Financial Service Provider {financial_service_provider}"
+        # to work both in inline and standalone
+        if delivery_mechanisms := self.data.get("delivery_mechanisms"):
+            if delivery_mechanism and str(delivery_mechanism.id) not in delivery_mechanisms:
+                raise ValidationError(error_message)
+        else:
+            if delivery_mechanism and delivery_mechanism not in financial_service_provider.delivery_mechanisms.all():
+                raise ValidationError(error_message)
+
+        return cleaned_data
+
+
 @admin.register(FspXlsxTemplatePerDeliveryMechanism)
 class FspXlsxTemplatePerDeliveryMechanismAdmin(HOPEModelAdminBase):
     list_display = ("financial_service_provider", "delivery_mechanism", "xlsx_template", "created_by")
     fields = ("financial_service_provider", "delivery_mechanism", "xlsx_template")
     autocomplete_fields = ("financial_service_provider", "xlsx_template")
     exclude = ("delivery_mechanism_choice",)
+    form = FspXlsxTemplatePerDeliveryMechanismForm
 
     def save_model(
         self, request: HttpRequest, obj: FspXlsxTemplatePerDeliveryMechanism, form: "Form", change: bool
@@ -406,6 +444,7 @@ class FinancialServiceProviderAdminForm(forms.ModelForm):
 
 
 class FspXlsxTemplatePerDeliveryMechanismAdminInline(admin.TabularInline):
+    form = FspXlsxTemplatePerDeliveryMechanismForm
     model = FspXlsxTemplatePerDeliveryMechanism
     extra = 0
     readonly_fields = ("created_by",)
