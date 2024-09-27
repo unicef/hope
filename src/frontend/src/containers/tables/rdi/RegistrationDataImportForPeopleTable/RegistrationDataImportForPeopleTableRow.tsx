@@ -80,7 +80,7 @@ export function RegistrationDataImportForPeopleTableRow({
         </UniversalMoment>
       </TableCell>
       <TableCell align="center">
-        {registrationDataImport.isDeduplicated}
+        {registrationDataImport.biometricDeduplicated}
       </TableCell>
       <TableCell align="right">
         {registrationDataImport.numberOfIndividuals}

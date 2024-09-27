@@ -472,6 +472,7 @@ class DeliveryMechanismDataAdmin(HOPEModelAdminBase):
     list_display = ("individual", "delivery_mechanism", "is_valid")
     raw_id_fields = ("individual", "possible_duplicate_of")
     readonly_fields = ("possible_duplicate_of", "unique_key", "signature_hash", "validation_errors")
+    exclude = ("delivery_mechanism_choice",)
 
 
 @admin.register(DeliveryMechanism)
