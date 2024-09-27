@@ -1,3 +1,4 @@
+import uuid
 from typing import Any
 from unittest.mock import MagicMock, patch
 
@@ -6,6 +7,7 @@ from django.test import TestCase
 
 import pytest
 
+from hct_mis_api.apps.registration_data.models import DeduplicationEngineSimilarityPair
 from hct_mis_api.apps.account.fixtures import (
     BusinessAreaFactory,
     PartnerFactory,
@@ -31,6 +33,7 @@ from hct_mis_api.apps.grievance.services.data_change.utils import (
 )
 from hct_mis_api.apps.grievance.services.needs_adjudication_ticket_services import (
     close_needs_adjudication_ticket_service,
+    create_grievance_ticket_with_details,
 )
 from hct_mis_api.apps.grievance.utils import (
     validate_all_individuals_before_close_needs_adjudication,
@@ -80,7 +83,11 @@ class TestGrievanceUtils(TestCase):
             MagicMock(values_list=MagicMock(return_value=["integer_field"])),
         ]
 
-        flex_fields = {"decimal_field": "321.11", "integer_field": "123", "string_field": "some_string"}
+        flex_fields = {
+            "decimal_field": "321.11",
+            "integer_field": "123",
+            "string_field": "some_string",
+        }
         cast_flex_fields(flex_fields)
 
         self.assertEqual(flex_fields["string_field"], "some_string")
@@ -125,7 +132,10 @@ class TestGrievanceUtils(TestCase):
     def test_verify_flex_fields(self) -> None:
         with pytest.raises(ValueError) as e:
             verify_flex_fields({"key": "value"}, "associated_with")
-            assert str(e.value) == "associated_with argument must be one of ['household', 'individual']"
+            assert (
+                str(e.value)
+                == "associated_with argument must be one of ['household', 'individual']"
+            )
 
         with pytest.raises(ValueError) as e:
             verify_flex_fields({"key": "value"}, "individuals")
@@ -141,14 +151,23 @@ class TestGrievanceUtils(TestCase):
 
         self.assertEqual(IndividualRoleInHousehold.objects.all().count(), 0)
         with pytest.raises(ValidationError) as e:
-            IndividualRoleInHouseholdFactory(household=household, individual=individuals[0], role=ROLE_PRIMARY)
+            IndividualRoleInHouseholdFactory(
+                household=household, individual=individuals[0], role=ROLE_PRIMARY
+            )
             handle_role(ROLE_PRIMARY, household, individuals[0])
-            assert str(e.value) == "Ticket cannot be closed, primary collector role has to be reassigned"
+            assert (
+                str(e.value)
+                == "Ticket cannot be closed, primary collector role has to be reassigned"
+            )
 
         # just remove exists roles
-        IndividualRoleInHousehold.objects.filter(household=household).update(role=ROLE_ALTERNATE)
+        IndividualRoleInHousehold.objects.filter(household=household).update(
+            role=ROLE_ALTERNATE
+        )
         handle_role("OTHER_ROLE_XD", household, individuals[0])
-        self.assertEqual(IndividualRoleInHousehold.objects.filter(household=household).count(), 0)
+        self.assertEqual(
+            IndividualRoleInHousehold.objects.filter(household=household).count(), 0
+        )
 
         # create new role
         handle_role(ROLE_ALTERNATE, household, individuals[0])
@@ -166,7 +185,13 @@ class TestGrievanceUtils(TestCase):
             individuals_data=[{}],
         )
         individual = individuals[0]
-        document_data = {"key": "TAX", "country": "AFG", "number": "111", "photo": "photo", "photoraw": "photo_raw"}
+        document_data = {
+            "key": "TAX",
+            "country": "AFG",
+            "number": "111",
+            "photo": "photo",
+            "photoraw": "photo_raw",
+        }
 
         with pytest.raises(ValidationError) as e:
             DocumentFactory(
@@ -183,7 +208,10 @@ class TestGrievanceUtils(TestCase):
             document_type.unique_for_individual = True
             document_type.save()
             handle_add_document(document_data, individual)
-            assert str(e.value) == "Document of type tax already exists for this individual"
+            assert (
+                str(e.value)
+                == "Document of type tax already exists for this individual"
+            )
 
         Document.objects.all().delete()
         self.assertEqual(Document.objects.all().count(), 0)
@@ -194,9 +222,13 @@ class TestGrievanceUtils(TestCase):
 
     def test_validate_individual_for_need_adjudication(self) -> None:
         area_type_level_1 = AreaTypeFactory(name="Province", area_level=1)
-        area_type_level_2 = AreaTypeFactory(name="District", area_level=2, parent=area_type_level_1)
+        area_type_level_2 = AreaTypeFactory(
+            name="District", area_level=2, parent=area_type_level_1
+        )
         ghazni = AreaFactory(name="Ghazni", area_type=area_type_level_1, p_code="area1")
-        doshi = AreaFactory(name="Doshi", area_type=area_type_level_2, p_code="area2", parent=ghazni)
+        doshi = AreaFactory(
+            name="Doshi", area_type=area_type_level_2, p_code="area2", parent=ghazni
+        )
         business_area = BusinessAreaFactory(slug="afghanistan")
         program = ProgramFactory(business_area=business_area)
         grievance = GrievanceTicketFactory(
@@ -208,13 +240,33 @@ class TestGrievanceUtils(TestCase):
         grievance.programs.add(program)
 
         _, individuals_1 = create_household(
-            {"size": 1, "business_area": business_area, "program": program, "admin2": doshi},
-            {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe"},
+            {
+                "size": 1,
+                "business_area": business_area,
+                "program": program,
+                "admin2": doshi,
+            },
+            {
+                "given_name": "John",
+                "family_name": "Doe",
+                "middle_name": "",
+                "full_name": "John Doe",
+            },
         )
 
         _, individuals_2 = create_household(
-            {"size": 1, "business_area": business_area, "program": program, "admin2": doshi},
-            {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe"},
+            {
+                "size": 1,
+                "business_area": business_area,
+                "program": program,
+                "admin2": doshi,
+            },
+            {
+                "given_name": "John",
+                "family_name": "Doe",
+                "middle_name": "",
+                "full_name": "John Doe",
+            },
         )
 
         ticket_details = TicketNeedsAdjudicationDetailsFactory(
@@ -231,17 +283,34 @@ class TestGrievanceUtils(TestCase):
         partner_unicef = PartnerFactory()
 
         with pytest.raises(PermissionDenied) as e:
-            validate_individual_for_need_adjudication(partner, individuals_1[0], ticket_details)
-            assert str(e.value) == "Permission Denied: User does not have access to select individual"
+            validate_individual_for_need_adjudication(
+                partner, individuals_1[0], ticket_details
+            )
+            assert (
+                str(e.value)
+                == "Permission Denied: User does not have access to select individual"
+            )
 
         with pytest.raises(ValidationError) as e:
             _, individuals = create_household(
-                {"size": 1, "business_area": business_area, "admin2": doshi, "program": program},
-                {"given_name": "Tester", "family_name": "Test", "middle_name": "", "full_name": "Tester Test"},
+                {
+                    "size": 1,
+                    "business_area": business_area,
+                    "admin2": doshi,
+                    "program": program,
+                },
+                {
+                    "given_name": "Tester",
+                    "family_name": "Test",
+                    "middle_name": "",
+                    "full_name": "Tester Test",
+                },
             )
             individuals[0].unicef_id = "IND-333"
             individuals[0].save()
-            validate_individual_for_need_adjudication(partner_unicef, individuals[0], ticket_details)
+            validate_individual_for_need_adjudication(
+                partner_unicef, individuals[0], ticket_details
+            )
             assert (
                 str(e.value)
                 == "The selected individual IND-333 is not valid, must be one of those attached to the ticket"
@@ -251,26 +320,45 @@ class TestGrievanceUtils(TestCase):
 
         with pytest.raises(ValidationError) as e:
             individuals[0].withdraw()
-            validate_individual_for_need_adjudication(partner_unicef, individuals[0], ticket_details)
-            assert str(e.value) == "The selected individual IND-333 is not valid, must be not withdrawn"
+            validate_individual_for_need_adjudication(
+                partner_unicef, individuals[0], ticket_details
+            )
+            assert (
+                str(e.value)
+                == "The selected individual IND-333 is not valid, must be not withdrawn"
+            )
 
             individuals[0].unwithdraw()
-            validate_individual_for_need_adjudication(partner_unicef, individuals[0], ticket_details)
+            validate_individual_for_need_adjudication(
+                partner_unicef, individuals[0], ticket_details
+            )
 
         ticket_details.selected_distinct.remove(individuals[0])
         individuals[0].unwithdraw()
-        validate_individual_for_need_adjudication(partner_unicef, individuals[0], ticket_details)
+        validate_individual_for_need_adjudication(
+            partner_unicef, individuals[0], ticket_details
+        )
 
     def test_validate_all_individuals_before_close_needs_adjudication(self) -> None:
         BusinessAreaFactory(slug="afghanistan")
         _, individuals_1 = create_household(
             {"size": 1},
-            {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe"},
+            {
+                "given_name": "John",
+                "family_name": "Doe",
+                "middle_name": "",
+                "full_name": "John Doe",
+            },
         )
 
         _, individuals_2 = create_household(
             {"size": 1},
-            {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe"},
+            {
+                "given_name": "John",
+                "family_name": "Doe",
+                "middle_name": "",
+                "full_name": "John Doe",
+            },
         )
         ticket_details = TicketNeedsAdjudicationDetailsFactory(
             golden_records_individual=individuals_1[0],
@@ -282,7 +370,10 @@ class TestGrievanceUtils(TestCase):
 
         with pytest.raises(ValidationError) as e:
             validate_all_individuals_before_close_needs_adjudication(ticket_details)
-            assert str(e.value) == "Close ticket is not possible when all Individuals are flagged as duplicates"
+            assert (
+                str(e.value)
+                == "Close ticket is not possible when all Individuals are flagged as duplicates"
+            )
 
         with pytest.raises(ValidationError) as e:
             validate_all_individuals_before_close_needs_adjudication(ticket_details)
@@ -295,7 +386,10 @@ class TestGrievanceUtils(TestCase):
             ticket_details.selected_distinct.add(individuals_2[0])
             ticket_details.save()
             validate_all_individuals_before_close_needs_adjudication(ticket_details)
-            assert str(e.value) == "Close ticket is possible when all active Individuals are flagged"
+            assert (
+                str(e.value)
+                == "Close ticket is possible when all active Individuals are flagged"
+            )
 
         ticket_details.selected_individuals.add(individuals_1[0])
         validate_all_individuals_before_close_needs_adjudication(ticket_details)
@@ -314,11 +408,21 @@ class TestGrievanceUtils(TestCase):
         grievance.programs.add(program)
         _, individuals_1 = create_household(
             {"size": 2, "business_area": ba, "program": program},
-            {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe"},
+            {
+                "given_name": "John",
+                "family_name": "Doe",
+                "middle_name": "",
+                "full_name": "John Doe",
+            },
         )
         _, individuals_2 = create_household(
             {"size": 1, "business_area": ba, "program": program},
-            {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe"},
+            {
+                "given_name": "John",
+                "family_name": "Doe",
+                "middle_name": "",
+                "full_name": "John Doe",
+            },
         )
         ind_1 = individuals_1[0]
         ind_2 = individuals_2[0]
@@ -357,11 +461,21 @@ class TestGrievanceUtils(TestCase):
         grievance.programs.add(program)
         _, individuals_1 = create_household(
             {"size": 2, "business_area": ba, "program": program},
-            {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe"},
+            {
+                "given_name": "John",
+                "family_name": "Doe",
+                "middle_name": "",
+                "full_name": "John Doe",
+            },
         )
         _, individuals_2 = create_household(
             {"size": 1, "business_area": ba, "program": program},
-            {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe"},
+            {
+                "given_name": "John",
+                "family_name": "Doe",
+                "middle_name": "",
+                "full_name": "John Doe",
+            },
         )
         ind_1 = individuals_1[0]
         ind_2 = individuals_2[0]
@@ -381,7 +495,10 @@ class TestGrievanceUtils(TestCase):
 
         with pytest.raises(ValidationError) as e:
             close_needs_adjudication_ticket_service(grievance, user)
-            assert str(e.value) == "Close ticket is not possible when all Individuals are flagged as duplicates"
+            assert (
+                str(e.value)
+                == "Close ticket is not possible when all Individuals are flagged as duplicates"
+            )
 
         gr = GrievanceTicketFactory(
             category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
@@ -401,3 +518,76 @@ class TestGrievanceUtils(TestCase):
         ticket_details_2.save()
 
         close_needs_adjudication_ticket_service(gr, user)
+
+    @patch.dict(
+        "os.environ",
+        {
+            "DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key",
+            "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com",
+        },
+    )
+    @patch(
+        "hct_mis_api.apps.registration_datahub.services.biometric_deduplication.BiometricDeduplicationService.report_false_positive_duplicate"
+    )
+    def test_close_needs_adjudication_ticket_service_for_biometrics(
+        self, report_false_positive_duplicate_mock
+    ) -> None:
+        user = UserFactory()
+        ba = BusinessAreaFactory(slug="afghanistan")
+        program = ProgramFactory(business_area=ba)
+        program.deduplication_set_id = uuid.uuid4()
+        program.save()
+
+        hh1, individuals_1 = create_household(
+            {"size": 2, "business_area": ba, "program": program},
+            {
+                "given_name": "John",
+                "family_name": "Doe",
+                "middle_name": "",
+                "full_name": "John Doe",
+            },
+        )
+        hh2, individuals_2 = create_household(
+            {"size": 2, "business_area": ba, "program": program},
+            {
+                "given_name": "John",
+                "family_name": "Doe",
+                "middle_name": "",
+                "full_name": "John Doe",
+            },
+        )
+        ind_1, ind_2 = sorted([individuals_1[1], individuals_2[1]], key=lambda x: x.id)
+
+        ticket, ticket_details = create_grievance_ticket_with_details(
+            main_individual=ind_1,
+            possible_duplicate=ind_2,
+            business_area=ba,
+            registration_data_import=hh1.registration_data_import,
+            possible_duplicates=[ind_2],
+            is_multiple_duplicates_version=True,
+            issue_type=GrievanceTicket.ISSUE_TYPE_BIOMETRICS_SIMILARITY,
+            dedup_engine_similarity_pair=DeduplicationEngineSimilarityPair.objects.create(
+                program=program,
+                individual1=ind_1,
+                individual2=ind_2,
+                similarity_score=90.55,
+            ),
+        )
+
+        ticket_details.selected_distinct.set([ind_1])
+        ticket_details.selected_individuals.set([ind_2])
+        ticket_details.save()
+
+        close_needs_adjudication_ticket_service(ticket, user)
+        report_false_positive_duplicate_mock.assert_not_called()
+
+        ticket_details.selected_distinct.set([ind_1, ind_2])
+        ticket_details.selected_individuals.set([])
+        ticket_details.save()
+
+        close_needs_adjudication_ticket_service(ticket, user)
+        report_false_positive_duplicate_mock.assert_called_once_with(
+            str(ind_1.id),
+            str(ind_2.id),
+            ticket_details.ticket.registration_data_import.program.deduplication_set_id,
+        )

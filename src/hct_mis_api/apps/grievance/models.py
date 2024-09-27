@@ -834,9 +834,6 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
     score_min = models.FloatField(default=0.0)
     score_max = models.FloatField(default=0.0)
     is_cross_area = models.BooleanField(default=False)
-    dedup_engine_similarity_pair = models.ForeignKey(
-        "registration_data.DeduplicationEngineSimilarityPair", on_delete=models.CASCADE, null=True
-    )
 
     # deprecated and will remove soon
     selected_individual = models.ForeignKey(
