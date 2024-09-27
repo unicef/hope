@@ -868,8 +868,6 @@ class TestManualCalendar:
 
         # Check Details page
         sleep(10)
-        new_url = pageProgrammeDetails.wait_for_new_url(programme_edit_url, 20)
-        assert new_url != programme_edit_url
         assert "details" in pageProgrammeDetails.wait_for_new_url(programme_edit_url, 20).split("/")
 
         partner_name_elements_new = pageProgrammeManagement.driver.find_elements(
