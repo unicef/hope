@@ -1233,8 +1233,9 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         if core_field["associated_with"] == _INDIVIDUAL:
             if lookup in get_from_snapshot and snapshot:
                 snapshot_data = snapshot.snapshot_data
-                collector_data = snapshot_data.get("primary_collector") or snapshot_data.get(
-                    "alternate_collector") or dict()
+                collector_data = (
+                    snapshot_data.get("primary_collector") or snapshot_data.get("alternate_collector") or dict()
+                )
                 if lookup in bank_account_info:
                     return collector_data.get("bank_account_info").get(lookup)
                 return nested_getattr(collector_data, lookup, None)
@@ -1298,7 +1299,10 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             "additional_document_type": (payment, "additional_document_type"),
             "additional_document_number": (payment, "additional_document_number"),
             "status": (payment, "payment_status"),
-            "transaction_status_blockchain_link": (payment, "transaction_status_blockchain_link"),  # TODO: get from snapshot ?
+            "transaction_status_blockchain_link": (
+                payment,
+                "transaction_status_blockchain_link",
+            ),  # TODO: get from snapshot ?
         }
         additional_columns = {
             "registration_token": cls.get_registration_token_doc_number,
