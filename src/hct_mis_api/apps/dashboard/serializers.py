@@ -1,20 +1,9 @@
+from typing import List, Optional
+
 from rest_framework import serializers
 
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.models import Payment, PaymentRecord
-from hct_mis_api.apps.reporting.models import DashboardReport, Report
-
-
-class ReportSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Report
-        fields = "__all__"
-
-
-class DashboardReportSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = DashboardReport
-        fields = "__all__"
 
 
 class PaymentSerializer(serializers.ModelSerializer):
@@ -23,7 +12,7 @@ class PaymentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Payment
-        fields = [
+        fields: List[str] = [
             "delivered_quantity",
             "delivery_date",
             "delivered_quantity_usd",
@@ -40,7 +29,7 @@ class PaymentRecordSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PaymentRecord
-        fields = [
+        fields: List[str] = [
             "delivered_quantity",
             "delivery_date",
             "delivered_quantity_usd",
@@ -61,7 +50,7 @@ class DashboardHouseholdSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Household
-        fields = [
+        fields: List[str] = [
             "id",
             "business_area",
             "payments",
@@ -74,17 +63,17 @@ class DashboardHouseholdSerializer(serializers.ModelSerializer):
             "children_count",
         ]
 
-    def get_admin1(self, obj):
+    def get_admin1(self, obj: Household) -> Optional[str]:
         if obj.admin1:
             return obj.admin1.name
         return None
 
-    def get_admin2(self, obj):
+    def get_admin2(self, obj: Household) -> Optional[str]:
         if obj.admin2:
             return obj.admin2.name
         return None
 
-    def get_payments(self, obj):
+    def get_payments(self, obj: Household) -> List[dict]:
         payments = (
             Payment.objects.using("read_only")
             .filter(household=obj)
@@ -97,7 +86,7 @@ class DashboardHouseholdSerializer(serializers.ModelSerializer):
             .select_related("service_provider", "delivery_type")
         )
 
-        payments_data = PaymentSerializer(payments, many=True).data
-        payment_records_data = PaymentRecordSerializer(payment_records, many=True).data
+        payments_data = list(PaymentSerializer(payments, many=True).data)
+        payment_records_data = list(PaymentRecordSerializer(payment_records, many=True).data)
 
         return payments_data + payment_records_data

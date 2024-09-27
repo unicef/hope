@@ -1,5 +1,6 @@
 import json
 import logging
+from typing import Any
 
 from django.core.cache import cache
 
@@ -28,7 +29,7 @@ class DashboardReportdView(APIView):
     permission_classes = [IsAuthenticated]
 
     @sentry_tags
-    def get(self, request, business_area_slug: str) -> Response:
+    def get(self, request: Any, business_area_slug: str) -> Response:
         """
         Retrieve the DashReport for a given business area.
 
@@ -78,7 +79,7 @@ class CreateOrUpdateDashReportView(APIView):
     permission_classes = [IsAuthenticated]
 
     @sentry_tags
-    def post(self, request, business_area_slug: str) -> Response:
+    def post(self, request: Any, business_area_slug: str) -> Response:
         if not request.user.is_superuser:
             raise PermissionDenied("Only superusers are allowed to create or update DashReports.")
 

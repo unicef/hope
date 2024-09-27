@@ -39,7 +39,7 @@ class GenerateDashReportService:
         """
         households = Household.objects.using("read_only").filter(business_area=self.business_area)
         serialized_data = DashboardHouseholdSerializer(households, many=True).data
-        return serialized_data
+        return list(serialized_data)
 
     def _save_report_file(self, data: List[Dict[str, Any]]) -> None:
         """

@@ -18,7 +18,7 @@ class DashReport(TimeStampedUUIDModel):
     status = models.IntegerField(choices=STATUSES, default=IN_PROGRESS)
     file = models.FileField(blank=True, null=True, upload_to="dashreports/")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Report for {self.business_area} (Status: {self.get_status_display()})"
 
     class Meta:

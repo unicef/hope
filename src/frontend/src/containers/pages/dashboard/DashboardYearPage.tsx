@@ -62,7 +62,7 @@ export function DashboardYearPage({ data }) {
 
     // Update Totals
     const updateTotals = () => {
-      const totalAmountPaid = ndx.groupAll().reduceSum((d) => d.delivered_quantity_usd).value();
+      const totalAmountPaid = ndx.groupAll().reduceSum((d) => d.delivered_quantity_usd).value() as number;
       const numberOfPayments = ndx.groupAll().reduceCount().value();
       const outstandingPayments = ndx.dimension(d => d.currency).group().reduceSum((d) => d.delivered_quantity).all()
         .filter(d => d.key)  // Filter valid currencies

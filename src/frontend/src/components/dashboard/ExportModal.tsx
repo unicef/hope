@@ -27,7 +27,7 @@ import {
 import { LoadingComponent } from '@core/LoadingComponent';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 
-export function ExportModal({ filter, year }): React.ReactElement {
+export function ExportModal({ year }): React.ReactElement {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selected, setSelected] = useState([]);
   const { businessArea, programId, isAllPrograms } = useBaseUrl();
