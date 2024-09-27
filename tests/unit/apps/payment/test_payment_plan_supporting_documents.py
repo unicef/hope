@@ -109,7 +109,7 @@ class PaymentPlanSupportingDocumentUploadViewTests(TestCase):
         payment_plan_id_base64 = base64.b64encode(f"PaymentPlanNode:{str(cls.payment_plan.id)}".encode()).decode()
 
         cls.url = reverse(
-            "api:payment-plan:supporting_documents",
+            "api:payment-plan:supporting_documents-list",
             kwargs={
                 "business_area": "afghanistan",
                 "program_id": program_id_base64,
@@ -189,7 +189,7 @@ class PaymentPlanSupportingDocumentViewTests(TestCase):
         )
 
         self.client.force_authenticate(user=self.user)
-        response = self.client.get(self.url)
+        response = self.client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsInstance(response, FileResponse)
