@@ -6,7 +6,7 @@ import crossfilter from 'crossfilter2';
 
 export function DashboardYearPage({ data }) {
   dc.config.defaultColors(d3.schemeTableau10);
-  const numberFormatter = d3.format(",.2f");
+  const numberFormatter = d3.format(',.2f');
 
   const fspChartRef = useRef<HTMLDivElement>(null);
   const deliveryChartRef = useRef<HTMLDivElement>(null);
