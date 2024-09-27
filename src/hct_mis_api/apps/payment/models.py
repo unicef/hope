@@ -1199,7 +1199,6 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         core_field_name: str,
         delivery_mechanism_data: Optional["DeliveryMechanismData"] = None,
     ) -> Any:
-        # TODO: try to get from snapshot
         def parse_admin_area(obj: "Area") -> str:
             if not obj:
                 return ""  # pragma: no cover
@@ -1218,25 +1217,28 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         if delivery_mechanism_data and core_field["associated_with"] == _DELIVERY_MECHANISM_DATA:
             return delivery_mechanism_data.delivery_data.get(core_field_name, None)
 
-        snapshot = payment.household_snapshot if hasattr(payment, "household_snapshot") else None
+        snapshot = getattr(payment, "household_snapshot", None)
 
         # fields from snap_shot
-        # snapshot.snapshot_data["primary_collector"] or snapshot.snapshot_data["alternate_collector"]
-        # ["", ]
-
-        # individual_data["bank_account_info"] = {
-        #     "bank_name": bank_account_info.bank_name,
-        #     "bank_account_number": bank_account_info.bank_account_number,
-        #     "debit_card_number": bank_account_info.debit_card_number,
+        bank_account_info = ["bank_name", "bank_account_number", "debit_card_number"]
+        get_from_snapshot = ["full_name", "payment_delivery_phone_no"] + bank_account_info
 
         # individual_data["delivery_mechanisms_data"] = {
         #  dmd.delivery_mechanism.code: dmd.delivery_data for dmd in individual.delivery_mechanisms_data.all()
-        # }
+        # }  ???
 
         lookup = core_field["lookup"]
         lookup = lookup.replace("__", ".")
 
         if core_field["associated_with"] == _INDIVIDUAL:
+            if lookup in get_from_snapshot and snapshot:
+                snapshot_data = snapshot.snapshot_data
+                collector_data = snapshot_data.get("primary_collector") or snapshot_data.get(
+                    "alternate_collector") or dict()
+                if lookup in bank_account_info:
+                    return collector_data.get("bank_account_info").get(lookup)
+                return nested_getattr(collector_data, lookup, None)
+
             if lookup_function := core_field.get("lookup_function"):
                 return lookup_function(collector)
             return nested_getattr(collector, lookup, None)
@@ -1251,7 +1253,6 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
 
     @classmethod
     def get_column_value_from_payment(cls, payment: "Payment", column_name: str) -> Union[str, float, list]:
-        # TODO: try to get from snapshot if not from payment
         # we can get if needed payment.parent.program.is_social_worker_program
         alternate_collector = None
         alternate_collector_column_names = (
@@ -1276,11 +1277,11 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             "admin_level_2": (payment.household.admin2, "name"),
             "village": (payment.household, "village"),
             "collector_name": (payment.collector, "full_name"),
-            "alternate_collector_full_name": (alternate_collector, "full_name"),
-            "alternate_collector_given_name": (alternate_collector, "given_name"),
-            "alternate_collector_middle_name": (alternate_collector, "middle_name"),
+            "alternate_collector_full_name": (alternate_collector, "full_name"),  # TODO: get from snapshot
+            "alternate_collector_given_name": (alternate_collector, "given_name"),  # TODO: get from snapshot
+            "alternate_collector_middle_name": (alternate_collector, "middle_name"),  # TODO: get from snapshot
             "alternate_collector_sex": (alternate_collector, "sex"),
-            "alternate_collector_phone_no": (alternate_collector, "phone_no"),
+            "alternate_collector_phone_no": (alternate_collector, "phone_no"),  # TODO: get from snapshot
             "alternate_collector_document_numbers": (alternate_collector, "document_number"),
             "payment_channel": (payment.delivery_type, "name"),
             "fsp_name": (payment.financial_service_provider, "name"),
@@ -1297,7 +1298,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             "additional_document_type": (payment, "additional_document_type"),
             "additional_document_number": (payment, "additional_document_number"),
             "status": (payment, "payment_status"),
-            "transaction_status_blockchain_link": (payment, "transaction_status_blockchain_link"),
+            "transaction_status_blockchain_link": (payment, "transaction_status_blockchain_link"),  # TODO: get from snapshot ?
         }
         additional_columns = {
             "registration_token": cls.get_registration_token_doc_number,

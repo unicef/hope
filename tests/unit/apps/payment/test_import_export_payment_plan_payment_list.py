@@ -570,3 +570,10 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
             "flex_date_i_f",
             (name for name, _ in response.context["adminform"].form.fields["flex_fields"].choices),
         )
+
+    def test_payment_row_get_snapshot_data(self) -> None:
+        # TODO: will add after get some real data
+        # create_payment_plan_snapshot_data(self.payment_plan)
+        # or PaymentHouseholdSnapshot(payment=payment, snapshot_data=household_data, household_id=household.id)
+        # XlsxPaymentPlanExportPerFspService.get_payment_row()
+        pass
