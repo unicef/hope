@@ -1199,6 +1199,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         core_field_name: str,
         delivery_mechanism_data: Optional["DeliveryMechanismData"] = None,
     ) -> Any:
+        # TODO: try to get from snapshot
         def parse_admin_area(obj: "Area") -> str:
             if not obj:
                 return ""  # pragma: no cover
@@ -1216,6 +1217,21 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
 
         if delivery_mechanism_data and core_field["associated_with"] == _DELIVERY_MECHANISM_DATA:
             return delivery_mechanism_data.delivery_data.get(core_field_name, None)
+
+        snapshot = payment.household_snapshot if hasattr(payment, "household_snapshot") else None
+
+        # fields from snap_shot
+        # snapshot.snapshot_data["primary_collector"] or snapshot.snapshot_data["alternate_collector"]
+        # ["", ]
+
+        # individual_data["bank_account_info"] = {
+        #     "bank_name": bank_account_info.bank_name,
+        #     "bank_account_number": bank_account_info.bank_account_number,
+        #     "debit_card_number": bank_account_info.debit_card_number,
+
+        # individual_data["delivery_mechanisms_data"] = {
+        #  dmd.delivery_mechanism.code: dmd.delivery_data for dmd in individual.delivery_mechanisms_data.all()
+        # }
 
         lookup = core_field["lookup"]
         lookup = lookup.replace("__", ".")
@@ -1235,6 +1251,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
 
     @classmethod
     def get_column_value_from_payment(cls, payment: "Payment", column_name: str) -> Union[str, float, list]:
+        # TODO: try to get from snapshot if not from payment
         # we can get if needed payment.parent.program.is_social_worker_program
         alternate_collector = None
         alternate_collector_column_names = (
