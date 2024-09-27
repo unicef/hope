@@ -4138,6 +4138,7 @@ export type Mutations = {
   updatePaymentVerificationReceivedAndReceivedAmount?: Maybe<UpdatePaymentVerificationReceivedAndReceivedAmount>;
   updatePaymentVerificationStatusAndReceivedAmount?: Maybe<UpdatePaymentVerificationStatusAndReceivedAmount>;
   updateProgram?: Maybe<UpdateProgram>;
+  updateProgramPartners?: Maybe<UpdateProgramPartners>;
   updateTargetPopulation?: Maybe<UpdateTargetPopulationMutation>;
   uploadImportDataXlsxFileAsync?: Maybe<UploadImportDataXlsxFileAsync>;
 };
@@ -4625,6 +4626,12 @@ export type MutationsUpdateProgramArgs = {
 };
 
 
+export type MutationsUpdateProgramPartnersArgs = {
+  programData?: InputMaybe<UpdateProgramPartnersInput>;
+  version?: InputMaybe<Scalars['BigInt']['input']>;
+};
+
+
 export type MutationsUpdateTargetPopulationArgs = {
   input: UpdateTargetPopulationInput;
   version?: InputMaybe<Scalars['BigInt']['input']>;
@@ -4708,7 +4715,6 @@ export type PartnerNode = {
   name?: Maybe<Scalars['String']['output']>;
   parent?: Maybe<PartnerNode>;
   partnerSet: Array<PartnerNode>;
-  permissions: Scalars['JSONString']['output'];
   programs: ProgramNodeConnection;
   rght: Scalars['Int']['output'];
   treeId: Scalars['Int']['output'];
@@ -4795,7 +4801,6 @@ export type PartnerType = {
   name: Scalars['String']['output'];
   parent?: Maybe<PartnerNode>;
   partnerSet: Array<PartnerNode>;
-  permissions: Scalars['JSONString']['output'];
   programs: ProgramNodeConnection;
   rght: Scalars['Int']['output'];
   treeId: Scalars['Int']['output'];
@@ -9014,8 +9019,6 @@ export type UpdateProgramInput = {
   frequencyOfPayments?: InputMaybe<Scalars['String']['input']>;
   id: Scalars['String']['input'];
   name?: InputMaybe<Scalars['String']['input']>;
-  partnerAccess?: InputMaybe<Scalars['String']['input']>;
-  partners?: InputMaybe<Array<InputMaybe<ProgramPartnerThroughInput>>>;
   pduFields?: InputMaybe<Array<InputMaybe<PduFieldInput>>>;
   populationGoal?: InputMaybe<Scalars['Int']['input']>;
   programmeCode?: InputMaybe<Scalars['String']['input']>;
@@ -9023,6 +9026,20 @@ export type UpdateProgramInput = {
   startDate?: InputMaybe<Scalars['Date']['input']>;
   status?: InputMaybe<Scalars['String']['input']>;
 };
+
+
+export type UpdateProgramPartners = {
+  __typename?: 'UpdateProgramPartners';
+  program?: Maybe<ProgramNode>;
+  validationErrors?: Maybe<Scalars['Arg']['output']>;
+};
+
+export type UpdateProgramPartnersInput = {
+  id: Scalars['String']['input'];
+  partnerAccess?: InputMaybe<Scalars['String']['input']>;
+  partners?: InputMaybe<Array<InputMaybe<ProgramPartnerThroughInput>>>;
+};
+
 
 export type UpdateTargetPopulationInput = {
   excludedIds?: InputMaybe<Scalars['String']['input']>;
@@ -10202,6 +10219,14 @@ export type UpdateProgramMutationVariables = Exact<{
 
 
 export type UpdateProgramMutation = { __typename?: 'Mutations', updateProgram?: { __typename?: 'UpdateProgram', validationErrors?: any | null, program?: { __typename?: 'ProgramNode', id: string, name: string, programmeCode?: string | null, startDate: any, endDate?: any | null, status: ProgramStatus, caId?: string | null, caHashId?: string | null, description: string, budget?: any | null, frequencyOfPayments: ProgramFrequencyOfPayments, cashPlus: boolean, populationGoal: number, scope?: ProgramScope | null, sector: ProgramSector, totalNumberOfHouseholds?: number | null, totalNumberOfHouseholdsWithTpInProgram?: number | null, administrativeAreasOfImplementation: string, isSocialWorkerProgram?: boolean | null, version: any, adminUrl?: string | null, partnerAccess: ProgramPartnerAccess, targetPopulationsCount?: number | null, canFinish?: boolean | null, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean, description: string, type?: DataCollectingTypeType | null } | null, partners?: Array<{ __typename?: 'PartnerNode', id: string, name?: string | null, areaAccess?: string | null, areas?: Array<{ __typename?: 'AreaNode', id: string, level: number } | null> | null } | null> | null, registrationImports: { __typename?: 'RegistrationDataImportNodeConnection', totalCount?: number | null }, pduFields?: Array<{ __typename?: 'PeriodicFieldNode', id: string, label: any, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null> | null } | null } | null };
+
+export type UpdateProgramPartnersMutationVariables = Exact<{
+  programData?: InputMaybe<UpdateProgramPartnersInput>;
+  version?: InputMaybe<Scalars['BigInt']['input']>;
+}>;
+
+
+export type UpdateProgramPartnersMutation = { __typename?: 'Mutations', updateProgramPartners?: { __typename?: 'UpdateProgramPartners', program?: { __typename?: 'ProgramNode', id: string, name: string, programmeCode?: string | null, startDate: any, endDate?: any | null, status: ProgramStatus, caId?: string | null, caHashId?: string | null, description: string, budget?: any | null, frequencyOfPayments: ProgramFrequencyOfPayments, cashPlus: boolean, populationGoal: number, scope?: ProgramScope | null, sector: ProgramSector, totalNumberOfHouseholds?: number | null, totalNumberOfHouseholdsWithTpInProgram?: number | null, administrativeAreasOfImplementation: string, isSocialWorkerProgram?: boolean | null, version: any, adminUrl?: string | null, partnerAccess: ProgramPartnerAccess, targetPopulationsCount?: number | null, canFinish?: boolean | null, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean, description: string, type?: DataCollectingTypeType | null } | null, partners?: Array<{ __typename?: 'PartnerNode', id: string, name?: string | null, areaAccess?: string | null, areas?: Array<{ __typename?: 'AreaNode', id: string, level: number } | null> | null } | null> | null, registrationImports: { __typename?: 'RegistrationDataImportNodeConnection', totalCount?: number | null }, pduFields?: Array<{ __typename?: 'PeriodicFieldNode', id: string, label: any, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null> | null } | null } | null };
 
 export type CreateRegistrationKoboImportMutationVariables = Exact<{
   registrationDataImportData: RegistrationKoboImportMutationInput;
@@ -15609,6 +15634,42 @@ export function useUpdateProgramMutation(baseOptions?: Apollo.MutationHookOption
 export type UpdateProgramMutationHookResult = ReturnType<typeof useUpdateProgramMutation>;
 export type UpdateProgramMutationResult = Apollo.MutationResult<UpdateProgramMutation>;
 export type UpdateProgramMutationOptions = Apollo.BaseMutationOptions<UpdateProgramMutation, UpdateProgramMutationVariables>;
+export const UpdateProgramPartnersDocument = gql`
+    mutation UpdateProgramPartners($programData: UpdateProgramPartnersInput, $version: BigInt) {
+  updateProgramPartners(programData: $programData, version: $version) {
+    program {
+      ...programDetails
+    }
+  }
+}
+    ${ProgramDetailsFragmentDoc}`;
+export type UpdateProgramPartnersMutationFn = Apollo.MutationFunction<UpdateProgramPartnersMutation, UpdateProgramPartnersMutationVariables>;
+
+/**
+ * __useUpdateProgramPartnersMutation__
+ *
+ * To run a mutation, you first call `useUpdateProgramPartnersMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateProgramPartnersMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateProgramPartnersMutation, { data, loading, error }] = useUpdateProgramPartnersMutation({
+ *   variables: {
+ *      programData: // value for 'programData'
+ *      version: // value for 'version'
+ *   },
+ * });
+ */
+export function useUpdateProgramPartnersMutation(baseOptions?: Apollo.MutationHookOptions<UpdateProgramPartnersMutation, UpdateProgramPartnersMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateProgramPartnersMutation, UpdateProgramPartnersMutationVariables>(UpdateProgramPartnersDocument, options);
+      }
+export type UpdateProgramPartnersMutationHookResult = ReturnType<typeof useUpdateProgramPartnersMutation>;
+export type UpdateProgramPartnersMutationResult = Apollo.MutationResult<UpdateProgramPartnersMutation>;
+export type UpdateProgramPartnersMutationOptions = Apollo.BaseMutationOptions<UpdateProgramPartnersMutation, UpdateProgramPartnersMutationVariables>;
 export const CreateRegistrationKoboImportDocument = gql`
     mutation CreateRegistrationKoboImport($registrationDataImportData: RegistrationKoboImportMutationInput!) {
   registrationKoboImport(registrationDataImportData: $registrationDataImportData) {
@@ -25157,6 +25218,8 @@ export type ResolversTypes = {
   UpdatePaymentVerificationStatusAndReceivedAmount: ResolverTypeWrapper<UpdatePaymentVerificationStatusAndReceivedAmount>;
   UpdateProgram: ResolverTypeWrapper<UpdateProgram>;
   UpdateProgramInput: UpdateProgramInput;
+  UpdateProgramPartners: ResolverTypeWrapper<UpdateProgramPartners>;
+  UpdateProgramPartnersInput: UpdateProgramPartnersInput;
   UpdateTargetPopulationInput: UpdateTargetPopulationInput;
   UpdateTargetPopulationMutation: ResolverTypeWrapper<UpdateTargetPopulationMutation>;
   Upload: ResolverTypeWrapper<Scalars['Upload']['output']>;
@@ -25623,6 +25686,8 @@ export type ResolversParentTypes = {
   UpdatePaymentVerificationStatusAndReceivedAmount: UpdatePaymentVerificationStatusAndReceivedAmount;
   UpdateProgram: UpdateProgram;
   UpdateProgramInput: UpdateProgramInput;
+  UpdateProgramPartners: UpdateProgramPartners;
+  UpdateProgramPartnersInput: UpdateProgramPartnersInput;
   UpdateTargetPopulationInput: UpdateTargetPopulationInput;
   UpdateTargetPopulationMutation: UpdateTargetPopulationMutation;
   Upload: Scalars['Upload']['output'];
@@ -27819,6 +27884,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   updatePaymentVerificationReceivedAndReceivedAmount?: Resolver<Maybe<ResolversTypes['UpdatePaymentVerificationReceivedAndReceivedAmount']>, ParentType, ContextType, RequireFields<MutationsUpdatePaymentVerificationReceivedAndReceivedAmountArgs, 'paymentVerificationId' | 'received' | 'receivedAmount'>>;
   updatePaymentVerificationStatusAndReceivedAmount?: Resolver<Maybe<ResolversTypes['UpdatePaymentVerificationStatusAndReceivedAmount']>, ParentType, ContextType, RequireFields<MutationsUpdatePaymentVerificationStatusAndReceivedAmountArgs, 'paymentVerificationId' | 'receivedAmount'>>;
   updateProgram?: Resolver<Maybe<ResolversTypes['UpdateProgram']>, ParentType, ContextType, Partial<MutationsUpdateProgramArgs>>;
+  updateProgramPartners?: Resolver<Maybe<ResolversTypes['UpdateProgramPartners']>, ParentType, ContextType, Partial<MutationsUpdateProgramPartnersArgs>>;
   updateTargetPopulation?: Resolver<Maybe<ResolversTypes['UpdateTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsUpdateTargetPopulationArgs, 'input'>>;
   uploadImportDataXlsxFileAsync?: Resolver<Maybe<ResolversTypes['UploadImportDataXLSXFileAsync']>, ParentType, ContextType, RequireFields<MutationsUploadImportDataXlsxFileAsyncArgs, 'businessAreaSlug' | 'file'>>;
 };
@@ -27884,7 +27950,6 @@ export type PartnerNodeResolvers<ContextType = any, ParentType extends Resolvers
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   parent?: Resolver<Maybe<ResolversTypes['PartnerNode']>, ParentType, ContextType>;
   partnerSet?: Resolver<Array<ResolversTypes['PartnerNode']>, ParentType, ContextType>;
-  permissions?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>;
   programs?: Resolver<ResolversTypes['ProgramNodeConnection'], ParentType, ContextType, Partial<PartnerNodeProgramsArgs>>;
   rght?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   treeId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
@@ -27914,7 +27979,6 @@ export type PartnerTypeResolvers<ContextType = any, ParentType extends Resolvers
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   parent?: Resolver<Maybe<ResolversTypes['PartnerNode']>, ParentType, ContextType>;
   partnerSet?: Resolver<Array<ResolversTypes['PartnerNode']>, ParentType, ContextType>;
-  permissions?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>;
   programs?: Resolver<ResolversTypes['ProgramNodeConnection'], ParentType, ContextType, Partial<PartnerTypeProgramsArgs>>;
   rght?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   treeId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
@@ -29745,6 +29809,12 @@ export type UpdateProgramResolvers<ContextType = any, ParentType extends Resolve
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type UpdateProgramPartnersResolvers<ContextType = any, ParentType extends ResolversParentTypes['UpdateProgramPartners'] = ResolversParentTypes['UpdateProgramPartners']> = {
+  program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>;
+  validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type UpdateTargetPopulationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['UpdateTargetPopulationMutation'] = ResolversParentTypes['UpdateTargetPopulationMutation']> = {
   targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>;
   validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>;
@@ -30315,6 +30385,7 @@ export type Resolvers<ContextType = any> = {
   UpdatePaymentVerificationReceivedAndReceivedAmount?: UpdatePaymentVerificationReceivedAndReceivedAmountResolvers<ContextType>;
   UpdatePaymentVerificationStatusAndReceivedAmount?: UpdatePaymentVerificationStatusAndReceivedAmountResolvers<ContextType>;
   UpdateProgram?: UpdateProgramResolvers<ContextType>;
+  UpdateProgramPartners?: UpdateProgramPartnersResolvers<ContextType>;
   UpdateTargetPopulationMutation?: UpdateTargetPopulationMutationResolvers<ContextType>;
   Upload?: GraphQLScalarType;
   UploadImportDataXLSXFileAsync?: UploadImportDataXlsxFileAsyncResolvers<ContextType>;
