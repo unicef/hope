@@ -859,11 +859,16 @@ class TestManualCalendar:
         # edit program
         pageProgrammeManagement.getButtonEditProgram().click()
         pageProgrammeManagement.getSelectEditProgramPartners().click()
+
         pageProgrammeManagement.getAccessToProgram().click()
         pageProgrammeManagement.selectWhoAccessToProgram("All Current Partners within the business area")
 
+        sleep(10)
+
+        pageProgrammeManagement.wait_for(pageProgrammeManagement.inputPartner).click()
+        pageProgrammeManagement.choosePartnerOption("UNHCR")
+
         programme_edit_url = pageProgrammeManagement.driver.current_url
-        pageProgrammeManagement.getButtonSave().click()
         pageProgrammeManagement.getButtonSave().click()
 
         # Check Details page
