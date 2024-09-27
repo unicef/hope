@@ -24,7 +24,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   ProgramStatus,
   useAllProgramsForChoicesLazyQuery,
-  useProgramLazyQuery,
+  useProgramQuery,
 } from '@generated/graphql';
 import { KeyboardEvent, useEffect, useRef, useState } from 'react';
 import ClearIcon from '@mui/icons-material/Clear';
@@ -131,12 +131,10 @@ export const GlobalProgramSelect = () => {
   });
   const isMounted = useRef(false);
   const [inputValue, setInputValue] = useState<string>('');
-  const [loadProgram, { data: programData, loading: loadingProgram }] =
-    useProgramLazyQuery({
-      variables: {
-        id: programId,
-      },
-    });
+  const { data: programData, loading: loadingProgram } = useProgramQuery({
+    variables: { id: programId },
+    skip: programId === 'all' || !programId,
+  });
   const [programs, setPrograms] = useState<ProgramRecord[]>([]);
 
   useEffect(() => {
@@ -149,12 +147,6 @@ export const GlobalProgramSelect = () => {
       isMounted.current = false;
     };
   }, []);
-
-  useEffect(() => {
-    if (programId !== 'all') {
-      void loadProgram();
-    }
-  }, [programId, loadProgram]);
 
   useEffect(() => {
     if (programId !== 'all') {
