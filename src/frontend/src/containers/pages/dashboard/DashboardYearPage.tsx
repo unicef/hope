@@ -3,8 +3,11 @@ import { Typography, Box, Grid, Paper } from '@mui/material';
 import * as dc from 'dc';
 import * as d3 from 'd3';
 import crossfilter from 'crossfilter2';
+import { useTranslation } from 'react-i18next';
+import { Household, HouseholdPayment } from '@api/dashboardApi'; // Use the defined types
 
-export function DashboardYearPage({ data }) {
+export function DashboardYearPage({ year, data }: { year: string, data: Household[] }) {
+  const { t } = useTranslation();
   dc.config.defaultColors(d3.schemeTableau10);
   const numberFormatter = d3.format(',.2f');
 
@@ -14,9 +17,11 @@ export function DashboardYearPage({ data }) {
   const volumeChartRef = useRef<HTMLDivElement>(null);
 
   const [totals, setTotals] = useState({
-    totalAmountPaid: 0,
+    totalAmountPaidUsd: 0,
+    totalAmountPaidLocal: 0,
     numberOfPayments: 0,
-    outstandingPayments: 0,
+    outstandingPaymentsUsd: 0,
+    outstandingPaymentsLocal: 0,
     householdsReached: 0,
     pwdReached: 0,
     childrenReached: 0,
@@ -26,8 +31,9 @@ export function DashboardYearPage({ data }) {
   useEffect(() => {
     if (!data || data.length === 0) return;
 
-    const processedPayments = data.map((household) => {
-      return household.payments.map((payment) => ({
+    // Process payments and define Payment type
+    const processedPayments: HouseholdPayment[] = data.map((household: Household) => {
+      return household.payments.map((payment: HouseholdPayment) => ({
         business_area: household.business_area,
         delivered_quantity: payment.delivered_quantity ? parseFloat(payment.delivered_quantity) : 0,
         delivered_quantity_usd: payment.delivered_quantity_usd ? parseFloat(payment.delivered_quantity_usd) : 0,
@@ -41,54 +47,77 @@ export function DashboardYearPage({ data }) {
         size: household.size,
         children_count: household.children_count ? household.children_count : 0,
         id: household.id,
-        delivery_date: new Date(payment.delivery_date),
+        delivery_date: payment.delivery_date,
+        currency: payment.currency,
+        status: payment.status,
       }));
     }).flat();
 
     const ndx = crossfilter(processedPayments);
 
-    // Define Dimensions and Groups
-    const fspDim = ndx.dimension((d) => d.fsp);
-    const fspGroup = fspDim.group().reduceSum((d) => d.delivered_quantity_usd);
+    // Dimensions
+    const fspDim = ndx.dimension((d: any) => d.fsp);
+    const deliveryDim = ndx.dimension((d: any) => d.delivery_type);
+    const sectorDim = ndx.dimension((d: any) => d.sector);
+    const volumeDim = ndx.dimension((d: any) => d.program);
 
-    const deliveryDim = ndx.dimension((d) => d.delivery_type);
-    const deliveryGroup = deliveryDim.group().reduceSum((d) => d.delivered_quantity_usd);
-
-    const sectorDim = ndx.dimension((d) => d.sector);
-    const sectorGroup = sectorDim.group().reduceSum((d) => d.delivered_quantity);
-
-    const volumeDim = ndx.dimension((d) => d.program);
-    const volumeGroup = volumeDim.group().reduceSum((d) => d.delivered_quantity);
+    // Groups
+    const fspGroup = fspDim.group().reduceSum((d: any) => d.delivered_quantity);
+    const deliveryGroup = deliveryDim.group().reduceSum((d: any) => d.delivered_quantity);
+    const sectorGroup = sectorDim.group().reduceSum((d: any) => d.delivered_quantity);
+    const volumeGroup = volumeDim.group().reduceSum((d: any) => d.delivered_quantity);
 
     // Update Totals
     const updateTotals = () => {
-      const totalAmountPaid = ndx.groupAll().reduceSum((d) => d.delivered_quantity_usd).value() as number;
-      const numberOfPayments = ndx.groupAll().reduceCount().value();
-      const outstandingPayments = ndx.dimension(d => d.currency).group().reduceSum((d) => d.delivered_quantity).all()
-        .filter(d => d.key)  // Filter valid currencies
-        .reduce((acc, { key: currency, value }) => {
-          acc[currency] = value;
-          return acc;
-        }, {});
-      const householdsReached = ndx.dimension((d) => d.id).group().all().length;
-      const individualsReached = ndx.groupAll().reduceSum((d) => d.size).value();
+      const totalAmountPaidUsd = ndx.groupAll().reduceSum((d: any) => {
+        if (['Transaction Successful', 'Distribution Successful', 'Partially Distributed'].includes(d.payment_status)) {
+          return d.delivered_quantity_usd;
+        }
+        return 0;
+      }).value() as number;
+
+      const totalAmountPaidLocal = ndx.groupAll().reduceSum((d: any) => {
+        if (['Transaction Successful', 'Distribution Successful', 'Partially Distributed'].includes(d.payment_status)) {
+          return d.delivered_quantity;
+        }
+        return 0;
+      }).value() as number;
+
+      const outstandingPaymentsUsd = ndx.groupAll().reduceSum((d: any) => {
+        if (d.payment_status === 'Pending') {
+          return d.delivered_quantity_usd;
+        }
+        return 0;
+      }).value() as number;
+
+      const outstandingPaymentsLocal = ndx.groupAll().reduceSum((d: any) => {
+        if (d.payment_status === 'Pending') {
+          return d.delivered_quantity;
+        }
+        return 0;
+      }).value() as number;
+
+      const numberOfPayments = ndx.groupAll().reduceCount().value() as number;
+      const householdsReached = ndx.dimension((d: any) => d.size).group().all().length;
       const pwdReached = householdsReached;
-      const childrenReached = ndx.groupAll().reduceSum((d) => d.children_count).value();
+      const childrenReached = ndx.groupAll().reduceSum((d: any) => d.children_count).value() as number;
 
       setTotals({
-        totalAmountPaid,
+        totalAmountPaidUsd,
+        totalAmountPaidLocal,
+        outstandingPaymentsUsd,
+        outstandingPaymentsLocal,
         numberOfPayments,
-        outstandingPayments,
         householdsReached,
-        individualsReached,
         pwdReached,
         childrenReached,
+        individualsReached: householdsReached, // Assuming households represent individuals here.
       });
     };
 
-    updateTotals(); // Call initially to set totals
-
-    // Initialize charts
+    updateTotals();
+    console.log(year);
+    // FSP Pie Chart
     const fspChart = dc.pieChart(fspChartRef.current as unknown as HTMLElement);
     fspChart
       .dimension(fspDim)
@@ -97,9 +126,35 @@ export function DashboardYearPage({ data }) {
       .innerRadius(30)
       .renderLabel(true)
       .useViewBoxResizing(true)
-      .label(d => `${d.key}: ${numberFormatter((d.value / totals.totalAmountPaid) * 100)}%`)
-      .title(d => `${d.key}: ${numberFormatter(d.value)} USD`);
+      .render();
 
+    // Volume Bar Chart (Fixing the missing x attribute error)
+    const volumeChart = dc.barChart(volumeChartRef.current as unknown as HTMLElement);
+    volumeChart
+      .dimension(volumeDim)
+      .group(volumeGroup)
+      .x(d3.scaleBand()) // Correctly define the x axis
+      .xUnits(dc.units.ordinal) // Use ordinal units for categorical data
+      .elasticX(true)
+      .height(300)
+      .label((d) => `${d.key}: ${d.value}`)
+      .title((d) => `${d.key}: ${d.value}`)
+      .xAxis().ticks(4);
+
+    // Sector Bar Chart (Fixing the missing x attribute error)
+    const sectorChart = dc.barChart(sectorChartRef.current as unknown as HTMLElement);
+    sectorChart
+      .dimension(sectorDim)
+      .group(sectorGroup)
+      .x(d3.scaleBand()) // Correctly define the x axis
+      .xUnits(dc.units.ordinal) // Use ordinal units for categorical data
+      .elasticX(true)
+      .height(300)
+      .label((d) => `${d.key}: ${(d.value || 0).toFixed(2)}`)
+      .title((d) => `${d.key}: ${(d.value || 0).toFixed(2)}`)
+      .xAxis().ticks(4);
+
+    // Delivery Pie Chart
     const deliveryChart = dc.pieChart(deliveryChartRef.current as unknown as HTMLElement);
     deliveryChart
       .dimension(deliveryDim)
@@ -108,138 +163,77 @@ export function DashboardYearPage({ data }) {
       .innerRadius(30)
       .renderLabel(true)
       .useViewBoxResizing(true)
-      .label(d => `${d.key}: ${numberFormatter((d.value / totals.totalAmountPaid) * 100)}%`)
-      .title(d => `${d.key}: ${numberFormatter(d.value)} USD`);
-
-    const sectorChart = dc.rowChart(sectorChartRef.current as unknown as HTMLElement);
-    sectorChart
-      .dimension(sectorDim)
-      .group(sectorGroup)
-      .elasticX(true)
-      .height(300)
-      .label(d => `${d.key}: ${numberFormatter(d.value)} USD`)
-      .title(d => `${d.key}: ${numberFormatter(d.value)} USD`)
-      .xAxis().ticks(4);
-
-    const volumeChart = dc.rowChart(volumeChartRef.current as unknown as HTMLElement);
-    volumeChart
-      .dimension(volumeDim)
-      .group(volumeGroup)
-      .elasticX(true)
-      .height(300)
-      .label(d => `${d.key}: ${numberFormatter(d.value)} USD`)
-      .title(d => `${d.key}: ${numberFormatter(d.value)} USD`)
-      .xAxis().ticks(4);
-
-    // Register global listener for filtering
-    dc.chartRegistry.list().forEach((chart) => {
-      chart.on('filtered', () => {
-        updateTotals();
-        dc.redrawAll();
-      });
-    });
+      .title((d) => `${d.key}: ${numberFormatter(d.value)} USD`)
+      .label((d) => `${d.key}: ${numberFormatter((d.value / totals.totalAmountPaidUsd) * 100)}%`)
+      .render();
 
     dc.renderAll();
-  }, [data]);
+  }, [data, numberFormatter, totals.totalAmountPaidUsd]);
 
   return (
     <Box p={4}>
+      {/* Year in a Glance */}
       <Grid container spacing={3}>
-        {/* Year in a Glance Section */}
         <Grid item xs={12}>
-          <Paper elevation={3} sx={{ padding: 2 }}>
-            <Typography variant="h6">Year in a Glance</Typography>
+          <Paper elevation={3} sx={{ padding: 3 }}>
+            <Typography variant="h5" align="center">
+              {t('Year in a Glance')}
+            </Typography>
             <Grid container spacing={2}>
-              <Grid item xs={4}>
-                <Typography>Total Amount Paid</Typography>
-                <Typography variant="h5">{numberFormatter(totals.totalAmountPaid)} USD</Typography>
+              <Grid item xs={6} sm={3}>
+                <Paper elevation={1} sx={{ padding: 2 }}>
+                  <Typography variant="subtitle1">{t('Total Amount Paid in USD')}</Typography>
+                  <Typography variant="h6">{numberFormatter(totals.totalAmountPaidUsd)} USD</Typography>
+                </Paper>
               </Grid>
-              <Grid item xs={4}>
-                <Typography>Total No. of Payments</Typography>
-                <Typography variant="h5">{totals.numberOfPayments}</Typography>
+              <Grid item xs={6} sm={3}>
+                <Paper elevation={1} sx={{ padding: 2 }}>
+                  <Typography variant="subtitle1">{t('Total Amount Paid in Local Currency')}</Typography>
+                  <Typography variant="h6">{numberFormatter(totals.totalAmountPaidLocal)} AFN</Typography>
+                </Paper>
               </Grid>
-              <Grid item xs={4}>
-                <Typography>Outstanding Payments Amounts</Typography>
-                {/* Display multiple currencies if applicable */}
-                <Typography variant="h5">
-                  {Object.entries(totals.outstandingPayments).map(([currency, amount]) => (
-                    <div key={currency}>{numberFormatter(amount)} {currency}</div>
-                  ))}
-                </Typography>
+              <Grid item xs={6} sm={3}>
+                <Paper elevation={1} sx={{ padding: 2 }}>
+                  <Typography variant="subtitle1">{t('Outstanding Payments in USD')}</Typography>
+                  <Typography variant="h6">{numberFormatter(totals.outstandingPaymentsUsd)} USD</Typography>
+                </Paper>
+              </Grid>
+              <Grid item xs={6} sm={3}>
+                <Paper elevation={1} sx={{ padding: 2 }}>
+                  <Typography variant="subtitle1">{t('Outstanding Payments in Local Currency')}</Typography>
+                  <Typography variant="h6">{numberFormatter(totals.outstandingPaymentsLocal)} AFN</Typography>
+                </Paper>
               </Grid>
             </Grid>
           </Paper>
         </Grid>
 
-        {/* Payment Reach Section */}
-        <Grid item xs={12}>
-          <Paper elevation={3} sx={{ padding: 2 }}>
-            <Typography variant="h6">Payment Reach</Typography>
-            <Grid container spacing={2}>
-              <Grid item xs={4}>
-                <Typography>Total No. of Households Reached</Typography>
-                <Typography variant="h5">{totals.householdsReached}</Typography>
-              </Grid>
-              <Grid item xs={4}>
-                <Typography>Total No. of PWD Reached</Typography>
-                <Typography variant="h5">{totals.pwdReached}</Typography>
-              </Grid>
-              <Grid item xs={4}>
-                <Typography>Total No. of Children Reached</Typography>
-                <Typography variant="h5">{totals.childrenReached}</Typography>
-              </Grid>
-            </Grid>
-          </Paper>
-        </Grid>
-
-        {/* Charts Section (FSP, Delivery Mechanism, Donor, Sector) */}
+        {/* Payment Charts */}
         <Grid item xs={12} md={6}>
           <Paper elevation={3} sx={{ padding: 2 }}>
-            <Typography variant="h6">Payments by FSP</Typography>
+            <Typography variant="h6">{t('Payments by FSP')}</Typography>
             <Box id="fsp-chart" ref={fspChartRef} />
           </Paper>
         </Grid>
+
         <Grid item xs={12} md={6}>
           <Paper elevation={3} sx={{ padding: 2 }}>
-            <Typography variant="h6">Payments by Delivery Mechanism</Typography>
+            <Typography variant="h6">{t('Payments by Delivery Mechanism')}</Typography>
             <Box id="delivery-chart" ref={deliveryChartRef} />
           </Paper>
         </Grid>
+
         <Grid item xs={12} md={6}>
           <Paper elevation={3} sx={{ padding: 2 }}>
-            <Typography variant="h6">Payments by Sector</Typography>
+            <Typography variant="h6">{t('Payments by Sector')}</Typography>
             <Box id="sector-chart" ref={sectorChartRef} />
           </Paper>
         </Grid>
+
         <Grid item xs={12} md={6}>
           <Paper elevation={3} sx={{ padding: 2 }}>
-            <Typography variant="h6">Volume by Programme Structure</Typography>
+            <Typography variant="h6">{t('Volume by Programme Structure')}</Typography>
             <Box id="volume-chart" ref={volumeChartRef} />
-          </Paper>
-        </Grid>
-
-        {/* Reconciliation and Verification Section */}
-        <Grid item xs={12}>
-          <Paper elevation={3} sx={{ padding: 2 }}>
-            <Typography variant="h6">Reconciliation and Verification</Typography>
-            <Grid container spacing={2}>
-              <Grid item xs={3}>
-                <Typography>Payments Reconciled</Typography>
-                <Typography variant="h5">82%</Typography>
-              </Grid>
-              <Grid item xs={3}>
-                <Typography>Pending Reconciliation</Typography>
-                <Typography variant="h5">6%</Typography>
-              </Grid>
-              <Grid item xs={3}>
-                <Typography>Payments Verified</Typography>
-                <Typography variant="h5">62%</Typography>
-              </Grid>
-              <Grid item xs={3}>
-                <Typography>Sites Verified</Typography>
-                <Typography variant="h5">72%</Typography>
-              </Grid>
-            </Grid>
           </Paper>
         </Grid>
       </Grid>

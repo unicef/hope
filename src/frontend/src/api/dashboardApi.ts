@@ -26,5 +26,5 @@ export interface Household {
 export const fetchDashboardData = async (
   businessArea: string,
 ): Promise<Household[]> => {
-  return api.get(`/api/dashboard/${businessArea}/`);
+  return api.get(`dashboard/${businessArea}/`);
 };

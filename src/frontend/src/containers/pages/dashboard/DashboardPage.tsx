@@ -3,23 +3,22 @@ import { Typography, Box, Tabs, Tab } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { DashboardYearPage } from './DashboardYearPage';
-import { useLocation } from 'react-router-dom';
+import { DashboardPaper } from '@components/dashboard/DashboardPaper';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { TabPanel } from '@components/core/TabPanel';
-import { fetchDashboardData } from '@api/dashboardApi'; // Import the new function
+import { fetchDashboardData, Household } from '@api/dashboardApi';
 
 export function DashboardPage(): React.ReactElement {
   const { t } = useTranslation();
-  const location = useLocation();
   const permissions = usePermissions();
   const { businessArea, isGlobal } = useBaseUrl();
   const [selectedTab, setSelectedTab] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [data, setData] = useState<Household[]>([]); // Updated to use Household type
+  const [data, setData] = useState<Household[]>([]);
   const [selectedYear, setSelectedYear] = useState<string | null>(null);
   const [availableYears, setAvailableYears] = useState<string[]>([]);
 
@@ -49,8 +48,8 @@ export function DashboardPage(): React.ReactElement {
       ),
     ).sort((a, b) => b - a); // Sort years in descending order
 
-    setAvailableYears(years);
-    setSelectedYear(years[0] || null); // Set the highest year as default
+    setAvailableYears(years.map(String));
+    setSelectedYear(years[0]?.toString() || null); // Set the highest year as default
   }, [data]);
 
   if (loading) return <LoadingComponent />;
@@ -85,19 +84,16 @@ export function DashboardPage(): React.ReactElement {
       {hasPermissionToView ? (
         <>
           {!isGlobal ? (
-            <Box p={3}>
-              <Typography variant="body2" color="textSecondary">
-                {t(
-                  'Data is presented for the selected business area and year.',
-                )}
-              </Typography>
+            <Box p={0}>
             </Box>
           ) : (
-            <Box p={3}>
-              <Typography variant="body2" color="textSecondary">
-                {t('All charts below show total numbers for the selected year across all business areas.')}
-              </Typography>
-            </Box>
+              <DashboardPaper noMarginTop extraPaddingLeft color="#6f6f6f">
+                <Typography variant="body2">
+                  {t(
+                    'All charts below show total numbers for the selected year.',
+                  )}
+                </Typography>
+            </DashboardPaper>
           )}
           <TabPanel value={selectedTab} index={selectedTab}>
             <DashboardYearPage
@@ -105,7 +101,7 @@ export function DashboardPage(): React.ReactElement {
               data={data.filter((household) =>
                 household.payments.some(
                   (payment) =>
-                    new Date(payment.delivery_date).getFullYear() === selectedYear,
+                    new Date(payment.delivery_date).getFullYear() === Number(selectedYear),
                 ),
               )}
             />
