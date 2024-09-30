@@ -148,7 +148,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         payment_row = [
             FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(payment, column_name)
             for column_name in fsp_template_columns
-        ]
+        ]  # TODO: get from snapshot
         delivery_mechanism_data = payment.collector.delivery_mechanisms_data.filter(
             delivery_mechanism=payment.delivery_type
         ).first()
@@ -157,7 +157,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
                 payment, column_name, delivery_mechanism_data
             )
             for column_name in fsp_template_core_fields
-        ]
+        ]  # TODO: get from snapshot
         payment_row.extend(core_fields_row)
         flex_field_row = [
             self._get_flex_field_by_name(column_name, payment) for column_name in fsp_xlsx_template.flex_fields
@@ -166,6 +166,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         return list(map(self.right_format_for_xlsx, payment_row))
 
     def _get_flex_field_by_name(self, name: str, payment: Payment) -> FlexibleAttribute:
+        # TODO: get from snapshot
         attribute: FlexibleAttribute = self.flexible_attributes[name]
         individual = payment.collector
         household = payment.household

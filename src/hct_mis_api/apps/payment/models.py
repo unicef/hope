@@ -1199,6 +1199,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         core_field_name: str,
         delivery_mechanism_data: Optional["DeliveryMechanismData"] = None,
     ) -> Any:
+        # TODO: get from snapshot all
         def parse_admin_area(obj: "Area") -> str:
             if not obj:
                 return ""  # pragma: no cover
@@ -1254,6 +1255,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
 
     @classmethod
     def get_column_value_from_payment(cls, payment: "Payment", column_name: str) -> Union[str, float, list]:
+        # TODO: get from snapshot all
         # we can get if needed payment.parent.program.is_social_worker_program
         alternate_collector = None
         alternate_collector_column_names = (
