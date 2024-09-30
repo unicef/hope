@@ -3,7 +3,6 @@ from typing import Any, Optional
 
 from django.db import transaction
 from django.db.models import QuerySet
-from django.http import FileResponse
 
 from constance import config
 from django_filters import rest_framework as filters
@@ -219,6 +218,6 @@ class PaymentPlanSupportingDocumentViewSet(
         url_path="download",
         permission_classes=[PaymentPlanSupportingDocumentDownloadPermission],
     )
-    def download(self, request: Request, *args: Any, **kwargs: Any) -> FileResponse:
+    def download(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         document = self.get_object()
-        return FileResponse(document.file.open(), as_attachment=True, filename=document.file.name)
+        return Response({"url": document.file.file.url}, status=status.HTTP_200_OK)

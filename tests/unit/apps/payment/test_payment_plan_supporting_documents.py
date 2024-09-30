@@ -2,12 +2,12 @@ import base64
 from io import BytesIO
 
 from django.core.files.uploadedfile import SimpleUploadedFile, InMemoryUploadedFile
-from django.http import FileResponse
 from django.test import TestCase
 from django.urls import reverse
 
 from rest_framework import status
 from rest_framework.test import APIClient
+from rest_framework.response import Response
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.models import Role, UserRole
@@ -192,5 +192,4 @@ class PaymentPlanSupportingDocumentViewTests(TestCase):
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIsInstance(response, FileResponse)
-        self.assertEqual(response["Content-Disposition"], f'attachment; filename="{self.document.file.name}"')
+        self.assertIsInstance(response, Response)
