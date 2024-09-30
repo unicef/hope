@@ -756,7 +756,6 @@ class TestCreateTargeting:
         pageTargetingCreate.getFieldName().send_keys(targeting_name)
         pageTargetingCreate.getTargetPopulationSaveButton().click()
         pageTargetingDetails.getLockButton()
-        pageTargetingCreate.screenshot("asdasddas111")
 
         assert pageTargetingDetails.getTitlePage().text == targeting_name
         assert pageTargetingDetails.getCriteriaContainer().text == expected_criteria_text
