@@ -47,7 +47,7 @@ export const deleteSupportingDocument = async (
 ) => {
   try {
     await api.delete(
-      `/${businessArea}/programs/${programId}/payment-plans/${paymentPlanId}/supporting-documents/${fileId}/`,
+      `${businessArea}/programs/${programId}/payment-plans/${paymentPlanId}/supporting-documents/${fileId}/`,
     );
     return { success: true };
   } catch (error: any) {
@@ -68,12 +68,24 @@ export const uploadSupportingDocument = async (
   formData.append('title', title);
 
   try {
-    await api.post(
+    const response = await api.post(
       `${businessArea}/programs/${programId}/payment-plans/${paymentPlanId}/supporting-documents/`,
       formData,
     );
-    return { success: true };
+    return response.data; // Return the response data
   } catch (error) {
     throw new Error(`Failed to upload supporting document: ${error.message}`);
   }
+};
+
+export const fetchSupportingDocument = async (
+  businessAreaSlug: string,
+  programId: string,
+  paymentPlanId: string,
+  fileId: string,
+): Promise<any> => {
+  const response = await api.get(
+    `${businessAreaSlug}/programs/${programId}/payment-plans/${paymentPlanId}/supporting-documents/${fileId}/download/`,
+  );
+  return response;
 };

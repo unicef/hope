@@ -33,7 +33,7 @@ export const PaymentPlanDetailsPage = (): React.ReactElement => {
       variables: {
         id: paymentPlanId,
       },
-      fetchPolicy: 'cache-and-network',
+      fetchPolicy: 'network-only',
     });
 
   const status = data?.paymentPlan?.status;

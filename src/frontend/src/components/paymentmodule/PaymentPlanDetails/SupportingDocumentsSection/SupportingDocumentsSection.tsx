@@ -24,7 +24,11 @@ import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { usePermissions } from '@hooks/usePermissions';
 import { useTranslation } from 'react-i18next';
-import { PaymentPlanQuery, PaymentPlanStatus } from '@generated/graphql';
+import {
+  PaymentPlanQuery,
+  PaymentPlanStatus,
+  usePaymentPlanLazyQuery,
+} from '@generated/graphql';
 import { DropzoneField } from '@components/core/DropzoneField';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import {
@@ -36,6 +40,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useConfirmation } from '@components/core/ConfirmationDialog';
 import { GreyBox } from '@components/core/GreyBox';
 import { BlueText } from '@components/grievances/LookUps/LookUpStyles';
+import { useDownloadSupportingDocument } from './SupportingDocumentsSectionActions';
 
 interface SupportingDocumentsSectionProps {
   initialOpen?: boolean;
@@ -50,11 +55,15 @@ export const SupportingDocumentsSection = ({
   const confirm = useConfirmation();
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
+
+  const { mutate: downloadSupportingDocument } =
+    useDownloadSupportingDocument();
+
   const { businessArea, programId } = useBaseUrl();
   const [documents, setDocuments] = useState(
     paymentPlan?.supportingDocuments || [],
   );
-  const [fileToImport, setFileToImport] = useState(null);
+  const [fileToImport, setFileToImport] = useState<File | null>(null);
   const [title, setTitle] = useState('');
   const [isExpanded, setIsExpanded] = useState(initialOpen);
   const [isLoading, setIsLoading] = useState(false);
@@ -77,31 +86,48 @@ export const SupportingDocumentsSection = ({
     permissions,
   );
 
-  const uploadMutation = useMutation({
-    mutationFn: (file: File) =>
-      uploadSupportingDocument(
-        businessArea,
-        programId,
-        paymentPlan.id,
+  const useUploadSupportingDocument = () => {
+    return useMutation({
+      mutationFn: ({
+        _businessArea,
+        _programId,
+        paymentPlanId,
         file,
-        title,
-      ),
-    onSuccess: () => {
-      setDocuments([
-        ...documents,
-        { id: Date.now().toString(), title, file: fileToImport },
-      ]);
-      setFileToImport(null);
-      setTitle('');
-      setIsLoading(false);
-      setErrorMessage(null);
-      showMessage(t('File uploaded successfully'));
-    },
-    onError: (err: Error) => {
-      setErrorMessage(err.message);
-      setIsLoading(false);
-    },
-  });
+        _title,
+      }: {
+        _businessArea: string;
+        _programId: string;
+        paymentPlanId: string;
+        file: File;
+        _title: string;
+      }) =>
+        uploadSupportingDocument(
+          _businessArea,
+          _programId,
+          paymentPlanId,
+          file,
+          _title,
+        ),
+      onSuccess: (doc) => {
+        setFileToImport(null);
+        setTitle('');
+        setIsLoading(false);
+        setErrorMessage('');
+        showMessage(t('File uploaded successfully'));
+        setOpenImport(false);
+        setDocuments([
+          ...documents,
+          { id: doc.id, title: doc.title, file: doc.file },
+        ]);
+      },
+      onError: (err: Error) => {
+        setErrorMessage(err.message);
+        setIsLoading(false);
+      },
+    });
+  };
+
+  const { mutate } = useUploadSupportingDocument();
 
   const handleUpload = (): void => {
     const maxFiles = 10;
@@ -129,35 +155,20 @@ export const SupportingDocumentsSection = ({
       return;
     }
     setIsLoading(true);
-
-    uploadMutation.mutate(fileToImport, {
-      onSuccess: () => {
-        setDocuments([
-          ...documents,
-          {
-            id: Date.now().toString(),
-            title: fileToImport.name,
-            file: fileToImport,
-          },
-        ]);
-        setFileToImport(null);
-        setIsLoading(false);
-        setOpenImport(false);
-        setErrorMessage('');
-        setTitleError('');
-      },
-      onError: (err) => {
-        setErrorMessage(err ? err.message : t('File upload failed.'));
-        setIsLoading(false);
-      },
+    mutate({
+      _businessArea: businessArea,
+      _programId: programId,
+      paymentPlanId: paymentPlan.id,
+      file: fileToImport,
+      _title: title,
     });
   };
 
   const handleRemove = async (
-    _businessArea,
-    _programId,
-    paymentPlanId,
-    fileId,
+    _businessArea: string,
+    _programId: string,
+    paymentPlanId: string,
+    fileId: string,
   ) => {
     try {
       await deleteSupportingDocument(
@@ -168,9 +179,9 @@ export const SupportingDocumentsSection = ({
       );
       setDocuments(documents.filter((doc) => doc.id !== fileId));
       showMessage(t('File deleted successfully.'));
-    } catch (error) {
+    } catch (err) {
       setErrorMessage(
-        t(`Failed to delete supporting document: ${error.message}`),
+        t(`Failed to delete supporting document: ${err.message}`),
       );
     }
   };
@@ -180,14 +191,13 @@ export const SupportingDocumentsSection = ({
     'Are you sure you want to delete this file? This action cannot be reversed.',
   );
 
-  const handleDownload = (file) => {
-    const url = URL.createObjectURL(file);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = file.name;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleSupportingDocumentDownloadClick = (fileId: string) => {
+    downloadSupportingDocument({
+      businessAreaSlug: businessArea,
+      programId,
+      paymentPlanId: paymentPlan.id,
+      fileId: fileId.toString(),
+    });
   };
 
   const handleExpandClick = () => {
@@ -201,7 +211,9 @@ export const SupportingDocumentsSection = ({
   return (
     <PaperContainer>
       <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Typography variant="h6" data-cy="supporting-documents-title">{t('Supporting Documents')}</Typography>
+        <Typography variant="h6" data-cy="supporting-documents-title">
+          {t('Supporting Documents')}
+        </Typography>
         <Box display="flex">
           {canUploadFile && (
             <Box mr={1}>
@@ -226,7 +238,9 @@ export const SupportingDocumentsSection = ({
       </Box>
 
       {documents.length === 0 && (
-        <GreyText data-cy="supporting-documents-empty">{t('No documents uploaded')}</GreyText>
+        <GreyText data-cy="supporting-documents-empty">
+          {t('No documents uploaded')}
+        </GreyText>
       )}
 
       <Collapse in={isExpanded}>
@@ -247,7 +261,9 @@ export const SupportingDocumentsSection = ({
                     <Box>
                       {canDownloadFile && (
                         <IconButton
-                          onClick={() => handleDownload(doc.file)}
+                          onClick={() =>
+                            handleSupportingDocumentDownloadClick(doc.id)
+                          }
                           data-cy="download-button"
                         >
                           <DownloadIcon />
@@ -354,7 +370,7 @@ export const SupportingDocumentsSection = ({
               onClick={() => {
                 setOpenImport(false);
                 setFileToImport(null);
-                setErrorMessage(null);
+                setErrorMessage('');
                 setTitle('');
               }}
             >
