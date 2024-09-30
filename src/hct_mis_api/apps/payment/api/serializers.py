@@ -1,3 +1,4 @@
+import base64
 from typing import Any, Dict, Optional
 
 from rest_framework import serializers
@@ -59,9 +60,14 @@ class PaymentPlanBulkActionSerializer(serializers.Serializer):
 
 
 class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):
+    id = serializers.SerializerMethodField()
+
     class Meta:
         model = PaymentPlanSupportingDocument
         fields = ["id", "title", "file", "uploaded_at", "created_by"]
+
+    def get_id(self, obj):
+        return base64.b64encode(f"PaymentPlanSupportingDocumentNode:{str(obj.id)}".encode()).decode()
 
     def validate_file(self, file: Any) -> Any:
         if file.size > PaymentPlanSupportingDocument.FILE_SIZE_LIMIT:
