@@ -84,22 +84,20 @@ export const IndividualAdditionalRegistrationInformation = ({
       );
     });
   return (
-    <div>
-      <Overview>
-        <Title>
-          <Typography variant="h6">
-            {t('Additional Registration information')}
-          </Typography>
-        </Title>
-        <Grid container spacing={6}>
-          {fields.map((field, i) => (
-            /* eslint-disable-next-line react/no-array-index-key */
-            <Grid key={i} item xs={4}>
-              {field}
-            </Grid>
-          ))}
-        </Grid>
-      </Overview>
-    </div>
+    <Overview>
+      <Title>
+        <Typography variant="h6">
+          {t('Additional Registration information')}
+        </Typography>
+      </Title>
+      <Grid container spacing={6}>
+        {fields.map((field, i) => (
+          /* eslint-disable-next-line react/no-array-index-key */
+          <Grid key={i} item xs={4}>
+            {field}
+          </Grid>
+        ))}
+      </Grid>
+    </Overview>
   );
 };
