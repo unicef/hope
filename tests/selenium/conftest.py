@@ -69,7 +69,7 @@ from selenium import webdriver
 from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.fixtures import RoleFactory, UserFactory
 from hct_mis_api.apps.account.models import Partner, Role, User, UserRole
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.models import (
@@ -497,6 +497,12 @@ def create_super_user(business_area: BusinessArea) -> User:
 
     for partner in Partner.objects.exclude(name="UNICEF"):
         partner.allowed_business_areas.add(business_area)
+        role = RoleFactory(name=f"Role for {partner.name}")
+        partner_through = BusinessAreaPartnerThrough.objects.create(
+            business_area=business_area,
+            partner=partner,
+        )
+        partner_through.roles.set([role])
 
     assert User.objects.filter(email="test@example.com").first()
     assert user.is_superuser

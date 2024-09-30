@@ -3,7 +3,7 @@ import moment from 'moment';
 import { today } from '@utils/utils';
 import { TFunction } from 'i18next';
 
-export const editProgramValidationSchema = (
+export const editProgramDetailsValidationSchema = (
   t: TFunction<'translation', undefined>,
   initialValues: any,
 ): Yup.ObjectSchema<any, any, any, any> => {
@@ -58,6 +58,13 @@ export const editProgramValidationSchema = (
       .max(255, t('Too long'))
       .nullable(),
     populationGoal: Yup.number().min(0).max(99999999, t('Number is too big')),
+  });
+};
+
+export const editPartnersValidationSchema = (
+  t: TFunction<'translation', undefined>,
+): Yup.ObjectSchema<any, any, any, any> => {
+  return Yup.object().shape({
     partnerAccess: Yup.string().required(),
     partners: Yup.array().of(
       Yup.object().shape({

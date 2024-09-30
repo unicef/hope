@@ -7,12 +7,12 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('core', '0087_migration'),
-        ('payment', '0144_migration'),
+        ('steficon', '0019_migration'),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='financialserviceprovider',
+            model_name='rule',
             name='allowed_business_areas',
             field=models.ManyToManyField(blank=True, to='core.BusinessArea'),
         ),
