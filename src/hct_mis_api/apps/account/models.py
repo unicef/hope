@@ -71,7 +71,6 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
             }
         }
     """
-    permissions = JSONField(default=dict, blank=True)  # TODO: remove after partner-permission-and-access migration
 
     def __str__(self) -> str:
         return f"{self.name} [Sub-Partner of {self.parent.name}]" if self.parent else self.name
@@ -304,6 +303,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             ("quick_links", "Can see quick links in admin"),
             ("restrict_help_desk", "Limit fields to be editable for help desk"),
             ("can_reindex_programs", "Can reindex programs"),
+            ("can_add_business_area_to_partner", "Can add business area to partner"),
         )
 
 

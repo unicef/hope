@@ -1,10 +1,10 @@
-import { Box, Button } from '@mui/material';
-import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
-import * as React from 'react';
-import { ProgramQuery, useCashAssistUrlPrefixQuery } from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
+import { EditProgramMenu } from '@components/programs/EditProgram/EditProgramMenu';
+import { ProgramQuery, useCashAssistUrlPrefixQuery } from '@generated/graphql';
+import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
+import { Box, Button } from '@mui/material';
+import * as React from 'react';
 import { DuplicateProgramButtonLink } from '../../dialogs/programs/DuplicateProgramButtonLink';
-import { EditProgramButtonLink } from '../../dialogs/programs/EditProgramButtonLink';
 import { FinishProgram } from '../../dialogs/programs/FinishProgram';
 
 export interface ActiveProgramDetailsPageHeaderPropTypes {
@@ -35,7 +35,7 @@ export function ActiveProgramDetailsPageHeaderButtons({
       )}
       {canEdit && (
         <Box m={2}>
-          <EditProgramButtonLink program={program} />
+          <EditProgramMenu program={program} />
         </Box>
       )}
       {!isPaymentPlanApplicable && (

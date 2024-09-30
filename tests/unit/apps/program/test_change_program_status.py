@@ -97,7 +97,6 @@ class TestChangeProgramStatus(APITestCase):
                 "programData": {
                     "id": self.id_to_base64(program.id, "ProgramNode"),
                     "status": target_status,
-                    "partners": [{"partner": str(self.user.partner.id), "areaAccess": "BUSINESS_AREA"}],
                 }
             },
         )
