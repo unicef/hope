@@ -14,7 +14,7 @@ class LimitBusinessAreaModelManager(models.Manager):
 
 
 class LimitBusinessAreaModelMixin(models.Model):
-    allowed_business_areas = models.ManyToManyField(to=BusinessArea)
+    allowed_business_areas = models.ManyToManyField(to=BusinessArea, blank=True)
 
     objects = LimitBusinessAreaModelManager()
 

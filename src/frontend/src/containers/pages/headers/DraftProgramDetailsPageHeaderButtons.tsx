@@ -1,10 +1,10 @@
+import { EditProgramMenu } from '@components/programs/EditProgram/EditProgramMenu';
+import { ProgramQuery } from '@generated/graphql';
 import { Box } from '@mui/material';
 import * as React from 'react';
-import { ProgramQuery } from '@generated/graphql';
 import { ActivateProgram } from '../../dialogs/programs/ActivateProgram';
 import { DeleteProgram } from '../../dialogs/programs/DeleteProgram';
 import { DuplicateProgramButtonLink } from '../../dialogs/programs/DuplicateProgramButtonLink';
-import { EditProgramButtonLink } from '../../dialogs/programs/EditProgramButtonLink';
 
 export interface DraftProgramDetailsPageHeaderPropTypes {
   program: ProgramQuery['program'];
@@ -29,7 +29,7 @@ export function DraftProgramDetailsPageHeaderButtons({
       )}
       {canEdit && (
         <Box m={2}>
-          <EditProgramButtonLink program={program} />
+          <EditProgramMenu program={program} />
         </Box>
       )}
       {canActivate && (

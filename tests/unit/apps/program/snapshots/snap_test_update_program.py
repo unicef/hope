@@ -56,21 +56,6 @@ snapshots['TestUpdateProgram::test_finish_active_program_with_not_finished_progr
                     'label': 'Full'
                 },
                 'name': 'initial name',
-                'partnerAccess': 'NONE_PARTNERS_ACCESS',
-                'partners': [
-                    {
-                        'areaAccess': 'BUSINESS_AREA',
-                        'areas': [
-                            {
-                                'name': 'Area in AFG 1'
-                            },
-                            {
-                                'name': 'Area in AFG 2'
-                            }
-                        ],
-                        'name': 'UNICEF'
-                    }
-                ],
                 'pduFields': [
                     {
                         'label': '{"English(EN)": "PDU Field To Be Preserved"}',
@@ -155,175 +140,6 @@ snapshots['TestUpdateProgram::test_update_draft_not_empty_program_with_dct 1'] =
     ]
 }
 
-snapshots['TestUpdateProgram::test_update_full_area_access_flag 1'] = {
-    'data': {
-        'updateProgram': {
-            'program': {
-                'dataCollectingType': {
-                    'code': 'partial_individuals',
-                    'label': 'Partial'
-                },
-                'name': 'updated name',
-                'partnerAccess': 'ALL_PARTNERS_ACCESS',
-                'partners': [
-                    {
-                        'areaAccess': 'BUSINESS_AREA',
-                        'areas': [
-                            {
-                                'name': 'Area in AFG 1'
-                            },
-                            {
-                                'name': 'Area in AFG 2'
-                            }
-                        ],
-                        'name': 'Other Partner'
-                    },
-                    {
-                        'areaAccess': 'BUSINESS_AREA',
-                        'areas': [
-                            {
-                                'name': 'Area in AFG 1'
-                            },
-                            {
-                                'name': 'Area in AFG 2'
-                            }
-                        ],
-                        'name': 'UNICEF'
-                    }
-                ],
-                'pduFields': [
-                    {
-                        'label': '{"English(EN)": "PDU Field To Be Preserved"}',
-                        'name': 'pdu_field_to_be_preserved',
-                        'pduData': {
-                            'numberOfRounds': 1,
-                            'roundsNames': [
-                                'Round To Be Preserved'
-                            ],
-                            'subtype': 'DATE'
-                        }
-                    },
-                    {
-                        'label': '{"English(EN)": "PDU Field To Be Removed"}',
-                        'name': 'pdu_field_to_be_removed',
-                        'pduData': {
-                            'numberOfRounds': 3,
-                            'roundsNames': [
-                                'Round 1 To Be Removed',
-                                'Round 2 To Be Removed',
-                                'Round 3 To Be Removed'
-                            ],
-                            'subtype': 'DECIMAL'
-                        }
-                    },
-                    {
-                        'label': '{"English(EN)": "PDU Field To Be Updated"}',
-                        'name': 'pdu_field_to_be_updated',
-                        'pduData': {
-                            'numberOfRounds': 2,
-                            'roundsNames': [
-                                'Round 1 To Be Updated',
-                                'Round 2 To Be Updated'
-                            ],
-                            'subtype': 'STRING'
-                        }
-                    }
-                ],
-                'status': 'DRAFT'
-            }
-        }
-    }
-}
-
-snapshots['TestUpdateProgram::test_update_full_area_access_flag 2'] = {
-    'data': {
-        'updateProgram': {
-            'program': {
-                'dataCollectingType': {
-                    'code': 'partial_individuals',
-                    'label': 'Partial'
-                },
-                'name': 'updated name',
-                'partnerAccess': 'SELECTED_PARTNERS_ACCESS',
-                'partners': [
-                    {
-                        'areaAccess': 'ADMIN_AREA',
-                        'areas': [
-                            {
-                                'name': 'Area in AFG 1'
-                            }
-                        ],
-                        'name': 'Other Partner'
-                    },
-                    {
-                        'areaAccess': 'BUSINESS_AREA',
-                        'areas': [
-                            {
-                                'name': 'Area in AFG 1'
-                            },
-                            {
-                                'name': 'Area in AFG 2'
-                            }
-                        ],
-                        'name': 'UNICEF'
-                    },
-                    {
-                        'areaAccess': 'BUSINESS_AREA',
-                        'areas': [
-                            {
-                                'name': 'Area in AFG 1'
-                            },
-                            {
-                                'name': 'Area in AFG 2'
-                            }
-                        ],
-                        'name': 'WFP'
-                    }
-                ],
-                'pduFields': [
-                    {
-                        'label': '{"English(EN)": "PDU Field To Be Preserved"}',
-                        'name': 'pdu_field_to_be_preserved',
-                        'pduData': {
-                            'numberOfRounds': 1,
-                            'roundsNames': [
-                                'Round To Be Preserved'
-                            ],
-                            'subtype': 'DATE'
-                        }
-                    },
-                    {
-                        'label': '{"English(EN)": "PDU Field To Be Removed"}',
-                        'name': 'pdu_field_to_be_removed',
-                        'pduData': {
-                            'numberOfRounds': 3,
-                            'roundsNames': [
-                                'Round 1 To Be Removed',
-                                'Round 2 To Be Removed',
-                                'Round 3 To Be Removed'
-                            ],
-                            'subtype': 'DECIMAL'
-                        }
-                    },
-                    {
-                        'label': '{"English(EN)": "PDU Field To Be Updated"}',
-                        'name': 'pdu_field_to_be_updated',
-                        'pduData': {
-                            'numberOfRounds': 2,
-                            'roundsNames': [
-                                'Round 1 To Be Updated',
-                                'Round 2 To Be Updated'
-                            ],
-                            'subtype': 'STRING'
-                        }
-                    }
-                ],
-                'status': 'DRAFT'
-            }
-        }
-    }
-}
-
 snapshots['TestUpdateProgram::test_update_program_authenticated_0_with_permissions 1'] = {
     'data': {
         'updateProgram': {
@@ -333,21 +149,6 @@ snapshots['TestUpdateProgram::test_update_program_authenticated_0_with_permissio
                     'label': 'Partial'
                 },
                 'name': 'updated name',
-                'partnerAccess': 'NONE_PARTNERS_ACCESS',
-                'partners': [
-                    {
-                        'areaAccess': 'BUSINESS_AREA',
-                        'areas': [
-                            {
-                                'name': 'Area in AFG 1'
-                            },
-                            {
-                                'name': 'Area in AFG 2'
-                            }
-                        ],
-                        'name': 'UNICEF'
-                    }
-                ],
                 'pduFields': [
                     {
                         'label': '{"English(EN)": "PDU Field To Be Preserved"}',
@@ -512,258 +313,6 @@ snapshots['TestUpdateProgram::test_update_program_not_authenticated 1'] = {
     ]
 }
 
-snapshots['TestUpdateProgram::test_update_program_of_other_partner_raise_error 1'] = {
-    'data': {
-        'updateProgram': None
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 7,
-                    'line': 3
-                }
-            ],
-            'message': "['Please assign access to your partner before saving the programme.']",
-            'path': [
-                'updateProgram'
-            ]
-        }
-    ]
-}
-
-snapshots['TestUpdateProgram::test_update_program_partners_0_valid 1'] = {
-    'data': {
-        'updateProgram': {
-            'program': {
-                'dataCollectingType': {
-                    'code': 'partial_individuals',
-                    'label': 'Partial'
-                },
-                'name': 'updated name',
-                'partnerAccess': 'SELECTED_PARTNERS_ACCESS',
-                'partners': [
-                    {
-                        'areaAccess': 'ADMIN_AREA',
-                        'areas': [
-                            {
-                                'name': 'Area1'
-                            },
-                            {
-                                'name': 'Area2'
-                            }
-                        ],
-                        'name': 'Partner to be added'
-                    },
-                    {
-                        'areaAccess': 'BUSINESS_AREA',
-                        'areas': [
-                            {
-                                'name': 'Area in AFG 1'
-                            },
-                            {
-                                'name': 'Area in AFG 2'
-                            }
-                        ],
-                        'name': 'UNICEF'
-                    },
-                    {
-                        'areaAccess': 'ADMIN_AREA',
-                        'areas': [
-                            {
-                                'name': 'Area1'
-                            },
-                            {
-                                'name': 'Area2'
-                            }
-                        ],
-                        'name': 'WFP'
-                    }
-                ],
-                'pduFields': [
-                    {
-                        'label': '{"English(EN)": "PDU Field To Be Preserved"}',
-                        'name': 'pdu_field_to_be_preserved',
-                        'pduData': {
-                            'numberOfRounds': 1,
-                            'roundsNames': [
-                                'Round To Be Preserved'
-                            ],
-                            'subtype': 'DATE'
-                        }
-                    },
-                    {
-                        'label': '{"English(EN)": "PDU Field To Be Removed"}',
-                        'name': 'pdu_field_to_be_removed',
-                        'pduData': {
-                            'numberOfRounds': 3,
-                            'roundsNames': [
-                                'Round 1 To Be Removed',
-                                'Round 2 To Be Removed',
-                                'Round 3 To Be Removed'
-                            ],
-                            'subtype': 'DECIMAL'
-                        }
-                    },
-                    {
-                        'label': '{"English(EN)": "PDU Field To Be Updated"}',
-                        'name': 'pdu_field_to_be_updated',
-                        'pduData': {
-                            'numberOfRounds': 2,
-                            'roundsNames': [
-                                'Round 1 To Be Updated',
-                                'Round 2 To Be Updated'
-                            ],
-                            'subtype': 'STRING'
-                        }
-                    }
-                ],
-                'status': 'DRAFT'
-            }
-        }
-    }
-}
-
-snapshots['TestUpdateProgram::test_update_program_partners_1_invalid_all_partner_access 1'] = {
-    'data': {
-        'updateProgram': None
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 7,
-                    'line': 3
-                }
-            ],
-            'message': "['You cannot specify partners for the chosen access type']",
-            'path': [
-                'updateProgram'
-            ]
-        }
-    ]
-}
-
-snapshots['TestUpdateProgram::test_update_program_partners_2_invalid_none_partner_access 1'] = {
-    'data': {
-        'updateProgram': None
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 7,
-                    'line': 3
-                }
-            ],
-            'message': "['You cannot specify partners for the chosen access type']",
-            'path': [
-                'updateProgram'
-            ]
-        }
-    ]
-}
-
-snapshots['TestUpdateProgram::test_update_program_partners_all_partners_access 1'] = {
-    'data': {
-        'updateProgram': {
-            'program': {
-                'dataCollectingType': {
-                    'code': 'partial_individuals',
-                    'label': 'Partial'
-                },
-                'name': 'updated name',
-                'partnerAccess': 'ALL_PARTNERS_ACCESS',
-                'partners': [
-                    {
-                        'areaAccess': 'BUSINESS_AREA',
-                        'areas': [
-                            {
-                                'name': 'Area in AFG 1'
-                            },
-                            {
-                                'name': 'Area in AFG 2'
-                            }
-                        ],
-                        'name': 'Other Partner'
-                    },
-                    {
-                        'areaAccess': 'BUSINESS_AREA',
-                        'areas': [
-                            {
-                                'name': 'Area in AFG 1'
-                            },
-                            {
-                                'name': 'Area in AFG 2'
-                            }
-                        ],
-                        'name': 'UNICEF'
-                    }
-                ],
-                'pduFields': [
-                    {
-                        'label': '{"English(EN)": "PDU Field To Be Preserved"}',
-                        'name': 'pdu_field_to_be_preserved',
-                        'pduData': {
-                            'numberOfRounds': 1,
-                            'roundsNames': [
-                                'Round To Be Preserved'
-                            ],
-                            'subtype': 'DATE'
-                        }
-                    },
-                    {
-                        'label': '{"English(EN)": "PDU Field To Be Removed"}',
-                        'name': 'pdu_field_to_be_removed',
-                        'pduData': {
-                            'numberOfRounds': 3,
-                            'roundsNames': [
-                                'Round 1 To Be Removed',
-                                'Round 2 To Be Removed',
-                                'Round 3 To Be Removed'
-                            ],
-                            'subtype': 'DECIMAL'
-                        }
-                    },
-                    {
-                        'label': '{"English(EN)": "PDU Field To Be Updated"}',
-                        'name': 'pdu_field_to_be_updated',
-                        'pduData': {
-                            'numberOfRounds': 2,
-                            'roundsNames': [
-                                'Round 1 To Be Updated',
-                                'Round 2 To Be Updated'
-                            ],
-                            'subtype': 'STRING'
-                        }
-                    }
-                ],
-                'status': 'DRAFT'
-            }
-        }
-    }
-}
-
-snapshots['TestUpdateProgram::test_update_program_partners_invalid_access_type_from_object 1'] = {
-    'data': {
-        'updateProgram': None
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 7,
-                    'line': 3
-                }
-            ],
-            'message': "['You cannot specify partners for the chosen access type']",
-            'path': [
-                'updateProgram'
-            ]
-        }
-    ]
-}
-
 snapshots['TestUpdateProgram::test_update_program_when_finished 1'] = {
     'data': {
         'updateProgram': None
@@ -919,21 +468,6 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields 2'] = {
                     'label': 'Full'
                 },
                 'name': 'Program with Updated PDU Fields',
-                'partnerAccess': 'NONE_PARTNERS_ACCESS',
-                'partners': [
-                    {
-                        'areaAccess': 'BUSINESS_AREA',
-                        'areas': [
-                            {
-                                'name': 'Area in AFG 1'
-                            },
-                            {
-                                'name': 'Area in AFG 2'
-                            }
-                        ],
-                        'name': 'UNICEF'
-                    }
-                ],
                 'pduFields': [
                     {
                         'label': '{"English(EN)": "PDU Field - New"}',
@@ -1057,21 +591,6 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_existing_field
                     'label': 'Full'
                 },
                 'name': 'Program with Updated PDU Fields',
-                'partnerAccess': 'NONE_PARTNERS_ACCESS',
-                'partners': [
-                    {
-                        'areaAccess': 'BUSINESS_AREA',
-                        'areas': [
-                            {
-                                'name': 'Area in AFG 1'
-                            },
-                            {
-                                'name': 'Area in AFG 2'
-                            }
-                        ],
-                        'name': 'UNICEF'
-                    }
-                ],
                 'pduFields': [
                     {
                         'label': '{"English(EN)": "PDU Field 1"}',
@@ -1127,21 +646,6 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_existing_field
                     'label': 'Full'
                 },
                 'name': 'Program with Updated PDU Fields',
-                'partnerAccess': 'NONE_PARTNERS_ACCESS',
-                'partners': [
-                    {
-                        'areaAccess': 'BUSINESS_AREA',
-                        'areas': [
-                            {
-                                'name': 'Area in AFG 1'
-                            },
-                            {
-                                'name': 'Area in AFG 2'
-                            }
-                        ],
-                        'name': 'UNICEF'
-                    }
-                ],
                 'pduFields': [
                     {
                         'label': '{"English(EN)": "PDU Field 1"}',
@@ -1217,21 +721,6 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_program_has_RD
                     'label': 'Full'
                 },
                 'name': 'Program with Updated PDU Fields',
-                'partnerAccess': 'NONE_PARTNERS_ACCESS',
-                'partners': [
-                    {
-                        'areaAccess': 'BUSINESS_AREA',
-                        'areas': [
-                            {
-                                'name': 'Area in AFG 1'
-                            },
-                            {
-                                'name': 'Area in AFG 2'
-                            }
-                        ],
-                        'name': 'UNICEF'
-                    }
-                ],
                 'pduFields': [
                     {
                         'label': '{"English(EN)": "PDU Field To Be Preserved"}',
@@ -1327,21 +816,6 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_program_has_RD
                     'label': 'Full'
                 },
                 'name': 'Program with Updated PDU Fields',
-                'partnerAccess': 'NONE_PARTNERS_ACCESS',
-                'partners': [
-                    {
-                        'areaAccess': 'BUSINESS_AREA',
-                        'areas': [
-                            {
-                                'name': 'Area in AFG 1'
-                            },
-                            {
-                                'name': 'Area in AFG 2'
-                            }
-                        ],
-                        'name': 'UNICEF'
-                    }
-                ],
                 'pduFields': [
                     {
                         'label': '{"English(EN)": "PDU Field To Be Preserved"}',
@@ -1395,21 +869,6 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_program_has_RD
                     'label': 'Full'
                 },
                 'name': 'Program with Updated PDU Fields',
-                'partnerAccess': 'NONE_PARTNERS_ACCESS',
-                'partners': [
-                    {
-                        'areaAccess': 'BUSINESS_AREA',
-                        'areas': [
-                            {
-                                'name': 'Area in AFG 1'
-                            },
-                            {
-                                'name': 'Area in AFG 2'
-                            }
-                        ],
-                        'name': 'UNICEF'
-                    }
-                ],
                 'pduFields': [
                     {
                         'label': '{"English(EN)": "PDU Field To Be Preserved"}',
