@@ -220,4 +220,4 @@ class PaymentPlanSupportingDocumentViewSet(
     )
     def download(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         document = self.get_object()
-        return Response({"url": document.file.file.url}, status=status.HTTP_200_OK)
+        return Response({"url": document.file.url}, status=status.HTTP_200_OK)
