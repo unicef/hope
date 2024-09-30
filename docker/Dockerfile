@@ -41,11 +41,10 @@ RUN apt-get update \
 
 ENV PDM_PACKAGES=/packages
 ENV CODE=/code
-ENV PDM_NO_SELF=True
 ENV PDM_PROJECT=$PDM_PACKAGES
 ENV PYPACKAGES=$PDM_PACKAGES/__pypackages__/3.11
 ENV PYTHONPYCACHEPREFIX=/tmp/pycache \
-    PYTHONPATH=$PYPACKAGES/lib:$CODE:$PYTHONPATH \
+    PYTHONPATH=$PYPACKAGES/lib:$PYTHONPATH \
     PATH=$PYPACKAGES/bin:$PATH \
     XDG_RUNTIME_DIR=/run/user/"${UID}"
 
@@ -54,8 +53,7 @@ WORKDIR $CODE
 COPY --from=waitforit /data/waitforit /usr/local/bin/waitforit
 
 # Dist builder image
-FROM base as builder
-
+FROM base as pdm
 RUN pip install --upgrade pip &&\
     pip install pdm==2.15.2 &&\
     pip install setuptools==71.1.0 &&\
@@ -63,13 +61,14 @@ RUN pip install --upgrade pip &&\
     pdm config python.use_venv false &&\
     pdm config venv.in_project true &&\
     pdm config check_update false
-
 WORKDIR $PDM_PACKAGES
-COPY pyproject.toml pdm.lock ./
-RUN pdm sync --prod --no-editable --no-self --no-isolation
+COPY README.md LICENSE pyproject.toml pdm.lock ./
+
+
+
 
 # Dev image
-FROM builder AS dev
+FROM pdm AS dev
 
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
@@ -83,24 +82,14 @@ RUN apt-get update \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
+ENV PYTHONPATH=$CODE/src:/test/:$PYTHONPATH
 RUN pdm sync --no-editable --no-self --no-isolation
 
 WORKDIR $CODE
 COPY ./src/ ./src/
 COPY ./tests /tests
+COPY ./manage.py ./manage.py
 COPY .flake8 pyproject.toml pdm.lock ./
-COPY ./docker/entrypoint.sh /bin/
-ENTRYPOINT ["entrypoint.sh"]
-
-## Dist (backend only) image
-FROM base AS be-dist
-
-COPY ./src/ ./
-COPY --chown=hope:hope --from=builder $PDM_PACKAGES $PDM_PACKAGES
-COPY --chown=hope:hope --from=certs /data/psql-cert.crt /code/psql-cert.crt
-
-USER hope
-
 COPY ./docker/entrypoint.sh /bin/
 ENTRYPOINT ["entrypoint.sh"]
 
@@ -115,7 +104,22 @@ RUN yarn install --frozen-lockfile --network-timeout 600000
 COPY ./src/frontend ./
 RUN NODE_ENV="production" NODE_OPTIONS="--max-old-space-size=4096" yarn build
 
+# Dist builder image
+FROM pdm as dist-builder
+COPY ./src/ ./src/
+COPY --chown=hope:hope --from=frontend-builder /fe-build/build $PDM_PACKAGES/src/hct_mis_api/apps/web/static/web
+RUN pdm sync --prod --no-editable --no-isolation
 
-FROM be-dist AS dist
 
-COPY --chown=hope:hope --from=frontend-builder /fe-build/build ./hct_mis_api/apps/web/static/web
+## Dist (backend only) image
+FROM base AS dist
+
+
+COPY ./src/gunicorn_config.py /conf/gunicorn_config.py
+COPY --chown=hope:hope --from=dist-builder $PDM_PACKAGES $PDM_PACKAGES
+COPY --chown=hope:hope --from=certs /data/psql-cert.crt /certs/psql-cert.crt
+
+USER hope
+
+COPY ./docker/entrypoint.sh /bin/
+ENTRYPOINT ["entrypoint.sh"]
