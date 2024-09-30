@@ -673,18 +673,25 @@ class HardDocumentDeduplication:
                 .select_related("individual", "type")
                 .select_for_update(of=("self",))  # no need to lock individuals
                 .order_by("pk")
+                .distinct()
             )
-            documents_numbers = [x.document_number for x in documents_to_dedup]
-            new_document_signatures = [self._generate_signature(d) for d in documents_to_dedup]
+
+            documents_numbers = []
+            new_document_signatures = []
+
+            # use this dict for skip ticket creation for the same Individual with the same doc number
+            new_document_signatures_in_batch_per_individual_dict = defaultdict(list)
+            for d in documents_to_dedup:
+                new_document_signature = self._generate_signature(d)
+                documents_numbers.append(d.document_number)
+                new_document_signatures.append(new_document_signature)
+                new_document_signatures_in_batch_per_individual_dict[str(d.individual_id)].append(
+                    new_document_signature
+                )
+
             new_document_signatures_duplicated_in_batch = [
                 d for d in new_document_signatures if new_document_signatures.count(d) > 1
             ]
-            # use this dict for skip ticket creation for the same Individual with the same doc number
-            ind_and_new_document_signatures_duplicated_in_batch_dict = defaultdict(list)
-            for d in documents_to_dedup:
-                ind_and_new_document_signatures_duplicated_in_batch_dict[str(d.individual_id)].append(
-                    self._generate_signature(d)
-                )
 
             # added order_by because test was failed randomly
             all_matching_number_documents = (
@@ -706,10 +713,12 @@ class HardDocumentDeduplication:
                     )
                 )
                 .order_by("individual_id")
+                .distinct()
             )
             all_matching_number_documents_dict = {d.signature: d for d in all_matching_number_documents}
             all_matching_number_documents_signatures = all_matching_number_documents_dict.keys()
-            already_processed_signatures = []
+
+            already_processed_signatures = set()
             ticket_data_dict = {}
             possible_duplicates_individuals_id_set = set()
 
@@ -717,9 +726,9 @@ class HardDocumentDeduplication:
                 new_document_signature = self._generate_signature(new_document)
                 # use this dict for skip ticket creation for the same Individual with the same doc number
                 is_duplicated_document_number_for_individual: bool = (
-                    ind_and_new_document_signatures_duplicated_in_batch_dict.get(
-                        str(new_document.individual_id), []
-                    ).count(new_document_signature)
+                    new_document_signatures_in_batch_per_individual_dict.get(str(new_document.individual_id), []).count(
+                        new_document_signature
+                    )
                     > 1
                 )
 
@@ -729,35 +738,40 @@ class HardDocumentDeduplication:
                         new_document_signature,
                         {
                             "original": all_matching_number_documents_dict[new_document_signature],
-                            "possible_duplicates": [],
+                            "possible_duplicates": set(),
                         },
                     )
-                    ticket_data["possible_duplicates"].append(new_document)
+                    ticket_data["possible_duplicates"].add(new_document)
                     ticket_data_dict[new_document_signature] = ticket_data
                     possible_duplicates_individuals_id_set.add(str(new_document.individual_id))
-                    continue
 
-                if (
-                    new_document_signature in new_document_signatures_duplicated_in_batch
-                    and new_document_signature in already_processed_signatures
-                    and not is_duplicated_document_number_for_individual
-                ):
-                    new_document.status = Document.STATUS_NEED_INVESTIGATION
-                    ticket_data_dict[new_document_signature]["possible_duplicates"].append(new_document)
-                    possible_duplicates_individuals_id_set.add(str(new_document.individual_id))
-                    continue
+                elif new_document_signature in new_document_signatures_duplicated_in_batch:
 
-                new_document.status = Document.STATUS_VALID
-                already_processed_signatures.append(new_document_signature)
+                    if is_duplicated_document_number_for_individual:
+                        # do not create ticket for the same Individual with the same doc number
+                        new_document.status = Document.STATUS_VALID
+                        new_document_signatures_in_batch_per_individual_dict[str(new_document.individual_id)].remove(
+                            new_document_signature
+                        )
+                        new_document_signatures_duplicated_in_batch.remove(new_document_signature)
+                    elif new_document_signature not in already_processed_signatures:
+                        # first occurrence of new document is considered valid, duplicated are added in next iterations
+                        new_document.status = Document.STATUS_VALID
 
-                if (
-                    new_document_signature in new_document_signatures_duplicated_in_batch
-                    and not is_duplicated_document_number_for_individual
-                ):
-                    ticket_data_dict[new_document_signature] = {
-                        "original": new_document,
-                        "possible_duplicates": [],
-                    }
+                        ticket_data_dict[new_document_signature] = {
+                            "original": new_document,
+                            "possible_duplicates": set(),
+                        }
+                    else:
+                        new_document.status = Document.STATUS_NEED_INVESTIGATION
+                        ticket_data_dict[new_document_signature]["possible_duplicates"].add(new_document)
+                        possible_duplicates_individuals_id_set.add(str(new_document.individual_id))
+
+                else:
+                    # not a duplicate
+                    new_document.status = Document.STATUS_VALID
+
+                already_processed_signatures.add(new_document_signature)
 
             try:
                 Document.objects.bulk_update(documents_to_dedup, ("status", "updated_at"))
