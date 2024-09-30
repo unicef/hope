@@ -746,7 +746,6 @@ class HardDocumentDeduplication:
                     possible_duplicates_individuals_id_set.add(str(new_document.individual_id))
 
                 elif new_document_signature in new_document_signatures_duplicated_in_batch:
-
                     if is_duplicated_document_number_for_individual:
                         # do not create ticket for the same Individual with the same doc number
                         new_document.status = Document.STATUS_VALID
