@@ -518,7 +518,7 @@ def create_program_partner_access(
     partners_data: List, program: Program, partner_access: Optional[str] = None
 ) -> List[Dict]:
     if partner_access == Program.ALL_PARTNERS_ACCESS:
-        partners = Partner.objects.filter(allowed_business_areas=program.business_area).exclude(
+        partners = Partner.objects.filter(business_areas=program.business_area).exclude(
             name=settings.DEFAULT_EMPTY_PARTNER
         )
         partners_data = [{"partner": partner.id, "areas": []} for partner in partners]

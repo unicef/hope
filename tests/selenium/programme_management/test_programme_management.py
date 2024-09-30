@@ -1,5 +1,6 @@
 import random
 from datetime import datetime
+from time import sleep
 
 from django.conf import settings
 from django.core.management import call_command
@@ -12,7 +13,11 @@ from tests.selenium.page_object.programme_details.programme_details import Progr
 from tests.selenium.page_object.programme_management.programme_management import ProgrammeManagement
 from selenium import webdriver
 from selenium.webdriver import Keys
+from selenium.webdriver.common.by import By
 
+from hct_mis_api.apps.account.fixtures import RoleFactory
+from hct_mis_api.apps.account.models import Partner
+from hct_mis_api.apps.core.models import BusinessArea, BusinessAreaPartnerThrough
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 
@@ -368,7 +373,7 @@ class TestProgrammeManagement:
         pageProgrammeManagement.getButtonNext().click()
         # 3rd step (Partners)
         pageProgrammeManagement.getAccessToProgram().click()
-        pageProgrammeManagement.selectWhoAccessToProgram("Only selected partners within the business area")
+        pageProgrammeManagement.selectWhoAccessToProgram("Only Selected Partners within the business area")
         pageProgrammeManagement.choosePartnerOption("UNHCR")
         pageProgrammeManagement.getButtonAddPartner().click()
         pageProgrammeManagement.getButtonDelete().click()
@@ -390,7 +395,6 @@ class TestProgrammeManagement:
 
 
 # ToDo: Check Unicef partner! and delete classes
-@pytest.mark.night
 @pytest.mark.usefixtures("login")
 class TestBusinessAreas:
     @pytest.mark.parametrize(
@@ -434,7 +438,7 @@ class TestBusinessAreas:
         pageProgrammeManagement.getButtonNext().click()
         # 3rd step (Partners)
         pageProgrammeManagement.getAccessToProgram().click()
-        pageProgrammeManagement.selectWhoAccessToProgram("Only selected partners within the business area")
+        pageProgrammeManagement.selectWhoAccessToProgram("Only Selected Partners within the business area")
         pageProgrammeManagement.choosePartnerOption("UNHCR")
         programme_creation_url = pageProgrammeManagement.driver.current_url
         pageProgrammeManagement.getButtonSave().click()
@@ -492,7 +496,7 @@ class TestBusinessAreas:
         pageProgrammeManagement.getButtonNext().click()
         # 3rd step (Partners)
         pageProgrammeManagement.getAccessToProgram().click()
-        pageProgrammeManagement.selectWhoAccessToProgram("None of the partners should have access")
+        pageProgrammeManagement.selectWhoAccessToProgram("None of the Partners should have access")
         pageProgrammeManagement.getButtonSave().click()
         pageProgrammeDetails.getCopyProgram().click()
         # 1st step (Details)
@@ -518,7 +522,6 @@ class TestBusinessAreas:
         assert "New Programme" in pageProgrammeDetails.getHeaderTitle().text
 
 
-@pytest.mark.night
 @pytest.mark.usefixtures("login")
 class TestAdminAreas:
     @pytest.mark.parametrize(
@@ -562,7 +565,7 @@ class TestAdminAreas:
         pageProgrammeManagement.getButtonNext().click()
         # 3rd step (Partners)
         pageProgrammeManagement.getAccessToProgram().click()
-        pageProgrammeManagement.selectWhoAccessToProgram("Only selected partners within the business area")
+        pageProgrammeManagement.selectWhoAccessToProgram("Only Selected Partners within the business area")
         pageProgrammeManagement.choosePartnerOption("UNHCR")
         pageProgrammeManagement.getLabelAdminArea().click()
         pageProgrammeManagement.chooseAreaAdmin1ByName("Baghlan").click()
@@ -623,7 +626,7 @@ class TestComeBackScenarios:
         pageProgrammeManagement.getButtonNext().click()
         # 3rd step (Partners)
         pageProgrammeManagement.getAccessToProgram().click()
-        pageProgrammeManagement.selectWhoAccessToProgram("Only selected partners within the business area")
+        pageProgrammeManagement.selectWhoAccessToProgram("Only Selected Partners within the business area")
         pageProgrammeManagement.choosePartnerOption("UNHCR")
         pageProgrammeManagement.getButtonBack().click()
         pageProgrammeManagement.getButtonBack().click()
@@ -656,7 +659,6 @@ class TestComeBackScenarios:
         assert "UNHCR" in pageProgrammeDetails.getLabelPartnerName().text
 
 
-@pytest.mark.night
 @pytest.mark.usefixtures("login")
 class TestManualCalendar:
     @freeze_time("2024-09-09")
@@ -708,7 +710,7 @@ class TestManualCalendar:
                     "startDate": FormatTime(1, 1, 2022),
                     "endDate": FormatTime(1, 2, 2032),
                     "dataCollectingType": "Partial",
-                    "partners_access": "None of the partners should have access",
+                    "partners_access": "None of the Partners should have access",
                 },
                 id="none_of_the_partners_should_have_access",
             ),
@@ -719,7 +721,7 @@ class TestManualCalendar:
                     "startDate": FormatTime(1, 1, 2022),
                     "endDate": FormatTime(1, 2, 2032),
                     "dataCollectingType": "Partial",
-                    "partners_access": "All partners within the business area",
+                    "partners_access": "All Current Partners within the business area",
                 },
                 id="all_partners_within_the_business_area",
             ),
@@ -762,6 +764,8 @@ class TestManualCalendar:
         pageProgrammeManagement.getTableRowByProgramName("Test Programm").click()
 
         pageProgrammeManagement.getButtonEditProgram().click()
+        pageProgrammeManagement.getSelectEditProgramDetails().click()
+
         # 1st step (Details)
         pageProgrammeManagement.getInputProgrammeName().send_keys(Keys.CONTROL + "a")
         pageProgrammeManagement.getInputProgrammeName().send_keys("New name after Edit")
@@ -776,10 +780,6 @@ class TestManualCalendar:
         pageProgrammeManagement.getButtonNext().click()
         # 2nd step (Time Series Fields)
         pageProgrammeManagement.getButtonAddTimeSeriesField()
-        pageProgrammeManagement.getButtonNext().click()
-        # 3rd step (Partners)
-        pageProgrammeManagement.getAccessToProgram().click()
-        pageProgrammeManagement.selectWhoAccessToProgram("None of the partners should have access")
         pageProgrammeManagement.getButtonSave().click()
         programme_creation_url = pageProgrammeManagement.driver.current_url
         # Check Details page
@@ -788,7 +788,97 @@ class TestManualCalendar:
         assert FormatTime(1, 1, 2022).date_in_text_format in pageProgrammeDetails.getLabelStartDate().text
         assert FormatTime(1, 10, 2099).date_in_text_format in pageProgrammeDetails.getLabelEndDate().text
 
-    @pytest.mark.skip(reason="Unskip after fix bug: 214927")
+    def test_programme_partners(
+        self,
+        create_programs: None,
+        pageProgrammeManagement: ProgrammeManagement,
+        pageProgrammeDetails: ProgrammeDetails,
+    ) -> None:
+        partner1 = Partner.objects.create(name="Test Partner 1")
+        partner2 = Partner.objects.create(name="Test Partner 2")
+        role = RoleFactory(name="Role in BA")
+        ba_partner_through = BusinessAreaPartnerThrough.objects.create(
+            business_area=BusinessArea.objects.get(slug="afghanistan"),
+            partner=partner1,
+        )
+        ba_partner_through.roles.set([role])
+        # Go to Programme Management
+        pageProgrammeManagement.getNavProgrammeManagement().click()
+        # Create Programme
+        pageProgrammeManagement.getButtonNewProgram().click()
+        # 1st step (Details)
+        pageProgrammeManagement.getInputProgrammeName().send_keys("Test Program Partners")
+        pageProgrammeManagement.getInputStartDate().click()
+        pageProgrammeManagement.getInputStartDate().send_keys(str(FormatTime(1, 1, 2022).numerically_formatted_date))
+        pageProgrammeManagement.getInputEndDate().click()
+        pageProgrammeManagement.getInputEndDate().send_keys(FormatTime(1, 10, 2099).numerically_formatted_date)
+        pageProgrammeManagement.chooseOptionSelector("Health")
+        pageProgrammeManagement.chooseOptionDataCollectingType("Partial")
+        pageProgrammeManagement.getInputCashPlus().click()
+        pageProgrammeManagement.getButtonNext().click()
+        # 2nd step (Time Series Fields)
+        pageProgrammeManagement.getButtonAddTimeSeriesField()
+        pageProgrammeManagement.getButtonNext().click()
+        # 3rd step (Partners)
+        # only partners with role in business area can be selected
+
+        assert partner1 in Partner.objects.filter(business_areas__slug="afghanistan").all()
+        assert partner2 not in Partner.objects.filter(business_areas__slug="afghanistan").all()
+        assert Partner.objects.get(name="UNHCR") in Partner.objects.filter(business_areas__slug="afghanistan").all()
+
+        partner_access_selected = "Only Selected Partners within the business area"
+        pageProgrammeManagement.getAccessToProgram().click()
+        pageProgrammeManagement.selectWhoAccessToProgram(partner_access_selected)
+
+        pageProgrammeManagement.wait_for(pageProgrammeManagement.inputPartner).click()
+        select_options_container = pageProgrammeManagement.getSelectOptionsContainer()
+        options = select_options_container.find_elements(By.TAG_NAME, "li")
+        assert any("Test Partner 1" == li.text for li in options) is True
+        assert any("Test Partner 2" == li.text for li in options) is False
+        assert any("UNHCR" == li.text for li in options) is True
+        assert any("TEST" == li.text for li in options) is True
+
+        pageProgrammeManagement.driver.find_element(By.CSS_SELECTOR, "body").click()
+
+        pageProgrammeManagement.choosePartnerOption("UNHCR")
+
+        programme_creation_url = pageProgrammeManagement.driver.current_url
+        pageProgrammeManagement.getButtonSave().click()
+
+        # Check Details page
+        assert "details" in pageProgrammeDetails.wait_for_new_url(programme_creation_url).split("/")
+        assert "Test Program Partners" in pageProgrammeDetails.getHeaderTitle().text
+        assert partner_access_selected in pageProgrammeDetails.getLabelPartnerAccess().text
+
+        partner_name_elements = pageProgrammeManagement.driver.find_elements(
+            By.CSS_SELECTOR, "[data-cy='label-partner-name']"
+        )
+        assert len(partner_name_elements) == 1
+        assert any("UNHCR" in partner.text.strip() for partner in partner_name_elements)
+
+        # edit program
+        pageProgrammeManagement.getButtonEditProgram().click()
+        pageProgrammeManagement.getSelectEditProgramPartners().click()
+
+        pageProgrammeManagement.getAccessToProgram().click()
+        pageProgrammeManagement.selectWhoAccessToProgram("All Current Partners within the business area")
+
+        programme_edit_url = pageProgrammeManagement.driver.current_url
+        pageProgrammeManagement.getButtonSave().click()
+
+        # Check Details page
+        sleep(10)
+        assert "details" in pageProgrammeDetails.wait_for_new_url(programme_edit_url, 20).split("/")
+
+        partner_name_elements_new = pageProgrammeManagement.driver.find_elements(
+            By.CSS_SELECTOR, "[data-cy='label-partner-name']"
+        )
+        assert len(partner_name_elements_new) == 3
+        pageProgrammeDetails.screenshot("partner_name_elements_new.png")
+        assert any("UNHCR" in partner.text.strip() for partner in partner_name_elements_new)
+        assert any("Test Partner 1" in partner.text.strip() for partner in partner_name_elements_new)
+        assert any("TEST" in partner.text.strip() for partner in partner_name_elements_new)
+
     @pytest.mark.parametrize(
         "test_data",
         [
@@ -836,7 +926,7 @@ class TestManualCalendar:
         pageProgrammeManagement.getButtonNext().click()
         # 3rd step (Partners)
         pageProgrammeManagement.getAccessToProgram().click()
-        pageProgrammeManagement.selectWhoAccessToProgram("All partners within the business area")
+        pageProgrammeManagement.selectWhoAccessToProgram("All Current Partners within the business area")
         pageProgrammeManagement.getButtonSave().click()
         pageProgrammeManagement.getButtonEditProgram()
         program_name = pageProgrammeDetails.getHeaderTitle().text
@@ -846,6 +936,8 @@ class TestManualCalendar:
         )
         # Edit Programme
         pageProgrammeManagement.getButtonEditProgram().click()
+        pageProgrammeManagement.getSelectEditProgramDetails().click()
+
         # 1st step (Details)
         pageProgrammeManagement.getInputProgrammeName().send_keys(Keys.CONTROL + "a")
         pageProgrammeManagement.getInputProgrammeName().send_keys("New name after Edit")
@@ -893,8 +985,5 @@ class TestManualCalendar:
 
         pageProgrammeManagement.getInputPduFieldsRoundsNames(0, 2).send_keys("Round 3")
 
-        pageProgrammeManagement.getButtonNext().click()
-        # 3rd step (Partners)
-        pageProgrammeManagement.getAccessToProgram()
         pageProgrammeManagement.getButtonSave().click()
         assert program_name in pageProgrammeDetails.getHeaderTitle().text
