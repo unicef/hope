@@ -133,3 +133,7 @@ cov.json
 .vscode/
 output_data/
 .coverage
+
+archive/
+output.json
+pytest_html_report.html

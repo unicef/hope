@@ -233,10 +233,11 @@ PROJECT_APPS = [
     "hct_mis_api.apps.steficon.apps.SteficonConfig",
     "hct_mis_api.apps.reporting.apps.ReportingConfig",
     "hct_mis_api.apps.activity_log.apps.ActivityLogConfig",
-    "hct_mis_api.aurora.apps.Config",
     "hct_mis_api.apps.accountability.apps.AccountabilityConfig",
     "hct_mis_api.apps.web.apps.WebConfig",
     "hct_mis_api.apps.periodic_data_update.apps.PeriodicDataUpdateConfig",
+    "hct_mis_api.contrib.aurora.apps.Config",
+    "hct_mis_api.contrib.vision.apps.Config",
 ]
 
 DJANGO_APPS = [
