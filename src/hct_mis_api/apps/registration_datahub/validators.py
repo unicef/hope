@@ -1461,7 +1461,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             raise
 
     @staticmethod
-    def validate_collectors_unique(household_collectors_data: list) -> Optional[dict]:
+    def validate_collectors_unique(household_collectors_data: list) -> Optional[dict]:  # noqa: F701
         collectors_unique_data = []
         for collector_info in household_collectors_data:
             collector_data = [
