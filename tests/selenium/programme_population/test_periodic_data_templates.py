@@ -2,6 +2,8 @@ import os
 from time import sleep
 
 import pytest
+from django.conf import settings
+
 from tests.selenium.page_object.programme_population.periodic_data_update_templates import (
     PeriodicDatUpdateTemplates,
     PeriodicDatUpdateTemplatesDetails,
@@ -32,8 +34,8 @@ pytestmark = pytest.mark.django_db(transaction=True)
 @pytest.fixture
 def clear_downloaded_files() -> None:
     yield
-    for file in os.listdir("./report/downloads/"):
-        os.remove(os.path.join("./report/downloads", file))
+    for file in os.listdir(settings.DOWNLOAD_DIRECTORY):
+        os.remove(os.path.join(settings.DOWNLOAD_DIRECTORY, file))
 
 
 @pytest.fixture
