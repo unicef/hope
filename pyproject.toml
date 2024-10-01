@@ -77,9 +77,6 @@ disable_error_code = [
 [tool.django-stubs]
 django_settings_module = "hct_mis_api.settings"
 
-[tool.pdm]
-distribution = true
-
 [tool.pdm.dev-dependencies]
 dev = [
     "mypy==0.982",
@@ -131,8 +128,16 @@ dev = [
     "coverage<8.0.0,>=7.3.2",
 ]
 
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
 [tool.pdm.build]
-includes = []
+includes = ['src/hct_mis_api','src/data']
+
+[tool.pdm]
+distribution = true
+
 [project]
 name = "hope"
 version = "3.0.0"
@@ -240,4 +245,4 @@ readme = "README.md"
 license = {text = "None"}
 
 [tool.setuptools]
-py-modules = []
+py-modules = ["hct_mis_api"]
