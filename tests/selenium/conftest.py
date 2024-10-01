@@ -6,6 +6,7 @@ from django.conf import settings
 from django.core.management import call_command
 
 import pytest
+from environ import Env
 from _pytest.fixtures import FixtureRequest
 from _pytest.nodes import Item
 from _pytest.runner import CallInfo
@@ -87,12 +88,20 @@ def pytest_addoption(parser) -> None:  # type: ignore
 
 
 def pytest_configure(config) -> None:  # type: ignore
+    env = Env()
+    settings.OUTPUT_DATA_ROOT = env("OUTPUT_DATA_ROOT", default="/tests/selenium/output_data")
     config.addinivalue_line("markers", "night: This marker is intended for e2e tests conducted during the night on CI")
-
     # delete all old screenshots
-    for file in os.listdir("report/screenshot"):
-        os.remove(os.path.join("report/screenshot", file))
-    from django.conf import settings
+    settings.REPORT_DIRECTORY = f"{settings.OUTPUT_DATA_ROOT}/report"
+    settings.DOWNLOAD_DIRECTORY = f"{settings.OUTPUT_DATA_ROOT}/report/downloads"
+    settings.SCREENSHOT_DIRECTORY = f"{settings.REPORT_DIRECTORY}/screenshot"
+    if not os.path.exists(settings.SCREENSHOT_DIRECTORY):
+        os.makedirs(settings.SCREENSHOT_DIRECTORY)
+    print('settings.SCREENSHOT_DIRECTORY',settings.SCREENSHOT_DIRECTORY)
+    print('*'*70)
+
+    for file in os.listdir(settings.SCREENSHOT_DIRECTORY):
+        os.remove(os.path.join(settings.SCREENSHOT_DIRECTORY, file))
 
     settings.DEBUG = True
     settings.ALLOWED_HOSTS = ["localhost", "127.0.0.1", "10.0.2.2", os.getenv("DOMAIN", "")]
@@ -179,7 +188,7 @@ def create_session(host: str, username: str, password: str, csrf: str = "") -> o
 @pytest.fixture
 def driver() -> Chrome:
     chrome_options = Options()
-    chrome_options.add_argument("--headless")
+    # chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-extensions")
     chrome_options.add_argument("--disable-plugins")
@@ -187,10 +196,10 @@ def driver() -> Chrome:
     chrome_options.add_argument("--disable-notifications")
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--window-size=1920,1080")
-    if not os.path.exists("./report/downloads/"):
-        os.makedirs("./report/downloads/")
+    if not os.path.exists(settings.DOWNLOAD_DIRECTORY):
+        os.makedirs(settings.DOWNLOAD_DIRECTORY)
     prefs = {
-        "download.default_directory": "./report/downloads/",
+        "download.default_directory": settings.DOWNLOAD_DIRECTORY,
     }
     chrome_options.add_experimental_option("prefs", prefs)
     driver = webdriver.Chrome(options=chrome_options)
@@ -600,9 +609,9 @@ def test_failed_check(request: FixtureRequest, browser: Chrome) -> None:
 
 # make a screenshot with a name of the test, date and time
 def screenshot(driver: Chrome, node_id: str) -> None:
-    if not os.path.exists("screenshot"):
-        os.makedirs("screenshot")
+    if not os.path.exists(settings.SCREENSHOT_DIRECTORY):
+        os.makedirs(settings.SCREENSHOT_DIRECTORY)
     file_name = f'{node_id}_{datetime.today().strftime("%Y-%m-%d_%H.%M")}.png'.replace("/", "_").replace("::", "__")
-    file_path = os.path.join("screenshot", file_name)
+    file_path = os.path.join(settings.SCREENSHOT_DIRECTORY, file_name)
     driver.get_screenshot_as_file(file_path)
     attach(data=driver.get_screenshot_as_png())
