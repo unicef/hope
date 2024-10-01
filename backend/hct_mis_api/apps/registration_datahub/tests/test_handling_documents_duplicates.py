@@ -8,7 +8,10 @@ from django.test.utils import CaptureQueriesContext
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
-from hct_mis_api.apps.grievance.models import GrievanceTicket
+from hct_mis_api.apps.grievance.models import (
+    GrievanceTicket,
+    TicketNeedsAdjudicationDetails,
+)
 from hct_mis_api.apps.household.fixtures import (
     DocumentTypeFactory,
     create_household_and_individuals,
@@ -28,8 +31,6 @@ from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
     HardDocumentDeduplication,
 )
 from hct_mis_api.apps.utils.models import MergeStatusModel
-
-from hct_mis_api.apps.grievance.models import TicketNeedsAdjudicationDetails
 
 
 class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
@@ -537,16 +538,16 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
         d1 = Document.objects.create(
             country=self.country,
             type=self.dt,
-            document_number="222", # different doc number
-            individual=self.individuals[2], # different Individual
+            document_number="222",  # different doc number
+            individual=self.individuals[2],  # different Individual
             program=self.program,
             rdi_merge_status=MergeStatusModel.MERGED,
         )
         d2 = Document.objects.create(
             country=self.country,
             type=self.dt,
-            document_number="111", # the same doc number
-            individual=self.individuals[3], # different Individual
+            document_number="111",  # the same doc number
+            individual=self.individuals[3],  # different Individual
             program=self.program,
             rdi_merge_status=MergeStatusModel.MERGED,
         )
@@ -560,9 +561,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
         ticket_details = TicketNeedsAdjudicationDetails.objects.first()
         self.assertIsNotNone(ticket_details.golden_records_individual)
         self.assertEqual(ticket_details.possible_duplicates.all().count(), 1)
-        self.assertNotEqual(
-            ticket_details.golden_records_individual, ticket_details.possible_duplicates.first()
-        )
+        self.assertNotEqual(ticket_details.golden_records_individual, ticket_details.possible_duplicates.first())
 
         passport.refresh_from_db()
         self.assertEqual(passport.status, Document.STATUS_VALID)
