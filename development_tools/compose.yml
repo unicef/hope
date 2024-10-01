@@ -25,11 +25,14 @@ services:
     ports:
       - "8080:8000"
     volumes:
-      - ../src:/code/
+      - ../src:/code/src/
+      - ../manage.py:/code/manage.py
+      - ../pyproject.toml:/code/pyproject.toml
+      - ../pdm.lock:/code/pdm.lock
       - ../tests:/tests/
       - backend-data:/data
-      - ../src/pyproject.toml:/packages/pyproject.toml
-      - ../src/pdm.lock:/packages/pdm.lock
+      - ../pyproject.toml:/packages/pyproject.toml
+      - ../pdm.lock:/packages/pdm.lock
       - ipython_data_local:/root/.ipython
     command: "dev"
     depends_on:
@@ -127,7 +130,7 @@ services:
     ports:
       - "5433:5432"
     healthcheck:
-      test: [ "CMD-SHELL", "su - postgres -c 'pg_isready -U postgres'" ]
+      test: [ "CMD-SHELL", "su - postgres -c 'pg_isready -h db -U postgres'" ]
       interval: 10s
       timeout: 10s
       retries: 5

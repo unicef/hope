@@ -82,7 +82,7 @@ class TargetingCreate(BaseComponents):
         'div[data-cy="select-individualsFiltersBlocks[{}].individualBlockFilters[{}].value"]'
     )
     totalNumberOfHouseholdsCount = 'div[data-cy="total-number-of-households-count"]'
-    totalNumberOfPeopleCount = 'div[data-cy="label-Total Number of Registered People"]'
+    totalNumberOfPeopleCount = 'div[data-cy="label-Total Number of People"]'
     selectProgramCycleAutocomplete = 'div[data-cy="filters-program-cycle-autocomplete"]'
     programmeCycleInput = 'div[data-cy="Programme Cycle-input"]'
 
