@@ -186,6 +186,7 @@ class PaymentPlanSupportingDocumentViewSet(
     permission_classes_by_action = {
         "create": [PaymentPlanSupportingDocumentUploadPermission],
         "delete": [PaymentPlanSupportingDocumentDeletePermission],
+        "download": [PaymentPlanSupportingDocumentDownloadPermission],
     }
 
     def get_queryset(self) -> QuerySet:
@@ -212,12 +213,7 @@ class PaymentPlanSupportingDocumentViewSet(
         document.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(
-        detail=True,
-        methods=["get"],
-        url_path="download",
-        permission_classes=[PaymentPlanSupportingDocumentDownloadPermission],
-    )
+    @action(detail=True, methods=["get"])
     def download(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         document = self.get_object()
         return Response({"url": document.file.url}, status=status.HTTP_200_OK)

@@ -66,7 +66,7 @@ class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):
         model = PaymentPlanSupportingDocument
         fields = ["id", "title", "file", "uploaded_at", "created_by"]
 
-    def get_id(self, obj):
+    def get_id(self, obj: PaymentPlanSupportingDocument) -> str:
         return base64.b64encode(f"PaymentPlanSupportingDocumentNode:{str(obj.id)}".encode()).decode()
 
     def validate_file(self, file: Any) -> Any:
