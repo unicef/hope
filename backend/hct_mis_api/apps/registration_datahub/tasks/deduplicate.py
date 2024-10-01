@@ -673,7 +673,6 @@ class HardDocumentDeduplication:
                 .select_related("individual", "type")
                 .select_for_update(of=("self",))  # no need to lock individuals
                 .order_by("pk")
-                .distinct()
             )
 
             documents_numbers = []
