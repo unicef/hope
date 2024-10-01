@@ -1,10 +1,10 @@
 import pytest
-from tests.selenium.page_object.admin_panel.admin_panel import AdminPanel
 from selenium.webdriver import Chrome
 from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.models import User
+from tests.selenium.page_object.admin_panel.admin_panel import AdminPanel
 
 pytestmark = pytest.mark.django_db(transaction=True)
 

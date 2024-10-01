@@ -6,13 +6,6 @@ from time import sleep
 import openpyxl
 import pytest
 from dateutil.relativedelta import relativedelta
-from tests.selenium.page_object.payment_module.new_payment_plan import NewPaymentPlan
-from tests.selenium.page_object.payment_module.payment_module import PaymentModule
-from tests.selenium.page_object.payment_module.payment_module_details import PaymentModuleDetails
-from tests.selenium.page_object.payment_module.program_cycle import (
-    ProgramCycleDetailsPage,
-    ProgramCyclePage,
-)
 from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.account.models import User
@@ -40,6 +33,15 @@ from hct_mis_api.apps.targeting.fixtures import (
 )
 from hct_mis_api.apps.targeting.models import TargetPopulation
 from tests.selenium.helpers.date_time_format import FormatTime
+from tests.selenium.page_object.payment_module.new_payment_plan import NewPaymentPlan
+from tests.selenium.page_object.payment_module.payment_module import PaymentModule
+from tests.selenium.page_object.payment_module.payment_module_details import (
+    PaymentModuleDetails,
+)
+from tests.selenium.page_object.payment_module.program_cycle import (
+    ProgramCycleDetailsPage,
+    ProgramCyclePage,
+)
 
 pytestmark = pytest.mark.django_db(transaction=True)
 

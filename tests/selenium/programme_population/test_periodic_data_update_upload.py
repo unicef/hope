@@ -4,12 +4,6 @@ from typing import Any
 
 import openpyxl
 import pytest
-from tests.selenium.page_object.programme_population.periodic_data_update_templates import (
-    PeriodicDatUpdateTemplates,
-)
-from tests.selenium.page_object.programme_population.periodic_data_update_uploads import (
-    PeriodicDataUpdateUploads,
-)
 
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
 from hct_mis_api.apps.core.models import (
@@ -38,6 +32,12 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from tests.selenium.page_object.programme_population.individuals import Individuals
+from tests.selenium.page_object.programme_population.periodic_data_update_templates import (
+    PeriodicDatUpdateTemplates,
+)
+from tests.selenium.page_object.programme_population.periodic_data_update_uploads import (
+    PeriodicDataUpdateUploads,
+)
 
 pytestmark = pytest.mark.django_db(transaction=True)
 

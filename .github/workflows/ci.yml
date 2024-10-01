@@ -104,7 +104,7 @@ jobs:
         run: |
           docker run --rm -i \
             ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev \
-            isort . --check-only
+            isort . tests --check-only
 
   black:
     runs-on: ubuntu-latest
@@ -122,7 +122,7 @@ jobs:
         run: |
           docker run --rm -i \
             ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev \
-            black . --check
+            black . tests --check
 
   flake8:
     runs-on: ubuntu-latest

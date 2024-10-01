@@ -2,10 +2,6 @@ import os
 from time import sleep
 
 import pytest
-from tests.selenium.page_object.programme_population.periodic_data_update_templates import (
-    PeriodicDatUpdateTemplates,
-    PeriodicDatUpdateTemplatesDetails,
-)
 from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -25,6 +21,10 @@ from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from tests.selenium.page_object.programme_population.individuals import Individuals
+from tests.selenium.page_object.programme_population.periodic_data_update_templates import (
+    PeriodicDatUpdateTemplates,
+    PeriodicDatUpdateTemplatesDetails,
+)
 
 pytestmark = pytest.mark.django_db(transaction=True)
 
