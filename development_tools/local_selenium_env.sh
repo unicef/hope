@@ -38,5 +38,11 @@ export CACHE_LOCATION=redis://localhost:6379/1
 export USE_DUMMY_EXCHANGE_RATES=yes
 export ELASTICSEARCH_HOST=http://localhost:9200
 export CELERY_TASK_ALWAYS_EAGER=true
-export DATA_VOLUME="./data1"
 export LIBRARY_PATHS=true
+export PYTHONPATH=./src:$PYTHONPATH
+export OUTPUT_DATA_ROOT=$(pwd)/tests/selenium/output_data
+export MEDIA_VOLUME=$OUTPUT_DATA_ROOT/data
+cd src/frontend
+yarn
+yarn build-for-backend
+cd ../../
