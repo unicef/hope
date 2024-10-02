@@ -21,31 +21,36 @@ export function DashboardYearPage({ year, data }: { year: string; data: Househol
     individualsReached: 0,
   });
 
+  const ndx = useMemo(() => {
+    if (!data || data.length === 0) return null;
+
+    const processedPayments: HouseholdPayment[] = data
+      .flatMap((household: Household) =>
+        household.payments.map((payment) => ({
+          business_area: household.business_area,
+          delivered_quantity: payment.delivered_quantity ? parseFloat(String(payment.delivered_quantity)) : 0,
+          delivered_quantity_usd: payment.delivered_quantity_usd ? parseFloat(String(payment.delivered_quantity_usd)) : 0,
+          payment_status: payment.status,
+          program: household.program,
+          admin1: household.admin1,
+          admin2: household.admin2,
+          sector: household.sector,
+          status: payment.status,
+          currency: payment.currency,
+          fsp: payment.fsp,
+          delivery_type: payment.delivery_type,
+          size: household.size,
+          children_count: household.children_count ? household.children_count : 0,
+          id: household.id,
+          delivery_date: new Date(payment.delivery_date),
+        })),
+      );
+
+    return crossfilter(processedPayments);
+  }, [data]);
+
   useEffect(() => {
-    if (!data || data.length === 0) return;
-
-    const processedPayments: HouseholdPayment[]  = data.map((household: Household) => {
-      return household.payments.map((payment) => ({
-        business_area: household.business_area,
-        delivered_quantity: payment.delivered_quantity ? parseFloat(String(payment.delivered_quantity)) : 0,
-        delivered_quantity_usd: payment.delivered_quantity_usd ? parseFloat(String(payment.delivered_quantity_usd)) : 0,
-        payment_status: payment.status,
-        program: household.program,
-        admin1: household.admin1,
-        admin2: household.admin2,
-        sector: household.sector,
-        status: payment.status,
-        currency: payment.currency,
-        fsp: payment.fsp,
-        delivery_type: payment.delivery_type,
-        size: household.size,
-        children_count: household.children_count ? household.children_count : 0,
-        id: household.id,
-        delivery_date: new Date(payment.delivery_date),
-      }));
-    }).flat();
-
-    const ndx = crossfilter(processedPayments);
+    if (!ndx) return;
 
     // Define Dimensions and Groups
     const fspDim = ndx.dimension((d) => d.fsp);
@@ -145,7 +150,7 @@ export function DashboardYearPage({ year, data }: { year: string; data: Househol
     });
 
     dc.renderAll();
-  },  [data, numberFormatter, totals.totalAmountPaid]);
+  },  [data, numberFormatter, totals.totalAmountPaid, ndx]);
 
   return (
     <Box p={4}>
@@ -222,19 +227,19 @@ export function DashboardYearPage({ year, data }: { year: string; data: Househol
             <Grid container spacing={2}>
               <Grid item xs={3}>
                 <Typography>{t('Payments Reconciled')}</Typography>
-                <Typography variant="h5">82%</Typography>
+                <Typography variant="h5"></Typography>
               </Grid>
               <Grid item xs={3}>
                 <Typography>{t('Pending Reconciliation')}</Typography>
-                <Typography variant="h5">6%</Typography>
+                <Typography variant="h5"></Typography>
               </Grid>
               <Grid item xs={3}>
                 <Typography>{t('Payments Verified')}</Typography>
-                <Typography variant="h5">62%</Typography>
+                <Typography variant="h5"></Typography>
               </Grid>
               <Grid item xs={3}>
                 <Typography>{t('Sites Verified')}</Typography>
-                <Typography variant="h5">72%</Typography>
+                <Typography variant="h5"></Typography>
               </Grid>
             </Grid>
           </Paper>

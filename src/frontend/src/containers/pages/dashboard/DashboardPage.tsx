@@ -1,19 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { Typography, Box, Tabs, Tab } from '@mui/material';
+import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { DashboardYearPage } from './DashboardYearPage';
 import { DashboardPaper } from '@components/dashboard/DashboardPaper';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
+import { ExportModal } from '@components/dashboard/ExportModal';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { TabPanel } from '@components/core/TabPanel';
+import { getFilterFromQueryParams } from '@utils/utils';
 import { fetchDashboardData, Household } from '@api/dashboardApi';
 
 export function DashboardPage(): React.ReactElement {
   const { t } = useTranslation();
+  const location = useLocation();
   const permissions = usePermissions();
   const { businessArea, isGlobal } = useBaseUrl();
   const [selectedTab, setSelectedTab] = useState(0);
@@ -21,6 +25,16 @@ export function DashboardPage(): React.ReactElement {
   const [data, setData] = useState<Household[]>([]);
   const [selectedYear, setSelectedYear] = useState<string | null>(null);
   const [availableYears, setAvailableYears] = useState<string[]>([]);
+  const initialFilter = {
+    administrativeArea: '',
+    program: '',
+  };
+  const [filter, setFilter] = useState(
+    getFilterFromQueryParams(location, initialFilter),
+  );
+  const [appliedFilter, setAppliedFilter] = useState(
+    getFilterFromQueryParams(location, initialFilter),
+  );
 
   useEffect(() => {
     const fetchData = async () => {
@@ -46,10 +60,10 @@ export function DashboardPage(): React.ReactElement {
           household.payments.map((payment) => new Date(payment.delivery_date).getFullYear()),
         ).flat(),
       ),
-    ).sort((a, b) => b - a); // Sort years in descending order
+    ).sort((a, b) => b - a);
 
     setAvailableYears(years.map(String));
-    setSelectedYear(years[0]?.toString() || null); // Set the highest year as default
+    setSelectedYear(years[0]?.toString() || null); 
   }, [data]);
 
   if (loading) return <LoadingComponent />;
@@ -57,6 +71,10 @@ export function DashboardPage(): React.ReactElement {
 
   const hasPermissionToView = hasPermissions(
     PERMISSIONS.DASHBOARD_VIEW_COUNTRY,
+    permissions,
+  );
+  const hasPermissionToExport = hasPermissions(
+    PERMISSIONS.DASHBOARD_EXPORT,
     permissions,
   );
 
@@ -80,7 +98,11 @@ export function DashboardPage(): React.ReactElement {
 
   return (
     <>
-      <PageHeader tabs={tabs} title={t('Dashboard')} />
+      <PageHeader tabs={tabs} title={t('Dashboard')} >
+      {hasPermissionToExport && (
+          <ExportModal filter={appliedFilter} year={availableYears[selectedTab]} />
+        )}
+      </PageHeader>
       {hasPermissionToView ? (
         <>
           {!isGlobal ? (
