@@ -661,7 +661,6 @@ class TestComeBackScenarios:
 
 @pytest.mark.usefixtures("login")
 class TestManualCalendar:
-    @freeze_time("2024-09-09")
     @pytest.mark.parametrize(
         "test_data",
         [
