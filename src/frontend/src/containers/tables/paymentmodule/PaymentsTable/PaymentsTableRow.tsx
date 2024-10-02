@@ -9,35 +9,14 @@ import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { WarningTooltip } from '@components/core/WarningTooltip';
 import {
   formatCurrencyWithSymbol,
-  opacityToHex,
+  paymentStatusDisplayMap,
+  paymentStatusToColor,
   renderSomethingOrDash,
 } from '@utils/utils';
-import { AllPaymentsForTableQuery, PaymentStatus } from '@generated/graphql';
+import { AllPaymentsForTableQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
-
-export const StyledLink = styled.div`
-  color: #000;
-  text-decoration: underline;
-  cursor: pointer;
-  display: flex;
-  align-content: center;
-`;
-
-const RoutedBox = styled.div`
-  color: ${({ theme }) => theme.hctPalette.red};
-  background-color: ${({ theme }) =>
-    `${theme.hctPalette.red}${opacityToHex(0.15)}`};
-  border-radius: 16px;
-  font-family: Roboto;
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 1.2px;
-  line-height: 16px;
-  padding: ${({ theme }) => theme.spacing(1)};
-  text-align: center;
-  margin-right: 20px;
-`;
+import { StatusBox } from '@components/core/StatusBox';
 
 const OrangeError = styled(ErrorOutlineRoundedIcon)`
   color: ${({ theme }) => theme.hctPalette.orange};
@@ -91,17 +70,6 @@ export function PaymentsTableRow({
         (${formatCurrencyWithSymbol(deliveredQuantityUsd, 'USD')})`}
       </>
     );
-  };
-
-  const renderPaymentStatusBox = (): React.ReactElement => {
-    const { status } = payment;
-    if (status === PaymentStatus.TransactionErroneous) {
-      return <RoutedBox>UNSUCCESSFUL</RoutedBox>;
-    }
-    if (status === PaymentStatus.ManuallyCancelled) {
-      return <RoutedBox>CANCELLED</RoutedBox>;
-    }
-    return <></>;
   };
 
   const renderMark = (): React.ReactElement => {
@@ -181,7 +149,13 @@ export function PaymentsTableRow({
       <TableCell data-cy="delivered-quantity-cell" align="left">
         {renderDeliveredQuantity()}
       </TableCell>
-      <TableCell>{renderPaymentStatusBox()}</TableCell>
+      <TableCell>
+        <StatusBox
+          status={payment.status}
+          statusToColor={paymentStatusToColor}
+          statusNameMapping={paymentStatusDisplayMap}
+        />
+      </TableCell>
       {hasPermissions(PERMISSIONS.PM_VIEW_FSP_AUTH_CODE, permissions) && (
         <TableCell data-cy="fsp-auth-code-cell" align="left">
           {payment.fspAuthCode || '-'}

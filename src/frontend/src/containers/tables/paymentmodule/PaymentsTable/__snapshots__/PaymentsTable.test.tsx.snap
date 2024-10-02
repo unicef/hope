@@ -9,7 +9,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render loading 1`]
       class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 css-1ps6pg7-MuiPaper-root"
     >
       <div
-        class="sc-iCKXBC iyaLVj MuiBox-root css-u331zs"
+        class="sc-cbDaos fmVUtP MuiBox-root css-u331zs"
       >
         <h6
           class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
@@ -471,7 +471,18 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render loading 1`]
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
-                />
+                >
+                  <div
+                    class="sc-gjLLEI cQdyAk"
+                  >
+                    <div
+                      class="sc-eAKtBH lfKnlm status-box-container"
+                      data-cy="status-container"
+                    >
+                      PENDING
+                    </div>
+                  </div>
+                </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
                   data-cy="fsp-auth-code-cell"
@@ -532,7 +543,18 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render loading 1`]
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
-                />
+                >
+                  <div
+                    class="sc-gjLLEI cQdyAk"
+                  >
+                    <div
+                      class="sc-eAKtBH lfKnlm status-box-container"
+                      data-cy="status-container"
+                    >
+                      PENDING
+                    </div>
+                  </div>
+                </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
                   data-cy="fsp-auth-code-cell"
@@ -669,7 +691,7 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
       class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 css-1ps6pg7-MuiPaper-root"
     >
       <div
-        class="sc-iCKXBC iyaLVj MuiBox-root css-u331zs"
+        class="sc-cbDaos fmVUtP MuiBox-root css-u331zs"
       >
         <h6
           class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
@@ -1131,7 +1153,18 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
-                />
+                >
+                  <div
+                    class="sc-gjLLEI cQdyAk"
+                  >
+                    <div
+                      class="sc-eAKtBH lfKnlm status-box-container"
+                      data-cy="status-container"
+                    >
+                      PENDING
+                    </div>
+                  </div>
+                </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
                   data-cy="fsp-auth-code-cell"
@@ -1192,7 +1225,18 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
-                />
+                >
+                  <div
+                    class="sc-gjLLEI cQdyAk"
+                  >
+                    <div
+                      class="sc-eAKtBH lfKnlm status-box-container"
+                      data-cy="status-container"
+                    >
+                      PENDING
+                    </div>
+                  </div>
+                </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
                   data-cy="fsp-auth-code-cell"
