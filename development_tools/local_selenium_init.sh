@@ -1,3 +1,7 @@
+if [ "$0" = "$BASH_SOURCE" ]; then
+    echo "Please source this script."
+    exit 1
+fi
 export SECRET_KEY=SOME_KEY_HERE
 export DEBUG=true
 export ENV=dev
@@ -39,10 +43,13 @@ export USE_DUMMY_EXCHANGE_RATES=yes
 export ELASTICSEARCH_HOST=http://localhost:9200
 export CELERY_TASK_ALWAYS_EAGER=true
 export LIBRARY_PATHS=true
-export PYTHONPATH=./src:$PYTHONPATH
-export OUTPUT_DATA_ROOT=$(pwd)/tests/selenium/output_data
+SCRIPT_DIR=$(realpath "$(dirname $0)")
+MAIN_DIR=$(realpath $SCRIPT_DIR/..)
+echo "SCRIPT_DIR: $SCRIPT_DIR"
+export PYTHONPATH=$MAIN_DIR/src:$PYTHONPATH
+export OUTPUT_DATA_ROOT=$MAIN_DIR/tests/selenium/output_data
 export DATA_VOLUME=$OUTPUT_DATA_ROOT/data
-cd src/frontend
+pushd  $MAIN_DIR/src/frontend
 yarn
 yarn build-for-backend
-cd ../../
+popd
