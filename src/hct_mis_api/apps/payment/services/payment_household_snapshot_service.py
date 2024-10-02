@@ -1,6 +1,6 @@
 import datetime
 from decimal import Decimal
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Dict, Optional
 from uuid import UUID
 
 from django.contrib.gis.geos import Point
@@ -10,7 +10,7 @@ from phonenumber_field.phonenumber import PhoneNumber
 
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.grievance.models import TicketNeedsAdjudicationDetails
-from hct_mis_api.apps.household.models import Individual
+from hct_mis_api.apps.household.models import Individual, BankAccountInfo
 from hct_mis_api.apps.payment.models import (
     Payment,
     PaymentHouseholdSnapshot,
@@ -138,12 +138,14 @@ def get_individual_snapshot(individual: Individual, is_hh_collector: bool = Fals
         }
         individual_data["documents"].append(document_data)
 
-    bank_account_info = individual.bank_account_info.first()
+    bank_account_info: Optional[BankAccountInfo] = individual.bank_account_info.first()
     if bank_account_info:
         individual_data["bank_account_info"] = {
             "bank_name": bank_account_info.bank_name,
             "bank_account_number": bank_account_info.bank_account_number,
             "debit_card_number": bank_account_info.debit_card_number,
+            "bank_branch_name": bank_account_info.bank_branch_name,
+            "account_holder_name": bank_account_info.account_holder_name,
         }
 
     if is_hh_collector:
