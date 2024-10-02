@@ -3,7 +3,7 @@ services:
   backend:
     image: ${dev_backend_image}
     volumes:
-      - ../../src/test-coverage:/code/backend/test-coverage
+      - ../../tests/test-coverage:/code/test-coverage
       - ./dev.sh:/code/dev.sh
     depends_on:
       - db

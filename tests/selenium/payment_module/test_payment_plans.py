@@ -6,6 +6,8 @@ from time import sleep
 import openpyxl
 import pytest
 from dateutil.relativedelta import relativedelta
+from sorl.thumbnail.conf import settings
+
 from tests.selenium.page_object.payment_module.new_payment_plan import NewPaymentPlan
 from tests.selenium.page_object.payment_module.payment_module import PaymentModule
 from tests.selenium.page_object.payment_module.payment_module_details import PaymentModuleDetails
@@ -44,7 +46,7 @@ from tests.selenium.helpers.date_time_format import FormatTime
 pytestmark = pytest.mark.django_db(transaction=True)
 
 
-def find_file(file_name: str, search_in_dir: str = "./report/downloads/", number_of_ties: int = 1) -> str:
+def find_file(file_name: str, search_in_dir: str = settings.DOWNLOAD_DIRECTORY, number_of_ties: int = 1) -> str:
     for _ in range(number_of_ties):
         for file in os.listdir(search_in_dir):
             if file_name in file:
@@ -122,11 +124,11 @@ def create_targeting(create_test_program: Program) -> None:
 
 @pytest.fixture
 def clear_downloaded_files() -> None:
-    for file in os.listdir("./report/downloads/"):
-        os.remove(os.path.join("./report/downloads", file))
+    for file in os.listdir(settings.DOWNLOAD_DIRECTORY):
+        os.remove(os.path.join(settings.DOWNLOAD_DIRECTORY, file))
     yield
-    for file in os.listdir("./report/downloads/"):
-        os.remove(os.path.join("./report/downloads", file))
+    for file in os.listdir(settings.DOWNLOAD_DIRECTORY):
+        os.remove(os.path.join(settings.DOWNLOAD_DIRECTORY, file))
 
 
 @pytest.fixture
