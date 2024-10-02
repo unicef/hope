@@ -228,7 +228,6 @@ jobs:
 
       - name: Unit tests
         run: |
-          # a little hack to allow to have 1 compose file running 2 different test suites because --env-file didn't work as docs suggested it should
           dev_backend_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev docker compose \
             -f ./.github/helpers/docker-compose.tst.yml \
             --profile unit \
@@ -236,7 +235,7 @@ jobs:
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
-          files: ./src/coverage.xml
+          files: ./tests/test-coverage/coverage.xml
           flags: unittests
           token: ${{ secrets.CODECOV_TOKEN }}
           verbose: true
@@ -265,7 +264,7 @@ jobs:
             -f ./.github/helpers/docker-compose.selenium.yml \
             run backend bash -c "
               waitforit -host=db -port=5432 -timeout=30
-              pytest -svvv $extra_options /tests/selenium --cov-report xml:./coverage.xml --html-report=./report/report.html --randomly-seed=42
+              pytest -svvv $extra_options /tests/selenium --cov-report xml:test-coverage/coverage.xml --html-report=/tests/selenium/output_data/report/report.html --randomly-seed=42
             "
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
@@ -273,14 +272,14 @@ jobs:
         continue-on-error: true
         with:
           name: report
-          path: ./src/report/
+          path: ./tests/report/
           retention-days: 5
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         if: always()
         continue-on-error: true
         with:
-          files: ./src/coverage.xml
+          files: ./test-coverage/coverage.xml
           flags: e2e
           token: ${{ secrets.CODECOV_TOKEN }}
           verbose: true

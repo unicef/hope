@@ -4,6 +4,7 @@ from time import sleep
 
 import pytest
 from dateutil.relativedelta import relativedelta
+from django.conf import settings
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
@@ -55,8 +56,8 @@ pytestmark = pytest.mark.django_db(transaction=True)
 @pytest.fixture
 def clear_downloaded_files() -> None:
     yield
-    for file in os.listdir("./report/downloads/"):
-        os.remove(os.path.join("./report/downloads", file))
+    for file in os.listdir(settings.DOWNLOAD_DIRECTORY):
+        os.remove(os.path.join(settings.DOWNLOAD_DIRECTORY, file))
 
 
 @pytest.fixture
