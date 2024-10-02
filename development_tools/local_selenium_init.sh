@@ -41,7 +41,7 @@ export CELERY_TASK_ALWAYS_EAGER=true
 export LIBRARY_PATHS=true
 export PYTHONPATH=./src:$PYTHONPATH
 export OUTPUT_DATA_ROOT=$(pwd)/tests/selenium/output_data
-export MEDIA_VOLUME=$OUTPUT_DATA_ROOT/data
+export DATA_VOLUME=$OUTPUT_DATA_ROOT/data
 cd src/frontend
 yarn
 yarn build-for-backend
