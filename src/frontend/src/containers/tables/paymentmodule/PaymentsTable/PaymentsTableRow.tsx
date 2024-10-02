@@ -80,16 +80,10 @@ export function PaymentsTableRow({
   };
 
   const renderDeliveredQuantity = (): React.ReactElement => {
-    const { deliveredQuantity, currency, deliveredQuantityUsd, status } =
-      payment;
-    if (status === PaymentStatus.TransactionErroneous) {
-      return <RoutedBox>UNSUCCESSFUL</RoutedBox>;
-    }
-    if (status === PaymentStatus.ManuallyCancelled) {
-      return <RoutedBox>CANCELLED</RoutedBox>;
-    }
+    const { deliveredQuantity, currency, deliveredQuantityUsd } = payment;
+
     if (deliveredQuantity === null) {
-      return <></>;
+      return <>-</>;
     }
     return (
       <>
@@ -97,6 +91,17 @@ export function PaymentsTableRow({
         (${formatCurrencyWithSymbol(deliveredQuantityUsd, 'USD')})`}
       </>
     );
+  };
+
+  const renderPaymentStatusBox = (): React.ReactElement => {
+    const { status } = payment;
+    if (status === PaymentStatus.TransactionErroneous) {
+      return <RoutedBox>UNSUCCESSFUL</RoutedBox>;
+    }
+    if (status === PaymentStatus.ManuallyCancelled) {
+      return <RoutedBox>CANCELLED</RoutedBox>;
+    }
+    return <></>;
   };
 
   const renderMark = (): React.ReactElement => {
@@ -176,6 +181,7 @@ export function PaymentsTableRow({
       <TableCell data-cy="delivered-quantity-cell" align="left">
         {renderDeliveredQuantity()}
       </TableCell>
+      <TableCell>{renderPaymentStatusBox()}</TableCell>
       {hasPermissions(PERMISSIONS.PM_VIEW_FSP_AUTH_CODE, permissions) && (
         <TableCell data-cy="fsp-auth-code-cell" align="left">
           {payment.fspAuthCode || '-'}
