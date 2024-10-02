@@ -367,6 +367,29 @@ class TestKoboSaveValidatorsMethods(TestCase):
                     "individual_questions/identification/account_holder_name_i_c": "Name qwerty",
                 },
                 {
+                    "individual_questions/role_i_c": "alternate",
+                    "individual_questions/age": "37",
+                    "individual_questions/given_name_i_c": "Tes",
+                    "individual_questions/gender_i_c": "female",
+                    "individual_questions/more_information/marital_status_i_c": "married",
+                    "individual_questions/more_information/pregnant_i_f": "0",
+                    "individual_questions/family_name_i_c": "Testowski",
+                    "individual_questions/more_information/phone_no_i_c": "+49432123422",
+                    "individual_questions/individual_vulnerabilities/formal_school_i_f": "0",
+                    "individual_questions/individual_index": "2",
+                    "individual_questions/full_name_i_c": "Tes Testowski",
+                    "individual_questions/relationship_i_c": "wife_husband",
+                    "individual_questions/individual_vulnerabilities/work_status_i_c": "0",
+                    "individual_questions/estimated_birth_date_i_c": "FALSE",
+                    "individual_questions/more_information/id_type_i_c": "birth_certificate",
+                    "individual_questions/individual_vulnerabilities/disability_i_c": "not disabled",
+                    "individual_questions/more_information/birth_certificate_no_i_c": "4442124124",
+                    "individual_questions/birth_date_i_c": "1983-06-20",
+                    "individual_questions/mas_treatment_i_f": "1",
+                    "individual_questions/arm_picture_i_f": "signature-12_13_0.png",
+                    "individual_questions/identification/account_holder_name_i_c": "Name qwerty",
+                },
+                {
                     "individual_questions/role_i_c": "primary",
                     "individual_questions/age": "23",
                     "individual_questions/given_name_i_c": "Tesa",
@@ -730,8 +753,16 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 "header": "birth_certificate_no_i_c",
                 "message": "Issuing country for birth_certificate_no_i_c is required, when any document data are provided",
             },
+            {
+                "header": "birth_certificate_no_i_c",
+                "message": "Issuing country for birth_certificate_no_i_c is required, when any document data are provided",
+            },
             # TODO: fix this? (rebase issue?)
             # {"header": "preferred_language_i_c", "message": "Invalid choice test for field preferred_language_i_c"},
             {"header": "role_i_c", "message": "Only one person can be a primary collector"},
+            {
+                "header": "role_i_c",
+                "message": "The same individual cannot be a primary and alternate collector for the same household."
+            },
         ]
         self.assertEqual(result, expected)
