@@ -55,6 +55,26 @@ def create_program_cycle(create_test_program: Program) -> ProgramCycle:
     yield program_cycle
 
 
+@pytest.fixture
+def create_program_cycle_without_payment_plan(create_test_program: Program) -> ProgramCycle:
+    program_cycle = ProgramCycle.objects.create(
+        title="Test Programme Cycle 001",
+        start_date=datetime.now(),
+        end_date=datetime.now() + relativedelta(days=5),
+        status=ProgramCycle.ACTIVE,
+        program=create_test_program,
+    )
+    # second draft cycle
+    ProgramCycle.objects.create(
+        title="Programme Cycle in Draft",
+        start_date=datetime.now() + relativedelta(days=6),
+        end_date=datetime.now() + relativedelta(days=16),
+        status=ProgramCycle.DRAFT,
+        program=create_test_program,
+    )
+    yield program_cycle
+
+
 @pytest.mark.usefixtures("login")
 class TestSmokeProgramCycle:
     def test_smoke_program_cycles(self, create_program_cycle: ProgramCycle, pageProgramCycle: ProgramCyclePage) -> None:
@@ -127,10 +147,10 @@ class TestSmokeProgramCycle:
 @pytest.mark.usefixtures("login")
 class TestProgramCycle:
     def test_program_cycles_finish_and_reactivate(self,
-                                   create_program_cycle: ProgramCycle,
-                                   pageProgramCycle: ProgramCyclePage,
-                                   pageProgramCycleDetails: ProgramCycleDetailsPage
-                                   ) -> None:
+                                                  create_program_cycle_without_payment_plan: ProgramCycle,
+                                                  pageProgramCycle: ProgramCyclePage,
+                                                  pageProgramCycleDetails: ProgramCycleDetailsPage
+                                                  ) -> None:
         pageProgramCycle.selectGlobalProgramFilter("Test Program")
         pageProgramCycle.getNavPaymentModule().click()
         pageProgramCycle.getNavProgrammeCycles().click()

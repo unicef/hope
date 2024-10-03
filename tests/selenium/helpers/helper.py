@@ -166,7 +166,7 @@ class Common:
         return element.find_elements(element_type, locator)
 
     def screenshot(
-        self, file_name: str = "test", file_type: str = "png", file_path: str = "screenshot", delay_sec: int = 1
+        self, file_name: str = "test", file_type: str = "png", file_path: str = "screenshot", delay_sec: float = 1
     ) -> None:
         sleep(delay_sec)
         self.driver.get_screenshot_as_file(os.path.join(f"{file_path}", f"{file_name}.{file_type}"))
