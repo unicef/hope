@@ -7,10 +7,6 @@ from django.core.management import call_command
 
 import pytest
 from dateutil.relativedelta import relativedelta
-from freezegun import freeze_time
-from tests.selenium.helpers.date_time_format import FormatTime
-from tests.selenium.page_object.programme_details.programme_details import ProgrammeDetails
-from tests.selenium.page_object.programme_management.programme_management import ProgrammeManagement
 from selenium import webdriver
 from selenium.webdriver import Keys
 from selenium.webdriver.common.by import By
@@ -20,6 +16,13 @@ from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.core.models import BusinessArea, BusinessAreaPartnerThrough
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from tests.selenium.helpers.date_time_format import FormatTime
+from tests.selenium.page_object.programme_details.programme_details import (
+    ProgrammeDetails,
+)
+from tests.selenium.page_object.programme_management.programme_management import (
+    ProgrammeManagement,
+)
 
 pytestmark = pytest.mark.django_db(transaction=True)
 
@@ -661,7 +664,6 @@ class TestComeBackScenarios:
 
 @pytest.mark.usefixtures("login")
 class TestManualCalendar:
-    @freeze_time("2024-09-09")
     @pytest.mark.parametrize(
         "test_data",
         [

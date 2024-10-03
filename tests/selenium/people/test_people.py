@@ -5,7 +5,6 @@ from django.db import transaction
 
 import pytest
 from dateutil.relativedelta import relativedelta
-from tests.selenium.page_object.people.people import People
 from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.account.models import User
@@ -30,6 +29,7 @@ from tests.selenium.page_object.grievance.details_grievance_page import (
 )
 from tests.selenium.page_object.grievance.grievance_tickets import GrievanceTickets
 from tests.selenium.page_object.grievance.new_ticket import NewTicket
+from tests.selenium.page_object.people.people import People
 from tests.selenium.page_object.people.people_details import PeopleDetails
 
 pytestmark = pytest.mark.django_db(transaction=True)
