@@ -3,11 +3,6 @@ from time import sleep
 
 import pytest
 from dateutil.relativedelta import relativedelta
-from tests.selenium.page_object.payment_verification.payment_record import PaymentRecord
-from tests.selenium.page_object.payment_verification.payment_verification import PaymentVerification
-from tests.selenium.page_object.payment_verification.payment_verification_details import (
-    PaymentVerificationDetails,
-)
 from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.account.models import User
@@ -31,6 +26,13 @@ from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFa
 from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
     TargetPopulationFactory,
+)
+from tests.selenium.page_object.payment_verification.payment_record import PaymentRecord
+from tests.selenium.page_object.payment_verification.payment_verification import (
+    PaymentVerification,
+)
+from tests.selenium.page_object.payment_verification.payment_verification_details import (
+    PaymentVerificationDetails,
 )
 
 pytestmark = pytest.mark.django_db(transaction=True)

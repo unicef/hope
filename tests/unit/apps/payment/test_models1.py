@@ -154,9 +154,7 @@ class TestPaymentPlanModel(TestCase):
             conflicted=False,
             currency="PLN",
         )
-        self.assertEqual(
-            pp1.payment_items.filter(payment_plan_hard_conflicted=True).count(), 1
-        )
+        self.assertEqual(pp1.payment_items.filter(payment_plan_hard_conflicted=True).count(), 1)
         self.assertEqual(pp1.can_be_locked, False)
 
         # create not conflicted payment
@@ -243,15 +241,9 @@ class TestPaymentModel(TestCase):
             program_cycle=program_cycle,
         )
         p1 = PaymentFactory(parent=pp1, conflicted=False, currency="PLN")
-        p2 = PaymentFactory(
-            parent=pp2, household=p1.household, conflicted=False, currency="PLN"
-        )
-        p3 = PaymentFactory(
-            parent=pp3, household=p1.household, conflicted=False, currency="PLN"
-        )
-        p4 = PaymentFactory(
-            parent=pp4, household=p1.household, conflicted=False, currency="PLN"
-        )
+        p2 = PaymentFactory(parent=pp2, household=p1.household, conflicted=False, currency="PLN")
+        p3 = PaymentFactory(parent=pp3, household=p1.household, conflicted=False, currency="PLN")
+        p4 = PaymentFactory(parent=pp4, household=p1.household, conflicted=False, currency="PLN")
 
         for obj in [pp1, pp2, pp3, pp4, p1, p2, p3, p4]:
             obj.refresh_from_db()  # update unicef_id from trigger
@@ -267,9 +259,7 @@ class TestPaymentModel(TestCase):
                 "payment_id": str(p2.id),
                 "payment_plan_id": str(pp2.id),
                 "payment_plan_status": str(pp2.status),
-                "payment_plan_start_date": program_cycle.start_date.strftime(
-                    "%Y-%m-%d"
-                ),
+                "payment_plan_start_date": program_cycle.start_date.strftime("%Y-%m-%d"),
                 "payment_plan_end_date": program_cycle.end_date.strftime("%Y-%m-%d"),
                 "payment_plan_unicef_id": str(pp2.unicef_id),
                 "payment_unicef_id": str(p2.unicef_id),
@@ -277,21 +267,14 @@ class TestPaymentModel(TestCase):
         )
         self.assertEqual(len(p1_data["payment_plan_soft_conflicted_data"]), 2)
         self.assertCountEqual(
-            [
-                json.loads(conflict_data)
-                for conflict_data in p1_data["payment_plan_soft_conflicted_data"]
-            ],
+            [json.loads(conflict_data) for conflict_data in p1_data["payment_plan_soft_conflicted_data"]],
             [
                 {
                     "payment_id": str(p3.id),
                     "payment_plan_id": str(pp3.id),
                     "payment_plan_status": str(pp3.status),
-                    "payment_plan_start_date": program_cycle.start_date.strftime(
-                        "%Y-%m-%d"
-                    ),
-                    "payment_plan_end_date": program_cycle.end_date.strftime(
-                        "%Y-%m-%d"
-                    ),
+                    "payment_plan_start_date": program_cycle.start_date.strftime("%Y-%m-%d"),
+                    "payment_plan_end_date": program_cycle.end_date.strftime("%Y-%m-%d"),
                     "payment_plan_unicef_id": str(pp3.unicef_id),
                     "payment_unicef_id": str(p3.unicef_id),
                 },
@@ -299,12 +282,8 @@ class TestPaymentModel(TestCase):
                     "payment_id": str(p4.id),
                     "payment_plan_id": str(pp4.id),
                     "payment_plan_status": str(pp4.status),
-                    "payment_plan_start_date": program_cycle.start_date.strftime(
-                        "%Y-%m-%d"
-                    ),
-                    "payment_plan_end_date": program_cycle.end_date.strftime(
-                        "%Y-%m-%d"
-                    ),
+                    "payment_plan_start_date": program_cycle.start_date.strftime("%Y-%m-%d"),
+                    "payment_plan_end_date": program_cycle.end_date.strftime("%Y-%m-%d"),
                     "payment_plan_unicef_id": str(pp4.unicef_id),
                     "payment_unicef_id": str(p4.unicef_id),
                 },
@@ -328,9 +307,7 @@ class TestPaymentModel(TestCase):
                 "payment_id": str(p2.id),
                 "payment_plan_id": str(pp2.id),
                 "payment_plan_status": str(pp2.status),
-                "payment_plan_start_date": program_cycle.start_date.strftime(
-                    "%Y-%m-%d"
-                ),
+                "payment_plan_start_date": program_cycle.start_date.strftime("%Y-%m-%d"),
                 "payment_plan_end_date": None,
                 "payment_plan_unicef_id": str(pp2.unicef_id),
                 "payment_unicef_id": str(p2.unicef_id),
@@ -338,18 +315,13 @@ class TestPaymentModel(TestCase):
         )
         self.assertEqual(len(payment_data["payment_plan_soft_conflicted_data"]), 2)
         self.assertCountEqual(
-            [
-                json.loads(conflict_data)
-                for conflict_data in payment_data["payment_plan_soft_conflicted_data"]
-            ],
+            [json.loads(conflict_data) for conflict_data in payment_data["payment_plan_soft_conflicted_data"]],
             [
                 {
                     "payment_id": str(p3.id),
                     "payment_plan_id": str(pp3.id),
                     "payment_plan_status": str(pp3.status),
-                    "payment_plan_start_date": program_cycle.start_date.strftime(
-                        "%Y-%m-%d"
-                    ),
+                    "payment_plan_start_date": program_cycle.start_date.strftime("%Y-%m-%d"),
                     "payment_plan_end_date": None,
                     "payment_plan_unicef_id": str(pp3.unicef_id),
                     "payment_unicef_id": str(p3.unicef_id),
@@ -358,9 +330,7 @@ class TestPaymentModel(TestCase):
                     "payment_id": str(p4.id),
                     "payment_plan_id": str(pp4.id),
                     "payment_plan_status": str(pp4.status),
-                    "payment_plan_start_date": program_cycle.start_date.strftime(
-                        "%Y-%m-%d"
-                    ),
+                    "payment_plan_start_date": program_cycle.start_date.strftime("%Y-%m-%d"),
                     "payment_plan_end_date": None,
                     "payment_plan_unicef_id": str(pp4.unicef_id),
                     "payment_unicef_id": str(p4.unicef_id),
@@ -437,9 +407,7 @@ class TestPaymentPlanSplitModel(TestCase):
             order=0,
         )
         pp_split1.payments.set([p1, p2])
-        self.assertEqual(
-            pp_split1.financial_service_provider, dm.financial_service_provider
-        )
+        self.assertEqual(pp_split1.financial_service_provider, dm.financial_service_provider)
         self.assertEqual(pp_split1.chosen_configuration, dm.chosen_configuration)
         self.assertEqual(pp_split1.delivery_mechanism, dm.delivery_mechanism)
 
@@ -494,12 +462,8 @@ class TestFinancialServiceProviderModel(TestCase):
         )
         country = CountryFactory()
         admin_type_1 = AreaTypeFactory(country=country, area_level=1)
-        admin_type_2 = AreaTypeFactory(
-            country=country, area_level=2, parent=admin_type_1
-        )
-        admin_type_3 = AreaTypeFactory(
-            country=country, area_level=3, parent=admin_type_2
-        )
+        admin_type_2 = AreaTypeFactory(country=country, area_level=2, parent=admin_type_1)
+        admin_type_3 = AreaTypeFactory(country=country, area_level=3, parent=admin_type_2)
         area1 = AreaFactory(parent=None, p_code="AF01", area_type=admin_type_1)
         area2 = AreaFactory(parent=area1, p_code="AF0101", area_type=admin_type_2)
         area3 = AreaFactory(parent=area2, p_code="AF010101", area_type=admin_type_3)
@@ -508,34 +472,24 @@ class TestFinancialServiceProviderModel(TestCase):
         household.admin3 = area3
         household.save()
 
-        payment = PaymentFactory(
-            program=ProgramFactory(), household=household, collector=individuals[0]
-        )
-        data_collecting_type = DataCollectingTypeFactory(
-            type=DataCollectingType.Type.SOCIAL
-        )
+        payment = PaymentFactory(program=ProgramFactory(), household=household, collector=individuals[0])
+        data_collecting_type = DataCollectingTypeFactory(type=DataCollectingType.Type.SOCIAL)
         fsp_xlsx_template = FinancialServiceProviderXlsxTemplate
         payment.parent.program.data_collecting_type = data_collecting_type
         payment.parent.program.save()
 
         # check invalid filed name
-        result = fsp_xlsx_template.get_column_from_core_field(
-            payment, "invalid_people_field_name"
-        )
+        result = fsp_xlsx_template.get_column_from_core_field(payment, "invalid_people_field_name")
         self.assertIsNone(result)
 
         # People program
         given_name = fsp_xlsx_template.get_column_from_core_field(payment, "given_name")
         self.assertEqual(given_name, individuals[0].given_name)
-        ind_unicef_id = fsp_xlsx_template.get_column_from_core_field(
-            payment, "individual_unicef_id"
-        )
+        ind_unicef_id = fsp_xlsx_template.get_column_from_core_field(payment, "individual_unicef_id")
         self.assertEqual(ind_unicef_id, individuals[0].unicef_id)
 
         # Standard program
-        payment.parent.program.data_collecting_type.type = (
-            DataCollectingType.Type.STANDARD
-        )
+        payment.parent.program.data_collecting_type.type = DataCollectingType.Type.STANDARD
         payment.parent.program.data_collecting_type.save()
 
         # check fields value
@@ -549,35 +503,21 @@ class TestFinancialServiceProviderModel(TestCase):
         self.assertEqual(admin3, f"{area3.p_code} - {area3.name}")
         given_name = fsp_xlsx_template.get_column_from_core_field(payment, "given_name")
         self.assertEqual(given_name, individuals[0].given_name)
-        ind_unicef_id = fsp_xlsx_template.get_column_from_core_field(
-            payment, "individual_unicef_id"
-        )
+        ind_unicef_id = fsp_xlsx_template.get_column_from_core_field(payment, "individual_unicef_id")
         self.assertEqual(ind_unicef_id, individuals[0].unicef_id)
-        hh_unicef_id = fsp_xlsx_template.get_column_from_core_field(
-            payment, "household_unicef_id"
-        )
+        hh_unicef_id = fsp_xlsx_template.get_column_from_core_field(payment, "household_unicef_id")
         self.assertEqual(hh_unicef_id, household.unicef_id)
         phone_no = fsp_xlsx_template.get_column_from_core_field(payment, "phone_no")
         self.assertEqual(phone_no, individuals[0].phone_no)
-        phone_no_alternative = fsp_xlsx_template.get_column_from_core_field(
-            payment, "phone_no_alternative"
-        )
+        phone_no_alternative = fsp_xlsx_template.get_column_from_core_field(payment, "phone_no_alternative")
         self.assertEqual(phone_no_alternative, individuals[0].phone_no_alternative)
-        national_id_no = fsp_xlsx_template.get_column_from_core_field(
-            payment, "national_id_no"
-        )
+        national_id_no = fsp_xlsx_template.get_column_from_core_field(payment, "national_id_no")
         self.assertEqual(national_id_no, document.document_number)
-        wallet_name = fsp_xlsx_template.get_column_from_core_field(
-            payment, "wallet_name"
-        )
+        wallet_name = fsp_xlsx_template.get_column_from_core_field(payment, "wallet_name")
         self.assertEqual(wallet_name, individuals[0].wallet_name)
-        blockchain_name = fsp_xlsx_template.get_column_from_core_field(
-            payment, "blockchain_name"
-        )
+        blockchain_name = fsp_xlsx_template.get_column_from_core_field(payment, "blockchain_name")
         self.assertEqual(blockchain_name, individuals[0].blockchain_name)
-        wallet_address = fsp_xlsx_template.get_column_from_core_field(
-            payment, "wallet_address"
-        )
+        wallet_address = fsp_xlsx_template.get_column_from_core_field(payment, "wallet_address")
         self.assertEqual(wallet_address, individuals[0].wallet_address)
 
 
@@ -615,15 +555,9 @@ class TestFinancialServiceProviderXlsxTemplate(TestCase):
         template = form.save()
         self.assertEqual(template.core_fields, ["age", "residence_status"])
 
-        form = self.FinancialServiceProviderXlsxTemplateForm(
-            data={"core_fields": ["field1"]}
-        )  # fake core fields
+        form = self.FinancialServiceProviderXlsxTemplateForm(data={"core_fields": ["field1"]})  # fake core fields
         self.assertFalse(form.is_valid())
         self.assertEqual(
             form.errors,
-            {
-                "core_fields": [
-                    "Select a valid choice. field1 is not one of the available choices."
-                ]
-            },
+            {"core_fields": ["Select a valid choice. field1 is not one of the available choices."]},
         )

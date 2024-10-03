@@ -80,6 +80,10 @@ export const ProgramCycleDetailsHeader = ({
       title: t('Payment Module'),
       to: '..',
     },
+    {
+      title: t('Programme Cycle'),
+      to: '..',
+    },
   ];
 
   const finishAction = async () => {
@@ -153,9 +157,7 @@ export const ProgramCycleDetailsHeader = ({
       title={
         <Box display="flex" alignItems={'center'}>
           <Box display="flex" flexDirection="column">
-            <Box>
-              {programCycle.title}
-            </Box>
+            <Box>{programCycle.title}</Box>
           </Box>
         </Box>
       }

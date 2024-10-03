@@ -762,7 +762,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
             {"header": "role_i_c", "message": "Only one person can be a primary collector"},
             {
                 "header": "role_i_c",
-                "message": "The same individual cannot be a primary and alternate collector for the same household."
+                "message": "The same individual cannot be a primary and alternate collector for the same household.",
             },
         ]
         self.assertEqual(result, expected)

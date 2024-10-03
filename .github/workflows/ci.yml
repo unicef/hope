@@ -264,7 +264,7 @@ jobs:
             -f ./.github/helpers/docker-compose.selenium.yml \
             run backend bash -c "
               waitforit -host=db -port=5432 -timeout=30
-              pytest -svvv $extra_options /tests/selenium --cov-report xml:test-coverage/coverage.xml --html-report=/tests/selenium/output_data/report/report.html --randomly-seed=42
+              pytest -svvv $extra_options ./tests/selenium --cov-report xml:test-coverage/coverage.xml --html-report=./tests/selenium/output_data/report/report.html --randomly-seed=42
             "
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
@@ -296,6 +296,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Run Trivy vulnerability scanner
+        continue-on-error: true # due to getting TOOMANYREQUESTS
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: '${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}'

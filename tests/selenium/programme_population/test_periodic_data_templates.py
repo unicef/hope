@@ -1,13 +1,9 @@
 import os
 from time import sleep
 
-import pytest
 from django.conf import settings
 
-from tests.selenium.page_object.programme_population.periodic_data_update_templates import (
-    PeriodicDatUpdateTemplates,
-    PeriodicDatUpdateTemplatesDetails,
-)
+import pytest
 from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -27,6 +23,10 @@ from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from tests.selenium.page_object.programme_population.individuals import Individuals
+from tests.selenium.page_object.programme_population.periodic_data_update_templates import (
+    PeriodicDatUpdateTemplates,
+    PeriodicDatUpdateTemplatesDetails,
+)
 
 pytestmark = pytest.mark.django_db(transaction=True)
 
@@ -292,10 +292,9 @@ class TestPeriodicDataTemplates:
 
         pageIndividuals.getDownloadBtn(periodic_data_update_template.pk).click()
         periodic_data_update_template.refresh_from_db()
-        user_path = os.path.expanduser("~")
         assert (
             pageIndividuals.check_file_exists(
-                os.path.join(user_path, "Downloads", periodic_data_update_template.file.file.name)
+                os.path.join(settings.DOWNLOAD_DIRECTORY, periodic_data_update_template.file.file.name)
             )
             is True
         )
