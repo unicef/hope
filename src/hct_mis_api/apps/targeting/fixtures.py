@@ -13,7 +13,7 @@ from hct_mis_api.apps.core.field_attributes.fields_types import Scope
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import HouseholdFactory
 from hct_mis_api.apps.household.models import RESIDENCE_STATUS_CHOICE
-from hct_mis_api.apps.program.fixtures import get_program_with_dct_type_and_name, ProgramCycleFactory
+from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, get_program_with_dct_type_and_name
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.models import (
     HouseholdSelection,
