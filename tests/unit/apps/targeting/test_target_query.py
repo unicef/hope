@@ -115,6 +115,7 @@ class TestTargetPopulationQuery(APITestCase):
         cls.partner = PartnerFactory(name="TestPartner")
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.program = ProgramFactory(name="test_program", status=Program.ACTIVE)
+        cls.cycle = cls.program.cycles.first()
         cls.cycle_2 = ProgramCycleFactory(program=cls.program)
 
         _ = create_household(
@@ -145,7 +146,7 @@ class TestTargetPopulationQuery(APITestCase):
             targeting_criteria=targeting_criteria,
             business_area=cls.business_area,
             program=cls.program,
-            program_cycle=cls.cycle_2,
+            program_cycle=cls.cycle,
         )
         cls.target_population_size_2.save()
         cls.target_population_size_2 = full_rebuild(cls.target_population_size_2)
@@ -175,7 +176,7 @@ class TestTargetPopulationQuery(APITestCase):
             status=TargetPopulation.STATUS_LOCKED,
             business_area=cls.business_area,
             program=cls.program,
-            program_cycle=cls.cycle_2,
+            program_cycle=cls.cycle,
         )
         cls.target_population_size_1_approved.save()
         cls.target_population_size_1_approved = full_rebuild(cls.target_population_size_1_approved)
@@ -222,7 +223,7 @@ class TestTargetPopulationQuery(APITestCase):
             status=TargetPopulation.STATUS_LOCKED,
             business_area=cls.business_area,
             program=cls.program,
-            program_cycle=cls.cycle_2,
+            program_cycle=cls.cycle,
         )
         cls.target_population_with_pdu_filter.save()
         cls.target_population_with_pdu_filter = full_rebuild(cls.target_population_with_pdu_filter)
@@ -257,7 +258,7 @@ class TestTargetPopulationQuery(APITestCase):
             status=TargetPopulation.STATUS_LOCKED,
             business_area=cls.business_area,
             program=cls.program,
-            program_cycle=cls.cycle_2,
+            program_cycle=cls.cycle,
         )
         cls.target_population_with_individual_filter.save()
         cls.target_population_with_individual_filter = full_rebuild(cls.target_population_with_individual_filter)
