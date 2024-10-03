@@ -3,6 +3,7 @@ repos:
     hooks:
       - id: Linters checks
         name: Linters checks
-        entry: bash -c "docker compose -f development_tools/compose.yml run --no-TTY -i --rm backend sh -c 'black . --check && isort . --check-only && flake8 . && mypy .'"
+        entry: docker compose -f development_tools/compose.yml run --no-TTY -i --rm backend sh -c 'black . --check && isort . --check-only && flake8 . && mypy .'
         language: system
         pass_filenames: false
+        verbose: true
