@@ -75,6 +75,7 @@ class TestPullDataFromDatahub(TestCase):
             status=TargetPopulation.STATUS_PROCESSING,
             program=cls.program,
             business_area=cls.business_area,
+            program_cycle=cls.program.cycles.first()
         )
 
         program = ProgramFactory(

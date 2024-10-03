@@ -600,21 +600,3 @@ class TestPaymentPlanServices(APITestCase):
         PaymentPlanService.create(input_data=input_data, user=self.user)
         cycle.refresh_from_db()
         assert cycle.status == ProgramCycle.ACTIVE
-
-    def test_create_pp_validation_errors_if_tp_without_cycle(self) -> None:
-        self.business_area.is_payment_plan_applicable = True
-        self.business_area.save()
-        targeting_without_cycle = TargetPopulationFactory(
-            program=ProgramFactory(), status=TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
-        )
-        input_data = dict(
-            business_area_slug=self.business_area.slug,
-            targeting_id=self.id_to_base64(targeting_without_cycle.id, "TargetingNode"),
-            dispersion_start_date=parse_date("2020-09-10"),
-            dispersion_end_date=parse_date("2020-09-11"),
-            currency="USD",
-        )
-
-        self.assertIsNone(targeting_without_cycle.program_cycle)
-        with self.assertRaisesMessage(GraphQLError, "Target Population should have assigned Programme Cycle"):
-            PaymentPlanService.create(input_data=input_data, user=self.user)
