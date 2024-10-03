@@ -66,15 +66,10 @@ from hct_mis_api.apps.core.field_attributes.fields_types import (
 )
 from hct_mis_api.apps.core.mixins import LimitBusinessAreaModelMixin
 from hct_mis_api.apps.core.models import BusinessArea, FileTemp, FlexibleAttribute
-from hct_mis_api.apps.core.utils import nested_getattr
 from hct_mis_api.apps.household.models import (
     FEMALE,
-    IDENTIFICATION_TYPE_NATIONAL_ID,
     MALE,
-    ROLE_ALTERNATE,
-    Document,
     Individual,
-    IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.fields import DynamicChoiceArrayField
@@ -1193,17 +1188,20 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
     )
 
     @staticmethod
-    def get_data_from_payment_snapshot(household_data: Dict[str, Any], core_field: Dict[str, Any], delivery_mechanism_data: Optional["DeliveryMechanismData"] = None,) -> Optional[str]:
+    def get_data_from_payment_snapshot(
+        household_data: Dict[str, Any],
+        core_field: Dict[str, Any],
+        delivery_mechanism_data: Optional["DeliveryMechanismData"] = None,
+    ) -> Optional[str]:
         core_field_name = core_field["name"]
-        collector_data = (
-                household_data.get("primary_collector") or household_data.get("alternate_collector") or dict()
-        )
+        collector_data = household_data.get("primary_collector") or household_data.get("alternate_collector") or dict()
         primary_collector = household_data.get("primary_collector", {})
         alternate_collector = household_data.get("alternate_collector", {})
 
         if delivery_mechanism_data and core_field["associated_with"] == _DELIVERY_MECHANISM_DATA:
             delivery_mech_data = collector_data.get("delivery_mechanisms_data", {}).get(
-                delivery_mechanism_data.delivery_mechanism.code, {})
+                delivery_mechanism_data.delivery_mechanism.code, {}
+            )
             return delivery_mech_data.get(core_field_name, None)
 
         lookup = core_field["lookup"]
@@ -1285,9 +1283,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         snapshot_data = snapshot.snapshot_data
         primary_collector = snapshot_data.get("primary_collector", {})
         alternate_collector = snapshot_data.get("alternate_collector", {})
-        collector_data = (
-                primary_collector or alternate_collector or dict()
-        )
+        collector_data = primary_collector or alternate_collector or dict()
 
         map_obj_name_column = {
             "payment_id": (payment, "unicef_id"),
@@ -1350,7 +1346,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
     @staticmethod
     def get_registration_token_doc_number(snapshot_data: Dict[str, Any]) -> str:
         collector_data = (
-                snapshot_data.get("primary_collector", {}) or snapshot_data.get("alternate_collector", {}) or dict()
+            snapshot_data.get("primary_collector", {}) or snapshot_data.get("alternate_collector", {}) or dict()
         )
         documents_list = collector_data.get("documents", [])
         documents_dict = {doc.get("type"): doc for doc in documents_list}
@@ -1359,7 +1355,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
     @staticmethod
     def get_national_id_doc_number(snapshot_data: Dict[str, Any]) -> str:
         collector_data = (
-                snapshot_data.get("primary_collector", {}) or snapshot_data.get("alternate_collector", {}) or dict()
+            snapshot_data.get("primary_collector", {}) or snapshot_data.get("alternate_collector", {}) or dict()
         )
         documents_list = collector_data.get("documents", [])
         documents_dict = {doc.get("type"): doc for doc in documents_list}
