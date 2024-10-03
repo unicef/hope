@@ -236,6 +236,8 @@ class TestSmokePaymentModule:
         assert "-" in pagePaymentModuleDetails.getLabelRelatedFollowUpPaymentPlans().text
         assert "SET UP FSP" in pagePaymentModuleDetails.getButtonSetUpFsp().text
         assert "CREATE" in pagePaymentModuleDetails.getButtonCreateExclusions().text
+        assert "Supporting Documents" in pagePaymentModuleDetails.getSupportingDocumentsTitle().text
+        assert "No documents uploaded" in pagePaymentModuleDetails.getSupportingDocumentsEmpty().text
         assert "0" in pagePaymentModuleDetails.getLabelFemaleChildren().text
         assert "0" in pagePaymentModuleDetails.getLabelFemaleAdults().text
         assert "0" in pagePaymentModuleDetails.getLabelMaleChildren().text

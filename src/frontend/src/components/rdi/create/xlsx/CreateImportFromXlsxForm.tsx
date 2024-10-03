@@ -1,19 +1,19 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { Box, CircularProgress } from '@mui/material';
-import { Field, FormikProvider, useFormik } from 'formik';
-import { useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
-import * as Yup from 'yup';
 import {
   ImportDataStatus,
   useCreateRegistrationXlsxImportMutation,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { Box, CircularProgress } from '@mui/material';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { Field, FormikProvider, useFormik } from 'formik';
+import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
+import * as Yup from 'yup';
 import { ScreenBeneficiaryField } from '../ScreenBeneficiaryField';
 import { DropzoneField } from './DropzoneField';
 import { XlsxImportDataRepresentation } from './XlsxImportDataRepresentation';
@@ -135,7 +135,9 @@ export function CreateImportFromXlsxForm({
             <Field
               name="allowDeliveryMechanismsValidationErrors"
               fullWidth
-              label={t('Ignore Delivery Mechanisms Validation Errors and Create Grievance Tickets')}
+              label={t(
+                'Ignore Delivery Mechanisms Validation Errors and Create Grievance Tickets',
+              )}
               variant="outlined"
               component={FormikCheckboxField}
             />

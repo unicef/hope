@@ -2589,3 +2589,20 @@ class DeliveryMechanism(TimeStampedUUIDModel):
             required_fields_map[dm.code].extend([f"{field}_i_c" for field in dm.required_fields])
 
         return required_fields_map
+
+
+class PaymentPlanSupportingDocument(models.Model):
+    FILE_LIMIT = 10  # max 10 files per Payment Plan
+    FILE_SIZE_LIMIT = 10 * 1024 * 1024  # 10 MB
+
+    payment_plan = models.ForeignKey(PaymentPlan, on_delete=models.CASCADE, related_name="documents")
+    title = models.CharField(max_length=255)
+    file = models.FileField()
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
+
+    class Meta:
+        ordering = ["uploaded_at"]
+
+    def __str__(self) -> str:
+        return self.title
