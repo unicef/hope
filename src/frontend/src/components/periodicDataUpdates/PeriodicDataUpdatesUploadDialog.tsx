@@ -15,6 +15,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { ButtonTooltip } from '@components/core/ButtonTooltip';
+import { GreyText } from '@components/core/GreyText';
 
 const Error = styled.div`
   color: ${({ theme }) => theme.palette.error.dark};
@@ -96,7 +97,16 @@ export const PeriodDataUpdatesUploadDialog = (): React.ReactElement => {
         aria-labelledby="form-dialog-title"
       >
         <DialogTitleWrapper data-cy="dialog-import">
-          <DialogTitle>{t('Periodic Data Updates')}</DialogTitle>
+          <DialogTitle>
+            <Box display="flex" flexDirection="column">
+              {t('Select Files to Upload')}
+              <GreyText>
+                {t(
+                  'The system accepts the following file extensions: XLSX, PDF, images (jpg, jpeg, png). File size must be \\u2264 10MB.',
+                )}
+              </GreyText>
+            </Box>
+          </DialogTitle>
           <>
             <DropzoneField
               dontShowFilename={false}
