@@ -1,42 +1,16 @@
-import csv
 import logging
-import os
-import tempfile
-from datetime import datetime
 from functools import wraps
 from typing import Any, Callable
 
 from django.db import transaction
-from django.utils import timezone
 
 from hct_mis_api.apps.core.celery import app
-from hct_mis_api.apps.core.models import StorageFile, XLSXKoboTemplate
+from hct_mis_api.apps.core.models import XLSXKoboTemplate
 from hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields import (
     KoboRetriableError,
 )
-from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
-from hct_mis_api.apps.household.models import (
-    COLLECT_TYPE_SIZE_ONLY,
-    HEAD,
-    IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
-    IDENTIFICATION_TYPE_TAX_ID,
-    MALE,
-    ROLE_PRIMARY,
-    BankAccountInfo,
-    Document,
-    DocumentType,
-    Household,
-    Individual,
-    IndividualRoleInHousehold,
-)
-from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.targeting.models import TargetPopulation
-from hct_mis_api.apps.targeting.services.targeting_stats_refresher import refresh_stats
 from hct_mis_api.apps.utils.logs import log_start_and_end
-from hct_mis_api.apps.utils.models import MergeStatusModel
-from hct_mis_api.apps.utils.sentry import sentry_tags, set_sentry_business_area_tag
+from hct_mis_api.apps.utils.sentry import sentry_tags
 
 logger = logging.getLogger(__name__)
 

@@ -44,7 +44,9 @@ from xlrd import XLRDError
 
 from hct_mis_api.apps.account.models import Role, User
 from hct_mis_api.apps.administration.widgets import JsonWidget
-from hct_mis_api.apps.core.celery_tasks import upload_new_kobo_template_and_update_flex_fields_task
+from hct_mis_api.apps.core.celery_tasks import (
+    upload_new_kobo_template_and_update_flex_fields_task,
+)
 from hct_mis_api.apps.core.forms import DataCollectingTypeForm
 from hct_mis_api.apps.core.models import (
     BusinessArea,
@@ -63,7 +65,6 @@ from hct_mis_api.apps.core.validators import KoboTemplateValidator
 from hct_mis_api.apps.household.models import DocumentType
 from hct_mis_api.apps.payment.forms import AcceptanceProcessThresholdForm
 from hct_mis_api.apps.payment.models import AcceptanceProcessThreshold
-from hct_mis_api.apps.targeting.models import TargetPopulation
 from hct_mis_api.apps.utils.admin import (
     HOPEModelAdminBase,
     LastSyncDateResetMixin,
