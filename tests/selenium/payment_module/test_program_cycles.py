@@ -11,6 +11,8 @@ from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 
+from tests.selenium.page_object.payment_module.program_cycle_details import ProgramCycleDetailsPage
+
 pytestmark = pytest.mark.django_db(transaction=True)
 
 
@@ -77,27 +79,74 @@ class TestSmokeProgramCycle:
         second_cycle = pageProgramCycle.getProgramCycleRow()[1]
         third_cycle = pageProgramCycle.getProgramCycleRow()[2]
         assert (
-            "Default Programme Cycle"
-            in first_cycle.find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-title"]').text
+                "Default Programme Cycle"
+                in first_cycle.find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-title"]').text
         )
         assert "Active" in first_cycle.find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-status"]').text
         assert (
-            "-" in first_cycle.find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-total-entitled-quantity"]').text
+                "-" in first_cycle.find_element(By.CSS_SELECTOR,
+                                                'td[data-cy="program-cycle-total-entitled-quantity"]').text
         )
         assert (
-            "Test Programme Cycle 001"
-            in second_cycle.find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-title"]').text
+                "Test Programme Cycle 001"
+                in second_cycle.find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-title"]').text
         )
         assert "Active" in second_cycle.find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-status"]').text
         assert (
-            "1833.99"
-            in second_cycle.find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-total-entitled-quantity"]').text
+                "1833.99"
+                in second_cycle.find_element(By.CSS_SELECTOR,
+                                             'td[data-cy="program-cycle-total-entitled-quantity"]').text
         )
         assert (
-            "Programme Cycle in Draft"
-            in third_cycle.find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-title"]').text
+                "Programme Cycle in Draft"
+                in third_cycle.find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-title"]').text
         )
         assert "Draft" in third_cycle.find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-status"]').text
         assert (
-            "-" in third_cycle.find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-total-entitled-quantity"]').text
+                "-" in third_cycle.find_element(By.CSS_SELECTOR,
+                                                'td[data-cy="program-cycle-total-entitled-quantity"]').text
         )
+
+    def test_smoke_program_cycles_details(self,
+                                          create_program_cycle: ProgramCycle,
+                                          pageProgramCycle: ProgramCyclePage,
+                                          pageProgramCycleDetails: ProgramCycleDetailsPage
+                                          ) -> None:
+        pageProgramCycle.selectGlobalProgramFilter("Test Program")
+        pageProgramCycle.getNavPaymentModule().click()
+        pageProgramCycle.getNavProgrammeCycles().click()
+        start_date = pageProgramCycle.getProgramCycleStartDateList()[1].text
+        end_date = pageProgramCycle.getProgramCycleEndDateList()[1].text
+        pageProgramCycle.getProgramCycleRow()[1].find_element("tag name", "a").click()
+        assert "Test Programme Cycle 001" in pageProgramCycleDetails.getPageHeaderTitle().text
+        assert "Active" in pageProgramCycleDetails.getStatusContainer().text
+        assert start_date in pageProgramCycleDetails.getLabelStartDate().text
+        assert end_date in pageProgramCycleDetails.getLabelEndDate().text
+
+
+@pytest.mark.usefixtures("login")
+class TestProgramCycle:
+    def test_program_cycles_finish_and_reactivate(self,
+                                   create_program_cycle: ProgramCycle,
+                                   pageProgramCycle: ProgramCyclePage,
+                                   pageProgramCycleDetails: ProgramCycleDetailsPage
+                                   ) -> None:
+        pageProgramCycle.selectGlobalProgramFilter("Test Program")
+        pageProgramCycle.getNavPaymentModule().click()
+        pageProgramCycle.getNavProgrammeCycles().click()
+        pageProgramCycle.getProgramCycleRow()[1].find_element("tag name", "a").click()
+        assert "Test Programme Cycle 001" in pageProgramCycleDetails.getPageHeaderTitle().text
+        assert "Active" in pageProgramCycleDetails.getStatusContainer().text
+        pageProgramCycleDetails.getButtonFinishProgrammeCycle().click()
+        pageProgramCycleDetails.driver.execute_script(
+            """
+            container = document.querySelector("div[data-cy='main-content']")
+            container.scrollBy(0,600)
+            """
+        )
+        from time import sleep
+        sleep(2)
+        pageProgramCycle.screenshot("1", file_path="./")
+        assert "Finished" in pageProgramCycleDetails.getStatusContainer().text
+        pageProgramCycleDetails.getButtonReactivateProgrammeCycle().click()
+        assert "Active" in pageProgramCycleDetails.getStatusContainer().text

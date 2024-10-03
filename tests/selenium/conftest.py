@@ -30,10 +30,8 @@ from tests.selenium.page_object.managerial_console.managerial_console import Man
 from tests.selenium.page_object.payment_module.new_payment_plan import NewPaymentPlan
 from tests.selenium.page_object.payment_module.payment_module import PaymentModule
 from tests.selenium.page_object.payment_module.payment_module_details import PaymentModuleDetails
-from tests.selenium.page_object.payment_module.program_cycle import (
-    ProgramCycleDetailsPage,
-    ProgramCyclePage,
-)
+from tests.selenium.page_object.payment_module.program_cycle import ProgramCyclePage
+from tests.selenium.page_object.payment_module.program_cycle_details import ProgramCycleDetailsPage
 from tests.selenium.page_object.payment_verification.payment_record import PaymentRecord
 from tests.selenium.page_object.payment_verification.payment_verification import PaymentVerification
 from tests.selenium.page_object.payment_verification.payment_verification_details import (
@@ -88,6 +86,9 @@ def pytest_addoption(parser) -> None:  # type: ignore
 
 def pytest_configure(config) -> None:  # type: ignore
     config.addinivalue_line("markers", "night: This marker is intended for e2e tests conducted during the night on CI")
+
+    if not os.path.exists("report/screenshot"):
+        os.makedirs("report/screenshot")
 
     # delete all old screenshots
     for file in os.listdir("report/screenshot"):
