@@ -11,6 +11,7 @@ omit =
         */admin/*.py
         */admin.py
         **/fixtures.py
+        **/forms.py
         hct_mis_api/one_time_scripts/*
         hct_mis_api/libs/*
         hct_mis_api/settings/*
