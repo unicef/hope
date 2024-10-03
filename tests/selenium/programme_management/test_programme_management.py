@@ -395,6 +395,7 @@ class TestProgrammeManagement:
 
 
 # ToDo: Check Unicef partner! and delete classes
+@pytest.mark.night
 @pytest.mark.usefixtures("login")
 class TestBusinessAreas:
     @pytest.mark.parametrize(
@@ -522,6 +523,7 @@ class TestBusinessAreas:
         assert "New Programme" in pageProgrammeDetails.getHeaderTitle().text
 
 
+@pytest.mark.night
 @pytest.mark.usefixtures("login")
 class TestAdminAreas:
     @pytest.mark.parametrize(
@@ -659,6 +661,7 @@ class TestComeBackScenarios:
         assert "UNHCR" in pageProgrammeDetails.getLabelPartnerName().text
 
 
+@pytest.mark.night
 @pytest.mark.usefixtures("login")
 class TestManualCalendar:
     @pytest.mark.parametrize(
