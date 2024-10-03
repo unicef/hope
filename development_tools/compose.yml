@@ -25,7 +25,7 @@ services:
     ports:
       - "8080:8000"
     volumes:
-#      - ../.:/code/
+      - ../.:/code/
       - backend-data:/data
       - ../pyproject.toml:/packages/pyproject.toml
       - ../pdm.lock:/packages/pdm.lock
