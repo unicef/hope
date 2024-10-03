@@ -35,9 +35,9 @@ class DeduplicationImage:
 
 
 @dataclasses.dataclass
-class IgnoredKeysPair:
-    first_reference_pk: str  # individual.id
-    second_reference_pk: str  # individual.id
+class IgnoredFilenamesPair:
+    first: str  # individual.photo.name
+    second: str  # individual.photo.name
 
 
 class DeduplicationEngineAPI(BaseAPI):
@@ -64,7 +64,8 @@ class DeduplicationEngineAPI(BaseAPI):
         BULK_DELETE_IMAGES = "deduplication_sets/{deduplication_set_pk}/images_bulk/clear/"  # DELETE - Delete all images for a deduplication set
 
         GET_DUPLICATES = "deduplication_sets/{deduplication_set_pk}/duplicates/"  # GET - List view
-        IGNORED_KEYS = "deduplication_sets/{deduplication_set_pk}/ignored_keys/"  # POST/GET
+        IGNORED_KEYS = "deduplication_sets/{deduplication_set_pk}/ignored/reference_pks/"  # POST/GET
+        IGNORED_FILENAMES = "deduplication_sets/{deduplication_set_pk}/ignored/filenames/"  # POST/GET
 
     def delete_deduplication_set(self, deduplication_set_id: str) -> dict:
         response_data, _ = self._delete(self.Endpoints.DELETE_DEDUPLICATION_SET.format(pk=deduplication_set_id))
@@ -101,8 +102,10 @@ class DeduplicationEngineAPI(BaseAPI):
         )
         return response_data, status
 
-    def report_false_positive_duplicate(self, false_positive_pair: IgnoredKeysPair, deduplication_set_id: str) -> None:
+    def report_false_positive_duplicate(
+        self, false_positive_pair: IgnoredFilenamesPair, deduplication_set_id: str
+    ) -> None:
         self._post(
-            self.Endpoints.IGNORED_KEYS.format(deduplication_set_pk=deduplication_set_id),
+            self.Endpoints.IGNORED_FILENAMES.format(deduplication_set_pk=deduplication_set_id),
             dataclasses.asdict(false_positive_pair),
         )

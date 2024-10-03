@@ -323,6 +323,13 @@ class RdiMergeTask:
                         CheckAgainstSanctionListPreMergeTask.execute(registration_data_import=obj_hct)
                         logger.info(f"RDI:{registration_data_import_id} Checked against sanction list")
 
+                    # synchronously deduplicate documents
+                    deduplicate_documents()
+                    #  synchronously deduplicate biometrics
+                    if obj_hct.program.biometric_deduplication_enabled:
+                        create_grievance_tickets_for_dedup_engine_results(obj_hct.id)
+                        update_rdis_deduplication_engine_statistics(obj_hct.program.id)
+
                     obj_hct.update_needs_adjudication_tickets_statistic()
                     obj_hct.status = RegistrationDataImport.MERGED
                     obj_hct.save()
@@ -363,15 +370,6 @@ class RdiMergeTask:
                     )
                     populate_index(Household.objects.filter(registration_data_import=obj_hct), HouseholdDocument)
                     logger.info(f"RDI:{registration_data_import_id} Saved registration data import")
-
-                    transaction.on_commit(lambda: deduplicate_documents.delay())
-                    if obj_hct.program.biometric_deduplication_enabled:
-                        transaction.on_commit(
-                            lambda: create_grievance_tickets_for_dedup_engine_results.delay(obj_hct.id)
-                        )
-                        transaction.on_commit(
-                            lambda: update_rdis_deduplication_engine_statistics.delay(obj_hct.program.id)
-                        )
 
                     rdi_merged.send(sender=obj_hct.__class__, instance=obj_hct)
                     log_create(
