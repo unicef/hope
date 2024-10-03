@@ -5,7 +5,7 @@ services:
   backend:
     volumes:
       - ../../tests/test-coverage:/code/test-coverage
-      - ../../tests/report/:/tests/selenium/output_data/report/
+      - ../../tests/report/:./tests/selenium/output_data/report/
       - type: volume
         source: backend-web-app
         target: /code/src/hct_mis_api/apps/web

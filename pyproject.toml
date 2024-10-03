@@ -45,18 +45,18 @@ known_first_party = [
     "accountability",
 ]
 known_django = "django"
-sections = ["FUTURE","STDLIB","DJANGO","THIRDPARTY","FIRSTPARTY","LOCALFOLDER"]
+sections = ["FUTURE", "STDLIB", "DJANGO", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
 include_trailing_comma = true
-skip = ["migrations", "snapshots", "venv", "__pypackages__"]
+skip = ["migrations", "snapshots", "venv", ".venv", "__pypackages__", "frontend"]
 
 [tool.mypy]
 python_version = 3.11
 show_error_codes = true
 exclude = [
-  "migrations",
-  "venv",
-  "snapshots",
-  "__pypackages__",
+    "migrations",
+    "venv",
+    "snapshots",
+    "__pypackages__",
 ]
 
 strict = true
@@ -66,12 +66,12 @@ follow_imports = "skip"
 
 # TODO: remove one, fix errors, repeat
 disable_error_code = [
-  "var-annotated", # this enforces Django Model fields to have type annotations
-  "attr-defined",
-  "misc", # cannot subclass DjangoObjectType
-  "union-attr",
-  "type-arg", # this misses type parameters for graphene.ObjectType
-  "no-any-return", # this enforces adding return None for function that returns None
+    "var-annotated", # this enforces Django Model fields to have type annotations
+    "attr-defined",
+    "misc", # cannot subclass DjangoObjectType
+    "union-attr",
+    "type-arg", # this misses type parameters for graphene.ObjectType
+    "no-any-return", # this enforces adding return None for function that returns None
 ]
 
 [tool.django-stubs]
@@ -133,7 +133,7 @@ requires = ["pdm-backend"]
 build-backend = "pdm.backend"
 
 [tool.pdm.build]
-includes = ['src/hct_mis_api','src/data']
+includes = ['src/hct_mis_api', 'src/data']
 
 [tool.pdm]
 distribution = true
@@ -143,7 +143,7 @@ name = "hope"
 version = "3.0.0"
 description = "HCT MIS is UNICEF's humanitarian cash transfer platform."
 authors = [
-    {name = "Tivix"},
+    { name = "Tivix" },
 ]
 dependencies = [
     "setuptools==71.1.0",
@@ -242,7 +242,7 @@ dependencies = [
 ]
 requires-python = "==3.11.*"
 readme = "README.md"
-license = {text = "None"}
+license = { text = "None" }
 
 [tool.setuptools]
 py-modules = ["hct_mis_api"]
