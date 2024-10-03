@@ -108,11 +108,13 @@ def close_needs_adjudication_new_ticket(ticket_details: TicketNeedsAdjudicationD
                 BiometricDeduplicationService,
             )
 
-            ids = [str(individual.id) for individual in distinct_individuals]
+            photos = sorted([str(individual.photo.name) for individual in distinct_individuals])
             service = BiometricDeduplicationService()
             try:
                 service.report_false_positive_duplicate(
-                    ids[0], ids[1], ticket_details.ticket.registration_data_import.program.deduplication_set_id
+                    photos[0],
+                    photos[1],
+                    str(ticket_details.ticket.registration_data_import.program.deduplication_set_id),
                 )
             except service.api.API_EXCEPTION_CLASS:
                 logger.exception("Failed to report false positive duplicate to Deduplication Engine")
