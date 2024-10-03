@@ -2,7 +2,6 @@ import tomli
 
 
 def get_full_version() -> str:
-    # with open("pyproject.toml", mode="rb") as fp:
-    #     config = tomli.load(fp)
-    # return config["project"]["version"]
-    return "123"
+    with open("pyproject.toml", mode="rb") as fp:
+        config = tomli.load(fp)
+    return config["project"]["version"]

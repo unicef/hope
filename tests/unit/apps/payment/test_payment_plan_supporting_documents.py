@@ -1,13 +1,13 @@
 import base64
 from io import BytesIO
 
-from django.core.files.uploadedfile import SimpleUploadedFile, InMemoryUploadedFile
+from django.core.files.uploadedfile import InMemoryUploadedFile, SimpleUploadedFile
 from django.test import TestCase
 from django.urls import reverse
 
 from rest_framework import status
-from rest_framework.test import APIClient
 from rest_framework.response import Response
+from rest_framework.test import APIClient
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.models import Role, UserRole
@@ -84,7 +84,9 @@ class PaymentPlanSupportingDocumentSerializerTests(TestCase):
                 ),
             )
 
-        serializer = PaymentPlanSupportingDocumentSerializer(data={"file": self.file, "title": "test"}, context=self.context)
+        serializer = PaymentPlanSupportingDocumentSerializer(
+            data={"file": self.file, "title": "test"}, context=self.context
+        )
         self.assertFalse(serializer.is_valid())
         self.assertIn("non_field_errors", serializer.errors)
         self.assertEqual(
@@ -160,7 +162,9 @@ class PaymentPlanSupportingDocumentViewTests(TestCase):
         )
         cls.program_id_base64 = base64.b64encode(f"ProgramNode:{str(cls.payment_plan.program.id)}".encode()).decode()
         cls.payment_plan_id_base64 = base64.b64encode(f"PaymentPlanNode:{str(cls.payment_plan.id)}".encode()).decode()
-        cls.supporting_document_id_base64 = base64.b64encode(f"PaymentPlanSupportingDocumentNode:{str(cls.document.id)}".encode()).decode()
+        cls.supporting_document_id_base64 = base64.b64encode(
+            f"PaymentPlanSupportingDocumentNode:{str(cls.document.id)}".encode()
+        ).decode()
 
         cls.url = reverse(
             "api:payment-plan:supporting_documents-detail",

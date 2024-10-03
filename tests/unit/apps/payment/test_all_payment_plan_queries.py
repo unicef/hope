@@ -2,8 +2,8 @@ from datetime import datetime
 from io import BytesIO
 from unittest.mock import patch
 
-from django.utils import timezone
 from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.utils import timezone
 
 from dateutil.relativedelta import relativedelta
 from freezegun import freeze_time
@@ -26,7 +26,8 @@ from hct_mis_api.apps.payment.models import (
     AcceptanceProcessThreshold,
     ApprovalProcess,
     PaymentHouseholdSnapshot,
-    PaymentPlan, PaymentPlanSupportingDocument,
+    PaymentPlan,
+    PaymentPlanSupportingDocument,
 )
 from hct_mis_api.apps.program.fixtures import ProgramCycleFactory
 
