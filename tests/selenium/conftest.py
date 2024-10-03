@@ -123,8 +123,6 @@ def pytest_configure(config) -> None:  # type: ignore
     settings.SCREENSHOT_DIRECTORY = f"{settings.REPORT_DIRECTORY}/screenshot"
     if not os.path.exists(settings.SCREENSHOT_DIRECTORY):
         os.makedirs(settings.SCREENSHOT_DIRECTORY)
-    print("settings.SCREENSHOT_DIRECTORY", settings.SCREENSHOT_DIRECTORY)
-    print("*" * 70)
 
     for file in os.listdir(settings.SCREENSHOT_DIRECTORY):
         os.remove(os.path.join(settings.SCREENSHOT_DIRECTORY, file))
@@ -211,7 +209,7 @@ def create_session(host: str, username: str, password: str, csrf: str = "") -> o
     return pytest.session
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def driver() -> Chrome:
     chrome_options = Options()
     chrome_options.add_argument("--headless")
@@ -232,11 +230,18 @@ def driver() -> Chrome:
     yield driver
 
 
-@pytest.fixture(autouse=True)
-def browser(driver: Chrome) -> Chrome:
-    driver.live_server = LiveServer("localhost")
-    yield driver
-    driver.quit()
+@pytest.fixture(scope="session")
+def live_server() -> LiveServer:
+    yield LiveServer("localhost")
+
+
+@pytest.fixture(autouse=True,scope="session")
+def browser(driver: Chrome, live_server: LiveServer) -> Chrome:
+    try:
+        driver.live_server = live_server
+        yield driver
+    finally:
+        driver.quit()
 
 
 @pytest.fixture
@@ -511,8 +516,7 @@ def create_super_user(business_area: BusinessArea) -> User:
     permission_list = [role.value for role in Permissions]
 
     role, _ = Role.objects.update_or_create(name="Role", defaults={"permissions": permission_list})
-
-    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json", verbosity=0)
+    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data_small.json", verbosity=0)
     country = Country.objects.get(name="Afghanistan")
     business_area.countries.add(country)
     user = UserFactory.create(
