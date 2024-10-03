@@ -17,10 +17,10 @@ else
         -n auto \
         --reruns 3 \
         --reruns-delay 1 \
-        --cov-report xml:coverage.xml \
+        --cov-report xml:test-coverage/coverage.xml \
         --randomly-seed=42 \
         --create-db \
-        /tests/unit/
+        ./tests/unit/
       ;;
     "lint")
       mkdir -p ./lint-results
