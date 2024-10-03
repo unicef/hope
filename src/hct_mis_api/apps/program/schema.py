@@ -270,7 +270,11 @@ class Query(graphene.ObjectType):
         program = Program.objects.only("id").get(id=decode_id_string(encoded_program_id))
         # deduplication engine in progress
         is_still_processing = RegistrationDataImport.objects.filter(
-            program=program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS
+            program=program,
+            deduplication_engine_status__in=[
+                RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS,
+                RegistrationDataImport.DEDUP_ENGINE_PROCESSING,
+            ],
         ).exists()
         # all rdis are deduplicated
         all_rdis_deduplicated = (
