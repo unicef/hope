@@ -22,7 +22,6 @@ from hct_mis_api.apps.grievance.fixtures import (
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.registration_data.models import DeduplicationEngineSimilarityPair
 from hct_mis_api.apps.sanction_list.models import SanctionListIndividual
 
 

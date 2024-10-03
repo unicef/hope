@@ -22,10 +22,10 @@ from hct_mis_api.apps.registration_datahub.apis.deduplication_engine import (
     DeduplicationEngineAPI,
     DeduplicationImage,
     DeduplicationSet,
-    DeduplicationSetData,
-    SimilarityPair,
     DeduplicationSetConfig,
+    DeduplicationSetData,
     IgnoredFilenamesPair,
+    SimilarityPair,
 )
 from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import (
     BiometricDeduplicationService,

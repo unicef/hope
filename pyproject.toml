@@ -16,6 +16,7 @@ exclude = '''
   | migrations
   | snapshots
   | __pypackages__
+  | frontend
 )/
 '''
 # TODO: remove migrations exclude rule once it won't create much conflicts between feature branches and develop

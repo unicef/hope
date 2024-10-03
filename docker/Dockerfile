@@ -47,7 +47,7 @@ ENV PYTHONPYCACHEPREFIX=/tmp/pycache \
     PYTHONPATH=$PYPACKAGES/lib:$PYTHONPATH \
     PATH=$PYPACKAGES/bin:$PATH \
     XDG_RUNTIME_DIR=/run/user/"${UID}"
-
+ENV DJANGO_SETTINGS_MODULE=hct_mis_api.config.settings
 WORKDIR $CODE
 
 COPY --from=waitforit /data/waitforit /usr/local/bin/waitforit
