@@ -7,9 +7,6 @@ from django.core.management import call_command
 
 import pytest
 from dateutil.relativedelta import relativedelta
-from tests.selenium.page_object.targeting.targeting import Targeting
-from tests.selenium.page_object.targeting.targeting_create import TargetingCreate
-from tests.selenium.page_object.targeting.targeting_details import TargetingDetails
 from selenium.common import NoSuchElementException
 from selenium.webdriver import ActionChains, Keys
 from selenium.webdriver.common.by import By
@@ -44,6 +41,9 @@ from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFa
 from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory
 from hct_mis_api.apps.targeting.models import TargetPopulation
 from tests.selenium.page_object.filters import Filters
+from tests.selenium.page_object.targeting.targeting import Targeting
+from tests.selenium.page_object.targeting.targeting_create import TargetingCreate
+from tests.selenium.page_object.targeting.targeting_details import TargetingDetails
 
 pytestmark = pytest.mark.django_db(transaction=True)
 

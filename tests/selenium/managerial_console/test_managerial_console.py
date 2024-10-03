@@ -4,7 +4,6 @@ from django.utils import timezone
 
 import pytest
 from dateutil.relativedelta import relativedelta
-from tests.selenium.page_object.managerial_console.managerial_console import ManagerialConsole
 from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -20,6 +19,9 @@ from hct_mis_api.apps.targeting.fixtures import (
     TargetPopulationFactory,
 )
 from hct_mis_api.apps.targeting.models import TargetPopulation
+from tests.selenium.page_object.managerial_console.managerial_console import (
+    ManagerialConsole,
+)
 
 pytestmark = pytest.mark.django_db(transaction=True)
 

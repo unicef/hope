@@ -8,7 +8,6 @@ from django.urls import reverse
 from rest_framework import status
 
 from hct_mis_api.api.models import Grant
-from tests.unit.api.base import HOPEApiTestCase
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.models import (
     COLLECT_TYPE_FULL,
@@ -24,6 +23,7 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from tests.unit.api.base import HOPEApiTestCase
 
 
 class PushLaxToRDITests(HOPEApiTestCase):
