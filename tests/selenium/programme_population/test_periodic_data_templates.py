@@ -292,10 +292,9 @@ class TestPeriodicDataTemplates:
 
         pageIndividuals.getDownloadBtn(periodic_data_update_template.pk).click()
         periodic_data_update_template.refresh_from_db()
-        user_path = os.path.expanduser("~")
         assert (
             pageIndividuals.check_file_exists(
-                os.path.join(user_path, "Downloads", periodic_data_update_template.file.file.name)
+                os.path.join(settings.DOWNLOAD_DIRECTORY, periodic_data_update_template.file.file.name)
             )
             is True
         )
