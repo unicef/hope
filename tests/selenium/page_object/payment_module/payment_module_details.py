@@ -22,6 +22,8 @@ class PaymentModuleDetails(BaseComponents):
     labelRelatedFollowUpPaymentPlans = 'div[data-cy="label-Related Follow-Up Payment Plans"]'
     buttonSetUpFsp = 'a[data-cy="button-set-up-fsp"]'
     buttonCreateExclusions = 'button[data-cy="button-create-exclusions"]'
+    supportingDocumentsTitle = 'h6[data-cy="supporting-documents-title"]'
+    supportingDocumentsEmpty = 'div[data-cy="supporting-documents-empty"]'
     inputExclusionreason = 'textarea[data-cy="input-exclusionReason"]'
     buttonApplyExclusions = 'button[data-cy="button-apply-exclusions"]'
     labelFemaleChildren = 'div[data-cy="label-Female Children"]'
@@ -221,3 +223,9 @@ class PaymentModuleDetails(BaseComponents):
                 break
             sleep(1)
         assert status in self.getStatusContainer().text
+
+    def getSupportingDocumentsTitle(self) -> WebElement:
+        return self.wait_for(self.supportingDocumentsTitle)
+
+    def getSupportingDocumentsEmpty(self) -> WebElement:
+        return self.wait_for(self.supportingDocumentsEmpty)
