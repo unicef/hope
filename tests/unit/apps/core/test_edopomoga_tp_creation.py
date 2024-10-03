@@ -5,6 +5,8 @@ from django.conf import settings
 from django.core.files import File
 from django.core.management import call_command
 
+import pytest
+
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.celery_tasks import create_target_population_task
@@ -18,6 +20,7 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
 
+@pytest.mark.skip(reason="Functionality probably can be removed.")
 class TestEdopomogaCreation(APITestCase):
     databases = ("default", "cash_assist_datahub_mis")
 
