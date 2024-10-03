@@ -28,9 +28,6 @@ from hct_mis_api.apps.cash_assist_datahub.tasks.pull_from_datahub import (
 )
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
-from tests.unit.apps.core.test_exchange_rates import (
-    EXCHANGE_RATES_WITH_HISTORICAL_DATA,
-)
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.fixtures import generate_delivery_mechanisms
@@ -46,6 +43,7 @@ from hct_mis_api.apps.program.fixtures import (
 )
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.models import TargetPopulation
+from tests.unit.apps.core.test_exchange_rates import EXCHANGE_RATES_WITH_HISTORICAL_DATA
 
 
 class DummyExchangeRates:
