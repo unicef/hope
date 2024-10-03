@@ -135,6 +135,7 @@ def get_individual_snapshot(individual: Individual, is_hh_collector: bool = Fals
             "cleared": document.cleared,
             "cleared_by": handle_type_mapping(document.cleared_by),
             "cleared_date": handle_type_mapping(document.cleared_date),
+            "photo": document.photo.name if document.photo else None,
         }
         individual_data["documents"].append(document_data)
 
