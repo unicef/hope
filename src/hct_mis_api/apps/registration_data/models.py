@@ -119,6 +119,7 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
     DEDUP_ENGINE_PENDING = "PENDING"
     DEDUP_ENGINE_UPLOADED = "UPLOADED"
     DEDUP_ENGINE_IN_PROGRESS = "IN_PROGRESS"
+    DEDUP_ENGINE_PROCESSING = "PROCESSING"
     DEDUP_ENGINE_FINISHED = "FINISHED"
     DEDUP_ENGINE_UPLOAD_ERROR = "UPLOAD_ERROR"
     DEDUP_ENGINE_ERROR = "ERROR"
@@ -126,7 +127,8 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
     DEDUP_ENGINE_STATUS_CHOICE = (
         (DEDUP_ENGINE_PENDING, _("Pending")),
         (DEDUP_ENGINE_UPLOADED, _("Uploaded")),
-        (DEDUP_ENGINE_IN_PROGRESS, _("In Progress")),
+        (DEDUP_ENGINE_IN_PROGRESS, _("Started")),
+        (DEDUP_ENGINE_PROCESSING, _("Processing")),
         (DEDUP_ENGINE_FINISHED, _("Finished")),
         (DEDUP_ENGINE_ERROR, _("Error")),
         (DEDUP_ENGINE_UPLOAD_ERROR, _("Upload Error")),

@@ -13,7 +13,7 @@ from hct_mis_api.apps.registration_datahub.apis.deduplication_engine import (
     DeduplicationImage,
     DeduplicationSet,
     DeduplicationSetConfig,
-    IgnoredKeysPair,
+    IgnoredFilenamesPair,
 )
 
 
@@ -150,14 +150,14 @@ class DeduplicationEngineApiTest(TestCase):
         post_mock.return_value = {}, 200
 
         api.report_false_positive_duplicate(
-            IgnoredKeysPair(first_reference_pk="123", second_reference_pk="456"),
+            IgnoredFilenamesPair(first="123", second="456"),
             deduplication_set_id,
         )
 
         post_mock.assert_called_once_with(
-            f"deduplication_sets/{deduplication_set_id}/ignored_keys/",
+            f"deduplication_sets/{deduplication_set_id}/ignored/filenames/",
             {
-                "first_reference_pk": "123",
-                "second_reference_pk": "456",
+                "first": "123",
+                "second": "456",
             },
         )
