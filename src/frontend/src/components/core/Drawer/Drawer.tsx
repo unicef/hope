@@ -14,7 +14,8 @@ import { DrawerItems } from './DrawerItems';
 import { resourcesItems } from './menuItems';
 import styled from 'styled-components';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { ProgramStatus, useProgramLazyQuery } from '@generated/graphql';
+import { ProgramStatus } from '@generated/graphql';
+import { useProgramContext } from 'src/programContext';
 
 const matchColorToWindowOrigin = (): string => {
   const url = window.location.href;
@@ -134,21 +135,12 @@ export const Drawer = ({
 }: DrawerProps): React.ReactElement => {
   const { t } = useTranslation();
   const [showMismatchedDialog, setShowMismatchedDialog] = useState(false);
+  const { selectedProgram } = useProgramContext();
+  const { isAllPrograms } = useBaseUrl();
 
-  const { programId, isAllPrograms } = useBaseUrl();
-  const [getProgram, programResults] = useProgramLazyQuery({
-    variables: {
-      id: programId,
-    },
-  });
   const backendVersion = useBackendVersion();
   const frontendVersion = useFrontendVersion();
 
-  useEffect(() => {
-    if (!isAllPrograms) {
-      getProgram();
-    }
-  }, [programId, isAllPrograms, getProgram]);
   useEffect(() => {
     if (
       !showMismatchedDialog &&
@@ -161,7 +153,7 @@ export const Drawer = ({
   }, [backendVersion, frontendVersion, showMismatchedDialog]);
 
   let notActiveBar = null;
-  const programStatus = programResults?.data?.program?.status;
+  const programStatus = selectedProgram?.status;
   const isActive = programStatus === ProgramStatus.Active;
   const isDefined = programStatus !== undefined && programStatus !== null;
   if (!isAllPrograms && !isActive && isDefined) {

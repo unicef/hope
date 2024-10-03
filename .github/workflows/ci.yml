@@ -296,6 +296,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Run Trivy vulnerability scanner
+        continue-on-error: true # due to getting TOOMANYREQUESTS
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: '${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}'
