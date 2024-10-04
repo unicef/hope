@@ -1,9 +1,4 @@
 import pytest
-from tests.selenium.helpers.fixtures import get_program_with_dct_type_and_name
-from tests.selenium.page_object.accountability.communication import AccountabilityCommunication
-from tests.selenium.page_object.accountability.comunication_details import (
-    AccountabilityCommunicationDetails,
-)
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.accountability.fixtures import CommunicationMessageFactory
@@ -15,6 +10,13 @@ from hct_mis_api.apps.targeting.fixtures import (
     TargetPopulationFactory,
 )
 from hct_mis_api.apps.targeting.models import TargetPopulation
+from tests.selenium.helpers.fixtures import get_program_with_dct_type_and_name
+from tests.selenium.page_object.accountability.communication import (
+    AccountabilityCommunication,
+)
+from tests.selenium.page_object.accountability.comunication_details import (
+    AccountabilityCommunicationDetails,
+)
 
 pytestmark = pytest.mark.django_db(transaction=True)
 

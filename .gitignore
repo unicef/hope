@@ -131,3 +131,6 @@ venv.bak/
 cov.json
 
 .vscode/
+output_data/
+.coverage
+compose.dist.yml

@@ -8,9 +8,6 @@ from django.core.management import call_command
 
 import pytest
 from dateutil.relativedelta import relativedelta
-from tests.selenium.page_object.grievance.details_grievance_page import GrievanceDetailsPage
-from tests.selenium.page_object.grievance.grievance_tickets import GrievanceTickets
-from tests.selenium.page_object.grievance.new_ticket import NewTicket
 from pytest_django import DjangoDbBlocker
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
@@ -38,6 +35,11 @@ from hct_mis_api.apps.targeting.fixtures import (
 from tests.selenium.drawer.test_drawer import get_program_with_dct_type_and_name
 from tests.selenium.helpers.date_time_format import FormatTime
 from tests.selenium.page_object.admin_panel.admin_panel import AdminPanel
+from tests.selenium.page_object.grievance.details_grievance_page import (
+    GrievanceDetailsPage,
+)
+from tests.selenium.page_object.grievance.grievance_tickets import GrievanceTickets
+from tests.selenium.page_object.grievance.new_ticket import NewTicket
 from tests.selenium.page_object.programme_population.households import Households
 from tests.selenium.page_object.programme_population.households_details import (
     HouseholdsDetails,

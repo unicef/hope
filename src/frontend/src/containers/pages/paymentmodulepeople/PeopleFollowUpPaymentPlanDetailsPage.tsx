@@ -18,6 +18,7 @@ import { PaymentsTable } from '../../tables/paymentmodule/PaymentsTable';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { ExcludeSection } from '@components/paymentmodule/PaymentPlanDetails/ExcludeSection';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { SupportingDocumentsSection } from '@components/paymentmodule/PaymentPlanDetails/SupportingDocumentsSection/SupportingDocumentsSection';
 
 export const PeopleFollowUpPaymentPlanDetailsPage = (): React.ReactElement => {
   const { paymentPlanId } = useParams();
@@ -76,6 +77,7 @@ export const PeopleFollowUpPaymentPlanDetailsPage = (): React.ReactElement => {
         <FspSection baseUrl={baseUrl} paymentPlan={paymentPlan} />
       )}
       <ExcludeSection paymentPlan={paymentPlan} />
+      <SupportingDocumentsSection paymentPlan={paymentPlan} />
       <PaymentPlanDetailsResults paymentPlan={paymentPlan} />
       <PaymentsTable
         businessArea={businessArea}
