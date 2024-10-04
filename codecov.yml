@@ -11,3 +11,17 @@ coverage:
         target: 95%
   ignore:
     - "**/forms.py"
+    - "*/selenium_tests/**"
+    - "*/tests/**"
+    - "*/migrations/*"
+    - "*/apps.py"
+    - "*/admin/*.py"
+    - "*/admin.py"
+    - "**/fixtures.py"
+    - "hct_mis_api/one_time_scripts/*"
+    - "hct_mis_api/libs/*"
+    - "hct_mis_api/settings/*"
+    - "hct_mis_api/settings.py"
+    - "hct_mis_api/conftest.py"
+    - "hct_mis_api/config/settings.py"
+    - "hct_mis_api/apps/core/management/commands/*"
