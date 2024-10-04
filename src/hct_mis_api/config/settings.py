@@ -121,9 +121,6 @@ RO_CONN.update(
 DATABASES = {
     "default": env.db(),
     "read_only": RO_CONN,
-    "cash_assist_datahub_mis": env.db("DATABASE_URL_HUB_MIS"),
-    "cash_assist_datahub_ca": env.db("DATABASE_URL_HUB_CA"),
-    "cash_assist_datahub_erp": env.db("DATABASE_URL_HUB_ERP"),
     "registration_datahub": env.db("DATABASE_URL_HUB_REGISTRATION"),
 }
 DATABASES["default"].update({"CONN_MAX_AGE": 60})
@@ -133,21 +130,6 @@ if env("POSTGRES_SSL", default=False):
         "sslmode": "verify-full",
         "sslrootcert": "/certs/psql-cert.crt",
     }
-    DATABASES["cash_assist_datahub_mis"]["OPTIONS"] = {
-        "sslmode": "verify-full",
-        "sslrootcert": "/certs/psql-cert.crt",
-        "options": "-c search_path=mis",
-    }
-    DATABASES["cash_assist_datahub_ca"]["OPTIONS"] = {
-        "sslmode": "verify-full",
-        "sslrootcert": "/certs/psql-cert.crt",
-        "options": "-c search_path=ca",
-    }
-    DATABASES["cash_assist_datahub_erp"]["OPTIONS"] = {
-        "sslmode": "verify-full",
-        "sslrootcert": "/certs/psql-cert.crt",
-        "options": "-c search_path=erp",
-    }
     DATABASES["registration_datahub"]["OPTIONS"] = {
         "sslmode": "verify-full",
         "sslrootcert": "/certs/psql-cert.crt",
@@ -155,9 +137,6 @@ if env("POSTGRES_SSL", default=False):
 
 # If app is not specified here it will use default db
 DATABASE_APPS_MAPPING: Dict[str, str] = {
-    "cash_assist_datahub": "cash_assist_datahub_ca",
-    "mis_datahub": "cash_assist_datahub_mis",
-    "erp_datahub": "cash_assist_datahub_erp",
     "registration_datahub": "registration_datahub",
 }
 
@@ -221,14 +200,10 @@ PROJECT_APPS = [
     "hct_mis_api.apps.program.apps.ProgramConfig",
     "hct_mis_api.apps.changelog.apps.ChangelogConfig",
     "power_query.apps.Config",
-    # "hct_mis_api.apps.targeting",
     "hct_mis_api.apps.targeting.apps.TargetingConfig",
     "hct_mis_api.apps.utils.apps.UtilsConfig",
     "hct_mis_api.apps.registration_datahub.apps.Config",
     "hct_mis_api.apps.registration_data.apps.RegistrationDataConfig",
-    "hct_mis_api.apps.cash_assist_datahub.apps.Config",
-    "hct_mis_api.apps.mis_datahub.apps.Config",
-    "hct_mis_api.apps.erp_datahub.apps.Config",
     "hct_mis_api.apps.sanction_list.apps.SanctionListConfig",
     "hct_mis_api.apps.steficon.apps.SteficonConfig",
     "hct_mis_api.apps.reporting.apps.ReportingConfig",
@@ -449,9 +424,6 @@ SYSINFO = {
 
 EXPLORER_CONNECTIONS = {
     "default": "default",
-    "HUB MIS": "cash_assist_datahub_mis",
-    "HUB CA": "cash_assist_datahub_ca",
-    "HUB ERP": "cash_assist_datahub_erp",
 }
 EXPLORER_DEFAULT_CONNECTION = "default"
 EXPLORER_PERMISSION_VIEW = lambda r: r.user.has_perm("explorer.view_query")
@@ -502,11 +474,6 @@ MARKDOWNIFY = {
         "WHITELIST_TAGS": ["a", "abbr", "acronym", "b", "blockquote", "em", "i", "li", "ol", "p", "strong", "ul" "br"]
     }
 }
-
-SHELL_PLUS_DONT_LOAD = [
-    "mis_datahub.Individual",
-    "mis_datahub.Household",
-]
 
 CYPRESS_TESTING = env("CYPRESS_TESTING", default="no") == "yes"
 

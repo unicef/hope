@@ -9,8 +9,6 @@ class DbRouter:
     def select_db(model: Optional[Type[Model]]) -> Optional[str]:
         if model._meta.proxy:
             model = model._meta.proxy_for_model
-        # if f"{model._meta.app_label}." == "mis_datahub.AuroraRecord":
-        #     return settings.DATABASE_APPS_MAPPING.get(model._meta.app_label)
         return settings.DATABASE_APPS_MAPPING.get(model._meta.app_label)
 
     def db_for_read(self, model: Optional[Type[Model]], **hints: Any) -> Optional[str]:

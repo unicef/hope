@@ -37,17 +37,8 @@ SMART_ADMIN_SECTIONS = {
         "core.FlexibleAttribute",
         "core.FlexibleAttributeGroup",
     ],
-    "HUB (Hope->CA)": [
-        "mis_datahub",
-    ],
-    "HUB (CA->Hope)": [
-        "cash_assist_datahub",
-    ],
     "HUB (Kobo->Hope)": [
         "registration_datahub",
-    ],
-    "HUB (Vision->Hope)": [
-        "erp_datahub",
     ],
     "System": [
         "social_django",
