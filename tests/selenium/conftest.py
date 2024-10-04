@@ -235,7 +235,7 @@ def live_server() -> LiveServer:
     yield LiveServer("localhost")
 
 
-@pytest.fixture(autouse=True,scope="session")
+@pytest.fixture(autouse=True, scope="session")
 def browser(driver: Chrome, live_server: LiveServer) -> Chrome:
     try:
         driver.live_server = live_server
