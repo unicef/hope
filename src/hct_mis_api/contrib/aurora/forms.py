@@ -3,7 +3,7 @@ from typing import Any, Dict, Optional
 from django import forms
 from django.core.exceptions import ValidationError
 
-from hct_mis_api.aurora.models import Registration
+from hct_mis_api.contrib.aurora.models import Registration
 
 
 class ProjectForm(forms.ModelForm):
