@@ -66,6 +66,7 @@ class TargetPopulationHouseholdsQueryTestCase(APITestCase):
         cls.partner = PartnerFactory(name="TestPartner")
         cls.user = UserFactory(partner=cls.partner)
         cls.program = get_program_with_dct_type_and_name()
+        cls.program_cycle = cls.program.cycles.first()
         targeting_criteria = cls.get_targeting_criteria_for_rule(
             {"field_name": "size", "arguments": [2], "comparison_method": "EQUALS"}
         )
@@ -75,6 +76,7 @@ class TargetPopulationHouseholdsQueryTestCase(APITestCase):
             targeting_criteria=targeting_criteria,
             business_area=cls.business_area,
             program=cls.program,
+            program_cycle=cls.program_cycle,
         )
         cls.target_population_size_2.save()
         targeting_criteria = cls.get_targeting_criteria_for_rule(
@@ -86,6 +88,7 @@ class TargetPopulationHouseholdsQueryTestCase(APITestCase):
             targeting_criteria=targeting_criteria,
             business_area=cls.business_area,
             program=cls.program,
+            program_cycle=cls.program_cycle,
         )
         cls.target_population_residence_status.save()
 
@@ -99,6 +102,7 @@ class TargetPopulationHouseholdsQueryTestCase(APITestCase):
             status="LOCKED",
             business_area=cls.business_area,
             program=cls.program,
+            program_cycle=cls.program_cycle,
         )
         cls.target_population_size_1_approved.save()
         HouseholdSelection.objects.create(

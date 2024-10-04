@@ -3,17 +3,21 @@ from django.core.management import call_command
 
 import pytest
 from elasticsearch_dsl import connections
-from tests.selenium.page_object.programme_population.households_details import HouseholdsDetails
-from tests.selenium.page_object.registration_data_import.rdi_details_page import RDIDetailsPage
-from tests.selenium.page_object.registration_data_import.registration_data_import import (
-    RegistrationDataImport,
-)
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area, AreaType, Country
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
+from tests.selenium.page_object.programme_population.households_details import (
+    HouseholdsDetails,
+)
+from tests.selenium.page_object.registration_data_import.rdi_details_page import (
+    RDIDetailsPage,
+)
+from tests.selenium.page_object.registration_data_import.registration_data_import import (
+    RegistrationDataImport,
+)
 
 pytestmark = pytest.mark.django_db(transaction=True)
 

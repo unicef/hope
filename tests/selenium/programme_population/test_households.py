@@ -2,8 +2,11 @@ from django.conf import settings
 from django.core.management import call_command
 
 import pytest
+
 from tests.selenium.page_object.programme_population.households import Households
-from tests.selenium.page_object.programme_population.households_details import HouseholdsDetails
+from tests.selenium.page_object.programme_population.households_details import (
+    HouseholdsDetails,
+)
 
 pytestmark = pytest.mark.django_db(transaction=True)
 

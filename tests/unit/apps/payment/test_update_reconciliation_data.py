@@ -22,9 +22,7 @@ from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service impo
 
 
 def file_without_delivery_dates() -> BytesIO:
-    content = Path(
-        f"{settings.TESTS_ROOT}/apps/payment/test_file/import_file_no_delivery_date.xlsx"
-    ).read_bytes()
+    content = Path(f"{settings.TESTS_ROOT}/apps/payment/test_file/import_file_no_delivery_date.xlsx").read_bytes()
     file = BytesIO(content)
     return file
 
