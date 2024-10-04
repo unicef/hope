@@ -2,9 +2,10 @@ import os
 from datetime import datetime
 from time import sleep
 
+from django.conf import settings
+
 import pytest
 from dateutil.relativedelta import relativedelta
-from django.conf import settings
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan

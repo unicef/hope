@@ -2,7 +2,6 @@ from datetime import datetime
 
 import pytest
 from dateutil.relativedelta import relativedelta
-from tests.selenium.page_object.payment_module.program_cycle import ProgramCyclePage
 from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
@@ -10,6 +9,7 @@ from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program, ProgramCycle
+from tests.selenium.page_object.payment_module.program_cycle import ProgramCyclePage
 
 pytestmark = pytest.mark.django_db(transaction=True)
 
