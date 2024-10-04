@@ -10,7 +10,7 @@ from phonenumber_field.phonenumber import PhoneNumber
 
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.grievance.models import TicketNeedsAdjudicationDetails
-from hct_mis_api.apps.household.models import Individual, BankAccountInfo
+from hct_mis_api.apps.household.models import BankAccountInfo, Individual
 from hct_mis_api.apps.payment.models import (
     Payment,
     PaymentHouseholdSnapshot,

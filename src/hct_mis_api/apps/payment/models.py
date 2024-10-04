@@ -66,11 +66,7 @@ from hct_mis_api.apps.core.field_attributes.fields_types import (
 )
 from hct_mis_api.apps.core.mixins import LimitBusinessAreaModelMixin
 from hct_mis_api.apps.core.models import BusinessArea, FileTemp, FlexibleAttribute
-from hct_mis_api.apps.household.models import (
-    FEMALE,
-    MALE,
-    Individual,
-)
+from hct_mis_api.apps.household.models import FEMALE, MALE, Individual
 from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.fields import DynamicChoiceArrayField
 from hct_mis_api.apps.payment.managers import PaymentManager
