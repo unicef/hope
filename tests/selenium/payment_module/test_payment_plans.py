@@ -14,6 +14,7 @@ from tests.selenium.page_object.payment_module.payment_module_details import Pay
 from tests.selenium.page_object.payment_module.program_cycle import ProgramCyclePage
 from tests.selenium.page_object.payment_module.program_cycle_details import ProgramCycleDetailsPage
 from selenium.webdriver.common.by import By
+from sorl.thumbnail.conf import settings
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
@@ -40,6 +41,15 @@ from hct_mis_api.apps.targeting.fixtures import (
 )
 from hct_mis_api.apps.targeting.models import TargetPopulation
 from tests.selenium.helpers.date_time_format import FormatTime
+from tests.selenium.page_object.payment_module.new_payment_plan import NewPaymentPlan
+from tests.selenium.page_object.payment_module.payment_module import PaymentModule
+from tests.selenium.page_object.payment_module.payment_module_details import (
+    PaymentModuleDetails,
+)
+from tests.selenium.page_object.payment_module.program_cycle import (
+    ProgramCycleDetailsPage,
+    ProgramCyclePage,
+)
 
 pytestmark = pytest.mark.django_db(transaction=True)
 
@@ -233,6 +243,8 @@ class TestSmokePaymentModule:
         assert "-" in pagePaymentModuleDetails.getLabelRelatedFollowUpPaymentPlans().text
         assert "SET UP FSP" in pagePaymentModuleDetails.getButtonSetUpFsp().text
         assert "CREATE" in pagePaymentModuleDetails.getButtonCreateExclusions().text
+        assert "Supporting Documents" in pagePaymentModuleDetails.getSupportingDocumentsTitle().text
+        assert "No documents uploaded" in pagePaymentModuleDetails.getSupportingDocumentsEmpty().text
         assert "0" in pagePaymentModuleDetails.getLabelFemaleChildren().text
         assert "0" in pagePaymentModuleDetails.getLabelFemaleAdults().text
         assert "0" in pagePaymentModuleDetails.getLabelMaleChildren().text

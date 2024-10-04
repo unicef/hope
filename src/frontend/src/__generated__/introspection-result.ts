@@ -39,6 +39,7 @@
       "PaymentHouseholdSnapshotNode",
       "PaymentNode",
       "PaymentPlanNode",
+      "PaymentPlanSupportingDocumentNode",
       "PaymentRecordNode",
       "PaymentVerificationLogEntryNode",
       "PaymentVerificationNode",

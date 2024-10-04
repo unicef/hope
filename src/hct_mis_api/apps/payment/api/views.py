@@ -18,13 +18,20 @@ from rest_framework_extensions.cache.decorators import cache_response
 
 from hct_mis_api.api.caches import etag_decorator
 from hct_mis_api.apps.account.api.permissions import (
+    PaymentPlanSupportingDocumentDeletePermission,
+    PaymentPlanSupportingDocumentDownloadPermission,
+    PaymentPlanSupportingDocumentUploadPermission,
     PaymentViewListManagerialPermission,
     PMViewListPermission,
 )
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
-from hct_mis_api.apps.core.api.mixins import BusinessAreaMixin, BusinessAreaProgramMixin
+from hct_mis_api.apps.core.api.mixins import (
+    ActionMixin,
+    BusinessAreaMixin,
+    BusinessAreaProgramMixin,
+)
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.payment.api.caches import PaymentPlanKeyConstructor
@@ -32,8 +39,9 @@ from hct_mis_api.apps.payment.api.filters import PaymentPlanFilter
 from hct_mis_api.apps.payment.api.serializers import (
     PaymentPlanBulkActionSerializer,
     PaymentPlanSerializer,
+    PaymentPlanSupportingDocumentSerializer,
 )
-from hct_mis_api.apps.payment.models import PaymentPlan
+from hct_mis_api.apps.payment.models import PaymentPlan, PaymentPlanSupportingDocument
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 
 logger = logging.getLogger(__name__)
@@ -163,3 +171,49 @@ class PaymentPlanManagerialViewSet(BusinessAreaMixin, PaymentPlanMixin, mixins.L
             PaymentPlan.Action.REVIEW.name: Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW.name,
         }
         return action_to_permissions_map.get(action_name)
+
+
+class PaymentPlanSupportingDocumentViewSet(
+    ActionMixin, mixins.CreateModelMixin, mixins.DestroyModelMixin, GenericViewSet
+):
+    serializer_class = PaymentPlanSupportingDocumentSerializer
+    lookup_field = "file_id"
+
+    serializer_classes_by_action = {
+        "create": PaymentPlanSupportingDocumentSerializer,
+        "delete": PaymentPlanSupportingDocumentSerializer,
+    }
+    permission_classes_by_action = {
+        "create": [PaymentPlanSupportingDocumentUploadPermission],
+        "delete": [PaymentPlanSupportingDocumentDeletePermission],
+        "download": [PaymentPlanSupportingDocumentDownloadPermission],
+    }
+
+    def get_queryset(self) -> QuerySet:
+        payment_plan_id = decode_id_string(self.kwargs.get("payment_plan_id"))
+        return PaymentPlanSupportingDocument.objects.filter(payment_plan_id=payment_plan_id)
+
+    def get_object(self) -> PaymentPlanSupportingDocument:
+        payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(self.kwargs.get("payment_plan_id")))
+        return get_object_or_404(
+            PaymentPlanSupportingDocument, id=decode_id_string(self.kwargs.get("file_id")), payment_plan=payment_plan
+        )
+
+    def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(kwargs.get("payment_plan_id")))
+        serializer = self.get_serializer(data=request.data, context={"payment_plan": payment_plan})
+        if serializer.is_valid():
+            serializer.save(payment_plan=payment_plan)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        self.permission_classes = [PaymentPlanSupportingDocumentDeletePermission]
+        document = self.get_object()
+        document.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=["get"])
+    def download(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        document = self.get_object()
+        return Response({"url": document.file.url}, status=status.HTTP_200_OK)
