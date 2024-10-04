@@ -11,7 +11,6 @@ omit =
         */admin/*.py
         */admin.py
         **/fixtures.py
-        src/hct_mis_api/**/forms.py
         hct_mis_api/one_time_scripts/*
         hct_mis_api/libs/*
         hct_mis_api/settings/*
@@ -19,6 +18,7 @@ omit =
         hct_mis_api/conftest.py
         hct_mis_api/config/settings.py
         hct_mis_api/apps/core/management/commands/*
+        hct_mis_api/apps/household/forms.py
 
 [report]
 # Regexes for lines to exclude from consideration
