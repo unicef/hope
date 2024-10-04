@@ -1,9 +1,6 @@
 from django.db import transaction
 
 import pytest
-from tests.selenium.helpers.fixtures import get_program_with_dct_type_and_name
-from tests.selenium.page_object.accountability.surveys import AccountabilitySurveys
-from tests.selenium.page_object.accountability.surveys_details import AccountabilitySurveysDetails
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.accountability.fixtures import SurveyFactory
@@ -15,6 +12,11 @@ from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
     TargetPopulationFactory,
+)
+from tests.selenium.helpers.fixtures import get_program_with_dct_type_and_name
+from tests.selenium.page_object.accountability.surveys import AccountabilitySurveys
+from tests.selenium.page_object.accountability.surveys_details import (
+    AccountabilitySurveysDetails,
 )
 
 pytestmark = pytest.mark.django_db(transaction=True)

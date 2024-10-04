@@ -1,4 +1,3 @@
-from .fixtures import *  # noqa: ABS101, F403, F401
 import logging
 import os
 import re
@@ -13,6 +12,8 @@ from _pytest.config.argparsing import Parser
 from django_elasticsearch_dsl.registries import registry
 from django_elasticsearch_dsl.test import is_es_online
 from elasticsearch_dsl import connections
+
+from .fixtures import *  # noqa: ABS101, F403, F401
 
 
 def pytest_addoption(parser: Parser) -> None:
@@ -52,7 +53,7 @@ def pytest_configure(config: Config) -> None:
     settings.SECURE_REFERRER_POLICY = "same-origin"
 
     settings.CACHE_ENABLED = False
-    settings.TESTS_ROOT = os.path.join(settings.PROJECT_ROOT, "../../tests/unit")
+    settings.TESTS_ROOT = "/code/tests/unit"
     settings.CACHES = {
         "default": {
             "BACKEND": "hct_mis_api.apps.core.memcache.LocMemCache",

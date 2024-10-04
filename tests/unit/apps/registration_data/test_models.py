@@ -20,10 +20,7 @@ from hct_mis_api.apps.registration_data.fixtures import (
     RegistrationDataImportDatahubFactory,
     RegistrationDataImportFactory,
 )
-from hct_mis_api.apps.registration_data.models import (
-    DeduplicationEngineSimilarityPair,
-    RegistrationDataImport,
-)
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 
 class TestRegistrationDataModels(TestCase):
@@ -144,4 +141,3 @@ class TestRegistrationDataImportDatahub(TestCase):
             self.rdi_datahub.linked_rdi,
             self.rdi,
         )
-

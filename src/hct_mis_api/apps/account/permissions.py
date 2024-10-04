@@ -110,6 +110,11 @@ class Permissions(Enum):
     PM_SEND_TO_PAYMENT_GATEWAY = auto()
     PM_VIEW_FSP_AUTH_CODE = auto()
 
+    # PaymentPlanSupportingDocument
+    PM_DOWNLOAD_SUPPORTING_DOCUMENT = auto()
+    PM_UPLOAD_SUPPORTING_DOCUMENT = auto()
+    PM_DELETE_SUPPORTING_DOCUMENT = auto()
+
     # Payment Module Admin
     PM_ADMIN_FINANCIAL_SERVICE_PROVIDER_UPDATE = auto()
 

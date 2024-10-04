@@ -11,7 +11,6 @@ from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.test import APIClient, APIRequestFactory
 
-from tests.unit.api.base import HOPEApiTestCase
 from hct_mis_api.apps.account.fixtures import (
     BusinessAreaFactory,
     PartnerFactory,
@@ -30,6 +29,7 @@ from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactor
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 from hct_mis_api.apps.targeting.models import TargetPopulation
+from tests.unit.api.base import HOPEApiTestCase
 
 
 class ProgramCycleAPITestCase(HOPEApiTestCase):

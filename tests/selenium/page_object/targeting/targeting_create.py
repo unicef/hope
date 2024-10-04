@@ -1,7 +1,8 @@
 from time import sleep
 
-from tests.selenium.page_object.base_components import BaseComponents
 from selenium.webdriver.remote.webelement import WebElement
+
+from tests.selenium.page_object.base_components import BaseComponents
 
 
 class TargetingCreate(BaseComponents):
@@ -82,7 +83,7 @@ class TargetingCreate(BaseComponents):
         'div[data-cy="select-individualsFiltersBlocks[{}].individualBlockFilters[{}].value"]'
     )
     totalNumberOfHouseholdsCount = 'div[data-cy="total-number-of-households-count"]'
-    totalNumberOfPeopleCount = 'div[data-cy="label-Total Number of Registered People"]'
+    totalNumberOfPeopleCount = 'div[data-cy="label-Total Number of People"]'
     selectProgramCycleAutocomplete = 'div[data-cy="filters-program-cycle-autocomplete"]'
     programmeCycleInput = 'div[data-cy="Programme Cycle-input"]'
 
