@@ -30,7 +30,8 @@
       "@shared/*": ["src/shared/*"],
       "@utils/*": ["src/utils/*"],
       "@hooks/*": ["src/hooks/*"],
-      "@generated/*": ["src/__generated__/*"]
+      "@generated/*": ["src/__generated__/*"],
+      "@restgenerated/*": ["../frontend/restgenerated/*"]
     }
   },
   "include": [
