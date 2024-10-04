@@ -1,9 +1,10 @@
 import { api } from './api';
+import { PaymentPlan } from '@restgenerated/models/PaymentPlan';
 
 export const fetchPaymentPlansManagerial = async (
   businessAreaSlug,
   params = {},
-) => {
+): Promise<PaymentPlan[]> => {
   const paramsWithNoLimit = {
     ...params,
     limit: 10000,
