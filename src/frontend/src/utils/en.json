@@ -901,6 +901,11 @@
   "Algorithm similarity score:": "Algorithm similarity score:",
   "Face images matching suggests:": "Face images matching suggests:",
   "Programme Partners updated.": "Programme Partners updated.",
+  "Select File to Upload": "Select File to Upload",
+  "The system accepts the following file extensions: XLSX, PDF, images (jpg, jpeg, png). File size must be ≤ 10MB.": "The system accepts the following file extensions: XLSX, PDF, images (jpg, jpeg, png). File size must be ≤ 10MB.",
+  "Deleting Supporting Document": "Deleting Supporting Document",
+  "You cannot upload more than 10 files.": "You cannot upload more than 10 files.",
+  "File deleted successfully.": "File deleted successfully.",
   "FX Rate Applied": "FX Rate Applied",
   "If displayed exchange rate differs from Vision, please contact your designated focal point for resolutionIf displayed exchange rate differs from Vision, please contact your designated focal point for resolution": "If displayed exchange rate differs from Vision, please contact your designated focal point for resolution"
 }

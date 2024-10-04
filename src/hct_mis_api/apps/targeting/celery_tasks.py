@@ -139,6 +139,7 @@ def create_tp_from_list(form_data: Dict[str, str], user_id: str, program_pk: str
                     name=form.cleaned_data["name"],
                     business_area=program.business_area,
                     program=program,
+                    program_cycle=form.cleaned_data["program_cycle"],
                 )
                 tp.households.set(population)
                 refresh_stats(tp)
