@@ -1,4 +1,5 @@
 from datetime import datetime
+from time import sleep
 
 import pytest
 from dateutil.relativedelta import relativedelta
@@ -88,7 +89,6 @@ class TestSmokeProgramCycle:
         assert "CLEAR" in pageProgramCycle.getButtonFiltersClear().text
         assert "APPLY" in pageProgramCycle.getButtonFiltersApply().text
         assert "Programme Cycles" in pageProgramCycle.getTableTitle().text
-        # assert "Programme Cycle ID" in pageProgramCycle.getHeadCellId().text
         assert "Programme Cycle Title" in pageProgramCycle.getHeadCellProgrammeCyclesTitle().text
         assert "Status" in pageProgramCycle.getHeadCellStatus().text
         assert "Total Entitled Quantity" in pageProgramCycle.getHeadCellTotalEntitledQuantity().text
@@ -158,15 +158,28 @@ class TestProgramCycle:
         assert "Test Programme Cycle 001" in pageProgramCycleDetails.getPageHeaderTitle().text
         assert "Active" in pageProgramCycleDetails.getStatusContainer().text
         pageProgramCycleDetails.getButtonFinishProgrammeCycle().click()
-        pageProgramCycleDetails.driver.execute_script(
-            """
-            container = document.querySelector("div[data-cy='main-content']")
-            container.scrollBy(0,600)
-            """
-        )
-        from time import sleep
-        sleep(2)
-        pageProgramCycle.screenshot("1", file_path="./")
         assert "Finished" in pageProgramCycleDetails.getStatusContainer().text
         pageProgramCycleDetails.getButtonReactivateProgrammeCycle().click()
+        for _ in range(100):
+            if "Active" in pageProgramCycleDetails.getStatusContainer().text:
+                break
+            sleep(0.1)
+        else:
+            assert "Active" in pageProgramCycleDetails.getStatusContainer().text
+
+    def test_program_cycles_finish_with_error(self,
+                                              create_program_cycle: ProgramCycle,
+                                              pageProgramCycle: ProgramCyclePage,
+                                              pageProgramCycleDetails: ProgramCycleDetailsPage
+                                              ) -> None:
+        pageProgramCycle.selectGlobalProgramFilter("Test Program")
+        pageProgramCycle.getNavPaymentModule().click()
+        pageProgramCycle.getNavProgrammeCycles().click()
+        pageProgramCycle.getProgramCycleRow()[1].find_element("tag name", "a").click()
+        assert "Test Programme Cycle 001" in pageProgramCycleDetails.getPageHeaderTitle().text
         assert "Active" in pageProgramCycleDetails.getStatusContainer().text
+        pageProgramCycleDetails.getButtonFinishProgrammeCycle().click()
+        assert "Finished" in pageProgramCycleDetails.getStatusContainer().text
+        pageProgramCycleDetails.getButtonReactivateProgrammeCycle().click()
+        pageProgramCycleDetails.checkAlert("All Payment Plans and Follow-Up Payment Plans have to be Reconciled.")
+        assert "Finished" in pageProgramCycleDetails.getStatusContainer().text

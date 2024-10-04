@@ -206,7 +206,7 @@ class BaseComponents(Common):
 
     def checkAlert(self, text: str) -> None:
         self.getAlert()
-        for _ in range(200):
+        for _ in range(300):
             if text in self.getAlert().text:
                 break
             sleep(0.1)

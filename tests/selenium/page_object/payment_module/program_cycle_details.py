@@ -33,6 +33,14 @@ class ProgramCycleDetailsPage(BaseComponents):
         return self.wait_for(self.buttonFinishProgrammeCycle)
 
     def getButtonReactivateProgrammeCycle(self) -> WebElement:
+        self.driver.execute_script(
+            """
+            container = document.querySelector("div[data-cy='main-content']")
+            container.scrollBy(0,-600)
+            """
+        )
+        from time import sleep
+        sleep(2)
         return self.wait_for(self.buttonReactivateProgrammeCycle)
 
     def getStatusContainer(self) -> WebElement:
