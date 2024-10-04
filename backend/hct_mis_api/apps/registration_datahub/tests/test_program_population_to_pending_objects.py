@@ -371,6 +371,10 @@ class TestProgramPopulationToPendingObjects(APITestCase):
             pending_document.individual,
             head_of_household_pending_individual,
         )
+        self.assertEqual(
+            pending_document.status,
+            Document.STATUS_PENDING,
+        )
 
         pending_identity = IndividualIdentity.pending_objects.first()
         self.assertEqual(

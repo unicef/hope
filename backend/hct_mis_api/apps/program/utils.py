@@ -264,6 +264,7 @@ class CopyProgramPopulation:
             document.individual = individual_representation
             document.program_id = individual_representation.program_id
             document.rdi_merge_status = rdi_merge_status
+            document.status = Document.STATUS_PENDING
             documents_list.append(document)
         return documents_list
 
