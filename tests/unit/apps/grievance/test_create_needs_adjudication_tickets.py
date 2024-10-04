@@ -110,9 +110,7 @@ class TestCreateNeedsAdjudicationTickets(APITestCase):
             "duplicates": [{"hit_id": str(ind_2.pk)}],
             "possible_duplicates": [{"hit_id": str(ind_2.pk)}],
         }
-        ind.deduplication_golden_record_results = (
-            deduplication_golden_record_results_data
-        )
+        ind.deduplication_golden_record_results = deduplication_golden_record_results_data
         ind_2.deduplication_golden_record_results = {
             "duplicates": [],
             "possible_duplicates": [],
@@ -216,22 +214,18 @@ class TestCreateNeedsAdjudicationTicketsBiometrics(APITestCase):
         cls.ind1, cls.ind2 = sorted(individuals, key=lambda x: x.id)
         cls.ind3, cls.ind4 = sorted([cls.ind1, other_individual], key=lambda x: x.id)
 
-        cls.dedup_engine_similarity_pair = (
-            DeduplicationEngineSimilarityPair.objects.create(
-                program=program,
-                individual1=cls.ind1,
-                individual2=cls.ind2,
-                similarity_score=55.55,
-            )
+        cls.dedup_engine_similarity_pair = DeduplicationEngineSimilarityPair.objects.create(
+            program=program,
+            individual1=cls.ind1,
+            individual2=cls.ind2,
+            similarity_score=55.55,
         )
 
-        cls.dedup_engine_similarity_pair_2 = (
-            DeduplicationEngineSimilarityPair.objects.create(
-                program=program,
-                individual1=cls.ind3,
-                individual2=cls.ind4,
-                similarity_score=75.25,
-            )
+        cls.dedup_engine_similarity_pair_2 = DeduplicationEngineSimilarityPair.objects.create(
+            program=program,
+            individual1=cls.ind3,
+            individual2=cls.ind4,
+            similarity_score=75.25,
         )
 
     def test_create_na_tickets_biometrics(self) -> None:
@@ -239,17 +233,13 @@ class TestCreateNeedsAdjudicationTicketsBiometrics(APITestCase):
         self.assertEqual(TicketNeedsAdjudicationDetails.objects.all().count(), 0)
         self.assertIsNone(self.rdi.deduplication_engine_status)
 
-        create_needs_adjudication_tickets_for_biometrics(
-            DeduplicationEngineSimilarityPair.objects.none(), self.rdi
-        )
+        create_needs_adjudication_tickets_for_biometrics(DeduplicationEngineSimilarityPair.objects.none(), self.rdi)
         self.assertEqual(GrievanceTicket.objects.all().count(), 0)
         self.assertEqual(TicketNeedsAdjudicationDetails.objects.all().count(), 0)
 
         self.assertEqual(DeduplicationEngineSimilarityPair.objects.all().count(), 2)
         create_needs_adjudication_tickets_for_biometrics(
-            DeduplicationEngineSimilarityPair.objects.filter(
-                pk=self.dedup_engine_similarity_pair.pk
-            ),
+            DeduplicationEngineSimilarityPair.objects.filter(pk=self.dedup_engine_similarity_pair.pk),
             self.rdi,
         )
 
@@ -258,9 +248,7 @@ class TestCreateNeedsAdjudicationTicketsBiometrics(APITestCase):
         grievance_ticket = GrievanceTicket.objects.first()
         na_ticket = TicketNeedsAdjudicationDetails.objects.first()
 
-        self.assertEqual(
-            grievance_ticket.category, GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION
-        )
+        self.assertEqual(grievance_ticket.category, GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION)
         self.assertEqual(
             grievance_ticket.issue_type,
             GrievanceTicket.ISSUE_TYPE_BIOMETRICS_SIMILARITY,
@@ -274,18 +262,14 @@ class TestCreateNeedsAdjudicationTicketsBiometrics(APITestCase):
 
         # different RDI
         create_needs_adjudication_tickets_for_biometrics(
-            DeduplicationEngineSimilarityPair.objects.filter(
-                pk=self.dedup_engine_similarity_pair_2.pk
-            ),
+            DeduplicationEngineSimilarityPair.objects.filter(pk=self.dedup_engine_similarity_pair_2.pk),
             self.rdi,
         )
         self.assertEqual(GrievanceTicket.objects.all().count(), 2)
         self.assertEqual(TicketNeedsAdjudicationDetails.objects.all().count(), 2)
         # run one time
         create_needs_adjudication_tickets_for_biometrics(
-            DeduplicationEngineSimilarityPair.objects.filter(
-                pk=self.dedup_engine_similarity_pair_2.pk
-            ),
+            DeduplicationEngineSimilarityPair.objects.filter(pk=self.dedup_engine_similarity_pair_2.pk),
             self.rdi,
         )
         self.assertEqual(GrievanceTicket.objects.all().count(), 2)

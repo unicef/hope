@@ -8,8 +8,6 @@ from django.test import TestCase
 
 import pytest
 
-from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.registration_data.models import DeduplicationEngineSimilarityPair
 from hct_mis_api.apps.account.fixtures import (
     BusinessAreaFactory,
     PartnerFactory,
@@ -58,6 +56,8 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.registration_data.models import DeduplicationEngineSimilarityPair
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
 
@@ -487,7 +487,9 @@ class TestGrievanceUtils(TestCase):
     @patch(
         "hct_mis_api.apps.registration_datahub.services.biometric_deduplication.BiometricDeduplicationService.report_false_positive_duplicate"
     )
-    def test_close_needs_adjudication_ticket_service_for_biometrics(self, report_false_positive_duplicate_mock) -> None:
+    def test_close_needs_adjudication_ticket_service_for_biometrics(
+        self, report_false_positive_duplicate_mock: MagicMock
+    ) -> None:
         user = UserFactory()
         ba = BusinessAreaFactory(slug="afghanistan")
         deduplication_set_id = uuid.uuid4()
@@ -535,6 +537,8 @@ class TestGrievanceUtils(TestCase):
                 similarity_score=90.55,
             ),
         )
+        if not ticket:
+            raise ValueError("Ticket not created")
         ticket.registration_data_import = rdi
         ticket.save()
 

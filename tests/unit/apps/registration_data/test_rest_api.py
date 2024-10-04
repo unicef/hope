@@ -6,13 +6,13 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient, APIRequestFactory
 
-from tests.unit.api.base import HOPEApiTestCase
 from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.models import Role, UserRole
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.api.views import WebhookDeduplicationView
+from tests.unit.api.base import HOPEApiTestCase
 
 
 class RegistrationDataImportViewSetTest(HOPEApiTestCase):
