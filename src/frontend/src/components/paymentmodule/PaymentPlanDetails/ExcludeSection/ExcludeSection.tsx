@@ -44,7 +44,7 @@ export function ExcludeSection({
     excludeHouseholdError,
   } = paymentPlan;
 
-  const initialExcludedIds = paymentPlan?.excludedIndividuals?.map(
+  const initialExcludedIds = paymentPlan?.excludedHouseholds?.map(
     (el) => el.unicefId,
   );
   const [isExclusionsOpen, setExclusionsOpen] = useState(initialOpen);
@@ -67,7 +67,7 @@ export function ExcludeSection({
   const getTooltipText = (): string => {
     if (!hasOpenOrLockedStatus) {
       return t(
-        'Beneficiaries can only be excluded from a Payment Plan in status open or locked',
+        'Households can only be excluded from a Payment Plan in status open or locked',
       );
     }
     if (!hasExcludePermission) {
@@ -115,7 +115,7 @@ export function ExcludeSection({
         awaitRefetchQueries: true,
       });
       if (!error) {
-        showMessage(t('Beneficiaries exclusion started'));
+        showMessage(t('Households exclusion started'));
         setExclusionsOpen(false);
       }
     } catch (e) {
@@ -125,7 +125,7 @@ export function ExcludeSection({
 
   const handleApply = (): void => {
     const idRegex =
-      /^(\s*IND-\d{2}-\d{4}\.\d{4}\s*)(,\s*IND-\d{2}-\d{4}\.\d{4}\s*)*$/;
+      /^(\s*HH-\d{2}-\d{4}\.\d{4}\s*)(,\s*HH-\d{2}-\d{4}\.\d{4}\s*)*$/;
     const ids = idsValue.trim().split(/,\s*|\s+/);
     const invalidIds: string[] = [];
     const alreadyExcludedIds: string[] = [];
@@ -311,7 +311,7 @@ export function ExcludeSection({
             <Grid item xs={6}>
               <Box mr={2}>
                 <StyledTextField
-                  label={t('Beneficiaries Ids')}
+                  label={t('Households Ids')}
                   value={idsValue}
                   onChange={handleIdsChange}
                   fullWidth
@@ -368,7 +368,7 @@ export function ExcludeSection({
               <Box mt={2} mb={2}>
                 <GreyText>
                   {`${numberOfExcluded} ${
-                    numberOfExcluded === 1 ? 'Beneficiary' : 'Beneficiaries'
+                    numberOfExcluded === 1 ? 'Household' : 'Households'
                   } excluded`}
                 </GreyText>
               </Box>

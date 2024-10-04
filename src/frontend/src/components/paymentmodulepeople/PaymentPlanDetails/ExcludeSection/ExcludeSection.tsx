@@ -67,7 +67,7 @@ export function ExcludeSection({
   const getTooltipText = (): string => {
     if (!hasOpenOrLockedStatus) {
       return t(
-        'Households can only be excluded from a Payment Plan in status open or locked',
+        'Beneficiaries can only be excluded from a Payment Plan in status open or locked',
       );
     }
     if (!hasExcludePermission) {
@@ -115,7 +115,7 @@ export function ExcludeSection({
         awaitRefetchQueries: true,
       });
       if (!error) {
-        showMessage(t('Households exclusion started'));
+        showMessage(t('Beneficiaries exclusion started'));
         setExclusionsOpen(false);
       }
     } catch (e) {
@@ -311,7 +311,7 @@ export function ExcludeSection({
             <Grid item xs={6}>
               <Box mr={2}>
                 <StyledTextField
-                  label={t('Household Ids')}
+                  label={t('Beneficiaries Ids')}
                   value={idsValue}
                   onChange={handleIdsChange}
                   fullWidth
@@ -368,7 +368,7 @@ export function ExcludeSection({
               <Box mt={2} mb={2}>
                 <GreyText>
                   {`${numberOfExcluded} ${
-                    numberOfExcluded === 1 ? 'Household' : 'Households'
+                    numberOfExcluded === 1 ? 'Beneficiary' : 'Beneficiaries'
                   } excluded`}
                 </GreyText>
               </Box>
