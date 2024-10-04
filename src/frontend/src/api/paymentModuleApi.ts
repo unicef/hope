@@ -17,12 +17,19 @@ export const fetchPaymentPlansManagerial = async (
   return response;
 };
 
-export const bulkActionPaymentPlansManagerial = async (
+interface BulkActionPaymentPlansManagerialProps {
+  businessAreaSlug: string;
+  ids: string[];
+  action: string;
+  comment: string;
+}
+
+export const bulkActionPaymentPlansManagerial = async ({
   businessAreaSlug,
   ids,
   action,
   comment,
-) => {
+}: BulkActionPaymentPlansManagerialProps) => {
   const payload: { ids: typeof ids; action: typeof action; comment?: string } =
     {
       ids,
