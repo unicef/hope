@@ -11,7 +11,12 @@ from constance import config
 from coreapi import codecs
 from coreapi.exceptions import NoCodecAvailable
 
-from hct_mis_api.aurora.models import Organization, Project, Record, Registration
+from hct_mis_api.contrib.aurora.models import (
+    Organization,
+    Project,
+    Record,
+    Registration,
+)
 
 logger = logging.getLogger(__name__)
 

@@ -11,8 +11,8 @@ from django.views.generic.edit import ProcessFormView
 from admin_extra_buttons.utils import HttpResponseRedirectToReferrer
 from sentry_sdk import set_tag
 
-from hct_mis_api.aurora.models import Registration
-from hct_mis_api.aurora.utils import fetch_metadata
+from hct_mis_api.contrib.aurora.models import Registration
+from hct_mis_api.contrib.aurora.utils import fetch_metadata
 
 
 class FetchDataView(ProcessFormView):

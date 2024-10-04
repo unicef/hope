@@ -67,26 +67,26 @@ from hct_mis_api.apps.registration_datahub.tasks.pull_kobo_submissions import (
     PullKoboSubmissions,
 )
 from hct_mis_api.apps.utils.models import MergeStatusModel
-from hct_mis_api.aurora.celery_tasks import (
+from hct_mis_api.contrib.aurora.celery_tasks import (
     automate_rdi_creation_task,
     process_flex_records_task,
 )
-from hct_mis_api.aurora.fixtures import (
+from hct_mis_api.contrib.aurora.fixtures import (
     OrganizationFactory,
     ProjectFactory,
     RegistrationFactory,
 )
-from hct_mis_api.aurora.models import Record
-from hct_mis_api.aurora.services.base_flex_registration_service import (
+from hct_mis_api.contrib.aurora.models import Record
+from hct_mis_api.contrib.aurora.services.base_flex_registration_service import (
     BaseRegistrationService,
 )
-from hct_mis_api.aurora.services.flex_registration_service import (
+from hct_mis_api.contrib.aurora.services.flex_registration_service import (
     create_task_for_processing_records,
 )
-from hct_mis_api.aurora.services.sri_lanka_flex_registration_service import (
+from hct_mis_api.contrib.aurora.services.sri_lanka_flex_registration_service import (
     SriLankaRegistrationService,
 )
-from hct_mis_api.aurora.services.ukraine_flex_registration_service import (
+from hct_mis_api.contrib.aurora.services.ukraine_flex_registration_service import (
     UkraineBaseRegistrationService,
     UkraineRegistrationService,
 )
@@ -487,7 +487,7 @@ def create_imported_document_types() -> None:
 
 
 def create_ukraine_business_area() -> None:
-    from hct_mis_api.aurora.models import Registration
+    from hct_mis_api.contrib.aurora.models import Registration
 
     slug = "ukraine"
     BusinessArea.objects.create(
@@ -553,7 +553,7 @@ def run_automate_rdi_creation_task(*args: Any, **kwargs: Any) -> Any:
 
 
 @patch(
-    "hct_mis_api.aurora.services.base_flex_registration_service.BaseRegistrationService.validate_data_collection_type"
+    "hct_mis_api.contrib.aurora.services.base_flex_registration_service.BaseRegistrationService.validate_data_collection_type"
 )
 class TestAutomatingRDICreationTask(TestCase):
     databases = {
