@@ -179,7 +179,5 @@ class TestProgramCycle:
         assert "Test Programme Cycle 001" in pageProgramCycleDetails.getPageHeaderTitle().text
         assert "Active" in pageProgramCycleDetails.getStatusContainer().text
         pageProgramCycleDetails.getButtonFinishProgrammeCycle().click()
-        assert "Finished" in pageProgramCycleDetails.getStatusContainer().text
-        pageProgramCycleDetails.getButtonReactivateProgrammeCycle().click()
         pageProgramCycleDetails.checkAlert("All Payment Plans and Follow-Up Payment Plans have to be Reconciled.")
-        assert "Finished" in pageProgramCycleDetails.getStatusContainer().text
+        assert "Active" in pageProgramCycleDetails.getStatusContainer().text

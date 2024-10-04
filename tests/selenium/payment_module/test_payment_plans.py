@@ -6,11 +6,7 @@ from time import sleep
 import openpyxl
 import pytest
 from dateutil.relativedelta import relativedelta
-from sorl.thumbnail.conf import settings
 
-from tests.selenium.page_object.payment_module.new_payment_plan import NewPaymentPlan
-from tests.selenium.page_object.payment_module.payment_module import PaymentModule
-from tests.selenium.page_object.payment_module.payment_module_details import PaymentModuleDetails
 from tests.selenium.page_object.payment_module.program_cycle import ProgramCyclePage
 from tests.selenium.page_object.payment_module.program_cycle_details import ProgramCycleDetailsPage
 from selenium.webdriver.common.by import By
@@ -45,10 +41,6 @@ from tests.selenium.page_object.payment_module.new_payment_plan import NewPaymen
 from tests.selenium.page_object.payment_module.payment_module import PaymentModule
 from tests.selenium.page_object.payment_module.payment_module_details import (
     PaymentModuleDetails,
-)
-from tests.selenium.page_object.payment_module.program_cycle import (
-    ProgramCycleDetailsPage,
-    ProgramCyclePage,
 )
 
 pytestmark = pytest.mark.django_db(transaction=True)
@@ -377,3 +369,49 @@ class TestSmokePaymentModule:
             .find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-status"]')
             .text
         )
+
+
+@pytest.mark.usefixtures("login")
+class TestPaymentPlans:
+    def test_payment_plan_edit(
+        self,
+        clear_downloaded_files: None,
+        create_targeting: None,
+        pagePaymentModule: PaymentModule,
+        pagePaymentModuleDetails: PaymentModuleDetails,
+        pageNewPaymentPlan: NewPaymentPlan,
+        pageProgramCycle: ProgramCyclePage,
+        pageProgramCycleDetails: ProgramCycleDetailsPage,
+    ) -> None:
+        targeting = TargetPopulation.objects.first()
+        pageProgramCycle.selectGlobalProgramFilter("Test Program")
+        pageProgramCycle.getNavPaymentModule().click()
+
+    # ToDo: Warning - For People program available excluding is HH
+    def test_payment_plan_exclude(
+        self,
+        clear_downloaded_files: None,
+        create_targeting: None,
+        pagePaymentModule: PaymentModule,
+        pagePaymentModuleDetails: PaymentModuleDetails,
+        pageNewPaymentPlan: NewPaymentPlan,
+        pageProgramCycle: ProgramCyclePage,
+        pageProgramCycleDetails: ProgramCycleDetailsPage,
+    ) -> None:
+        targeting = TargetPopulation.objects.first()
+        pageProgramCycle.selectGlobalProgramFilter("Test Program")
+        pageProgramCycle.getNavPaymentModule().click()
+
+    def test_payment_plan_delete(
+        self,
+        clear_downloaded_files: None,
+        create_targeting: None,
+        pagePaymentModule: PaymentModule,
+        pagePaymentModuleDetails: PaymentModuleDetails,
+        pageNewPaymentPlan: NewPaymentPlan,
+        pageProgramCycle: ProgramCyclePage,
+        pageProgramCycleDetails: ProgramCycleDetailsPage,
+    ) -> None:
+        targeting = TargetPopulation.objects.first()
+        pageProgramCycle.selectGlobalProgramFilter("Test Program")
+        pageProgramCycle.getNavPaymentModule().click()
