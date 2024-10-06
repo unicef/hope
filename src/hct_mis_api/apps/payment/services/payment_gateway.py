@@ -125,6 +125,7 @@ class PaymentSerializer(ReadOnlyModelSerializer):
         delivery_mechanism_data = obj.collector.delivery_mechanisms_data.filter(
             delivery_mechanism=obj.delivery_type
         ).first()
+        # TODO: get data from snapshot
 
         base_data = {
             "amount": obj.entitlement_quantity,

@@ -148,7 +148,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         payment_row = [
             FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(payment, column_name)
             for column_name in fsp_template_columns
-        ]  # TODO: get from snapshot
+        ]
         delivery_mechanism_data = payment.collector.delivery_mechanisms_data.filter(
             delivery_mechanism=payment.delivery_type
         ).first()
@@ -157,7 +157,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
                 payment, column_name, delivery_mechanism_data
             )
             for column_name in fsp_template_core_fields
-        ]  # TODO: get from snapshot
+        ]
         payment_row.extend(core_fields_row)
         flex_field_row = [
             self._get_flex_field_by_name(column_name, payment) for column_name in fsp_xlsx_template.flex_fields
@@ -165,15 +165,23 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         payment_row.extend(flex_field_row)
         return list(map(self.right_format_for_xlsx, payment_row))
 
-    def _get_flex_field_by_name(self, name: str, payment: Payment) -> FlexibleAttribute:
-        # TODO: get from snapshot
+    def _get_flex_field_by_name(self, name: str, payment: Payment) -> str:
         attribute: FlexibleAttribute = self.flexible_attributes[name]
-        individual = payment.collector
-        household = payment.household
+
+        snapshot = getattr(payment, "household_snapshot", None)
+        if not snapshot:
+            logger.error(f"Not found snapshot for Payment {payment.unicef_id}")
+            return ""
+
+        snapshot_data = snapshot.snapshot_data
+        primary_collector = snapshot_data.get("primary_collector", {})
+        alternate_collector = snapshot_data.get("alternate_collector", {})
+        collector_data = primary_collector or alternate_collector or dict()
+
         if attribute.associated_with == FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL:
-            return individual.flex_fields.get(name, "")
+            return collector_data.get("flex_fields", {}).get(name, "")
         else:
-            return household.flex_fields.get(name, "")
+            return snapshot_data.get("flex_fields", {}).get(name, "")
 
     def save_workbook(self, zip_file: zipfile.ZipFile, wb: "Workbook", filename: str) -> None:
         with NamedTemporaryFile() as tmp:

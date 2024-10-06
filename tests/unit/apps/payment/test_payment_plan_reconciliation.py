@@ -59,6 +59,9 @@ from hct_mis_api.apps.payment.models import (
     PaymentVerification,
     PaymentVerificationPlan,
 )
+from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
+    create_payment_plan_snapshot_data,
+)
 from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
     XlsxPaymentPlanImportPerFspService,
 )
@@ -463,8 +466,9 @@ class TestPaymentPlanReconciliation(APITestCase):
         )
         encoded_santander_fsp_id = encode_id_base64(santander_fsp.id, "FinancialServiceProvider")
 
+        payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
         payment = PaymentFactory(
-            parent=PaymentPlan.objects.get(id=payment_plan_id),
+            parent=payment_plan,
             business_area=self.business_area,
             household=self.household_1,
             collector=self.individual_1,
@@ -477,6 +481,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             currency="PLN",
         )
         self.assertEqual(payment.entitlement_quantity, 1000)
+        create_payment_plan_snapshot_data(payment_plan)
 
         lock_payment_plan_response = self.graphql_request(
             request_string=PAYMENT_PLAN_ACTION_MUTATION,
@@ -494,7 +499,6 @@ class TestPaymentPlanReconciliation(APITestCase):
         rule = RuleFactory(name="Rule")
         RuleCommitFactory(definition="result.value=Decimal('500')", rule=rule)
 
-        payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
         self.assertEqual(payment_plan.background_action_status, None)
 
         with patch("hct_mis_api.apps.payment.mutations.payment_plan_apply_engine_rule") as mock:

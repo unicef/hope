@@ -66,6 +66,7 @@ from hct_mis_api.apps.core.field_attributes.fields_types import (
 )
 from hct_mis_api.apps.core.mixins import LimitBusinessAreaModelMixin
 from hct_mis_api.apps.core.models import BusinessArea, FileTemp, FlexibleAttribute
+from hct_mis_api.apps.geo.models import Area, Country
 from hct_mis_api.apps.household.models import FEMALE, MALE, Individual
 from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.fields import DynamicChoiceArrayField
@@ -86,7 +87,6 @@ from hct_mis_api.apps.utils.models import (
 if TYPE_CHECKING:
     from hct_mis_api.apps.account.models import User
     from hct_mis_api.apps.core.exchange_rates.api import ExchangeRateClient
-    from hct_mis_api.apps.geo.models import Area, Country
     from hct_mis_api.apps.grievance.models import GrievanceTicket
     from hct_mis_api.apps.program.models import Program
 
@@ -1207,38 +1207,38 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             snapshot_field_path_split = snapshot_field_path.split("__")
             main_key = snapshot_field_path.split("__")[0] if len(snapshot_field_path_split) > 0 else None
 
-        if main_key in {"country_origin_id", "country_id"}:
-            country = Country.objects.filter(pk=household_data.get(main_key)).first()
-            return country.iso_code3 if country else None
+            if main_key in {"country_origin_id", "country_id"}:
+                country = Country.objects.filter(pk=household_data.get(main_key)).first()
+                return country.iso_code3 if country else None
 
-        if main_key in {"admin1_id", "admin2_id", "admin3_id", "admin4_id", "admin_area_id"}:
-            area = Area.objects.filter(pk=household_data.get(main_key)).first()
-            return area.p_code if area else None
+            if main_key in {"admin1_id", "admin2_id", "admin3_id", "admin4_id", "admin_area_id"}:
+                area = Area.objects.filter(pk=household_data.get(main_key)).first()
+                return area.p_code if area else None
 
-        if main_key == "roles":
-            lookup_id = primary_collector.get("id") or alternate_collector.get("id")
-            if not lookup_id:
+            if main_key == "roles":
+                lookup_id = primary_collector.get("id") or alternate_collector.get("id")
+                if not lookup_id:
+                    return None
+
+                for role in household_data.get("roles", []):
+                    individual = role.get("individual", {})
+                    if individual.get("id") == lookup_id:
+                        return role.get("role")
+                # return None if role not found
                 return None
 
-            for role in household_data.get("roles", []):
-                individual = role.get("individual", {})
-                if individual.get("id") == lookup_id:
-                    return role.get("role")
-            # return None if role not found
-            return None
+            if main_key in {"primary_collector", "alternate_collector"}:
+                return household_data.get(main_key, {}).get("id")
 
-        if main_key in {"primary_collector", "alternate_collector"}:
-            return household_data.get(main_key, {}).get("id")
+            if main_key == "bank_account_info":
+                bank_account_info_lookup = snapshot_field_path_split[1]
+                return collector_data.get("bank_account_info", {}).get(bank_account_info_lookup)
 
-        if main_key == "bank_account_info":
-            bank_account_info_lookup = snapshot_field_path[1]
-            return collector_data.get("bank_account_info", {}).get(bank_account_info_lookup)
-
-        if main_key == "documents":
-            doc_type, doc_lookup = snapshot_field_path[1], snapshot_field_path[2]
-            documents_list = collector_data.get("documents", [])
-            documents_dict = {doc.get("type"): doc for doc in documents_list}
-            return documents_dict.get(doc_type, {}).get(doc_lookup)
+            if main_key == "documents":
+                doc_type, doc_lookup = snapshot_field_path_split[1], snapshot_field_path_split[2]
+                documents_list = collector_data.get("documents", [])
+                documents_dict = {doc.get("type"): doc for doc in documents_list}
+                return documents_dict.get(doc_type, {}).get(doc_lookup)
 
         if core_field["associated_with"] == _INDIVIDUAL:
             return collector_data.get(lookup, None) or collector_data.get(main_key, None)
@@ -1246,9 +1246,10 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         if core_field["associated_with"] == _HOUSEHOLD:
             return household_data.get(lookup, None)
 
+        return None
+
     @staticmethod
     def get_column_from_core_field(
-        cls,
         payment: "Payment",
         core_field_name: str,
         delivery_mechanism_data: Optional["DeliveryMechanismData"] = None,
@@ -1265,7 +1266,9 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             logger.error(f"Not found snapshot for Payment {payment.unicef_id}")
             return None
 
-        snapshot_data = cls.get_data_from_payment_snapshot(snapshot.snapshot_data, core_field, delivery_mechanism_data)
+        snapshot_data = FinancialServiceProviderXlsxTemplate.get_data_from_payment_snapshot(
+            snapshot.snapshot_data, core_field, delivery_mechanism_data
+        )
 
         return snapshot_data
 

@@ -124,6 +124,7 @@ def get_individual_snapshot(individual: Individual, is_hh_collector: bool = Fals
     individual_data["needs_adjudication_tickets_count"] = get_needs_adjudication_tickets_count(individual)
     individual_data["bank_account_info"] = {}
 
+    print("SnapShot === data docs", individual.documents.all())
     for document in individual.documents.all():
         document_data = {
             "type": document.type.key,
@@ -135,7 +136,7 @@ def get_individual_snapshot(individual: Individual, is_hh_collector: bool = Fals
             "cleared": document.cleared,
             "cleared_by": handle_type_mapping(document.cleared_by),
             "cleared_date": handle_type_mapping(document.cleared_date),
-            "photo": document.photo.name if document.photo else None,
+            "photo": document.photo.name if document.photo else "",
         }
         individual_data["documents"].append(document_data)
 

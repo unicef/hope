@@ -90,12 +90,12 @@ class TestCoreFields(APITestCase):
 
     def test_get_all_core_fields_choices(self) -> None:
         choices = FieldFactory.get_all_core_fields_choices()
-        self.assertEqual(len(choices), 137)
+        self.assertEqual(len(choices), 135)
         self.assertEqual(choices[0], ("age", "Age (calculated)"))
 
         generate_delivery_mechanisms()
         choices = FieldFactory.get_all_core_fields_choices()
-        self.assertEqual(len(choices), 150)
+        self.assertEqual(len(choices), 148)
         self.assertEqual(
             choices[-1],
             (

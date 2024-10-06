@@ -113,9 +113,9 @@ class TestKoboTemplateUpload(APITestCase):
                 "Field: tax_id_no_i_c - Field is missing",
                 "Field: tax_id_issuer_i_c - Field is missing",
                 "Field: national_passport_no_i_c - Field is missing",
+                "Field: program_registration_id_h_c - Field is missing",
                 "Field: account_holder_name_i_c - Field is missing",
                 "Field: bank_branch_name_i_c - Field is missing",
-                "Field: program_registration_id_h_c - Field is missing",
             ]
         }
         self.assertEqual(form.errors, expected_errors)
