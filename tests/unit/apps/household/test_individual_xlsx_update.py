@@ -213,5 +213,5 @@ class TestIndividualXlsxUpdate(APITestCase):
 
         self.assertEqual(
             str({"phone_no": [f"Invalid phone number for individual {self.individuals[0]}."]}),
-            str(context.exception)
+            str(context.exception),
         )
