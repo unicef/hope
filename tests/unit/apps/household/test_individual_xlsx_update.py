@@ -3,6 +3,7 @@ from io import BytesIO
 from pathlib import Path
 
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.core.files import File
 
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -39,6 +40,13 @@ def invalid_file() -> File:
     return File(BytesIO(content), name="invalid_updated_test_file.xlsx")
 
 
+def invalid_phone_no_file() -> File:
+    content = Path(
+        f"{settings.TESTS_ROOT}/apps/household/test_file/invalid_updated_test_file_wrong_phone_no.xlsx"
+    ).read_bytes()
+    return File(BytesIO(content), name="invalid_updated_phone_no_test_file.xlsx")
+
+
 class TestIndividualXlsxUpdate(APITestCase):
     databases = "__all__"
 
@@ -65,6 +73,12 @@ class TestIndividualXlsxUpdate(APITestCase):
             file=valid_file_complex(),
             business_area=cls.business_area,
             xlsx_match_columns=["individual__full_name"],
+        )
+
+        cls.xlsx_update_invalid_phone_no_file = XlsxUpdateFile.objects.create(
+            file=invalid_phone_no_file(),
+            business_area=cls.business_area,
+            xlsx_match_columns=["individual__given_name"],
         )
 
         household_data = {
@@ -192,3 +206,12 @@ class TestIndividualXlsxUpdate(APITestCase):
         self.assertEqual(self.individuals[1].birth_date, datetime.date(1965, 8, 6))
         self.assertEqual(self.individuals[2].birth_date, datetime.date(1965, 8, 7))
         self.assertEqual(self.individuals[3].birth_date, datetime.date(1985, 8, 12))
+
+    def test_raise_error_when_invalid_phone_number(self) -> None:
+        with self.assertRaises(ValidationError) as context:
+            IndividualXlsxUpdate(self.xlsx_update_invalid_phone_no_file).update_individuals()
+
+        self.assertEqual(
+            str({"phone_no": [f"Invalid phone number for individual {self.individuals[0]}."]}),
+            str(context.exception)
+        )

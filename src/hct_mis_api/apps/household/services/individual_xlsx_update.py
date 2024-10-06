@@ -144,6 +144,8 @@ class IndividualXlsxUpdate:
             field.required = False
 
         if not form.is_valid():
+            if "phone_no" in form.errors:
+                form.errors["phone_no"] = [f"Invalid phone number for individual {individual.unicef_id}."]
             raise ValidationError(form.errors)
         # TODO: add 'program_id' arg or None? individual.program_id
         log_create(Individual.ACTIVITY_LOG_MAPPING, "business_area", None, None, old_individual, individual)
