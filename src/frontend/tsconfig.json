@@ -43,6 +43,6 @@
     ".eslintrc.cjs",
     "jest.config"
   ],
-  "exclude": ["node_modules", "frontend/jest"],
+  "exclude": ["node_modules", "frontend/jest", "src/restgenerated"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
