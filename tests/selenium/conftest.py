@@ -59,9 +59,13 @@ from tests.selenium.page_object.managerial_console.managerial_console import (
 )
 from tests.selenium.page_object.payment_module.new_payment_plan import NewPaymentPlan
 from tests.selenium.page_object.payment_module.payment_module import PaymentModule
-from tests.selenium.page_object.payment_module.payment_module_details import PaymentModuleDetails
+from tests.selenium.page_object.payment_module.payment_module_details import (
+    PaymentModuleDetails,
+)
 from tests.selenium.page_object.payment_module.program_cycle import ProgramCyclePage
-from tests.selenium.page_object.payment_module.program_cycle_details import ProgramCycleDetailsPage
+from tests.selenium.page_object.payment_module.program_cycle_details import (
+    ProgramCycleDetailsPage,
+)
 from tests.selenium.page_object.payment_verification.payment_record import PaymentRecord
 from tests.selenium.page_object.payment_verification.payment_verification import (
     PaymentVerification,

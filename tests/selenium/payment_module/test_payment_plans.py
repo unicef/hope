@@ -6,9 +6,6 @@ from time import sleep
 import openpyxl
 import pytest
 from dateutil.relativedelta import relativedelta
-
-from tests.selenium.page_object.payment_module.program_cycle import ProgramCyclePage
-from tests.selenium.page_object.payment_module.program_cycle_details import ProgramCycleDetailsPage
 from selenium.webdriver.common.by import By
 from sorl.thumbnail.conf import settings
 
@@ -41,6 +38,10 @@ from tests.selenium.page_object.payment_module.new_payment_plan import NewPaymen
 from tests.selenium.page_object.payment_module.payment_module import PaymentModule
 from tests.selenium.page_object.payment_module.payment_module_details import (
     PaymentModuleDetails,
+)
+from tests.selenium.page_object.payment_module.program_cycle import ProgramCyclePage
+from tests.selenium.page_object.payment_module.program_cycle_details import (
+    ProgramCycleDetailsPage,
 )
 
 pytestmark = pytest.mark.django_db(transaction=True)
@@ -431,6 +432,7 @@ class TestPaymentPlans:
         pagePaymentModuleDetails.getButtonCreateExclusions().click()
         pagePaymentModuleDetails.screenshot("1", file_path="./")
         from tests.selenium.tools.tag_name_finder import printing
+
         printing("Mapping", pagePaymentModuleDetails.driver)
         printing("Methods", pagePaymentModuleDetails.driver)
         printing("Assert", pagePaymentModuleDetails.driver)
@@ -453,6 +455,7 @@ class TestPaymentPlans:
         pagePaymentModuleDetails.getInputExclusionReason().send_keys("Reason e2e Test")
         pagePaymentModuleDetails.screenshot("1", file_path="./")
         from tests.selenium.tools.tag_name_finder import printing
+
         printing("Mapping", pagePaymentModuleDetails.driver)
         printing("Methods", pagePaymentModuleDetails.driver)
         printing("Assert", pagePaymentModuleDetails.driver)

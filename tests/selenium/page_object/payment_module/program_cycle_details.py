@@ -1,5 +1,6 @@
-from tests.selenium.page_object.base_components import BaseComponents
 from selenium.webdriver.remote.webelement import WebElement
+
+from tests.selenium.page_object.base_components import BaseComponents
 
 
 class ProgramCycleDetailsPage(BaseComponents):
@@ -40,6 +41,7 @@ class ProgramCycleDetailsPage(BaseComponents):
             """
         )
         from time import sleep
+
         sleep(2)
         return self.wait_for(self.buttonReactivateProgrammeCycle)
 
