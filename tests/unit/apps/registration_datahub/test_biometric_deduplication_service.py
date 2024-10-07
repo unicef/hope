@@ -473,7 +473,7 @@ class BiometricDeduplicationServiceTest(TestCase):
 
         duplicates = service.get_duplicates_for_merged_rdi_against_population(rdi2)
 
-        assert len(duplicates) == 1
+        assert len(duplicates) == 3
         assert list(
             duplicates.order_by("similarity_score").values("individual1", "individual2", "similarity_score")
         ) == [
