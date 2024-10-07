@@ -1122,6 +1122,9 @@ class DeduplicationEngineCeleryTasksTests(TestCase):
         self,
         mock_fetch_biometric_deduplication_results_and_process: Mock,
     ) -> None:
+        fetch_biometric_deduplication_results_and_process(None)
+        mock_fetch_biometric_deduplication_results_and_process.assert_not_called()
+
         deduplication_set_id = str(uuid.uuid4())
         self.program.deduplication_set_id = deduplication_set_id
         self.program.save()
