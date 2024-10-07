@@ -235,15 +235,13 @@ class BiometricDeduplicationService:
         self, rdi: RegistrationDataImport
     ) -> QuerySet[DeduplicationEngineSimilarityPair]:
         """Used in Grievance tickets creation for merged RDI"""
-        from hct_mis_api.apps.utils.models import MergeStatusModel
-
-        rdi_individuals = rdi.individuals.filter(is_removed=False).only("id")
+        rdi_pending_individuals = PendingIndividual.objects.filter(is_removed=False, registration_data_import=rdi).only(
+            "id"
+        )
         return DeduplicationEngineSimilarityPair.objects.filter(
-            Q(individual1__in=rdi_individuals) | Q(individual2__in=rdi_individuals),
+            Q(individual1__in=rdi_pending_individuals) | Q(individual2__in=rdi_pending_individuals),
             Q(individual1__duplicate=False) & Q(individual2__duplicate=False),
             Q(individual1__withdrawn=False) & Q(individual2__withdrawn=False),
-            Q(individual1__rdi_merge_status=MergeStatusModel.MERGED)
-            & Q(individual2__rdi_merge_status=MergeStatusModel.MERGED),
             program=rdi.program,
         ).distinct()
 
