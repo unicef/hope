@@ -505,7 +505,7 @@ def create_grievance_tickets_for_dedup_engine_results(self: Any, rdi_id: str) ->
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def fetch_biometric_deduplication_results_and_process(self: Any, deduplication_set_id: str) -> None:
+def fetch_biometric_deduplication_results_and_process(self: Any, deduplication_set_id: Optional[str]) -> None:
     from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import (
         BiometricDeduplicationService,
     )
