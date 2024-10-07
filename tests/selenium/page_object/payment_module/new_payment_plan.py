@@ -11,7 +11,9 @@ class NewPaymentPlan(BaseComponents):
     inputTargetPopulation = 'div[data-cy="input-target-population"]'
     selectTargetingid = 'div[data-cy="select-targetingId"]'
     inputStartDate = 'div[data-cy="input-start-date"]'
+    inputStartDateError = 'div[data-cy="input-dispersion-start-date"]'
     inputEndDate = 'div[data-cy="input-end-date"]'
+    inputEndDateError = 'div[data-cy="input-dispersion-end-date"]'
     inputCurrency = 'div[data-cy="input-currency"]'
     inputDispersionStartDate = 'div[data-cy="input-dispersion-start-date"]'
     inputDispersionEndDate = 'div[data-cy="input-dispersion-end-date"]'
@@ -38,6 +40,12 @@ class NewPaymentPlan(BaseComponents):
     def getInputEndDate(self) -> WebElement:
         self.wait_for(self.inputEndDate)
         return self.wait_for(self.inputEndDate).find_elements(By.TAG_NAME, "input")[0]
+
+    def getInputStartDateError(self) -> WebElement:
+        return self.wait_for(self.inputStartDateError)
+
+    def getInputEndDateError(self) -> WebElement:
+        return self.wait_for(self.inputEndDateError)
 
     def getInputCurrency(self) -> WebElement:
         return self.wait_for(self.inputCurrency)

@@ -401,6 +401,8 @@ class TestPaymentPlans:
         targeting = TargetPopulation.objects.first()
         pageProgramCycle.selectGlobalProgramFilter("Test Program")
         pageProgramCycle.getNavPaymentModule().click()
+    #     data-cy="button-create-exclusions"
+
 
     def test_payment_plan_delete(
         self,
@@ -415,3 +417,34 @@ class TestPaymentPlans:
         targeting = TargetPopulation.objects.first()
         pageProgramCycle.selectGlobalProgramFilter("Test Program")
         pageProgramCycle.getNavPaymentModule().click()
+
+    def test_payment_plan_creation_error(
+        self,
+        clear_downloaded_files: None,
+        create_targeting: None,
+        pagePaymentModule: PaymentModule,
+        pagePaymentModuleDetails: PaymentModuleDetails,
+        pageNewPaymentPlan: NewPaymentPlan,
+        pageProgramCycle: ProgramCyclePage,
+        pageProgramCycleDetails: ProgramCycleDetailsPage,
+    ) -> None:
+        pageProgramCycle.selectGlobalProgramFilter("Test Program")
+        pageProgramCycle.getNavPaymentModule().click()
+        pageProgramCycle.getNavProgrammeCycles().click()
+        assert (
+            "Draft"
+            in pageProgramCycle.getProgramCycleRow()[0]
+            .find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-status"]')
+            .text
+        )
+        pageProgramCycle.getProgramCycleRow()[0].find_element(
+            By.CSS_SELECTOR, 'td[data-cy="program-cycle-title"]'
+        ).find_element(By.TAG_NAME, "a").click()
+        pageProgramCycleDetails.getButtonCreatePaymentPlan().click()
+
+        pageNewPaymentPlan.getButtonSavePaymentPlan().click()
+
+        assert "Target Population is required" in pageNewPaymentPlan.getInputTargetPopulation().text
+        assert "Dispersion Start Date is required" in pageNewPaymentPlan.getInputStartDateError().text
+        assert "Dispersion End Date is required" in pageNewPaymentPlan.getInputEndDateError().text
+        assert "Currency is required" in pageNewPaymentPlan.getInputCurrency().text
