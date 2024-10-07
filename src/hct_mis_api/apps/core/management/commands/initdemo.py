@@ -65,7 +65,7 @@ class Command(BaseCommand):
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/household/fixtures/data.json")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/accountability/fixtures/data.json")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/steficon/fixtures/data.json")
-        call_command("loaddata", f"{settings.PROJECT_ROOT}/aurora/fixtures/data.json")
+        call_command("loaddata", f"{settings.PROJECT_ROOT}/contrib/aurora/fixtures/data.json")
 
         try:
             call_command("search_index", "--rebuild", "-f")
@@ -86,14 +86,9 @@ class Command(BaseCommand):
             "jan.romaniak@kellton.com",
             "jakub.krasnowski@kellton.com",
             "pavlo.mokiichuk@kellton.com",
-            "kamil.swiechowski@kellton.com",
-            "karolina.sliwinska@kellton.com",
             "katarzyna.lanecka@kellton.com",
-            "konrad.marzec@kellton.com",
             "maciej.szewczyk@kellton.com",
             "marek.biczysko@kellton.com",
-            "patryk.dabrowski@kellton.com",
-            "zuzanna.okrutna@kellton.com",
             "gerba@unicef.org",
             "ddinicola@unicef.org",
             "sapostolico@unicef.org",
@@ -103,10 +98,8 @@ class Command(BaseCommand):
             "asrugano@unicef.org",
             "gkeriri@unicef.org",
             "jbassette@unicef.org",
-            "jyablonski@unicef.org",
             "nmkuzi@unicef.org",
             "dhassooneh@unicef.org",
-            "swaheed@unicef.org",
         ]
         tester_list = [
             "khaddad@unicef.org",

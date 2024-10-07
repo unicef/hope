@@ -959,6 +959,7 @@ def generate_payment_plan() -> None:
         business_area=afghanistan,
         program=program,
         created_by=root,
+        program_cycle=program_cycle,
     )[0]
     full_rebuild(target_population)
     target_population.save()

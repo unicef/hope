@@ -90,6 +90,7 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
             program=cls.program_individual_data_needed_true,
             business_area=business_area_with_data_sharing,
             status=TargetPopulation.STATUS_PROCESSING,
+            program_cycle=cls.program_individual_data_needed_true.cycles.first(),
         )
         cls.target_population_with_individuals.households.set([cls.household, cls.household_second])
         cls.target_population_with_individuals = refresh_stats(cls.target_population_with_individuals)
@@ -101,6 +102,7 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
             program=cls.program_individual_data_needed_false,
             business_area=business_area_with_data_sharing,
             status=TargetPopulation.STATUS_PROCESSING,
+            program_cycle=cls.program_individual_data_needed_false.cycles.first(),
         )
         cls.target_population_without_individuals.households.set([cls.household, cls.household_second])
         cls.target_population_without_individuals = refresh_stats(cls.target_population_without_individuals)
