@@ -470,7 +470,6 @@ class TestPaymentPlans:
         pageProgramCycle: ProgramCyclePage,
         pageProgramCycleDetails: ProgramCycleDetailsPage,
     ) -> None:
-        targeting = TargetPopulation.objects.first()
         pageProgramCycle.selectGlobalProgramFilter("Test Program")
         pageProgramCycle.getNavPaymentModule().click()
 
