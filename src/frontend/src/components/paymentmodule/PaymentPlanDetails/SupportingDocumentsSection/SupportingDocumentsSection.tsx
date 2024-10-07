@@ -24,11 +24,7 @@ import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { usePermissions } from '@hooks/usePermissions';
 import { useTranslation } from 'react-i18next';
-import {
-  PaymentPlanQuery,
-  PaymentPlanStatus,
-  usePaymentPlanLazyQuery,
-} from '@generated/graphql';
+import { PaymentPlanQuery, PaymentPlanStatus } from '@generated/graphql';
 import { DropzoneField } from '@components/core/DropzoneField';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import {
