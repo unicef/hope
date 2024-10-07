@@ -637,7 +637,7 @@ class BiometricDeduplicationServiceTest(TestCase):
 
         rdi1 = RegistrationDataImportFactory(
             program=self.program,
-            deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS,
+            deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_PROCESSING,
         )
 
         service.get_duplicate_individuals_for_rdi_against_batch_count = mock.Mock(return_value=8)

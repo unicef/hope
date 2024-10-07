@@ -186,7 +186,7 @@ class BiometricDeduplicationService:
         rdis = RegistrationDataImport.objects.filter(
             status=RegistrationDataImport.IN_REVIEW,
             program=program,
-            deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS,
+            deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_PROCESSING,
         )
         for rdi in rdis:
             rdi.dedup_engine_batch_duplicates = self.get_duplicate_individuals_for_rdi_against_batch_count(rdi)
