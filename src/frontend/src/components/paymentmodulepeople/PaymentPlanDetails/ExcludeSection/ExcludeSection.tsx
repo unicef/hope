@@ -312,6 +312,7 @@ export function ExcludeSection({
               <Box mr={2}>
                 <StyledTextField
                   label={t('Household Ids')}
+                  data-cy="input-household-ids"
                   value={idsValue}
                   onChange={handleIdsChange}
                   fullWidth
