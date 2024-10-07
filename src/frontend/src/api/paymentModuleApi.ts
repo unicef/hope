@@ -1,5 +1,6 @@
 import { api } from './api';
-import { PaymentPlan } from '../../../frontend/restgenerated/models/PaymentPlan';
+import { PaymentPlan } from 'restgenerated/models/PaymentPlan';
+
 export const fetchPaymentPlansManagerial = async (
   businessAreaSlug,
   params = {},
