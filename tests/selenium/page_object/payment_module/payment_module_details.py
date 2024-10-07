@@ -22,9 +22,10 @@ class PaymentModuleDetails(BaseComponents):
     labelRelatedFollowUpPaymentPlans = 'div[data-cy="label-Related Follow-Up Payment Plans"]'
     buttonSetUpFsp = 'a[data-cy="button-set-up-fsp"]'
     buttonCreateExclusions = 'button[data-cy="button-create-exclusions"]'
+    buttonSaveExclusions = 'button[data-cy="button-save-exclusions"]'
     supportingDocumentsTitle = 'h6[data-cy="supporting-documents-title"]'
     supportingDocumentsEmpty = 'div[data-cy="supporting-documents-empty"]'
-    inputExclusionreason = 'textarea[data-cy="input-exclusionReason"]'
+    inputExclusionReason = 'textarea[data-cy="input-exclusionReason"]'
     buttonApplyExclusions = 'button[data-cy="button-apply-exclusions"]'
     labelFemaleChildren = 'div[data-cy="label-Female Children"]'
     labelFemaleAdults = 'div[data-cy="label-Female Adults"]'
@@ -124,8 +125,11 @@ class PaymentModuleDetails(BaseComponents):
     def getButtonCreateExclusions(self) -> WebElement:
         return self.wait_for(self.buttonCreateExclusions)
 
-    def getInputExclusionreason(self) -> WebElement:
-        return self.wait_for(self.inputExclusionreason)
+    def getButtonSaveExclusions(self) -> WebElement:
+        return self.wait_for(self.buttonSaveExclusions)
+
+    def getInputExclusionReason(self) -> WebElement:
+        return self.wait_for(self.inputExclusionReason)
 
     def getButtonApplyExclusions(self) -> WebElement:
         return self.wait_for(self.buttonApplyExclusions)
