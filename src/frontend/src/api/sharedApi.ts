@@ -1,5 +1,5 @@
 import { api } from './api';
-import { PaginatedAreaList } from '@restgenerated/models/PaginatedAreaList';
+import { PaginatedAreaList } from 'restgenerated/models/PaginatedAreaList';
 
 export const fetchAreas = async (
   businessArea: string,

@@ -1,5 +1,5 @@
 import { api } from './api';
-import { RegistrationDataImportList } from '@restgenerated/models/RegistrationDataImportList';
+import { RegistrationDataImportList } from 'restgenerated/models/RegistrationDataImportList';
 
 export const fetchRegistrationDataImports = async (
   businessAreaSlug: string,
