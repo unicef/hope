@@ -478,9 +478,19 @@ class BiometricDeduplicationServiceTest(TestCase):
             duplicates.order_by("similarity_score").values("individual1", "individual2", "similarity_score")
         ) == [
             {
+                "individual1": ind1.id,
+                "individual2": ind3.id,
+                "similarity_score": Decimal("70.00"),
+            },
+            {
                 "individual1": ind4.id,
                 "individual2": ind5.id,
                 "similarity_score": Decimal("70.00"),
+            },
+            {
+                "individual1": ind3.id,
+                "individual2": ind4.id,
+                "similarity_score": Decimal("90.00"),
             },
         ]
 

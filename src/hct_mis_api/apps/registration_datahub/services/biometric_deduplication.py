@@ -238,12 +238,20 @@ class BiometricDeduplicationService:
         rdi_pending_individuals = PendingIndividual.objects.filter(is_removed=False, registration_data_import=rdi).only(
             "id"
         )
-        return DeduplicationEngineSimilarityPair.objects.filter(
-            Q(individual1__in=rdi_pending_individuals) | Q(individual2__in=rdi_pending_individuals),
-            Q(individual1__duplicate=False) & Q(individual2__duplicate=False),
-            Q(individual1__withdrawn=False) & Q(individual2__withdrawn=False),
-            program=rdi.program,
-        ).distinct()
+        other_pending_individuals = PendingIndividual.objects.filter(is_removed=False, program=rdi.program).exclude(
+            id__in=rdi_pending_individuals
+        )
+
+        return (
+            DeduplicationEngineSimilarityPair.objects.filter(
+                Q(individual1__in=rdi_pending_individuals) | Q(individual2__in=rdi_pending_individuals),
+                Q(individual1__duplicate=False) & Q(individual2__duplicate=False),
+                Q(individual1__withdrawn=False) & Q(individual2__withdrawn=False),
+                program=rdi.program,
+            )
+            .exclude(Q(individual1__in=other_pending_individuals) | Q(individual2__in=other_pending_individuals))
+            .distinct()
+        )
 
     def get_duplicates_for_rdi_against_population(
         self, rdi: RegistrationDataImport
