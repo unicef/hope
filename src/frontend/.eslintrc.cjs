@@ -35,7 +35,12 @@ module.exports = {
     'jest',
     '@tanstack/query',
   ],
-  ignorePatterns: ['**/*.test.tsx', '**/*.test.ts', '**/__generated__/*'],
+  ignorePatterns: [
+    '**/*.test.tsx',
+    '**/*.test.ts',
+    '**/__generated__/*',
+    'src/restgenerated/',
+  ],
   settings: {
     react: {
       version: 'detect',
