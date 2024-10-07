@@ -160,6 +160,35 @@ def create_payment_plan(create_targeting: None) -> PaymentPlan:
     yield payment_plan[0]
 
 
+@pytest.fixture
+def create_payment_plan_lock(create_targeting: None) -> PaymentPlan:
+    tp = TargetPopulation.objects.get(program__name="Test Program")
+    cycle = ProgramCycleFactory(
+        program=tp.program,
+        title="Cycle for PaymentPlan",
+        status=ProgramCycle.ACTIVE,
+        start_date=datetime.now() + relativedelta(days=10),
+        end_date=datetime.now() + relativedelta(days=15),
+    )
+    payment_plan = PaymentPlan.objects.update_or_create(
+        business_area=BusinessArea.objects.only("is_payment_plan_applicable").get(slug="afghanistan"),
+        target_population=tp,
+        program_cycle=cycle,
+        currency="USD",
+        dispersion_start_date=datetime.now() + relativedelta(days=10),
+        dispersion_end_date=datetime.now() + relativedelta(days=15),
+        status_date=datetime.now(),
+        status=PaymentPlan.Status.LOCK,
+        created_by=User.objects.first(),
+        program=tp.program,
+        total_delivered_quantity=999,
+        total_entitled_quantity=2999,
+        is_follow_up=False,
+        program_id=tp.program.id,
+    )
+    yield payment_plan[0]
+
+
 @pytest.mark.usefixtures("login")
 class TestSmokePaymentModule:
     def test_smoke_payment_plan(self, create_payment_plan: PaymentPlan, pagePaymentModule: PaymentModule) -> None:
@@ -387,22 +416,45 @@ class TestPaymentPlans:
         pageProgramCycle.selectGlobalProgramFilter("Test Program")
         pageProgramCycle.getNavPaymentModule().click()
 
-    # ToDo: Warning - For People program available excluding is HH
-    def test_payment_plan_exclude(
+    def test_payment_plan_exclude_not_lock_error(
         self,
-        clear_downloaded_files: None,
-        create_targeting: None,
+        create_payment_plan: PaymentPlan,
         pagePaymentModule: PaymentModule,
         pagePaymentModuleDetails: PaymentModuleDetails,
         pageNewPaymentPlan: NewPaymentPlan,
         pageProgramCycle: ProgramCyclePage,
         pageProgramCycleDetails: ProgramCycleDetailsPage,
     ) -> None:
-        targeting = TargetPopulation.objects.first()
-        pageProgramCycle.selectGlobalProgramFilter("Test Program")
-        pageProgramCycle.getNavPaymentModule().click()
-    #     data-cy="button-create-exclusions"
+        pagePaymentModule.selectGlobalProgramFilter("Test Program")
+        pagePaymentModule.getNavPaymentModule().click()
+        pagePaymentModule.getNavPaymentPlans().click()
+        pagePaymentModule.getRow(0).click()
+        pagePaymentModuleDetails.getButtonCreateExclusions().click()
+        pagePaymentModuleDetails.screenshot("1", file_path="./")
+        from tests.selenium.tools.tag_name_finder import printing
+        printing("Mapping", pagePaymentModuleDetails.driver)
+        printing("Methods", pagePaymentModuleDetails.driver)
+        printing("Assert", pagePaymentModuleDetails.driver)
 
+    # ToDo: Warning - For People program available excluding is HH
+    def test_payment_plan_exclude(
+        self,
+        create_payment_plan: PaymentPlan,
+        pagePaymentModule: PaymentModule,
+        pagePaymentModuleDetails: PaymentModuleDetails,
+        pageNewPaymentPlan: NewPaymentPlan,
+        pageProgramCycle: ProgramCyclePage,
+        pageProgramCycleDetails: ProgramCycleDetailsPage,
+    ) -> None:
+        pagePaymentModule.selectGlobalProgramFilter("Test Program")
+        pagePaymentModule.getNavPaymentModule().click()
+        pagePaymentModule.getNavPaymentPlans().click()
+        pagePaymentModule.getRow(0).click()
+        pagePaymentModuleDetails.getButtonCreateExclusions().click()
+        pagePaymentModuleDetails.screenshot("1", file_path="./")
+        from tests.selenium.tools.tag_name_finder import printing
+        printing("Mapping", pagePaymentModuleDetails.driver)
+        printing("Methods", pagePaymentModuleDetails.driver)
 
     def test_payment_plan_delete(
         self,
