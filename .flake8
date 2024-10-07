@@ -21,6 +21,7 @@ exclude =
     migrations,
     snapshots,
     __pypackages__,
+    frontend,
 
 ignore =
     # black formatting related

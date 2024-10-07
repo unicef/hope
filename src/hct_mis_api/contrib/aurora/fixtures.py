@@ -6,7 +6,7 @@ from faker import Faker
 
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.aurora.models import Organization, Project, Registration
+from hct_mis_api.contrib.aurora.models import Organization, Project, Registration
 
 faker = Faker()
 

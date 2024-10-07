@@ -81,3 +81,15 @@ class ProgramCycleUpdatePermission(BaseRestPermission):
 
 class ProgramCycleDeletePermission(BaseRestPermission):
     PERMISSIONS = [Permissions.PM_PROGRAMME_CYCLE_DELETE]
+
+
+class PaymentPlanSupportingDocumentUploadPermission(BaseRestPermission):
+    PERMISSIONS = [Permissions.PM_UPLOAD_SUPPORTING_DOCUMENT]
+
+
+class PaymentPlanSupportingDocumentDownloadPermission(BaseRestPermission):
+    PERMISSIONS = [Permissions.PM_DOWNLOAD_SUPPORTING_DOCUMENT]
+
+
+class PaymentPlanSupportingDocumentDeletePermission(BaseRestPermission):
+    PERMISSIONS = [Permissions.PM_DELETE_SUPPORTING_DOCUMENT]

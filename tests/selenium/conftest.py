@@ -9,60 +9,8 @@ import pytest
 from _pytest.fixtures import FixtureRequest
 from _pytest.nodes import Item
 from _pytest.runner import CallInfo
+from environ import Env
 from flags.models import FlagState
-from tests.selenium.page_object.accountability.communication import AccountabilityCommunication
-from tests.selenium.page_object.accountability.comunication_details import (
-    AccountabilityCommunicationDetails,
-)
-from tests.selenium.page_object.accountability.surveys import AccountabilitySurveys
-from tests.selenium.page_object.accountability.surveys_details import AccountabilitySurveysDetails
-from tests.selenium.page_object.admin_panel.admin_panel import AdminPanel
-from tests.selenium.page_object.country_dashboard.country_dashboard import CountryDashboard
-from tests.selenium.page_object.filters import Filters
-from tests.selenium.page_object.grievance.details_feedback_page import FeedbackDetailsPage
-from tests.selenium.page_object.grievance.details_grievance_page import GrievanceDetailsPage
-from tests.selenium.page_object.grievance.feedback import Feedback
-from tests.selenium.page_object.grievance.grievance_dashboard import GrievanceDashboard
-from tests.selenium.page_object.grievance.grievance_tickets import GrievanceTickets
-from tests.selenium.page_object.grievance.new_feedback import NewFeedback
-from tests.selenium.page_object.grievance.new_ticket import NewTicket
-from tests.selenium.page_object.managerial_console.managerial_console import ManagerialConsole
-from tests.selenium.page_object.payment_module.new_payment_plan import NewPaymentPlan
-from tests.selenium.page_object.payment_module.payment_module import PaymentModule
-from tests.selenium.page_object.payment_module.payment_module_details import PaymentModuleDetails
-from tests.selenium.page_object.payment_module.program_cycle import (
-    ProgramCycleDetailsPage,
-    ProgramCyclePage,
-)
-from tests.selenium.page_object.payment_verification.payment_record import PaymentRecord
-from tests.selenium.page_object.payment_verification.payment_verification import PaymentVerification
-from tests.selenium.page_object.payment_verification.payment_verification_details import (
-    PaymentVerificationDetails,
-)
-from tests.selenium.page_object.people.people import People
-from tests.selenium.page_object.people.people_details import PeopleDetails
-from tests.selenium.page_object.program_log.payment_log import ProgramLog
-from tests.selenium.page_object.programme_details.programme_details import ProgrammeDetails
-from tests.selenium.page_object.programme_management.programme_management import ProgrammeManagement
-from tests.selenium.page_object.programme_population.households import Households
-from tests.selenium.page_object.programme_population.households_details import HouseholdsDetails
-from tests.selenium.page_object.programme_population.individuals import Individuals
-from tests.selenium.page_object.programme_population.individuals_details import IndividualsDetails
-from tests.selenium.page_object.programme_population.periodic_data_update_templates import (
-    PeriodicDatUpdateTemplates,
-    PeriodicDatUpdateTemplatesDetails,
-)
-from tests.selenium.page_object.programme_population.periodic_data_update_uploads import (
-    PeriodicDataUpdateUploads,
-)
-from tests.selenium.page_object.programme_users.programme_users import ProgrammeUsers
-from tests.selenium.page_object.registration_data_import.rdi_details_page import RDIDetailsPage
-from tests.selenium.page_object.registration_data_import.registration_data_import import (
-    RegistrationDataImport,
-)
-from tests.selenium.page_object.targeting.targeting import Targeting
-from tests.selenium.page_object.targeting.targeting_create import TargetingCreate
-from tests.selenium.page_object.targeting.targeting_details import TargetingDetails
 from pytest_django.live_server_helper import LiveServer
 from pytest_html_reporter import attach
 from selenium import webdriver
@@ -80,6 +28,85 @@ from hct_mis_api.apps.core.models import (
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.household.fixtures import DocumentTypeFactory
 from hct_mis_api.apps.household.models import DocumentType
+from tests.selenium.page_object.accountability.communication import (
+    AccountabilityCommunication,
+)
+from tests.selenium.page_object.accountability.comunication_details import (
+    AccountabilityCommunicationDetails,
+)
+from tests.selenium.page_object.accountability.surveys import AccountabilitySurveys
+from tests.selenium.page_object.accountability.surveys_details import (
+    AccountabilitySurveysDetails,
+)
+from tests.selenium.page_object.admin_panel.admin_panel import AdminPanel
+from tests.selenium.page_object.country_dashboard.country_dashboard import (
+    CountryDashboard,
+)
+from tests.selenium.page_object.filters import Filters
+from tests.selenium.page_object.grievance.details_feedback_page import (
+    FeedbackDetailsPage,
+)
+from tests.selenium.page_object.grievance.details_grievance_page import (
+    GrievanceDetailsPage,
+)
+from tests.selenium.page_object.grievance.feedback import Feedback
+from tests.selenium.page_object.grievance.grievance_dashboard import GrievanceDashboard
+from tests.selenium.page_object.grievance.grievance_tickets import GrievanceTickets
+from tests.selenium.page_object.grievance.new_feedback import NewFeedback
+from tests.selenium.page_object.grievance.new_ticket import NewTicket
+from tests.selenium.page_object.managerial_console.managerial_console import (
+    ManagerialConsole,
+)
+from tests.selenium.page_object.payment_module.new_payment_plan import NewPaymentPlan
+from tests.selenium.page_object.payment_module.payment_module import PaymentModule
+from tests.selenium.page_object.payment_module.payment_module_details import (
+    PaymentModuleDetails,
+)
+from tests.selenium.page_object.payment_module.program_cycle import (
+    ProgramCycleDetailsPage,
+    ProgramCyclePage,
+)
+from tests.selenium.page_object.payment_verification.payment_record import PaymentRecord
+from tests.selenium.page_object.payment_verification.payment_verification import (
+    PaymentVerification,
+)
+from tests.selenium.page_object.payment_verification.payment_verification_details import (
+    PaymentVerificationDetails,
+)
+from tests.selenium.page_object.people.people import People
+from tests.selenium.page_object.people.people_details import PeopleDetails
+from tests.selenium.page_object.program_log.payment_log import ProgramLog
+from tests.selenium.page_object.programme_details.programme_details import (
+    ProgrammeDetails,
+)
+from tests.selenium.page_object.programme_management.programme_management import (
+    ProgrammeManagement,
+)
+from tests.selenium.page_object.programme_population.households import Households
+from tests.selenium.page_object.programme_population.households_details import (
+    HouseholdsDetails,
+)
+from tests.selenium.page_object.programme_population.individuals import Individuals
+from tests.selenium.page_object.programme_population.individuals_details import (
+    IndividualsDetails,
+)
+from tests.selenium.page_object.programme_population.periodic_data_update_templates import (
+    PeriodicDatUpdateTemplates,
+    PeriodicDatUpdateTemplatesDetails,
+)
+from tests.selenium.page_object.programme_population.periodic_data_update_uploads import (
+    PeriodicDataUpdateUploads,
+)
+from tests.selenium.page_object.programme_users.programme_users import ProgrammeUsers
+from tests.selenium.page_object.registration_data_import.rdi_details_page import (
+    RDIDetailsPage,
+)
+from tests.selenium.page_object.registration_data_import.registration_data_import import (
+    RegistrationDataImport,
+)
+from tests.selenium.page_object.targeting.targeting import Targeting
+from tests.selenium.page_object.targeting.targeting_create import TargetingCreate
+from tests.selenium.page_object.targeting.targeting_details import TargetingDetails
 
 
 def pytest_addoption(parser) -> None:  # type: ignore
@@ -87,12 +114,20 @@ def pytest_addoption(parser) -> None:  # type: ignore
 
 
 def pytest_configure(config) -> None:  # type: ignore
+    env = Env()
+    settings.OUTPUT_DATA_ROOT = env("OUTPUT_DATA_ROOT", default="/tests/selenium/output_data")
     config.addinivalue_line("markers", "night: This marker is intended for e2e tests conducted during the night on CI")
-
     # delete all old screenshots
-    for file in os.listdir("report/screenshot"):
-        os.remove(os.path.join("report/screenshot", file))
-    from django.conf import settings
+    settings.REPORT_DIRECTORY = f"{settings.OUTPUT_DATA_ROOT}/report"
+    settings.DOWNLOAD_DIRECTORY = f"{settings.OUTPUT_DATA_ROOT}/report/downloads"
+    settings.SCREENSHOT_DIRECTORY = f"{settings.REPORT_DIRECTORY}/screenshot"
+    if not os.path.exists(settings.SCREENSHOT_DIRECTORY):
+        os.makedirs(settings.SCREENSHOT_DIRECTORY)
+    print("settings.SCREENSHOT_DIRECTORY", settings.SCREENSHOT_DIRECTORY)
+    print("*" * 70)
+
+    for file in os.listdir(settings.SCREENSHOT_DIRECTORY):
+        os.remove(os.path.join(settings.SCREENSHOT_DIRECTORY, file))
 
     settings.DEBUG = True
     settings.ALLOWED_HOSTS = ["localhost", "127.0.0.1", "10.0.2.2", os.getenv("DOMAIN", "")]
@@ -187,10 +222,10 @@ def driver() -> Chrome:
     chrome_options.add_argument("--disable-notifications")
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--window-size=1920,1080")
-    if not os.path.exists("./report/downloads/"):
-        os.makedirs("./report/downloads/")
+    if not os.path.exists(settings.DOWNLOAD_DIRECTORY):
+        os.makedirs(settings.DOWNLOAD_DIRECTORY)
     prefs = {
-        "download.default_directory": "./report/downloads/",
+        "download.default_directory": settings.DOWNLOAD_DIRECTORY,
     }
     chrome_options.add_experimental_option("prefs", prefs)
     driver = webdriver.Chrome(options=chrome_options)
@@ -600,9 +635,9 @@ def test_failed_check(request: FixtureRequest, browser: Chrome) -> None:
 
 # make a screenshot with a name of the test, date and time
 def screenshot(driver: Chrome, node_id: str) -> None:
-    if not os.path.exists("screenshot"):
-        os.makedirs("screenshot")
+    if not os.path.exists(settings.SCREENSHOT_DIRECTORY):
+        os.makedirs(settings.SCREENSHOT_DIRECTORY)
     file_name = f'{node_id}_{datetime.today().strftime("%Y-%m-%d_%H.%M")}.png'.replace("/", "_").replace("::", "__")
-    file_path = os.path.join("screenshot", file_name)
+    file_path = os.path.join(settings.SCREENSHOT_DIRECTORY, file_name)
     driver.get_screenshot_as_file(file_path)
     attach(data=driver.get_screenshot_as_png())

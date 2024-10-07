@@ -3,8 +3,11 @@ from django.core.management import call_command
 
 import pytest
 from freezegun import freeze_time
+
 from tests.selenium.page_object.programme_population.individuals import Individuals
-from tests.selenium.page_object.programme_population.individuals_details import IndividualsDetails
+from tests.selenium.page_object.programme_population.individuals_details import (
+    IndividualsDetails,
+)
 
 pytestmark = pytest.mark.django_db(transaction=True)
 

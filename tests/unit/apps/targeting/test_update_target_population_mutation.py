@@ -168,6 +168,7 @@ class TestUpdateTargetPopulationMutation(APITestCase):
         create_household({"size": 3, "residence_status": "HOST", "business_area": cls.business_area})
         create_household({"size": 3, "residence_status": "HOST", "business_area": cls.business_area})
         cls.program = ProgramFactory(status=Program.ACTIVE, business_area=cls.business_area)
+        cls.program_cycle = cls.program.cycles.first()
         cls.update_partner_access_to_program(partner, cls.program)
         cls.draft_target_population = TargetPopulation(
             name="draft_target_population",
@@ -177,6 +178,7 @@ class TestUpdateTargetPopulationMutation(APITestCase):
             created_by=cls.user,
             business_area=cls.business_area,
             program=cls.program,
+            program_cycle=cls.program_cycle,
         )
         cls.draft_target_population.save()
         cls.approved_target_population = TargetPopulation(
@@ -188,11 +190,11 @@ class TestUpdateTargetPopulationMutation(APITestCase):
             created_by=cls.user,
             business_area=cls.business_area,
             program=cls.program,
+            program_cycle=cls.program_cycle,
         )
         cls.approved_target_population.save()
         cls.approved_target_population.households.set(Household.objects.all())
         cls.target_populations = [cls.draft_target_population, cls.approved_target_population]
-        cls.program_cycle = cls.program.cycles.first()
 
     @staticmethod
     def get_targeting_criteria_for_rule(rule_filter: Dict) -> TargetingCriteria:
@@ -292,6 +294,7 @@ class TestUpdateTargetPopulationMutation(APITestCase):
             business_area=self.business_area,
             program=self.program,
             status=TargetPopulation.STATUS_PROCESSING,
+            program_cycle=self.program_cycle,
         )
         target_population_with_incorrect_status.save()
 

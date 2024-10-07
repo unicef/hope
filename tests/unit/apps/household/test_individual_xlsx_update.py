@@ -30,16 +30,12 @@ def valid_file() -> File:
 
 
 def valid_file_complex() -> File:
-    content = Path(
-        f"{settings.TESTS_ROOT}/apps/household//test_file/valid_updated_test_file_complex.xlsx"
-    ).read_bytes()
+    content = Path(f"{settings.TESTS_ROOT}/apps/household//test_file/valid_updated_test_file_complex.xlsx").read_bytes()
     return File(BytesIO(content), name="valid_updated_test_file_complex.xlsx")
 
 
 def invalid_file() -> File:
-    content = Path(
-        f"{settings.TESTS_ROOT}/apps/household/test_file/invalid_updated_test_file.xlsx"
-    ).read_bytes()
+    content = Path(f"{settings.TESTS_ROOT}/apps/household/test_file/invalid_updated_test_file.xlsx").read_bytes()
     return File(BytesIO(content), name="invalid_updated_test_file.xlsx")
 
 

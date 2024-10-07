@@ -18,6 +18,7 @@ omit =
         hct_mis_api/conftest.py
         hct_mis_api/config/settings.py
         hct_mis_api/apps/core/management/commands/*
+        hct_mis_api/apps/household/forms.py
 
 [report]
 # Regexes for lines to exclude from consideration

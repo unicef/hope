@@ -47,7 +47,7 @@ ENV PYTHONPYCACHEPREFIX=/tmp/pycache \
     PYTHONPATH=$PYPACKAGES/lib:$PYTHONPATH \
     PATH=$PYPACKAGES/bin:$PATH \
     XDG_RUNTIME_DIR=/run/user/"${UID}"
-
+ENV DJANGO_SETTINGS_MODULE=hct_mis_api.config.settings
 WORKDIR $CODE
 
 COPY --from=waitforit /data/waitforit /usr/local/bin/waitforit
@@ -82,12 +82,12 @@ RUN apt-get update \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
-ENV PYTHONPATH=$CODE/src:/test/:$PYTHONPATH
+ENV PYTHONPATH=$CODE/src:$CODE/test/:$PYTHONPATH
 RUN pdm sync --no-editable --no-self --no-isolation
 
 WORKDIR $CODE
 COPY ./src/ ./src/
-COPY ./tests /tests
+COPY ./tests ./tests
 COPY ./manage.py ./manage.py
 COPY .flake8 pyproject.toml pdm.lock ./
 COPY ./docker/entrypoint.sh /bin/
