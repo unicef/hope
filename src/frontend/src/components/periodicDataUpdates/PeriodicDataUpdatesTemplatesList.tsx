@@ -22,7 +22,7 @@ import { useTranslation } from 'react-i18next';
 import { ButtonTooltip } from '@components/core/ButtonTooltip';
 import { usePermissions } from '@hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
-import { PeriodicDataUpdateTemplateList } from '@restgenerated/models/PeriodicDataUpdateTemplateList';
+import { PeriodicDataUpdateTemplateList } from 'restgenerated/models/PeriodicDataUpdateTemplateList';
 
 const templatesHeadCells: HeadCell<PeriodicDataUpdateTemplateList>[] = [
   {

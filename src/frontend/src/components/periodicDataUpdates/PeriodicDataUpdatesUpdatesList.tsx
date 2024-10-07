@@ -11,7 +11,7 @@ import { fetchPeriodicDataUpdateUpdates } from '@api/periodicDataUpdateApi';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { PeriodicDataUpdatesUploadDetailsDialog } from '@components/periodicDataUpdates/PeriodicDataUpdatesUploadDetailsDialog';
-import { PeriodicDataUpdateUploadList } from '@restgenerated/models/PeriodicDataUpdateUploadList';
+import { PeriodicDataUpdateUploadList } from 'restgenerated/models/PeriodicDataUpdateUploadList';
 
 const updatesHeadCells: HeadCell<PeriodicDataUpdateUploadList>[] = [
   {

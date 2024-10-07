@@ -1,9 +1,9 @@
 import { api } from './api';
-import { PaginatedPeriodicDataUpdateTemplateListList } from '@restgenerated/models/PaginatedPeriodicDataUpdateTemplateListList';
-import { PeriodicDataUpdateUploadList } from '@restgenerated/models/PeriodicDataUpdateUploadList';
-import { PeriodicDataUpdateTemplateDetail } from '@restgenerated/models/PeriodicDataUpdateTemplateDetail';
-import { PeriodicDataUpdateUploadDetail } from '@restgenerated/models/PeriodicDataUpdateUploadDetail';
-import { PaginatedPeriodicFieldList } from '@restgenerated/models/PaginatedPeriodicFieldList';
+import { PaginatedPeriodicDataUpdateTemplateListList } from 'restgenerated/models/PaginatedPeriodicDataUpdateTemplateListList';
+import { PeriodicDataUpdateUploadList } from 'restgenerated/models/PeriodicDataUpdateUploadList';
+import { PeriodicDataUpdateTemplateDetail } from 'restgenerated/models/PeriodicDataUpdateTemplateDetail';
+import { PeriodicDataUpdateUploadDetail } from 'restgenerated/models/PeriodicDataUpdateUploadDetail';
+import { PaginatedPeriodicFieldList } from 'restgenerated/models/PaginatedPeriodicFieldList';
 
 export const fetchPeriodicDataUpdateTemplates = async (
   businessAreaSlug: string,

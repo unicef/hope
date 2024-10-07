@@ -1,5 +1,5 @@
 import { api } from './api';
-import { TargetPopulationList } from '@restgenerated/models/TargetPopulationList';
+import { TargetPopulationList } from 'restgenerated/models/TargetPopulationList';
 
 export const fetchTargetPopulations = async (
   businessAreaSlug: string,

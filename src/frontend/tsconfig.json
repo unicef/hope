@@ -31,7 +31,7 @@
       "@utils/*": ["src/utils/*"],
       "@hooks/*": ["src/hooks/*"],
       "@generated/*": ["src/__generated__/*"],
-      "@restgenerated/*": ["../frontend/restgenerated/*"]
+      "restgenerated/*": ["../frontend/restgenerated/*"]
     }
   },
   "include": [
