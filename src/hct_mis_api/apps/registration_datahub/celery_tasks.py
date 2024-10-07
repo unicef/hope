@@ -510,6 +510,10 @@ def fetch_biometric_deduplication_results_and_process(self: Any, deduplication_s
         BiometricDeduplicationService,
     )
 
+    if not deduplication_set_id:
+        logger.error("Program.deduplication_set_id is None")
+        return
+
     program = Program.objects.get(deduplication_set_id=deduplication_set_id)
     set_sentry_business_area_tag(program.business_area.name)
 
