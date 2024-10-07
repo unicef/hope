@@ -234,7 +234,7 @@ class BiometricDeduplicationService:
     def get_duplicates_for_merged_rdi_against_population(
         self, rdi: RegistrationDataImport
     ) -> QuerySet[DeduplicationEngineSimilarityPair]:
-        """Used in Grievance tickets creation for merged RDI"""
+        """Used in Grievance tickets creation for merging RDI"""
         rdi_pending_individuals = PendingIndividual.objects.filter(is_removed=False, registration_data_import=rdi).only(
             "id"
         )

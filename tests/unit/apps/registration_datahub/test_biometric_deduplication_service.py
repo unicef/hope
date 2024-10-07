@@ -471,26 +471,16 @@ class BiometricDeduplicationServiceTest(TestCase):
         ]
         service.store_similarity_pairs(str(self.program.deduplication_set_id), similarity_pairs)
 
-        duplicates = service.get_duplicates_for_merged_rdi_against_population(rdi1)
+        duplicates = service.get_duplicates_for_merged_rdi_against_population(rdi2)
 
-        assert len(duplicates) == 3
+        assert len(duplicates) == 1
         assert list(
             duplicates.order_by("similarity_score").values("individual1", "individual2", "similarity_score")
         ) == [
             {
-                "individual1": ind1.id,
-                "individual2": ind2.id,
-                "similarity_score": Decimal("70.00"),
-            },
-            {
-                "individual1": ind1.id,
+                "individual1": ind4.id,
                 "individual2": ind5.id,
-                "similarity_score": Decimal("80.00"),
-            },
-            {
-                "individual1": ind2.id,
-                "individual2": ind6.id,
-                "similarity_score": Decimal("90.00"),
+                "similarity_score": Decimal("70.00"),
             },
         ]
 
