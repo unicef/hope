@@ -38,7 +38,7 @@ class BiometricDeduplicationService:
             notification_url=f"https://{settings.DOMAIN_NAME}/api/rest/{program.business_area.slug}/programs/{str(program.id)}/registration-data/webhookdeduplication/",
             # notification_url=reverse("registration-data:webhook_deduplication", kwargs={"program_id": str(program.id), "business_area": program.business_area.slug}), # TODO MB why reverse is not working
             config=DeduplicationSetConfig(
-                face_distance_threshold=program.business_area.biometric_deduplication_threshold / 100
+                face_distance_threshold=1 - (program.business_area.biometric_deduplication_threshold / 100)
             ),
         )
         response_data = self.api.create_deduplication_set(deduplication_set)
