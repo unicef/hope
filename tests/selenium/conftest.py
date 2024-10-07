@@ -220,6 +220,7 @@ def driver() -> Chrome:
     chrome_options.add_argument("--disable-notifications")
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--window-size=1920,1080")
+    chrome_options.add_argument("--disable-dev-shm-usage")
     if not os.path.exists(settings.DOWNLOAD_DIRECTORY):
         os.makedirs(settings.DOWNLOAD_DIRECTORY)
     prefs = {
