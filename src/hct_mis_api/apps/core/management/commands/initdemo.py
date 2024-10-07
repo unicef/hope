@@ -1,3 +1,52 @@
+"""
+Django Management Command: initdemo
+
+This command initializes demo data for the application by performing the following steps:
+
+1. **Database Setup**:
+    - Waits for the default database connection to be available.
+    - Optionally drops existing databases unless the `--skip-drop` flag is used.
+    - Migrates the databases to apply the latest schema.
+    - Flushes specified databases to remove existing data.
+
+2. **Fixture Loading**:
+    - Loads a series of JSON fixtures into the databases to populate them with initial data.
+    - Rebuilds the Elasticsearch search index to ensure it's in sync with the loaded data.
+
+3. **Data Generation**:
+    - Generates additional data such as delivery mechanisms, payment plans, and reconciled payment plans.
+    - Updates Financial Service Providers (FSPs) with the latest information.
+
+4. **User Creation**:
+    - Creates users based on provided email lists, assigning appropriate roles and permissions.
+    - Users can be added as staff, superusers, or testers based on input.
+
+5. **Logging and Error Handling**:
+    - Logs key actions and errors to assist with debugging and monitoring the initialization process.
+
+**Usage Examples**:
+
+- Initialize demo data with default settings:
+  ```bash
+  python manage.py initdemo
+  ```
+
+- Initialize demo data without dropping existing databases:
+  ```bash
+  python manage.py initdemo --skip-drop
+  ```
+
+- Initialize demo data and add specific staff and tester users:
+  ```bash
+  python manage.py initdemo --email-list="admin@example.com,user@example.com" --tester-list="tester1@example.com,tester2@example.com"
+  ```
+
+**Environment Variables**:
+
+- `INITDEMO_EMAIL_LIST`: Comma-separated list of emails to be added as staff and superusers.
+- `INITDEMO_TESTER_LIST`: Comma-separated list of emails to be added as testers.
+"""
+
 import logging
 import os
 import time
