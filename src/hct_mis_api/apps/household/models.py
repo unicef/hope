@@ -53,7 +53,7 @@ from hct_mis_api.apps.utils.phone import (
 )
 
 if TYPE_CHECKING:
-    from hct_mis_api.aurora.models import Record
+    from hct_mis_api.contrib.aurora.models import Record
 
 BLANK = ""
 IDP = "IDP"
@@ -658,7 +658,7 @@ class Household(
 
     @property
     def flex_registrations_record(self) -> Optional["Record"]:
-        from hct_mis_api.aurora.models import Record
+        from hct_mis_api.contrib.aurora.models import Record
 
         return Record.objects.filter(id=self.flex_registrations_record_id).first()
 

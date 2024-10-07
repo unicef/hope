@@ -13,8 +13,8 @@ from hct_mis_api.apps.registration_datahub.celery_tasks import (
 )
 from hct_mis_api.apps.utils.logs import log_start_and_end
 from hct_mis_api.apps.utils.sentry import sentry_tags
-from hct_mis_api.aurora.models import Record, Registration
-from hct_mis_api.aurora.services.extract_record import extract
+from hct_mis_api.contrib.aurora.models import Record, Registration
+from hct_mis_api.contrib.aurora.services.extract_record import extract
 
 if TYPE_CHECKING:
     from uuid import UUID
