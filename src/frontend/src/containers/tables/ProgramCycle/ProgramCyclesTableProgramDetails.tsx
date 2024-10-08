@@ -1,4 +1,8 @@
-import { ProgramQuery, ProgramStatus } from '@generated/graphql';
+import {
+  ProgramCycleStatus,
+  ProgramQuery,
+  ProgramStatus,
+} from '@generated/graphql';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import React, { ReactElement, useState } from 'react';
 import { ClickableTableRow } from '@core/Table/ClickableTableRow';
@@ -42,17 +46,26 @@ export const ProgramCyclesTableProgramDetails = ({
     },
   });
 
+  const { registrationImports, targetPopulationsCount } = program;
+
   const canViewDetails = programId !== 'all';
+  const programHasRdi = registrationImports?.totalCount > 0;
+  const programHasTp = targetPopulationsCount > 0;
 
   const renderRow = (row: ProgramCycle): ReactElement => {
     const detailsUrl = `/${baseUrl}/payment-module/program-cycles/${row.id}`;
+
     const canEditProgramCycle =
       (row.status === 'Draft' || row.status === 'Active') &&
       hasPermissions(PERMISSIONS.PM_PROGRAMME_CYCLE_UPDATE, permissions);
+
     const canDeleteProgramCycle =
       row.status === 'Draft' &&
       data.results.length > 1 &&
-      hasPermissions(PERMISSIONS.PM_PROGRAMME_CYCLE_DELETE, permissions);
+      hasPermissions(PERMISSIONS.PM_PROGRAMME_CYCLE_DELETE, permissions) &&
+      !programHasRdi &&
+      !programHasTp;
+
     return (
       <ClickableTableRow key={row.id} data-cy="program-cycle-row">
         <TableCell data-cy="program-cycle-title">
