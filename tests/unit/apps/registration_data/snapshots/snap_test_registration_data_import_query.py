@@ -46,7 +46,7 @@ snapshots['TestRegistrationDataImportQuery::test_registration_data_import_datahu
                                 'percentage': 0.0
                             }
                         ],
-                        'isDeduplicated': 'NO',
+                        'biometricDeduplicated': 'NO',
                         'name': 'Lorem Ipsum 4',
                         'numberOfHouseholds': 184,
                         'numberOfIndividuals': 423,
@@ -105,7 +105,7 @@ snapshots['TestRegistrationDataImportQuery::test_registration_data_import_datahu
                                 'percentage': 100.0
                             }
                         ],
-                        'isDeduplicated': 'NO',
+                        'biometricDeduplicated': 'NO',
                         'name': 'Lorem Ipsum 3',
                         'numberOfHouseholds': 154,
                         'numberOfIndividuals': 323,
@@ -164,7 +164,7 @@ snapshots['TestRegistrationDataImportQuery::test_registration_data_import_datahu
                                 'percentage': 100.0
                             }
                         ],
-                        'isDeduplicated': 'YES',
+                        'biometricDeduplicated': 'YES',
                         'name': 'Lorem Ipsum 2',
                         'numberOfHouseholds': 154,
                         'numberOfIndividuals': 323,
@@ -207,7 +207,7 @@ snapshots['TestRegistrationDataImportQuery::test_registration_data_import_datahu
                                 'percentage': 0.0
                             }
                         ],
-                        'isDeduplicated': 'NO',
+                        'biometricDeduplicated': 'NO',
                         'name': 'Lorem Ipsum',
                         'numberOfHouseholds': 54,
                         'numberOfIndividuals': 123,

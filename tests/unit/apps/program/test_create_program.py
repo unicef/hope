@@ -6,6 +6,7 @@ from parameterized import parameterized
 from hct_mis_api.apps.account.fixtures import (
     BusinessAreaFactory,
     PartnerFactory,
+    RoleFactory,
     UserFactory,
 )
 from hct_mis_api.apps.account.permissions import Permissions
@@ -17,6 +18,7 @@ from hct_mis_api.apps.core.fixtures import (
 )
 from hct_mis_api.apps.core.models import (
     BusinessArea,
+    BusinessAreaPartnerThrough,
     DataCollectingType,
     PeriodicFieldData,
 )
@@ -109,11 +111,18 @@ class TestCreateProgram(APITestCase):
         # create UNICEF partner - it will always be granted access while creating program
         PartnerFactory(name="UNICEF")
 
-        # partner allowed within BA - will be granted access for ALL_PARTNERS_ACCESS type
-        partner_allowed_in_BA = PartnerFactory(name="Other Partner")
-        partner_allowed_in_BA.allowed_business_areas.set([cls.business_area])
+        # partner with role in BA - will be granted access for ALL_PARTNERS_ACCESS type
+        partner_with_role_in_BA = PartnerFactory(name="Other Partner")
+        partner_with_role_in_BA.allowed_business_areas.set([cls.business_area])
+        role = RoleFactory(name="Role in BA")
+        ba_partner_through = BusinessAreaPartnerThrough.objects.create(
+            business_area=cls.business_area,
+            partner=partner_with_role_in_BA,
+        )
+        ba_partner_through.roles.set([role])
 
-        PartnerFactory(name="Partner not allowed in BA")
+        partner_without_role_in_BA = PartnerFactory(name="Partner without role in BA")
+        partner_without_role_in_BA.allowed_business_areas.set([cls.business_area])
 
         country_afg = CountryFactory(name="Afghanistan")
         country_afg.business_areas.set([cls.business_area])

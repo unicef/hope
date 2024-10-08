@@ -1,18 +1,18 @@
 {
   "name": "frontend",
-  "version": "2.11.0",
+  "version": "3.0.0",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "build-for-backend": "yarn build --outDir '../backend/hct_mis_api/apps/web/static/web'",
+    "build-for-backend": "yarn build --outDir '../hct_mis_api/apps/web/static/web' --emptyOutDir",
     "build-and-watch": "yarn build-for-backend --watch",
     "lint": "eslint 'src/**/*.{ts,tsx}'",
     "test": "TZ=UTC jest --config jest.config.ts",
     "preview": "vite preview",
     "download-dev-schema": "wget --no-check-certificate -O data/schema.graphql https://dev-hct.unitst.org/api/graphql/schema.graphql",
-    "download-local-schema": "wget --no-check-certificate -O data/schema.graphql http://localhost:8080/api/graphql/schema.graphql",
+    "download-local-schema": "wget --no-check-certificate -O data/schema.graphql http://localhost:3000/api/graphql/schema.graphql",
     "generate-types": "yarn download-dev-schema && graphql-codegen --config codegen.yml --debug",
     "generate-types-local": "yarn download-local-schema && graphql-codegen --config codegen.yml --debug"
   },

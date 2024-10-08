@@ -20,19 +20,19 @@ export const headCells = [
   },
   {
     disablePadding: false,
-    label: 'Total Entitled Quantity (USD)',
+    label: 'Total Entitled Quantity',
     id: 'totalEntitledQuantity',
     numeric: true,
   },
   {
     disablePadding: false,
-    label: 'Total Undelivered Quantity (USD)',
+    label: 'Total Undelivered Quantity',
     id: 'totalUndeliveredQuantity',
     numeric: true,
   },
   {
     disablePadding: false,
-    label: 'Total Delivered Quantity (USD)',
+    label: 'Total Delivered Quantity',
     id: 'totalDeliveredQuantity',
     numeric: true,
   },

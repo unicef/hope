@@ -7,9 +7,6 @@ from django.core.management import call_command
 
 import pytest
 from dateutil.relativedelta import relativedelta
-from tests.selenium.helpers.date_time_format import FormatTime
-from tests.selenium.page_object.programme_details.programme_details import ProgrammeDetails
-from tests.selenium.page_object.programme_management.programme_management import ProgrammeManagement
 from selenium.webdriver import Keys
 
 from hct_mis_api.apps.account.models import User
@@ -28,6 +25,13 @@ from hct_mis_api.apps.targeting.fixtures import (
     TargetPopulationFactory,
 )
 from hct_mis_api.apps.targeting.models import TargetPopulation
+from tests.selenium.helpers.date_time_format import FormatTime
+from tests.selenium.page_object.programme_details.programme_details import (
+    ProgrammeDetails,
+)
+from tests.selenium.page_object.programme_management.programme_management import (
+    ProgrammeManagement,
+)
 
 pytestmark = pytest.mark.django_db(transaction=True)
 
@@ -266,7 +270,7 @@ class TestSmokeProgrammeDetails:
         assert program.administrative_areas_of_implementation in pageProgrammeDetails.getLabelAdministrativeAreas().text
         assert program.description in pageProgrammeDetails.getLabelDescription().text
         assert "Yes" if program.cash_plus else "No" in pageProgrammeDetails.getLabelCashPlus().text
-        assert "Only selected partners within the business area" in pageProgrammeDetails.getLabelPartnerAccess().text
+        assert "Only Selected Partners within the business area" in pageProgrammeDetails.getLabelPartnerAccess().text
         assert "0" in pageProgrammeDetails.getLabelProgramSize().text
 
     def test_edit_programme_from_details(
@@ -277,6 +281,7 @@ class TestSmokeProgrammeDetails:
     ) -> None:
         pageProgrammeDetails.selectGlobalProgramFilter("Test Programm")
         pageProgrammeDetails.getButtonEditProgram().click()
+        pageProgrammeDetails.getSelectEditProgramDetails().click()
         pageProgrammeManagement.getInputProgrammeName().send_keys(Keys.CONTROL + "a")
         pageProgrammeManagement.getInputProgrammeName().send_keys("New name after Edit")
         pageProgrammeManagement.getInputProgrammeCode().send_keys(Keys.CONTROL + "a")
@@ -289,10 +294,7 @@ class TestSmokeProgrammeDetails:
         pageProgrammeManagement.getInputEndDate().send_keys(FormatTime(1, 10, 2099).numerically_formatted_date)
         pageProgrammeManagement.getButtonNext().click()
         pageProgrammeManagement.getButtonAddTimeSeriesField()
-        pageProgrammeManagement.getButtonNext().click()
         programme_creation_url = pageProgrammeDetails.driver.current_url
-        pageProgrammeManagement.getAccessToProgram().click()
-        pageProgrammeManagement.selectWhoAccessToProgram("None of the partners should have access")
         pageProgrammeManagement.getButtonSave().click()
         # Check Details page
         assert "details" in pageProgrammeDetails.wait_for_new_url(programme_creation_url).split("/")
@@ -753,6 +755,7 @@ class TestProgrammeDetails:
         pageProgrammeDetails.selectGlobalProgramFilter("ThreeCyclesProgramme")
         assert "ACTIVE" in pageProgrammeDetails.getProgramStatus().text
         pageProgrammeDetails.getButtonEditProgram().click()
+        pageProgrammeDetails.getSelectEditProgramDetails().click()
         pageProgrammeManagement.getInputProgrammeName()
         pageProgrammeManagement.getInputStartDate().click()
         pageProgrammeManagement.getInputStartDate().send_keys(Keys.CONTROL + "a")
@@ -762,10 +765,7 @@ class TestProgrammeDetails:
         pageProgrammeManagement.getInputEndDate().send_keys(FormatTime(1, 10, 2022).numerically_formatted_date)
         pageProgrammeManagement.getButtonNext().click()
         pageProgrammeManagement.getButtonAddTimeSeriesField()
-        pageProgrammeManagement.getButtonNext().click()
         programme_creation_url = pageProgrammeDetails.driver.current_url
-        pageProgrammeManagement.getAccessToProgram().click()
-        pageProgrammeManagement.selectWhoAccessToProgram("None of the partners should have access")
         pageProgrammeManagement.getButtonSave().click()
         # Check Details page
         with pytest.raises(Exception):

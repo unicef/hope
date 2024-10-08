@@ -1,7 +1,8 @@
 from time import sleep
 
-from tests.selenium.helpers.helper import Common
 from selenium.webdriver.remote.webelement import WebElement
+
+from tests.selenium.helpers.helper import Common
 
 
 class BaseComponents(Common):

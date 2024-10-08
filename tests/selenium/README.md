@@ -44,11 +44,11 @@ brew install wkhtmltopdf pango postgis gdal
 <b><h3>Start tests:</h3></b>
 ```bash
 pyenv activate new-venv
-cd backend
-source ../local_selenium_env.sh 
+cd src
+source ../development_tools/local_selenium_env.sh 
 
 # second tab: 
-docker compose -f compose.selenium.local.yml up --build
+docker compose -f ../development_tools/compose.selenium.local.yml up --build 
 # first tab: 
-python -m pytest -svvv selenium_tests --html-report=./report/report.html
+python -m pytest -svvv ../tests/selenium --html-report=../tests/selenium/report/report.html
 ```

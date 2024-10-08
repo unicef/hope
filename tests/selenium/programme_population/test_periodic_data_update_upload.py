@@ -2,14 +2,10 @@ import os
 from tempfile import NamedTemporaryFile, _TemporaryFileWrapper
 from typing import Any
 
+from django.conf import settings
+
 import openpyxl
 import pytest
-from tests.selenium.page_object.programme_population.periodic_data_update_templates import (
-    PeriodicDatUpdateTemplates,
-)
-from tests.selenium.page_object.programme_population.periodic_data_update_uploads import (
-    PeriodicDataUpdateUploads,
-)
 
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
 from hct_mis_api.apps.core.models import (
@@ -38,6 +34,12 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from tests.selenium.page_object.programme_population.individuals import Individuals
+from tests.selenium.page_object.programme_population.periodic_data_update_templates import (
+    PeriodicDatUpdateTemplates,
+)
+from tests.selenium.page_object.programme_population.periodic_data_update_uploads import (
+    PeriodicDataUpdateUploads,
+)
 
 pytestmark = pytest.mark.django_db(transaction=True)
 
@@ -45,8 +47,8 @@ pytestmark = pytest.mark.django_db(transaction=True)
 @pytest.fixture
 def clear_downloaded_files() -> None:
     yield
-    for file in os.listdir("./report/downloads/"):
-        os.remove(os.path.join("./report/downloads", file))
+    for file in os.listdir(settings.DOWNLOAD_DIRECTORY):
+        os.remove(os.path.join(settings.DOWNLOAD_DIRECTORY, file))
 
 
 @pytest.fixture

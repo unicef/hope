@@ -5,6 +5,12 @@ import graphene
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 
+from hct_mis_api.apps.account.permissions import (
+    BaseNodePermissionMixin,
+    Permissions,
+    hopePermissionClass,
+)
+
 
 class DeduplicationResultNode(graphene.ObjectType):
     hit_id = graphene.ID()
@@ -31,3 +37,17 @@ class DeduplicationResultNode(graphene.ObjectType):
 
     def resolve_distinct(self, info: Any) -> bool:
         return self.get("distinct", False)
+
+
+class DeduplicationEngineSimilarityPairIndividualNode(graphene.ObjectType):
+    photo = graphene.String()
+    full_name = graphene.String()
+    unicef_id = graphene.String()
+
+
+class DeduplicationEngineSimilarityPairNode(BaseNodePermissionMixin, graphene.ObjectType):
+    permission_classes = (hopePermissionClass(Permissions.GRIEVANCES_VIEW_BIOMETRIC_RESULTS),)
+
+    individual1 = graphene.Field(DeduplicationEngineSimilarityPairIndividualNode)
+    individual2 = graphene.Field(DeduplicationEngineSimilarityPairIndividualNode)
+    similarity_score = graphene.String()

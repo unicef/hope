@@ -22,7 +22,6 @@ from hct_mis_api.apps.grievance.fixtures import (
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.registration_data.models import DeduplicationEngineSimilarityPair
 from hct_mis_api.apps.sanction_list.models import SanctionListIndividual
 
 
@@ -104,15 +103,16 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
                 selectedDuplicates {
                   unicefId
                 }
-                dedupEngineSimilarityPair {
-                  individual1 {
-                    fullName
-                  }
-                  individual2 {
-                    fullName
-                  }
-                  similarityScore
-                  isDuplicate
+                extraData{
+                    dedupEngineSimilarityPair {
+                      individual1 {
+                        fullName
+                      }
+                      individual2 {
+                        fullName
+                      }
+                      similarityScore
+                    }
                 }
               }
             }
@@ -239,18 +239,11 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
             business_area=cls.business_area,
             status=GrievanceTicket.STATUS_FOR_APPROVAL,
         )
-        dedup_engine_similarity_pair = DeduplicationEngineSimilarityPair.objects.create(
-            program=program_one,
-            individual1=ind1,
-            individual2=ind2,
-            similarity_score=55.55,
-        )
         ticket_details = TicketNeedsAdjudicationDetailsFactory(
             ticket=cls.needs_adjudication_grievance_ticket,
             golden_records_individual=first_individual,
             possible_duplicate=second_individual,
             selected_individual=None,
-            dedup_engine_similarity_pair=dedup_engine_similarity_pair,
         )
         ticket_details.possible_duplicates.add(first_individual, second_individual)
 

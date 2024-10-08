@@ -30,6 +30,11 @@ from hct_mis_api.apps.household.fixtures import (
     create_household_and_individuals,
 )
 from hct_mis_api.apps.household.models import DocumentType, Individual
+from hct_mis_api.apps.payment.fixtures import (
+    DeliveryMechanismDataFactory,
+    generate_delivery_mechanisms,
+)
+from hct_mis_api.apps.payment.models import DeliveryMechanism
 from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
@@ -204,13 +209,17 @@ class TestIndividualQuery(APITestCase):
             "id": "8ff39244-2884-459b-ad14-8d63a6fe4a4a",
         }
         cls.individual_2 = IndividualFactory(
-            household=cls.household_2, program=cls.program_other, **cls.individual_to_create_2_data
+            household=cls.household_2,
+            program=cls.program_other,
+            **cls.individual_to_create_2_data,
         )
         cls.household_2.head_of_household = cls.individual_2
         cls.household_2.save()
 
         cls.bank_account_info = BankAccountInfoFactory(
-            individual=cls.individuals[5], bank_name="ING", bank_account_number=11110000222255558888999925
+            individual=cls.individuals[5],
+            bank_name="ING",
+            bank_account_number=11110000222255558888999925,
         )
 
         cls.individual_unicef_id_to_search = Individual.objects.get(full_name="Benjamin Butler").unicef_id
@@ -275,7 +284,12 @@ class TestIndividualQuery(APITestCase):
         )
 
         cls.area1 = AreaFactory(name="City Test1", area_type=area_type_level_1, p_code="area1")
-        cls.area2 = AreaFactory(name="City Test2", area_type=area_type_level_2, p_code="area2", parent=cls.area1)
+        cls.area2 = AreaFactory(
+            name="City Test2",
+            area_type=area_type_level_2,
+            p_code="area2",
+            parent=cls.area1,
+        )
 
         cls.household_one.set_admin_areas(cls.area2)
 
@@ -330,7 +344,10 @@ class TestIndividualQuery(APITestCase):
 
     def test_individual_query_single_different_program_in_header(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], self.business_area, self.program
+            self.user,
+            [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS],
+            self.business_area,
+            self.program,
         )
 
         self.snapshot_graphql_request(
@@ -391,7 +408,10 @@ class TestIndividualQuery(APITestCase):
 
     def test_individual_query_draft(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST], self.business_area, self.program_draft
+            self.user,
+            [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST],
+            self.business_area,
+            self.program_draft,
         )
 
         self.snapshot_graphql_request(
@@ -447,7 +467,10 @@ class TestIndividualQuery(APITestCase):
                     "Business-Area": self.business_area.slug,
                 },
             },
-            variables={"documentNumber": f"{self.national_id.document_number}", "documentType": "national_id"},
+            variables={
+                "documentNumber": f"{self.national_id.document_number}",
+                "documentType": "national_id",
+            },
         )
 
     @parameterized.expand(
@@ -540,7 +563,10 @@ class TestIndividualQuery(APITestCase):
                     "Business-Area": self.business_area.slug,
                 },
             },
-            variables={"documentNumber": self.birth_certificate.document_number, "documentType": "birth_certificate"},
+            variables={
+                "documentNumber": self.birth_certificate.document_number,
+                "documentType": "birth_certificate",
+            },
         )
 
     @parameterized.expand(
@@ -562,7 +588,10 @@ class TestIndividualQuery(APITestCase):
                     "Business-Area": self.business_area.slug,
                 },
             },
-            variables={"documentNumber": self.disability_card.document_number, "documentType": "disability_card"},
+            variables={
+                "documentNumber": self.disability_card.document_number,
+                "documentType": "disability_card",
+            },
         )
 
     @parameterized.expand(
@@ -584,7 +613,10 @@ class TestIndividualQuery(APITestCase):
                     "Business-Area": self.business_area.slug,
                 },
             },
-            variables={"documentNumber": self.drivers_license.document_number, "documentType": "drivers_license"},
+            variables={
+                "documentNumber": self.drivers_license.document_number,
+                "documentType": "drivers_license",
+            },
         )
 
     @parameterized.expand(
@@ -610,7 +642,9 @@ class TestIndividualQuery(APITestCase):
 
     def test_individual_query_all_for_all_programs(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST], self.business_area
+            self.user,
+            [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST],
+            self.business_area,
         )
 
         self.snapshot_graphql_request(
@@ -623,9 +657,13 @@ class TestIndividualQuery(APITestCase):
             },
         )
 
-    def test_individual_query_all_for_all_programs_user_with_no_program_access(self) -> None:
+    def test_individual_query_all_for_all_programs_user_with_no_program_access(
+        self,
+    ) -> None:
         self.create_user_role_with_permissions(
-            self.user_with_no_access, [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST], self.business_area
+            self.user_with_no_access,
+            [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST],
+            self.business_area,
         )
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
@@ -705,14 +743,26 @@ class TestIndividualWithFlexFieldsQuery(APITestCase):
         # populate pdu fields with null values
         cls.individual.flex_fields = populate_pdu_with_null_values(cls.program, {})
         # populate some values - in the Individual Query only populated values should be returned
-        cls.individual.flex_fields["pdu_field_1"]["1"] = {"value": 123.45, "collection_date": "2021-01-01"}
-        cls.individual.flex_fields["pdu_field_1"]["2"] = {"value": 234.56, "collection_date": "2021-01-01"}
-        cls.individual.flex_fields["pdu_field_2"]["4"] = {"value": "Value D", "collection_date": "2021-01-01"}
+        cls.individual.flex_fields["pdu_field_1"]["1"] = {
+            "value": 123.45,
+            "collection_date": "2021-01-01",
+        }
+        cls.individual.flex_fields["pdu_field_1"]["2"] = {
+            "value": 234.56,
+            "collection_date": "2021-01-01",
+        }
+        cls.individual.flex_fields["pdu_field_2"]["4"] = {
+            "value": "Value D",
+            "collection_date": "2021-01-01",
+        }
         cls.individual.save()
 
     def test_individual_query_single_with_flex_fields(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS], self.business_area, self.program
+            self.user,
+            [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS],
+            self.business_area,
+            self.program,
         )
 
         self.snapshot_graphql_request(
@@ -741,4 +791,108 @@ class TestIndividualWithFlexFieldsQuery(APITestCase):
                     "4": {"value": "Value D", "collection_date": "2021-01-01"},
                 },
             },
+        )
+
+
+class TestIndividualWithDeliveryMechanismsDataQuery(APITestCase):
+    databases = "__all__"
+
+    INDIVIDUAL_QUERY = """
+    query Individual($id: ID!) {
+      individual(id: $id) {
+        fullName
+        givenName
+        familyName
+        phoneNo
+        birthDate
+        deliveryMechanismsData {
+            name
+            isValid
+            individualTabData
+        }
+      }
+    }
+    """
+
+    @classmethod
+    def setUpTestData(cls) -> None:
+        super().setUpTestData()
+        cls.user = UserFactory()
+        cls.business_area = create_afghanistan()
+        generate_delivery_mechanisms()
+        cls.dm_atm_card = DeliveryMechanism.objects.get(code="atm_card")
+        cls.dm_mobile_money = DeliveryMechanism.objects.get(code="mobile_money")
+
+        cls.program = ProgramFactory(
+            name="Test Program for Individual Query",
+            business_area=cls.business_area,
+            status=Program.ACTIVE,
+        )
+
+        household, individuals = create_household_and_individuals(
+            household_data={"business_area": cls.business_area, "program": cls.program},
+            individuals_data=[
+                {
+                    "full_name": "Benjamin Butler",
+                    "given_name": "Benjamin",
+                    "family_name": "Butler",
+                    "phone_no": "(953)682-4596",
+                    "birth_date": "1943-07-30",
+                    "id": "ffb2576b-126f-42de-b0f5-ef889b7bc1fe",
+                    "business_area": cls.business_area,
+                },
+            ],
+        )
+        cls.individual = individuals[0]
+        DeliveryMechanismDataFactory(
+            individual=cls.individual,
+            delivery_mechanism=cls.dm_atm_card,
+            data={
+                "card_number__atm_card": "123",
+                "card_expiry_date__atm_card": "2022-01-01",
+                "name_of_cardholder__atm_card": "Marek",
+            },
+            is_valid=True,
+        )
+        DeliveryMechanismDataFactory(
+            individual=cls.individual,
+            delivery_mechanism=cls.dm_mobile_money,
+            data={
+                "service_provider_code__mobile_money": "ABC",
+                "delivery_phone_number__mobile_money": "123456789",
+                "provider__mobile_money": "Provider",
+            },
+            is_valid=False,
+        )
+
+    @parameterized.expand(
+        [
+            (
+                "with_permissions",
+                [
+                    Permissions.POPULATION_VIEW_INDIVIDUALS_LIST,
+                    Permissions.POPULATION_VIEW_INDIVIDUAL_DELIVERY_MECHANISMS_SECTION,
+                ],
+            ),
+            (
+                "without_permissions",
+                [
+                    Permissions.POPULATION_VIEW_INDIVIDUALS_LIST,
+                ],
+            ),
+        ]
+    )
+    def test_individual_query_delivery_mechanisms_data(self, _: Any, permissions: List[Permissions]) -> None:
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
+
+        self.snapshot_graphql_request(
+            request_string=self.INDIVIDUAL_QUERY,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+            variables={"id": self.id_to_base64(self.individual.id, "IndividualNode")},
         )

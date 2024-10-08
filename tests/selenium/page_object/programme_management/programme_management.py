@@ -1,9 +1,10 @@
 from time import sleep
 
-from tests.selenium.page_object.base_components import BaseComponents
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webelement import WebElement
+
+from tests.selenium.page_object.base_components import BaseComponents
 
 
 class ProgrammeManagement(BaseComponents):
@@ -42,7 +43,10 @@ class ProgrammeManagement(BaseComponents):
     calendarDays = "//*[@data-timestamp]"
     filtersSearch = '//*[@data-cy="filters-search"]/div/input'
     buttonApply = 'button[data-cy="button-filters-clear"]'
-    buttonEditProgram = 'a[data-cy="button-edit-program"]'
+    buttonEditProgram = 'button[data-cy="button-edit-program"]'
+    selectEditProgramDetails = 'li[data-cy="menu-item-edit-details"]'
+    selectEditProgramPartners = 'li[data-cy="menu-item-edit-partners"]'
+    selectOptionsContainer = 'ul[data-cy="select-options-container"]'
     inputProgrammeCode = 'input[data-cy="input-programmeCode"]'
     tableRow = 'tr[data-cy="table-row-{}"]'
     stepButtonDetails = 'button[data-cy="step-button-details"]'
@@ -113,6 +117,9 @@ class ProgrammeManagement(BaseComponents):
     def selectWhoAccessToProgram(self, name: str) -> None:
         self.select_option_by_name(name)
 
+    def getSelectOptionsContainer(self) -> WebElement:
+        return self.wait_for(self.selectOptionsContainer)
+
     def getButtonAddPartner(self) -> WebElement:
         return self.wait_for(self.buttonAddPartner)
 
@@ -122,9 +129,12 @@ class ProgrammeManagement(BaseComponents):
     def getButtonDeletePopup(self) -> WebElement:
         return self.wait_for("/html/body/div[2]/div[3]/div/div[3]/div/button[2]", By.XPATH)
 
+    def getInputPartner(self) -> WebElement:
+        return self.wait_for(self.inputPartner)
+
     def choosePartnerOption(self, optionName: str) -> None:
         # Todo: Change undefined to name of Partner
-        self.wait_for(self.inputPartner).click()
+        self.getInputPartner().click()
         self.select_option_by_name(optionName)
 
     def getInputProgrammeName(self) -> WebElement:
@@ -226,6 +236,12 @@ class ProgrammeManagement(BaseComponents):
 
     def getButtonEditProgram(self) -> WebElement:
         return self.wait_for(self.buttonEditProgram)
+
+    def getSelectEditProgramDetails(self) -> WebElement:
+        return self.wait_for(self.selectEditProgramDetails)
+
+    def getSelectEditProgramPartners(self) -> WebElement:
+        return self.wait_for(self.selectEditProgramPartners)
 
     def getInputProgrammeCode(self) -> WebElement:
         return self.wait_for(self.inputProgrammeCode)

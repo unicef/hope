@@ -30,7 +30,7 @@ TASKS_SCHEDULES = {
     #     "schedule": crontab(hour="*/24"),
     # },
     "extract_records_task": {
-        "task": "hct_mis_api.aurora.celery_tasks.extract_records_task",
+        "task": "hct_mis_api.contrib.aurora.celery_tasks.extract_records_task",
         "schedule": crontab(hour="*/24"),
     },
     "remove_old_cash_plan_payment_verification_xls": {
@@ -42,7 +42,7 @@ TASKS_SCHEDULES = {
         "schedule": crontab(minute="*/15"),
     },
     "clean_old_record_files_task": {
-        "task": "hct_mis_api.aurora.celery_tasks.clean_old_record_files_task",
+        "task": "hct_mis_api.contrib.aurora.celery_tasks.clean_old_record_files_task",
         "schedule": crontab(month_of_year="2-12/2"),
     },
     "periodic_sync_payment_gateway_fsp": {

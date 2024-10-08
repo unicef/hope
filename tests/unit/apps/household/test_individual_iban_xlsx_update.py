@@ -37,23 +37,17 @@ def valid_file() -> File:
 
 
 def invalid_file_no_match() -> File:
-    content = Path(
-        f"{settings.TESTS_ROOT}/apps/household/test_file/iban_update_invalid_no_match.xlsx"
-    ).read_bytes()
+    content = Path(f"{settings.TESTS_ROOT}/apps/household/test_file/iban_update_invalid_no_match.xlsx").read_bytes()
     return File(BytesIO(content), name="iban_update_invalid_no_match.xlsx")
 
 
 def invalid_file_empty_cell() -> File:
-    content = Path(
-        f"{settings.TESTS_ROOT}/apps/household/test_file/iban_update_invalid_empty_cell.xlsx"
-    ).read_bytes()
+    content = Path(f"{settings.TESTS_ROOT}/apps/household/test_file/iban_update_invalid_empty_cell.xlsx").read_bytes()
     return File(BytesIO(content), name="iban_update_invalid_empty_cell.xlsx")
 
 
 def invalid_file_bad_columns() -> File:
-    content = Path(
-        f"{settings.TESTS_ROOT}/apps/household/test_file/iban_update_invalid_bad_columns.xlsx"
-    ).read_bytes()
+    content = Path(f"{settings.TESTS_ROOT}/apps/household/test_file/iban_update_invalid_bad_columns.xlsx").read_bytes()
     return File(BytesIO(content), name="iban_update_invalid_bad_columns.xlsx")
 
 

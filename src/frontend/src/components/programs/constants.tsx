@@ -2,11 +2,11 @@ import { ProgramPartnerAccess } from '@generated/graphql';
 
 export const PartnerAccess = {
   [ProgramPartnerAccess.NonePartnersAccess]:
-    'None of the partners should have access',
+    'None of the Partners should have access',
   [ProgramPartnerAccess.SelectedPartnersAccess]:
-    'Only selected partners within the business area',
+    'Only Selected Partners within the business area',
   [ProgramPartnerAccess.AllPartnersAccess]:
-    'All partners within the business area',
+    'All Current Partners within the business area',
 };
 
 export const partnerAccessChoices = Object.entries(PartnerAccess).map(

@@ -32,6 +32,7 @@ from hct_mis_api.apps.program.inputs import (
     CopyProgramInput,
     CreateProgramInput,
     UpdateProgramInput,
+    UpdateProgramPartnersInput,
 )
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.program.schema import ProgramNode
@@ -145,9 +146,6 @@ class UpdateProgram(
         check_concurrency_version_in_mutation(kwargs.get("version"), program)
         old_program = Program.objects.get(id=program_id)
         business_area = program.business_area
-        partners_data = program_data.pop("partners", [])
-        partner = info.context.user.partner
-        partner_access = program_data.get("partner_access", program.partner_access)
         pdu_fields = program_data.pop("pdu_fields", None)
         programme_code = program_data.get("programme_code", "")
 
@@ -163,12 +161,6 @@ class UpdateProgram(
             elif status_to_set == Program.FINISHED:
                 cls.has_permission(info, Permissions.PROGRAMME_FINISH, business_area)
 
-        if status_to_set not in [Program.ACTIVE, Program.FINISHED]:
-            cls.validate_partners_data(
-                partners_data=partners_data,
-                partner_access=partner_access,
-                partner=partner,
-            )
         data_collecting_type_code = program_data.pop("data_collecting_type_code", None)
         data_collecting_type = old_program.data_collecting_type
         if data_collecting_type_code and data_collecting_type_code != data_collecting_type.code:
@@ -199,13 +191,6 @@ class UpdateProgram(
             if hasattr(program, attrib):
                 setattr(program, attrib, value)
         program.full_clean()
-        # update partner access only for SELECTED_PARTNERS_ACCESS type, since NONE and ALL are handled through signal
-        if (
-            status_to_set not in [Program.ACTIVE, Program.FINISHED]
-            and partner_access == Program.SELECTED_PARTNERS_ACCESS
-        ):
-            partners_data = create_program_partner_access(partners_data, program, partner_access)
-            remove_program_partner_access(partners_data, program)
         program.save()
 
         if status_to_set == Program.FINISHED and program.biometric_deduplication_enabled:
@@ -214,6 +199,54 @@ class UpdateProgram(
         if pdu_fields is not None:
             FlexibleAttributeForPDUService(program, pdu_fields).update_pdu_flex_attributes_in_program_update()
             populate_pdu_new_rounds_with_null_values_task.delay(program_id)
+
+        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, old_program, program)
+        return UpdateProgram(program=program)
+
+
+class UpdateProgramPartners(
+    PartnersDataValidator,
+    PermissionMutation,
+    ValidationErrorMutationMixin,
+):
+    program = graphene.Field(ProgramNode)
+
+    class Arguments:
+        program_data = UpdateProgramPartnersInput()
+        version = BigInt(required=False)
+
+    @classmethod
+    @transaction.atomic
+    @is_authenticated
+    def processed_mutate(cls, root: Any, info: Any, program_data: Dict, **kwargs: Any) -> "UpdateProgram":
+        program_id = decode_id_string(program_data.pop("id", None))
+        program = Program.objects.select_for_update().get(id=program_id)
+        check_concurrency_version_in_mutation(kwargs.get("version"), program)
+        old_program = Program.objects.get(id=program_id)
+        business_area = program.business_area
+        partners_data = program_data.pop("partners", [])
+        partner = info.context.user.partner
+        partner_access = program_data.get("partner_access", None)
+        old_partner_access = old_program.partner_access
+
+        cls.has_permission(info, Permissions.PROGRAMME_UPDATE, business_area)
+
+        cls.validate_partners_data(
+            partners_data=partners_data,
+            partner_access=partner_access,
+            partner=partner,
+        )
+
+        program.partner_access = partner_access
+
+        # update partner access for ALL_PARTNERS_ACCESS type if it was not changed but the partners need to be refetched
+        if partner_access == old_partner_access and partner_access == Program.ALL_PARTNERS_ACCESS:
+            create_program_partner_access([], program, partner_access)
+        # update partner access only for SELECTED_PARTNERS_ACCESS type, since update to NONE and ALL are handled through signal
+        if partner_access == Program.SELECTED_PARTNERS_ACCESS:
+            partners_data = create_program_partner_access(partners_data, program, partner_access)
+            remove_program_partner_access(partners_data, program)
+        program.save()
 
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, old_program, program)
         return UpdateProgram(program=program)
@@ -297,5 +330,6 @@ class CopyProgram(
 class Mutations(graphene.ObjectType):
     create_program = CreateProgram.Field()
     update_program = UpdateProgram.Field()
+    update_program_partners = UpdateProgramPartners.Field()
     delete_program = DeleteProgram.Field()
     copy_program = CopyProgram.Field()

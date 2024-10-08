@@ -1,7 +1,4 @@
-import {
-  useBusinessAreaDataQuery,
-  useProgramLazyQuery,
-} from '@generated/graphql';
+import { useBusinessAreaDataQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import ExpandLess from '@mui/icons-material/ExpandLess';
@@ -24,6 +21,7 @@ import {
   SCOPE_ALL_PROGRAMS,
   SCOPE_PROGRAM,
 } from './menuItems';
+import { useProgramContext } from 'src/programContext';
 
 const Text = styled(ListItemText)`
   .MuiTypography-body1 {
@@ -63,16 +61,7 @@ export const DrawerItems = ({
   open,
 }: DrawerItemsProps): React.ReactElement => {
   const { baseUrl, businessArea, programId, isAllPrograms } = useBaseUrl();
-  const [getProgram, programResults] = useProgramLazyQuery({
-    variables: {
-      id: programId,
-    },
-  });
-  useEffect(() => {
-    if (!isAllPrograms) {
-      getProgram();
-    }
-  }, [programId, getProgram, isAllPrograms]);
+  const { isSocialDctType } = useProgramContext();
   const permissions = usePermissions();
   const { data: businessAreaData } = useBusinessAreaDataQuery({
     variables: { businessAreaSlug: businessArea },
@@ -121,8 +110,7 @@ export const DrawerItems = ({
       let isVisible = isAllPrograms
         ? item.scopes.includes(SCOPE_ALL_PROGRAMS)
         : item.scopes.includes(SCOPE_PROGRAM);
-      const isSocialWorkerProgram =
-        programResults?.data?.program?.isSocialWorkerProgram;
+      const isSocialWorkerProgram = isSocialDctType;
       if (item.isSocialWorker === false) {
         isVisible &&= !isSocialWorkerProgram;
       } else if (item.isSocialWorker === true) {
