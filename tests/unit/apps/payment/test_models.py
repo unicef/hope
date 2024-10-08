@@ -572,7 +572,12 @@ class TestFinancialServiceProviderModel(TestCase):
             document_number="id_doc_number_123",
         )
 
+        # get None if no snapshot
+        none_resp = fsp_xlsx_template.get_column_from_core_field(payment, "given_name")
+        self.assertIsNone(none_resp)
+
         create_payment_plan_snapshot_data(payment.parent)
+        payment.refresh_from_db()
 
         # check invalid filed name
         result = fsp_xlsx_template.get_column_from_core_field(payment, "invalid_people_field_name")
@@ -615,6 +620,12 @@ class TestFinancialServiceProviderModel(TestCase):
         self.assertEqual(blockchain_name, primary.blockchain_name)
         wallet_address = fsp_xlsx_template.get_column_from_core_field(payment, "wallet_address")
         self.assertEqual(wallet_address, primary.wallet_address)
+
+        role = fsp_xlsx_template.get_column_from_core_field(payment, "role")
+        self.assertEqual(role, "PRIMARY")
+
+        primary_collector_id = fsp_xlsx_template.get_column_from_core_field(payment, "primary_collector_id")
+        self.assertEqual(primary_collector_id, str(primary.pk))
 
 
 class TestDynamicChoiceArrayField(TestCase):
