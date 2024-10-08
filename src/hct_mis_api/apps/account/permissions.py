@@ -43,6 +43,7 @@ class Permissions(Enum):
     POPULATION_VIEW_HOUSEHOLDS_DETAILS = auto()
     POPULATION_VIEW_INDIVIDUALS_LIST = auto()
     POPULATION_VIEW_INDIVIDUALS_DETAILS = auto()
+    POPULATION_VIEW_INDIVIDUAL_DELIVERY_MECHANISMS_SECTION = auto()
 
     # Programme
     PROGRAMME_VIEW_LIST_AND_DETAILS = auto()
@@ -108,6 +109,11 @@ class Permissions(Enum):
     PM_EXPORT_PDF_SUMMARY = auto()
     PM_SEND_TO_PAYMENT_GATEWAY = auto()
     PM_VIEW_FSP_AUTH_CODE = auto()
+
+    # PaymentPlanSupportingDocument
+    PM_DOWNLOAD_SUPPORTING_DOCUMENT = auto()
+    PM_UPLOAD_SUPPORTING_DOCUMENT = auto()
+    PM_DELETE_SUPPORTING_DOCUMENT = auto()
 
     # Payment Module Admin
     PM_ADMIN_FINANCIAL_SERVICE_PROVIDER_UPDATE = auto()

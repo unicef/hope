@@ -3,6 +3,7 @@ from django.apps import AppConfig
 
 class ProgramConfig(AppConfig):
     name = "hct_mis_api.apps.program"
+    verbose_name = "Programme"
 
     def ready(self) -> None:
         from hct_mis_api.apps.grievance import signals as grievance_signals

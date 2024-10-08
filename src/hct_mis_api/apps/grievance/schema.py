@@ -75,7 +75,10 @@ from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
 from hct_mis_api.apps.payment.schema import PaymentRecordAndPaymentNode
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.program.schema import ProgramNode
-from hct_mis_api.apps.registration_data.nodes import DeduplicationResultNode
+from hct_mis_api.apps.registration_data.nodes import (
+    DeduplicationEngineSimilarityPairNode,
+    DeduplicationResultNode,
+)
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 from hct_mis_api.apps.utils.schema import Arg, ChartDatasetNode
 
@@ -395,6 +398,7 @@ class TicketHouseholdDataUpdateDetailsNode(DjangoObjectType):
 class TicketNeedsAdjudicationDetailsExtraDataNode(graphene.ObjectType):
     golden_records = graphene.List(DeduplicationResultNode)
     possible_duplicate = graphene.List(DeduplicationResultNode)
+    dedup_engine_similarity_pair = graphene.Field(DeduplicationEngineSimilarityPairNode)
 
     def resolve_golden_records(self, info: Any) -> List[Dict]:
         return encode_ids(self.golden_records, "Individual", "hit_id")
@@ -419,7 +423,10 @@ class TicketNeedsAdjudicationDetailsNode(DjangoObjectType):
     def resolve_extra_data(parent, info: Any) -> TicketNeedsAdjudicationDetailsExtraDataNode:
         golden_records = parent.extra_data.get("golden_records")
         possible_duplicate = parent.extra_data.get("possible_duplicate")
-        return TicketNeedsAdjudicationDetailsExtraDataNode(golden_records, possible_duplicate)
+        dedup_engine_similarity_pair = parent.extra_data.get("dedup_engine_similarity_pair")
+        return TicketNeedsAdjudicationDetailsExtraDataNode(
+            golden_records, possible_duplicate, dedup_engine_similarity_pair
+        )
 
     def resolve_possible_duplicates(self, info: Any) -> QuerySet:
         return self.possible_duplicates.all()

@@ -82,6 +82,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
             "cash_plus",
             "population_goal",
             "administrative_areas_of_implementation",
+            "partner_access",
         ],
         {"admin_areas_log": "admin_areas"},
     )

@@ -209,7 +209,7 @@ class Query(graphene.ObjectType):
         return to_choice_object(
             list(
                 Partner.objects.exclude(name=settings.DEFAULT_EMPTY_PARTNER)
-                .allowed_to(business_area_slug)
+                .filter(business_areas__slug=business_area_slug)
                 .values_list("id", "name")
             )
             + [(unicef.id, unicef.name)]  # unicef partner is always available

@@ -61,10 +61,26 @@ class TestPaymentPlanModel(TestCase):
         PaymentFactory(parent=pp, household=hh1, head_of_household=hoh1, currency="PLN")
         PaymentFactory(parent=pp, household=hh2, head_of_household=hoh2, currency="PLN")
 
-        IndividualFactory(household=hh1, sex="FEMALE", birth_date=datetime.now().date() - relativedelta(years=5))
-        IndividualFactory(household=hh1, sex="MALE", birth_date=datetime.now().date() - relativedelta(years=5))
-        IndividualFactory(household=hh2, sex="FEMALE", birth_date=datetime.now().date() - relativedelta(years=20))
-        IndividualFactory(household=hh2, sex="MALE", birth_date=datetime.now().date() - relativedelta(years=20))
+        IndividualFactory(
+            household=hh1,
+            sex="FEMALE",
+            birth_date=datetime.now().date() - relativedelta(years=5),
+        )
+        IndividualFactory(
+            household=hh1,
+            sex="MALE",
+            birth_date=datetime.now().date() - relativedelta(years=5),
+        )
+        IndividualFactory(
+            household=hh2,
+            sex="FEMALE",
+            birth_date=datetime.now().date() - relativedelta(years=20),
+        )
+        IndividualFactory(
+            household=hh2,
+            sex="MALE",
+            birth_date=datetime.now().date() - relativedelta(years=20),
+        )
 
         pp.update_population_count_fields()
 
@@ -76,7 +92,10 @@ class TestPaymentPlanModel(TestCase):
         self.assertEqual(pp.total_households_count, 2)
         self.assertEqual(pp.total_individuals_count, 4)
 
-    @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @patch(
+        "hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate",
+        return_value=2.0,
+    )
     def test_update_money_fields(self, get_exchange_rate_mock: Any) -> None:
         pp = PaymentPlanFactory()
         PaymentFactory(
@@ -129,7 +148,12 @@ class TestPaymentPlanModel(TestCase):
             program_cycle=program_cycle,
         )
         p1 = PaymentFactory(parent=pp1, conflicted=False, currency="PLN")
-        PaymentFactory(parent=pp1_conflicted, household=p1.household, conflicted=False, currency="PLN")
+        PaymentFactory(
+            parent=pp1_conflicted,
+            household=p1.household,
+            conflicted=False,
+            currency="PLN",
+        )
         self.assertEqual(pp1.payment_items.filter(payment_plan_hard_conflicted=True).count(), 1)
         self.assertEqual(pp1.can_be_locked, False)
 
@@ -431,7 +455,11 @@ class TestFinancialServiceProviderModel(TestCase):
             },
         )
         document_type = DocumentTypeFactory(key="national_id")
-        document = DocumentFactory(individual=individuals[0], type=document_type, document_number="id_doc_number_123")
+        document = DocumentFactory(
+            individual=individuals[0],
+            type=document_type,
+            document_number="id_doc_number_123",
+        )
         country = CountryFactory()
         admin_type_1 = AreaTypeFactory(country=country, area_level=1)
         admin_type_2 = AreaTypeFactory(country=country, area_level=2, parent=admin_type_1)
@@ -500,7 +528,8 @@ class TestDynamicChoiceArrayField(TestCase):
 
     def test_choices(self) -> None:
         field = DynamicChoiceArrayField(
-            base_field=models.CharField(max_length=255), choices_callable=self.mock_choices_callable
+            base_field=models.CharField(max_length=255),
+            choices_callable=self.mock_choices_callable,
         )
         form_field = field.formfield()
 
@@ -512,22 +541,21 @@ class TestDynamicChoiceArrayField(TestCase):
         self.assertIsInstance(form_field, DynamicChoiceField)
 
 
-class FinancialServiceProviderXlsxTemplateForm(forms.ModelForm):
-    class Meta:
-        model = FinancialServiceProviderXlsxTemplate
-        fields = ["core_fields"]
-
-
 class TestFinancialServiceProviderXlsxTemplate(TestCase):
+    class FinancialServiceProviderXlsxTemplateForm(forms.ModelForm):
+        class Meta:
+            model = FinancialServiceProviderXlsxTemplate
+            fields = ["core_fields"]
+
     def test_model_form_integration(self) -> None:
-        form = FinancialServiceProviderXlsxTemplateForm(
+        form = self.FinancialServiceProviderXlsxTemplateForm(
             data={"core_fields": ["age", "residence_status"]}
         )  # real existing core fields
         self.assertTrue(form.is_valid())
         template = form.save()
         self.assertEqual(template.core_fields, ["age", "residence_status"])
 
-        form = FinancialServiceProviderXlsxTemplateForm(data={"core_fields": ["field1"]})  # fake core fields
+        form = self.FinancialServiceProviderXlsxTemplateForm(data={"core_fields": ["field1"]})  # fake core fields
         self.assertFalse(form.is_valid())
         self.assertEqual(
             form.errors,

@@ -14,9 +14,6 @@ from parameterized import parameterized
 from hct_mis_api.apps.core.exchange_rates import ExchangeRateClientAPI, ExchangeRates
 from hct_mis_api.apps.core.exchange_rates.api import ExchangeRateClientDummy
 from hct_mis_api.apps.core.models import BusinessArea
-from tests.unit.apps.core.test_files.exchange_rates_api_response import (
-    EXCHANGE_RATES_API_RESPONSE,
-)
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.fixtures import (
     RealCashPlanFactory,
@@ -25,6 +22,9 @@ from hct_mis_api.apps.payment.fixtures import (
     ServiceProviderFactory,
 )
 from hct_mis_api.apps.payment.models import PaymentRecord
+from tests.unit.apps.core.test_files.exchange_rates_api_response import (
+    EXCHANGE_RATES_API_RESPONSE,
+)
 
 EXCHANGE_RATES_WITH_HISTORICAL_DATA = {
     "ROWSET": {

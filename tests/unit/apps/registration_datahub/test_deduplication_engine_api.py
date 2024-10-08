@@ -12,12 +12,20 @@ from hct_mis_api.apps.registration_datahub.apis.deduplication_engine import (
     DeduplicationEngineAPI,
     DeduplicationImage,
     DeduplicationSet,
+    DeduplicationSetConfig,
+    IgnoredFilenamesPair,
 )
 
 
 @pytest.fixture(autouse=True)
 def mock_deduplication_engine_env_vars() -> None:
-    with mock.patch.dict(os.environ, {"DEDUPLICATION_ENGINE_API_KEY": "TEST", "DEDUPLICATION_ENGINE_API_URL": "TEST"}):
+    with mock.patch.dict(
+        os.environ,
+        {
+            "DEDUPLICATION_ENGINE_API_KEY": "TEST",
+            "DEDUPLICATION_ENGINE_API_URL": "TEST",
+        },
+    ):
         yield
 
 
@@ -40,11 +48,12 @@ class DeduplicationEngineApiTest(TestCase):
         deduplication_set = DeduplicationSet(
             reference_pk=str(uuid.uuid4()),
             notification_url="http://test.com",
+            config=DeduplicationSetConfig(face_distance_threshold=0.5),
         )
         mock_post.return_value = {}, 200
 
         api.create_deduplication_set(deduplication_set)
-
+        print(dataclasses.asdict(deduplication_set))
         mock_post.assert_called_once_with("deduplication_sets/", dataclasses.asdict(deduplication_set))
 
     @patch("hct_mis_api.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI._get")
@@ -106,5 +115,25 @@ class DeduplicationEngineApiTest(TestCase):
         api.process_deduplication(deduplication_set_id)
 
         post_mock.assert_called_once_with(
-            f"deduplication_sets/{deduplication_set_id}/process/", validate_response=False
+            f"deduplication_sets/{deduplication_set_id}/process/",
+            validate_response=False,
+        )
+
+    @patch("hct_mis_api.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI._post")
+    def test_report_false_positive_duplicate(self, post_mock: mock.Mock) -> None:
+        api = DeduplicationEngineAPI()
+        deduplication_set_id = str(uuid.uuid4())
+        post_mock.return_value = {}, 200
+
+        api.report_false_positive_duplicate(
+            IgnoredFilenamesPair(first="123", second="456"),
+            deduplication_set_id,
+        )
+
+        post_mock.assert_called_once_with(
+            f"deduplication_sets/{deduplication_set_id}/ignored/filenames/",
+            {
+                "first": "123",
+                "second": "456",
+            },
         )

@@ -1,5 +1,5 @@
-from tests.unit.apps.household.test_admin import BaseTest
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
+from tests.unit.apps.household.test_admin import BaseTest
 
 
 # temporary added test for AutoCompleteFilterTemp have to be removed after fix in AutoCompleteFilter

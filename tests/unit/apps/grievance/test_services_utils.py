@@ -1,7 +1,9 @@
+import uuid
 from typing import Any
 from unittest.mock import MagicMock, patch
 
 from django.core.exceptions import PermissionDenied, ValidationError
+from django.core.files.base import ContentFile
 from django.test import TestCase
 
 import pytest
@@ -31,6 +33,7 @@ from hct_mis_api.apps.grievance.services.data_change.utils import (
 )
 from hct_mis_api.apps.grievance.services.needs_adjudication_ticket_services import (
     close_needs_adjudication_ticket_service,
+    create_grievance_ticket_with_details,
 )
 from hct_mis_api.apps.grievance.utils import (
     validate_all_individuals_before_close_needs_adjudication,
@@ -53,6 +56,8 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.registration_data.models import DeduplicationEngineSimilarityPair
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
 
@@ -80,7 +85,11 @@ class TestGrievanceUtils(TestCase):
             MagicMock(values_list=MagicMock(return_value=["integer_field"])),
         ]
 
-        flex_fields = {"decimal_field": "321.11", "integer_field": "123", "string_field": "some_string"}
+        flex_fields = {
+            "decimal_field": "321.11",
+            "integer_field": "123",
+            "string_field": "some_string",
+        }
         cast_flex_fields(flex_fields)
 
         self.assertEqual(flex_fields["string_field"], "some_string")
@@ -166,7 +175,13 @@ class TestGrievanceUtils(TestCase):
             individuals_data=[{}],
         )
         individual = individuals[0]
-        document_data = {"key": "TAX", "country": "AFG", "number": "111", "photo": "photo", "photoraw": "photo_raw"}
+        document_data = {
+            "key": "TAX",
+            "country": "AFG",
+            "number": "111",
+            "photo": "photo",
+            "photoraw": "photo_raw",
+        }
 
         with pytest.raises(ValidationError) as e:
             DocumentFactory(
@@ -208,13 +223,33 @@ class TestGrievanceUtils(TestCase):
         grievance.programs.add(program)
 
         _, individuals_1 = create_household(
-            {"size": 1, "business_area": business_area, "program": program, "admin2": doshi},
-            {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe"},
+            {
+                "size": 1,
+                "business_area": business_area,
+                "program": program,
+                "admin2": doshi,
+            },
+            {
+                "given_name": "John",
+                "family_name": "Doe",
+                "middle_name": "",
+                "full_name": "John Doe",
+            },
         )
 
         _, individuals_2 = create_household(
-            {"size": 1, "business_area": business_area, "program": program, "admin2": doshi},
-            {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe"},
+            {
+                "size": 1,
+                "business_area": business_area,
+                "program": program,
+                "admin2": doshi,
+            },
+            {
+                "given_name": "John",
+                "family_name": "Doe",
+                "middle_name": "",
+                "full_name": "John Doe",
+            },
         )
 
         ticket_details = TicketNeedsAdjudicationDetailsFactory(
@@ -236,8 +271,18 @@ class TestGrievanceUtils(TestCase):
 
         with pytest.raises(ValidationError) as e:
             _, individuals = create_household(
-                {"size": 1, "business_area": business_area, "admin2": doshi, "program": program},
-                {"given_name": "Tester", "family_name": "Test", "middle_name": "", "full_name": "Tester Test"},
+                {
+                    "size": 1,
+                    "business_area": business_area,
+                    "admin2": doshi,
+                    "program": program,
+                },
+                {
+                    "given_name": "Tester",
+                    "family_name": "Test",
+                    "middle_name": "",
+                    "full_name": "Tester Test",
+                },
             )
             individuals[0].unicef_id = "IND-333"
             individuals[0].save()
@@ -265,12 +310,22 @@ class TestGrievanceUtils(TestCase):
         BusinessAreaFactory(slug="afghanistan")
         _, individuals_1 = create_household(
             {"size": 1},
-            {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe"},
+            {
+                "given_name": "John",
+                "family_name": "Doe",
+                "middle_name": "",
+                "full_name": "John Doe",
+            },
         )
 
         _, individuals_2 = create_household(
             {"size": 1},
-            {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe"},
+            {
+                "given_name": "John",
+                "family_name": "Doe",
+                "middle_name": "",
+                "full_name": "John Doe",
+            },
         )
         ticket_details = TicketNeedsAdjudicationDetailsFactory(
             golden_records_individual=individuals_1[0],
@@ -314,11 +369,21 @@ class TestGrievanceUtils(TestCase):
         grievance.programs.add(program)
         _, individuals_1 = create_household(
             {"size": 2, "business_area": ba, "program": program},
-            {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe"},
+            {
+                "given_name": "John",
+                "family_name": "Doe",
+                "middle_name": "",
+                "full_name": "John Doe",
+            },
         )
         _, individuals_2 = create_household(
             {"size": 1, "business_area": ba, "program": program},
-            {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe"},
+            {
+                "given_name": "John",
+                "family_name": "Doe",
+                "middle_name": "",
+                "full_name": "John Doe",
+            },
         )
         ind_1 = individuals_1[0]
         ind_2 = individuals_2[0]
@@ -357,11 +422,21 @@ class TestGrievanceUtils(TestCase):
         grievance.programs.add(program)
         _, individuals_1 = create_household(
             {"size": 2, "business_area": ba, "program": program},
-            {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe"},
+            {
+                "given_name": "John",
+                "family_name": "Doe",
+                "middle_name": "",
+                "full_name": "John Doe",
+            },
         )
         _, individuals_2 = create_household(
             {"size": 1, "business_area": ba, "program": program},
-            {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe"},
+            {
+                "given_name": "John",
+                "family_name": "Doe",
+                "middle_name": "",
+                "full_name": "John Doe",
+            },
         )
         ind_1 = individuals_1[0]
         ind_2 = individuals_2[0]
@@ -401,3 +476,86 @@ class TestGrievanceUtils(TestCase):
         ticket_details_2.save()
 
         close_needs_adjudication_ticket_service(gr, user)
+
+    @patch.dict(
+        "os.environ",
+        {
+            "DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key",
+            "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com",
+        },
+    )
+    @patch(
+        "hct_mis_api.apps.registration_datahub.services.biometric_deduplication.BiometricDeduplicationService.report_false_positive_duplicate"
+    )
+    def test_close_needs_adjudication_ticket_service_for_biometrics(
+        self, report_false_positive_duplicate_mock: MagicMock
+    ) -> None:
+        user = UserFactory()
+        ba = BusinessAreaFactory(slug="afghanistan")
+        deduplication_set_id = uuid.uuid4()
+        program = ProgramFactory(business_area=ba, deduplication_set_id=deduplication_set_id)
+        rdi = RegistrationDataImportFactory(
+            program=program,
+        )
+
+        hh1, individuals_1 = create_household(
+            {"size": 2, "business_area": ba, "program": program},
+            {
+                "given_name": "John",
+                "family_name": "Doe",
+                "middle_name": "",
+                "full_name": "John Doe",
+            },
+        )
+        hh2, individuals_2 = create_household(
+            {"size": 2, "business_area": ba, "program": program},
+            {
+                "given_name": "John",
+                "family_name": "Doe",
+                "middle_name": "",
+                "full_name": "John Doe",
+            },
+        )
+        ind_1, ind_2 = sorted([individuals_1[1], individuals_2[1]], key=lambda x: x.id)
+        ind_1.photo = ContentFile(b"...", name="1.png")
+        ind_2.photo = ContentFile(b"...", name="2.png")
+        ind_1.save()
+        ind_2.save()
+
+        ticket, ticket_details = create_grievance_ticket_with_details(
+            main_individual=ind_1,
+            possible_duplicate=ind_2,
+            business_area=ba,
+            registration_data_import=hh1.registration_data_import,
+            possible_duplicates=[ind_2],
+            is_multiple_duplicates_version=True,
+            issue_type=GrievanceTicket.ISSUE_TYPE_BIOMETRICS_SIMILARITY,
+            dedup_engine_similarity_pair=DeduplicationEngineSimilarityPair.objects.create(
+                program=program,
+                individual1=ind_1,
+                individual2=ind_2,
+                similarity_score=90.55,
+            ),
+        )
+        if not ticket:
+            raise ValueError("Ticket not created")
+        ticket.registration_data_import = rdi
+        ticket.save()
+
+        ticket_details.selected_distinct.set([ind_1])
+        ticket_details.selected_individuals.set([ind_2])
+        ticket_details.save()
+
+        close_needs_adjudication_ticket_service(ticket, user)
+        report_false_positive_duplicate_mock.assert_not_called()
+
+        ticket_details.selected_distinct.set([ind_1, ind_2])
+        ticket_details.selected_individuals.set([])
+        ticket_details.save()
+
+        close_needs_adjudication_ticket_service(ticket, user)
+        report_false_positive_duplicate_mock.assert_called_once_with(
+            str(ind_1.photo.name),
+            str(ind_2.photo.name),
+            str(deduplication_set_id),
+        )

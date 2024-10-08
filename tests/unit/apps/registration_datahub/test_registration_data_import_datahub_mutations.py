@@ -142,9 +142,7 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
             charset=None,
         )
 
-        xlsx_valid_file_path = (
-            f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file/new_reg_data_import.xlsx"
-        )
+        xlsx_valid_file_path = f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file/new_reg_data_import.xlsx"
 
         xlsx_invalid_file_path = f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file/rdi_import_3_hh_missing_required_delivery_fields.xlsx"
 
