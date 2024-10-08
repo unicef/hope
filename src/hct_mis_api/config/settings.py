@@ -121,7 +121,6 @@ RO_CONN.update(
 DATABASES = {
     "default": env.db(),
     "read_only": RO_CONN,
-    "registration_datahub": env.db("DATABASE_URL_HUB_REGISTRATION"),
 }
 DATABASES["default"].update({"CONN_MAX_AGE": 60})
 
@@ -130,15 +129,9 @@ if env("POSTGRES_SSL", default=False):
         "sslmode": "verify-full",
         "sslrootcert": "/certs/psql-cert.crt",
     }
-    DATABASES["registration_datahub"]["OPTIONS"] = {
-        "sslmode": "verify-full",
-        "sslrootcert": "/certs/psql-cert.crt",
-    }
 
 # If app is not specified here it will use default db
-DATABASE_APPS_MAPPING: Dict[str, str] = {
-    "registration_datahub": "registration_datahub",
-}
+DATABASE_APPS_MAPPING: Dict[str, str] = {}
 
 DATABASE_ROUTERS = ("hct_mis_api.apps.core.dbrouters.DbRouter",)
 
