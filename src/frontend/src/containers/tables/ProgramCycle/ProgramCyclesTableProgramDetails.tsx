@@ -34,6 +34,10 @@ export const ProgramCyclesTableProgramDetails = ({
   const canCreateProgramCycle =
     program.status === ProgramStatus.Active &&
     hasPermissions(PERMISSIONS.PM_PROGRAMME_CYCLE_CREATE, permissions);
+  const canDeleteProgramCycle = hasPermissions(
+    PERMISSIONS.PM_PROGRAMME_CYCLE_DELETE,
+    permissions,
+  );
 
   const { data, error, isLoading } = useQuery({
     queryKey: ['programCycles', businessArea, program.id, queryVariables],
@@ -98,7 +102,7 @@ export const ProgramCyclesTableProgramDetails = ({
                 <EditProgramCycle program={program} programCycle={row} />
               )}
 
-              {row.can_remove_cycle && (
+              {row.can_remove_cycle && canDeleteProgramCycle && (
                 <DeleteProgramCycle program={program} programCycle={row} />
               )}
             </>
