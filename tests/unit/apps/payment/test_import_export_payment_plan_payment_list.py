@@ -585,9 +585,16 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
             (name for name, _ in response.context["adminform"].form.fields["flex_fields"].choices),
         )
 
-    def test_payment_row_get_snapshot_data(self) -> None:
-        # TODO: will add after get some real data
-        # create_payment_plan_snapshot_data(self.payment_plan)
-        # or PaymentHouseholdSnapshot(payment=payment, snapshot_data=household_data, household_id=household.id)
-        # XlsxPaymentPlanExportPerFspService.get_payment_row()
-        pass
+    def test_payment_row_get_flex_field_if_no_snapshot_data(self) -> None:
+        flex_field = FlexibleAttribute(
+            type=FlexibleAttribute.DECIMAL,
+            name="flex_decimal_i_f",
+            associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+        )
+        flex_field.save()
+        fsp_xlsx_template = FinancialServiceProviderXlsxTemplateFactory(flex_fields=[flex_field.name])
+        export_service = XlsxPaymentPlanExportPerFspService(self.payment_plan)
+        payment = PaymentFactory(parent=self.payment_plan)
+        empty_payment_row = export_service.get_payment_row(payment, fsp_xlsx_template)
+        for value in empty_payment_row:
+            self.assertEqual(value, "")

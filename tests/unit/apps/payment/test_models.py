@@ -28,15 +28,18 @@ from hct_mis_api.apps.payment.fields import DynamicChoiceArrayField, DynamicChoi
 from hct_mis_api.apps.payment.fixtures import (
     ApprovalFactory,
     ApprovalProcessFactory,
+    DeliveryMechanismDataFactory,
     DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
     PaymentPlanSplitFactory,
     RealProgramFactory,
+    generate_delivery_mechanisms,
 )
 from hct_mis_api.apps.payment.models import (
     Approval,
+    DeliveryMechanism,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     Payment,
@@ -551,6 +554,7 @@ class TestFinancialServiceProviderModel(TestCase):
         household.admin1 = area1
         household.admin2 = area2
         household.admin3 = area3
+        household.country_origin = country
         household.save()
 
         payment = PaymentFactory(program=ProgramFactory(), household=household, collector=individuals[0])
@@ -559,6 +563,8 @@ class TestFinancialServiceProviderModel(TestCase):
         payment.parent.program.data_collecting_type = data_collecting_type
         payment.parent.program.save()
         primary = IndividualRoleInHousehold.objects.filter(role=ROLE_PRIMARY).first().individual
+        # update primary collector
+        primary.household = household
         primary.phone_no = "+48577123654"
         primary.phone_no_alternative = "+48111222333"
         primary.wallet_name = "wallet_name_Ind_111"
@@ -570,6 +576,17 @@ class TestFinancialServiceProviderModel(TestCase):
             individual=primary,
             type__key="national_id",
             document_number="id_doc_number_123",
+        )
+        generate_delivery_mechanisms()
+        dm_atm_card = DeliveryMechanism.objects.get(code="atm_card")
+        dmd = DeliveryMechanismDataFactory(
+            individual=primary,
+            delivery_mechanism=dm_atm_card,
+            data={
+                "card_number__atm_card": "333111222",
+                "card_expiry_date__atm_card": "2025-11-11",
+                "name_of_cardholder__atm_card": "Just Random Test Name",
+            },
         )
 
         # get None if no snapshot
@@ -626,6 +643,14 @@ class TestFinancialServiceProviderModel(TestCase):
 
         primary_collector_id = fsp_xlsx_template.get_column_from_core_field(payment, "primary_collector_id")
         self.assertEqual(primary_collector_id, str(primary.pk))
+
+        # get delivery_mechanisms_data field
+        dmd_resp = fsp_xlsx_template.get_column_from_core_field(payment, "name_of_cardholder__atm_card", dmd)
+        self.assertEqual(dmd_resp, "Just Random Test Name")
+
+        # country_origin
+        country_origin = fsp_xlsx_template.get_column_from_core_field(payment, "country_origin")
+        self.assertEqual(household.country_origin.iso_code3, country_origin)
 
 
 class TestDynamicChoiceArrayField(TestCase):
