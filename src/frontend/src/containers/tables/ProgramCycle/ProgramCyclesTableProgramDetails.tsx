@@ -55,6 +55,10 @@ export const ProgramCyclesTableProgramDetails = ({
       (row.status === 'Draft' || row.status === 'Active') &&
       hasPermissions(PERMISSIONS.PM_PROGRAMME_CYCLE_UPDATE, permissions);
 
+    const hasPermissionToDelete = hasPermissions(
+      PERMISSIONS.PM_PROGRAMME_CYCLE_DELETE,
+      permissions,
+    );
     return (
       <ClickableTableRow key={row.id} data-cy="program-cycle-row">
         <TableCell data-cy="program-cycle-title">
@@ -102,7 +106,7 @@ export const ProgramCyclesTableProgramDetails = ({
                 <EditProgramCycle program={program} programCycle={row} />
               )}
 
-              {row.can_remove_cycle && canDeleteProgramCycle && (
+              {row.can_remove_cycle && hasPermissionToDelete && (
                 <DeleteProgramCycle program={program} programCycle={row} />
               )}
             </>
