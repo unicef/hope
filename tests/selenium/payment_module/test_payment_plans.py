@@ -453,6 +453,9 @@ class TestPaymentPlans:
         pagePaymentModule.getRow(0).click()
         pagePaymentModuleDetails.getButtonCreateExclusions().click()
         pagePaymentModuleDetails.getInputExclusionReason().send_keys("Reason e2e Test")
+        pagePaymentModuleDetails.getInputExclusion().send_keys("IND-09-0001.2395")
+        pagePaymentModuleDetails.getButtonApplyExclusions().click()
+        pagePaymentModuleDetails.getButtonSaveExclusions().click()
         pagePaymentModuleDetails.screenshot("1", file_path="./")
         from tests.selenium.tools.tag_name_finder import printing
 
@@ -462,8 +465,7 @@ class TestPaymentPlans:
 
     def test_payment_plan_delete(
         self,
-        clear_downloaded_files: None,
-        create_targeting: None,
+        create_payment_plan_lock: PaymentPlan,
         pagePaymentModule: PaymentModule,
         pagePaymentModuleDetails: PaymentModuleDetails,
         pageNewPaymentPlan: NewPaymentPlan,
@@ -471,11 +473,18 @@ class TestPaymentPlans:
         pageProgramCycleDetails: ProgramCycleDetailsPage,
     ) -> None:
         pageProgramCycle.selectGlobalProgramFilter("Test Program")
-        pageProgramCycle.getNavPaymentModule().click()
+        pagePaymentModule.getNavPaymentModule().click()
+        pagePaymentModule.getNavPaymentPlans().click()
+        payment_plan = pagePaymentModule.getRow(0).text
+        pagePaymentModule.getRow(0).click()
+
+        pagePaymentModuleDetails.getDeleteButton().click()
+        pagePaymentModuleDetails.getButtonSubmit().click()
+        pagePaymentModule.getRow(0)
+        assert payment_plan not in pagePaymentModule.getRow(0).text
 
     def test_payment_plan_creation_error(
         self,
-        clear_downloaded_files: None,
         create_targeting: None,
         pagePaymentModule: PaymentModule,
         pagePaymentModuleDetails: PaymentModuleDetails,

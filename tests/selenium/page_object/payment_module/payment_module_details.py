@@ -25,6 +25,7 @@ class PaymentModuleDetails(BaseComponents):
     buttonSaveExclusions = 'button[data-cy="button-save-exclusions"]'
     supportingDocumentsTitle = 'h6[data-cy="supporting-documents-title"]'
     supportingDocumentsEmpty = 'div[data-cy="supporting-documents-empty"]'
+    inputExclusion = 'textarea[data-cy="input-exclusion"]'
     inputExclusionReason = 'textarea[data-cy="input-exclusionReason"]'
     buttonApplyExclusions = 'button[data-cy="button-apply-exclusions"]'
     labelFemaleChildren = 'div[data-cy="label-Female Children"]'
@@ -61,6 +62,7 @@ class PaymentModuleDetails(BaseComponents):
     buttonUploadReconciliationInfo = 'button[data-cy="button-import"]'
     buttonImportSubmit = 'button[data-cy="button-import-submit"]'
     errorsContainer = 'div[data-cy="errors-container"]'
+    deleteButton = '[data-cy="button-delete-payment-plan"]'
 
     def getButtonLockPlan(self) -> WebElement:
         return self.wait_for(self.buttonLockPlan)
@@ -95,6 +97,9 @@ class PaymentModuleDetails(BaseComponents):
     def getButtonImportSubmit(self) -> WebElement:
         return self.wait_for(self.buttonImportSubmit)
 
+    def getDeleteButton(self) -> WebElement:
+        return self.wait_for(self.deleteButton)
+
     def getLabelCreatedBy(self) -> WebElement:
         return self.wait_for(self.labelCreatedBy)
 
@@ -127,6 +132,9 @@ class PaymentModuleDetails(BaseComponents):
 
     def getButtonSaveExclusions(self) -> WebElement:
         return self.wait_for(self.buttonSaveExclusions)
+
+    def getInputExclusion(self) -> WebElement:
+        return self.wait_for(self.inputExclusionReason)
 
     def getInputExclusionReason(self) -> WebElement:
         return self.wait_for(self.inputExclusionReason)
