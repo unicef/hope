@@ -2,11 +2,7 @@ import { Box, Grid, Typography } from '@mui/material';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import {
-  ProgrammeChoiceDataQuery,
-  ProgramPartnerAccess,
-  ProgramQuery,
-} from '@generated/graphql';
+import { ProgrammeChoiceDataQuery, ProgramQuery } from '@generated/graphql';
 import { MiśTheme } from '../../../theme';
 import { choicesToDict, programStatusToColor } from '@utils/utils';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
