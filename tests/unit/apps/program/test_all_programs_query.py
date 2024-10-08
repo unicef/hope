@@ -5,7 +5,7 @@ from django.contrib.auth.models import AnonymousUser
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
+from hct_mis_api.apps.account.fixtures import PartnerFactory, RoleFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import (
@@ -72,6 +72,9 @@ class TestAllProgramsQuery(APITestCase):
 
         cls.partner = PartnerFactory(name="WFP")
         cls.partner.allowed_business_areas.add(cls.business_area)
+        role = RoleFactory(name="Role for WFP")
+        cls.add_partner_role_in_business_area(cls.partner, cls.business_area, [role])
+
         cls.user = UserFactory.create(partner=cls.partner)
 
         cls.unicef_partner = PartnerFactory(name="UNICEF")
@@ -301,6 +304,27 @@ class TestAllProgramsQuery(APITestCase):
               isDeduplicationDisabled
             }
             """,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                    "Program": self.id_to_base64(program1.id, "ProgramNode"),
+                },
+            },
+            variables={},
+        )
+        RegistrationDataImportFactory(
+            deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_PENDING,
+            data_source=RegistrationDataImport.XLS,
+            program=program1,
+        )
+        self.snapshot_graphql_request(
+            request_string="""
+                    query canRunDeduplicationAndIsDeduplicationDisabled {
+                      canRunDeduplication
+                      isDeduplicationDisabled
+                    }
+                    """,
             context={
                 "user": self.user,
                 "headers": {

@@ -78,7 +78,7 @@ export function RegistrationDataImportPage(): React.ReactElement {
               disabled={deduplicationFlags.isDeduplicationDisabled}
               title={t('Deduplication engine already in progress')}
             >
-              {t('RUN DEDUPLICATION ENGINE')}
+              {t('START DEDUPLICATION ENGINE')}
             </ButtonTooltip>
           </Box>
         )}

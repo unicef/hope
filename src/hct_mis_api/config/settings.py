@@ -131,26 +131,26 @@ DATABASES["default"].update({"CONN_MAX_AGE": 60})
 if env("POSTGRES_SSL", default=False):
     DATABASES["default"]["OPTIONS"] = {
         "sslmode": "verify-full",
-        "sslrootcert": "/code/psql-cert.crt",
+        "sslrootcert": "/certs/psql-cert.crt",
     }
     DATABASES["cash_assist_datahub_mis"]["OPTIONS"] = {
         "sslmode": "verify-full",
-        "sslrootcert": "/code/psql-cert.crt",
+        "sslrootcert": "/certs/psql-cert.crt",
         "options": "-c search_path=mis",
     }
     DATABASES["cash_assist_datahub_ca"]["OPTIONS"] = {
         "sslmode": "verify-full",
-        "sslrootcert": "/code/psql-cert.crt",
+        "sslrootcert": "/certs/psql-cert.crt",
         "options": "-c search_path=ca",
     }
     DATABASES["cash_assist_datahub_erp"]["OPTIONS"] = {
         "sslmode": "verify-full",
-        "sslrootcert": "/code/psql-cert.crt",
+        "sslrootcert": "/certs/psql-cert.crt",
         "options": "-c search_path=erp",
     }
     DATABASES["registration_datahub"]["OPTIONS"] = {
         "sslmode": "verify-full",
-        "sslrootcert": "/code/psql-cert.crt",
+        "sslrootcert": "/certs/psql-cert.crt",
     }
 
 # If app is not specified here it will use default db
@@ -233,10 +233,11 @@ PROJECT_APPS = [
     "hct_mis_api.apps.steficon.apps.SteficonConfig",
     "hct_mis_api.apps.reporting.apps.ReportingConfig",
     "hct_mis_api.apps.activity_log.apps.ActivityLogConfig",
-    "hct_mis_api.aurora.apps.Config",
     "hct_mis_api.apps.accountability.apps.AccountabilityConfig",
     "hct_mis_api.apps.web.apps.WebConfig",
     "hct_mis_api.apps.periodic_data_update.apps.PeriodicDataUpdateConfig",
+    "hct_mis_api.contrib.aurora.apps.Config",
+    "hct_mis_api.contrib.vision.apps.Config",
 ]
 
 DJANGO_APPS = [

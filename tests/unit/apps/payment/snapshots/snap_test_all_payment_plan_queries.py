@@ -46,6 +46,11 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans 1'] = {
                             'startDate': '2020-09-10'
                         },
                         'status': 'OPEN',
+                        'supportingDocuments': [
+                            {
+                                'title': 'Test File 123'
+                            }
+                        ],
                         'totalDeliveredQuantity': 50.0,
                         'totalDeliveredQuantityUsd': 100.0,
                         'totalEntitledQuantity': 100.0,
@@ -87,6 +92,8 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans 1'] = {
                             'startDate': '2020-09-10'
                         },
                         'status': 'LOCKED',
+                        'supportingDocuments': [
+                        ],
                         'totalDeliveredQuantity': 50.0,
                         'totalDeliveredQuantityUsd': 100.0,
                         'totalEntitledQuantity': 100.0,

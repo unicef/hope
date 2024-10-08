@@ -86,9 +86,7 @@ export const ProgramDetails = ({
     (partner) => partner.name !== 'UNICEF',
   );
 
-  const showPartners =
-    program.partnerAccess === ProgramPartnerAccess.SelectedPartnersAccess &&
-    partners.length > 0;
+  const showPartners = partners.length > 0;
   return (
     <ContainerColumnWithBorder data-cy="program-details-container">
       <Title>

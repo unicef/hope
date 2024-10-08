@@ -82,6 +82,7 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.household.services.household_programs_with_delivered_quantity import (
     delivered_quantity_service,
 )
+from hct_mis_api.apps.payment.models import DeliveryMechanismData
 from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.nodes import DeduplicationResultNode
@@ -204,6 +205,26 @@ class BankAccountInfoNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
 
+class DeliveryMechanismDataNode(BaseNodePermissionMixin, DjangoObjectType):
+    permission_classes = (hopePermissionClass(Permissions.POPULATION_VIEW_INDIVIDUAL_DELIVERY_MECHANISMS_SECTION),)
+
+    name = graphene.String(required=False)
+    is_valid = graphene.Boolean()
+    individual_tab_data = graphene.JSONString()
+
+    def resolve_name(self, info: Any) -> str:
+        return self.delivery_mechanism.name
+
+    def resolve_individual_tab_data(self, info: Any) -> dict:
+        return {key: self._data.get(key, None) for key in self.all_dm_fields}
+
+    class Meta:
+        model = DeliveryMechanismData
+        exclude = ("unique_key", "signature_hash")
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+
 class IndividualNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     permission_classes: Tuple[Type[BasePermission], ...] = (
         hopePermissionClass(Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS),
@@ -230,6 +251,7 @@ class IndividualNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTyp
     phone_no_alternative_valid = graphene.Boolean()
     payment_channels = graphene.List(BankAccountInfoNode)
     preferred_language = graphene.String()
+    delivery_mechanisms_data = graphene.List(DeliveryMechanismDataNode)
 
     @staticmethod
     def resolve_preferred_language(parent: Individual, info: Any) -> Optional[str]:
@@ -286,6 +308,17 @@ class IndividualNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTyp
 
     def resolve_phone_no_alternative_valid(parent, info: Any) -> Boolean:
         return parent.phone_no_alternative_valid
+
+    def resolve_delivery_mechanisms_data(parent, info: Any) -> QuerySet[DeliveryMechanismData]:
+        program_id = get_program_id_from_headers(info.context.headers)
+        if not info.context.user.has_permission(
+            Permissions.POPULATION_VIEW_INDIVIDUAL_DELIVERY_MECHANISMS_SECTION.value,
+            parent.business_area,
+            program_id,
+        ):
+            return parent.delivery_mechanisms_data.none()
+
+        return parent.delivery_mechanisms_data.all()
 
     @classmethod
     def check_node_permission(cls, info: Any, object_instance: Individual) -> None:

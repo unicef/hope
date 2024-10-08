@@ -46,7 +46,7 @@ class TestRegistrationDataImportQuery(APITestCase):
               percentage
             }
             totalHouseholdsCountWithValidPhoneNo
-            isDeduplicated
+            biometricDeduplicated
             canMerge
             biometricDeduplicationEnabled
           }

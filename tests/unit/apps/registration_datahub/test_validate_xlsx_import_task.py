@@ -37,9 +37,7 @@ class TestValidateXlsxImportTask(TestCase):
         "hct_mis_api.apps.registration_datahub.tasks.validate_xlsx_import.UploadXLSXInstanceValidator.validate_everything"
     )
     def test_people(self, validate_everything_mock: Mock) -> None:
-        content = Path(
-            f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file/rdi_people_test.xlsx"
-        ).read_bytes()
+        content = Path(f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file/rdi_people_test.xlsx").read_bytes()
         file = File(BytesIO(content), name="rdi_people_test.xlsx")
         import_data = ImportData.objects.create(
             file=file,

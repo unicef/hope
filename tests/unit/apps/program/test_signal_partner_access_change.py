@@ -1,7 +1,8 @@
 from django.test import TestCase
 
-from hct_mis_api.apps.account.fixtures import PartnerFactory
+from hct_mis_api.apps.account.fixtures import PartnerFactory, RoleFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.models import BusinessAreaPartnerThrough
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program, ProgramPartnerThrough
@@ -15,13 +16,24 @@ class TestPartnerAccessChangeSignal(TestCase):
 
         cls.unicef_partner = PartnerFactory(name="UNICEF")
 
-        cls.partner_allowed_in_afg_1 = PartnerFactory(name="Partner Allowed in Afg 1")
-        cls.partner_allowed_in_afg_1.allowed_business_areas.set([cls.business_area])
+        role = RoleFactory(name="Role for Partner")
+        cls.partner_with_role_in_afg_1 = PartnerFactory(name="Partner with role in Afg 1")
+        cls.partner_with_role_in_afg_1.allowed_business_areas.set([cls.business_area])
+        afg_partner_through_1 = BusinessAreaPartnerThrough.objects.create(
+            business_area=cls.business_area,
+            partner=cls.partner_with_role_in_afg_1,
+        )
+        afg_partner_through_1.roles.set([role])
 
-        cls.partner_allowed_in_afg_2 = PartnerFactory(name="Partner Allowed in Afg 2")
-        cls.partner_allowed_in_afg_2.allowed_business_areas.set([cls.business_area])
+        cls.partner_with_role_in_afg_2 = PartnerFactory(name="Partner with role in Afg 2")
+        cls.partner_with_role_in_afg_2.allowed_business_areas.set([cls.business_area])
+        afg_partner_through_2 = BusinessAreaPartnerThrough.objects.create(
+            business_area=cls.business_area,
+            partner=cls.partner_with_role_in_afg_2,
+        )
+        afg_partner_through_2.roles.set([role])
 
-        cls.partner_not_allowed_in_BA = PartnerFactory(name="Partner not allowed in Afg")
+        cls.partner_not_allowed_in_BA = PartnerFactory(name="Partner without role in Afg")
 
         country_afg = CountryFactory(name="Afghanistan")
         country_afg.business_areas.set([cls.business_area])
@@ -73,7 +85,7 @@ class TestPartnerAccessChangeSignal(TestCase):
         self.assertEqual(self.program.partners.count(), 3)
         self.assertSetEqual(
             set(self.program.partners.all()),
-            {self.unicef_partner, self.partner_allowed_in_afg_1, self.partner_allowed_in_afg_2},
+            {self.unicef_partner, self.partner_with_role_in_afg_1, self.partner_with_role_in_afg_2},
         )
         for program_partner_through in self.program.program_partner_through.all():
             self.assertEqual(program_partner_through.areas.count(), 2)
@@ -89,7 +101,7 @@ class TestPartnerAccessChangeSignal(TestCase):
         self.assertEqual(self.program.partners.count(), 1)
 
         program_partner_through = ProgramPartnerThrough.objects.create(
-            program=self.program, partner=self.partner_allowed_in_afg_1
+            program=self.program, partner=self.partner_with_role_in_afg_1
         )
         program_partner_through.areas.set([self.area_in_afg_1])
 
@@ -101,7 +113,7 @@ class TestPartnerAccessChangeSignal(TestCase):
         self.assertEqual(self.program.partners.count(), 3)
         self.assertSetEqual(
             set(self.program.partners.all()),
-            {self.unicef_partner, self.partner_allowed_in_afg_1, self.partner_allowed_in_afg_2},
+            {self.unicef_partner, self.partner_with_role_in_afg_1, self.partner_with_role_in_afg_2},
         )
         for program_partner_through in self.program.program_partner_through.all():
             self.assertEqual(program_partner_through.areas.count(), 2)

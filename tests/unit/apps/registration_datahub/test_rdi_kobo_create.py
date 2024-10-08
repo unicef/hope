@@ -42,9 +42,7 @@ class TestRdiKoboCreateTask(TestCase):
 
     @staticmethod
     def _return_test_image(*args: Any, **kwargs: Any) -> BytesIO:
-        return BytesIO(
-            Path(f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file/image.png").read_bytes()
-        )
+        return BytesIO(Path(f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file/image.png").read_bytes())
 
     @classmethod
     def setUpTestData(cls) -> None:
@@ -62,9 +60,7 @@ class TestRdiKoboCreateTask(TestCase):
             document_types.append(DocumentType(label=label, key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[doc_type]))
         DocumentType.objects.bulk_create(document_types, ignore_conflicts=True)
 
-        content = Path(
-            f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file/kobo_submissions.json"
-        ).read_bytes()
+        content = Path(f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file/kobo_submissions.json").read_bytes()
         file = File(BytesIO(content), name="kobo_submissions.json")
         cls.import_data = ImportData.objects.create(
             file=file,

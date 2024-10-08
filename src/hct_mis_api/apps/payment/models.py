@@ -1354,23 +1354,6 @@ class FspXlsxTemplatePerDeliveryMechanism(TimeStampedUUIDModel):
     def __str__(self) -> str:
         return f"{self.financial_service_provider.name} - {self.xlsx_template} - {self.delivery_mechanism}"  # pragma: no cover
 
-    def clean(self) -> None:
-        missing_required_core_fields = [
-            required_field
-            for required_field in self.delivery_mechanism.required_fields
-            if required_field not in self.xlsx_template.core_fields
-        ]
-        if missing_required_core_fields:
-            raise ValidationError(
-                f"{missing_required_core_fields} fields are required by delivery mechanism "
-                f"{self.delivery_mechanism} and must be present in the template core fields"
-            )
-
-        if self.delivery_mechanism not in self.financial_service_provider.delivery_mechanisms.all():
-            raise ValidationError(
-                f"Delivery Mechanism {self.delivery_mechanism} is not supported by Financial Service Provider {self.financial_service_provider}"
-            )
-
 
 class FinancialServiceProvider(LimitBusinessAreaModelMixin, TimeStampedUUIDModel):
     COMMUNICATION_CHANNEL_API = "API"
@@ -2255,7 +2238,11 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
         "household.Individual", on_delete=models.CASCADE, related_name="delivery_mechanisms_data"
     )
     delivery_mechanism_choice = models.CharField(
-        max_length=255, verbose_name=_("Delivery Mechanism"), choices=DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES
+        max_length=255,
+        verbose_name=_("Delivery Mechanism"),
+        choices=DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES,
+        null=True,
+        blank=True,
     )  # TODO MB drop later
     delivery_mechanism = models.ForeignKey("DeliveryMechanism", on_delete=models.PROTECT)
     data = JSONField(default=dict, blank=True)
@@ -2300,9 +2287,13 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
         associated_objects = {
             _INDIVIDUAL: self.individual,
             _HOUSEHOLD: self.individual.household,
-            _DELIVERY_MECHANISM_DATA: json.loads(self.data) if not isinstance(self.data, dict) else self.data,
+            _DELIVERY_MECHANISM_DATA: self._data,
         }
         return associated_objects.get(associated_with)
+
+    @property
+    def _data(self) -> Dict:
+        return json.loads(self.data) if not isinstance(self.data, dict) else self.data
 
     @cached_property
     def delivery_data(self) -> Dict:
@@ -2372,6 +2363,10 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
     @property
     def all_fields(self) -> List[dict]:
         return self.delivery_mechanism.all_fields
+
+    @property
+    def all_dm_fields(self) -> List[dict]:
+        return self.delivery_mechanism.all_dm_fields
 
     @property
     def unique_fields(self) -> List[str]:
@@ -2543,3 +2538,20 @@ class DeliveryMechanism(TimeStampedUUIDModel):
             required_fields_map[dm.code].extend([f"{field}_i_c" for field in dm.required_fields])
 
         return required_fields_map
+
+
+class PaymentPlanSupportingDocument(models.Model):
+    FILE_LIMIT = 10  # max 10 files per Payment Plan
+    FILE_SIZE_LIMIT = 10 * 1024 * 1024  # 10 MB
+
+    payment_plan = models.ForeignKey(PaymentPlan, on_delete=models.CASCADE, related_name="documents")
+    title = models.CharField(max_length=255)
+    file = models.FileField()
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
+
+    class Meta:
+        ordering = ["uploaded_at"]
+
+    def __str__(self) -> str:
+        return self.title

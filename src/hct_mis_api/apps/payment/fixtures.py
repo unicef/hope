@@ -802,6 +802,7 @@ def generate_reconciled_payment_plan() -> None:
         total_delivered_quantity=999,
         total_entitled_quantity=2999,
         is_follow_up=False,
+        exchange_rate=234.6742,
     )[0]
     # update status
     payment_plan.status_finished()
@@ -958,6 +959,7 @@ def generate_payment_plan() -> None:
         business_area=afghanistan,
         program=program,
         created_by=root,
+        program_cycle=program_cycle,
     )[0]
     full_rebuild(target_population)
     target_population.save()

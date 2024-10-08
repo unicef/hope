@@ -87,7 +87,7 @@ export function RegistrationDataImportTableRow({
       </TableCell>
       {biometricDeduplicationEnabled && (
         <TableCell align="center">
-          {registrationDataImport.isDeduplicated}
+          {registrationDataImport.biometricDeduplicated}
         </TableCell>
       )}
       <TableCell align="right">

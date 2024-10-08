@@ -76,7 +76,11 @@ class TestCopyTargetPopulationMutation(APITestCase):
         cls.household = household
         cls.update_partner_access_to_program(partner, cls.program)
         tp = TargetPopulation(
-            name="Original Target Population", status="LOCKED", business_area=cls.business_area, program=cls.program
+            name="Original Target Population",
+            status="LOCKED",
+            business_area=cls.business_area,
+            program=cls.program,
+            program_cycle=cls.cycle,
         )
 
         tp.targeting_criteria = cls.get_targeting_criteria_for_rule(
@@ -86,7 +90,11 @@ class TestCopyTargetPopulationMutation(APITestCase):
         tp.households.add(cls.household)
         cls.target_population = tp
         cls.empty_target_population_1 = TargetPopulation(
-            name="emptyTargetPopulation1", status="LOCKED", business_area=cls.business_area, program=cls.program
+            name="emptyTargetPopulation1",
+            status="LOCKED",
+            business_area=cls.business_area,
+            program=cls.program,
+            program_cycle=cls.cycle,
         )
         cls.empty_target_population_1.save()
 
@@ -95,6 +103,7 @@ class TestCopyTargetPopulationMutation(APITestCase):
             status="LOCKED",
             business_area=cls.business_area,
             program=cls.program,
+            program_cycle=cls.cycle,
         )
         targeting_criteria_hh_ids = TargetingCriteria(household_ids=[cls.household.unicef_id])
         targeting_criteria_hh_ids.save()
@@ -106,6 +115,7 @@ class TestCopyTargetPopulationMutation(APITestCase):
             status="LOCKED",
             business_area=cls.business_area,
             program=cls.program,
+            program_cycle=cls.cycle,
         )
         targeting_criteria_hh_ids = TargetingCriteria(individual_ids=[individual.unicef_id])
         targeting_criteria_hh_ids.save()

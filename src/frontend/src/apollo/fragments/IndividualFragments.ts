@@ -128,6 +128,11 @@ export const individualDetailed = gql`
       accountHolderName
       bankBranchName
     }
+    deliveryMechanismsData {
+      name
+      isValid
+      individualTabData
+    }
     documents {
       edges {
         node {
