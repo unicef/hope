@@ -7,7 +7,7 @@ wait_for_db() {
 }
 
 if [ $# -eq 0 ]; then
-    exec gunicorn hct_mis_api.wsgi -c /code/gunicorn_config.py
+    exec gunicorn hct_mis_api.wsgi -c /conf/gunicorn_config.py
 else
   case "$1" in
     "dev")
