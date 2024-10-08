@@ -63,6 +63,8 @@ class PaymentModuleDetails(BaseComponents):
     buttonImportSubmit = 'button[data-cy="button-import-submit"]'
     errorsContainer = 'div[data-cy="errors-container"]'
     deleteButton = '[data-cy="button-delete-payment-plan"]'
+    uploadFileButton = 'button[data-cy="upload-file-button"]'
+    titleInput = 'div[data-cy="title-input"]'
 
     def getButtonLockPlan(self) -> WebElement:
         return self.wait_for(self.buttonLockPlan)
@@ -99,6 +101,12 @@ class PaymentModuleDetails(BaseComponents):
 
     def getDeleteButton(self) -> WebElement:
         return self.wait_for(self.deleteButton)
+
+    def getUploadFileButton(self) -> WebElement:
+        return self.wait_for(self.uploadFileButton)
+
+    def getTitleInput(self) -> WebElement:
+        return self.wait_for(self.titleInput)
 
     def getLabelCreatedBy(self) -> WebElement:
         return self.wait_for(self.labelCreatedBy)

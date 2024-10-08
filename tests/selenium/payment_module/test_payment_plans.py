@@ -430,14 +430,9 @@ class TestPaymentPlans:
         pagePaymentModule.getNavPaymentPlans().click()
         pagePaymentModule.getRow(0).click()
         pagePaymentModuleDetails.getButtonCreateExclusions().click()
-        pagePaymentModuleDetails.screenshot("1", file_path="./")
-        from tests.selenium.tools.tag_name_finder import printing
+        with pytest.raises(Exception):
+            pagePaymentModuleDetails.getButtonSaveExclusions().click()
 
-        printing("Mapping", pagePaymentModuleDetails.driver)
-        printing("Methods", pagePaymentModuleDetails.driver)
-        printing("Assert", pagePaymentModuleDetails.driver)
-
-    # ToDo: Warning - For People program available excluding is HH
     def test_payment_plan_save_exclude(
         self,
         create_payment_plan_lock: PaymentPlan,
@@ -456,14 +451,8 @@ class TestPaymentPlans:
         pagePaymentModuleDetails.getInputExclusion().send_keys("IND-09-0001.2395")
         pagePaymentModuleDetails.getButtonApplyExclusions().click()
         pagePaymentModuleDetails.getButtonSaveExclusions().click()
-        pagePaymentModuleDetails.screenshot("1", file_path="./")
-        from tests.selenium.tools.tag_name_finder import printing
 
-        printing("Mapping", pagePaymentModuleDetails.driver)
-        printing("Methods", pagePaymentModuleDetails.driver)
-        printing("Assert", pagePaymentModuleDetails.driver)
-
-    def test_payment_plan_delete(
+    def test_payment_plan_save_exclude_people(
         self,
         create_payment_plan_lock: PaymentPlan,
         pagePaymentModule: PaymentModule,
@@ -472,7 +461,24 @@ class TestPaymentPlans:
         pageProgramCycle: ProgramCyclePage,
         pageProgramCycleDetails: ProgramCycleDetailsPage,
     ) -> None:
-        pageProgramCycle.selectGlobalProgramFilter("Test Program")
+        pagePaymentModule.selectGlobalProgramFilter("Test Program")
+        pagePaymentModule.getNavPaymentModule().click()
+        pagePaymentModule.getNavPaymentPlans().click()
+        pagePaymentModule.getRow(0).click()
+        pagePaymentModuleDetails.getButtonCreateExclusions().click()
+        pagePaymentModuleDetails.getInputExclusionReason().send_keys("Reason e2e Test")
+        pagePaymentModuleDetails.getInputExclusion().send_keys("IND-09-0001.2395")
+        pagePaymentModuleDetails.getButtonApplyExclusions().click()
+        pagePaymentModuleDetails.getButtonSaveExclusions().click()
+
+    def test_payment_plan_delete(
+        self,
+        create_payment_plan_lock: PaymentPlan,
+        pagePaymentModule: PaymentModule,
+        pagePaymentModuleDetails: PaymentModuleDetails,
+        pageNewPaymentPlan: NewPaymentPlan
+    ) -> None:
+        pagePaymentModule.selectGlobalProgramFilter("Test Program")
         pagePaymentModule.getNavPaymentModule().click()
         pagePaymentModule.getNavPaymentPlans().click()
         payment_plan = pagePaymentModule.getRow(0).text
@@ -512,3 +518,34 @@ class TestPaymentPlans:
         assert "Dispersion Start Date is required" in pageNewPaymentPlan.getInputStartDateError().text
         assert "Dispersion End Date is required" in pageNewPaymentPlan.getInputEndDateError().text
         assert "Currency is required" in pageNewPaymentPlan.getInputCurrency().text
+
+    def test_payment_plan_supporting_documents(
+        self,
+        create_payment_plan_lock: PaymentPlan,
+        pagePaymentModule: PaymentModule,
+        pagePaymentModuleDetails: PaymentModuleDetails,
+    ) -> None:
+        pagePaymentModule.selectGlobalProgramFilter("Test Program")
+        pagePaymentModule.getNavPaymentModule().click()
+        pagePaymentModule.getNavPaymentPlans().click()
+        pagePaymentModule.getRow(0).click()
+        pagePaymentModuleDetails.getUploadFileButton().click()
+        pagePaymentModuleDetails.upload_file(f"{pytest.SELENIUM_PATH}/helpers/document_example.png")
+        pagePaymentModuleDetails.getTitleInput().send_keys("title input")
+        pagePaymentModuleDetails.buttonImportSubmit().click()
+        pagePaymentModuleDetails.screenshot("1", file_path="./")
+
+    def test_payment_plan_count(
+        self,
+        create_payment_plan_lock: PaymentPlan,
+        pagePaymentModule: PaymentModule,
+        pagePaymentModuleDetails: PaymentModuleDetails,
+    ) -> None:
+        pagePaymentModule.selectGlobalProgramFilter("Test Program")
+        pagePaymentModule.getNavPaymentModule().click()
+        pagePaymentModule.getNavPaymentPlans().click()
+        pagePaymentModule.getRow(0).click()
+        assert "0" in pagePaymentModuleDetails.getLabelFemaleChildren().text
+        assert "0" in pagePaymentModuleDetails.getLabelFemaleAdults().text
+        assert "0" in pagePaymentModuleDetails.getLabelMaleChildren().text
+        assert "0" in pagePaymentModuleDetails.getLabelMaleAdults().text
