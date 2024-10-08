@@ -419,7 +419,7 @@ class TestSmokeGrievanceTickets:
         assert "-" in pageGrievanceDetailsPage.getLabelPaymentPlan().text
         assert "-" in pageGrievanceDetailsPage.getLabelPaymentPlanVerification().text
         assert "Test Program" in pageGrievanceDetailsPage.getLabelProgramme().text
-        assert "Andarab" in pageGrievanceDetailsPage.getAdministrativeLevel().text
+        assert "Shakardara" in pageGrievanceDetailsPage.getAdministrativeLevel().text
         assert "-" in pageGrievanceDetailsPage.getAreaVillage().text
         assert "English | English" in pageGrievanceDetailsPage.getLanguagesSpoken().text
         assert "-" in pageGrievanceDetailsPage.getDocumentation().text

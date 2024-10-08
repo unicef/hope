@@ -504,6 +504,7 @@ def change_super_user(business_area: BusinessArea) -> None:
     user.partner = Partner.objects.get(name="UNHCR")
     user.partner.allowed_business_areas.add(business_area)
     user.save()
+    yield user
 
 
 @pytest.fixture(autouse=True)
