@@ -38,7 +38,7 @@ class BiometricDeduplicationService:
             notification_url=f"https://{settings.DOMAIN_NAME}/api/rest/{program.business_area.slug}/programs/{str(program.id)}/registration-data/webhookdeduplication/",
             # notification_url=reverse("registration-data:webhook_deduplication", kwargs={"program_id": str(program.id), "business_area": program.business_area.slug}), # TODO MB why reverse is not working
             config=DeduplicationSetConfig(
-                face_distance_threshold=program.business_area.biometric_deduplication_threshold / 100
+                face_distance_threshold=1 - (program.business_area.biometric_deduplication_threshold / 100)
             ),
         )
         response_data = self.api.create_deduplication_set(deduplication_set)
@@ -186,7 +186,7 @@ class BiometricDeduplicationService:
         rdis = RegistrationDataImport.objects.filter(
             status=RegistrationDataImport.IN_REVIEW,
             program=program,
-            deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS,
+            deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_PROCESSING,
         )
         for rdi in rdis:
             rdi.dedup_engine_batch_duplicates = self.get_duplicate_individuals_for_rdi_against_batch_count(rdi)
@@ -234,18 +234,24 @@ class BiometricDeduplicationService:
     def get_duplicates_for_merged_rdi_against_population(
         self, rdi: RegistrationDataImport
     ) -> QuerySet[DeduplicationEngineSimilarityPair]:
-        """Used in Grievance tickets creation for merged RDI"""
-        from hct_mis_api.apps.utils.models import MergeStatusModel
+        """Used in Grievance tickets creation for merging RDI"""
+        rdi_pending_individuals = PendingIndividual.objects.filter(is_removed=False, registration_data_import=rdi).only(
+            "id"
+        )
+        other_pending_individuals = PendingIndividual.objects.filter(is_removed=False, program=rdi.program).exclude(
+            id__in=rdi_pending_individuals
+        )
 
-        rdi_individuals = rdi.individuals.filter(is_removed=False).only("id")
-        return DeduplicationEngineSimilarityPair.objects.filter(
-            Q(individual1__in=rdi_individuals) | Q(individual2__in=rdi_individuals),
-            Q(individual1__duplicate=False) & Q(individual2__duplicate=False),
-            Q(individual1__withdrawn=False) & Q(individual2__withdrawn=False),
-            Q(individual1__rdi_merge_status=MergeStatusModel.MERGED)
-            & Q(individual2__rdi_merge_status=MergeStatusModel.MERGED),
-            program=rdi.program,
-        ).distinct()
+        return (
+            DeduplicationEngineSimilarityPair.objects.filter(
+                Q(individual1__in=rdi_pending_individuals) | Q(individual2__in=rdi_pending_individuals),
+                Q(individual1__duplicate=False) & Q(individual2__duplicate=False),
+                Q(individual1__withdrawn=False) & Q(individual2__withdrawn=False),
+                program=rdi.program,
+            )
+            .exclude(Q(individual1__in=other_pending_individuals) | Q(individual2__in=other_pending_individuals))
+            .distinct()
+        )
 
     def get_duplicates_for_rdi_against_population(
         self, rdi: RegistrationDataImport

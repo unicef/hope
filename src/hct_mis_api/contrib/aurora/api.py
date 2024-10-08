@@ -1,7 +1,7 @@
 # from rest_framework import serializers
 # from rest_framework.generics import ListAPIView
 #
-# from hct_mis_api.aurora.models import AuroraRegistration
+# from hct_mis_api.contrib.aurora.models import AuroraRegistration
 #
 #
 # class RegistrationDetailSerializer(serializers.ModelSerializer):
