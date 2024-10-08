@@ -204,6 +204,7 @@ class TestSendTpToDatahub(TestCase):
             program=cls.program_individual_data_needed_true,
             business_area=business_area_with_data_sharing,
             status=TargetPopulation.STATUS_PROCESSING,
+            program_cycle=cls.program_individual_data_needed_true.cycles.first(),
         )
         cls.target_population_first.households.set([cls.household])
         cls.target_population_first = refresh_stats(cls.target_population_first)
@@ -215,6 +216,7 @@ class TestSendTpToDatahub(TestCase):
             program=cls.program_individual_data_needed_false,
             business_area=business_area_with_data_sharing,
             status=TargetPopulation.STATUS_PROCESSING,
+            program_cycle=cls.program_individual_data_needed_false.cycles.first(),
         )
         cls.target_population_second.households.set([cls.household])
         cls.target_population_second = refresh_stats(cls.target_population_second)
@@ -226,6 +228,7 @@ class TestSendTpToDatahub(TestCase):
             program=cls.program_third,
             business_area=business_area_with_data_sharing,
             status=TargetPopulation.STATUS_PROCESSING,
+            program_cycle=cls.program_third.cycles.first(),
         )
         cls.target_population_third.households.set([cls.household_second])
         cls.target_population_third = refresh_stats(cls.target_population_third)
@@ -292,6 +295,7 @@ class TestSendTpToDatahub(TestCase):
             program=program_individual_data_needed_false,
             business_area=business_area_with_data_sharing,
             status=TargetPopulation.STATUS_PROCESSING,
+            program_cycle=program_individual_data_needed_false.cycles.first(),
         )
         target_population_first.households.set([household])
         target_population_first = refresh_stats(target_population_first)
@@ -301,6 +305,7 @@ class TestSendTpToDatahub(TestCase):
             program=program_individual_data_needed_true,
             business_area=business_area_with_data_sharing,
             status=TargetPopulation.STATUS_PROCESSING,
+            program_cycle=program_individual_data_needed_true.cycles.first(),
         )
         target_population_second.households.set([household])
         target_population_second = refresh_stats(target_population_second)

@@ -14,9 +14,9 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import PendingHousehold, PendingIndividual
 from hct_mis_api.apps.registration_data.models import ImportData, RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.celery_tasks import rdi_deduplication_task
-from hct_mis_api.aurora.celery_tasks import process_flex_records_task
-from hct_mis_api.aurora.models import Record, Registration
-from hct_mis_api.aurora.rdi import AuroraProcessor
+from hct_mis_api.contrib.aurora.celery_tasks import process_flex_records_task
+from hct_mis_api.contrib.aurora.models import Record, Registration
+from hct_mis_api.contrib.aurora.rdi import AuroraProcessor
 
 if TYPE_CHECKING:
     from uuid import UUID

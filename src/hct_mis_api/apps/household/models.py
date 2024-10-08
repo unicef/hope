@@ -53,7 +53,7 @@ from hct_mis_api.apps.utils.phone import (
 )
 
 if TYPE_CHECKING:
-    from hct_mis_api.aurora.models import Record
+    from hct_mis_api.contrib.aurora.models import Record
 
 BLANK = ""
 IDP = "IDP"
@@ -658,7 +658,7 @@ class Household(
 
     @property
     def flex_registrations_record(self) -> Optional["Record"]:
-        from hct_mis_api.aurora.models import Record
+        from hct_mis_api.contrib.aurora.models import Record
 
         return Record.objects.filter(id=self.flex_registrations_record_id).first()
 
@@ -716,7 +716,7 @@ class Document(AbstractSyncable, SoftDeletableRepresentationMergeStatusModel, Ti
         (STATUS_INVALID, _("Invalid")),
     )
 
-    document_number = models.CharField(max_length=255, blank=True)
+    document_number = models.CharField(max_length=255, blank=True, db_index=True)
     photo = models.ImageField(blank=True)
     individual = models.ForeignKey("Individual", related_name="documents", on_delete=models.CASCADE)
     type = models.ForeignKey("DocumentType", related_name="documents", on_delete=models.CASCADE)

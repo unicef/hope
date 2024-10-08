@@ -23,7 +23,7 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.utils.age_at_registration import calculate_age_at_registration
-from hct_mis_api.aurora.services.base_flex_registration_service import (
+from hct_mis_api.contrib.aurora.services.base_flex_registration_service import (
     BaseRegistrationService,
 )
 
