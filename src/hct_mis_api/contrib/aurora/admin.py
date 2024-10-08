@@ -31,14 +31,14 @@ from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 from hct_mis_api.apps.utils.security import is_root
-from hct_mis_api.aurora import models
-from hct_mis_api.aurora.celery_tasks import fresh_extract_records_task
-from hct_mis_api.aurora.models import Record, Registration
-from hct_mis_api.aurora.services.extract_record import extract
-from hct_mis_api.aurora.services.flex_registration_service import (
+from hct_mis_api.contrib.aurora import models
+from hct_mis_api.contrib.aurora.celery_tasks import fresh_extract_records_task
+from hct_mis_api.contrib.aurora.models import Record, Registration
+from hct_mis_api.contrib.aurora.services.extract_record import extract
+from hct_mis_api.contrib.aurora.services.flex_registration_service import (
     create_task_for_processing_records,
 )
-from hct_mis_api.aurora.utils import fetch_records, get_metadata
+from hct_mis_api.contrib.aurora.utils import fetch_records, get_metadata
 
 
 class StatusFilter(ChoicesFieldComboFilter):

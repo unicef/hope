@@ -1,6 +1,6 @@
 from django.urls import path
 
-from hct_mis_api.aurora.views import FetchDataView, RegistrationDataView
+from hct_mis_api.contrib.aurora.views import FetchDataView, RegistrationDataView
 
 app_name = "aurora"
 
