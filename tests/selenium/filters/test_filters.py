@@ -5,7 +5,6 @@ from django.core.management import call_command
 
 import pytest
 from dateutil.relativedelta import relativedelta
-from tests.selenium.page_object.filters import Filters
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.models import BusinessArea
@@ -27,6 +26,7 @@ from hct_mis_api.apps.targeting.fixtures import (
     TargetPopulationFactory,
 )
 from hct_mis_api.apps.targeting.models import TargetPopulation
+from tests.selenium.page_object.filters import Filters
 from tests.selenium.page_object.grievance.details_grievance_page import (
     GrievanceDetailsPage,
 )

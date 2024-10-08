@@ -1,5 +1,6 @@
-from tests.selenium.page_object.base_components import BaseComponents
 from selenium.webdriver.remote.webelement import WebElement
+
+from tests.selenium.page_object.base_components import BaseComponents
 
 
 class ProgrammeDetails(BaseComponents):
@@ -21,7 +22,9 @@ class ProgrammeDetails(BaseComponents):
     labelPartnerName = 'h6[data-cy="label-partner-name"]'
     labelPartnerAccess = 'div[data-cy="label-Partner Access"]'
     buttonRemoveProgram = 'button[data-cy="button-remove-program"]'
-    buttonEditProgram = 'a[data-cy="button-edit-program"]'
+    buttonEditProgram = 'button[data-cy="button-edit-program"]'
+    selectEditProgramDetails = 'li[data-cy="menu-item-edit-details"]'
+    selectEditProgramPartners = 'li[data-cy="menu-item-edit-partners"]'
     buttonActivateProgram = 'button[data-cy="button-activate-program"]'
     buttonActivateProgramModal = 'button[data-cy="button-activate-program-modal"]'
     labelProgrammeCode = 'div[data-cy="label-Programme Code"]'
@@ -188,6 +191,12 @@ class ProgrammeDetails(BaseComponents):
 
     def getButtonEditProgram(self) -> WebElement:
         return self.wait_for(self.buttonEditProgram)
+
+    def getSelectEditProgramDetails(self) -> WebElement:
+        return self.wait_for(self.selectEditProgramDetails)
+
+    def getSselectEditProgramPartners(self) -> WebElement:
+        return self.wait_for(self.selectEditProgramPartners)
 
     def getButtonActivateProgram(self) -> WebElement:
         return self.wait_for(self.buttonActivateProgram)

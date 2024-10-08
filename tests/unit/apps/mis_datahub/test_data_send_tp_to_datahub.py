@@ -88,6 +88,7 @@ class TestDataSendTpToDatahub(TestCase):
             ca_hash_id=uuid.uuid4(),
             ca_id="TEST",
         )
+        cls.program_cycle = cls.program.cycles.first()
         rdi = RegistrationDataImportFactory(program=cls.program)
 
         cls.create_first_household(admin_area2, rdi)
@@ -98,6 +99,7 @@ class TestDataSendTpToDatahub(TestCase):
             program=cls.program,
             business_area=business_area_with_data_sharing,
             status=TargetPopulation.STATUS_PROCESSING,
+            program_cycle=cls.program_cycle,
         )
         cls.target_population.households.set([cls.household])
         cls.target_population: TargetPopulation = refresh_stats(cls.target_population)

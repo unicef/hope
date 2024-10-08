@@ -4,11 +4,11 @@ volumes:
 services:
   backend:
     volumes:
-      - ../src/report/screenshot/:/code/screenshot/
-      - ../src/report/:/code/report/
+      - ../../tests/test-coverage:/code/test-coverage
+      - ../../tests/report/:/code/tests/selenium/output_data/report/
       - type: volume
         source: backend-web-app
-        target: /code/hct_mis_api/apps/web
+        target: /code/src/hct_mis_api/apps/web
         volume:
           nocopy: false
     depends_on:
@@ -31,7 +31,7 @@ services:
       - backend-web-app:/tmp/
     command: |
       sh -c "
-        cp -r ./hct_mis_api/apps/web/* /tmp/
+        cp -r /packages/__pypackages__/3.11/lib/hct_mis_api/apps/web/* /tmp/
       "
     restart: "no"
 

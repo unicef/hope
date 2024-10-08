@@ -1460,6 +1460,28 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
+    @staticmethod
+    def validate_collectors_unique(household_collectors_data: list) -> Optional[dict]:
+        collectors_unique_data = []
+        for collector_info in household_collectors_data:
+            collector_data = [
+                collector_info.get("full_name_i_c"),
+                collector_info.get("gender_i_c"),
+                collector_info.get("birth_date_i_c"),
+                collector_info.get("middle_name_i_c"),
+                collector_info.get("given_name_i_c"),
+                collector_info.get("family_name_i_c"),
+                collector_info.get("phone_no_i_c"),
+                collector_info.get("phone_no_alternative_i_c"),
+            ]
+            if collector_data in collectors_unique_data:
+                return {
+                    "header": "role_i_c",
+                    "message": "The same individual cannot be a primary and alternate collector for the same household.",
+                }
+            collectors_unique_data.append(collector_data)
+        return None
+
     def validate_everything(
         self, submissions: List, business_area: BusinessArea, skip_validate_pictures: Optional[bool] = False
     ) -> List:
@@ -1554,11 +1576,14 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                 }
                 attachments = household.get("_attachments", [])
                 hh_value: List[Dict]
+                household_collectors_data = []
                 for hh_field, hh_value in household.items():
                     expected_hh_fields.discard(hh_field)
                     if hh_field == KOBO_FORM_INDIVIDUALS_COLUMN_NAME:
                         individual: Dict
                         for individual in hh_value:
+                            if individual.get("role_i_c") in ["primary", "alternate"]:
+                                household_collectors_data.append(individual)
                             expected_i_fields = {
                                 *self.expected_individuals_fields,
                             }
@@ -1641,6 +1666,8 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                         error = self._get_field_type_error(hh_field, hh_value, attachments, skip_validate_pictures)
                         if error:
                             errors.append(error)
+                if collectors_error := self.validate_collectors_unique(household_collectors_data):
+                    errors.append(collectors_error)
                 hh_expected_field_errors = [
                     {"header": field, "message": f"Missing household required field {field}"}
                     for field in expected_hh_fields

@@ -1,4 +1,4 @@
-import { Grid, Typography } from '@mui/material';
+import { Box, Grid, IconButton, Tooltip, Typography } from '@mui/material';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { PaymentPlanQuery } from '@generated/graphql';
@@ -9,6 +9,7 @@ import { LabelizedField } from '@core/LabelizedField';
 import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
+import { Info } from '@mui/icons-material';
 
 interface FollowUpPaymentPlanDetailsProps {
   baseUrl: string;
@@ -33,6 +34,7 @@ export function FollowUpPaymentPlanDetails({
       unicefId: sourcePaymentPlanUnicefId,
     },
     targetPopulation,
+    exchangeRate,
   } = paymentPlan;
 
   return (
@@ -95,6 +97,28 @@ export function FollowUpPaymentPlanDetails({
               <LabelizedField label={t('Dispersion End Date')}>
                 <UniversalMoment>{dispersionEndDate}</UniversalMoment>
               </LabelizedField>
+            </Grid>
+            <Grid item xs={3}>
+              <Box display="flex" alignItems="center">
+                <Box mr={1}>
+                  <LabelizedField label={t('FX Rate Applied')}>
+                    {exchangeRate}
+                  </LabelizedField>
+                </Box>
+                <Tooltip
+                  title={t(
+                    'If displayed exchange rate differs from Vision, please contact your designated focal point for resolution',
+                  )}
+                >
+                  <IconButton
+                    color="primary"
+                    aria-label="exchange-rate"
+                    data-cy="info-exchange-rate"
+                  >
+                    <Info />
+                  </IconButton>
+                </Tooltip>
+              </Box>
             </Grid>
           </Grid>
         </OverviewContainer>

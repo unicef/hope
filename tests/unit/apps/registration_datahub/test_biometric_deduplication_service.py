@@ -22,7 +22,9 @@ from hct_mis_api.apps.registration_datahub.apis.deduplication_engine import (
     DeduplicationEngineAPI,
     DeduplicationImage,
     DeduplicationSet,
+    DeduplicationSetConfig,
     DeduplicationSetData,
+    IgnoredFilenamesPair,
     SimilarityPair,
 )
 from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import (
@@ -33,7 +35,13 @@ from hct_mis_api.apps.utils.models import MergeStatusModel
 
 @pytest.fixture(autouse=True)
 def mock_deduplication_engine_env_vars() -> None:
-    with mock.patch.dict(os.environ, {"DEDUPLICATION_ENGINE_API_KEY": "TEST", "DEDUPLICATION_ENGINE_API_URL": "TEST"}):
+    with mock.patch.dict(
+        os.environ,
+        {
+            "DEDUPLICATION_ENGINE_API_KEY": "TEST",
+            "DEDUPLICATION_ENGINE_API_URL": "TEST",
+        },
+    ):
         yield
 
 
@@ -62,6 +70,9 @@ class BiometricDeduplicationServiceTest(TestCase):
             DeduplicationSet(
                 reference_pk=str(self.program.id),
                 notification_url=f"https://{settings.DOMAIN_NAME}/api/rest/{self.program.business_area.slug}/programs/{str(self.program.id)}/registration-data/webhookdeduplication/",
+                config=DeduplicationSetConfig(
+                    face_distance_threshold=1 - (self.program.business_area.biometric_deduplication_threshold / 100)
+                ),
             )
         )
 
@@ -84,7 +95,7 @@ class BiometricDeduplicationServiceTest(TestCase):
         mock_get_deduplication_set.return_value = dict(state="Clean", error=None)
 
         data = service.get_deduplication_set(deduplication_set_id)
-        self.assertEqual(data, DeduplicationSetData(state="Clean", error=None))
+        self.assertEqual(data, DeduplicationSetData(state="Clean"))
 
         mock_get_deduplication_set.assert_called_once_with(deduplication_set_id)
 
@@ -92,8 +103,10 @@ class BiometricDeduplicationServiceTest(TestCase):
     def test_upload_individuals_success(self, mock_bulk_upload_images: mock.Mock) -> None:
         self.program.deduplication_set_id = uuid.uuid4()
         self.program.save()
+
         rdi = RegistrationDataImportFactory(
-            program=self.program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_PENDING
+            program=self.program,
+            deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_PENDING,
         )
         individual = IndividualFactory(registration_data_import=rdi, photo="some_photo.jpg")
 
@@ -107,11 +120,18 @@ class BiometricDeduplicationServiceTest(TestCase):
         rdi.refresh_from_db()
         assert rdi.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_UPLOADED
 
+        rdi.deduplication_engine_status = RegistrationDataImport.DEDUP_ENGINE_ERROR
+        rdi.save()
+        service.upload_individuals(str(self.program.deduplication_set_id), rdi)
+        rdi.refresh_from_db()
+        assert rdi.deduplication_engine_status == RegistrationDataImport.DEDUP_ENGINE_UPLOADED
+
     @patch("hct_mis_api.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI.bulk_upload_images")
     def test_upload_individuals_failure(self, mock_bulk_upload_images: mock.Mock) -> None:
         mock_bulk_upload_images.side_effect = DeduplicationEngineAPI.DeduplicationEngineAPIException
         rdi = RegistrationDataImportFactory(
-            program=self.program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_PENDING
+            program=self.program,
+            deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_PENDING,
         )
         IndividualFactory(registration_data_import=rdi, photo="some_photo.jpg")
 
@@ -123,7 +143,8 @@ class BiometricDeduplicationServiceTest(TestCase):
 
     def test_upload_individuals_no_individuals(self) -> None:
         rdi = RegistrationDataImportFactory(
-            program=self.program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_PENDING
+            program=self.program,
+            deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_PENDING,
         )
         IndividualFactory(registration_data_import=rdi, photo="some_photo.jpg", withdrawn=True)
 
@@ -140,7 +161,8 @@ class BiometricDeduplicationServiceTest(TestCase):
         self.program.deduplication_set_id = uuid.uuid4()
         self.program.save()
         rdi = RegistrationDataImportFactory(
-            program=self.program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_PENDING
+            program=self.program,
+            deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_PENDING,
         )
         service = BiometricDeduplicationService()
 
@@ -148,12 +170,16 @@ class BiometricDeduplicationServiceTest(TestCase):
         service.process_deduplication_set(str(self.program.deduplication_set_id), RegistrationDataImport.objects.all())
         mock_process_deduplication.assert_called_once_with(str(self.program.deduplication_set_id))
         rdi.refresh_from_db()
-        self.assertEqual(rdi.deduplication_engine_status, RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS)
+        self.assertEqual(
+            rdi.deduplication_engine_status,
+            RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS,
+        )
 
         mock_process_deduplication.return_value = ({}, 409)
         with self.assertRaises(BiometricDeduplicationService.BiometricDeduplicationServiceException):
             service.process_deduplication_set(
-                str(self.program.deduplication_set_id), RegistrationDataImport.objects.all()
+                str(self.program.deduplication_set_id),
+                RegistrationDataImport.objects.all(),
             )
 
         mock_process_deduplication.return_value = ({}, 400)
@@ -204,10 +230,12 @@ class BiometricDeduplicationServiceTest(TestCase):
         self.program.save()
 
         rdi_1 = RegistrationDataImportFactory(
-            program=self.program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_PENDING
+            program=self.program,
+            deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_PENDING,
         )
         rdi_2 = RegistrationDataImportFactory(
-            program=self.program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS
+            program=self.program,
+            deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS,
         )
         IndividualFactory(registration_data_import=rdi_1, photo="some_photo1.jpg")
         PendingIndividualFactory(registration_data_import=rdi_2, photo="some_photo2.jpg")
@@ -228,7 +256,8 @@ class BiometricDeduplicationServiceTest(TestCase):
 
         mock_bulk_upload_images.side_effect = DeduplicationEngineAPI.DeduplicationEngineAPIException
         with self.assertRaisesMessage(
-            BiometricDeduplicationService.BiometricDeduplicationServiceException, "Failed to upload images for all RDIs"
+            BiometricDeduplicationService.BiometricDeduplicationServiceException,
+            "Failed to upload images for all RDIs",
         ):
             service.upload_and_process_deduplication_set(self.program)
             assert mock_bulk_upload_images.call_count == 2
@@ -296,14 +325,25 @@ class BiometricDeduplicationServiceTest(TestCase):
         self.program.deduplication_set_id = uuid.uuid4()
         self.program.save()
         rdi = RegistrationDataImportFactory(
-            program=self.program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS
+            program=self.program,
+            deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS,
+        )
+
+        service.mark_rdis_as_processing(str(self.program.deduplication_set_id))
+        rdi.refresh_from_db()
+        self.assertEqual(
+            rdi.deduplication_engine_status,
+            RegistrationDataImport.DEDUP_ENGINE_PROCESSING,
         )
 
         service.mark_rdis_as_deduplicated(str(self.program.deduplication_set_id))
         rdi.refresh_from_db()
-        self.assertEqual(rdi.deduplication_engine_status, RegistrationDataImport.DEDUP_ENGINE_FINISHED)
+        self.assertEqual(
+            rdi.deduplication_engine_status,
+            RegistrationDataImport.DEDUP_ENGINE_FINISHED,
+        )
 
-        rdi.deduplication_engine_status = RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS
+        rdi.deduplication_engine_status = RegistrationDataImport.DEDUP_ENGINE_PROCESSING
         rdi.save()
 
         service.mark_rdis_as_deduplication_error(str(self.program.deduplication_set_id))
@@ -317,13 +357,16 @@ class BiometricDeduplicationServiceTest(TestCase):
         self.program.save()
 
         rdi1 = RegistrationDataImportFactory(
-            program=self.program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED
+            program=self.program,
+            deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED,
         )
         rdi2 = RegistrationDataImportFactory(
-            program=self.program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED
+            program=self.program,
+            deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED,
         )
         rdi3 = RegistrationDataImportFactory(
-            program=self.program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED
+            program=self.program,
+            deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED,
         )
         individuals = IndividualFactory.create_batch(6, program=self.program)
         ind1, ind2, ind3, ind4, ind5, ind6 = sorted(individuals, key=lambda x: x.id)
@@ -363,8 +406,16 @@ class BiometricDeduplicationServiceTest(TestCase):
         assert list(
             duplicates.order_by("similarity_score").values("individual1", "individual2", "similarity_score")
         ) == [
-            {"individual1": ind1.id, "individual2": ind5.id, "similarity_score": Decimal("80.00")},
-            {"individual1": ind2.id, "individual2": ind6.id, "similarity_score": Decimal("90.00")},
+            {
+                "individual1": ind1.id,
+                "individual2": ind5.id,
+                "similarity_score": Decimal("80.00"),
+            },
+            {
+                "individual1": ind2.id,
+                "individual2": ind6.id,
+                "similarity_score": Decimal("90.00"),
+            },
         ]
 
         duplicate_individuals_count = service.get_duplicate_individuals_for_rdi_against_population_count(rdi1)
@@ -377,13 +428,16 @@ class BiometricDeduplicationServiceTest(TestCase):
         self.program.save()
 
         rdi1 = RegistrationDataImportFactory(
-            program=self.program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED
+            program=self.program,
+            deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED,
         )
         rdi2 = RegistrationDataImportFactory(
-            program=self.program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED
+            program=self.program,
+            deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED,
         )
         rdi3 = RegistrationDataImportFactory(
-            program=self.program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED
+            program=self.program,
+            deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED,
         )
         individuals = IndividualFactory.create_batch(6, program=self.program)
         ind1, ind2, ind3, ind4, ind5, ind6 = sorted(individuals, key=lambda x: x.id)
@@ -417,15 +471,27 @@ class BiometricDeduplicationServiceTest(TestCase):
         ]
         service.store_similarity_pairs(str(self.program.deduplication_set_id), similarity_pairs)
 
-        duplicates = service.get_duplicates_for_merged_rdi_against_population(rdi1)
+        duplicates = service.get_duplicates_for_merged_rdi_against_population(rdi2)
 
         assert len(duplicates) == 3
         assert list(
             duplicates.order_by("similarity_score").values("individual1", "individual2", "similarity_score")
         ) == [
-            {"individual1": ind1.id, "individual2": ind2.id, "similarity_score": Decimal("70.00")},
-            {"individual1": ind1.id, "individual2": ind5.id, "similarity_score": Decimal("80.00")},
-            {"individual1": ind2.id, "individual2": ind6.id, "similarity_score": Decimal("90.00")},
+            {
+                "individual1": ind1.id,
+                "individual2": ind3.id,
+                "similarity_score": Decimal("70.00"),
+            },
+            {
+                "individual1": ind4.id,
+                "individual2": ind5.id,
+                "similarity_score": Decimal("70.00"),
+            },
+            {
+                "individual1": ind3.id,
+                "individual2": ind4.id,
+                "similarity_score": Decimal("90.00"),
+            },
         ]
 
     def test_get_duplicates_for_rdi_against_batch(self) -> None:
@@ -435,13 +501,16 @@ class BiometricDeduplicationServiceTest(TestCase):
         self.program.save()
 
         rdi1 = RegistrationDataImportFactory(
-            program=self.program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED
+            program=self.program,
+            deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED,
         )
         rdi2 = RegistrationDataImportFactory(
-            program=self.program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED
+            program=self.program,
+            deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED,
         )
         rdi3 = RegistrationDataImportFactory(
-            program=self.program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED
+            program=self.program,
+            deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED,
         )
         individuals = IndividualFactory.create_batch(6, program=self.program)
         ind1, ind2, ind3, ind4, ind5, ind6 = sorted(individuals, key=lambda x: x.id)
@@ -481,7 +550,11 @@ class BiometricDeduplicationServiceTest(TestCase):
         assert list(
             duplicates.order_by("similarity_score").values("individual1", "individual2", "similarity_score")
         ) == [
-            {"individual1": ind1.id, "individual2": ind2.id, "similarity_score": Decimal("90.00")},
+            {
+                "individual1": ind1.id,
+                "individual2": ind2.id,
+                "similarity_score": Decimal("90.00"),
+            },
         ]
         duplicate_individuals_count = service.get_duplicate_individuals_for_rdi_against_batch_count(rdi1)
         assert duplicate_individuals_count == 2
@@ -493,7 +566,8 @@ class BiometricDeduplicationServiceTest(TestCase):
         self, create_needs_adjudication_tickets_for_biometrics_mock: mock.Mock
     ) -> None:
         rdi1 = RegistrationDataImportFactory(
-            program=self.program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED
+            program=self.program,
+            deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED,
         )
 
         service = BiometricDeduplicationService()
@@ -507,11 +581,19 @@ class BiometricDeduplicationServiceTest(TestCase):
         deduplication_set_id = str(uuid.uuid4())
         service = BiometricDeduplicationService()
 
-        service.get_deduplication_set = mock.Mock(return_value=DeduplicationSetData(state="Clean", error=None))
+        service.get_deduplication_set = mock.Mock(return_value=DeduplicationSetData(state="Clean"))
 
         results_data = [
-            {"first": {"reference_pk": "1"}, "second": {"reference_pk": "2"}, "score": 0.9},
-            {"first": {"reference_pk": "3"}, "second": {"reference_pk": "4"}, "score": 0.8},
+            {
+                "first": {"reference_pk": "1"},
+                "second": {"reference_pk": "2"},
+                "score": 0.9,
+            },
+            {
+                "first": {"reference_pk": "3"},
+                "second": {"reference_pk": "4"},
+                "score": 0.8,
+            },
         ]
         service.get_deduplication_set_results = mock.Mock(return_value=results_data)
         service.store_similarity_pairs = mock.Mock()
@@ -538,7 +620,7 @@ class BiometricDeduplicationServiceTest(TestCase):
         deduplication_set_id = str(uuid.uuid4())
         service = BiometricDeduplicationService()
 
-        service.get_deduplication_set = mock.Mock(return_value=DeduplicationSetData(state="Error", error="error"))
+        service.get_deduplication_set = mock.Mock(return_value=DeduplicationSetData(state="Error"))
         service.mark_rdis_as_deduplication_error = mock.Mock()
 
         service.fetch_biometric_deduplication_results_and_process(deduplication_set_id)
@@ -554,7 +636,8 @@ class BiometricDeduplicationServiceTest(TestCase):
         service = BiometricDeduplicationService()
 
         rdi1 = RegistrationDataImportFactory(
-            program=self.program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS
+            program=self.program,
+            deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_PROCESSING,
         )
 
         service.get_duplicate_individuals_for_rdi_against_batch_count = mock.Mock(return_value=8)
@@ -593,3 +676,16 @@ class BiometricDeduplicationServiceTest(TestCase):
         rdi1.refresh_from_db()
         assert rdi1.dedup_engine_batch_duplicates == 8
         assert rdi1.dedup_engine_golden_record_duplicates == 9
+
+    @patch(
+        "hct_mis_api.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI.report_false_positive_duplicate"
+    )
+    def test_report_false_positive_duplicate(self, mock_report_false_positive_duplicate: mock.Mock) -> None:
+        service = BiometricDeduplicationService()
+        deduplication_set_id = uuid.uuid4()
+
+        service.report_false_positive_duplicate("123", "456", str(deduplication_set_id))
+        mock_report_false_positive_duplicate.assert_called_once_with(
+            IgnoredFilenamesPair(first="123", second="456"),
+            str(deduplication_set_id),
+        )
