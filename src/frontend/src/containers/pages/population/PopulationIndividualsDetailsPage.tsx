@@ -27,6 +27,7 @@ import { AdminButton } from '@core/AdminButton';
 import { ProgrammeTimeSeriesFields } from '@components/population/ProgrammeTimeSeriesFields';
 import { fetchPeriodicFields } from '@api/periodicDataUpdateApi';
 import { useQuery } from '@tanstack/react-query';
+import { IndividualDeliveryMechanisms } from '@components/population/IndividualDeliveryMechanisms';
 
 const Container = styled.div`
   padding: 20px;
@@ -129,6 +130,9 @@ export const PopulationIndividualsDetailsPage = (): React.ReactElement => {
           individual={individual as IndividualNode}
           choicesData={choicesData}
           grievancesChoices={grievancesChoices}
+        />
+        <IndividualDeliveryMechanisms
+          individual={individual as IndividualNode}
         />
         <IndividualAdditionalRegistrationInformation
           flexFieldsData={flexFieldsData}

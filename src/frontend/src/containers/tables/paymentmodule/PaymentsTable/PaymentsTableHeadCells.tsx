@@ -61,6 +61,13 @@ export const headCells: HeadCell<
   },
   {
     disablePadding: false,
+    label: 'Status',
+    id: 'status',
+    numeric: false,
+    disableSort: true,
+  },
+  {
+    disablePadding: false,
     label: 'FSP Auth Code',
     id: 'fsp_auth_code',
     numeric: false,

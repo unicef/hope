@@ -255,8 +255,9 @@ class TestSmokePaymentModule:
         assert "FSP" in pagePaymentModuleDetails.getTableLabel()[6].text
         assert "Entitlement" in pagePaymentModuleDetails.getTableLabel()[7].text
         assert "Delivered Quantity" in pagePaymentModuleDetails.getTableLabel()[8].text
-        assert "FSP Auth Code" in pagePaymentModuleDetails.getTableLabel()[9].text
-        assert "Reconciliation" in pagePaymentModuleDetails.getTableLabel()[10].text
+        assert "Status" in pagePaymentModuleDetails.getTableLabel()[9].text
+        assert "FSP Auth Code" in pagePaymentModuleDetails.getTableLabel()[10].text
+        assert "Reconciliation" in pagePaymentModuleDetails.getTableLabel()[11].text
 
     @pytest.mark.skip(reason="Test fails in CI")
     def test_payment_plan_happy_path(
