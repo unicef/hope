@@ -71,7 +71,7 @@ class BiometricDeduplicationServiceTest(TestCase):
                 reference_pk=str(self.program.id),
                 notification_url=f"https://{settings.DOMAIN_NAME}/api/rest/{self.program.business_area.slug}/programs/{str(self.program.id)}/registration-data/webhookdeduplication/",
                 config=DeduplicationSetConfig(
-                    face_distance_threshold=self.program.business_area.biometric_deduplication_threshold / 100
+                    face_distance_threshold=1 - (self.program.business_area.biometric_deduplication_threshold / 100)
                 ),
             )
         )
@@ -471,7 +471,7 @@ class BiometricDeduplicationServiceTest(TestCase):
         ]
         service.store_similarity_pairs(str(self.program.deduplication_set_id), similarity_pairs)
 
-        duplicates = service.get_duplicates_for_merged_rdi_against_population(rdi1)
+        duplicates = service.get_duplicates_for_merged_rdi_against_population(rdi2)
 
         assert len(duplicates) == 3
         assert list(
@@ -479,17 +479,17 @@ class BiometricDeduplicationServiceTest(TestCase):
         ) == [
             {
                 "individual1": ind1.id,
-                "individual2": ind2.id,
+                "individual2": ind3.id,
                 "similarity_score": Decimal("70.00"),
             },
             {
-                "individual1": ind1.id,
+                "individual1": ind4.id,
                 "individual2": ind5.id,
-                "similarity_score": Decimal("80.00"),
+                "similarity_score": Decimal("70.00"),
             },
             {
-                "individual1": ind2.id,
-                "individual2": ind6.id,
+                "individual1": ind3.id,
+                "individual2": ind4.id,
                 "similarity_score": Decimal("90.00"),
             },
         ]
@@ -637,7 +637,7 @@ class BiometricDeduplicationServiceTest(TestCase):
 
         rdi1 = RegistrationDataImportFactory(
             program=self.program,
-            deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS,
+            deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_PROCESSING,
         )
 
         service.get_duplicate_individuals_for_rdi_against_batch_count = mock.Mock(return_value=8)
