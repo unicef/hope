@@ -51,6 +51,7 @@ class TestSmokeIndividuals:
         add_households: None,
         pageIndividuals: Individuals,
         pageIndividualsDetails: IndividualsDetails,
+        driver,
     ) -> None:
         pageIndividuals.selectGlobalProgramFilter("Test Programm")
         pageIndividuals.getNavProgrammePopulation().click()

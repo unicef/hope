@@ -163,15 +163,17 @@ class BaseComponents(Common):
 
     def selectGlobalProgramFilter(self, name: str) -> None:
         # TODO: remove this one after fix bug with cache
-        self.getMenuUserProfile().click()
-        self.getMenuItemClearCache().click()
+        # self.getMenuUserProfile().click()
+        # self.getMenuItemClearCache().click()
 
         self.getGlobalProgramFilter().click()
+        self.getGlobalProgramFilterSearchInput().clear()
+        self.getGlobalProgramFilterSearchButton().click()
         if name != "All Programmes":
             self.getGlobalProgramFilterSearchInput().send_keys(name)
             self.getGlobalProgramFilterSearchButton().click()
-
             self.wait_for_text_disappear("All Programmes", '[data-cy="select-option-name"]')
+        
         self.select_listbox_element(name)
 
     def getDrawerInactiveSubheader(self, timeout: int = Common.DEFAULT_TIMEOUT) -> WebElement:

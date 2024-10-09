@@ -4,7 +4,6 @@ from django.conf import settings
 from django.core.management import call_command
 
 import pytest
-from pytest_django import DjangoDbBlocker
 from selenium.webdriver import Keys
 
 from hct_mis_api.apps.geo.models import Area, Country
@@ -28,17 +27,15 @@ pytestmark = pytest.mark.django_db(transaction=True)
 
 
 @pytest.fixture
-def add_feedbacks(django_db_setup: Generator[None, None, None], django_db_blocker: DjangoDbBlocker) -> None:
-    with django_db_blocker.unblock():
-        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/accountability/fixtures/data-cypress.json")
+def add_feedbacks() -> None:
+    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/accountability/fixtures/data-cypress.json")
     yield
 
 
 @pytest.fixture
-def add_households(django_db_setup: Generator[None, None, None], django_db_blocker: DjangoDbBlocker) -> None:
-    with django_db_blocker.unblock():
-        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/registration_data/fixtures/data-cypress.json")
-        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/household/fixtures/data-cypress.json")
+def add_households() -> None:
+    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/registration_data/fixtures/data-cypress.json")
+    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/household/fixtures/data-cypress.json")
     yield
 
 
