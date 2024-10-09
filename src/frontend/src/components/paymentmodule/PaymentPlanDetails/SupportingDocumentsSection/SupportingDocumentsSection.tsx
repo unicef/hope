@@ -1,5 +1,6 @@
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import styled from 'styled-components';
 import DownloadIcon from '@mui/icons-material/Download';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { PaperContainer } from '@components/targeting/PaperContainer';
@@ -37,6 +38,16 @@ import { useConfirmation } from '@components/core/ConfirmationDialog';
 import { GreyBox } from '@components/core/GreyBox';
 import { BlueText } from '@components/grievances/LookUps/LookUpStyles';
 import { useDownloadSupportingDocument } from './SupportingDocumentsSectionActions';
+
+const StyledBox = styled(Box)`
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background-color: ${({ theme }) => theme.palette.grey[200]};
+  padding: 4px;
+  margin-bottom: 4px;
+`;
 
 interface SupportingDocumentsSectionProps {
   initialOpen?: boolean;
@@ -251,8 +262,12 @@ export const SupportingDocumentsSection = ({
                     alignItems="center"
                   >
                     <Box display="flex" flexDirection="column">
-                      <BlueText>{doc.title}</BlueText>
-                      <BlueText>{doc.file}</BlueText>
+                      <StyledBox>
+                        <BlueText>{doc.title}</BlueText>
+                      </StyledBox>
+                      <StyledBox>
+                        <BlueText>{doc.file}</BlueText>
+                      </StyledBox>
                     </Box>
                     <Box>
                       {canDownloadFile && (
