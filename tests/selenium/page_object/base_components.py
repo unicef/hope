@@ -173,7 +173,7 @@ class BaseComponents(Common):
             self.getGlobalProgramFilterSearchInput().send_keys(name)
             self.getGlobalProgramFilterSearchButton().click()
             self.wait_for_text_disappear("All Programmes", '[data-cy="select-option-name"]')
-        
+
         self.select_listbox_element(name)
 
     def getDrawerInactiveSubheader(self, timeout: int = Common.DEFAULT_TIMEOUT) -> WebElement:

@@ -446,7 +446,7 @@ class TestProgrammeDetails:
         assert "Test %$ What?" in pageProgrammeDetails.getProgramCycleTitle()[2].text
 
     def test_program_details_add_new_programme_cycle(
-        self, standard_active_program: Program, pageProgrammeDetails: ProgrammeDetails,driver
+        self, standard_active_program: Program, pageProgrammeDetails: ProgrammeDetails, driver
     ) -> None:
         pageProgrammeDetails.selectGlobalProgramFilter("Active Programme")
         assert "ACTIVE" in pageProgrammeDetails.getProgramStatus().text

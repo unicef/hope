@@ -112,6 +112,7 @@ from tests.selenium.page_object.targeting.targeting_details import TargetingDeta
 def pytest_addoption(parser) -> None:  # type: ignore
     parser.addoption("--mapping", action="store_true", default=False, help="Enable mapping mode")
 
+
 def pytest_configure(config) -> None:  # type: ignore
     env = Env()
     settings.OUTPUT_DATA_ROOT = env("OUTPUT_DATA_ROOT", default="/tests/selenium/output_data")
@@ -247,12 +248,14 @@ def browser(driver: Chrome, live_server: LiveServer) -> Chrome:
 @pytest.fixture
 def login(browser: Chrome) -> Chrome:
     browser.get(f"{browser.live_server.url}/api/unicorn/")
-    browser.execute_script("""
+    browser.execute_script(
+        """
     window.indexedDB.databases().then(dbs => dbs.forEach(db => {
         console.log('Deleting database:', db.name);
         indexedDB.deleteDatabase(db.name);
     }));
-    """)
+    """
+    )
     login = "id_username"
     password = "id_password"
     loginButton = '//*[@id="login-form"]/div[3]/input'
@@ -648,7 +651,9 @@ def test_failed_check(request: FixtureRequest, browser: Chrome) -> None:
 def screenshot(driver: Chrome, node_id: str) -> None:
     if not os.path.exists(settings.SCREENSHOT_DIRECTORY):
         os.makedirs(settings.SCREENSHOT_DIRECTORY)
-    file_name = f'{node_id.split("__")[-1]}_{datetime.today().strftime("%Y-%m-%d_%H.%M")}.png'.replace("/", "_").replace("::", "__")
+    file_name = f'{node_id.split("__")[-1]}_{datetime.today().strftime("%Y-%m-%d_%H.%M")}.png'.replace(
+        "/", "_"
+    ).replace("::", "__")
     file_path = os.path.join(settings.SCREENSHOT_DIRECTORY, file_name)
     driver.get_screenshot_as_file(file_path)
     attach(data=driver.get_screenshot_as_png())
