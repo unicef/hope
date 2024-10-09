@@ -44,6 +44,10 @@ class DeduplicationEngineSimilarityPairIndividualNode(graphene.ObjectType):
     full_name = graphene.String()
     unicef_id = graphene.String()
 
+    @staticmethod
+    def resolve_photo(parent: Any, info: Any) -> Optional[graphene.String]:
+        return parent.photo.url if parent.photo else None
+
 
 class DeduplicationEngineSimilarityPairNode(BaseNodePermissionMixin, graphene.ObjectType):
     permission_classes = (hopePermissionClass(Permissions.GRIEVANCES_VIEW_BIOMETRIC_RESULTS),)
