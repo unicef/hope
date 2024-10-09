@@ -254,6 +254,8 @@ def login(browser: Chrome) -> Chrome:
         console.log('Deleting database:', db.name);
         indexedDB.deleteDatabase(db.name);
     }));
+    window.localStorage.clear();
+    window.sessionStorage.clear();
     """
     )
     login = "id_username"
@@ -651,7 +653,7 @@ def test_failed_check(request: FixtureRequest, browser: Chrome) -> None:
 def screenshot(driver: Chrome, node_id: str) -> None:
     if not os.path.exists(settings.SCREENSHOT_DIRECTORY):
         os.makedirs(settings.SCREENSHOT_DIRECTORY)
-    file_name = f'{node_id.split("__")[-1]}_{datetime.today().strftime("%Y-%m-%d_%H.%M")}.png'.replace(
+    file_name = f'{node_id.split("::")[-1]}_{datetime.today().strftime("%Y-%m-%d_%H.%M")}.png'.replace(
         "/", "_"
     ).replace("::", "__")
     file_path = os.path.join(settings.SCREENSHOT_DIRECTORY, file_name)

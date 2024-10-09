@@ -238,6 +238,9 @@ class GrievanceDetailsPage(BaseComponents):
 
     def disappearButtonConfirm(self) -> WebElement:
         return self.wait_for_disappear(self.buttonConfirm)
+    
+    def disappearButtonCloseTicket(self) -> WebElement:
+        return self.wait_for_disappear(self.buttonCloseTicket)
 
     def getButtonEdit(self) -> WebElement:
         return self.wait_for(self.buttonEdit)

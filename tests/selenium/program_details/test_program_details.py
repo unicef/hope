@@ -405,7 +405,7 @@ class TestProgrammeDetails:
         assert "Test Title" in pageProgrammeDetails.getProgramCycleTitle()[1].text
 
     def test_program_details_add_new_programme_cycle_without_end_date(
-        self, standard_active_program: Program, pageProgrammeDetails: ProgrammeDetails
+        self, standard_active_program: Program, pageProgrammeDetails: ProgrammeDetails, driver
     ) -> None:
         pageProgrammeDetails.selectGlobalProgramFilter("Active Programme")
         assert "ACTIVE" in pageProgrammeDetails.getProgramStatus().text
@@ -428,6 +428,12 @@ class TestProgrammeDetails:
         pageProgrammeDetails.getButtonCreateProgramCycle().click()
 
         pageProgrammeDetails.getProgramCycleRow()
+
+        # TODO TEST REFACTOR
+        from selenium.webdriver.common.by import By
+        from selenium.webdriver.support.ui import WebDriverWait
+        from selenium.webdriver.support import expected_conditions as EC
+        WebDriverWait(driver, 10).until(lambda d: len(d.find_elements(By.CSS_SELECTOR, pageProgrammeDetails.programCycleRow)) == 3)
 
         assert "Draft" in pageProgrammeDetails.getProgramCycleStatus()[1].text
         assert (datetime.now() + relativedelta(days=1)).strftime(
@@ -469,7 +475,11 @@ class TestProgrammeDetails:
         pageProgrammeDetails.getEndDateCycle().click()
         pageProgrammeDetails.getEndDateCycle().send_keys((datetime.now() + relativedelta(days=21)).strftime("%Y-%m-%d"))
         pageProgrammeDetails.getButtonCreateProgramCycle().click()
-
+        # TODO TEST REFACTOR
+        from selenium.webdriver.common.by import By
+        from selenium.webdriver.support.ui import WebDriverWait
+        from selenium.webdriver.support import expected_conditions as EC
+        WebDriverWait(driver, 10).until(lambda d: len(d.find_elements(By.CSS_SELECTOR, pageProgrammeDetails.programCycleRow)) == 3)
         pageProgrammeDetails.getProgramCycleRow()
 
         assert "Draft" in pageProgrammeDetails.getProgramCycleStatus()[1].text

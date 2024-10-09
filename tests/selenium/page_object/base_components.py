@@ -1,5 +1,5 @@
 from time import sleep
-
+from selenium.webdriver import Keys
 from selenium.webdriver.remote.webelement import WebElement
 
 from tests.selenium.helpers.helper import Common
@@ -168,6 +168,8 @@ class BaseComponents(Common):
 
         self.getGlobalProgramFilter().click()
         self.getGlobalProgramFilterSearchInput().clear()
+        self.getGlobalProgramFilterSearchInput().send_keys(Keys.CONTROL + "a")  # Select all (use COMMAND on Mac)
+        self.getGlobalProgramFilterSearchInput().send_keys(Keys.BACKSPACE)
         self.getGlobalProgramFilterSearchButton().click()
         if name != "All Programmes":
             self.getGlobalProgramFilterSearchInput().send_keys(name)

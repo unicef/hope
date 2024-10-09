@@ -13,7 +13,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 
 class Common:
-    DEFAULT_TIMEOUT = 60
+    DEFAULT_TIMEOUT = 10
 
     def __init__(self, driver: Chrome):
         self.driver = driver
@@ -43,7 +43,8 @@ class Common:
 
     def wait_for(self, locator: str, element_type: str = By.CSS_SELECTOR, timeout: int = DEFAULT_TIMEOUT) -> WebElement:
         from selenium.common.exceptions import TimeoutException
-
+        import time
+        # time.sleep(1)
         try:
             return self._wait(timeout).until(EC.visibility_of_element_located((element_type, locator)))
         except TimeoutException:

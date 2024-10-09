@@ -425,7 +425,7 @@ class TestSmokeGrievanceTickets:
         assert "ADD NEW NOTE" in pageGrievanceDetailsPage.getButtonNewNote().text
 
 
-@pytest.mark.usefixtures("login")
+
 class TestGrievanceTicketsHappyPath:
     def test_grievance_tickets_create_new_ticket_referral(
         self,
@@ -1191,6 +1191,7 @@ class TestGrievanceTickets:
         pageGrievanceDetailsPage.getButtonCloseTicket().click()
         pageGrievanceDetailsPage.getButtonConfirm().click()
         pageGrievanceDetailsPage.disappearButtonConfirm()
+        pageGrievanceDetailsPage.disappearButtonCloseTicket()
 
         pageGrievanceDetailsPage.selectGlobalProgramFilter("Test Program")
         pageGrievanceDetailsPage.getNavProgrammePopulation().click()
