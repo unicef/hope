@@ -532,7 +532,7 @@ class TestPaymentPlans:
         pagePaymentModule.getRow(0).click()
         pagePaymentModuleDetails.getUploadFileButton().click()
         pagePaymentModuleDetails.upload_file(f"{pytest.SELENIUM_PATH}/helpers/document_example.png")
-        pagePaymentModuleDetails.getTitleInput().send_keys("title input")
+        pagePaymentModuleDetails.getTitleInput().find_element(By.TAG_NAME, "input").send_keys("title input")
         pagePaymentModuleDetails.buttonImportSubmit().click()
         pagePaymentModuleDetails.screenshot("1", file_path="./")
 
