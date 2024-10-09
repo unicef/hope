@@ -22,7 +22,7 @@ from hct_mis_api.apps.household.models import (
     PendingIndividualRoleInHousehold,
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.aurora.services.base_flex_registration_service import (
+from hct_mis_api.contrib.aurora.services.base_flex_registration_service import (
     BaseRegistrationService,
 )
 

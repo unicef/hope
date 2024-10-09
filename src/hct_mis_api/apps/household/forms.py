@@ -15,7 +15,7 @@ from hct_mis_api.apps.household.models import (
     PendingIndividual,
     XlsxUpdateFile,
 )
-from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.targeting.models import TargetingCriteria, TargetPopulation
 
@@ -189,6 +189,10 @@ class CreateTargetPopulationTextForm(forms.Form):
         assert self.program is not None
         read_only = kwargs.pop("read_only", False)
         super().__init__(*args, **kwargs)
+        self.fields["program_cycle"] = forms.ModelChoiceField(
+            queryset=ProgramCycle.objects.filter(program=self.program),
+            label="Programme Cycle",
+        )
 
         if read_only:
             self.fields["name"].widget = HiddenInput()
@@ -196,6 +200,7 @@ class CreateTargetPopulationTextForm(forms.Form):
             self.fields["target_field"].widget = HiddenInput()
             self.fields["separator"].widget = HiddenInput()
             self.fields["targeting_criteria"].widget = HiddenInput()
+            self.fields["program_cycle"].widget = HiddenInput()
 
     def clean_criteria(self) -> Optional[List]:
         try:

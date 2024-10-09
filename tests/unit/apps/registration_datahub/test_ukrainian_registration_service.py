@@ -18,13 +18,13 @@ from hct_mis_api.apps.household.models import (
     PendingIndividual,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.aurora.fixtures import (
+from hct_mis_api.contrib.aurora.fixtures import (
     OrganizationFactory,
     ProjectFactory,
     RegistrationFactory,
 )
-from hct_mis_api.aurora.models import Record
-from hct_mis_api.aurora.services.ukraine_flex_registration_service import (
+from hct_mis_api.contrib.aurora.models import Record
+from hct_mis_api.contrib.aurora.services.ukraine_flex_registration_service import (
     Registration2024,
     UkraineBaseRegistrationService,
 )

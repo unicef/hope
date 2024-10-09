@@ -23,6 +23,7 @@ import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTabl
 import { PeoplePaymentPlanDetailsResults } from '@components/paymentmodulepeople/PaymentPlanDetails/PeoplePaymentPlanDetailsResults';
 import { PeoplePaymentsTable } from '@containers/tables/paymentmodulePeople/PeoplePaymentsTable';
 import { ExcludeSection } from '@components/paymentmodulepeople/PaymentPlanDetails/ExcludeSection';
+import { SupportingDocumentsSection } from '@components/paymentmodule/PaymentPlanDetails/SupportingDocumentsSection/SupportingDocumentsSection';
 
 export const PeoplePaymentPlanDetailsPage = (): React.ReactElement => {
   const { paymentPlanId } = useParams();
@@ -90,6 +91,7 @@ export const PeoplePaymentPlanDetailsPage = (): React.ReactElement => {
             <FspSection baseUrl={baseUrl} paymentPlan={paymentPlan} />
           )}
           <ExcludeSection paymentPlan={paymentPlan} />
+          <SupportingDocumentsSection paymentPlan={paymentPlan} />
           <PeoplePaymentPlanDetailsResults paymentPlan={paymentPlan} />
           <PeoplePaymentsTable
             businessArea={businessArea}
