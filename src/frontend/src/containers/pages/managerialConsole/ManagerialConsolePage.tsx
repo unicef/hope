@@ -100,12 +100,12 @@ export const ManagerialConsolePage: React.FC = () => {
 
   const bulkAction = useMutation({
     mutationFn: (params: { ids: string[]; action: string; comment: string }) =>
-      bulkActionPaymentPlansManagerial(
-        businessArea,
-        params.ids,
-        params.action,
-        params.comment,
-      ),
+      bulkActionPaymentPlansManagerial({
+        businessAreaSlug: businessArea,
+        ids: params.ids,
+        action: params.action,
+        comment: params.comment,
+      }),
     onSuccess: () => {
       refetchInApproval();
       refetchInAuthorization();
