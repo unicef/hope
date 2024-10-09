@@ -476,7 +476,7 @@ class TestPaymentPlans:
         create_payment_plan_lock: PaymentPlan,
         pagePaymentModule: PaymentModule,
         pagePaymentModuleDetails: PaymentModuleDetails,
-        pageNewPaymentPlan: NewPaymentPlan
+        pageNewPaymentPlan: NewPaymentPlan,
     ) -> None:
         pagePaymentModule.selectGlobalProgramFilter("Test Program")
         pagePaymentModule.getNavPaymentModule().click()
@@ -549,3 +549,11 @@ class TestPaymentPlans:
         assert "0" in pagePaymentModuleDetails.getLabelFemaleAdults().text
         assert "0" in pagePaymentModuleDetails.getLabelMaleChildren().text
         assert "0" in pagePaymentModuleDetails.getLabelMaleAdults().text
+
+    def test_payment_plan_details_payee_list(
+        self,
+        create_payment_plan_lock: PaymentPlan,
+        pagePaymentModule: PaymentModule,
+        pagePaymentModuleDetails: PaymentModuleDetails,
+    ) -> None:
+        pass
