@@ -1,10 +1,11 @@
 import { api } from './api';
+import { RegistrationDataImportList } from '@restgenerated/models/RegistrationDataImportList';
 
 export const fetchRegistrationDataImports = async (
   businessAreaSlug: string,
   programId: string,
   params = {},
-): Promise<any> => {
+): Promise<RegistrationDataImportList> => {
   const response = await api.get(
     `${businessAreaSlug}/programs/${programId}/registration-data/registration-data-imports/`,
     params,
