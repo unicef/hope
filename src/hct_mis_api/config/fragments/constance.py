@@ -148,7 +148,6 @@ CONSTANCE_CONFIG = {
     ),
     "QUICK_LINKS": (
         """Kobo,https://kf-hope.unitst.org/
-CashAssist,https://cashassist-trn.crm4.dynamics.com/
 Sentry,https://excubo.unicef.io/sentry/hct-mis-stg/
 elasticsearch,hope-elasticsearch-coordinating-only:9200
 Datamart,https://datamart.unicef.io
