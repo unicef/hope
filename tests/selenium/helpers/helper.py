@@ -86,7 +86,7 @@ class Common:
         delay_before: int = 2,
         delay_between_checks: float = 0.5,
     ) -> None:
-        sleep(delay_before)
+        # sleep(delay_before)
         select_element = self.wait_for(listbox)
         items = select_element.find_elements("tag name", tag_name)
         for item in items:

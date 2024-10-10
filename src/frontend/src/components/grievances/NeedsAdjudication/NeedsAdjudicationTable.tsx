@@ -97,7 +97,7 @@ export const NeedsAdjudicationTable = ({
     !isActiveProgram;
 
   const renderPossibleDuplicateRow = (possibleDuplicate) => (
-    <TableRow key={possibleDuplicate.id} data-cy="possible-duplicate-row">
+    <TableRow key={possibleDuplicate.id} data-cy={`possible-duplicate-row-${possibleDuplicate?.unicefId}`}>
       <TableCell align="left" data-cy="checkbox-cell">
         <Checkbox
           color="primary"
@@ -232,7 +232,7 @@ export const NeedsAdjudicationTable = ({
         </TableRow>
       </TableHead>
       <TableBody>
-        <TableRow data-cy="possible-duplicate-golden-row">
+        <TableRow data-cy={`possible-duplicate-row-${details.goldenRecordsIndividual?.unicefId}`}>
           <TableCell align="left">
             <Checkbox
               color="primary"

@@ -5,6 +5,7 @@ import { GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
 import {
   GrievanceTicketQuery,
   useIndividualLazyQuery,
+  useIndividualQuery,
 } from '@generated/graphql';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { LookUpButton } from '../../LookUpButton';
@@ -13,9 +14,10 @@ import { LookUpReassignRoleModal } from './LookUpReassignRoleModal';
 
 interface LookUpReassignRoleProps {
   household?:
-  | GrievanceTicketQuery['grievanceTicket']['household']
-  | GrievanceTicketQuery['grievanceTicket']['individual']['householdsAndRoles'][number]['household'];
-  individual: GrievanceTicketQuery['grievanceTicket']['individual'];
+    | GrievanceTicketQuery['grievanceTicket']['household']
+    | GrievanceTicketQuery['grievanceTicket']['individual']['householdsAndRoles'][number]['household'];
+  individualToReassign: GrievanceTicketQuery['grievanceTicket']['individual'];
+  initialSelectedIndividualId: string;
   ticket: GrievanceTicketQuery['grievanceTicket'];
   individualRole: { role: string; id: string };
   shouldDisableButton?: boolean;
@@ -26,9 +28,18 @@ export function LookUpReassignRole({
   ticket,
   individualRole,
   shouldDisableButton,
-  individual,
+  individualToReassign,
+  initialSelectedIndividualId,
 }: LookUpReassignRoleProps): React.ReactElement {
   const { t } = useTranslation();
+  const [selectedIndividualId, setSelectedIndividualId] = useState<string>(
+    initialSelectedIndividualId,
+  );
+  const { data: individualData, loading } = useIndividualQuery({
+    variables: { id: selectedIndividualId },
+  });
+  console.log('initialSelectedIndividualId', selectedIndividualId);
+  console.log('individualData zS', individualData?.individual?.unicefId);
   const [lookUpDialogOpen, setLookUpDialogOpen] = useState<boolean>(false);
   const [selectedHousehold, setSelectedHousehold] =
     useState<LookUpReassignRoleProps['household']>(null);
@@ -37,14 +48,16 @@ export function LookUpReassignRole({
     role;
     household;
     individual;
+    new_individual;
   }>({
     household: null,
     individual: null,
     role: null,
+    new_individual: null,
   });
   const [shouldUseMultiple, setShouldUseMultiple] = useState(false);
-  const [loadIndividual, { data: individualData, loading }] =
-    useIndividualLazyQuery();
+  // const [loadIndividual, { data: individualData, loading }] =
+  //   useIndividualLazyQuery();
 
   useEffect(() => {
     setSelectedHousehold(household);
@@ -100,16 +113,16 @@ export function LookUpReassignRole({
 
   useEffect(() => {
     if (reAssigneeRole?.individual) {
-      loadIndividual({ variables: { id: reAssigneeRole.individual } });
+      setSelectedIndividualId(reAssigneeRole.new_individual);
+      // loadIndividual({ variables: { id: reAssigneeRole.individual } });
     }
-  }, [reAssigneeRole, loadIndividual]);
+  }, [reAssigneeRole]);
 
   if (loading) return <LoadingComponent />;
-
   return (
     <Formik
       initialValues={{
-        selectedIndividual,
+        selectedIndividual: individualData.individual,
         selectedHousehold,
         role: individualRole.role,
       }}
@@ -136,7 +149,7 @@ export function LookUpReassignRole({
             initialValues={values}
             onValueChange={setFieldValue}
             ticket={ticket}
-            individual={individual}
+            individual={individualToReassign}
             selectedIndividual={selectedIndividual}
             selectedHousehold={selectedHousehold}
             setSelectedHousehold={setSelectedHousehold}

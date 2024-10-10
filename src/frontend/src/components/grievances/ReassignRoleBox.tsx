@@ -86,7 +86,10 @@ export const ReassignRoleBox = ({
       shouldShowReassignHoH = false;
     }
   }
-
+  const reassignDataDictByIndividualId = {};
+  for (const key of Object.keys(reassignData)) {
+    reassignDataDictByIndividualId[reassignData[key].individual] = reassignData[key];
+  }
   const mappedLookUpsForExternalHouseholds = householdsAndRoles
     .filter((el) => el.role !== 'NO_ROLE')
     .map((el) => (
@@ -109,7 +112,10 @@ export const ReassignRoleBox = ({
             individualRole={{ role: el.role, id: el.id }}
             ticket={ticket}
             household={el.household}
-            individual={individual}
+            individualToReassign={individual}
+            initialSelectedIndividualId={
+              reassignDataDictByIndividualId[individual.id]?.new_individual
+            }
           />
         ) : null}
         {shouldDisplayButton &&
@@ -180,7 +186,10 @@ export const ReassignRoleBox = ({
                 individualRole={{ role: 'HEAD', id: 'HEAD' }}
                 ticket={ticket}
                 household={household}
-                individual={individual}
+                individualToReassign={individual}
+                initialSelectedIndividualId={
+                  reassignDataDictByIndividualId[individual.id]?.new_individual
+                }
               />
             ) : null}
           </Box>

@@ -126,7 +126,6 @@ class GrievanceDetailsPage(BaseComponents):
     docNumberCell = 'td[data-cy="doc-number-cell"]'
     adminLevel2Cell = 'td[data-cy="admin-level2-cell"]'
     villageCell = 'td[data-cy="village-cell"]'
-    possibleDuplicateRow = 'tr[data-cy="possible-duplicate-row"]'
     checkboxCell = 'td[data-cy="checkbox-cell"]'
     selectCheckbox = 'span[data-cy="select-checkbox"]'
     statusCell = 'td[data-cy="status-cell"]'
@@ -168,7 +167,7 @@ class GrievanceDetailsPage(BaseComponents):
     textNotAssigment = "-"
     textAssigmentRootRootkowski = "Root Rootkowski"
     textNoCategory = "Needs Adjudication"
-    possibleDuplicateGoldenRow = 'tr[data-cy="possible-duplicate-golden-row"]'
+    possibleDuplicateRowTemplate = 'tr[data-cy="possible-duplicate-row-{}"]'
     peopleIcon = 'svg[data-cy="people-icon"]'
     personIcon = 'svg[data-cy="person-icon"]'
     buttonRotateImage = 'button[data-cy="button-rotate-image"]'
@@ -579,12 +578,8 @@ class GrievanceDetailsPage(BaseComponents):
         self.wait_for(self.villageCell)
         return self.get_elements(self.villageCell)
 
-    def getPossibleDuplicateRow(self) -> [WebElement]:
-        self.wait_for(self.possibleDuplicateRow)
-        return self.get_elements(self.possibleDuplicateRow)
-
-    def getPossibleDuplicateGoldenRow(self) -> WebElement:
-        return self.wait_for(self.possibleDuplicateGoldenRow)
+    def getPossibleDuplicateRowByUnicefId(self,unicef_id) -> WebElement:
+        return self.wait_for(self.possibleDuplicateRowTemplate.format(unicef_id))
 
     def getCheckboxCell(self) -> [WebElement]:
         self.wait_for(self.checkboxCell)
