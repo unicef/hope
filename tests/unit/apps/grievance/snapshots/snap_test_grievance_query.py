@@ -373,6 +373,37 @@ snapshots['TestGrievanceQuery::test_grievance_query_single_1_without_permission 
     ]
 }
 
+snapshots['TestGrievanceQuery::test_grievance_query_with_dedup_engine_results_0_with_permission 1'] = {
+    'data': {
+        'grievanceTicket': {
+            'admin': 'City Test',
+            'category': 8,
+            'consent': True,
+            'createdAt': '2020-03-12T00:00:00+00:00',
+            'description': 'Ticket with program, in admin area 1, new',
+            'language': 'Polish',
+            'needsAdjudicationTicketDetails': {
+                'extraData': {
+                    'dedupEngineSimilarityPair': {
+                        'individual1': {
+                            'fullName': 'Nicole Theresa Brooks',
+                            'photo': '/api/uploads/1_Nc20lpl.png',
+                            'unicefId': 'IND-0'
+                        },
+                        'individual2': {
+                            'fullName': 'Russell Holly White',
+                            'photo': '/api/uploads/2_E4rsILK.png',
+                            'unicefId': 'IND-1'
+                        },
+                        'similarityScore': '60.0'
+                    }
+                }
+            },
+            'status': 1
+        }
+    }
+}
+
 snapshots['TestGrievanceQuery::test_grievance_ticket_query_partner_access_detail_partner_unicef_for_all_programs 1'] = {
     'data': {
         'grievanceTicket': {

@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Any, List
 
 from django.core.cache import cache
+from django.core.files.base import ContentFile
 from django.core.management import call_command
 from django.utils import timezone
 
@@ -129,6 +130,37 @@ class TestGrievanceQuery(APITestCase):
     }
     """
 
+    GRIEVANCE_QUERY_DEDUP_ENGINE = """
+    query GrievanceTicket($id: ID!) {
+      grievanceTicket(id: $id) {
+        status
+        category
+        admin
+        language
+        description
+        consent
+        createdAt
+        needsAdjudicationTicketDetails {
+              extraData {
+                      dedupEngineSimilarityPair {
+                        individual1 {
+                          unicefId
+                          fullName
+                          photo
+                        }
+                        individual2 {
+                          unicefId
+                          fullName
+                          photo
+                        }
+                        similarityScore
+                      }
+                    }
+              }
+      }
+    }
+    """
+
     FILTER_BY_CATEGORY = """
     query AllGrievanceTickets($category: String) {
       allGrievanceTicket(businessArea: "afghanistan", orderBy: "-created_at", category: $category) {
@@ -252,6 +284,11 @@ class TestGrievanceQuery(APITestCase):
         cls.individual_1 = individuals[0]
         cls.individual_2 = individuals[1]
 
+        cls.individual_1.photo = ContentFile(b"...", name="1.png")
+        cls.individual_1.save()
+        cls.individual_2.photo = ContentFile(b"...", name="2.png")
+        cls.individual_2.save()
+
         created_at_dates_to_set = {
             GrievanceTicket.STATUS_NEW: [timezone.make_aware(datetime(year=2020, month=3, day=12))],
             GrievanceTicket.STATUS_ON_HOLD: [timezone.make_aware(datetime(year=2020, month=7, day=12))],
@@ -353,7 +390,7 @@ class TestGrievanceQuery(APITestCase):
                 gt.save(update_fields=("created_at",))
 
         TicketNeedsAdjudicationDetails.objects.create(
-            ticket=GrievanceTicket.objects.first(),
+            ticket=GrievanceTicket.objects.get(description="Ticket with program, in admin area 1, new"),
             golden_records_individual=cls.individual_1,
             possible_duplicate=cls.individual_2,
             score_min=100,
@@ -383,6 +420,19 @@ class TestGrievanceQuery(APITestCase):
                         "distinct": False,
                     }
                 ],
+                "dedup_engine_similarity_pair": {
+                    "individual1": {
+                        "unicef_id": str(cls.individual_1.unicef_id),
+                        "full_name": cls.individual_1.full_name,
+                        "photo_name": str(cls.individual_1.photo.name) if cls.individual_1.photo else None,
+                    },
+                    "individual2": {
+                        "unicef_id": str(cls.individual_2.unicef_id),
+                        "full_name": cls.individual_2.full_name,
+                        "photo_name": str(cls.individual_2.photo.name) if cls.individual_2.photo else None,
+                    },
+                    "similarity_score": 60.0,
+                },
             },
         )
 
@@ -467,6 +517,33 @@ class TestGrievanceQuery(APITestCase):
         gt_id = GrievanceTicket.objects.get(description="Ticket with program, in admin area 2, in progress").id
         self.snapshot_graphql_request(
             request_string=self.GRIEVANCE_QUERY,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+            variables={"id": self.id_to_base64(gt_id, "GrievanceTicketNode")},
+        )
+
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [
+                    Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR,
+                    Permissions.GRIEVANCES_VIEW_BIOMETRIC_RESULTS,
+                ],
+            ),
+        ]
+    )
+    def test_grievance_query_with_dedup_engine_results(self, _: Any, permissions: List[Permissions]) -> None:
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
+
+        gt_id = GrievanceTicket.objects.get(description="Ticket with program, in admin area 1, new").id
+        self.snapshot_graphql_request(
+            request_string=self.GRIEVANCE_QUERY_DEDUP_ENGINE,
             context={
                 "user": self.user,
                 "headers": {
