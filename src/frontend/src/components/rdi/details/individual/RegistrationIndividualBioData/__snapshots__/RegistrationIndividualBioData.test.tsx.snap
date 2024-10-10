@@ -3,10 +3,10 @@
 exports[`components/rdi/details/individual/RegistrationIndividualBioData should render 1`] = `
 <div>
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-qZrbh jScPhr css-1ps6pg7-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-khLCKb iJuZvT css-1ps6pg7-MuiPaper-root"
   >
     <div
-      class="sc-hLQSwg iuGfmc"
+      class="sc-fAUdSK cpcECW"
     >
       <h6
         class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
@@ -22,7 +22,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       >
         <div>
           <span
-            class="sc-guDLey RwNuC"
+            class="sc-gtLWhw bkWrmx"
             color="textSecondary"
           >
             Full Name
@@ -31,7 +31,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
             data-cy="label-Full Name"
           >
             <span
-              class="sc-dmyCSP bGPBYf"
+              class="sc-egkSDF XYdBd"
               color="textSecondary"
             >
               Alicja Kowalska
@@ -44,7 +44,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       >
         <div>
           <span
-            class="sc-guDLey RwNuC"
+            class="sc-gtLWhw bkWrmx"
             color="textSecondary"
           >
             Given Name
@@ -53,7 +53,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
             data-cy="label-Given Name"
           >
             <span
-              class="sc-dmyCSP bGPBYf"
+              class="sc-egkSDF XYdBd"
               color="textSecondary"
             >
               Alicja
@@ -66,7 +66,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       >
         <div>
           <span
-            class="sc-guDLey RwNuC"
+            class="sc-gtLWhw bkWrmx"
             color="textSecondary"
           >
             Middle Name
@@ -83,7 +83,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       >
         <div>
           <span
-            class="sc-guDLey RwNuC"
+            class="sc-gtLWhw bkWrmx"
             color="textSecondary"
           >
             Family Name
@@ -92,7 +92,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
             data-cy="label-Family Name"
           >
             <span
-              class="sc-dmyCSP bGPBYf"
+              class="sc-egkSDF XYdBd"
               color="textSecondary"
             >
               Kowalska
@@ -105,7 +105,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       >
         <div>
           <span
-            class="sc-guDLey RwNuC"
+            class="sc-gtLWhw bkWrmx"
             color="textSecondary"
           >
             Gender
@@ -114,7 +114,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
             data-cy="label-Gender"
           >
             <span
-              class="sc-dmyCSP bGPBYf"
+              class="sc-egkSDF XYdBd"
               color="textSecondary"
             >
               Female
@@ -127,7 +127,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       >
         <div>
           <span
-            class="sc-guDLey RwNuC"
+            class="sc-gtLWhw bkWrmx"
             color="textSecondary"
           >
             Age
@@ -136,7 +136,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
             data-cy="label-Age"
           >
             <span
-              class="sc-dmyCSP bGPBYf"
+              class="sc-egkSDF XYdBd"
               color="textSecondary"
             >
               80
@@ -149,7 +149,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       >
         <div>
           <span
-            class="sc-guDLey RwNuC"
+            class="sc-gtLWhw bkWrmx"
             color="textSecondary"
           >
             Date of Birth
@@ -158,7 +158,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
             data-cy="label-Date of Birth"
           >
             <span
-              class="sc-dmyCSP bGPBYf"
+              class="sc-egkSDF XYdBd"
               color="textSecondary"
             >
               <time
@@ -175,7 +175,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       >
         <div>
           <span
-            class="sc-guDLey RwNuC"
+            class="sc-gtLWhw bkWrmx"
             color="textSecondary"
           >
             Estimated Date of Birth
@@ -184,7 +184,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
             data-cy="label-Estimated Date of Birth"
           >
             <span
-              class="sc-dmyCSP bGPBYf"
+              class="sc-egkSDF XYdBd"
               color="textSecondary"
             >
               No
@@ -197,7 +197,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       >
         <div>
           <span
-            class="sc-guDLey RwNuC"
+            class="sc-gtLWhw bkWrmx"
             color="textSecondary"
           >
             Marital Status
@@ -206,7 +206,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
             data-cy="label-Marital Status"
           >
             <span
-              class="sc-dmyCSP bGPBYf"
+              class="sc-egkSDF XYdBd"
               color="textSecondary"
             >
               Married
@@ -219,7 +219,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       >
         <div>
           <span
-            class="sc-guDLey RwNuC"
+            class="sc-gtLWhw bkWrmx"
             color="textSecondary"
           >
             Work Status
@@ -228,7 +228,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
             data-cy="label-Work Status"
           >
             <span
-              class="sc-dmyCSP bGPBYf"
+              class="sc-egkSDF XYdBd"
               color="textSecondary"
             >
               Not provided
@@ -241,7 +241,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       >
         <div>
           <span
-            class="sc-guDLey RwNuC"
+            class="sc-gtLWhw bkWrmx"
             color="textSecondary"
           >
             Pregnant
@@ -250,7 +250,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
             data-cy="label-Pregnant"
           >
             <span
-              class="sc-dmyCSP bGPBYf"
+              class="sc-egkSDF XYdBd"
               color="textSecondary"
             >
               Yes
@@ -263,7 +263,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       >
         <div>
           <span
-            class="sc-guDLey RwNuC"
+            class="sc-gtLWhw bkWrmx"
             color="textSecondary"
           >
             Household ID
@@ -272,7 +272,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
             data-cy="label-Household ID"
           >
             <span
-              class="sc-dmyCSP bGPBYf"
+              class="sc-egkSDF XYdBd"
               color="textSecondary"
             >
               -
@@ -285,7 +285,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       >
         <div>
           <span
-            class="sc-guDLey RwNuC"
+            class="sc-gtLWhw bkWrmx"
             color="textSecondary"
           >
             Role
@@ -294,7 +294,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
             data-cy="label-Role"
           >
             <span
-              class="sc-dmyCSP bGPBYf"
+              class="sc-egkSDF XYdBd"
               color="textSecondary"
             >
               Alternate collector
@@ -307,7 +307,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       >
         <div>
           <span
-            class="sc-guDLey RwNuC"
+            class="sc-gtLWhw bkWrmx"
             color="textSecondary"
           >
             Relationship to HOH
@@ -316,7 +316,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
             data-cy="label-Relationship to HOH"
           >
             <span
-              class="sc-dmyCSP bGPBYf"
+              class="sc-egkSDF XYdBd"
               color="textSecondary"
             >
               Not a Family Member. Can only act as a recipient.
@@ -329,7 +329,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       >
         <div>
           <span
-            class="sc-guDLey RwNuC"
+            class="sc-gtLWhw bkWrmx"
             color="textSecondary"
           >
             Preferred language
@@ -345,7 +345,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
         class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 css-1idn90j-MuiGrid-root"
       >
         <div
-          class="sc-jsEeTM gZYCVp"
+          class="sc-dstKZu kpmDQU"
         />
       </div>
       <div
@@ -353,7 +353,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       >
         <div>
           <span
-            class="sc-guDLey RwNuC"
+            class="sc-gtLWhw bkWrmx"
             color="textSecondary"
           >
             Observed disabilities
@@ -370,7 +370,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       >
         <div>
           <span
-            class="sc-guDLey RwNuC"
+            class="sc-gtLWhw bkWrmx"
             color="textSecondary"
           >
             Seeing disability severity
@@ -379,7 +379,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
             data-cy="label-Seeing disability severity"
           >
             <span
-              class="sc-dmyCSP bGPBYf"
+              class="sc-egkSDF XYdBd"
               color="textSecondary"
             >
               None
@@ -392,7 +392,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       >
         <div>
           <span
-            class="sc-guDLey RwNuC"
+            class="sc-gtLWhw bkWrmx"
             color="textSecondary"
           >
             Hearing disability severity
@@ -401,7 +401,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
             data-cy="label-Hearing disability severity"
           >
             <span
-              class="sc-dmyCSP bGPBYf"
+              class="sc-egkSDF XYdBd"
               color="textSecondary"
             >
               None
@@ -414,7 +414,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       >
         <div>
           <span
-            class="sc-guDLey RwNuC"
+            class="sc-gtLWhw bkWrmx"
             color="textSecondary"
           >
             Physical disability severity
@@ -423,7 +423,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
             data-cy="label-Physical disability severity"
           >
             <span
-              class="sc-dmyCSP bGPBYf"
+              class="sc-egkSDF XYdBd"
               color="textSecondary"
             >
               None
@@ -436,7 +436,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       >
         <div>
           <span
-            class="sc-guDLey RwNuC"
+            class="sc-gtLWhw bkWrmx"
             color="textSecondary"
           >
             Remembering or concentrating disability severity
@@ -445,7 +445,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
             data-cy="label-Remembering or concentrating disability severity"
           >
             <span
-              class="sc-dmyCSP bGPBYf"
+              class="sc-egkSDF XYdBd"
               color="textSecondary"
             >
               None
@@ -458,7 +458,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       >
         <div>
           <span
-            class="sc-guDLey RwNuC"
+            class="sc-gtLWhw bkWrmx"
             color="textSecondary"
           >
             Self-care disability severity
@@ -467,7 +467,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
             data-cy="label-Self-care disability severity"
           >
             <span
-              class="sc-dmyCSP bGPBYf"
+              class="sc-egkSDF XYdBd"
               color="textSecondary"
             >
               None
@@ -480,7 +480,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       >
         <div>
           <span
-            class="sc-guDLey RwNuC"
+            class="sc-gtLWhw bkWrmx"
             color="textSecondary"
           >
             Communicating disability severity
@@ -489,7 +489,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
             data-cy="label-Communicating disability severity"
           >
             <span
-              class="sc-dmyCSP bGPBYf"
+              class="sc-egkSDF XYdBd"
               color="textSecondary"
             >
               None
@@ -502,7 +502,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       >
         <div>
           <span
-            class="sc-guDLey RwNuC"
+            class="sc-gtLWhw bkWrmx"
             color="textSecondary"
           >
             Disability
@@ -511,7 +511,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
             data-cy="label-Disability"
           >
             <span
-              class="sc-dmyCSP bGPBYf"
+              class="sc-egkSDF XYdBd"
               color="textSecondary"
             >
               Not Disabled
@@ -523,7 +523,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
         class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 css-1idn90j-MuiGrid-root"
       >
         <div
-          class="sc-jsEeTM gZYCVp"
+          class="sc-dstKZu kpmDQU"
         />
       </div>
       <div
@@ -537,7 +537,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           >
             <div>
               <span
-                class="sc-guDLey RwNuC"
+                class="sc-gtLWhw bkWrmx"
                 color="textSecondary"
               >
                 National ID
@@ -546,7 +546,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
                 data-cy="label-National ID"
               >
                 <span
-                  class="sc-dmyCSP bGPBYf"
+                  class="sc-egkSDF XYdBd"
                   color="textSecondary"
                 >
                   WSH221365
@@ -556,7 +556,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
           </div>
           <div>
             <span
-              class="sc-guDLey RwNuC"
+              class="sc-gtLWhw bkWrmx"
               color="textSecondary"
             >
               issued
@@ -565,7 +565,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
               data-cy="label-issued"
             >
               <span
-                class="sc-dmyCSP bGPBYf"
+                class="sc-egkSDF XYdBd"
                 color="textSecondary"
               >
                 Poland
@@ -578,7 +578,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
         class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 css-1idn90j-MuiGrid-root"
       >
         <div
-          class="sc-jsEeTM gZYCVp"
+          class="sc-dstKZu kpmDQU"
         />
       </div>
       <div
@@ -586,7 +586,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       >
         <div>
           <span
-            class="sc-guDLey RwNuC"
+            class="sc-gtLWhw bkWrmx"
             color="textSecondary"
           >
             Email
@@ -603,7 +603,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       >
         <div>
           <span
-            class="sc-guDLey RwNuC"
+            class="sc-gtLWhw bkWrmx"
             color="textSecondary"
           >
             Phone Number
@@ -612,7 +612,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
             data-cy="label-Phone Number"
           >
             <span
-              class="sc-dmyCSP bGPBYf"
+              class="sc-egkSDF XYdBd"
               color="textSecondary"
             >
               +48503123555
@@ -625,7 +625,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
       >
         <div>
           <span
-            class="sc-guDLey RwNuC"
+            class="sc-gtLWhw bkWrmx"
             color="textSecondary"
           >
             Alternate Phone Number
@@ -634,7 +634,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
             data-cy="label-Alternate Phone Number"
           >
             <span
-              class="sc-dmyCSP bGPBYf"
+              class="sc-egkSDF XYdBd"
               color="textSecondary"
             >
               -
