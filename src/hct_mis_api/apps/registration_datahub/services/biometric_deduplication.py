@@ -109,7 +109,8 @@ class BiometricDeduplicationService:
 
         deduplication_set_id = program.deduplication_set_id and str(program.deduplication_set_id)
         if not deduplication_set_id:
-            deduplication_set_id = self.create_deduplication_set(program)
+            with transaction.atomic():
+                deduplication_set_id = self.create_deduplication_set(program)
 
         if RegistrationDataImport.objects.filter(
             program=program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS
