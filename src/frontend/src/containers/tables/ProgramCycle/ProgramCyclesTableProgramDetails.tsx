@@ -1,6 +1,6 @@
 import { ProgramQuery, ProgramStatus } from '@generated/graphql';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
-import React, { ReactElement, useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { ClickableTableRow } from '@core/Table/ClickableTableRow';
 import TableCell from '@mui/material/TableCell';
 import { UniversalMoment } from '@core/UniversalMoment';
@@ -34,6 +34,10 @@ export const ProgramCyclesTableProgramDetails = ({
   const canCreateProgramCycle =
     program.status === ProgramStatus.Active &&
     hasPermissions(PERMISSIONS.PM_PROGRAMME_CYCLE_CREATE, permissions);
+  const canDeleteProgramCycle = hasPermissions(
+    PERMISSIONS.PM_PROGRAMME_CYCLE_DELETE,
+    permissions,
+  );
 
   const { data, error, isLoading } = useQuery({
     queryKey: ['programCycles', businessArea, program.id, queryVariables],
@@ -46,13 +50,15 @@ export const ProgramCyclesTableProgramDetails = ({
 
   const renderRow = (row: ProgramCycle): ReactElement => {
     const detailsUrl = `/${baseUrl}/payment-module/program-cycles/${row.id}`;
+
     const canEditProgramCycle =
       (row.status === 'Draft' || row.status === 'Active') &&
       hasPermissions(PERMISSIONS.PM_PROGRAMME_CYCLE_UPDATE, permissions);
-    const canDeleteProgramCycle =
-      row.status === 'Draft' &&
-      data.results.length > 1 &&
-      hasPermissions(PERMISSIONS.PM_PROGRAMME_CYCLE_DELETE, permissions);
+
+    const hasPermissionToDelete = hasPermissions(
+      PERMISSIONS.PM_PROGRAMME_CYCLE_DELETE,
+      permissions,
+    );
     return (
       <ClickableTableRow key={row.id} data-cy="program-cycle-row">
         <TableCell data-cy="program-cycle-title">
@@ -100,7 +106,7 @@ export const ProgramCyclesTableProgramDetails = ({
                 <EditProgramCycle program={program} programCycle={row} />
               )}
 
-              {canDeleteProgramCycle && (
+              {row.can_remove_cycle && hasPermissionToDelete && (
                 <DeleteProgramCycle program={program} programCycle={row} />
               )}
             </>
