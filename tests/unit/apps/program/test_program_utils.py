@@ -6,8 +6,6 @@ from unittest.mock import patch
 from django.core.cache import cache
 from django.test import TestCase
 
-import pytest
-
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.celery_tasks import enroll_households_to_program_task
@@ -288,28 +286,30 @@ class TestEnrolHouseholdToProgram(TestCase):
         self.assertEqual(hh_count, Household.objects.count())
         self.assertEqual(ind_count, Individual.objects.count())
 
-    @pytest.mark.parametrize("cache_exists", (True, False))
-    def test_enroll_households_to_program_task_already_running(self, cache_exists: bool) -> None:
+    def test_enroll_households_to_program_task_already_running(self) -> None:
         hh_count = Household.objects.count()
         ind_count = Individual.objects.count()
 
-        if cache_exists:
-            task_params = {
-                "task_name": "enroll_households_to_program_task",
-                "household_ids": [str(self.household.id)],
-                "program_for_enroll_id": str(self.program2.pk),
-            }
-            task_params_str = json.dumps(task_params, sort_keys=True)
-            cache_key = hashlib.sha256(task_params_str.encode()).hexdigest()
-            cache.set(cache_key, True, timeout=24 * 60 * 60)
+        task_params = {
+            "task_name": "enroll_households_to_program_task",
+            "household_ids": [str(self.household.id)],
+            "program_for_enroll_id": str(self.program2.pk),
+        }
+        task_params_str = json.dumps(task_params, sort_keys=True)
+        cache_key = hashlib.sha256(task_params_str.encode()).hexdigest()
+        cache.set(cache_key, True, timeout=24 * 60 * 60)
 
         enroll_households_to_program_task([str(self.household.id)], str(self.program2.pk), self.str_user_id)
 
-        self.assertEqual(hh_count + (0 if cache_exists else 1), Household.objects.count())
-        self.assertEqual(ind_count + (0 if cache_exists else 2), Individual.objects.count())
+        self.assertEqual(hh_count, Household.objects.count())
+        self.assertEqual(ind_count, Individual.objects.count())
 
-        if cache_exists:
-            cache.delete(cache_key)
+        cache.delete(cache_key)
+
+        enroll_households_to_program_task([str(self.household.id)], str(self.program2.pk), self.str_user_id)
+
+        self.assertEqual(hh_count + 1, Household.objects.count())
+        self.assertEqual(ind_count + 2, Individual.objects.count())
 
     @patch("hct_mis_api.apps.program.utils.randint")
     def test_generate_rdi_unique_name_when_conflicts(self, mock_randint: Any) -> None:
