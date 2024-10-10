@@ -2,10 +2,12 @@ import os
 import zipfile
 from datetime import datetime
 from time import sleep
+import factory
 
 import openpyxl
 import pytest
 from dateutil.relativedelta import relativedelta
+from pytz import utc
 from selenium.webdriver.common.by import By
 from sorl.thumbnail.conf import settings
 
@@ -61,10 +63,19 @@ def find_file(file_name: str, search_in_dir: str = settings.DOWNLOAD_DIRECTORY, 
 
 @pytest.fixture
 def create_test_program() -> Program:
+    yield create_program()
+
+
+@pytest.fixture
+def social_worker_program() -> Program:
+    yield create_program(dct_type=DataCollectingType.Type.SOCIAL)
+
+
+def create_program(name: str = "Test Program", dct_type: str = DataCollectingType.Type.STANDARD):
     BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
-    dct = DataCollectingTypeFactory(type=DataCollectingType.Type.STANDARD)
-    yield ProgramFactory(
-        name="Test Program",
+    dct = DataCollectingTypeFactory(type=dct_type)
+    return ProgramFactory(
+        name=name,
         programme_code="1234",
         start_date=datetime.now() - relativedelta(months=1),
         end_date=datetime.now() + relativedelta(months=1),
@@ -165,8 +176,15 @@ def create_payment_plan(create_targeting: None) -> PaymentPlan:
 
 @pytest.fixture
 def create_payment_plan_lock(create_test_program: Program) -> PaymentPlan:
-    program = create_test_program
+    yield payment_plan_create(create_test_program)
 
+
+@pytest.fixture
+def create_payment_plan_lock_social_worker(social_worker_program: Program) -> PaymentPlan:
+    yield payment_plan_create(social_worker_program)
+
+
+def payment_plan_create(program: Program):
     program_cycle = ProgramCycleFactory(
         program=program,
         title="Cycle for PaymentPlan",
@@ -185,13 +203,40 @@ def create_payment_plan_lock(create_test_program: Program) -> PaymentPlan:
 
     hoh1 = IndividualFactory(household=None)
     hoh2 = IndividualFactory(household=None)
-    household_1 = HouseholdFactory(id="3d7087be-e8f8-478d-9ca2-4ca6d5e96f51", head_of_household=hoh1, size=2)
-    household_2 = HouseholdFactory(id="3d7087be-e8f8-478d-9ca2-4ca6d5e96f52", head_of_household=hoh2, size=3)
-    IndividualFactory(household=household_1, program=program, sex="Male")
-    IndividualFactory(household=household_1, program=program, sex="Female")
-    IndividualFactory(household=household_2, program=program, sex="Male")
-    IndividualFactory(household=household_2, program=program, sex="Female")
-    IndividualFactory(household=household_2, program=program, sex="Female")
+    household_1 = HouseholdFactory(id="3d7087be-e8f8-478d-9ca2-4ca6d5e96f51",
+                                   unicef_id="HH-17-0000.3340",
+                                   head_of_household=hoh1,
+                                   size=2)
+    household_2 = HouseholdFactory(id="3d7087be-e8f8-478d-9ca2-4ca6d5e96f52",
+                                   unicef_id="HH-17-0000.3341",
+                                   head_of_household=hoh2,
+                                   size=3)
+
+    # HH1 - Female Children: 1; Female Adults: 1; Male Children: 2; Male Adults: 1;
+    IndividualFactory(household=household_1, program=program, sex="MALE",
+                      birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=11, maximum_age=16))
+    IndividualFactory(household=household_1, program=program, sex="MALE",
+                      birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=11, maximum_age=16))
+    IndividualFactory(household=household_1, program=program, sex="MALE", unicef_id="IND-06-0001.1828",
+                      birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=20, maximum_age=40))
+    IndividualFactory(household=household_1, program=program, sex="FEMALE",
+                      birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=1, maximum_age=10))
+    IndividualFactory(household=household_1, program=program, sex="FEMALE",
+                      birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=20, maximum_age=40))
+
+    # HH2 - Female Children: 4; Female Adults: 1; Male Children: 1; Male Adults: 0;
+    IndividualFactory(household=household_2, program=program, sex="MALE",
+                      birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=1, maximum_age=3))
+    IndividualFactory(household=household_2, program=program, sex="FEMALE",
+                      birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=1, maximum_age=10))
+    IndividualFactory(household=household_2, program=program, sex="FEMALE",
+                      birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=1, maximum_age=10))
+    IndividualFactory(household=household_2, program=program, sex="FEMALE",
+                      birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=1, maximum_age=10))
+    IndividualFactory(household=household_2, program=program, sex="FEMALE",
+                      birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=1, maximum_age=10))
+    IndividualFactory(household=household_2, program=program, sex="FEMALE",
+                      birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=30, maximum_age=45))
 
     PaymentFactory(parent=payment_plan, household=household_1, excluded=False, currency="PLN")
     PaymentFactory(parent=payment_plan, household=household_2, excluded=False, currency="PLN")
@@ -199,7 +244,7 @@ def create_payment_plan_lock(create_test_program: Program) -> PaymentPlan:
     payment_plan.update_population_count_fields()
     payment_plan.update_money_fields()
 
-    yield payment_plan
+    return payment_plan
 
 
 @pytest.mark.usefixtures("login")
@@ -232,12 +277,12 @@ class TestSmokePaymentModule:
         assert "Rows per page: 5 1–1 of 1" in pagePaymentModule.getTablePagination().text.replace("\n", " ")
 
     def test_smoke_new_payment_plan(
-        self,
-        create_test_program: Program,
-        pagePaymentModule: PaymentModule,
-        pageProgramCycle: ProgramCyclePage,
-        pageProgramCycleDetails: ProgramCycleDetailsPage,
-        pageNewPaymentPlan: NewPaymentPlan,
+            self,
+            create_test_program: Program,
+            pagePaymentModule: PaymentModule,
+            pageProgramCycle: ProgramCyclePage,
+            pageProgramCycleDetails: ProgramCycleDetailsPage,
+            pageNewPaymentPlan: NewPaymentPlan,
     ) -> None:
         pagePaymentModule.selectGlobalProgramFilter("Test Program")
         pagePaymentModule.getNavPaymentModule().click()
@@ -254,10 +299,10 @@ class TestSmokePaymentModule:
         assert "Dispersion End Date*" in pageNewPaymentPlan.wait_for(pageNewPaymentPlan.inputDispersionEndDate).text
 
     def test_smoke_details_payment_plan(
-        self,
-        create_payment_plan: PaymentPlan,
-        pagePaymentModule: PaymentModule,
-        pagePaymentModuleDetails: PaymentModuleDetails,
+            self,
+            create_payment_plan: PaymentPlan,
+            pagePaymentModule: PaymentModule,
+            pagePaymentModuleDetails: PaymentModuleDetails,
     ) -> None:
         pagePaymentModule.selectGlobalProgramFilter("Test Program")
         pagePaymentModule.getNavPaymentModule().click()
@@ -267,12 +312,12 @@ class TestSmokePaymentModule:
         assert "EXPORT XLSX" in pagePaymentModuleDetails.getButtonExportXlsx().text
         assert "USD" in pagePaymentModuleDetails.getLabelCurrency().text
         assert (
-            str((datetime.now() + relativedelta(days=10)).strftime("%-d %b %Y"))
-            in pagePaymentModuleDetails.getLabelDispersionStartDate().text
+                str((datetime.now() + relativedelta(days=10)).strftime("%-d %b %Y"))
+                in pagePaymentModuleDetails.getLabelDispersionStartDate().text
         )
         assert (
-            str((datetime.now() + relativedelta(days=15)).strftime("%-d %b %Y"))
-            in pagePaymentModuleDetails.getLabelDispersionEndDate().text
+                str((datetime.now() + relativedelta(days=15)).strftime("%-d %b %Y"))
+                in pagePaymentModuleDetails.getLabelDispersionEndDate().text
         )
         assert "-" in pagePaymentModuleDetails.getLabelRelatedFollowUpPaymentPlans().text
         assert "SET UP FSP" in pagePaymentModuleDetails.getButtonSetUpFsp().text
@@ -301,24 +346,24 @@ class TestSmokePaymentModule:
         assert "Reconciliation" in pagePaymentModuleDetails.getTableLabel()[11].text
 
     def test_payment_plan_happy_path(
-        self,
-        clear_downloaded_files: None,
-        create_targeting: None,
-        pagePaymentModule: PaymentModule,
-        pagePaymentModuleDetails: PaymentModuleDetails,
-        pageNewPaymentPlan: NewPaymentPlan,
-        pageProgramCycle: ProgramCyclePage,
-        pageProgramCycleDetails: ProgramCycleDetailsPage,
+            self,
+            clear_downloaded_files: None,
+            create_targeting: None,
+            pagePaymentModule: PaymentModule,
+            pagePaymentModuleDetails: PaymentModuleDetails,
+            pageNewPaymentPlan: NewPaymentPlan,
+            pageProgramCycle: ProgramCyclePage,
+            pageProgramCycleDetails: ProgramCycleDetailsPage,
     ) -> None:
         targeting = TargetPopulation.objects.first()
         pageProgramCycle.selectGlobalProgramFilter("Test Program")
         pageProgramCycle.getNavPaymentModule().click()
         pageProgramCycle.getNavProgrammeCycles().click()
         assert (
-            "Draft"
-            in pageProgramCycle.getProgramCycleRow()[0]
-            .find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-status"]')
-            .text
+                "Draft"
+                in pageProgramCycle.getProgramCycleRow()[0]
+                .find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-status"]')
+                .text
         )
         pageProgramCycle.getProgramCycleRow()[0].find_element(
             By.CSS_SELECTOR, 'td[data-cy="program-cycle-title"]'
@@ -337,7 +382,8 @@ class TestSmokePaymentModule:
         assert "OPEN" in pagePaymentModuleDetails.getStatusContainer().text
         assert "CZK" in pagePaymentModuleDetails.getLabelCurrency().text
         assert (
-            FormatTime(22, 1, 2024).date_in_text_format in pagePaymentModuleDetails.getLabelDispersionStartDate().text
+                FormatTime(22, 1,
+                           2024).date_in_text_format in pagePaymentModuleDetails.getLabelDispersionStartDate().text
         )
         assert FormatTime(30, 6, 2030).date_in_text_format in pagePaymentModuleDetails.getLabelDispersionEndDate().text
         pagePaymentModuleDetails.getButtonLockPlan().click()
@@ -407,36 +453,36 @@ class TestSmokePaymentModule:
         pagePaymentModule.getNavPaymentModule().click()
         pagePaymentModule.getNavProgrammeCycles().click()
         assert (
-            "Active"
-            in pageProgramCycle.getProgramCycleRow()[0]
-            .find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-status"]')
-            .text
+                "Active"
+                in pageProgramCycle.getProgramCycleRow()[0]
+                .find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-status"]')
+                .text
         )
 
 
 @pytest.mark.usefixtures("login")
 class TestPaymentPlans:
     def test_payment_plan_edit(
-        self,
-        clear_downloaded_files: None,
-        create_targeting: None,
-        pagePaymentModule: PaymentModule,
-        pagePaymentModuleDetails: PaymentModuleDetails,
-        pageNewPaymentPlan: NewPaymentPlan,
-        pageProgramCycle: ProgramCyclePage,
-        pageProgramCycleDetails: ProgramCycleDetailsPage,
+            self,
+            clear_downloaded_files: None,
+            create_targeting: None,
+            pagePaymentModule: PaymentModule,
+            pagePaymentModuleDetails: PaymentModuleDetails,
+            pageNewPaymentPlan: NewPaymentPlan,
+            pageProgramCycle: ProgramCyclePage,
+            pageProgramCycleDetails: ProgramCycleDetailsPage,
     ) -> None:
         pageProgramCycle.selectGlobalProgramFilter("Test Program")
         pageProgramCycle.getNavPaymentModule().click()
 
     def test_payment_plan_exclude_not_lock_error(
-        self,
-        create_payment_plan: PaymentPlan,
-        pagePaymentModule: PaymentModule,
-        pagePaymentModuleDetails: PaymentModuleDetails,
-        pageNewPaymentPlan: NewPaymentPlan,
-        pageProgramCycle: ProgramCyclePage,
-        pageProgramCycleDetails: ProgramCycleDetailsPage,
+            self,
+            create_payment_plan: PaymentPlan,
+            pagePaymentModule: PaymentModule,
+            pagePaymentModuleDetails: PaymentModuleDetails,
+            pageNewPaymentPlan: NewPaymentPlan,
+            pageProgramCycle: ProgramCyclePage,
+            pageProgramCycleDetails: ProgramCycleDetailsPage,
     ) -> None:
         pagePaymentModule.selectGlobalProgramFilter("Test Program")
         pagePaymentModule.getNavPaymentModule().click()
@@ -446,59 +492,86 @@ class TestPaymentPlans:
         with pytest.raises(Exception):
             pagePaymentModuleDetails.getButtonSaveExclusions().click()
 
-    def test_payment_plan_save_exclude(
-        self,
-        create_payment_plan_lock: PaymentPlan,
-        pagePaymentModule: PaymentModule,
-        pagePaymentModuleDetails: PaymentModuleDetails,
-        pageNewPaymentPlan: NewPaymentPlan,
-        pageProgramCycle: ProgramCyclePage,
-        pageProgramCycleDetails: ProgramCycleDetailsPage,
+    def test_payment_plan_save_exclude_people(
+            self,
+            create_payment_plan_lock_social_worker: PaymentPlan,
+            pagePaymentModule: PaymentModule,
+            pagePaymentModuleDetails: PaymentModuleDetails,
     ) -> None:
         pagePaymentModule.selectGlobalProgramFilter("Test Program")
         pagePaymentModule.getNavPaymentModule().click()
         pagePaymentModule.getNavPaymentPlans().click()
         pagePaymentModule.getRow(0).click()
+        pagePaymentModuleDetails.getButtonCreateExclusions()
+        pagePaymentModuleDetails.getLabelTotalNumberOfPeople()
+        assert "5" in pagePaymentModuleDetails.getLabelFemaleChildren().text
+        assert "2" in pagePaymentModuleDetails.getLabelFemaleAdults().text
+        assert "3" in pagePaymentModuleDetails.getLabelMaleChildren().text
+        assert "1" in pagePaymentModuleDetails.getLabelMaleAdults().text
+        assert "11" in pagePaymentModuleDetails.getLabelTotalNumberOfPeople().text
         pagePaymentModuleDetails.getButtonCreateExclusions().click()
         pagePaymentModuleDetails.getInputExclusionReason().send_keys("Reason e2e Test")
-        pagePaymentModuleDetails.getInputExclusion().send_keys("IND-09-0001.2395")
+        pagePaymentModuleDetails.getInputBeneficiariesIds()
+        pagePaymentModuleDetails.getInputBeneficiariesIds().find_element(By.TAG_NAME, "input").send_keys("IND-06-0001.1828")
         pagePaymentModuleDetails.getButtonApplyExclusions().click()
         pagePaymentModuleDetails.getButtonSaveExclusions().click()
+        for _ in range(100):
+            sleep(0.1)
+            if "0" in pagePaymentModuleDetails.getLabelMaleAdults().text:
+                break
+        else:
+            assert "0" in pagePaymentModuleDetails.getLabelMaleAdults().text
 
-    def test_payment_plan_save_exclude_people(
-        self,
-        create_payment_plan_lock: PaymentPlan,
-        pagePaymentModule: PaymentModule,
-        pagePaymentModuleDetails: PaymentModuleDetails,
+        assert "5" in pagePaymentModuleDetails.getLabelFemaleChildren().text
+        assert "2" in pagePaymentModuleDetails.getLabelFemaleAdults().text
+        assert "3" in pagePaymentModuleDetails.getLabelMaleChildren().text
+
+        assert "10" in pagePaymentModuleDetails.getLabelTotalNumberOfPeople().text
+
+    def test_payment_plan_save_exclude(
+            self,
+            create_payment_plan_lock: PaymentPlan,
+            pagePaymentModule: PaymentModule,
+            pagePaymentModuleDetails: PaymentModuleDetails,
     ) -> None:
         pagePaymentModule.selectGlobalProgramFilter("Test Program")
         pagePaymentModule.getNavPaymentModule().click()
         pagePaymentModule.getNavPaymentPlans().click()
         pagePaymentModule.getRow(0).click()
+        pagePaymentModuleDetails.getButtonCreateExclusions()
+        pagePaymentModuleDetails.getLabelTargetedIndividuals()
+        assert "5" in pagePaymentModuleDetails.getLabelFemaleChildren().text
+        assert "2" in pagePaymentModuleDetails.getLabelFemaleAdults().text
+        assert "3" in pagePaymentModuleDetails.getLabelMaleChildren().text
+        assert "1" in pagePaymentModuleDetails.getLabelMaleAdults().text
+        assert "2" in pagePaymentModuleDetails.getLabelTotalNumberOfHouseholds().text
+        assert "11" in pagePaymentModuleDetails.getLabelTargetedIndividuals().text
         pagePaymentModuleDetails.getButtonCreateExclusions().click()
         pagePaymentModuleDetails.getInputExclusionReason().send_keys("Reason e2e Test")
         pagePaymentModuleDetails.getInputHouseholdsIds()
         pagePaymentModuleDetails.getInputHouseholdsIds().find_element(By.TAG_NAME, "input").send_keys("HH-17-0000.3340")
         pagePaymentModuleDetails.getButtonApplyExclusions().click()
         pagePaymentModuleDetails.getButtonSaveExclusions().click()
-        pagePaymentModuleDetails.driver.execute_script(
-            """
-            container = document.querySelector("div[data-cy='main-content']")
-            container.scrollBy(0,1600)
-            """
-        )
-        sleep(2)
-        sleep(20)
+        for _ in range(100):
+            sleep(0.1)
+            if "1" in pagePaymentModuleDetails.getLabelTotalNumberOfHouseholds().text:
+                break
+        else:
+            assert "1" in pagePaymentModuleDetails.getLabelTotalNumberOfHouseholds().text
 
-        for i in range(10):
-            pagePaymentModuleDetails.screenshot(str(i), file_path="./")
+        assert "4" in pagePaymentModuleDetails.getLabelFemaleChildren().text
+        assert "1" in pagePaymentModuleDetails.getLabelFemaleAdults().text
+        assert "1" in pagePaymentModuleDetails.getLabelMaleChildren().text
+        assert "0" in pagePaymentModuleDetails.getLabelMaleAdults().text
+
+        assert "6" in pagePaymentModuleDetails.getLabelTargetedIndividuals().text
 
     def test_payment_plan_delete(
-        self,
-        create_payment_plan_lock: PaymentPlan,
-        pagePaymentModule: PaymentModule,
-        pagePaymentModuleDetails: PaymentModuleDetails,
-        pageNewPaymentPlan: NewPaymentPlan,
+            self,
+            create_payment_plan_lock: PaymentPlan,
+            pagePaymentModule: PaymentModule,
+            pagePaymentModuleDetails: PaymentModuleDetails,
+            pageNewPaymentPlan: NewPaymentPlan,
     ) -> None:
         pagePaymentModule.selectGlobalProgramFilter("Test Program")
         pagePaymentModule.getNavPaymentModule().click()
@@ -512,22 +585,22 @@ class TestPaymentPlans:
         assert payment_plan not in pagePaymentModule.getRow(0).text
 
     def test_payment_plan_creation_error(
-        self,
-        create_targeting: None,
-        pagePaymentModule: PaymentModule,
-        pagePaymentModuleDetails: PaymentModuleDetails,
-        pageNewPaymentPlan: NewPaymentPlan,
-        pageProgramCycle: ProgramCyclePage,
-        pageProgramCycleDetails: ProgramCycleDetailsPage,
+            self,
+            create_targeting: None,
+            pagePaymentModule: PaymentModule,
+            pagePaymentModuleDetails: PaymentModuleDetails,
+            pageNewPaymentPlan: NewPaymentPlan,
+            pageProgramCycle: ProgramCyclePage,
+            pageProgramCycleDetails: ProgramCycleDetailsPage,
     ) -> None:
         pageProgramCycle.selectGlobalProgramFilter("Test Program")
         pageProgramCycle.getNavPaymentModule().click()
         pageProgramCycle.getNavProgrammeCycles().click()
         assert (
-            "Draft"
-            in pageProgramCycle.getProgramCycleRow()[0]
-            .find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-status"]')
-            .text
+                "Draft"
+                in pageProgramCycle.getProgramCycleRow()[0]
+                .find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-status"]')
+                .text
         )
         pageProgramCycle.getProgramCycleRow()[0].find_element(
             By.CSS_SELECTOR, 'td[data-cy="program-cycle-title"]'
@@ -542,10 +615,10 @@ class TestPaymentPlans:
         assert "Currency is required" in pageNewPaymentPlan.getInputCurrency().text
 
     def test_payment_plan_supporting_documents(
-        self,
-        create_payment_plan_lock: PaymentPlan,
-        pagePaymentModule: PaymentModule,
-        pagePaymentModuleDetails: PaymentModuleDetails,
+            self,
+            create_payment_plan_lock: PaymentPlan,
+            pagePaymentModule: PaymentModule,
+            pagePaymentModuleDetails: PaymentModuleDetails,
     ) -> None:
         pagePaymentModule.selectGlobalProgramFilter("Test Program")
         pagePaymentModule.getNavPaymentModule().click()
@@ -555,29 +628,3 @@ class TestPaymentPlans:
         pagePaymentModuleDetails.upload_file(f"{pytest.SELENIUM_PATH}/helpers/document_example.png")
         pagePaymentModuleDetails.getTitleInput().find_element(By.TAG_NAME, "input").send_keys("title input")
         pagePaymentModuleDetails.getButtonImportSubmit().click()
-
-    def test_payment_plan_count(
-        self,
-        create_payment_plan_lock: PaymentPlan,
-        pagePaymentModule: PaymentModule,
-        pagePaymentModuleDetails: PaymentModuleDetails,
-    ) -> None:
-        pagePaymentModule.selectGlobalProgramFilter("Test Program")
-        pagePaymentModule.getNavPaymentModule().click()
-        pagePaymentModule.getNavPaymentPlans().click()
-        pagePaymentModule.getRow(0).click()
-        pagePaymentModuleDetails.driver.execute_script(
-            """
-            container = document.querySelector("div[data-cy='main-content']")
-            container.scrollBy(0,1600)
-            """
-        )
-        sleep(5)
-        pagePaymentModuleDetails.screenshot("xxx", file_path="./")
-
-        assert "0" in pagePaymentModuleDetails.getLabelFemaleChildren().text
-        assert "0" in pagePaymentModuleDetails.getLabelFemaleAdults().text
-        assert "2" in pagePaymentModuleDetails.getLabelMaleChildren().text
-        assert "3" in pagePaymentModuleDetails.getLabelMaleAdults().text
-        assert "2" in pagePaymentModuleDetails.getLabelTotalNumberOfHouseholds().text
-        assert "5" in pagePaymentModuleDetails.getLabelTargetedIndividuals().text

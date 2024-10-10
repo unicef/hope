@@ -28,6 +28,7 @@ class PaymentModuleDetails(BaseComponents):
     inputExclusion = 'textarea[data-cy="input-exclusion"]'
     inputExclusionReason = 'textarea[data-cy="input-exclusionReason"]'
     inputHouseholdsIds = '[data-cy="input-households-ids"]'
+    inputBeneficiariesIds = '[data-cy="input-beneficiaries-ids"]'
     buttonApplyExclusions = 'button[data-cy="button-apply-exclusions"]'
     labelFemaleChildren = 'div[data-cy="label-Female Children"]'
     labelFemaleAdults = 'div[data-cy="label-Female Adults"]'
@@ -35,6 +36,7 @@ class PaymentModuleDetails(BaseComponents):
     labelMaleAdults = 'div[data-cy="label-Male Adults"]'
     chartContainer = 'div[data-cy="chart-container"]'
     labelTotalNumberOfHouseholds = 'div[data-cy="label-Total Number of Households"]'
+    labelTotalNumberOfPeople = 'div[data-cy="label-Total Number of People"]'
     labelTargetedIndividuals = 'div[data-cy="label-Targeted Individuals"]'
     tableTitle = 'h6[data-cy="table-title"]'
     buttonImport = 'button[data-cy="button-import"]'
@@ -145,6 +147,9 @@ class PaymentModuleDetails(BaseComponents):
     def getInputHouseholdsIds(self) -> WebElement:
         return self.wait_for(self.inputHouseholdsIds)
 
+    def getInputBeneficiariesIds(self) -> WebElement:
+        return self.wait_for(self.inputBeneficiariesIds)
+
     def getInputExclusionReason(self) -> WebElement:
         return self.wait_for(self.inputExclusionReason)
 
@@ -168,6 +173,9 @@ class PaymentModuleDetails(BaseComponents):
 
     def getLabelTotalNumberOfHouseholds(self) -> WebElement:
         return self.wait_for(self.labelTotalNumberOfHouseholds)
+
+    def getLabelTotalNumberOfPeople(self) -> WebElement:
+        return self.wait_for(self.labelTotalNumberOfPeople)
 
     def getLabelTargetedIndividuals(self) -> WebElement:
         return self.wait_for(self.labelTargetedIndividuals)
