@@ -24,7 +24,6 @@ from hct_mis_api.apps.core.utils import (
 )
 from hct_mis_api.apps.core.validators import raise_program_status_is
 from hct_mis_api.apps.household.models import Household, Individual
-from hct_mis_api.apps.mis_datahub.celery_tasks import send_target_population_task
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.apps.steficon.schema import SteficonRuleNode
@@ -440,9 +439,6 @@ class FinalizeTargetPopulationMutation(ValidatedMutation):
                 target_population.finalized_by = user
                 target_population.finalized_at = timezone.now()
                 target_population.save()
-                transaction.on_commit(
-                    lambda: send_target_population_task.delay(target_population_id=target_population.id)
-                )
         log_create(
             TargetPopulation.ACTIVITY_LOG_MAPPING,
             "business_area",
