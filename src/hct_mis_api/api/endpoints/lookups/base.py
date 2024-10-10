@@ -1,9 +1,10 @@
 from typing import TYPE_CHECKING, Any, Optional
 
-from django_countries import Countries
 from rest_framework.response import Response
 
 from hct_mis_api.api.endpoints.base import HOPEAPIView
+from hct_mis_api.api.endpoints.serializers import CountrySerializer
+from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.household.models import (
     COLLECT_TYPES,
     IDENTIFICATION_TYPE_CHOICE,
@@ -25,9 +26,12 @@ class DocumentType(HOPEAPIView):
         return Response(dict(IDENTIFICATION_TYPE_CHOICE))
 
 
-class Country(HOPEAPIView):
+class CountryAPIView(HOPEAPIView):
+    serializer_class = CountrySerializer
+
     def get(self, request: "Request", format: Optional[Any] = None) -> Response:
-        return Response(dict(Countries()))
+        serializer = self.serializer_class(Country.objects.all(), many=True)
+        return Response(serializer.data)
 
 
 class ResidenceStatus(HOPEAPIView):
@@ -78,3 +82,8 @@ class FrequencyOfPayments(HOPEAPIView):
 class ProgramScope(HOPEAPIView):
     def get(self, request: "Request", format: Optional[Any] = None) -> Response:
         return Response(dict(Program.SCOPE_CHOICE))
+
+
+class ProgramStatuses(HOPEAPIView):
+    def get(self, request: "Request", format: Optional[Any] = None) -> Response:
+        return Response(dict(Program.STATUS_CHOICE))
