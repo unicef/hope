@@ -27,6 +27,7 @@ class PaymentModuleDetails(BaseComponents):
     supportingDocumentsEmpty = 'div[data-cy="supporting-documents-empty"]'
     inputExclusion = 'textarea[data-cy="input-exclusion"]'
     inputExclusionReason = 'textarea[data-cy="input-exclusionReason"]'
+    inputHouseholdsIds = '[data-cy="input-households-ids"]'
     buttonApplyExclusions = 'button[data-cy="button-apply-exclusions"]'
     labelFemaleChildren = 'div[data-cy="label-Female Children"]'
     labelFemaleAdults = 'div[data-cy="label-Female Adults"]'
@@ -141,8 +142,8 @@ class PaymentModuleDetails(BaseComponents):
     def getButtonSaveExclusions(self) -> WebElement:
         return self.wait_for(self.buttonSaveExclusions)
 
-    def getInputExclusion(self) -> WebElement:
-        return self.wait_for(self.inputExclusionReason)
+    def getInputHouseholdsIds(self) -> WebElement:
+        return self.wait_for(self.inputHouseholdsIds)
 
     def getInputExclusionReason(self) -> WebElement:
         return self.wait_for(self.inputExclusionReason)
