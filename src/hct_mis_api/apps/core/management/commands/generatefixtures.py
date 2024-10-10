@@ -7,14 +7,9 @@ from typing import Any, Callable, Dict
 
 from django.core.management import BaseCommand, call_command
 from django.db import transaction
-from django.db.models import Q
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.models import UserRole
-from hct_mis_api.apps.cash_assist_datahub import (
-    fixtures as cash_assist_datahub_fixtures,
-)
-from hct_mis_api.apps.cash_assist_datahub.models import Programme, Session
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.fixtures import (
@@ -36,7 +31,6 @@ from hct_mis_api.apps.payment.fixtures import (
     PaymentVerificationPlanFactory,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
@@ -201,9 +195,6 @@ class Command(BaseCommand):
         self.stdout.write("Generating fixtures...")
         if options["flush"]:
             call_command("flush", "--noinput")
-            call_command("flush", "--noinput", database="cash_assist_datahub_mis")
-            call_command("flush", "--noinput", database="cash_assist_datahub_ca")
-            call_command("flush", "--noinput", database="cash_assist_datahub_erp")
             call_command(
                 "loaddata",
                 "hct_mis_api/apps/account/fixtures/superuser.json",
@@ -244,18 +235,6 @@ class Command(BaseCommand):
         for index in range(business_area_amount):
             for _ in range(programs_amount):
                 self._generate_program_with_dependencies(options, index)
-
-        session = Session(source=Session.SOURCE_CA, status=Session.STATUS_READY)
-        session.save()
-        cash_assist_datahub_fixtures.ServiceProviderFactory.create_batch(10, session=session)
-        cash_assist_datahub_fixtures.CashPlanFactory.create_batch(10, session=session)
-        cash_assist_datahub_fixtures.PaymentRecordFactory.create_batch(10, session=session)
-
-        for _ in range(programs_amount):
-            used_ids = list(Programme.objects.values_list("mis_id", flat=True))
-            mis_id = Program.objects.filter(~Q(id__in=used_ids)).first().id
-            programme = cash_assist_datahub_fixtures.ProgrammeFactory(session=session, mis_id=mis_id)
-            programme.save()
 
         if not options["noreindex"]:
             rebuild_search_index()
