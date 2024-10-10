@@ -288,7 +288,14 @@ class TestCopyProgram(APITestCase):
             .card_number,
             self.entitlement_card1.card_number,
         )
-
+        self.assertNotEqual(
+            copied_program.household_set.filter(copied_from=self.household1).first().first_registration_date,
+            self.household1.first_registration_date,
+        )
+        self.assertNotEqual(
+            copied_program.household_set.filter(copied_from=self.household1).first().last_registration_date,
+            self.household1.last_registration_date,
+        )
         self.assertEqual(Document.objects.count(), 2)
         self.assertNotEqual(
             copied_program.individuals.filter(copied_from=self.individuals1[0]).first().documents.first().id,
@@ -355,6 +362,14 @@ class TestCopyProgram(APITestCase):
         self.assertEqual(
             copied_program.individuals.filter(copied_from=self.individuals1[0]).first().individual_collection,
             self.individuals1[0].individual_collection,
+        )
+        self.assertNotEqual(
+            copied_program.individuals.filter(copied_from=self.individuals1[0]).first().first_registration_date,
+            self.individuals1[0].first_registration_date,
+        )
+        self.assertNotEqual(
+            copied_program.individuals.filter(copied_from=self.individuals1[0]).first().last_registration_date,
+            self.individuals1[0].last_registration_date,
         )
         # check flex fields and PDU fields on original and copied individual
         self.assertNotEqual(
