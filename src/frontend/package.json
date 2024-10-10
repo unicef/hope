@@ -36,7 +36,7 @@
     "@mui/system": "^5.8.0",
     "@mui/x-date-pickers": "^6.19.4",
     "@mui/x-tree-view": "^6.17.0",
-    "@sentry/browser": "7.112.1",
+    "@sentry/browser": "^7.119.1",
     "@sentry/react": "7.112.1",
     "@tanstack/react-query": "^5.28.8",
     "@tanstack/react-query-devtools": "^5.28.8",
@@ -128,6 +128,8 @@
     "typescript": "~5.3.3"
   },
   "resolutions": {
-    "braces": "^3.0.3"
+    "braces": "^3.0.3",
+    "micromatch": "^4.0.8",
+    "@sentry/browser": "^7.119.1"
   }
 }
