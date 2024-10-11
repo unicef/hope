@@ -229,7 +229,7 @@ class FspData(FlexibleArgumentsDataclassMixin):
     id: int
     remote_id: str
     name: str
-    vision_vendor_number: str
+    vendor_number: str
     configs: List[Union[FspConfig, Dict]]
 
     def __post_init__(self) -> None:
@@ -436,7 +436,7 @@ class PaymentGatewayService:
             fsp, created = FinancialServiceProvider.objects.update_or_create(
                 payment_gateway_id=fsp_data.id,
                 defaults={
-                    "vision_vendor_number": fsp_data.vision_vendor_number,
+                    "vision_vendor_number": fsp_data.vendor_number,
                     "name": fsp_data.name,
                     "communication_channel": FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
                     "data_transfer_configuration": [dataclasses.asdict(config) for config in fsp_data.configs],
