@@ -3,10 +3,10 @@
 exports[`components/population/IndividualAdditionalRegistrationInformation should render 1`] = `
 <div>
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-fsYfdN ctuPcH css-1ps6pg7-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-ixGGxD fHLOhc css-1ps6pg7-MuiPaper-root"
   >
     <div
-      class="sc-dmyCSP ljiJAm"
+      class="sc-egkSDF flCGEE"
     >
       <h6
         class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
@@ -22,7 +22,7 @@ exports[`components/population/IndividualAdditionalRegistrationInformation shoul
       >
         <div>
           <span
-            class="sc-beySPh gbuZtJ"
+            class="sc-blHHSb dUfUKp"
             color="textSecondary"
           >
             muac
@@ -31,7 +31,7 @@ exports[`components/population/IndividualAdditionalRegistrationInformation shoul
             data-cy="label-muac"
           >
             <span
-              class="sc-guDLey cyWTlF"
+              class="sc-gtLWhw dynQwi"
               color="textSecondary"
             >
               334
@@ -44,7 +44,7 @@ exports[`components/population/IndividualAdditionalRegistrationInformation shoul
       >
         <div>
           <span
-            class="sc-beySPh gbuZtJ"
+            class="sc-blHHSb dUfUKp"
             color="textSecondary"
           >
             school enrolled
@@ -53,7 +53,7 @@ exports[`components/population/IndividualAdditionalRegistrationInformation shoul
             data-cy="label-school enrolled"
           >
             <span
-              class="sc-guDLey cyWTlF"
+              class="sc-gtLWhw dynQwi"
               color="textSecondary"
             >
               Yes
@@ -66,7 +66,7 @@ exports[`components/population/IndividualAdditionalRegistrationInformation shoul
       >
         <div>
           <span
-            class="sc-beySPh gbuZtJ"
+            class="sc-blHHSb dUfUKp"
             color="textSecondary"
           >
             school enrolled before
@@ -75,7 +75,7 @@ exports[`components/population/IndividualAdditionalRegistrationInformation shoul
             data-cy="label-school enrolled before"
           >
             <span
-              class="sc-guDLey cyWTlF"
+              class="sc-gtLWhw dynQwi"
               color="textSecondary"
             >
               No

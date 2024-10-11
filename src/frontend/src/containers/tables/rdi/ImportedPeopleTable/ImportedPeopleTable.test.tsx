@@ -1,6 +1,6 @@
 import { MockedProvider } from '@apollo/react-testing';
 import * as React from 'react';
-import { act } from '@testing-library/react';
+import { act } from 'react';
 import wait from 'waait';
 import { ImportedPeopleTable } from '.';
 import { render, ApolloLoadingLink } from '../../../../testUtils/testUtils';

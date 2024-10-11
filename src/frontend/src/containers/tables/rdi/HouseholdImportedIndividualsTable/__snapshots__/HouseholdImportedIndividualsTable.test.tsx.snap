@@ -3,16 +3,16 @@
 exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render loading 1`] = `
 <div>
   <div
-    class="sc-hLQSwg gYvGVw"
+    class="sc-fAUdSK kiWCKq"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-eDLKkx kTiBFR css-1ps6pg7-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-dntaoT dzXcRq css-1ps6pg7-MuiPaper-root"
     >
       <div
-        class="MuiTableContainer-root sc-fsYfdN css-rorn0c-MuiTableContainer-root"
+        class="MuiTableContainer-root sc-ixGGxD css-rorn0c-MuiTableContainer-root"
       >
         <div
-          class="sc-qZrbh fDJnQI MuiBox-root css-0"
+          class="sc-khLCKb snsJA MuiBox-root css-0"
         >
           <div
             class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-1w02pvu-MuiToolbar-root"
@@ -25,11 +25,11 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
             </h6>
           </div>
           <div
-            class="sc-qZrbh fDJnQI MuiBox-root css-1ruxp1v"
+            class="sc-khLCKb snsJA MuiBox-root css-1ruxp1v"
           />
         </div>
         <table
-          class="MuiTable-root sc-jTQCzO sc-jsEeTM gwVygm iETolD css-b1kpk9-MuiTable-root"
+          class="MuiTable-root sc-ivxoEo sc-dstKZu llKqxz ePplQm css-b1kpk9-MuiTable-root"
         >
           <thead
             class="MuiTableHead-root css-15wwp11-MuiTableHead-root"
@@ -42,7 +42,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
                 scope="col"
               >
                 <span
-                  class="sc-dmyCSP kdktwE"
+                  class="sc-egkSDF buCIue"
                   data-cy="table-label"
                 >
                   Individual ID
@@ -53,7 +53,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
                 scope="col"
               >
                 <span
-                  class="sc-dmyCSP kdktwE"
+                  class="sc-egkSDF buCIue"
                   data-cy="table-label"
                 >
                   Individual
@@ -64,7 +64,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
                 scope="col"
               >
                 <span
-                  class="sc-dmyCSP kdktwE"
+                  class="sc-egkSDF buCIue"
                   data-cy="table-label"
                 >
                   Role
@@ -75,7 +75,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
                 scope="col"
               >
                 <span
-                  class="sc-dmyCSP kdktwE"
+                  class="sc-egkSDF buCIue"
                   data-cy="table-label"
                 >
                   Relationship to HoH
@@ -86,7 +86,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
                 scope="col"
               >
                 <span
-                  class="sc-dmyCSP kdktwE"
+                  class="sc-egkSDF buCIue"
                   data-cy="table-label"
                 >
                   Date of Birth
@@ -97,7 +97,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
                 scope="col"
               >
                 <span
-                  class="sc-dmyCSP kdktwE"
+                  class="sc-egkSDF buCIue"
                   data-cy="table-label"
                 >
                   Gender
@@ -108,7 +108,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
                 scope="col"
               >
                 <span
-                  class="sc-dmyCSP kdktwE"
+                  class="sc-egkSDF buCIue"
                   data-cy="table-label"
                 >
                   Dedupe within Batch
@@ -119,7 +119,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
                 scope="col"
               >
                 <span
-                  class="sc-dmyCSP kdktwE"
+                  class="sc-egkSDF buCIue"
                   data-cy="table-label"
                 >
                   Dedupe against Population
@@ -131,14 +131,14 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
             class="MuiTableBody-root css-apqrd9-MuiTableBody-root"
           >
             <tr
-              class="MuiTableRow-root MuiTableRow-hover sc-hABBmJ epuKTt css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root MuiTableRow-hover sc-ovuCP gCVigK css-n2dwpd-MuiTableRow-root"
               role="checkbox"
             >
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
                 <a
-                  class="sc-brSamD dPuKUD"
+                  class="sc-jtQUzJ atfmU"
                   href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTo0YmY3NmE4ZC05MmFjLTQwZjAtOTE2YS04ZDcwMDIwNzFiYmI="
                 />
               </td>
@@ -183,14 +183,14 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root MuiTableRow-hover sc-hABBmJ epuKTt css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root MuiTableRow-hover sc-ovuCP gCVigK css-n2dwpd-MuiTableRow-root"
               role="checkbox"
             >
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
                 <a
-                  class="sc-brSamD dPuKUD"
+                  class="sc-jtQUzJ atfmU"
                   href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTpjMjZiNmQ2MS1mMTdjLTQ0NmYtYjQ1MC0wMWI0NmMyYmE4Yjk="
                 />
               </td>
@@ -235,14 +235,14 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root MuiTableRow-hover sc-hABBmJ epuKTt css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root MuiTableRow-hover sc-ovuCP gCVigK css-n2dwpd-MuiTableRow-root"
               role="checkbox"
             >
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
                 <a
-                  class="sc-brSamD dPuKUD"
+                  class="sc-jtQUzJ atfmU"
                   href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTozZTE0OGVkYy0wMTY3LTQ0ZTYtOTliYi02ZDA3MmM4ZjA2NWI="
                 />
               </td>
@@ -356,16 +356,16 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
 exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render with data 1`] = `
 <div>
   <div
-    class="sc-hLQSwg gYvGVw"
+    class="sc-fAUdSK kiWCKq"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-eDLKkx kTiBFR css-1ps6pg7-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-dntaoT dzXcRq css-1ps6pg7-MuiPaper-root"
     >
       <div
-        class="MuiTableContainer-root sc-fsYfdN css-rorn0c-MuiTableContainer-root"
+        class="MuiTableContainer-root sc-ixGGxD css-rorn0c-MuiTableContainer-root"
       >
         <div
-          class="sc-qZrbh fDJnQI MuiBox-root css-0"
+          class="sc-khLCKb snsJA MuiBox-root css-0"
         >
           <div
             class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-1w02pvu-MuiToolbar-root"
@@ -378,11 +378,11 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
             </h6>
           </div>
           <div
-            class="sc-qZrbh fDJnQI MuiBox-root css-1ruxp1v"
+            class="sc-khLCKb snsJA MuiBox-root css-1ruxp1v"
           />
         </div>
         <table
-          class="MuiTable-root sc-jTQCzO sc-jsEeTM gwVygm iETolD css-b1kpk9-MuiTable-root"
+          class="MuiTable-root sc-ivxoEo sc-dstKZu llKqxz ePplQm css-b1kpk9-MuiTable-root"
         >
           <thead
             class="MuiTableHead-root css-15wwp11-MuiTableHead-root"
@@ -395,7 +395,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
                 scope="col"
               >
                 <span
-                  class="sc-dmyCSP kdktwE"
+                  class="sc-egkSDF buCIue"
                   data-cy="table-label"
                 >
                   Individual ID
@@ -406,7 +406,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
                 scope="col"
               >
                 <span
-                  class="sc-dmyCSP kdktwE"
+                  class="sc-egkSDF buCIue"
                   data-cy="table-label"
                 >
                   Individual
@@ -417,7 +417,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
                 scope="col"
               >
                 <span
-                  class="sc-dmyCSP kdktwE"
+                  class="sc-egkSDF buCIue"
                   data-cy="table-label"
                 >
                   Role
@@ -428,7 +428,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
                 scope="col"
               >
                 <span
-                  class="sc-dmyCSP kdktwE"
+                  class="sc-egkSDF buCIue"
                   data-cy="table-label"
                 >
                   Relationship to HoH
@@ -439,7 +439,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
                 scope="col"
               >
                 <span
-                  class="sc-dmyCSP kdktwE"
+                  class="sc-egkSDF buCIue"
                   data-cy="table-label"
                 >
                   Date of Birth
@@ -450,7 +450,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
                 scope="col"
               >
                 <span
-                  class="sc-dmyCSP kdktwE"
+                  class="sc-egkSDF buCIue"
                   data-cy="table-label"
                 >
                   Gender
@@ -461,7 +461,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
                 scope="col"
               >
                 <span
-                  class="sc-dmyCSP kdktwE"
+                  class="sc-egkSDF buCIue"
                   data-cy="table-label"
                 >
                   Dedupe within Batch
@@ -472,7 +472,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
                 scope="col"
               >
                 <span
-                  class="sc-dmyCSP kdktwE"
+                  class="sc-egkSDF buCIue"
                   data-cy="table-label"
                 >
                   Dedupe against Population
@@ -484,14 +484,14 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
             class="MuiTableBody-root css-apqrd9-MuiTableBody-root"
           >
             <tr
-              class="MuiTableRow-root MuiTableRow-hover sc-hABBmJ epuKTt css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root MuiTableRow-hover sc-ovuCP gCVigK css-n2dwpd-MuiTableRow-root"
               role="checkbox"
             >
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
                 <a
-                  class="sc-brSamD dPuKUD"
+                  class="sc-jtQUzJ atfmU"
                   href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTo0YmY3NmE4ZC05MmFjLTQwZjAtOTE2YS04ZDcwMDIwNzFiYmI="
                 />
               </td>
@@ -536,14 +536,14 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root MuiTableRow-hover sc-hABBmJ epuKTt css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root MuiTableRow-hover sc-ovuCP gCVigK css-n2dwpd-MuiTableRow-root"
               role="checkbox"
             >
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
                 <a
-                  class="sc-brSamD dPuKUD"
+                  class="sc-jtQUzJ atfmU"
                   href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTpjMjZiNmQ2MS1mMTdjLTQ0NmYtYjQ1MC0wMWI0NmMyYmE4Yjk="
                 />
               </td>
@@ -588,14 +588,14 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root MuiTableRow-hover sc-hABBmJ epuKTt css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root MuiTableRow-hover sc-ovuCP gCVigK css-n2dwpd-MuiTableRow-root"
               role="checkbox"
             >
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
                 <a
-                  class="sc-brSamD dPuKUD"
+                  class="sc-jtQUzJ atfmU"
                   href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTozZTE0OGVkYy0wMTY3LTQ0ZTYtOTliYi02ZDA3MmM4ZjA2NWI="
                 />
               </td>

@@ -165,14 +165,23 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         payment_row.extend(flex_field_row)
         return list(map(self.right_format_for_xlsx, payment_row))
 
-    def _get_flex_field_by_name(self, name: str, payment: Payment) -> FlexibleAttribute:
+    def _get_flex_field_by_name(self, name: str, payment: Payment) -> str:
         attribute: FlexibleAttribute = self.flexible_attributes[name]
-        individual = payment.collector
-        household = payment.household
+
+        snapshot = getattr(payment, "household_snapshot", None)
+        if not snapshot:
+            logger.error(f"Not found snapshot for Payment {payment.unicef_id}")
+            return ""
+
+        snapshot_data = snapshot.snapshot_data
+        primary_collector = snapshot_data.get("primary_collector", {})
+        alternate_collector = snapshot_data.get("alternate_collector", {})
+        collector_data = primary_collector or alternate_collector or dict()
+
         if attribute.associated_with == FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL:
-            return individual.flex_fields.get(name, "")
+            return collector_data.get("flex_fields", {}).get(name, "")
         else:
-            return household.flex_fields.get(name, "")
+            return snapshot_data.get("flex_fields", {}).get(name, "")
 
     def save_workbook(self, zip_file: zipfile.ZipFile, wb: "Workbook", filename: str) -> None:
         with NamedTemporaryFile() as tmp:
