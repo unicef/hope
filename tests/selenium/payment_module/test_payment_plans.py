@@ -185,8 +185,8 @@ def create_payment_plan_lock_social_worker(social_worker_program: Program) -> Pa
 
 
 @pytest.fixture
-def create_payment_plan_open(create_test_program: Program) -> PaymentPlan:
-    yield payment_plan_create(create_test_program, status=PaymentPlan.Status.OPEN)
+def create_payment_plan_open(social_worker_program: Program) -> PaymentPlan:
+    yield payment_plan_create(social_worker_program, status=PaymentPlan.Status.OPEN)
 
 
 def payment_plan_create(program: Program, status: str = PaymentPlan.Status.LOCKED) -> PaymentPlan:
