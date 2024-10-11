@@ -3,6 +3,7 @@ import time
 from time import sleep
 from typing import Literal, Union
 
+from django.conf import settings
 from selenium.common import NoSuchElementException
 from selenium.webdriver import Chrome, Keys
 from selenium.webdriver.common.action_chains import ActionChains
@@ -86,7 +87,7 @@ class Common:
         delay_before: int = 2,
         delay_between_checks: float = 0.5,
     ) -> None:
-        # sleep(delay_before)
+        sleep(delay_before)
         select_element = self.wait_for(listbox)
         items = select_element.find_elements("tag name", tag_name)
         for item in items:
@@ -167,8 +168,10 @@ class Common:
         return element.find_elements(element_type, locator)
 
     def screenshot(
-        self, file_name: str = "test", file_type: str = "png", file_path: str = "screenshot", delay_sec: int = 1
+        self, file_name: str = "test", file_type: str = "png", file_path: str = None, delay_sec: int = 1
     ) -> None:
+        if file_path is None:
+            file_path = settings.SCREENSHOT_DIRECTORY
         sleep(delay_sec)
         self.driver.get_screenshot_as_file(os.path.join(f"{file_path}", f"{file_name}.{file_type}"))
 

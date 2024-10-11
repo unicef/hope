@@ -319,6 +319,23 @@ def create_grievance_referral(
     return grievance_ticket
 
 
+from selenium.common.exceptions import StaleElementReferenceException
+from contextlib import contextmanager
+
+@contextmanager
+def retry_on_stale_element(max_attempts=5):
+    attempt = 0
+    while attempt < max_attempts:
+        try:
+            yield True
+            return 
+        except StaleElementReferenceException:
+            attempt += 1
+    yield False
+    
+
+        
+
 @pytest.mark.usefixtures("login")
 class TestSmokeGrievanceTickets:
     def test_check_grievance_tickets_user_generated_page(
@@ -424,7 +441,7 @@ class TestSmokeGrievanceTickets:
         assert "" in pageGrievanceDetailsPage.getNewNoteField().text
         assert "ADD NEW NOTE" in pageGrievanceDetailsPage.getButtonNewNote().text
 
-
+@pytest.mark.usefixtures("login")
 class TestGrievanceTicketsHappyPath:
     def test_grievance_tickets_create_new_ticket_referral(
         self,
@@ -958,13 +975,24 @@ class TestGrievanceTickets:
             assert list_row[0] in pageGrievanceTickets.getSelectedTickets().text
         pageGrievanceTickets.getButtonSave().click()
         pageGrievanceTickets.getStatusContainer()
-        pageGrievanceTickets.waitForRows()
-        for _ in range(50):
-            if "Assigned" in pageGrievanceTickets.getStatusContainer()[0].text:
-                break
-            sleep(0.1)
+        max_attempts=5
+        attempt=0
+        while attempt < max_attempts:
+            try:
+                pageGrievanceTickets.waitForRows()
+                assert "Assigned" in pageGrievanceTickets.waitForRow(0).text 
+                break 
+            except StaleElementReferenceException:
+                attempt += 1
         else:
-            assert "Assigned" in pageGrievanceTickets.getStatusContainer()[0].text
+            pytest.fail('LOL1')
+            
+        # for _ in range(50):
+        #     if "Assigned" in pageGrievanceTickets.getStatusContainer()[0].text:
+        #         break
+        #     sleep(0.1)
+        # else:
+        #     assert "Assigned" in pageGrievanceTickets.getStatusContainer()[0].text
         for str_row in pageGrievanceTickets.getRows():
             list_row = str_row.text.replace("\n", " ").split(" ")
             assert list_row[1] in "Assigned"
@@ -975,13 +1003,26 @@ class TestGrievanceTickets:
         pageGrievanceTickets.select_listbox_element("Medium")
         pageGrievanceTickets.getButtonSave().click()
         pageGrievanceTickets.getStatusContainer()
-        pageGrievanceTickets.waitForRows()
-        for _ in range(50):
-            if "Medium" in pageGrievanceTickets.getRows()[0].text:
-                break
-            sleep(0.1)
+
+        max_attempts=5
+        attempt=0
+        while attempt < max_attempts:
+            try:
+                pageGrievanceTickets.waitForRows()
+                assert "Medium" in pageGrievanceTickets.waitForRow(0).text 
+                break 
+            except StaleElementReferenceException:
+                attempt += 1
         else:
-            assert "Medium" in pageGrievanceTickets.getRows()[0].text
+            pytest.fail('LOL1')
+
+        # for _ in range(50):
+        #     if "Medium" in pageGrievanceTickets.getRows()[0].text:
+        #         break
+        #     sleep(0.1)
+        # else:
+        #     assert "Medium" in pageGrievanceTickets.getRows()[0].text
+
         for str_row in pageGrievanceTickets.getRows():
             assert "Medium" in str_row.text.replace("\n", " ").split(" ")
         pageGrievanceTickets.getSelectAll().click()
@@ -989,14 +1030,27 @@ class TestGrievanceTickets:
         pageGrievanceTickets.getDropdown().click()
         pageGrievanceTickets.select_listbox_element("Urgent")
         pageGrievanceTickets.getButtonSave().click()
+        # from datetime import datetime
+        # pageGrievanceTickets.screenshot(f'lol{datetime.now()}',delay_sec=1)
         pageGrievanceTickets.getStatusContainer()
-        pageGrievanceTickets.waitForRows()
-        for _ in range(0):
-            if "Urgent" in pageGrievanceTickets.getRows()[0].text:
-                break
-            sleep(0.1)
+        
+        max_attempts=5
+        attempt=0
+        while attempt < max_attempts:
+            try:
+                pageGrievanceTickets.waitForRows()
+                assert "Urgent" in pageGrievanceTickets.waitForRow(0).text 
+                break 
+            except StaleElementReferenceException:
+                attempt += 1
         else:
-            assert "Urgent" in pageGrievanceTickets.getRows()[0].text
+            pytest.fail('LOL1')
+        # for _ in range(10):
+        #     if "Urgent" in pageGrievanceTickets.getRows()[0].text:
+        #         break
+        #     sleep(0.1)
+        # else:
+        #     assert "Urgent" in pageGrievanceTickets.getRows()[0].text
         for str_row in pageGrievanceTickets.getRows():
             assert "Urgent" in str_row.text.replace("\n", " ").split(" ")
 

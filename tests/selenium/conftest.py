@@ -190,7 +190,7 @@ def pytest_configure(config) -> None:  # type: ignore
         }
     )
 
-    logging.disable(logging.CRITICAL)
+    # logging.disable(logging)
     pytest.SELENIUM_PATH = os.path.dirname(__file__)
 
 
@@ -271,6 +271,8 @@ def login(browser: Chrome) -> Chrome:
     browser.find_element(By.ID, password).send_keys("testtest2")
     browser.find_element(By.XPATH, loginButton).click()
     browser.get(f"{browser.live_server.url}/")
+    from django.core.cache import cache
+    cache.clear()
     yield browser
 
 

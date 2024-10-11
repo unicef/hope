@@ -49,6 +49,7 @@ class BaseComponents(Common):
     globalProgramFilterSearchButton = 'button[data-cy="search-icon"]'
     globalProgramFilterClearButton = 'button[data-cy="clear-icon"]'
     rows = 'tr[role="checkbox"]'
+    row_index_template = 'tr[role="checkbox"]:nth-child({})'
     alert = '[role="alert"]'
     breadcrumbsChevronIcon = 'svg[data-cy="breadcrumbs-chevron-icon"]'
     arrowBack = 'div[data-cy="arrow_back"]'
@@ -201,7 +202,16 @@ class BaseComponents(Common):
 
     def waitForRows(self) -> [WebElement]:
         self.wait_for(self.rows)
+        from selenium.webdriver.support.ui import WebDriverWait
+        from selenium.webdriver.support import expected_conditions as EC
+        from selenium.webdriver.common.by import By
+        WebDriverWait(self.driver, 10).until(
+            EC.element_to_be_clickable((By.CSS_SELECTOR, self.rows))
+        )
         return self.get_elements(self.rows)
+
+    def waitForRow(self, index) -> WebElement:
+        return self.wait_for(self.row_index_template.format(index))
 
     def getRows(self) -> [WebElement]:
         return self.get_elements(self.rows)
