@@ -267,37 +267,9 @@ class RdiMergeTask:
                     logger.info(
                         f"RDI:{registration_data_import_id} Populated index for {len(household_ids)} households"
                     )
-
-                    imported_delivery_mechanism_data = PendingDeliveryMechanismData.objects.filter(
-                        individual_id__in=individual_ids,
-                    )
-                    self._create_grievance_tickets_for_delivery_mechanisms_errors(
-                        imported_delivery_mechanism_data, obj_hct
-                    )
-
-                    imported_delivery_mechanism_data.update(rdi_merge_status=MergeStatusModel.MERGED)
-                    PendingIndividualRoleInHousehold.objects.filter(
-                        household_id__in=household_ids, individual_id__in=individual_ids
-                    ).update(rdi_merge_status=MergeStatusModel.MERGED)
-                    PendingBankAccountInfo.objects.filter(individual_id__in=individual_ids).update(
-                        rdi_merge_status=MergeStatusModel.MERGED
-                    )
-                    PendingDocument.objects.filter(individual_id__in=individual_ids).update(
-                        rdi_merge_status=MergeStatusModel.MERGED
-                    )
-                    PendingIndividualRoleInHousehold.objects.filter(individual_id__in=individual_ids).update(
-                        rdi_merge_status=MergeStatusModel.MERGED
-                    )
-                    households.update(rdi_merge_status=MergeStatusModel.MERGED)
-                    individuals.update(rdi_merge_status=MergeStatusModel.MERGED)
-                    populate_index(
-                        Individual.objects.filter(registration_data_import=obj_hct),
-                        get_individual_doc(obj_hct.business_area.slug),
-                    )
-
                     if not obj_hct.business_area.postpone_deduplication:
                         individuals = evaluate_qs(
-                            Individual.objects.filter(registration_data_import=obj_hct)
+                            PendingIndividual.objects.filter(registration_data_import=obj_hct)
                             .select_for_update()
                             .order_by("pk")
                         )
@@ -334,7 +306,6 @@ class RdiMergeTask:
                             "possible_duplicates",
                             obj_hct.business_area,
                             registration_data_import=obj_hct,
-                            issue_type=GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
                         )
                         logger.info(
                             f"RDI:{registration_data_import_id} Created tickets for {len(needs_adjudication)} needs adjudication"
@@ -346,10 +317,6 @@ class RdiMergeTask:
                         CheckAgainstSanctionListPreMergeTask.execute(registration_data_import=obj_hct)
                         logger.info(f"RDI:{registration_data_import_id} Checked against sanction list")
 
-                    # synchronously deduplicate documents
-                    deduplicate_documents()
-
-                    obj_hct.update_needs_adjudication_tickets_statistic()
                     obj_hct.status = RegistrationDataImport.MERGED
                     obj_hct.save()
 
@@ -358,12 +325,38 @@ class RdiMergeTask:
                         self._update_household_collections(households, obj_hct)
                         self._update_individual_collections(individuals, obj_hct)
 
+                    imported_delivery_mechanism_data = PendingDeliveryMechanismData.objects.filter(
+                        individual_id__in=individual_ids,
+                    )
+                    self._create_grievance_tickets_for_delivery_mechanisms_errors(
+                        imported_delivery_mechanism_data, obj_hct
+                    )
+                    imported_delivery_mechanism_data.update(rdi_merge_status=MergeStatusModel.MERGED)
+                    PendingIndividualRoleInHousehold.objects.filter(
+                        household_id__in=household_ids, individual_id__in=individual_ids
+                    ).update(rdi_merge_status=MergeStatusModel.MERGED)
+                    PendingBankAccountInfo.objects.filter(individual_id__in=individual_ids).update(
+                        rdi_merge_status=MergeStatusModel.MERGED
+                    )
+                    PendingDocument.objects.filter(individual_id__in=individual_ids).update(
+                        rdi_merge_status=MergeStatusModel.MERGED
+                    )
+                    PendingIndividualRoleInHousehold.objects.filter(individual_id__in=individual_ids).update(
+                        rdi_merge_status=MergeStatusModel.MERGED
+                    )
+                    households.update(rdi_merge_status=MergeStatusModel.MERGED)
+                    individuals.update(rdi_merge_status=MergeStatusModel.MERGED)
+
+                    populate_index(
+                        Individual.objects.filter(registration_data_import=obj_hct),
+                        get_individual_doc(obj_hct.business_area.slug),
+                    )
                     logger.info(
                         f"RDI:{registration_data_import_id} Populated index for {len(individual_ids)} individuals"
                     )
                     populate_index(Household.objects.filter(registration_data_import=obj_hct), HouseholdDocument)
                     logger.info(f"RDI:{registration_data_import_id} Saved registration data import")
-
+                    transaction.on_commit(lambda: deduplicate_documents.delay())
                     rdi_merged.send(sender=obj_hct.__class__, instance=obj_hct)
                     log_create(
                         RegistrationDataImport.ACTIVITY_LOG_MAPPING,
