@@ -7,6 +7,46 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
+snapshots['TestUpdateProgram::test_finish_active_program_with_not_finished_program_cycle_or_end_date 1'] = {
+    'data': {
+        'updateProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Cannot finish programme with active cycles',
+            'path': [
+                'updateProgram'
+            ]
+        }
+    ]
+}
+
+snapshots['TestUpdateProgram::test_finish_active_program_with_not_finished_program_cycle_or_end_date 2'] = {
+    'data': {
+        'updateProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Cannot finish programme without end date',
+            'path': [
+                'updateProgram'
+            ]
+        }
+    ]
+}
+
 snapshots['TestUpdateProgram::test_update_active_program_with_dct 1'] = {
     'data': {
         'updateProgram': None
@@ -317,6 +357,66 @@ snapshots['TestUpdateProgram::test_update_program_authenticated_2_without_permis
                 }
             ],
             'message': 'Permission Denied: User does not have correct permission.',
+            'path': [
+                'updateProgram'
+            ]
+        }
+    ]
+}
+
+snapshots['TestUpdateProgram::test_update_program_end_date_validation 1'] = {
+    'data': {
+        'updateProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'End date cannot be before start date.',
+            'path': [
+                'updateProgram'
+            ]
+        }
+    ]
+}
+
+snapshots['TestUpdateProgram::test_update_program_end_date_validation 2'] = {
+    'data': {
+        'updateProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'End date must be equal or after the latest cycle.',
+            'path': [
+                'updateProgram'
+            ]
+        }
+    ]
+}
+
+snapshots['TestUpdateProgram::test_update_program_end_date_validation 3'] = {
+    'data': {
+        'updateProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Start date must be equal or before the earliest cycle.',
             'path': [
                 'updateProgram'
             ]
@@ -769,7 +869,7 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields 2'] = {
                 'pduFields': [
                     {
                         'label': '{"English(EN)": "PDU Field - New"}',
-                        'name': 'pdu_field_-_new',
+                        'name': 'pdu_field_new',
                         'pduData': {
                             'numberOfRounds': 4,
                             'roundsNames': [
@@ -778,20 +878,7 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields 2'] = {
                                 'Round 3C',
                                 'Round 4D'
                             ],
-                            'subtype': 'BOOLEAN'
-                        }
-                    },
-                    {
-                        'label': '{"English(EN)": "PDU Field - Updated"}',
-                        'name': 'pdu_field_-_updated',
-                        'pduData': {
-                            'numberOfRounds': 3,
-                            'roundsNames': [
-                                'Round 1 Updated',
-                                'Round 2 Updated',
-                                'Round 3 Updated'
-                            ],
-                            'subtype': 'BOOLEAN'
+                            'subtype': 'BOOL'
                         }
                     },
                     {
@@ -803,6 +890,19 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields 2'] = {
                                 'Round To Be Preserved'
                             ],
                             'subtype': 'DATE'
+                        }
+                    },
+                    {
+                        'label': '{"English(EN)": "PDU Field - Updated"}',
+                        'name': 'pdu_field_updated',
+                        'pduData': {
+                            'numberOfRounds': 3,
+                            'roundsNames': [
+                                'Round 1 Updated',
+                                'Round 2 Updated',
+                                'Round 3 Updated'
+                            ],
+                            'subtype': 'BOOL'
                         }
                     }
                 ],
@@ -819,7 +919,7 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields 3'] = {
             'pduFields': [
                 {
                     'label': '{"English(EN)": "PDU Field - New"}',
-                    'name': 'pdu_field_-_new',
+                    'name': 'pdu_field_new',
                     'pduData': {
                         'numberOfRounds': 4,
                         'roundsNames': [
@@ -828,20 +928,7 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields 3'] = {
                             'Round 3C',
                             'Round 4D'
                         ],
-                        'subtype': 'BOOLEAN'
-                    }
-                },
-                {
-                    'label': '{"English(EN)": "PDU Field - Updated"}',
-                    'name': 'pdu_field_-_updated',
-                    'pduData': {
-                        'numberOfRounds': 3,
-                        'roundsNames': [
-                            'Round 1 Updated',
-                            'Round 2 Updated',
-                            'Round 3 Updated'
-                        ],
-                        'subtype': 'BOOLEAN'
+                        'subtype': 'BOOL'
                     }
                 },
                 {
@@ -853,6 +940,19 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields 3'] = {
                             'Round To Be Preserved'
                         ],
                         'subtype': 'DATE'
+                    }
+                },
+                {
+                    'label': '{"English(EN)": "PDU Field - Updated"}',
+                    'name': 'pdu_field_updated',
+                    'pduData': {
+                        'numberOfRounds': 3,
+                        'roundsNames': [
+                            'Round 1 Updated',
+                            'Round 2 Updated',
+                            'Round 3 Updated'
+                        ],
+                        'subtype': 'BOOL'
                     }
                 }
             ]
@@ -906,19 +1006,6 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_existing_field
                 ],
                 'pduFields': [
                     {
-                        'label': '{"English(EN)": "PDU Field - Updated"}',
-                        'name': 'pdu_field_-_updated',
-                        'pduData': {
-                            'numberOfRounds': 3,
-                            'roundsNames': [
-                                'Round 1 Updated',
-                                'Round 2 Updated',
-                                'Round 3 Updated'
-                            ],
-                            'subtype': 'BOOLEAN'
-                        }
-                    },
-                    {
                         'label': '{"English(EN)": "PDU Field 1"}',
                         'name': 'pdu_field_1',
                         'pduData': {
@@ -929,7 +1016,7 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_existing_field
                                 'Round 3C',
                                 'Round 4D'
                             ],
-                            'subtype': 'BOOLEAN'
+                            'subtype': 'BOOL'
                         }
                     },
                     {
@@ -941,6 +1028,19 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_existing_field
                                 'Round To Be Preserved'
                             ],
                             'subtype': 'DATE'
+                        }
+                    },
+                    {
+                        'label': '{"English(EN)": "PDU Field - Updated"}',
+                        'name': 'pdu_field_updated',
+                        'pduData': {
+                            'numberOfRounds': 3,
+                            'roundsNames': [
+                                'Round 1 Updated',
+                                'Round 2 Updated',
+                                'Round 3 Updated'
+                            ],
+                            'subtype': 'BOOL'
                         }
                     }
                 ],
@@ -976,20 +1076,6 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_existing_field
                 ],
                 'pduFields': [
                     {
-                        'label': '{"English(EN)": "PDU Field - New"}',
-                        'name': 'pdu_field_-_new',
-                        'pduData': {
-                            'numberOfRounds': 4,
-                            'roundsNames': [
-                                'Round 1A',
-                                'Round 2B',
-                                'Round 3C',
-                                'Round 4D'
-                            ],
-                            'subtype': 'BOOLEAN'
-                        }
-                    },
-                    {
                         'label': '{"English(EN)": "PDU Field 1"}',
                         'name': 'pdu_field_1',
                         'pduData': {
@@ -999,7 +1085,21 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_existing_field
                                 'Round 2 Updated',
                                 'Round 3 Updated'
                             ],
-                            'subtype': 'BOOLEAN'
+                            'subtype': 'BOOL'
+                        }
+                    },
+                    {
+                        'label': '{"English(EN)": "PDU Field - New"}',
+                        'name': 'pdu_field_new',
+                        'pduData': {
+                            'numberOfRounds': 4,
+                            'roundsNames': [
+                                'Round 1A',
+                                'Round 2B',
+                                'Round 3C',
+                                'Round 4D'
+                            ],
+                            'subtype': 'BOOL'
                         }
                     },
                     {
@@ -1122,7 +1222,7 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_program_has_RD
                     'line': 3
                 }
             ],
-            'message': 'It is not possible to change the names of existing rounds for a Program with RDI',
+            'message': 'It is not possible to change the names of existing rounds for a Program with RDI or TP',
             'path': [
                 'updateProgram'
             ]
@@ -1142,7 +1242,7 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_program_has_RD
                     'line': 3
                 }
             ],
-            'message': 'It is not possible to decrease the number of rounds for a Program with RDI',
+            'message': 'It is not possible to decrease the number of rounds for a Program with RDI or TP',
             'path': [
                 'updateProgram'
             ]

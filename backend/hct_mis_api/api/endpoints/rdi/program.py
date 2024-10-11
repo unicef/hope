@@ -28,6 +28,7 @@ class ProgramSerializer(serializers.ModelSerializer):
             "sector",
             "cash_plus",
             "population_goal",
+            "data_collecting_type",
         )
 
 

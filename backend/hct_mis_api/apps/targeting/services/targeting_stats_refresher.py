@@ -1,44 +1,34 @@
-from django.db.models import Count, Sum
-from django.db.models.functions import Coalesce
+from datetime import datetime
+
+from django.db.models import Count, Q
 from django.utils import timezone
 
-from hct_mis_api.apps.household.models import Household
+from dateutil.relativedelta import relativedelta
+
+from hct_mis_api.apps.household.models import FEMALE, MALE, Household, Individual
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
 
 def refresh_stats(target_population: TargetPopulation) -> TargetPopulation:
-    targeting_details = target_population.household_list.annotate(
-        child_male=Coalesce("male_age_group_0_5_count", 0)
-        + Coalesce("male_age_group_6_11_count", 0)
-        + Coalesce("male_age_group_12_17_count", 0)
-        + Coalesce("male_age_group_0_5_disabled_count", 0)
-        + Coalesce("male_age_group_6_11_disabled_count", 0)
-        + Coalesce("male_age_group_12_17_disabled_count", 0),
-        child_female=Coalesce("female_age_group_0_5_count", 0)
-        + Coalesce("female_age_group_6_11_count", 0)
-        + Coalesce("female_age_group_12_17_count", 0)
-        + Coalesce("female_age_group_0_5_disabled_count", 0)
-        + Coalesce("female_age_group_6_11_disabled_count", 0)
-        + Coalesce("female_age_group_12_17_disabled_count", 0),
-        adult_male=Coalesce("male_age_group_18_59_count", 0)
-        + Coalesce("male_age_group_60_count", 0)
-        + Coalesce("male_age_group_18_59_disabled_count", 0)
-        + Coalesce("male_age_group_60_disabled_count", 0),
-        adult_female=Coalesce("female_age_group_18_59_count", 0)
-        + Coalesce("female_age_group_60_count", 0)
-        + Coalesce("female_age_group_18_59_disabled_count", 0)
-        + Coalesce("female_age_group_60_disabled_count", 0),
-    ).aggregate(
-        child_male_count=Sum("child_male"),
-        child_female_count=Sum("child_female"),
-        adult_male_count=Sum("adult_male"),
-        adult_female_count=Sum("adult_female"),
-        total_individuals_count=Sum("size"),
-        total_households_count=Count("id"),
+    households_ids = target_population.household_list.values_list("id", flat=True)
+
+    delta18 = relativedelta(years=+18)
+    date18ago = datetime.now() - delta18
+
+    targeted_individuals = Individual.objects.filter(household__id__in=households_ids).aggregate(
+        child_male_count=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=MALE)),
+        child_female_count=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=FEMALE)),
+        adult_male_count=Count("id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=MALE)),
+        adult_female_count=Count("id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=FEMALE)),
+        total_individuals_count=Count("id", distinct=True),
     )
 
-    for key, value in targeting_details.items():
-        setattr(target_population, key, value)
+    target_population.child_male_count = targeted_individuals["child_male_count"]
+    target_population.child_female_count = targeted_individuals["child_female_count"]
+    target_population.adult_male_count = targeted_individuals["adult_male_count"]
+    target_population.adult_female_count = targeted_individuals["adult_female_count"]
+    target_population.total_individuals_count = targeted_individuals["total_individuals_count"]
+    target_population.total_households_count = households_ids.count()
 
     target_population.build_status = TargetPopulation.BUILD_STATUS_OK
     target_population.built_at = timezone.now()

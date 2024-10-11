@@ -1,10 +1,10 @@
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  AllProgramsQuery,
-  AllProgramsQueryVariables,
+  AllProgramsForTableQuery,
+  AllProgramsForTableQueryVariables,
   ProgrammeChoiceDataQuery,
-  useAllProgramsQuery,
+  useAllProgramsForTableQuery,
 } from '@generated/graphql';
 import { TableWrapper } from '@components/core/TableWrapper';
 import { UniversalTable } from '../UniversalTable';
@@ -23,7 +23,7 @@ export function ProgrammesTable({
   choicesData,
 }: ProgrammesTableProps): ReactElement {
   const { t } = useTranslation();
-  const initialVariables: AllProgramsQueryVariables = {
+  const initialVariables: AllProgramsForTableQueryVariables = {
     businessArea,
     search: filter.search,
     startDate: filter.startDate || null,
@@ -40,12 +40,12 @@ export function ProgrammesTable({
   return (
     <TableWrapper>
       <UniversalTable<
-      AllProgramsQuery['allPrograms']['edges'][number]['node'],
-      AllProgramsQueryVariables
+        AllProgramsForTableQuery['allPrograms']['edges'][number]['node'],
+        AllProgramsForTableQueryVariables
       >
         title={t('Programmes')}
         headCells={headCells}
-        query={useAllProgramsQuery}
+        query={useAllProgramsForTableQuery}
         queriedObjectName="allPrograms"
         initialVariables={initialVariables}
         renderRow={(row) => (

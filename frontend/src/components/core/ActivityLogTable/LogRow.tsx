@@ -49,7 +49,7 @@ export const LogRow = ({ logEntry }: LogRowProps): ReactElement => {
   const { length } = keys;
   if (length === 1) {
     return (
-      <Row role="checkbox" data-cy={`log-row-${logEntry.id}`}>
+      <Row role="checkbox" data-cy="log-row">
         <Cell weight={headCells[0].weight} data-cy="timestamp-cell">
           {moment(logEntry.timestamp).format('DD MMM YYYY HH:mm')}
         </Cell>

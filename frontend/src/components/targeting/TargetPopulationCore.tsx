@@ -11,11 +11,11 @@ import {
 } from '@generated/graphql';
 import { PaperContainer } from './PaperContainer';
 import { ResultsForHouseholds } from './ResultsForHouseholds';
-import { TargetingCriteria } from './TargetingCriteria';
 import { TargetingHouseholds } from './TargetingHouseholds';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { TargetPopulationPeopleTable } from '@containers/tables/targeting/TargetPopulationPeopleTable';
 import { ResultsForPeople } from '@components/targeting/ResultsForPeople';
+import { TargetingCriteriaDisplay } from './TargetingCriteriaDisplay/TargetingCriteriaDisplay';
 
 const Label = styled.p`
   color: #b1b1b5;
@@ -111,7 +111,7 @@ export const TargetPopulationCore = ({
               {individualIds}
             </IdContainer>
           )}
-          <TargetingCriteria
+          <TargetingCriteriaDisplay
             rules={targetPopulation.targetingCriteria?.rules || []}
             targetPopulation={targetPopulation}
             screenBeneficiary={screenBeneficiary}
@@ -127,8 +127,8 @@ export const TargetPopulationCore = ({
             {isSocialDctType
               ? t('Excluded Target Population Entries')
               : t(
-                'Excluded Target Population Entries (Households or Individuals)',
-              )}
+                  'Excluded Target Population Entries (Households or Individuals)',
+                )}
           </Typography>
           <Box mt={2}>
             <Grid container>

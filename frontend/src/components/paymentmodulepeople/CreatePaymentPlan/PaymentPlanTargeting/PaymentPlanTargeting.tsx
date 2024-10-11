@@ -6,7 +6,6 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { AllTargetPopulationsQuery } from '@generated/graphql';
-import { GreyText } from '@core/GreyText';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
@@ -41,11 +40,10 @@ export function PaymentPlanTargeting({
   return (
     <PaperContainer>
       <Title>
-        <Typography variant="h6">{t('Targeting')}</Typography>
+        <Typography variant="h6">{t('Target Population')}</Typography>
       </Title>
       <OverviewContainer>
         <StyledBox display="flex" flexDirection="column">
-          <GreyText>{t('Select Target Population')}</GreyText>
           <Grid container>
             <Grid item xs={6}>
               <Field

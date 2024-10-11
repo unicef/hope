@@ -12,8 +12,8 @@ class TargetingDetails(BaseComponents):
     lock_button = 'button[data-cy="button-target-population-lock"]'
     lockPopupButton = 'button[data-cy="button-target-population-modal-lock"]'
     household_table_cell = "table tr:nth-of-type({}) td:nth-of-type({})"
-    people_table_rows = '[data-cy="target-population-people-row"]'
     household_table_rows = '[data-cy="target-population-household-row"]'
+    people_table_rows = '[data-cy="target-population-people-row"]'
     pageHeaderContainer = 'div[data-cy="page-header-container"]'
     pageHeaderTitle = 'h5[data-cy="page-header-title"]'
     buttonTargetPopulationDuplicate = 'button[data-cy="button-target-population-duplicate"]'

@@ -21,7 +21,7 @@ class TestProgrammeLog:
     def test_smoke_program_log(
         self, standard_program: Program, pageProgramLog: ProgramLog, pageProgrammeDetails: ProgrammeDetails
     ) -> None:
-        pageProgrammeDetails.selectGlobalProgramFilter("Test Program").click()
+        pageProgrammeDetails.selectGlobalProgramFilter("Test Program")
         pageProgrammeDetails.getButtonFinishProgram().click()
         pageProgrammeDetails.clickButtonFinishProgramPopup()
         pageProgramLog.getNavProgramLog().click()
@@ -39,10 +39,10 @@ class TestProgrammeLog:
     def test_smoke_activity_log(
         self, standard_program: Program, pageProgramLog: ProgramLog, pageProgrammeDetails: ProgrammeDetails
     ) -> None:
-        pageProgrammeDetails.selectGlobalProgramFilter("Test Program").click()
+        pageProgrammeDetails.selectGlobalProgramFilter("Test Program")
         pageProgrammeDetails.getButtonFinishProgram().click()
         pageProgrammeDetails.clickButtonFinishProgramPopup()
-        pageProgrammeDetails.selectGlobalProgramFilter("All Programmes").click()
+        pageProgrammeDetails.selectGlobalProgramFilter("All Programmes")
         pageProgramLog.getNavActivityLog().click()
         assert "Activity Log" in pageProgramLog.getPageHeaderTitle().text
         assert "Update" in pageProgramLog.getActionCell().text

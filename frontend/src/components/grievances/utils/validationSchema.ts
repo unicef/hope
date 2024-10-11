@@ -1,6 +1,15 @@
 import * as Yup from 'yup';
 import { GrievanceSteps, GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
 
+const selectedPaymentRecordsScheme = Yup.array()
+  .of(
+    Yup.object().shape({
+      id: Yup.string(),
+      caId: Yup.string(),
+    }),
+  )
+  .nullable();
+
 export const validationSchema = Yup.object().shape({
   description: Yup.string().required('Description is required'),
   category: Yup.string().required('Category is required').nullable(),
@@ -8,7 +17,7 @@ export const validationSchema = Yup.object().shape({
   area: Yup.string(),
   language: Yup.string(),
   consent: Yup.bool().oneOf([true], 'Consent is required'),
-  selectedPaymentRecords: Yup.array().of(Yup.string()).nullable(),
+  selectedPaymentRecords: selectedPaymentRecordsScheme,
   selectedLinkedTickets: Yup.array().of(Yup.string()).nullable(),
 });
 
@@ -21,7 +30,7 @@ export const validationSchemaWithSteps = (currentStep: number): unknown => {
     consent: Yup.bool(),
     area: Yup.string(),
     language: Yup.string(),
-    selectedPaymentRecords: Yup.array().of(Yup.string()).nullable(),
+    selectedPaymentRecords: selectedPaymentRecordsScheme,
     selectedRelatedTickets: Yup.array().of(Yup.string()).nullable(),
   } as any;
 

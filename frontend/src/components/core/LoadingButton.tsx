@@ -10,7 +10,13 @@ export function LoadingButton({
     <Button
       {...otherProps}
       disabled={otherProps.disabled || loading}
-      endIcon={loading ? <CircularProgress color="inherit" size={20} /> : null}
+      endIcon={
+        loading ? (
+          <CircularProgress color="inherit" size={20} />
+        ) : (
+          otherProps.endIcon
+        )
+      }
     >
       {children}
     </Button>

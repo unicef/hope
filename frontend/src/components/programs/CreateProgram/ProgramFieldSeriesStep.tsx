@@ -20,6 +20,7 @@ interface ProgramFieldSeriesStepProps {
   setStep: (step: number) => void;
   step: number;
   programHasRdi?: boolean;
+  programHasTp?: boolean;
   pdusubtypeChoicesData?: PduSubtypeChoicesDataQuery;
   errors: any;
   programId?: string;
@@ -33,6 +34,7 @@ export const ProgramFieldSeriesStep = ({
   setStep,
   step,
   programHasRdi,
+  programHasTp,
   pdusubtypeChoicesData,
   errors,
   programId: formProgramId,
@@ -56,6 +58,8 @@ export const ProgramFieldSeriesStep = ({
     'Are you sure you want to delete this field? This action cannot be reversed.',
   );
 
+  const fieldDisabled = programHasRdi || programHasTp;
+
   return (
     <>
       <FieldArray
@@ -75,7 +79,7 @@ export const ProgramFieldSeriesStep = ({
                             variant="outlined"
                             label={t('Time Series Field Name')}
                             component={FormikTextField}
-                            disabled={programHasRdi}
+                            disabled={fieldDisabled}
                           />
                         </Grid>
                         <Grid item xs={3}>
@@ -87,7 +91,7 @@ export const ProgramFieldSeriesStep = ({
                             label={t('Data Type')}
                             component={FormikSelectField}
                             choices={mappedPduSubtypeChoices}
-                            disabled={programHasRdi}
+                            disabled={fieldDisabled}
                           />
                         </Grid>
                         <Grid item xs={3}>
@@ -134,7 +138,7 @@ export const ProgramFieldSeriesStep = ({
                             choices={[...Array(20).keys()].map((n) => {
                               const isDisabled =
                                 values.editMode &&
-                                programHasRdi &&
+                                fieldDisabled &&
                                 n + 2 <=
                                   (program?.pduFields[index]?.pduData
                                     ?.numberOfRounds || 0);
@@ -156,7 +160,7 @@ export const ProgramFieldSeriesStep = ({
                                 type: 'error',
                               }).then(() => arrayHelpers.remove(index))
                             }
-                            disabled={programHasRdi}
+                            disabled={fieldDisabled}
                           >
                             <DeleteIcon />
                           </IconButton>
@@ -171,7 +175,7 @@ export const ProgramFieldSeriesStep = ({
                               program?.pduFields?.[index]?.pduData
                                 ?.numberOfRounds || 0;
                             const isDisabled =
-                              programHasRdi &&
+                              fieldDisabled &&
                               values.editMode &&
                               round + 1 <= selectedNumberOfRounds;
                             return (
@@ -212,7 +216,7 @@ export const ProgramFieldSeriesStep = ({
                   })
                 }
                 endIcon={<AddIcon />}
-                disabled={programHasRdi}
+                disabled={fieldDisabled}
                 data-cy="button-add-time-series-field"
               >
                 {t('Add Time Series Fields')}

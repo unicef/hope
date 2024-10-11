@@ -15,8 +15,8 @@ class UserPartnerTest(TestCase):
     def setUpTestData(cls) -> None:
         cls.role_1 = Role.objects.create(name="Create_program", permissions=["PROGRAMME_CREATE"])
         cls.role_2 = Role.objects.create(name="Finish_program", permissions=["PROGRAMME_FINISH"])
-        cls.area_1 = AreaFactory(name="Area 1")
-        cls.area_2 = AreaFactory(name="Area 2")
+        cls.area_1 = AreaFactory(name="Area 1", p_code="AREA1")
+        cls.area_2 = AreaFactory(name="Area 2", p_code="AREA2")
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.program = ProgramFactory.create(status=Program.DRAFT, business_area=cls.business_area)

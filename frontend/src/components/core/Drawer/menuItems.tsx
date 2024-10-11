@@ -138,12 +138,36 @@ export const menuItems: MenuItem[] = [
   },
   {
     name: 'Payment Module',
-    href: '/payment-module',
+    href: '/payment-module/program-cycles',
     selectedRegexp: /^\/payment-module.*$/,
     icon: <PaymentIcon />,
+    collapsable: true,
+    permissionModule: 'PM',
     scopes: [SCOPE_PROGRAM],
-    permissions: [PERMISSIONS.PM_VIEW_LIST, PERMISSIONS.PM_VIEW_DETAILS],
     flag: 'isPaymentPlanApplicable',
+    secondaryActions: [
+      {
+        name: 'Programme Cycles',
+        href: '/payment-module/program-cycles',
+        selectedRegexp: /^\/payment-module\/program-cycles.*$/,
+        icon: <PaymentIcon />,
+        permissions: [
+          PERMISSIONS.PM_PROGRAMME_CYCLE_VIEW_LIST,
+          PERMISSIONS.PM_PROGRAMME_CYCLE_VIEW_DETAILS,
+        ],
+        permissionModule: 'PM',
+        scopes: [SCOPE_PROGRAM],
+      },
+      {
+        name: 'Payment Plans',
+        href: '/payment-module/payment-plans',
+        selectedRegexp: /^\/payment-module\/payment-plans.*$/,
+        icon: <PaymentIcon />,
+        permissions: [PERMISSIONS.PM_VIEW_LIST, PERMISSIONS.PM_VIEW_DETAILS],
+        permissionModule: 'PM',
+        scopes: [SCOPE_PROGRAM],
+      },
+    ],
   },
   {
     name: 'Payment Verification',

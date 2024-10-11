@@ -73,7 +73,6 @@ export const ProgramForm = ({ values }: ProgramFormPropTypes): ReactElement => {
             name="endDate"
             label={t('End Date')}
             component={FormikDateField}
-            required
             disabled={!values.startDate}
             initialFocusedDate={values.startDate}
             fullWidth

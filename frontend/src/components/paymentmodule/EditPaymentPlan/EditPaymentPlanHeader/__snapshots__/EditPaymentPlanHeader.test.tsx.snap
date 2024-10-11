@@ -82,6 +82,7 @@ exports[`components/paymentmodule/EditPaymentPlanHeader should render 1`] = `
             </div>
             <div
               class="MuiBox-root css-15aqakd"
+              data-cy="button-admin"
             />
           </div>
         </div>

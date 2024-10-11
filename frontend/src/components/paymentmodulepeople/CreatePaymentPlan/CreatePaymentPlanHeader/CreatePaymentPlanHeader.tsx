@@ -25,7 +25,7 @@ export function CreatePaymentPlanHeader({
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Payment Module'),
-      to: `/${baseUrl}/payment-module/`,
+      to: `/${baseUrl}/payment-module/payment-plans`,
     },
   ];
 
@@ -40,7 +40,10 @@ export function CreatePaymentPlanHeader({
     >
       <Box display="flex" mt={2} mb={2}>
         <Box mr={3}>
-          <Button component={Link} to={`/${baseUrl}/payment-module`}>
+          <Button
+            component={Link}
+            to={`/${baseUrl}/payment-module/payment-plans`}
+          >
             {t('Cancel')}
           </Button>
         </Box>

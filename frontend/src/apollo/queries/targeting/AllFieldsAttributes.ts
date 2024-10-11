@@ -8,6 +8,13 @@ export const AllFieldsAttributes = gql`
       labelEn
       associatedWith
       isFlexField
+      type
+      pduData {
+        id
+        subtype
+        numberOfRounds
+        roundsNames
+      }
     }
   }
 `;

@@ -43,12 +43,24 @@ class TestAreaViews:
         self.area_type_2_afg = AreaTypeFactory(name="Area Type 2 in Afg", country=self.country_1_afg, area_level=2)
         self.area_type_afg_2 = AreaTypeFactory(name="Area Type in Afg 2", country=self.country_2_afg, area_level=1)
 
-        self.area_1_area_type_1 = AreaFactory(name="Area 1 Area Type 1", area_type=self.area_type_1_afg)
-        self.area_2_area_type_1 = AreaFactory(name="Area 2 Area Type 1", area_type=self.area_type_1_afg)
-        self.area_1_area_type_2 = AreaFactory(name="Area 1 Area Type 2", area_type=self.area_type_2_afg)
-        self.area_2_area_type_2 = AreaFactory(name="Area 2 Area Type 2", area_type=self.area_type_2_afg)
-        self.area_1_area_type_afg_2 = AreaFactory(name="Area 1 Area Type Afg 2", area_type=self.area_type_afg_2)
-        self.area_2_area_type_afg_2 = AreaFactory(name="Area 2 Area Type Afg 2", area_type=self.area_type_afg_2)
+        self.area_1_area_type_1 = AreaFactory(
+            name="Area 1 Area Type 1", area_type=self.area_type_1_afg, p_code="AREA1-ARTYPE1"
+        )
+        self.area_2_area_type_1 = AreaFactory(
+            name="Area 2 Area Type 1", area_type=self.area_type_1_afg, p_code="AREA2-ARTYPE1"
+        )
+        self.area_1_area_type_2 = AreaFactory(
+            name="Area 1 Area Type 2", area_type=self.area_type_2_afg, p_code="AREA1-ARTYPE2"
+        )
+        self.area_2_area_type_2 = AreaFactory(
+            name="Area 2 Area Type 2", area_type=self.area_type_2_afg, p_code="AREA2-ARTYPE2"
+        )
+        self.area_1_area_type_afg_2 = AreaFactory(
+            name="Area 1 Area Type Afg 2", area_type=self.area_type_afg_2, p_code="AREA1-ARTYPE-AFG2"
+        )
+        self.area_2_area_type_afg_2 = AreaFactory(
+            name="Area 2 Area Type Afg 2", area_type=self.area_type_afg_2, p_code="AREA2-ARTYPE-AFG2"
+        )
 
         self.business_area_other = BusinessAreaFactory(name="Other")
         self.country_other = CountryFactory(
@@ -60,7 +72,7 @@ class TestAreaViews:
         )
         self.country_other.business_areas.set([self.business_area_other])
         self.area_type_other = AreaTypeFactory(name="Area Type Other", country=self.country_other)
-        self.area_other = AreaFactory(name="Area Other", area_type=self.area_type_other)
+        self.area_other = AreaFactory(name="Area Other", area_type=self.area_type_other, p_code="AREA-OTHER")
 
         self.url_list = reverse(
             "api:geo:areas-list",

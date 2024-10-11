@@ -3,28 +3,23 @@
 exports[`components/paymentmodule/PaymentPlanTargeting should render 1`] = `
 <div>
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-iBdnpw CUnko css-1ps6pg7-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-gLLuof iPcfRV css-1ps6pg7-MuiPaper-root"
   >
     <div
-      class="sc-gLLuof bNTvKV"
+      class="sc-jTQCzO fDgnPj"
     >
       <h6
         class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
       >
-        Targeting
+        Target Population
       </h6>
     </div>
     <div
-      class="sc-jTQCzO GcLEc"
+      class="sc-eDLKkx dztDbI"
     >
       <div
-        class="sc-fsYfdN iJWUfq MuiBox-root css-j7qwjs"
+        class="sc-iBdnpw dcYiFg MuiBox-root css-j7qwjs"
       >
-        <div
-          class="sc-hLQSwg gbKMjE"
-        >
-          Select Target Population
-        </div>
         <div
           class="MuiGrid-root MuiGrid-container css-11lq3yg-MuiGrid-root"
         >

@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
-import { TargetPopulationFilters } from '@components/targeting/TargetPopulationFilters';
+import { TargetPopulationTableFilters } from '@components/targeting/TargetPopulationTableFilters';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { getFilterFromQueryParams } from '@utils/utils';
@@ -31,7 +31,7 @@ export const TargetPopulationsPage = (): React.ReactElement => {
   const location = useLocation();
   const { t } = useTranslation();
   const permissions = usePermissions();
-  const {  programId } = useBaseUrl();
+  const { programId } = useBaseUrl();
   const { data: programData } = useProgramQuery({
     variables: { id: programId },
   });
@@ -51,7 +51,7 @@ export const TargetPopulationsPage = (): React.ReactElement => {
     return <PermissionDenied />;
   if (!programData) return null;
   let Table = TargetPopulationTable;
-  let Filters = TargetPopulationFilters;
+  let Filters = TargetPopulationTableFilters;
   if (programData.program.isSocialWorkerProgram) {
     Table = TargetPopulationForPeopleTable;
     Filters = TargetPopulationForPeopleFilters;

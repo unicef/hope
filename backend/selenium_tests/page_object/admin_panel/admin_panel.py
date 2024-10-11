@@ -12,6 +12,10 @@ class AdminPanel(BaseComponents):
     buttonLogout = '//*[@id="user-tools"]/a[3]'
     loggedOut = '//*[@id="content"]'
     errorNote = '//*[@class="errornote"]'
+    unicefID = '//*[@id="content"]/h2'
+
+    def getUnicefID(self) -> WebElement:
+        return self.wait_for(self.unicefID, By.XPATH)
 
     def getErrorLogin(self) -> WebElement:
         return self.wait_for(self.errorNote, By.XPATH)

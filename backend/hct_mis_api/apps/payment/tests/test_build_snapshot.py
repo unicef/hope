@@ -1,10 +1,8 @@
 from datetime import datetime
 
 from django.test import TestCase
-from django.utils import timezone
 
 from freezegun import freeze_time
-from pytz import utc
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
@@ -40,8 +38,8 @@ class TestBuildSnapshot(TestCase):
                 program_cycle=program_cycle,
                 dispersion_start_date=datetime(2020, 8, 10),
                 dispersion_end_date=datetime(2020, 12, 10),
-                start_date=timezone.datetime(2020, 9, 10, tzinfo=utc),
-                end_date=timezone.datetime(2020, 11, 10, tzinfo=utc),
+                # start_date=timezone.datetime(2020, 9, 10, tzinfo=utc),
+                # end_date=timezone.datetime(2020, 11, 10, tzinfo=utc),
                 is_follow_up=False,
             )
             cls.pp.unicef_id = "PP-01"
@@ -120,8 +118,8 @@ class TestBuildSnapshot(TestCase):
             program_cycle=program_cycle,
             dispersion_start_date=datetime(2020, 8, 10),
             dispersion_end_date=datetime(2020, 12, 10),
-            start_date=timezone.datetime(2020, 9, 10, tzinfo=utc),
-            end_date=timezone.datetime(2020, 11, 10, tzinfo=utc),
+            # start_date=timezone.datetime(2020, 9, 10, tzinfo=utc),
+            # end_date=timezone.datetime(2020, 11, 10, tzinfo=utc),
             is_follow_up=False,
         )
         pp.unicef_id = "PP-02"

@@ -12,7 +12,6 @@ class PaymentModuleDetails(BaseComponents):
     buttonExportXlsx = 'button[data-cy="button-export-xlsx"]'
     buttonDownloadXlsx = 'a[data-cy="button-download-xlsx"]'
     labelCreatedBy = 'div[data-cy="label-Created By"]'
-    labelProgramme = 'div[data-cy="label-Programme"]'
     labelTargetPopulation = 'div[data-cy="label-Target Population"]'
     labelCurrency = 'div[data-cy="label-Currency"]'
     labelStartDate = 'div[data-cy="label-Start Date"]'
@@ -94,9 +93,6 @@ class PaymentModuleDetails(BaseComponents):
 
     def getLabelCreatedBy(self) -> WebElement:
         return self.wait_for(self.labelCreatedBy)
-
-    def getLabelProgramme(self) -> WebElement:
-        return self.wait_for(self.labelProgramme)
 
     def getLabelTargetPopulation(self) -> WebElement:
         return self.wait_for(self.labelTargetPopulation)

@@ -17,8 +17,14 @@ interface ProgramDetailsProps {
 export function TargetPopulationDetails({
   targetPopulation,
 }: ProgramDetailsProps): React.ReactElement {
-  const { createdBy, finalizedBy, changeDate, finalizedAt, program } =
-    targetPopulation;
+  const {
+    createdBy,
+    finalizedBy,
+    changeDate,
+    finalizedAt,
+    program,
+    programCycle,
+  } = targetPopulation;
   const { t } = useTranslation();
   const closeDate = changeDate ? (
     <UniversalMoment>{changeDate}</UniversalMoment>
@@ -69,6 +75,13 @@ export function TargetPopulationDetails({
               dataCy="program-name"
               label={t('Programme')}
               value={programName}
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <LabelizedField
+              dataCy="programme-cycle-title"
+              label={t('Programme Cycle')}
+              value={programCycle?.title ?? '-'}
             />
           </Grid>
           <Grid item xs={4}>

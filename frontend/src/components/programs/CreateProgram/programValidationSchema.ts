@@ -25,7 +25,7 @@ export const programValidationSchema = (
       .transform((v) => (v instanceof Date && !isNaN(v.getTime()) ? v : null)),
     endDate: Yup.date()
       .transform((curr, orig) => (orig === '' ? null : curr))
-      .required(t('End Date is required'))
+      .nullable()
       .when('startDate', (startDate, schema) =>
         startDate instanceof Date && !isNaN(startDate.getTime())
           ? schema.min(

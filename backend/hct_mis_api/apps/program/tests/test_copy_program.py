@@ -210,9 +210,11 @@ class TestCopyProgram(APITestCase):
         )
         cls.area_type_other = AreaTypeFactory(name="Area Type Other", country=country_other)
 
-        cls.area_in_afg_1 = AreaFactory(name="Area in AFG 1", area_type=area_type_afg)
-        cls.area_in_afg_2 = AreaFactory(name="Area in AFG 2", area_type=area_type_afg)
-        cls.area_not_in_afg = AreaFactory(name="Area not in AFG", area_type=cls.area_type_other)
+        cls.area_in_afg_1 = AreaFactory(name="Area in AFG 1", area_type=area_type_afg, p_code="AREA-IN-AFG1")
+        cls.area_in_afg_2 = AreaFactory(name="Area in AFG 2", area_type=area_type_afg, p_code="AREA-IN-AFG2")
+        cls.area_not_in_afg = AreaFactory(
+            name="Area not in AFG", area_type=cls.area_type_other, p_code="AREA-NOT-IN-AFG"
+        )
 
         # PDU data - on original Program - SHOULD NOT BE COPIED into new Program
         pdu_data = PeriodicFieldDataFactory(
@@ -255,11 +257,12 @@ class TestCopyProgram(APITestCase):
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_DUPLICATE], self.business_area)
         self.assertIsNone(self.household1.household_collection)
         self.assertIsNone(self.individuals1[0].individual_collection)
-        self.snapshot_graphql_request(
-            request_string=self.COPY_PROGRAM_MUTATION,
-            context={"user": self.user},
-            variables=self.copy_data,
-        )
+        with self.captureOnCommitCallbacks(execute=True):
+            self.snapshot_graphql_request(
+                request_string=self.COPY_PROGRAM_MUTATION,
+                context={"user": self.user},
+                variables=self.copy_data,
+            )
         copied_program = Program.objects.exclude(id=self.program.id).order_by("created_at").last()
         self.assertEqual(copied_program.status, Program.DRAFT)
         self.assertEqual(copied_program.name, "copied name")
@@ -372,6 +375,12 @@ class TestCopyProgram(APITestCase):
             {"flex_field_1": "Value 1"},
         )
 
+        self.assertIsNotNone(copied_program.cycles.first())
+        self.assertEqual(copied_program.cycles.first().program_id, copied_program.pk)
+        self.assertEqual(copied_program.cycles.first().title, "Default Programme Cycle")
+        self.assertEqual(copied_program.cycles.first().status, "DRAFT")
+        self.assertIsNone(copied_program.cycles.first().end_date)
+
     def test_copy_program_incompatible_collecting_type(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_DUPLICATE], self.business_area)
         copy_data_incompatible = {**self.copy_data}
@@ -401,8 +410,8 @@ class TestCopyProgram(APITestCase):
     )
     def test_copy_program_with_partners(self, _: Any, partner_access: str) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_DUPLICATE], self.business_area)
-        area1 = AreaFactory(name="North Brianmouth", area_type=self.area_type_other)
-        area2 = AreaFactory(name="South Catherine", area_type=self.area_type_other)
+        area1 = AreaFactory(name="North Brianmouth", area_type=self.area_type_other, p_code="NORTH-B")
+        area2 = AreaFactory(name="South Catherine", area_type=self.area_type_other, p_code="SOUTH-C")
         partner2 = PartnerFactory(name="New Partner")
         self.copy_data["programData"]["partners"] = [
             {
@@ -467,7 +476,7 @@ class TestCopyProgram(APITestCase):
             {
                 "label": "PDU Field 4",
                 "pduData": {
-                    "subtype": "BOOLEAN",
+                    "subtype": "BOOL",
                     "numberOfRounds": 4,
                     "roundsNames": ["Round 1A", "Round 2B", "Round 3C", "Round 4D"],
                 },

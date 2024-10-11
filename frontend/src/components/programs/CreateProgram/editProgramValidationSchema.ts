@@ -5,8 +5,28 @@ import { TFunction } from 'i18next';
 
 export const editProgramValidationSchema = (
   t: TFunction<'translation', undefined>,
-): Yup.ObjectSchema<any, any, any, any> =>
-  Yup.object().shape({
+  initialValues: any,
+): Yup.ObjectSchema<any, any, any, any> => {
+  let endDate = Yup.date()
+    .transform((curr, orig) => (orig === '' ? null : curr))
+    .when('startDate', (startDate, schema) =>
+      startDate instanceof Date && !isNaN(startDate.getTime())
+        ? schema.min(
+            startDate,
+            `${t('End date have to be greater than')} ${moment(
+              startDate,
+            ).format('YYYY-MM-DD')}`,
+          )
+        : schema,
+    )
+    .min(today, t('End Date cannot be in the past'))
+    .nullable();
+
+  if (initialValues.endDate) {
+    endDate = endDate.required(t('End Date is required'));
+  }
+
+  return Yup.object().shape({
     editMode: Yup.boolean(),
     name: Yup.string()
       .required(t('Programme Name is required'))
@@ -23,24 +43,7 @@ export const editProgramValidationSchema = (
     startDate: Yup.date()
       .required(t('Start Date is required'))
       .transform((v) => (v instanceof Date && !isNaN(v.getTime()) ? v : null)),
-    endDate: Yup.date()
-      .transform((curr, orig) => (orig === '' ? null : curr))
-      .required(t('End Date is required'))
-      .when('startDate', (startDate, schema) =>
-        startDate instanceof Date && !isNaN(startDate.getTime())
-          ? schema.min(
-              startDate,
-              `${t('End date have to be greater than')} ${moment(
-                startDate,
-              ).format('YYYY-MM-DD')}`,
-            )
-          : schema,
-      )
-      .when('editMode', (editMode, schema) => {
-        return editMode
-          ? schema
-          : schema.min(today, t('End Date cannot be in the past'));
-      }),
+    endDate,
     sector: Yup.string().required(t('Sector is required')),
     dataCollectingTypeCode: Yup.string().required(
       t('Data Collecting Type is required'),
@@ -63,3 +66,4 @@ export const editProgramValidationSchema = (
       }),
     ),
   });
+};

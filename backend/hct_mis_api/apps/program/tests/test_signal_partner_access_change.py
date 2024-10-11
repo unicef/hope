@@ -34,9 +34,11 @@ class TestPartnerAccessChangeSignal(TestCase):
         )
         cls.area_type_other = AreaTypeFactory(name="Area Type Other", country=country_other)
 
-        cls.area_in_afg_1 = AreaFactory(name="Area in AFG 1", area_type=area_type_afg)
-        cls.area_in_afg_2 = AreaFactory(name="Area in AFG 2", area_type=area_type_afg)
-        cls.area_not_in_afg = AreaFactory(name="Area not in AFG", area_type=cls.area_type_other)
+        cls.area_in_afg_1 = AreaFactory(name="Area in AFG 1", area_type=area_type_afg, p_code="AREA-IN-AFG1")
+        cls.area_in_afg_2 = AreaFactory(name="Area in AFG 2", area_type=area_type_afg, p_code="AREA-IN-AFG2")
+        cls.area_not_in_afg = AreaFactory(
+            name="Area not in AFG", area_type=cls.area_type_other, p_code="AREA-NOT-IN-AFG"
+        )
 
         cls.program = ProgramFactory.create(
             status=Program.DRAFT, business_area=cls.business_area, partner_access=Program.NONE_PARTNERS_ACCESS

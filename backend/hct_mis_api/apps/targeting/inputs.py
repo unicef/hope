@@ -8,6 +8,7 @@ class CopyTargetPopulationInput(graphene.InputObjectType):
 
     id = graphene.ID()
     name = graphene.String()
+    program_cycle_id = graphene.ID(required=True)
 
 
 class UpdateTargetPopulationInput(graphene.InputObjectType):
@@ -15,6 +16,7 @@ class UpdateTargetPopulationInput(graphene.InputObjectType):
     name = graphene.String()
     targeting_criteria = TargetingCriteriaObjectType()
     program_id = graphene.ID()
+    program_cycle_id = graphene.ID()
     vulnerability_score_min = graphene.Decimal()
     vulnerability_score_max = graphene.Decimal()
     excluded_ids = graphene.String()
@@ -26,5 +28,6 @@ class CreateTargetPopulationInput(graphene.InputObjectType):
     targeting_criteria = TargetingCriteriaObjectType(required=True)
     business_area_slug = graphene.String(required=True)
     program_id = graphene.ID(required=True)
+    program_cycle_id = graphene.ID(required=True)
     excluded_ids = graphene.String(required=True)
     exclusion_reason = graphene.String()

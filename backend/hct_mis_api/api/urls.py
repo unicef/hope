@@ -84,6 +84,7 @@ urlpatterns = [
                                 "targeting/",
                                 include("hct_mis_api.apps.targeting.api.urls", namespace="targeting"),
                             ),
+                            path("", include("hct_mis_api.apps.program.api.urls", namespace="programs")),
                         ]
                     ),
                 ),

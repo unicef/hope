@@ -79,6 +79,10 @@ export const ActivateProgram = ({
         <DialogContent>
           <DialogDescription>
             {t('Are you sure you want to activate this Programme?')}
+            <br />
+            {t(
+              'Upon activation of this Programme, default Programme Cycles will be created.',
+            )}
           </DialogDescription>
         </DialogContent>
         <DialogFooter>

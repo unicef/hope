@@ -1,31 +1,63 @@
 import { Box, Button } from '@mui/material';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { BreadCrumbsItem } from '@core/BreadCrumbs';
 import { PageHeader } from '@core/PageHeader';
 import { LoadingButton } from '@core/LoadingButton';
+import { decodeIdString } from '@utils/utils';
+import { useQuery } from '@tanstack/react-query';
+import { fetchProgramCycle } from '@api/programCycleApi';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface CreatePaymentPlanHeaderProps {
   handleSubmit: () => Promise<void>;
-  baseUrl: string;
   permissions: string[];
   loadingCreate: boolean;
 }
 
 export function CreatePaymentPlanHeader({
   handleSubmit,
-  baseUrl,
   permissions,
   loadingCreate,
 }: CreatePaymentPlanHeaderProps): React.ReactElement {
   const { t } = useTranslation();
+  const { businessArea, programId } = useBaseUrl();
+  const { programCycleId } = useParams();
+
+  const decodedProgramCycleId = decodeIdString(programCycleId);
+
+  const { data: programCycleData, isLoading: isLoadingProgramCycle } = useQuery(
+    {
+      queryKey: [
+        'programCyclesDetails',
+        businessArea,
+        programId,
+        decodedProgramCycleId,
+      ],
+      queryFn: async () => {
+        return fetchProgramCycle(
+          businessArea,
+          programId,
+          decodedProgramCycleId,
+        );
+      },
+    },
+  );
+
+  if (isLoadingProgramCycle) {
+    return null;
+  }
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Payment Module'),
-      to: `/${baseUrl}/payment-module/`,
+      to: '../../..',
+    },
+    {
+      title: `${programCycleData.title}`,
+      to: '../..',
     },
   ];
 
@@ -40,7 +72,7 @@ export function CreatePaymentPlanHeader({
     >
       <Box display="flex" mt={2} mb={2}>
         <Box mr={3}>
-          <Button component={Link} to={`/${baseUrl}/payment-module`}>
+          <Button component={Link} to={'../..'}>
             {t('Cancel')}
           </Button>
         </Box>

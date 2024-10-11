@@ -1,3 +1,4 @@
+from datetime import timedelta
 from typing import Any, List
 
 from parameterized import parameterized
@@ -28,7 +29,7 @@ from hct_mis_api.apps.household.fixtures import (
 )
 from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import Program, ProgramPartnerThrough
+from hct_mis_api.apps.program.models import Program, ProgramCycle, ProgramPartnerThrough
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 
 
@@ -98,6 +99,7 @@ class TestUpdateProgram(APITestCase):
             business_area=cls.business_area,
             data_collecting_type=data_collecting_type,
             partner_access=Program.NONE_PARTNERS_ACCESS,
+            version=123,
         )
         unicef_program, _ = ProgramPartnerThrough.objects.get_or_create(
             program=cls.program,
@@ -130,9 +132,11 @@ class TestUpdateProgram(APITestCase):
         )
         cls.area_type_other = AreaTypeFactory(name="Area Type Other", country=country_other)
 
-        cls.area_in_afg_1 = AreaFactory(name="Area in AFG 1", area_type=area_type_afg)
-        cls.area_in_afg_2 = AreaFactory(name="Area in AFG 2", area_type=area_type_afg)
-        cls.area_not_in_afg = AreaFactory(name="Area not in AFG", area_type=cls.area_type_other)
+        cls.area_in_afg_1 = AreaFactory(name="Area in AFG 1", area_type=area_type_afg, p_code="AREA-IN-AFG1")
+        cls.area_in_afg_2 = AreaFactory(name="Area in AFG 2", area_type=area_type_afg, p_code="AREA-IN-AFG2")
+        cls.area_not_in_afg = AreaFactory(
+            name="Area not in AFG", area_type=cls.area_type_other, p_code="AREA-NOT-IN-AFG2"
+        )
 
         unicef_program.areas.set([cls.area_in_afg_1, cls.area_in_afg_2])
 
@@ -229,9 +233,11 @@ class TestUpdateProgram(APITestCase):
         ]
     )
     def test_update_program_partners(self, _: Any, partner_access: str) -> None:
-        area1 = AreaFactory(name="Area1", area_type=self.area_type_other)
-        area2 = AreaFactory(name="Area2", area_type=self.area_type_other)
-        area_to_be_unselected = AreaFactory(name="AreaToBeUnselected", area_type=self.area_type_other)
+        area1 = AreaFactory(name="Area1", area_type=self.area_type_other, p_code="AREA1")
+        area2 = AreaFactory(name="Area2", area_type=self.area_type_other, p_code="AREA2")
+        area_to_be_unselected = AreaFactory(
+            name="AreaToBeUnselected", area_type=self.area_type_other, p_code="AREA-TO-BE-UNSELECTED"
+        )
         program_partner = ProgramPartnerThrough.objects.create(
             program=self.program,
             partner=self.partner,
@@ -274,9 +280,11 @@ class TestUpdateProgram(APITestCase):
         )
 
     def test_update_program_partners_invalid_access_type_from_object(self) -> None:
-        area1 = AreaFactory(name="Area1", area_type=self.area_type_other)
-        area2 = AreaFactory(name="Area2", area_type=self.area_type_other)
-        area_to_be_unselected = AreaFactory(name="AreaToBeUnselected", area_type=self.area_type_other)
+        area1 = AreaFactory(name="Area1", area_type=self.area_type_other, p_code="AREA1")
+        area2 = AreaFactory(name="Area2", area_type=self.area_type_other, p_code="AREA2")
+        area_to_be_unselected = AreaFactory(
+            name="AreaToBeUnselected", area_type=self.area_type_other, p_code="AREA-TO-BE-UNSELECTED"
+        )
         program_partner = ProgramPartnerThrough.objects.create(
             program=self.program,
             partner=self.partner,
@@ -651,7 +659,7 @@ class TestUpdateProgram(APITestCase):
                         "id": self.id_to_base64(self.pdu_field_to_be_updated.id, "PeriodicFieldNode"),
                         "label": "PDU Field - Updated",
                         "pduData": {
-                            "subtype": "BOOLEAN",
+                            "subtype": "BOOL",
                             "numberOfRounds": 3,
                             "roundsNames": ["Round 1 Updated", "Round 2 Updated", "Round 3 Updated"],
                         },
@@ -659,7 +667,7 @@ class TestUpdateProgram(APITestCase):
                     {
                         "label": "PDU Field - New",
                         "pduData": {
-                            "subtype": "BOOLEAN",
+                            "subtype": "BOOL",
                             "numberOfRounds": 4,
                             "roundsNames": ["Round 1A", "Round 2B", "Round 3C", "Round 4D"],
                         },
@@ -693,10 +701,8 @@ class TestUpdateProgram(APITestCase):
         )
         self.assertIsNone(FlexibleAttribute.objects.filter(name="pdu_field_to_be_removed").first())
         self.assertIsNone(FlexibleAttribute.objects.filter(name="pdu_field_to_be_updated").first())
-        self.assertEqual(
-            FlexibleAttribute.objects.filter(name="pdu_field_-_updated").first().pdu_data.subtype, "BOOLEAN"
-        )
-        self.assertIsNotNone(FlexibleAttribute.objects.filter(name="pdu_field_-_new").first())
+        self.assertEqual(FlexibleAttribute.objects.filter(name="pdu_field_updated").first().pdu_data.subtype, "BOOL")
+        self.assertIsNotNone(FlexibleAttribute.objects.filter(name="pdu_field_new").first())
         self.assertIsNotNone(FlexibleAttribute.objects.filter(name="pdu_field_to_be_preserved").first())
 
     def test_update_program_with_pdu_fields_invalid_data(self) -> None:
@@ -719,7 +725,7 @@ class TestUpdateProgram(APITestCase):
                         "id": self.id_to_base64(self.pdu_field_to_be_updated.id, "PeriodicFieldNode"),
                         "label": "PDU Field - Updated",
                         "pduData": {
-                            "subtype": "BOOLEAN",
+                            "subtype": "BOOL",
                             "numberOfRounds": 1,
                             "roundsNames": ["Round 1 Updated", "Round 2 Updated", "Round 3 Updated"],
                         },
@@ -727,7 +733,7 @@ class TestUpdateProgram(APITestCase):
                     {
                         "label": "PDU Field - New",
                         "pduData": {
-                            "subtype": "BOOLEAN",
+                            "subtype": "BOOL",
                             "numberOfRounds": 3,
                             "roundsNames": ["Round 1A", "Round 2B", "Round 3C", "Round 4D"],
                         },
@@ -765,7 +771,7 @@ class TestUpdateProgram(APITestCase):
                         "id": self.id_to_base64(self.pdu_field_to_be_updated.id, "PeriodicFieldNode"),
                         "label": "PDU Field 1",
                         "pduData": {
-                            "subtype": "BOOLEAN",
+                            "subtype": "BOOL",
                             "numberOfRounds": 3,
                             "roundsNames": ["Round 1 Updated", "Round 2 Updated", "Round 3 Updated"],
                         },
@@ -773,7 +779,7 @@ class TestUpdateProgram(APITestCase):
                     {
                         "label": "PDU Field 1",
                         "pduData": {
-                            "subtype": "BOOLEAN",
+                            "subtype": "BOOL",
                             "numberOfRounds": 4,
                             "roundsNames": ["Round 1A", "Round 2B", "Round 3C", "Round 4D"],
                         },
@@ -822,7 +828,7 @@ class TestUpdateProgram(APITestCase):
                         "id": self.id_to_base64(self.pdu_field_to_be_updated.id, "PeriodicFieldNode"),
                         "label": "PDU Field - Updated",
                         "pduData": {
-                            "subtype": "BOOLEAN",
+                            "subtype": "BOOL",
                             "numberOfRounds": 3,
                             "roundsNames": ["Round 1 Updated", "Round 2 Updated", "Round 3 Updated"],
                         },
@@ -830,7 +836,7 @@ class TestUpdateProgram(APITestCase):
                     {
                         "label": "PDU Field 1",
                         "pduData": {
-                            "subtype": "BOOLEAN",
+                            "subtype": "BOOL",
                             "numberOfRounds": 4,
                             "roundsNames": ["Round 1A", "Round 2B", "Round 3C", "Round 4D"],
                         },
@@ -879,7 +885,7 @@ class TestUpdateProgram(APITestCase):
                         "id": self.id_to_base64(self.pdu_field_to_be_updated.id, "PeriodicFieldNode"),
                         "label": "PDU Field 1",
                         "pduData": {
-                            "subtype": "BOOLEAN",
+                            "subtype": "BOOL",
                             "numberOfRounds": 3,
                             "roundsNames": ["Round 1 Updated", "Round 2 Updated", "Round 3 Updated"],
                         },
@@ -887,7 +893,7 @@ class TestUpdateProgram(APITestCase):
                     {
                         "label": "PDU Field - New",
                         "pduData": {
-                            "subtype": "BOOLEAN",
+                            "subtype": "BOOL",
                             "numberOfRounds": 4,
                             "roundsNames": ["Round 1A", "Round 2B", "Round 3C", "Round 4D"],
                         },
@@ -916,7 +922,7 @@ class TestUpdateProgram(APITestCase):
                         "id": self.id_to_base64(self.pdu_field_to_be_updated.id, "PeriodicFieldNode"),
                         "label": "PDU Field - NAME WILL NOT BE UPDATED",
                         "pduData": {
-                            "subtype": "BOOLEAN",  # subtype will NOT be updated
+                            "subtype": "BOOL",  # subtype will NOT be updated
                             "numberOfRounds": 4,
                             "roundsNames": [
                                 "Round 1 To Be Updated",
@@ -950,7 +956,7 @@ class TestUpdateProgram(APITestCase):
                     {
                         "label": "PDU Field - New",
                         "pduData": {
-                            "subtype": "BOOLEAN",
+                            "subtype": "BOOL",
                             "numberOfRounds": 4,
                             "roundsNames": ["Round 1A", "Round 2B", "Round 3C", "Round 4D"],
                         },
@@ -980,7 +986,7 @@ class TestUpdateProgram(APITestCase):
                         "id": self.id_to_base64(self.pdu_field_to_be_updated.id, "PeriodicFieldNode"),
                         "label": "PDU Field - Updated",
                         "pduData": {
-                            "subtype": "BOOLEAN",
+                            "subtype": "BOOL",
                             "numberOfRounds": 2,
                             "roundsNames": ["Round 1 To Be Updated", "Round 2 To Be Updated"],
                         },
@@ -1122,5 +1128,93 @@ class TestUpdateProgram(APITestCase):
                     "3": {"value": None},
                     "4": {"value": None},
                 },
+            },
+        )
+
+    def test_finish_active_program_with_not_finished_program_cycle_or_end_date(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_FINISH], self.business_area)
+        Program.objects.filter(id=self.program.id).update(status=Program.ACTIVE)
+        self.program.refresh_from_db()
+        self.assertEqual(self.program.status, Program.ACTIVE)
+        self.assertEqual(self.program.cycles.count(), 1)
+        program_cycle = self.program.cycles.first()
+        program_cycle.status = ProgramCycle.ACTIVE
+        program_cycle.save()
+        # has active cycle
+        self.snapshot_graphql_request(
+            request_string=self.UPDATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables={
+                "programData": {
+                    "id": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "status": Program.FINISHED,
+                },
+                "version": self.program.version,
+            },
+        )
+        program_cycle.status = ProgramCycle.DRAFT
+        program_cycle.save()
+        self.program.end_date = None
+        self.program.save()
+        self.program.refresh_from_db()
+        self.assertIsNone(self.program.end_date)
+        # no program end date
+        self.snapshot_graphql_request(
+            request_string=self.UPDATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables={
+                "programData": {
+                    "id": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "status": Program.FINISHED,
+                },
+                "version": self.program.version,
+            },
+        )
+
+    def test_update_program_end_date_validation(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
+        Program.objects.filter(id=self.program.id).update(status=Program.ACTIVE, end_date=None)
+        self.program.refresh_from_db()
+        self.assertEqual(self.program.status, Program.ACTIVE)
+        self.assertIsNone(self.program.end_date)
+        program_cycle = self.program.cycles.first()
+        program_cycle.end_date = self.program.start_date + timedelta(days=5)
+        program_cycle.save()
+
+        # end date before program start date
+        self.snapshot_graphql_request(
+            request_string=self.UPDATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables={
+                "programData": {
+                    "id": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "endDate": self.program.start_date - timedelta(days=5),
+                },
+                "version": self.program.version,
+            },
+        )
+
+        # end date before last cycle
+        self.snapshot_graphql_request(
+            request_string=self.UPDATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables={
+                "programData": {
+                    "id": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "endDate": program_cycle.end_date - timedelta(days=2),
+                },
+                "version": self.program.version,
+            },
+        )
+        # start date after cycle start date
+        self.snapshot_graphql_request(
+            request_string=self.UPDATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables={
+                "programData": {
+                    "id": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "startDate": program_cycle.start_date + timedelta(days=5),
+                },
+                "version": self.program.version,
             },
         )
