@@ -156,9 +156,19 @@ class TestProgramCycle:
         pageProgramCycle.getNavProgrammeCycles().click()
         pageProgramCycle.getProgramCycleRow()[1].find_element("tag name", "a").click()
         assert "Test Programme Cycle 001" in pageProgramCycleDetails.getPageHeaderTitle().text
-        assert "Active" in pageProgramCycleDetails.getStatusContainer().text
+        for _ in range(100):
+            if "Active" in pageProgramCycleDetails.getStatusContainer().text:
+                break
+            sleep(0.1)
+        else:
+            assert "Active" in pageProgramCycleDetails.getStatusContainer().text
         pageProgramCycleDetails.getButtonFinishProgrammeCycle().click()
-        assert "Finished" in pageProgramCycleDetails.getStatusContainer().text
+        for _ in range(100):
+            if "Finished" in pageProgramCycleDetails.getStatusContainer().text:
+                break
+            sleep(0.1)
+        else:
+            assert "Finished" in pageProgramCycleDetails.getStatusContainer().text
         pageProgramCycleDetails.getButtonReactivateProgrammeCycle().click()
         for _ in range(100):
             if "Active" in pageProgramCycleDetails.getStatusContainer().text:
