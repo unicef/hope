@@ -122,22 +122,26 @@ class PaymentSerializer(ReadOnlyModelSerializer):
         return {}
 
     def get_payload(self, obj: Payment) -> Dict:
-        delivery_mechanism_data = obj.collector.delivery_mechanisms_data.filter(
-            delivery_mechanism=obj.delivery_type
-        ).first()
+        snapshot = getattr(obj, "household_snapshot", None)
+        if not snapshot:
+            logger.error(f"Not found snapshot for Payment {obj.unicef_id}")
+
+        snapshot_data = snapshot.snapshot_data
+        collector_data = snapshot_data.get("primary_collector") or snapshot_data.get("alternate_collector") or dict()
+        delivery_mech_data = collector_data.get("delivery_mechanisms_data", {}).get(obj.delivery_type.code, {})
 
         base_data = {
             "amount": obj.entitlement_quantity,
             "destination_currency": obj.currency,
-            "phone_no": str(obj.collector.phone_no),
-            "last_name": obj.collector.family_name,
-            "first_name": obj.collector.given_name,
-            "full_name": obj.full_name,
+            "phone_no": collector_data.get("phone_no", ""),
+            "last_name": collector_data.get("family_name", ""),
+            "first_name": collector_data.get("given_name", ""),
+            "full_name": collector_data.get("full_name", ""),
         }
-        if (
-            obj.delivery_type.code == "mobile_money" and not delivery_mechanism_data
-        ):  # this workaround need to be dropped
-            base_data["service_provider_code"] = obj.collector.flex_fields.get("service_provider_code_i_f", "")
+        if obj.delivery_type.code == "mobile_money" and not delivery_mech_data:  # this workaround need to be dropped
+            base_data["service_provider_code"] = collector_data.get("flex_fields", {}).get(
+                "service_provider_code_i_f", ""
+            )
 
         payload = PaymentPayloadSerializer(data=base_data)
         if not payload.is_valid():
@@ -145,8 +149,8 @@ class PaymentSerializer(ReadOnlyModelSerializer):
 
         payload_data = payload.data
 
-        if delivery_mechanism_data:
-            payload_data.update(delivery_mechanism_data.delivery_data)
+        if delivery_mech_data:
+            payload_data.update(delivery_mech_data)
 
         return payload_data
 

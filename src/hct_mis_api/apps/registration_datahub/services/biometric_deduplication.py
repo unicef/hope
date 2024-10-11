@@ -32,7 +32,7 @@ class BiometricDeduplicationService:
     def __init__(self) -> None:
         self.api = DeduplicationEngineAPI()
 
-    def create_deduplication_set(self, program: Program) -> None:
+    def create_deduplication_set(self, program: Program) -> str:
         deduplication_set = DeduplicationSet(
             reference_pk=str(program.id),
             notification_url=f"https://{settings.DOMAIN_NAME}/api/rest/{program.business_area.slug}/programs/{str(program.id)}/registration-data/webhookdeduplication/",
@@ -42,8 +42,11 @@ class BiometricDeduplicationService:
             ),
         )
         response_data = self.api.create_deduplication_set(deduplication_set)
-        program.deduplication_set_id = uuid.UUID(response_data["id"])
+        deduplication_set_id = uuid.UUID(response_data["id"])
+        program.deduplication_set_id = deduplication_set_id
         program.save(update_fields=["deduplication_set_id"])
+
+        return str(deduplication_set_id)
 
     def get_deduplication_set_results(self, deduplication_set_id: str) -> dict:
         return self.api.get_duplicates(deduplication_set_id)
@@ -104,15 +107,15 @@ class BiometricDeduplicationService:
         if not program.biometric_deduplication_enabled:
             raise self.BiometricDeduplicationServiceException("Biometric deduplication is not enabled for this program")
 
-        if not program.deduplication_set_id:
-            self.create_deduplication_set(program)
+        deduplication_set_id = program.deduplication_set_id and str(program.deduplication_set_id)
+        if not deduplication_set_id:
+            with transaction.atomic():
+                deduplication_set_id = self.create_deduplication_set(program)
 
         if RegistrationDataImport.objects.filter(
             program=program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS
         ).exists():
             raise self.BiometricDeduplicationServiceException("Deduplication is already in progress for some RDIs")
-
-        deduplication_set_id = str(program.deduplication_set_id)
 
         pending_rdis = RegistrationDataImport.objects.filter(
             program=program,
