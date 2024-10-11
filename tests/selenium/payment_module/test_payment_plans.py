@@ -226,13 +226,6 @@ def payment_plan_create(program: Program) -> PaymentPlan:
     IndividualFactory(
         household=household_1,
         program=program,
-        sex="MALE",
-        unicef_id="IND-06-0001.1828",
-        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=20, maximum_age=40),
-    )
-    IndividualFactory(
-        household=household_1,
-        program=program,
         sex="FEMALE",
         birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=1, maximum_age=10),
     )
@@ -240,6 +233,13 @@ def payment_plan_create(program: Program) -> PaymentPlan:
         household=household_1,
         program=program,
         sex="FEMALE",
+        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=20, maximum_age=40),
+    )
+    IndividualFactory(
+        household=household_1,
+        program=program,
+        sex="MALE",
+        unicef_id="IND-06-0001.1828",
         birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=20, maximum_age=40),
     )
 
@@ -566,11 +566,11 @@ class TestPaymentPlans:
         else:
             assert "0" in pagePaymentModuleDetails.getLabelMaleAdults().text
 
-        assert "5" in pagePaymentModuleDetails.getLabelFemaleChildren().text
-        assert "2" in pagePaymentModuleDetails.getLabelFemaleAdults().text
-        assert "3" in pagePaymentModuleDetails.getLabelMaleChildren().text
+        assert "4" in pagePaymentModuleDetails.getLabelFemaleChildren().text
+        assert "1" in pagePaymentModuleDetails.getLabelFemaleAdults().text
+        assert "1" in pagePaymentModuleDetails.getLabelMaleChildren().text
 
-        assert "10" in pagePaymentModuleDetails.getLabelTotalNumberOfPeople().text
+        assert "6" in pagePaymentModuleDetails.getLabelTotalNumberOfPeople().text
 
     def test_payment_plan_save_exclude(
         self,
