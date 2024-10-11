@@ -173,11 +173,9 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
     )
     program = models.ForeignKey(
         "program.Program",
-        blank=True,
-        null=True,
         help_text="""Set only when the target population moves from draft to
             candidate list frozen state (approved)""",
-        on_delete=models.SET_NULL,
+        on_delete=models.PROTECT,
     )
     program_cycle = models.ForeignKey(
         "program.ProgramCycle", on_delete=models.CASCADE, related_name="target_populations"
