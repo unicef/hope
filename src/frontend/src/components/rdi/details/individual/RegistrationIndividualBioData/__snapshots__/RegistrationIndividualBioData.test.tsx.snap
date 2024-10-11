@@ -1,0 +1,648 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`components/rdi/details/individual/RegistrationIndividualBioData should render 1`] = `
+<div>
+  <div
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-khLCKb iJuZvT css-1ps6pg7-MuiPaper-root"
+  >
+    <div
+      class="sc-fAUdSK cpcECW"
+    >
+      <h6
+        class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
+      >
+        Bio Data
+      </h6>
+    </div>
+    <div
+      class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-6 css-zow5z4-MuiGrid-root"
+    >
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+      >
+        <div>
+          <span
+            class="sc-gtLWhw bkWrmx"
+            color="textSecondary"
+          >
+            Full Name
+          </span>
+          <div
+            data-cy="label-Full Name"
+          >
+            <span
+              class="sc-egkSDF XYdBd"
+              color="textSecondary"
+            >
+              Alicja Kowalska
+            </span>
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+      >
+        <div>
+          <span
+            class="sc-gtLWhw bkWrmx"
+            color="textSecondary"
+          >
+            Given Name
+          </span>
+          <div
+            data-cy="label-Given Name"
+          >
+            <span
+              class="sc-egkSDF XYdBd"
+              color="textSecondary"
+            >
+              Alicja
+            </span>
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+      >
+        <div>
+          <span
+            class="sc-gtLWhw bkWrmx"
+            color="textSecondary"
+          >
+            Middle Name
+          </span>
+          <div
+            data-cy="label-Middle Name"
+          >
+            -
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+      >
+        <div>
+          <span
+            class="sc-gtLWhw bkWrmx"
+            color="textSecondary"
+          >
+            Family Name
+          </span>
+          <div
+            data-cy="label-Family Name"
+          >
+            <span
+              class="sc-egkSDF XYdBd"
+              color="textSecondary"
+            >
+              Kowalska
+            </span>
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+      >
+        <div>
+          <span
+            class="sc-gtLWhw bkWrmx"
+            color="textSecondary"
+          >
+            Gender
+          </span>
+          <div
+            data-cy="label-Gender"
+          >
+            <span
+              class="sc-egkSDF XYdBd"
+              color="textSecondary"
+            >
+              Female
+            </span>
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+      >
+        <div>
+          <span
+            class="sc-gtLWhw bkWrmx"
+            color="textSecondary"
+          >
+            Age
+          </span>
+          <div
+            data-cy="label-Age"
+          >
+            <span
+              class="sc-egkSDF XYdBd"
+              color="textSecondary"
+            >
+              80
+            </span>
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+      >
+        <div>
+          <span
+            class="sc-gtLWhw bkWrmx"
+            color="textSecondary"
+          >
+            Date of Birth
+          </span>
+          <div
+            data-cy="label-Date of Birth"
+          >
+            <span
+              class="sc-egkSDF XYdBd"
+              color="textSecondary"
+            >
+              <time
+                datetime="-894672000000"
+              >
+                26 Aug 1941
+              </time>
+            </span>
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+      >
+        <div>
+          <span
+            class="sc-gtLWhw bkWrmx"
+            color="textSecondary"
+          >
+            Estimated Date of Birth
+          </span>
+          <div
+            data-cy="label-Estimated Date of Birth"
+          >
+            <span
+              class="sc-egkSDF XYdBd"
+              color="textSecondary"
+            >
+              No
+            </span>
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+      >
+        <div>
+          <span
+            class="sc-gtLWhw bkWrmx"
+            color="textSecondary"
+          >
+            Marital Status
+          </span>
+          <div
+            data-cy="label-Marital Status"
+          >
+            <span
+              class="sc-egkSDF XYdBd"
+              color="textSecondary"
+            >
+              Married
+            </span>
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+      >
+        <div>
+          <span
+            class="sc-gtLWhw bkWrmx"
+            color="textSecondary"
+          >
+            Work Status
+          </span>
+          <div
+            data-cy="label-Work Status"
+          >
+            <span
+              class="sc-egkSDF XYdBd"
+              color="textSecondary"
+            >
+              Not provided
+            </span>
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+      >
+        <div>
+          <span
+            class="sc-gtLWhw bkWrmx"
+            color="textSecondary"
+          >
+            Pregnant
+          </span>
+          <div
+            data-cy="label-Pregnant"
+          >
+            <span
+              class="sc-egkSDF XYdBd"
+              color="textSecondary"
+            >
+              Yes
+            </span>
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+      >
+        <div>
+          <span
+            class="sc-gtLWhw bkWrmx"
+            color="textSecondary"
+          >
+            Household ID
+          </span>
+          <div
+            data-cy="label-Household ID"
+          >
+            <span
+              class="sc-egkSDF XYdBd"
+              color="textSecondary"
+            >
+              -
+            </span>
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+      >
+        <div>
+          <span
+            class="sc-gtLWhw bkWrmx"
+            color="textSecondary"
+          >
+            Role
+          </span>
+          <div
+            data-cy="label-Role"
+          >
+            <span
+              class="sc-egkSDF XYdBd"
+              color="textSecondary"
+            >
+              Alternate collector
+            </span>
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+      >
+        <div>
+          <span
+            class="sc-gtLWhw bkWrmx"
+            color="textSecondary"
+          >
+            Relationship to HOH
+          </span>
+          <div
+            data-cy="label-Relationship to HOH"
+          >
+            <span
+              class="sc-egkSDF XYdBd"
+              color="textSecondary"
+            >
+              Not a Family Member. Can only act as a recipient.
+            </span>
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+      >
+        <div>
+          <span
+            class="sc-gtLWhw bkWrmx"
+            color="textSecondary"
+          >
+            Preferred language
+          </span>
+          <div
+            data-cy="label-Preferred language"
+          >
+            -
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 css-1idn90j-MuiGrid-root"
+      >
+        <div
+          class="sc-dstKZu kpmDQU"
+        />
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+      >
+        <div>
+          <span
+            class="sc-gtLWhw bkWrmx"
+            color="textSecondary"
+          >
+            Observed disabilities
+          </span>
+          <div
+            data-cy="label-Observed disabilities"
+          >
+            -
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+      >
+        <div>
+          <span
+            class="sc-gtLWhw bkWrmx"
+            color="textSecondary"
+          >
+            Seeing disability severity
+          </span>
+          <div
+            data-cy="label-Seeing disability severity"
+          >
+            <span
+              class="sc-egkSDF XYdBd"
+              color="textSecondary"
+            >
+              None
+            </span>
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+      >
+        <div>
+          <span
+            class="sc-gtLWhw bkWrmx"
+            color="textSecondary"
+          >
+            Hearing disability severity
+          </span>
+          <div
+            data-cy="label-Hearing disability severity"
+          >
+            <span
+              class="sc-egkSDF XYdBd"
+              color="textSecondary"
+            >
+              None
+            </span>
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+      >
+        <div>
+          <span
+            class="sc-gtLWhw bkWrmx"
+            color="textSecondary"
+          >
+            Physical disability severity
+          </span>
+          <div
+            data-cy="label-Physical disability severity"
+          >
+            <span
+              class="sc-egkSDF XYdBd"
+              color="textSecondary"
+            >
+              None
+            </span>
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+      >
+        <div>
+          <span
+            class="sc-gtLWhw bkWrmx"
+            color="textSecondary"
+          >
+            Remembering or concentrating disability severity
+          </span>
+          <div
+            data-cy="label-Remembering or concentrating disability severity"
+          >
+            <span
+              class="sc-egkSDF XYdBd"
+              color="textSecondary"
+            >
+              None
+            </span>
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+      >
+        <div>
+          <span
+            class="sc-gtLWhw bkWrmx"
+            color="textSecondary"
+          >
+            Self-care disability severity
+          </span>
+          <div
+            data-cy="label-Self-care disability severity"
+          >
+            <span
+              class="sc-egkSDF XYdBd"
+              color="textSecondary"
+            >
+              None
+            </span>
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+      >
+        <div>
+          <span
+            class="sc-gtLWhw bkWrmx"
+            color="textSecondary"
+          >
+            Communicating disability severity
+          </span>
+          <div
+            data-cy="label-Communicating disability severity"
+          >
+            <span
+              class="sc-egkSDF XYdBd"
+              color="textSecondary"
+            >
+              None
+            </span>
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+      >
+        <div>
+          <span
+            class="sc-gtLWhw bkWrmx"
+            color="textSecondary"
+          >
+            Disability
+          </span>
+          <div
+            data-cy="label-Disability"
+          >
+            <span
+              class="sc-egkSDF XYdBd"
+              color="textSecondary"
+            >
+              Not Disabled
+            </span>
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 css-1idn90j-MuiGrid-root"
+      >
+        <div
+          class="sc-dstKZu kpmDQU"
+        />
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+      >
+        <div
+          class="MuiBox-root css-cgq59l"
+        >
+          <div
+            class="MuiBox-root css-1itv5e3"
+          >
+            <div>
+              <span
+                class="sc-gtLWhw bkWrmx"
+                color="textSecondary"
+              >
+                National ID
+              </span>
+              <div
+                data-cy="label-National ID"
+              >
+                <span
+                  class="sc-egkSDF XYdBd"
+                  color="textSecondary"
+                >
+                  WSH221365
+                </span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <span
+              class="sc-gtLWhw bkWrmx"
+              color="textSecondary"
+            >
+              issued
+            </span>
+            <div
+              data-cy="label-issued"
+            >
+              <span
+                class="sc-egkSDF XYdBd"
+                color="textSecondary"
+              >
+                Poland
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 css-1idn90j-MuiGrid-root"
+      >
+        <div
+          class="sc-dstKZu kpmDQU"
+        />
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+      >
+        <div>
+          <span
+            class="sc-gtLWhw bkWrmx"
+            color="textSecondary"
+          >
+            Email
+          </span>
+          <div
+            data-cy="label-Email"
+          >
+            -
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+      >
+        <div>
+          <span
+            class="sc-gtLWhw bkWrmx"
+            color="textSecondary"
+          >
+            Phone Number
+          </span>
+          <div
+            data-cy="label-Phone Number"
+          >
+            <span
+              class="sc-egkSDF XYdBd"
+              color="textSecondary"
+            >
+              +48503123555
+            </span>
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+      >
+        <div>
+          <span
+            class="sc-gtLWhw bkWrmx"
+            color="textSecondary"
+          >
+            Alternate Phone Number
+          </span>
+          <div
+            data-cy="label-Alternate Phone Number"
+          >
+            <span
+              class="sc-egkSDF XYdBd"
+              color="textSecondary"
+            >
+              -
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
