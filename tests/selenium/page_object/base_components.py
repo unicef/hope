@@ -210,8 +210,15 @@ class BaseComponents(Common):
         )
         return self.get_elements(self.rows)
 
-    def waitForRow(self, index) -> WebElement:
-        return self.wait_for(self.row_index_template.format(index+1))
+    def waitForRowWithText(self, index, text) -> WebElement:
+        import time
+        timeout = 10
+        start_time = time.time()
+        while time.time()-start_time<timeout:
+            time.sleep(0.01)
+            if text in self.wait_for(self.row_index_template.format(index+1)).text:
+                return
+        assert text in self.wait_for(self.row_index_template.format(index+1)).text
 
     def getRows(self) -> [WebElement]:
         return self.get_elements(self.rows)

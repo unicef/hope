@@ -319,19 +319,9 @@ def create_grievance_referral(
     return grievance_ticket
 
 
-from selenium.common.exceptions import StaleElementReferenceException
-from contextlib import contextmanager
 
-@contextmanager
-def retry_on_stale_element(max_attempts=5):
-    attempt = 0
-    while attempt < max_attempts:
-        try:
-            yield True
-            return 
-        except StaleElementReferenceException:
-            attempt += 1
-    yield False
+
+
     
 
         
@@ -980,7 +970,7 @@ class TestGrievanceTickets:
         while attempt < max_attempts:
             try:
                 pageGrievanceTickets.waitForRows()
-                assert "Assigned" in pageGrievanceTickets.waitForRow(0).text 
+                pageGrievanceTickets.waitForRowWithText(0,'Assigned')
                 break 
             except StaleElementReferenceException:
                 attempt += 1
@@ -1009,7 +999,7 @@ class TestGrievanceTickets:
         while attempt < max_attempts:
             try:
                 pageGrievanceTickets.waitForRows()
-                assert "Medium" in pageGrievanceTickets.waitForRow(0).text 
+                pageGrievanceTickets.waitForRowWithText(0,'Medium')
                 break 
             except StaleElementReferenceException:
                 attempt += 1
@@ -1039,7 +1029,7 @@ class TestGrievanceTickets:
         while attempt < max_attempts:
             try:
                 pageGrievanceTickets.waitForRows()
-                assert "Urgent" in pageGrievanceTickets.waitForRow(0).text 
+                pageGrievanceTickets.waitForRowWithText(0,'Urgent')
                 break 
             except StaleElementReferenceException:
                 attempt += 1
