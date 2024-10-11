@@ -3,16 +3,16 @@
 exports[`containers/tables/payments/VerificationRecordsTable should render loading 1`] = `
 <div>
   <div
-    class="sc-iBdnpw dcYiFg"
+    class="sc-kLhKbu blzheD"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-fsYfdN dTdCVM css-1ps6pg7-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-ixGGxD bQEzZz css-1ps6pg7-MuiPaper-root"
     >
       <div
-        class="MuiTableContainer-root sc-irLvIq css-rorn0c-MuiTableContainer-root"
+        class="MuiTableContainer-root sc-dpBQxM css-rorn0c-MuiTableContainer-root"
       >
         <div
-          class="sc-csKJxZ enzmTw MuiBox-root css-0"
+          class="sc-jwIPbr gFzJhR MuiBox-root css-0"
         >
           <div
             class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-1w02pvu-MuiToolbar-root"
@@ -25,11 +25,11 @@ exports[`containers/tables/payments/VerificationRecordsTable should render loadi
             </h6>
           </div>
           <div
-            class="sc-csKJxZ enzmTw MuiBox-root css-1ruxp1v"
+            class="sc-jwIPbr gFzJhR MuiBox-root css-1ruxp1v"
           />
         </div>
         <table
-          class="MuiTable-root sc-qZrbh sc-eTNRI haQfFY bGeKmT css-b1kpk9-MuiTable-root"
+          class="MuiTable-root sc-khLCKb sc-cHqXqK kpTumY jRUhWR css-b1kpk9-MuiTable-root"
         >
           <thead
             class="MuiTableHead-root css-15wwp11-MuiTableHead-root"
@@ -42,7 +42,7 @@ exports[`containers/tables/payments/VerificationRecordsTable should render loadi
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -66,7 +66,7 @@ exports[`containers/tables/payments/VerificationRecordsTable should render loadi
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -90,7 +90,7 @@ exports[`containers/tables/payments/VerificationRecordsTable should render loadi
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -114,7 +114,7 @@ exports[`containers/tables/payments/VerificationRecordsTable should render loadi
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -138,7 +138,7 @@ exports[`containers/tables/payments/VerificationRecordsTable should render loadi
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -162,7 +162,7 @@ exports[`containers/tables/payments/VerificationRecordsTable should render loadi
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -186,7 +186,7 @@ exports[`containers/tables/payments/VerificationRecordsTable should render loadi
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -210,7 +210,7 @@ exports[`containers/tables/payments/VerificationRecordsTable should render loadi
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -234,7 +234,7 @@ exports[`containers/tables/payments/VerificationRecordsTable should render loadi
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -258,7 +258,7 @@ exports[`containers/tables/payments/VerificationRecordsTable should render loadi
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -282,7 +282,7 @@ exports[`containers/tables/payments/VerificationRecordsTable should render loadi
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -307,11 +307,11 @@ exports[`containers/tables/payments/VerificationRecordsTable should render loadi
             class="MuiTableBody-root css-apqrd9-MuiTableBody-root"
           >
             <tr
-              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jibNxN css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit huBFmm css-1ex1afd-MuiTableCell-root"
                 colspan="11"
               >
                 <span
@@ -321,11 +321,11 @@ exports[`containers/tables/payments/VerificationRecordsTable should render loadi
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jibNxN css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit huBFmm css-1ex1afd-MuiTableCell-root"
                 colspan="11"
               >
                 <span
@@ -335,11 +335,11 @@ exports[`containers/tables/payments/VerificationRecordsTable should render loadi
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jibNxN css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit huBFmm css-1ex1afd-MuiTableCell-root"
                 colspan="11"
               >
                 <span
@@ -349,11 +349,11 @@ exports[`containers/tables/payments/VerificationRecordsTable should render loadi
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jibNxN css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit huBFmm css-1ex1afd-MuiTableCell-root"
                 colspan="11"
               >
                 <span
@@ -363,11 +363,11 @@ exports[`containers/tables/payments/VerificationRecordsTable should render loadi
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jibNxN css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit huBFmm css-1ex1afd-MuiTableCell-root"
                 colspan="11"
               >
                 <span
@@ -486,16 +486,16 @@ exports[`containers/tables/payments/VerificationRecordsTable should render loadi
 exports[`containers/tables/payments/VerificationRecordsTable should render with data 1`] = `
 <div>
   <div
-    class="sc-iBdnpw dcYiFg"
+    class="sc-kLhKbu blzheD"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-fsYfdN dTdCVM css-1ps6pg7-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-ixGGxD bQEzZz css-1ps6pg7-MuiPaper-root"
     >
       <div
-        class="MuiTableContainer-root sc-irLvIq css-rorn0c-MuiTableContainer-root"
+        class="MuiTableContainer-root sc-dpBQxM css-rorn0c-MuiTableContainer-root"
       >
         <div
-          class="sc-csKJxZ enzmTw MuiBox-root css-0"
+          class="sc-jwIPbr gFzJhR MuiBox-root css-0"
         >
           <div
             class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-1w02pvu-MuiToolbar-root"
@@ -508,11 +508,11 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
             </h6>
           </div>
           <div
-            class="sc-csKJxZ enzmTw MuiBox-root css-1ruxp1v"
+            class="sc-jwIPbr gFzJhR MuiBox-root css-1ruxp1v"
           />
         </div>
         <table
-          class="MuiTable-root sc-qZrbh sc-eTNRI haQfFY bGeKmT css-b1kpk9-MuiTable-root"
+          class="MuiTable-root sc-khLCKb sc-cHqXqK kpTumY jRUhWR css-b1kpk9-MuiTable-root"
         >
           <thead
             class="MuiTableHead-root css-15wwp11-MuiTableHead-root"
@@ -525,7 +525,7 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -549,7 +549,7 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -573,7 +573,7 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -597,7 +597,7 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -621,7 +621,7 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -645,7 +645,7 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -669,7 +669,7 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -693,7 +693,7 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -717,7 +717,7 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -741,7 +741,7 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -765,7 +765,7 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -790,11 +790,11 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
             class="MuiTableBody-root css-apqrd9-MuiTableBody-root"
           >
             <tr
-              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jibNxN css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit huBFmm css-1ex1afd-MuiTableCell-root"
                 colspan="11"
               >
                 <span
@@ -804,11 +804,11 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jibNxN css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit huBFmm css-1ex1afd-MuiTableCell-root"
                 colspan="11"
               >
                 <span
@@ -818,11 +818,11 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jibNxN css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit huBFmm css-1ex1afd-MuiTableCell-root"
                 colspan="11"
               >
                 <span
@@ -832,11 +832,11 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jibNxN css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit huBFmm css-1ex1afd-MuiTableCell-root"
                 colspan="11"
               >
                 <span
@@ -853,7 +853,7 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
                 <a
-                  class="sc-fHejqy itrONR"
+                  class="sc-eauhAA efYrfP"
                   href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/verification/payment/UGF5bWVudE5vZGU6NzBjYmU4ZjgtNzUxYy00NTliLTlmZjEtZDg4M2Y4ZTFjNGFj"
                 >
                   RCPT-0060-22-0.000.005
@@ -873,10 +873,10 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
                 <div
-                  class="sc-ifyrAs fSIDzb"
+                  class="sc-gQaihK hjXnKu"
                 >
                   <div
-                    class="sc-dJGMql iKMXMO status-box-container"
+                    class="sc-iuUfFv dTaoVa status-box-container"
                     data-cy="status-container"
                   >
                     PENDING
@@ -897,10 +897,10 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
                 <div
-                  class="sc-ifyrAs fSIDzb"
+                  class="sc-gQaihK hjXnKu"
                 >
                   <div
-                    class="sc-dJGMql fQdggy status-box-container"
+                    class="sc-iuUfFv fGjeZq status-box-container"
                     data-cy="status-container"
                   >
                     ACTIVE
@@ -936,7 +936,7 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
                 <a
-                  class="sc-fHejqy itrONR"
+                  class="sc-eauhAA efYrfP"
                   href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/verification/payment/UGF5bWVudE5vZGU6ZmI4NjIzM2EtNWRiOS00NjQ2LWJiN2UtN2Q3OTVhNWI3Njc2"
                 >
                   RCPT-0060-22-0.000.007
@@ -956,10 +956,10 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
                 <div
-                  class="sc-ifyrAs fSIDzb"
+                  class="sc-gQaihK hjXnKu"
                 >
                   <div
-                    class="sc-dJGMql iKMXMO status-box-container"
+                    class="sc-iuUfFv dTaoVa status-box-container"
                     data-cy="status-container"
                   >
                     PENDING
@@ -980,10 +980,10 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
                 <div
-                  class="sc-ifyrAs fSIDzb"
+                  class="sc-gQaihK hjXnKu"
                 >
                   <div
-                    class="sc-dJGMql fQdggy status-box-container"
+                    class="sc-iuUfFv fGjeZq status-box-container"
                     data-cy="status-container"
                   >
                     ACTIVE
@@ -1019,7 +1019,7 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
                 <a
-                  class="sc-fHejqy itrONR"
+                  class="sc-eauhAA efYrfP"
                   href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/verification/payment/UGF5bWVudE5vZGU6M2UyZTQ4NjktZWRmNC00NTA4LWI4ZjAtY2YwZjZmNmUzNzY3"
                 >
                   RCPT-0060-22-0.000.003
@@ -1039,10 +1039,10 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
                 <div
-                  class="sc-ifyrAs fSIDzb"
+                  class="sc-gQaihK hjXnKu"
                 >
                   <div
-                    class="sc-dJGMql iKMXMO status-box-container"
+                    class="sc-iuUfFv dTaoVa status-box-container"
                     data-cy="status-container"
                   >
                     PENDING
@@ -1063,10 +1063,10 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
                 <div
-                  class="sc-ifyrAs fSIDzb"
+                  class="sc-gQaihK hjXnKu"
                 >
                   <div
-                    class="sc-dJGMql fQdggy status-box-container"
+                    class="sc-iuUfFv fGjeZq status-box-container"
                     data-cy="status-container"
                   >
                     ACTIVE
@@ -1102,7 +1102,7 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
                 <a
-                  class="sc-fHejqy itrONR"
+                  class="sc-eauhAA efYrfP"
                   href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/verification/payment/UGF5bWVudE5vZGU6ZTE2YTUxNWUtNjlhOC00NTM2LTg0MGMtMjczN2FmMjgyYmQw"
                 >
                   RCPT-0060-22-0.000.004
@@ -1122,10 +1122,10 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
                 <div
-                  class="sc-ifyrAs fSIDzb"
+                  class="sc-gQaihK hjXnKu"
                 >
                   <div
-                    class="sc-dJGMql iKMXMO status-box-container"
+                    class="sc-iuUfFv dTaoVa status-box-container"
                     data-cy="status-container"
                   >
                     PENDING
@@ -1146,10 +1146,10 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
                 <div
-                  class="sc-ifyrAs fSIDzb"
+                  class="sc-gQaihK hjXnKu"
                 >
                   <div
-                    class="sc-dJGMql fQdggy status-box-container"
+                    class="sc-iuUfFv fGjeZq status-box-container"
                     data-cy="status-container"
                   >
                     ACTIVE
@@ -1185,7 +1185,7 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
                 <a
-                  class="sc-fHejqy itrONR"
+                  class="sc-eauhAA efYrfP"
                   href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/verification/payment/UGF5bWVudE5vZGU6ZjI3NTQxNzMtZjdjMC00NWJhLTgxNDctMmE4MTVjNWZmZmI3"
                 >
                   RCPT-0060-22-0.000.006
@@ -1205,10 +1205,10 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
                 <div
-                  class="sc-ifyrAs fSIDzb"
+                  class="sc-gQaihK hjXnKu"
                 >
                   <div
-                    class="sc-dJGMql iKMXMO status-box-container"
+                    class="sc-iuUfFv dTaoVa status-box-container"
                     data-cy="status-container"
                   >
                     PENDING
@@ -1229,10 +1229,10 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
                 <div
-                  class="sc-ifyrAs fSIDzb"
+                  class="sc-gQaihK hjXnKu"
                 >
                   <div
-                    class="sc-dJGMql fQdggy status-box-container"
+                    class="sc-iuUfFv fGjeZq status-box-container"
                     data-cy="status-container"
                   >
                     ACTIVE
@@ -1261,11 +1261,11 @@ exports[`containers/tables/payments/VerificationRecordsTable should render with 
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
               style="height: 70px;"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jibNxN css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit huBFmm css-1ex1afd-MuiTableCell-root"
                 colspan="11"
               />
             </tr>

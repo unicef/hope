@@ -1,6 +1,6 @@
 import { MockedProvider } from '@apollo/react-testing';
 import * as React from 'react';
-import { act } from '@testing-library/react';
+import { act } from 'react';
 import wait from 'waait';
 import { UsersTable } from '.';
 import { render, ApolloLoadingLink } from '../../../testUtils/testUtils';
@@ -20,10 +20,7 @@ describe('containers/tables/UsersTable', () => {
 
   it('should render loading', () => {
     const { container } = render(
-      <MockedProvider
-        addTypename={false}
-        mocks={fakeApolloAllUsers}
-      >
+      <MockedProvider addTypename={false} mocks={fakeApolloAllUsers}>
         <UsersTable filter={{}} />
       </MockedProvider>,
     );

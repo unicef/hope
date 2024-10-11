@@ -3,10 +3,10 @@
 exports[`components/ProgramDetails should render 1`] = `
 <div>
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-beySPh fvkwGO css-1ps6pg7-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-blHHSb kPa-dfK css-1ps6pg7-MuiPaper-root"
   >
     <div
-      class="sc-fsYfdN hnQuqu"
+      class="sc-ixGGxD gVEuoR"
     >
       <h6
         class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
@@ -15,7 +15,7 @@ exports[`components/ProgramDetails should render 1`] = `
       </h6>
     </div>
     <div
-      class="sc-jTQCzO GcLEc"
+      class="sc-ivxoEo gQJYfN"
     >
       <div
         class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-6 css-zow5z4-MuiGrid-root"
@@ -25,7 +25,7 @@ exports[`components/ProgramDetails should render 1`] = `
         >
           <div>
             <span
-              class="sc-hLQSwg hqLXmS"
+              class="sc-fAUdSK goVbUg"
               color="textSecondary"
             >
               status
@@ -34,14 +34,14 @@ exports[`components/ProgramDetails should render 1`] = `
               data-cy="label-status"
             >
               <span
-                class="sc-eDLKkx gpSOvu"
+                class="sc-dntaoT dIDHTF"
                 color="textSecondary"
               >
                 <div
-                  class="sc-gLLuof PuEQG"
+                  class="sc-ghWlax feyaBO"
                 >
                   <div
-                    class="sc-iBdnpw jiYZmp status-box-container"
+                    class="sc-kLhKbu ujRxK status-box-container"
                     data-cy="status-container"
                   >
                     FINISHED
@@ -56,7 +56,7 @@ exports[`components/ProgramDetails should render 1`] = `
         >
           <div>
             <span
-              class="sc-hLQSwg hqLXmS"
+              class="sc-fAUdSK goVbUg"
               color="textSecondary"
             >
               START DATE
@@ -65,7 +65,7 @@ exports[`components/ProgramDetails should render 1`] = `
               data-cy="label-START DATE"
             >
               <span
-                class="sc-eDLKkx gpSOvu"
+                class="sc-dntaoT dIDHTF"
                 color="textSecondary"
               >
                 <time
@@ -82,7 +82,7 @@ exports[`components/ProgramDetails should render 1`] = `
         >
           <div>
             <span
-              class="sc-hLQSwg hqLXmS"
+              class="sc-fAUdSK goVbUg"
               color="textSecondary"
             >
               END DATE
@@ -91,7 +91,7 @@ exports[`components/ProgramDetails should render 1`] = `
               data-cy="label-END DATE"
             >
               <span
-                class="sc-eDLKkx gpSOvu"
+                class="sc-dntaoT dIDHTF"
                 color="textSecondary"
               >
                 <time
@@ -108,7 +108,7 @@ exports[`components/ProgramDetails should render 1`] = `
         >
           <div>
             <span
-              class="sc-hLQSwg hqLXmS"
+              class="sc-fAUdSK goVbUg"
               color="textSecondary"
             >
               Programme Code
@@ -125,7 +125,7 @@ exports[`components/ProgramDetails should render 1`] = `
         >
           <div>
             <span
-              class="sc-hLQSwg hqLXmS"
+              class="sc-fAUdSK goVbUg"
               color="textSecondary"
             >
               Sector
@@ -134,7 +134,7 @@ exports[`components/ProgramDetails should render 1`] = `
               data-cy="label-Sector"
             >
               <span
-                class="sc-eDLKkx gpSOvu"
+                class="sc-dntaoT dIDHTF"
                 color="textSecondary"
               >
                 Child Protection
@@ -147,7 +147,7 @@ exports[`components/ProgramDetails should render 1`] = `
         >
           <div>
             <span
-              class="sc-hLQSwg hqLXmS"
+              class="sc-fAUdSK goVbUg"
               color="textSecondary"
             >
               Data Collecting Type
@@ -164,7 +164,7 @@ exports[`components/ProgramDetails should render 1`] = `
         >
           <div>
             <span
-              class="sc-hLQSwg hqLXmS"
+              class="sc-fAUdSK goVbUg"
               color="textSecondary"
             >
               Frequency of Payment
@@ -173,7 +173,7 @@ exports[`components/ProgramDetails should render 1`] = `
               data-cy="label-Frequency of Payment"
             >
               <span
-                class="sc-eDLKkx gpSOvu"
+                class="sc-dntaoT dIDHTF"
                 color="textSecondary"
               >
                 Regular
@@ -186,7 +186,7 @@ exports[`components/ProgramDetails should render 1`] = `
         >
           <div>
             <span
-              class="sc-hLQSwg hqLXmS"
+              class="sc-fAUdSK goVbUg"
               color="textSecondary"
             >
               Administrative Areas of implementation
@@ -195,7 +195,7 @@ exports[`components/ProgramDetails should render 1`] = `
               data-cy="label-Administrative Areas of implementation"
             >
               <span
-                class="sc-eDLKkx gpSOvu"
+                class="sc-dntaoT dIDHTF"
                 color="textSecondary"
               >
                 Crime book.
@@ -208,7 +208,7 @@ exports[`components/ProgramDetails should render 1`] = `
         >
           <div>
             <span
-              class="sc-hLQSwg hqLXmS"
+              class="sc-fAUdSK goVbUg"
               color="textSecondary"
             >
               Description
@@ -217,7 +217,7 @@ exports[`components/ProgramDetails should render 1`] = `
               data-cy="label-Description"
             >
               <span
-                class="sc-eDLKkx gpSOvu"
+                class="sc-dntaoT dIDHTF"
                 color="textSecondary"
               >
                 Yeah worry might newspaper drive her many.
@@ -230,7 +230,7 @@ exports[`components/ProgramDetails should render 1`] = `
         >
           <div>
             <span
-              class="sc-hLQSwg hqLXmS"
+              class="sc-fAUdSK goVbUg"
               color="textSecondary"
             >
               CASH+
@@ -239,7 +239,7 @@ exports[`components/ProgramDetails should render 1`] = `
               data-cy="label-CASH+"
             >
               <span
-                class="sc-eDLKkx gpSOvu"
+                class="sc-dntaoT dIDHTF"
                 color="textSecondary"
               >
                 No
@@ -252,7 +252,7 @@ exports[`components/ProgramDetails should render 1`] = `
         >
           <div>
             <span
-              class="sc-hLQSwg hqLXmS"
+              class="sc-fAUdSK goVbUg"
               color="textSecondary"
             >
               Partner Access
@@ -261,7 +261,7 @@ exports[`components/ProgramDetails should render 1`] = `
               data-cy="label-Partner Access"
             >
               <span
-                class="sc-eDLKkx gpSOvu"
+                class="sc-dntaoT dIDHTF"
                 color="textSecondary"
               >
                 Only Selected Partners within the business area
@@ -271,11 +271,11 @@ exports[`components/ProgramDetails should render 1`] = `
         </div>
       </div>
       <div
-        class="sc-qZrbh iVQrUc"
+        class="sc-khLCKb UflYU"
       >
         <div>
           <span
-            class="sc-hLQSwg hqLXmS"
+            class="sc-fAUdSK goVbUg"
             color="textSecondary"
           >
             Programme size
@@ -284,11 +284,11 @@ exports[`components/ProgramDetails should render 1`] = `
             data-cy="label-Programme size"
           >
             <span
-              class="sc-eDLKkx gpSOvu"
+              class="sc-dntaoT dIDHTF"
               color="textSecondary"
             >
               <div
-                class="sc-jsEeTM jBiGsE"
+                class="sc-dstKZu cdphKB"
               >
                 2
               </div>
@@ -298,14 +298,14 @@ exports[`components/ProgramDetails should render 1`] = `
       </div>
     </div>
     <div
-      class="sc-guDLey cGgsPx"
+      class="sc-gtLWhw VFxTS"
     >
       <div
-        class="sc-dmyCSP hqweMa"
+        class="sc-egkSDF cYYMIc"
       />
     </div>
     <div
-      class="sc-fsYfdN hnQuqu"
+      class="sc-ixGGxD gVEuoR"
     >
       <h6
         class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
@@ -314,7 +314,7 @@ exports[`components/ProgramDetails should render 1`] = `
       </h6>
     </div>
     <div
-      class="sc-jTQCzO GcLEc"
+      class="sc-ivxoEo gQJYfN"
     >
       <div
         class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-6 css-zow5z4-MuiGrid-root"
@@ -323,7 +323,7 @@ exports[`components/ProgramDetails should render 1`] = `
           class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
         >
           <div
-            class="sc-kFCroH edzSFu MuiBox-root css-bo4s1r"
+            class="sc-keTIit erJcDl MuiBox-root css-bo4s1r"
           >
             <h6
               class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
@@ -333,7 +333,7 @@ exports[`components/ProgramDetails should render 1`] = `
               data-cy="labelized-field-container-area-access-field"
             >
               <span
-                class="sc-hLQSwg hqLXmS"
+                class="sc-fAUdSK goVbUg"
                 color="textSecondary"
               >
                 Area Access
@@ -342,7 +342,7 @@ exports[`components/ProgramDetails should render 1`] = `
                 data-cy="label-Area Access"
               >
                 <span
-                  class="sc-eDLKkx gpSOvu"
+                  class="sc-dntaoT dIDHTF"
                   color="textSecondary"
                 >
                   Business Area
