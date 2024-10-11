@@ -11,7 +11,6 @@ from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.filters import _prepare_kobo_asset_id_value
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_TAX_ID,
-    Document,
     Household,
     PendingDocument,
     PendingHousehold,
@@ -26,18 +25,7 @@ from hct_mis_api.apps.utils.profiling import profiling
 logger = logging.getLogger(__name__)
 
 
-def get_individual(tax_id: str, business_area_code: Optional[str]) -> Union[Individual, PendingIndividual]:
 def get_individual(tax_id: str, business_area_code: Optional[str]) -> PendingIndividual:
-    documents = (
-        Document.objects.all()
-        if not business_area_code
-        else Document.objects.filter(individual__household__business_area__code=business_area_code)
-    ).filter(type__key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID], document_number=tax_id)
-    if documents.count() > 1:
-        raise Exception(f"Multiple documents ({documents.count()}) with given tax_id found")
-    if documents.count() == 1:
-        return documents.first().individual
-
     pending_documents = (
         PendingDocument.objects.all()
         if not business_area_code
