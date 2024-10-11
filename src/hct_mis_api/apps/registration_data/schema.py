@@ -121,7 +121,11 @@ class RegistrationDataImportNode(BaseNodePermissionMixin, AdminUrlNodeMixin, Dja
             return False
 
         is_still_processing = RegistrationDataImport.objects.filter(
-            program=parent.program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS
+            program=parent.program,
+            deduplication_engine_status__in=[
+                RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS,
+                RegistrationDataImport.DEDUP_ENGINE_PROCESSING,
+            ],
         ).exists()
         if is_still_processing:
             return False
