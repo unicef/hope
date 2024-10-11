@@ -103,7 +103,7 @@ export function PageHeader({
                       {title}
                     </Typography>
                   </TitleContainer>
-                  <Box display="flex" ml={2}>
+                  <Box data-cy="button-admin" display="flex" ml={2}>
                     {flags}
                   </Box>
                 </Box>

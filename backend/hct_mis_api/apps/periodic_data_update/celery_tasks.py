@@ -61,7 +61,8 @@ def remove_old_pdu_template_files_task(self: Any, expiration_days: int = 30) -> 
             if file_qs:
                 # update status
                 templates_qs = PeriodicDataUpdateTemplate.objects.filter(file__in=file_qs).all()
-                templates_qs.update(status=PeriodicDataUpdateTemplate.Status.EXPORTING)
+                templates_qs.update(status=PeriodicDataUpdateTemplate.Status.TO_EXPORT)
+                templates_qs.update(curr_async_result_id=None)
                 # increase cache version, as it is a bulk action
                 for business_area_slug, program_id in templates_qs.values_list("business_area__slug", "program_id"):
                     increment_periodic_data_update_template_version_cache_function(business_area_slug, program_id)

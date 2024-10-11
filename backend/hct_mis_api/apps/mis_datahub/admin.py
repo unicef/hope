@@ -129,6 +129,7 @@ class IndividualAdmin(HUBAdminMixin):
 @admin.register(FundsCommitment)
 class FundsCommitmentAdmin(HUBAdminMixin):
     filters = (BusinessAreaFilter,)
+    search_fields = ("rec_serial_number", "vendor_id", "wbs_element", "funds_commitment_number")
 
 
 @admin.register(DownPayment)

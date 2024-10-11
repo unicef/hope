@@ -43,7 +43,7 @@ export const SetUpFspCore = ({
   const { baseUrl } = useBaseUrl();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { id } = useParams();
+  const { paymentPlanId } = useParams();
   const location = useLocation();
 
   const { data: deliveryMechanismsData, loading: deliveryMechanismLoading } =
@@ -54,7 +54,7 @@ export const SetUpFspCore = ({
   const { data: fspsData } = useAvailableFspsForDeliveryMechanismsQuery({
     variables: {
       input: {
-        paymentPlanId: id,
+        paymentPlanId,
       },
     },
     fetchPolicy: 'network-only',
@@ -100,7 +100,7 @@ export const SetUpFspCore = ({
       await chooseDeliveryMechanisms({
         variables: {
           input: {
-            paymentPlanId: id,
+            paymentPlanId,
             deliveryMechanisms: mappedDeliveryMechanisms,
           },
         },
@@ -109,14 +109,14 @@ export const SetUpFspCore = ({
             query: AvailableFspsForDeliveryMechanismsDocument,
             variables: {
               input: {
-                paymentPlanId: id,
+                paymentPlanId,
               },
             },
           },
           {
             query: PaymentPlanDocument,
             variables: {
-              id,
+              id: paymentPlanId,
             },
           },
         ],
@@ -148,7 +148,7 @@ export const SetUpFspCore = ({
       await assignFspToDeliveryMechanism({
         variables: {
           input: {
-            paymentPlanId: id,
+            paymentPlanId,
             mappings,
           },
         },
@@ -157,7 +157,7 @@ export const SetUpFspCore = ({
       navigate(
         `/${baseUrl}/payment-module/${
           isFollowUp ? 'followup-payment-plans' : 'payment-plans'
-        }/${id}`,
+        }/${paymentPlanId}`,
       );
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
@@ -260,7 +260,7 @@ export const SetUpFspCore = ({
                 step={activeStep}
                 submitForm={submitForm}
                 baseUrl={baseUrl}
-                paymentPlanId={id}
+                paymentPlanId={paymentPlanId}
                 handleBackStep={handleBackStep}
               />
             </ContainerColumnWithBorder>

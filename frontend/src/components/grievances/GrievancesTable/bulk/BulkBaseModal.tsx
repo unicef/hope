@@ -97,19 +97,19 @@ export function BulkBaseModal({
             <StyledTable>
               <Typography>
                 {t('Tickets ID')}:{' '}
-                <Bold>
+                <Bold data-cy="selected-tickets">
                   {selectedTickets.map((ticket) => ticket.unicefId).join(', ')}
                 </Bold>
               </Typography>
             </StyledTable>
           </Box>
           <StyledTable>
-            <TableBody>{children}</TableBody>
+            <TableBody data-cy="dropdown">{children}</TableBody>
           </StyledTable>
         </DialogContent>
         <DialogFooter>
           <DialogActions>
-            <Button
+            <Button data-cy="button-cancel"
               onClick={() => {
                 setDialogOpen(false);
               }}
@@ -117,6 +117,7 @@ export function BulkBaseModal({
               {t('CANCEL')}
             </Button>
             <Button
+              data-cy="button-save"
               variant="contained"
               color="primary"
               onClick={onAccept}

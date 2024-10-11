@@ -19,8 +19,9 @@ import * as Yup from 'yup';
 import { AndDivider, AndDividerLabel } from '../AndDivider';
 import { Exclusions } from '../CreateTargetPopulation/Exclusions';
 import { PaperContainer } from '../PaperContainer';
-import { TargetingCriteria } from '../TargetingCriteria';
 import { EditTargetPopulationHeader } from './EditTargetPopulationHeader';
+import { TargetingCriteriaDisplay } from '../TargetingCriteriaDisplay/TargetingCriteriaDisplay';
+import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
 
 interface EditTargetPopulationProps {
   targetPopulation: TargetPopulationQuery['targetPopulation'];
@@ -47,6 +48,10 @@ export const EditTargetPopulation = ({
       targetPopulation.targetingCriteria.flagExcludeIfOnSanctionList || false,
     householdIds: targetPopulation.targetingCriteria.householdIds,
     individualIds: targetPopulation.targetingCriteria.individualIds,
+    programCycleId: {
+      value: targetPopulation.programCycle.id,
+      name: targetPopulation.programCycle.title,
+    },
   };
   const [mutate, { loading }] = useUpdateTpMutation();
   const { showMessage } = useSnackbar();
@@ -95,6 +100,9 @@ export const EditTargetPopulation = ({
     householdIds: idValidation,
     individualIds: idValidation,
     exclusionReason: Yup.string().max(500, t('Too long')),
+    programCycleId: Yup.object().shape({
+      value: Yup.string().required('Program Cycle is required'),
+    }),
   });
 
   const handleSubmit = async (values): Promise<void> => {
@@ -106,6 +114,7 @@ export const EditTargetPopulation = ({
             programId: values.program,
             excludedIds: values.excludedIds,
             exclusionReason: values.exclusionReason,
+            programCycleId: values.programCycleId.value,
             ...(targetPopulation.status === TargetPopulationStatus.Open && {
               name: values.name,
             }),
@@ -134,7 +143,7 @@ export const EditTargetPopulation = ({
       validationSchema={validationSchema}
       onSubmit={handleSubmit}
     >
-      {({ values, submitForm }) => (
+      {({ values, submitForm, errors, setFieldValue }) => (
         <Form>
           <AutoSubmitFormOnEnter />
           <EditTargetPopulationHeader
@@ -149,6 +158,19 @@ export const EditTargetPopulation = ({
             <Box pt={3} pb={3}>
               <Typography variant="h6">{t('Targeting Criteria')}</Typography>
             </Box>
+            <Grid container mb={5}>
+              <Grid item xs={6}>
+                <ProgramCycleAutocompleteRest
+                  value={values.programCycleId}
+                  onChange={async (e) => {
+                    await setFieldValue('programCycleId', e);
+                  }}
+                  required
+                  // @ts-ignore
+                  error={errors.programCycleId?.value}
+                />
+              </Grid>
+            </Grid>
             <Grid container>
               <Grid item xs={6}>
                 <Field
@@ -171,7 +193,7 @@ export const EditTargetPopulation = ({
               <FieldArray
                 name="targetingCriteria"
                 render={(arrayHelpers) => (
-                  <TargetingCriteria
+                  <TargetingCriteriaDisplay
                     helpers={arrayHelpers}
                     rules={values.targetingCriteria}
                     isEdit

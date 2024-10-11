@@ -26,6 +26,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentHouseholdSnapshot,
     PaymentPlan,
 )
+from hct_mis_api.apps.program.fixtures import ProgramCycleFactory
 
 
 def create_child_payment_plans(pp: PaymentPlan) -> None:
@@ -33,10 +34,10 @@ def create_child_payment_plans(pp: PaymentPlan) -> None:
         id="56aca38c-dc16-48a9-ace4-70d88b41d462",
         dispersion_start_date=datetime(2020, 8, 10),
         dispersion_end_date=datetime(2020, 12, 10),
-        start_date=timezone.datetime(2020, 9, 10, tzinfo=utc),
-        end_date=timezone.datetime(2020, 11, 10, tzinfo=utc),
         is_follow_up=True,
         source_payment_plan=pp,
+        program__cycle__start_date=timezone.datetime(2020, 9, 10, tzinfo=utc).date(),
+        program__cycle__end_date=timezone.datetime(2020, 11, 10, tzinfo=utc).date(),
     )
     fpp1.unicef_id = "PP-0060-20-00000003"
     fpp1.save()
@@ -45,10 +46,10 @@ def create_child_payment_plans(pp: PaymentPlan) -> None:
         id="5b04f7c3-579a-48dd-a232-424daaefffe7",
         dispersion_start_date=datetime(2020, 8, 10),
         dispersion_end_date=datetime(2020, 12, 10),
-        start_date=timezone.datetime(2020, 9, 10, tzinfo=utc),
-        end_date=timezone.datetime(2020, 11, 10, tzinfo=utc),
         is_follow_up=True,
         source_payment_plan=pp,
+        program__cycle__start_date=timezone.datetime(2020, 9, 10, tzinfo=utc).date(),
+        program__cycle__end_date=timezone.datetime(2020, 11, 10, tzinfo=utc).date(),
     )
     fpp2.unicef_id = "PP-0060-20-00000004"
     fpp2.save()
@@ -82,7 +83,6 @@ class TestPaymentPlanQueries(APITestCase):
             canCreateFollowUp
             dispersionEndDate
             dispersionStartDate
-            endDate
             exchangeRate
             femaleAdultsCount
             femaleChildrenCount
@@ -91,8 +91,11 @@ class TestPaymentPlanQueries(APITestCase):
             paymentItems{
               totalCount
             }
+            programCycle{
+                startDate
+                endDate
+            }
             paymentsConflictsCount
-            startDate
             status
             totalDeliveredQuantity
             totalDeliveredQuantityUsd
@@ -112,8 +115,8 @@ class TestPaymentPlanQueries(APITestCase):
     """
 
     ALL_PAYMENT_PLANS_FILTER_QUERY = """
-    query AllPaymentPlans($businessArea: String!, $search: String, $status: [String], $totalEntitledQuantityFrom: Float, $totalEntitledQuantityTo: Float, $dispersionStartDate: Date, $dispersionEndDate: Date, $program: String) {
-        allPaymentPlans(businessArea: $businessArea, search: $search, status: $status, totalEntitledQuantityFrom: $totalEntitledQuantityFrom, totalEntitledQuantityTo: $totalEntitledQuantityTo, dispersionStartDate: $dispersionStartDate, dispersionEndDate: $dispersionEndDate, program: $program, orderBy: "unicef_id") {
+    query AllPaymentPlans($businessArea: String!, $search: String, $status: [String], $totalEntitledQuantityFrom: Float, $totalEntitledQuantityTo: Float, $dispersionStartDate: Date, $dispersionEndDate: Date, $program: String, $programCycle: String) {
+        allPaymentPlans(businessArea: $businessArea, search: $search, status: $status, totalEntitledQuantityFrom: $totalEntitledQuantityFrom, totalEntitledQuantityTo: $totalEntitledQuantityTo, dispersionStartDate: $dispersionStartDate, dispersionEndDate: $dispersionEndDate, program: $program, orderBy: "unicef_id", programCycle: $programCycle) {
         edges {
           node {
             dispersionEndDate
@@ -215,15 +218,16 @@ class TestPaymentPlanQueries(APITestCase):
         )
 
         with freeze_time("2020-10-10"):
-            program = RealProgramFactory()
+            program = RealProgramFactory(
+                cycle__start_date=timezone.datetime(2020, 9, 10, tzinfo=utc).date(),
+                cycle__end_date=timezone.datetime(2020, 11, 10, tzinfo=utc).date(),
+            )
             program_cycle = program.cycles.first()
             cls.pp = PaymentPlanFactory(
                 program=program,
                 program_cycle=program_cycle,
                 dispersion_start_date=datetime(2020, 8, 10),
                 dispersion_end_date=datetime(2020, 12, 10),
-                start_date=timezone.datetime(2020, 9, 10, tzinfo=utc),
-                end_date=timezone.datetime(2020, 11, 10, tzinfo=utc),
                 is_follow_up=False,
             )
             cls.pp.unicef_id = "PP-01"
@@ -262,8 +266,6 @@ class TestPaymentPlanQueries(APITestCase):
             cls.pp_conflicted = PaymentPlanFactory(
                 program=program,
                 program_cycle=program_cycle,
-                start_date=cls.pp.start_date,
-                end_date=cls.pp.end_date,
                 status=PaymentPlan.Status.LOCKED,
                 dispersion_start_date=cls.pp.dispersion_start_date + relativedelta(months=2),
                 dispersion_end_date=cls.pp.dispersion_end_date - relativedelta(months=2),
@@ -345,6 +347,7 @@ class TestPaymentPlanQueries(APITestCase):
 
     @freeze_time("2020-10-10")
     def test_fetch_all_payment_plans_filters(self) -> None:
+        just_random_program_cycle = ProgramCycleFactory(program=self.pp.program)
         for filter_data in [
             {"search": self.pp.unicef_id},
             {"status": self.pp.status},
@@ -356,6 +359,8 @@ class TestPaymentPlanQueries(APITestCase):
                 "dispersionStartDate": self.pp_conflicted.dispersion_start_date,
                 "dispersionEndDate": self.pp_conflicted.dispersion_end_date,
             },
+            {"programCycle": encode_id_base64(self.pp.program_cycle.pk, "ProgramCycleNode")},
+            {"programCycle": encode_id_base64(just_random_program_cycle.pk, "ProgramCycleNode")},
         ]:
             self.snapshot_graphql_request(
                 request_string=self.ALL_PAYMENT_PLANS_FILTER_QUERY,
@@ -433,15 +438,15 @@ class TestPaymentPlanQueries(APITestCase):
 
     def test_payment_node_with_legacy_data(self) -> None:
         # test get snapshot data only
-        program = RealProgramFactory()
-        program_cycle = program.cycles.first()
+        program = RealProgramFactory(
+            cycle__start_date=timezone.datetime(2023, 9, 10, tzinfo=utc).date(),
+            cycle__end_date=timezone.datetime(2023, 11, 10, tzinfo=utc).date(),
+        )
         new_pp = PaymentPlanFactory(
             program=program,
-            program_cycle=program_cycle,
+            program_cycle=program.cycles.first(),
             dispersion_start_date=datetime(2023, 8, 10),
             dispersion_end_date=datetime(2023, 12, 10),
-            start_date=timezone.datetime(2023, 9, 10, tzinfo=utc),
-            end_date=timezone.datetime(2023, 11, 10, tzinfo=utc),
             is_follow_up=False,
         )
         hoh_1 = IndividualFactory(household=None)

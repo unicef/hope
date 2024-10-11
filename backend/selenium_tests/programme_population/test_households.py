@@ -27,7 +27,7 @@ class TestSmokeHouseholds:
     def test_smoke_page_households(
         self, create_programs: None, add_households: None, pageHouseholds: Households
     ) -> None:
-        pageHouseholds.selectGlobalProgramFilter("Test Programm").click()
+        pageHouseholds.selectGlobalProgramFilter("Test Programm")
         pageHouseholds.getNavProgrammePopulation().click()
         pageHouseholds.getNavHouseholds().click()
         assert 2 == len(pageHouseholds.getHouseholdsRows())
@@ -48,7 +48,7 @@ class TestSmokeHouseholds:
         pageHouseholds: Households,
         pageHouseholdsDetails: HouseholdsDetails,
     ) -> None:
-        pageHouseholds.selectGlobalProgramFilter("Test Programm").click()
+        pageHouseholds.selectGlobalProgramFilter("Test Programm")
         pageHouseholds.getNavProgrammePopulation().click()
         pageHouseholds.getNavHouseholds().click()
         pageHouseholds.getHouseholdsRowByNumber(0).click()

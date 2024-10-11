@@ -16,7 +16,7 @@ export function EditSetUpFspHeader({
   const { baseUrl } = useBaseUrl();
   const location = useLocation();
   const { t } = useTranslation();
-  const { id } = useParams();
+  const { paymentPlanId } = useParams();
   const isFollowUp = location.pathname.indexOf('followup') !== -1;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
@@ -24,7 +24,7 @@ export function EditSetUpFspHeader({
       title: t('Payment Module'),
       to: `/${baseUrl}/payment-module/${
         isFollowUp ? 'followup-payment-plans' : 'payment-plans'
-      }/${id}`,
+      }/${paymentPlanId}`,
     },
   ];
   return (

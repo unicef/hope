@@ -75,7 +75,7 @@ class FlexibleAttributeForPDUService:
         self.delete_pdu_flex_attributes(flexible_attribute_ids_to_preserve=flexible_attribute_ids_to_preserve)
 
     def update_pdu_flex_attributes_in_program_update(self) -> None:
-        if self.program.registration_imports.exists():
+        if self.program.registration_imports.exists() or self.program.targetpopulation_set.exists():
             self.increase_pdu_rounds_for_program_with_rdi()
         else:
             self.update_pdu_flex_attributes()
@@ -116,6 +116,6 @@ class FlexibleAttributeForPDUService:
         new_number_of_rounds = pdu_data["number_of_rounds"]
         new_rounds_names = pdu_data["rounds_names"]
         if new_number_of_rounds <= current_number_of_rounds:
-            raise GraphQLError("It is not possible to decrease the number of rounds for a Program with RDI")
+            raise GraphQLError("It is not possible to decrease the number of rounds for a Program with RDI or TP")
         if current_rounds_names != new_rounds_names[:current_number_of_rounds]:
-            raise GraphQLError("It is not possible to change the names of existing rounds for a Program with RDI")
+            raise GraphQLError("It is not possible to change the names of existing rounds for a Program with RDI or TP")

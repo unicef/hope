@@ -129,7 +129,7 @@ class TestPeriodicDataTemplates:
                 }
             ],
         )
-        pageIndividuals.selectGlobalProgramFilter(program.name).click()
+        pageIndividuals.selectGlobalProgramFilter(program.name)
         pageIndividuals.getNavProgrammePopulation().click()
         pageIndividuals.getNavIndividuals().click()
         pageIndividuals.getTabPeriodicDataUpdates().click()
@@ -150,6 +150,7 @@ class TestPeriodicDataTemplates:
             is True
         )
 
+    @pytest.mark.night
     def test_periodic_data_template_list(
         self,
         program: Program,
@@ -175,7 +176,7 @@ class TestPeriodicDataTemplates:
         periodic_data_update_template.refresh_from_db()
         index = periodic_data_update_template.id
 
-        pageIndividuals.selectGlobalProgramFilter(program.name).click()
+        pageIndividuals.selectGlobalProgramFilter(program.name)
         pageIndividuals.getNavProgrammePopulation().click()
         pageIndividuals.getNavIndividuals().click()
         pageIndividuals.getTabPeriodicDataUpdates().click()
@@ -197,6 +198,7 @@ class TestPeriodicDataTemplates:
 
         assert "EXPORTED" in pagePeriodicDataUpdateTemplates.getTemplateStatus(index).text
 
+    @pytest.mark.night
     def test_periodic_data_template_details(
         self,
         program: Program,
@@ -225,7 +227,7 @@ class TestPeriodicDataTemplates:
         periodic_data_update_template.refresh_from_db()
         index = periodic_data_update_template.id
 
-        pageIndividuals.selectGlobalProgramFilter(program.name).click()
+        pageIndividuals.selectGlobalProgramFilter(program.name)
         pageIndividuals.getNavProgrammePopulation().click()
         pageIndividuals.getNavIndividuals().click()
         pageIndividuals.getTabPeriodicDataUpdates().click()
@@ -244,6 +246,7 @@ class TestPeriodicDataTemplates:
             in pagePeriodicDataUpdateTemplates.getTemplateNumberOfIndividuals(0).text
         )
 
+    @pytest.mark.night
     def test_periodic_data_template_create_and_download(
         self,
         program: Program,
@@ -255,7 +258,7 @@ class TestPeriodicDataTemplates:
     ) -> None:
         populate_pdu_with_null_values(program, individual.flex_fields)
         individual.save()
-        pageIndividuals.selectGlobalProgramFilter(program.name).click()
+        pageIndividuals.selectGlobalProgramFilter(program.name)
         pageIndividuals.getNavProgrammePopulation().click()
         pageIndividuals.getNavIndividuals().click()
         pageIndividuals.getTabPeriodicDataUpdates().click()
@@ -263,7 +266,7 @@ class TestPeriodicDataTemplates:
         pagePeriodicDataUpdateTemplates.getNewTemplateButton().click()
         pagePeriodicDataUpdateTemplatesDetails.getFiltersRegistrationDataImport().click()
 
-        pagePeriodicDataUpdateTemplatesDetails.select_listbox_element(individual.registration_data_import.name).click()
+        pagePeriodicDataUpdateTemplatesDetails.select_listbox_element(individual.registration_data_import.name)
         pagePeriodicDataUpdateTemplatesDetails.getSubmitButton().click()
         pagePeriodicDataUpdateTemplatesDetails.getCheckbox(string_attribute.name).click()
         pagePeriodicDataUpdateTemplatesDetails.getSubmitButton().click()

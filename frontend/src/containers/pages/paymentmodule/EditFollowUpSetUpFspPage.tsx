@@ -9,12 +9,12 @@ import { usePermissions } from '@hooks/usePermissions';
 import { usePaymentPlanQuery } from '@generated/graphql';
 
 export function EditFollowUpSetUpFspPage(): React.ReactElement {
-  const { id } = useParams();
+  const { paymentPlanId } = useParams();
 
   const { data: paymentPlanData, loading: paymentPlanLoading } =
     usePaymentPlanQuery({
       variables: {
-        id,
+        id: paymentPlanId,
       },
       fetchPolicy: 'cache-and-network',
     });
@@ -41,10 +41,7 @@ export function EditFollowUpSetUpFspPage(): React.ReactElement {
   return (
     <>
       <EditSetUpFspHeader permissions={permissions} />
-      <SetUpFspCore
-        permissions={permissions}
-        initialValues={initialValues}
-      />
+      <SetUpFspCore permissions={permissions} initialValues={initialValues} />
     </>
   );
 }

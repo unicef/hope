@@ -64,7 +64,7 @@ class TestSmokeAccountabilitySurveys:
         add_accountability_surveys_message: Survey,
         pageAccountabilitySurveys: AccountabilitySurveys,
     ) -> None:
-        pageAccountabilitySurveys.selectGlobalProgramFilter("Test Program").click()
+        pageAccountabilitySurveys.selectGlobalProgramFilter("Test Program")
         pageAccountabilitySurveys.getNavAccountability().click()
         pageAccountabilitySurveys.getNavSurveys().click()
 
@@ -99,7 +99,7 @@ class TestSmokeAccountabilitySurveys:
         pageAccountabilitySurveysDetails: AccountabilitySurveysDetails,
     ) -> None:
         add_accountability_surveys_message.recipients.set([Household.objects.first()])
-        pageAccountabilitySurveys.selectGlobalProgramFilter("Test Program").click()
+        pageAccountabilitySurveys.selectGlobalProgramFilter("Test Program")
         pageAccountabilitySurveys.getNavAccountability().click()
         pageAccountabilitySurveys.getNavSurveys().click()
         pageAccountabilitySurveys.getRows()[0].click()

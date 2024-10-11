@@ -39,7 +39,7 @@ export function FollowUpPaymentPlanDetailsHeader({
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Payment Module'),
-      to: `/${baseUrl}/payment-module/`,
+      to: `/${baseUrl}/payment-module/payment-plans`,
     },
   ];
 

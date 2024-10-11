@@ -106,7 +106,7 @@ def get_program_with_dct_type_and_name(
 @pytest.mark.usefixtures("login")
 class TestSmokePeople:
     def test_smoke_page_people(self, social_worker_program: Program, pagePeople: People) -> None:
-        pagePeople.selectGlobalProgramFilter("Worker Program").click()
+        pagePeople.selectGlobalProgramFilter("Worker Program")
         pagePeople.getNavPeople().click()
         assert "People" in pagePeople.getTableTitle().text
         assert "Individual ID" in pagePeople.getIndividualId().text
@@ -123,7 +123,7 @@ class TestSmokePeople:
         pagePeopleDetails: PeopleDetails,
         filters: Filters,
     ) -> None:
-        pagePeople.selectGlobalProgramFilter("Worker Program").click()
+        pagePeople.selectGlobalProgramFilter("Worker Program")
         pagePeople.getNavPeople().click()
         assert "People" in pagePeople.getTableTitle().text
         unicef_id = pagePeople.getIndividualTableRow(0).text.split(" ")[0]
@@ -227,7 +227,7 @@ class TestSmokePeople:
         pagePeople: People,
         pagePeopleDetails: PeopleDetails,
     ) -> None:
-        pagePeople.selectGlobalProgramFilter("Worker Program").click()
+        pagePeople.selectGlobalProgramFilter("Worker Program")
         pagePeople.getNavPeople().click()
         pagePeople.getIndividualTableRow(0).click()
         assert "21.36" in pagePeopleDetails.getLabelTotalCashReceived().text
@@ -236,3 +236,7 @@ class TestSmokePeople:
         assert "21.36" in pagePeopleDetails.getRows()[0].text
         assert "DELIVERED FULLY" in pagePeopleDetails.getRows()[0].text
         assert add_people_with_payment_record.unicef_id in pagePeopleDetails.getRows()[0].text
+
+    @pytest.mark.skip(reason="ToDo")
+    def test_check_data_after_grievance_ticket_processed(self) -> None:
+        pass

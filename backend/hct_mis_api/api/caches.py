@@ -104,3 +104,12 @@ class BusinessAreaAndProgramKeyBit(KeyBitBase):
         version_key = f"{business_area_slug}:{business_area_version}:{program_id}:{self.specific_view_cache_key}"
         version = get_or_create_cache_key(version_key, 1)
         return str(version)
+
+
+class ProgramKeyBit(KeyBitBase):
+    def get_data(
+        self, params: Any, view_instance: Any, view_method: Any, request: Any, args: tuple, kwargs: dict
+    ) -> str:
+        program_id = decode_id_string(kwargs.get("program_id"))
+        version = get_or_create_cache_key(f"{program_id}:version", 1)
+        return str(version)

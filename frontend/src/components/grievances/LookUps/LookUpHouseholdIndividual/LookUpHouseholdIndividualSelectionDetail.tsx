@@ -131,7 +131,9 @@ export function LookUpHouseholdIndividualSelectionDetail({
             variant="fullWidth"
             aria-label="look up tabs"
           >
-            <Tab label={t('LOOK UP HOUSEHOLD')} />
+            <Tab
+             data-cy="look-up-household"
+             label={t('LOOK UP HOUSEHOLD')} />
             <Tab
               disabled={
                 initialValues.issueType ===
@@ -140,6 +142,7 @@ export function LookUpHouseholdIndividualSelectionDetail({
                   GRIEVANCE_ISSUE_TYPES.DELETE_HOUSEHOLD ||
                 initialValues.issueType === GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD
               }
+             data-cy="look-up-individual"
               label={t('LOOK UP INDIVIDUAL')}
             />
           </StyledTabs>

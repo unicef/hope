@@ -1179,7 +1179,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             PeriodicFieldData.DATE: self.date_validator,
             PeriodicFieldData.DECIMAL: self.decimal_validator,
             PeriodicFieldData.STRING: self.string_validator,
-            PeriodicFieldData.BOOLEAN: self.bool_validator,
+            PeriodicFieldData.BOOL: self.bool_validator,
         }
         errors = []
         for flexible_attribute in self.pdu_flexible_attributes:

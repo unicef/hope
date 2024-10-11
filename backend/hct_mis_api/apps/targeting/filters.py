@@ -19,7 +19,7 @@ from hct_mis_api.apps.core.filters import (
     GlobalProgramFilterMixin,
     IntegerFilter,
 )
-from hct_mis_api.apps.core.utils import CustomOrderingFilter
+from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string_required
 from hct_mis_api.apps.program.models import Program
 
 if TYPE_CHECKING:
@@ -77,6 +77,7 @@ class TargetPopulationFilter(GlobalProgramFilterMixin, FilterSet):
     total_households_count_with_valid_phone_no_min = IntegerFilter(
         method="filter_total_households_count_with_valid_phone_no_min"
     )
+    program_cycle = CharFilter(method="filter_by_program_cycle")
 
     @staticmethod
     def filter_created_by_name(queryset: "QuerySet", model_field: str, value: Any) -> "QuerySet":
@@ -135,6 +136,10 @@ class TargetPopulationFilter(GlobalProgramFilterMixin, FilterSet):
                 & Q(status=target_models.TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE)
             )
         return queryset
+
+    @staticmethod
+    def filter_by_program_cycle(queryset: "QuerySet", name: str, value: str) -> "QuerySet":
+        return queryset.filter(program_cycle_id=decode_id_string_required(value))
 
     class Meta:
         model = target_models.TargetPopulation

@@ -43,8 +43,8 @@ class TestCrossAreaFilter(APITestCase):
         role = RoleFactory(name="GRIEVANCES CROSS AREA FILTER", permissions=["GRIEVANCES_CROSS_AREA_FILTER"])
         UserRole.objects.create(business_area=cls.business_area, user=cls.user, role=role)
 
-        cls.admin_area1 = AreaFactory(name="Admin Area 1", level=2)
-        cls.admin_area2 = AreaFactory(name="Admin Area 2", level=2)
+        cls.admin_area1 = AreaFactory(name="Admin Area 1", level=2, p_code="AREA1")
+        cls.admin_area2 = AreaFactory(name="Admin Area 2", level=2, p_code="AREA2")
 
         cls.program = ProgramFactory(business_area=cls.business_area, status=Program.ACTIVE)
 

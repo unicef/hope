@@ -58,7 +58,7 @@ class PullFromDatahubTask:
         "coverage_duration": "coverage_duration",
         "coverage_unit": "coverage_unit",
         "dispersion_date": "dispersion_date",
-        "end_date": "end_date",
+        "end_date": "end_date",  # TODO: what with CashPlan and ProgramCycle ???
         "start_date": "start_date",
         "distribution_level": "distribution_level",
         "name": "name",

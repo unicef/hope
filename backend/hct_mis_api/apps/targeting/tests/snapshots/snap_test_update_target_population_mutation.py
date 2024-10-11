@@ -114,8 +114,8 @@ snapshots['TestUpdateTargetPopulationMutation::test_update_mutation_correct_vari
                 'name': 'with_permission_draft updated',
                 'status': 'OPEN',
                 'targetingCriteria': {
-                    "flagExcludeIfActiveAdjudicationTicket": False,
-                    "flagExcludeIfOnSanctionList": True,
+                    'flagExcludeIfActiveAdjudicationTicket': False,
+                    'flagExcludeIfOnSanctionList': True,
                     'rules': [
                         {
                             'filters': [
@@ -125,7 +125,7 @@ snapshots['TestUpdateTargetPopulationMutation::test_update_mutation_correct_vari
                                     ],
                                     'comparisonMethod': 'EQUALS',
                                     'fieldName': 'size',
-                                    'isFlexField': False
+                                    'flexFieldClassification': 'NOT_FLEX_FIELD'
                                 }
                             ]
                         }

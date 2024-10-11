@@ -10,6 +10,7 @@ snapshots = Snapshot()
 snapshots['TestProgramQuery::test_single_program_query_0_with_permission 1'] = {
     'data': {
         'program': {
+            'canFinish': False,
             'name': 'Test Program Query',
             'pduFields': [
                 {
@@ -57,11 +58,12 @@ snapshots['TestProgramQuery::test_single_program_query_0_with_permission 1'] = {
                             'Round A',
                             'Round B'
                         ],
-                        'subtype': 'BOOLEAN'
+                        'subtype': 'BOOL'
                     }
                 }
             ],
-            'status': 'ACTIVE'
+            'status': 'ACTIVE',
+            'targetPopulationsCount': 1
         }
     }
 }

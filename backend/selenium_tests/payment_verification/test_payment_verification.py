@@ -119,7 +119,7 @@ class TestSmokePaymentVerification:
     def test_smoke_payment_verification(
         self, active_program: Program, add_payment_verification: PV, pagePaymentVerification: PaymentVerification
     ) -> None:
-        pagePaymentVerification.selectGlobalProgramFilter("Active Program").click()
+        pagePaymentVerification.selectGlobalProgramFilter("Active Program")
         pagePaymentVerification.getNavPaymentVerification().click()
         assert "Payment Verification" in pagePaymentVerification.getPageHeaderTitle().text
         assert "List of Payment Plans" in pagePaymentVerification.getTableTitle().text
@@ -139,7 +139,7 @@ class TestSmokePaymentVerification:
         pagePaymentVerification: PaymentVerification,
         pagePaymentVerificationDetails: PaymentVerificationDetails,
     ) -> None:
-        pagePaymentVerification.selectGlobalProgramFilter("Active Program").click()
+        pagePaymentVerification.selectGlobalProgramFilter("Active Program")
         pagePaymentVerification.getNavPaymentVerification().click()
         pagePaymentVerification.getCashPlanTableRow().click()
         assert "Payment Plan PP-0000-00-1122334" in pagePaymentVerificationDetails.getPageHeaderTitle().text
@@ -190,7 +190,7 @@ class TestSmokePaymentVerification:
         pagePaymentVerificationDetails: PaymentVerificationDetails,
         pagePaymentRecord: PaymentRecord,
     ) -> None:
-        pagePaymentVerification.selectGlobalProgramFilter("Active Program").click()
+        pagePaymentVerification.selectGlobalProgramFilter("Active Program")
         pagePaymentVerification.getNavPaymentVerification().click()
         pagePaymentVerification.getCashPlanTableRow().click()
         assert "1" in pagePaymentVerificationDetails.getLabelPaymentRecords().text
@@ -273,3 +273,16 @@ class TestSmokePaymentVerification:
         pagePaymentRecord.getArrowBack().click()
 
         assert "FINISHED" in pagePaymentVerification.getCashPlanTableRow().text
+
+
+@pytest.mark.usefixtures("login")
+class TestPaymentVerification:
+    @pytest.mark.skip("ToDo: Old and same value - maybe parametrization with values")
+    def test_payment_verification_create_grievance_ticket_same_value(
+        self, active_program: Program, add_payment_verification: PV, pagePaymentVerification: PaymentVerification
+    ) -> None:
+        pagePaymentVerification.selectGlobalProgramFilter("Active Program")
+        # Upon resolving the Payment Verification grievance ticket,
+        # the received value changes with the new verified value.
+        # If the received value is 0, it should stay 0 even when a new verified value is provided in the ticket.
+        # Check conversation with Jakub

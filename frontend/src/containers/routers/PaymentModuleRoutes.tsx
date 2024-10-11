@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { useRoutes } from 'react-router-dom';
-import { CreatePaymentPlanPage } from '../pages/paymentmodule/CreatePaymentPlanPage';
 import { EditFollowUpPaymentPlanPage } from '../pages/paymentmodule/EditFollowUpPaymentPlanPage';
 import { EditFollowUpSetUpFspPage } from '../pages/paymentmodule/EditFollowUpSetUpFspPage';
 import { EditPaymentPlanPage } from '../pages/paymentmodule/EditPaymentPlanPage';
@@ -8,21 +7,21 @@ import { EditSetUpFspPage } from '../pages/paymentmodule/EditSetUpFspPage';
 import { FollowUpPaymentPlanDetailsPage } from '../pages/paymentmodule/FollowUpPaymentPlanDetailsPage';
 import { PaymentDetailsPage } from '../pages/paymentmodule/PaymentDetailsPage';
 import { PaymentModulePage } from '../pages/paymentmodule/PaymentModulePage';
-import { PaymentPlanDetailsPage } from '../pages/paymentmodule/PaymentPlanDetailsPage';
 import { SetUpFspPage } from '../pages/paymentmodule/SetUpFspPage';
 import { SetUpFollowUpFspPage } from '../pages/paymentmodule/SetUpFollowUpFspPage';
 import { useProgramContext } from '../../programContext';
-import { CreatePeoplePaymentPlanPage } from '@containers/pages/paymentmodulepeople/CreatePeoplePaymentPlanPage';
 import { PeoplePaymentModulePage } from '@containers/pages/paymentmodulepeople/PeoplePaymentModulePage';
 import { EditPeopleFollowUpPaymentPlanPage } from '@containers/pages/paymentmodulepeople/EditPeopleFollowUpPaymentPlanPage';
 import { EditPeopleFollowUpSetUpFspPage } from '@containers/pages/paymentmodulepeople/EditPeopleFollowUpSetUpFspPage';
 import { SetUpPeopleFollowUpFspPage } from '@containers/pages/paymentmodulepeople/SetUpPeopleFollowUpFspPage';
-import { EditPeopleSetUpFspPage } from '@containers/pages/paymentmodulepeople/EditPeopleSetUpFspPage';
-import { EditPeoplePaymentPlanPage } from '@containers/pages/paymentmodulepeople/EditPeoplePaymentPlanPage';
 import { PeoplePaymentDetailsPage } from '@containers/pages/paymentmodulepeople/PeoplePaymentDetailsPage';
-import { SetUpPeopleFspPage } from '@containers/pages/paymentmodulepeople/SetUpPeopleFspPage';
 import { PeoplePaymentPlanDetailsPage } from '@containers/pages/paymentmodulepeople/PeoplePaymentPlanDetailsPage';
 import { PeopleFollowUpPaymentPlanDetailsPage } from '@containers/pages/paymentmodulepeople/PeopleFollowUpPaymentPlanDetailsPage';
+import { ProgramCyclePage } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCyclePage';
+import { ProgramCycleDetailsPage } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/ProgramCycleDetailsPage';
+import { PaymentPlanDetailsPage } from '@containers/pages/paymentmodule/ProgramCycle/PaymentPlanDetails/PaymentPlanDetailsPage';
+import { CreatePaymentPlanPage } from '@containers/pages/paymentmodule/ProgramCycle/CreatePaymentPlanPage';
+import { EditPeoplePaymentPlanPage } from '@containers/pages/paymentmodulepeople/EditPeoplePaymentPlanPage';
 
 export const PaymentModuleRoutes = (): React.ReactElement => {
   const { isSocialDctType } = useProgramContext();
@@ -31,15 +30,37 @@ export const PaymentModuleRoutes = (): React.ReactElement => {
   if (isSocialDctType) {
     children = [
       {
-        path: '',
-        element: <PeoplePaymentModulePage />,
+        path: 'payment-plans',
+        children: [
+          {
+            path: '',
+            element: <PeoplePaymentModulePage />,
+          },
+          {
+            path: ':paymentPlanId',
+            children: [
+              {
+                path: '',
+                element: <PeoplePaymentPlanDetailsPage />,
+              },
+              {
+                path: 'edit',
+                element: <EditPaymentPlanPage />,
+              },
+              {
+                path: 'setup-fsp/edit',
+                element: <EditSetUpFspPage />,
+              },
+              {
+                path: 'setup-fsp/create',
+                element: <SetUpFspPage />,
+              },
+            ],
+          },
+        ],
       },
       {
-        path: 'new-plan',
-        element: <CreatePeoplePaymentPlanPage />,
-      },
-      {
-        path: 'followup-payment-plans/:id',
+        path: 'followup-payment-plans/:paymentPlanId',
         children: [
           {
             path: '',
@@ -60,43 +81,84 @@ export const PaymentModuleRoutes = (): React.ReactElement => {
         ],
       },
       {
-        path: 'payment-plans/:id',
+        path: 'payments/:paymentId',
+        element: <PeoplePaymentDetailsPage />,
+      },
+      {
+        path: 'program-cycles',
         children: [
           {
             path: '',
-            element: <PeoplePaymentPlanDetailsPage />,
+            element: <ProgramCyclePage />,
           },
           {
-            path: 'edit',
-            element: <EditPeoplePaymentPlanPage />,
-          },
-          {
-            path: 'setup-fsp/edit',
-            element: <EditPeopleSetUpFspPage />,
-          },
-          {
-            path: 'setup-fsp/create',
-            element: <SetUpPeopleFspPage />,
+            path: ':programCycleId',
+            children: [
+              {
+                path: '',
+                element: <ProgramCycleDetailsPage />,
+              },
+              {
+                path: 'payment-plans',
+                children: [
+                  {
+                    path: 'new-plan',
+                    element: <CreatePaymentPlanPage />,
+                  },
+                  {
+                    path: ':paymentPlanId',
+                    children: [
+                      {
+                        path: '',
+                        element: <PeoplePaymentPlanDetailsPage />,
+                      },
+                      {
+                        path: 'edit',
+                        element: <EditPeoplePaymentPlanPage />,
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
           },
         ],
-      },
-      {
-        path: 'payments/:id',
-        element: <PeoplePaymentDetailsPage />,
       },
     ];
   } else {
     children = [
       {
-        path: '',
-        element: <PaymentModulePage />,
+        path: 'payment-plans',
+        children: [
+          {
+            path: '',
+            element: <PaymentModulePage />,
+          },
+          {
+            path: ':paymentPlanId',
+            children: [
+              {
+                path: '',
+                element: <PaymentPlanDetailsPage />,
+              },
+              {
+                path: 'edit',
+                element: <EditPaymentPlanPage />,
+              },
+              {
+                path: 'setup-fsp/edit',
+                element: <EditSetUpFspPage />,
+              },
+              {
+                path: 'setup-fsp/create',
+                element: <SetUpFspPage />,
+              },
+            ],
+          },
+        ],
       },
       {
-        path: 'new-plan',
-        element: <CreatePaymentPlanPage />,
-      },
-      {
-        path: 'followup-payment-plans/:id',
+        path: 'followup-payment-plans/:paymentPlanId',
         children: [
           {
             path: '',
@@ -117,29 +179,48 @@ export const PaymentModuleRoutes = (): React.ReactElement => {
         ],
       },
       {
-        path: 'payment-plans/:id',
+        path: 'payments/:paymentId',
+        element: <PaymentDetailsPage />,
+      },
+      {
+        path: 'program-cycles',
         children: [
           {
             path: '',
-            element: <PaymentPlanDetailsPage />,
+            element: <ProgramCyclePage />,
           },
           {
-            path: 'edit',
-            element: <EditPaymentPlanPage />,
-          },
-          {
-            path: 'setup-fsp/edit',
-            element: <EditSetUpFspPage />,
-          },
-          {
-            path: 'setup-fsp/create',
-            element: <SetUpFspPage />,
+            path: ':programCycleId',
+            children: [
+              {
+                path: '',
+                element: <ProgramCycleDetailsPage />,
+              },
+              {
+                path: 'payment-plans',
+                children: [
+                  {
+                    path: 'new-plan',
+                    element: <CreatePaymentPlanPage />,
+                  },
+                  {
+                    path: ':paymentPlanId',
+                    children: [
+                      {
+                        path: '',
+                        element: <PaymentPlanDetailsPage />,
+                      },
+                      {
+                        path: 'edit',
+                        element: <EditPaymentPlanPage />,
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
           },
         ],
-      },
-      {
-        path: 'payments/:id',
-        element: <PaymentDetailsPage />,
       },
     ];
   }

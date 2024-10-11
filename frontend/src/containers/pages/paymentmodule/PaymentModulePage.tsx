@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
@@ -10,9 +10,6 @@ import { usePermissions } from '@hooks/usePermissions';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { PaymentPlansTable } from '../../tables/paymentmodule/PaymentPlansTable';
 import { PaymentPlansFilters } from '../../tables/paymentmodule/PaymentPlansTable/PaymentPlansFilters';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { ButtonTooltip } from '@components/core/ButtonTooltip';
-import { useProgramContext } from '../../../programContext';
 
 const initialFilter = {
   search: '',
@@ -26,10 +23,8 @@ const initialFilter = {
 
 export function PaymentModulePage(): React.ReactElement {
   const { t } = useTranslation();
-  const { baseUrl } = useBaseUrl();
   const permissions = usePermissions();
   const location = useLocation();
-  const { isActiveProgram } = useProgramContext();
 
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
@@ -45,21 +40,7 @@ export function PaymentModulePage(): React.ReactElement {
 
   return (
     <>
-      <PageHeader title={t('Payment Module')}>
-        {hasPermissions(PERMISSIONS.PM_CREATE, permissions) && (
-          <ButtonTooltip
-            variant="contained"
-            color="primary"
-            component={Link}
-            to={`/${baseUrl}/payment-module/new-plan`}
-            data-cy="button-new-payment-plan"
-            title={t('Program has to be active to create new Payment Program')}
-            disabled={!isActiveProgram}
-          >
-            {t('NEW PAYMENT PLAN')}
-          </ButtonTooltip>
-        )}
-      </PageHeader>
+      <PageHeader title={t('Payment Module')} />
       <PaymentPlansFilters
         filter={filter}
         setFilter={setFilter}

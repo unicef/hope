@@ -316,6 +316,7 @@ class PaymentPlanFilter(FilterSet):
     is_follow_up = BooleanFilter(field_name="is_follow_up")
     source_payment_plan_id = CharFilter(method="source_payment_plan_filter")
     program = CharFilter(method="filter_by_program")
+    program_cycle = CharFilter(method="filter_by_program_cycle")
 
     class Meta:
         fields = tuple()
@@ -351,6 +352,9 @@ class PaymentPlanFilter(FilterSet):
 
     def filter_by_program(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[PaymentPlan]":
         return qs.filter(program_id=decode_id_string_required(value))
+
+    def filter_by_program_cycle(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[PaymentPlan]":
+        return qs.filter(program_cycle_id=decode_id_string_required(value))
 
 
 class PaymentFilter(FilterSet):

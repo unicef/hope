@@ -59,7 +59,7 @@ class PeriodicDataUpdateTemplate(TimeStampedModel, CeleryEnabledModel):
     "received_assistance": true/false,
     }
     """
-    filters = models.JSONField()
+    filters = models.JSONField(default=dict, blank=True, null=True)
     """
     Example of rounds_data:
         [
