@@ -36,7 +36,18 @@ import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
+import styled from 'styled-components';
 import { useDownloadSupportingDocument } from './SupportingDocumentsSectionActions';
+
+const StyledBox = styled(Box)`
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background-color: ${({ theme }) => theme.palette.grey[200]};
+  padding: 4px;
+  margin-bottom: 4px;
+`;
 
 interface SupportingDocumentsSectionProps {
   initialOpen?: boolean;
@@ -251,8 +262,12 @@ export const SupportingDocumentsSection = ({
                     alignItems="center"
                   >
                     <Box display="flex" flexDirection="column">
-                      <BlueText>{doc.title}</BlueText>
-                      <BlueText>{doc.file}</BlueText>
+                      <StyledBox>
+                        <BlueText>{doc.title}</BlueText>
+                      </StyledBox>
+                      <StyledBox>
+                        <BlueText>{doc.file}</BlueText>
+                      </StyledBox>
                     </Box>
                     <Box>
                       {canDownloadFile && (
