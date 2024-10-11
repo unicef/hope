@@ -222,7 +222,7 @@ class PaymentVerificationAdmin(HOPEModelAdminBase):
 
 @admin.register(ServiceProvider)
 class ServiceProviderAdmin(HOPEModelAdminBase):
-    list_display = ("full_name", "short_name", "country")
+    list_display = ("full_name", "short_name", "country", "vision_id")
     search_fields = ("full_name", "vision_id", "short_name")
     list_filter = (("business_area", AutoCompleteFilter),)
     autocomplete_fields = ("business_area",)
