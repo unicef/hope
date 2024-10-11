@@ -279,7 +279,6 @@ class TestSmokePaymentVerification:
 
 @pytest.mark.usefixtures("login")
 class TestPaymentVerification:
-    @pytest.mark.skip("ToDo: Old and same value - maybe parametrization with values")
     def test_payment_verification_create_grievance_ticket_same_value(
         self, active_program: Program, add_payment_verification: PV, pagePaymentVerification: PaymentVerification
     ) -> None:
