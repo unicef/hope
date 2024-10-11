@@ -211,7 +211,7 @@ class BaseComponents(Common):
         return self.get_elements(self.rows)
 
     def waitForRow(self, index) -> WebElement:
-        return self.wait_for(self.row_index_template.format(index))
+        return self.wait_for(self.row_index_template.format(index+1))
 
     def getRows(self) -> [WebElement]:
         return self.get_elements(self.rows)
