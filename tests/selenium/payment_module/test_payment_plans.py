@@ -184,7 +184,12 @@ def create_payment_plan_lock_social_worker(social_worker_program: Program) -> Pa
     yield payment_plan_create(social_worker_program)
 
 
-def payment_plan_create(program: Program) -> PaymentPlan:
+@pytest.fixture
+def create_payment_plan_open(create_test_program: Program) -> PaymentPlan:
+    yield payment_plan_create(create_test_program, status=PaymentPlan.Status.OPEN)
+
+
+def payment_plan_create(program: Program, status: str = PaymentPlan.Status.LOCKED) -> PaymentPlan:
     program_cycle = ProgramCycleFactory(
         program=program,
         title="Cycle for PaymentPlan",
@@ -196,7 +201,7 @@ def payment_plan_create(program: Program) -> PaymentPlan:
     payment_plan = PaymentPlanFactory(
         program=program,
         is_follow_up=False,
-        status=PaymentPlan.Status.LOCKED,
+        status=status,
         program_cycle=program_cycle,
         dispersion_start_date=datetime.now().date(),
     )
@@ -573,7 +578,7 @@ class TestPaymentPlans:
 
     def test_payment_plan_save_exclude(
         self,
-        create_payment_plan_lock: PaymentPlan,
+        create_payment_plan_lock_social_worker: PaymentPlan,
         pagePaymentModule: PaymentModule,
         pagePaymentModuleDetails: PaymentModuleDetails,
     ) -> None:
@@ -611,7 +616,7 @@ class TestPaymentPlans:
 
     def test_payment_plan_delete(
         self,
-        create_payment_plan_lock: PaymentPlan,
+        create_payment_plan_open: PaymentPlan,
         pagePaymentModule: PaymentModule,
         pagePaymentModuleDetails: PaymentModuleDetails,
         pageNewPaymentPlan: NewPaymentPlan,
