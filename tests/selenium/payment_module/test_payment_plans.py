@@ -569,7 +569,6 @@ class TestPaymentPlans:
         assert "4" in pagePaymentModuleDetails.getLabelFemaleChildren().text
         assert "1" in pagePaymentModuleDetails.getLabelFemaleAdults().text
         assert "1" in pagePaymentModuleDetails.getLabelMaleChildren().text
-
         assert "6" in pagePaymentModuleDetails.getLabelTotalNumberOfPeople().text
 
     def test_payment_plan_save_exclude(
