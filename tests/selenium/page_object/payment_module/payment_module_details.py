@@ -65,7 +65,7 @@ class PaymentModuleDetails(BaseComponents):
     buttonUploadReconciliationInfo = 'button[data-cy="button-import"]'
     buttonImportSubmit = 'button[data-cy="button-import-submit"]'
     errorsContainer = 'div[data-cy="errors-container"]'
-    deleteButton = '[data-cy="button-delete-payment-plan"]'
+    deleteButton = 'button[data-cy="button-delete-pp"]'
     uploadFileButton = 'button[data-cy="upload-file-button"]'
     titleInput = 'div[data-cy="title-input"]'
 

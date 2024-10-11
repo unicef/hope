@@ -626,7 +626,6 @@ class TestPaymentPlans:
         pagePaymentModule.getNavPaymentPlans().click()
         payment_plan = pagePaymentModule.getRow(0).text
         pagePaymentModule.getRow(0).click()
-
         pagePaymentModuleDetails.getDeleteButton().click()
         pagePaymentModuleDetails.getButtonSubmit().click()
         pagePaymentModule.getRow(0)
