@@ -204,12 +204,15 @@ class TestFeedback:
         pageNewFeedback.chooseOptionByName(issue_type)
         pageNewFeedback.getButtonNext().click()
         pageNewFeedback.getHouseholdTab()
+        pageNewFeedback.getTableEmptyRow()
         pageNewFeedback.getButtonNext().click()
         pageNewFeedback.getReceivedConsent().click()
         pageNewFeedback.getButtonNext().click()
         assert "Feedback" in pageNewFeedback.getLabelCategory().text
         pageNewFeedback.getDescription().send_keys("Test")
-        pageNewFeedback.check_page_after_click(pageNewFeedback.getButtonNext(), "=")
+        pageNewFeedback.getButtonNext().click()
+        pageFeedbackDetails.getButtonCreateLinkedTicket()
+        # pageNewFeedback.check_page_after_click(pageNewFeedback.getButtonNext(), "=")
         # Check Details page
         assert pageFeedbackDetails.textCategory in pageFeedbackDetails.getCategory().text
         assert issue_type in pageFeedbackDetails.getIssueType().text

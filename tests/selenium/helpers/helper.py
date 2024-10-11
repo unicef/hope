@@ -119,9 +119,9 @@ class Common:
             raise AssertionError(f"Element: {name} is not in the list: {[item.text for item in items]}")
 
     def check_page_after_click(self, button: WebElement, url_fragment: str) -> None:
-        programme_creation_url = self.driver.current_url
+        current_page_url = self.driver.current_url
         button.click()
-        assert url_fragment in self.wait_for_new_url(programme_creation_url).split("/")[-1]
+        assert url_fragment in self.wait_for_new_url(current_page_url).split("/")[-1], (current_page_url, url_fragment)
 
     def upload_file(
         self, upload_file: str, xpath: str = "//input[@type='file']", timeout: int = DEFAULT_TIMEOUT
