@@ -965,24 +965,8 @@ class TestGrievanceTickets:
             assert list_row[0] in pageGrievanceTickets.getSelectedTickets().text
         pageGrievanceTickets.getButtonSave().click()
         pageGrievanceTickets.getStatusContainer()
-        max_attempts=5
-        attempt=0
-        while attempt < max_attempts:
-            try:
-                pageGrievanceTickets.waitForRows()
-                pageGrievanceTickets.waitForRowWithText(0,'Assigned')
-                break 
-            except StaleElementReferenceException:
-                attempt += 1
-        else:
-            pytest.fail('LOL1')
+        pageGrievanceTickets.checkIfTextExistInArow(0,'Assigned')
             
-        # for _ in range(50):
-        #     if "Assigned" in pageGrievanceTickets.getStatusContainer()[0].text:
-        #         break
-        #     sleep(0.1)
-        # else:
-        #     assert "Assigned" in pageGrievanceTickets.getStatusContainer()[0].text
         for str_row in pageGrievanceTickets.getRows():
             list_row = str_row.text.replace("\n", " ").split(" ")
             assert list_row[1] in "Assigned"
@@ -994,25 +978,7 @@ class TestGrievanceTickets:
         pageGrievanceTickets.getButtonSave().click()
         pageGrievanceTickets.getStatusContainer()
 
-        max_attempts=5
-        attempt=0
-        while attempt < max_attempts:
-            try:
-                pageGrievanceTickets.waitForRows()
-                pageGrievanceTickets.waitForRowWithText(0,'Medium')
-                break 
-            except StaleElementReferenceException:
-                attempt += 1
-        else:
-            pytest.fail('LOL1')
-
-        # for _ in range(50):
-        #     if "Medium" in pageGrievanceTickets.getRows()[0].text:
-        #         break
-        #     sleep(0.1)
-        # else:
-        #     assert "Medium" in pageGrievanceTickets.getRows()[0].text
-
+        pageGrievanceTickets.checkIfTextExistInArow(0,'Medium')
         for str_row in pageGrievanceTickets.getRows():
             assert "Medium" in str_row.text.replace("\n", " ").split(" ")
         pageGrievanceTickets.getSelectAll().click()
@@ -1020,27 +986,9 @@ class TestGrievanceTickets:
         pageGrievanceTickets.getDropdown().click()
         pageGrievanceTickets.select_listbox_element("Urgent")
         pageGrievanceTickets.getButtonSave().click()
-        # from datetime import datetime
-        # pageGrievanceTickets.screenshot(f'lol{datetime.now()}',delay_sec=1)
         pageGrievanceTickets.getStatusContainer()
         
-        max_attempts=5
-        attempt=0
-        while attempt < max_attempts:
-            try:
-                pageGrievanceTickets.waitForRows()
-                pageGrievanceTickets.waitForRowWithText(0,'Urgent')
-                break 
-            except StaleElementReferenceException:
-                attempt += 1
-        else:
-            pytest.fail('LOL1')
-        # for _ in range(10):
-        #     if "Urgent" in pageGrievanceTickets.getRows()[0].text:
-        #         break
-        #     sleep(0.1)
-        # else:
-        #     assert "Urgent" in pageGrievanceTickets.getRows()[0].text
+        pageGrievanceTickets.checkIfTextExistInArow(0,'Urgent')
         for str_row in pageGrievanceTickets.getRows():
             assert "Urgent" in str_row.text.replace("\n", " ").split(" ")
 

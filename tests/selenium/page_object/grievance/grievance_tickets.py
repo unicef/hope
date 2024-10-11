@@ -255,7 +255,7 @@ class GrievanceTickets(BaseComponents):
         while attempt < max_attempts:
             try:
                 self.waitForRows()
-                self.waitForRowWithText(0,'Medium')
+                self.waitForRowWithText(row_index,text)
                 return 
             except StaleElementReferenceException as e:
                 attempt += 1
