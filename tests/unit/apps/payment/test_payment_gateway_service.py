@@ -761,7 +761,7 @@ class TestPaymentGatewayService(APITestCase):
                 id=33,
                 remote_id="33",
                 name="New FSP",
-                vision_vendor_number="33",
+                vendor_number="33",
                 configs=[
                     {
                         "id": 21,
@@ -783,7 +783,7 @@ class TestPaymentGatewayService(APITestCase):
                 id=123,
                 remote_id="123",
                 name="Western Union",
-                vision_vendor_number="123",
+                vendor_number="123",
                 configs=[
                     {
                         "id": 23,
