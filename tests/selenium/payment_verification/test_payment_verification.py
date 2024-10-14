@@ -21,7 +21,7 @@ from hct_mis_api.apps.payment.models import PaymentRecord as PR
 from hct_mis_api.apps.payment.models import PaymentVerification as PV
 from hct_mis_api.apps.payment.models import PaymentVerificationPlan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
@@ -57,6 +57,48 @@ def get_program_with_dct_type_and_name(
         status=status,
     )
     return program
+
+
+def create_program(name: str = "Test Program", dct_type: str = DataCollectingType.Type.STANDARD) -> Program:
+    BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
+    dct = DataCollectingTypeFactory(type=dct_type)
+    yield ProgramFactory(
+        name=name,
+        programme_code="1234",
+        start_date=datetime.now() - relativedelta(months=1),
+        end_date=datetime.now() + relativedelta(months=1),
+        data_collecting_type=dct,
+        status=Program.ACTIVE,
+        cycle__title="First cycle for Test Program",
+        cycle__status=ProgramCycle.DRAFT,
+        cycle__start_date=datetime.now() - relativedelta(days=5),
+        cycle__end_date=datetime.now() + relativedelta(days=5),
+    )
+
+
+@pytest.fixture
+def social_worker_program() -> Program:
+    yield create_program(dct_type=DataCollectingType.Type.SOCIAL)
+
+
+@pytest.fixture
+def empty_payment_verification(social_worker_program: Program) -> PV:
+    # cash_plan = CashPlanFactory(
+    #     name="TEST",
+    #     program=social_worker_program,
+    #     business_area=BusinessArea.objects.first(),
+    #     start_date=datetime.now() - relativedelta(months=1),
+    #     end_date=datetime.now() + relativedelta(months=1),
+    # )
+
+    payment_verification_plan = PaymentVerificationPlanFactory(
+        verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL,
+    )
+
+    yield PaymentVerificationFactory(
+        payment_verification_plan=payment_verification_plan,
+        status=PV.STATUS_PENDING,
+    )
 
 
 @pytest.fixture
@@ -287,3 +329,11 @@ class TestPaymentVerification:
         # the received value changes with the new verified value.
         # If the received value is 0, it should stay 0 even when a new verified value is provided in the ticket.
         # Check conversation with Jakub
+
+    def test_payment_verification_create_verification_plan(
+        self, active_program: Program, empty_payment_verification: PV, pagePaymentVerification: PaymentVerification
+    ) -> None:
+        pagePaymentVerification.selectGlobalProgramFilter("Active Program")
+        pagePaymentVerification.getNavPaymentVerification().click()
+        pagePaymentVerification.getCashPlanTableRow().click()
+        pagePaymentVerification.screenshot("0", file_path="./")

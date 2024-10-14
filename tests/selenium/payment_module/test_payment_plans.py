@@ -43,10 +43,7 @@ from tests.selenium.page_object.payment_module.payment_module import PaymentModu
 from tests.selenium.page_object.payment_module.payment_module_details import (
     PaymentModuleDetails,
 )
-from tests.selenium.page_object.payment_module.program_cycle import ProgramCyclePage
-from tests.selenium.page_object.payment_module.program_cycle_details import (
-    ProgramCycleDetailsPage,
-)
+from tests.selenium.page_object.payment_module.program_cycle import ProgramCyclePage, ProgramCycleDetailsPage
 
 pytestmark = pytest.mark.django_db(transaction=True)
 
@@ -669,7 +666,6 @@ class TestPaymentPlans:
         pagePaymentModule.getNavPaymentPlans().click()
         pagePaymentModule.getRows()
         for i in range(len(pagePaymentModule.getRows())):
-            print(f'{i} - {pagePaymentModule.getRow(i).text}')
             if "OPEN" in pagePaymentModule.getRow(i).text:
                 payment_plan = pagePaymentModule.getRow(i).text
                 pagePaymentModule.getRow(i).click()
