@@ -20,9 +20,6 @@ SMART_ADMIN_SECTIONS = {
         "constance",
         "flags",
     ],
-    "Power Query & Reports": [
-        "power_query",
-    ],
     "Rule Engine": [
         "steficon",
     ],
