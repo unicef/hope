@@ -21,6 +21,4 @@ class ProgramFilter(UpdatedAtFilter):
     def is_active_filter(self, queryset: "QuerySet[Program]", name: str, value: bool) -> "QuerySet[Program]":
         if value is True:
             return queryset.filter(status=Program.ACTIVE)
-        elif value is False:
-            return queryset.exclude(status=Program.ACTIVE)
-        return queryset
+        return queryset.exclude(status=Program.ACTIVE)

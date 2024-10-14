@@ -251,6 +251,16 @@ class APIGlobalProgramTests(HOPEApiTestCase):
             response.json()["results"],
         )
 
+    def test_list_program_filter_not_active(self) -> None:
+        with token_grant_permission(self.token, Grant.API_READ_ONLY):
+            response = self.client.get(self.list_url, {"active": "false"})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json()["results"]), 1)
+        self.assertIn(
+            self.program2_expected_response,
+            response.json()["results"],
+        )
+
     def test_list_program_filter_status(self) -> None:
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             response = self.client.get(self.list_url, {"status": Program.DRAFT})
