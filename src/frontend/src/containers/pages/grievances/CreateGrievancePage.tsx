@@ -297,6 +297,14 @@ export const CreateGrievancePage = (): React.ReactElement => {
             choicesData.grievanceTicketIssueTypeChoices,
           );
 
+        const disableNextOnFirstStep = (): boolean => {
+          if (!values.category) return true;
+          if (showIssueType(values)) {
+            if (!values.issueType) return true;
+          }
+          return false;
+        };
+
         return (
           <>
             <AutoSubmitFormOnEnter />
@@ -392,6 +400,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
                             variant="contained"
                             onClick={submitForm}
                             data-cy="button-submit"
+                            disabled={disableNextOnFirstStep()}
                           >
                             {activeStep === GrievanceSteps.Description
                               ? t('Save')
