@@ -1,6 +1,9 @@
+import hashlib
+import json
 from typing import Any
 from unittest.mock import patch
 
+from django.core.cache import cache
 from django.test import TestCase
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -275,13 +278,38 @@ class TestEnrolHouseholdToProgram(TestCase):
         )
 
     def test_enroll_households_to_program_task(self) -> None:
+        hh_count = Household.objects.count()
+        ind_count = Individual.objects.count()
         enroll_households_to_program_task(
             [str(self.household_already_enrolled.id)], str(self.program2.pk), self.str_user_id
         )
-        hh_count = Household.objects.count()
-        ind_count = Individual.objects.count()
         self.assertEqual(hh_count, Household.objects.count())
         self.assertEqual(ind_count, Individual.objects.count())
+
+    def test_enroll_households_to_program_task_already_running(self) -> None:
+        hh_count = Household.objects.count()
+        ind_count = Individual.objects.count()
+
+        task_params = {
+            "task_name": "enroll_households_to_program_task",
+            "household_ids": [str(self.household.id)],
+            "program_for_enroll_id": str(self.program2.pk),
+        }
+        task_params_str = json.dumps(task_params, sort_keys=True)
+        cache_key = hashlib.sha256(task_params_str.encode()).hexdigest()
+        cache.set(cache_key, True, timeout=24 * 60 * 60)
+
+        enroll_households_to_program_task([str(self.household.id)], str(self.program2.pk), self.str_user_id)
+
+        self.assertEqual(hh_count, Household.objects.count())
+        self.assertEqual(ind_count, Individual.objects.count())
+
+        cache.delete(cache_key)
+
+        enroll_households_to_program_task([str(self.household.id)], str(self.program2.pk), self.str_user_id)
+
+        self.assertEqual(hh_count + 1, Household.objects.count())
+        self.assertEqual(ind_count + 2, Individual.objects.count())
 
     @patch("hct_mis_api.apps.program.utils.randint")
     def test_generate_rdi_unique_name_when_conflicts(self, mock_randint: Any) -> None:
