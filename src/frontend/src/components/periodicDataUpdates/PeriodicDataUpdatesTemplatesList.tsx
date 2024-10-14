@@ -22,17 +22,9 @@ import { useTranslation } from 'react-i18next';
 import { ButtonTooltip } from '@components/core/ButtonTooltip';
 import { usePermissions } from '@hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
+import { PeriodicDataUpdateTemplateList } from '@restgenerated/models/PeriodicDataUpdateTemplateList';
 
-export interface Template {
-  id: number;
-  number_of_records: number;
-  created_at: string;
-  created_by: string;
-  status: string;
-  can_export: boolean;
-}
-
-const templatesHeadCells: HeadCell<Template>[] = [
+const templatesHeadCells: HeadCell<PeriodicDataUpdateTemplateList>[] = [
   {
     id: 'id',
     numeric: false,
@@ -124,7 +116,7 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
     });
   };
 
-  const handleDialogOpen = (template: Template) => {
+  const handleDialogOpen = (template: PeriodicDataUpdateTemplateList) => {
     setSelectedTemplateId(template.id);
     setIsDialogOpen(true);
   };
@@ -170,7 +162,9 @@ export const PeriodicDataUpdatesTemplatesList = (): ReactElement => {
     permissions,
   );
 
-  const renderTemplateRow = (row: Template): ReactElement => (
+  const renderTemplateRow = (
+    row: PeriodicDataUpdateTemplateList,
+  ): ReactElement => (
     <ClickableTableRow key={row.id} data-cy={`template-row-${row.id}`}>
       <TableCell data-cy={`template-id-${row.id}`}>{row.id}</TableCell>
       <TableCell data-cy={`template-records-${row.id}`} align="right">

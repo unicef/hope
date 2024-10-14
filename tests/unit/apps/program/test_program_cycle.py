@@ -69,6 +69,7 @@ class TestProgramCycleMethods(TestCase):
         self.cycle.set_active()
         self.cycle.refresh_from_db()
         self.assertEqual(self.cycle.status, ProgramCycle.ACTIVE)
+        self.assertFalse(self.cycle.can_remove_cycle)
 
     def test_set_draft(self) -> None:
         with self.assertRaisesMessage(ValidationError, "Program should be within Active status."):
@@ -88,6 +89,7 @@ class TestProgramCycleMethods(TestCase):
         self.cycle.set_draft()
         self.cycle.refresh_from_db()
         self.assertEqual(self.cycle.status, ProgramCycle.DRAFT)
+        self.assertTrue(self.cycle.can_remove_cycle)
 
     def test_set_finish(self) -> None:
         with self.assertRaisesMessage(ValidationError, "Program should be within Active status."):
@@ -105,6 +107,7 @@ class TestProgramCycleMethods(TestCase):
         self.cycle.set_finish()
         self.cycle.refresh_from_db()
         self.assertEqual(self.cycle.status, ProgramCycle.FINISHED)
+        self.assertFalse(self.cycle.can_remove_cycle)
 
     def test_total_entitled_quantity_usd(self) -> None:
         self.assertEqual(self.cycle.total_entitled_quantity_usd, Decimal("0.0"))

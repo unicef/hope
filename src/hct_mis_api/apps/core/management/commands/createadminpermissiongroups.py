@@ -67,27 +67,7 @@ class Command(BaseCommand):
                 "individual",
                 "xlsxupdatefile",
             ],
-            "cash_assist_datahub": [
-                "cashplan",
-                "paymentrecord",
-                "programme",
-                "serviceprovider",
-                "session",
-                "targetpopulation",
-            ],
-            "erp_datahub": ["downpayment", "fundscommitment"],
-            "mis_datahub": [
-                "document",
-                "downpayment",
-                "fundscommitment",
-                "household",
-                "individualroleinhousehold",
-                "individual",
-                "program",
-                "session",
-                "targetpopulationentry",
-                "targetpopulation",
-            ],
+            "vision": ["downpayment", "fundscommitment"],
             "payment": ["cashplanpaymentverification", "paymentrecord", "paymentverification", "serviceprovider"],
             "django_celery_beat": [
                 "clockedschedule",
@@ -96,7 +76,6 @@ class Command(BaseCommand):
                 "periodictask",
                 "solarschedule",
             ],
-            "power_query": ["formatter", "query", "report"],  # 'dataset' change only
             "program": ["cashplan", "program"],
             "social_django": ["association", "nonce", "usersocialauth"],
             "registration_data": ["registrationdataimport"],
@@ -159,7 +138,6 @@ class Command(BaseCommand):
                 "codename": "change_advancedfilter",
                 "action": "change",
             },
-            {"name": "power_query | dataset | Can change dataset", "codename": "change_dataset", "action": "change"},
         ]
 
         for i in other_custom_groups_map:
