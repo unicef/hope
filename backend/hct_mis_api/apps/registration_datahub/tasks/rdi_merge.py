@@ -288,19 +288,25 @@ class RdiMergeTask:
                     PendingIndividualRoleInHousehold.objects.filter(individual_id__in=individual_ids).update(
                         rdi_merge_status=MergeStatusModel.MERGED
                     )
-                    households.update(rdi_merge_status=MergeStatusModel.MERGED)
-                    individuals.update(rdi_merge_status=MergeStatusModel.MERGED)
+                    PendingHousehold.objects.filter(id__in=household_ids).update(
+                        rdi_merge_status=MergeStatusModel.MERGED
+                    )
+                    PendingIndividual.objects.filter(id__in=individual_ids).update(
+                        rdi_merge_status=MergeStatusModel.MERGED
+                    )
                     populate_index(
                         Individual.objects.filter(registration_data_import=obj_hct),
                         get_individual_doc(obj_hct.business_area.slug),
                     )
 
+                    individuals = evaluate_qs(
+                        Individual.objects.filter(registration_data_import=obj_hct).select_for_update().order_by("pk")
+                    )
+                    households = evaluate_qs(
+                        Household.objects.filter(registration_data_import=obj_hct).select_for_update().order_by("pk")
+                    )
+
                     if not obj_hct.business_area.postpone_deduplication:
-                        individuals = evaluate_qs(
-                            Individual.objects.filter(registration_data_import=obj_hct)
-                            .select_for_update()
-                            .order_by("pk")
-                        )
                         DeduplicateTask(
                             obj_hct.business_area.slug, obj_hct.program.id
                         ).deduplicate_individuals_against_population(individuals)
@@ -402,9 +408,11 @@ class RdiMergeTask:
         # if this is the 2nd representation - the collection is created now for the new representation and the existing one
         for household in households:
             # find other household with the same unicef_id and group them in the same collection
-            household_from_collection = Household.objects.filter(
-                unicef_id=household.unicef_id, business_area=rdi.business_area
-            ).first()
+            household_from_collection = (
+                Household.objects.filter(unicef_id=household.unicef_id, business_area=rdi.business_area)
+                .exclude(registration_data_import=rdi)
+                .first()
+            )
             if household_from_collection:
                 if collection := household_from_collection.household_collection:
                     household.household_collection = collection
@@ -422,9 +430,14 @@ class RdiMergeTask:
         individuals_to_update = []
         for individual in individuals:
             # find other individual with the same unicef_id and group them in the same collection
-            individual_from_collection = Individual.objects.filter(
-                unicef_id=individual.unicef_id, business_area=rdi.business_area
-            ).first()
+            individual_from_collection = (
+                Individual.objects.filter(
+                    unicef_id=individual.unicef_id,
+                    business_area=rdi.business_area,
+                )
+                .exclude(registration_data_import=rdi)
+                .first()
+            )
             if individual_from_collection:
                 if collection := individual_from_collection.individual_collection:
                     individual.individual_collection = collection
