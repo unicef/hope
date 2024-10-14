@@ -56,7 +56,7 @@ class TestDetails(TestCase):
         household, individuals = create_household(household_args={"size": 1, "business_area": self.business_area})
         individual = individuals[0]
         document_type = DocumentTypeFactory(key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID])
-        document = DocumentFactory(individual=individual, type=document_type)
+        document = PendingDocumentFactory(individual=individual, type=document_type)
         tax_id = document.document_number
 
         response_ok = self.api_client.get(
@@ -129,7 +129,7 @@ class TestDetails(TestCase):
         household, individuals = create_household(household_args={"size": 1, "business_area": self.business_area})
         individual = individuals[0]
         document_type = DocumentTypeFactory(key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID])
-        document = DocumentFactory(individual=individual, type=document_type)
+        document = PendingDocumentFactory(individual=individual, type=document_type)
         tax_id = document.document_number
 
         response = self.api_client.get(f"/api/hh-status?tax_id={tax_id}")
@@ -143,7 +143,7 @@ class TestDetails(TestCase):
         household, individuals = create_household(household_args={"size": 1, "business_area": self.business_area})
         individual = individuals[0]
         document_type = DocumentTypeFactory(key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID])
-        document = DocumentFactory(individual=individual, type=document_type)
+        document = PendingDocumentFactory(individual=individual, type=document_type)
         tax_id = document.document_number
         target_popuplation = TargetPopulationFactory(
             business_area=self.business_area,
@@ -162,7 +162,7 @@ class TestDetails(TestCase):
         household, individuals = create_household(household_args={"size": 1, "business_area": self.business_area})
         individual = individuals[0]
         document_type = DocumentTypeFactory(key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID])
-        document = DocumentFactory(individual=individual, type=document_type)
+        document = PendingDocumentFactory(individual=individual, type=document_type)
         tax_id = document.document_number
 
         target_popuplation = TargetPopulationFactory(
@@ -184,7 +184,7 @@ class TestDetails(TestCase):
         household, individuals = create_household(household_args={"size": 1, "business_area": self.business_area})
         individual = individuals[0]
         document_type = DocumentTypeFactory(key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID])
-        document = DocumentFactory(individual=individual, type=document_type)
+        document = PendingDocumentFactory(individual=individual, type=document_type)
         tax_id = document.document_number
         payment_record = PaymentRecordFactory(household=household, currency="PLN")
 
