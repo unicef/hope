@@ -241,7 +241,6 @@ class RdiMergeTask:
             household_ids = list(households.values_list("id", flat=True))
             try:
                 with transaction.atomic():
-                    print("WTF")
                     old_obj_hct = copy_model_object(obj_hct)
 
                     transaction.on_commit(lambda: recalculate_population_fields_task(household_ids, obj_hct.program_id))
