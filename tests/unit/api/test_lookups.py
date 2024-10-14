@@ -1,9 +1,10 @@
 from rest_framework import status
 from rest_framework.reverse import reverse
 
+from hct_mis_api.api.models import Grant
 from hct_mis_api.apps.geo.fixtures import CountryFactory
 from hct_mis_api.apps.program.models import Program
-from tests.unit.api.base import HOPEApiTestCase
+from tests.unit.api.base import HOPEApiTestCase, token_grant_permission
 
 
 class APIProgramStatuesTests(HOPEApiTestCase):
@@ -12,7 +13,8 @@ class APIProgramStatuesTests(HOPEApiTestCase):
 
     def test_get_program_statues(self) -> None:
         url = reverse("api:program-statuses-list")
-        response = self.client.get(url)
+        with token_grant_permission(self.token, Grant.API_READ_ONLY):
+            response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), dict(Program.STATUS_CHOICE))
 
@@ -31,7 +33,8 @@ class APICountriesTests(HOPEApiTestCase):
             iso_num="0620",
         )
         url = reverse("api:country-list")
-        response = self.client.get(url)
+        with token_grant_permission(self.token, Grant.API_READ_ONLY):
+            response = self.client.get(url)
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == [
             {

@@ -1,22 +1,20 @@
 from django.db.models.query import QuerySet
 
-from django_filters import BooleanFilter, CharFilter, DateFromToRangeFilter
-from django_filters.rest_framework import FilterSet
+from django_filters import BooleanFilter, CharFilter
 
+from hct_mis_api.apps.core.api.filters import UpdatedAtFilter
 from hct_mis_api.apps.program.models import Program
 
 
-class ProgramFilter(FilterSet):
+class ProgramFilter(UpdatedAtFilter):
     business_area = CharFilter(field_name="business_area__slug")
     active = BooleanFilter(method="is_active_filter")
-    updated_at = DateFromToRangeFilter()
 
     class Meta:
         model = Program
         fields = (
             "business_area",
             "active",
-            "updated_at",
             "status",
         )
 

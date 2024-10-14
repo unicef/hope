@@ -1,25 +1,16 @@
-import contextlib
-from typing import Iterator
+from datetime import timedelta
+
+from django.utils import timezone
 
 from rest_framework.reverse import reverse
 
-from hct_mis_api.api.models import APIToken, Grant
+from hct_mis_api.api.models import Grant
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from tests.unit.api.base import HOPEApiTestCase
-
-
-@contextlib.contextmanager
-def token_grant_permission(token: APIToken, grant: Grant) -> Iterator:
-    old = token.grants
-    token.grants += [grant.name]
-    token.save()
-    yield
-    token.grants = old
-    token.save()
+from tests.unit.api.base import HOPEApiTestCase, token_grant_permission
 
 
 class APIProgramTests(HOPEApiTestCase):
@@ -269,3 +260,28 @@ class APIGlobalProgramTests(HOPEApiTestCase):
             self.program2_expected_response,
             response.json()["results"],
         )
+
+    def test_list_program_filter_updated_at(self) -> None:
+        tomorrow = (timezone.now() + timedelta(days=1)).date()
+        tomorrow_str = tomorrow.strftime("%Y-%m-%d")
+        yesterday = (timezone.now() - timedelta(days=1)).date()
+        yesterday_str = yesterday.strftime("%Y-%m-%d")
+        with token_grant_permission(self.token, Grant.API_READ_ONLY):
+            response = self.client.get(self.list_url, {"updated_at_before": tomorrow_str})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json()["results"]), 3)
+
+        with token_grant_permission(self.token, Grant.API_READ_ONLY):
+            response = self.client.get(self.list_url, {"updated_at_after": tomorrow_str})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json()["results"]), 0)
+
+        with token_grant_permission(self.token, Grant.API_READ_ONLY):
+            response = self.client.get(self.list_url, {"updated_at_before": yesterday_str})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json()["results"]), 0)
+
+        with token_grant_permission(self.token, Grant.API_READ_ONLY):
+            response = self.client.get(self.list_url, {"updated_at_after": yesterday_str})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json()["results"]), 3)
