@@ -11,12 +11,8 @@ if TYPE_CHECKING:
 
 
 def get_household_status(household: Household) -> Tuple[str, datetime]:
-    if household.rdi_merge_status == Household.PENDING:
+    if household.rdi_merge_status == MergeStatusModel.PENDING:
         return "imported", household.updated_at
-
-    payment_records = PaymentRecord.objects.filter(household=household)
-    if payment_records.exists():
-        return "paid", payment_records.first().updated_at
     if household.rdi_merge_status == MergeStatusModel.MERGED:
         payment_records = PaymentRecord.objects.filter(household=household)
         if payment_records.exists():
