@@ -278,8 +278,8 @@ class PaymentGatewayAPI(BaseAPI):
     class PaymentGatewayMissingAPICredentialsException(Exception):
         pass
 
-    API_EXCEPTION_CLASS = PaymentGatewayAPIException
-    API_MISSING_CREDENTIALS_EXCEPTION_CLASS = PaymentGatewayMissingAPICredentialsException
+    API_EXCEPTION_CLASS = PaymentGatewayAPIException  # type: ignore
+    API_MISSING_CREDENTIALS_EXCEPTION_CLASS = PaymentGatewayMissingAPICredentialsException  # type: ignore
 
     class Endpoints:
         CREATE_PAYMENT_INSTRUCTION = "payment_instructions/"
@@ -307,7 +307,7 @@ class PaymentGatewayAPI(BaseAPI):
 
     def change_payment_instruction_status(self, status: PaymentInstructionStatus, remote_id: str) -> str:
         if status.value not in [s.value for s in PaymentInstructionStatus]:
-            raise self.API_EXCEPTION_CLASS(f"Can't set invalid Payment Instruction status: {status}")
+            raise self.API_EXCEPTION_CLASS(f"Can't set invalid Payment Instruction status: {status}")  # type: ignore
 
         action_endpoint_map = {
             PaymentInstructionStatus.ABORTED: self.Endpoints.ABORT_PAYMENT_INSTRUCTION_STATUS,
