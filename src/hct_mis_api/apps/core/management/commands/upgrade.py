@@ -11,7 +11,3 @@ class Command(BaseCommand):
         from adminactions.perms import create_extra_permissions
 
         create_extra_permissions()
-
-        from hct_mis_api.libs.power_query.defaults import hope_create_defaults
-
-        hope_create_defaults()
