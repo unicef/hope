@@ -1,4 +1,3 @@
-from django.core.management import call_command
 from django.db.models import Count
 from django.test import TransactionTestCase
 
