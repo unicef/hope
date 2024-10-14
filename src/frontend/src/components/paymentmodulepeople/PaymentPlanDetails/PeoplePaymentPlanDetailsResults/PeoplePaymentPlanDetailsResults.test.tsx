@@ -1,10 +1,10 @@
 import { MockedProvider } from '@apollo/react-testing';
-import { act } from 'react-dom/test-utils';
 import wait from 'waait';
 import { fakeApolloPaymentPlan } from '../../../../../fixtures/paymentmodule/fakeApolloPaymentPlan';
 import { fakeActionPpMutation } from '../../../../../fixtures/paymentmodule/fakeApolloActionPaymentPlanMutation';
 import { render } from '../../../../testUtils/testUtils';
 import { PeoplePaymentPlanDetailsResults } from './PeoplePaymentPlanDetailsResults';
+import { act } from 'react';
 
 describe('components/paymentmodule/PaymentPlanDetails/PeoplePaymentPlanDetailsHeader/PaymentPlanDetailsResults', () => {
   it('should render', async () => {

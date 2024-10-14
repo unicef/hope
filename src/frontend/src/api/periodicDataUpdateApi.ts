@@ -1,10 +1,15 @@
 import { api } from './api';
+import { PaginatedPeriodicDataUpdateTemplateListList } from '@restgenerated/models/PaginatedPeriodicDataUpdateTemplateListList';
+import { PeriodicDataUpdateUploadList } from '@restgenerated/models/PeriodicDataUpdateUploadList';
+import { PeriodicDataUpdateTemplateDetail } from '@restgenerated/models/PeriodicDataUpdateTemplateDetail';
+import { PeriodicDataUpdateUploadDetail } from '@restgenerated/models/PeriodicDataUpdateUploadDetail';
+import { PaginatedPeriodicFieldList } from '@restgenerated/models/PaginatedPeriodicFieldList';
 
 export const fetchPeriodicDataUpdateTemplates = async (
-  businessAreaSlug,
-  programId,
+  businessAreaSlug: string,
+  programId: string,
   params = {},
-) => {
+): Promise<PaginatedPeriodicDataUpdateTemplateListList> => {
   const response = await api.get(
     `${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-templates/`,
     params,
@@ -16,7 +21,7 @@ export const fetchPeriodicDataUpdateUpdates = async (
   businessAreaSlug,
   programId,
   params = {},
-) => {
+): Promise<PeriodicDataUpdateUploadList> => {
   const response = await api.get(
     `${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-uploads/`,
     params,
@@ -28,7 +33,7 @@ export const fetchPeriodicDataUpdateTemplateDetails = async (
   businessAreaSlug,
   programId,
   templateId,
-) => {
+): Promise<PeriodicDataUpdateTemplateDetail> => {
   const response = await api.get(
     `${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-templates/${templateId}/`,
   );
@@ -82,7 +87,7 @@ export const fetchPeriodicDataUpdateUploadDetails = async (
   businessAreaSlug,
   programId,
   uploadId,
-) => {
+): Promise<PeriodicDataUpdateUploadDetail> => {
   const response = await api.get(
     `${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-uploads/${uploadId}/`,
   );
@@ -92,9 +97,8 @@ export const fetchPeriodicDataUpdateUploadDetails = async (
 export const createPeriodicDataUpdateTemplate = async (
   businessAreaSlug: string,
   programId: string,
-  //TODO MS: Add types
-  roundsData: any,
-  filters: any,
+  roundsData: Record<string, any>,
+  filters: Record<string, any> | null,
 ) => {
   const payload = {
     rounds_data: roundsData,
@@ -112,7 +116,7 @@ export const fetchPeriodicFields = async (
   businessAreaSlug: string,
   programId: string,
   params = {},
-): Promise<any> => {
+): Promise<PaginatedPeriodicFieldList> => {
   const response = await api.get(
     `${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-fields/`,
     params,

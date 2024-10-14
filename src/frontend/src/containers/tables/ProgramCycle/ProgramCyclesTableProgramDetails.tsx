@@ -1,20 +1,20 @@
-import { ProgramQuery, ProgramStatus } from '@generated/graphql';
+import { fetchProgramCycles, ProgramCycle } from '@api/programCycleApi';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
-import React, { ReactElement, useState } from 'react';
-import { ClickableTableRow } from '@core/Table/ClickableTableRow';
-import TableCell from '@mui/material/TableCell';
-import { UniversalMoment } from '@core/UniversalMoment';
-import { StatusBox } from '@core/StatusBox';
-import { programCycleStatusToColor } from '@utils/utils';
-import headCells from '@containers/tables/ProgramCycle/HeadCells';
-import { AddNewProgramCycle } from '@containers/tables/ProgramCycle/NewProgramCycle/AddNewProgramCycle';
 import { DeleteProgramCycle } from '@containers/tables/ProgramCycle/DeleteProgramCycle';
 import { EditProgramCycle } from '@containers/tables/ProgramCycle/EditProgramCycle';
-import { useQuery } from '@tanstack/react-query';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { fetchProgramCycles, ProgramCycle } from '@api/programCycleApi';
+import headCells from '@containers/tables/ProgramCycle/HeadCells';
+import { AddNewProgramCycle } from '@containers/tables/ProgramCycle/NewProgramCycle/AddNewProgramCycle';
 import { BlackLink } from '@core/BlackLink';
+import { StatusBox } from '@core/StatusBox';
+import { ClickableTableRow } from '@core/Table/ClickableTableRow';
+import { UniversalMoment } from '@core/UniversalMoment';
+import { ProgramQuery, ProgramStatus } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
+import TableCell from '@mui/material/TableCell';
+import { useQuery } from '@tanstack/react-query';
+import { programCycleStatusToColor } from '@utils/utils';
+import { ReactElement, useState } from 'react';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 
 interface ProgramCyclesTableProgramDetailsProps {
@@ -46,13 +46,15 @@ export const ProgramCyclesTableProgramDetails = ({
 
   const renderRow = (row: ProgramCycle): ReactElement => {
     const detailsUrl = `/${baseUrl}/payment-module/program-cycles/${row.id}`;
+
     const canEditProgramCycle =
       (row.status === 'Draft' || row.status === 'Active') &&
       hasPermissions(PERMISSIONS.PM_PROGRAMME_CYCLE_UPDATE, permissions);
-    const canDeleteProgramCycle =
-      row.status === 'Draft' &&
-      data.results.length > 1 &&
-      hasPermissions(PERMISSIONS.PM_PROGRAMME_CYCLE_DELETE, permissions);
+
+    const hasPermissionToDelete = hasPermissions(
+      PERMISSIONS.PM_PROGRAMME_CYCLE_DELETE,
+      permissions,
+    );
     return (
       <ClickableTableRow key={row.id} data-cy="program-cycle-row">
         <TableCell data-cy="program-cycle-title">
@@ -100,7 +102,7 @@ export const ProgramCyclesTableProgramDetails = ({
                 <EditProgramCycle program={program} programCycle={row} />
               )}
 
-              {canDeleteProgramCycle && (
+              {row.can_remove_cycle && hasPermissionToDelete && (
                 <DeleteProgramCycle program={program} programCycle={row} />
               )}
             </>
