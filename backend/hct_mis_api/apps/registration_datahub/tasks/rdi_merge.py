@@ -334,7 +334,6 @@ class RdiMergeTask:
                             "possible_duplicates",
                             obj_hct.business_area,
                             registration_data_import=obj_hct,
-                            issue_type=GrievanceTicket.ISSUE_TYPE_BIOGRAPHICAL_DATA_SIMILARITY,
                         )
                         logger.info(
                             f"RDI:{registration_data_import_id} Created tickets for {len(needs_adjudication)} needs adjudication"
@@ -349,7 +348,6 @@ class RdiMergeTask:
                     # synchronously deduplicate documents
                     deduplicate_documents()
 
-                    obj_hct.update_needs_adjudication_tickets_statistic()
                     obj_hct.status = RegistrationDataImport.MERGED
                     obj_hct.save()
 
