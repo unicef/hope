@@ -4,18 +4,19 @@ from typing import TYPE_CHECKING, Dict, Optional, Tuple
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
+from hct_mis_api.apps.utils.models import MergeStatusModel
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.household.models import Individual
 
 
 def get_household_status(household: Household) -> Tuple[str, datetime]:
-    if household.rdi_merge_status == Household.PENDING:
+    if household.rdi_merge_status == MergeStatusModel.PENDING:
         return "imported", household.updated_at
-
-    payment_records = PaymentRecord.objects.filter(household=household)
-    if payment_records.exists():
-        return "paid", payment_records.first().updated_at
+    if household.rdi_merge_status == MergeStatusModel.MERGED:
+        payment_records = PaymentRecord.objects.filter(household=household)
+        if payment_records.exists():
+            return "paid", payment_records.first().updated_at
 
     selections = HouseholdSelection.objects.filter(household=household)
     if selections.exists():
