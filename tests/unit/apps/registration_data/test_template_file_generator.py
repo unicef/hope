@@ -92,8 +92,10 @@ class TestTemplateFileGenerator(TestCase):
         self.assertEqual("pp_village_i_c", people_rows[0][70])
         self.assertEqual("Village - STRING", people_rows[1][70])
 
-        self.assertEqual("pp_index_id", people_rows[0][86])
-        self.assertEqual("Index ID - INTEGER - required", people_rows[1][86])
+        self.assertEqual("pp_bank_branch_name_i_c", people_rows[0][86])
+
+        self.assertEqual("pp_index_id", people_rows[0][84])
+        self.assertEqual("Index ID - INTEGER - required", people_rows[1][84])
 
         self.assertIn("pp_wallet_name__transfer_to_digital_wallet_i_c", people_rows[0])
         self.assertIn(

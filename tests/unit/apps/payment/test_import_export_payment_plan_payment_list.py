@@ -31,8 +31,10 @@ from hct_mis_api.apps.household.fixtures import (
 )
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_NATIONAL_ID,
+    ROLE_PRIMARY,
     Document,
     Household,
+    IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.fixtures import (
@@ -51,9 +53,13 @@ from hct_mis_api.apps.payment.models import (
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     FspXlsxTemplatePerDeliveryMechanism,
+    PaymentHouseholdSnapshot,
     PaymentPlan,
     PaymentPlanSplit,
     ServiceProvider,
+)
+from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
+    create_payment_plan_snapshot_data,
 )
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.payment.utils import to_decimal
@@ -127,6 +133,8 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         # set Lock status
         cls.payment_plan.status_lock()
         cls.payment_plan.save()
+
+        create_payment_plan_snapshot_data(cls.payment_plan)
 
         cls.xlsx_valid_file = FileTemp.objects.create(
             object_id=cls.payment_plan.pk,
@@ -206,7 +214,10 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
             document_number="Test_Number_National_Id_123",
             individual=payment.collector,
         )
-
+        # remove old and create new snapshot with national_id document
+        PaymentHouseholdSnapshot.objects.all().delete()
+        self.assertEqual(payment.collector.documents.all().count(), 1)
+        create_payment_plan_snapshot_data(self.payment_plan)
         export_service = XlsxPaymentPlanExportService(self.payment_plan)
         export_service.save_xlsx_file(self.user)
 
@@ -353,25 +364,31 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
             "bank_branch_name",
             "bank_name",
             "bank_account_number",
+            "debit_card_number",
         ]
         export_service = XlsxPaymentPlanExportPerFspService(self.payment_plan)
         fsp_xlsx_template = FinancialServiceProviderXlsxTemplateFactory(core_fields=core_fields)
         headers = export_service.prepare_headers(fsp_xlsx_template)
         household, _ = create_household({"size": 1})
-        individual = household.primary_collector
+        primary = IndividualRoleInHousehold.objects.filter(role=ROLE_PRIMARY, household=household).first().individual
         BankAccountInfoFactory(
-            individual=individual,
+            individual=primary,
             account_holder_name="Kowalski",
             bank_branch_name="BranchJPMorgan",
             bank_name="JPMorgan",
             bank_account_number="362277220020615398848112903",
+            debit_card_number="123",
         )
-        payment = PaymentFactory(parent=self.payment_plan, household=household)
+        payment = PaymentFactory(parent=self.payment_plan, household=household, collector=primary)
+        # remove old and create new snapshot with bank account info
+        PaymentHouseholdSnapshot.objects.all().delete()
+        create_payment_plan_snapshot_data(self.payment_plan)
 
         account_holder_name_index = headers.index("account_holder_name")
         bank_branch_name_index = headers.index("bank_branch_name")
         bank_name_index = headers.index("bank_name")
         bank_account_number_index = headers.index("bank_account_number")
+        debit_card_number_index = headers.index("debit_card_number")
 
         payment_row = export_service.get_payment_row(payment, fsp_xlsx_template)
 
@@ -379,13 +396,11 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         self.assertEqual(payment_row[bank_branch_name_index], "BranchJPMorgan")
         self.assertEqual(payment_row[bank_name_index], "JPMorgan")
         self.assertEqual(payment_row[bank_account_number_index], "362277220020615398848112903")
+        self.assertEqual(payment_row[debit_card_number_index], "123")
 
     def test_payment_row_flex_fields(self) -> None:
         core_fields = [
             "account_holder_name",
-            "bank_branch_name",
-            "bank_name",
-            "bank_account_number",
         ]
         decimal_flexible_attribute = FlexibleAttribute(
             type=FlexibleAttribute.DECIMAL,
@@ -418,16 +433,15 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         household.flex_fields = {
             date_flexible_attribute.name: "2021-01-01",
         }
-        BankAccountInfoFactory(
-            individual=individual,
-            account_holder_name="Kowalski",
-            bank_branch_name="BranchJPMorgan",
-            bank_name="JPMorgan",
-            bank_account_number="362277220020615398848112903",
-        )
-        payment = PaymentFactory(parent=self.payment_plan, household=household)
+        household.save()
+        payment = PaymentFactory(parent=self.payment_plan, household=household, collector=individual)
         decimal_flexible_attribute_index = headers.index(decimal_flexible_attribute.name)
         date_flexible_attribute_index = headers.index(date_flexible_attribute.name)
+
+        # remove old and create new snapshot
+        PaymentHouseholdSnapshot.objects.all().delete()
+        create_payment_plan_snapshot_data(self.payment_plan)
+
         payment_row = export_service.get_payment_row(payment, fsp_xlsx_template)
         self.assertEqual(payment_row[decimal_flexible_attribute_index], 123.45)
         self.assertEqual(payment_row[date_flexible_attribute_index], "2021-01-01")
@@ -570,3 +584,17 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
             "flex_date_i_f",
             (name for name, _ in response.context["adminform"].form.fields["flex_fields"].choices),
         )
+
+    def test_payment_row_get_flex_field_if_no_snapshot_data(self) -> None:
+        flex_field = FlexibleAttribute(
+            type=FlexibleAttribute.DECIMAL,
+            name="flex_decimal_i_f",
+            associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+        )
+        flex_field.save()
+        fsp_xlsx_template = FinancialServiceProviderXlsxTemplateFactory(flex_fields=[flex_field.name])
+        export_service = XlsxPaymentPlanExportPerFspService(self.payment_plan)
+        payment = PaymentFactory(parent=self.payment_plan)
+        empty_payment_row = export_service.get_payment_row(payment, fsp_xlsx_template)
+        for value in empty_payment_row:
+            self.assertEqual(value, "")
