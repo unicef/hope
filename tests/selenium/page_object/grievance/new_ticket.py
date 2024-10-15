@@ -218,7 +218,7 @@ class NewTicket(BaseComponents):
         return self.get_elements(self.individualTableRow)[number]
 
     def getReceivedConsent(self) -> WebElement:
-        return self.wait_for(self.receivedConsent)
+        return self.wait_for(self.receivedConsent, timeout=100)
 
     def getDescription(self) -> WebElement:
         return self.wait_for(self.description)
