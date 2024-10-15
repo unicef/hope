@@ -165,6 +165,7 @@ class TestCreateNeedsAdjudicationTicketsBiometrics(APITestCase):
         cls.rdi = cls.household.registration_data_import
         individuals_to_create = [
             {
+                "id": "11111111-1111-1111-1111-111111111111",
                 "full_name": "test name",
                 "given_name": "test",
                 "family_name": "name",
@@ -176,6 +177,7 @@ class TestCreateNeedsAdjudicationTicketsBiometrics(APITestCase):
                 "photo": ContentFile(b"aaa", name="fooa.png"),
             },
             {
+                "id": "22222222-2222-2222-2222-222222222222",
                 "full_name": "Test2 Name2",
                 "given_name": "Test2",
                 "family_name": "Name2",
@@ -189,6 +191,7 @@ class TestCreateNeedsAdjudicationTicketsBiometrics(APITestCase):
         ]
         individuals_to_create_2 = [
             {
+                "id": "33333333-3333-3333-3333-333333333333",
                 "full_name": "test name",
                 "given_name": "test",
                 "family_name": "name",
@@ -297,12 +300,10 @@ class TestCreateNeedsAdjudicationTicketsBiometrics(APITestCase):
                         }
                         dedupEngineSimilarityPair {
                           individual1 {
-                            photo
                             fullName
                           }
                           individual2 {
                             fullName
-                            photo
                           }
                           similarityScore
                         }
