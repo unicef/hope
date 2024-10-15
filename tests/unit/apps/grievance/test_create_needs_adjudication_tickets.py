@@ -300,11 +300,9 @@ class TestCreateNeedsAdjudicationTicketsBiometrics(APITestCase):
                         }
                         dedupEngineSimilarityPair {
                           individual1 {
-                            photo
                             fullName
                           }
                           individual2 {
-                            fullName
                             photo
                           }
                           similarityScore
