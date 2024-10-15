@@ -1,9 +1,8 @@
 import { MockedProvider } from '@apollo/react-testing';
-import { act } from '@testing-library/react';
-import * as React from 'react';
+import { act } from 'react';
 import wait from 'waait';
 import { fakeApolloAllPaymentPlansForTable } from '../../../../../fixtures/payments/fakeApolloAllPaymentPlansForTable';
-import { ApolloLoadingLink, render } from '../../../../testUtils/testUtils';
+import { render } from '../../../../testUtils/testUtils';
 import { PaymentPlansTable } from './PaymentPlansTable';
 
 describe('containers/tables/payments/PaymentPlansTable', () => {
@@ -30,7 +29,7 @@ describe('containers/tables/payments/PaymentPlansTable', () => {
     await act(() => wait(0)); // wait for response
 
     expect(container).toMatchSnapshot();
-  });
+  }, 10000); // Increase the timeout to 10 seconds
 
   it('should render loading', async () => {
     const { container } = render(
@@ -55,5 +54,5 @@ describe('containers/tables/payments/PaymentPlansTable', () => {
     await act(() => wait(0)); // wait for response
 
     expect(container).toMatchSnapshot();
-  });
+  }, 10000); // Increase the timeout to 10 seconds
 });

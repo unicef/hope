@@ -593,6 +593,29 @@ class TestRdiMergeTask(TestCase):
         with capture_on_commit_callbacks(execute=True):
             RdiMergeTask().execute(self.rdi.pk)
 
+    @patch.dict(
+        "os.environ",
+        {"DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key", "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com"},
+    )
+    @mock.patch(
+        "hct_mis_api.apps.registration_datahub.services.biometric_deduplication.BiometricDeduplicationService.create_grievance_tickets_for_duplicates"
+    )
+    @mock.patch(
+        "hct_mis_api.apps.registration_datahub.services.biometric_deduplication.BiometricDeduplicationService.update_rdis_deduplication_statistics"
+    )
+    def test_merge_biometric_deduplication_enabled(
+        self,
+        update_rdis_deduplication_statistics_mock: mock.Mock,
+        create_grievance_tickets_for_duplicates_mock: mock.Mock,
+    ) -> None:
+        program = self.rdi.program
+        program.biometric_deduplication_enabled = True
+        program.save()
+        with capture_on_commit_callbacks(execute=True):
+            RdiMergeTask().execute(self.rdi.pk)
+        create_grievance_tickets_for_duplicates_mock.assert_called_once_with(self.rdi)
+        update_rdis_deduplication_statistics_mock.assert_called_once_with(program, exclude_rdi=self.rdi)
+
 
 class TestRdiMergeTaskDeliveryMechanismData(TestCase):
     fixtures = [
