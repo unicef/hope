@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db.models import QuerySet
 
 from constance import config
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
@@ -22,6 +23,7 @@ from hct_mis_api.apps.account.api.permissions import (
     PDUUploadPermission,
     PDUViewListAndDetailsPermission,
 )
+from hct_mis_api.apps.core.api.filters import UpdatedAtFilter
 from hct_mis_api.apps.core.api.mixins import (
     ActionMixin,
     BusinessAreaProgramMixin,
@@ -69,7 +71,8 @@ class PeriodicDataUpdateTemplateViewSet(
         "export": [PDUTemplateCreatePermission],
         "download": [PDUTemplateDownloadPermission],
     }
-    filter_backends = (OrderingFilter,)
+    filter_backends = (OrderingFilter, DjangoFilterBackend)
+    filterset_class = UpdatedAtFilter
 
     def get_queryset(self) -> QuerySet:
         business_area = self.get_business_area()
@@ -132,7 +135,8 @@ class PeriodicDataUpdateUploadViewSet(
         "retrieve": [PDUViewListAndDetailsPermission],
         "upload": [PDUUploadPermission],
     }
-    filter_backends = (OrderingFilter,)
+    filter_backends = (OrderingFilter, DjangoFilterBackend)
+    filterset_class = UpdatedAtFilter
 
     def get_queryset(self) -> QuerySet:
         business_area = self.get_business_area()
@@ -183,7 +187,8 @@ class PeriodicFieldViewSet(
 ):
     serializer_class = PeriodicFieldSerializer
     permission_classes = [PDUViewListAndDetailsPermission]
-    filter_backends = (OrderingFilter,)
+    filter_backends = (OrderingFilter, DjangoFilterBackend)
+    filterset_class = UpdatedAtFilter
 
     def get_queryset(self) -> QuerySet:
         program = self.get_program()
