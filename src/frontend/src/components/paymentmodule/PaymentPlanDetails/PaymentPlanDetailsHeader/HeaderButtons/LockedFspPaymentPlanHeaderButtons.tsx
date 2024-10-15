@@ -44,6 +44,7 @@ export function LockedFspPaymentPlanHeaderButtons({
             color="primary"
             onClick={() => unlock()}
             disabled={!isActiveProgram}
+            data-cy="button-unlock-fsp"
           >
             {t('Unlock FSP')}
           </LoadingButton>

@@ -56,6 +56,7 @@ export function DeletePaymentPlan({
         <IconButton
           onClick={() => setDeleteDialogOpen(true)}
           disabled={!isActiveProgram}
+          data-cy="button-delete-pp"
         >
           <Delete />
         </IconButton>

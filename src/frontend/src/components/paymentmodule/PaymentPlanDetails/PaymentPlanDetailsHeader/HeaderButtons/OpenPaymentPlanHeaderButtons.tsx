@@ -33,6 +33,7 @@ export function OpenPaymentPlanHeaderButtons({
             variant="outlined"
             color="primary"
             startIcon={<EditRounded />}
+            data-cy="button-edit-payment-plan"
             component={Link}
             to={'./edit'}
             disabled={!isActiveProgram}
