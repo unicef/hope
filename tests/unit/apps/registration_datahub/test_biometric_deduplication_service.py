@@ -352,7 +352,6 @@ class BiometricDeduplicationServiceTest(TestCase):
 
     def test_get_duplicates_for_rdi_against_population(self) -> None:
         self.program.deduplication_set_id = uuid.uuid4()
-        self.program.business_area.biometric_deduplication_threshold = 0.6
         self.program.business_area.save()
         self.program.save()
 
@@ -400,8 +399,7 @@ class BiometricDeduplicationServiceTest(TestCase):
         ]
         service.store_similarity_pairs(str(self.program.deduplication_set_id), similarity_pairs)
 
-        duplicates = service.get_duplicates_for_rdi_against_population(rdi1)
-
+        duplicates = service.get_duplicates_for_rdi_against_population(rdi1, rdi_merged=False)
         assert len(duplicates) == 2
         assert list(
             duplicates.order_by("similarity_score").values("individual1", "individual2", "similarity_score")
@@ -423,7 +421,6 @@ class BiometricDeduplicationServiceTest(TestCase):
 
     def test_get_duplicates_for_merged_rdi_against_population(self) -> None:
         self.program.deduplication_set_id = uuid.uuid4()
-        self.program.business_area.biometric_deduplication_threshold = 0.6
         self.program.business_area.save()
         self.program.save()
 
@@ -455,10 +452,6 @@ class BiometricDeduplicationServiceTest(TestCase):
         ind5.save()
         ind6.save()
 
-        for ind in [ind3, ind4]:
-            ind.rdi_merge_status = MergeStatusModel.PENDING
-            ind.save()
-
         service = BiometricDeduplicationService()
         similarity_pairs = [
             SimilarityPair(score=0.7, first=ind1.id, second=ind2.id),  # within merged rdi1
@@ -471,7 +464,7 @@ class BiometricDeduplicationServiceTest(TestCase):
         ]
         service.store_similarity_pairs(str(self.program.deduplication_set_id), similarity_pairs)
 
-        duplicates = service.get_duplicates_for_merged_rdi_against_population(rdi2)
+        duplicates = service.get_duplicates_for_rdi_against_population(rdi2, rdi_merged=True)
 
         assert len(duplicates) == 3
         assert list(
@@ -571,8 +564,8 @@ class BiometricDeduplicationServiceTest(TestCase):
         )
 
         service = BiometricDeduplicationService()
-        service.get_duplicates_for_merged_rdi_against_population = mock.MagicMock()
-        service.get_duplicates_for_merged_rdi_against_population.return_value = []
+        service.get_duplicates_for_rdi_against_population = mock.MagicMock()
+        service.get_duplicates_for_rdi_against_population.return_value = []
 
         service.create_grievance_tickets_for_duplicates(rdi1)
         create_needs_adjudication_tickets_for_biometrics_mock.assert_called_once_with([], rdi1)
@@ -663,18 +656,23 @@ class BiometricDeduplicationServiceTest(TestCase):
             program=self.program,
             deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED,
             status=RegistrationDataImport.IN_REVIEW,
+            dedup_engine_batch_duplicates=5,
+            dedup_engine_golden_record_duplicates=6,
+        )
+        rdi2 = RegistrationDataImportFactory(
+            program=self.program,
+            deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED,
+            status=RegistrationDataImport.IN_REVIEW,
         )
 
-        service.get_duplicate_individuals_for_rdi_against_batch_count = mock.Mock(return_value=8)
         service.get_duplicate_individuals_for_rdi_against_population_count = mock.Mock(return_value=9)
 
-        service.update_rdis_deduplication_statistics(self.program.id)
+        service.update_rdis_deduplication_statistics(self.program, exclude_rdi=rdi2)
 
-        service.get_duplicate_individuals_for_rdi_against_batch_count.assert_called_once_with(rdi1)
         service.get_duplicate_individuals_for_rdi_against_population_count.assert_called_once_with(rdi1)
 
         rdi1.refresh_from_db()
-        assert rdi1.dedup_engine_batch_duplicates == 8
+        assert rdi1.dedup_engine_batch_duplicates == 5
         assert rdi1.dedup_engine_golden_record_duplicates == 9
 
     @patch(
