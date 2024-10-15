@@ -22,10 +22,6 @@ def remove_migrated_data_is_original() -> None:
                 f"Removing objects with 'is_original=True': {queryset_is_original.count()}"
             )
 
-            try:
-                count, _ = queryset_is_original.delete(soft=False)
-            #  TypeError: QuerySet.delete() got an unexpected keyword argument 'soft'
-            except TypeError:
-                count, _ = queryset_is_original.delete()
+            count, _ = queryset_is_original.delete()
 
             print(f"Deleted {model.__name__} and related objects {count}.\n")
