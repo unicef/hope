@@ -51,7 +51,6 @@ from hct_mis_api.apps.registration_data.models import (
     RegistrationDataImport,
 )
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
-    create_grievance_tickets_for_dedup_engine_results,
     deduplication_engine_process,
     fetch_biometric_deduplication_results_and_process,
     merge_registration_data_import_task,
@@ -1093,22 +1092,6 @@ class DeduplicationEngineCeleryTasksTests(TestCase):
         deduplication_engine_process(str(self.program.id))
 
         mock_upload_and_process.assert_called_once_with(self.program)
-
-    @patch.dict(
-        "os.environ",
-        {"DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key", "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com"},
-    )
-    @patch(
-        "hct_mis_api.apps.registration_datahub.services.biometric_deduplication.BiometricDeduplicationService"
-        ".create_grievance_tickets_for_duplicates"
-    )
-    def test_create_grievance_tickets_for_dedup_engine_results_task(
-        self,
-        mock_create_tickets: Mock,
-    ) -> None:
-        create_grievance_tickets_for_dedup_engine_results(str(self.registration_data_import.id))
-
-        mock_create_tickets.assert_called_once_with(self.registration_data_import)
 
     @patch.dict(
         "os.environ",
