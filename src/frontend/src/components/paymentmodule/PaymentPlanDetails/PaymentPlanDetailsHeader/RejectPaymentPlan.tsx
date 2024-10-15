@@ -65,7 +65,10 @@ export function RejectPaymentPlan({
         <>
           {rejectDialogOpen && <AutoSubmitFormOnEnter />}
           <Box p={2}>
-            <ErrorButton onClick={() => setRejectDialogOpen(true)}>
+            <ErrorButton
+              data-cy="button-reject"
+              onClick={() => setRejectDialogOpen(true)}
+            >
               {t('Reject')}
             </ErrorButton>
           </Box>
