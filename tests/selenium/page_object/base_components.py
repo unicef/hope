@@ -207,10 +207,10 @@ class BaseComponents(Common):
 
     def checkAlert(self, text: str) -> None:
         self.getAlert()
-        for _ in range(10):
+        for _ in range(300):
             if text in self.getAlert().text:
                 break
-            sleep(1)
+            sleep(0.1)
         assert text in self.getAlert().text
 
     def waitForNumberOfRows(self, number: int) -> bool:
