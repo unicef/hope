@@ -303,7 +303,7 @@ class TestCreateNeedsAdjudicationTicketsBiometrics(APITestCase):
                             fullName
                           }
                           individual2 {
-                            photo
+                            fullName
                           }
                           similarityScore
                         }
