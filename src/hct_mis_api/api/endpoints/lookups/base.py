@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING, Any, Optional
 
+from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 
 from hct_mis_api.api.endpoints.base import HOPEAPIView
@@ -26,12 +27,10 @@ class DocumentType(HOPEAPIView):
         return Response(dict(IDENTIFICATION_TYPE_CHOICE))
 
 
-class CountryAPIView(HOPEAPIView):
+class CountryAPIView(HOPEAPIView, ListAPIView):
+    queryset = Country.objects.all()
     serializer_class = CountrySerializer
-
-    def get(self, request: "Request", format: Optional[Any] = None) -> Response:
-        serializer = self.serializer_class(Country.objects.all(), many=True)
-        return Response(serializer.data)
+    pagination_class = None
 
 
 class ResidenceStatus(HOPEAPIView):
