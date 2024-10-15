@@ -38,6 +38,7 @@ urlpatterns = [
     path("lookups/sex/", endpoints.lookups.Sex().as_view(), name="sex-list"),
     path("business_areas/", endpoints.core.BusinessAreaListView.as_view(), name="business-area-list"),
     path("programs/", ProgramGlobalListView.as_view(), name="program-global-list"),
+    path("dashboard/", include("hct_mis_api.apps.dashboard.urls")),
     path(
         "<slug:business_area>/",
         include(
