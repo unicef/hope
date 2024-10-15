@@ -1,4 +1,3 @@
-import json
 import random
 from typing import Any, List
 
@@ -147,7 +146,7 @@ class FlexibleAttributeForPDUFactory(DjangoModelFactory):
     @classmethod
     def _create(cls, target_class: Any, *args: Any, **kwargs: Any) -> FlexibleAttribute:
         label = kwargs.pop("label", None)
-        kwargs["label"] = json.dumps({"English(EN)": label})
+        kwargs["label"] = {"English(EN)": label}
         obj = super()._create(target_class, *args, **kwargs)
         return obj
 
