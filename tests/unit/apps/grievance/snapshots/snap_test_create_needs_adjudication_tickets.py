@@ -19,12 +19,12 @@ snapshots['TestCreateNeedsAdjudicationTicketsBiometrics::test_ticket_biometric_q
                             'extraData': {
                                 'dedupEngineSimilarityPair': {
                                     'individual1': {
-                                        'fullName': 'Test2 Name2',
-                                        'photo': '/api/uploads/foob.png'
-                                    },
-                                    'individual2': {
                                         'fullName': 'test name',
                                         'photo': '/api/uploads/fooa.png'
+                                    },
+                                    'individual2': {
+                                        'fullName': 'Test2 Name2',
+                                        'photo': '/api/uploads/foob.png'
                                     },
                                     'similarityScore': '55.55'
                                 },
