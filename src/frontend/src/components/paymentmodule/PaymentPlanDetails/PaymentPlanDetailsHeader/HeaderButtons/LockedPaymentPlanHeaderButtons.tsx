@@ -39,6 +39,7 @@ export function LockedPaymentPlanHeaderButtons({
             color="primary"
             onClick={() => unlock()}
             disabled={!isActiveProgram}
+            data-cy="button-unlock-payment-plan"
           >
             {t('Unlock')}
           </LoadingButton>
