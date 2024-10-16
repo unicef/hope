@@ -455,6 +455,7 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
 
     class Status(models.TextChoices):
         PREPARING = "PREPARING", "Preparing"
+        DRAFT = "DRAFT", "Draft"
         OPEN = "OPEN", "Open"
         LOCKED = "LOCKED", "Locked"
         LOCKED_FSP = "LOCKED_FSP", "Locked FSP"
@@ -821,7 +822,16 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
         source=Status.PREPARING,
         target=Status.OPEN,
     )
+    # TODO: after new process implemented have to be change here source=Status.DRAFT
     def status_open(self) -> None:
+        self.status_date = timezone.now()
+
+    @transition(
+        field=status,
+        source=[Status.PREPARING, Status.OPEN],
+        target=Status.DRAFT,
+    )
+    def status_draft(self) -> None:
         self.status_date = timezone.now()
 
     @property
