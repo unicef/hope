@@ -9,13 +9,13 @@ def remove_migrated_data_is_original(batch_size: int = 1000) -> None:
     for model in all_models:
         if hasattr(model, "is_original"):
             if model.__name__ == "GrievanceTicket":
-                queryset_all = model.default_for_migrations_fix.all().only("is_original")
+                queryset_all = model.default_for_migrations_fix.all().only("is_original", "id")
                 queryset_is_original = queryset_all.filter(is_original=True)
             elif model.__name__ in ["HouseholdSelection", "EntitlementCard", "Feedback", "Message"]:
-                queryset_all = model.original_and_repr_objects.all().only("is_original")
+                queryset_all = model.original_and_repr_objects.all().only("is_original", "id")
                 queryset_is_original = queryset_all.filter(is_original=True)
             else:
-                queryset_all = model.all_objects.all().only("is_original")
+                queryset_all = model.all_objects.all().only("is_original", "id")
                 queryset_is_original = queryset_all.filter(is_original=True)
 
             print(
