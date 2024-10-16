@@ -86,6 +86,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
             name="flex_field_1",
             type=FlexibleAttribute.STRING,
             associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+            label={"English(EN)": "value"},
         )
         pdu_data = PeriodicFieldDataFactory(
             subtype=PeriodicFieldData.DECIMAL,
