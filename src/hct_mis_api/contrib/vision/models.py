@@ -66,9 +66,6 @@ class FundsCommitment(models.Model):
     def __str__(self) -> str:
         return self.funds_commitment_number
 
-    class Meta:
-        unique_together = ("funds_commitment_number", "funds_commitment_item")
-
 
 class DownPayment(models.Model):
     rec_serial_number = models.IntegerField(primary_key=True)
