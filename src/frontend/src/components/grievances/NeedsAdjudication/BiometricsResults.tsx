@@ -78,7 +78,7 @@ export const BiometricsResults = ({
             }}
             data-cy="button-open-biometrics-results"
           >
-            {t('Open Biometrics Results')}
+            {t('View Biometrics Results')}
           </Button>
         </Box>
       )}
@@ -143,9 +143,7 @@ export const BiometricsResults = ({
                   {t('Algorithm similarity score:')} {similarityScore}
                 </strong>
               </div>
-              <div>
-                {t('Face images matching suggests: Duplicates')}
-              </div>
+              <div>{t('Face images matching suggests: Duplicates')}</div>
             </Box>
           </DialogContainer>
         </DialogContent>
