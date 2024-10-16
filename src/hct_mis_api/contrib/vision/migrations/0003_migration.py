@@ -23,10 +23,6 @@ class Migration(migrations.Migration):
             name='rec_serial_number',
             field=models.IntegerField(primary_key=True, serialize=False),
         ),
-        migrations.AlterUniqueTogether(
-            name='fundscommitment',
-            unique_together=set(),
-        ),
         migrations.RemoveField(
             model_name='fundscommitment',
             name='created',
