@@ -40,6 +40,7 @@ Following the Principles for Digital Development, the “reuse and improve” an
 ### Why
 
 |#| HOPE Functions  | Added Value |		
+|---|--------------------------|----------------------------------------------|
 |1|Registration of payees data	| Quality Assurance for data collection, verification of eligibility |
 |2|Deduplication of personal records|Mitigate the risk of duplicate records|
 |3|Target payments|Ensure inclusion of relevant payees in payment plan|
