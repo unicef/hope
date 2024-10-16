@@ -29,7 +29,7 @@ export const EditPeopleFollowUpSetUpFspPage = (): React.ReactElement => {
 
   const mappedInitialDeliveryMechanisms =
     paymentPlanData.paymentPlan.deliveryMechanisms.map((el) => ({
-      deliveryMechanism: el.name,
+      deliveryMechanism: el.code,
       fsp: el.fsp?.id || '',
       chosenConfiguration: el.chosenConfiguration || '',
     }));
