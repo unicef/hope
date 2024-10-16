@@ -91,11 +91,13 @@ class TestRdiXlsxCreateTask(TestCase):
             type=FlexibleAttribute.INTEGER,
             name="muac_i_f",
             associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+            label={"English(EN)": "value"},
         )
         FlexibleAttribute.objects.create(
             type=FlexibleAttribute.DECIMAL,
             name="jan_decimal_i_f",
             associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+            label={"English(EN)": "value"},
         )
         content = Path(
             f"{settings.TESTS_ROOT}/apps/registration_datahub/test_file/new_reg_data_import.xlsx"
