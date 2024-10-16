@@ -1,14 +1,16 @@
 from typing import TYPE_CHECKING, Any
 
+from django.db.models import QuerySet
+
 from drf_spectacular.utils import extend_schema
 from rest_framework import serializers, status
 from rest_framework.exceptions import PermissionDenied
-from rest_framework.mixins import CreateModelMixin
+from rest_framework.generics import GenericAPIView
+from rest_framework.mixins import CreateModelMixin, ListModelMixin
 from rest_framework.response import Response
 
 from hct_mis_api.api.endpoints.base import HOPEAPIBusinessAreaViewSet
 from hct_mis_api.api.models import Grant
-from hct_mis_api.apps.core.api.filters import UpdatedAtFilter
 from hct_mis_api.apps.program.models import Program
 
 if TYPE_CHECKING:
@@ -33,10 +35,14 @@ class ProgramSerializer(serializers.ModelSerializer):
         )
 
 
-class ProgramViewSet(CreateModelMixin, HOPEAPIBusinessAreaViewSet):
+class ProgramViewSet(CreateModelMixin, ListModelMixin, HOPEAPIBusinessAreaViewSet, GenericAPIView):
     serializer_class = ProgramSerializer
-    model = Program
     permission = Grant.API_READ_ONLY
+    queryset = Program.objects.all()
+    pagination_class = None
+
+    def get_queryset(self) -> QuerySet:
+        return self.queryset.filter(business_area=self.selected_business_area)
 
     def perform_create(self, serializer_class: "BaseSerializer") -> None:
         serializer_class.save(business_area=self.selected_business_area)
@@ -51,13 +57,3 @@ class ProgramViewSet(CreateModelMixin, HOPEAPIBusinessAreaViewSet):
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-
-    def list(self, request: "Request", *args: Any, **kwargs: Any) -> Response:
-        queryset = self.model.objects.filter(business_area=self.selected_business_area)
-
-        filterset = UpdatedAtFilter(request.GET, queryset=queryset)
-        if filterset.is_valid():
-            queryset = filterset.qs
-
-        serializer = self.serializer_class(queryset, many=True)
-        return Response(serializer.data)
