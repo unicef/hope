@@ -76,7 +76,6 @@ class Command(BaseCommand):
                 "periodictask",
                 "solarschedule",
             ],
-            "power_query": ["formatter", "query", "report"],  # 'dataset' change only
             "program": ["cashplan", "program"],
             "social_django": ["association", "nonce", "usersocialauth"],
             "registration_data": ["registrationdataimport"],
@@ -139,7 +138,6 @@ class Command(BaseCommand):
                 "codename": "change_advancedfilter",
                 "action": "change",
             },
-            {"name": "power_query | dataset | Can change dataset", "codename": "change_dataset", "action": "change"},
         ]
 
         for i in other_custom_groups_map:

@@ -1,6 +1,6 @@
 import datetime
 from decimal import Decimal
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Dict, Optional
 from uuid import UUID
 
 from django.contrib.gis.geos import Point
@@ -10,7 +10,13 @@ from phonenumber_field.phonenumber import PhoneNumber
 
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.grievance.models import TicketNeedsAdjudicationDetails
-from hct_mis_api.apps.household.models import Individual
+from hct_mis_api.apps.household.models import (
+    ROLE_ALTERNATE,
+    ROLE_PRIMARY,
+    BankAccountInfo,
+    Individual,
+    IndividualRoleInHousehold,
+)
 from hct_mis_api.apps.payment.models import (
     Payment,
     PaymentHouseholdSnapshot,
@@ -92,9 +98,7 @@ def create_payment_snapshot_data(payment: Payment) -> PaymentHouseholdSnapshot:
         if str(household.primary_collector.id) in individuals_dict:
             household_data["primary_collector"] = individuals_dict[str(household.primary_collector.id)]
         else:
-            household_data["primary_collector"] = get_individual_snapshot(
-                household.primary_collector, is_hh_collector=True
-            )
+            household_data["primary_collector"] = get_individual_snapshot(household.primary_collector)
             household_data["needs_adjudication_tickets_count"] += household_data["primary_collector"][
                 "needs_adjudication_tickets_count"
             ]
@@ -103,7 +107,7 @@ def create_payment_snapshot_data(payment: Payment) -> PaymentHouseholdSnapshot:
             household_data["alternate_collector"] = individuals_dict[str(household.alternate_collector.id)]
         else:
             household_data["alternate_collector"] = get_individual_snapshot(
-                household.alternate_collector, is_hh_collector=True
+                household.alternate_collector,
             )
             household_data["needs_adjudication_tickets_count"] += household_data["alternate_collector"][
                 "needs_adjudication_tickets_count"
@@ -113,7 +117,7 @@ def create_payment_snapshot_data(payment: Payment) -> PaymentHouseholdSnapshot:
     return PaymentHouseholdSnapshot(payment=payment, snapshot_data=household_data, household_id=household.id)
 
 
-def get_individual_snapshot(individual: Individual, is_hh_collector: bool = False) -> dict:
+def get_individual_snapshot(individual: Individual) -> dict:
     all_individual_data_dict = individual.__dict__
     keys = [key for key in all_individual_data_dict.keys() if key not in excluded_individual_fields]
     individual_data = {}
@@ -135,16 +139,23 @@ def get_individual_snapshot(individual: Individual, is_hh_collector: bool = Fals
             "cleared": document.cleared,
             "cleared_by": handle_type_mapping(document.cleared_by),
             "cleared_date": handle_type_mapping(document.cleared_date),
+            "photo": document.photo.name if document.photo else "",
         }
         individual_data["documents"].append(document_data)
 
-    bank_account_info = individual.bank_account_info.first()
+    bank_account_info: Optional[BankAccountInfo] = individual.bank_account_info.first()
     if bank_account_info:
         individual_data["bank_account_info"] = {
             "bank_name": bank_account_info.bank_name,
             "bank_account_number": bank_account_info.bank_account_number,
             "debit_card_number": bank_account_info.debit_card_number,
+            "bank_branch_name": bank_account_info.bank_branch_name,
+            "account_holder_name": bank_account_info.account_holder_name,
         }
+
+    is_hh_collector = IndividualRoleInHousehold.objects.filter(
+        role__in=[ROLE_PRIMARY, ROLE_ALTERNATE], household=individual.household, individual=individual
+    ).exists()
 
     if is_hh_collector:
         individual_data["delivery_mechanisms_data"] = {

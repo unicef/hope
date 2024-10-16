@@ -22,9 +22,13 @@ class PaymentModuleDetails(BaseComponents):
     labelRelatedFollowUpPaymentPlans = 'div[data-cy="label-Related Follow-Up Payment Plans"]'
     buttonSetUpFsp = 'a[data-cy="button-set-up-fsp"]'
     buttonCreateExclusions = 'button[data-cy="button-create-exclusions"]'
+    buttonSaveExclusions = 'button[data-cy="button-save-exclusions"]'
     supportingDocumentsTitle = 'h6[data-cy="supporting-documents-title"]'
     supportingDocumentsEmpty = 'div[data-cy="supporting-documents-empty"]'
-    inputExclusionreason = 'textarea[data-cy="input-exclusionReason"]'
+    inputExclusion = 'textarea[data-cy="input-exclusion"]'
+    inputExclusionReason = 'textarea[data-cy="input-exclusionReason"]'
+    inputHouseholdsIds = '[data-cy="input-households-ids"]'
+    inputBeneficiariesIds = '[data-cy="input-beneficiaries-ids"]'
     buttonApplyExclusions = 'button[data-cy="button-apply-exclusions"]'
     labelFemaleChildren = 'div[data-cy="label-Female Children"]'
     labelFemaleAdults = 'div[data-cy="label-Female Adults"]'
@@ -32,6 +36,7 @@ class PaymentModuleDetails(BaseComponents):
     labelMaleAdults = 'div[data-cy="label-Male Adults"]'
     chartContainer = 'div[data-cy="chart-container"]'
     labelTotalNumberOfHouseholds = 'div[data-cy="label-Total Number of Households"]'
+    labelTotalNumberOfPeople = 'div[data-cy="label-Total Number of People"]'
     labelTargetedIndividuals = 'div[data-cy="label-Targeted Individuals"]'
     tableTitle = 'h6[data-cy="table-title"]'
     buttonImport = 'button[data-cy="button-import"]'
@@ -60,6 +65,9 @@ class PaymentModuleDetails(BaseComponents):
     buttonUploadReconciliationInfo = 'button[data-cy="button-import"]'
     buttonImportSubmit = 'button[data-cy="button-import-submit"]'
     errorsContainer = 'div[data-cy="errors-container"]'
+    deleteButton = 'button[data-cy="button-delete-pp"]'
+    uploadFileButton = 'button[data-cy="upload-file-button"]'
+    titleInput = 'div[data-cy="title-input"]'
 
     def getButtonLockPlan(self) -> WebElement:
         return self.wait_for(self.buttonLockPlan)
@@ -94,6 +102,15 @@ class PaymentModuleDetails(BaseComponents):
     def getButtonImportSubmit(self) -> WebElement:
         return self.wait_for(self.buttonImportSubmit)
 
+    def getDeleteButton(self) -> WebElement:
+        return self.wait_for(self.deleteButton)
+
+    def getUploadFileButton(self) -> WebElement:
+        return self.wait_for(self.uploadFileButton)
+
+    def getTitleInput(self) -> WebElement:
+        return self.wait_for(self.titleInput)
+
     def getLabelCreatedBy(self) -> WebElement:
         return self.wait_for(self.labelCreatedBy)
 
@@ -124,8 +141,17 @@ class PaymentModuleDetails(BaseComponents):
     def getButtonCreateExclusions(self) -> WebElement:
         return self.wait_for(self.buttonCreateExclusions)
 
-    def getInputExclusionreason(self) -> WebElement:
-        return self.wait_for(self.inputExclusionreason)
+    def getButtonSaveExclusions(self) -> WebElement:
+        return self.wait_for(self.buttonSaveExclusions)
+
+    def getInputHouseholdsIds(self) -> WebElement:
+        return self.wait_for(self.inputHouseholdsIds)
+
+    def getInputBeneficiariesIds(self) -> WebElement:
+        return self.wait_for(self.inputBeneficiariesIds)
+
+    def getInputExclusionReason(self) -> WebElement:
+        return self.wait_for(self.inputExclusionReason)
 
     def getButtonApplyExclusions(self) -> WebElement:
         return self.wait_for(self.buttonApplyExclusions)
@@ -147,6 +173,9 @@ class PaymentModuleDetails(BaseComponents):
 
     def getLabelTotalNumberOfHouseholds(self) -> WebElement:
         return self.wait_for(self.labelTotalNumberOfHouseholds)
+
+    def getLabelTotalNumberOfPeople(self) -> WebElement:
+        return self.wait_for(self.labelTotalNumberOfPeople)
 
     def getLabelTargetedIndividuals(self) -> WebElement:
         return self.wait_for(self.labelTargetedIndividuals)

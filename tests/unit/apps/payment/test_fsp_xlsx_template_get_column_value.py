@@ -10,10 +10,14 @@ from hct_mis_api.apps.household.fixtures import (
     DocumentTypeFactory,
     create_household,
 )
+from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
 from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
 from hct_mis_api.apps.payment.models import (
     FinancialServiceProviderXlsxTemplate,
     PaymentPlan,
+)
+from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
+    create_payment_plan_snapshot_data,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
@@ -33,6 +37,7 @@ class FinancialServiceProviderXlsxTemplateTest(APITestCase):
             program=self.program, status=PaymentPlan.Status.ACCEPTED, business_area=self.business_area
         )
         payment = PaymentFactory(parent=payment_plan, household=household, collector=individual, currency="PLN")
+        create_payment_plan_snapshot_data(payment_plan)
 
         result = FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(payment, "registration_token")
         # return empty string if no document
@@ -55,14 +60,16 @@ class FinancialServiceProviderXlsxTemplateTest(APITestCase):
             individual_args={"full_name": "John Wilson", "given_name": "John", "family_name": "Wilson"},
         )
         individual = individuals[0]
-        document_type = DocumentTypeFactory(key="registration_token")
-        document = DocumentFactory(individual=individual, type=document_type)
 
         payment_plan = PaymentPlanFactory(
             program=self.program, status=PaymentPlan.Status.ACCEPTED, business_area=self.business_area
         )
-
         payment = PaymentFactory(parent=payment_plan, household=household, collector=individual, currency="PLN")
+        primary = IndividualRoleInHousehold.objects.filter(role=ROLE_PRIMARY).first().individual
+        document_type = DocumentTypeFactory(key="registration_token")
+        document = DocumentFactory(individual=primary, type=document_type)
+
+        create_payment_plan_snapshot_data(payment_plan)
 
         result = FinancialServiceProviderXlsxTemplate.get_column_value_from_payment(payment, field_name)
 
@@ -70,7 +77,7 @@ class FinancialServiceProviderXlsxTemplateTest(APITestCase):
             "payment_id": payment.unicef_id,
             "household_id": household.unicef_id,
             "household_size": 1,
-            "collector_name": "John Wilson",
+            "collector_name": primary.full_name,
             "currency": "PLN",
             "registration_token": document.document_number,
             "invalid_column_name": "wrong_column_name",

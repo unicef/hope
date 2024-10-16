@@ -3,7 +3,7 @@
 exports[`components/dashboard/TotalAmountTransferredSection should render 1`] = `
 <div>
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-jTQCzO kDebLm css-1ps6pg7-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-ivxoEo BQBNL css-1ps6pg7-MuiPaper-root"
     color="#1E877D"
   >
     <div
@@ -13,12 +13,12 @@ exports[`components/dashboard/TotalAmountTransferredSection should render 1`] = 
         class="MuiGrid-root MuiGrid-item css-13i4rnv-MuiGrid-root"
       >
         <div
-          class="sc-beySPh kIkzEK"
+          class="sc-blHHSb bfnLSC"
         >
           TOTAL AMOUNT TRANSFERRED
         </div>
         <div
-          class="sc-guDLey gyhxLl"
+          class="sc-gtLWhw BvXWK"
         >
           IN USD
         </div>
@@ -34,7 +34,7 @@ exports[`components/dashboard/TotalAmountTransferredSection should render 1`] = 
             class="MuiGrid-root MuiGrid-item css-13i4rnv-MuiGrid-root"
           >
             <div
-              class="sc-hLQSwg ghfqgX"
+              class="sc-fAUdSK cAWWcd"
             >
               USD 1,719.00
             </div>
@@ -44,7 +44,7 @@ exports[`components/dashboard/TotalAmountTransferredSection should render 1`] = 
           >
             <div
               bg="#d9eceb"
-              class="sc-eDLKkx iqMerL"
+              class="sc-dntaoT fxmYCc"
               color="#03867b"
             >
               <svg
