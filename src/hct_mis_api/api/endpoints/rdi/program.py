@@ -2,15 +2,18 @@ from typing import TYPE_CHECKING, Any
 
 from django.db.models import QuerySet
 
+from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 from rest_framework import serializers, status
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.filters import OrderingFilter
 from rest_framework.generics import GenericAPIView
 from rest_framework.mixins import CreateModelMixin, ListModelMixin
 from rest_framework.response import Response
 
 from hct_mis_api.api.endpoints.base import HOPEAPIBusinessAreaViewSet
 from hct_mis_api.api.models import Grant
+from hct_mis_api.apps.core.api.filters import UpdatedAtFilter
 from hct_mis_api.apps.program.models import Program
 
 if TYPE_CHECKING:
@@ -40,6 +43,8 @@ class ProgramViewSet(CreateModelMixin, ListModelMixin, HOPEAPIBusinessAreaViewSe
     permission = Grant.API_READ_ONLY
     queryset = Program.objects.all()
     pagination_class = None
+    filter_backends = (OrderingFilter, DjangoFilterBackend)
+    filterset_class = UpdatedAtFilter
 
     def get_queryset(self) -> QuerySet:
         return self.queryset.filter(business_area=self.selected_business_area)
