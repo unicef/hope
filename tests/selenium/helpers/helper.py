@@ -168,7 +168,7 @@ class Common:
         return element.find_elements(element_type, locator)
 
     def screenshot(
-        self, file_name: str = "test", file_type: str = "png", file_path: str = None, delay_sec: int = 1
+        self, file_name: str = "test", file_type: str = "png", file_path: str = "screenshot", delay_sec: float = 1
     ) -> None:
         if file_path is None:
             file_path = settings.SCREENSHOT_DIRECTORY

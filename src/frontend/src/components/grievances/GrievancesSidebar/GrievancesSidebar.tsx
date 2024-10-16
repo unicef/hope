@@ -43,7 +43,7 @@ export function GrievancesSidebar({
     const isRightStatus = status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
     if (!isRightStatus) return false;
 
-    const householdsAndRoles = individual?.householdsAndRoles;
+    const householdsAndRoles = individual?.householdsAndRoles || [];
     const isHeadOfHousehold = individual?.id === household?.headOfHousehold?.id;
     const hasRolesToReassign =
       householdsAndRoles?.filter((el) => el.role !== 'NO_ROLE').length > 0;
@@ -88,7 +88,7 @@ export function GrievancesSidebar({
                   ) || []
                 }
               />
-              ) : null}
+            ) : null}
           </Box>
           <Box mt={3}>
             <OtherRelatedTickets ticket={ticket} />

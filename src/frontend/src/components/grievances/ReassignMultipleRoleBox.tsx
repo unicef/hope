@@ -59,7 +59,7 @@ export function ReassignMultipleRoleBox({
         const { household } = selectedIndividualToReassign;
 
         const householdsAndRoles =
-          selectedIndividualToReassign?.householdsAndRoles;
+          selectedIndividualToReassign?.householdsAndRoles || [];
 
         const shouldShowReassignHoH =
           selectedIndividualToReassign?.id === household?.headOfHousehold?.id;

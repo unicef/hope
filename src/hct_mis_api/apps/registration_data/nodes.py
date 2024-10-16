@@ -44,6 +44,13 @@ class DeduplicationEngineSimilarityPairIndividualNode(graphene.ObjectType):
     full_name = graphene.String()
     unicef_id = graphene.String()
 
+    @staticmethod
+    def resolve_photo(parent: Any, info: Any) -> Optional[graphene.String]:
+        from hct_mis_api.apps.household.models import Individual
+
+        individual = Individual.objects.get(unicef_id=parent.get("unicef_id"))
+        return individual.photo.url if individual.photo else None
+
 
 class DeduplicationEngineSimilarityPairNode(BaseNodePermissionMixin, graphene.ObjectType):
     permission_classes = (hopePermissionClass(Permissions.GRIEVANCES_VIEW_BIOMETRIC_RESULTS),)

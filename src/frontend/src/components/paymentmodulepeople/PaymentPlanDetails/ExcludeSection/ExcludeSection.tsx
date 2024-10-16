@@ -125,7 +125,7 @@ export function ExcludeSection({
 
   const handleApply = (): void => {
     const idRegex =
-      /^(\s*HH-\d{2}-\d{4}\.\d{4}\s*)(,\s*HH-\d{2}-\d{4}\.\d{4}\s*)*$/;
+      /^(\s*IND-\d{2}-\d{4}\.\d{4}\s*)(,\s*IND-\d{2}-\d{4}\.\d{4}\s*)*$/;
     const ids = idsValue.trim().split(/,\s*|\s+/);
     const invalidIds: string[] = [];
     const alreadyExcludedIds: string[] = [];
@@ -312,6 +312,7 @@ export function ExcludeSection({
               <Box mr={2}>
                 <StyledTextField
                   label={t('Beneficiaries Ids')}
+                  data-cy="input-beneficiaries-ids"
                   value={idsValue}
                   onChange={handleIdsChange}
                   fullWidth
