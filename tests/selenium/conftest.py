@@ -190,7 +190,7 @@ def pytest_configure(config) -> None:  # type: ignore
         }
     )
 
-    # logging.disable(logging)
+    logging.disable(logging.CRITICAL)
     pytest.SELENIUM_PATH = os.path.dirname(__file__)
 
 
