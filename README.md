@@ -39,15 +39,17 @@ Following the Principles for Digital Development, the “reuse and improve” an
 
 ### Why
 
-* Put cash recipients at the center with secure personal data processing
-* Unified consolidated reporting for beneficiary data
-* Increase accountability beneficiaries and donors
-* Financial Inclusion of Beneficiaries
-* To Enhance Traceability
-* Simplify current process in EMOPS
-* Ensuring due diligence in-cash transfer
-* Grow the use of effective cash program for children in a risk informed manner
-* Eliminate redundancies and dupes in how we do things
+|#| HOPE Functions  | Added Value |		
+|1|Registration of payees data	| Quality Assurance for data collection, verification of eligibility |
+|2|Deduplication of personal records|Mitigate the risk of duplicate records|
+|3|Target payments|Ensure inclusion of relevant payees in payment plan|
+|4|Entitlment Calculations|Ensure cash benefit entitlement rules are uphold|
+|5|Payment Management|Approval, Authorization and Financial Release tracking|
+|6|Reconciliation of Individual payment|Support liquidation or advance or reimbursement to Financial Service Provider|
+|7|Payment Verification|Mitigate the risk of inaccurate FSP reports and fraud|
+|8|Grievances Redressals and Payees Communications|Ensure payment quality and direct communication with payees|
+|9|Roles base access|Uphold segragation of duties and data protection principles|
+|10|Reporting|Access process and output indicators|
 
 ## Legal
 Humanitarian cash Operations and Programme Ecosystem
