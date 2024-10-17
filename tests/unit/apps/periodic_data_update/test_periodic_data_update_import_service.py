@@ -210,7 +210,7 @@ class TestPeriodicDataUpdateImportService(TestCase):
                 {
                     "row": 2,
                     "errors": {
-                        "date_attribute__round_value": [{"message": "Invalid boolean value", "code": "invalid"}]
+                        "boolean_attribute__round_value": [{"message": "Invalid boolean value", "code": "invalid"}]
                     },
                 }
             ],
