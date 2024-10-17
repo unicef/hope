@@ -1,4 +1,5 @@
 from datetime import datetime
+from decimal import Decimal
 from time import sleep
 
 import pytest
@@ -14,9 +15,9 @@ from hct_mis_api.apps.payment.fixtures import (
     CashPlanFactory,
     PaymentRecordFactory,
     PaymentVerificationFactory,
-    PaymentVerificationPlanFactory,
+    PaymentVerificationPlanFactory, PaymentPlanFactory, PaymentFactory, PaymentVerificationSummaryFactory,
 )
-from hct_mis_api.apps.payment.models import GenericPayment
+from hct_mis_api.apps.payment.models import GenericPayment, PaymentPlan, PaymentVerificationSummary
 from hct_mis_api.apps.payment.models import PaymentRecord as PR
 from hct_mis_api.apps.payment.models import PaymentVerification as PV
 from hct_mis_api.apps.payment.models import PaymentVerificationPlan
@@ -82,23 +83,36 @@ def social_worker_program() -> Program:
 
 
 @pytest.fixture
-def empty_payment_verification(social_worker_program: Program) -> PV:
-    # cash_plan = CashPlanFactory(
-    #     name="TEST",
-    #     program=social_worker_program,
-    #     business_area=BusinessArea.objects.first(),
-    #     start_date=datetime.now() - relativedelta(months=1),
-    #     end_date=datetime.now() + relativedelta(months=1),
-    # )
-
-    payment_verification_plan = PaymentVerificationPlanFactory(
-        verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL,
+def empty_payment_verification(social_worker_program: Program) -> None:
+    registration_data_import = RegistrationDataImportFactory(
+        imported_by=User.objects.first(), business_area=BusinessArea.objects.first()
+    )
+    program = Program.objects.filter(name="Active Program").first()
+    household, individuals = create_household(
+        {
+            "registration_data_import": registration_data_import,
+            "admin_area": Area.objects.order_by("?").first(),
+            "program": program,
+        },
+        {"registration_data_import": registration_data_import},
     )
 
-    yield PaymentVerificationFactory(
-        payment_verification_plan=payment_verification_plan,
-        status=PV.STATUS_PENDING,
+    payment_plan = PaymentPlanFactory(
+            program=program,
+            status=PaymentPlan.Status.FINISHED,
+            business_area=BusinessArea.objects.filter(slug="afghanistan").first(),
+        )
+    PaymentFactory(
+        parent=payment_plan,
+        business_area=BusinessArea.objects.first(),
+        household=household,
+        head_of_household=household.head_of_household,
+        entitlement_quantity=Decimal("21.36"),
+        delivered_quantity=Decimal("21.36"),
+        currency="PLN",
+        status=GenericPayment.STATUS_DISTRIBUTION_SUCCESS,
     )
+    summary = PaymentVerificationSummaryFactory(payment_plan_obj=payment_plan)
 
 
 @pytest.fixture
@@ -155,7 +169,7 @@ def add_payment_verification() -> PV:
         payment_verification_plan=payment_verification_plan,
         status=PV.STATUS_PENDING,
     )
-    return pv
+    yield pv
 
 
 @pytest.mark.usefixtures("login")
@@ -330,10 +344,94 @@ class TestPaymentVerification:
         # If the received value is 0, it should stay 0 even when a new verified value is provided in the ticket.
         # Check conversation with Jakub
 
-    def test_payment_verification_create_verification_plan(
-        self, active_program: Program, empty_payment_verification: PV, pagePaymentVerification: PaymentVerification
+    @pytest.mark.parametrize(
+        "channel",
+        [
+            "manual",
+            "rapidpro",
+            "xlsx",
+        ],
+    )
+    def test_payment_verification_create_verification_plan_full_list(
+        self, channel: str,
+            active_program: Program,
+            empty_payment_verification: None,
+            pagePaymentVerification: PaymentVerification,
+            pagePaymentVerificationDetails: PaymentVerificationDetails
     ) -> None:
         pagePaymentVerification.selectGlobalProgramFilter("Active Program")
         pagePaymentVerification.getNavPaymentVerification().click()
         pagePaymentVerification.getCashPlanTableRow().click()
+        pagePaymentVerification.getButtonNewPlan().click()
+        pagePaymentVerification.getRadioVerificationChannel(channel).click()
+        pagePaymentVerification.getButtonSubmit().click()
+        assert "PENDING" in pagePaymentVerificationDetails.getVerificationPlansSummaryStatus().text
+        assert "PENDING" in pagePaymentVerificationDetails.getVerificationPlanStatus().text
+        assert channel.upper() in pagePaymentVerificationDetails.getLabelVerificationChannel().text
+        assert "Full list" in pagePaymentVerificationDetails.getLabelSampling().text
+
+    # @pytest.mark.parametrize(
+    #     "channel",
+    #     [
+    #         "manual",
+    #         "rapidpro",
+    #         "xlsx",
+    #     ],
+    # )
+    def test_payment_verification_create_verification_plan_random_sampling_manual(
+            self,
+            active_program: Program,
+            empty_payment_verification: None,
+            pagePaymentVerification: PaymentVerification,
+            pagePaymentVerificationDetails: PaymentVerificationDetails
+    ) -> None:
+        pagePaymentVerification.selectGlobalProgramFilter("Active Program")
+        pagePaymentVerification.getNavPaymentVerification().click()
+        pagePaymentVerification.getCashPlanTableRow().click()
+        pagePaymentVerification.getButtonNewPlan().click()
+        pagePaymentVerification.getTabRandomSampling().click()
+        pagePaymentVerification.getInputAdmincheckbox().click()
+        pagePaymentVerification.getInputAgecheckbox().click()
+        pagePaymentVerification.getInputSexcheckbox().click()
+        pagePaymentVerification.getButtonSubmit().click()
+        assert "PENDING" in pagePaymentVerificationDetails.getVerificationPlansSummaryStatus().text
+        assert "PENDING" in pagePaymentVerificationDetails.getVerificationPlanStatus().text
+        assert "MANUAL" in pagePaymentVerificationDetails.getLabelVerificationChannel().text
+        assert "Random sampling" in pagePaymentVerificationDetails.getLabelSampling().text
+        assert "0" in pagePaymentVerificationDetails.getLabelSampleSize().text
+        assert "1" in pagePaymentVerificationDetails.getLabelNumberOfVerificationPlans().text
+
+    def test_payment_verification_records(
+                self,
+                active_program: Program,
+                add_payment_verification: PV,
+                pagePaymentVerification: PaymentVerification,
+                pagePaymentVerificationDetails: PaymentVerificationDetails,
+                pagePaymentRecord: PaymentRecord,
+        ) -> None:
+        pagePaymentVerification.selectGlobalProgramFilter("Active Program")
+        pagePaymentVerification.getNavPaymentVerification().click()
+        pagePaymentVerification.getCashPlanTableRow().click()
+        assert "1" in pagePaymentVerificationDetails.getLabelPaymentRecords().text
+        pagePaymentVerificationDetails.getButtonActivatePlan().click()
+        pagePaymentVerificationDetails.getButtonSubmit().click()
+
+        pagePaymentVerificationDetails.driver.execute_script(
+            """
+            container = document.querySelector("div[data-cy='main-content']")
+            container.scrollBy(0,600)
+            """
+        )
+        sleep(2)
+        pagePaymentVerificationDetails.driver.execute_script(
+            """
+            container = document.querySelector("div[data-cy='main-content']")
+            container.scrollBy(0,600)
+            """
+        )
+        sleep(2)
         pagePaymentVerification.screenshot("0", file_path="./")
+        from tests.selenium.tools.tag_name_finder import printing
+        printing("Mapping", pagePaymentVerification.driver)
+        printing("Methods", pagePaymentVerification.driver)
+        printing("Assert", pagePaymentVerification.driver)

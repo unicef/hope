@@ -48,6 +48,7 @@ export function FormikRadioGroup({
             value: string;
             optionLabel?: string | React.ReactElement;
             name: string;
+            dataCy?: string;
           }) => (
             <Box p={2} mb={2} key={each.value}>
               <Box display="flex" alignItems={alignItems}>
@@ -55,6 +56,7 @@ export function FormikRadioGroup({
                   color="primary"
                   value={each.value}
                   checked={field.value === each.value}
+                  data-cy={each?.dataCy}
                 />
                 {withGreyBox ? (
                   <GreyBox p={2}>
