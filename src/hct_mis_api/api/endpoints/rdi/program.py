@@ -8,6 +8,7 @@ from rest_framework.response import Response
 
 from hct_mis_api.api.endpoints.base import HOPEAPIBusinessAreaViewSet
 from hct_mis_api.api.models import Grant
+from hct_mis_api.apps.core.api.filters import UpdatedAtFilter
 from hct_mis_api.apps.program.models import Program
 
 if TYPE_CHECKING:
@@ -33,17 +34,17 @@ class ProgramSerializer(serializers.ModelSerializer):
 
 
 class ProgramViewSet(CreateModelMixin, HOPEAPIBusinessAreaViewSet):
-    serializer = ProgramSerializer
+    serializer_class = ProgramSerializer
     model = Program
     permission = Grant.API_READ_ONLY
 
-    def perform_create(self, serializer: "BaseSerializer") -> None:
-        serializer.save(business_area=self.selected_business_area)
+    def perform_create(self, serializer_class: "BaseSerializer") -> None:
+        serializer_class.save(business_area=self.selected_business_area)
 
     @extend_schema(request=ProgramSerializer)
     def create(self, request: "Request", *args: Any, **kwargs: Any) -> Response:
-        self.selected_business_area  # TODO does it work? It should be called
-        serializer = ProgramSerializer(data=request.data)
+        self.selected_business_area
+        serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         if Grant.API_PROGRAM_CREATE.name not in request.auth.grants:
             raise PermissionDenied()
@@ -53,5 +54,10 @@ class ProgramViewSet(CreateModelMixin, HOPEAPIBusinessAreaViewSet):
 
     def list(self, request: "Request", *args: Any, **kwargs: Any) -> Response:
         queryset = self.model.objects.filter(business_area=self.selected_business_area)
-        serializer = self.serializer(queryset, many=True)
+
+        filterset = UpdatedAtFilter(request.GET, queryset=queryset)
+        if filterset.is_valid():
+            queryset = filterset.qs
+
+        serializer = self.serializer_class(queryset, many=True)
         return Response(serializer.data)

@@ -31,6 +31,7 @@ class TestFlexibleAttribute(TransactionTestCase):
             name="flex_field_1",
             type=FlexibleAttribute.STRING,
             associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+            label={"English(EN)": "value"},
         )
 
         self.pdu_field = FlexibleAttributeForPDUFactory(
@@ -63,6 +64,7 @@ class TestFlexibleAttribute(TransactionTestCase):
                 name=self.flex_field.name,
                 type=FlexibleAttribute.STRING,
                 associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+                label={"English(EN)": "value"},
             )
         self.assertIn(
             'duplicate key value violates unique constraint "unique_name_without_program"',
@@ -75,6 +77,7 @@ class TestFlexibleAttribute(TransactionTestCase):
                 name=self.pdu_field.name,
                 type=FlexibleAttribute.STRING,
                 associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+                label={"English(EN)": "value"},
             )
         self.assertIn(
             f'Flex field with name "{self.pdu_field.name}" already exists inside a program.',
@@ -90,3 +93,21 @@ class TestFlexibleAttribute(TransactionTestCase):
             f'Flex field with name "{self.flex_field.name}" already exists without a program.',
             str(ve_context.exception),
         )
+
+    def test_flexible_attribute_label_without_english_en_key(self) -> None:
+        with self.assertRaisesMessage(ValidationError, 'The "English(EN)" key is required in the label.'):
+            FlexibleAttribute.objects.create(
+                name="flex_field_2",
+                type=FlexibleAttribute.STRING,
+                associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+                label={"other value": "value"},
+            )
+        flexible_attribute = FlexibleAttribute.objects.create(
+            name="flex_field_2",
+            type=FlexibleAttribute.STRING,
+            associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+            label={"English(EN)": "value"},
+        )
+        with self.assertRaisesMessage(ValidationError, 'The "English(EN)" key is required in the label.'):
+            flexible_attribute.label = {"wrong": "value"}
+            flexible_attribute.save()
