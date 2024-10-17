@@ -22,6 +22,7 @@ import { UniversalMoment } from '@core/UniversalMoment';
 import { LinkedTicketsModal } from '../LinkedTicketsModal/LinkedTicketsModal';
 import { AssignedToDropdown } from './AssignedToDropdown';
 import { getGrievanceDetailsPath } from '../utils/createGrievanceUtils';
+import { useProgramContext } from 'src/programContext';
 
 interface GrievancesTableRowProps {
   ticket: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'];
@@ -55,6 +56,7 @@ export function GrievancesTableRow({
   initialVariables,
 }: GrievancesTableRowProps): React.ReactElement {
   const { baseUrl, businessArea, isAllPrograms } = useBaseUrl();
+  const { isSocialDctType } = useProgramContext();
   const navigate = useNavigate();
   const { showMessage } = useSnackbar();
   const detailsPath = getGrievanceDetailsPath(
@@ -64,9 +66,9 @@ export function GrievancesTableRow({
   );
   const issueType = ticket.issueType
     ? issueTypeChoicesData
-      .find((el) => el.category === ticket.category.toString())
-      .subCategories.find((el) => el.value === ticket.issueType.toString())
-      .name
+        .find((el) => el.category === ticket.category.toString())
+        .subCategories.find((el) => el.value === ticket.issueType.toString())
+        .name
     : '-';
 
   const [mutate] = useBulkUpdateGrievanceAssigneeMutation();
@@ -120,6 +122,14 @@ export function GrievancesTableRow({
 
   const mappedPrograms = getMappedPrograms();
 
+  //TODO: add target to the query
+  const getTargetUnicefId = (_ticket) => {
+    return isSocialDctType || isAllPrograms
+      ? _ticket?.target?.unicefId
+      : _ticket.household.unicefId;
+  };
+  const targetUnicefId = getTargetUnicefId(ticket);
+
   return (
     <ClickableTableRow
       onClick={handleRowClick}
@@ -168,7 +178,7 @@ export function GrievancesTableRow({
       </TableCell>
       <TableCell align="left">{categoryChoices[ticket.category]}</TableCell>
       <TableCell align="left">{issueType}</TableCell>
-      <TableCell align="left">{ticket.household?.unicefId || '-'}</TableCell>
+      <TableCell align="left">{targetUnicefId || '-'}</TableCell>
       <TableCell align="left">
         <StatusBox
           status={

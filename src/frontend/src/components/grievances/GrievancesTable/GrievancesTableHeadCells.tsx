@@ -130,10 +130,10 @@ export const headCellsSocialProgram: HeadCell<
   },
   {
     disablePadding: false,
-    label: 'Household ID',
-    id: 'household_unicef_id',
+    label: 'Target ID',
+    id: 'target_unicef_id',
     numeric: false,
-    dataCy: 'householdId',
+    dataCy: 'targetId',
   },
   {
     disablePadding: false,

@@ -50,6 +50,7 @@ import {
   hasPermissionInModule,
   hasPermissions,
 } from '../../../config/permissions';
+import { useProgramContext } from 'src/programContext';
 
 const InnerBoxPadding = styled.div`
   .MuiPaper-root {
@@ -82,6 +83,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
   const { baseUrl, businessArea, programId, isAllPrograms } = useBaseUrl();
+  const { isSocialDctType } = useProgramContext();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
 
@@ -206,12 +208,20 @@ export const CreateGrievancePage = (): React.ReactElement => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
 
-  let steps = [
-    'Category Selection',
-    'Household/Individual Look up',
-    'Identity Verification',
-    'Description',
-  ];
+  let steps = isSocialDctType
+    ? [
+        'Category Selection',
+        'Individual Look up',
+        'Identity Verification',
+        'Description',
+      ]
+    : [
+        'Category Selection',
+        'Household/Individual Look up',
+        'Identity Verification',
+        'Description',
+      ];
+
   // if creating a linked G&F ticket from Feedback page skip Look Up
   if (linkedFeedbackId && selectedHousehold && selectedIndividual) {
     steps = ['Category Selection', 'Identity Verification', 'Description'];
