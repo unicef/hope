@@ -20,14 +20,15 @@ def remove_migrated_data_is_original(batch_size: int = 1000) -> None:
             print(f"Removing objects with 'is_original=True': {model.__name__}")
 
             ids_to_delete = [
-                str(obj_id) for obj_id in queryset_is_original.values_list("id", flat=True).iterator(chunk_size=batch_size)
+                str(obj_id)
+                for obj_id in queryset_is_original.values_list("id", flat=True).iterator(chunk_size=batch_size)
             ]
 
             deleted_count = 0
             total_to_delete = len(ids_to_delete)
 
             for i in range(0, total_to_delete, batch_size):
-                batch_pks = ids_to_delete[i:i + batch_size]
+                batch_pks = ids_to_delete[i : i + batch_size]
                 deleted, _ = model_qs.filter(pk__in=batch_pks).delete()
                 deleted_count += deleted
 
