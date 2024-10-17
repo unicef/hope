@@ -248,7 +248,8 @@ def browser(driver: Chrome, live_server: LiveServer) -> Chrome:
 @pytest.fixture
 def login(browser: Chrome) -> Chrome:
     browser.get(f"{browser.live_server.url}/api/unicorn/")
-    browser.execute_script(
+
+    browser.execute_script(  # type: ignore
         """
     window.indexedDB.databases().then(dbs => dbs.forEach(db => {
         console.log('Deleting database:', db.name);
@@ -272,6 +273,7 @@ def login(browser: Chrome) -> Chrome:
     browser.find_element(By.XPATH, loginButton).click()
     browser.get(f"{browser.live_server.url}/")
     from django.core.cache import cache
+
     cache.clear()
     yield browser
 

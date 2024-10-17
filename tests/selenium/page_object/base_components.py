@@ -1,10 +1,11 @@
 from time import sleep
-from selenium.webdriver import Keys
-from selenium.webdriver.remote.webelement import WebElement
 
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver import Keys
 from selenium.webdriver.common.by import By
+from selenium.webdriver.remote.webelement import WebElement
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+
 from tests.selenium.helpers.helper import Common
 
 
@@ -205,20 +206,19 @@ class BaseComponents(Common):
 
     def waitForRows(self) -> [WebElement]:
         self.wait_for(self.rows)
-        WebDriverWait(self.driver, 10).until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, self.rows))
-        )
+        WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, self.rows)))
         return self.get_elements(self.rows)
 
-    def waitForRowWithText(self, index, text) -> WebElement:
+    def waitForRowWithText(self, index: int, text: str) -> None:
         import time
+
         timeout = 10
         start_time = time.time()
-        while time.time()-start_time<timeout:
+        while time.time() - start_time < timeout:
             time.sleep(0.01)
-            if text in self.wait_for(self.row_index_template.format(index+1)).text:
+            if text in self.wait_for(self.row_index_template.format(index + 1)).text:
                 return
-        assert text in self.wait_for(self.row_index_template.format(index+1)).text
+        assert text in self.wait_for(self.row_index_template.format(index + 1)).text
 
     def getRows(self) -> [WebElement]:
         return self.get_elements(self.rows)

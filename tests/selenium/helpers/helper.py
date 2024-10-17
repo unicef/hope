@@ -4,6 +4,7 @@ from time import sleep
 from typing import Literal, Union
 
 from django.conf import settings
+
 from selenium.common import NoSuchElementException
 from selenium.webdriver import Chrome, Keys
 from selenium.webdriver.common.action_chains import ActionChains
@@ -44,8 +45,7 @@ class Common:
 
     def wait_for(self, locator: str, element_type: str = By.CSS_SELECTOR, timeout: int = DEFAULT_TIMEOUT) -> WebElement:
         from selenium.common.exceptions import TimeoutException
-        import time
-        # time.sleep(1)
+
         try:
             return self._wait(timeout).until(EC.visibility_of_element_located((element_type, locator)))
         except TimeoutException:

@@ -1,7 +1,7 @@
 import base64
 from datetime import datetime
 from time import sleep
-from typing import Generator, Optional
+from typing import Optional
 
 from django.conf import settings
 from django.core.management import call_command
@@ -319,13 +319,6 @@ def create_grievance_referral(
     return grievance_ticket
 
 
-
-
-
-    
-
-        
-
 @pytest.mark.usefixtures("login")
 class TestSmokeGrievanceTickets:
     def test_check_grievance_tickets_user_generated_page(
@@ -430,6 +423,7 @@ class TestSmokeGrievanceTickets:
         assert "-" in pageGrievanceDetailsPage.getLabelComments().text
         assert "" in pageGrievanceDetailsPage.getNewNoteField().text
         assert "ADD NEW NOTE" in pageGrievanceDetailsPage.getButtonNewNote().text
+
 
 @pytest.mark.usefixtures("login")
 class TestGrievanceTicketsHappyPath:
@@ -965,8 +959,8 @@ class TestGrievanceTickets:
             assert list_row[0] in pageGrievanceTickets.getSelectedTickets().text
         pageGrievanceTickets.getButtonSave().click()
         pageGrievanceTickets.getStatusContainer()
-        pageGrievanceTickets.checkIfTextExistInArow(0,'Assigned')
-            
+        pageGrievanceTickets.checkIfTextExistInArow(0, "Assigned")
+
         for str_row in pageGrievanceTickets.getRows():
             list_row = str_row.text.replace("\n", " ").split(" ")
             assert list_row[1] in "Assigned"
@@ -978,7 +972,7 @@ class TestGrievanceTickets:
         pageGrievanceTickets.getButtonSave().click()
         pageGrievanceTickets.getStatusContainer()
 
-        pageGrievanceTickets.checkIfTextExistInArow(0,'Medium')
+        pageGrievanceTickets.checkIfTextExistInArow(0, "Medium")
         for str_row in pageGrievanceTickets.getRows():
             assert "Medium" in str_row.text.replace("\n", " ").split(" ")
         pageGrievanceTickets.getSelectAll().click()
@@ -987,8 +981,8 @@ class TestGrievanceTickets:
         pageGrievanceTickets.select_listbox_element("Urgent")
         pageGrievanceTickets.getButtonSave().click()
         pageGrievanceTickets.getStatusContainer()
-        
-        pageGrievanceTickets.checkIfTextExistInArow(0,'Urgent')
+
+        pageGrievanceTickets.checkIfTextExistInArow(0, "Urgent")
         for str_row in pageGrievanceTickets.getRows():
             assert "Urgent" in str_row.text.replace("\n", " ").split(" ")
 
@@ -1235,17 +1229,16 @@ class TestGrievanceTickets:
                 for icon in individual_row.find_elements(By.TAG_NAME, "svg"):
                     assert "Confirmed Duplicate" in icon.get_attribute("aria-label")
 
-
-@pytest.mark.xfail(reason="Unskip after fix bug: 209087")
-def test_grievance_tickets_create_new_error(
-    self,
-    pageGrievanceTickets: GrievanceTickets,
-    pageGrievanceNewTicket: NewTicket,
-    pageGrievanceDetailsPage: GrievanceDetailsPage,
-) -> None:
-    pageGrievanceTickets.getNavGrievance().click()
-    assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
-    pageGrievanceTickets.getButtonNewTicket().click()
-    pageGrievanceNewTicket.getButtonNext().click()
-    with pytest.raises(Exception):
-        pageGrievanceNewTicket.getHouseholdTab()
+    @pytest.mark.xfail(reason="Unskip after fix bug: 209087")
+    def test_grievance_tickets_create_new_error(
+        self,
+        pageGrievanceTickets: GrievanceTickets,
+        pageGrievanceNewTicket: NewTicket,
+        pageGrievanceDetailsPage: GrievanceDetailsPage,
+    ) -> None:
+        pageGrievanceTickets.getNavGrievance().click()
+        assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
+        pageGrievanceTickets.getButtonNewTicket().click()
+        pageGrievanceNewTicket.getButtonNext().click()
+        with pytest.raises(Exception):
+            pageGrievanceNewTicket.getHouseholdTab()

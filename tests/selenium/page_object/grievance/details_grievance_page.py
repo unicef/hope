@@ -237,7 +237,7 @@ class GrievanceDetailsPage(BaseComponents):
 
     def disappearButtonConfirm(self) -> WebElement:
         return self.wait_for_disappear(self.buttonConfirm)
-    
+
     def disappearButtonCloseTicket(self) -> WebElement:
         return self.wait_for_disappear(self.buttonCloseTicket)
 
@@ -578,7 +578,7 @@ class GrievanceDetailsPage(BaseComponents):
         self.wait_for(self.villageCell)
         return self.get_elements(self.villageCell)
 
-    def getPossibleDuplicateRowByUnicefId(self,unicef_id) -> WebElement:
+    def getPossibleDuplicateRowByUnicefId(self, unicef_id: str) -> WebElement:
         return self.wait_for(self.possibleDuplicateRowTemplate.format(unicef_id))
 
     def getCheckboxCell(self) -> [WebElement]:

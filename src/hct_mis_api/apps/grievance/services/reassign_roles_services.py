@@ -43,7 +43,7 @@ def reassign_roles_on_marking_as_duplicate_individual_service(
     role_reassign_data: Dict,
     user: "AbstractUser",
     duplicated_individuals: QuerySet[Individual],
-) -> Optional[Household]:
+) -> None:
     roles_to_bulk_update = []
     roles_to_delete = []
     duplicated_individuals_ids = [str(individual.id) for individual in duplicated_individuals]
@@ -52,7 +52,7 @@ def reassign_roles_on_marking_as_duplicate_individual_service(
             "household_id", flat=True
         )
     )
-    for key,role_data in role_reassign_data.items():
+    for _key, role_data in role_reassign_data.items():
         role_name = role_data.get("role")
         new_individual = get_object_or_404(Individual, id=decode_id_string(role_data.get("new_individual")))
         old_individual_to_log = Individual.objects.get(id=new_individual.id)
@@ -126,8 +126,8 @@ def reassign_head_of_household_relationship_for_need_adjudication_ticket(
     individual_which_loses_role: Individual,
     new_individual: Individual,
     old_individual_to_log: Individual,
-    user: "User",
-):
+    user: AbstractUser,
+) -> None:
     if household != individual_which_loses_role.household:
         raise ValidationError("Household missmatch Individual which loses role and household")
     if household.head_of_household.pk == new_individual.pk or new_individual == individual_which_loses_role:

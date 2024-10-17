@@ -1,7 +1,8 @@
 from time import sleep
 
-from selenium.webdriver.remote.webelement import WebElement
 from selenium.common.exceptions import StaleElementReferenceException
+from selenium.webdriver.remote.webelement import WebElement
+
 from tests.selenium.page_object.base_components import BaseComponents
 
 
@@ -248,17 +249,16 @@ class GrievanceTickets(BaseComponents):
 
     def getButtonConfirm(self) -> WebElement:
         return self.wait_for(self.buttonConfirm)
-    
-    def checkIfTextExistInArow(self,row_index,text,max_attempts=5):
-        attempt=0
+
+    def checkIfTextExistInArow(self, row_index: int, text: str, max_attempts: int = 5) -> None:
+        attempt = 0
         exception = None
         while attempt < max_attempts:
             try:
                 self.waitForRows()
-                self.waitForRowWithText(row_index,text)
-                return 
+                self.waitForRowWithText(row_index, text)
+                return
             except StaleElementReferenceException as e:
                 attempt += 1
-                exception=e
+                exception = e
         raise exception
-

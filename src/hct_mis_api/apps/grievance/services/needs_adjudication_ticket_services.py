@@ -12,7 +12,7 @@ from hct_mis_api.apps.grievance.models import (
 )
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 from hct_mis_api.apps.grievance.services.reassign_roles_services import (
-    reassign_roles_on_disable_individual_service, reassign_roles_on_marking_as_duplicate_individual_service,
+    reassign_roles_on_marking_as_duplicate_individual_service,
 )
 from hct_mis_api.apps.grievance.signals import (
     individual_marked_as_distinct,
@@ -39,11 +39,9 @@ from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
 from hct_mis_api.apps.utils.elasticsearch_utils import (
     remove_elasticsearch_documents_by_matching_ids,
 )
-from hct_mis_api.apps.utils.exceptions import log_and_raise
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.program.models import Program
-
 
 logger = logging.getLogger(__name__)
 
@@ -72,12 +70,11 @@ def close_needs_adjudication_new_ticket(ticket_details: TicketNeedsAdjudicationD
     distinct_individuals = ticket_details.selected_distinct.all()
     duplicate_individuals = ticket_details.selected_individuals.all()
     if duplicate_individuals:
-
         reassign_roles_on_marking_as_duplicate_individual_service(
-            ticket_details.role_reassign_data, user,duplicate_individuals
+            ticket_details.role_reassign_data, user, duplicate_individuals
         )
         for individual_to_remove in duplicate_individuals:
-            unique_individual= None
+            unique_individual = None
             household = individual_to_remove.household
             mark_as_duplicate_individual(
                 individual_to_remove, unique_individual, household, user, ticket_details.ticket.programs.all()
@@ -283,8 +280,6 @@ def create_needs_adjudication_tickets_for_biometrics(
 
     for ticket in new_tickets:
         ticket.linked_tickets.set([t for t in new_tickets if t != ticket])
-
-
 
 
 def mark_as_duplicate_individual(
