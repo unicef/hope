@@ -39,6 +39,9 @@ from hct_mis_api.apps.registration_data.models import (
     RegistrationDataImport,
 )
 from hct_mis_api.apps.registration_datahub.celery_tasks import deduplicate_documents
+from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import (
+    BiometricDeduplicationService,
+)
 from hct_mis_api.apps.registration_datahub.signals import rdi_merged
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
@@ -237,7 +240,7 @@ class RdiMergeTask:
             individual_ids = list(individuals.values_list("id", flat=True))
             household_ids = list(households.values_list("id", flat=True))
             try:
-                with transaction.atomic(using="default"):
+                with transaction.atomic():
                     old_obj_hct = copy_model_object(obj_hct)
 
                     transaction.on_commit(lambda: recalculate_population_fields_task(household_ids, obj_hct.program_id))
@@ -355,7 +358,13 @@ class RdiMergeTask:
 
                     # synchronously deduplicate documents
                     deduplicate_documents()
+                    #  synchronously deduplicate biometrics
+                    if obj_hct.program.biometric_deduplication_enabled:
+                        dedupe_service = BiometricDeduplicationService()
+                        dedupe_service.create_grievance_tickets_for_duplicates(obj_hct)
+                        dedupe_service.update_rdis_deduplication_statistics(obj_hct.program, exclude_rdi=obj_hct)
 
+                    obj_hct.update_needs_adjudication_tickets_statistic()
                     obj_hct.status = RegistrationDataImport.MERGED
                     obj_hct.save()
 
