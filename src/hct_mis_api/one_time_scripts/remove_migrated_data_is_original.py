@@ -1,4 +1,5 @@
 from django.apps import apps
+from django.db import transaction
 from django.utils import timezone
 
 
@@ -29,8 +30,10 @@ def remove_migrated_data_is_original(batch_size: int = 1000) -> None:
 
             for i in range(0, total_to_delete, batch_size):
                 batch_pks = ids_to_delete[i : i + batch_size]
-                deleted, _ = model_qs.filter(pk__in=batch_pks).delete()
-                deleted_count += deleted
+                # batch processing atomically
+                with transaction.atomic():
+                    deleted, _ = model_qs.filter(pk__in=batch_pks).delete()
+                    deleted_count += deleted
 
                 if i % (batch_size * 10) == 0:
                     print(f"Progress: Deleted {deleted_count} of {total_to_delete} records from {model.__name__}")
