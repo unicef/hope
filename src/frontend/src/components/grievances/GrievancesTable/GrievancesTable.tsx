@@ -27,12 +27,16 @@ import {
   PERMISSIONS,
   hasCreatorOrOwnerPermissions,
 } from '../../../config/permissions';
-import { headCells } from './GrievancesTableHeadCells';
+import {
+  headCellsStandardProgram,
+  headCellsSocialProgram,
+} from './GrievancesTableHeadCells';
 import { GrievancesTableRow } from './GrievancesTableRow';
 import { BulkAddNoteModal } from './bulk/BulkAddNoteModal';
 import { BulkAssignModal } from './bulk/BulkAssignModal';
 import { BulkSetPriorityModal } from './bulk/BulkSetPriorityModal';
 import { BulkSetUrgencyModal } from './bulk/BulkSetUrgencyModal';
+import { headCells } from '../SanctionListIndividualsTable/SanctionListIndividualsHeadCells';
 
 interface GrievancesTableProps {
   filter;
@@ -196,7 +200,7 @@ export const GrievancesTable = ({
   };
 
   const headCellsWithProgramColumn = [
-    ...headCells,
+    ...headCellsStandardProgram,
     {
       disablePadding: false,
       label: 'Programmes',
