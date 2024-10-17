@@ -304,7 +304,6 @@ class TestBatchDeduplication(TestCase):
         )
 
 
-@disabled_locally_test
 class TestGoldenRecordDeduplication(TestCase):
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
