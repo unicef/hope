@@ -287,6 +287,14 @@ class TestPaymentPlanModel(TestCase):
         p2.save()
         self.assertEqual(pp.is_reconciled, True)
 
+    def test_set_draft_status(self) -> None:
+        pp = PaymentPlanFactory(currency="PLN")
+        self.assertEqual(pp.status, PaymentPlan.Status.OPEN)
+        pp.status_draft()
+        pp.save()
+        pp.refresh_from_db(fields=["status"])
+        self.assertEqual(pp.status, PaymentPlan.Status.DRAFT)
+
 
 class TestPaymentModel(TestCase):
     @classmethod
