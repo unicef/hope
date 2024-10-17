@@ -146,9 +146,8 @@ class FlexibleAttributeForPDUFactory(DjangoModelFactory):
     @classmethod
     def _create(cls, target_class: Any, *args: Any, **kwargs: Any) -> FlexibleAttribute:
         label = kwargs.pop("label", None)
+        kwargs["label"] = {"English(EN)": label}
         obj = super()._create(target_class, *args, **kwargs)
-        obj.label = {"English(EN)": label}
-        obj.save()
         return obj
 
     class Meta:

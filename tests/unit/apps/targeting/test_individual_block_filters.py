@@ -180,6 +180,7 @@ class TestIndividualBlockFilter(TestCase):
             name="flex_field_1",
             type=FlexibleAttribute.STRING,
             associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+            label={"English(EN)": "value"},
         )
         query = Household.objects.all()
         flex_field_filter = TargetingIndividualBlockRuleFilter(

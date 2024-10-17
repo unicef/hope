@@ -38,10 +38,9 @@ from hct_mis_api.apps.registration_data.models import (
     KoboImportedSubmission,
     RegistrationDataImport,
 )
-from hct_mis_api.apps.registration_datahub.celery_tasks import (
-    create_grievance_tickets_for_dedup_engine_results,
-    deduplicate_documents,
-    update_rdis_deduplication_engine_statistics,
+from hct_mis_api.apps.registration_datahub.celery_tasks import deduplicate_documents
+from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import (
+    BiometricDeduplicationService,
 )
 from hct_mis_api.apps.registration_datahub.signals import rdi_merged
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
@@ -271,12 +270,46 @@ class RdiMergeTask:
                     logger.info(
                         f"RDI:{registration_data_import_id} Populated index for {len(household_ids)} households"
                     )
+
+                    imported_delivery_mechanism_data = PendingDeliveryMechanismData.objects.filter(
+                        individual_id__in=individual_ids,
+                    )
+                    self._create_grievance_tickets_for_delivery_mechanisms_errors(
+                        imported_delivery_mechanism_data, obj_hct
+                    )
+
+                    imported_delivery_mechanism_data.update(rdi_merge_status=MergeStatusModel.MERGED)
+                    PendingIndividualRoleInHousehold.objects.filter(
+                        household_id__in=household_ids, individual_id__in=individual_ids
+                    ).update(rdi_merge_status=MergeStatusModel.MERGED)
+                    PendingBankAccountInfo.objects.filter(individual_id__in=individual_ids).update(
+                        rdi_merge_status=MergeStatusModel.MERGED
+                    )
+                    PendingDocument.objects.filter(individual_id__in=individual_ids).update(
+                        rdi_merge_status=MergeStatusModel.MERGED
+                    )
+                    PendingIndividualRoleInHousehold.objects.filter(individual_id__in=individual_ids).update(
+                        rdi_merge_status=MergeStatusModel.MERGED
+                    )
+                    PendingHousehold.objects.filter(id__in=household_ids).update(
+                        rdi_merge_status=MergeStatusModel.MERGED
+                    )
+                    PendingIndividual.objects.filter(id__in=individual_ids).update(
+                        rdi_merge_status=MergeStatusModel.MERGED
+                    )
+                    populate_index(
+                        Individual.objects.filter(registration_data_import=obj_hct),
+                        get_individual_doc(obj_hct.business_area.slug),
+                    )
+
+                    individuals = evaluate_qs(
+                        Individual.objects.filter(registration_data_import=obj_hct).select_for_update().order_by("pk")
+                    )
+                    households = evaluate_qs(
+                        Household.objects.filter(registration_data_import=obj_hct).select_for_update().order_by("pk")
+                    )
+
                     if not obj_hct.business_area.postpone_deduplication:
-                        individuals = evaluate_qs(
-                            PendingIndividual.objects.filter(registration_data_import=obj_hct)
-                            .select_for_update()
-                            .order_by("pk")
-                        )
                         DeduplicateTask(
                             obj_hct.business_area.slug, obj_hct.program.id
                         ).deduplicate_individuals_against_population(individuals)
@@ -327,8 +360,9 @@ class RdiMergeTask:
                     deduplicate_documents()
                     #  synchronously deduplicate biometrics
                     if obj_hct.program.biometric_deduplication_enabled:
-                        create_grievance_tickets_for_dedup_engine_results(obj_hct.id)
-                        update_rdis_deduplication_engine_statistics(obj_hct.program.id)
+                        dedupe_service = BiometricDeduplicationService()
+                        dedupe_service.create_grievance_tickets_for_duplicates(obj_hct)
+                        dedupe_service.update_rdis_deduplication_statistics(obj_hct.program, exclude_rdi=obj_hct)
 
                     obj_hct.update_needs_adjudication_tickets_statistic()
                     obj_hct.status = RegistrationDataImport.MERGED
@@ -339,32 +373,6 @@ class RdiMergeTask:
                         self._update_household_collections(households, obj_hct)
                         self._update_individual_collections(individuals, obj_hct)
 
-                    imported_delivery_mechanism_data = PendingDeliveryMechanismData.objects.filter(
-                        individual_id__in=individual_ids,
-                    )
-                    self._create_grievance_tickets_for_delivery_mechanisms_errors(
-                        imported_delivery_mechanism_data, obj_hct
-                    )
-                    imported_delivery_mechanism_data.update(rdi_merge_status=MergeStatusModel.MERGED)
-                    PendingIndividualRoleInHousehold.objects.filter(
-                        household_id__in=household_ids, individual_id__in=individual_ids
-                    ).update(rdi_merge_status=MergeStatusModel.MERGED)
-                    PendingBankAccountInfo.objects.filter(individual_id__in=individual_ids).update(
-                        rdi_merge_status=MergeStatusModel.MERGED
-                    )
-                    PendingDocument.objects.filter(individual_id__in=individual_ids).update(
-                        rdi_merge_status=MergeStatusModel.MERGED
-                    )
-                    PendingIndividualRoleInHousehold.objects.filter(individual_id__in=individual_ids).update(
-                        rdi_merge_status=MergeStatusModel.MERGED
-                    )
-                    households.update(rdi_merge_status=MergeStatusModel.MERGED)
-                    individuals.update(rdi_merge_status=MergeStatusModel.MERGED)
-
-                    populate_index(
-                        Individual.objects.filter(registration_data_import=obj_hct),
-                        get_individual_doc(obj_hct.business_area.slug),
-                    )
                     logger.info(
                         f"RDI:{registration_data_import_id} Populated index for {len(individual_ids)} individuals"
                     )
@@ -411,9 +419,11 @@ class RdiMergeTask:
         # if this is the 2nd representation - the collection is created now for the new representation and the existing one
         for household in households:
             # find other household with the same unicef_id and group them in the same collection
-            household_from_collection = Household.objects.filter(
-                unicef_id=household.unicef_id, business_area=rdi.business_area
-            ).first()
+            household_from_collection = (
+                Household.objects.filter(unicef_id=household.unicef_id, business_area=rdi.business_area)
+                .exclude(registration_data_import=rdi)
+                .first()
+            )
             if household_from_collection:
                 if collection := household_from_collection.household_collection:
                     household.household_collection = collection
@@ -431,9 +441,14 @@ class RdiMergeTask:
         individuals_to_update = []
         for individual in individuals:
             # find other individual with the same unicef_id and group them in the same collection
-            individual_from_collection = Individual.objects.filter(
-                unicef_id=individual.unicef_id, business_area=rdi.business_area
-            ).first()
+            individual_from_collection = (
+                Individual.objects.filter(
+                    unicef_id=individual.unicef_id,
+                    business_area=rdi.business_area,
+                )
+                .exclude(registration_data_import=rdi)
+                .first()
+            )
             if individual_from_collection:
                 if collection := individual_from_collection.individual_collection:
                     individual.individual_collection = collection

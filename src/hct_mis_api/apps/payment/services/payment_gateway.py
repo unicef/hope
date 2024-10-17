@@ -233,7 +233,7 @@ class FspData(FlexibleArgumentsDataclassMixin):
     id: int
     remote_id: str
     name: str
-    vision_vendor_number: str
+    vendor_number: str
     configs: List[Union[FspConfig, Dict]]
 
     def __post_init__(self) -> None:
@@ -278,8 +278,8 @@ class PaymentGatewayAPI(BaseAPI):
     class PaymentGatewayMissingAPICredentialsException(Exception):
         pass
 
-    API_EXCEPTION_CLASS = PaymentGatewayAPIException
-    API_MISSING_CREDENTIALS_EXCEPTION_CLASS = PaymentGatewayMissingAPICredentialsException
+    API_EXCEPTION_CLASS = PaymentGatewayAPIException  # type: ignore
+    API_MISSING_CREDENTIALS_EXCEPTION_CLASS = PaymentGatewayMissingAPICredentialsException  # type: ignore
 
     class Endpoints:
         CREATE_PAYMENT_INSTRUCTION = "payment_instructions/"
@@ -307,7 +307,7 @@ class PaymentGatewayAPI(BaseAPI):
 
     def change_payment_instruction_status(self, status: PaymentInstructionStatus, remote_id: str) -> str:
         if status.value not in [s.value for s in PaymentInstructionStatus]:
-            raise self.API_EXCEPTION_CLASS(f"Can't set invalid Payment Instruction status: {status}")
+            raise self.API_EXCEPTION_CLASS(f"Can't set invalid Payment Instruction status: {status}")  # type: ignore
 
         action_endpoint_map = {
             PaymentInstructionStatus.ABORTED: self.Endpoints.ABORT_PAYMENT_INSTRUCTION_STATUS,
@@ -440,7 +440,7 @@ class PaymentGatewayService:
             fsp, created = FinancialServiceProvider.objects.update_or_create(
                 payment_gateway_id=fsp_data.id,
                 defaults={
-                    "vision_vendor_number": fsp_data.vision_vendor_number,
+                    "vision_vendor_number": fsp_data.vendor_number,
                     "name": fsp_data.name,
                     "communication_channel": FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
                     "data_transfer_configuration": [dataclasses.asdict(config) for config in fsp_data.configs],

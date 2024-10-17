@@ -43,7 +43,10 @@ from tests.selenium.page_object.payment_module.payment_module import PaymentModu
 from tests.selenium.page_object.payment_module.payment_module_details import (
     PaymentModuleDetails,
 )
-from tests.selenium.page_object.payment_module.program_cycle import ProgramCyclePage, ProgramCycleDetailsPage
+from tests.selenium.page_object.payment_module.program_cycle import ProgramCyclePage
+from tests.selenium.page_object.payment_module.program_cycle_details import (
+    ProgramCycleDetailsPage,
+)
 
 pytestmark = pytest.mark.django_db(transaction=True)
 

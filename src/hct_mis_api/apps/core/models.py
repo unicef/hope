@@ -191,6 +191,11 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
         return default
 
 
+def label_contains_english_en_validator(data: dict) -> None:
+    if "English(EN)" not in data:
+        raise ValidationError('The "English(EN)" key is required in the label.')
+
+
 class FlexibleAttribute(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDModel):
     STRING = "STRING"
     IMAGE = "IMAGE"
@@ -237,7 +242,7 @@ class FlexibleAttribute(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDMode
         null=True,
         related_name="flex_field",
     )
-    label = JSONField(default=dict)
+    label = JSONField(default=dict, validators=[label_contains_english_en_validator])
     hint = JSONField(default=dict)
     group = models.ForeignKey(
         "core.FlexibleAttributeGroup", on_delete=models.CASCADE, related_name="flex_attributes", null=True, blank=True
@@ -263,6 +268,8 @@ class FlexibleAttribute(SoftDeletableModel, NaturalKeyModel, TimeStampedUUIDMode
             and FlexibleAttribute.objects.filter(name=self.name, program__isnull=False).exclude(id=self.id).exists()
         ):
             raise ValidationError(f'Flex field with name "{self.name}" already exists inside a program.')
+
+        label_contains_english_en_validator(self.label)
 
     def save(self, *args: Any, **kwargs: Any) -> None:
         self.clean()
