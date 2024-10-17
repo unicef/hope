@@ -13,11 +13,14 @@ from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.fixtures import (
     CashPlanFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
     PaymentRecordFactory,
     PaymentVerificationFactory,
-    PaymentVerificationPlanFactory, PaymentPlanFactory, PaymentFactory, PaymentVerificationSummaryFactory,
+    PaymentVerificationPlanFactory,
+    PaymentVerificationSummaryFactory,
 )
-from hct_mis_api.apps.payment.models import GenericPayment, PaymentPlan, PaymentVerificationSummary
+from hct_mis_api.apps.payment.models import GenericPayment, PaymentPlan
 from hct_mis_api.apps.payment.models import PaymentRecord as PR
 from hct_mis_api.apps.payment.models import PaymentVerification as PV
 from hct_mis_api.apps.payment.models import PaymentVerificationPlan
@@ -98,10 +101,10 @@ def empty_payment_verification(social_worker_program: Program) -> None:
     )
 
     payment_plan = PaymentPlanFactory(
-            program=program,
-            status=PaymentPlan.Status.FINISHED,
-            business_area=BusinessArea.objects.filter(slug="afghanistan").first(),
-        )
+        program=program,
+        status=PaymentPlan.Status.FINISHED,
+        business_area=BusinessArea.objects.filter(slug="afghanistan").first(),
+    )
     PaymentFactory(
         parent=payment_plan,
         business_area=BusinessArea.objects.first(),
@@ -112,7 +115,7 @@ def empty_payment_verification(social_worker_program: Program) -> None:
         currency="PLN",
         status=GenericPayment.STATUS_DISTRIBUTION_SUCCESS,
     )
-    summary = PaymentVerificationSummaryFactory(payment_plan_obj=payment_plan)
+    PaymentVerificationSummaryFactory(payment_plan_obj=payment_plan)
 
 
 @pytest.fixture
@@ -353,11 +356,12 @@ class TestPaymentVerification:
         ],
     )
     def test_payment_verification_create_verification_plan_full_list(
-        self, channel: str,
-            active_program: Program,
-            empty_payment_verification: None,
-            pagePaymentVerification: PaymentVerification,
-            pagePaymentVerificationDetails: PaymentVerificationDetails
+        self,
+        channel: str,
+        active_program: Program,
+        empty_payment_verification: None,
+        pagePaymentVerification: PaymentVerification,
+        pagePaymentVerificationDetails: PaymentVerificationDetails,
     ) -> None:
         pagePaymentVerification.selectGlobalProgramFilter("Active Program")
         pagePaymentVerification.getNavPaymentVerification().click()
@@ -379,11 +383,11 @@ class TestPaymentVerification:
     #     ],
     # )
     def test_payment_verification_create_verification_plan_random_sampling_manual(
-            self,
-            active_program: Program,
-            empty_payment_verification: None,
-            pagePaymentVerification: PaymentVerification,
-            pagePaymentVerificationDetails: PaymentVerificationDetails
+        self,
+        active_program: Program,
+        empty_payment_verification: None,
+        pagePaymentVerification: PaymentVerification,
+        pagePaymentVerificationDetails: PaymentVerificationDetails,
     ) -> None:
         pagePaymentVerification.selectGlobalProgramFilter("Active Program")
         pagePaymentVerification.getNavPaymentVerification().click()
@@ -402,13 +406,13 @@ class TestPaymentVerification:
         assert "1" in pagePaymentVerificationDetails.getLabelNumberOfVerificationPlans().text
 
     def test_payment_verification_records(
-                self,
-                active_program: Program,
-                add_payment_verification: PV,
-                pagePaymentVerification: PaymentVerification,
-                pagePaymentVerificationDetails: PaymentVerificationDetails,
-                pagePaymentRecord: PaymentRecord,
-        ) -> None:
+        self,
+        active_program: Program,
+        add_payment_verification: PV,
+        pagePaymentVerification: PaymentVerification,
+        pagePaymentVerificationDetails: PaymentVerificationDetails,
+        pagePaymentRecord: PaymentRecord,
+    ) -> None:
         pagePaymentVerification.selectGlobalProgramFilter("Active Program")
         pagePaymentVerification.getNavPaymentVerification().click()
         pagePaymentVerification.getCashPlanTableRow().click()
@@ -432,6 +436,7 @@ class TestPaymentVerification:
         sleep(2)
         pagePaymentVerification.screenshot("0", file_path="./")
         from tests.selenium.tools.tag_name_finder import printing
+
         printing("Mapping", pagePaymentVerification.driver)
         printing("Methods", pagePaymentVerification.driver)
         printing("Assert", pagePaymentVerification.driver)
