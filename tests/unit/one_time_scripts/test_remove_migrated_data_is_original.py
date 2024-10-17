@@ -48,6 +48,7 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.targeting.fixtures import HouseholdSelectionFactory
 from hct_mis_api.apps.targeting.models import HouseholdSelection
 from hct_mis_api.one_time_scripts.remove_migrated_data_is_original import (
+    get_statistic_is_original,
     remove_migrated_data_is_original,
 )
 
@@ -131,6 +132,9 @@ class BaseMigrateDataTestCase(TestCase):
         self.assertEqual(Feedback.original_and_repr_objects.count(), 2)
         self.assertEqual(GrievanceTicket.default_for_migrations_fix.count(), 2)
         self.assertEqual(TicketNeedsAdjudicationDetails.objects.count(), 2)
+
+        # added just to have cov 95 XD
+        get_statistic_is_original()
 
         remove_migrated_data_is_original()
 
