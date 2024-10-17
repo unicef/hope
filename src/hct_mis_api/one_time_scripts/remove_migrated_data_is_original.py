@@ -9,6 +9,42 @@ def remove_migrated_data_is_original(batch_size: int = 1000) -> None:
     for model in all_models:
         if hasattr(model, "is_original"):
             if model.__name__ == "GrievanceTicket":
+                model_qs = model.default_for_migrations_fix
+            elif model.__name__ in ["HouseholdSelection", "EntitlementCard", "Feedback", "Message"]:
+                model_qs = model.original_and_repr_objects
+            else:
+                model_qs = model.all_objects
+
+            queryset_is_original = model_qs.filter(is_original=True).only("id")
+
+            print(f"Removing objects with 'is_original=True': {model.__name__}")
+
+            ids_to_delete = [
+                str(obj_id) for obj_id in queryset_is_original.values_list("id", flat=True).iterator(chunk_size=batch_size)
+            ]
+
+            deleted_count = 0
+            total_to_delete = len(ids_to_delete)
+
+            for i in range(0, total_to_delete, batch_size):
+                batch_pks = ids_to_delete[i:i + batch_size]
+                deleted, _ = model_qs.filter(pk__in=batch_pks).delete()
+                deleted_count += deleted
+
+                if i % (batch_size * 10) == 0:
+                    print(f"Progress: Deleted {deleted_count} of {total_to_delete} records from {model.__name__}")
+
+            print(f"Deleted {model.__name__} and related objects: {deleted_count}.\n")
+    print(f"Completed in {timezone.now() - start_time}\n", "*" * 60)
+
+
+def get_statistic_is_original() -> None:
+    start_time = timezone.now()
+    all_models = apps.get_models()
+
+    for model in all_models:
+        if hasattr(model, "is_original"):
+            if model.__name__ == "GrievanceTicket":
                 queryset_all = model.default_for_migrations_fix.all().only("is_original", "id")
                 queryset_is_original = queryset_all.filter(is_original=True)
             elif model.__name__ in ["HouseholdSelection", "EntitlementCard", "Feedback", "Message"]:
@@ -20,17 +56,6 @@ def remove_migrated_data_is_original(batch_size: int = 1000) -> None:
 
             print(
                 f"*** {model.__name__} All objects: {queryset_all.count()}. "
-                f"Removing objects with 'is_original=True': {queryset_is_original.count()}"
+                f"Will remove objects with 'is_original=True': {queryset_is_original.count()}"
             )
-
-            deleted_count = 0
-            ids_to_delete = list(queryset_is_original.values_list("id", flat=True).iterator(chunk_size=batch_size))
-
-            for i in range(0, len(ids_to_delete), batch_size):
-                batch_pks = ids_to_delete[i : i + batch_size]
-                count, _ = queryset_all.filter(pk__in=batch_pks).delete()
-                deleted_count += count
-
-            print(f"Deleted {model.__name__} and related objects {deleted_count}.\n")
-
     print(f"Completed in {timezone.now() - start_time}\n", "*" * 55)
