@@ -126,7 +126,7 @@ def reassign_head_of_household_relationship_for_need_adjudication_ticket(
     individual_which_loses_role: Individual,
     new_individual: Individual,
     old_individual_to_log: Individual,
-    user: AbstractUser,
+    user: "AbstractUser",
 ) -> None:
     if household != individual_which_loses_role.household:
         raise ValidationError("Household missmatch Individual which loses role and household")
