@@ -133,9 +133,7 @@ class BaseMigrateDataTestCase(TestCase):
         self.assertEqual(GrievanceTicket.default_for_migrations_fix.count(), 2)
         self.assertEqual(TicketNeedsAdjudicationDetails.objects.count(), 2)
 
-        # added just to have cov 95 XD
         get_statistic_is_original()
-
         remove_migrated_data_is_original()
 
         # check count after

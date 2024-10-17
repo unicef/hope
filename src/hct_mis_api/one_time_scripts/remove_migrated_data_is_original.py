@@ -45,11 +45,10 @@ def remove_migrated_data_is_original(batch_size: int = 1000) -> None:
 
             if i % (batch_size * 10) == 0:
                 print(
-                    f"Progress: Deleted {deleted_count} {model.__name__} and related objects. "
-                    f"{model.__name__} list contains {total_to_delete} records."
+                    f"Progress: Deleted {deleted_count:,} {model.__name__} and related objects. "
+                    f"{model.__name__} list contains {total_to_delete:,} records."
                 )
-
-        print(f"Deleted {model.__name__} and related objects: {deleted_count}.\n")
+        print(f"Deleted {model.__name__} and related objects: {deleted_count:,}.\n")
     print(f"Completed in {timezone.now() - start_time}\n", "*" * 60)
 
 
@@ -66,7 +65,7 @@ def get_statistic_is_original() -> None:
             queryset_all = model.all_objects.all().only("is_original", "id")
             queryset_is_original = queryset_all.filter(is_original=True)
         print(
-            f"*** {model.__name__} All objects: {queryset_all.count()}. "
-            f"Will remove objects with 'is_original=True': {queryset_is_original.count()}"
+            f"*** {model.__name__} All objects: {queryset_all.count():,}. "
+            f"Will remove objects with 'is_original=True': {queryset_is_original.count():,}"
         )
     print(f"Completed in {timezone.now() - start_time}\n", "*" * 55)
