@@ -82,7 +82,7 @@ class TestSmokeIndividuals:
         assert "None" in pageIndividualsDetails.getLabelRememberingOrConcentratingDisabilitySeverity().text
         assert "None" in pageIndividualsDetails.getLabelCommunicatingDisabilitySeverity().text
         assert "Not Disabled" in pageIndividualsDetails.getLabelDisability().text
-        assert "Poland" in pageIndividualsDetails.getLabelIssued().text
+        assert "Afghanistan" in pageIndividualsDetails.getLabelIssued().text
         assert "fake111test@email.com" in pageIndividualsDetails.getLabelEmail().text
         assert "0048503123555" in pageIndividualsDetails.getLabelPhoneNumber().text
         assert "-" in pageIndividualsDetails.getLabelAlternativePhoneNumber().text

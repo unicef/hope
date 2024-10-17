@@ -40,7 +40,13 @@ export function ReassignMultipleRoleBox({
 }): React.ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
-
+  const reassignData = JSON.parse(
+    ticket.needsAdjudicationTicketDetails.roleReassignData,
+  );
+  const reassignDataDictByIndividualId = {};
+  for (const key of Object.keys(reassignData)) {
+    reassignDataDictByIndividualId[reassignData[key].individual] = reassignData[key];
+  }
   const selectedIndividualsToReassign =
     ticket.needsAdjudicationTicketDetails.selectedDuplicates?.filter(
       (el) =>
@@ -90,7 +96,8 @@ export function ReassignMultipleRoleBox({
                 }}
                 ticket={ticket}
                 household={householdAndRole.household}
-                individual={selectedIndividualToReassign}
+                individualToReassign={selectedIndividualToReassign}
+                initialSelectedIndividualId={reassignDataDictByIndividualId[selectedIndividualToReassign.id].new_individual}
               />
             </Box>
           ));
@@ -129,7 +136,8 @@ export function ReassignMultipleRoleBox({
                   individualRole={{ role: 'HEAD', id: 'HEAD' }}
                   ticket={ticket}
                   household={household}
-                  individual={selectedIndividualToReassign}
+                  individualToReassign={selectedIndividualToReassign}
+                  initialSelectedIndividualId={reassignDataDictByIndividualId[selectedIndividualToReassign.id].new_individual}
                 />
               </Box>
             )}

@@ -429,6 +429,14 @@ class TestProgrammeDetails:
 
         pageProgrammeDetails.getProgramCycleRow()
 
+        # TODO TEST REFACTOR
+        from selenium.webdriver.common.by import By
+        from selenium.webdriver.support.ui import WebDriverWait
+
+        WebDriverWait(pageProgrammeDetails.driver, 10).until(
+            lambda d: len(d.find_elements(By.CSS_SELECTOR, pageProgrammeDetails.programCycleRow)) == 3
+        )
+
         assert "Draft" in pageProgrammeDetails.getProgramCycleStatus()[1].text
         assert (datetime.now() + relativedelta(days=1)).strftime(
             "%-d %b %Y"
@@ -469,7 +477,13 @@ class TestProgrammeDetails:
         pageProgrammeDetails.getEndDateCycle().click()
         pageProgrammeDetails.getEndDateCycle().send_keys((datetime.now() + relativedelta(days=21)).strftime("%Y-%m-%d"))
         pageProgrammeDetails.getButtonCreateProgramCycle().click()
+        # TODO TEST REFACTOR
+        from selenium.webdriver.common.by import By
+        from selenium.webdriver.support.ui import WebDriverWait
 
+        WebDriverWait(pageProgrammeDetails.driver, 10).until(
+            lambda d: len(d.find_elements(By.CSS_SELECTOR, pageProgrammeDetails.programCycleRow)) == 3
+        )
         pageProgrammeDetails.getProgramCycleRow()
 
         assert "Draft" in pageProgrammeDetails.getProgramCycleStatus()[1].text

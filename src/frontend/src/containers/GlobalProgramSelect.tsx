@@ -221,7 +221,7 @@ export const GlobalProgramSelect = () => {
       setPrograms(newProgramsList);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [programsList?.allPrograms]);
+  }, [programsList?.allPrograms, inputValue]);
 
   const handleClose = () => {
     setAnchorEl(null);
