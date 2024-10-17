@@ -406,12 +406,14 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
             type=FlexibleAttribute.DECIMAL,
             name="flex_decimal_i_f",
             associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+            label={"English(EN)": "value"},
         )
         decimal_flexible_attribute.save()
         date_flexible_attribute = FlexibleAttribute(
             type=FlexibleAttribute.DECIMAL,
             name="flex_date_i_f",
             associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD,
+            label={"English(EN)": "value"},
         )
         date_flexible_attribute.save()
         flex_fields = [
@@ -561,12 +563,14 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
             type=FlexibleAttribute.DECIMAL,
             name="flex_decimal_i_f",
             associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+            label={"English(EN)": "value"},
         )
         decimal_flexible_attribute.save()
         date_flexible_attribute = FlexibleAttribute(
             type=FlexibleAttribute.DECIMAL,
             name="flex_date_i_f",
             associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+            label={"English(EN)": "value"},
         )
         date_flexible_attribute.save()
         self.client.login(username="admin", password="password")
@@ -590,6 +594,7 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
             type=FlexibleAttribute.DECIMAL,
             name="flex_decimal_i_f",
             associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+            label={"English(EN)": "value"},
         )
         flex_field.save()
         fsp_xlsx_template = FinancialServiceProviderXlsxTemplateFactory(flex_fields=[flex_field.name])
