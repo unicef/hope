@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { ContentLink } from '@core/ContentLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useProgramContext } from 'src/programContext';
 
 interface IndividualQuestionnaireProps {
   values;
@@ -15,11 +16,85 @@ export const IndividualQuestionnaire = ({
 }: IndividualQuestionnaireProps): React.ReactElement => {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
+  const { isSocialDctType } = useProgramContext();
   const selectedIndividualData =
     values.selectedIndividual || values.selectedHousehold.headOfHousehold;
-  return (
-    <Grid container spacing={6}>
-      {[
+  const questionFields = isSocialDctType
+    ? [
+        {
+          name: 'questionnaire_fullName',
+          label: t('Individual Full Name'),
+          value: (
+            <ContentLink
+              href={`/${baseUrl}/population/individuals/${selectedIndividualData.id}`}
+            >
+              {selectedIndividualData.fullName}
+            </ContentLink>
+          ),
+          size: 3,
+        },
+        {
+          name: 'questionnaire_birthDate',
+          label: t('Birth Date'),
+          value: selectedIndividualData.birthDate,
+          size: 3,
+        },
+        {
+          name: 'questionnaire_sex',
+          label: t('Gender'),
+          value: selectedIndividualData.sex,
+          size: 3,
+        },
+        {
+          name: 'questionnaire_phoneNo',
+          label: t('Phone Number'),
+          value: selectedIndividualData.phoneNo,
+          size: 3,
+        },
+        {
+          name: 'questionnaire_countryOfOrigin',
+          label: t('Country of Origin'),
+          value: selectedIndividualData?.countryOfOrigin,
+          size: 3,
+        },
+        {
+          name: 'questionnaire_address',
+          label: t('Address'),
+          value: selectedIndividualData?.address,
+          size: 3,
+        },
+        {
+          name: 'questionnaire_village',
+          label: t('Village'),
+          value: selectedIndividualData?.village,
+          size: 3,
+        },
+        {
+          name: 'questionnaire_adminLevel1',
+          label: t('Administrative Level 1'),
+          value: selectedIndividualData?.adminLevel1,
+          size: 3,
+        },
+        {
+          name: 'questionnaire_adminLevel2',
+          label: t('Administrative Level 2'),
+          value: selectedIndividualData?.adminLevel2,
+          size: 3,
+        },
+        {
+          name: 'questionnaire_adminLevel3',
+          label: t('Administrative Level 3'),
+          value: selectedIndividualData?.adminLevel3,
+          size: 3,
+        },
+        {
+          name: 'questionnaire_adminLevel4',
+          label: t('Administrative Level 4'),
+          value: selectedIndividualData?.adminLevel4,
+          size: 3,
+        },
+      ]
+    : [
         {
           name: 'questionnaire_fullName',
           label: t('Individual Full Name'),
@@ -56,7 +131,10 @@ export const IndividualQuestionnaire = ({
           value: selectedIndividualData.relationship,
           size: 3,
         },
-      ].map((el) => (
+      ];
+  return (
+    <Grid container spacing={6}>
+      {questionFields.map((el) => (
         <Grid key={el.name} item xs={3}>
           <Field
             data-cy={`input-${el.name}`}

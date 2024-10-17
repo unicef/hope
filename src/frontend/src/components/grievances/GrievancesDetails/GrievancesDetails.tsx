@@ -1,17 +1,4 @@
-import { Box, Grid, GridSize, Typography } from '@mui/material';
-import * as React from 'react';
-import { useTranslation } from 'react-i18next';
-import {
-  GrievanceTicketQuery,
-  GrievancesChoiceDataQuery,
-} from '@generated/graphql';
-import { GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
-import {
-  choicesToDict,
-  grievanceTicketBadgeColors,
-  grievanceTicketStatusToColor,
-  renderUserName,
-} from '@utils/utils';
+import { BlackLink } from '@core/BlackLink';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { ContentLink } from '@core/ContentLink';
 import { LabelizedField } from '@core/LabelizedField';
@@ -20,8 +7,22 @@ import { PhotoModal } from '@core/PhotoModal/PhotoModal';
 import { StatusBox } from '@core/StatusBox';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
+import {
+  GrievanceTicketQuery,
+  GrievancesChoiceDataQuery,
+} from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { BlackLink } from '@core/BlackLink';
+import { Box, Grid, GridSize, Typography } from '@mui/material';
+import { GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
+import {
+  choicesToDict,
+  grievanceTicketBadgeColors,
+  grievanceTicketStatusToColor,
+  renderUserName,
+} from '@utils/utils';
+import * as React from 'react';
+import { useTranslation } from 'react-i18next';
+import { useProgramContext } from 'src/programContext';
 
 interface GrievancesDetailsProps {
   ticket: GrievanceTicketQuery['grievanceTicket'];
@@ -40,6 +41,7 @@ export function GrievancesDetails({
 }: GrievancesDetailsProps): React.ReactElement {
   const { t } = useTranslation();
   const { isAllPrograms } = useBaseUrl();
+  const { isSocialDctType } = useProgramContext();
   const statusChoices: {
     [id: number]: string;
   } = choicesToDict(choicesData.grievanceTicketStatusChoices);
@@ -363,7 +365,9 @@ export function GrievancesDetails({
                 size: 12,
               },
             ]
-              .filter((el) => el)
+              .filter((el) =>
+                isSocialDctType ? el.label !== 'Household ID' : el,
+              )
               .map((el) => (
                 <Grid key={el.label} item xs={el.size as GridSize}>
                   <LabelizedField label={el.label}>{el.value}</LabelizedField>
