@@ -9,8 +9,12 @@ import { UniversalTable } from '@containers/tables/UniversalTable';
 import { decodeIdString } from '@utils/utils';
 import { TableWrapper } from '@core/TableWrapper';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { headCells } from './LookUpIndividualTableHeadCells';
+import {
+  headCellsSocialProgram,
+  headCellsStandardProgram,
+} from './LookUpIndividualTableHeadCells';
 import { LookUpIndividualTableRow } from './LookUpIndividualTableRow';
+import { useProgramContext } from 'src/programContext';
 
 interface LookUpIndividualTableProps {
   filter;
@@ -45,12 +49,13 @@ export function LookUpIndividualTable({
   excludedId,
   noTableStyling = false,
 }: LookUpIndividualTableProps): React.ReactElement {
+  const { isSocialDctType } = useProgramContext();
   const { programId, isAllPrograms } = useBaseUrl();
 
   const handleRadioChange = (individual): void => {
     setSelectedIndividual(individual);
 
-    if (individual.household) {
+    if (individual.household && !isSocialDctType) {
       setSelectedHousehold(individual.household);
       setFieldValue('selectedHousehold', individual.household);
     }
@@ -87,6 +92,10 @@ export function LookUpIndividualTable({
     isActiveProgram: filter.programState === 'active' ? true : null,
   };
 
+  const headCells = isSocialDctType
+    ? headCellsSocialProgram
+    : headCellsStandardProgram;
+
   const headCellsWithProgramColumn = [
     ...headCells,
     {
@@ -104,8 +113,8 @@ export function LookUpIndividualTable({
 
   const renderTable = (): React.ReactElement => (
     <UniversalTable<
-    AllIndividualsForPopulationTableQuery['allIndividuals']['edges'][number]['node'],
-    AllIndividualsForPopulationTableQueryVariables
+      AllIndividualsForPopulationTableQuery['allIndividuals']['edges'][number]['node'],
+      AllIndividualsForPopulationTableQueryVariables
     >
       headCells={preparedHeadcells}
       allowSort={false}

@@ -7,6 +7,7 @@ import { sexToCapitalize } from '@utils/utils';
 import { BlackLink } from '@core/BlackLink';
 import { ClickableTableRow } from '@core/Table/ClickableTableRow';
 import { UniversalMoment } from '@core/UniversalMoment';
+import { useProgramContext } from 'src/programContext';
 
 interface LookUpIndividualTableRowProps {
   individual: AllIndividualsForPopulationTableQuery['allIndividuals']['edges'][number]['node'];
@@ -22,6 +23,7 @@ export function LookUpIndividualTableRow({
   selectedIndividual,
 }: LookUpIndividualTableRowProps): React.ReactElement {
   const { baseUrl, isAllPrograms } = useBaseUrl();
+  const { isSocialDctType } = useProgramContext();
 
   return (
     <ClickableTableRow
@@ -55,9 +57,11 @@ export function LookUpIndividualTableRow({
         )}
       </TableCell>
       <TableCell align="left">{individual.fullName}</TableCell>
-      <TableCell align="left">
-        {individual.household ? individual.household.unicefId : '-'}
-      </TableCell>
+      {!isSocialDctType && (
+        <TableCell align="left">
+          {individual.household ? individual.household.unicefId : '-'}
+        </TableCell>
+      )}
       <TableCell align="right">{individual.age}</TableCell>
       <TableCell align="left">{sexToCapitalize(individual.sex)}</TableCell>
       <TableCell align="left">
