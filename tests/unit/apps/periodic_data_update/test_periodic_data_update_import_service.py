@@ -69,9 +69,15 @@ class TestPeriodicDataUpdateImportService(TestCase):
                     "program_id": cls.program.pk,
                     "registration_data_import": cls.rdi,
                 },
+                {
+                    "business_area": cls.business_area,
+                    "program_id": cls.program.pk,
+                    "registration_data_import": cls.rdi,
+                },
             ],
         )
         cls.individual = cls.individuals[0]
+        cls.individual2 = cls.individuals[1]
 
         cls.string_attribute = create_pdu_flexible_attribute(
             label="String Attribute",
@@ -179,7 +185,7 @@ class TestPeriodicDataUpdateImportService(TestCase):
                     "number_of_records": 0,
                 }
             ],
-            [[True, "2021-05-02"]],
+            [[True, "2021-05-02"], [False, "2021-05-02"]],
         )
         service = PeriodicDataUpdateImportService(periodic_data_update_upload)
         service.import_data()
@@ -188,6 +194,8 @@ class TestPeriodicDataUpdateImportService(TestCase):
         self.individual.refresh_from_db()
         self.assertEqual(self.individual.flex_fields[flexible_attribute.name]["1"]["value"], True)
         self.assertEqual(self.individual.flex_fields[flexible_attribute.name]["1"]["collection_date"], "2021-05-02")
+        self.assertEqual(self.individual2.flex_fields[flexible_attribute.name]["1"]["value"], False)
+        self.assertEqual(self.individual2.flex_fields[flexible_attribute.name]["1"]["collection_date"], "2021-05-02")
 
     def test_import_data_boolean_fail(self) -> None:
         flexible_attribute = self.boolean_attribute
@@ -365,7 +373,10 @@ class TestPeriodicDataUpdateImportService(TestCase):
                     "number_of_records": 0,
                 }
             ],
-            [[datetime.datetime(2021, 5, 2), datetime.date(2021, 5, 2)]],
+            [
+                [datetime.datetime(2021, 5, 2), datetime.datetime(2021, 5, 2)],
+                [datetime.date(2021, 5, 1), datetime.date(2021, 5, 2)],
+            ],
         )
         service = PeriodicDataUpdateImportService(periodic_data_update_upload)
         service.import_data()
@@ -374,6 +385,8 @@ class TestPeriodicDataUpdateImportService(TestCase):
         self.individual.refresh_from_db()
         self.assertEqual(self.individual.flex_fields[flexible_attribute.name]["1"]["value"], "2021-05-02")
         self.assertEqual(self.individual.flex_fields[flexible_attribute.name]["1"]["collection_date"], "2021-05-02")
+        self.assertEqual(self.individual2.flex_fields[flexible_attribute.name]["1"]["value"], "2021-05-01")
+        self.assertEqual(self.individual2.flex_fields[flexible_attribute.name]["1"]["collection_date"], "2021-05-02")
 
     def test_read_periodic_data_update_template_object(self) -> None:
         periodic_data_update_template = PeriodicDataUpdateTemplate.objects.create(
