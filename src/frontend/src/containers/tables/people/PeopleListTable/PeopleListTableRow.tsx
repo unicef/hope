@@ -8,7 +8,8 @@ import { AnonTableCell } from '@components/core/Table/AnonTableCell';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { IndividualFlags } from '@components/population/IndividualFlags';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { sexToCapitalize } from '@utils/utils';
+import { individualStatusToColor, sexToCapitalize } from '@utils/utils';
+import { StatusBox } from '@components/core/StatusBox';
 
 interface IndividualsListTableRowProps {
   individual: IndividualNode;
@@ -43,7 +44,13 @@ export const PeopleListTableRow = ({
         <BlackLink to={individualDetailsPath}>{individual.unicefId}</BlackLink>
       </TableCell>
       <AnonTableCell>{individual.fullName}</AnonTableCell>
-      <TableCell align="right">
+      <TableCell align="left">
+        <StatusBox
+          status={individual.status}
+          statusToColor={individualStatusToColor}
+        />
+      </TableCell>
+      <TableCell align="left">
         {individual.relationship === IndividualRelationship.Head
           ? t('Beneficiary')
           : t('Non-beneficiary')}

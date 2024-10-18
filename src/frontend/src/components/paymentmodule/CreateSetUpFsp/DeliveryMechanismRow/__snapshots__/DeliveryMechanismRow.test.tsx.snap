@@ -30,7 +30,7 @@ exports[`components/paymentmodule/CreateSetUpFsp/DeliveryMechanismRow should ren
               </label>
               <div
                 choices="[object Object],[object Object]"
-                class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall  css-26qevy-MuiInputBase-root-MuiOutlinedInput-root-MuiSelect-root"
+                class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall css-26qevy-MuiInputBase-root-MuiOutlinedInput-root-MuiSelect-root"
               >
                 <div
                   aria-controls=":r0:"

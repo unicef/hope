@@ -3,10 +3,10 @@
 exports[`components/population/HouseholdCompositionTable should render 1`] = `
 <div>
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-dmyCSP ijqGAZ css-1ps6pg7-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-egkSDF kFuXoH css-1ps6pg7-MuiPaper-root"
   >
     <div
-      class="sc-beySPh ljSTVf"
+      class="sc-blHHSb bWeSIj"
     >
       <h6
         class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
@@ -30,19 +30,19 @@ exports[`components/population/HouseholdCompositionTable should render 1`] = `
             Age Group
           </th>
           <th
-            class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-guDLey cqTVaT css-1ygcj2i-MuiTableCell-root"
+            class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-gtLWhw bxhSlA css-1ygcj2i-MuiTableCell-root"
             scope="col"
           >
             Females
           </th>
           <th
-            class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-guDLey cqTVaT css-1ygcj2i-MuiTableCell-root"
+            class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-gtLWhw bxhSlA css-1ygcj2i-MuiTableCell-root"
             scope="col"
           >
             with disability
           </th>
           <th
-            class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-guDLey cqTVaT css-1ygcj2i-MuiTableCell-root"
+            class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-gtLWhw bxhSlA css-1ygcj2i-MuiTableCell-root"
             scope="col"
           >
             Pregnant
@@ -52,13 +52,13 @@ exports[`components/population/HouseholdCompositionTable should render 1`] = `
             scope="col"
           />
           <th
-            class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-guDLey cqTVaT css-1ygcj2i-MuiTableCell-root"
+            class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-gtLWhw bxhSlA css-1ygcj2i-MuiTableCell-root"
             scope="col"
           >
             Males
           </th>
           <th
-            class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-guDLey cqTVaT css-1ygcj2i-MuiTableCell-root"
+            class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-gtLWhw bxhSlA css-1ygcj2i-MuiTableCell-root"
             scope="col"
           >
             with disability
@@ -78,13 +78,13 @@ exports[`components/population/HouseholdCompositionTable should render 1`] = `
             0 - 5
           </td>
           <td
-            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-guDLey cqTVaT css-1ex1afd-MuiTableCell-root"
+            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-gtLWhw bxhSlA css-1ex1afd-MuiTableCell-root"
           />
           <td
-            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-guDLey cqTVaT css-1ex1afd-MuiTableCell-root"
+            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-gtLWhw bxhSlA css-1ex1afd-MuiTableCell-root"
           />
           <td
-            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-guDLey cqTVaT css-1ex1afd-MuiTableCell-root"
+            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-gtLWhw bxhSlA css-1ex1afd-MuiTableCell-root"
           >
             -
           </td>
@@ -92,10 +92,10 @@ exports[`components/population/HouseholdCompositionTable should render 1`] = `
             class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
           />
           <td
-            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-guDLey cqTVaT css-1ex1afd-MuiTableCell-root"
+            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-gtLWhw bxhSlA css-1ex1afd-MuiTableCell-root"
           />
           <td
-            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-guDLey cqTVaT css-1ex1afd-MuiTableCell-root"
+            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-gtLWhw bxhSlA css-1ex1afd-MuiTableCell-root"
           />
         </tr>
         <tr
@@ -107,13 +107,13 @@ exports[`components/population/HouseholdCompositionTable should render 1`] = `
             6 - 11
           </td>
           <td
-            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-guDLey cqTVaT css-1ex1afd-MuiTableCell-root"
+            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-gtLWhw bxhSlA css-1ex1afd-MuiTableCell-root"
           />
           <td
-            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-guDLey cqTVaT css-1ex1afd-MuiTableCell-root"
+            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-gtLWhw bxhSlA css-1ex1afd-MuiTableCell-root"
           />
           <td
-            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-guDLey cqTVaT css-1ex1afd-MuiTableCell-root"
+            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-gtLWhw bxhSlA css-1ex1afd-MuiTableCell-root"
           >
             -
           </td>
@@ -121,10 +121,10 @@ exports[`components/population/HouseholdCompositionTable should render 1`] = `
             class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
           />
           <td
-            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-guDLey cqTVaT css-1ex1afd-MuiTableCell-root"
+            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-gtLWhw bxhSlA css-1ex1afd-MuiTableCell-root"
           />
           <td
-            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-guDLey cqTVaT css-1ex1afd-MuiTableCell-root"
+            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-gtLWhw bxhSlA css-1ex1afd-MuiTableCell-root"
           />
         </tr>
         <tr
@@ -136,13 +136,13 @@ exports[`components/population/HouseholdCompositionTable should render 1`] = `
             12 - 17
           </td>
           <td
-            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-guDLey cqTVaT css-1ex1afd-MuiTableCell-root"
+            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-gtLWhw bxhSlA css-1ex1afd-MuiTableCell-root"
           />
           <td
-            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-guDLey cqTVaT css-1ex1afd-MuiTableCell-root"
+            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-gtLWhw bxhSlA css-1ex1afd-MuiTableCell-root"
           />
           <td
-            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-guDLey cqTVaT css-1ex1afd-MuiTableCell-root"
+            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-gtLWhw bxhSlA css-1ex1afd-MuiTableCell-root"
           >
             -
           </td>
@@ -150,10 +150,10 @@ exports[`components/population/HouseholdCompositionTable should render 1`] = `
             class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
           />
           <td
-            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-guDLey cqTVaT css-1ex1afd-MuiTableCell-root"
+            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-gtLWhw bxhSlA css-1ex1afd-MuiTableCell-root"
           />
           <td
-            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-guDLey cqTVaT css-1ex1afd-MuiTableCell-root"
+            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-gtLWhw bxhSlA css-1ex1afd-MuiTableCell-root"
           />
         </tr>
         <tr
@@ -165,22 +165,22 @@ exports[`components/population/HouseholdCompositionTable should render 1`] = `
             18 - 59
           </td>
           <td
-            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-guDLey cqTVaT css-1ex1afd-MuiTableCell-root"
+            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-gtLWhw bxhSlA css-1ex1afd-MuiTableCell-root"
           />
           <td
-            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-guDLey cqTVaT css-1ex1afd-MuiTableCell-root"
+            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-gtLWhw bxhSlA css-1ex1afd-MuiTableCell-root"
           />
           <td
-            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-guDLey cqTVaT css-1ex1afd-MuiTableCell-root"
+            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-gtLWhw bxhSlA css-1ex1afd-MuiTableCell-root"
           />
           <td
             class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
           />
           <td
-            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-guDLey cqTVaT css-1ex1afd-MuiTableCell-root"
+            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-gtLWhw bxhSlA css-1ex1afd-MuiTableCell-root"
           />
           <td
-            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-guDLey cqTVaT css-1ex1afd-MuiTableCell-root"
+            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-gtLWhw bxhSlA css-1ex1afd-MuiTableCell-root"
           />
         </tr>
         <tr
@@ -192,13 +192,13 @@ exports[`components/population/HouseholdCompositionTable should render 1`] = `
             60 +
           </td>
           <td
-            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-guDLey cqTVaT css-1ex1afd-MuiTableCell-root"
+            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-gtLWhw bxhSlA css-1ex1afd-MuiTableCell-root"
           />
           <td
-            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-guDLey cqTVaT css-1ex1afd-MuiTableCell-root"
+            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-gtLWhw bxhSlA css-1ex1afd-MuiTableCell-root"
           />
           <td
-            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-guDLey cqTVaT css-1ex1afd-MuiTableCell-root"
+            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-gtLWhw bxhSlA css-1ex1afd-MuiTableCell-root"
           >
             -
           </td>
@@ -206,10 +206,10 @@ exports[`components/population/HouseholdCompositionTable should render 1`] = `
             class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
           />
           <td
-            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-guDLey cqTVaT css-1ex1afd-MuiTableCell-root"
+            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-gtLWhw bxhSlA css-1ex1afd-MuiTableCell-root"
           />
           <td
-            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-guDLey cqTVaT css-1ex1afd-MuiTableCell-root"
+            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium sc-gtLWhw bxhSlA css-1ex1afd-MuiTableCell-root"
           />
         </tr>
       </tbody>

@@ -9,10 +9,10 @@ exports[`components/core/DocumentSearchField should render 1`] = `
       class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
     >
       <div
-        class="sc-eDLKkx jFMHa-d"
+        class="sc-dntaoT dIKcKO"
       >
         <div
-          class="MuiFormControl-root MuiFormControl-fullWidth sc-beySPh eVDjfH css-q8hpuo-MuiFormControl-root"
+          class="MuiFormControl-root MuiFormControl-fullWidth sc-blHHSb dhZMPX css-q8hpuo-MuiFormControl-root"
           data-cy="select-filter"
         >
           <div
@@ -25,7 +25,7 @@ exports[`components/core/DocumentSearchField should render 1`] = `
               Document Type
             </label>
             <div
-              class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall sc-jTQCzO ePdTqF css-26qevy-MuiInputBase-root-MuiOutlinedInput-root-MuiSelect-root"
+              class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall sc-ivxoEo eONSFc css-26qevy-MuiInputBase-root-MuiOutlinedInput-root-MuiSelect-root"
               data-cy="filters-document-type"
             >
               <div
@@ -40,7 +40,7 @@ exports[`components/core/DocumentSearchField should render 1`] = `
                   class="MuiBox-root css-70qvj9"
                 >
                   <div
-                    class="sc-gLLuof hzhzCP"
+                    class="sc-ghWlax crbcJj"
                   >
                     Document 1
                   </div>
@@ -85,7 +85,7 @@ exports[`components/core/DocumentSearchField should render 1`] = `
       class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-8 css-vok43g-MuiGrid-root"
     >
       <div
-        class="MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root sc-iBdnpw itEnZP css-wb57ya-MuiFormControl-root-MuiTextField-root"
+        class="MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root sc-kLhKbu LXzRU css-wb57ya-MuiFormControl-root-MuiTextField-root"
         data-cy="filters-document-number"
       >
         <label

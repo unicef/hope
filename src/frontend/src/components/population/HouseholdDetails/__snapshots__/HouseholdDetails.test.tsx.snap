@@ -3,10 +3,10 @@
 exports[`components/population/HouseholdDetails should render 1`] = `
 <div>
   <div
-    class="sc-fLseNd ikoaob"
+    class="sc-hJRrWL bEariC"
   >
     <div
-      class="sc-hLQSwg iuGfmc"
+      class="sc-fAUdSK cpcECW"
     >
       <h6
         class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
@@ -15,7 +15,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
       </h6>
     </div>
     <div
-      class="sc-bBkKde jJMthr"
+      class="sc-fwzISk kOsYtq"
     >
       <div
         class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-3 css-acctgf-MuiGrid-root"
@@ -25,7 +25,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
         >
           <div>
             <span
-              class="sc-guDLey RwNuC"
+              class="sc-gtLWhw bkWrmx"
               color="textSecondary"
             >
               Household Size
@@ -34,7 +34,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
               data-cy="label-Household Size"
             >
               <span
-                class="sc-dmyCSP bGPBYf"
+                class="sc-egkSDF XYdBd"
                 color="textSecondary"
               >
                 4
@@ -47,7 +47,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
         >
           <div>
             <span
-              class="sc-guDLey RwNuC"
+              class="sc-gtLWhw bkWrmx"
               color="textSecondary"
             >
               Residence Status
@@ -56,7 +56,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
               data-cy="label-Residence Status"
             >
               <span
-                class="sc-dmyCSP bGPBYf"
+                class="sc-egkSDF XYdBd"
                 color="textSecondary"
               >
                 None
@@ -69,7 +69,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
         >
           <div>
             <span
-              class="sc-guDLey RwNuC"
+              class="sc-gtLWhw bkWrmx"
               color="textSecondary"
             >
               Head of Household
@@ -78,11 +78,11 @@ exports[`components/population/HouseholdDetails should render 1`] = `
               data-cy="label-Head of Household"
             >
               <span
-                class="sc-dmyCSP bGPBYf"
+                class="sc-egkSDF XYdBd"
                 color="textSecondary"
               >
                 <a
-                  class="sc-beySPh hDnmZE"
+                  class="sc-blHHSb hLtlEI"
                   href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/population/individuals/SW5kaXZpZHVhbE5vZGU6Y2MwMDAwMDAtMDAwMC0wMDAwLTAwMDAtMDAwMDAwMDAwMDAx"
                 >
                   Jan Kowalski
@@ -96,7 +96,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
         >
           <div>
             <span
-              class="sc-guDLey RwNuC"
+              class="sc-gtLWhw bkWrmx"
               color="textSecondary"
             >
               FEMALE CHILD HEADED HOUSEHOLD
@@ -105,7 +105,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
               data-cy="label-FEMALE CHILD HEADED HOUSEHOLD"
             >
               <span
-                class="sc-dmyCSP bGPBYf"
+                class="sc-egkSDF XYdBd"
                 color="textSecondary"
               >
                 No
@@ -118,7 +118,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
         >
           <div>
             <span
-              class="sc-guDLey RwNuC"
+              class="sc-gtLWhw bkWrmx"
               color="textSecondary"
             >
               CHILD HEADED HOUSEHOLD
@@ -127,7 +127,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
               data-cy="label-CHILD HEADED HOUSEHOLD"
             >
               <span
-                class="sc-dmyCSP bGPBYf"
+                class="sc-egkSDF XYdBd"
                 color="textSecondary"
               >
                 No
@@ -140,7 +140,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
         >
           <div>
             <span
-              class="sc-guDLey RwNuC"
+              class="sc-gtLWhw bkWrmx"
               color="textSecondary"
             >
               Country
@@ -157,7 +157,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
         >
           <div>
             <span
-              class="sc-guDLey RwNuC"
+              class="sc-gtLWhw bkWrmx"
               color="textSecondary"
             >
               Country of Origin
@@ -174,7 +174,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
         >
           <div>
             <span
-              class="sc-guDLey RwNuC"
+              class="sc-gtLWhw bkWrmx"
               color="textSecondary"
             >
               Address
@@ -183,7 +183,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
               data-cy="label-Address"
             >
               <span
-                class="sc-dmyCSP bGPBYf"
+                class="sc-egkSDF XYdBd"
                 color="textSecondary"
               >
                 Ohio
@@ -196,7 +196,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
         >
           <div>
             <span
-              class="sc-guDLey RwNuC"
+              class="sc-gtLWhw bkWrmx"
               color="textSecondary"
             >
               Village
@@ -213,7 +213,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
         >
           <div>
             <span
-              class="sc-guDLey RwNuC"
+              class="sc-gtLWhw bkWrmx"
               color="textSecondary"
             >
               Zip code
@@ -230,7 +230,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
         >
           <div>
             <span
-              class="sc-guDLey RwNuC"
+              class="sc-gtLWhw bkWrmx"
               color="textSecondary"
             >
               Administrative Level 1
@@ -247,7 +247,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
         >
           <div>
             <span
-              class="sc-guDLey RwNuC"
+              class="sc-gtLWhw bkWrmx"
               color="textSecondary"
             >
               Administrative Level 2
@@ -264,7 +264,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
         >
           <div>
             <span
-              class="sc-guDLey RwNuC"
+              class="sc-gtLWhw bkWrmx"
               color="textSecondary"
             >
               Administrative Level 3
@@ -281,7 +281,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
         >
           <div>
             <span
-              class="sc-guDLey RwNuC"
+              class="sc-gtLWhw bkWrmx"
               color="textSecondary"
             >
               Administrative Level 4
@@ -298,7 +298,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
         >
           <div>
             <span
-              class="sc-guDLey RwNuC"
+              class="sc-gtLWhw bkWrmx"
               color="textSecondary"
             >
               Geolocation
@@ -307,7 +307,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
               data-cy="label-Geolocation"
             >
               <span
-                class="sc-dmyCSP bGPBYf"
+                class="sc-egkSDF XYdBd"
                 color="textSecondary"
               >
                 -
@@ -320,7 +320,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
         >
           <div>
             <span
-              class="sc-guDLey RwNuC"
+              class="sc-gtLWhw bkWrmx"
               color="textSecondary"
             >
               UNHCR CASE ID
@@ -337,7 +337,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
         >
           <div>
             <span
-              class="sc-guDLey RwNuC"
+              class="sc-gtLWhw bkWrmx"
               color="textSecondary"
             >
               LENGTH OF TIME SINCE ARRIVAL
@@ -354,7 +354,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
         >
           <div>
             <span
-              class="sc-guDLey RwNuC"
+              class="sc-gtLWhw bkWrmx"
               color="textSecondary"
             >
               NUMBER OF TIMES DISPLACED
@@ -371,7 +371,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
         >
           <div>
             <span
-              class="sc-guDLey RwNuC"
+              class="sc-gtLWhw bkWrmx"
               color="textSecondary"
             >
               IS THIS A RETURNEE HOUSEHOLD?
@@ -380,7 +380,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
               data-cy="label-IS THIS A RETURNEE HOUSEHOLD?"
             >
               <span
-                class="sc-dmyCSP bGPBYf"
+                class="sc-egkSDF XYdBd"
                 color="textSecondary"
               >
                 No
@@ -393,7 +393,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
         >
           <div>
             <span
-              class="sc-guDLey RwNuC"
+              class="sc-gtLWhw bkWrmx"
               color="textSecondary"
             >
               Linked Grievances
@@ -402,7 +402,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
               data-cy="label-Linked Grievances"
             >
               <span
-                class="sc-dmyCSP bGPBYf"
+                class="sc-egkSDF XYdBd"
                 color="textSecondary"
               >
                 <span>
@@ -417,7 +417,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
         >
           <div>
             <span
-              class="sc-guDLey RwNuC"
+              class="sc-gtLWhw bkWrmx"
               color="textSecondary"
             >
               Data Collecting Type
@@ -426,7 +426,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
               data-cy="label-Data Collecting Type"
             >
               <span
-                class="sc-dmyCSP bGPBYf"
+                class="sc-egkSDF XYdBd"
                 color="textSecondary"
               >
                 data collecting type
@@ -438,10 +438,10 @@ exports[`components/population/HouseholdDetails should render 1`] = `
     </div>
   </div>
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-iuOOrT bhocpf css-1ps6pg7-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-hbtGpV dsjZFY css-1ps6pg7-MuiPaper-root"
   >
     <div
-      class="sc-hLQSwg iuGfmc"
+      class="sc-fAUdSK cpcECW"
     >
       <h6
         class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
@@ -457,7 +457,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
       >
         <div>
           <span
-            class="sc-guDLey RwNuC"
+            class="sc-gtLWhw bkWrmx"
             color="textSecondary"
           >
             Cash received
@@ -466,7 +466,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
             data-cy="label-Cash received"
           >
             <span
-              class="sc-dmyCSP bGPBYf"
+              class="sc-egkSDF XYdBd"
               color="textSecondary"
             >
               <div
@@ -508,11 +508,11 @@ exports[`components/population/HouseholdDetails should render 1`] = `
         class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div
-          class="sc-csKJxZ hOFubx"
+          class="sc-jwIPbr iTDanY"
         >
           <div>
             <span
-              class="sc-guDLey RwNuC"
+              class="sc-gtLWhw bkWrmx"
               color="textSecondary"
             >
               Total Cash Received
@@ -521,11 +521,11 @@ exports[`components/population/HouseholdDetails should render 1`] = `
               data-cy="label-Total Cash Received"
             >
               <span
-                class="sc-dmyCSP bGPBYf"
+                class="sc-egkSDF XYdBd"
                 color="textSecondary"
               >
                 <div
-                  class="sc-eTNRI iQIAhw"
+                  class="sc-cHqXqK iAzTMC"
                 >
                   USD 0.00
                 </div>

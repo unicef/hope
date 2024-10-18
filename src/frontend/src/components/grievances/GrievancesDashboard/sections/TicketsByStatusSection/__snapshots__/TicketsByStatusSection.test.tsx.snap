@@ -3,7 +3,7 @@
 exports[`components/grievances/GrievancesDashboard/TicketsByStatusSection should render 1`] = `
 <div>
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-beySPh iMtPUV css-1ps6pg7-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-blHHSb bfMGrt css-1ps6pg7-MuiPaper-root"
   >
     <div
       class="MuiBox-root css-i3pbo"
