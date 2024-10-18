@@ -5,6 +5,7 @@ from typing import Dict, List, Optional
 from django.conf import settings
 from django.db import transaction
 from django.db.models import Q, QuerySet
+from django.utils import timezone
 
 from hct_mis_api.apps.account.models import Partner, User
 from hct_mis_api.apps.core.models import DataCollectingType, FlexibleAttribute
@@ -109,6 +110,8 @@ class CopyProgramPopulation:
         individual.program = self.program
         individual.copied_from_id = copied_from_pk
         individual.registration_data_import = self.rdi
+        individual.first_registration_date = timezone.now()
+        individual.last_registration_date = timezone.now()
         individual.rdi_merge_status = self.rdi_merge_status
         return individual
 
@@ -135,6 +138,8 @@ class CopyProgramPopulation:
         household.program = self.program
         household.total_cash_received = None
         household.total_cash_received_usd = None
+        household.first_registration_date = timezone.now()
+        household.last_registration_date = timezone.now()
         household.copied_from_id = copy_from_household_id
         household.registration_data_import = self.rdi
         household.rdi_merge_status = self.rdi_merge_status
@@ -456,6 +461,8 @@ def enroll_households_to_program(households: QuerySet, program: Program, user_id
                 household.registration_data_import = rdi
                 household.total_cash_received = None
                 household.total_cash_received_usd = None
+                household.first_registration_date = timezone.now()
+                household.last_registration_date = timezone.now()
 
                 if original_head_of_household_unicef_id in individuals_dict:
                     household.head_of_household = individuals_dict[original_head_of_household_unicef_id]
@@ -506,6 +513,8 @@ def copy_individual(individual: Individual, program: Program, rdi: RegistrationD
     individual.program = program
     individual.household = None
     individual.registration_data_import = rdi
+    individual.first_registration_date = timezone.now()
+    individual.last_registration_date = timezone.now()
 
     documents_to_create = CopyProgramPopulation.copy_document_per_individual(documents, individual)
     identities_to_create = CopyProgramPopulation.copy_individual_identity_per_individual(identities, individual)
