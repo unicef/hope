@@ -134,6 +134,7 @@ export const headCellsSocialProgram: HeadCell<
     id: 'target_unicef_id',
     numeric: false,
     dataCy: 'targetId',
+    disableSort: true,
   },
   {
     disablePadding: false,
