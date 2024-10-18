@@ -2,7 +2,11 @@ import React, { ReactElement, useEffect, useState } from 'react';
 import { ClickableTableRow } from '@core/Table/ClickableTableRow';
 import TableCell from '@mui/material/TableCell';
 import { StatusBox } from '@core/StatusBox';
-import { decodeIdString, programCycleStatusToColor } from '@utils/utils';
+import {
+  decodeIdString,
+  formatCurrencyWithSymbol,
+  programCycleStatusToColor,
+} from '@utils/utils';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
 import { headCells } from '@containers/tables/ProgramCyclesTablePaymentModule/HeadCells';
@@ -112,7 +116,7 @@ export const ProgramCyclesTablePaymentModule = ({
         />
       </TableCell>
       <TableCell align="right" data-cy="program-cycle-total-entitled-quantity">
-        {row.total_entitled_quantity_usd || '-'}
+        {formatCurrencyWithSymbol(row.total_entitled_quantity, row.currency)}
       </TableCell>
       <TableCell data-cy="program-cycle-start-date">
         <UniversalMoment>{row.start_date}</UniversalMoment>
