@@ -86,6 +86,61 @@ def social_worker_program() -> Program:
 
 
 @pytest.fixture
+def payment_verification_3() -> None:
+    payment_verification_multiple_verification_plans(3)
+
+
+def payment_verification_multiple_verification_plans(number_verification_plans: int) -> None:
+    registration_data_import = RegistrationDataImportFactory(
+        imported_by=User.objects.first(), business_area=BusinessArea.objects.first()
+    )
+    program = Program.objects.filter(name="Active Program").first()
+    households = list()
+    for _ in range(number_verification_plans):
+        household, _ = create_household(
+            {
+                "registration_data_import": registration_data_import,
+                "admin_area": Area.objects.order_by("?").first(),
+                "program": program,
+            },
+            {"registration_data_import": registration_data_import},
+        )
+        households.append(household)
+
+    payment_plan = PaymentPlanFactory(
+        program=program,
+        status=PaymentPlan.Status.FINISHED,
+        business_area=BusinessArea.objects.filter(slug="afghanistan").first(),
+    )
+    payments = list()
+    for hh in households:
+        payments.append(PaymentFactory(
+            parent=payment_plan,
+            business_area=BusinessArea.objects.first(),
+            household=hh,
+            head_of_household=household.head_of_household,
+            entitlement_quantity=Decimal("21.36"),
+            delivered_quantity=Decimal("21.36"),
+            currency="PLN",
+            status=GenericPayment.STATUS_DISTRIBUTION_SUCCESS,
+        ))
+
+    PaymentVerificationSummaryFactory(payment_plan_obj=payment_plan)
+
+    for payment in payments:
+        payment_verification_plan = PaymentVerificationPlanFactory(
+            payment_plan_obj=payment_plan,
+            verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL,
+        )
+
+        PaymentVerificationFactory(
+            payment_obj=payment,
+            payment_verification_plan=payment_verification_plan,
+            status=PV.STATUS_PENDING,
+        )
+
+
+@pytest.fixture
 def empty_payment_verification(social_worker_program: Program) -> None:
     registration_data_import = RegistrationDataImportFactory(
         imported_by=User.objects.first(), business_area=BusinessArea.objects.first()
@@ -440,3 +495,25 @@ class TestPaymentVerification:
         printing("Mapping", pagePaymentVerification.driver)
         printing("Methods", pagePaymentVerification.driver)
         printing("Assert", pagePaymentVerification.driver)
+
+    def test_payment_verification_delete(
+        self,
+        active_program: Program,
+        payment_verification_3: None,
+        pagePaymentVerification: PaymentVerification,
+        pagePaymentVerificationDetails: PaymentVerificationDetails,
+        pagePaymentRecord: PaymentRecord,
+    ):
+        pagePaymentVerification.selectGlobalProgramFilter("Active Program")
+        pagePaymentVerification.getNavPaymentVerification().click()
+        pagePaymentVerification.getCashPlanTableRow().click()
+        pagePaymentVerificationDetails.getButtonDeletePlan()
+        before_list_of_verification_plans = [i.text for i in pagePaymentVerificationDetails.getVerificationPlanPrefix()]
+        pagePaymentVerificationDetails.deleteVerificationPlanByNumber(1)
+        pagePaymentVerificationDetails.getButtonSubmit().click()
+        for i in range(50):
+            if 2 == len(pagePaymentVerificationDetails.getVerificationPlanPrefix()):
+                break
+        else:
+            raise AssertionError("Verification Plan was not deleted")
+        assert before_list_of_verification_plans[1] not in pagePaymentVerificationDetails.getVerificationPlanPrefix()

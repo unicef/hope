@@ -29,6 +29,8 @@ class PaymentVerificationDetails(BaseComponents):
     labelizedFieldContainerSummaryNumberOfPlans = 'div[data-cy="labelized-field-container-summary-number-of-plans"]'
     labelNumberOfVerificationPlans = 'div[data-cy="label-Number of Verification Plans"]'
     buttonDeletePlan = 'button[data-cy="button-delete-plan"]'
+    verificationPlan = 'h6[data-cy="verification-plan-{}"]'
+    verificationPlanPrefix = 'h6[data-cy^="verification-plan"]'
     buttonActivatePlan = 'button[data-cy="button-activate-plan"]'
     verificationPlanStatus = 'div[data-cy="verification-plan-status"]'
     labelSampling = 'div[data-cy="label-SAMPLING"]'
@@ -116,6 +118,15 @@ class PaymentVerificationDetails(BaseComponents):
 
     def getButtonDeletePlan(self) -> WebElement:
         return self.wait_for(self.buttonDeletePlan)
+
+    def deleteVerificationPlanByNumber(self, number: int) -> None:
+        self.get_elements(self.buttonDeletePlan)[number].click()
+
+    def getVerificationPlanName(self, name: str) -> WebElement:
+        return self.wait_for(self.verificationPlan.format(name))
+
+    def getVerificationPlanPrefix(self) -> [WebElement]:
+        return self.get_elements(self.verificationPlanPrefix)
 
     def getButtonActivatePlan(self) -> WebElement:
         return self.wait_for(self.buttonActivatePlan)
