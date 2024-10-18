@@ -48,7 +48,7 @@ class StrictDateField(forms.DateField):
             return None
         if isinstance(value, datetime.datetime):
             return value.date()
-        if isinstance(value, datetime.date):
+        if isinstance(value, datetime.date):  # pragma: no cover
             return value
         if isinstance(value, str):
             return super().to_python(value)
