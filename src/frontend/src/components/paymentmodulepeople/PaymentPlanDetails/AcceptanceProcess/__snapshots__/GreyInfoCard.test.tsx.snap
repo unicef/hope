@@ -9,7 +9,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/GreyInfoC
       class="MuiBox-root css-38zrbw"
     >
       <div
-        class="sc-fsYfdN jMIuUM"
+        class="sc-ixGGxD foWIaj"
       >
         Test top message
          on
@@ -21,7 +21,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/GreyInfoC
       </div>
     </div>
     <div
-      class="sc-jsEeTM dTGmvg MuiBox-root css-e6xxd1"
+      class="sc-dstKZu chYUKh MuiBox-root css-e6xxd1"
     >
       <div
         class="MuiBox-root css-fv3lde"
@@ -31,7 +31,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/GreyInfoC
           class="MuiBox-root css-15fzge"
         >
           <div
-            class="sc-iBdnpw bQxTxM"
+            class="sc-kLhKbu fsBovP"
           >
             on 
             <time
@@ -45,7 +45,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/GreyInfoC
           class="MuiBox-root css-1el3gal"
         >
           <div
-            class="sc-qZrbh iHiqlR"
+            class="sc-khLCKb kDroYd"
           />
         </div>
       </div>

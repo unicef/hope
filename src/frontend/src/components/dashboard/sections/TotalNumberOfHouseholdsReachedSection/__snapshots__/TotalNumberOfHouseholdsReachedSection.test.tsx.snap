@@ -3,11 +3,11 @@
 exports[`components/dashboard/TotalNumberOfHouseholdsReachedSection should render 1`] = `
 <div>
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-jTQCzO eKzULq css-1ps6pg7-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-ivxoEo llmCNP css-1ps6pg7-MuiPaper-root"
     color="#00A9FB"
   >
     <div
-      class="sc-beySPh kIkzEK"
+      class="sc-blHHSb bfnLSC"
     >
       TOTAL NUMBER OF HOUSEHOLDS REACHED
     </div>
@@ -19,7 +19,7 @@ exports[`components/dashboard/TotalNumberOfHouseholdsReachedSection should rende
         data-cy="total-number-of-households-reached"
       >
         <div
-          class="sc-gLLuof inbPtu"
+          class="sc-ghWlax kVWbfy"
         >
           1
         </div>
@@ -29,7 +29,7 @@ exports[`components/dashboard/TotalNumberOfHouseholdsReachedSection should rende
       >
         <div
           bg="#DAF1FF"
-          class="sc-eDLKkx cLLFLF"
+          class="sc-dntaoT ddbdFC"
           color="#00A9FB"
         >
           <svg
