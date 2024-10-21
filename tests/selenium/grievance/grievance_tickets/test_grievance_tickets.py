@@ -352,7 +352,7 @@ class TestSmokeGrievanceTickets:
             "Assigned to",
             "Category",
             "Issue Type",
-            "Household ID",
+            "Target ID",
             "Priority",
             "Urgency",
             "Linked Tickets",
