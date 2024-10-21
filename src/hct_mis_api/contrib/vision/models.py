@@ -73,6 +73,7 @@ class DownPayment(models.Model):
     down_payment_reference = models.CharField(max_length=20)
     document_type = models.CharField(max_length=10)
     consumed_fc_number = models.CharField(max_length=10)
+    consumed_fc_item_number = models.CharField(max_length=3, null=True, blank=True)
     total_down_payment_amount_local = models.DecimalField(
         decimal_places=2,
         max_digits=15,
