@@ -42,7 +42,6 @@ class PaymentRecordSerializer(serializers.ModelSerializer):
 
 class DashboardHouseholdSerializer(serializers.ModelSerializer):
     payments = serializers.SerializerMethodField()
-    business_area = serializers.CharField(source="business_area.slug")
     program = serializers.CharField(source="program.name")
     sector = serializers.CharField(source="program.sector")
     admin1 = serializers.SerializerMethodField()
@@ -52,7 +51,6 @@ class DashboardHouseholdSerializer(serializers.ModelSerializer):
         model = Household
         fields: List[str] = [
             "id",
-            "business_area",
             "payments",
             "program",
             "size",

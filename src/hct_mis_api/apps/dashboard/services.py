@@ -1,74 +1,50 @@
 import json
-from tempfile import NamedTemporaryFile
 from typing import Any, Dict, List
 
-from django.core.files import File
+from django.core.cache import cache
+from django.utils import timezone
 
-from hct_mis_api.apps.dashboard.models import DashReport
 from hct_mis_api.apps.dashboard.serializers import DashboardHouseholdSerializer
 from hct_mis_api.apps.household.models import Household
 
+CACHE_TIMEOUT = 60 * 60 * 6  # 6 hours
 
-class GenerateDashReportService:
+
+class DashboardDataCache:
     """
-    Service class responsible for generating DashReports for a specific business area.
-
-    Attributes:
-        report (DashReport): The DashReport instance being generated.
-        business_area (BusinessArea): The business area associated with the report.
+    Utility class to manage dashboard data caching using Redis.
     """
 
-    def __init__(self, report: DashReport) -> None:
-        """
-        Initializes the GenerateDashReportService with the given DashReport.
+    @staticmethod
+    def get_cache_key(business_area_slug: str) -> str:
+        return f"dashboard_data_{business_area_slug}"
 
-        Args:
-            report (DashReport): The DashReport instance to be processed.
+    @classmethod
+    def get_data(cls, business_area_slug: str):
         """
-        self.report = report
-        self.business_area = report.business_area
-
-    def _serialize_data(self) -> List[Dict[str, Any]]:
+        Retrieve cached dashboard data for a given business area.
         """
-        Serializes the household data for the given business area into a list of dictionaries.
+        cache_key = cls.get_cache_key(business_area_slug)
+        data = cache.get(cache_key)
+        if data:
+            return json.loads(data)
+        return None
 
-        Uses the DashboardHouseholdSerializer to serialize household data.
-
-        Returns:
-            List[Dict[str, Any]]: A list of dictionaries containing serialized household data.
+    @classmethod
+    def store_data(cls, business_area_slug: str, data: dict):
         """
-        households = Household.objects.using("read_only").filter(business_area=self.business_area)
+        Store data in Redis cache for a given business area.
+        """
+        cache_key = cls.get_cache_key(business_area_slug)
+        cache.set(cache_key, json.dumps(data), CACHE_TIMEOUT)
+
+    @classmethod
+    def refresh_data(cls, business_area_slug: str):
+        """
+        Generate and store updated data for a given business area.
+        """
+        households = Household.objects.using("read_only").filter(business_area__slug=business_area_slug)
         serialized_data = DashboardHouseholdSerializer(households, many=True).data
-        return list(serialized_data)
 
-    def _save_report_file(self, data: List[Dict[str, Any]]) -> None:
-        """
-        Saves the serialized data to a JSON file and attaches it to the report.
-
-        The data is first written to a temporary file, which is then saved as a File object
-        and linked to the DashReport.
-
-        Args:
-            data (List[Dict[str, Any]]): The serialized household data to be saved.
-        """
-        with NamedTemporaryFile(suffix=".json", mode="w+") as tmp_file:
-            json.dump(data, tmp_file, indent=4)
-            tmp_file.flush()
-            tmp_file.seek(0)
-            self.report.file.save(f"{self.business_area.slug}_report.json", File(tmp_file), save=False)
-
-    def generate_report(self) -> None:
-        """
-        Generates the DashReport by serializing the household data and saving it to a file.
-
-        This method sets the report status to 'COMPLETED' if successful, and 'FAILED' if an exception occurs.
-        """
-        try:
-            data = self._serialize_data()
-            self._save_report_file(data)
-            self.report.status = DashReport.COMPLETED
-        except Exception as e:
-            self.report.status = DashReport.FAILED
-            print(f"Error: {e}")
-        finally:
-            self.report.save()
+        cls.store_data(business_area_slug, serialized_data)
+        return serialized_data
