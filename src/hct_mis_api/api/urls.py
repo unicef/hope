@@ -22,7 +22,7 @@ urlpatterns = [
     path("areatypes/", endpoints.lookups.AreaTypeList().as_view(), name="areatype-list"),
     path("constance/", ConstanceSettingsAPIView().as_view(), name="constance-list"),
     path("lookups/document/", endpoints.lookups.DocumentType().as_view(), name="document-list"),
-    path("lookups/country/", endpoints.lookups.Country().as_view(), name="country-list"),
+    path("lookups/country/", endpoints.lookups.CountryAPIView().as_view(), name="country-list"),
     path("lookups/residencestatus/", endpoints.lookups.ResidenceStatus().as_view(), name="residencestatus-list"),
     path("lookups/maritalstatus/", endpoints.lookups.MaritalStatus().as_view(), name="maritalstatus-list"),
     path(
@@ -36,6 +36,7 @@ urlpatterns = [
     ),
     path("lookups/role/", endpoints.lookups.Roles().as_view(), name="role-list"),
     path("lookups/sex/", endpoints.lookups.Sex().as_view(), name="sex-list"),
+    path("lookups/program-statuses/", endpoints.lookups.ProgramStatuses().as_view(), name="program-statuses-list"),
     path("business_areas/", endpoints.core.BusinessAreaListView.as_view(), name="business-area-list"),
     path("programs/", ProgramGlobalListView.as_view(), name="program-global-list"),
     path("dashboard/", include("hct_mis_api.apps.dashboard.urls")),

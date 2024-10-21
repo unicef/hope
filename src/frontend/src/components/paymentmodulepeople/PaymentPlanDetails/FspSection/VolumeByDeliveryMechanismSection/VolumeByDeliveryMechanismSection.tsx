@@ -69,8 +69,8 @@ export const VolumeByDeliveryMechanismSection: React.FC<
           color={getDeliveryMechanismColor(vdm.deliveryMechanism.name)}
         >
           <LabelizedField
-            label={`${vdm.deliveryMechanism.name} (${vdm.deliveryMechanism.fsp?.name})`}
-            value={`${vdm.volume} ${paymentPlan.currency} (${vdm.volumeUsd} USD)`}
+            label={`${vdm.deliveryMechanism.name} (${vdm.deliveryMechanism.fsp?.name ?? '-'})`}
+            value={`${vdm.volume ?? '0.00'} ${paymentPlan.currency} (${vdm.volumeUsd ?? '0.00'} USD)`}
           />
         </FieldBorder>
       </Grid>
