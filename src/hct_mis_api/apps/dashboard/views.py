@@ -5,7 +5,7 @@ from typing import Any
 from django.core.cache import cache
 from django.shortcuts import get_object_or_404
 from rest_framework import status
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -15,12 +15,12 @@ from django.views.generic import TemplateView
 from hct_mis_api.apps.account.permissions import Permissions, check_permissions
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.dashboard.celery_tasks import generate_dash_report_task
-from hct_mis_api.apps.dashboard.models import DashReport
+from hct_mis_api.apps.dashboard.services import DashboardDataCache
 from hct_mis_api.apps.utils.sentry import sentry_tags
 
 log = logging.getLogger(__name__)
 
-CACHE_TIMEOUT = 60 * 60 * 6  # 6 hours
+CACHE_TIMEOUT = 60 * 60 * 6
 
 
 class DashboardDataView(APIView):
@@ -34,48 +34,21 @@ class DashboardDataView(APIView):
     @sentry_tags
     def get(self, request: Any, business_area_slug: str) -> Response:
         """
-        Retrieve the DashReport for a given business area.
-
-        Args:
-            request: The HTTP request object.
-            business_area_slug (str): The slug of the business area.
-
-        Returns:
-            Response: JSON response containing the report data or an error message.
+        Retrieve dashboard data for a given business area from Redis cache.
+        If data is not cached or needs updating, refresh it.
         """
-        try:
-            business_area = BusinessArea.objects.get(slug=business_area_slug)
-            if not check_permissions(request.user, [Permissions.DASHBOARD_VIEW_COUNTRY], business_area=business_area):
-                raise PermissionDenied("You do not have permission to view this dashboard.")
-        except BusinessArea.DoesNotExist:
-            log.error(f"Business area with slug {business_area_slug} not found.")
-            return Response({"detail": "Business area not found."}, status=status.HTTP_404_NOT_FOUND)
+        business_area = get_object_or_404(BusinessArea, slug=business_area_slug)
 
-        cache_key = f"dashboard_report_{business_area_slug}"
-        cached_data = cache.get(cache_key)
-        if cached_data:
-            return Response(cached_data, status=status.HTTP_200_OK)
+        if not check_permissions(request.user, [Permissions.DASHBOARD_VIEW_COUNTRY], business_area=business_area):
+            return Response(
+                {"detail": "You do not have permission to view this dashboard."}, status=status.HTTP_403_FORBIDDEN
+            )
 
-        try:
-            dash_report = DashReport.objects.get(business_area=business_area)
+        data = DashboardDataCache.get_data(business_area_slug)
+        if not data:
+            data = DashboardDataCache.refresh_data(business_area_slug)
 
-            if dash_report.status != DashReport.COMPLETED or not dash_report.file:
-                return Response(
-                    {"detail": "Report is either not completed or does not have a file."},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
-            with open(dash_report.file.path, "r") as file:
-                file_contents = json.load(file)
-            cache.set(cache_key, file_contents, CACHE_TIMEOUT)
-            return Response(file_contents, status=status.HTTP_200_OK)
-
-        except DashReport.DoesNotExist:
-            log.error(f"Report not found for business area with slug {business_area_slug}.")
-            return Response({"detail": "Report not found for this business area."}, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
-            log.exception(f"An error occurred while fetching the report for {business_area_slug}: {e}")
-            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response(data, status=status.HTTP_200_OK)
 
 
 class CreateOrUpdateDashReportView(APIView):
@@ -117,16 +90,16 @@ class DashboardReportdView(LoginRequiredMixin, TemplateView):
     """
     View to render the dashboard template for a specific business area.
     """
+
     template_name = "dashboard.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         business_area_slug = kwargs.get("business_area_slug")
         business_area = get_object_or_404(BusinessArea, slug=business_area_slug)
-        
+
         if not check_permissions(self.request.user, [Permissions.DASHBOARD_VIEW_COUNTRY], business_area=business_area):
             raise PermissionDenied("You do not have permission to view this dashboard.")
-        
+
         context["business_area_slug"] = business_area_slug
         return context
-        
