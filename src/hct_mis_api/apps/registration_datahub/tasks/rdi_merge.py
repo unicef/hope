@@ -357,7 +357,7 @@ class RdiMergeTask:
                         logger.info(f"RDI:{registration_data_import_id} Checked against sanction list")
 
                     # synchronously deduplicate documents
-                    deduplicate_documents()
+                    deduplicate_documents(rdi_id=obj_hct.id)
                     #  synchronously deduplicate biometrics
                     if obj_hct.program.biometric_deduplication_enabled:
                         dedupe_service = BiometricDeduplicationService()
