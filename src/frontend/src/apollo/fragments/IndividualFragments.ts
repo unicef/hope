@@ -88,6 +88,8 @@ export const individualMinimal = gql`
       lastRegistrationDate
       start
       firstRegistrationDate
+      countryOrigin
+      village
     }
   }
 `;
