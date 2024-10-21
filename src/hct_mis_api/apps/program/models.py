@@ -356,9 +356,9 @@ class ProgramCycle(AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentifiedModel, C
 
     @property
     def total_undelivered_quantity_usd(self) -> Decimal:
-        total_undelivered_usd = self.payment_plans.aggregate(total_undelivered_usd=Sum("total_undelivered_quantity_usd"))[
-            "total_undelivered_usd"
-        ]
+        total_undelivered_usd = self.payment_plans.aggregate(
+            total_undelivered_usd=Sum("total_undelivered_quantity_usd")
+        )["total_undelivered_usd"]
         return total_undelivered_usd or Decimal(0.0)
 
     @property
@@ -370,9 +370,7 @@ class ProgramCycle(AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentifiedModel, C
 
     @property
     def total_entitled_quantity(self) -> Decimal:
-        total_entitled = self.payment_plans.aggregate(total_entitled=Sum("total_entitled_quantity"))[
-            "total_entitled"
-        ]
+        total_entitled = self.payment_plans.aggregate(total_entitled=Sum("total_entitled_quantity"))["total_entitled"]
         return total_entitled or Decimal(0.0)
 
     @property
