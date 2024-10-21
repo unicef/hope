@@ -463,7 +463,7 @@ class TestPaymentVerification:
     def test_payment_verification_records(
         self,
         active_program: Program,
-        add_payment_verification: PV,
+        payment_verification_3: None,
         pagePaymentVerification: PaymentVerification,
         pagePaymentVerificationDetails: PaymentVerificationDetails,
         pagePaymentRecord: PaymentRecord,
@@ -471,7 +471,7 @@ class TestPaymentVerification:
         pagePaymentVerification.selectGlobalProgramFilter("Active Program")
         pagePaymentVerification.getNavPaymentVerification().click()
         pagePaymentVerification.getCashPlanTableRow().click()
-        assert "1" in pagePaymentVerificationDetails.getLabelPaymentRecords().text
+        assert "3" in pagePaymentVerificationDetails.getLabelPaymentRecords().text
         pagePaymentVerificationDetails.getButtonActivatePlan().click()
         pagePaymentVerificationDetails.getButtonSubmit().click()
 
@@ -517,3 +517,25 @@ class TestPaymentVerification:
         else:
             raise AssertionError("Verification Plan was not deleted")
         assert before_list_of_verification_plans[1] not in pagePaymentVerificationDetails.getVerificationPlanPrefix()
+
+    def test_payment_verification_edit(
+        self,
+        active_program: Program,
+        payment_verification_3: None,
+        pagePaymentVerification: PaymentVerification,
+        pagePaymentVerificationDetails: PaymentVerificationDetails,
+        pagePaymentRecord: PaymentRecord,
+    ):
+        pagePaymentVerification.selectGlobalProgramFilter("Active Program")
+        pagePaymentVerification.getNavPaymentVerification().click()
+        pagePaymentVerification.getCashPlanTableRow().click()
+        print(pagePaymentVerificationDetails.getLabelSampling().text)
+        pagePaymentVerificationDetails.getButtonEditPlan().click()
+        pagePaymentVerification.getTabFullList().click()
+        pagePaymentVerification.getRadioVerificationChannel("manual").click()
+        pagePaymentVerification.getButtonSubmit().click()
+        assert "PENDING" in pagePaymentVerificationDetails.getVerificationPlansSummaryStatus().text
+        assert "PENDING" in pagePaymentVerificationDetails.getVerificationPlanStatus().text
+        assert "MANUAL" in pagePaymentVerificationDetails.getLabelVerificationChannel().text
+        assert "Full list" in pagePaymentVerificationDetails.getLabelSampling().text
+        pagePaymentVerification.screenshot("0", file_path="./")
