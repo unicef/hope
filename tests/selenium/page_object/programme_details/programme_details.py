@@ -39,7 +39,7 @@ class ProgrammeDetails(BaseComponents):
     statusContainer = 'div[data-cy="status-container"]'
     programCycleTotalEntitledQuantityUSD = 'td[data-cy="program-cycle-total-entitled-quantity-usd"]'
     programCycleTotalUndeliveredQuantityUSD = 'td[data-cy="program-cycle-total-undelivered-quantity-usd"]'
-    programCycleTotalDeliveredQuantityUSD = 'td[data-cy="program-cycle-total-delivered-quantit-usd"]'
+    programCycleTotalDeliveredQuantityUSD = 'td[data-cy="program-cycle-total-delivered-quantity-usd"]'
     programCycleStartDate = 'td[data-cy="program-cycle-start-date"]'
     programCycleEndDate = 'td[data-cy="program-cycle-end-date"]'
     programCycleDetailsBtn = 'td[data-cy="program-cycle-details-btn"]'
