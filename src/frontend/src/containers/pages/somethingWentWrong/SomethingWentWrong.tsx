@@ -49,14 +49,23 @@ const Paragraph = styled.p`
   line-height: 32px;
 `;
 
-export const SomethingWentWrong: React.FC = () => {
+interface SomethingWentWrongProps {
+  pathname: string;
+  errorMessage: string;
+  component: string;
+}
+
+export const SomethingWentWrong: React.FC<SomethingWentWrongProps> = ({
+  pathname,
+  errorMessage,
+  component,
+}) => {
   const refreshAndClearCache = async (): Promise<void> => {
     const client = await getClient();
     await clearCache(client);
     window.history.back();
   };
   const location = useLocation();
-  const errorMessage = location.state?.errorMessage;
 
   const handleGoBack = (): void => {
     const lastSuccessfulPage = location.state?.lastSuccessfulPage;
@@ -87,7 +96,15 @@ export const SomethingWentWrong: React.FC = () => {
       <TextContainer>
         <Title>Oops! Something went wrong</Title>
         {errorMessage ? (
-          <Paragraph>{errorMessage}</Paragraph>
+          <Box display="flex" flexDirection="column">
+            <Paragraph style={{ wordWrap: 'break-word' }}>
+              Location: {pathname}
+            </Paragraph>
+            <Paragraph style={{ wordWrap: 'break-word' }}>
+              Error: {errorMessage}
+            </Paragraph>
+            <Paragraph>Component: {component}</Paragraph>
+          </Box>
         ) : (
           <Paragraph>
             Don&apos;t worry! Our team is on it, working to fix the issue.
