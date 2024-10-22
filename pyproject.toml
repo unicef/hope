@@ -21,7 +21,7 @@ exclude = '''
 '''
 # TODO: remove migrations exclude rule once it won't create much conflicts between feature branches and develop
 [tool.isort]
-py_version = 39
+py_version = 312
 profile = "black"
 default_section = "THIRDPARTY"
 known_first_party = [
@@ -48,7 +48,7 @@ include_trailing_comma = true
 skip = ["migrations", "snapshots", "venv", ".venv", "__pypackages__", "frontend"]
 
 [tool.mypy]
-python_version = 3.11
+python_version = 3.12
 show_error_codes = true
 exclude = [
     "migrations",
@@ -164,6 +164,7 @@ dependencies = [
     "django-adminfilters==2.4.2",
     "django-advanced-filters<3.0.0,>=2.0.0",
     "django-auditlog<3.0.0,>=2.1.1",
+    "django-celery-boost",
     "django-celery-beat<3.0.0,>=2.3.0",
     "django-celery-results<3.0.0,>=2.3.1",
     "django-concurrency<3.0,>=2.4",
@@ -191,6 +192,7 @@ dependencies = [
     "django-reversion<6.0.0,>=5.0.2",
     "django-silk<6.0.0,>=5.0.1",
     "django-smart-admin<3,>=2",
+    "django-smart-env",
     "django-sql-explorer[xls]<4,>=3",
     "django-storages[azure]<2.0.0,>=1.12.3",
     "django-strategy-field<4.0,>=3.0",
@@ -237,8 +239,9 @@ dependencies = [
     "django-rest-extensions>=0.2.0",
     "pydyf==0.10.0",
     "elastic-transport==8.13.0",
+    "hope-flex-fields>=0.5.0",
 ]
-requires-python = "==3.11.*"
+requires-python = "==3.12.*"
 readme = "README.md"
 license = { text = "None" }
 
