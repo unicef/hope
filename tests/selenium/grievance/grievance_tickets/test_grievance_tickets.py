@@ -356,7 +356,7 @@ class TestSmokeGrievanceTickets:
             "Priority",
             "Urgency",
             "Linked Tickets",
-            "Creation Date\nsorted descending",
+            "Creation Date",
             "Last Modified Date",
             "Total Days",
             "Programmes",
