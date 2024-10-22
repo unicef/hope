@@ -53,7 +53,7 @@ services:
       timeout: 10s
       retries: 10
 
-  celery_worker:
+  celery-worker:
     profiles:
       - default
     stdin_open: true
@@ -129,7 +129,6 @@ services:
       timeout: 10s
       retries: 5
 
-
   redis:
     image: redis:4.0.11-alpine3.8
     profiles:
@@ -166,7 +165,7 @@ services:
     volumes:
       - data_es:/usr/share/elasticsearch/data
     ports:
-      - 9200:9200
+      - "9200:9200"
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1" ]
       interval: 10s
@@ -174,15 +173,24 @@ services:
       retries: 3
 
   celery-flower:
-    image: johniak/flower:1.6
     profiles:
       - default
-    command: [ "flower", "--broker=redis://redis:6379/0", "--port=5555" ]
-    environment:
-      - FLOWER_AUTH_PROVIDER=""
-      - FLOWER_DEBUG="1"
-      - FLOWER_ADDRESS=0.0.0.0
+    stdin_open: true
+    tty: true
+    image: unicef/hct-mis-backend
+    env_file:
+      - .env
+    command: "celery-flower"
+    volumes:
+      - ../src:/code/
+      - backend-data:/data
     ports:
       - "5555:5555"
+    environment:
+      - REDIS_INSTANCE=redis:6379
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - PYTHONUNBUFFERED=1
     depends_on:
+      - celery-worker
       - redis
