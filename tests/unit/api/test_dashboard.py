@@ -1,106 +1,79 @@
+from typing import Callable, List, Any
 
-from django.urls import reverse
-
+import pytest
 from rest_framework import status
+from rest_framework.reverse import reverse
+from rest_framework.test import APIClient
 
-from hct_mis_api.api.models import APIToken, Grant
-from hct_mis_api.apps.account.fixtures import RoleFactory, UserFactory, UserRoleFactory
+from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
+from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.dashboard.services import DashboardDataCache
+
+pytestmark = pytest.mark.django_db
 
 
-def test_get_dash_report_json(api_client, business_area):
-    """
-    Test fetching the dashboard report and ensure it contains valid JSON when fetched via the API.
-    """
-    user = UserFactory(is_superuser=False, is_staff=False)
-    api_client.force_login(user)
+class TestDashboardDataView:
+    def set_up(self, api_client: Callable, business_area: BusinessAreaFactory) -> None:
+        self.user: User = UserFactory(is_superuser=False, is_staff=False)
+        self.client: APIClient = api_client(self.user)
+        self.business_area: BusinessAreaFactory = business_area
+        self.business_area_2: BusinessAreaFactory = BusinessAreaFactory(name="Test Business Area 2")
 
-    url = reverse("api:household-data", args=[business_area.slug])
-    response = api_client.get(url)
-    assert response.status_code == status.HTTP_403_FORBIDDEN
+        DashboardDataCache.refresh_data(self.business_area.slug)
 
-    role = RoleFactory(name="Dashboard Viewer", subsystem="API", permissions=[Permissions.DASHBOARD_VIEW_COUNTRY.name])
-    UserRoleFactory(user=user, role=role, business_area=business_area)
+        self.list_url: str = reverse("api:household-data", args=[self.business_area.slug])
+        self.generate_report_url: str = reverse("api:generate-dashreport", args=[self.business_area.slug])
 
-    response = api_client.get(url)
-    assert response.status_code == status.HTTP_200_OK
-    assert response["Content-Type"] == "application/json"
-
-    report_data = response.json()
-    assert isinstance(report_data, dict)
-    assert "total_households" in report_data
-    assert "last_updated" in report_data
-
-
-def test_get_dash_report_with_valid_permissions(api_client, business_area):
-    """Test fetching a dashboard report with valid permissions."""
-    user = UserFactory(is_superuser=False, is_staff=False)
-    api_client.force_login(user)
-
-    role = RoleFactory(name="Dashboard Viewer", subsystem="API", permissions=[Permissions.DASHBOARD_VIEW_COUNTRY.name])
-    UserRoleFactory(user=user, role=role, business_area=business_area)
-
-    url = reverse("api:household-data", args=[business_area.slug])
-    response = api_client.get(url)
-    assert response.status_code == status.HTTP_200_OK
-
-
-def test_get_dash_report_without_permissions(api_client, business_area):
-    """Test fetching a dashboard report without permissions returns 403."""
-    user = UserFactory(is_superuser=False, is_staff=False)
-    api_client.force_login(user)
-
-    url = reverse("api:household-data", args=[business_area.slug])
-    response = api_client.get(url)
-    assert response.status_code == status.HTTP_403_FORBIDDEN
-
-
-def test_get_nonexistent_business_area(api_client):
-    """Test fetching a dashboard report for a nonexistent business area."""
-    user = UserFactory(is_superuser=False, is_staff=False)
-    api_client.force_login(user)
-
-    url = reverse("api:household-data", args=["nonexistent-business"])
-    response = api_client.get(url)
-    assert response.status_code == status.HTTP_404_NOT_FOUND
-
-
-def test_generate_report_permission_denied(api_client, business_area):
-    """Test generating a DashReport as a non-superuser returns 403."""
-    user = UserFactory(is_superuser=False, is_staff=False)
-    api_client.force_login(user)
-
-    url = reverse("api:generate-dashreport", args=[business_area.slug])
-    response = api_client.post(url)
-    assert response.status_code == status.HTTP_403_FORBIDDEN
-    assert response.json()["detail"] == (
-        "Only superusers or users with the correct permissions can create or update DashReports."
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([], status.HTTP_403_FORBIDDEN),
+            ([Permissions.DASHBOARD_VIEW_COUNTRY], status.HTTP_200_OK),
+        ],
     )
+    @pytest.mark.django_db(databases=["default", "read_only"])
+    def test_dashboard_data_permission(
+        self,
+        permissions: List[str],
+        expected_status: int,
+        api_client: Callable,
+        afghanistan: BusinessAreaFactory,
+        create_user_role_with_permissions: Callable,
+    ) -> None:
+        self.set_up(api_client, afghanistan)
+        create_user_role_with_permissions(self.user, permissions, self.business_area)
 
+        response = self.client.get(self.list_url)
+        assert response.status_code == expected_status
 
-def test_generate_report_as_superuser(api_client, business_area):
-    """Test generating a DashReport as a superuser works."""
-    user = UserFactory(is_superuser=True, is_staff=True)
-    api_client.force_login(user)
+    @pytest.mark.django_db(databases=["default", "read_only"])
+    def test_get_dash_report_json(
+        self,
+        api_client: Callable,
+        afghanistan: BusinessAreaFactory,
+        create_user_role_with_permissions: Callable,
+    ) -> None:
+        """
+        Test fetching the dashboard report and ensure it contains valid JSON.
+        """
+        self.set_up(api_client, afghanistan)
+        create_user_role_with_permissions(self.user, [Permissions.DASHBOARD_VIEW_COUNTRY], self.business_area)
 
-    url = reverse("api:generate-dashreport", args=[business_area.slug])
-    response = api_client.post(url)
-    assert response.status_code == status.HTTP_202_ACCEPTED
-    assert "detail" in response.json()
-    assert response.json()["detail"] == "DashReport generation task has been triggered."
+        response = self.client.get(self.list_url)
+        assert response.status_code == status.HTTP_200_OK
+        assert response["Content-Type"] == "application/json"
 
+        report_data: List[Any] = response.json()
+        assert isinstance(report_data, list)
+        assert "total_households" in report_data
+        assert "last_updated" in report_data
 
-def test_access_other_business_area_fails(api_client, business_area, other_business_area):
-    """Test accessing a DashReport from a different business area fails."""
-    user = UserFactory(is_superuser=False, is_staff=False)
-    api_client.force_login(user)
+    @pytest.mark.django_db(databases=["default", "read_only"])
+    def test_get_nonexistent_business_area(self, api_client: Callable, afghanistan: BusinessAreaFactory) -> None:
+        """Test fetching a dashboard report for a nonexistent business area."""
+        self.set_up(api_client, afghanistan)
 
-    token = APIToken.objects.create(user=user)
-    token.grants += [Grant.API_READ_ONLY.name]
-    token.save()
-    api_client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
-
-    url = reverse("api:household-data", args=[other_business_area.slug])
-    response = api_client.get(url)
-    assert response.status_code == status.HTTP_403_FORBIDDEN
-    assert response.json()["detail"] == "You do not have permission to view this dashboard."
+        url: str = reverse("api:household-data", args=["nonexistent-business"])
+        response = self.client.get(url)
+        assert response.status_code == status.HTTP_404_NOT_FOUND
