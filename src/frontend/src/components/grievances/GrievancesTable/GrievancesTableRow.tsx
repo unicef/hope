@@ -125,10 +125,10 @@ export function GrievancesTableRow({
   //TODO: add target to the query
   const getTargetUnicefId = (_ticket) => {
     return isSocialDctType || isAllPrograms
-      ? _ticket?.target?.unicefId
-      : _ticket.household.unicefId;
+      ? _ticket?.targetId
+      : _ticket?.household?.unicefId;
   };
-  const targetUnicefId = getTargetUnicefId(ticket);
+  const targetId = getTargetUnicefId(ticket);
 
   return (
     <ClickableTableRow
@@ -178,7 +178,7 @@ export function GrievancesTableRow({
       </TableCell>
       <TableCell align="left">{categoryChoices[ticket.category]}</TableCell>
       <TableCell align="left">{issueType}</TableCell>
-      <TableCell align="left">{targetUnicefId || '-'}</TableCell>
+      <TableCell align="left">{targetId || '-'}</TableCell>
       <TableCell align="left">
         <StatusBox
           status={
