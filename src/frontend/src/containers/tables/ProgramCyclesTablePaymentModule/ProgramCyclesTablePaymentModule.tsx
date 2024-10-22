@@ -111,7 +111,7 @@ export const ProgramCyclesTablePaymentModule = ({
           statusToColor={programCycleStatusToColor}
         />
       </TableCell>
-      <TableCell align="right" data-cy="program-cycle-total-entitled-quantity">
+      <TableCell align="right" data-cy="program-cycle-total-entitled-quantity-usd">
         {row.total_entitled_quantity_usd || '-'}
       </TableCell>
       <TableCell data-cy="program-cycle-start-date">
