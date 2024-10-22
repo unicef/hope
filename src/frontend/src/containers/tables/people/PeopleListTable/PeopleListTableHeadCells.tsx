@@ -25,9 +25,17 @@ export const headCells: HeadCell<IndividualNode>[] = [
   },
   {
     disablePadding: false,
+    label: 'Status',
+    id: 'status',
+    numeric: false,
+    dataCy: 'status',
+    disableSort: true,
+  },
+  {
+    disablePadding: false,
     label: 'Type',
     id: '-birthDate',
-    numeric: true,
+    numeric: false,
     dataCy: 'individual-age',
   },
   {
