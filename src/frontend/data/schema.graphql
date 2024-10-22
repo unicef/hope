@@ -1608,6 +1608,7 @@ type GrievanceTicketNode implements Node {
   relatedTickets: [GrievanceTicketNode]
   totalDays: String
   documentation: [GrievanceDocumentNode]
+  targetId: String
 }
 
 type GrievanceTicketNodeConnection {
