@@ -1,3 +1,4 @@
+import datetime
 import json
 from typing import Any, Optional, Union
 
@@ -36,6 +37,22 @@ class StrictBooleanField(forms.Field):
             return False
         else:
             raise ValidationError("Invalid boolean value", code="invalid")
+
+
+class StrictDateField(forms.DateField):
+    def to_python(self, value: Any) -> Optional[datetime.date]:
+        """
+        Override to cover other cases, i.e. integer value provided.
+        """
+        if value in self.empty_values:
+            return None
+        if isinstance(value, datetime.datetime):
+            return value.date()
+        if isinstance(value, datetime.date):  # pragma: no cover
+            return value
+        if isinstance(value, str):
+            return super().to_python(value)
+        raise ValidationError("Invalid date value", code="invalid")
 
 
 class RowValidationError(ValidationError):
@@ -278,7 +295,7 @@ class PeriodicDataUpdateImportService:
             form_fields_dict[f"{round['field']}__round_number"] = forms.IntegerField()
             form_fields_dict[f"{round['field']}__round_name"] = forms.CharField(required=False)
             form_fields_dict[f"{round['field']}__round_value"] = self._get_form_field_for_value(flexible_attribute)
-            form_fields_dict[f"{round['field']}__collection_date"] = forms.DateField(required=False)
+            form_fields_dict[f"{round['field']}__collection_date"] = StrictDateField(required=False)
 
         return type("PeriodicDataUpdateForm", (PeriodicDataUpdateBaseForm,), form_fields_dict)
 
@@ -290,5 +307,5 @@ class PeriodicDataUpdateImportService:
         elif flexible_attribute.pdu_data.subtype == PeriodicFieldData.BOOL:
             return StrictBooleanField(required=False)
         elif flexible_attribute.pdu_data.subtype == PeriodicFieldData.DATE:
-            return forms.DateField(required=False)
+            return StrictDateField(required=False)
         raise ValidationError(f"Invalid subtype for field {flexible_attribute.name}")
