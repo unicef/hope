@@ -27,7 +27,6 @@ import { useTranslation } from 'react-i18next';
 import {
   PaymentPlanQuery,
   PaymentPlanStatus,
-  usePaymentPlanLazyQuery,
 } from '@generated/graphql';
 import { DropzoneField } from '@components/core/DropzoneField';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
