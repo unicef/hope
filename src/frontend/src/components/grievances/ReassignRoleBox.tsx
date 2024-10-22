@@ -68,7 +68,7 @@ export const ReassignRoleBox = ({
       ticket.systemFlaggingTicketDetails.roleReassignData,
     );
   }
-  let householdsAndRoles = individual?.householdsAndRoles;
+  let householdsAndRoles = individual?.householdsAndRoles || [];
   let shouldShowReassignHoH = individual?.id === household?.headOfHousehold?.id;
 
   if (
@@ -113,7 +113,8 @@ export const ReassignRoleBox = ({
           />
         ) : null}
         {shouldDisplayButton &&
-        ticket.category.toString() === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION &&
+        ticket.category.toString() ===
+          GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION &&
         reassignData[el.id]?.individual !== uniqueIndividual.id ? (
           <ReassignRoleUnique
             individualRole={{ role: el.role, id: el.id }}
@@ -121,7 +122,7 @@ export const ReassignRoleBox = ({
             household={el.household}
             individual={uniqueIndividual}
           />
-          ) : null}
+        ) : null}
       </Box>
     ));
 
@@ -140,7 +141,7 @@ export const ReassignRoleBox = ({
             ?.value === 'NO_ROLE'))
     ) {
       return (
-        <Typography variant='body2'>
+        <Typography variant="body2">
           {t(
             'Upon removing you will need to select new individual(s) for this role.',
           )}

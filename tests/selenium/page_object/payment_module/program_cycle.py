@@ -99,89 +99,22 @@ class ProgramCyclePage(BaseComponents):
     def getProgramCycleEndDate(self) -> WebElement:
         return self.wait_for(self.programCycleEndDate)
 
+    def getProgramCycleStartDateList(self) -> [WebElement]:
+        self.wait_for(self.programCycleStartDate)
+        return self.get_elements(self.programCycleStartDate)
+
+    def getProgramCycleEndDateList(self) -> [WebElement]:
+        self.wait_for(self.programCycleEndDate)
+        return self.get_elements(self.programCycleEndDate)
+
     def getProgramCycleDetailsBtn(self) -> WebElement:
         return self.wait_for(self.programCycleDetailsBtn)
 
     def getTablePagination(self) -> WebElement:
         return self.wait_for(self.tablePagination)
 
-    def getTableProgramCycleTitle(self) -> WebElement:
+    def getTableProgramCycleTitle(self) -> [WebElement]:
         return self.get_elements(self.programCycleTitle)
 
     def getProgramCycleId(self) -> WebElement:
         return self.wait_for(self.programCycleId)
-
-
-class ProgramCycleDetailsPage(BaseComponents):
-    pageHeaderTitle = 'h5[data-cy="page-header-title"]'
-    buttonCreatePaymentPlan = 'a[data-cy="button-create-payment-plan"]'
-    buttonFinishProgrammeCycle = 'button[data-cy="button-finish-programme-cycle"]'
-    statusContainer = 'div[data-cy="status-container"]'
-    labelCreatedBy = 'div[data-cy="label-Created By"]'
-    labelStartDate = 'div[data-cy="label-Start Date"]'
-    labelEndDate = 'div[data-cy="label-End Date"]'
-    labelProgrammeStartDate = 'div[data-cy="label-Programme Start Date"]'
-    labelProgrammeEndDate = 'div[data-cy="label-Programme End Date"]'
-    labelFrequencyOfPayment = 'div[data-cy="label-Frequency of Payment"]'
-    selectFilter = 'div[data-cy="select-filter"]'
-    datePickerFilterFrom = 'div[data-cy="date-picker-filter-From"]'
-    datePickerFilterTo = 'div[data-cy="date-picker-filter-To"]'
-    buttonFiltersClear = 'button[data-cy="button-filters-clear"]'
-    buttonFiltersApply = 'button[data-cy="button-filters-apply"]'
-    tableLabel = 'span[data-cy="table-label"]'
-    tableRow = 'tr[data-cy="table-row"]'
-    tablePagination = 'div[data-cy="table-pagination"]'
-
-    def getPageHeaderTitle(self) -> WebElement:
-        return self.wait_for(self.pageHeaderTitle)
-
-    def getButtonCreatePaymentPlan(self) -> WebElement:
-        return self.wait_for(self.buttonCreatePaymentPlan)
-
-    def getButtonFinishProgrammeCycle(self) -> WebElement:
-        return self.wait_for(self.buttonFinishProgrammeCycle)
-
-    def getStatusContainer(self) -> WebElement:
-        return self.wait_for(self.statusContainer)
-
-    def getLabelCreatedBy(self) -> WebElement:
-        return self.wait_for(self.labelCreatedBy)
-
-    def getLabelStartDate(self) -> WebElement:
-        return self.wait_for(self.labelStartDate)
-
-    def getLabelEndDate(self) -> WebElement:
-        return self.wait_for(self.labelEndDate)
-
-    def getLabelProgrammeStartDate(self) -> WebElement:
-        return self.wait_for(self.labelProgrammeStartDate)
-
-    def getLabelProgrammeEndDate(self) -> WebElement:
-        return self.wait_for(self.labelProgrammeEndDate)
-
-    def getLabelFrequencyOfPayment(self) -> WebElement:
-        return self.wait_for(self.labelFrequencyOfPayment)
-
-    def getSelectFilter(self) -> WebElement:
-        return self.wait_for(self.selectFilter)
-
-    def getDatePickerFilterFrom(self) -> WebElement:
-        return self.wait_for(self.datePickerFilterFrom)
-
-    def getDatePickerFilterTo(self) -> WebElement:
-        return self.wait_for(self.datePickerFilterTo)
-
-    def getButtonFiltersClear(self) -> WebElement:
-        return self.wait_for(self.buttonFiltersClear)
-
-    def getButtonFiltersApply(self) -> WebElement:
-        return self.wait_for(self.buttonFiltersApply)
-
-    def getTableLabel(self) -> WebElement:
-        return self.wait_for(self.tableLabel)
-
-    def getTableRow(self) -> WebElement:
-        return self.wait_for(self.tableRow)
-
-    def getTablePagination(self) -> WebElement:
-        return self.wait_for(self.tablePagination)

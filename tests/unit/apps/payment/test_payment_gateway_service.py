@@ -33,6 +33,7 @@ from hct_mis_api.apps.payment.models import (
     DeliveryMechanism,
     FinancialServiceProvider,
     Payment,
+    PaymentHouseholdSnapshot,
     PaymentPlan,
     PaymentPlanSplit,
 )
@@ -45,6 +46,9 @@ from hct_mis_api.apps.payment.services.payment_gateway import (
     PaymentGatewayService,
     PaymentInstructionStatus,
     PaymentRecordData,
+)
+from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
+    create_payment_plan_snapshot_data,
 )
 
 
@@ -93,9 +97,10 @@ class TestPaymentGatewayService(APITestCase):
                     "service_provider_code_i_f": "123456789",
                 },
             )
-            hoh = IndividualFactory(household=None)
-            hh = HouseholdFactory(head_of_household=hoh)
-            IndividualRoleInHouseholdFactory(household=hh, individual=hoh, role=ROLE_PRIMARY)
+            hh = HouseholdFactory(head_of_household=collector)
+            collector.household = hh
+            collector.save()
+            IndividualRoleInHouseholdFactory(household=hh, individual=collector, role=ROLE_PRIMARY)
             IndividualFactory.create_batch(2, household=hh)
             cls.payments.append(
                 PaymentFactory(
@@ -109,6 +114,8 @@ class TestPaymentGatewayService(APITestCase):
                     financial_service_provider=cls.pg_fsp,
                 )
             )
+
+        create_payment_plan_snapshot_data(cls.pp)
 
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     @mock.patch(
@@ -625,8 +632,10 @@ class TestPaymentGatewayService(APITestCase):
             "errors": None,
         }, 200
 
+        primary_collector = self.payments[0].collector
+
         DeliveryMechanismDataFactory(
-            individual=self.payments[0].collector,
+            individual=primary_collector,
             delivery_mechanism=self.dm_mobile_money,
             data={
                 "service_provider_code__mobile_money": "ABC",
@@ -636,6 +645,16 @@ class TestPaymentGatewayService(APITestCase):
         )
         self.payments[0].delivery_type = self.dm_mobile_money
         self.payments[0].save()
+
+        # remove old and create new snapshot
+        PaymentHouseholdSnapshot.objects.all().delete()
+        self.assertEqual(PaymentHouseholdSnapshot.objects.count(), 0)
+        self.assertEqual(Payment.objects.count(), 2)
+
+        create_payment_plan_snapshot_data(self.payments[0].parent)
+        self.assertEqual(PaymentHouseholdSnapshot.objects.count(), 2)
+        self.payments[0].refresh_from_db()
+
         PaymentGatewayAPI().add_records_to_payment_instruction([self.payments[0]], "123")
         post_mock.assert_called_once_with(
             "payment_instructions/123/add_records/",
@@ -645,10 +664,10 @@ class TestPaymentGatewayService(APITestCase):
                     "record_code": self.payments[0].unicef_id,
                     "payload": {
                         "amount": str(self.payments[0].entitlement_quantity),
-                        "phone_no": str(self.payments[0].collector.phone_no),
-                        "last_name": self.payments[0].collector.family_name,
-                        "first_name": self.payments[0].collector.given_name,
-                        "full_name": self.payments[0].collector.full_name,
+                        "phone_no": str(primary_collector.phone_no),
+                        "last_name": primary_collector.family_name,
+                        "first_name": primary_collector.given_name,
+                        "full_name": primary_collector.full_name,
                         "destination_currency": self.payments[0].currency,
                         "service_provider_code__mobile_money": "ABC",
                         "delivery_phone_number__mobile_money": "123456789",

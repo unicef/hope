@@ -39,9 +39,6 @@ known_first_party = [
     "mptt",
     "django_extensions",
     "registration_data",
-    "cash_assist_datahub",
-    "mis_datahub",
-    "erp_datahub",
     "sanction_list",
     "accountability",
 ]

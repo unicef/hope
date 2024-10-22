@@ -1,32 +1,32 @@
-import React from 'react';
-import { useTranslation } from 'react-i18next';
-import { Template } from './PeriodicDataUpdatesTemplatesList';
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
-  DialogActions,
-  Button,
-} from '@mui/material';
-import { LabelizedField } from '@components/core/LabelizedField';
 import {
   fetchPeriodicDataUpdateTemplateDetails,
   fetchPeriodicFields,
 } from '@api/periodicDataUpdateApi';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useQuery } from '@tanstack/react-query';
+import { LabelizedField } from '@components/core/LabelizedField';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { useArrayToDict } from '@hooks/useArrayToDict';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+} from '@mui/material';
+import { PeriodicDataUpdateTemplateList } from '@restgenerated/models/PeriodicDataUpdateTemplateList';
+import { useQuery } from '@tanstack/react-query';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface PeriodicDataUpdatesTemplateDetailsDialogProps {
   open: boolean;
   onClose: () => void;
-  template: Template;
+  template: PeriodicDataUpdateTemplateList;
 }
 
 export const PeriodicDataUpdatesTemplateDetailsDialog: React.FC<
@@ -53,11 +53,7 @@ export const PeriodicDataUpdatesTemplateDetailsDialog: React.FC<
       queryKey: ['periodicFields', businessArea, programId],
       queryFn: () => fetchPeriodicFields(businessArea, programId),
     });
-  const pduDataDict = useArrayToDict(
-    periodicFieldsData?.results,
-    'name',
-    '*',
-  );
+  const pduDataDict = useArrayToDict(periodicFieldsData?.results, 'name', '*');
   if (isLoading || periodicFieldsLoading || !pduDataDict)
     return <LoadingComponent />;
   return (

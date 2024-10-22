@@ -1,6 +1,4 @@
-import {
-  fetchSupportingDocument,
-} from '@api/paymentModuleApi';
+import { fetchSupportingDocument } from '@api/paymentModuleApi';
 import { useMutation } from '@tanstack/react-query';
 
 export const useDownloadSupportingDocument = () => {

@@ -8,12 +8,11 @@ export const fakeApolloAllSteficonRules = [
         enabled: true,
         deprecated: false,
         type: 'PAYMENT_PLAN',
-        first: 5,
       },
     },
     result: {
       data: {
-        allStepiconRules: {
+        allSteficonRules: {
           pageInfo: {
             hasNextPage: true,
             hasPreviousPage: false,
