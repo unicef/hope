@@ -1,14 +1,11 @@
-import json
 
-from django.core.cache import cache
 from django.urls import reverse
 
 from rest_framework import status
 
 from hct_mis_api.api.models import APIToken, Grant
-from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, RoleFactory, UserFactory, UserRoleFactory
+from hct_mis_api.apps.account.fixtures import RoleFactory, UserFactory, UserRoleFactory
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.dashboard.services import DashboardDataCache
 
 
 def test_get_dash_report_json(api_client, business_area):

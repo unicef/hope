@@ -1,9 +1,6 @@
 import logging
 from typing import Any
 
-from django.core.cache import cache
-from django.utils import timezone
-
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.dashboard.services import DashboardDataCache
