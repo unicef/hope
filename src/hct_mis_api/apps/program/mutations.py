@@ -76,6 +76,8 @@ class CreateProgram(
 
         if not (data_collecting_type_code := program_data.pop("data_collecting_type_code", None)):
             raise ValidationError("DataCollectingType is required for creating new Program")
+        if not program_data.pop("beneficiary_group", None):
+            raise ValidationError("Beneficiary Group is required for creating new Program")
         data_collecting_type = DataCollectingType.objects.get(code=data_collecting_type_code)
         partner_access = program_data.get("partner_access", [])
         partners_data = program_data.pop("partners", [])
@@ -183,6 +185,10 @@ class UpdateProgram(
             # Only reactivation is possible
             if status_to_set != Program.ACTIVE or len(program_data) > 1:
                 raise ValidationError("You cannot change finished program")
+        if old_program.registration_imports.exists() and old_program.beneficiary_group != program_data.get(
+            "beneficiary_group"
+        ):
+            raise ValidationError("You cannot update a program's Beneficiary Group if it has imported population.")
 
         if data_collecting_type_code:
             program.data_collecting_type = data_collecting_type

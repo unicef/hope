@@ -14,7 +14,7 @@ from faker import Faker
 
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
-from hct_mis_api.apps.program.models import Program, ProgramCycle
+from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
 
 fake = Faker()
 
@@ -117,3 +117,9 @@ def get_program_with_dct_type_and_name(
         **kwargs,
     )
     return program
+
+
+class BeneficiaryGroupFactory(DjangoModelFactory):
+    class Meta:
+        model = BeneficiaryGroup
+        django_get_or_create = ("name",)

@@ -64,6 +64,23 @@ class ProgramPartnerThrough(TimeStampedUUIDModel):
         ]
 
 
+class BeneficiaryGroup(TimeStampedUUIDModel):
+    name = models.CharField(max_length=255, unique=True)
+    group_label = models.CharField(max_length=255)
+    group_label_plural = models.CharField(max_length=255)
+    member_label = models.CharField(max_length=255)
+    member_label_plural = models.CharField(max_length=255)
+    master_detail = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = "Beneficiary Group"
+        verbose_name_plural = "Beneficiary Groups"
+        ordering = ("name",)
+
+    def __str__(self) -> str:
+        return self.name
+
+
 class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel, AdminUrlMixin):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
@@ -205,6 +222,13 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         default=False, help_text="Enable Deduplication of Face Images"
     )
     deduplication_set_id = models.UUIDField(blank=True, null=True)
+    # TODO: set not nullable after migrating old data
+    beneficiary_group = models.ForeignKey(
+        BeneficiaryGroup,
+        on_delete=models.PROTECT,
+        related_name="programs",
+        null=True,
+    )
 
     objects = SoftDeletableIsVisibleManager()
 

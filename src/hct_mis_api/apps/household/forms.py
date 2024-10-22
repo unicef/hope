@@ -231,7 +231,6 @@ class MassEnrollForm(forms.Form):
         if "apply" in self.data:
             program_for_enroll = cleaned_data.get("program_for_enroll")
             warning_message = None  # Initialize the warning message
-
             # Check each household in the queryset
             for household in self.households:
                 if not (
@@ -246,6 +245,9 @@ class MassEnrollForm(forms.Form):
                         "Not all households have data collecting type compatible with the selected program"
                     )
                     break  # Exit the loop after the first incompatible household
+
+            if self.households.exclude(program__beneficiary_group=program_for_enroll.beneficiary_group).exists():
+                self.add_error(None, "Some households belong to a different beneficiary group than selected program.")
 
             if warning_message:
                 # Add the warning message as a non-field error
