@@ -1,4 +1,4 @@
-from typing import Callable, List, Any
+from typing import Any, Callable, List
 
 import pytest
 from rest_framework import status
