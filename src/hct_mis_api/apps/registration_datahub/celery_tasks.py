@@ -4,7 +4,6 @@ from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 from django.core.cache import cache
 from django.db import transaction
-from django.db.models import Count
 from django.utils import timezone
 
 from hct_mis_api.apps.core.celery import app
