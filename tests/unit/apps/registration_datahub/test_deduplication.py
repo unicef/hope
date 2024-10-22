@@ -31,10 +31,12 @@ from hct_mis_api.apps.utils.elasticsearch_utils import (
     rebuild_search_index,
 )
 from hct_mis_api.apps.utils.querysets import evaluate_qs
+from tests.unit.conftest import disabled_locally_test
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 
+@disabled_locally_test
 class TestBatchDeduplication(TestCase):
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
@@ -236,7 +238,7 @@ class TestBatchDeduplication(TestCase):
     def test_batch_deduplication(self) -> None:
         task = DeduplicateTask(self.business_area.slug, self.program.id)
 
-        with self.assertNumQueries(20):
+        with self.assertNumQueries(11):
             task.deduplicate_pending_individuals(self.registration_data_import)
         duplicate_in_batch = PendingIndividual.objects.order_by("full_name").filter(
             deduplication_batch_status=DUPLICATE_IN_BATCH
