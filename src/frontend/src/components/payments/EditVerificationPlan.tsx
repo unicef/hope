@@ -309,8 +309,8 @@ export const EditVerificationPlan = ({
                       variant="fullWidth"
                       aria-label="full width tabs example"
                     >
-                      <Tab label={t('FULL LIST')} />
-                      <Tab label={t('RANDOM SAMPLING')} />
+                      <Tab  data-cy="tab-full-list" label={t('FULL LIST')} />
+                      <Tab data-cy="tab-random-sampling" label={t('RANDOM SAMPLING')} />
                     </StyledTabs>
                   </TabsContainer>
                   <TabPanel value={selectedTab} index={0}>

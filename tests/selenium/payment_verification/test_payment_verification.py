@@ -529,13 +529,21 @@ class TestPaymentVerification:
         pagePaymentVerification.selectGlobalProgramFilter("Active Program")
         pagePaymentVerification.getNavPaymentVerification().click()
         pagePaymentVerification.getCashPlanTableRow().click()
-        print(pagePaymentVerificationDetails.getLabelSampling().text)
         pagePaymentVerificationDetails.getButtonEditPlan().click()
         pagePaymentVerification.getTabFullList().click()
-        pagePaymentVerification.getRadioVerificationChannel("manual").click()
+        if "MANUAL" in pagePaymentVerificationDetails.getLabelVerificationChannel().text:
+            pagePaymentVerification.getRadioVerificationChannel("xlsx").click()
+            channel = "XLSX"
+        else:
+            pagePaymentVerification.getRadioVerificationChannel("manual").click()
+            channel = "MANUAL"
+
         pagePaymentVerification.getButtonSubmit().click()
         assert "PENDING" in pagePaymentVerificationDetails.getVerificationPlansSummaryStatus().text
         assert "PENDING" in pagePaymentVerificationDetails.getVerificationPlanStatus().text
-        assert "MANUAL" in pagePaymentVerificationDetails.getLabelVerificationChannel().text
+        for _ in range(50):
+            if channel in pagePaymentVerificationDetails.getLabelVerificationChannel().text:
+                break
+        else:
+            assert channel in pagePaymentVerificationDetails.getLabelVerificationChannel().text
         assert "Full list" in pagePaymentVerificationDetails.getLabelSampling().text
-        pagePaymentVerification.screenshot("0", file_path="./")
