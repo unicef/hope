@@ -748,7 +748,23 @@ class HardDocumentDeduplication:
                 elif new_document_signatures_duplicated_in_batch.count(new_document_signature) > 1:
                     if is_duplicated_document_number_for_individual:
                         # do not create ticket for the same Individual with the same doc number
-                        new_document.status = Document.STATUS_VALID
+                        if new_document.type.valid_for_deduplication:
+                            new_document.status = Document.STATUS_INVALID
+                        else:
+                            if (
+                                new_documents.filter(
+                                    id__in=[d.id for d in documents_to_dedup],
+                                    document_number=new_document.document_number,
+                                    type=new_document.type,
+                                    individual=new_document.individual,
+                                )
+                                .exclude(id=new_document.id)
+                                .exists()
+                            ):
+                                # same document number/type/individual_id exists in batch
+                                new_document.status = Document.STATUS_INVALID
+                            else:
+                                new_document.status = Document.STATUS_VALID
                         new_document_signatures_in_batch_per_individual_dict[str(new_document.individual_id)].remove(
                             new_document_signature
                         )
