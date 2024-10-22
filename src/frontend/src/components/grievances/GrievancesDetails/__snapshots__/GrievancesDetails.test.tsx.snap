@@ -6,10 +6,10 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
     class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 css-13i4rnv-MuiGrid-root"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-beySPh fvkwGO css-1ps6pg7-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-blHHSb kPa-dfK css-1ps6pg7-MuiPaper-root"
     >
       <div
-        class="sc-irLvIq cDFsGT"
+        class="sc-dpBQxM jHeYpq"
       >
         <h6
           class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
@@ -18,7 +18,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
         </h6>
       </div>
       <div
-        class="sc-eDLKkx dztDbI"
+        class="sc-dntaoT fMVexb"
       >
         <div
           class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-6 css-zow5z4-MuiGrid-root"
@@ -28,7 +28,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
           >
             <div>
               <span
-                class="sc-dmyCSP edirvw"
+                class="sc-egkSDF bUfwNm"
                 color="textSecondary"
               >
                 Status
@@ -37,14 +37,14 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 data-cy="label-Status"
               >
                 <span
-                  class="sc-hLQSwg hXyiIZ"
+                  class="sc-fAUdSK fuvdWP"
                   color="textSecondary"
                 >
                   <div
-                    class="sc-jsEeTM xQgAl"
+                    class="sc-dstKZu jHyLSU"
                   >
                     <div
-                      class="sc-kFCroH iNLqSI status-box-container"
+                      class="sc-keTIit gWjvwv status-box-container"
                       data-cy="status-container"
                     >
                       In Progress
@@ -59,7 +59,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
           >
             <div>
               <span
-                class="sc-dmyCSP edirvw"
+                class="sc-egkSDF bUfwNm"
                 color="textSecondary"
               >
                 Priority
@@ -68,14 +68,14 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 data-cy="label-Priority"
               >
                 <span
-                  class="sc-hLQSwg hXyiIZ"
+                  class="sc-fAUdSK fuvdWP"
                   color="textSecondary"
                 >
                   <div
-                    class="sc-jsEeTM xQgAl"
+                    class="sc-dstKZu jHyLSU"
                   >
                     <div
-                      class="sc-kFCroH jBgGcQ status-box-container"
+                      class="sc-keTIit hA-dCPj status-box-container"
                       data-cy="status-container"
                     >
                       High
@@ -90,7 +90,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
           >
             <div>
               <span
-                class="sc-dmyCSP edirvw"
+                class="sc-egkSDF bUfwNm"
                 color="textSecondary"
               >
                 Urgency
@@ -99,14 +99,14 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 data-cy="label-Urgency"
               >
                 <span
-                  class="sc-hLQSwg hXyiIZ"
+                  class="sc-fAUdSK fuvdWP"
                   color="textSecondary"
                 >
                   <div
-                    class="sc-jsEeTM xQgAl"
+                    class="sc-dstKZu jHyLSU"
                   >
                     <div
-                      class="sc-kFCroH jBgGcQ status-box-container"
+                      class="sc-keTIit hA-dCPj status-box-container"
                       data-cy="status-container"
                     >
                       Very urgent
@@ -121,7 +121,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
           >
             <div>
               <span
-                class="sc-dmyCSP edirvw"
+                class="sc-egkSDF bUfwNm"
                 color="textSecondary"
               >
                 Assigned to
@@ -130,7 +130,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 data-cy="label-Assigned to"
               >
                 <span
-                  class="sc-hLQSwg hXyiIZ"
+                  class="sc-fAUdSK fuvdWP"
                   color="textSecondary"
                 >
                   Maciej Szewczyk
@@ -143,7 +143,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
           >
             <div>
               <span
-                class="sc-dmyCSP edirvw"
+                class="sc-egkSDF bUfwNm"
                 color="textSecondary"
               >
                 Category
@@ -152,7 +152,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 data-cy="label-Category"
               >
                 <span
-                  class="sc-hLQSwg hXyiIZ"
+                  class="sc-fAUdSK fuvdWP"
                   color="textSecondary"
                 >
                   <span>
@@ -167,7 +167,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
           >
             <div>
               <span
-                class="sc-dmyCSP edirvw"
+                class="sc-egkSDF bUfwNm"
                 color="textSecondary"
               >
                 Issue Type
@@ -176,7 +176,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 data-cy="label-Issue Type"
               >
                 <span
-                  class="sc-hLQSwg hXyiIZ"
+                  class="sc-fAUdSK fuvdWP"
                   color="textSecondary"
                 >
                   <span>
@@ -191,7 +191,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
           >
             <div>
               <span
-                class="sc-dmyCSP edirvw"
+                class="sc-egkSDF bUfwNm"
                 color="textSecondary"
               >
                 Household ID
@@ -200,12 +200,12 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 data-cy="label-Household ID"
               >
                 <span
-                  class="sc-hLQSwg hXyiIZ"
+                  class="sc-fAUdSK fuvdWP"
                   color="textSecondary"
                 >
                   <span>
                     <a
-                      class="sc-csKJxZ igZsQL"
+                      class="sc-jwIPbr gLUwzC"
                       href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/population/household/SG91c2Vob2xkTm9kZTo3NjExNzM2Ny0yYWFiLTRmNTEtODUwOC1mMzBmODliYWUzYzE="
                     >
                       HH-20-0000.0001
@@ -220,7 +220,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
           >
             <div>
               <span
-                class="sc-dmyCSP edirvw"
+                class="sc-egkSDF bUfwNm"
                 color="textSecondary"
               >
                 Individual ID
@@ -229,12 +229,12 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 data-cy="label-Individual ID"
               >
                 <span
-                  class="sc-hLQSwg hXyiIZ"
+                  class="sc-fAUdSK fuvdWP"
                   color="textSecondary"
                 >
                   <span>
                     <a
-                      class="sc-csKJxZ igZsQL"
+                      class="sc-jwIPbr gLUwzC"
                       href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/population/individuals/SW5kaXZpZHVhbE5vZGU6ZjVmMzgwN2ItYTBjOS00Mjk0LTg0Y2QtNDhkMjllMjZhODU3"
                     >
                       IND-88-0000.0005
@@ -249,7 +249,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
           >
             <div>
               <span
-                class="sc-dmyCSP edirvw"
+                class="sc-egkSDF bUfwNm"
                 color="textSecondary"
               >
                 Payment ID
@@ -258,7 +258,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 data-cy="label-Payment ID"
               >
                 <span
-                  class="sc-hLQSwg hXyiIZ"
+                  class="sc-fAUdSK fuvdWP"
                   color="textSecondary"
                 >
                   <span>
@@ -273,7 +273,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
           >
             <div>
               <span
-                class="sc-dmyCSP edirvw"
+                class="sc-egkSDF bUfwNm"
                 color="textSecondary"
               >
                 Payment Plan
@@ -282,7 +282,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 data-cy="label-Payment Plan"
               >
                 <span
-                  class="sc-hLQSwg hXyiIZ"
+                  class="sc-fAUdSK fuvdWP"
                   color="textSecondary"
                 >
                   <span>
@@ -297,7 +297,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
           >
             <div>
               <span
-                class="sc-dmyCSP edirvw"
+                class="sc-egkSDF bUfwNm"
                 color="textSecondary"
               >
                 Payment Plan Verification
@@ -306,7 +306,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 data-cy="label-Payment Plan Verification"
               >
                 <span
-                  class="sc-hLQSwg hXyiIZ"
+                  class="sc-fAUdSK fuvdWP"
                   color="textSecondary"
                 >
                   <span>
@@ -321,7 +321,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
           >
             <div>
               <span
-                class="sc-dmyCSP edirvw"
+                class="sc-egkSDF bUfwNm"
                 color="textSecondary"
               >
                 Programme
@@ -330,7 +330,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 data-cy="label-Programme"
               >
                 <span
-                  class="sc-hLQSwg hXyiIZ"
+                  class="sc-fAUdSK fuvdWP"
                   color="textSecondary"
                 >
                   -
@@ -343,7 +343,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
           >
             <div>
               <span
-                class="sc-dmyCSP edirvw"
+                class="sc-egkSDF bUfwNm"
                 color="textSecondary"
               >
                 Created By
@@ -352,7 +352,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 data-cy="label-Created By"
               >
                 <span
-                  class="sc-hLQSwg hXyiIZ"
+                  class="sc-fAUdSK fuvdWP"
                   color="textSecondary"
                 >
                   Maciej Szewczyk
@@ -365,7 +365,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
           >
             <div>
               <span
-                class="sc-dmyCSP edirvw"
+                class="sc-egkSDF bUfwNm"
                 color="textSecondary"
               >
                 Date Created
@@ -374,7 +374,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 data-cy="label-Date Created"
               >
                 <span
-                  class="sc-hLQSwg hXyiIZ"
+                  class="sc-fAUdSK fuvdWP"
                   color="textSecondary"
                 >
                   <time
@@ -391,7 +391,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
           >
             <div>
               <span
-                class="sc-dmyCSP edirvw"
+                class="sc-egkSDF bUfwNm"
                 color="textSecondary"
               >
                 Last Modified Date
@@ -400,7 +400,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 data-cy="label-Last Modified Date"
               >
                 <span
-                  class="sc-hLQSwg hXyiIZ"
+                  class="sc-fAUdSK fuvdWP"
                   color="textSecondary"
                 >
                   <time
@@ -417,7 +417,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
           >
             <div>
               <span
-                class="sc-dmyCSP edirvw"
+                class="sc-egkSDF bUfwNm"
                 color="textSecondary"
               >
                 Administrative Level 2
@@ -434,7 +434,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
           >
             <div>
               <span
-                class="sc-dmyCSP edirvw"
+                class="sc-egkSDF bUfwNm"
                 color="textSecondary"
               >
                 Area / Village / Pay point
@@ -451,7 +451,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
           >
             <div>
               <span
-                class="sc-dmyCSP edirvw"
+                class="sc-egkSDF bUfwNm"
                 color="textSecondary"
               >
                 Languages Spoken
@@ -468,7 +468,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
           >
             <div>
               <span
-                class="sc-dmyCSP edirvw"
+                class="sc-egkSDF bUfwNm"
                 color="textSecondary"
               >
                 Documentation
@@ -477,7 +477,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 data-cy="label-Documentation"
               >
                 <span
-                  class="sc-hLQSwg hXyiIZ"
+                  class="sc-fAUdSK fuvdWP"
                   color="textSecondary"
                 >
                   <div
@@ -494,7 +494,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
           >
             <div>
               <span
-                class="sc-dmyCSP edirvw"
+                class="sc-egkSDF bUfwNm"
                 color="textSecondary"
               >
                 Description
@@ -503,7 +503,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 data-cy="label-Description"
               >
                 <span
-                  class="sc-hLQSwg hXyiIZ"
+                  class="sc-fAUdSK fuvdWP"
                   color="textSecondary"
                 >
                   dwdw
@@ -516,7 +516,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
           >
             <div>
               <span
-                class="sc-dmyCSP edirvw"
+                class="sc-egkSDF bUfwNm"
                 color="textSecondary"
               >
                 Comments

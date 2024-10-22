@@ -26,7 +26,7 @@ class ProgramCyclePage(BaseComponents):
     programCycleId = 'td[data-cy="program-cycle-id"]'
     programCycleTitle = 'td[data-cy="program-cycle-title"]'
     programCycleStatus = 'td[data-cy="program-cycle-status"]'
-    programCycleTotalEntitledQuantity = 'td[data-cy="program-cycle-total-entitled-quantity"]'
+    programCycleTotalEntitledQuantityUSD = 'td[data-cy="program-cycle-total-entitled-quantity-usd"]'
     programCycleStartDate = 'td[data-cy="program-cycle-start-date"]'
     programCycleEndDate = 'td[data-cy="program-cycle-end-date"]'
     programCycleDetailsBtn = 'td[data-cy="program-cycle-details-btn"]'
@@ -71,8 +71,8 @@ class ProgramCyclePage(BaseComponents):
     def getHeadCellStatus(self) -> WebElement:
         return self.wait_for(self.headCellStatus)
 
-    def getHeadCellTotalEntitledQuantity(self) -> WebElement:
-        return self.wait_for(self.headCellTotalEntitledQuantity)
+    def getHeadCellTotalEntitledQuantityUSD(self) -> WebElement:
+        return self.wait_for(self.headCellTotalEntitledQuantityUSD)
 
     def getHeadCellStartDate(self) -> WebElement:
         return self.wait_for(self.headCellStartDate)

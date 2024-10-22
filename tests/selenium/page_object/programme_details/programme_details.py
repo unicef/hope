@@ -37,9 +37,9 @@ class ProgrammeDetails(BaseComponents):
     programCycleTitle = 'td[data-cy="program-cycle-title"]'
     programCycleStatus = 'td[data-cy="program-cycle-status"]'
     statusContainer = 'div[data-cy="status-container"]'
-    programCycleTotalEntitledQuantity = 'td[data-cy="program-cycle-total-entitled-quantity"]'
-    programCycleTotalUndeliveredQuantity = 'td[data-cy="program-cycle-total-undelivered-quantity"]'
-    programCycleTotalDeliveredQuantity = 'td[data-cy="program-cycle-total-delivered-quantity"]'
+    programCycleTotalEntitledQuantityUSD = 'td[data-cy="program-cycle-total-entitled-quantity-usd"]'
+    programCycleTotalUndeliveredQuantityUSD = 'td[data-cy="program-cycle-total-undelivered-quantity-usd"]'
+    programCycleTotalDeliveredQuantityUSD = 'td[data-cy="program-cycle-total-delivered-quantit-usd"]'
     programCycleStartDate = 'td[data-cy="program-cycle-start-date"]'
     programCycleEndDate = 'td[data-cy="program-cycle-end-date"]'
     programCycleDetailsBtn = 'td[data-cy="program-cycle-details-btn"]'
@@ -79,9 +79,9 @@ class ProgrammeDetails(BaseComponents):
         self.wait_for(self.statusContainer)
         return self.get_elements(self.statusContainer)
 
-    def getProgramCycleTotalEntitledQuantity(self) -> WebElement:
-        self.wait_for(self.programCycleTotalEntitledQuantity)
-        return self.get_elements(self.programCycleTotalEntitledQuantity)
+    def getProgramCycleTotalEntitledQuantityUSD(self) -> WebElement:
+        self.wait_for(self.programCycleTotalEntitledQuantityUSD)
+        return self.get_elements(self.programCycleTotalEntitledQuantityUSD)
 
     def getProgramCycleTotalUndeliveredQuantity(self) -> WebElement:
         self.wait_for(self.programCycleTotalUndeliveredQuantity)
