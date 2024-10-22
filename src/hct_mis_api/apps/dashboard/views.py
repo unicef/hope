@@ -1,16 +1,16 @@
-import json
 import logging
-from typing import Any
+from typing import Any, Dict
 
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.cache import cache
 from django.shortcuts import get_object_or_404
+from django.views.generic import TemplateView
+
 from rest_framework import status
-from rest_framework.exceptions import PermissionDenied, ValidationError
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import TemplateView
 
 from hct_mis_api.apps.account.permissions import Permissions, check_permissions
 from hct_mis_api.apps.core.models import BusinessArea
@@ -86,14 +86,14 @@ class CreateOrUpdateDashReportView(APIView):
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-class DashboardReportdView(LoginRequiredMixin, TemplateView):
+class DashboardReportView(LoginRequiredMixin, TemplateView):
     """
     View to render the dashboard template for a specific business area.
     """
 
     template_name = "dashboard.html"
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         context = super().get_context_data(**kwargs)
         business_area_slug = kwargs.get("business_area_slug")
         business_area = get_object_or_404(BusinessArea, slug=business_area_slug)

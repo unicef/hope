@@ -1,8 +1,7 @@
 import json
-from typing import Any, Dict, List
+from typing import Any, Dict, Optional
 
 from django.core.cache import cache
-from django.utils import timezone
 
 from hct_mis_api.apps.dashboard.serializers import DashboardHouseholdSerializer
 from hct_mis_api.apps.household.models import Household
@@ -20,7 +19,7 @@ class DashboardDataCache:
         return f"dashboard_data_{business_area_slug}"
 
     @classmethod
-    def get_data(cls, business_area_slug: str):
+    def get_data(cls, business_area_slug: str) -> Optional[Dict[str, Any]]:
         """
         Retrieve cached dashboard data for a given business area.
         """
@@ -31,7 +30,7 @@ class DashboardDataCache:
         return None
 
     @classmethod
-    def store_data(cls, business_area_slug: str, data: dict):
+    def store_data(cls, business_area_slug: str, data: Dict[str, Any]) -> None:
         """
         Store data in Redis cache for a given business area.
         """
@@ -39,7 +38,7 @@ class DashboardDataCache:
         cache.set(cache_key, json.dumps(data), CACHE_TIMEOUT)
 
     @classmethod
-    def refresh_data(cls, business_area_slug: str):
+    def refresh_data(cls, business_area_slug: str) -> Dict[str, Any]:
         """
         Generate and store updated data for a given business area.
         """
