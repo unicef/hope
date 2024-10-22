@@ -90,8 +90,8 @@ class ProgramCyclePage(BaseComponents):
     def getProgramCycleStatus(self) -> WebElement:
         return self.wait_for(self.programCycleStatus)
 
-    def getProgramCycleTotalEntitledQuantity(self) -> WebElement:
-        return self.wait_for(self.programCycleTotalEntitledQuantity)
+    def getProgramCycleTotalEntitledQuantityUSD(self) -> WebElement:
+        return self.wait_for(self.programCycleTotalEntitledQuantityUSD)
 
     def getProgramCycleStartDate(self) -> WebElement:
         return self.wait_for(self.programCycleStartDate)

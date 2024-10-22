@@ -83,13 +83,13 @@ class ProgrammeDetails(BaseComponents):
         self.wait_for(self.programCycleTotalEntitledQuantityUSD)
         return self.get_elements(self.programCycleTotalEntitledQuantityUSD)
 
-    def getProgramCycleTotalUndeliveredQuantity(self) -> WebElement:
-        self.wait_for(self.programCycleTotalUndeliveredQuantity)
-        return self.get_elements(self.programCycleTotalUndeliveredQuantity)
+    def getProgramCycleTotalUndeliveredQuantityUSD(self) -> WebElement:
+        self.wait_for(self.programCycleTotalUndeliveredQuantityUSD)
+        return self.get_elements(self.programCycleTotalUndeliveredQuantityUSD)
 
-    def getProgramCycleTotalDeliveredQuantity(self) -> WebElement:
-        self.wait_for(self.programCycleTotalDeliveredQuantity)
-        return self.get_elements(self.programCycleTotalDeliveredQuantity)
+    def getProgramCycleTotalDeliveredQuantityUSD(self) -> WebElement:
+        self.wait_for(self.programCycleTotalDeliveredQuantityUSD)
+        return self.get_elements(self.programCycleTotalDeliveredQuantityUSD)
 
     def getProgramCycleStartDate(self) -> WebElement:
         self.wait_for(self.programCycleStartDate)
