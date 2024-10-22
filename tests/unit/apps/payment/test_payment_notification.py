@@ -349,7 +349,6 @@ class TestPaymentNotification(APITestCase):
     def test_send_email_notification_exclude_superuser(self, mock_post: Any) -> None:
         self.user_with_approval_permission_partner_unicef.is_superuser = True
         self.user_with_approval_permission_partner_unicef.save()
-        self.user_with_approval_permission_partner_unicef.refresh_from_db()
         payment_notification = PaymentNotification(
             self.payment_plan,
             PaymentPlan.Action.SEND_FOR_APPROVAL.name,
