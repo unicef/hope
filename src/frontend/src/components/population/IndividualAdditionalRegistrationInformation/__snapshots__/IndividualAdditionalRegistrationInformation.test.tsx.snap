@@ -4,10 +4,10 @@ exports[`components/population/IndividualAdditionalRegistrationInformation shoul
 <div>
   <div>
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-ixGGxD fHLOhc css-1ps6pg7-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-fsYfdN ctuPcH css-1ps6pg7-MuiPaper-root"
     >
       <div
-        class="sc-egkSDF flCGEE"
+        class="sc-dmyCSP ljiJAm"
       >
         <h6
           class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
@@ -23,7 +23,7 @@ exports[`components/population/IndividualAdditionalRegistrationInformation shoul
         >
           <div>
             <span
-              class="sc-blHHSb dUfUKp"
+              class="sc-beySPh gbuZtJ"
               color="textSecondary"
             >
               muac
@@ -32,7 +32,7 @@ exports[`components/population/IndividualAdditionalRegistrationInformation shoul
               data-cy="label-muac"
             >
               <span
-                class="sc-gtLWhw dynQwi"
+                class="sc-guDLey cyWTlF"
                 color="textSecondary"
               >
                 334
@@ -45,7 +45,7 @@ exports[`components/population/IndividualAdditionalRegistrationInformation shoul
         >
           <div>
             <span
-              class="sc-blHHSb dUfUKp"
+              class="sc-beySPh gbuZtJ"
               color="textSecondary"
             >
               school enrolled
@@ -54,7 +54,7 @@ exports[`components/population/IndividualAdditionalRegistrationInformation shoul
               data-cy="label-school enrolled"
             >
               <span
-                class="sc-gtLWhw dynQwi"
+                class="sc-guDLey cyWTlF"
                 color="textSecondary"
               >
                 Yes
@@ -67,7 +67,7 @@ exports[`components/population/IndividualAdditionalRegistrationInformation shoul
         >
           <div>
             <span
-              class="sc-blHHSb dUfUKp"
+              class="sc-beySPh gbuZtJ"
               color="textSecondary"
             >
               school enrolled before
@@ -76,7 +76,7 @@ exports[`components/population/IndividualAdditionalRegistrationInformation shoul
               data-cy="label-school enrolled before"
             >
               <span
-                class="sc-gtLWhw dynQwi"
+                class="sc-guDLey cyWTlF"
                 color="textSecondary"
               >
                 No
