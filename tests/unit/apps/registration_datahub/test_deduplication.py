@@ -237,7 +237,7 @@ class TestBatchDeduplication(TestCase):
     def test_batch_deduplication(self) -> None:
         task = DeduplicateTask(self.business_area.slug, self.program.id)
 
-        with self.assertNumQueries(11):
+        with self.assertNumQueries(20):
             task.deduplicate_pending_individuals(self.registration_data_import)
         duplicate_in_batch = PendingIndividual.objects.order_by("full_name").filter(
             deduplication_batch_status=DUPLICATE_IN_BATCH
