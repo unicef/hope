@@ -4,7 +4,6 @@ from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 from django.core.cache import cache
 from django.db import transaction
-from django.db.models import Count
 from django.utils import timezone
 
 from hct_mis_api.apps.core.celery import app
@@ -370,27 +369,20 @@ def check_and_set_taxid(queryset: "QuerySet") -> Dict:
 @app.task
 @log_start_and_end
 @sentry_tags
-def deduplicate_documents() -> bool:
+def deduplicate_documents(rdi_id: str) -> bool:
     with locked_cache(key="deduplicate_documents") as locked:
         if not locked:
             return True
-        grouped_rdi = (
-            Document.objects.filter(status=Document.STATUS_PENDING)
-            .values("individual__registration_data_import")
-            .annotate(count=Count("individual__registration_data_import"))
-        )
-        rdi_ids = [x["individual__registration_data_import"] for x in grouped_rdi if x is not None]
-        for rdi in RegistrationDataImport.objects.filter(id__in=rdi_ids).order_by("created_at"):
-            with transaction.atomic():
-                documents_query = Document.objects.filter(
-                    status=Document.STATUS_PENDING, individual__registration_data_import=rdi
-                )
-                HardDocumentDeduplication().deduplicate(
-                    documents_query,
-                    registration_data_import=rdi,
-                )
-                rdi.update_needs_adjudication_tickets_statistic()
-
+        rdi = RegistrationDataImport.objects.get(id=rdi_id)
+        with transaction.atomic():
+            documents_query = Document.objects.filter(
+                status=Document.STATUS_PENDING, individual__registration_data_import=rdi
+            )
+            HardDocumentDeduplication().deduplicate(
+                documents_query,
+                registration_data_import=rdi,
+            )
+            rdi.update_needs_adjudication_tickets_statistic()
     return True
 
 
