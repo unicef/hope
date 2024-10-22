@@ -369,25 +369,6 @@ class ProgramCycle(AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentifiedModel, C
         return total_delivered_usd or Decimal(0.0)
 
     @property
-    def total_entitled_quantity(self) -> Decimal:
-        total_entitled = self.payment_plans.aggregate(total_entitled=Sum("total_entitled_quantity"))["total_entitled"]
-        return total_entitled or Decimal(0.0)
-
-    @property
-    def total_undelivered_quantity(self) -> Decimal:
-        total_undelivered = self.payment_plans.aggregate(total_undelivered=Sum("total_undelivered_quantity"))[
-            "total_undelivered"
-        ]
-        return total_undelivered or Decimal(0.0)
-
-    @property
-    def total_delivered_quantity(self) -> Decimal:
-        total_delivered = self.payment_plans.aggregate(total_delivered=Sum("total_delivered_quantity"))[
-            "total_delivered"
-        ]
-        return total_delivered or Decimal(0.0)
-
-    @property
     def program_start_date(self) -> date:
         return self.program.start_date
 
