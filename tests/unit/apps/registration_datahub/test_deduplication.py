@@ -32,7 +32,6 @@ from hct_mis_api.apps.utils.elasticsearch_utils import (
 )
 from hct_mis_api.apps.utils.querysets import evaluate_qs
 
-
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 
