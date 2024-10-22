@@ -11,12 +11,14 @@ import { PaymentIds } from '../PaymentIds';
 import { ReassignMultipleRoleBox } from '../ReassignMultipleRoleBox';
 import { ReassignRoleBox } from '../ReassignRoleBox';
 import { GrievanceTicketQuery } from '@generated/graphql';
+import { useProgramContext } from 'src/programContext';
 
 export function GrievancesSidebar({
   ticket,
 }: {
   ticket: GrievanceTicketQuery['grievanceTicket'];
 }): React.ReactElement {
+  const { isSocialDctType } = useProgramContext();
   const shouldShowReassignBoxDataChange = (): boolean => {
     let { individual, household } = ticket;
     const { category, issueType, status } = ticket;
@@ -63,12 +65,17 @@ export function GrievancesSidebar({
       }
     }
 
-    return (isHeadOfHousehold || hasRolesToReassign) && isProperDataChange;
+    return (
+      (isHeadOfHousehold || hasRolesToReassign) &&
+      isProperDataChange &&
+      !isSocialDctType
+    );
   };
 
   const shouldShowReassignMultipleBoxDataChange = (): boolean =>
     ticket.category.toString() === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION &&
-    ticket.needsAdjudicationTicketDetails.isMultipleDuplicatesVersion;
+    ticket.needsAdjudicationTicketDetails.isMultipleDuplicatesVersion &&
+    !isSocialDctType;
 
   const renderRightSection = (): React.ReactElement => {
     if (
