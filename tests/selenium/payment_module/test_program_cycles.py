@@ -92,7 +92,7 @@ class TestSmokeProgramCycle:
         assert "Programme Cycles" in pageProgramCycle.getTableTitle().text
         assert "Programme Cycle Title" in pageProgramCycle.getHeadCellProgrammeCyclesTitle().text
         assert "Status" in pageProgramCycle.getHeadCellStatus().text
-        assert "Total Entitled Quantity" in pageProgramCycle.getHeadCellTotalEntitledQuantity().text
+        assert "Total Entitled Quantity (USD)" in pageProgramCycle.getHeadCellTotalEntitledQuantityUSD().text
         assert "Start Date" in pageProgramCycle.getHeadCellStartDate().text
         assert "End Date" in pageProgramCycle.getHeadCellEndDate().text
         assert "Rows per page: 5 1–3 of 3" in pageProgramCycle.getTablePagination().text.replace("\n", " ")
