@@ -102,7 +102,7 @@ class PaymentQuerySet(SoftDeletableQuerySet):
                 Q(parent__program_cycle__end_date__gte=OuterRef("parent__program_cycle__start_date"))
                 | Q(parent__program_cycle__end_date__isnull=True),
                 Q(household=OuterRef("household")) & Q(conflicted=False),
-                ~Q(parent__status=PaymentPlan.Status.OPEN),
+                ~Q(parent__status__in=[PaymentPlan.Status.DRAFT, PaymentPlan.Status.OPEN]),
                 ~Q(status=Payment.STATUS_ERROR),
                 ~Q(status=Payment.STATUS_NOT_DISTRIBUTED),
                 ~Q(status=Payment.STATUS_FORCE_FAILED),
