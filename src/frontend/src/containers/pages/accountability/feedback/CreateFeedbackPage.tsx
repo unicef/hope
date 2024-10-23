@@ -12,7 +12,7 @@ import { Field, Formik } from 'formik';
 import * as React from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import * as Yup from 'yup';
 import {
@@ -48,6 +48,7 @@ import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { FeedbackSteps } from '@utils/constants';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
 const steps = [
   'Category Selection',
@@ -148,6 +149,7 @@ export const validationSchemaWithSteps = (currentStep: number): unknown => {
 
 export function CreateFeedbackPage(): React.ReactElement {
   const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useTranslation();
   const { baseUrl, businessArea, isAllPrograms, programId } = useBaseUrl();
   const permissions = usePermissions();
@@ -229,301 +231,314 @@ export function CreateFeedbackPage(): React.ReactElement {
   );
 
   return (
-    <Formik
-      initialValues={initialValues}
-      onSubmit={async (values) => {
-        if (activeStep === steps.length - 1) {
-          try {
-            const response = await mutate({
-              variables: { input: prepareVariables(values) },
-            });
-            showMessage(t('Feedback created'));
-            navigate(
-              `/${baseUrl}/grievance/feedback/${response.data.createFeedback.feedback.id}`,
-            );
-          } catch (e) {
-            e.graphQLErrors.map((x) => showMessage(x.message));
-          }
-        } else {
-          setValidateData(false);
-          handleNext();
-        }
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'CreateFeedbackPage.tsx');
       }}
-      validateOnChange={activeStep < FeedbackSteps.Verification || validateData}
-      validateOnBlur={activeStep < FeedbackSteps.Verification || validateData}
-      validationSchema={validationSchemaWithSteps(activeStep)}
-      // validate={(values) =>
-      //   validateUsingSteps(values, activeStep, setValidateData)
-      // }
+      componentName="CreateFeedbackPage"
     >
-      {({ submitForm, values, setFieldValue, errors, touched }) => {
-        const isAnonymousTicket =
-          !values.selectedHousehold?.id && !values.selectedIndividual?.id;
-
-        // Set program value based on selected household or individual
-        if (
-          values.selectedHousehold?.program?.id &&
-          values.program !== values.selectedHousehold.program.id
-        ) {
-          setFieldValue('program', values.selectedHousehold.program.id);
-        } else if (
-          values.selectedIndividual?.program?.id &&
-          values.program !== values.selectedIndividual.program.id
-        ) {
-          setFieldValue('program', values.selectedIndividual.program.id);
+      <Formik
+        initialValues={initialValues}
+        onSubmit={async (values) => {
+          if (activeStep === steps.length - 1) {
+            try {
+              const response = await mutate({
+                variables: { input: prepareVariables(values) },
+              });
+              showMessage(t('Feedback created'));
+              navigate(
+                `/${baseUrl}/grievance/feedback/${response.data.createFeedback.feedback.id}`,
+              );
+            } catch (e) {
+              e.graphQLErrors.map((x) => showMessage(x.message));
+            }
+          } else {
+            setValidateData(false);
+            handleNext();
+          }
+        }}
+        validateOnChange={
+          activeStep < FeedbackSteps.Verification || validateData
         }
-        return (
-          <>
-            <PageHeader
-              title="New Feedback"
-              breadCrumbs={
-                hasPermissionInModule(
-                  'GRIEVANCES_FEEDBACK_VIEW_LIST',
-                  permissions,
-                )
-                  ? breadCrumbsItems
-                  : null
-              }
-            />
-            <Grid container spacing={3}>
-              <Grid item xs={12}>
-                <NewTicket>
-                  <InnerBoxPadding>
-                    <ContainerColumnWithBorder>
-                      <NoRootPadding>
-                        <Stepper activeStep={activeStep}>
-                          {steps.map((label) => {
-                            const stepProps: { completed?: boolean } = {};
-                            const labelProps: {
-                              optional?: React.ReactNode;
-                            } = {};
-                            return (
-                              <Step key={label} {...stepProps}>
-                                <StepLabel {...labelProps}>{label}</StepLabel>
-                              </Step>
-                            );
-                          })}
-                        </Stepper>
-                      </NoRootPadding>
-                      {activeStep === FeedbackSteps.Selection && (
-                        <Grid container spacing={3}>
-                          <Grid item xs={6}>
-                            <LabelizedField label={t('Category')}>
-                              {t('Feedback')}
-                            </LabelizedField>
+        validateOnBlur={activeStep < FeedbackSteps.Verification || validateData}
+        validationSchema={validationSchemaWithSteps(activeStep)}
+        // validate={(values) =>
+        //   validateUsingSteps(values, activeStep, setValidateData)
+        // }
+      >
+        {({ submitForm, values, setFieldValue, errors, touched }) => {
+          const isAnonymousTicket =
+            !values.selectedHousehold?.id && !values.selectedIndividual?.id;
+
+          // Set program value based on selected household or individual
+          if (
+            values.selectedHousehold?.program?.id &&
+            values.program !== values.selectedHousehold.program.id
+          ) {
+            setFieldValue('program', values.selectedHousehold.program.id);
+          } else if (
+            values.selectedIndividual?.program?.id &&
+            values.program !== values.selectedIndividual.program.id
+          ) {
+            setFieldValue('program', values.selectedIndividual.program.id);
+          }
+          return (
+            <>
+              <PageHeader
+                title="New Feedback"
+                breadCrumbs={
+                  hasPermissionInModule(
+                    'GRIEVANCES_FEEDBACK_VIEW_LIST',
+                    permissions,
+                  )
+                    ? breadCrumbsItems
+                    : null
+                }
+              />
+              <Grid container spacing={3}>
+                <Grid item xs={12}>
+                  <NewTicket>
+                    <InnerBoxPadding>
+                      <ContainerColumnWithBorder>
+                        <NoRootPadding>
+                          <Stepper activeStep={activeStep}>
+                            {steps.map((label) => {
+                              const stepProps: { completed?: boolean } = {};
+                              const labelProps: {
+                                optional?: React.ReactNode;
+                              } = {};
+                              return (
+                                <Step key={label} {...stepProps}>
+                                  <StepLabel {...labelProps}>{label}</StepLabel>
+                                </Step>
+                              );
+                            })}
+                          </Stepper>
+                        </NoRootPadding>
+                        {activeStep === FeedbackSteps.Selection && (
+                          <Grid container spacing={3}>
+                            <Grid item xs={6}>
+                              <LabelizedField label={t('Category')}>
+                                {t('Feedback')}
+                              </LabelizedField>
+                            </Grid>
+                            <Grid item xs={6}>
+                              <Field
+                                name="issueType"
+                                label="Issue Type"
+                                variant="outlined"
+                                required
+                                choices={choicesData.feedbackIssueTypeChoices}
+                                component={FormikSelectField}
+                                data-cy="input-issue-type"
+                              />
+                            </Grid>
                           </Grid>
-                          <Grid item xs={6}>
-                            <Field
-                              name="issueType"
-                              label="Issue Type"
-                              variant="outlined"
-                              required
-                              choices={choicesData.feedbackIssueTypeChoices}
-                              component={FormikSelectField}
-                              data-cy="input-issue-type"
-                            />
-                          </Grid>
-                        </Grid>
-                      )}
-                      {activeStep === FeedbackSteps.Lookup && (
-                        <BoxWithBorders>
-                          <Box display="flex" flexDirection="column">
-                            <LookUpHouseholdIndividualSelection
-                              values={values}
-                              onValueChange={setFieldValue}
-                              errors={errors}
-                              touched={touched}
-                            />
-                          </Box>
-                        </BoxWithBorders>
-                      )}
-                      {activeStep === FeedbackSteps.Verification && (
-                        <BoxWithBorders>
-                          {values.selectedHousehold && (
-                            <>
-                              {/* //TODO: Optional for now */}
-                              {/* <Typography variant='subtitle1'>
+                        )}
+                        {activeStep === FeedbackSteps.Lookup && (
+                          <BoxWithBorders>
+                            <Box display="flex" flexDirection="column">
+                              <LookUpHouseholdIndividualSelection
+                                values={values}
+                                onValueChange={setFieldValue}
+                                errors={errors}
+                                touched={touched}
+                              />
+                            </Box>
+                          </BoxWithBorders>
+                        )}
+                        {activeStep === FeedbackSteps.Verification && (
+                          <BoxWithBorders>
+                            {values.selectedHousehold && (
+                              <>
+                                {/* //TODO: Optional for now */}
+                                {/* <Typography variant='subtitle1'>
                                 {t(
                                   'Select correctly answered questions (minimum 5)',
                                 )}
                               </Typography> */}
-                              <Box py={4}>
+                                <Box py={4}>
+                                  <Typography variant="subtitle2">
+                                    {t('Household Questionnaire')}
+                                  </Typography>
+                                  <Box py={4}>
+                                    <HouseholdQuestionnaire values={values} />
+                                  </Box>
+                                </Box>
                                 <Typography variant="subtitle2">
-                                  {t('Household Questionnaire')}
+                                  {t('Individual Questionnaire')}
                                 </Typography>
                                 <Box py={4}>
-                                  <HouseholdQuestionnaire values={values} />
+                                  <IndividualQuestionnaire values={values} />
                                 </Box>
+                                <BoxWithBorderBottom />
+                              </>
+                            )}
+                            <Consent />
+                            <Field
+                              name="consent"
+                              label={t('Received Consent')}
+                              color="primary"
+                              fullWidth
+                              required
+                              container={false}
+                              component={FormikCheckboxField}
+                              data-cy="input-consent"
+                            />
+                          </BoxWithBorders>
+                        )}
+                        {activeStep === steps.length - 1 && (
+                          <BoxPadding>
+                            <OverviewContainer>
+                              <Box p={6}>
+                                <Grid container spacing={6}>
+                                  <Grid item xs={6}>
+                                    <LabelizedField label={t('Category')}>
+                                      {t('Feedback')}
+                                    </LabelizedField>
+                                  </Grid>
+                                  <Grid item xs={6}>
+                                    <LabelizedField label={t('Issue Type')}>
+                                      {values.issueType ===
+                                      FeedbackIssueType.PositiveFeedback
+                                        ? 'Positive Feedback'
+                                        : 'Negative Feedback'}
+                                    </LabelizedField>
+                                  </Grid>
+                                  <Grid item xs={6}>
+                                    <LabelizedField label={t('Household')}>
+                                      {values.selectedHousehold?.unicefId}
+                                    </LabelizedField>
+                                  </Grid>
+                                  <Grid item xs={6}>
+                                    <LabelizedField label={t('Individual')}>
+                                      {values.selectedIndividual?.unicefId}
+                                    </LabelizedField>
+                                  </Grid>
+                                </Grid>
                               </Box>
-                              <Typography variant="subtitle2">
-                                {t('Individual Questionnaire')}
-                              </Typography>
-                              <Box py={4}>
-                                <IndividualQuestionnaire values={values} />
-                              </Box>
-                              <BoxWithBorderBottom />
-                            </>
-                          )}
-                          <Consent />
-                          <Field
-                            name="consent"
-                            label={t('Received Consent')}
-                            color="primary"
-                            fullWidth
-                            required
-                            container={false}
-                            component={FormikCheckboxField}
-                            data-cy="input-consent"
-                          />
-                        </BoxWithBorders>
-                      )}
-                      {activeStep === steps.length - 1 && (
-                        <BoxPadding>
-                          <OverviewContainer>
-                            <Box p={6}>
-                              <Grid container spacing={6}>
-                                <Grid item xs={6}>
-                                  <LabelizedField label={t('Category')}>
-                                    {t('Feedback')}
-                                  </LabelizedField>
-                                </Grid>
-                                <Grid item xs={6}>
-                                  <LabelizedField label={t('Issue Type')}>
-                                    {values.issueType ===
-                                    FeedbackIssueType.PositiveFeedback
-                                      ? 'Positive Feedback'
-                                      : 'Negative Feedback'}
-                                  </LabelizedField>
-                                </Grid>
-                                <Grid item xs={6}>
-                                  <LabelizedField label={t('Household')}>
-                                    {values.selectedHousehold?.unicefId}
-                                  </LabelizedField>
-                                </Grid>
-                                <Grid item xs={6}>
-                                  <LabelizedField label={t('Individual')}>
-                                    {values.selectedIndividual?.unicefId}
-                                  </LabelizedField>
-                                </Grid>
+                            </OverviewContainer>
+                            <BoxWithBorderBottom />
+                            <BoxPadding />
+                            <Grid container spacing={3}>
+                              <Grid item xs={12}>
+                                <Field
+                                  name="description"
+                                  multiline
+                                  fullWidth
+                                  variant="outlined"
+                                  label={t('Description')}
+                                  required
+                                  component={FormikTextField}
+                                  data-cy="input-description"
+                                />
                               </Grid>
-                            </Box>
-                          </OverviewContainer>
-                          <BoxWithBorderBottom />
-                          <BoxPadding />
-                          <Grid container spacing={3}>
-                            <Grid item xs={12}>
-                              <Field
-                                name="description"
-                                multiline
-                                fullWidth
-                                variant="outlined"
-                                label={t('Description')}
-                                required
-                                component={FormikTextField}
-                                data-cy="input-description"
-                              />
+                              <Grid item xs={12}>
+                                <Field
+                                  name="comments"
+                                  multiline
+                                  fullWidth
+                                  variant="outlined"
+                                  label={t('Comments')}
+                                  component={FormikTextField}
+                                  data-cy="input-comments"
+                                />
+                              </Grid>
+                              <Grid item xs={6}>
+                                <Field
+                                  name="admin2"
+                                  variant="outlined"
+                                  component={FormikAdminAreaAutocomplete}
+                                  dataCy="input-admin2"
+                                  disabled={Boolean(
+                                    values.selectedHousehold?.admin2,
+                                  )}
+                                />
+                              </Grid>
+                              <Grid item xs={6}>
+                                <Field
+                                  name="area"
+                                  fullWidth
+                                  variant="outlined"
+                                  label={t('Area / Village / Pay point')}
+                                  component={FormikTextField}
+                                  data-cy="input-area"
+                                />
+                              </Grid>
+                              <Grid item xs={6}>
+                                <Field
+                                  name="language"
+                                  multiline
+                                  fullWidth
+                                  variant="outlined"
+                                  label={t('Languages Spoken')}
+                                  component={FormikTextField}
+                                  data-cy="input-languages"
+                                />
+                              </Grid>
+                              <Grid item xs={3}>
+                                <Field
+                                  name="program"
+                                  label={t('Programme Name')}
+                                  fullWidth
+                                  variant="outlined"
+                                  choices={mappedProgramChoices}
+                                  component={FormikSelectField}
+                                  disabled={
+                                    !isAllPrograms || !isAnonymousTicket
+                                  }
+                                />
+                              </Grid>
                             </Grid>
-                            <Grid item xs={12}>
-                              <Field
-                                name="comments"
-                                multiline
-                                fullWidth
-                                variant="outlined"
-                                label={t('Comments')}
-                                component={FormikTextField}
-                                data-cy="input-comments"
-                              />
-                            </Grid>
-                            <Grid item xs={6}>
-                              <Field
-                                name="admin2"
-                                variant="outlined"
-                                component={FormikAdminAreaAutocomplete}
-                                dataCy="input-admin2"
-                                disabled={Boolean(
-                                  values.selectedHousehold?.admin2,
-                                )}
-                              />
-                            </Grid>
-                            <Grid item xs={6}>
-                              <Field
-                                name="area"
-                                fullWidth
-                                variant="outlined"
-                                label={t('Area / Village / Pay point')}
-                                component={FormikTextField}
-                                data-cy="input-area"
-                              />
-                            </Grid>
-                            <Grid item xs={6}>
-                              <Field
-                                name="language"
-                                multiline
-                                fullWidth
-                                variant="outlined"
-                                label={t('Languages Spoken')}
-                                component={FormikTextField}
-                                data-cy="input-languages"
-                              />
-                            </Grid>
-                            <Grid item xs={3}>
-                              <Field
-                                name="program"
-                                label={t('Programme Name')}
-                                fullWidth
-                                variant="outlined"
-                                choices={mappedProgramChoices}
-                                component={FormikSelectField}
-                                disabled={!isAllPrograms || !isAnonymousTicket}
-                              />
-                            </Grid>
-                          </Grid>
-                        </BoxPadding>
-                      )}
-                      {errors.verificationRequired ? (
-                        <FormHelperText error>
-                          {errors.verificationRequired}
-                        </FormHelperText>
-                      ) : null}
-                      <Box pt={3} display="flex" flexDirection="row">
-                        <Box mr={3}>
-                          <Button
-                            component={Link}
-                            to={`/${baseUrl}/grievance/feedback`}
-                            data-cy="button-cancel"
-                          >
-                            {t('Cancel')}
-                          </Button>
+                          </BoxPadding>
+                        )}
+                        {errors.verificationRequired ? (
+                          <FormHelperText error>
+                            {errors.verificationRequired}
+                          </FormHelperText>
+                        ) : null}
+                        <Box pt={3} display="flex" flexDirection="row">
+                          <Box mr={3}>
+                            <Button
+                              component={Link}
+                              to={`/${baseUrl}/grievance/feedback`}
+                              data-cy="button-cancel"
+                            >
+                              {t('Cancel')}
+                            </Button>
+                          </Box>
+                          <Box display="flex" ml="auto">
+                            <Button
+                              disabled={activeStep === 0}
+                              onClick={handleBack}
+                              data-cy="button-back"
+                            >
+                              {t('Back')}
+                            </Button>
+                            <LoadingButton
+                              loading={loading}
+                              color="primary"
+                              variant="contained"
+                              onClick={submitForm}
+                              data-cy="button-submit"
+                            >
+                              {activeStep === steps.length - 1
+                                ? t('Save')
+                                : t('Next')}
+                            </LoadingButton>
+                          </Box>
                         </Box>
-                        <Box display="flex" ml="auto">
-                          <Button
-                            disabled={activeStep === 0}
-                            onClick={handleBack}
-                            data-cy="button-back"
-                          >
-                            {t('Back')}
-                          </Button>
-                          <LoadingButton
-                            loading={loading}
-                            color="primary"
-                            variant="contained"
-                            onClick={submitForm}
-                            data-cy="button-submit"
-                          >
-                            {activeStep === steps.length - 1
-                              ? t('Save')
-                              : t('Next')}
-                          </LoadingButton>
-                        </Box>
-                      </Box>
-                    </ContainerColumnWithBorder>
-                  </InnerBoxPadding>
-                </NewTicket>
+                      </ContainerColumnWithBorder>
+                    </InnerBoxPadding>
+                  </NewTicket>
+                </Grid>
               </Grid>
-            </Grid>
-          </>
-        );
-      }}
-    </Formik>
+            </>
+          );
+        }}
+      </Formik>
+    </UniversalErrorBoundary>
   );
 }

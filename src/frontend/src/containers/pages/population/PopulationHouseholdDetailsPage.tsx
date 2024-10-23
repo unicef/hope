@@ -32,6 +32,7 @@ import { HouseholdCompositionTable } from '../../tables/population/HouseholdComp
 import { AdminButton } from '@core/AdminButton';
 import { CollectorsTable } from '@containers/tables/population/CollectorsTable';
 import { HouseholdMembersTable } from '@containers/tables/population/HouseholdMembersTable';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
 const Container = styled.div`
   padding: 20px;
@@ -115,7 +116,14 @@ export const PopulationHouseholdDetailsPage = (): React.ReactElement => {
   const { household } = data;
 
   return (
-    <>
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'PopulationHouseholdDetailsPage.tsx');
+      }}
+      componentName="PopulationHouseholdDetailsPage"
+    >
       <PageHeader
         title={`${t('Household ID')}: ${renderSomethingOrDash(
           household?.unicefId,
@@ -261,6 +269,6 @@ export const PopulationHouseholdDetailsPage = (): React.ReactElement => {
       {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
         <UniversalActivityLogTable objectId={data.household?.id} />
       )}
-    </>
+    </UniversalErrorBoundary>
   );
 };
