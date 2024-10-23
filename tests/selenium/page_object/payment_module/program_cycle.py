@@ -19,7 +19,7 @@ class ProgramCyclePage(BaseComponents):
     headCellProgrammeCyclesTitle = 'th[data-cy="head-cell-programme-cycles-title"]'
     headCellStatus = 'th[data-cy="head-cell-status"]'
     headCellTotalEntitledQuantity = 'th[data-cy="head-cell-total-entitled-quantity"]'
-    headCellTotalEntitledQuantityUSD = 'th[data-cy="head-cell-total-entitled-quantity_usd"]'
+    headCellTotalEntitledQuantityUSD = 'th[data-cy="head-cell-total-entitled-quantity-usd"]'
     headCellStartDate = 'th[data-cy="head-cell-start-date"]'
     headCellEndDate = 'th[data-cy="head-cell-end-date"]'
     headCellEmpty = 'th[data-cy="head-cell-empty"]'
