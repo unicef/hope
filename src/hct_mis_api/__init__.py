@@ -7,7 +7,6 @@ import tomli
 
 
 def get_full_version() -> str:
-    return "3.3"
     try:
         # works in dist image
         version = importlib.metadata.version("hope")
