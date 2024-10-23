@@ -6,7 +6,6 @@ from django.db.models import QuerySet
 from django.http import FileResponse
 
 from constance import config
-from django.http import FileResponse
 from django_filters import rest_framework as filters
 from rest_framework import mixins, status
 from rest_framework.decorators import action
