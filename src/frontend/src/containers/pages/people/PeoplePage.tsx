@@ -1,38 +1,50 @@
-import { Box } from '@mui/material';
 import * as React from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
-import { useHouseholdChoiceDataQuery } from '@generated/graphql';
+import {
+  useHouseholdChoiceDataQuery,
+  useIndividualChoiceDataQuery,
+} from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
-import { HouseholdFilters } from '@components/population/HouseholdFilter';
-import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
+import { PeriodicDataUpdates } from '@components/periodicDataUpdates/PeriodicDataUpdates'; // Import PeriodicDataUpdates component
+import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { getFilterFromQueryParams } from '@utils/utils';
-import { HouseholdTable } from '../../tables/population/HouseholdTable';
+import { PeopleListTable } from '@containers/tables/people/PeopleListTable';
+import { PeopleFilter } from '@components/people/PeopleFilter';
+import { Box, Tabs, Tab, Fade, Tooltip } from '@mui/material';
+import { useProgramContext } from 'src/programContext';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
-export function PeoplePage(): React.ReactElement {
+export const PeoplePage = (): React.ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
-  const { data: choicesData, loading: choicesLoading } =
-    useHouseholdChoiceDataQuery({
-      fetchPolicy: 'cache-first',
-    });
+  const { programHasPdu } = useProgramContext();
+  const { businessArea } = useBaseUrl();
+  const isNewTemplateJustCreated =
+    location.state?.isNewTemplateJustCreated || false;
+  const permissions = usePermissions();
+  const { data: householdChoicesData, loading: householdChoicesLoading } =
+    useHouseholdChoiceDataQuery();
+
   const initialFilter = {
     search: '',
-    documentType: choicesData?.documentTypeChoices?.[0]?.value,
+    documentType: householdChoicesData?.documentTypeChoices?.[0].value,
     documentNumber: '',
-    residenceStatus: '',
     admin1: '',
     admin2: '',
-    householdSizeMin: '',
-    householdSizeMax: '',
+    sex: '',
+    ageMin: '',
+    ageMax: '',
+    flags: [],
     orderBy: 'unicef_id',
-    withdrawn: '',
+    status: '',
+    lastRegistrationDateMin: '',
+    lastRegistrationDateMax: '',
   };
 
   const [filter, setFilter] = useState(
@@ -42,16 +54,23 @@ export function PeoplePage(): React.ReactElement {
     getFilterFromQueryParams(location, initialFilter),
   );
 
-  const { businessArea } = useBaseUrl();
-  const permissions = usePermissions();
+  const [currentTab, setCurrentTab] = useState(
+    isNewTemplateJustCreated ? 1 : 0,
+  );
 
-  if (choicesLoading) return <LoadingComponent />;
-  if (permissions === null) return null;
+  const { data: individualChoicesData, loading: individualChoicesLoading } =
+    useIndividualChoiceDataQuery();
 
-  if (!hasPermissions(PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_LIST, permissions))
+  if (householdChoicesLoading || individualChoicesLoading)
+    return <LoadingComponent />;
+
+  if (!individualChoicesData || !householdChoicesData || permissions === null)
+    return null;
+
+  if (
+    !hasPermissions(PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_LIST, permissions)
+  )
     return <PermissionDenied />;
-
-  if (!choicesData) return null;
 
   return (
     <UniversalErrorBoundary
@@ -62,32 +81,72 @@ export function PeoplePage(): React.ReactElement {
       }}
       componentName="PeoplePage"
     >
-      <>
-        <PageHeader title={t('People')} />
-        <HouseholdFilters
-          filter={filter}
-          choicesData={choicesData}
-          setFilter={setFilter}
-          initialFilter={initialFilter}
-          appliedFilter={appliedFilter}
-          setAppliedFilter={setAppliedFilter}
-        />
-        <Box
-          display="flex"
-          flexDirection="column"
-          data-cy="page-details-container"
-        >
-          <HouseholdTable
-            filter={appliedFilter}
-            businessArea={businessArea}
-            choicesData={choicesData}
-            canViewDetails={hasPermissions(
-              PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
-              permissions,
+      <PageHeader
+        title={t('People')}
+        tabs={
+          <Tabs
+            value={currentTab}
+            onChange={(_, newValue) => {
+              setCurrentTab(newValue);
+            }}
+          >
+            <Tab data-cy="tab-individuals" label="Individuals" />
+            {!programHasPdu ? (
+              <Tooltip
+                title={t(
+                  'Programme does not have defined fields for periodic updates',
+                )}
+              >
+                <span>
+                  <Tab
+                    disabled={!programHasPdu}
+                    data-cy="tab-periodic-data-updates"
+                    label="Periodic Data Updates"
+                  />
+                </span>
+              </Tooltip>
+            ) : (
+              <Tab
+                disabled={!programHasPdu}
+                data-cy="tab-periodic-data-updates"
+                label="Periodic Data Updates"
+              />
             )}
-          />
+          </Tabs>
+        }
+      />
+      <Fade in={true} timeout={500} key={currentTab}>
+        <Box>
+          {currentTab === 0 ? (
+            <>
+              <PeopleFilter
+                filter={filter}
+                choicesData={individualChoicesData}
+                setFilter={setFilter}
+                initialFilter={initialFilter}
+                appliedFilter={appliedFilter}
+                setAppliedFilter={setAppliedFilter}
+              />
+              <Box
+                display="flex"
+                flexDirection="column"
+                data-cy="page-details-container"
+              >
+                <PeopleListTable
+                  filter={appliedFilter}
+                  businessArea={businessArea}
+                  canViewDetails={hasPermissions(
+                    PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_DETAILS,
+                    permissions,
+                  )}
+                />
+              </Box>
+            </>
+          ) : (
+            <PeriodicDataUpdates />
+          )}
         </Box>
-      </>
+      </Fade>
     </UniversalErrorBoundary>
   );
-}
+};

@@ -124,7 +124,6 @@ export const PopulationHouseholdDetailsPage = (): React.ReactElement => {
       }}
       componentName="PopulationHouseholdDetailsPage"
     >
-      {' '}
       <PageHeader
         title={`${t('Household ID')}: ${renderSomethingOrDash(
           household?.unicefId,
