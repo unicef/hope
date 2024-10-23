@@ -83,8 +83,9 @@ def household_without_disabilities() -> Household:
 
 @pytest.fixture
 def household_social_worker() -> Household:
-    yield create_custom_household(observed_disability=[], program_name="Social Program",
-                                  dct_type=DataCollectingType.Type.SOCIAL)
+    yield create_custom_household(
+        observed_disability=[], program_name="Social Program", dct_type=DataCollectingType.Type.SOCIAL
+    )
 
 
 @pytest.fixture
@@ -122,7 +123,7 @@ def social_worker_program() -> Program:
 
 
 def create_program(
-        name: str, dct_type: str = DataCollectingType.Type.STANDARD, status: str = Program.ACTIVE
+    name: str, dct_type: str = DataCollectingType.Type.STANDARD, status: str = Program.ACTIVE
 ) -> Program:
     BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
     dct = DataCollectingTypeFactory(type=dct_type)
@@ -136,10 +137,12 @@ def create_program(
     return program
 
 
-def create_custom_household(observed_disability: list[str],
-                            residence_status: str = HOST,
-                            program_name: str = "Test Program",
-                            dct_type: str = DataCollectingType.Type.STANDARD) -> Household:
+def create_custom_household(
+    observed_disability: list[str],
+    residence_status: str = HOST,
+    program_name: str = "Test Program",
+    dct_type: str = DataCollectingType.Type.STANDARD,
+) -> Household:
     program = get_program_with_dct_type_and_name(program_name, "1234", dct_type=dct_type)
     household, _ = create_household_and_individuals(
         household_data={
@@ -184,17 +187,17 @@ def add_grievance_needs_adjudication() -> None:
 
 
 def generate_grievance(
-        unicef_id: str = "GRV-0000001",
-        status: int = GrievanceTicket.STATUS_NEW,
-        category: int = GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
-        created_by: Optional[User] = None,
-        assigned_to: Optional[User] = None,
-        business_area: Optional[BusinessArea] = None,
-        priority: int = 1,
-        urgency: int = 1,
-        household_unicef_id: str = "HH-20-0000.0001",
-        updated_at: str = "2023-09-27T11:26:33.846Z",
-        created_at: str = "2022-04-30T09:54:07.827000",
+    unicef_id: str = "GRV-0000001",
+    status: int = GrievanceTicket.STATUS_NEW,
+    category: int = GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+    created_by: Optional[User] = None,
+    assigned_to: Optional[User] = None,
+    business_area: Optional[BusinessArea] = None,
+    priority: int = 1,
+    urgency: int = 1,
+    household_unicef_id: str = "HH-20-0000.0001",
+    updated_at: str = "2023-09-27T11:26:33.846Z",
+    created_at: str = "2022-04-30T09:54:07.827000",
 ) -> GrievanceTicket:
     created_by = User.objects.first() if created_by is None else created_by
     assigned_to = User.objects.first() if assigned_to is None else assigned_to
@@ -291,25 +294,24 @@ def create_four_grievance_tickets() -> [GrievanceTicket]:
 
 @pytest.fixture
 def create_grievance_tickets_social_program() -> GrievanceTicket:
-    grievance = create_grievance_referral(assigned_to="",
-                                          household_unicef_id=Household.objects.filter(unicef_id="HH-20-0000.0001"))
+    grievance = create_grievance_referral(assigned_to="", household_unicef_id="HH-20-0000.0001")
     grievance.programs.add(Program.objects.filter(name="Social Program").first())
     grievance.save()
     yield grievance
 
 
 def create_grievance_referral(
-        unicef_id: str = "GRV-0000001",
-        status: int = GrievanceTicket.STATUS_NEW,
-        category: int = GrievanceTicket.CATEGORY_REFERRAL,
-        created_by: User | None = None,
-        assigned_to: User | None | str = None,
-        business_area: BusinessArea | None = None,
-        priority: int = 1,
-        urgency: int = 1,
-        household_unicef_id: str = "HH-20-0000.0001",
-        updated_at: str = "2023-09-27T11:26:33.846Z",
-        created_at: str = "2022-04-30T09:54:07.827000",
+    unicef_id: str = "GRV-0000001",
+    status: int = GrievanceTicket.STATUS_NEW,
+    category: int = GrievanceTicket.CATEGORY_REFERRAL,
+    created_by: User | None = None,
+    assigned_to: User | None | str = None,
+    business_area: BusinessArea | None = None,
+    priority: int = 1,
+    urgency: int = 1,
+    household_unicef_id: str = "HH-20-0000.0001",
+    updated_at: str = "2023-09-27T11:26:33.846Z",
+    created_at: str = "2022-04-30T09:54:07.827000",
 ) -> GrievanceTicket:
     created_by = User.objects.first() if created_by is None else created_by
     business_area = BusinessArea.objects.filter(slug="afghanistan").first() if business_area is None else business_area
@@ -340,7 +342,7 @@ def create_grievance_referral(
     from hct_mis_api.apps.grievance.models import TicketReferralDetails
 
     TicketReferralDetails.objects.create(
-        ticket=grievance_ticket,
+        ticket=grievance_ticket, individual=Individual.objects.filter(unicef_id="IND-00-0000.0011").first()
     )
 
     return grievance_ticket
@@ -349,11 +351,11 @@ def create_grievance_referral(
 @pytest.mark.usefixtures("login")
 class TestSmokeGrievanceTickets:
     def test_check_grievance_tickets_user_generated_page(
-            self,
-            create_programs: None,
-            add_households: None,
-            add_grievance: None,
-            pageGrievanceTickets: GrievanceTickets,
+        self,
+        create_programs: None,
+        add_households: None,
+        add_grievance: None,
+        pageGrievanceTickets: GrievanceTickets,
     ) -> None:
         """
         Go to Grievance tickets user generated page
@@ -387,11 +389,11 @@ class TestSmokeGrievanceTickets:
         assert expected_labels == [i.text for i in pageGrievanceTickets.getTableLabel()]
 
     def test_check_grievance_tickets_system_generated_page(
-            self,
-            create_programs: None,
-            add_households: None,
-            add_grievance: None,
-            pageGrievanceTickets: GrievanceTickets,
+        self,
+        create_programs: None,
+        add_households: None,
+        add_grievance: None,
+        pageGrievanceTickets: GrievanceTickets,
     ) -> None:
         """
         Go to Grievance tickets system generated page
@@ -411,12 +413,12 @@ class TestSmokeGrievanceTickets:
         assert "NEW TICKET" in pageGrievanceTickets.getButtonNewTicket().text
 
     def test_check_grievance_tickets_details_page(
-            self,
-            create_programs: None,
-            add_households: None,
-            add_grievance: None,
-            pageGrievanceTickets: GrievanceTickets,
-            pageGrievanceDetailsPage: GrievanceDetailsPage,
+        self,
+        create_programs: None,
+        add_households: None,
+        add_grievance: None,
+        pageGrievanceTickets: GrievanceTickets,
+        pageGrievanceDetailsPage: GrievanceDetailsPage,
     ) -> None:
         """
         Go to Grievance tickets details page
@@ -448,12 +450,12 @@ class TestSmokeGrievanceTickets:
         assert "ADD NEW NOTE" in pageGrievanceDetailsPage.getButtonNewNote().text
 
     def test_check_grievance_tickets_details_page_normal_program(
-            self,
-            create_programs: None,
-            add_households: None,
-            add_grievance: None,
-            pageGrievanceTickets: GrievanceTickets,
-            pageGrievanceDetailsPage: GrievanceDetailsPage,
+        self,
+        create_programs: None,
+        add_households: None,
+        add_grievance: None,
+        pageGrievanceTickets: GrievanceTickets,
+        pageGrievanceDetailsPage: GrievanceDetailsPage,
     ) -> None:
         """
         Go to Grievance tickets details page
@@ -487,18 +489,17 @@ class TestSmokeGrievanceTickets:
         assert "ADD NEW NOTE" in pageGrievanceDetailsPage.getButtonNewNote().text
 
     def test_check_grievance_tickets_details_page_social_worker_program(
-            self,
-            household_social_worker: Household,
-            create_grievance_tickets_social_program: GrievanceTicket,
-            pageGrievanceTickets: GrievanceTickets,
-            pageGrievanceDetailsPage: GrievanceDetailsPage,
+        self,
+        household_social_worker: Household,
+        create_grievance_tickets_social_program: GrievanceTicket,
+        pageGrievanceTickets: GrievanceTickets,
+        pageGrievanceDetailsPage: GrievanceDetailsPage,
     ) -> None:
         """
         Go to Grievance tickets details page
         Check if all elements on page exist
         """
         pageGrievanceTickets.selectGlobalProgramFilter("Social Program")
-        grievance = create_grievance_tickets_social_program
         # Go to Grievance Tickets
         pageGrievanceTickets.getNavGrievance().click()
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
@@ -512,16 +513,16 @@ class TestSmokeGrievanceTickets:
         assert "Very urgent" in pageGrievanceDetailsPage.getLabelUrgency().text
         assert "Referral" in pageGrievanceDetailsPage.getTicketCategory().text
         assert "Social Program" in pageGrievanceDetailsPage.getLabelProgramme().text
-        assert "HH-20-0000.0002" in pageGrievanceDetailsPage.getTicketTargetID().text
+        assert "IND-00-0000.0011" in pageGrievanceDetailsPage.getTicketTargetID().text
 
 
 @pytest.mark.usefixtures("login")
 class TestGrievanceTicketsHappyPath:
     def test_grievance_tickets_create_new_ticket_referral(
-            self,
-            pageGrievanceTickets: GrievanceTickets,
-            pageGrievanceNewTicket: NewTicket,
-            pageGrievanceDetailsPage: GrievanceDetailsPage,
+        self,
+        pageGrievanceTickets: GrievanceTickets,
+        pageGrievanceNewTicket: NewTicket,
+        pageGrievanceDetailsPage: GrievanceDetailsPage,
     ) -> None:
         pageGrievanceTickets.getNavGrievance().click()
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
@@ -576,12 +577,12 @@ class TestGrievanceTickets:
         ],
     )
     def test_grievance_tickets_create_new_tickets(
-            self,
-            pageGrievanceTickets: GrievanceTickets,
-            pageGrievanceNewTicket: NewTicket,
-            pageGrievanceDetailsPage: GrievanceDetailsPage,
-            test_data: dict,
-            household_without_disabilities: Household,
+        self,
+        pageGrievanceTickets: GrievanceTickets,
+        pageGrievanceNewTicket: NewTicket,
+        pageGrievanceDetailsPage: GrievanceDetailsPage,
+        test_data: dict,
+        household_without_disabilities: Household,
     ) -> None:
         pageGrievanceTickets.getNavGrievance().click()
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
@@ -613,12 +614,28 @@ class TestGrievanceTickets:
         assert "Not set" in pageGrievanceDetailsPage.getTicketPriority().text
         assert "Not set" in pageGrievanceDetailsPage.getTicketUrgency().text
 
+    def test_grievance_tickets_create_new_tickets_social_program(
+        self,
+        pageGrievanceTickets: GrievanceTickets,
+        pageGrievanceNewTicket: NewTicket,
+        pageGrievanceDetailsPage: GrievanceDetailsPage,
+        test_data: dict,
+        household_social_worker: Household,
+    ) -> None:
+        pageGrievanceTickets.getNavGrievance().click()
+        assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
+        pageGrievanceTickets.getButtonNewTicket().click()
+        pageGrievanceNewTicket.getSelectCategory().click()
+        pageGrievanceNewTicket.select_option_by_name(test_data["category"])
+        pageGrievanceNewTicket.getIssueType().click()
+        pageGrievanceNewTicket.select_listbox_element(test_data["type"])
+
     def test_grievance_tickets_create_new_ticket_Data_Change_Add_Individual_All_Fields(
-            self,
-            pageGrievanceTickets: GrievanceTickets,
-            pageGrievanceNewTicket: NewTicket,
-            pageGrievanceDetailsPage: GrievanceDetailsPage,
-            household_without_disabilities: Household,
+        self,
+        pageGrievanceTickets: GrievanceTickets,
+        pageGrievanceNewTicket: NewTicket,
+        pageGrievanceDetailsPage: GrievanceDetailsPage,
+        household_without_disabilities: Household,
     ) -> None:
         pageGrievanceTickets.getNavGrievance().click()
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
@@ -687,11 +704,11 @@ class TestGrievanceTickets:
         assert "Not set" in pageGrievanceDetailsPage.getTicketUrgency().text
 
     def test_grievance_tickets_create_new_ticket_Data_Change_Add_Individual_Mandatory_Fields(
-            self,
-            pageGrievanceTickets: GrievanceTickets,
-            pageGrievanceNewTicket: NewTicket,
-            pageGrievanceDetailsPage: GrievanceDetailsPage,
-            household_without_disabilities: Household,
+        self,
+        pageGrievanceTickets: GrievanceTickets,
+        pageGrievanceNewTicket: NewTicket,
+        pageGrievanceDetailsPage: GrievanceDetailsPage,
+        household_without_disabilities: Household,
     ) -> None:
         pageGrievanceTickets.getNavGrievance().click()
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
@@ -757,12 +774,12 @@ class TestGrievanceTickets:
         ],
     )
     def test_hh_grievance_tickets_create_new_ticket(
-            self,
-            pageGrievanceTickets: GrievanceTickets,
-            pageGrievanceNewTicket: NewTicket,
-            pageGrievanceDetailsPage: GrievanceDetailsPage,
-            household_without_disabilities: Household,
-            test_data: dict,
+        self,
+        pageGrievanceTickets: GrievanceTickets,
+        pageGrievanceNewTicket: NewTicket,
+        pageGrievanceDetailsPage: GrievanceDetailsPage,
+        household_without_disabilities: Household,
+        test_data: dict,
     ) -> None:
         pageGrievanceTickets.getNavGrievance().click()
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
@@ -800,12 +817,12 @@ class TestGrievanceTickets:
         ],
     )
     def test_grievance_tickets_create_new_ticket(
-            self,
-            pageGrievanceTickets: GrievanceTickets,
-            pageGrievanceNewTicket: NewTicket,
-            pageGrievanceDetailsPage: GrievanceDetailsPage,
-            household_without_disabilities: Household,
-            test_data: dict,
+        self,
+        pageGrievanceTickets: GrievanceTickets,
+        pageGrievanceNewTicket: NewTicket,
+        pageGrievanceDetailsPage: GrievanceDetailsPage,
+        household_without_disabilities: Household,
+        test_data: dict,
     ) -> None:
         pageGrievanceTickets.getNavGrievance().click()
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
@@ -848,11 +865,11 @@ class TestGrievanceTickets:
         assert "English" in row1[-1]
 
     def test_grievance_tickets_create_new_tickets_Grievance_Complaint_Partner_Related_Complaint(
-            self,
-            pageGrievanceTickets: GrievanceTickets,
-            pageGrievanceNewTicket: NewTicket,
-            pageGrievanceDetailsPage: GrievanceDetailsPage,
-            household_without_disabilities: Household,
+        self,
+        pageGrievanceTickets: GrievanceTickets,
+        pageGrievanceNewTicket: NewTicket,
+        pageGrievanceDetailsPage: GrievanceDetailsPage,
+        household_without_disabilities: Household,
     ) -> None:
         pageGrievanceTickets.getNavGrievance().click()
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
@@ -875,11 +892,11 @@ class TestGrievanceTickets:
         assert "UNICEF" in pageGrievanceDetailsPage.getLabelPartner().text
 
     def test_grievance_tickets_create_new_tickets_Grievance_Complaint_Payment_Related_Complaint(
-            self,
-            pageGrievanceTickets: GrievanceTickets,
-            pageGrievanceNewTicket: NewTicket,
-            pageGrievanceDetailsPage: GrievanceDetailsPage,
-            hh_with_payment_record: PaymentRecord,
+        self,
+        pageGrievanceTickets: GrievanceTickets,
+        pageGrievanceNewTicket: NewTicket,
+        pageGrievanceDetailsPage: GrievanceDetailsPage,
+        hh_with_payment_record: PaymentRecord,
     ) -> None:
         payment_id = PaymentRecord.objects.first().unicef_id
         pageGrievanceTickets.getNavGrievance().click()
@@ -906,12 +923,12 @@ class TestGrievanceTickets:
         assert payment_id in pageGrievanceDetailsPage.getTicketPaymentLabel().text
 
     def test_grievance_tickets_look_up_linked_ticket(
-            self,
-            pageGrievanceTickets: GrievanceTickets,
-            pageGrievanceNewTicket: NewTicket,
-            pageGrievanceDetailsPage: GrievanceDetailsPage,
-            household_without_disabilities: Household,
-            add_grievance_tickets: GrievanceTicket,
+        self,
+        pageGrievanceTickets: GrievanceTickets,
+        pageGrievanceNewTicket: NewTicket,
+        pageGrievanceDetailsPage: GrievanceDetailsPage,
+        household_without_disabilities: Household,
+        add_grievance_tickets: GrievanceTicket,
     ) -> None:
         linked_ticket = GrievanceTicket.objects.first().unicef_id
         pageGrievanceTickets.getNavGrievance().click()
@@ -942,11 +959,11 @@ class TestGrievanceTickets:
         assert linked_ticket in pageGrievanceDetailsPage.getLabelTickets().text
 
     def test_grievance_tickets_add_documentation(
-            self,
-            pageGrievanceTickets: GrievanceTickets,
-            pageGrievanceNewTicket: NewTicket,
-            pageGrievanceDetailsPage: GrievanceDetailsPage,
-            household_without_disabilities: Household,
+        self,
+        pageGrievanceTickets: GrievanceTickets,
+        pageGrievanceNewTicket: NewTicket,
+        pageGrievanceDetailsPage: GrievanceDetailsPage,
+        household_without_disabilities: Household,
     ) -> None:
         pageGrievanceTickets.getNavGrievance().click()
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
@@ -970,11 +987,11 @@ class TestGrievanceTickets:
         assert "example" in pageGrievanceDetailsPage.getLinkShowPhoto().text
 
     def test_grievance_tickets_check_identity_verification(
-            self,
-            pageGrievanceTickets: GrievanceTickets,
-            pageGrievanceNewTicket: NewTicket,
-            pageGrievanceDetailsPage: GrievanceDetailsPage,
-            household_without_disabilities: Household,
+        self,
+        pageGrievanceTickets: GrievanceTickets,
+        pageGrievanceNewTicket: NewTicket,
+        pageGrievanceDetailsPage: GrievanceDetailsPage,
+        household_without_disabilities: Household,
     ) -> None:
         pageGrievanceTickets.getNavGrievance().click()
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
@@ -1033,10 +1050,10 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getButtonNext().click()
 
     def test_grievance_tickets_edit_tickets_from_main_grievance_page(
-            self,
-            pageGrievanceTickets: GrievanceTickets,
-            pageHouseholds: Households,
-            create_four_grievance_tickets: [GrievanceTicket],
+        self,
+        pageGrievanceTickets: GrievanceTickets,
+        pageHouseholds: Households,
+        create_four_grievance_tickets: [GrievanceTicket],
     ) -> None:
         pageGrievanceTickets.getNavGrievance().click()
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
@@ -1092,13 +1109,13 @@ class TestGrievanceTickets:
             assert "Urgent" in str_row.text.replace("\n", " ").split(" ")
 
     def test_grievance_tickets_process_tickets(
-            self,
-            pageGrievanceTickets: GrievanceTickets,
-            pageGrievanceNewTicket: NewTicket,
-            pageGrievanceDetailsPage: GrievanceDetailsPage,
-            household_without_disabilities: Household,
-            pageHouseholdsDetails: HouseholdsDetails,
-            pageHouseholds: Households,
+        self,
+        pageGrievanceTickets: GrievanceTickets,
+        pageGrievanceNewTicket: NewTicket,
+        pageGrievanceDetailsPage: GrievanceDetailsPage,
+        household_without_disabilities: Household,
+        pageHouseholdsDetails: HouseholdsDetails,
+        pageHouseholds: Households,
     ) -> None:
         pageGrievanceTickets.getNavGrievance().click()
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
@@ -1137,12 +1154,12 @@ class TestGrievanceTickets:
         assert "5" in pageHouseholdsDetails.getRow05().text
 
     def test_grievance_tickets_add_note(
-            self,
-            pageGrievanceTickets: GrievanceTickets,
-            pageGrievanceNewTicket: NewTicket,
-            pageGrievanceDetailsPage: GrievanceDetailsPage,
-            household_without_disabilities: Household,
-            add_grievance_tickets: GrievanceTicket,
+        self,
+        pageGrievanceTickets: GrievanceTickets,
+        pageGrievanceNewTicket: NewTicket,
+        pageGrievanceDetailsPage: GrievanceDetailsPage,
+        household_without_disabilities: Household,
+        add_grievance_tickets: GrievanceTicket,
     ) -> None:
         pageGrievanceTickets.getNavGrievance().click()
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
@@ -1156,11 +1173,11 @@ class TestGrievanceTickets:
         assert "Test adding new note." in pageGrievanceDetailsPage.getNoteRows()[0].text
 
     def test_grievance_tickets_activity_log(
-            self,
-            pageGrievanceTickets: GrievanceTickets,
-            pageGrievanceDetailsPage: GrievanceDetailsPage,
-            household_without_disabilities: Household,
-            add_grievance_tickets: GrievanceTicket,
+        self,
+        pageGrievanceTickets: GrievanceTickets,
+        pageGrievanceDetailsPage: GrievanceDetailsPage,
+        household_without_disabilities: Household,
+        add_grievance_tickets: GrievanceTicket,
     ) -> None:
         pageGrievanceTickets.getNavGrievance().click()
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
@@ -1173,13 +1190,13 @@ class TestGrievanceTickets:
         assert "In Progress" in pageGrievanceDetailsPage.getLogRow()[0].text
 
     def test_grievance_tickets_go_to_admin_panel_button(
-            self,
-            pageGrievanceTickets: GrievanceTickets,
-            pageGrievanceNewTicket: NewTicket,
-            pageGrievanceDetailsPage: GrievanceDetailsPage,
-            household_without_disabilities: Household,
-            add_grievance_tickets: GrievanceTicket,
-            pageAdminPanel: AdminPanel,
+        self,
+        pageGrievanceTickets: GrievanceTickets,
+        pageGrievanceNewTicket: NewTicket,
+        pageGrievanceDetailsPage: GrievanceDetailsPage,
+        household_without_disabilities: Household,
+        add_grievance_tickets: GrievanceTicket,
+        pageAdminPanel: AdminPanel,
     ) -> None:
         pageGrievanceTickets.getNavGrievance().click()
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
@@ -1189,11 +1206,11 @@ class TestGrievanceTickets:
         assert GrievanceTicket.objects.first().unicef_id in pageAdminPanel.getUnicefID().text
 
     def test_grievance_tickets_needs_adjudication(
-            self,
-            add_grievance_needs_adjudication: None,
-            pageGrievanceTickets: GrievanceTickets,
-            pageGrievanceDetailsPage: GrievanceDetailsPage,
-            pageIndividuals: Individuals,
+        self,
+        add_grievance_needs_adjudication: None,
+        pageGrievanceTickets: GrievanceTickets,
+        pageGrievanceDetailsPage: GrievanceDetailsPage,
+        pageIndividuals: Individuals,
     ) -> None:
         pageGrievanceTickets.getNavGrievance().click()
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
@@ -1299,10 +1316,10 @@ class TestGrievanceTickets:
 
     @pytest.mark.xfail(reason="Unskip after fix bug: 209087")
     def test_grievance_tickets_create_new_error(
-            self,
-            pageGrievanceTickets: GrievanceTickets,
-            pageGrievanceNewTicket: NewTicket,
-            pageGrievanceDetailsPage: GrievanceDetailsPage,
+        self,
+        pageGrievanceTickets: GrievanceTickets,
+        pageGrievanceNewTicket: NewTicket,
+        pageGrievanceDetailsPage: GrievanceDetailsPage,
     ) -> None:
         pageGrievanceTickets.getNavGrievance().click()
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
