@@ -11,6 +11,7 @@ import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { PaymentPlansTable } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/PaymentPlansTable';
 import { PaymentPlansFilters } from '@containers/pages/paymentmodule/ProgramCycle/ProgramCycleDetails/PaymentPlansFilters';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
 const initialFilter = {
   search: '',
@@ -51,7 +52,14 @@ export const ProgramCycleDetailsPage = (): React.ReactElement => {
   if (isLoading) return null;
 
   return (
-    <>
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'ProgramCycleDetailsPage.tsx');
+      }}
+      componentName="ProgramCycleDetailsPage"
+    >
       <ProgramCycleDetailsHeader programCycle={data} />
       <ProgramCycleDetailsSection programCycle={data} />
       <TableWrapper>
@@ -73,6 +81,6 @@ export const ProgramCycleDetailsPage = (): React.ReactElement => {
           )}
         />
       </TableWrapper>
-    </>
+    </UniversalErrorBoundary>
   );
 };

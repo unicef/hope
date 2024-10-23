@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import {
   PaymentVerificationPlanStatus,
   usePaymentQuery,
@@ -17,11 +17,13 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError } from '@utils/utils';
 import { AdminButton } from '@core/AdminButton';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
 export function VerificationPaymentDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
   const permissions = usePermissions();
+  const location = useLocation();
   const { data, loading, error } = usePaymentQuery({
     variables: { id },
     fetchPolicy: 'cache-and-network',
@@ -43,22 +45,22 @@ export function VerificationPaymentDetailsPage(): React.ReactElement {
   const breadCrumbsItems: BreadCrumbsItem[] = [
     ...(hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VIEW_LIST, permissions)
       ? [
-        {
-          title: t('Payment Verification'),
-          to: `/${baseUrl}/payment-verification`,
-        },
-      ]
+          {
+            title: t('Payment Verification'),
+            to: `/${baseUrl}/payment-verification`,
+          },
+        ]
       : []),
     ...(hasPermissions(
       PERMISSIONS.PAYMENT_VERIFICATION_VIEW_DETAILS,
       permissions,
     )
       ? [
-        {
-          title: `${t('Payment Plan')} ${payment.parent.unicefId}`,
-          to: `/${baseUrl}/payment-verification/payment-plan/${payment.parent.id}`,
-        },
-      ]
+          {
+            title: `${t('Payment Plan')} ${payment.parent.unicefId}`,
+            to: `/${baseUrl}/payment-verification/payment-plan/${payment.parent.id}`,
+          },
+        ]
       : []),
   ];
 
@@ -66,9 +68,7 @@ export function VerificationPaymentDetailsPage(): React.ReactElement {
     <PageHeader
       title={`${t('Payment ID')} ${payment.unicefId}`}
       breadCrumbs={breadCrumbsItems}
-      flags={
-        <AdminButton adminUrl={payment.verification?.adminUrl}/>
-      }
+      flags={<AdminButton adminUrl={payment.verification?.adminUrl} />}
     >
       {verification?.verificationChannel === 'MANUAL' &&
       hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VERIFY, permissions) &&
@@ -79,20 +79,29 @@ export function VerificationPaymentDetailsPage(): React.ReactElement {
           enabled={payment.verification.isManuallyEditable}
           receivedAmount={payment.verification.receivedAmount}
         />
-        ) : null}
+      ) : null}
     </PageHeader>
   );
   return (
-    <div>
-      {toolbar}
-      <VerificationPaymentDetails
-        payment={payment}
-        canViewActivityLog={hasPermissions(
-          PERMISSIONS.ACTIVITY_LOG_VIEW,
-          permissions,
-        )}
-        choicesData={choicesData}
-      />
-    </div>
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'VerificationPaymentDetailsPage.tsx');
+      }}
+      componentName="VerificationPaymentDetailsPage"
+    >
+      <div>
+        {toolbar}
+        <VerificationPaymentDetails
+          payment={payment}
+          canViewActivityLog={hasPermissions(
+            PERMISSIONS.ACTIVITY_LOG_VIEW,
+            permissions,
+          )}
+          choicesData={choicesData}
+        />
+      </div>
+    </UniversalErrorBoundary>
   );
 }

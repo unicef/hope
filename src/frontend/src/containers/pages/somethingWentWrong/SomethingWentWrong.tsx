@@ -60,25 +60,17 @@ export const SomethingWentWrong: React.FC<SomethingWentWrongProps> = ({
   errorMessage,
   component,
 }) => {
-  const refreshAndClearCache = async (): Promise<void> => {
+  const handleGoBackAndClearCache = async (): Promise<void> => {
     const client = await getClient();
     await clearCache(client);
     window.history.back();
   };
-  const location = useLocation();
 
-  const handleGoBack = (): void => {
-    const lastSuccessfulPage = location.state?.lastSuccessfulPage;
-    if (lastSuccessfulPage) {
-      window.location.href = lastSuccessfulPage;
-    } else {
-      if (window.history.length > 2) {
-        window.history.go(-2);
-      } else {
-        window.history.back();
-      }
-    }
-  };
+  const isEnvWhereShowErrors =
+    window.location.hostname.includes('localhost') ||
+    window.location.href.includes('dev') ||
+    window.location.href.includes('trn') ||
+    window.location.href.includes('stg');
 
   return (
     <Container>
@@ -95,7 +87,7 @@ export const SomethingWentWrong: React.FC<SomethingWentWrongProps> = ({
       </SquareLogo>
       <TextContainer>
         <Title>Oops! Something went wrong</Title>
-        {errorMessage ? (
+        {errorMessage && isEnvWhereShowErrors ? (
           <Box display="flex" flexDirection="column">
             <Paragraph style={{ wordWrap: 'break-word' }}>
               Location: {pathname}
@@ -113,22 +105,11 @@ export const SomethingWentWrong: React.FC<SomethingWentWrongProps> = ({
         )}
       </TextContainer>
       <Box display="flex" justifyContent="center" alignItems="center">
-        <Box mr={4}>
-          <Button
-            endIcon={<Refresh />}
-            variant="outlined"
-            color="primary"
-            data-cy="button-refresh-page"
-            onClick={refreshAndClearCache}
-          >
-            REFRESH PAGE
-          </Button>
-        </Box>
         <Button
           endIcon={<ArrowBackIcon />}
           color="primary"
           variant="contained"
-          onClick={handleGoBack}
+          onClick={handleGoBackAndClearCache}
           data-cy="button-go-back"
         >
           GO BACK
