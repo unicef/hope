@@ -109,7 +109,12 @@ if ENV != "prod":
 else:
     EMAIL_SUBJECT_PREFIX = ""
 
-RO_CONN = dict(**env.db("DATABASE_URL")).copy()
+REPLICA_DB = env("REP_DATABASE_URL", default=None)
+
+if REPLICA_DB:
+    RO_CONN = dict(**env.db("REP_DATABASE_URL")).copy()
+else:
+    RO_CONN = dict(**env.db("DATABASE_URL")).copy()
 RO_CONN.update(
     {
         "OPTIONS": {"options": "-c default_transaction_read_only=on"},
@@ -200,6 +205,7 @@ PROJECT_APPS = [
     "hct_mis_api.apps.steficon.apps.SteficonConfig",
     "hct_mis_api.apps.reporting.apps.ReportingConfig",
     "hct_mis_api.apps.activity_log.apps.ActivityLogConfig",
+    "hct_mis_api.apps.dashboard.apps.DashboardConfig",
     "hct_mis_api.apps.accountability.apps.AccountabilityConfig",
     "hct_mis_api.apps.web.apps.WebConfig",
     "hct_mis_api.apps.periodic_data_update.apps.PeriodicDataUpdateConfig",
