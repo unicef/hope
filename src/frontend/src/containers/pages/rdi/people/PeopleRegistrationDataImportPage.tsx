@@ -17,6 +17,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { useDeduplicationFlagsQuery } from '@generated/graphql';
 import { ButtonTooltip } from '@core/ButtonTooltip';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
 const initialFilter = {
   search: '',
@@ -91,7 +92,14 @@ export function PeopleRegistrationDataImportPage(): React.ReactElement {
     </PageHeader>
   );
   return (
-    <div>
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'PeopleRegistrationDataImportPage.tsx');
+      }}
+      componentName="PeopleRegistrationDataImportPage"
+    >
       {toolbar}
       <RegistrationPeopleFilters
         filter={filter}
@@ -107,6 +115,6 @@ export function PeopleRegistrationDataImportPage(): React.ReactElement {
           permissions,
         )}
       />
-    </div>
+    </UniversalErrorBoundary>
   );
 }

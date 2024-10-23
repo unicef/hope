@@ -10,6 +10,7 @@ import { PermissionDenied } from '@core/PermissionDenied';
 import { useProgramContext } from '../../../../programContext';
 import { TableWrapper } from '@core/TableWrapper';
 import { ProgramCyclesTablePaymentModule } from '@containers/tables/ProgramCyclesTablePaymentModule/ProgramCyclesTablePaymentModule';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
 const initialFilter = {
   search: '',
@@ -39,21 +40,30 @@ export const ProgramCyclePage = (): React.ReactElement => {
     return <PermissionDenied />;
 
   return (
-    <>
-      <PageHeader title={t('Payment Module')} />
-      <ProgramCyclesFilters
-        filter={filter}
-        setFilter={setFilter}
-        initialFilter={initialFilter}
-        appliedFilter={appliedFilter}
-        setAppliedFilter={setAppliedFilter}
-      />
-      <TableWrapper>
-        <ProgramCyclesTablePaymentModule
-          program={selectedProgram}
-          filters={appliedFilter}
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'ProgramCyclePage.tsx');
+      }}
+      componentName="ProgramCyclePage"
+    >
+      <>
+        <PageHeader title={t('Payment Module')} />
+        <ProgramCyclesFilters
+          filter={filter}
+          setFilter={setFilter}
+          initialFilter={initialFilter}
+          appliedFilter={appliedFilter}
+          setAppliedFilter={setAppliedFilter}
         />
-      </TableWrapper>
-    </>
+        <TableWrapper>
+          <ProgramCyclesTablePaymentModule
+            program={selectedProgram}
+            filters={appliedFilter}
+          />
+        </TableWrapper>
+      </>
+    </UniversalErrorBoundary>
   );
 };

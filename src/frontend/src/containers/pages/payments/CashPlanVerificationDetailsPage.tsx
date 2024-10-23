@@ -32,6 +32,7 @@ import { VerificationRecordsTable } from '../../tables/payments/VerificationReco
 import { VerificationRecordsFilters } from '../../tables/payments/VerificationRecordsTable/VerificationRecordsFilters';
 import { useProgramContext } from '../../../programContext';
 import { PeopleVerificationRecordsTable } from '@containers/tables/payments/VerificationRecordsTable/People/PeopleVerificationRecordsTable';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
 const Container = styled.div`
   display: flex;
@@ -191,7 +192,14 @@ export function CashPlanVerificationDetailsPage(): React.ReactElement {
   };
 
   return (
-    <>
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'CashPlanVerificationDetailsPage.tsx');
+      }}
+      componentName="CashPlanVerificationDetailsPage"
+    >
       {toolbar}
       <Container>
         <CashPlanDetailsSection planNode={cashPlan} />
@@ -229,7 +237,6 @@ export function CashPlanVerificationDetailsPage(): React.ReactElement {
           {t('To see more details please activate Verification Plan')}
         </BottomTitle>
       ) : null}
-
       {canSeeCreationMessage() ? (
         <BottomTitle>
           {t('To see more details please create Verification Plan')}
@@ -241,6 +248,6 @@ export function CashPlanVerificationDetailsPage(): React.ReactElement {
             objectId={cashPlan.id}
           />
         )}
-    </>
+    </UniversalErrorBoundary>
   );
 }

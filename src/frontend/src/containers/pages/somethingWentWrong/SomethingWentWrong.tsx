@@ -3,7 +3,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { Box, Button } from '@mui/material';
 import { clearCache } from '@utils/utils';
 import * as React from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { getClient } from '../../../apollo/client';
 import SomethingWentWrongGraphic from './something_went_wrong_graphic.png';
@@ -49,27 +49,37 @@ const Paragraph = styled.p`
   line-height: 32px;
 `;
 
-export const SomethingWentWrong: React.FC = () => {
-  const refreshAndClearCache = async (): Promise<void> => {
+interface SomethingWentWrongProps {
+  pathname?: string;
+  errorMessage?: string;
+  component?: string;
+}
+
+export const SomethingWentWrong: React.FC<SomethingWentWrongProps> = ({
+  pathname,
+  errorMessage: propsErrorMessage,
+  component,
+}) => {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleGoBackAndClearCache = async (): Promise<void> => {
     const client = await getClient();
     await clearCache(client);
-    window.history.back();
-  };
-  const location = useLocation();
-  const errorMessage = location.state?.errorMessage;
-
-  const handleGoBack = (): void => {
-    const lastSuccessfulPage = location.state?.lastSuccessfulPage;
-    if (lastSuccessfulPage) {
-      window.location.href = lastSuccessfulPage;
+    if (location.state?.lastSuccessfulPage) {
+      navigate(location.state.lastSuccessfulPage);
     } else {
-      if (window.history.length > 2) {
-        window.history.go(-2);
-      } else {
-        window.history.back();
-      }
+      window.history.back();
     }
   };
+
+  const isEnvWhereShowErrors =
+    window.location.hostname.includes('localhost') ||
+    window.location.href.includes('dev') ||
+    window.location.href.includes('trn') ||
+    window.location.href.includes('stg');
+
+  const errorMessage = location.state?.errorMessage || propsErrorMessage;
 
   return (
     <Container>
@@ -86,8 +96,20 @@ export const SomethingWentWrong: React.FC = () => {
       </SquareLogo>
       <TextContainer>
         <Title>Oops! Something went wrong</Title>
-        {errorMessage ? (
-          <Paragraph>{errorMessage}</Paragraph>
+        {errorMessage && isEnvWhereShowErrors ? (
+          <Box display="flex" flexDirection="column">
+            {pathname && (
+              <Paragraph style={{ wordWrap: 'break-word' }}>
+                Location: {pathname}
+              </Paragraph>
+            )}
+            {errorMessage && (
+              <Paragraph style={{ wordWrap: 'break-word' }}>
+                Error: {errorMessage}
+              </Paragraph>
+            )}
+            {component && <Paragraph>Component: {component}</Paragraph>}
+          </Box>
         ) : (
           <Paragraph>
             Don&apos;t worry! Our team is on it, working to fix the issue.
@@ -96,22 +118,11 @@ export const SomethingWentWrong: React.FC = () => {
         )}
       </TextContainer>
       <Box display="flex" justifyContent="center" alignItems="center">
-        <Box mr={4}>
-          <Button
-            endIcon={<Refresh />}
-            variant="outlined"
-            color="primary"
-            data-cy="button-refresh-page"
-            onClick={refreshAndClearCache}
-          >
-            REFRESH PAGE
-          </Button>
-        </Box>
         <Button
           endIcon={<ArrowBackIcon />}
           color="primary"
           variant="contained"
-          onClick={handleGoBack}
+          onClick={handleGoBackAndClearCache}
           data-cy="button-go-back"
         >
           GO BACK

@@ -17,6 +17,7 @@ import { usePermissions } from '@hooks/usePermissions';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { DashboardYearPage } from './DashboardYearPage';
 import { TabPanel } from '@components/core/TabPanel';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
 export function DashboardPage(): React.ReactElement {
   const { t } = useTranslation();
@@ -68,8 +69,16 @@ export function DashboardPage(): React.ReactElement {
       {mappedTabs}
     </Tabs>
   );
+
   return (
-    <>
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'DashboardPage.tsx');
+      }}
+      componentName="DashboardPage"
+    >
       <PageHeader tabs={tabs} title={t('Dashboard')}>
         {hasPermissionToExport && (
           <ExportModal filter={appliedFilter} year={years[selectedTab]} />
@@ -104,6 +113,6 @@ export function DashboardPage(): React.ReactElement {
       ) : (
         <PermissionDenied />
       )}
-    </>
+    </UniversalErrorBoundary>
   );
 }

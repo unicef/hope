@@ -15,6 +15,7 @@ import { getFilterFromQueryParams } from '@utils/utils';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ButtonTooltip } from '@components/core/ButtonTooltip';
 import { useProgramContext } from '../../../../programContext';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
 export function FeedbackPage(): React.ReactElement {
   const { baseUrl, isAllPrograms } = useBaseUrl();
@@ -54,7 +55,14 @@ export function FeedbackPage(): React.ReactElement {
   );
 
   return (
-    <>
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'FeedbackPage.tsx');
+      }}
+      componentName="FeedbackPage"
+    >
       <PageHeader title={t('Feedback')}>
         <ButtonTooltip
           variant="contained"
@@ -76,6 +84,6 @@ export function FeedbackPage(): React.ReactElement {
         setAppliedFilter={setAppliedFilter}
       />
       <FeedbackTable filter={appliedFilter} canViewDetails={canViewDetails} />
-    </>
+    </UniversalErrorBoundary>
   );
 }

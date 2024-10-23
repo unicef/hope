@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import {
   PaymentVerificationPlanStatus,
   usePaymentRecordQuery,
@@ -17,11 +17,13 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError } from '@utils/utils';
 import { AdminButton } from '@core/AdminButton';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
 export function VerificationPaymentRecordDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
   const permissions = usePermissions();
+  const location = useLocation();
   const { data, loading, error } = usePaymentRecordQuery({
     variables: { id },
     fetchPolicy: 'cache-and-network',
@@ -42,22 +44,22 @@ export function VerificationPaymentRecordDetailsPage(): React.ReactElement {
   const breadCrumbsItems: BreadCrumbsItem[] = [
     ...(hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VIEW_LIST, permissions)
       ? [
-        {
-          title: t('Payment Verification'),
-          to: `/${baseUrl}/payment-verification`,
-        },
-      ]
+          {
+            title: t('Payment Verification'),
+            to: `/${baseUrl}/payment-verification`,
+          },
+        ]
       : []),
     ...(hasPermissions(
       PERMISSIONS.PAYMENT_VERIFICATION_VIEW_DETAILS,
       permissions,
     )
       ? [
-        {
-          title: `${t('Payment Plan')} ${paymentRecord.parent.unicefId}`,
-          to: `/${baseUrl}/payment-verification/cash-plan/${paymentRecord.parent.id}`,
-        },
-      ]
+          {
+            title: `${t('Payment Plan')} ${paymentRecord.parent.unicefId}`,
+            to: `/${baseUrl}/payment-verification/cash-plan/${paymentRecord.parent.id}`,
+          },
+        ]
       : []),
   ];
 
@@ -65,9 +67,7 @@ export function VerificationPaymentRecordDetailsPage(): React.ReactElement {
     <PageHeader
       title={`${t('Payment Record ID')} ${paymentRecord.caId}`}
       breadCrumbs={breadCrumbsItems}
-      flags={
-        <AdminButton adminUrl={paymentRecord.verification?.adminUrl} />
-      }
+      flags={<AdminButton adminUrl={paymentRecord.verification?.adminUrl} />}
     >
       {verification?.verificationChannel === 'MANUAL' &&
       hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VERIFY, permissions) &&
@@ -78,20 +78,29 @@ export function VerificationPaymentRecordDetailsPage(): React.ReactElement {
           enabled={paymentRecord.verification.isManuallyEditable}
           receivedAmount={paymentRecord.verification.receivedAmount}
         />
-        ) : null}
+      ) : null}
     </PageHeader>
   );
   return (
-    <div>
-      {toolbar}
-      <VerificationPaymentRecordDetails
-        paymentRecord={paymentRecord}
-        canViewActivityLog={hasPermissions(
-          PERMISSIONS.ACTIVITY_LOG_VIEW,
-          permissions,
-        )}
-        choicesData={choicesData}
-      />
-    </div>
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'VerificationPaymentRecordDetailsPage.tsx');
+      }}
+      componentName="VerificationPaymentRecordDetailsPage"
+    >
+      <div>
+        {toolbar}
+        <VerificationPaymentRecordDetails
+          paymentRecord={paymentRecord}
+          canViewActivityLog={hasPermissions(
+            PERMISSIONS.ACTIVITY_LOG_VIEW,
+            permissions,
+          )}
+          choicesData={choicesData}
+        />
+      </div>
+    </UniversalErrorBoundary>
   );
 }
