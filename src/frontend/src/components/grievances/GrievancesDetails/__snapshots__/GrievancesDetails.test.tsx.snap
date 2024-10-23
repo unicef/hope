@@ -420,57 +420,6 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 class="sc-dntaoT LjMES"
                 color="textSecondary"
               >
-                Administrative Level 2
-              </span>
-              <div
-                data-cy="label-Administrative Level 2"
-              >
-                -
-              </div>
-            </div>
-          </div>
-          <div
-            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
-          >
-            <div>
-              <span
-                class="sc-dntaoT LjMES"
-                color="textSecondary"
-              >
-                Area / Village / Pay point
-              </span>
-              <div
-                data-cy="label-Area / Village / Pay point"
-              >
-                -
-              </div>
-            </div>
-          </div>
-          <div
-            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
-          >
-            <div>
-              <span
-                class="sc-dntaoT LjMES"
-                color="textSecondary"
-              >
-                Languages Spoken
-              </span>
-              <div
-                data-cy="label-Languages Spoken"
-              >
-                -
-              </div>
-            </div>
-          </div>
-          <div
-            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
-          >
-            <div>
-              <span
-                class="sc-dntaoT LjMES"
-                color="textSecondary"
-              >
                 Documentation
               </span>
               <div
@@ -508,23 +457,6 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 >
                   dwdw
                 </span>
-              </div>
-            </div>
-          </div>
-          <div
-            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 css-1idn90j-MuiGrid-root"
-          >
-            <div>
-              <span
-                class="sc-dntaoT LjMES"
-                color="textSecondary"
-              >
-                Comments
-              </span>
-              <div
-                data-cy="label-Comments"
-              >
-                -
               </div>
             </div>
           </div>

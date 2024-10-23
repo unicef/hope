@@ -250,7 +250,7 @@ export function GrievancesDetails({
                 value: <span>{issueType}</span>,
                 size: 3,
               },
-              {
+              !isAllPrograms && {
                 label: t('Household ID'),
                 value: (
                   <span>
@@ -272,26 +272,30 @@ export function GrievancesDetails({
                 size: 3,
               },
               {
-                label: t('Individual ID'),
-                value: (
-                  <span>
-                    {ticket.individual?.id &&
-                    canViewIndividualDetails &&
-                    !isAllPrograms ? (
-                      <BlackLink
-                        to={`/${baseUrl}/population/individuals/${ticket.individual.id}`}
-                      >
-                        {ticket.individual.unicefId}
-                      </BlackLink>
-                    ) : (
-                      <div>
-                        {ticket.individual?.id
-                          ? ticket.individual.unicefId
-                          : '-'}
-                      </div>
-                    )}
-                  </span>
-                ),
+                label:
+                  isAllPrograms || isSocialDctType
+                    ? t('Target ID')
+                    : t('Individual ID'),
+                value:
+                  isAllPrograms || isSocialDctType ? (
+                    <div>{ticket?.targetId || '-'}</div>
+                  ) : (
+                    <span>
+                      {ticket.individual?.id && canViewIndividualDetails ? (
+                        <BlackLink
+                          to={`/${baseUrl}/population/individuals/${ticket.individual.id}`}
+                        >
+                          {ticket.individual.unicefId}
+                        </BlackLink>
+                      ) : (
+                        <div>
+                          {ticket.individual?.id
+                            ? ticket.individual.unicefId
+                            : '-'}
+                        </div>
+                      )}
+                    </span>
+                  ),
                 size: 3,
               },
               {
@@ -368,11 +372,18 @@ export function GrievancesDetails({
               .filter((el) =>
                 isSocialDctType ? el.label !== 'Household ID' : el,
               )
-              .map((el) => (
-                <Grid key={el.label} item xs={el.size as GridSize}>
-                  <LabelizedField label={el.label}>{el.value}</LabelizedField>
-                </Grid>
-              ))}
+              .map(
+                (el) =>
+                  el.label &&
+                  el.value &&
+                  el.size && (
+                    <Grid key={el.label} item xs={el.size as GridSize}>
+                      <LabelizedField label={el.label}>
+                        {el.value}
+                      </LabelizedField>
+                    </Grid>
+                  ),
+              )}
           </Grid>
         </OverviewContainer>
       </ContainerColumnWithBorder>
