@@ -5,6 +5,7 @@ from django.db import transaction
 from django.db.models import QuerySet
 
 from constance import config
+from django.http import FileResponse
 from django_filters import rest_framework as filters
 from rest_framework import mixins, status
 from rest_framework.decorators import action
@@ -215,6 +216,7 @@ class PaymentPlanSupportingDocumentViewSet(
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, methods=["get"])
-    def download(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def download(self, request: Request, *args: Any, **kwargs: Any) -> FileResponse:
         document = self.get_object()
-        return Response({"url": document.file.url}, status=status.HTTP_200_OK)
+        return FileResponse(document.file.open(), as_attachment=True, filename=document.file.name)
+        # return Response({"url": document.file.url}, status=status.HTTP_200_OK)
