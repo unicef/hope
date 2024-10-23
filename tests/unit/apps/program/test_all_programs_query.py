@@ -14,7 +14,11 @@ from hct_mis_api.apps.core.fixtures import (
 )
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
-from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
+from hct_mis_api.apps.program.fixtures import (
+    BeneficiaryGroupFactory,
+    ProgramCycleFactory,
+    ProgramFactory,
+)
 from hct_mis_api.apps.program.models import Program, ProgramPartnerThrough
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
@@ -22,8 +26,8 @@ from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 class TestAllProgramsQuery(APITestCase):
     ALL_PROGRAMS_QUERY = """
-    query AllPrograms($businessArea: String!, $orderBy: String, $compatibleDct: Boolean) {
-        allPrograms(businessArea: $businessArea, orderBy: $orderBy, compatibleDct: $compatibleDct) {
+    query AllPrograms($businessArea: String!, $orderBy: String, $compatibleDct: Boolean, $beneficiaryGroupMatch: Boolean) {
+        allPrograms(businessArea: $businessArea, orderBy: $orderBy, compatibleDct: $compatibleDct, beneficiaryGroupMatch: $beneficiaryGroupMatch) {
           totalCount
           edges {
             node {
@@ -185,6 +189,54 @@ class TestAllProgramsQuery(APITestCase):
                 },
             },
             variables={"businessArea": self.business_area.slug, "orderBy": "name", "compatibleDct": True},
+        )
+
+    def test_all_programs_query_filter_beneficiary_group(self) -> None:
+        beneficiary_group1 = BeneficiaryGroupFactory(name="Beneficiary Group 1")
+        beneficiary_group2 = BeneficiaryGroupFactory(name="Beneficiary Group 2")
+        program1 = ProgramFactory.create(
+            name="Program Beneficiary Group 1",
+            status=Program.ACTIVE,
+            business_area=self.business_area,
+            beneficiary_group=beneficiary_group1,
+        )
+        ProgramFactory.create(
+            name="Other Program Beneficiary Group 1",
+            status=Program.ACTIVE,
+            business_area=self.business_area,
+            beneficiary_group=beneficiary_group1,
+        )
+        ProgramFactory.create(
+            name="Program Beneficiary Group 2",
+            status=Program.ACTIVE,
+            business_area=self.business_area,
+            beneficiary_group=beneficiary_group2,
+        )
+
+        user = UserFactory.create(partner=self.unicef_partner)
+        self.create_user_role_with_permissions(user, [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS], self.business_area)
+        self.snapshot_graphql_request(
+            request_string=self.ALL_PROGRAMS_QUERY,
+            context={
+                "user": user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                    "Program": self.id_to_base64(program1.id, "ProgramNode"),
+                },
+            },
+            variables={"businessArea": self.business_area.slug, "orderBy": "name", "beneficiaryGroupMatch": True},
+        )
+
+        self.snapshot_graphql_request(
+            request_string=self.ALL_PROGRAMS_QUERY,
+            context={
+                "user": user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                    "Program": self.id_to_base64(program1.id, "ProgramNode"),
+                },
+            },
+            variables={"businessArea": self.business_area.slug, "orderBy": "name", "beneficiaryGroupMatch": False},
         )
 
     @patch("django.contrib.auth.models.AnonymousUser.is_authenticated", new_callable=lambda: False)

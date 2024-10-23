@@ -23,7 +23,7 @@ from hct_mis_api.apps.core.models import (
     PeriodicFieldData,
 )
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.fixtures import BeneficiaryGroupFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
 
@@ -90,6 +90,7 @@ class TestCreateProgram(APITestCase):
             individual_filters_available=True,
         )
         cls.data_collecting_type.limit_to.add(cls.business_area)
+        cls.beneficiary_group = BeneficiaryGroupFactory()
         cls.program_data = {
             "programData": {
                 "name": "Test",
@@ -105,6 +106,7 @@ class TestCreateProgram(APITestCase):
                 "businessAreaSlug": cls.business_area.slug,
                 "dataCollectingTypeCode": cls.data_collecting_type.code,
                 "partnerAccess": Program.NONE_PARTNERS_ACCESS,
+                "beneficiaryGroup": str(cls.beneficiary_group.id),
             }
         }
 
@@ -169,6 +171,16 @@ class TestCreateProgram(APITestCase):
 
         program_data = self.program_data
         program_data["programData"]["dataCollectingTypeCode"] = None
+
+        self.snapshot_graphql_request(
+            request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=program_data
+        )
+
+    def test_create_program_without_beneficiary_group(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
+
+        program_data = self.program_data
+        program_data["programData"]["beneficiaryGroup"] = None
 
         self.snapshot_graphql_request(
             request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=program_data

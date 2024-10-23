@@ -120,6 +120,8 @@ def get_program_with_dct_type_and_name(
 
 
 class BeneficiaryGroupFactory(DjangoModelFactory):
+    name = factory.Faker("word")
+
     class Meta:
         model = BeneficiaryGroup
         django_get_or_create = ("name",)

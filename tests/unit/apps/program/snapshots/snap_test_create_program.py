@@ -642,6 +642,26 @@ snapshots['TestCreateProgram::test_create_program_with_programme_code_not_within
     ]
 }
 
+snapshots['TestCreateProgram::test_create_program_without_beneficiary_group 1'] = {
+    'data': {
+        'createProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': "['Beneficiary Group is required for creating new Program']",
+            'path': [
+                'createProgram'
+            ]
+        }
+    ]
+}
+
 snapshots['TestCreateProgram::test_create_program_without_dct 1'] = {
     'data': {
         'createProgram': None

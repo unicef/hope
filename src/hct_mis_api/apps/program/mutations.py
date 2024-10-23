@@ -185,8 +185,11 @@ class UpdateProgram(
             # Only reactivation is possible
             if status_to_set != Program.ACTIVE or len(program_data) > 1:
                 raise ValidationError("You cannot change finished program")
-        if old_program.registration_imports.exists() and old_program.beneficiary_group != program_data.get(
-            "beneficiary_group"
+        beneficiary_group = program_data.get("beneficiary_group")
+        if (
+            beneficiary_group
+            and old_program.registration_imports.exists()
+            and old_program.beneficiary_group != beneficiary_group
         ):
             raise ValidationError("You cannot update a program's Beneficiary Group if it has imported population.")
 

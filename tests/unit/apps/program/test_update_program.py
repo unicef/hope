@@ -29,7 +29,7 @@ from hct_mis_api.apps.household.fixtures import (
     create_household_and_individuals,
 )
 from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.fixtures import BeneficiaryGroupFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program, ProgramCycle, ProgramPartnerThrough
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 
@@ -302,6 +302,26 @@ class TestUpdateProgram(APITestCase):
                 "programData": {
                     "id": self.id_to_base64(self.program.id, "ProgramNode"),
                     "dataCollectingTypeCode": "test_wrong_ba",
+                },
+                "version": self.program.version,
+            },
+        )
+
+    def test_update_program_beneficiary_group_when_imported_population(self) -> None:
+        beneficiary_group1 = BeneficiaryGroupFactory()
+        beneficiary_group2 = BeneficiaryGroupFactory()
+        self.program.beneficiary_group = beneficiary_group1
+        self.program.save()
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
+        RegistrationDataImportFactory(program=self.program)
+
+        self.snapshot_graphql_request(
+            request_string=self.UPDATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables={
+                "programData": {
+                    "id": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "beneficiaryGroup": str(beneficiary_group2.id),
                 },
                 "version": self.program.version,
             },

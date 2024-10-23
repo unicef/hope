@@ -233,6 +233,26 @@ snapshots['TestUpdateProgram::test_update_program_authenticated_2_without_permis
     ]
 }
 
+snapshots['TestUpdateProgram::test_update_program_beneficiary_group_when_imported_population 1'] = {
+    'data': {
+        'updateProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': '["You cannot update a program\'s Beneficiary Group if it has imported population."]',
+            'path': [
+                'updateProgram'
+            ]
+        }
+    ]
+}
+
 snapshots['TestUpdateProgram::test_update_program_end_date_validation 1'] = {
     'data': {
         'updateProgram': None
