@@ -11,6 +11,7 @@ import { usePermissions } from '@hooks/usePermissions';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { PaymentVerificationTable } from '../../tables/payments/PaymentVerificationTable';
 import { PaymentVerificationFilters } from '../../tables/payments/PaymentVerificationTable/PaymentVerificationFilters';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
 const initialFilter = {
   search: '',
@@ -39,7 +40,14 @@ export function PaymentVerificationPage(): React.ReactElement {
     return <PermissionDenied />;
 
   return (
-    <>
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'PaymentVerificationPage.tsx');
+      }}
+      componentName="PaymentVerificationPage"
+    >
       <PageHeader title={t('Payment Verification')} />
       <PaymentVerificationFilters
         filter={filter}
@@ -58,6 +66,6 @@ export function PaymentVerificationPage(): React.ReactElement {
           )}
         />
       </TableWrapper>
-    </>
+    </UniversalErrorBoundary>
   );
 }

@@ -35,10 +35,11 @@ import {
 } from '@utils/utils';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
 const Container = styled.div`
   padding: 20px 20px 00px 20px;
@@ -67,6 +68,7 @@ export const PeopleDetailsPage = (): React.ReactElement => {
   const { id } = useParams();
   const { baseUrl, businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
+  const location = useLocation();
 
   const { data, loading, error } = useIndividualQuery({
     variables: {
@@ -122,7 +124,14 @@ export const PeopleDetailsPage = (): React.ReactElement => {
   const household = individual?.household;
 
   return (
-    <>
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'PeopleDetailsPage.tsx');
+      }}
+      componentName="PeopleDetailsPage"
+    >
       <PageHeader
         title={`${t('Individual ID')}: ${individual?.unicefId}`}
         breadCrumbs={
@@ -146,7 +155,6 @@ export const PeopleDetailsPage = (): React.ReactElement => {
           ) : null}
         </Box>
       </PageHeader>
-
       <Container>
         <PeopleBioData
           baseUrl={baseUrl}
@@ -291,6 +299,6 @@ export const PeopleDetailsPage = (): React.ReactElement => {
       {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
         <UniversalActivityLogTable objectId={individual?.id} />
       )}
-    </>
+    </UniversalErrorBoundary>
   );
 };

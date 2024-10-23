@@ -13,10 +13,13 @@ import { hasPermissionInModule } from '../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { useAllGrievanceDashboardChartsQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { useLocation } from 'react-router-dom';
 
 export function GrievancesDashboardPage(): React.ReactElement {
   const { t } = useTranslation();
   const { businessArea } = useBaseUrl();
+  const location = useLocation();
   const permissions = usePermissions();
   const { data, loading } = useAllGrievanceDashboardChartsQuery({
     variables: { businessAreaSlug: businessArea },
@@ -51,7 +54,14 @@ export function GrievancesDashboardPage(): React.ReactElement {
     closedUserGeneratedCount + closedSystemGeneratedCount;
 
   return (
-    <>
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'GrievancesDashboardPage.tsx');
+      }}
+      componentName="GrievancesDashboardPage"
+    >
       <PageHeader title={t('Grievance Dashboard')} />
       <TableWrapper>
         <Grid container spacing={2}>
@@ -80,9 +90,9 @@ export function GrievancesDashboardPage(): React.ReactElement {
                 topNumber={`${
                   numberOfClosedTickets > 0
                     ? (
-                      (userWeightedTime + systemWeightedTime) /
+                        (userWeightedTime + systemWeightedTime) /
                         numberOfClosedTickets
-                    ).toFixed(2)
+                      ).toFixed(2)
                     : 0
                 } days`}
                 systemGenerated={`${systemGeneratedAvgResolution} days`}
@@ -106,6 +116,6 @@ export function GrievancesDashboardPage(): React.ReactElement {
           </Grid>
         </Grid>
       </TableWrapper>
-    </>
+    </UniversalErrorBoundary>
   );
 }
