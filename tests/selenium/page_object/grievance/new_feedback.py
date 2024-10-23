@@ -64,6 +64,7 @@ class NewFeedback(BaseComponents):
     inputQuestionnaire_phoneno = 'span[data-cy="input-questionnaire_phoneNo"]'
     labelPhoneNumber = 'div[data-cy="label-Phone Number"]'
     inputQuestionnaire_relationship = 'span[data-cy="input-questionnaire_relationship"]'
+    emptyHouseholdRow = 'tr[data-cy="table-row"]'
 
     # Texts
     textTitle = "New Feedback"
@@ -285,3 +286,6 @@ class NewFeedback(BaseComponents):
 
     def getInputConsent(self) -> WebElement:
         return self.wait_for(self.inputConsent)
+
+    def getTableEmptyRow(self) -> None:
+        self.wait_for_text("No results", self.emptyHouseholdRow)

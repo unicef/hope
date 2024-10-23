@@ -123,8 +123,6 @@ def pytest_configure(config) -> None:  # type: ignore
     settings.SCREENSHOT_DIRECTORY = f"{settings.REPORT_DIRECTORY}/screenshot"
     if not os.path.exists(settings.SCREENSHOT_DIRECTORY):
         os.makedirs(settings.SCREENSHOT_DIRECTORY)
-    print("settings.SCREENSHOT_DIRECTORY", settings.SCREENSHOT_DIRECTORY)
-    print("*" * 70)
 
     for file in os.listdir(settings.SCREENSHOT_DIRECTORY):
         os.remove(os.path.join(settings.SCREENSHOT_DIRECTORY, file))
@@ -211,7 +209,7 @@ def create_session(host: str, username: str, password: str, csrf: str = "") -> o
     return pytest.session
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def driver() -> Chrome:
     chrome_options = Options()
     chrome_options.add_argument("--headless")
@@ -222,6 +220,7 @@ def driver() -> Chrome:
     chrome_options.add_argument("--disable-notifications")
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--window-size=1920,1080")
+    chrome_options.add_argument("--disable-dev-shm-usage")
     if not os.path.exists(settings.DOWNLOAD_DIRECTORY):
         os.makedirs(settings.DOWNLOAD_DIRECTORY)
     prefs = {
@@ -232,16 +231,34 @@ def driver() -> Chrome:
     yield driver
 
 
-@pytest.fixture(autouse=True)
-def browser(driver: Chrome) -> Chrome:
-    driver.live_server = LiveServer("localhost")
-    yield driver
-    driver.quit()
+@pytest.fixture(scope="session")
+def live_server() -> LiveServer:
+    yield LiveServer("localhost")
+
+
+@pytest.fixture(autouse=True, scope="session")
+def browser(driver: Chrome, live_server: LiveServer) -> Chrome:
+    try:
+        driver.live_server = live_server
+        yield driver
+    finally:
+        driver.quit()
 
 
 @pytest.fixture
 def login(browser: Chrome) -> Chrome:
     browser.get(f"{browser.live_server.url}/api/unicorn/")
+
+    browser.execute_script(  # type: ignore
+        """
+    window.indexedDB.databases().then(dbs => dbs.forEach(db => {
+        console.log('Deleting database:', db.name);
+        indexedDB.deleteDatabase(db.name);
+    }));
+    window.localStorage.clear();
+    window.sessionStorage.clear();
+    """
+    )
     login = "id_username"
     password = "id_password"
     loginButton = '//*[@id="login-form"]/div[3]/input'
@@ -255,6 +272,9 @@ def login(browser: Chrome) -> Chrome:
     browser.find_element(By.ID, password).send_keys("testtest2")
     browser.find_element(By.XPATH, loginButton).click()
     browser.get(f"{browser.live_server.url}/")
+    from django.core.cache import cache
+
+    cache.clear()
     yield browser
 
 
@@ -498,6 +518,7 @@ def change_super_user(business_area: BusinessArea) -> None:
     user.partner = Partner.objects.get(name="UNHCR")
     user.partner.allowed_business_areas.add(business_area)
     user.save()
+    yield user
 
 
 @pytest.fixture(autouse=True)
@@ -511,8 +532,7 @@ def create_super_user(business_area: BusinessArea) -> User:
     permission_list = [role.value for role in Permissions]
 
     role, _ = Role.objects.update_or_create(name="Role", defaults={"permissions": permission_list})
-
-    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json", verbosity=0)
+    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data_small.json", verbosity=0)
     country = Country.objects.get(name="Afghanistan")
     business_area.countries.add(country)
     user = UserFactory.create(
@@ -637,7 +657,9 @@ def test_failed_check(request: FixtureRequest, browser: Chrome) -> None:
 def screenshot(driver: Chrome, node_id: str) -> None:
     if not os.path.exists(settings.SCREENSHOT_DIRECTORY):
         os.makedirs(settings.SCREENSHOT_DIRECTORY)
-    file_name = f'{node_id}_{datetime.today().strftime("%Y-%m-%d_%H.%M")}.png'.replace("/", "_").replace("::", "__")
+    file_name = f'{node_id.split("::")[-1]}_{datetime.today().strftime("%Y-%m-%d_%H.%M")}.png'.replace(
+        "/", "_"
+    ).replace("::", "__")
     file_path = os.path.join(settings.SCREENSHOT_DIRECTORY, file_name)
     driver.get_screenshot_as_file(file_path)
     attach(data=driver.get_screenshot_as_png())
