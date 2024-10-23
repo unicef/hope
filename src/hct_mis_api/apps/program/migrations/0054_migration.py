@@ -4,6 +4,22 @@ from django.db import migrations, models
 import django.db.models.deletion
 import model_utils.fields
 import uuid
+from constance import config
+
+
+def create_default_object(apps, schema_editor):
+    Program = apps.get_model("program", "Program")
+    BeneficiaryGroup = apps.get_model("program", "BeneficiaryGroup")
+
+    default_household_beneficiary_group = BeneficiaryGroup.objects.create(
+        name=config.DEFAULT_HOUSEHOLD_GROUP_NAME,
+        group_label="Household",
+        group_label_plural="Households",
+        member_label="Individual",
+        member_label_plural="Individuals",
+    )
+
+    Program.objects.update(beneficiary_group=default_household_beneficiary_group)
 
 
 class Migration(migrations.Migration):
@@ -36,5 +52,11 @@ class Migration(migrations.Migration):
             model_name='program',
             name='beneficiary_group',
             field=models.ForeignKey(null=True, blank=True, on_delete=django.db.models.deletion.PROTECT, related_name='programs', to='program.beneficiarygroup'),
+        ),
+        migrations.RunPython(create_default_object, migrations.RunPython.noop),
+        migrations.AlterField(
+            model_name='program',
+            name='beneficiary_group',
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='programs', to='program.beneficiarygroup'),
         ),
     ]

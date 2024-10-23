@@ -222,13 +222,10 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         default=False, help_text="Enable Deduplication of Face Images"
     )
     deduplication_set_id = models.UUIDField(blank=True, null=True)
-    # TODO: set not nullable after migrating old data
     beneficiary_group = models.ForeignKey(
         BeneficiaryGroup,
         on_delete=models.PROTECT,
         related_name="programs",
-        blank=True,
-        null=True,
     )
 
     objects = SoftDeletableIsVisibleManager()
