@@ -24,7 +24,7 @@ class GrievanceDetailsPage(BaseComponents):
     ticketAssigment = 'div[data-cy="label-Assigned to"]'
     ticketCategory = 'div[data-cy="label-Category"]'
     labelIssueType = 'div[data-cy="label-Issue Type"]'
-    ticketHouseholdID = 'div[data-cy="label-Household ID"]'
+    ticketHouseholdID = 'div[data-cy="label-Target ID"]'
     ticketIndividualID = 'div[data-cy="label-Individual ID"]'
     ticketPaymentLabel = 'div[data-cy="label-Payment ID"]'
     labelPaymentPlan = 'div[data-cy="label-Payment Plan"]'
