@@ -3,7 +3,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { Box, Button } from '@mui/material';
 import { clearCache } from '@utils/utils';
 import * as React from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { getClient } from '../../../apollo/client';
 import SomethingWentWrongGraphic from './something_went_wrong_graphic.png';
@@ -50,20 +50,27 @@ const Paragraph = styled.p`
 `;
 
 interface SomethingWentWrongProps {
-  pathname: string;
-  errorMessage: string;
-  component: string;
+  pathname?: string;
+  errorMessage?: string;
+  component?: string;
 }
 
 export const SomethingWentWrong: React.FC<SomethingWentWrongProps> = ({
   pathname,
-  errorMessage,
+  errorMessage: propsErrorMessage,
   component,
 }) => {
+  const location = useLocation();
+  const navigate = useNavigate();
+
   const handleGoBackAndClearCache = async (): Promise<void> => {
     const client = await getClient();
     await clearCache(client);
-    window.history.back();
+    if (location.state?.lastSuccessfulPage) {
+      navigate(location.state.lastSuccessfulPage);
+    } else {
+      window.history.back();
+    }
   };
 
   const isEnvWhereShowErrors =
@@ -71,6 +78,8 @@ export const SomethingWentWrong: React.FC<SomethingWentWrongProps> = ({
     window.location.href.includes('dev') ||
     window.location.href.includes('trn') ||
     window.location.href.includes('stg');
+
+  const errorMessage = location.state?.errorMessage || propsErrorMessage;
 
   return (
     <Container>
@@ -89,13 +98,17 @@ export const SomethingWentWrong: React.FC<SomethingWentWrongProps> = ({
         <Title>Oops! Something went wrong</Title>
         {errorMessage && isEnvWhereShowErrors ? (
           <Box display="flex" flexDirection="column">
-            <Paragraph style={{ wordWrap: 'break-word' }}>
-              Location: {pathname}
-            </Paragraph>
-            <Paragraph style={{ wordWrap: 'break-word' }}>
-              Error: {errorMessage}
-            </Paragraph>
-            <Paragraph>Component: {component}</Paragraph>
+            {pathname && (
+              <Paragraph style={{ wordWrap: 'break-word' }}>
+                Location: {pathname}
+              </Paragraph>
+            )}
+            {errorMessage && (
+              <Paragraph style={{ wordWrap: 'break-word' }}>
+                Error: {errorMessage}
+              </Paragraph>
+            )}
+            {component && <Paragraph>Component: {component}</Paragraph>}
           </Box>
         ) : (
           <Paragraph>

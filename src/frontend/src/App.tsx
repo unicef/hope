@@ -40,6 +40,7 @@ const Root: React.FC = () => (
     <Route path="/maintenance/*" element={<MaintenancePage />} />
     <Route path="/404/*" element={<PageNotFound />} />
     <Route path="/access-denied/*" element={<AccessDenied />} />
+    <Route path="/error/*" element={<SomethingWentWrong />} />
     <Route
       path="/sentry-check"
       element={
