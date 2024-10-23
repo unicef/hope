@@ -250,7 +250,6 @@ class TestPeriodicDataTemplates:
             in pagePeriodicDataUpdateTemplates.getTemplateNumberOfIndividuals(0).text
         )
 
-    @pytest.mark.night
     def test_periodic_data_template_create_and_download(
         self,
         program: Program,
