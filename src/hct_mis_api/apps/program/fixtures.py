@@ -45,6 +45,11 @@ class ProgramCycleFactory(DjangoModelFactory):
 
 class BeneficiaryGroupFactory(DjangoModelFactory):
     name = "Household"
+    group_label = factory.Faker("word")
+    group_label_plural = factory.Faker("word")
+    member_label = factory.Faker("word")
+    member_label_plural = factory.Faker("word")
+    master_detail = factory.Faker("boolean")
 
     class Meta:
         model = BeneficiaryGroup
