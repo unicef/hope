@@ -27,6 +27,7 @@ from hct_mis_api.apps.grievance.constants import (
     URGENCY_CHOICES,
     URGENCY_NOT_SET,
 )
+from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification
 from hct_mis_api.apps.utils.models import (
     AdminUrlMixin,
@@ -36,7 +37,7 @@ from hct_mis_api.apps.utils.models import (
 )
 
 if TYPE_CHECKING:
-    from hct_mis_api.apps.household.models import Household, Individual
+    from hct_mis_api.apps.household.models import Household
 
 logger = logging.getLogger(__name__)
 
@@ -495,6 +496,17 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
     @property
     def has_social_worker_program(self) -> bool:
         return any(program.is_social_worker_program for program in self.programs.all())
+
+    @property
+    def target_id(self) -> str:
+        if self.has_social_worker_program:
+            ticket_details = self.ticket_details
+            if ticket_details and getattr(ticket_details, "individual", None):
+                return ticket_details.individual.unicef_id if ticket_details.individual else ""
+            # get IND unicef_id from HH
+            individual = Individual.objects.filter(household__unicef_id=self.household_unicef_id).first()
+            return individual.unicef_id if individual else ""
+        return self.household_unicef_id
 
     class Meta:
         ordering = (
