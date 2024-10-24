@@ -30,7 +30,7 @@ jobs:
           dist_backend_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-develop-latest-dist \
           dev_backend_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-develop-latest-dev \
           docker compose \
-            -f ./.github/helpers/docker-compose.selenium.yml \
+            -f ./deployment/docker-compose.selenium-night.yml \
             run selenium
 
       - name: Upload Nightly Test Artifacts
