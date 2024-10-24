@@ -1,5 +1,8 @@
+import base64
 from datetime import datetime
+from decimal import Decimal
 from time import sleep
+from selenium.webdriver import Chrome
 
 import pytest
 from dateutil.relativedelta import relativedelta
@@ -12,16 +15,19 @@ from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.fixtures import (
     CashPlanFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
     PaymentRecordFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
+    PaymentVerificationSummaryFactory,
 )
-from hct_mis_api.apps.payment.models import GenericPayment
+from hct_mis_api.apps.payment.models import GenericPayment, PaymentPlan
 from hct_mis_api.apps.payment.models import PaymentRecord as PR
 from hct_mis_api.apps.payment.models import PaymentVerification as PV
 from hct_mis_api.apps.payment.models import PaymentVerificationPlan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
@@ -57,6 +63,116 @@ def get_program_with_dct_type_and_name(
         status=status,
     )
     return program
+
+
+def create_program(name: str = "Test Program", dct_type: str = DataCollectingType.Type.STANDARD) -> Program:
+    BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
+    dct = DataCollectingTypeFactory(type=dct_type)
+    yield ProgramFactory(
+        name=name,
+        programme_code="1234",
+        start_date=datetime.now() - relativedelta(months=1),
+        end_date=datetime.now() + relativedelta(months=1),
+        data_collecting_type=dct,
+        status=Program.ACTIVE,
+        cycle__title="First cycle for Test Program",
+        cycle__status=ProgramCycle.DRAFT,
+        cycle__start_date=datetime.now() - relativedelta(days=5),
+        cycle__end_date=datetime.now() + relativedelta(days=5),
+    )
+
+
+@pytest.fixture
+def social_worker_program() -> Program:
+    yield create_program(dct_type=DataCollectingType.Type.SOCIAL)
+
+
+@pytest.fixture
+def payment_verification_3() -> None:
+    payment_verification_multiple_verification_plans(3)
+
+
+def payment_verification_multiple_verification_plans(number_verification_plans: int) -> None:
+    registration_data_import = RegistrationDataImportFactory(
+        imported_by=User.objects.first(), business_area=BusinessArea.objects.first()
+    )
+    program = Program.objects.filter(name="Active Program").first()
+    households = list()
+    for _ in range(number_verification_plans):
+        household, _ = create_household(
+            {
+                "registration_data_import": registration_data_import,
+                "admin_area": Area.objects.order_by("?").first(),
+                "program": program,
+            },
+            {"registration_data_import": registration_data_import},
+        )
+        households.append(household)
+
+    payment_plan = PaymentPlanFactory(
+        program=program,
+        status=PaymentPlan.Status.FINISHED,
+        business_area=BusinessArea.objects.filter(slug="afghanistan").first(),
+    )
+    payments = list()
+    for hh in households:
+        payments.append(PaymentFactory(
+            parent=payment_plan,
+            business_area=BusinessArea.objects.first(),
+            household=hh,
+            head_of_household=household.head_of_household,
+            entitlement_quantity=Decimal("21.36"),
+            delivered_quantity=Decimal("21.36"),
+            currency="PLN",
+            status=GenericPayment.STATUS_DISTRIBUTION_SUCCESS,
+        ))
+
+    PaymentVerificationSummaryFactory(payment_plan_obj=payment_plan)
+
+    for payment in payments:
+        payment_verification_plan = PaymentVerificationPlanFactory(
+            payment_plan_obj=payment_plan,
+            verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL,
+        )
+
+        PaymentVerificationFactory(
+            payment_obj=payment,
+            payment_verification_plan=payment_verification_plan,
+            status=PV.STATUS_PENDING,
+        )
+
+
+@pytest.fixture
+def empty_payment_verification(social_worker_program: Program) -> None:
+    registration_data_import = RegistrationDataImportFactory(
+        imported_by=User.objects.first(), business_area=BusinessArea.objects.first()
+    )
+    program = Program.objects.filter(name="Active Program").first()
+    household, individuals = create_household(
+        {
+            "registration_data_import": registration_data_import,
+            "admin_area": Area.objects.order_by("?").first(),
+            "program": program,
+        },
+        {"registration_data_import": registration_data_import},
+    )
+
+    payment_plan = PaymentPlanFactory(
+        program=program,
+        status=PaymentPlan.Status.FINISHED,
+        business_area=BusinessArea.objects.filter(slug="afghanistan").first(),
+    )
+    PaymentFactory(
+        parent=payment_plan,
+        business_area=BusinessArea.objects.first(),
+        household=household,
+        head_of_household=household.head_of_household,
+        entitlement_quantity=Decimal("21.36"),
+        delivered_quantity=Decimal("21.36"),
+        currency="PLN",
+        status=GenericPayment.STATUS_DISTRIBUTION_SUCCESS,
+    )
+    PaymentVerificationSummaryFactory(payment_plan_obj=payment_plan)
 
 
 @pytest.fixture
@@ -113,7 +229,7 @@ def add_payment_verification() -> PV:
         payment_verification_plan=payment_verification_plan,
         status=PV.STATUS_PENDING,
     )
-    return pv
+    yield pv
 
 
 @pytest.mark.usefixtures("login")
@@ -279,7 +395,153 @@ class TestSmokePaymentVerification:
 
 @pytest.mark.usefixtures("login")
 class TestPaymentVerification:
-    @pytest.mark.skip("ToDo: Old and same value - maybe parametrization with values")
+
+    @pytest.mark.parametrize(
+        "channel",
+        [
+            "manual",
+            "rapidpro",
+            "xlsx",
+        ],
+    )
+    def test_payment_verification_create_verification_plan_full_list(
+        self,
+        channel: str,
+        active_program: Program,
+        empty_payment_verification: None,
+        pagePaymentVerification: PaymentVerification,
+        pagePaymentVerificationDetails: PaymentVerificationDetails,
+    ) -> None:
+        pagePaymentVerification.selectGlobalProgramFilter("Active Program")
+        pagePaymentVerification.getNavPaymentVerification().click()
+        pagePaymentVerification.getCashPlanTableRow().click()
+        pagePaymentVerification.getButtonNewPlan().click()
+        pagePaymentVerification.getRadioVerificationChannel(channel).click()
+        pagePaymentVerification.getButtonSubmit().click()
+        assert "PENDING" in pagePaymentVerificationDetails.getVerificationPlansSummaryStatus().text
+        assert "PENDING" in pagePaymentVerificationDetails.getVerificationPlanStatus().text
+        assert channel.upper() in pagePaymentVerificationDetails.getLabelVerificationChannel().text
+        assert "Full list" in pagePaymentVerificationDetails.getLabelSampling().text
+
+    # @pytest.mark.parametrize(
+    #     "channel",
+    #     [
+    #         "manual",
+    #         "rapidpro",
+    #         "xlsx",
+    #     ],
+    # )
+    def test_payment_verification_create_verification_plan_random_sampling_manual(
+        self,
+        active_program: Program,
+        empty_payment_verification: None,
+        pagePaymentVerification: PaymentVerification,
+        pagePaymentVerificationDetails: PaymentVerificationDetails,
+    ) -> None:
+        pagePaymentVerification.selectGlobalProgramFilter("Active Program")
+        pagePaymentVerification.getNavPaymentVerification().click()
+        pagePaymentVerification.getCashPlanTableRow().click()
+        pagePaymentVerification.getButtonNewPlan().click()
+        pagePaymentVerification.getTabRandomSampling().click()
+        pagePaymentVerification.getInputAdmincheckbox().click()
+        pagePaymentVerification.getInputAgecheckbox().click()
+        pagePaymentVerification.getInputSexcheckbox().click()
+        pagePaymentVerification.getButtonSubmit().click()
+        assert "PENDING" in pagePaymentVerificationDetails.getVerificationPlansSummaryStatus().text
+        assert "PENDING" in pagePaymentVerificationDetails.getVerificationPlanStatus().text
+        assert "MANUAL" in pagePaymentVerificationDetails.getLabelVerificationChannel().text
+        assert "Random sampling" in pagePaymentVerificationDetails.getLabelSampling().text
+        assert "0" in pagePaymentVerificationDetails.getLabelSampleSize().text
+        assert "1" in pagePaymentVerificationDetails.getLabelNumberOfVerificationPlans().text
+
+    def test_payment_verification_records(
+        self,
+        active_program: Program,
+        payment_verification_3: None,
+        pagePaymentVerification: PaymentVerification,
+        pagePaymentVerificationDetails: PaymentVerificationDetails,
+        pagePaymentRecord: PaymentRecord,
+    ) -> None:
+        pagePaymentVerification.selectGlobalProgramFilter("Active Program")
+        pagePaymentVerification.getNavPaymentVerification().click()
+        pagePaymentVerification.getCashPlanTableRow().click()
+        assert "3" in pagePaymentVerificationDetails.getLabelPaymentRecords().text
+        pagePaymentVerificationDetails.getButtonActivatePlan().click()
+        pagePaymentVerificationDetails.getButtonSubmit().click()
+
+        pagePaymentVerificationDetails.driver.execute_script(
+            """
+            container = document.querySelector("div[data-cy='main-content']")
+            container.scrollBy(0,600)
+            """
+        )
+        sleep(2)
+        pagePaymentVerificationDetails.driver.execute_script(
+            """
+            container = document.querySelector("div[data-cy='main-content']")
+            container.scrollBy(0,600)
+            """
+        )
+        sleep(2)
+        pagePaymentVerification.screenshot("0", file_path="./")
+        from tests.selenium.tools.tag_name_finder import printing
+
+        printing("Mapping", pagePaymentVerification.driver)
+        printing("Methods", pagePaymentVerification.driver)
+        printing("Assert", pagePaymentVerification.driver)
+
+    def test_payment_verification_delete(
+        self,
+        active_program: Program,
+        payment_verification_3: None,
+        pagePaymentVerification: PaymentVerification,
+        pagePaymentVerificationDetails: PaymentVerificationDetails,
+        pagePaymentRecord: PaymentRecord,
+    ):
+        pagePaymentVerification.selectGlobalProgramFilter("Active Program")
+        pagePaymentVerification.getNavPaymentVerification().click()
+        pagePaymentVerification.getCashPlanTableRow().click()
+        pagePaymentVerificationDetails.getButtonDeletePlan()
+        before_list_of_verification_plans = [i.text for i in pagePaymentVerificationDetails.getVerificationPlanPrefix()]
+        pagePaymentVerificationDetails.deleteVerificationPlanByNumber(1)
+        pagePaymentVerificationDetails.getButtonSubmit().click()
+        for i in range(50):
+            if 2 == len(pagePaymentVerificationDetails.getVerificationPlanPrefix()):
+                break
+        else:
+            raise AssertionError("Verification Plan was not deleted")
+        assert before_list_of_verification_plans[1] not in pagePaymentVerificationDetails.getVerificationPlanPrefix()
+
+    def test_payment_verification_edit(
+        self,
+        active_program: Program,
+        payment_verification_3: None,
+        pagePaymentVerification: PaymentVerification,
+        pagePaymentVerificationDetails: PaymentVerificationDetails,
+        pagePaymentRecord: PaymentRecord,
+    ):
+        pagePaymentVerification.selectGlobalProgramFilter("Active Program")
+        pagePaymentVerification.getNavPaymentVerification().click()
+        pagePaymentVerification.getCashPlanTableRow().click()
+        pagePaymentVerificationDetails.getButtonEditPlan().click()
+        pagePaymentVerification.getTabFullList().click()
+        if "MANUAL" in pagePaymentVerificationDetails.getLabelVerificationChannel().text:
+            pagePaymentVerification.getRadioVerificationChannel("xlsx").click()
+            channel = "XLSX"
+        else:
+            pagePaymentVerification.getRadioVerificationChannel("manual").click()
+            channel = "MANUAL"
+
+        pagePaymentVerification.getButtonSubmit().click()
+        assert "PENDING" in pagePaymentVerificationDetails.getVerificationPlansSummaryStatus().text
+        assert "PENDING" in pagePaymentVerificationDetails.getVerificationPlanStatus().text
+        for _ in range(50):
+            if channel in pagePaymentVerificationDetails.getLabelVerificationChannel().text:
+                break
+        else:
+            assert channel in pagePaymentVerificationDetails.getLabelVerificationChannel().text
+        assert "Full list" in pagePaymentVerificationDetails.getLabelSampling().text
+
     def test_payment_verification_create_grievance_ticket_same_value(
         self, active_program: Program, add_payment_verification: PV, pagePaymentVerification: PaymentVerification
     ) -> None:
@@ -288,3 +550,24 @@ class TestPaymentVerification:
         # the received value changes with the new verified value.
         # If the received value is 0, it should stay 0 even when a new verified value is provided in the ticket.
         # Check conversation with Jakub
+
+    def test_payment_verification_successful_received(
+            self,
+            active_program: Program,
+            add_payment_verification: PV,
+            pagePaymentVerification: PaymentVerification,
+            browser: Chrome
+    ) -> None:
+        # program_url_id = base64.b64encode(f"ProgramNode:{str(active_program.id)}".encode()).decode()
+        # payment_url_id = base64.b64encode(f"PaymentPlanNode:{str(add_payment_verification.payment_obj.parent.id)}".encode()).decode()
+        # print(f"{active_program.id}")
+        # browser.get(f"{browser.live_server.url}/afghanistan/programs/{program_url_id}")
+        pagePaymentVerification.navigate_to_page(active_program.business_area.slug, str(active_program.id))
+        sleep(5)
+        pagePaymentVerification.screenshot("0", file_path="./")
+
+    def test_payment_verification_successful_not_received(
+            self, active_program: Program, add_payment_verification: PV, pagePaymentVerification: PaymentVerification
+    ) -> None:
+        pagePaymentVerification.selectGlobalProgramFilter("Active Program")
+

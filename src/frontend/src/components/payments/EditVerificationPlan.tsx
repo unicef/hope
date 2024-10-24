@@ -309,8 +309,8 @@ export const EditVerificationPlan = ({
                       variant="fullWidth"
                       aria-label="full width tabs example"
                     >
-                      <Tab label={t('FULL LIST')} />
-                      <Tab label={t('RANDOM SAMPLING')} />
+                      <Tab  data-cy="tab-full-list" label={t('FULL LIST')} />
+                      <Tab data-cy="tab-random-sampling" label={t('RANDOM SAMPLING')} />
                     </StyledTabs>
                   </TabsContainer>
                   <TabPanel value={selectedTab} index={0}>
@@ -351,9 +351,9 @@ export const EditVerificationPlan = ({
                           label={t('Verification Channel')}
                           style={{ flexDirection: 'row', alignItems: 'center' }}
                           choices={[
-                            { value: 'RAPIDPRO', name: 'RAPIDPRO' },
-                            { value: 'XLSX', name: 'XLSX' },
-                            { value: 'MANUAL', name: 'MANUAL' },
+                            { value: 'RAPIDPRO', name: 'RAPIDPRO', dataCy: 'radio-rapidpro' },
+                            { value: 'XLSX', name: 'XLSX', dataCy: 'radio-xlsx' },
+                            { value: 'MANUAL', name: 'MANUAL', dataCy: 'radio-manual' },
                           ]}
                           component={FormikRadioGroup}
                           alignItems="center"
@@ -500,9 +500,9 @@ export const EditVerificationPlan = ({
                         }}
                         alignItems="center"
                         choices={[
-                          { value: 'RAPIDPRO', name: 'RAPIDPRO' },
-                          { value: 'XLSX', name: 'XLSX' },
-                          { value: 'MANUAL', name: 'MANUAL' },
+                            { value: 'RAPIDPRO', name: 'RAPIDPRO', dataCy: 'radio-rapidpro' },
+                            { value: 'XLSX', name: 'XLSX', dataCy: 'radio-xlsx' },
+                            { value: 'MANUAL', name: 'MANUAL', dataCy: 'radio-manual' },
                         ]}
                         component={FormikRadioGroup}
                       />

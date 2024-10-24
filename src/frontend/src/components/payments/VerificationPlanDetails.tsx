@@ -49,7 +49,7 @@ export function VerificationPlanDetails({
     <Container>
       <Box display="flex" alignItems="center" justifyContent="space-between">
         <Title>
-          <Typography variant="h6">
+          <Typography data-cy={`verification-plan-${verificationPlan.unicefId}`} variant="h6">
             {t('Verification Plan')} #{verificationPlan.unicefId}
             <AdminButton adminUrl={verificationPlan.adminUrl} sx={{ ml: 2 }}/>
           </Typography>
