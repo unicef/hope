@@ -66,12 +66,21 @@ class BeneficiaryGroupAPITestCase(HOPEApiTestCase):
             after_edit_etag,
         )
 
-        self.beneficiary_group1.delete()
+        beneficiary_group3 = BeneficiaryGroupFactory(name="Other `BG")
         response = self.client.get(self.list_url, HTTP_IF_NONE_MATCH=after_edit_etag)
+        self.assertEqual(response.status_code, 200)
+        after_create_etag = response.headers["ETAG"]
+        self.assertNotEqual(
+            after_edit_etag,
+            after_create_etag,
+        )
+
+        beneficiary_group3.delete()
+        response = self.client.get(self.list_url, HTTP_IF_NONE_MATCH=after_create_etag)
         self.assertEqual(response.status_code, 200)
         after_delete_etag = response.headers["ETAG"]
         self.assertNotEqual(
-            after_edit_etag,
+            after_create_etag,
             after_delete_etag,
         )
         self.assertNotEqual(
@@ -79,14 +88,5 @@ class BeneficiaryGroupAPITestCase(HOPEApiTestCase):
             after_delete_etag,
         )
 
-        BeneficiaryGroupFactory(name="bg3")
         response = self.client.get(self.list_url, HTTP_IF_NONE_MATCH=after_delete_etag)
-        self.assertEqual(response.status_code, 200)
-        after_create_etag = response.headers["ETAG"]
-        self.assertNotEqual(
-            after_delete_etag,
-            after_create_etag,
-        )
-
-        response = self.client.get(self.list_url, HTTP_IF_NONE_MATCH=after_create_etag)
         self.assertEqual(response.status_code, 304)
