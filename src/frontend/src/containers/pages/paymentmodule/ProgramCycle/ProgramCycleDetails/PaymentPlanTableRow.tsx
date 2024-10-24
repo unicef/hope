@@ -50,13 +50,13 @@ export const PaymentPlanTableRow = ({
         {paymentPlan.totalHouseholdsCount || '-'}
       </TableCell>
       <TableCell align="right">
-        {`${formatCurrencyWithSymbol(paymentPlan.totalEntitledQuantity)}`}
+        {`${formatCurrencyWithSymbol(paymentPlan.totalEntitledQuantity, paymentPlan.currency)}`}
       </TableCell>
       <TableCell align="right">
-        {`${formatCurrencyWithSymbol(paymentPlan.totalUndeliveredQuantity)}`}
+        {`${formatCurrencyWithSymbol(paymentPlan.totalUndeliveredQuantity, paymentPlan.currency)}`}
       </TableCell>
       <TableCell align="right">
-        {`${formatCurrencyWithSymbol(paymentPlan.totalDeliveredQuantity)}`}
+        {`${formatCurrencyWithSymbol(paymentPlan.totalDeliveredQuantity, paymentPlan.currency)}`}
       </TableCell>
       <TableCell align="left">
         <UniversalMoment>{paymentPlan.dispersionStartDate}</UniversalMoment>
