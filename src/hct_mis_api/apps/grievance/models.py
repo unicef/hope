@@ -37,7 +37,7 @@ from hct_mis_api.apps.utils.models import (
 )
 
 if TYPE_CHECKING:
-    from hct_mis_api.apps.household.models import Household
+    from hct_mis_api.apps.household.models import Household  # pragma: no cover
 
 logger = logging.getLogger(__name__)
 
