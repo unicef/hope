@@ -46,7 +46,7 @@ pip-delete-this-directory.txt
 # Unit test / coverage reports
 htmlcov/
 .tox/
-.coverage
+.coveragep
 .coverage.*
 .cache
 nosetests.xml
@@ -91,6 +91,7 @@ celerybeat-schedule
 *.sage.py
 
 # Environments
+development_tools/.env
 .env
 .envrc
 .venv
@@ -99,6 +100,8 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+
+.pdm-python
 
 # Spyder project settings
 .spyderproject
@@ -128,3 +131,10 @@ venv.bak/
 cov.json
 
 .vscode/
+output_data/
+.coverage
+
+archive/
+output.json
+pytest_html_report.html
+compose.dist.yml
