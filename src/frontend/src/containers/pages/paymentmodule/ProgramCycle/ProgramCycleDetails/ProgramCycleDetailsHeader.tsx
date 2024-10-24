@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { Box, Button } from '@mui/material';
 import { PageHeader } from '@core/PageHeader';
 import {
@@ -24,7 +24,7 @@ interface ProgramCycleDetailsHeaderProps {
 
 export const ProgramCycleDetailsHeader = ({
   programCycle,
-}: ProgramCycleDetailsHeaderProps): React.ReactElement => {
+}: ProgramCycleDetailsHeaderProps): ReactElement => {
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
   const { t } = useTranslation();

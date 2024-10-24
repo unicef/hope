@@ -5,7 +5,7 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { Button, ListItemText, Menu, MenuItem } from '@mui/material';
 import { styled } from '@mui/system';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
@@ -30,14 +30,14 @@ interface EditProgramMenuProps {
 
 export const EditProgramMenu = ({
   program,
-}: EditProgramMenuProps): React.ReactElement => {
+}: EditProgramMenuProps): ReactElement => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { baseUrl } = useBaseUrl();
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
-  const handleClick = (event: React.MouseEvent<HTMLElement>): void => {
+  const handleClick = (event: MouseEvent<HTMLElement>): void => {
     setAnchorEl(event.currentTarget);
   };
 

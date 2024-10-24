@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { ProgramCycle } from '@api/programCycleApi';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import {
@@ -22,7 +22,7 @@ export const PaymentPlansTable = ({
   filter,
   canViewDetails,
   title,
-}: PaymentPlansTableProps): React.ReactElement => {
+}: PaymentPlansTableProps): ReactElement => {
   const { programId, businessArea } = useBaseUrl();
   const initialVariables: AllPaymentPlansForTableQueryVariables = {
     businessArea,

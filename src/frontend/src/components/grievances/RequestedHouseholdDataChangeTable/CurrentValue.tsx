@@ -1,6 +1,6 @@
-import * as React from 'react';
 import { AllEditHouseholdFieldsQuery } from '@generated/graphql';
 import { GrievanceFlexFieldPhotoModal } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModal';
+import { ReactElement } from 'react';
 
 export interface CurrentValueProps {
   field: AllEditHouseholdFieldsQuery['allEditHouseholdFieldsAttributes'][number];
@@ -10,7 +10,7 @@ export interface CurrentValueProps {
 export function CurrentValue({
   field,
   value,
-}: CurrentValueProps): React.ReactElement {
+}: CurrentValueProps): ReactElement {
   let displayValue;
   if (
     field?.name === 'country' ||

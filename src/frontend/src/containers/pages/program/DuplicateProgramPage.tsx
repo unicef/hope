@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
@@ -22,7 +21,7 @@ import { decodeIdString } from '@utils/utils';
 import { Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { hasPermissionInModule } from '../../../config/permissions';
 import { BaseSection } from '@components/core/BaseSection';
 import { ProgramFieldSeriesStep } from '@components/programs/CreateProgram/ProgramFieldSeriesStep';
@@ -69,7 +68,7 @@ export const DuplicateProgramPage = (): ReactElement => {
             areaAccess,
           }))
         : [];
-    const { editMode, ...requestValues } = values;
+    const { ...requestValues } = values;
 
     const initialPduFieldState = {
       label: '',

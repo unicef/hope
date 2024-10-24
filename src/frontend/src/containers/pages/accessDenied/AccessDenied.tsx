@@ -1,12 +1,12 @@
 import { Box, Button } from '@mui/material';
 import { Refresh } from '@mui/icons-material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import * as React from 'react';
 import styled from 'styled-components';
 import { getClient } from '../../../apollo/client';
 import { clearCache } from '@utils/utils';
 import AccessDeniedGraphic from './access_denied.png';
 import HopeLogo from './access_denied_hope_logo.png';
+import { FC } from 'react';
 
 const Container = styled.div`
   background-color: #ffffff;
@@ -48,7 +48,7 @@ const Paragraph = styled.p`
   line-height: 32px;
 `;
 
-export const AccessDenied: React.FC = () => {
+export const AccessDenied: FC = () => {
   const refreshAndClearCache = async (): Promise<void> => {
     const client = await getClient();
     await clearCache(client);

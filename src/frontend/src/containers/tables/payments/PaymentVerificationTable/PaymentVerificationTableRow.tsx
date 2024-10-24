@@ -1,4 +1,3 @@
-import * as React from 'react';
 import TableCell from '@mui/material/TableCell';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -14,6 +13,7 @@ import { StatusBox } from '@components/core/StatusBox';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { ReactElement } from 'react';
 
 interface PaymentVerificationTableRowProps {
   plan: CashPlanAndPaymentPlanNode;
@@ -23,7 +23,7 @@ interface PaymentVerificationTableRowProps {
 export function PaymentVerificationTableRow({
   plan,
   canViewDetails,
-}: PaymentVerificationTableRowProps): React.ReactElement {
+}: PaymentVerificationTableRowProps): ReactElement {
   const navigate = useNavigate();
   const { baseUrl } = useBaseUrl();
   const planVerificationPath = `/${baseUrl}/payment-verification/${

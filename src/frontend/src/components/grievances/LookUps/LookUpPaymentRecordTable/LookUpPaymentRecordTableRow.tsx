@@ -1,24 +1,19 @@
 import { Checkbox } from '@mui/material';
 import TableCell from '@mui/material/TableCell';
-import * as React from 'react';
 import { PaymentRecordAndPaymentNode } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import {
-  formatCurrencyWithSymbol,
-  paymentStatusToColor,
-} from '@utils/utils';
+import { formatCurrencyWithSymbol, paymentStatusToColor } from '@utils/utils';
 import { BlackLink } from '@core/BlackLink';
 import { StatusBox } from '@core/StatusBox';
 import { ClickableTableRow } from '@core/Table/ClickableTableRow';
+import { ReactElement } from 'react';
 
 interface LookUpPaymentRecordTableRowProps {
   paymentRecord: PaymentRecordAndPaymentNode;
   openInNewTab: boolean;
   selected: Array<PaymentRecordAndPaymentNode>;
   checkboxClickHandler: (
-    event:
-    | React.MouseEvent<HTMLButtonElement, MouseEvent>
-    | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
+    event: MouseEvent<HTMLButtonElement, MouseEvent>,
     selectedPaymentRecord: PaymentRecordAndPaymentNode,
   ) => void;
 }
@@ -27,7 +22,7 @@ export function LookUpPaymentRecordTableRow({
   paymentRecord,
   selected,
   checkboxClickHandler,
-}: LookUpPaymentRecordTableRowProps): React.ReactElement {
+}: LookUpPaymentRecordTableRowProps): ReactElement {
   const { baseUrl, isAllPrograms } = useBaseUrl();
   const isItemSelected = (item): boolean =>
     selected.some((selectedItem) => selectedItem.id === item.id);

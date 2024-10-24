@@ -1,16 +1,13 @@
-import * as React from 'react';
 import { format } from 'date-fns';
 import { DATE_FORMAT, DATE_FORMAT_LONG } from '../../config';
+import { ReactElement } from 'react';
 
 export interface Props {
   children: string;
   withTime?: boolean;
 }
 
-export function UniversalMoment({
-  children,
-  withTime,
-}: Props): React.ReactElement {
+export function UniversalMoment({ children, withTime }: Props): ReactElement {
   const dateFormat = withTime ? DATE_FORMAT_LONG : DATE_FORMAT;
   const date = children ? new Date(children) : null;
   const formattedDate = date ? format(date, dateFormat) : '-';

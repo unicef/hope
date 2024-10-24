@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import { decodeIdString, today } from '@utils/utils';
@@ -48,7 +48,7 @@ interface EditProgramCycleProps {
 export const EditProgramCycle = ({
   programCycle,
   program,
-}: EditProgramCycleProps): React.ReactElement => {
+}: EditProgramCycleProps): ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { businessArea } = useBaseUrl();

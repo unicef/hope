@@ -1,9 +1,8 @@
 import { useNavigate } from 'react-router-dom';
-import * as React from 'react';
-import { useEffect } from 'react';
+import { ReactElement, useEffect } from 'react';
 import { useCachedMe } from '@hooks/useCachedMe';
 
-export const DefaultRoute = (): React.ReactElement | null => {
+export const DefaultRoute = (): ReactElement | null => {
   const { data } = useCachedMe();
   const navigate = useNavigate();
 

@@ -1,5 +1,4 @@
 import { Box } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
@@ -18,6 +17,7 @@ import { LockedFspPaymentPlanHeaderButtons } from '../../PaymentPlanDetails/Paym
 import { LockedPaymentPlanHeaderButtons } from '../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/LockedPaymentPlanHeaderButtons';
 import { OpenPaymentPlanHeaderButtons } from '../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/OpenPaymentPlanHeaderButtons';
 import { PaymentPlanQuery } from '@generated/graphql';
+import { ReactElement } from 'react';
 
 const StatusWrapper = styled.div`
   width: 140px;
@@ -34,7 +34,7 @@ export function FollowUpPaymentPlanDetailsHeader({
   baseUrl,
   permissions,
   paymentPlan,
-}: FollowUpPaymentPlanDetailsHeaderProps): React.ReactElement {
+}: FollowUpPaymentPlanDetailsHeaderProps): ReactElement {
   const { t } = useTranslation();
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -77,7 +77,7 @@ export function FollowUpPaymentPlanDetailsHeader({
   const canSplit =
     hasPermissions(PERMISSIONS.PM_SPLIT, permissions) && paymentPlan.canSplit;
 
-  let buttons: React.ReactElement | null = null;
+  let buttons: ReactElement | null = null;
   switch (paymentPlan.status) {
     case 'OPEN':
       buttons = (

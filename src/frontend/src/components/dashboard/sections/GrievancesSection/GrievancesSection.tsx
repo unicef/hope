@@ -1,11 +1,11 @@
 import { Grid, Typography } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { formatNumber } from '@utils/utils';
 import { AllChartsQuery } from '@generated/graphql';
 import { GrievancesChart } from '../../charts/GrievancesChart';
 import { DashboardPaper } from '../../DashboardPaper';
+import { ReactElement } from 'react';
 
 const CardTitleSmaller = styled.div`
   text-transform: capitalize;
@@ -20,7 +20,7 @@ interface GrievancesSectionProps {
 
 export function GrievancesSection({
   data,
-}: GrievancesSectionProps): React.ReactElement {
+}: GrievancesSectionProps): ReactElement {
   const { t } = useTranslation();
   if (!data) return null;
   return (

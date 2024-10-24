@@ -40,7 +40,7 @@ export function RequestedIndividualDataChange({
 }: {
   ticket: GrievanceTicketQuery['grievanceTicket'];
   canApproveDataChange: boolean;
-}): React.ReactElement {
+}): ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const confirm = useConfirmation();

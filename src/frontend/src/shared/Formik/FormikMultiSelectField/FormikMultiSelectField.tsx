@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { useTheme } from '@mui/material/styles';
 import Input from '@mui/material/Input';
 import InputLabel from '@mui/material/InputLabel';
@@ -7,6 +6,7 @@ import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import Chip from '@mui/material/Chip';
 import styled from 'styled-components';
+import { ReactElement } from 'react';
 
 const StyledFormControl = styled(FormControl)`
   margin: ${(props) => props.theme.spacing(1)};
@@ -59,7 +59,7 @@ export function FormikMultiSelectField({
   label,
   choices,
   ...otherProps
-}): React.ReactElement {
+}): ReactElement {
   const theme = useTheme();
 
   const handleChange = (event): void => {

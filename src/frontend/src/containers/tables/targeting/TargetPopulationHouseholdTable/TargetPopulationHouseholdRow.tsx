@@ -1,10 +1,10 @@
-import * as React from 'react';
 import TableCell from '@mui/material/TableCell';
 import { HouseholdNode } from '@generated/graphql';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { AnonTableCell } from '@components/core/Table/AnonTableCell';
 import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { ReactElement } from 'react';
 
 interface TargetPopulationHouseholdTableRowProps {
   household: HouseholdNode;
@@ -14,7 +14,7 @@ interface TargetPopulationHouseholdTableRowProps {
 export function TargetPopulationHouseholdTableRow({
   household,
   canViewDetails,
-}): React.ReactElement<TargetPopulationHouseholdTableRowProps> {
+}): ReactElement<TargetPopulationHouseholdTableRowProps> {
   const { baseUrl } = useBaseUrl();
   const householdDetailsPath = `/${baseUrl}/population/household/${household.id}`;
   const handleClick = (): void => {

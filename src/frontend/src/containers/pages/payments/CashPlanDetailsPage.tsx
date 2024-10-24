@@ -1,6 +1,5 @@
 import { Button } from '@mui/material';
 import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -22,6 +21,7 @@ import {
 import { PaymentRecordTable } from '../../tables/payments/PaymentRecordTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { ReactElement } from 'react';
 
 const Container = styled.div`
   && {
@@ -31,7 +31,7 @@ const Container = styled.div`
   }
 `;
 
-export function CashPlanDetailsPage(): React.ReactElement {
+export function CashPlanDetailsPage(): ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
   const location = useLocation();

@@ -1,8 +1,8 @@
 import { Grid } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { LabelizedField } from '@core/LabelizedField';
 import { DashboardCard, CardTitle, CardAmountSmaller } from './DashboardCard';
+import { ReactElement } from 'react';
 
 interface GrievanceDashboardCardProps {
   topLabel: string;
@@ -18,7 +18,7 @@ export function GrievanceDashboardCard({
   systemGenerated,
   userGenerated,
   dataCy,
-}: GrievanceDashboardCardProps): React.ReactElement {
+}: GrievanceDashboardCardProps): ReactElement {
   const { t } = useTranslation();
   return (
     <DashboardCard color="#FFF">

@@ -1,5 +1,4 @@
 import { Box, Grid, Paper, Typography } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
@@ -21,6 +20,7 @@ import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { DocumentPopulationPhotoModal } from '../DocumentPopulationPhotoModal';
 import { LinkedGrievancesModal } from '../LinkedGrievancesModal/LinkedGrievancesModal';
+import { ReactElement, ReactNode } from 'react';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}
@@ -44,7 +44,7 @@ export const IndividualBioData = ({
   businessArea,
   choicesData,
   grievancesChoices,
-}: IndividualBioDataProps): React.ReactElement => {
+}: IndividualBioDataProps): ReactElement => {
   const { t } = useTranslation();
   const relationshipChoicesDict = choicesToDict(
     choicesData.relationshipChoices,
@@ -111,7 +111,7 @@ export const IndividualBioData = ({
     </Grid>
   );
 
-  const renderBankAccountInfo = (): React.ReactNode => {
+  const renderBankAccountInfo = (): ReactNode => {
     if (!individual?.bankAccountInfo) {
       return null;
     }
@@ -144,7 +144,7 @@ export const IndividualBioData = ({
     );
   };
 
-  const renderDigitalWalletInfo = (): React.ReactNode => {
+  const renderDigitalWalletInfo = (): ReactNode => {
     return (
       <>
         <Grid item xs={12}>

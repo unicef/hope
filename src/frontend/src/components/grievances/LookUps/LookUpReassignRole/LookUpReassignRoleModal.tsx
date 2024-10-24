@@ -7,8 +7,7 @@ import {
   DialogTitle,
 } from '@mui/material';
 import { Field, Formik } from 'formik';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router-dom';
 import {
@@ -53,7 +52,7 @@ export function LookUpReassignRoleModal({
   shouldUseMultiple;
   individual;
   household?;
-}): React.ReactElement {
+}): ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
   const { id } = useParams();

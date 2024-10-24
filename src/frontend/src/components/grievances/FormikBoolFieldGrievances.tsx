@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { useEffect } from 'react';
+import { ReactElement, useEffect } from 'react';
 import {
   FormControl,
   FormHelperText,
@@ -26,7 +25,7 @@ export function FormikBoolFieldGrievances({
   multiple,
   required,
   ...otherProps
-}): React.ReactElement {
+}): ReactElement {
   const isInvalid =
     get(form.errors, field.name) &&
     (get(form.touched, field.name) || form.submitCount > 0);
