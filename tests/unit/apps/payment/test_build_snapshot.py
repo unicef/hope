@@ -38,8 +38,6 @@ class TestBuildSnapshot(TestCase):
                 program_cycle=program_cycle,
                 dispersion_start_date=datetime(2020, 8, 10),
                 dispersion_end_date=datetime(2020, 12, 10),
-                # start_date=timezone.datetime(2020, 9, 10, tzinfo=utc),
-                # end_date=timezone.datetime(2020, 11, 10, tzinfo=utc),
                 is_follow_up=False,
             )
             cls.pp.unicef_id = "PP-01"
@@ -55,6 +53,8 @@ class TestBuildSnapshot(TestCase):
                 role=ROLE_PRIMARY,
                 rdi_merge_status=MergeStatusModel.MERGED,
             )
+            cls.hoh1.household = cls.hh1
+            cls.hoh1.save()
             DeliveryMechanismDataFactory(
                 individual=cls.hoh1,
                 delivery_mechanism=cls.dm_atm_card,
@@ -99,7 +99,7 @@ class TestBuildSnapshot(TestCase):
         self.assertEqual(len(self.p2.household_snapshot.snapshot_data["individuals"]), self.hh2.individuals.count())
         self.assertIsNotNone(self.p1.household_snapshot.snapshot_data["primary_collector"])
         self.assertEqual(
-            self.p1.household_snapshot.snapshot_data["primary_collector"]["delivery_mechanisms_data"],
+            self.p1.household_snapshot.snapshot_data["primary_collector"].get("delivery_mechanisms_data", {}),
             {
                 "atm_card": {
                     "card_expiry_date__atm_card": "2022-01-01",
@@ -118,8 +118,6 @@ class TestBuildSnapshot(TestCase):
             program_cycle=program_cycle,
             dispersion_start_date=datetime(2020, 8, 10),
             dispersion_end_date=datetime(2020, 12, 10),
-            # start_date=timezone.datetime(2020, 9, 10, tzinfo=utc),
-            # end_date=timezone.datetime(2020, 11, 10, tzinfo=utc),
             is_follow_up=False,
         )
         pp.unicef_id = "PP-02"

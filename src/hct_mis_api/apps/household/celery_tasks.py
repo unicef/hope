@@ -1,7 +1,10 @@
+import hashlib
+import json
 import logging
 from typing import List, Optional
 from uuid import UUID
 
+from django.core.cache import cache
 from django.core.paginator import Paginator
 from django.db import transaction
 from django.utils import timezone
@@ -204,14 +207,30 @@ def revalidate_phone_number_task(individual_ids: List[UUID]) -> None:
 @log_start_and_end
 @sentry_tags
 def enroll_households_to_program_task(households_ids: List, program_for_enroll_id: str, user_id: str) -> None:
-    households = Household.objects.filter(pk__in=households_ids)
-    program_for_enroll = Program.objects.get(id=program_for_enroll_id)
-    enroll_households_to_program(households, program_for_enroll, user_id)
-    populate_index(
-        Individual.objects.filter(program=program_for_enroll),
-        get_individual_doc(program_for_enroll.business_area.slug),
-    )
-    populate_index(Household.objects.filter(program=program_for_enroll), HouseholdDocument)
+    task_params = {
+        "task_name": "enroll_households_to_program_task",
+        "household_ids": sorted([str(household_id) for household_id in households_ids]),
+        "program_for_enroll_id": program_for_enroll_id,
+    }
+    task_params_str = json.dumps(task_params, sort_keys=True)
+    cache_key = hashlib.sha256(task_params_str.encode()).hexdigest()
+    if cache.get(cache_key):
+        logger.info("Task enroll_households_to_program_task with this data is already running.")
+        return
+
+    # 1 day timeout
+    cache.set(cache_key, True, timeout=24 * 60 * 60)
+    try:
+        households = Household.objects.filter(pk__in=households_ids)
+        program_for_enroll = Program.objects.get(id=program_for_enroll_id)
+        enroll_households_to_program(households, program_for_enroll, user_id)
+        populate_index(
+            Individual.objects.filter(program=program_for_enroll),
+            get_individual_doc(program_for_enroll.business_area.slug),
+        )
+        populate_index(Household.objects.filter(program=program_for_enroll), HouseholdDocument)
+    finally:
+        cache.delete(cache_key)
 
 
 @app.task()

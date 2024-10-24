@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { SetUpFspCore } from '@components/paymentmodule/CreateSetUpFsp/SetUpFspCore/SetUpFspCore';
@@ -7,9 +7,11 @@ import { EditSetUpFspHeader } from '@components/paymentmodule/EditSetUpFsp/EditS
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { usePaymentPlanQuery } from '@generated/graphql';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
 export function EditFollowUpSetUpFspPage(): React.ReactElement {
   const { paymentPlanId } = useParams();
+  const location = useLocation();
 
   const { data: paymentPlanData, loading: paymentPlanLoading } =
     usePaymentPlanQuery({
@@ -29,7 +31,7 @@ export function EditFollowUpSetUpFspPage(): React.ReactElement {
 
   const mappedInitialDeliveryMechanisms =
     paymentPlanData.paymentPlan.deliveryMechanisms.map((el) => ({
-      deliveryMechanism: el.name,
+      deliveryMechanism: el.code,
       fsp: el.fsp?.id || '',
       chosenConfiguration: el.chosenConfiguration || '',
     }));
@@ -39,9 +41,16 @@ export function EditFollowUpSetUpFspPage(): React.ReactElement {
   };
 
   return (
-    <>
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'EditFollowUpSetUpFspPage.tsx');
+      }}
+      componentName="EditFollowUpSetUpFspPage"
+    >
       <EditSetUpFspHeader permissions={permissions} />
       <SetUpFspCore permissions={permissions} initialValues={initialValues} />
-    </>
+    </UniversalErrorBoundary>
   );
 }

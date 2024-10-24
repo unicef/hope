@@ -17,6 +17,7 @@ import { useProgramQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { TargetPopulationForPeopleTable } from '@containers/tables/targeting/TargetPopulationForPeopleTable';
 import { TargetPopulationForPeopleFilters } from '@components/targeting/TargetPopulationForPeopleFilters';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
 const initialFilter = {
   name: '',
@@ -57,35 +58,44 @@ export const TargetPopulationsPage = (): React.ReactElement => {
     Filters = TargetPopulationForPeopleFilters;
   }
   return (
-    <>
-      <PageHeader title={t('Targeting')}>
-        <>
-          <IconButton
-            onClick={() => setToggleInfo(true)}
-            color="primary"
-            aria-label="Targeting Information"
-            data-cy="button-target-population-info"
-          >
-            <Info />
-          </IconButton>
-          <TargetingInfoDialog open={isInfoOpen} setOpen={setToggleInfo} />
-          {canCreate && <CreateTPMenu />}
-        </>
-      </PageHeader>
-      <Filters
-        filter={filter}
-        setFilter={setFilter}
-        initialFilter={initialFilter}
-        appliedFilter={appliedFilter}
-        setAppliedFilter={setAppliedFilter}
-      />
-      <Table
-        filter={appliedFilter}
-        canViewDetails={hasPermissions(
-          PERMISSIONS.TARGETING_VIEW_DETAILS,
-          permissions,
-        )}
-      />
-    </>
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'TargetPopulationsPage.tsx');
+      }}
+      componentName="TargetPopulationsPage"
+    >
+      <>
+        <PageHeader title={t('Targeting')}>
+          <>
+            <IconButton
+              onClick={() => setToggleInfo(true)}
+              color="primary"
+              aria-label="Targeting Information"
+              data-cy="button-target-population-info"
+            >
+              <Info />
+            </IconButton>
+            <TargetingInfoDialog open={isInfoOpen} setOpen={setToggleInfo} />
+            {canCreate && <CreateTPMenu />}
+          </>
+        </PageHeader>
+        <Filters
+          filter={filter}
+          setFilter={setFilter}
+          initialFilter={initialFilter}
+          appliedFilter={appliedFilter}
+          setAppliedFilter={setAppliedFilter}
+        />
+        <Table
+          filter={appliedFilter}
+          canViewDetails={hasPermissions(
+            PERMISSIONS.TARGETING_VIEW_DETAILS,
+            permissions,
+          )}
+        />
+      </>
+    </UniversalErrorBoundary>
   );
 };

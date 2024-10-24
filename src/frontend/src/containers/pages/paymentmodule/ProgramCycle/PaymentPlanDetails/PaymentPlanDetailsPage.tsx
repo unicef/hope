@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { usePermissions } from '@hooks/usePermissions';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import {
@@ -23,10 +23,12 @@ import { PaymentsTable } from '@containers/tables/paymentmodule/PaymentsTable';
 import { ReconciliationSummary } from '@components/paymentmodule/PaymentPlanDetails/ReconciliationSummary';
 import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityLogTable';
 import { SupportingDocumentsSection } from '@components/paymentmodule/PaymentPlanDetails/SupportingDocumentsSection/SupportingDocumentsSection';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
 export const PaymentPlanDetailsPage = (): React.ReactElement => {
   const { paymentPlanId } = useParams();
   const permissions = usePermissions();
+  const location = useLocation();
   const { baseUrl, businessArea } = useBaseUrl();
   const { data, loading, startPolling, stopPolling, error } =
     usePaymentPlanQuery({
@@ -73,38 +75,50 @@ export const PaymentPlanDetailsPage = (): React.ReactElement => {
   const { paymentPlan } = data;
 
   return (
-    <Box display="flex" flexDirection="column">
-      <PaymentPlanDetailsHeader
-        paymentPlan={paymentPlan}
-        permissions={permissions}
-      />
-      <PaymentPlanDetails baseUrl={baseUrl} paymentPlan={paymentPlan} />
-      {status !== PaymentPlanStatus.Preparing && (
-        <>
-          <AcceptanceProcess paymentPlan={paymentPlan} />
-          {shouldDisplayEntitlement && (
-            <Entitlement paymentPlan={paymentPlan} permissions={permissions} />
-          )}
-          {shouldDisplayFsp && (
-            <FspSection baseUrl={baseUrl} paymentPlan={paymentPlan} />
-          )}
-          <ExcludeSection paymentPlan={paymentPlan} />
-          <SupportingDocumentsSection paymentPlan={paymentPlan} />
-          <PaymentPlanDetailsResults paymentPlan={paymentPlan} />
-          <PaymentsTable
-            businessArea={businessArea}
-            paymentPlan={paymentPlan}
-            permissions={permissions}
-            canViewDetails
-          />
-          {shouldDisplayReconciliationSummary && (
-            <ReconciliationSummary paymentPlan={paymentPlan} />
-          )}
-        </>
-      )}
-      {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
-        <UniversalActivityLogTable objectId={paymentPlan.id} />
-      )}
-    </Box>
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'PaymentPlanDetailsPage.tsx');
+      }}
+      componentName="PaymentPlanDetailsPage"
+    >
+      <Box display="flex" flexDirection="column">
+        <PaymentPlanDetailsHeader
+          paymentPlan={paymentPlan}
+          permissions={permissions}
+        />
+        <PaymentPlanDetails baseUrl={baseUrl} paymentPlan={paymentPlan} />
+        {status !== PaymentPlanStatus.Preparing && (
+          <>
+            <AcceptanceProcess paymentPlan={paymentPlan} />
+            {shouldDisplayEntitlement && (
+              <Entitlement
+                paymentPlan={paymentPlan}
+                permissions={permissions}
+              />
+            )}
+            {shouldDisplayFsp && (
+              <FspSection baseUrl={baseUrl} paymentPlan={paymentPlan} />
+            )}
+            <ExcludeSection paymentPlan={paymentPlan} />
+            <SupportingDocumentsSection paymentPlan={paymentPlan} />
+            <PaymentPlanDetailsResults paymentPlan={paymentPlan} />
+            <PaymentsTable
+              businessArea={businessArea}
+              paymentPlan={paymentPlan}
+              permissions={permissions}
+              canViewDetails
+            />
+            {shouldDisplayReconciliationSummary && (
+              <ReconciliationSummary paymentPlan={paymentPlan} />
+            )}
+          </>
+        )}
+        {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
+          <UniversalActivityLogTable objectId={paymentPlan.id} />
+        )}
+      </Box>
+    </UniversalErrorBoundary>
   );
 };

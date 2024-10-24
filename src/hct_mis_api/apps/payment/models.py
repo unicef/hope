@@ -66,16 +66,8 @@ from hct_mis_api.apps.core.field_attributes.fields_types import (
 )
 from hct_mis_api.apps.core.mixins import LimitBusinessAreaModelMixin
 from hct_mis_api.apps.core.models import BusinessArea, FileTemp, FlexibleAttribute
-from hct_mis_api.apps.core.utils import nested_getattr
-from hct_mis_api.apps.household.models import (
-    FEMALE,
-    IDENTIFICATION_TYPE_NATIONAL_ID,
-    MALE,
-    ROLE_ALTERNATE,
-    Document,
-    Individual,
-    IndividualRoleInHousehold,
-)
+from hct_mis_api.apps.geo.models import Area, Country
+from hct_mis_api.apps.household.models import FEMALE, MALE, Individual
 from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.fields import DynamicChoiceArrayField
 from hct_mis_api.apps.payment.managers import PaymentManager
@@ -95,7 +87,6 @@ from hct_mis_api.apps.utils.models import (
 if TYPE_CHECKING:
     from hct_mis_api.apps.account.models import User
     from hct_mis_api.apps.core.exchange_rates.api import ExchangeRateClient
-    from hct_mis_api.apps.geo.models import Area
     from hct_mis_api.apps.grievance.models import GrievanceTicket
     from hct_mis_api.apps.program.models import Program
 
@@ -1192,21 +1183,77 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         blank=True,
     )
 
-    @classmethod
+    @staticmethod
+    def get_data_from_payment_snapshot(
+        household_data: Dict[str, Any],
+        core_field: Dict[str, Any],
+        delivery_mechanism_data: Optional["DeliveryMechanismData"] = None,
+    ) -> Optional[str]:
+        core_field_name = core_field["name"]
+        collector_data = household_data.get("primary_collector") or household_data.get("alternate_collector") or dict()
+        primary_collector = household_data.get("primary_collector", {})
+        alternate_collector = household_data.get("alternate_collector", {})
+
+        if delivery_mechanism_data and core_field["associated_with"] == _DELIVERY_MECHANISM_DATA:
+            delivery_mech_data = collector_data.get("delivery_mechanisms_data", {}).get(
+                delivery_mechanism_data.delivery_mechanism.code, {}
+            )
+            return delivery_mech_data.get(core_field_name, None)
+
+        lookup = core_field["lookup"]
+        main_key = None  # just help find specific field from snapshot
+        snapshot_field_path = core_field.get("snapshot_field")
+        if snapshot_field_path:
+            snapshot_field_path_split = snapshot_field_path.split("__")
+            main_key = snapshot_field_path.split("__")[0] if len(snapshot_field_path_split) > 0 else None
+
+            if main_key in {"country_origin_id", "country_id"}:
+                country = Country.objects.filter(pk=household_data.get(main_key)).first()
+                return country.iso_code3 if country else None
+
+            if main_key in {"admin1_id", "admin2_id", "admin3_id", "admin4_id", "admin_area_id"}:
+                area = Area.objects.filter(pk=household_data.get(main_key)).first()
+                return area.p_code if area else None
+
+            if main_key == "roles":
+                lookup_id = primary_collector.get("id") or alternate_collector.get("id")
+                if not lookup_id:
+                    return None
+
+                for role in household_data.get("roles", []):
+                    individual = role.get("individual", {})
+                    if individual.get("id") == lookup_id:
+                        return role.get("role")
+                # return None if role not found
+                return None
+
+            if main_key in {"primary_collector", "alternate_collector"}:
+                return household_data.get(main_key, {}).get("id")
+
+            if main_key == "bank_account_info":
+                bank_account_info_lookup = snapshot_field_path_split[1]
+                return collector_data.get("bank_account_info", {}).get(bank_account_info_lookup)
+
+            if main_key == "documents":
+                doc_type, doc_lookup = snapshot_field_path_split[1], snapshot_field_path_split[2]
+                documents_list = collector_data.get("documents", [])
+                documents_dict = {doc.get("type"): doc for doc in documents_list}
+                return documents_dict.get(doc_type, {}).get(doc_lookup)
+
+        if core_field["associated_with"] == _INDIVIDUAL:
+            return collector_data.get(lookup, None) or collector_data.get(main_key, None)
+
+        if core_field["associated_with"] == _HOUSEHOLD:
+            return household_data.get(lookup, None)
+
+        return None
+
+    @staticmethod
     def get_column_from_core_field(
-        cls,
         payment: "Payment",
         core_field_name: str,
         delivery_mechanism_data: Optional["DeliveryMechanismData"] = None,
     ) -> Any:
-        def parse_admin_area(obj: "Area") -> str:
-            if not obj:
-                return ""  # pragma: no cover
-            return f"{obj.p_code} - {obj.name}"
-
-        collector = payment.collector
-        household = payment.household
-
         core_fields_attributes = FieldFactory(get_core_fields_attributes()).to_dict_by("name")
         core_field = core_fields_attributes.get(core_field_name)
         if not core_field:
@@ -1214,51 +1261,37 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             # which are not applicable to "People" export.
             return None
 
-        if delivery_mechanism_data and core_field["associated_with"] == _DELIVERY_MECHANISM_DATA:
-            return delivery_mechanism_data.delivery_data.get(core_field_name, None)
+        snapshot = getattr(payment, "household_snapshot", None)
+        if not snapshot:
+            logger.error(f"Not found snapshot for Payment {payment.unicef_id}")
+            return None
 
-        lookup = core_field["lookup"]
-        lookup = lookup.replace("__", ".")
+        snapshot_data = FinancialServiceProviderXlsxTemplate.get_data_from_payment_snapshot(
+            snapshot.snapshot_data, core_field, delivery_mechanism_data
+        )
 
-        if core_field["associated_with"] == _INDIVIDUAL:
-            if lookup_function := core_field.get("lookup_function"):
-                return lookup_function(collector)
-            return nested_getattr(collector, lookup, None)
-
-        if core_field["associated_with"] == _HOUSEHOLD:
-            if core_field_name in {"admin1", "admin2", "admin3", "admin4"}:
-                admin_area = getattr(household, core_field_name)
-                return parse_admin_area(admin_area)
-            return nested_getattr(household, lookup, None)
-
-        return None  # pragma: no cover
+        return snapshot_data
 
     @classmethod
-    def get_column_value_from_payment(cls, payment: "Payment", column_name: str) -> Union[str, float, list]:
+    def get_column_value_from_payment(cls, payment: "Payment", column_name: str) -> Union[str, float, list, None]:
         # we can get if needed payment.parent.program.is_social_worker_program
-        alternate_collector = None
-        alternate_collector_column_names = (
-            "alternate_collector_full_name",
-            "alternate_collector_given_name",
-            "alternate_collector_middle_name",
-            "alternate_collector_sex",
-            "alternate_collector_phone_no",
-            "alternate_collector_document_numbers",
-        )
-        if column_name in alternate_collector_column_names:
-            if ind_role := IndividualRoleInHousehold.objects.filter(
-                household=payment.household, role=ROLE_ALTERNATE
-            ).first():
-                alternate_collector = ind_role.individual
+        snapshot = getattr(payment, "household_snapshot", None)
+        if not snapshot:
+            logger.error(f"Not found snapshot for Payment {payment.unicef_id}")
+            return None
+        snapshot_data = snapshot.snapshot_data
+        primary_collector = snapshot_data.get("primary_collector", {})
+        alternate_collector = snapshot_data.get("alternate_collector", {})
+        collector_data = primary_collector or alternate_collector or dict()
 
         map_obj_name_column = {
             "payment_id": (payment, "unicef_id"),
-            "individual_id": (payment.household.individuals.first(), "unicef_id"),  # add for people export
-            "household_id": (payment.household, "unicef_id"),  # remove for people export
-            "household_size": (payment.household, "size"),  # remove for people export
-            "admin_level_2": (payment.household.admin2, "name"),
-            "village": (payment.household, "village"),
-            "collector_name": (payment.collector, "full_name"),
+            "individual_id": (collector_data, "unicef_id"),  # add for people export
+            "household_id": (snapshot_data, "unicef_id"),  # remove for people export
+            "household_size": (snapshot_data, "size"),  # remove for people export
+            "admin_level_2": (snapshot_data, "admin2"),
+            "village": (snapshot_data, "village"),
+            "collector_name": (collector_data, "full_name"),
             "alternate_collector_full_name": (alternate_collector, "full_name"),
             "alternate_collector_given_name": (alternate_collector, "given_name"),
             "alternate_collector_middle_name": (alternate_collector, "middle_name"),
@@ -1280,15 +1313,20 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             "additional_document_type": (payment, "additional_document_type"),
             "additional_document_number": (payment, "additional_document_number"),
             "status": (payment, "payment_status"),
-            "transaction_status_blockchain_link": (payment, "transaction_status_blockchain_link"),
+            "transaction_status_blockchain_link": (
+                payment,
+                "transaction_status_blockchain_link",
+            ),
         }
         additional_columns = {
             "registration_token": cls.get_registration_token_doc_number,
             "national_id": cls.get_national_id_doc_number,
+            "admin_level_2": cls.get_admin_level_2,
+            "alternate_collector_document_numbers": cls.get_alternate_collector_doc_numbers,
         }
         if column_name in additional_columns:
             method = additional_columns[column_name]
-            return method(payment)
+            return method(snapshot_data)
 
         if column_name not in map_obj_name_column:
             return "wrong_column_name"
@@ -1296,31 +1334,43 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             return float(-1)
         if column_name == "delivery_date" and payment.delivery_date is not None:
             return str(payment.delivery_date)
-        if column_name == "alternate_collector_document_numbers" and alternate_collector:
-            return (
-                list(
-                    alternate_collector.documents.filter(status=Document.STATUS_VALID).values_list(
-                        "document_number", flat=True
-                    )
-                )
-                or ""
-            )
+
         obj, nested_field = map_obj_name_column[column_name]
+        # return if obj is dictionary from snapshot
+        if isinstance(obj, dict):
+            return obj.get(nested_field, "")
+        # return if obj is model
         return getattr(obj, nested_field, None) or ""
 
     @staticmethod
-    def get_registration_token_doc_number(payment: "Payment") -> str:
-        doc = Document.objects.filter(individual=payment.collector, type__key="registration_token").first()
-        return doc.document_number if doc else ""
+    def get_registration_token_doc_number(snapshot_data: Dict[str, Any]) -> str:
+        collector_data = (
+            snapshot_data.get("primary_collector", {}) or snapshot_data.get("alternate_collector", {}) or dict()
+        )
+        documents_list = collector_data.get("documents", [])
+        documents_dict = {doc.get("type"): doc for doc in documents_list}
+        return documents_dict.get("registration_token", {}).get("document_number", "")
 
     @staticmethod
-    def get_national_id_doc_number(payment: "Payment") -> str:
-        doc = Document.objects.filter(
-            individual=payment.collector,
-            type__key=IDENTIFICATION_TYPE_NATIONAL_ID.lower(),
-            status=Document.STATUS_VALID,
-        ).first()
-        return doc.document_number if doc else ""
+    def get_national_id_doc_number(snapshot_data: Dict[str, Any]) -> str:
+        collector_data = (
+            snapshot_data.get("primary_collector", {}) or snapshot_data.get("alternate_collector", {}) or dict()
+        )
+        documents_list = collector_data.get("documents", [])
+        documents_dict = {doc.get("type"): doc for doc in documents_list}
+        return documents_dict.get("national_id", {}).get("document_number", "")
+
+    @staticmethod
+    def get_alternate_collector_doc_numbers(snapshot_data: Dict[str, Any]) -> str:
+        alternate_collector_data = snapshot_data.get("alternate_collector", {}) or dict()
+        doc_list = alternate_collector_data.get("documents", [])
+        doc_numbers = [doc.get("document_number", "") for doc in doc_list]
+        return ", ".join(doc_numbers)
+
+    @staticmethod
+    def get_admin_level_2(snapshot_data: Dict[str, Any]) -> str:
+        area = Area.objects.filter(pk=snapshot_data.get("admin2_id")).first()
+        return area.name if area else ""
 
     def __str__(self) -> str:
         return f"{self.name} ({len(self.columns) + len(self.core_fields)})"

@@ -3,10 +3,10 @@
 exports[`components/population/IndividualBioData should render 1`] = `
 <div>
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-fmKFGs khJLEe css-1ps6pg7-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-eOzmre jYcykM css-1ps6pg7-MuiPaper-root"
   >
     <div
-      class="sc-dmyCSP ljiJAm"
+      class="sc-egkSDF flCGEE"
     >
       <h6
         class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
@@ -22,7 +22,7 @@ exports[`components/population/IndividualBioData should render 1`] = `
       >
         <div>
           <span
-            class="sc-beySPh gbuZtJ"
+            class="sc-blHHSb dUfUKp"
             color="textSecondary"
           >
             Full Name
@@ -31,7 +31,7 @@ exports[`components/population/IndividualBioData should render 1`] = `
             data-cy="label-Full Name"
           >
             <span
-              class="sc-guDLey cyWTlF"
+              class="sc-gtLWhw dynQwi"
               color="textSecondary"
             >
               Jan Romaniak
@@ -44,7 +44,7 @@ exports[`components/population/IndividualBioData should render 1`] = `
       >
         <div>
           <span
-            class="sc-beySPh gbuZtJ"
+            class="sc-blHHSb dUfUKp"
             color="textSecondary"
           >
             Given Name
@@ -53,7 +53,7 @@ exports[`components/population/IndividualBioData should render 1`] = `
             data-cy="label-Given Name"
           >
             <span
-              class="sc-guDLey cyWTlF"
+              class="sc-gtLWhw dynQwi"
               color="textSecondary"
             >
               Jan
@@ -66,7 +66,7 @@ exports[`components/population/IndividualBioData should render 1`] = `
       >
         <div>
           <span
-            class="sc-beySPh gbuZtJ"
+            class="sc-blHHSb dUfUKp"
             color="textSecondary"
           >
             Middle Name
@@ -83,7 +83,7 @@ exports[`components/population/IndividualBioData should render 1`] = `
       >
         <div>
           <span
-            class="sc-beySPh gbuZtJ"
+            class="sc-blHHSb dUfUKp"
             color="textSecondary"
           >
             Family Name
@@ -92,7 +92,7 @@ exports[`components/population/IndividualBioData should render 1`] = `
             data-cy="label-Family Name"
           >
             <span
-              class="sc-guDLey cyWTlF"
+              class="sc-gtLWhw dynQwi"
               color="textSecondary"
             >
               Romaniak
@@ -105,7 +105,7 @@ exports[`components/population/IndividualBioData should render 1`] = `
       >
         <div>
           <span
-            class="sc-beySPh gbuZtJ"
+            class="sc-blHHSb dUfUKp"
             color="textSecondary"
           >
             Gender
@@ -114,7 +114,7 @@ exports[`components/population/IndividualBioData should render 1`] = `
             data-cy="label-Gender"
           >
             <span
-              class="sc-guDLey cyWTlF"
+              class="sc-gtLWhw dynQwi"
               color="textSecondary"
             >
               Male
@@ -127,7 +127,7 @@ exports[`components/population/IndividualBioData should render 1`] = `
       >
         <div>
           <span
-            class="sc-beySPh gbuZtJ"
+            class="sc-blHHSb dUfUKp"
             color="textSecondary"
           >
             Age
@@ -136,7 +136,7 @@ exports[`components/population/IndividualBioData should render 1`] = `
             data-cy="label-Age"
           >
             <span
-              class="sc-guDLey cyWTlF"
+              class="sc-gtLWhw dynQwi"
               color="textSecondary"
             >
               121
@@ -149,7 +149,7 @@ exports[`components/population/IndividualBioData should render 1`] = `
       >
         <div>
           <span
-            class="sc-beySPh gbuZtJ"
+            class="sc-blHHSb dUfUKp"
             color="textSecondary"
           >
             Date of Birth
@@ -158,7 +158,7 @@ exports[`components/population/IndividualBioData should render 1`] = `
             data-cy="label-Date of Birth"
           >
             <span
-              class="sc-guDLey cyWTlF"
+              class="sc-gtLWhw dynQwi"
               color="textSecondary"
             >
               <time
@@ -175,7 +175,7 @@ exports[`components/population/IndividualBioData should render 1`] = `
       >
         <div>
           <span
-            class="sc-beySPh gbuZtJ"
+            class="sc-blHHSb dUfUKp"
             color="textSecondary"
           >
             Estimated Date of Birth
@@ -184,7 +184,7 @@ exports[`components/population/IndividualBioData should render 1`] = `
             data-cy="label-Estimated Date of Birth"
           >
             <span
-              class="sc-guDLey cyWTlF"
+              class="sc-gtLWhw dynQwi"
               color="textSecondary"
             >
               No
@@ -197,7 +197,7 @@ exports[`components/population/IndividualBioData should render 1`] = `
       >
         <div>
           <span
-            class="sc-beySPh gbuZtJ"
+            class="sc-blHHSb dUfUKp"
             color="textSecondary"
           >
             Marital Status
@@ -206,7 +206,7 @@ exports[`components/population/IndividualBioData should render 1`] = `
             data-cy="label-Marital Status"
           >
             <span
-              class="sc-guDLey cyWTlF"
+              class="sc-gtLWhw dynQwi"
               color="textSecondary"
             >
               Married
@@ -219,7 +219,7 @@ exports[`components/population/IndividualBioData should render 1`] = `
       >
         <div>
           <span
-            class="sc-beySPh gbuZtJ"
+            class="sc-blHHSb dUfUKp"
             color="textSecondary"
           >
             Work Status
@@ -228,7 +228,7 @@ exports[`components/population/IndividualBioData should render 1`] = `
             data-cy="label-Work Status"
           >
             <span
-              class="sc-guDLey cyWTlF"
+              class="sc-gtLWhw dynQwi"
               color="textSecondary"
             >
               Not provided
@@ -241,7 +241,7 @@ exports[`components/population/IndividualBioData should render 1`] = `
       >
         <div>
           <span
-            class="sc-beySPh gbuZtJ"
+            class="sc-blHHSb dUfUKp"
             color="textSecondary"
           >
             Pregnant
@@ -250,7 +250,7 @@ exports[`components/population/IndividualBioData should render 1`] = `
             data-cy="label-Pregnant"
           >
             <span
-              class="sc-guDLey cyWTlF"
+              class="sc-gtLWhw dynQwi"
               color="textSecondary"
             >
               No
@@ -263,7 +263,7 @@ exports[`components/population/IndividualBioData should render 1`] = `
       >
         <div>
           <span
-            class="sc-beySPh gbuZtJ"
+            class="sc-blHHSb dUfUKp"
             color="textSecondary"
           >
             Role
@@ -272,7 +272,7 @@ exports[`components/population/IndividualBioData should render 1`] = `
             data-cy="label-Role"
           >
             <span
-              class="sc-guDLey cyWTlF"
+              class="sc-gtLWhw dynQwi"
               color="textSecondary"
             >
               None
@@ -285,7 +285,7 @@ exports[`components/population/IndividualBioData should render 1`] = `
       >
         <div>
           <span
-            class="sc-beySPh gbuZtJ"
+            class="sc-blHHSb dUfUKp"
             color="textSecondary"
           >
             Preferred language
@@ -302,7 +302,7 @@ exports[`components/population/IndividualBioData should render 1`] = `
       >
         <div>
           <span
-            class="sc-beySPh gbuZtJ"
+            class="sc-blHHSb dUfUKp"
             color="textSecondary"
           >
             Residence Status
@@ -319,7 +319,7 @@ exports[`components/population/IndividualBioData should render 1`] = `
       >
         <div>
           <span
-            class="sc-beySPh gbuZtJ"
+            class="sc-blHHSb dUfUKp"
             color="textSecondary"
           >
             Country
@@ -336,7 +336,7 @@ exports[`components/population/IndividualBioData should render 1`] = `
       >
         <div>
           <span
-            class="sc-beySPh gbuZtJ"
+            class="sc-blHHSb dUfUKp"
             color="textSecondary"
           >
             Country of Origin
@@ -345,7 +345,7 @@ exports[`components/population/IndividualBioData should render 1`] = `
             data-cy="label-Country of Origin"
           >
             <span
-              class="sc-guDLey cyWTlF"
+              class="sc-gtLWhw dynQwi"
               color="textSecondary"
             >
               San Marino
@@ -358,7 +358,7 @@ exports[`components/population/IndividualBioData should render 1`] = `
       >
         <div>
           <span
-            class="sc-beySPh gbuZtJ"
+            class="sc-blHHSb dUfUKp"
             color="textSecondary"
           >
             Address
@@ -367,7 +367,7 @@ exports[`components/population/IndividualBioData should render 1`] = `
             data-cy="label-Address"
           >
             <span
-              class="sc-guDLey cyWTlF"
+              class="sc-gtLWhw dynQwi"
               color="textSecondary"
             >
               938 Luna Cliffs Apt. 551
@@ -381,7 +381,7 @@ Jameschester, SC 24934
       >
         <div>
           <span
-            class="sc-beySPh gbuZtJ"
+            class="sc-blHHSb dUfUKp"
             color="textSecondary"
           >
             Vilage
@@ -398,7 +398,7 @@ Jameschester, SC 24934
       >
         <div>
           <span
-            class="sc-beySPh gbuZtJ"
+            class="sc-blHHSb dUfUKp"
             color="textSecondary"
           >
             Zip Code
@@ -415,7 +415,7 @@ Jameschester, SC 24934
       >
         <div>
           <span
-            class="sc-beySPh gbuZtJ"
+            class="sc-blHHSb dUfUKp"
             color="textSecondary"
           >
             Administrative Level 1
@@ -424,7 +424,7 @@ Jameschester, SC 24934
             data-cy="label-Administrative Level 1"
           >
             <span
-              class="sc-guDLey cyWTlF"
+              class="sc-gtLWhw dynQwi"
               color="textSecondary"
             >
               Ghazni
@@ -437,7 +437,7 @@ Jameschester, SC 24934
       >
         <div>
           <span
-            class="sc-beySPh gbuZtJ"
+            class="sc-blHHSb dUfUKp"
             color="textSecondary"
           >
             Administrative Level 2
@@ -446,7 +446,7 @@ Jameschester, SC 24934
             data-cy="label-Administrative Level 2"
           >
             <span
-              class="sc-guDLey cyWTlF"
+              class="sc-gtLWhw dynQwi"
               color="textSecondary"
             >
               Abband
@@ -459,7 +459,7 @@ Jameschester, SC 24934
       >
         <div>
           <span
-            class="sc-beySPh gbuZtJ"
+            class="sc-blHHSb dUfUKp"
             color="textSecondary"
           >
             Administrative Level 3
@@ -476,7 +476,7 @@ Jameschester, SC 24934
       >
         <div>
           <span
-            class="sc-beySPh gbuZtJ"
+            class="sc-blHHSb dUfUKp"
             color="textSecondary"
           >
             Administrative Level 4
@@ -493,7 +493,7 @@ Jameschester, SC 24934
       >
         <div>
           <span
-            class="sc-beySPh gbuZtJ"
+            class="sc-blHHSb dUfUKp"
             color="textSecondary"
           >
             Geolocation
@@ -502,7 +502,7 @@ Jameschester, SC 24934
             data-cy="label-Geolocation"
           >
             <span
-              class="sc-guDLey cyWTlF"
+              class="sc-gtLWhw dynQwi"
               color="textSecondary"
             >
               -
@@ -515,7 +515,7 @@ Jameschester, SC 24934
       >
         <div>
           <span
-            class="sc-beySPh gbuZtJ"
+            class="sc-blHHSb dUfUKp"
             color="textSecondary"
           >
             Data Collecting Type
@@ -524,7 +524,7 @@ Jameschester, SC 24934
             data-cy="label-Data Collecting Type"
           >
             <span
-              class="sc-guDLey cyWTlF"
+              class="sc-gtLWhw dynQwi"
               color="textSecondary"
             >
               data collecting type
@@ -536,7 +536,7 @@ Jameschester, SC 24934
         class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 css-1idn90j-MuiGrid-root"
       >
         <div
-          class="sc-fHejqy hpSvKY"
+          class="sc-eauhAA glRDYa"
         />
       </div>
       <div
@@ -544,7 +544,7 @@ Jameschester, SC 24934
       >
         <div>
           <span
-            class="sc-beySPh gbuZtJ"
+            class="sc-blHHSb dUfUKp"
             color="textSecondary"
           >
             Observed disabilities
@@ -561,7 +561,7 @@ Jameschester, SC 24934
       >
         <div>
           <span
-            class="sc-beySPh gbuZtJ"
+            class="sc-blHHSb dUfUKp"
             color="textSecondary"
           >
             Seeing disability severity
@@ -570,7 +570,7 @@ Jameschester, SC 24934
             data-cy="label-Seeing disability severity"
           >
             <span
-              class="sc-guDLey cyWTlF"
+              class="sc-gtLWhw dynQwi"
               color="textSecondary"
             >
               None
@@ -583,7 +583,7 @@ Jameschester, SC 24934
       >
         <div>
           <span
-            class="sc-beySPh gbuZtJ"
+            class="sc-blHHSb dUfUKp"
             color="textSecondary"
           >
             Hearing disability severity
@@ -592,7 +592,7 @@ Jameschester, SC 24934
             data-cy="label-Hearing disability severity"
           >
             <span
-              class="sc-guDLey cyWTlF"
+              class="sc-gtLWhw dynQwi"
               color="textSecondary"
             >
               None
@@ -605,7 +605,7 @@ Jameschester, SC 24934
       >
         <div>
           <span
-            class="sc-beySPh gbuZtJ"
+            class="sc-blHHSb dUfUKp"
             color="textSecondary"
           >
             Physical disability severity
@@ -614,7 +614,7 @@ Jameschester, SC 24934
             data-cy="label-Physical disability severity"
           >
             <span
-              class="sc-guDLey cyWTlF"
+              class="sc-gtLWhw dynQwi"
               color="textSecondary"
             >
               None
@@ -627,7 +627,7 @@ Jameschester, SC 24934
       >
         <div>
           <span
-            class="sc-beySPh gbuZtJ"
+            class="sc-blHHSb dUfUKp"
             color="textSecondary"
           >
             Remembering or concentrating disability severity
@@ -636,7 +636,7 @@ Jameschester, SC 24934
             data-cy="label-Remembering or concentrating disability severity"
           >
             <span
-              class="sc-guDLey cyWTlF"
+              class="sc-gtLWhw dynQwi"
               color="textSecondary"
             >
               None
@@ -649,7 +649,7 @@ Jameschester, SC 24934
       >
         <div>
           <span
-            class="sc-beySPh gbuZtJ"
+            class="sc-blHHSb dUfUKp"
             color="textSecondary"
           >
             Self-care disability severity
@@ -658,7 +658,7 @@ Jameschester, SC 24934
             data-cy="label-Self-care disability severity"
           >
             <span
-              class="sc-guDLey cyWTlF"
+              class="sc-gtLWhw dynQwi"
               color="textSecondary"
             >
               None
@@ -671,7 +671,7 @@ Jameschester, SC 24934
       >
         <div>
           <span
-            class="sc-beySPh gbuZtJ"
+            class="sc-blHHSb dUfUKp"
             color="textSecondary"
           >
             Communicating disability severity
@@ -680,7 +680,7 @@ Jameschester, SC 24934
             data-cy="label-Communicating disability severity"
           >
             <span
-              class="sc-guDLey cyWTlF"
+              class="sc-gtLWhw dynQwi"
               color="textSecondary"
             >
               None
@@ -693,7 +693,7 @@ Jameschester, SC 24934
       >
         <div>
           <span
-            class="sc-beySPh gbuZtJ"
+            class="sc-blHHSb dUfUKp"
             color="textSecondary"
           >
             Disability
@@ -702,7 +702,7 @@ Jameschester, SC 24934
             data-cy="label-Disability"
           >
             <span
-              class="sc-guDLey cyWTlF"
+              class="sc-gtLWhw dynQwi"
               color="textSecondary"
             >
               Not Disabled
@@ -714,7 +714,7 @@ Jameschester, SC 24934
         class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 css-1idn90j-MuiGrid-root"
       >
         <div
-          class="sc-fHejqy hpSvKY"
+          class="sc-eauhAA glRDYa"
         />
       </div>
       <div
@@ -728,7 +728,7 @@ Jameschester, SC 24934
           >
             <div>
               <span
-                class="sc-beySPh gbuZtJ"
+                class="sc-blHHSb dUfUKp"
                 color="textSecondary"
               >
                 National ID
@@ -737,7 +737,7 @@ Jameschester, SC 24934
                 data-cy="label-National ID"
               >
                 <span
-                  class="sc-guDLey cyWTlF"
+                  class="sc-gtLWhw dynQwi"
                   color="textSecondary"
                 >
                   WSH221365
@@ -747,7 +747,7 @@ Jameschester, SC 24934
           </div>
           <div>
             <span
-              class="sc-beySPh gbuZtJ"
+              class="sc-blHHSb dUfUKp"
               color="textSecondary"
             >
               issued
@@ -756,7 +756,7 @@ Jameschester, SC 24934
               data-cy="label-issued"
             >
               <span
-                class="sc-guDLey cyWTlF"
+                class="sc-gtLWhw dynQwi"
                 color="textSecondary"
               >
                 Poland
@@ -769,7 +769,7 @@ Jameschester, SC 24934
         class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 css-1idn90j-MuiGrid-root"
       >
         <div
-          class="sc-fHejqy hpSvKY"
+          class="sc-eauhAA glRDYa"
         />
       </div>
       <div
@@ -777,7 +777,7 @@ Jameschester, SC 24934
       >
         <div>
           <span
-            class="sc-beySPh gbuZtJ"
+            class="sc-blHHSb dUfUKp"
             color="textSecondary"
           >
             Email
@@ -794,7 +794,7 @@ Jameschester, SC 24934
       >
         <div>
           <span
-            class="sc-beySPh gbuZtJ"
+            class="sc-blHHSb dUfUKp"
             color="textSecondary"
           >
             Phone Number
@@ -803,7 +803,7 @@ Jameschester, SC 24934
             data-cy="label-Phone Number"
           >
             <span
-              class="sc-guDLey cyWTlF"
+              class="sc-gtLWhw dynQwi"
               color="textSecondary"
             >
               +48734123423
@@ -816,7 +816,7 @@ Jameschester, SC 24934
       >
         <div>
           <span
-            class="sc-beySPh gbuZtJ"
+            class="sc-blHHSb dUfUKp"
             color="textSecondary"
           >
             Alternative Phone Number
@@ -825,7 +825,7 @@ Jameschester, SC 24934
             data-cy="label-Alternative Phone Number"
           >
             <span
-              class="sc-guDLey cyWTlF"
+              class="sc-gtLWhw dynQwi"
               color="textSecondary"
             >
               -
@@ -837,7 +837,7 @@ Jameschester, SC 24934
         class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 css-1idn90j-MuiGrid-root"
       >
         <div
-          class="sc-fHejqy hpSvKY"
+          class="sc-eauhAA glRDYa"
         />
       </div>
       <div
@@ -845,7 +845,7 @@ Jameschester, SC 24934
       >
         <div>
           <span
-            class="sc-beySPh gbuZtJ"
+            class="sc-blHHSb dUfUKp"
             color="textSecondary"
           >
             Date of last screening against sanctions list
@@ -854,7 +854,7 @@ Jameschester, SC 24934
             data-cy="label-Date of last screening against sanctions list"
           >
             <span
-              class="sc-guDLey cyWTlF"
+              class="sc-gtLWhw dynQwi"
               color="textSecondary"
             >
               <time
@@ -871,7 +871,7 @@ Jameschester, SC 24934
       >
         <div>
           <span
-            class="sc-beySPh gbuZtJ"
+            class="sc-blHHSb dUfUKp"
             color="textSecondary"
           >
             Linked Grievances
@@ -880,7 +880,7 @@ Jameschester, SC 24934
             data-cy="label-Linked Grievances"
           >
             <span
-              class="sc-guDLey cyWTlF"
+              class="sc-gtLWhw dynQwi"
               color="textSecondary"
             >
               <span>
@@ -894,7 +894,7 @@ Jameschester, SC 24934
         class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 css-1idn90j-MuiGrid-root"
       >
         <div
-          class="sc-fHejqy hpSvKY"
+          class="sc-eauhAA glRDYa"
         />
       </div>
       <div
@@ -902,7 +902,7 @@ Jameschester, SC 24934
       >
         <div>
           <span
-            class="sc-beySPh gbuZtJ"
+            class="sc-blHHSb dUfUKp"
             color="textSecondary"
           >
             Wallet Name
@@ -919,7 +919,7 @@ Jameschester, SC 24934
       >
         <div>
           <span
-            class="sc-beySPh gbuZtJ"
+            class="sc-blHHSb dUfUKp"
             color="textSecondary"
           >
             Blockchain Name
@@ -936,7 +936,7 @@ Jameschester, SC 24934
       >
         <div>
           <span
-            class="sc-beySPh gbuZtJ"
+            class="sc-blHHSb dUfUKp"
             color="textSecondary"
           >
             Wallet Address

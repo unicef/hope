@@ -716,7 +716,7 @@ class Document(AbstractSyncable, SoftDeletableRepresentationMergeStatusModel, Ti
         (STATUS_INVALID, _("Invalid")),
     )
 
-    document_number = models.CharField(max_length=255, blank=True)
+    document_number = models.CharField(max_length=255, blank=True, db_index=True)
     photo = models.ImageField(blank=True)
     individual = models.ForeignKey("Individual", related_name="documents", on_delete=models.CASCADE)
     type = models.ForeignKey("DocumentType", related_name="documents", on_delete=models.CASCADE)

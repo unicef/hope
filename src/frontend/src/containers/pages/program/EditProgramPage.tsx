@@ -33,6 +33,7 @@ import {
   editPartnersValidationSchema,
   editProgramDetailsValidationSchema,
 } from '@components/programs/CreateProgram/editProgramValidationSchema';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
 export const EditProgramPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -305,7 +306,14 @@ export const EditProgramPage = (): ReactElement => {
   ];
 
   return (
-    <>
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'EditProgramPage.tsx');
+      }}
+      componentName="EditProgramPage"
+    >
       <PageHeader
         title={`${t('Edit Programme')}: (${name})`}
         breadCrumbs={
@@ -432,6 +440,6 @@ export const EditProgramPage = (): ReactElement => {
           }}
         </Formik>
       )}
-    </>
+    </UniversalErrorBoundary>
   );
 };

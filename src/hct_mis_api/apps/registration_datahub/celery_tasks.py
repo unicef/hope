@@ -4,7 +4,6 @@ from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 from django.core.cache import cache
 from django.db import transaction
-from django.db.models import Count
 from django.utils import timezone
 
 from hct_mis_api.apps.core.celery import app
@@ -370,27 +369,20 @@ def check_and_set_taxid(queryset: "QuerySet") -> Dict:
 @app.task
 @log_start_and_end
 @sentry_tags
-def deduplicate_documents() -> bool:
+def deduplicate_documents(rdi_id: str) -> bool:
     with locked_cache(key="deduplicate_documents") as locked:
         if not locked:
             return True
-        grouped_rdi = (
-            Document.objects.filter(status=Document.STATUS_PENDING)
-            .values("individual__registration_data_import")
-            .annotate(count=Count("individual__registration_data_import"))
-        )
-        rdi_ids = [x["individual__registration_data_import"] for x in grouped_rdi if x is not None]
-        for rdi in RegistrationDataImport.objects.filter(id__in=rdi_ids).order_by("created_at"):
-            with transaction.atomic():
-                documents_query = Document.objects.filter(
-                    status=Document.STATUS_PENDING, individual__registration_data_import=rdi
-                )
-                HardDocumentDeduplication().deduplicate(
-                    documents_query,
-                    registration_data_import=rdi,
-                )
-                rdi.update_needs_adjudication_tickets_statistic()
-
+        rdi = RegistrationDataImport.objects.get(id=rdi_id)
+        with transaction.atomic():
+            documents_query = Document.objects.filter(
+                status=Document.STATUS_PENDING, individual__registration_data_import=rdi
+            )
+            HardDocumentDeduplication().deduplicate(
+                documents_query,
+                registration_data_import=rdi,
+            )
+            rdi.update_needs_adjudication_tickets_statistic()
     return True
 
 
@@ -483,32 +475,16 @@ def deduplication_engine_process(self: Any, program_id: str) -> None:
 
 
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
-@sentry_tags
 @log_start_and_end
-def create_grievance_tickets_for_dedup_engine_results(self: Any, rdi_id: str) -> None:
+@sentry_tags
+def fetch_biometric_deduplication_results_and_process(self: Any, deduplication_set_id: Optional[str]) -> None:
     from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import (
         BiometricDeduplicationService,
     )
 
-    rdi = RegistrationDataImport.objects.get(id=rdi_id)
-    program = Program.objects.get(id=rdi.program_id)
-    set_sentry_business_area_tag(program.business_area.name)
-
-    try:
-        rdi = RegistrationDataImport.objects.get(id=rdi_id)
-        BiometricDeduplicationService().create_grievance_tickets_for_duplicates(rdi)
-    except Exception as e:
-        logger.exception(e)
-        raise
-
-
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
-@log_start_and_end
-@sentry_tags
-def fetch_biometric_deduplication_results_and_process(self: Any, deduplication_set_id: str) -> None:
-    from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import (
-        BiometricDeduplicationService,
-    )
+    if not deduplication_set_id:
+        logger.error("Program.deduplication_set_id is None")
+        return
 
     program = Program.objects.get(deduplication_set_id=deduplication_set_id)
     set_sentry_business_area_tag(program.business_area.name)
@@ -516,23 +492,6 @@ def fetch_biometric_deduplication_results_and_process(self: Any, deduplication_s
     try:
         service = BiometricDeduplicationService()
         service.fetch_biometric_deduplication_results_and_process(deduplication_set_id)
-    except Exception as e:
-        logger.exception(e)
-        raise
-
-
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
-@sentry_tags
-@log_start_and_end
-def update_rdis_deduplication_engine_statistics(self: Any, program_id: str) -> None:
-    from hct_mis_api.apps.registration_datahub.services.biometric_deduplication import (
-        BiometricDeduplicationService,
-    )
-
-    program = Program.objects.get(id=program_id)
-    set_sentry_business_area_tag(program.business_area.name)
-    try:
-        BiometricDeduplicationService().update_rdis_deduplication_statistics(program_id)
     except Exception as e:
         logger.exception(e)
         raise

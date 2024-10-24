@@ -51,7 +51,6 @@ from hct_mis_api.apps.registration_data.models import (
     RegistrationDataImport,
 )
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
-    create_grievance_tickets_for_dedup_engine_results,
     deduplication_engine_process,
     fetch_biometric_deduplication_results_and_process,
     merge_registration_data_import_task,
@@ -556,12 +555,6 @@ def run_automate_rdi_creation_task(*args: Any, **kwargs: Any) -> Any:
     "hct_mis_api.contrib.aurora.services.base_flex_registration_service.BaseRegistrationService.validate_data_collection_type"
 )
 class TestAutomatingRDICreationTask(TestCase):
-    databases = {
-        "default",
-        "cash_assist_datahub_ca",
-        "cash_assist_datahub_erp",
-        "cash_assist_datahub_mis",
-    }
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
@@ -1100,28 +1093,15 @@ class DeduplicationEngineCeleryTasksTests(TestCase):
     )
     @patch(
         "hct_mis_api.apps.registration_datahub.services.biometric_deduplication.BiometricDeduplicationService"
-        ".create_grievance_tickets_for_duplicates"
-    )
-    def test_create_grievance_tickets_for_dedup_engine_results_task(
-        self,
-        mock_create_tickets: Mock,
-    ) -> None:
-        create_grievance_tickets_for_dedup_engine_results(str(self.registration_data_import.id))
-
-        mock_create_tickets.assert_called_once_with(self.registration_data_import)
-
-    @patch.dict(
-        "os.environ",
-        {"DEDUPLICATION_ENGINE_API_KEY": "dedup_api_key", "DEDUPLICATION_ENGINE_API_URL": "http://dedup-fake-url.com"},
-    )
-    @patch(
-        "hct_mis_api.apps.registration_datahub.services.biometric_deduplication.BiometricDeduplicationService"
         ".fetch_biometric_deduplication_results_and_process"
     )
     def test_fetch_biometric_deduplication_results_and_process(
         self,
         mock_fetch_biometric_deduplication_results_and_process: Mock,
     ) -> None:
+        fetch_biometric_deduplication_results_and_process(None)
+        mock_fetch_biometric_deduplication_results_and_process.assert_not_called()
+
         deduplication_set_id = str(uuid.uuid4())
         self.program.deduplication_set_id = deduplication_set_id
         self.program.save()

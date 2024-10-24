@@ -44,6 +44,7 @@ from hct_mis_api.apps.payment.services.verification_plan_status_change_services 
     VerificationPlanStatusChangeServices,
 )
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, PaymentPlanCeleryTasksMixin
+from hct_mis_api.apps.utils.security import is_root
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -222,7 +223,7 @@ class PaymentVerificationAdmin(HOPEModelAdminBase):
 
 @admin.register(ServiceProvider)
 class ServiceProviderAdmin(HOPEModelAdminBase):
-    list_display = ("full_name", "short_name", "country")
+    list_display = ("full_name", "short_name", "country", "vision_id")
     search_fields = ("full_name", "vision_id", "short_name")
     list_filter = (("business_area", AutoCompleteFilter),)
     autocomplete_fields = ("business_area",)
@@ -262,7 +263,7 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
     search_fields = ("id", "unicef_id")
 
     def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
-        return False
+        return is_root(request)
 
 
 class PaymentHouseholdSnapshotInline(admin.StackedInline):

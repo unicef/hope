@@ -184,7 +184,7 @@ export function Entitlement({
                   data-cy="input-entitlement-formula"
                   onChange={(event) => setSteficonRuleValue(event.target.value)}
                 >
-                  {steficonData.allSteficonRules.edges.map((each, index) => (
+                  {steficonData.allSteficonRules?.edges?.map((each, index) => (
                     <MenuItem
                       data-cy={`select-option-${index}`}
                       key={each.node.id}
