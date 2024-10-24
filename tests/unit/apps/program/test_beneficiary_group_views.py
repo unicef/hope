@@ -23,28 +23,29 @@ class BeneficiaryGroupAPITestCase(HOPEApiTestCase):
     def test_list_beneficiary_group(self) -> None:
         response = self.client.get(self.list_url)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(
+        self.assertIn(
+            {
+                "id": str(self.beneficiary_group1.id),
+                "name": "Household",
+                "group_label": self.beneficiary_group1.group_label,
+                "group_label_plural": self.beneficiary_group1.group_label_plural,
+                "member_label": self.beneficiary_group1.member_label,
+                "member_label_plural": self.beneficiary_group1.member_label_plural,
+                "master_detail": self.beneficiary_group1.master_detail,
+            },
             response.json()["results"],
-            [
-                {
-                    "id": str(self.beneficiary_group1.id),
-                    "name": "Household",
-                    "group_label": self.beneficiary_group1.group_label,
-                    "group_label_plural": self.beneficiary_group1.group_label_plural,
-                    "member_label": self.beneficiary_group1.member_label,
-                    "member_label_plural": self.beneficiary_group1.member_label_plural,
-                    "master_detail": self.beneficiary_group1.master_detail,
-                },
-                {
-                    "id": str(self.beneficiary_group2.id),
-                    "name": "Social Workers",
-                    "group_label": self.beneficiary_group2.group_label,
-                    "group_label_plural": self.beneficiary_group2.group_label_plural,
-                    "member_label": self.beneficiary_group2.member_label,
-                    "member_label_plural": self.beneficiary_group2.member_label_plural,
-                    "master_detail": self.beneficiary_group2.master_detail,
-                },
-            ],
+        )
+        self.assertIn(
+            {
+                "id": str(self.beneficiary_group2.id),
+                "name": "Social Workers",
+                "group_label": self.beneficiary_group2.group_label,
+                "group_label_plural": self.beneficiary_group2.group_label_plural,
+                "member_label": self.beneficiary_group2.member_label,
+                "member_label_plural": self.beneficiary_group2.member_label_plural,
+                "master_detail": self.beneficiary_group2.master_detail,
+            },
+            response.json()["results"],
         )
 
     def test_list_beneficiary_group_caching(self) -> None:

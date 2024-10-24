@@ -6,20 +6,35 @@ import model_utils.fields
 import uuid
 from constance import config
 
+from hct_mis_api.apps.core.models import DataCollectingType
+
 
 def create_default_object(apps, schema_editor):
     Program = apps.get_model("program", "Program")
     BeneficiaryGroup = apps.get_model("program", "BeneficiaryGroup")
 
     default_household_beneficiary_group = BeneficiaryGroup.objects.create(
-        name=config.DEFAULT_HOUSEHOLD_GROUP_NAME,
+        name=config.DEFAULT_BENEFICIARY_GROUP_NAME,
         group_label="Household",
         group_label_plural="Households",
         member_label="Individual",
         member_label_plural="Individuals",
+        master_detail=True,
     )
-
-    Program.objects.update(beneficiary_group=default_household_beneficiary_group)
+    default_social_worker_beneficiary_group = BeneficiaryGroup.objects.create(
+        name="Social Workers",
+        group_label="Household",
+        group_label_plural="Households",
+        member_label="Individual",
+        member_label_plural="Individuals",
+        master_detail=False,
+    )
+    Program.objects.filter(
+        data_collecting_type__type=DataCollectingType.Type.SOCIAL
+    ).update(beneficiary_group=default_social_worker_beneficiary_group)
+    Program.objects.exclude(
+        data_collecting_type__type=DataCollectingType.Type.SOCIAL
+    ).update(beneficiary_group=default_household_beneficiary_group)
 
 
 class Migration(migrations.Migration):
@@ -40,7 +55,7 @@ class Migration(migrations.Migration):
                 ('group_label_plural', models.CharField(max_length=255)),
                 ('member_label', models.CharField(max_length=255)),
                 ('member_label_plural', models.CharField(max_length=255)),
-                ('master_detail', models.BooleanField(default=False)),
+                ('master_detail', models.BooleanField(default=True)),
             ],
             options={
                 'verbose_name': 'Beneficiary Group',

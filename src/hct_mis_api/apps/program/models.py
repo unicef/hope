@@ -70,7 +70,7 @@ class BeneficiaryGroup(TimeStampedUUIDModel):
     group_label_plural = models.CharField(max_length=255)
     member_label = models.CharField(max_length=255)
     member_label_plural = models.CharField(max_length=255)
-    master_detail = models.BooleanField(default=False)
+    master_detail = models.BooleanField(default=True)
 
     class Meta:
         verbose_name = "Beneficiary Group"
