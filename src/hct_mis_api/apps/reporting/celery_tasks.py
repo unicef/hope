@@ -27,22 +27,3 @@ def report_export_task(self: Any, report_id: UUID) -> None:
     except Exception as e:
         logger.exception(e)
         raise self.retry(exc=e)
-
-
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
-@log_start_and_end
-@sentry_tags
-def dashboard_report_export_task(self: Any, dashboard_report_id: UUID) -> None:
-    try:
-        from hct_mis_api.apps.reporting.models import DashboardReport
-        from hct_mis_api.apps.reporting.services.generate_dashboard_report_service import (
-            GenerateDashboardReportService,
-        )
-
-        report_obj = DashboardReport.objects.get(id=dashboard_report_id)
-        set_sentry_business_area_tag(report_obj.business_area.name)
-        service = GenerateDashboardReportService(report=report_obj)
-        service.generate_report()
-    except Exception as e:
-        logger.exception(e)
-        raise self.retry(exc=e)

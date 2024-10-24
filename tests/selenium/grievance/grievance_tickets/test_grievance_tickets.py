@@ -23,14 +23,10 @@ from hct_mis_api.apps.household.fixtures import (
     create_household_and_individuals,
 )
 from hct_mis_api.apps.household.models import HOST, Household, Individual
-from hct_mis_api.apps.payment.fixtures import CashPlanFactory, PaymentRecordFactory
-from hct_mis_api.apps.payment.models import PaymentRecord
+from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
+from hct_mis_api.apps.payment.models import Payment
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.targeting.fixtures import (
-    TargetingCriteriaFactory,
-    TargetPopulationFactory,
-)
 from tests.selenium.drawer.test_drawer import get_program_with_dct_type_and_name
 from tests.selenium.helpers.date_time_format import FormatTime
 from tests.selenium.page_object.admin_panel.admin_panel import AdminPanel
@@ -85,28 +81,18 @@ def household_social_worker() -> Household:
 
 
 @pytest.fixture
-def hh_with_payment_record(household_without_disabilities: Household) -> PaymentRecord:
-    targeting_criteria = TargetingCriteriaFactory()
-
-    target_population = TargetPopulationFactory(
-        created_by=User.objects.first(),
-        targeting_criteria=targeting_criteria,
-        business_area=household_without_disabilities.business_area,
-    )
-    cash_plan = CashPlanFactory(
+def hh_with_payment_record(household_without_disabilities: Household) -> Payment:
+    payment_plan = PaymentPlanFactory(
         program=household_without_disabilities.program,
         business_area=household_without_disabilities.business_area,
     )
-    cash_plan.save()
-    payment_record = PaymentRecordFactory(
-        parent=cash_plan,
+    payment = PaymentFactory(
+        parent=payment_plan,
         household=household_without_disabilities,
-        target_population=target_population,
         delivered_quantity_usd=None,
         business_area=household_without_disabilities.business_area,
     )
-    payment_record.save()
-    return payment_record
+    return payment
 
 
 def find_text_of_label(element: WebElement) -> str:
@@ -907,9 +893,9 @@ class TestGrievanceTickets:
         pageGrievanceTickets: GrievanceTickets,
         pageGrievanceNewTicket: NewTicket,
         pageGrievanceDetailsPage: GrievanceDetailsPage,
-        hh_with_payment_record: PaymentRecord,
+        hh_with_payment_record: Payment,
     ) -> None:
-        payment_id = PaymentRecord.objects.first().unicef_id
+        payment_id = Payment.objects.first().unicef_id
         pageGrievanceTickets.getNavGrievance().click()
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
         pageGrievanceTickets.getButtonNewTicket().click()

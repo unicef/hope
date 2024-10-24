@@ -333,7 +333,7 @@ class PaymentPlanService:
             payments_to_create.append(
                 Payment(
                     parent=payment_plan,
-                    program_id=payment_plan.program_id,
+                    program_id=payment_plan.program_cycle.program_id,
                     business_area_id=payment_plan.business_area_id,
                     status=Payment.STATUS_PENDING,
                     status_date=timezone.now(),
@@ -395,7 +395,6 @@ class PaymentPlanService:
                 business_area=business_area,
                 created_by=user,
                 target_population=target_population,
-                program=target_population.program,
                 program_cycle=program_cycle,
                 name=target_population.name,
                 currency=input_data["currency"],
@@ -443,7 +442,6 @@ class PaymentPlanService:
                 self.payment_plan.target_population.save()
 
                 self.payment_plan.target_population = new_target_population
-                self.payment_plan.program = new_target_population.program
                 self.payment_plan.program_cycle = new_target_population.program_cycle
                 self.payment_plan.target_population.status = TargetPopulation.STATUS_ASSIGNED
                 self.payment_plan.target_population.save()
@@ -619,7 +617,7 @@ class PaymentPlanService:
             Payment(
                 parent=self.payment_plan,
                 source_payment=payment,
-                program_id=self.payment_plan.program_id,
+                program_id=self.payment_plan.program_cycle.program_id,
                 is_follow_up=True,
                 business_area_id=payment.business_area_id,
                 status=Payment.STATUS_PENDING,
@@ -650,6 +648,7 @@ class PaymentPlanService:
             raise GraphQLError("Cannot create a follow-up for a payment plan with no unsuccessful payments")
 
         follow_up_pp = PaymentPlan.objects.create(
+            name=source_pp.name,
             status=PaymentPlan.Status.PREPARING,
             status_date=timezone.now(),
             is_follow_up=True,
@@ -657,7 +656,6 @@ class PaymentPlanService:
             business_area=source_pp.business_area,
             created_by=user,
             target_population=source_pp.target_population,
-            program=source_pp.program,
             program_cycle=source_pp.program_cycle,
             currency=source_pp.currency,
             dispersion_start_date=dispersion_start_date,

@@ -24,7 +24,7 @@ from hct_mis_api.apps.household.celery_tasks import enroll_households_to_program
 from hct_mis_api.apps.household.documents import get_individual_doc
 from hct_mis_api.apps.household.forms import MassEnrollForm
 from hct_mis_api.apps.household.models import Individual, PendingIndividual
-from hct_mis_api.apps.payment.models import PaymentRecord
+from hct_mis_api.apps.payment.models import Payment
 from hct_mis_api.apps.registration_data.models import (
     DeduplicationEngineSimilarityPair,
     RegistrationDataImport,
@@ -164,9 +164,7 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
     @staticmethod
     def delete_merged_rdi_visible(rdi: RegistrationDataImport) -> bool:
         is_correct_status = rdi.status == RegistrationDataImport.MERGED
-        is_not_used_by_payment_record = (
-            PaymentRecord.objects.filter(household__registration_data_import=rdi).count() == 0
-        )
+        is_not_used_by_payment_record = Payment.objects.filter(household__registration_data_import=rdi).count() == 0
         return is_correct_status and is_not_used_by_payment_record
 
     @staticmethod

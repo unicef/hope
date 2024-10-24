@@ -6,11 +6,8 @@ from django.db.models.functions import Coalesce
 
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification
-from hct_mis_api.apps.payment.utils import (
-    get_payment_items_for_dashboard,
-    get_payment_items_sequence_qs,
-)
+from hct_mis_api.apps.payment.models import Payment, PaymentVerification
+from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
 
 
 class PaymentVerificationChartQueryResponse(TypedDict):
@@ -39,7 +36,9 @@ def payment_verification_chart_query(
     )
 
     if program:
-        params &= Q(Q(payment__parent__program__id=program) | Q(payment_record__parent__program__id=program))
+        params &= Q(
+            Q(payment__parent__program_cycle__program__id=program) | Q(payment_record__parent__program__id=program)
+        )
 
     if administrative_area:
         inner_params = Q()
@@ -74,13 +73,13 @@ def payment_verification_chart_query(
         "payments_count"
     ]
     all_payment_records_for_created_verifications = (
-        get_payment_items_sequence_qs()
+        Payment.objects.filter(excluded=False, conflicted=False)
         .filter(
-            parent__in=payment_verifications.distinct("payment_verification_plan__payment_plan_object_id").values_list(
-                "payment_verification_plan__payment_plan_object_id", flat=True
+            parent__in=payment_verifications.distinct("payment_verification_plan__payment_plan_id").values_list(
+                "payment_verification_plan__payment_plan_id", flat=True
             )
         )
-        .filter(status=PaymentRecord.STATUS_SUCCESS, delivered_quantity__gt=0)
+        .filter(status=Payment.STATUS_SUCCESS, delivered_quantity__gt=0)
         .filter(household__collect_type=collect_type)
         .count()
     )

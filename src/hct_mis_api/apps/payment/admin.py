@@ -19,7 +19,6 @@ from adminfilters.querystring import QueryStringFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 from smart_admin.mixins import LinkedObjectsMixin
 
-from hct_mis_api.apps.payment.forms import ImportPaymentRecordsForm
 from hct_mis_api.apps.payment.models import (
     CashPlan,
     DeliveryMechanism,
@@ -36,9 +35,6 @@ from hct_mis_api.apps.payment.models import (
     PaymentVerification,
     PaymentVerificationPlan,
     ServiceProvider,
-)
-from hct_mis_api.apps.payment.services.create_cash_plan_from_reconciliation import (
-    CreateCashPlanReconciliationService,
 )
 from hct_mis_api.apps.payment.services.verification_plan_status_change_services import (
     VerificationPlanStatusChangeServices,
@@ -94,49 +90,10 @@ class PaymentRecordAdmin(AdminAdvancedFiltersMixin, LinkedObjectsMixin, HOPEMode
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).select_related("household", "parent", "target_population", "business_area")
 
-    @button()
-    def import_payment_records(self, request: HttpRequest) -> Any:
-        title = "Import Payment Records"
-        if request.method == "GET":
-            form = ImportPaymentRecordsForm()
-            context = self.get_common_context(request, title=title, form=form)
-            return TemplateResponse(request, "admin/payment/payment_record/import_payment_records.html", context)
-
-        form = ImportPaymentRecordsForm(request.POST, request.FILES)
-        context = self.get_common_context(request, title=title, form=form)
-        if not form.is_valid():
-            return TemplateResponse(request, "admin/payment/payment_record/import_payment_records.html", context)
-        cleaned_data = form.cleaned_data
-        column_mapping = {
-            CreateCashPlanReconciliationService.COLUMN_PAYMENT_ID: "Payment ID",
-            CreateCashPlanReconciliationService.COLUMN_PAYMENT_STATUS: "Reconciliation status",
-            CreateCashPlanReconciliationService.COLUMN_DELIVERED_AMOUNT: "Delivered Amount",
-            CreateCashPlanReconciliationService.COLUMN_ENTITLEMENT_QUANTITY: "Entitlement Quantity",
-        }
-        service = CreateCashPlanReconciliationService(
-            cleaned_data.pop("business_area"),
-            cleaned_data.pop("reconciliation_file"),
-            column_mapping,
-            cleaned_data,
-            cleaned_data.pop("currency"),
-            cleaned_data.pop("delivery_type"),
-            cleaned_data.pop("delivery_date"),
-        )
-
-        service.create_celery_task(request.user)
-
-        self.message_user(
-            request,
-            "Background task created and Payment Records will imported soon. We will send an email after finishing import",
-            level=messages.SUCCESS,
-        )
-
-        return HttpResponseRedirect(reverse("admin:payment_paymentrecord_changelist"))
-
 
 @admin.register(PaymentVerificationPlan)
 class PaymentVerificationPlanAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
-    list_display = ("payment_plan_obj", "status", "verification_channel")
+    list_display = ("payment_plan", "status", "verification_channel")
     list_filter = (
         ("status", ChoicesFieldComboFilter),
         ("verification_channel", ChoicesFieldComboFilter),
@@ -200,11 +157,11 @@ class PaymentVerificationAdmin(HOPEModelAdminBase):
     raw_id_fields = ("payment_verification_plan", "payment_content_type")
 
     def payment_plan_name(self, obj: PaymentVerification) -> str:
-        payment_plan = obj.payment_verification_plan.payment_plan_obj
+        payment_plan = obj.payment_verification_plan.payment_plan
         return getattr(payment_plan, "name", "~no name~")
 
     def household(self, obj: PaymentVerification) -> str:
-        payment = obj.payment_obj
+        payment = obj.payment
         return payment.household.unicef_id if payment else ""
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
@@ -213,10 +170,10 @@ class PaymentVerificationAdmin(HOPEModelAdminBase):
             .get_queryset(request)
             .select_related("payment_verification_plan")
             .prefetch_related(
-                "payment_obj",
-                "payment_obj__household",
-                "payment_verification_plan__payment_plan_obj",
-                "payment_verification_plan__payment_plan_obj__business_area",
+                "payment",
+                "payment__household",
+                "payment_verification_plan__payment_plan",
+                "payment_verification_plan__payment_plan__business_area",
             )
         )
 
@@ -252,14 +209,14 @@ class CashPlanAdmin(HOPEModelAdminBase):
 
 @admin.register(PaymentPlan)
 class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
-    list_display = ("unicef_id", "program", "status", "target_population")
+    list_display = ("unicef_id", "program_cycle", "status", "target_population")
     list_filter = (
         ("status", ChoicesFieldComboFilter),
         ("business_area", AutoCompleteFilter),
-        ("program__id", ValueFilter),
+        ("program_cycle__program__id", ValueFilter),
         ("target_population", AutoCompleteFilter),
     )
-    raw_id_fields = ("business_area", "program", "target_population", "created_by", "program_cycle")
+    raw_id_fields = ("business_area", "target_population", "created_by", "program_cycle")
     search_fields = ("id", "unicef_id")
 
     def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
