@@ -2030,7 +2030,7 @@ def handle_payment_related_tickets(business_area: Optional[BusinessArea] = None)
         .distinct()
     )
     for payment_verification_ticket in payment_verification_tickets:
-        payment_obj = payment_verification_ticket.payment_verification.payment_obj
+        payment_obj = payment_verification_ticket.payment_verification.payment
         if isinstance(payment_obj, Payment):
             program = payment_obj.parent.target_population.program
         elif isinstance(payment_obj, PaymentRecord):

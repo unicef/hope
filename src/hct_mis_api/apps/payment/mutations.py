@@ -234,7 +234,7 @@ class FinishPaymentVerificationPlan(PermissionMutation):
             old_payment_verification_plan,
             payment_verification_plan,
         )
-        return FinishPaymentVerificationPlan(payment_plan=payment_verification_plan.payment_plan_obj)
+        return FinishPaymentVerificationPlan(payment_plan=payment_verification_plan.payment_plan)
 
 
 class DiscardPaymentVerificationPlan(PermissionMutation):
@@ -321,7 +321,7 @@ class DeletePaymentVerificationPlan(PermissionMutation):
     ) -> "DeletePaymentVerificationPlan":
         payment_verification_plan_id = decode_id_string(payment_verification_plan_id)
         payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=payment_verification_plan_id)
-        payment_plan = payment_verification_plan.payment_plan_obj
+        payment_plan = payment_verification_plan.payment_plan
         program_id = getattr(payment_verification_plan.get_program, "pk", None)
 
         check_concurrency_version_in_mutation(kwargs.get("version"), payment_verification_plan)
@@ -560,7 +560,7 @@ class ExportXlsxPaymentVerificationPlanFile(PermissionMutation):
         payment_verification_plan.xlsx_file_exporting = True
         payment_verification_plan.save()
         create_payment_verification_plan_xlsx.delay(payment_verification_plan_id, info.context.user.pk)
-        return cls(payment_plan=payment_verification_plan.payment_plan_obj)
+        return cls(payment_plan=payment_verification_plan.payment_plan)
 
 
 class ImportXlsxPaymentVerificationPlanFile(PermissionMutation):
@@ -596,7 +596,7 @@ class ImportXlsxPaymentVerificationPlanFile(PermissionMutation):
         calculate_counts(payment_verification_plan)
         payment_verification_plan.xlsx_file_imported = True
         payment_verification_plan.save()
-        return ImportXlsxPaymentVerificationPlanFile(payment_verification_plan.payment_plan_obj, import_service.errors)
+        return ImportXlsxPaymentVerificationPlanFile(payment_verification_plan.payment_plan, import_service.errors)
 
 
 class MarkPaymentRecordAsFailedMutation(PermissionMutation):
@@ -1152,7 +1152,7 @@ class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
             user=info.context.user,
-            programs=payment_plan.get_program.pk,
+            programs=payment_plan.program.pk,
             old_object=old_payment_plan,
             new_object=payment_plan,
         )

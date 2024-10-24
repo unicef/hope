@@ -27,7 +27,7 @@ from hct_mis_api.apps.grievance.constants import (
     URGENCY_CHOICES,
     URGENCY_NOT_SET,
 )
-from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification
+from hct_mis_api.apps.payment.models import Payment, PaymentRecord, PaymentVerification
 from hct_mis_api.apps.utils.models import (
     AdminUrlMixin,
     ConcurrencyModel,
@@ -612,7 +612,7 @@ FEEDBACK_STATUS_FLOW = {
 }
 
 
-class TicketComplaintDetails(GenericPaymentTicket):
+class TicketComplaintDetails(GenericPaymentTicket):  # TODO TP drop GenericPaymentTicket
     STATUS_FLOW = GENERAL_STATUS_FLOW
 
     ticket = models.OneToOneField(
@@ -631,13 +631,19 @@ class TicketComplaintDetails(GenericPaymentTicket):
         related_name="complaint_ticket_details",
         on_delete=models.CASCADE,
         null=True,
+    )
+    payment = models.OneToOneField(
+        Payment,
+        on_delete=models.CASCADE,
+        null=True,
+        related_name="ticket_complaint_details",
     )
 
     class Meta:
         verbose_name_plural = "Ticket Complaint Details"
 
 
-class TicketSensitiveDetails(GenericPaymentTicket):
+class TicketSensitiveDetails(GenericPaymentTicket):  # TODO TP drop GenericPaymentTicket
     STATUS_FLOW = GENERAL_STATUS_FLOW
 
     ticket = models.OneToOneField(
@@ -656,6 +662,12 @@ class TicketSensitiveDetails(GenericPaymentTicket):
         related_name="sensitive_ticket_details",
         on_delete=models.CASCADE,
         null=True,
+    )
+    payment = models.OneToOneField(
+        Payment,
+        on_delete=models.CASCADE,
+        null=True,
+        related_name="ticket_sensitive_details",
     )
 
     class Meta:

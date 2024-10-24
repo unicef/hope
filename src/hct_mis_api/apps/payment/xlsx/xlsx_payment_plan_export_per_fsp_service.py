@@ -32,7 +32,9 @@ logger = logging.getLogger(__name__)
 
 
 def check_if_token_or_order_number_exists_per_program(payment: Payment, field_name: str, token: int) -> bool:
-    return Payment.objects.filter(parent__program=payment.parent.program, **{field_name: token}).exists()
+    return Payment.objects.filter(
+        parent__program_cycle__program=payment.parent.program_cycle.program, **{field_name: token}
+    ).exists()
 
 
 def generate_token_and_order_numbers(payment: Payment) -> Payment:

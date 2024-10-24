@@ -200,11 +200,11 @@ class PaymentVerificationAdmin(HOPEModelAdminBase):
     raw_id_fields = ("payment_verification_plan", "payment_content_type")
 
     def payment_plan_name(self, obj: PaymentVerification) -> str:
-        payment_plan = obj.payment_verification_plan.payment_plan_obj
+        payment_plan = obj.payment_verification_plan.payment_plan
         return getattr(payment_plan, "name", "~no name~")
 
     def household(self, obj: PaymentVerification) -> str:
-        payment = obj.payment_obj
+        payment = obj.payment
         return payment.household.unicef_id if payment else ""
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
@@ -259,7 +259,7 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
         ("program__id", ValueFilter),
         ("target_population", AutoCompleteFilter),
     )
-    raw_id_fields = ("business_area", "program", "target_population", "created_by", "program_cycle")
+    raw_id_fields = ("business_area", "target_population", "created_by", "program_cycle")
     search_fields = ("id", "unicef_id")
 
     def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:

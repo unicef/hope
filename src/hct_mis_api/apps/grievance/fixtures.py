@@ -30,10 +30,7 @@ from hct_mis_api.apps.grievance.models import (
     TicketSystemFlaggingDetails,
 )
 from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.payment.fixtures import (
-    PaymentRecordFactory,
-    PaymentVerificationFactory,
-)
+from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentVerificationFactory
 from hct_mis_api.apps.payment.models import PaymentVerification
 
 
@@ -89,7 +86,7 @@ class SensitiveGrievanceTicketFactory(DjangoModelFactory):
         )
         obj.household = household
         obj.individual = individuals[0]
-        obj.payment_obj = PaymentRecordFactory(household=household, currency="EUR")
+        obj.payment = PaymentFactory(household=household, currency="EUR")
         obj.save()
 
 
@@ -116,8 +113,7 @@ class GrievanceComplaintTicketFactory(DjangoModelFactory):
         )
         obj.household = household
         obj.individual = individuals[0]
-        obj.payment_object_id = PaymentRecordFactory(household=household, currency="EUR").id
-        obj.payment_content_type_id = 80
+        obj.payment = PaymentFactory(household=household, currency="EUR")
 
         obj.save()
 

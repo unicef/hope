@@ -195,7 +195,7 @@ class PaymentVerificationLogEntryFilter(LogEntryFilter):
         object_type = cleaned_data.get("object_type")
         object_id = cleaned_data.get("object_id")
         plan_object = (PaymentPlan if object_type == self.PLAN_TYPE_PAYMENT else CashPlan).objects.get(pk=object_id)
-        verifications_ids = plan_object.payment_verification_plan.all().values_list("pk", flat=True)
+        verifications_ids = plan_object.payment_verification_plans.all().values_list("pk", flat=True)
         return queryset.filter(object_id__in=verifications_ids)
 
     def object_id_filter(self, qs: QuerySet, name: str, value: UUID) -> QuerySet:
@@ -430,7 +430,7 @@ def cash_plan_and_payment_plan_filter(queryset: ExtendedQuerySetSequence, **kwar
         queryset = queryset.filter(business_area__slug=business_area)
 
     if program:
-        queryset = queryset.filter(program=decode_id_string(program))
+        queryset = queryset.filter(program=decode_id_string(program))  # TODO TP program__cycle__program
 
     if start_date_gte:
         queryset = queryset.filter(start_date__gte=start_date_gte)
@@ -466,7 +466,7 @@ def cash_plan_and_payment_plan_ordering(queryset: ExtendedQuerySetSequence, orde
     if order_by == "verification_status":
         qs = queryset.order_by(reverse + "custom_order")
     elif order_by == "unicef_id":
-        qs = sorted(queryset, key=lambda o: o.get_unicef_id, reverse=bool(reverse))
+        qs = sorted(queryset, key=lambda o: o.unicef_id, reverse=bool(reverse))
     elif order_by == "dispersion_date":
         # TODO this field is empty at the moment
         qs = queryset
@@ -490,7 +490,7 @@ def payment_record_and_payment_filter(queryset: ExtendedQuerySetSequence, **kwar
         queryset = queryset.filter(household__id=decode_id_string(household))
 
     if program:
-        queryset = queryset.filter(parent__program=decode_id_string(program))
+        queryset = queryset.filter(parent__program=decode_id_string(program))  # TODO TP payment_cycle__program
 
     return queryset
 
@@ -500,7 +500,7 @@ def payment_record_and_payment_ordering(queryset: ExtendedQuerySetSequence, orde
     order_by = order_by[1:] if reverse else order_by
 
     if order_by == "ca_id":
-        qs = sorted(queryset, key=lambda o: o.get_unicef_id, reverse=bool(reverse))
+        qs = sorted(queryset, key=lambda o: o.unicef_id, reverse=bool(reverse))
     elif order_by in ("head_of_household", "entitlement_quantity", "delivered_quantity", "delivery_date"):
         order_by_dict = {f"{order_by}__isnull": True}
         qs_null = list(queryset.filter(**order_by_dict))

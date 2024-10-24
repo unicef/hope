@@ -797,7 +797,6 @@ def generate_reconciled_payment_plan() -> None:
         status_date=now,
         status=PaymentPlan.Status.ACCEPTED,
         created_by=root,
-        program=tp.program,
         program_cycle=tp.program.cycles.first(),
         total_delivered_quantity=999,
         total_entitled_quantity=2999,
@@ -974,7 +973,6 @@ def generate_payment_plan() -> None:
         dispersion_end_date=now + timedelta(days=14),
         status_date=now,
         created_by=root,
-        program=program,
         program_cycle=program_cycle,
     )[0]
 

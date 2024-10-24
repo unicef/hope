@@ -123,7 +123,7 @@ class TestXlsxVerificationImport(APITestCase):
         self.assertEqual(import_service.errors, [])
 
     def test_validation_valid_status_changed_for_people(self) -> None:
-        dct = self.verification.payment_plan_obj.program.data_collecting_type
+        dct = self.verification.payment_plan.program_cycle.program.data_collecting_type
         dct.type = DataCollectingType.Type.SOCIAL
         dct.save()
         export_service = XlsxVerificationExportService(self.verification)

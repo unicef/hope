@@ -578,7 +578,6 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
     )
     payment_verification_summary = graphene.Field(
         PaymentVerificationSummaryNode,
-        source="get_payment_verification_summary",
     )
     bank_reconciliation_success = graphene.Int()
     bank_reconciliation_error = graphene.Int()
@@ -604,7 +603,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
         return to_choice_object(PaymentPlanSplit.SplitType.choices)
 
     def resolve_verification_plans(self, info: Any) -> graphene.List:
-        return self.get_payment_verification_plans
+        return self.payment_verification_plans.all()
 
     def resolve_payments_conflicts_count(self, info: Any) -> graphene.Int:
         return self.payment_items.filter(excluded=False, payment_plan_hard_conflicted=True).count()
@@ -795,7 +794,7 @@ class CashPlanAndPaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, gra
 
     obj_type = graphene.String()
     id = graphene.String()
-    unicef_id = graphene.String(source="get_unicef_id")
+    unicef_id = graphene.String()
     verification_status = graphene.String()
     status = graphene.String()
     currency = graphene.String()
@@ -824,7 +823,7 @@ class CashPlanAndPaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, gra
         return self.payment_items.count()
 
     def resolve_verification_status(self, info: Any, **kwargs: Any) -> Optional[graphene.String]:
-        return self.get_payment_verification_summary.status if self.get_payment_verification_summary else None
+        return self.payment_verification_summary.status if self.payment_verification_summary else None
 
     def resolve_status(self, info: Any, **kwargs: Any) -> Optional[graphene.String]:
         return self.status
@@ -833,7 +832,7 @@ class CashPlanAndPaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, gra
         return self.program.name
 
     def resolve_verification_plans(self, info: Any, **kwargs: Any) -> graphene.List:
-        return self.payment_verification_plan.all()
+        return self.payment_verification_plans.all()
 
     # TODO: do we need this empty fields ??
     def resolve_assistance_measurement(self, info: Any, **kwargs: Any) -> str:
@@ -937,16 +936,13 @@ class GenericPaymentPlanNode(graphene.ObjectType):
     def resolve_obj_type(self, info: Any, **kwargs: Any) -> str:
         return self.__class__.__name__
 
-    def resolve_payment_verification_summary(self, info: Any, **kwargs: Any) -> graphene.Field:
-        return self.get_payment_verification_summary
-
     def resolve_available_payment_records_count(self, info: Any, **kwargs: Any) -> graphene.Int:
         return self.payment_items.filter(
             status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0
         ).count()
 
     def resolve_verification_plans(self, info: Any, **kwargs: Any) -> DjangoPermissionFilterConnectionField:
-        return self.get_payment_verification_plans
+        return self.payment_verification_plans.all()
 
     def resolve_total_entitled_quantity(self, info: Any, **kwargs: Any) -> graphene.Float:
         return self.total_entitled_quantity
