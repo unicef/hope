@@ -13,7 +13,7 @@ from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.payment.fixtures import ApprovalProcessFactory, PaymentPlanFactory
 from hct_mis_api.apps.payment.models import PaymentPlan
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
@@ -59,9 +59,10 @@ def create_program(
 
 @pytest.fixture
 def create_payment_plan(create_active_test_program: Program, second_test_program: Program) -> PaymentPlan:
+    program_cycle_second = ProgramCycleFactory(program=second_test_program)
     PaymentPlanFactory(
         target_population=TargetPopulationFactory(program=second_test_program),
-        program=second_test_program,
+        program_cycle=program_cycle_second,
         status=PaymentPlan.Status.IN_APPROVAL,
         business_area=BusinessArea.objects.filter(slug="afghanistan").first(),
     )
@@ -73,6 +74,7 @@ def create_payment_plan(create_active_test_program: Program, second_test_program
     )
     tp = TargetPopulation.objects.get(program__name="Test Programm")
     payment_plan = PaymentPlan.objects.update_or_create(
+        name="Test Payment Plan",
         business_area=BusinessArea.objects.only("is_payment_plan_applicable").get(slug="afghanistan"),
         target_population=tp,
         currency="USD",
@@ -81,12 +83,10 @@ def create_payment_plan(create_active_test_program: Program, second_test_program
         status_date=datetime.now(),
         status=PaymentPlan.Status.IN_APPROVAL,
         created_by=User.objects.first(),
-        program=tp.program,
         program_cycle=tp.program.cycles.first(),
         total_delivered_quantity=999,
         total_entitled_quantity=2999,
         is_follow_up=False,
-        program_id=tp.program.id,
     )[0]
     approval_user = UserFactory()
     approval_date = timezone.datetime(2000, 10, 10, tzinfo=timezone.utc)
@@ -117,23 +117,24 @@ class TestSmokeManagerialConsole:
             pageManagerialConsole.getReleaseButton().click()
 
         program = Program.objects.filter(name="Test Programm").first()
+        program_cycle = ProgramCycleFactory(program=program)
         PaymentPlanFactory(
-            program=program,
+            program_cycle=program_cycle,
             status=PaymentPlan.Status.IN_APPROVAL,
             business_area=BusinessArea.objects.filter(slug="afghanistan").first(),
         )
         PaymentPlanFactory(
-            program=program,
+            program_cycle=program_cycle,
             status=PaymentPlan.Status.IN_AUTHORIZATION,
             business_area=BusinessArea.objects.filter(slug="afghanistan").first(),
         )
         PaymentPlanFactory(
-            program=program,
+            program_cycle=program_cycle,
             status=PaymentPlan.Status.IN_REVIEW,
             business_area=BusinessArea.objects.filter(slug="afghanistan").first(),
         )
         PaymentPlanFactory(
-            program=program,
+            program_cycle=program_cycle,
             status=PaymentPlan.Status.ACCEPTED,
             business_area=BusinessArea.objects.filter(slug="afghanistan").first(),
         )

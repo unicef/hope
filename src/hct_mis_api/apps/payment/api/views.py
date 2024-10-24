@@ -73,7 +73,7 @@ class PaymentPlanViewSet(BusinessAreaProgramMixin, PaymentPlanMixin, mixins.List
     def get_queryset(self) -> QuerySet:
         business_area = self.get_business_area()
         program = self.get_program()
-        return PaymentPlan.objects.filter(business_area=business_area, program=program)
+        return PaymentPlan.objects.filter(business_area=business_area, program_cycle__program=program)
 
 
 class PaymentPlanManagerialViewSet(BusinessAreaMixin, PaymentPlanMixin, mixins.ListModelMixin, GenericViewSet):
@@ -93,7 +93,7 @@ class PaymentPlanManagerialViewSet(BusinessAreaMixin, PaymentPlanMixin, mixins.L
                 PaymentPlan.Status.IN_REVIEW,
                 PaymentPlan.Status.ACCEPTED,
             ],
-            program__in=program_ids,
+            program_cycle__program__in=program_ids,
         )
 
     @etag_decorator(PaymentPlanKeyConstructor)
@@ -139,7 +139,7 @@ class PaymentPlanManagerialViewSet(BusinessAreaMixin, PaymentPlanMixin, mixins.L
         if not self.request.user.has_permission(
             self._get_action_permission(input_data["action"]),
             business_area,
-            payment_plan.program_id,
+            payment_plan.program_cycle.program_id,
         ):
             raise PermissionDenied(
                 f"You do not have permission to perform action {input_data['action']} "
@@ -161,7 +161,7 @@ class PaymentPlanManagerialViewSet(BusinessAreaMixin, PaymentPlanMixin, mixins.L
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
             user=request.user,
-            programs=payment_plan.get_program.pk,
+            programs=payment_plan.program_cycle.program.pk,
             old_object=old_payment_plan,
             new_object=payment_plan,
         )

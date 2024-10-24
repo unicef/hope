@@ -223,6 +223,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         help_text="Written by a tool such as Corticon.",
         blank=True,
     )
+
     excluded_ids = models.TextField(blank=True)
     exclusion_reason = models.TextField(blank=True)
 
@@ -251,7 +252,6 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         null=True,
     )
 
-    # TODO: move to StorageFile
     storage_file = models.OneToOneField(StorageFile, blank=True, null=True, on_delete=models.SET_NULL)
 
     @property

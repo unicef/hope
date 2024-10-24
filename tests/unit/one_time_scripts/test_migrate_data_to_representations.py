@@ -34,14 +34,8 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.fixtures import (
-    CashPlanFactory,
-    PaymentFactory,
-    PaymentPlanFactory,
-    PaymentRecordFactory,
-    ServiceProviderFactory,
-)
-from hct_mis_api.apps.payment.models import Payment, PaymentRecord, ServiceProvider
+from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
+from hct_mis_api.apps.payment.models import Payment
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
@@ -49,7 +43,6 @@ from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
 from hct_mis_api.one_time_scripts.migrate_data_to_representations import (
-    adjust_payment_records,
     adjust_payments,
     copy_household_representation_for_programs_fast,
     migrate_data_to_representations,
@@ -193,7 +186,7 @@ class BaseMigrateDataTestCase:
         # Payments 1
         payment_plan1 = PaymentPlanFactory(
             target_population=self.target_population1,
-            program=self.program_active,
+            program_cycle=self.program_active.cycles.first(),
         )
 
         self.payment1 = PaymentFactory(
@@ -203,18 +196,6 @@ class BaseMigrateDataTestCase:
             head_of_household=self.individual1_1,
             program=self.program_active,
             entitlement_quantity=103,
-            currency="PLN",
-        )
-        cash_plan = CashPlanFactory(
-            program=self.program_active,
-        )
-
-        self.payment_record1 = PaymentRecordFactory(
-            target_population=self.target_population1,
-            household=self.household1,
-            head_of_household=self.individual1_1,
-            service_provider=ServiceProvider.objects.first() or ServiceProviderFactory(),
-            parent=cash_plan,
             currency="PLN",
         )
 
@@ -262,7 +243,7 @@ class BaseMigrateDataTestCase:
         # Payments 2
         payment_plan2 = PaymentPlanFactory(
             target_population=self.target_population_paid,
-            program=self.program_active,
+            program_cycle=self.program_active.cycles.first(),
         )
         self.payment2 = PaymentFactory(
             parent=payment_plan2,
@@ -270,15 +251,6 @@ class BaseMigrateDataTestCase:
             household=self.household2,
             head_of_household=self.individual2_1,
             program=self.program_active,
-            currency="PLN",
-        )
-
-        self.payment_record2 = PaymentRecordFactory(
-            target_population=self.target_population_paid,
-            household=self.household2,
-            head_of_household=self.collector2_1,
-            service_provider=ServiceProvider.objects.first() or ServiceProviderFactory(),
-            parent=cash_plan,
             currency="PLN",
         )
 
@@ -425,7 +397,7 @@ class BaseMigrateDataTestCase:
         # Payments 5
         payment_plan5 = PaymentPlanFactory(
             target_population=self.target_population_paid,
-            program=self.program_finished1,
+            program_cycle=self.program_finished1.cycles.first(),
         )
         self.payment5 = PaymentFactory(
             parent=payment_plan5,
@@ -436,17 +408,10 @@ class BaseMigrateDataTestCase:
             currency="PLN",
         )
 
-        self.payment_record5 = PaymentRecordFactory(
-            target_population=self.target_population_paid,
-            household=self.household5,
-            head_of_household=self.individual5_1,
-            service_provider=ServiceProvider.objects.first() or ServiceProviderFactory(),
-            parent=cash_plan,
-        )
         # Payments 7
         payment_plan7 = PaymentPlanFactory(
             target_population=self.target_population3,
-            program=self.program_finished2,
+            program_cycle=self.program_finished2.cycles.first(),
         )
         self.payment7 = PaymentFactory(
             parent=payment_plan7,
@@ -456,15 +421,6 @@ class BaseMigrateDataTestCase:
             program=self.program_finished2,
             currency="PLN",
         )
-
-        self.payment_record7 = PaymentRecordFactory(
-            target_population=self.target_population3,
-            household=self.household7,
-            head_of_household=self.individual7_1,
-            service_provider=ServiceProvider.objects.first() or ServiceProviderFactory(),
-            parent=cash_plan,
-        )
-
         # Households from mixed rdi
         self.rdi_mixed = RegistrationDataImportFactory(
             business_area=self.business_area,
@@ -670,9 +626,7 @@ class BaseMigrateDataTestCase:
         self.individual4_1.refresh_from_db()
         self.collector2_1.refresh_from_db()
         self.payment1.refresh_from_db()
-        self.payment_record1.refresh_from_db()
         self.payment2.refresh_from_db()
-        self.payment_record2.refresh_from_db()
         self.household5.refresh_from_db()
         self.individual5_1.refresh_from_db()
         self.household6.refresh_from_db()
@@ -682,9 +636,7 @@ class BaseMigrateDataTestCase:
         self.collector5_1.refresh_from_db()
         self.collector5_2.refresh_from_db()
         self.payment5.refresh_from_db()
-        self.payment_record5.refresh_from_db()
         self.payment7.refresh_from_db()
-        self.payment_record7.refresh_from_db()
         self.rdi_with_3_hhs.refresh_from_db()
         self.individual_helper3.refresh_from_db()
         self.individual_mixed_closed_tp_paid.refresh_from_db()
@@ -1806,42 +1758,31 @@ class TestMigrateDataToRepresentations(BaseMigrateDataTestCase, TestCase):
             self.program_active,
         )
 
-    def test_adjust_payments_and_payment_records(self) -> None:
+    def test_adjust_payments(self) -> None:
         payment_count = Payment.objects.filter(business_area=self.business_area).count()
-        payment_record_count = PaymentRecord.objects.filter(business_area=self.business_area).count()
 
         self.assertEqual(self.payment1.collector, self.individual1_2)
         self.assertEqual(self.payment1.head_of_household, self.individual1_1)
         self.assertEqual(self.payment1.household, self.household1)
-        self.assertEqual(self.payment_record1.head_of_household, self.individual1_1)
-        self.assertEqual(self.payment_record1.household, self.household1)
 
         self.assertEqual(self.payment2.collector, self.collector2_1)
         self.assertEqual(self.payment2.head_of_household, self.individual2_1)
         self.assertEqual(self.payment2.household, self.household2)
-        self.assertEqual(self.payment_record2.head_of_household, self.collector2_1)
-        self.assertEqual(self.payment_record2.household, self.household2)
 
         self.assertEqual(self.payment5.collector, self.collector5_1)
         self.assertEqual(self.payment5.head_of_household, self.individual5_1)
         self.assertEqual(self.payment5.household, self.household5)
-        self.assertEqual(self.payment_record5.head_of_household, self.individual5_1)
-        self.assertEqual(self.payment_record5.household, self.household5)
 
         self.assertEqual(self.payment7.collector, self.collector5_1)
         self.assertEqual(self.payment7.head_of_household, self.individual7_1)
         self.assertEqual(self.payment7.household, self.household7)
-        self.assertEqual(self.payment_record7.head_of_household, self.individual7_1)
-        self.assertEqual(self.payment_record7.household, self.household7)
 
         migrate_data_to_representations_per_business_area(business_area=self.business_area)
         adjust_payments(business_area=self.business_area)
-        adjust_payment_records(business_area=self.business_area)
 
         self.refresh_objects()
 
         self.assertEqual(Payment.objects.filter(business_area=self.business_area).count(), payment_count)
-        self.assertEqual(PaymentRecord.objects.filter(business_area=self.business_area).count(), payment_record_count)
 
         # payment1
         individual1_1_representation1 = Individual.original_and_repr_objects.filter(
@@ -1856,8 +1797,6 @@ class TestMigrateDataToRepresentations(BaseMigrateDataTestCase, TestCase):
         self.assertEqual(self.payment1.collector, individual1_2_representation1)
         self.assertEqual(self.payment1.head_of_household, individual1_1_representation1)
         self.assertEqual(self.payment1.household, household1_representation1)
-        self.assertEqual(self.payment_record1.head_of_household, individual1_1_representation1)
-        self.assertEqual(self.payment_record1.household, household1_representation1)
 
         # payment2
         individual2_1_representation2 = Individual.original_and_repr_objects.filter(
@@ -1872,8 +1811,6 @@ class TestMigrateDataToRepresentations(BaseMigrateDataTestCase, TestCase):
         self.assertEqual(self.payment2.collector, collector2_1_representation2)
         self.assertEqual(self.payment2.head_of_household, individual2_1_representation2)
         self.assertEqual(self.payment2.household, household2_representation2)
-        self.assertEqual(self.payment_record2.head_of_household, collector2_1_representation2)
-        self.assertEqual(self.payment_record2.household, household2_representation2)
 
         # payment5
         collector5_1_representation2 = Individual.original_and_repr_objects.filter(
@@ -1888,8 +1825,6 @@ class TestMigrateDataToRepresentations(BaseMigrateDataTestCase, TestCase):
         self.assertEqual(self.payment5.collector, collector5_1_representation2)
         self.assertEqual(self.payment5.head_of_household, individual5_1_representation2)
         self.assertEqual(self.payment5.household, household5_representation2)
-        self.assertEqual(self.payment_record5.head_of_household, individual5_1_representation2)
-        self.assertEqual(self.payment_record5.household, household5_representation2)
 
         # payment7
         collector5_1_representation3 = Individual.original_and_repr_objects.filter(
@@ -1904,8 +1839,6 @@ class TestMigrateDataToRepresentations(BaseMigrateDataTestCase, TestCase):
         self.assertEqual(self.payment7.collector, collector5_1_representation3)
         self.assertEqual(self.payment7.head_of_household, individual7_1_representation3)
         self.assertEqual(self.payment7.household, household7_representation3)
-        self.assertEqual(self.payment_record7.head_of_household, individual7_1_representation3)
-        self.assertEqual(self.payment_record7.household, household7_representation3)
 
 
 class TestCountrySpecificRules(TestCase):

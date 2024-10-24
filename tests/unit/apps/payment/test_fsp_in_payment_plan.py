@@ -119,7 +119,7 @@ def payment_plan_setup(cls: Any) -> None:
         total_households_count=4,
         target_population=target_population,
         status=PaymentPlan.Status.LOCKED,
-        program=cls.program,
+        program_cycle=cls.program.cycles.first(),
     )
     cls.encoded_payment_plan_id = encode_id_base64(cls.payment_plan.id, "PaymentPlan")
 
@@ -251,7 +251,7 @@ class TestFSPSetup(APITestCase):
 
     def test_choosing_delivery_mechanism_order(self) -> None:
         payment_plan = PaymentPlanFactory(
-            total_households_count=1, status=PaymentPlan.Status.LOCKED, program=self.program
+            total_households_count=1, status=PaymentPlan.Status.LOCKED, program_cycle=self.program.cycles.first()
         )
         encoded_payment_plan_id = encode_id_base64(payment_plan.id, "PaymentPlan")
         choose_dms_mutation_variables_mutation_variables_without_delivery_mechanisms = dict(
@@ -320,7 +320,7 @@ class TestFSPSetup(APITestCase):
         payment_plan = PaymentPlanFactory(
             total_households_count=1,
             status=PaymentPlan.Status.LOCKED,
-            program=self.program,
+            program_cycle=self.program.cycles.first(),
             currency=USDC,
         )
         assert payment_plan.currency == USDC
@@ -365,7 +365,7 @@ class TestFSPSetup(APITestCase):
 
     def test_providing_non_unique_delivery_mechanisms(self) -> None:
         payment_plan = PaymentPlanFactory(
-            total_households_count=1, status=PaymentPlan.Status.LOCKED, program=self.program
+            total_households_count=1, status=PaymentPlan.Status.LOCKED, program_cycle=self.program.cycles.first()
         )
         encoded_payment_plan_id = encode_id_base64(payment_plan.id, "PaymentPlan")
         choose_dms_mutation_variables_mutation_variables = dict(
@@ -1116,7 +1116,9 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
         # FSP with limit is used in other conflicting PP
         self.bank_of_america_fsp.distribution_limit = 1000
         self.bank_of_america_fsp.save()
-        new_payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED_FSP, program=self.program)
+        new_payment_plan = PaymentPlanFactory(
+            status=PaymentPlan.Status.LOCKED_FSP, program_cycle=self.program.cycles.first()
+        )
         DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=new_payment_plan,
             delivery_mechanism=self.dm_voucher,

@@ -22,7 +22,7 @@ class CreatePaymentVerifications:
             payment_record_verification = PaymentVerification(
                 status_date=timezone.now(),
                 payment_verification_plan=self.payment_verification_plan,
-                payment_obj=payment_record,
+                payment=payment_record,
                 received_amount=None,
             )
             payment_record_verifications_to_create.append(payment_record_verification)

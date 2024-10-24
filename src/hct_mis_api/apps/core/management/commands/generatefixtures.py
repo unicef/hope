@@ -25,8 +25,8 @@ from hct_mis_api.apps.household.fixtures import (
 )
 from hct_mis_api.apps.household.models import DocumentType
 from hct_mis_api.apps.payment.fixtures import (
-    CashPlanFactory,
-    PaymentRecordFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
 )
@@ -36,7 +36,6 @@ from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
     TargetingCriteriaRuleFactory,
     TargetingCriteriaRuleFilterFactory,
-    TargetPopulationFactory,
 )
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 
@@ -118,17 +117,11 @@ class Command(BaseCommand):
         for rule in rules:
             TargetingCriteriaRuleFilterFactory.create_batch(random.randint(1, 5), targeting_criteria_rule=rule)
 
-        target_population = TargetPopulationFactory(
-            created_by=user,
-            targeting_criteria=targeting_criteria,
-            business_area=business_area,
-        )
         for _ in range(cash_plans_amount):
-            cash_plan = CashPlanFactory(
+            payment_plan = PaymentPlanFactory(
                 program=program,
                 business_area=business_area,
             )
-            cash_plan.save()
             for _ in range(payment_record_amount):
                 registration_data_import = RegistrationDataImportFactory(imported_by=user, business_area=business_area)
                 household, individuals = create_household_for_fixtures(
@@ -146,17 +139,16 @@ class Command(BaseCommand):
                 if household.admin_area:
                     program.admin_areas.add(household.admin_area)
 
-                payment_record = PaymentRecordFactory(
-                    parent=cash_plan,
+                payment = PaymentFactory(
+                    parent=payment_plan,
                     household=household,
-                    target_population=target_population,
                     delivered_quantity_usd=None,
                     business_area=business_area,
                 )
-                payment_record.delivered_quantity_usd = Decimal(
-                    cash_plan.exchange_rate * payment_record.delivered_quantity
+                payment.delivered_quantity_usd = Decimal(
+                    payment_plan.exchange_rate * payment.delivered_quantity
                 ).quantize(Decimal(".01"))
-                payment_record.save()
+                payment.save()
 
                 should_create_grievance = random.choice((True, False))
                 if should_create_grievance:
@@ -174,13 +166,13 @@ class Command(BaseCommand):
                             SensitiveGrievanceTicketWithoutExtrasFactory,
                             household=household,
                             individual=random.choice(individuals),
-                            payment_record=payment_record if should_contain_payment_record else None,
+                            payment=payment if should_contain_payment_record else None,
                         ),
                         "complaint": partial(
                             GrievanceComplaintTicketWithoutExtrasFactory,
                             household=household,
                             individual=random.choice(individuals),
-                            payment_record=payment_record if should_contain_payment_record else None,
+                            payment=payment if should_contain_payment_record else None,
                         ),
                     }
 

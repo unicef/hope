@@ -10,7 +10,6 @@ import {
   ChoiceObject,
   PaymentPlanBackgroundActionStatus,
   PaymentPlanStatus,
-  PaymentRecordStatus,
   PaymentStatus,
   ProgramStatus,
   TargetPopulationBuildStatus,
@@ -135,12 +134,12 @@ export function paymentRecordStatusToColor(
   status: string,
 ): string {
   switch (status) {
-    case PaymentRecordStatus.Pending:
+    case PaymentStatus.Pending:
       return theme.hctPalette.orange;
-    case PaymentRecordStatus.DistributionSuccessful:
-    case PaymentRecordStatus.TransactionSuccessful:
+    case PaymentStatus.DistributionSuccessful:
+    case PaymentStatus.TransactionSuccessful:
       return theme.hctPalette.green;
-    case PaymentRecordStatus.PartiallyDistributed:
+    case PaymentStatus.PartiallyDistributed:
       return theme.hctPalette.lightBlue;
     default:
       return theme.palette.error.main;
@@ -169,19 +168,14 @@ export function paymentStatusToColor(
 export function paymentStatusDisplayMap(status: string): string {
   switch (status) {
     case PaymentStatus.Pending:
-    case PaymentRecordStatus.Pending:
       return 'PENDING';
     case PaymentStatus.DistributionSuccessful:
     case PaymentStatus.TransactionSuccessful:
-    case PaymentRecordStatus.DistributionSuccessful:
-    case PaymentRecordStatus.TransactionSuccessful:
       return 'DELIVERED FULLY';
     case PaymentStatus.PartiallyDistributed:
       return 'DELIVERED PARTIALLY';
-    case PaymentRecordStatus.NotDistributed:
     case PaymentStatus.NotDistributed:
       return 'NOT DELIVERED';
-    case PaymentRecordStatus.ForceFailed:
     case PaymentStatus.ForceFailed:
       return 'FORCE FAILED';
     case PaymentStatus.ManuallyCancelled:

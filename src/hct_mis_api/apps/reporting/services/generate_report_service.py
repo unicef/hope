@@ -203,8 +203,8 @@ class GenerateReportContentHelpers:
     def format_cash_plan_verification_row(cls, verification: PaymentVerificationPlan) -> tuple:
         return (
             verification.id,
-            verification.payment_plan_obj.get_unicef_id,
-            verification.payment_plan_obj.program.name,
+            verification.payment_plan.unicef_id,
+            verification.payment_plan.program.name,
             cls._format_date(verification.activation_date),
             verification.status,
             verification.verification_channel,
@@ -247,8 +247,8 @@ class GenerateReportContentHelpers:
                 cash_or_voucher = "voucher"
 
         return (
-            payment.ca_id,
-            payment.parent.ca_id if payment.parent else "",
+            payment.unicef_id,
+            payment.parent.unicef_id if payment.parent else "",
             payment.status,
             payment.currency,
             payment.delivered_quantity,
@@ -269,21 +269,21 @@ class GenerateReportContentHelpers:
             PaymentPlan.objects.filter(business_area=report.business_area).values_list("id", flat=True)
         )
         filter_vars = {
-            "payment_verification_plan__payment_plan_object_id__in": pp_business_area_ids,
+            "payment_verification_plan__payment_plan_id__in": pp_business_area_ids,
             "payment_verification_plan__completion_date__isnull": False,
             "payment_verification_plan__completion_date__date__range": (report.date_from, report.date_to),
         }
         if report.program:
             pp_program_ids = list(PaymentPlan.objects.filter(program=report.program).values_list("id", flat=True))
-            filter_vars["payment_verification_plan__payment_plan_object_id__in"] = pp_program_ids
+            filter_vars["payment_verification_plan__payment_plan_id__in"] = pp_program_ids
         return PaymentVerification.objects.filter(**filter_vars)
 
     @classmethod
     def format_payment_verification_row(cls, payment_verification: PaymentVerification) -> tuple:
         return (
             payment_verification.payment_verification_plan.id,
-            payment_verification.payment_obj.unicef_id,
-            payment_verification.payment_verification_plan.get_payment_plan.get_unicef_id,
+            payment_verification.payment.unicef_id,
+            payment_verification.payment_verification_plan.payment_plan.unicef_id,
             cls._format_date(payment_verification.payment_verification_plan.completion_date),
             payment_verification.received_amount,
             payment_verification.status,
@@ -304,7 +304,7 @@ class GenerateReportContentHelpers:
     @classmethod
     def format_payment_plan_row(cls, payment_plan: PaymentPlan) -> tuple:
         return (
-            payment_plan.get_unicef_id,
+            payment_plan.unicef_id,
             payment_plan.get_status_display(),
             payment_plan.total_households_count,
             payment_plan.get_currency_display(),

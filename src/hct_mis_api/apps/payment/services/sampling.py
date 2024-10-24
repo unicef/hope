@@ -1,5 +1,5 @@
 import abc
-from typing import TYPE_CHECKING, Any, Dict, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, Tuple
 
 from django.db.models import Q, QuerySet
 
@@ -11,16 +11,14 @@ from hct_mis_api.apps.payment.models import PaymentVerificationPlan
 from hct_mis_api.apps.payment.utils import get_number_of_samples
 
 if TYPE_CHECKING:
-    from hct_mis_api.apps.payment.models import CashPlan, PaymentPlan, PaymentRecord
+    from hct_mis_api.apps.payment.models import Payment, PaymentPlan
 
 
 class Sampling:
-    def __init__(
-        self, input_data: Dict, payment_plan: Union["CashPlan", "PaymentPlan"], payment_records: QuerySet
-    ) -> None:
+    def __init__(self, input_data: Dict, payment_plan: "PaymentPlan", payment_records: QuerySet["Payment"]) -> None:
         self.input_data = input_data
         self.payment_plan = payment_plan
-        self.payment_records: QuerySet = payment_records
+        self.payment_records = payment_records
 
     def process_sampling(
         self, payment_verification_plan: PaymentVerificationPlan
@@ -83,12 +81,12 @@ class BaseSampling(abc.ABC):
             return get_number_of_samples(sample_count, self.confidence_interval, self.margin_of_error)
 
     @abc.abstractmethod
-    def sampling(self, payment_records: QuerySet["PaymentRecord"]) -> None:
+    def sampling(self, payment_records: QuerySet["Payment"]) -> None:
         pass
 
 
 class RandomSampling(BaseSampling):
-    def sampling(self, payment_records: QuerySet["PaymentRecord"]) -> None:
+    def sampling(self, payment_records: QuerySet["Payment"]) -> None:
         if self.sex is not None:
             payment_records = payment_records.filter(household__head_of_household__sex=self.sex)
 
@@ -107,7 +105,7 @@ class RandomSampling(BaseSampling):
 
 
 class FullListSampling(BaseSampling):
-    def sampling(self, payment_records: QuerySet["PaymentRecord"]) -> None:
+    def sampling(self, payment_records: QuerySet["Payment"]) -> None:
         self.payment_records = payment_records.filter(
             ~(Q(household__admin_area__id__in=self.excluded_admin_areas_decoded))
         )

@@ -1,4 +1,5 @@
 from typing import Any, List
+from unittest import mock
 
 from parameterized import parameterized
 
@@ -10,6 +11,9 @@ from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFact
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
+@mock.patch(
+    "hct_mis_api.apps.registration_data.signals.increment_registration_data_import_version_cache", return_value=None
+)
 class TestFilterIndividualsByProgram(APITestCase):
     QUERY = """
     query AllIndividuals($program: ID){
@@ -112,7 +116,7 @@ class TestFilterIndividualsByProgram(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_individual_query_all(self, _: Any, permissions: List[Permissions]) -> None:
+    def test_individual_query_all(self, _mock: Any, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program1)
 
         headers = {

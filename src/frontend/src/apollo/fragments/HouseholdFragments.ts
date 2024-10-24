@@ -140,24 +140,6 @@ export const householdDetailed = gql`
         username
       }
     }
-    paymentrecordSet {
-      edges {
-        node {
-          id
-          fullName
-          parent {
-            id
-            totalPersonsCovered
-            program {
-              id
-              name
-            }
-            totalDeliveredQuantity
-            assistanceMeasurement
-          }
-        }
-      }
-    }
     flexFields
     deliveredQuantities {
       totalDeliveredQuantity
