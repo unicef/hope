@@ -11,6 +11,7 @@
       "AreaNode",
       "AreaTypeNode",
       "BankAccountInfoNode",
+      "BeneficiaryGroupNode",
       "BusinessAreaNode",
       "CashPlanNode",
       "CommunicationMessageNode",
