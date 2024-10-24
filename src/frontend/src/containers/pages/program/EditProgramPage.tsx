@@ -34,6 +34,7 @@ import {
   editProgramDetailsValidationSchema,
 } from '@components/programs/CreateProgram/editProgramValidationSchema';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { omit } from 'lodash';
 
 export const EditProgramPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -160,8 +161,12 @@ export const EditProgramPage = (): ReactElement => {
       }));
 
     try {
-      const { ...requestValuesDetails } = values;
-
+      const requestValuesDetails = omit(values, [
+        'editMode',
+        'partners',
+        'partnerAccess',
+        'pduFields',
+      ]);
       const response = await updateProgramDetails({
         variables: {
           programData: {
