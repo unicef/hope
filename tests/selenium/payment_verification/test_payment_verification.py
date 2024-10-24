@@ -1,6 +1,8 @@
+import base64
 from datetime import datetime
 from decimal import Decimal
 from time import sleep
+from selenium.webdriver import Chrome
 
 import pytest
 from dateutil.relativedelta import relativedelta
@@ -393,14 +395,6 @@ class TestSmokePaymentVerification:
 
 @pytest.mark.usefixtures("login")
 class TestPaymentVerification:
-    def test_payment_verification_create_grievance_ticket_same_value(
-        self, active_program: Program, add_payment_verification: PV, pagePaymentVerification: PaymentVerification
-    ) -> None:
-        pagePaymentVerification.selectGlobalProgramFilter("Active Program")
-        # Upon resolving the Payment Verification grievance ticket,
-        # the received value changes with the new verified value.
-        # If the received value is 0, it should stay 0 even when a new verified value is provided in the ticket.
-        # Check conversation with Jakub
 
     @pytest.mark.parametrize(
         "channel",
@@ -547,3 +541,33 @@ class TestPaymentVerification:
         else:
             assert channel in pagePaymentVerificationDetails.getLabelVerificationChannel().text
         assert "Full list" in pagePaymentVerificationDetails.getLabelSampling().text
+
+    def test_payment_verification_create_grievance_ticket_same_value(
+        self, active_program: Program, add_payment_verification: PV, pagePaymentVerification: PaymentVerification
+    ) -> None:
+        pagePaymentVerification.selectGlobalProgramFilter("Active Program")
+        # Upon resolving the Payment Verification grievance ticket,
+        # the received value changes with the new verified value.
+        # If the received value is 0, it should stay 0 even when a new verified value is provided in the ticket.
+        # Check conversation with Jakub
+
+    def test_payment_verification_successful_received(
+            self,
+            active_program: Program,
+            add_payment_verification: PV,
+            pagePaymentVerification: PaymentVerification,
+            browser: Chrome
+    ) -> None:
+        # program_url_id = base64.b64encode(f"ProgramNode:{str(active_program.id)}".encode()).decode()
+        # payment_url_id = base64.b64encode(f"PaymentPlanNode:{str(add_payment_verification.payment_obj.parent.id)}".encode()).decode()
+        # print(f"{active_program.id}")
+        # browser.get(f"{browser.live_server.url}/afghanistan/programs/{program_url_id}")
+        pagePaymentVerification.navigate_to_page(active_program.business_area.slug, str(active_program.id))
+        sleep(5)
+        pagePaymentVerification.screenshot("0", file_path="./")
+
+    def test_payment_verification_successful_not_received(
+            self, active_program: Program, add_payment_verification: PV, pagePaymentVerification: PaymentVerification
+    ) -> None:
+        pagePaymentVerification.selectGlobalProgramFilter("Active Program")
+
