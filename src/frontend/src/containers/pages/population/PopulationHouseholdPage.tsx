@@ -13,6 +13,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { HouseholdTable } from '../../tables/population/HouseholdTable';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
 export function PopulationHouseholdPage(): React.ReactElement {
   const { t } = useTranslation();
@@ -53,31 +54,40 @@ export function PopulationHouseholdPage(): React.ReactElement {
   if (!choicesData) return null;
 
   return (
-    <>
-      <PageHeader title={t('Households')} />
-      <HouseholdFilters
-        filter={filter}
-        choicesData={choicesData}
-        setFilter={setFilter}
-        initialFilter={initialFilter}
-        appliedFilter={appliedFilter}
-        setAppliedFilter={setAppliedFilter}
-      />
-      <Box
-        display="flex"
-        flexDirection="column"
-        data-cy="page-details-container"
-      >
-        <HouseholdTable
-          filter={appliedFilter}
-          businessArea={businessArea}
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'PopulationHouseholdPage.tsx');
+      }}
+      componentName="PopulationHouseholdPage"
+    >
+      <>
+        <PageHeader title={t('Households')} />
+        <HouseholdFilters
+          filter={filter}
           choicesData={choicesData}
-          canViewDetails={hasPermissions(
-            PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
-            permissions,
-          )}
+          setFilter={setFilter}
+          initialFilter={initialFilter}
+          appliedFilter={appliedFilter}
+          setAppliedFilter={setAppliedFilter}
         />
-      </Box>
-    </>
+        <Box
+          display="flex"
+          flexDirection="column"
+          data-cy="page-details-container"
+        >
+          <HouseholdTable
+            filter={appliedFilter}
+            businessArea={businessArea}
+            choicesData={choicesData}
+            canViewDetails={hasPermissions(
+              PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
+              permissions,
+            )}
+          />
+        </Box>
+      </>
+    </UniversalErrorBoundary>
   );
 }

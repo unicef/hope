@@ -306,7 +306,7 @@ class TestGoldenRecordDeduplication(TestCase):
             # 9. Bulk Create PossibleDuplicateThrough
             # 10. Transaction savepoint release
             # 11 - 13. Queries for `is_cross_area` update
-            self.assertEqual(first_dedup_query_count, 13, "Should only use 13 queries")
+            self.assertEqual(first_dedup_query_count, 13, "Should only use 14 queries")
 
     def test_ticket_created_correctly(self) -> None:
         HardDocumentDeduplication().deduplicate(
@@ -577,3 +577,87 @@ class TestGoldenRecordDeduplication(TestCase):
         self.assertEqual(tax_id.status, Document.STATUS_VALID)
         d2.refresh_from_db()
         self.assertEqual(d2.status, Document.STATUS_NEED_INVESTIGATION)
+
+    def test_ticket_creation_for_the_same_ind_doc_numbers_same_doc_type(self) -> None:
+        Document.objects.all().delete()
+        passport = Document.objects.create(
+            country=self.country,  # the same country
+            type=self.dt,
+            document_number="111",  # the same doc number
+            individual=self.individuals[2],  # the same Individual
+            program=self.program,
+            rdi_merge_status=MergeStatusModel.MERGED,
+        )
+        passport2 = Document.objects.create(
+            country=self.country,  # the same country
+            type=self.dt,
+            document_number="111",  # the same doc number
+            individual=self.individuals[2],  # the same Individual
+            program=self.program,
+            rdi_merge_status=MergeStatusModel.MERGED,
+        )
+        d1 = Document.objects.create(
+            country=self.country,
+            type=self.dt,
+            document_number="222",
+            individual=self.individuals[1],
+            program=self.program,
+            rdi_merge_status=MergeStatusModel.MERGED,
+        )
+
+        self.assertEqual(GrievanceTicket.objects.all().count(), 0)
+        HardDocumentDeduplication().deduplicate(
+            self.get_documents_query([passport, passport2, d1]),
+            self.registration_data_import,
+        )
+
+        self.assertEqual(GrievanceTicket.objects.all().count(), 0)
+
+        passport.refresh_from_db()
+        self.assertEqual(passport.status, Document.STATUS_INVALID)
+
+        passport2.refresh_from_db()
+        self.assertEqual(passport2.status, Document.STATUS_VALID)
+        self.assertEqual(GrievanceTicket.objects.all().count(), 0)
+
+    def test_ticket_creation_for_the_same_ind_doc_numbers_different_doc_type(self) -> None:
+        Document.objects.all().delete()
+        passport = Document.objects.create(
+            country=self.country,  # the same country
+            type=self.dt,
+            document_number="111",  # the same doc number
+            individual=self.individuals[2],  # the same Individual
+            program=self.program,
+            rdi_merge_status=MergeStatusModel.MERGED,
+        )
+        passport2 = Document.objects.create(
+            country=self.country,  # the same country
+            type=self.dt_tax_id,
+            document_number="111",  # the same doc number
+            individual=self.individuals[2],  # the same Individual
+            program=self.program,
+            rdi_merge_status=MergeStatusModel.MERGED,
+        )
+        d1 = Document.objects.create(
+            country=self.country,
+            type=self.dt,
+            document_number="222",
+            individual=self.individuals[1],
+            program=self.program,
+            rdi_merge_status=MergeStatusModel.MERGED,
+        )
+
+        self.assertEqual(GrievanceTicket.objects.all().count(), 0)
+        HardDocumentDeduplication().deduplicate(
+            self.get_documents_query([passport, passport2, d1]),
+            self.registration_data_import,
+        )
+
+        self.assertEqual(GrievanceTicket.objects.all().count(), 0)
+
+        passport.refresh_from_db()
+        self.assertEqual(passport.status, Document.STATUS_VALID)
+
+        passport2.refresh_from_db()
+        self.assertEqual(passport2.status, Document.STATUS_VALID)
+        self.assertEqual(GrievanceTicket.objects.all().count(), 0)

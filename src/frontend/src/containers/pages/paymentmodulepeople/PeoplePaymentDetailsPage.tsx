@@ -1,7 +1,7 @@
 import { Box } from '@mui/material';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
@@ -19,10 +19,12 @@ import { RevertForceFailedButton } from '@components/paymentmodule/RevertForceFa
 import { ForceFailedButton } from '@components/paymentmodule/ForceFailedButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { AdminButton } from '@core/AdminButton';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
 export const PeoplePaymentDetailsPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const { paymentId } = useParams();
+  const location = useLocation();
   const { data: caData, loading: caLoading } = useCashAssistUrlPrefixQuery({
     fetchPolicy: 'cache-first',
   });
@@ -77,24 +79,33 @@ export const PeoplePaymentDetailsPage = (): React.ReactElement => {
   );
 
   return (
-    <>
-      <PageHeader
-        title={`Payment ${payment.unicefId}`}
-        breadCrumbs={breadCrumbsItems}
-        flags={<AdminButton adminUrl={payment.adminUrl} />}
-      >
-        {renderButton()}
-      </PageHeader>
-      <Box display="flex" flexDirection="column">
-        <PaymentDetails
-          payment={payment}
-          canViewActivityLog={hasPermissions(
-            PERMISSIONS.ACTIVITY_LOG_VIEW,
-            permissions,
-          )}
-          canViewHouseholdDetails={canViewHouseholdDetails}
-        />
-      </Box>
-    </>
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'PeoplePaymentDetailsPage.tsx');
+      }}
+      componentName="PeoplePaymentDetailsPage"
+    >
+      <>
+        <PageHeader
+          title={`Payment ${payment.unicefId}`}
+          breadCrumbs={breadCrumbsItems}
+          flags={<AdminButton adminUrl={payment.adminUrl} />}
+        >
+          {renderButton()}
+        </PageHeader>
+        <Box display="flex" flexDirection="column">
+          <PaymentDetails
+            payment={payment}
+            canViewActivityLog={hasPermissions(
+              PERMISSIONS.ACTIVITY_LOG_VIEW,
+              permissions,
+            )}
+            canViewHouseholdDetails={canViewHouseholdDetails}
+          />
+        </Box>
+      </>
+    </UniversalErrorBoundary>
   );
 };
