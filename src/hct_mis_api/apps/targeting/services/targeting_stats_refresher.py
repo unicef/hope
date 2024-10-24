@@ -8,6 +8,7 @@ from dateutil.relativedelta import relativedelta
 from hct_mis_api.apps.household.models import FEMALE, MALE, Household, Individual
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
+
 # TODO TP move to payment plan
 def refresh_stats(target_population: TargetPopulation) -> TargetPopulation:
     households_ids = target_population.household_list.values_list("id", flat=True)

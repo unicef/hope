@@ -48,7 +48,6 @@ from model_utils.models import SoftDeletableModel
 from multiselectfield import MultiSelectField
 from psycopg2._range import NumericRange
 
-from hct_mis_api.apps.account.models import HorizontalChoiceArrayField
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES, USDC
 from hct_mis_api.apps.core.exchange_rates import ExchangeRates
@@ -76,13 +75,13 @@ from hct_mis_api.apps.steficon.models import RuleCommit
 from hct_mis_api.apps.utils.models import (
     AdminUrlMixin,
     ConcurrencyModel,
+    InternalDataFieldModel,
     MergedManager,
     MergeStatusModel,
     PendingManager,
     SignatureMixin,
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
-    InternalDataFieldModel,
 )
 
 if TYPE_CHECKING:
@@ -1199,7 +1198,7 @@ class PaymentPlan(
                 ).exists()
             )
 
-    ############ from generic pp
+    # from generic pp
     def get_exchange_rate(self, exchange_rates_client: Optional["ExchangeRateClient"] = None) -> float:
         if self.currency == USDC:
             # exchange rate for Digital currency USDC to USD
@@ -1237,8 +1236,6 @@ class PaymentPlan(
     @property
     def can_create_payment_verification_plan(self) -> int:
         return self.available_payment_records().count() > 0
-
-    #########
 
 
 class FlexFieldArrayField(ArrayField):
@@ -1884,8 +1881,7 @@ class Payment(
     AdminUrlMixin,
     SignatureMixin,
 ):
-
-    ###### GenericPayment fields
+    # GenericPayment fields
 
     usd_fields = ["delivered_quantity_usd", "entitlement_quantity_usd"]
 

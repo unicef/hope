@@ -31,8 +31,8 @@ from hct_mis_api.apps.grievance.models import (
 )
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.fixtures import (
-    PaymentRecordFactory,
-    PaymentVerificationFactory, PaymentFactory,
+    PaymentFactory,
+    PaymentVerificationFactory,
 )
 from hct_mis_api.apps.payment.models import PaymentVerification
 

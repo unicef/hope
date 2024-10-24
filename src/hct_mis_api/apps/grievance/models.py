@@ -27,7 +27,7 @@ from hct_mis_api.apps.grievance.constants import (
     URGENCY_CHOICES,
     URGENCY_NOT_SET,
 )
-from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification, Payment
+from hct_mis_api.apps.payment.models import Payment, PaymentRecord, PaymentVerification
 from hct_mis_api.apps.utils.models import (
     AdminUrlMixin,
     ConcurrencyModel,

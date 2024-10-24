@@ -135,117 +135,121 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
             StartEndSpaceValidator,
             ProhibitNullCharactersValidator(),
         ],
-    ) # TODO TP the same as PP name
-    ca_id = CICharField(max_length=255, null=True, blank=True) # TODO TP store in json
-    ca_hash_id = CICharField(max_length=255, null=True, blank=True) # TODO TP store in json
+    )  # TODO TP the same as PP name
+    ca_id = CICharField(max_length=255, null=True, blank=True)  # TODO TP store in json
+    ca_hash_id = CICharField(max_length=255, null=True, blank=True)  # TODO TP store in json
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         related_name="target_populations",
         null=True,
-    ) # TODO TP -> PP created_by
-    change_date = models.DateTimeField(null=True, blank=True) # TODO TP pp.status_date
+    )  # TODO TP -> PP created_by
+    change_date = models.DateTimeField(null=True, blank=True)  # TODO TP pp.status_date
     changed_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         related_name="changed_target_populations",
         null=True,
         blank=True,
-    ) # TODO TP move to PP (status changed by?)
-    finalized_at = models.DateTimeField(null=True, blank=True) # TODO TP this is just a status change
+    )  # TODO TP move to PP (status changed by?)
+    finalized_at = models.DateTimeField(null=True, blank=True)  # TODO TP this is just a status change
     finalized_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         related_name="finalized_target_populations",
         null=True,
         blank=True,
-    ) # TODO TP this is just a status change
-    business_area = models.ForeignKey("core.BusinessArea", null=True, on_delete=models.CASCADE) # TODO TP exists in PP
-    status = models.CharField(max_length=256, choices=STATUS_CHOICES, default=STATUS_OPEN, db_index=True) # TODO TP exists in PP
+    )  # TODO TP this is just a status change
+    business_area = models.ForeignKey("core.BusinessArea", null=True, on_delete=models.CASCADE)  # TODO TP exists in PP
+    status = models.CharField(
+        max_length=256, choices=STATUS_CHOICES, default=STATUS_OPEN, db_index=True
+    )  # TODO TP exists in PP
     build_status = models.CharField(
         max_length=256, choices=BUILD_STATUS_CHOICES, default=BUILD_STATUS_PENDING, db_index=True
-    ) # TODO TP move to PP with separate statuses
-    built_at = models.DateTimeField(null=True, blank=True) # TODO TP move to PP
+    )  # TODO TP move to PP with separate statuses
+    built_at = models.DateTimeField(null=True, blank=True)  # TODO TP move to PP
     households = models.ManyToManyField(
         "household.Household",
         related_name="target_populations",
         through="HouseholdSelection",
-    ) # TODO TP drop, create payments automatically
+    )  # TODO TP drop, create payments automatically
     program = models.ForeignKey(
         "program.Program",
         help_text="""Set only when the target population moves from draft to
             candidate list frozen state (approved)""",
         on_delete=models.PROTECT,
-    ) # TODO TP exists in PP
+    )  # TODO TP exists in PP
     program_cycle = models.ForeignKey(
         "program.ProgramCycle", on_delete=models.CASCADE, related_name="target_populations"
-    ) # TODO TP exists ALSO in PP ?!
+    )  # TODO TP exists ALSO in PP ?!
     targeting_criteria = models.OneToOneField(
         "TargetingCriteria",
         blank=True,
         null=True,
         on_delete=models.SET_NULL,
         related_name="target_population",
-    ) # TODO TP move to PP
+    )  # TODO TP move to PP
     sent_to_datahub = models.BooleanField(
         default=False,
         help_text="""
             Flag set when TP is processed by celery task
             """,
         db_index=True,
-    ) # TODO TP store in json
+    )  # TODO TP store in json
     steficon_rule = models.ForeignKey(
         RuleCommit,
         null=True,
         on_delete=models.PROTECT,
         related_name="target_populations",
         blank=True,
-    ) # TODO TP move to PP
-    steficon_applied_date = models.DateTimeField(blank=True, null=True) # TODO TP move to PP
+    )  # TODO TP move to PP
+    steficon_applied_date = models.DateTimeField(blank=True, null=True)  # TODO TP move to PP
     vulnerability_score_min = models.DecimalField(
         null=True,
         decimal_places=3,
         max_digits=6,
         help_text="Written by a tool such as Corticon.",
         blank=True,
-    ) # TODO TP move to PP
+    )  # TODO TP move to PP
     vulnerability_score_max = models.DecimalField(
         null=True,
         decimal_places=3,
         max_digits=6,
         help_text="Written by a tool such as Corticon.",
         blank=True,
-    ) # TODO TP move to PP
+    )  # TODO TP move to PP
 
-    excluded_ids = models.TextField(blank=True) # TODO TP move to PP, merge with PP.excluded_ids??
-    exclusion_reason = models.TextField(blank=True) # TODO TP move to PP, merge with PP.exclusion_reason??
+    excluded_ids = models.TextField(blank=True)  # TODO TP move to PP, merge with PP.excluded_ids??
+    exclusion_reason = models.TextField(blank=True)  # TODO TP move to PP, merge with PP.exclusion_reason??
 
     total_households_count = models.PositiveIntegerField(
         blank=True,
         null=True,
-    ) # TODO TP exists in PP
+    )  # TODO TP exists in PP
     total_individuals_count = models.PositiveIntegerField(
         blank=True,
         null=True,
-    ) # TODO TP exists in PP
+    )  # TODO TP exists in PP
     child_male_count = models.PositiveIntegerField(
         blank=True,
         null=True,
-    ) # TODO TP exists in PP
+    )  # TODO TP exists in PP
     child_female_count = models.PositiveIntegerField(
         blank=True,
         null=True,
-    ) # TODO TP exists in PP
+    )  # TODO TP exists in PP
     adult_male_count = models.PositiveIntegerField(
         blank=True,
         null=True,
-    ) # TODO TP exists in PP
+    )  # TODO TP exists in PP
     adult_female_count = models.PositiveIntegerField(
         blank=True,
         null=True,
-    ) # TODO TP exists in PP
+    )  # TODO TP exists in PP
 
-    storage_file = models.OneToOneField(StorageFile, blank=True, null=True, on_delete=models.SET_NULL) # TODO TP move to PP
+    storage_file = models.OneToOneField(
+        StorageFile, blank=True, null=True, on_delete=models.SET_NULL
+    )  # TODO TP move to PP
 
     @property
     def excluded_household_ids(self) -> List:

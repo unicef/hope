@@ -39,6 +39,7 @@ from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
     AdminUrlMixin,
     ConcurrencyModel,
+    InternalDataFieldModel,
     MergeStatusModel,
     RepresentationManager,
     SoftDeletableRepresentationMergeStatusModel,
@@ -46,7 +47,6 @@ from hct_mis_api.apps.utils.models import (
     SoftDeletableRepresentationPendingManager,
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
-    InternalDataFieldModel,
 )
 from hct_mis_api.apps.utils.phone import (
     calculate_phone_numbers_validity,

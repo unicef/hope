@@ -430,7 +430,7 @@ def cash_plan_and_payment_plan_filter(queryset: ExtendedQuerySetSequence, **kwar
         queryset = queryset.filter(business_area__slug=business_area)
 
     if program:
-        queryset = queryset.filter(program=decode_id_string(program)) # TODO TP program__cycle__program
+        queryset = queryset.filter(program=decode_id_string(program))  # TODO TP program__cycle__program
 
     if start_date_gte:
         queryset = queryset.filter(start_date__gte=start_date_gte)
@@ -490,7 +490,7 @@ def payment_record_and_payment_filter(queryset: ExtendedQuerySetSequence, **kwar
         queryset = queryset.filter(household__id=decode_id_string(household))
 
     if program:
-        queryset = queryset.filter(parent__program=decode_id_string(program)) # TODO TP payment_cycle__program
+        queryset = queryset.filter(parent__program=decode_id_string(program))  # TODO TP payment_cycle__program
 
     return queryset
 
