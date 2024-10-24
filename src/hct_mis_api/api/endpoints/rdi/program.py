@@ -35,6 +35,7 @@ class ProgramSerializer(serializers.ModelSerializer):
             "cash_plus",
             "population_goal",
             "data_collecting_type",
+            "beneficiary_group",
         )
 
 

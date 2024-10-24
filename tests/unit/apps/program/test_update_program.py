@@ -29,7 +29,7 @@ from hct_mis_api.apps.household.fixtures import (
     create_household_and_individuals,
 )
 from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.fixtures import BeneficiaryGroupFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program, ProgramCycle, ProgramPartnerThrough
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 
@@ -44,6 +44,9 @@ class TestUpdateProgram(APITestCase):
           dataCollectingType {
             label
             code
+          }
+          beneficiaryGroup {
+            name
           }
           pduFields {
             name
@@ -85,7 +88,7 @@ class TestUpdateProgram(APITestCase):
 
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.business_area.data_collecting_types.set(DataCollectingType.objects.all().values_list("id", flat=True))
-
+        beneficiary_group = BeneficiaryGroupFactory()
         cls.program = ProgramFactory.create(
             name="initial name",
             status=Program.DRAFT,
@@ -94,11 +97,13 @@ class TestUpdateProgram(APITestCase):
             partner_access=Program.NONE_PARTNERS_ACCESS,
             version=123,
             biometric_deduplication_enabled=True,
+            beneficiary_group=beneficiary_group,
         )
         cls.program_finished = ProgramFactory.create(
             status=Program.FINISHED,
             business_area=cls.business_area,
             partner_access=Program.NONE_PARTNERS_ACCESS,
+            beneficiary_group=beneficiary_group,
         )
 
         cls.partner = PartnerFactory(name="WFP")
@@ -302,6 +307,39 @@ class TestUpdateProgram(APITestCase):
                 "programData": {
                     "id": self.id_to_base64(self.program.id, "ProgramNode"),
                     "dataCollectingTypeCode": "test_wrong_ba",
+                },
+                "version": self.program.version,
+            },
+        )
+
+    def test_update_program_beneficiary_group(self) -> None:
+        beneficiary_group2 = BeneficiaryGroupFactory(name="Other Group")
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=self.UPDATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables={
+                "programData": {
+                    "id": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "beneficiaryGroup": str(beneficiary_group2.id),
+                },
+                "version": self.program.version,
+            },
+        )
+
+    def test_update_program_beneficiary_group_when_imported_population(self) -> None:
+        beneficiary_group2 = BeneficiaryGroupFactory(name="Other Group")
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
+        RegistrationDataImportFactory(program=self.program)
+
+        self.snapshot_graphql_request(
+            request_string=self.UPDATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables={
+                "programData": {
+                    "id": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "beneficiaryGroup": str(beneficiary_group2.id),
                 },
                 "version": self.program.version,
             },

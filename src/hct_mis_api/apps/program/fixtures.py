@@ -14,7 +14,7 @@ from faker import Faker
 
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
-from hct_mis_api.apps.program.models import Program, ProgramCycle
+from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
 
 fake = Faker()
 
@@ -41,6 +41,19 @@ class ProgramCycleFactory(DjangoModelFactory):
         ext_word_list=None,
     )
     program = factory.SubFactory("program.fixtures.ProgramFactory")
+
+
+class BeneficiaryGroupFactory(DjangoModelFactory):
+    name = "Household"
+    group_label = factory.Faker("word")
+    group_label_plural = factory.Faker("word")
+    member_label = factory.Faker("word")
+    member_label_plural = factory.Faker("word")
+    master_detail = factory.Faker("boolean")
+
+    class Meta:
+        model = BeneficiaryGroup
+        django_get_or_create = ("name",)
 
 
 class ProgramFactory(DjangoModelFactory):
@@ -96,6 +109,7 @@ class ProgramFactory(DjangoModelFactory):
     programme_code = factory.LazyAttribute(
         lambda o: "".join(random.choice(string.ascii_uppercase + string.digits) for _ in range(4))
     )
+    beneficiary_group = factory.SubFactory(BeneficiaryGroupFactory)
 
     @factory.post_generation
     def cycle(self, create: bool, extracted: bool, **kwargs: Any) -> None:

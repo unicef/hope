@@ -57,8 +57,12 @@ from hct_mis_api.apps.payment.models import (
     ServiceProvider,
 )
 from hct_mis_api.apps.payment.utils import to_decimal
-from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
-from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.program.fixtures import (
+    BeneficiaryGroupFactory,
+    ProgramCycleFactory,
+    ProgramFactory,
+)
+from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
@@ -367,6 +371,7 @@ class RealProgramFactory(DjangoModelFactory):
         lambda o: "".join(random.choice(string.ascii_uppercase + string.digits) for _ in range(4))
     )
     data_collecting_type = factory.SubFactory(DataCollectingTypeFactory)
+    beneficiary_group = factory.SubFactory(BeneficiaryGroupFactory)
 
     @factory.post_generation
     def cycle(self, create: bool, extracted: bool, **kwargs: Any) -> None:
@@ -855,6 +860,7 @@ def generate_payment_plan() -> None:
         scope=Program.SCOPE_UNICEF,
         data_collecting_type=DataCollectingType.objects.get(code="full"),
         programme_code="T3ST",
+        beneficiary_group=BeneficiaryGroup.objects.first(),
     )[0]
     program_cycle = ProgramCycleFactory(
         program=program,

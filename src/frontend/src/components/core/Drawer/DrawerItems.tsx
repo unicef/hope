@@ -67,6 +67,7 @@ export const DrawerItems = ({
     variables: { businessAreaSlug: businessArea },
     fetchPolicy: 'cache-first',
   });
+
   const clearLocation = currentLocation.replace(`/${baseUrl}`, '');
   const navigate = useNavigate();
   const initialIndex = menuItems.findIndex((item) => {

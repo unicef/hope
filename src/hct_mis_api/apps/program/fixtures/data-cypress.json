@@ -1,5 +1,19 @@
 [
   {
+    "model": "program.beneficiarygroup",
+    "pk": "09343484-199b-4374-b6e8-9b0c6eae6bda",
+    "fields": {
+      "created_at": "2024-10-23T19:28:21.649Z",
+      "updated_at": "2024-10-23T19:28:21.649Z",
+      "name": "Household",
+      "group_label": "Household",
+      "group_label_plural": "Households",
+      "member_label": "Individual",
+      "member_label_plural": "Individuals",
+      "master_detail": true
+    }
+    },
+  {
     "fields": {
       "is_removed": false,
       "created_at": "2023-06-02T08:47:24.043Z",
@@ -23,7 +37,8 @@
       "administrative_areas_of_implementation": "",
       "admin_areas": [],
       "data_collecting_type": 1,
-      "programme_code": "ABC2"
+      "programme_code": "ABC2",
+      "beneficiary_group": "09343484-199b-4374-b6e8-9b0c6eae6bda"
     },
     "model": "program.program",
     "pk": "de3a43bf-a755-41ff-a5c0-acd02cf3d244"
@@ -54,7 +69,8 @@
       "administrative_areas_of_implementation": "other data here ",
       "admin_areas": [],
       "data_collecting_type": 1,
-      "programme_code": "ABC1"
+      "programme_code": "ABC1",
+      "beneficiary_group": "09343484-199b-4374-b6e8-9b0c6eae6bda"
     }
   },
   {

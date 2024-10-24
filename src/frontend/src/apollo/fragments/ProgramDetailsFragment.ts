@@ -58,5 +58,14 @@ export const programDetails = gql`
       }
     }
     canFinish
+    beneficiaryGroup {
+      id
+      name
+      groupLabel
+      groupLabelPlural
+      memberLabel
+      memberLabelPlural
+      masterDetail
+    }
   }
 `;

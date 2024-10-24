@@ -12,6 +12,9 @@ snapshots['TestCreateProgram::test_create_program_authenticated_0_with_permissio
         'createProgram': {
             'program': {
                 'administrativeAreasOfImplementation': 'Lorem Ipsum',
+                'beneficiaryGroup': {
+                    'name': 'Household'
+                },
                 'budget': '20000000',
                 'cashPlus': True,
                 'dataCollectingType': {
@@ -178,6 +181,9 @@ snapshots['TestCreateProgram::test_create_program_with_partners_0_valid 1'] = {
         'createProgram': {
             'program': {
                 'administrativeAreasOfImplementation': 'Lorem Ipsum',
+                'beneficiaryGroup': {
+                    'name': 'Household'
+                },
                 'budget': '20000000',
                 'cashPlus': True,
                 'dataCollectingType': {
@@ -288,6 +294,9 @@ snapshots['TestCreateProgram::test_create_program_with_partners_all_partners_acc
         'createProgram': {
             'program': {
                 'administrativeAreasOfImplementation': 'Lorem Ipsum',
+                'beneficiaryGroup': {
+                    'name': 'Household'
+                },
                 'budget': '20000000',
                 'cashPlus': True,
                 'dataCollectingType': {
@@ -346,6 +355,9 @@ snapshots['TestCreateProgram::test_create_program_with_partners_none_partners_ac
         'createProgram': {
             'program': {
                 'administrativeAreasOfImplementation': 'Lorem Ipsum',
+                'beneficiaryGroup': {
+                    'name': 'Household'
+                },
                 'budget': '20000000',
                 'cashPlus': True,
                 'dataCollectingType': {
@@ -392,6 +404,9 @@ snapshots['TestCreateProgram::test_create_program_with_pdu_fields 1'] = {
         'createProgram': {
             'program': {
                 'administrativeAreasOfImplementation': 'Lorem Ipsum',
+                'beneficiaryGroup': {
+                    'name': 'Household'
+                },
                 'budget': '20000000',
                 'cashPlus': True,
                 'dataCollectingType': {
@@ -508,6 +523,9 @@ snapshots['TestCreateProgram::test_create_program_with_pdu_fields_existing_field
         'createProgram': {
             'program': {
                 'administrativeAreasOfImplementation': 'Lorem Ipsum',
+                'beneficiaryGroup': {
+                    'name': 'Household'
+                },
                 'budget': '20000000',
                 'cashPlus': True,
                 'dataCollectingType': {
@@ -635,6 +653,26 @@ snapshots['TestCreateProgram::test_create_program_with_programme_code_not_within
                 }
             ],
             'message': 'Programme code should be exactly 4 characters long and may only contain letters, digits and characters: - . /',
+            'path': [
+                'createProgram'
+            ]
+        }
+    ]
+}
+
+snapshots['TestCreateProgram::test_create_program_without_beneficiary_group 1'] = {
+    'data': {
+        'createProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': "['Beneficiary Group is required for creating new Program']",
             'path': [
                 'createProgram'
             ]
