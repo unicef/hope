@@ -17,8 +17,8 @@ class BeneficiaryGroupAPITestCase(HOPEApiTestCase):
         cls.list_url = reverse(
             "api:beneficiary-group:beneficiary-group-list",
         )
-        cls.beneficiary_group1 = BeneficiaryGroupFactory(name="bg1")
-        cls.beneficiary_group2 = BeneficiaryGroupFactory(name="bg2")
+        cls.beneficiary_group1 = BeneficiaryGroupFactory(name="Household")
+        cls.beneficiary_group2 = BeneficiaryGroupFactory(name="Social Workers")
 
     def test_list_beneficiary_group(self) -> None:
         response = self.client.get(self.list_url)
@@ -28,7 +28,7 @@ class BeneficiaryGroupAPITestCase(HOPEApiTestCase):
             [
                 {
                     "id": str(self.beneficiary_group1.id),
-                    "name": "bg1",
+                    "name": "Household",
                     "group_label": self.beneficiary_group1.group_label,
                     "group_label_plural": self.beneficiary_group1.group_label_plural,
                     "member_label": self.beneficiary_group1.member_label,
@@ -37,7 +37,7 @@ class BeneficiaryGroupAPITestCase(HOPEApiTestCase):
                 },
                 {
                     "id": str(self.beneficiary_group2.id),
-                    "name": "bg2",
+                    "name": "Social Workers",
                     "group_label": self.beneficiary_group2.group_label,
                     "group_label_plural": self.beneficiary_group2.group_label_plural,
                     "member_label": self.beneficiary_group2.member_label,

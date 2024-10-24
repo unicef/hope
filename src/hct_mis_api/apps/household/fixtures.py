@@ -147,12 +147,13 @@ class HouseholdFactory(DjangoModelFactory):
     @classmethod
     def build(cls, **kwargs: Any) -> Household:
         """Build an instance of the associated class, with overriden attrs."""
-        if "registration_data_import" not in kwargs:
-            kwargs["registration_data_import"] = RegistrationDataImportFactory()
-        if "registration_data_import__imported_by__partner" not in kwargs:
-            kwargs["registration_data_import__imported_by__partner"] = PartnerFactory(name="UNICEF")
         if "program" not in kwargs:
             kwargs["program"] = ProgramFactory()
+        if "registration_data_import" not in kwargs:
+            kwargs["registration_data_import"] = RegistrationDataImportFactory(program=kwargs["program"])
+        if "registration_data_import__imported_by__partner" not in kwargs:
+            kwargs["registration_data_import__imported_by__partner"] = PartnerFactory(name="UNICEF")
+
         return cls._generate(enums.BUILD_STRATEGY, kwargs)
 
 

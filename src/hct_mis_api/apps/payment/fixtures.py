@@ -62,7 +62,7 @@ from hct_mis_api.apps.program.fixtures import (
     ProgramCycleFactory,
     ProgramFactory,
 )
-from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
@@ -860,6 +860,7 @@ def generate_payment_plan() -> None:
         scope=Program.SCOPE_UNICEF,
         data_collecting_type=DataCollectingType.objects.get(code="full"),
         programme_code="T3ST",
+        beneficiary_group=BeneficiaryGroup.objects.first(),
     )[0]
     program_cycle = ProgramCycleFactory(
         program=program,
