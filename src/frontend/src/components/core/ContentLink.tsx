@@ -1,6 +1,6 @@
-import * as React from 'react';
 import styled from 'styled-components';
 import { MiśTheme } from '../../theme';
+import { ReactElement } from 'react';
 
 interface LinkProps {
   fullWidth?: boolean;
@@ -8,7 +8,7 @@ interface LinkProps {
 }
 
 const Link = styled('a')<LinkProps>`
-  font-family: ${({ theme }: { theme: MiśTheme; }) => theme.hctTypography.fontFamily};
+  font-family: ${({ theme }: { theme: MiśTheme }) => theme.hctTypography.fontFamily};
   color: #000;
   font-size: 14px;
   line-height: 19px;
@@ -26,7 +26,7 @@ export function ContentLink({
   children: string;
   download?: boolean;
   fullWidth?: boolean;
-}): React.ReactElement {
+}): ReactElement {
   return (
     <Link download={download} href={href} fullWidth={fullWidth}>
       {children}

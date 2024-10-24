@@ -1,5 +1,5 @@
 import { Paper } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
@@ -45,7 +45,7 @@ function filtersToVariables(filters) {
   return variables;
 }
 
-export function ActivityLogPage(): React.ReactElement {
+export function ActivityLogPage(): ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
   const [page, setPage] = useState(0);

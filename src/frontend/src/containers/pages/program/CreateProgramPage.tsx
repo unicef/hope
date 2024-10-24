@@ -71,7 +71,7 @@ export const CreateProgramPage = (): ReactElement => {
             areaAccess,
           }))
         : [];
-    const { editMode, ...requestValues } = values;
+    const { ...requestValues } = values;
 
     const initialPduFieldState = {
       label: '',

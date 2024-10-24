@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { UniversalTable } from '@containers/tables/UniversalTable';
 import { choicesToDict, dateToIsoString } from '@utils/utils';
 import {
@@ -24,7 +23,7 @@ export function LookUpLinkedTicketsTable({
   filter,
   setFieldValue,
   initialValues,
-}: LookUpLinkedTicketsTableProps): React.ReactElement {
+}: LookUpLinkedTicketsTableProps): ReactElement {
   const { data: choicesData, loading: choicesLoading } =
     useGrievancesChoiceDataQuery();
   const initialVariables: AllGrievanceTicketQueryVariables = {
@@ -53,9 +52,7 @@ export function LookUpLinkedTicketsTable({
   } = choicesToDict(choicesData.grievanceTicketCategoryChoices);
 
   const handleCheckboxClick = (
-    _event:
-    | React.MouseEvent<HTMLButtonElement, MouseEvent>
-    | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
+    _event: MouseEvent<HTMLButtonElement, MouseEvent>,
     name: string,
   ): void => {
     const selectedIndex = selected.indexOf(name);
@@ -86,8 +83,8 @@ export function LookUpLinkedTicketsTable({
   return (
     <TableWrapper>
       <UniversalTable<
-      AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'],
-      AllGrievanceTicketQueryVariables
+        AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'],
+        AllGrievanceTicketQueryVariables
       >
         headCells={headCells}
         rowsPerPageOptions={[10, 15, 20]}

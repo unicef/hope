@@ -1,6 +1,5 @@
 import { get } from 'lodash';
-import * as React from 'react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { ReactElement, useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAllAdminAreasLazyQuery } from '@generated/graphql';
@@ -37,7 +36,7 @@ export function AdminAreaAutocomplete({
   setAppliedFilter: (filter) => void;
   setFilter: (filter) => void;
   dataCy?: string;
-}): React.ReactElement {
+}): ReactElement {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [inputValue, onInputTextChange] = useState('');

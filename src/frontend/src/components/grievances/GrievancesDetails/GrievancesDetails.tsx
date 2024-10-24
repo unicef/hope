@@ -1,5 +1,4 @@
 import { Box, Grid, GridSize, Typography } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   GrievanceTicketQuery,
@@ -22,6 +21,7 @@ import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { BlackLink } from '@core/BlackLink';
+import { ReactElement } from 'react';
 
 interface GrievancesDetailsProps {
   ticket: GrievanceTicketQuery['grievanceTicket'];
@@ -37,7 +37,7 @@ export function GrievancesDetails({
   baseUrl,
   canViewHouseholdDetails,
   canViewIndividualDetails,
-}: GrievancesDetailsProps): React.ReactElement {
+}: GrievancesDetailsProps): ReactElement {
   const { t } = useTranslation();
   const { isAllPrograms } = useBaseUrl();
   const statusChoices: {
@@ -71,7 +71,7 @@ export function GrievancesDetails({
   const showPartner =
     ticket.issueType === +GRIEVANCE_ISSUE_TYPES.PARTNER_COMPLAINT;
 
-  const mappedDocumentation = (): React.ReactElement => (
+  const mappedDocumentation = (): ReactElement => (
     <Box display="flex" flexDirection="column">
       {ticket.documentation?.length
         ? ticket.documentation.map((doc) => {
@@ -100,7 +100,7 @@ export function GrievancesDetails({
     objType: string,
     href: string,
     displayedId: string,
-  ): React.ReactElement => {
+  ): ReactElement => {
     if (isAllPrograms) {
       return <>{displayedId}</>;
     }
@@ -127,7 +127,7 @@ export function GrievancesDetails({
     }
   };
 
-  const renderPaymentUrl = (): React.ReactElement => {
+  const renderPaymentUrl = (): ReactElement => {
     const paymentRecord = ticket?.paymentRecord;
     if (paymentRecord) {
       return renderUrl(
@@ -140,7 +140,7 @@ export function GrievancesDetails({
     return <>-</>;
   };
 
-  const renderPaymentPlanUrl = (): React.ReactElement => {
+  const renderPaymentPlanUrl = (): ReactElement => {
     const parent = ticket?.paymentRecord?.parent;
     if (parent) {
       return renderUrl(
@@ -153,7 +153,7 @@ export function GrievancesDetails({
     return <>-</>;
   };
 
-  const renderPaymentPlanVerificationUrl = (): React.ReactElement => {
+  const renderPaymentPlanVerificationUrl = (): ReactElement => {
     const parent = ticket?.paymentRecord?.parent;
     if (parent) {
       const url = `/${baseUrl}/payment-verification/${
@@ -164,7 +164,7 @@ export function GrievancesDetails({
     return <>-</>;
   };
 
-  const mappedPrograms = (): React.ReactElement => {
+  const mappedPrograms = (): ReactElement => {
     if (!ticket.programs?.length) {
       return <>-</>;
     }

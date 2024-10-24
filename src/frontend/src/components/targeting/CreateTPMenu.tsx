@@ -3,7 +3,7 @@ import { Menu, MenuItem, Button, ListItemText } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from 'src/programContext';
@@ -24,14 +24,14 @@ const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
   },
 }));
 
-export const CreateTPMenu = (): React.ReactElement => {
+export const CreateTPMenu = (): ReactElement => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { baseUrl } = useBaseUrl();
   const { isActiveProgram } = useProgramContext();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
-  const handleClick = (event: React.MouseEvent<HTMLElement>): void => {
+  const handleClick = (event: MouseEvent<HTMLElement>): void => {
     setAnchorEl(event.currentTarget);
   };
 

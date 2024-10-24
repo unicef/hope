@@ -1,5 +1,4 @@
 import { Box, Grid, Typography } from '@mui/material';
-import * as React from 'react';
 import { Doughnut } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -10,6 +9,7 @@ import { LabelizedField } from '@core/LabelizedField';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { ReactElement } from 'react';
 
 const ChartContainer = styled.div`
   width: 100%;
@@ -28,7 +28,7 @@ interface CashPlanDetailsSectionProps {
 
 export function CashPlanDetailsSection({
   planNode,
-}: CashPlanDetailsSectionProps): React.ReactElement {
+}: CashPlanDetailsSectionProps): ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
 

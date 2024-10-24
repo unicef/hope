@@ -1,7 +1,6 @@
 import { Checkbox } from '@mui/material';
 import TableCell from '@mui/material/TableCell';
 import { useNavigate } from 'react-router-dom';
-import * as React from 'react';
 import {
   AllGrievanceTicketDocument,
   AllGrievanceTicketQuery,
@@ -22,6 +21,7 @@ import { UniversalMoment } from '@core/UniversalMoment';
 import { LinkedTicketsModal } from '../LinkedTicketsModal/LinkedTicketsModal';
 import { AssignedToDropdown } from './AssignedToDropdown';
 import { getGrievanceDetailsPath } from '../utils/createGrievanceUtils';
+import { ReactElement } from 'react';
 
 interface GrievancesTableRowProps {
   ticket: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'];
@@ -53,7 +53,7 @@ export function GrievancesTableRow({
   optionsData,
   setInputValue,
   initialVariables,
-}: GrievancesTableRowProps): React.ReactElement {
+}: GrievancesTableRowProps): ReactElement {
   const { baseUrl, businessArea, isAllPrograms } = useBaseUrl();
   const navigate = useNavigate();
   const { showMessage } = useSnackbar();
@@ -64,9 +64,9 @@ export function GrievancesTableRow({
   );
   const issueType = ticket.issueType
     ? issueTypeChoicesData
-      .find((el) => el.category === ticket.category.toString())
-      .subCategories.find((el) => el.value === ticket.issueType.toString())
-      .name
+        .find((el) => el.category === ticket.category.toString())
+        .subCategories.find((el) => el.value === ticket.issueType.toString())
+        .name
     : '-';
 
   const [mutate] = useBulkUpdateGrievanceAssigneeMutation();
@@ -100,7 +100,7 @@ export function GrievancesTableRow({
     return null;
   };
 
-  const getMappedPrograms = (): React.ReactElement => {
+  const getMappedPrograms = (): ReactElement => {
     if (ticket.programs?.length) {
       return (
         <div>

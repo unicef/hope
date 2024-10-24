@@ -1,6 +1,5 @@
 import { Grid, MenuItem } from '@mui/material';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
-import * as React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useCashPlanVerificationStatusChoicesQuery } from '@generated/graphql';
 import { DatePickerFilter } from '@components/core/DatePickerFilter';
@@ -8,6 +7,7 @@ import { SearchTextField } from '@components/core/SearchTextField';
 import { SelectFilter } from '@components/core/SelectFilter';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { FiltersSection } from '@components/core/FiltersSection';
+import { ReactElement } from 'react';
 
 interface PaymentVerificationFiltersProps {
   filter;
@@ -22,7 +22,7 @@ export const PaymentVerificationFilters = ({
   initialFilter,
   appliedFilter,
   setAppliedFilter,
-}: PaymentVerificationFiltersProps): React.ReactElement => {
+}: PaymentVerificationFiltersProps): ReactElement => {
   const navigate = useNavigate();
   const location = useLocation();
   const { handleFilterChange, applyFilterChanges, clearFilter } =

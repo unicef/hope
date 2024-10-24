@@ -1,10 +1,10 @@
 import { Paper } from '@mui/material';
-import * as React from 'react';
+import { ReactNode, ReactElement } from 'react';
 import styled from 'styled-components';
 
 interface DashboardCardProps {
   color: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 export const CardTitle = styled.div`
   text-transform: capitalize;
@@ -75,6 +75,6 @@ export const CardAmountLink = styled.div`
 export const DashboardCard = ({
   color,
   children,
-}: DashboardCardProps): React.ReactElement => {
+}: DashboardCardProps): ReactElement => {
   return <StyledPaper color={color}>{children}</StyledPaper>;
 };

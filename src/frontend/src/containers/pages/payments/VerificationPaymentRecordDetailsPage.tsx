@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useLocation } from 'react-router-dom';
 import {
@@ -18,8 +17,9 @@ import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError } from '@utils/utils';
 import { AdminButton } from '@core/AdminButton';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { ReactElement } from 'react';
 
-export function VerificationPaymentRecordDetailsPage(): React.ReactElement {
+export function VerificationPaymentRecordDetailsPage(): ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
   const permissions = usePermissions();
