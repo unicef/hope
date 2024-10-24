@@ -40,6 +40,7 @@ module.exports = {
     '**/*.test.ts',
     '**/__generated__/*',
     'src/restgenerated/',
+    'node_modules/',
   ],
   settings: {
     react: {

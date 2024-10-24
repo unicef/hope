@@ -345,6 +345,7 @@ export const DuplicateProgramPage = (): ReactElement => {
                           values={values}
                           handleNext={handleNextStep}
                           programId={id}
+                          errors={errors}
                         />
                       )}
                     </div>
@@ -359,9 +360,8 @@ export const DuplicateProgramPage = (): ReactElement => {
                           setStep={setStep}
                           pdusubtypeChoicesData={pdusubtypeChoicesData}
                           errors={errors}
-                          setErrors={setErrors}
-                          setFieldTouched={setFieldTouched}
                           programId={id}
+                          setFieldValue={setFieldValue}
                         />
                       )}
                     </div>

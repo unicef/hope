@@ -98,7 +98,6 @@ export function VerificationPaymentRecordDetailsPage(): ReactElement {
             PERMISSIONS.ACTIVITY_LOG_VIEW,
             permissions,
           )}
-          choicesData={choicesData}
         />
       </div>
     </UniversalErrorBoundary>

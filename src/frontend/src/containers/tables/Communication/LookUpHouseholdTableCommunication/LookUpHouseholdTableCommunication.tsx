@@ -1,4 +1,4 @@
-import { ReactElement, useState } from 'react';
+import { MouseEvent, ReactElement, useState } from 'react';
 import styled from 'styled-components';
 import {
   AllHouseholdsForPopulationTableQueryVariables,
@@ -79,7 +79,7 @@ export function LookUpHouseholdTableCommunication({
   );
 
   const handleCheckboxClick = (
-    _event: MouseEvent<HTMLButtonElement, MouseEvent>,
+    _event: MouseEvent<HTMLTableRowElement> | MouseEvent<HTMLButtonElement>,
     name: string,
   ): void => {
     const selectedIndex = selected.indexOf(name);

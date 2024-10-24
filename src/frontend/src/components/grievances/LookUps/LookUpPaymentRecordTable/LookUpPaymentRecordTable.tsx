@@ -1,4 +1,4 @@
-import { ReactElement, useState } from 'react';
+import { MouseEvent, ReactElement, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import {
   LookUpPaymentRecordsQueryVariables,
@@ -33,9 +33,7 @@ export function LookUpPaymentRecordTable({
   );
 
   const handleCheckboxClick = (
-    _event:
-      | MouseEvent<HTMLButtonElement, MouseEvent>
-       ,
+    _event: MouseEvent<HTMLTableRowElement> | MouseEvent<HTMLButtonElement>,
     selectedPaymentRecord,
   ): void => {
     const selectedIndex = selected.indexOf(selectedPaymentRecord);

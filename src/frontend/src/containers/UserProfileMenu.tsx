@@ -12,7 +12,7 @@ import styled from 'styled-components';
 import { MeQuery } from '@generated/graphql';
 import { clearCache } from '@utils/utils';
 import { getClient } from '../apollo/client';
-import { ReactElement, useState, useRef, useEffect } from 'react';
+import React, { ReactElement, useState, useRef, useEffect } from 'react';
 
 const UserProfileButton = styled(Button)`
   && {
@@ -34,7 +34,7 @@ export function UserProfileMenu({
   const prevOpen = useRef(open);
   useEffect(() => {
     if (prevOpen.current === true && open === false) {
-      anchorRef.current.focus();
+      anchorRef.current?.focus();
     }
 
     prevOpen.current = open;
@@ -49,9 +49,7 @@ export function UserProfileMenu({
     await clearCache(client);
   };
 
-  const handleClose = (
-    event: MouseEvent<HTMLAnchorElement, MouseEvent> | MouseEvent | TouchEvent,
-  ): void => {
+  const handleClose = (event): void => {
     if (
       anchorRef.current &&
       anchorRef.current.contains(event.target as HTMLElement)
@@ -62,9 +60,7 @@ export function UserProfileMenu({
     setOpen(false);
   };
 
-  const handleLogout = (
-    event: MouseEvent<HTMLAnchorElement, MouseEvent> | MouseEvent | TouchEvent,
-  ): void => {
+  const handleLogout = (event: React.MouseEvent<HTMLAnchorElement>): void => {
     window.location.assign('/api/logout');
     localStorage.removeItem('AUTHENTICATED');
     handleClose(event);
@@ -76,7 +72,7 @@ export function UserProfileMenu({
     window.location.reload();
   };
 
-  function handleListKeyDown(event: KeyboardEvent): void {
+  function handleListKeyDown(event: React.KeyboardEvent): void {
     if (event.key === 'Tab') {
       event.preventDefault();
       setOpen(false);
@@ -114,6 +110,7 @@ export function UserProfileMenu({
             <Paper>
               <ClickAwayListener onClickAway={handleClose}>
                 <MenuList
+                  component="ul"
                   autoFocusItem={open}
                   id="menu-list-grow"
                   onKeyDown={handleListKeyDown}

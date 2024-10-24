@@ -7,13 +7,13 @@ import { AllGrievanceTicketQuery } from '@generated/graphql';
 import { BlackLink } from '@core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { getGrievanceDetailsPath } from '@components/grievances/utils/createGrievanceUtils';
-import { ReactElement } from 'react';
+import { MouseEvent, ReactElement } from 'react';
 
 interface LookUpLinkedTicketsTableRowProps {
   ticket: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'];
   selected: Array<string>;
   checkboxClickHandler: (
-    event: MouseEvent<HTMLButtonElement, MouseEvent>,
+    event: MouseEvent<HTMLTableRowElement> | MouseEvent<HTMLButtonElement>,
     number,
   ) => void;
   statusChoices: { [id: number]: string };

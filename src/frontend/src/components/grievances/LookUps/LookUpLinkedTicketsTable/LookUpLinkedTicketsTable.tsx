@@ -1,4 +1,4 @@
-import { ReactElement, useState } from 'react';
+import { MouseEvent, ReactElement, useState } from 'react';
 import { UniversalTable } from '@containers/tables/UniversalTable';
 import { choicesToDict, dateToIsoString } from '@utils/utils';
 import {
@@ -52,7 +52,7 @@ export function LookUpLinkedTicketsTable({
   } = choicesToDict(choicesData.grievanceTicketCategoryChoices);
 
   const handleCheckboxClick = (
-    _event: MouseEvent<HTMLButtonElement, MouseEvent>,
+    _event: MouseEvent<HTMLTableRowElement> | MouseEvent<HTMLButtonElement>,
     name: string,
   ): void => {
     const selectedIndex = selected.indexOf(name);
