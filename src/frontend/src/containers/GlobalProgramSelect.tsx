@@ -25,7 +25,14 @@ import {
   useAllProgramsForChoicesLazyQuery,
   useProgramQuery,
 } from '@generated/graphql';
-import { ChangeEvent, KeyboardEvent, useEffect, useRef, useState } from 'react';
+import {
+  ChangeEvent,
+  KeyboardEvent,
+  MouseEvent,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import ClearIcon from '@mui/icons-material/Clear';
 
 interface PopperComponentProps {

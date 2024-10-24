@@ -8,7 +8,7 @@ import {
 import { BlackLink } from '@components/core/BlackLink';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
-import { ReactElement } from 'react';
+import { MouseEvent, ReactElement } from 'react';
 
 interface LookUpHouseholdTableRowCommunicationProps {
   household: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'];
@@ -18,7 +18,7 @@ interface LookUpHouseholdTableRowCommunicationProps {
   selectedHousehold: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'];
   choicesData: HouseholdChoiceDataQuery;
   checkboxClickHandler?: (
-    event: MouseEvent<HTMLButtonElement, MouseEvent>,
+    event: MouseEvent<HTMLTableRowElement> | MouseEvent<HTMLButtonElement>,
     number,
   ) => void;
   selected?: Array<string>;

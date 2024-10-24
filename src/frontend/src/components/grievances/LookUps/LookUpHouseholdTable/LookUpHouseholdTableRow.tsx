@@ -8,7 +8,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { BlackLink } from '@core/BlackLink';
 import { ClickableTableRow } from '@core/Table/ClickableTableRow';
 import { UniversalMoment } from '@core/UniversalMoment';
-import { ReactElement } from 'react';
+import { MouseEvent, ReactElement } from 'react';
 
 interface LookUpHouseholdTableRowProps {
   household: AllHouseholdsForPopulationTableQuery['allHouseholds']['edges'][number]['node'];
@@ -18,7 +18,7 @@ interface LookUpHouseholdTableRowProps {
   selectedHousehold: AllHouseholdsForPopulationTableQuery['allHouseholds']['edges'][number]['node'];
   choicesData: HouseholdChoiceDataQuery;
   checkboxClickHandler?: (
-    event: MouseEvent<HTMLButtonElement, MouseEvent>,
+    event: MouseEvent<HTMLTableRowElement> | MouseEvent<HTMLButtonElement>,
     number,
   ) => void;
   selected?: Array<string>;

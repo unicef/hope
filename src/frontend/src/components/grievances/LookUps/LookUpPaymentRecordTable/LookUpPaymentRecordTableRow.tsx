@@ -6,14 +6,14 @@ import { formatCurrencyWithSymbol, paymentStatusToColor } from '@utils/utils';
 import { BlackLink } from '@core/BlackLink';
 import { StatusBox } from '@core/StatusBox';
 import { ClickableTableRow } from '@core/Table/ClickableTableRow';
-import { ReactElement } from 'react';
+import { MouseEvent, ReactElement } from 'react';
 
 interface LookUpPaymentRecordTableRowProps {
   paymentRecord: PaymentRecordAndPaymentNode;
   openInNewTab: boolean;
   selected: Array<PaymentRecordAndPaymentNode>;
   checkboxClickHandler: (
-    event: MouseEvent<HTMLButtonElement, MouseEvent>,
+    event: MouseEvent<HTMLTableRowElement> | MouseEvent<HTMLButtonElement>,
     selectedPaymentRecord: PaymentRecordAndPaymentNode,
   ) => void;
 }
