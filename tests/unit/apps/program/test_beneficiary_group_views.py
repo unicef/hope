@@ -22,6 +22,8 @@ class BeneficiaryGroupAPITestCase(HOPEApiTestCase):
 
     def test_list_beneficiary_group(self) -> None:
         response = self.client.get(self.list_url)
+        self.beneficiary_group1.refresh_from_db()
+        self.beneficiary_group2.refresh_from_db()
         self.assertEqual(response.status_code, 200)
         self.assertIn(
             {
