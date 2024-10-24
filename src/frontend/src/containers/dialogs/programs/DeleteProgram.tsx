@@ -1,7 +1,6 @@
 import { Button, Dialog, DialogContent, DialogTitle } from '@mui/material';
 import CloseIcon from '@mui/icons-material/CloseRounded';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
@@ -41,9 +40,7 @@ interface DeleteProgramProps {
   program: ProgramQuery['program'];
 }
 
-export function DeleteProgram({
-  program,
-}: DeleteProgramProps): React.ReactElement {
+export function DeleteProgram({ program }: DeleteProgramProps): ReactElement {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);

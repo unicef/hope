@@ -9,13 +9,13 @@ import {
   Typography,
 } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { GrievanceTicketQuery } from '@generated/graphql';
 import { TableTitle } from '@core/TableTitle';
 import { handleSelected } from '../utils/helpers';
+import { ReactElement } from 'react';
 
 const GreenIcon = styled.div`
   color: #28cb15;
@@ -40,7 +40,7 @@ export function PaymentChannelsToRemoveTable({
   paymentChannelsToRemove,
   previousPaymentChannels,
   setFieldValue,
-}: PaymentChannelsToRemoveTableProps): React.ReactElement {
+}: PaymentChannelsToRemoveTableProps): ReactElement {
   const { t } = useTranslation();
   const { selectedPaymentChannelsToRemove } = values;
   const paymentChannelsTableHead = (

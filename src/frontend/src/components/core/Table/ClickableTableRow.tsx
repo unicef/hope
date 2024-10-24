@@ -1,4 +1,4 @@
-import { MouseEventHandler, useState } from 'react';
+import { MouseEventHandler, ReactElement, useState } from 'react';
 import TableRow, { TableRowProps } from '@mui/material/TableRow';
 import styled from 'styled-components';
 
@@ -28,7 +28,7 @@ function getSelectedText(): string {
 export function ClickableTableRow({
   onClick,
   ...props
-}: TableRowProps): React.ReactElement {
+}: TableRowProps): ReactElement {
   const [selectedText, setSelectedText] = useState('');
   let realOnClick: MouseEventHandler<HTMLTableRowElement>;
   let onMouseDown: MouseEventHandler<HTMLTableRowElement>;

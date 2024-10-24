@@ -1,9 +1,9 @@
-import * as React from 'react';
 import styled from 'styled-components';
 import { getClient } from '../../../apollo/client';
 import { clearCache } from '@utils/utils';
 import MaintenanceGraphic from './maintenance_graphic_painter.png';
 import HopeLogo from './maintenance_hope_logo.png';
+import { FC } from 'react';
 
 const Container = styled.div`
   background-color: #ffffff;
@@ -65,7 +65,7 @@ const Icon = styled.img`
   height: 28px;
 `;
 
-export const MaintenancePage: React.FC = () => {
+export const MaintenancePage: FC = () => {
   const goBackAndClearCache = async (): Promise<void> => {
     const client = await getClient();
     await clearCache(client);

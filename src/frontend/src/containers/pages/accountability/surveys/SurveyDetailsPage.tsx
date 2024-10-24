@@ -1,5 +1,4 @@
 import { Box, Button } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { SurveyDetails } from '@components/accountability/Surveys/SurveyDetails';
@@ -24,8 +23,9 @@ import { ButtonTooltip } from '@components/core/ButtonTooltip';
 import { useProgramContext } from '../../../../programContext';
 import { AdminButton } from '@core/AdminButton';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { ReactElement } from 'react';
 
-export function SurveyDetailsPage(): React.ReactElement {
+export function SurveyDetailsPage(): ReactElement {
   const { showMessage } = useSnackbar();
   const { t } = useTranslation();
   const location = useLocation();
@@ -72,7 +72,7 @@ export function SurveyDetailsPage(): React.ReactElement {
     }
   };
 
-  const renderActions = (): React.ReactElement => {
+  const renderActions = (): ReactElement => {
     if (survey.category === SurveyCategory.RapidPro) {
       return (
         <ButtonTooltip

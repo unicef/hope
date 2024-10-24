@@ -1,7 +1,6 @@
 import { Box, Button } from '@mui/material';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
-import * as React from 'react';
-import { useState } from 'react';
+import { FC, useState } from 'react';
 import { Bar } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import { formatThousands } from '@utils/utils';
@@ -12,7 +11,7 @@ interface TicketsByLocationAndCategoryChartProps {
   data: AllGrievanceDashboardChartsQuery['ticketsByLocationAndCategory'];
 }
 
-export const TicketsByLocationAndCategoryChart: React.FC<
+export const TicketsByLocationAndCategoryChart: FC<
   TicketsByLocationAndCategoryChartProps
 > = ({ data }) => {
   const lessDataCount = 5;

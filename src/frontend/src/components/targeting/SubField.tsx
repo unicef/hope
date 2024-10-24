@@ -1,7 +1,6 @@
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { Field, useFormikContext } from 'formik';
-import * as React from 'react';
-import { useEffect } from 'react';
+import { FC, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { FormikAutocomplete } from '@shared/Formik/FormikAutocomplete';
@@ -62,7 +61,7 @@ interface SubFieldProps {
   choicesDict?: any; // Adjust the type of choicesDict as necessary
 }
 
-export const SubField: React.FC<SubFieldProps> = ({
+export const SubField: FC<SubFieldProps> = ({
   baseName,
   blockIndex,
   index,

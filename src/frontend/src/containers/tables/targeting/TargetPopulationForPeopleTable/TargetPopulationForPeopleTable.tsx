@@ -57,7 +57,7 @@ export function TargetPopulationForPeopleTable({
     handleChange(id);
   };
 
-  const renderTable = (): React.ReactElement => (
+  const renderTable = (): ReactElement => (
     <TableWrapper>
       <UniversalTable<TargetPopulationNode, AllTargetPopulationsQueryVariables>
         title={noTitle ? null : t('Target Populations')}

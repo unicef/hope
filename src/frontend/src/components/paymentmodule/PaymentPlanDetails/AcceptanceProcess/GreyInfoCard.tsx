@@ -1,9 +1,9 @@
 import { Box } from '@mui/material';
-import * as React from 'react';
 import styled from 'styled-components';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { PaymentPlanQuery } from '@generated/graphql';
 import { MessageDialog } from './MessageDialog';
+import { ReactElement } from 'react';
 
 const GreyText = styled.div`
   color: #9e9e9e;
@@ -34,7 +34,7 @@ export function GreyInfoCard({
   topMessage,
   topDate,
   approvals,
-}: GreyInfoCardProps): React.ReactElement {
+}: GreyInfoCardProps): ReactElement {
   const mappedApprovals = approvals.map((action) => {
     const { info, createdAt, comment, createdBy } = action;
     return (

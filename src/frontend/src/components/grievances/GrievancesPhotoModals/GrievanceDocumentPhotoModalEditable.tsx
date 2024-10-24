@@ -1,6 +1,5 @@
 import { Box } from '@mui/material';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { PhotoModal } from '@core/PhotoModal/PhotoModal';
 
 interface GrievanceDocumentPhotoModalProps {
@@ -13,7 +12,7 @@ export function GrievanceDocumentPhotoModalEditable({
   photoSrc,
   setFieldValue,
   fieldName,
-}: GrievanceDocumentPhotoModalProps): React.ReactElement {
+}: GrievanceDocumentPhotoModalProps): ReactElement {
   const [isEdited, setEdit] = useState(false);
   const picUrl = photoSrc;
 

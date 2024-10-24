@@ -1,6 +1,5 @@
 import { Button, Dialog } from '@mui/material';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ProgramQuery } from '@generated/graphql';
 import AddIcon from '@mui/icons-material/Add';
@@ -18,7 +17,7 @@ interface AddNewProgramCycleProps {
 export const AddNewProgramCycle = ({
   program,
   lastProgramCycle,
-}: AddNewProgramCycleProps): React.ReactElement => {
+}: AddNewProgramCycleProps): ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);

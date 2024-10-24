@@ -1,8 +1,7 @@
 import { Box, Button, Typography } from '@mui/material';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
@@ -29,7 +28,7 @@ interface AcceptanceProcessProps {
 
 export function AcceptanceProcess({
   paymentPlan,
-}: AcceptanceProcessProps): React.ReactElement {
+}: AcceptanceProcessProps): ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const permissions = usePermissions();

@@ -2,7 +2,7 @@ import {
   AllPaymentPlansForTableQuery,
   useCashPlanVerificationStatusChoicesQuery,
 } from '@generated/graphql';
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import TableCell from '@mui/material/TableCell';
 import { BlackLink } from '@core/BlackLink';
@@ -22,7 +22,7 @@ interface PaymentPlanTableRowProps {
 export const PaymentPlanTableRow = ({
   paymentPlan,
   canViewDetails,
-}: PaymentPlanTableRowProps): React.ReactElement => {
+}: PaymentPlanTableRowProps): ReactElement => {
   const { data: statusChoicesData } =
     useCashPlanVerificationStatusChoicesQuery();
 

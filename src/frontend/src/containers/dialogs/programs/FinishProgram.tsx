@@ -1,6 +1,5 @@
 import { Button, Dialog, DialogContent, DialogTitle } from '@mui/material';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ProgramQuery,
@@ -21,9 +20,7 @@ interface FinishProgramProps {
   program: ProgramQuery['program'];
 }
 
-export function FinishProgram({
-  program,
-}: FinishProgramProps): React.ReactElement {
+export function FinishProgram({ program }: FinishProgramProps): ReactElement {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);

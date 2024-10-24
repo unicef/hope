@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { useEffect } from 'react';
+import { ReactElement, useEffect } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import {
   TargetPopulationBuildStatus,
@@ -14,7 +13,7 @@ import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError } from '@utils/utils';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
-export const EditTargetPopulationPage = (): React.ReactElement => {
+export const EditTargetPopulationPage = (): ReactElement => {
   const { id } = useParams();
   const permissions = usePermissions();
   const location = useLocation();

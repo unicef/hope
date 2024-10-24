@@ -1,6 +1,5 @@
 import { Box } from '@mui/material';
 import EditIcon from '@mui/icons-material/EditRounded';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { FeedbackQuery } from '@generated/graphql';
@@ -10,6 +9,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ButtonTooltip } from '@core/ButtonTooltip';
 import { useProgramContext } from '../../../programContext';
 import { AdminButton } from '@core/AdminButton';
+import { ReactElement } from 'react';
 
 interface FeedbackDetailsToolbarProps {
   feedback: FeedbackQuery['feedback'];
@@ -19,7 +19,7 @@ interface FeedbackDetailsToolbarProps {
 export function FeedbackDetailsToolbar({
   feedback,
   canEdit,
-}: FeedbackDetailsToolbarProps): React.ReactElement {
+}: FeedbackDetailsToolbarProps): ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
   const { baseUrl } = useBaseUrl();

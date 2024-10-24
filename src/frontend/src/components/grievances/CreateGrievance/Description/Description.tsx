@@ -1,7 +1,6 @@
 import { Box, FormHelperText, Grid, GridSize, Typography } from '@mui/material';
 import { Field } from 'formik';
-import * as React from 'react';
-import { useEffect } from 'react';
+import { ReactElement, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
@@ -61,7 +60,7 @@ export function Description({
   setFieldValue,
   errors,
   permissions,
-}: DescriptionProps): React.ReactElement {
+}: DescriptionProps): ReactElement {
   const { t } = useTranslation();
   const { isAllPrograms } = useBaseUrl();
   const { data: partnerChoicesData } = usePartnerForGrievanceChoicesQuery({

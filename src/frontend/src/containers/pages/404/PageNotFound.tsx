@@ -1,13 +1,13 @@
 import { Box, Button } from '@mui/material';
 import { Refresh } from '@mui/icons-material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
-import * as React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { getClient } from '../../../apollo/client';
 import { clearCache } from '@utils/utils';
 import PageNotFoundGraphic from './404_graphic.png';
 import HopeLogo from './404_hope_logo.png';
+import { FC } from 'react';
 
 const Container = styled.div`
   background-color: #ffffff;
@@ -49,7 +49,7 @@ const Paragraph = styled.p`
   line-height: 32px;
 `;
 
-export const PageNotFound: React.FC = () => {
+export const PageNotFound: FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const pathSegments = location.pathname.split('/');

@@ -1,5 +1,4 @@
 import TableCell from '@mui/material/TableCell';
-import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BlackLink } from '@components/core/BlackLink';
 import { LoadingComponent } from '@components/core/LoadingComponent';
@@ -14,6 +13,7 @@ import {
   useHouseholdChoiceDataQuery,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { ReactElement } from 'react';
 
 interface RecipientsTableRowProps {
   household: HouseholdNode;
@@ -25,7 +25,7 @@ export const RecipientsTableRow = ({
   household,
   headOfHousehold,
   canViewDetails,
-}: RecipientsTableRowProps): React.ReactElement => {
+}: RecipientsTableRowProps): ReactElement => {
   const navigate = useNavigate();
   const { baseUrl } = useBaseUrl();
   const { data: choicesData, loading: choicesLoading } =

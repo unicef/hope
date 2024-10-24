@@ -1,6 +1,6 @@
-import * as React from 'react';
 import styled from 'styled-components';
 import { CircularProgress } from '@mui/material';
+import { ReactElement } from 'react';
 
 interface ContainerProps {
   absolute?: boolean;
@@ -23,7 +23,7 @@ interface LoadingComponentProps {
 export function LoadingComponent({
   isLoading = true,
   absolute,
-}: LoadingComponentProps): React.ReactElement {
+}: LoadingComponentProps): ReactElement {
   if (!isLoading) {
     return null;
   }

@@ -7,10 +7,16 @@ import {
   DialogTitle,
   Typography,
 } from '@mui/material';
-import * as React from 'react';
 import { AddCircleOutline } from '@mui/icons-material';
 import { FieldArray, Formik } from 'formik';
-import { useEffect, useRef, useState } from 'react';
+import {
+  Component,
+  ReactElement,
+  ReactNode,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import * as Yup from 'yup';
@@ -83,15 +89,15 @@ const validationSchema = Yup.object().shape({
 
 interface ArrayFieldWrapperProps {
   arrayHelpers;
-  children: React.ReactNode;
+  children: ReactNode;
 }
-class ArrayFieldWrapper extends React.Component<ArrayFieldWrapperProps> {
+class ArrayFieldWrapper extends Component<ArrayFieldWrapperProps> {
   getArrayHelpers(): object {
     const { arrayHelpers } = this.props;
     return arrayHelpers;
   }
 
-  render(): React.ReactNode {
+  render(): ReactNode {
     const { children } = this.props;
     return children;
   }
@@ -118,7 +124,7 @@ export const TargetingCriteriaForm = ({
   individualFiltersAvailable,
   householdFiltersAvailable,
   isSocialWorkingProgram,
-}: TargetingCriteriaFormPropTypes): React.ReactElement => {
+}: TargetingCriteriaFormPropTypes): ReactElement => {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
 

@@ -1,5 +1,5 @@
 import { Button } from '@mui/material';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -19,7 +19,6 @@ import { MergeRegistrationDataImportDialog } from './MergeRegistrationDataImport
 import { RerunDedupe } from './RerunDedupe';
 import { RefuseRdiForm } from './refuseRdiForm';
 import { AdminButton } from '@core/AdminButton';
-import * as React from 'react';
 
 export interface RegistrationDataImportDetailsPageHeaderPropTypes {
   registration: RegistrationDetailedFragment;
@@ -39,7 +38,7 @@ export const RegistrationDataImportDetailsPageHeader = ({
   canRerunDedupe,
   canViewList,
   canRefuse,
-}: RegistrationDataImportDetailsPageHeaderPropTypes): React.ReactElement => {
+}: RegistrationDataImportDetailsPageHeaderPropTypes): ReactElement => {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const confirm = useConfirmation();

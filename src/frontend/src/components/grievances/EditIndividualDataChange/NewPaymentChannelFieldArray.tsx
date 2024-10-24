@@ -2,10 +2,10 @@ import { Button, Grid } from '@mui/material';
 import { AddCircleOutline } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { FieldArray } from 'formik';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { PaymentChannelField } from '../PaymentChannelField';
 import { removeItemById } from '../utils/helpers';
+import { ReactElement } from 'react';
 
 export interface NewPaymentChannelFieldArrayProps {
   values;
@@ -13,7 +13,7 @@ export interface NewPaymentChannelFieldArrayProps {
 
 export function NewPaymentChannelFieldArray({
   values,
-}: NewPaymentChannelFieldArrayProps): React.ReactElement {
+}: NewPaymentChannelFieldArrayProps): ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;

@@ -3,8 +3,7 @@ import camelCase from 'lodash/camelCase';
 import { Delete } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { useField, Field } from 'formik';
-import * as React from 'react';
-import { useEffect } from 'react';
+import { ReactElement, useEffect } from 'react';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import {
   AllAddIndividualFieldsQuery,
@@ -30,12 +29,11 @@ export const EditIndividualDataChangeFieldRow = ({
   notAvailableFields,
   onDelete,
   values,
-}: EditIndividualDataChangeFieldRowProps): React.ReactElement => {
+}: EditIndividualDataChangeFieldRowProps): ReactElement => {
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   const field = fields.find((item) => item.name === itemValue.fieldName);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [fieldNotUsed, metaNotUsed, helpers] = useField(
+  const [, , helpers] = useField(
     `individualDataUpdateFields[${index}].isFlexField`,
   );
   useEffect(() => {

@@ -1,11 +1,11 @@
 import { Grid } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { AllAddIndividualFieldsQuery } from '@generated/graphql';
 import { LabelizedField } from '@core/LabelizedField';
 import { GrievanceFlexFieldPhotoModal } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModal';
 import { GrievanceFlexFieldPhotoModalNewIndividual } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModalNewIndividual';
+import { ReactElement } from 'react';
 
 export interface CurrentValueProps {
   field: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'][number];
@@ -17,7 +17,7 @@ export function CurrentValue({
   field,
   value,
   values,
-}: CurrentValueProps): React.ReactElement {
+}: CurrentValueProps): ReactElement {
   const location = useLocation();
   const isNewTicket = location.pathname.indexOf('new-ticket') !== -1;
 

@@ -1,7 +1,7 @@
 import { Box, InputAdornment, TextField } from '@mui/material';
 import styled from 'styled-components';
-import * as React from 'react';
 import { FieldLabel } from './FieldLabel';
+import { ReactElement } from 'react';
 
 const TextContainer = styled(TextField)`
   input[type='number']::-webkit-inner-spin-button,
@@ -20,7 +20,7 @@ export function NumberTextField({
   onChange,
   icon = null,
   ...otherProps
-}): React.ReactElement {
+}): ReactElement {
   return (
     <Box display="flex" flexDirection="column">
       {topLabel ? <FieldLabel>{topLabel}</FieldLabel> : null}

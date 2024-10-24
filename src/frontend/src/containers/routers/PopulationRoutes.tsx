@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { useRoutes } from 'react-router-dom';
 import { PopulationHouseholdDetailsPage } from '../pages/population/PopulationHouseholdDetailsPage';
 import { PopulationHouseholdPage } from '../pages/population/PopulationHouseholdPage';
@@ -7,8 +6,9 @@ import { PeoplePage } from '@containers/pages/people/PeoplePage';
 import { PeopleDetailsPage } from '@containers/pages/people/PeopleDetailsPage';
 import { NewTemplatePage } from '@containers/pages/householdMembers/NewTemplatePage';
 import { HouseholdMembersPage } from '@containers/pages/population/HouseholdMembersPage';
+import { ReactElement } from 'react';
 
-export const PopulationRoutes = (): React.ReactElement => {
+export const PopulationRoutes = (): ReactElement => {
   const populationRoutes = [
     {
       path: 'population/household/:id',

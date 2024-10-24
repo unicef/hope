@@ -2,13 +2,13 @@ import { Grid, IconButton } from '@mui/material';
 import { Delete } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { Field } from 'formik';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { AllAddIndividualFieldsQuery } from '@generated/graphql';
 import { GrievanceDocumentPhotoModalEditable } from './GrievancesPhotoModals/GrievanceDocumentPhotoModalEditable';
 import { getIndexForId } from './utils/helpers';
+import { ReactElement } from 'react';
 
 export interface DocumentFieldProps {
   id: string;
@@ -34,7 +34,7 @@ export function DocumentField({
   setFieldValue,
   photoSrc,
   values,
-}: DocumentFieldProps): React.ReactElement {
+}: DocumentFieldProps): ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;

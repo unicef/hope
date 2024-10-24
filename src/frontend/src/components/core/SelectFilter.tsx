@@ -6,10 +6,9 @@ import {
   Select,
 } from '@mui/material';
 import { Close } from '@mui/icons-material';
-import * as React from 'react';
 import styled from 'styled-components';
-
 import { StyledFormControl } from '../StyledFormControl';
+import { ReactElement, Children, isValidElement } from 'react';
 
 const StartInputAdornment = styled(InputAdornment)`
   margin-right: 0;
@@ -56,7 +55,7 @@ export const SelectFilter = ({
   disableClearable = false,
   dataCy = 'select-filter',
   ...otherProps
-}): React.ReactElement => {
+}): ReactElement => {
   const checkValue = (value): boolean => {
     if (Array.isArray(value)) {
       return value.length > 0;
@@ -97,9 +96,9 @@ export const SelectFilter = ({
                 ? selected
                 : [selected];
 
-              const selectedOptions = React.Children.toArray(children).filter(
-                (child): child is React.ReactElement<any> =>
-                  React.isValidElement(child) &&
+              const selectedOptions = Children.toArray(children).filter(
+                (child): child is ReactElement<any> =>
+                  isValidElement(child) &&
                   selectedValues.includes(child.props.value),
               );
 

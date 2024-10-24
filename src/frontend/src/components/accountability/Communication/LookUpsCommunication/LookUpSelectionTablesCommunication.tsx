@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { HouseholdChoiceDataQuery } from '@generated/graphql';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { LookUpHouseholdTableCommunication } from '@containers/tables/Communication/LookUpHouseholdTableCommunication/LookUpHouseholdTableCommunication';
@@ -6,6 +5,7 @@ import { LookUpRegistrationDataImportTableCommunication } from '@containers/tabl
 import { LookUpTargetPopulationTableCommunication } from '@containers/tables/Communication/LookUpTargetPopulationTableCommunication';
 import { usePermissions } from '@hooks/usePermissions';
 import { CommunicationTabsValues } from '@utils/constants';
+import { ReactElement } from 'react';
 
 interface LookUpSelectionTablesCommunicationProps {
   selectedTab: number;
@@ -28,7 +28,7 @@ export function LookUpSelectionTablesCommunication({
   businessArea,
   onValueChange,
   handleChange,
-}: LookUpSelectionTablesCommunicationProps): React.ReactElement {
+}: LookUpSelectionTablesCommunicationProps): ReactElement {
   const permissions = usePermissions();
 
   return (

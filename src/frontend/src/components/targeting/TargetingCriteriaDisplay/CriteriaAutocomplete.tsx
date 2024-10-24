@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { useEffect, useState } from 'react';
+import { forwardRef, ReactElement, useEffect, useState } from 'react';
 import Autocomplete from '@mui/lab/Autocomplete';
 import styled from 'styled-components';
 import get from 'lodash/get';
@@ -12,10 +11,7 @@ interface Option {
   labelEn: string;
 }
 
-export function CriteriaAutocomplete({
-  field,
-  ...otherProps
-}): React.ReactElement {
+export function CriteriaAutocomplete({ field, ...otherProps }): ReactElement {
   const [open, setOpen] = useState(false);
   const [newValue, setNewValue] = useState(null);
   const [choicesWithoutDuplicates, setChoicesWithoutDuplicates] = useState();
@@ -76,7 +72,7 @@ export function CriteriaAutocomplete({
         />
       )}
       data-cy="autocomplete-target-criteria"
-      component={React.forwardRef(
+      component={forwardRef(
         function CriteriaAutocompletePaperComponent(props, ref) {
           return (
             <Paper

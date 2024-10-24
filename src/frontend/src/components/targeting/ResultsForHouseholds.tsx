@@ -1,5 +1,4 @@
 import { Grid, Typography } from '@mui/material';
-import * as React from 'react';
 import { Pie } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -11,6 +10,7 @@ import { MiśTheme } from '../../theme';
 import { FieldBorder } from '@core/FieldBorder';
 import { LabelizedField } from '@core/LabelizedField';
 import { PaperContainer } from './PaperContainer';
+import { ReactElement } from 'react';
 
 const colors = {
   femaleChildren: '#5F02CF',
@@ -55,7 +55,7 @@ interface ResultsProps {
 
 export function ResultsForHouseholds({
   targetPopulation,
-}: ResultsProps): React.ReactElement {
+}: ResultsProps): ReactElement {
   const { t } = useTranslation();
   if (targetPopulation.buildStatus !== TargetPopulationBuildStatus.Ok) {
     return null;
@@ -157,7 +157,7 @@ export function ResultsForHouseholds({
                 <Grid item xs={6}>
                   <SummaryBorder>
                     <LabelizedField label={t('Total Number of Households')}>
-                      <SummaryValue data-cy='total-number-of-households-count'>
+                      <SummaryValue data-cy="total-number-of-households-count">
                         {targetPopulation.totalHouseholdsCount || '0'}
                       </SummaryValue>
                     </LabelizedField>

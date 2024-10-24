@@ -1,5 +1,4 @@
 import { Box, Grid, Typography } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
@@ -15,6 +14,7 @@ import { UniversalMoment } from '@core/UniversalMoment';
 import { VerificationPlanActions } from './VerificationPlanActions';
 import { VerificationPlanDetailsChart } from './VerificationPlanChart';
 import { AdminButton } from '@core/AdminButton';
+import { ReactElement } from 'react';
 
 const Container = styled.div`
   display: flex;
@@ -39,7 +39,7 @@ export function VerificationPlanDetails({
   verificationPlan,
   samplingChoicesData,
   planNode,
-}: VerificationPlanDetailsProps): React.ReactElement {
+}: VerificationPlanDetailsProps): ReactElement {
   const { t } = useTranslation();
 
   const samplingChoicesDict = choicesToDict(
@@ -51,7 +51,7 @@ export function VerificationPlanDetails({
         <Title>
           <Typography variant="h6">
             {t('Verification Plan')} #{verificationPlan.unicefId}
-            <AdminButton adminUrl={verificationPlan.adminUrl} sx={{ ml: 2 }}/>
+            <AdminButton adminUrl={verificationPlan.adminUrl} sx={{ ml: 2 }} />
           </Typography>
         </Title>
         <VerificationPlanActions

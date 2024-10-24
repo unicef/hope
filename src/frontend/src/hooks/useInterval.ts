@@ -26,6 +26,7 @@ export function useLazyInterval(
   callback,
   delay,
 ): [(args?) => void, () => void] {
+  // eslint-disable-next-line no-undef
   const [intervalId, setIntervalId] = useState<NodeJS.Timeout>();
   const startInterval = (args): void => {
     setIntervalId(setInterval(() => callback(args), delay));

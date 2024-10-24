@@ -1,8 +1,8 @@
 import { Box, Grid } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyledBox, BlueText, LightGrey } from '../LookUpStyles';
+import { ReactElement } from 'react';
 
 export function LookUpReassignRoleDisplay({
   selectedHousehold,
@@ -14,7 +14,7 @@ export function LookUpReassignRoleDisplay({
   selectedIndividual;
   setLookUpDialogOpen;
   disabled?: boolean;
-}): React.ReactElement {
+}): ReactElement {
   const { t } = useTranslation();
   return (
     <StyledBox>

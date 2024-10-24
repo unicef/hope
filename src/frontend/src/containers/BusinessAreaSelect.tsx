@@ -1,10 +1,10 @@
 import { MenuItem, Select } from '@mui/material';
-import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useCachedMe } from '@hooks/useCachedMe';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useApolloClient } from '@apollo/client';
+import { ReactElement } from 'react';
 
 const CountrySelect = styled(Select)`
   && {
@@ -43,7 +43,7 @@ const CountrySelect = styled(Select)`
   }
 `;
 
-export function BusinessAreaSelect(): React.ReactElement {
+export function BusinessAreaSelect(): ReactElement {
   const { data } = useCachedMe();
   const { businessArea } = useBaseUrl();
   const navigate = useNavigate();

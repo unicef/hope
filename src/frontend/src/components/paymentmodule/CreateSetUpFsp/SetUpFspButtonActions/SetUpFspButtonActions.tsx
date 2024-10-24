@@ -1,5 +1,5 @@
 import { Box, Button } from '@mui/material';
-import * as React from 'react';
+import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router-dom';
 
@@ -17,7 +17,7 @@ export function SetUpFspButtonActions({
   baseUrl,
   paymentPlanId,
   handleBackStep,
-}: SetUpFspButtonActionsProps): React.ReactElement {
+}: SetUpFspButtonActionsProps): ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
   const isFollowUp = location.pathname.indexOf('followup') !== -1;

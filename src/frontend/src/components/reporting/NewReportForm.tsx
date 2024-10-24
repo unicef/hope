@@ -10,8 +10,7 @@ import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { Field, Form, Formik } from 'formik';
 import get from 'lodash/get';
 import moment from 'moment';
-import * as React from 'react';
-import { useState } from 'react';
+import { forwardRef, ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import { Dialog } from '@containers/dialogs/Dialog';
@@ -36,7 +35,7 @@ import { LoadingComponent } from '@core/LoadingComponent';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useNavigate } from 'react-router-dom';
 
-export const NewReportForm = (): React.ReactElement => {
+export const NewReportForm = (): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -146,7 +145,7 @@ export const NewReportForm = (): React.ReactElement => {
     }
   };
 
-  const renderConditionalFields = (values): React.ReactElement => {
+  const renderConditionalFields = (values): ReactElement => {
     const adminArea2Field = (
       <Grid item xs={12}>
         <Field
@@ -215,7 +214,7 @@ export const NewReportForm = (): React.ReactElement => {
     return label;
   };
 
-  const ForwardedPaper = React.forwardRef<HTMLDivElement>((props, ref) => (
+  const ForwardedPaper = forwardRef<HTMLDivElement>((props, ref) => (
     <Paper
       {...{
         ...props,

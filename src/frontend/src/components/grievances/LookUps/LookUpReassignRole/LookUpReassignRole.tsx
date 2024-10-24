@@ -1,5 +1,5 @@
 import { Formik } from 'formik';
-import { useEffect, useState } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
 import {
@@ -13,8 +13,8 @@ import { LookUpReassignRoleModal } from './LookUpReassignRoleModal';
 
 interface LookUpReassignRoleProps {
   household?:
-  | GrievanceTicketQuery['grievanceTicket']['household']
-  | GrievanceTicketQuery['grievanceTicket']['individual']['householdsAndRoles'][number]['household'];
+    | GrievanceTicketQuery['grievanceTicket']['household']
+    | GrievanceTicketQuery['grievanceTicket']['individual']['householdsAndRoles'][number]['household'];
   individual: GrievanceTicketQuery['grievanceTicket']['individual'];
   ticket: GrievanceTicketQuery['grievanceTicket'];
   individualRole: { role: string; id: string };
@@ -27,7 +27,7 @@ export function LookUpReassignRole({
   individualRole,
   shouldDisableButton,
   individual,
-}: LookUpReassignRoleProps): React.ReactElement {
+}: LookUpReassignRoleProps): ReactElement {
   const { t } = useTranslation();
   const [lookUpDialogOpen, setLookUpDialogOpen] = useState<boolean>(false);
   const [selectedHousehold, setSelectedHousehold] =

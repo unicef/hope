@@ -1,10 +1,10 @@
 import { Box, Button } from '@mui/material';
 import { Link } from 'react-router-dom';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { BreadCrumbsItem } from '@core/BreadCrumbs';
 import { PageHeader } from '@core/PageHeader';
+import { ReactElement } from 'react';
 
 interface EditFspHeaderProps {
   handleSubmit: () => Promise<void>;
@@ -16,7 +16,7 @@ export function EditFspHeader({
   handleSubmit,
   baseUrl,
   permissions,
-}: EditFspHeaderProps): React.ReactElement {
+}: EditFspHeaderProps): ReactElement {
   const { t } = useTranslation();
 
   const breadCrumbsItems: BreadCrumbsItem[] = [

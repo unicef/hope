@@ -1,6 +1,5 @@
 import TableCell from '@mui/material/TableCell';
 import { useNavigate } from 'react-router-dom';
-import * as React from 'react';
 import { Radio } from '@mui/material';
 import { RegistrationDataImportNode } from '@generated/graphql';
 import { useBusinessArea } from '@hooks/useBusinessArea';
@@ -9,6 +8,7 @@ import { StatusBox } from '@components/core/StatusBox';
 import { registrationDataImportStatusToColor } from '@utils/utils';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { BlackLink } from '@components/core/BlackLink';
+import { ReactElement } from 'react';
 
 interface LookUpRegistrationDataImportTableRowCommunicationProps {
   registrationDataImport: RegistrationDataImportNode;
@@ -22,7 +22,7 @@ export function LookUpRegistrationDataImportTableRowCommunication({
   canViewDetails,
   selectedRDI,
   radioChangeHandler,
-}: LookUpRegistrationDataImportTableRowCommunicationProps): React.ReactElement {
+}: LookUpRegistrationDataImportTableRowCommunicationProps): ReactElement {
   const navigate = useNavigate();
   const businessArea = useBusinessArea();
   const importDetailsPath = `/${businessArea}/registration-data-import/${registrationDataImport.id}`;

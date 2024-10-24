@@ -1,7 +1,7 @@
 import { Box } from '@mui/material';
-import * as React from 'react';
 import { Doughnut } from 'react-chartjs-2';
 import { AllGrievanceDashboardChartsQuery } from '@generated/graphql';
+import { ReactElement } from 'react';
 
 interface TicketsByStatusChartProps {
   data: AllGrievanceDashboardChartsQuery['ticketsByCategory'];
@@ -9,7 +9,7 @@ interface TicketsByStatusChartProps {
 
 export const TicketsByStatusChart = ({
   data,
-}: TicketsByStatusChartProps): React.ReactElement => {
+}: TicketsByStatusChartProps): ReactElement => {
   if (!data) return null;
 
   const chartData = {

@@ -1,6 +1,5 @@
-import * as React from 'react';
 import CircularProgress from '@mui/material/CircularProgress';
-import { useEffect, useState } from 'react';
+import { ReactElement, ReactNode, useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { StyledAutocomplete, StyledTextField } from '../StyledAutocomplete';
 import { useDebounce } from '@hooks/useDebounce';
@@ -43,17 +42,15 @@ export function BaseAutocompleteRest({
   handleChange: (event, newValue) => void;
   handleOptionSelected: (option: OptionType, value: OptionType) => boolean;
   handleOptionLabel: (option: OptionType) => string;
-  startAdornment?: React.ReactNode;
+  startAdornment?: ReactNode;
   mapOptions?: (options: OptionType[]) => OptionType[];
   autocompleteProps?: Record<string, any>;
   textFieldProps?: Record<string, any>;
   onDebouncedInputTextChanges: (text: string) => void;
   required?: boolean;
   error?: string;
-}): React.ReactElement {
-  const [modifiedOptions, setModifiedOptions] = React.useState<OptionType[]>(
-    [],
-  );
+}): ReactElement {
+  const [modifiedOptions, setModifiedOptions] = useState<OptionType[]>([]);
   const [inputValue, setInputValue] = useState('');
   const debouncedInputText = useDebounce(inputValue, 800);
   const [open, setOpen] = useState(false);

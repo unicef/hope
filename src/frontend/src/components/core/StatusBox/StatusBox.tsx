@@ -1,7 +1,7 @@
-import * as React from 'react';
 import styled from 'styled-components';
 import { theme as themeObj } from '../../../theme';
 import { opacityToHex } from '@utils/utils';
+import { ReactElement } from 'react';
 
 interface Props {
   status: string;
@@ -41,7 +41,7 @@ export const StatusBox = ({
   statusToColor,
   statusNameMapping,
   dataCy,
-}: Props): React.ReactElement => {
+}: Props): ReactElement => {
   const underscoreRemoveRegex = /_/g;
   if (!status) return <>-</>;
   return (

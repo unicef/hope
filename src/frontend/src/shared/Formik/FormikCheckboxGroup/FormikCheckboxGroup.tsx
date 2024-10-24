@@ -1,12 +1,9 @@
 import { Box, Checkbox, FormControlLabel } from '@mui/material';
 import { Field } from 'formik';
-import * as React from 'react';
 import { FieldLabel } from '@components/core/FieldLabel';
+import { ReactElement } from 'react';
 
-export function FormikCheckboxGroup({
-  field,
-  ...otherProps
-}): React.ReactElement {
+export function FormikCheckboxGroup({ field, ...otherProps }): ReactElement {
   return (
     <>
       <FieldLabel>{otherProps.label}</FieldLabel>

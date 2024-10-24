@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { TableWrapper } from '@components/core/TableWrapper';
 import {
@@ -9,6 +8,7 @@ import {
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './RecipientsTableHeadCells';
 import { RecipientsTableRow } from './RecipientsTableRow';
+import { ReactElement } from 'react';
 
 interface RecipientsTableProps {
   id: string;
@@ -18,7 +18,7 @@ interface RecipientsTableProps {
 export function RecipientsTable({
   id,
   canViewDetails,
-}: RecipientsTableProps): React.ReactElement {
+}: RecipientsTableProps): ReactElement {
   const { t } = useTranslation();
   const initialVariables: RecipientsQueryVariables = {
     survey: id,

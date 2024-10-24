@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ProgramQuery, ProgramStatus } from '@generated/graphql';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
@@ -8,6 +7,7 @@ import { ActiveProgramDetailsPageHeaderButtons } from './ActiveProgramDetailsPag
 import { DraftProgramDetailsPageHeaderButtons } from './DraftProgramDetailsPageHeaderButtons';
 import { FinishedProgramDetailsPageHeaderButtons } from './FinishedProgramDetailsPageHeaderButtons';
 import { AdminButton } from '@core/AdminButton';
+import { ReactElement } from 'react';
 
 export interface ProgramDetailsPageHeaderPropTypes {
   program: ProgramQuery['program'];
@@ -27,7 +27,7 @@ export function ProgramDetailsPageHeader({
   canFinish,
   canDuplicate,
   isPaymentPlanApplicable,
-}: ProgramDetailsPageHeaderPropTypes): React.ReactElement {
+}: ProgramDetailsPageHeaderPropTypes): ReactElement {
   let buttons;
   const { t } = useTranslation();
   const { baseUrl, isAllPrograms } = useBaseUrl();
@@ -74,9 +74,9 @@ export function ProgramDetailsPageHeader({
 
   return (
     <PageHeader
-        title={program.name}
-        breadCrumbs={breadCrumbsItems}
-        flags={<AdminButton adminUrl={program.adminUrl} />}
+      title={program.name}
+      breadCrumbs={breadCrumbsItems}
+      flags={<AdminButton adminUrl={program.adminUrl} />}
     >
       {buttons}
     </PageHeader>

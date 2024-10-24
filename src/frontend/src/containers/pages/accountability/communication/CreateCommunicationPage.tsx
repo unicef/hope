@@ -12,7 +12,13 @@ import {
   Typography,
 } from '@mui/material';
 import { Field, Form, Formik } from 'formik';
-import { ReactElement, useCallback, useEffect, useState } from 'react';
+import {
+  ReactElement,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -46,7 +52,6 @@ import { FormikSliderField } from '@shared/Formik/FormikSliderField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { CommunicationSteps, CommunicationTabsValues } from '@utils/constants';
 import { getPercentage } from '@utils/utils';
-import * as React from 'react';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
 const steps = ['Recipients Look up', 'Sample Size', 'Details'];
@@ -112,7 +117,7 @@ function prepareVariables(
   };
 }
 
-export const CreateCommunicationPage = (): React.ReactElement => {
+export const CreateCommunicationPage = (): ReactElement => {
   const { t } = useTranslation();
   const [mutate, { loading }] =
     useCreateAccountabilityCommunicationMessageMutation();
@@ -353,7 +358,7 @@ export const CreateCommunicationPage = (): React.ReactElement => {
                   {steps.map((label) => {
                     const stepProps: { completed?: boolean } = {};
                     const labelProps: {
-                      optional?: React.ReactNode;
+                      optional?: ReactNode;
                     } = {};
                     return (
                       <Step key={label} {...stepProps}>

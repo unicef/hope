@@ -1,5 +1,4 @@
 import { Grid, Typography } from '@mui/material';
-import * as React from 'react';
 import { Pie } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import { PaymentPlanQuery } from '@generated/graphql';
@@ -15,6 +14,7 @@ import {
 } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsResults/Styles';
 import { ResultsForHouseholds } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsResults/ResultsForHouseholds';
 import { ResultsForPeople } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsResults/ResultsForPeople';
+import { ReactElement } from 'react';
 
 interface PaymentPlanDetailsResultsProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
@@ -22,7 +22,7 @@ interface PaymentPlanDetailsResultsProps {
 
 export const PaymentPlanDetailsResults = ({
   paymentPlan,
-}: PaymentPlanDetailsResultsProps): React.ReactElement => {
+}: PaymentPlanDetailsResultsProps): ReactElement => {
   const { t } = useTranslation();
   const { isSocialDctType } = useProgramContext();
   const {

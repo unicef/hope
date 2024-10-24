@@ -1,8 +1,8 @@
 import { Box } from '@mui/material';
-import * as React from 'react';
 import { Bar } from 'react-chartjs-2';
 import { AllChartsQuery } from '@generated/graphql';
 import type { ChartData, ChartOptions } from 'chart.js';
+import { ReactElement } from 'react';
 
 interface PaymentVerificationChartProps {
   data: AllChartsQuery['chartPaymentVerification']['datasets'];
@@ -20,7 +20,7 @@ type Dataset = {
 
 export function PaymentVerificationChart({
   data,
-}: PaymentVerificationChartProps): React.ReactElement {
+}: PaymentVerificationChartProps): ReactElement {
   const datasets = data.reduce(
     (previousValue, currentValue) => ({
       ...previousValue,

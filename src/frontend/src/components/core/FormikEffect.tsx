@@ -1,10 +1,9 @@
 import { connect } from 'formik';
-import * as React from 'react';
-import { useEffect } from 'react';
+import { ReactElement, useEffect } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import isEqual from 'lodash/isEqual';
 
-function FormikEffectComponent({ onChange, values }): React.ReactElement {
+function FormikEffectComponent({ onChange, values }): ReactElement {
   const prevValues = usePrevious(values);
   useEffect(() => {
     // Don't run effect on form init and if values did not change

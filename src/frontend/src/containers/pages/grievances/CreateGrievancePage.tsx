@@ -67,7 +67,7 @@ const BoxWithBorders = styled.div`
   border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
   padding: 15px 0;
 `;
-function EmptyComponent(): React.ReactElement {
+function EmptyComponent(): ReactElement {
   return null;
 }
 export const dataChangeComponentDict = {
@@ -78,7 +78,7 @@ export const dataChangeComponentDict = {
   },
 };
 
-export const CreateGrievancePage = (): React.ReactElement => {
+export const CreateGrievancePage = (): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const location = useLocation();

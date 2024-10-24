@@ -1,5 +1,4 @@
 import { Box, Grid, Typography } from '@mui/material';
-import * as React from 'react';
 import { Pie } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -7,6 +6,7 @@ import { PaymentPlanQuery } from '@generated/graphql';
 import { LabelizedField } from '@core/LabelizedField';
 import { FieldBorder } from '@core/FieldBorder';
 import type { ChartData, ChartOptions } from 'chart.js';
+import { FC } from 'react';
 
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(2)};
@@ -51,7 +51,7 @@ export const getDeliveryMechanismColor = (
   return '#CCC';
 };
 
-export const VolumeByDeliveryMechanismSection: React.FC<
+export const VolumeByDeliveryMechanismSection: FC<
   VolumeByDeliveryMechanismSectionProps
 > = ({ paymentPlan }) => {
   const { t } = useTranslation();

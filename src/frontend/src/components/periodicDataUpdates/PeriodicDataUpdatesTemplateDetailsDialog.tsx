@@ -20,7 +20,7 @@ import {
 } from '@mui/material';
 import { PeriodicDataUpdateTemplateList } from '@restgenerated/models/PeriodicDataUpdateTemplateList';
 import { useQuery } from '@tanstack/react-query';
-import React from 'react';
+import React, { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface PeriodicDataUpdatesTemplateDetailsDialogProps {
@@ -29,7 +29,7 @@ interface PeriodicDataUpdatesTemplateDetailsDialogProps {
   template: PeriodicDataUpdateTemplateList;
 }
 
-export const PeriodicDataUpdatesTemplateDetailsDialog: React.FC<
+export const PeriodicDataUpdatesTemplateDetailsDialog: FC<
   PeriodicDataUpdatesTemplateDetailsDialogProps
 > = ({ open, onClose, template }) => {
   const { t } = useTranslation();

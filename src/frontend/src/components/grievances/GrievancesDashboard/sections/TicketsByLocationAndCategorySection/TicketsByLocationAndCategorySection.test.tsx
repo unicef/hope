@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { render } from '../../../../../testUtils/testUtils';
 import { fakeChartTicketsByLocationAndCategory } from '../../../../../../fixtures/grievances/grievancesDashboard/fakeChartTicketsByLocationAndCategory';
 import { TicketsByLocationAndCategorySection } from './TicketsByLocationAndCategorySection';

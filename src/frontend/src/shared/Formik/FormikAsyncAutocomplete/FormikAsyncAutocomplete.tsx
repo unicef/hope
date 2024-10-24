@@ -1,5 +1,5 @@
 import Autocomplete from '@mui/lab/Autocomplete';
-import { useEffect, useState } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 import { TextField } from '@mui/material';
 
 export function FormikAsyncAutocomplete({
@@ -9,7 +9,7 @@ export function FormikAsyncAutocomplete({
   query,
   fetchData,
   variables,
-}): React.ReactElement {
+}): ReactElement {
   const [value, setValue] = useState(null);
   const [inputValue, setInputValue] = useState('');
   const [options, setOptions] = useState([]);

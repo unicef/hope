@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { ReactElement, useEffect } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { usePermissions } from '@hooks/usePermissions';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -25,7 +25,7 @@ import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityL
 import { SupportingDocumentsSection } from '@components/paymentmodule/PaymentPlanDetails/SupportingDocumentsSection/SupportingDocumentsSection';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
-export const PaymentPlanDetailsPage = (): React.ReactElement => {
+export const PaymentPlanDetailsPage = (): ReactElement => {
   const { paymentPlanId } = useParams();
   const permissions = usePermissions();
   const location = useLocation();

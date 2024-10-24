@@ -1,5 +1,4 @@
 import { Box, Grid } from '@mui/material';
-import * as React from 'react';
 import { GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
 import { GrievanceTicketQuery } from '@generated/graphql';
 import { AddIndividualGrievanceDetails } from '../AddIndividualGrievanceDetails';
@@ -11,6 +10,7 @@ import { NeedsAdjudicationDetailsOld } from '../NeedsAdjudication/NeedsAdjudicat
 import { PaymentGrievanceDetails } from '../PaymentGrievance/PaymentGrievanceDetails/PaymentGrievanceDetails';
 import { RequestedHouseholdDataChange } from '../RequestedHouseholdDataChange';
 import { RequestedIndividualDataChange } from '../RequestedIndividualDataChange';
+import { ReactElement } from 'react';
 
 interface GrievancesApproveSectionProps {
   ticket: GrievanceTicketQuery['grievanceTicket'];
@@ -25,8 +25,8 @@ export function GrievancesApproveSection({
   canApproveFlagAndAdjudication,
   canApproveDataChange,
   canApprovePaymentVerification,
-}: GrievancesApproveSectionProps): React.ReactElement {
-  const matchDetailsComponent = (): React.ReactElement => {
+}: GrievancesApproveSectionProps): ReactElement {
+  const matchDetailsComponent = (): ReactElement => {
     if (ticket?.category?.toString() === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING) {
       return (
         <FlagDetails
@@ -35,7 +35,9 @@ export function GrievancesApproveSection({
         />
       );
     }
-    if (ticket?.category?.toString() === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION) {
+    if (
+      ticket?.category?.toString() === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION
+    ) {
       if (ticket.needsAdjudicationTicketDetails.isMultipleDuplicatesVersion) {
         return (
           <NeedsAdjudicationDetailsNew

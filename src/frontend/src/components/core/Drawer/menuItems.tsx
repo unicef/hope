@@ -22,12 +22,13 @@ import SupervisedUserCircle from '@mui/icons-material/SupervisedUserCircle';
 import TrackChangesIcon from '@mui/icons-material/TrackChanges';
 import TrendingUpRoundedIcon from '@mui/icons-material/TrendingUpRounded';
 import { PERMISSIONS } from '../../../config/permissions';
+import React from 'react';
 
 export type MenuItem = {
   name: string;
   href?: string;
   selectedRegexp: RegExp;
-  icon: JSX.Element;
+  icon: React.JSX.Element;
   permissions?: string[];
   collapsable?: boolean;
   permissionModule?: string;

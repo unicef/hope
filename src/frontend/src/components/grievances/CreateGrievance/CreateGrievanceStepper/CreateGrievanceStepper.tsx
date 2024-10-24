@@ -1,5 +1,5 @@
 import { Step, StepLabel, Stepper } from '@mui/material';
-import * as React from 'react';
+import { ReactElement, ReactNode } from 'react';
 import styled from 'styled-components';
 
 const NoRootPadding = styled.div`
@@ -16,14 +16,14 @@ export interface CreateGrievanceStepperProps {
 export function CreateGrievanceStepper({
   activeStep,
   steps,
-}: CreateGrievanceStepperProps): React.ReactElement {
+}: CreateGrievanceStepperProps): ReactElement {
   return (
     <NoRootPadding>
       <Stepper activeStep={activeStep}>
         {steps.map((label) => {
           const stepProps: { completed?: boolean } = {};
           const labelProps: {
-            optional?: React.ReactNode;
+            optional?: ReactNode;
           } = {};
           return (
             <Step key={label} {...stepProps}>

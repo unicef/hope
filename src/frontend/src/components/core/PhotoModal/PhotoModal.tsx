@@ -1,8 +1,7 @@
 import { Box, Button, DialogContent, IconButton } from '@mui/material';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import CloseIcon from '@mui/icons-material/Close';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
@@ -59,12 +58,12 @@ export function PhotoModal({
   title?: string;
   closeHandler?;
   showRotate?: boolean;
-}): React.ReactElement {
+}): ReactElement {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [turnAngle, setTurnAngle] = useState(90);
   const { t } = useTranslation();
 
-  const matchVariant = (): React.ReactElement => {
+  const matchVariant = (): ReactElement => {
     let element;
     switch (variant) {
       case 'picture':

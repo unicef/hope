@@ -1,7 +1,7 @@
-import * as React from 'react';
 import { Bar } from 'react-chartjs-2';
 import { formatThousands } from '@utils/utils';
 import { AllGrievanceDashboardChartsQuery } from '@generated/graphql';
+import { ReactElement } from 'react';
 
 interface TicketsByCategoryChartProps {
   data: AllGrievanceDashboardChartsQuery['ticketsByCategory'];
@@ -9,7 +9,7 @@ interface TicketsByCategoryChartProps {
 
 export const TicketsByCategoryChart = ({
   data,
-}: TicketsByCategoryChartProps): React.ReactElement => {
+}: TicketsByCategoryChartProps): ReactElement => {
   if (!data) return null;
 
   const chartData: any = {

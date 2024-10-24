@@ -1,10 +1,10 @@
-import * as React from 'react';
 import {
   KoboErrorNode,
   KoboImportDataQueryHookResult,
 } from '@generated/graphql';
 import { ImportCounters } from '../ImportCounters';
 import { ErrorsKobo } from './KoboErrors';
+import { ReactElement } from 'react';
 
 export interface KoboImportDataRepresentationPropTypes {
   koboImportData: KoboImportDataQueryHookResult['data']['koboImportData'];
@@ -13,7 +13,7 @@ export interface KoboImportDataRepresentationPropTypes {
 export function KoboImportDataRepresentation({
   koboImportData,
   loading,
-}: KoboImportDataRepresentationPropTypes): React.ReactElement {
+}: KoboImportDataRepresentationPropTypes): ReactElement {
   if (!koboImportData || loading) {
     return null;
   }

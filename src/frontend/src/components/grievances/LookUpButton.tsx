@@ -1,6 +1,6 @@
-import * as React from 'react';
 import styled from 'styled-components';
 import SearchIcon from '@mui/icons-material/Search';
+import { ReactElement } from 'react';
 
 const LookUp = styled.div`
   display: flex;
@@ -40,7 +40,7 @@ export function LookUpButton({
   title: string;
   handleClick?: () => void;
   placeholder?: boolean;
-}): React.ReactElement {
+}): ReactElement {
   return placeholder ? (
     <LookUpPlaceholder onClick={() => null}>
       <MarginRightSpan>

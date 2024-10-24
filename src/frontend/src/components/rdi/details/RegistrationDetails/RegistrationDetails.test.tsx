@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { fakeRegistrationDetailedFragment } from '../../../../../fixtures/registration/fakeRegistrationDetailedFragment';
 import { render } from '../../../../testUtils/testUtils';
 import { RegistrationDetails } from './RegistrationDetails';

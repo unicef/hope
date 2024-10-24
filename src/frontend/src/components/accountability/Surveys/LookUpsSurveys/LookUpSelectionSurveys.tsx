@@ -1,6 +1,5 @@
 import { Box, FormControlLabel, Radio, RadioGroup } from '@mui/material';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
@@ -32,7 +31,7 @@ export function LookUpSelectionSurveys({
   values;
   selectedTab;
   setSelectedTab;
-}): React.ReactElement {
+}): ReactElement {
   const location = useLocation();
   const initialFilterP = {
     search: '',

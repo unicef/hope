@@ -1,9 +1,9 @@
 import { Table, TableBody, TableCell, TableRow } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { formatCurrency, formatNumber } from '@utils/utils';
 import { CountryChartsQuery } from '@generated/graphql';
 import { EnhancedTableHead } from '@core/Table/EnhancedTableHead';
+import { ReactElement } from 'react';
 
 interface TotalAmountTransferredByAdminAreaTableProps {
   data: CountryChartsQuery['tableTotalCashTransferredByAdministrativeArea']['data'];
@@ -18,7 +18,7 @@ export function TotalAmountTransferredByAdminAreaTable({
   handleSort,
   order,
   orderBy,
-}: TotalAmountTransferredByAdminAreaTableProps): React.ReactElement {
+}: TotalAmountTransferredByAdminAreaTableProps): ReactElement {
   const { t } = useTranslation();
 
   const headCells = [
@@ -43,7 +43,7 @@ export function TotalAmountTransferredByAdminAreaTable({
   ];
   if (!data) return null;
 
-  const renderRows = (): Array<React.ReactElement> =>
+  const renderRows = (): Array<ReactElement> =>
     data.map((el) => (
       <TableRow key={el.id}>
         <TableCell align="left">{el.admin2}</TableCell>

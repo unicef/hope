@@ -6,8 +6,7 @@ import {
   DialogTitle,
 } from '@mui/material';
 import MergeTypeRoundedIcon from '@mui/icons-material/MergeTypeRounded';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DialogDescription } from '@containers/dialogs/DialogDescription';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
@@ -26,7 +25,7 @@ interface MergeRegistrationDataImportDialogProps {
 
 export function MergeRegistrationDataImportDialog({
   registration,
-}: MergeRegistrationDataImportDialogProps): React.ReactElement {
+}: MergeRegistrationDataImportDialogProps): ReactElement {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();

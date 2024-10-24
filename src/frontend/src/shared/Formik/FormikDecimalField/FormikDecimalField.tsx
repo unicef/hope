@@ -1,7 +1,7 @@
-import * as React from 'react';
 import styled from 'styled-components';
 import get from 'lodash/get';
 import { TextField, InputAdornment } from '@mui/material';
+import { ReactElement } from 'react';
 
 const StyledTextField = styled(TextField)`
   input[type='number']::-webkit-inner-spin-button,
@@ -19,7 +19,7 @@ export function FormikDecimalField({
   decoratorStart,
   decoratorEnd,
   ...otherProps
-}): React.ReactElement {
+}): ReactElement {
   const isInvalid =
     get(form.errors, field.name) &&
     (get(form.touched, field.name) || form.submitCount > 0);

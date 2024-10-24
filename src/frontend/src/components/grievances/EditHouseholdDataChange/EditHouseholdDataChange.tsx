@@ -2,8 +2,7 @@ import { Button, Grid, Typography } from '@mui/material';
 import { AddCircleOutline } from '@mui/icons-material';
 import { FieldArray } from 'formik';
 import { useLocation } from 'react-router-dom';
-import * as React from 'react';
-import { useEffect } from 'react';
+import { ReactElement, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   AllHouseholdsQuery,
@@ -21,7 +20,7 @@ export interface EditHouseholdDataChangeProps {
 export function EditHouseholdDataChange({
   values,
   setFieldValue,
-}: EditHouseholdDataChangeProps): React.ReactElement {
+}: EditHouseholdDataChangeProps): ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
   const isEditTicket = location.pathname.includes('edit-ticket');

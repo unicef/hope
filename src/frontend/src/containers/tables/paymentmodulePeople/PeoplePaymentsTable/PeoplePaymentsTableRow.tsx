@@ -1,5 +1,4 @@
 import TableCell from '@mui/material/TableCell';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import CheckCircleOutlineRoundedIcon from '@mui/icons-material/CheckCircleOutlineRounded';
@@ -15,6 +14,7 @@ import {
 import { AllPaymentsForTableQuery, PaymentStatus } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
+import { ReactElement, SyntheticEvent } from 'react';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -65,19 +65,17 @@ export const PeoplePaymentsTableRow = ({
   canViewDetails,
   onWarningClick,
   permissions,
-}: PeoplePaymentsTableRowProps): React.ReactElement => {
+}: PeoplePaymentsTableRowProps): ReactElement => {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const paymentDetailsPath = `/${baseUrl}/payment-module/payments/${payment.id}`;
 
-  const handleDialogWarningOpen = (
-    e: React.SyntheticEvent<HTMLDivElement>,
-  ): void => {
+  const handleDialogWarningOpen = (e: SyntheticEvent<HTMLDivElement>): void => {
     e.stopPropagation();
     onWarningClick(payment);
   };
 
-  const renderDeliveredQuantity = (): React.ReactElement => {
+  const renderDeliveredQuantity = (): ReactElement => {
     const { deliveredQuantity, currency, deliveredQuantityUsd, status } =
       payment;
     if (status === PaymentStatus.TransactionErroneous) {
@@ -94,7 +92,7 @@ export const PeoplePaymentsTableRow = ({
     );
   };
 
-  const renderMark = (): React.ReactElement => {
+  const renderMark = (): ReactElement => {
     const { deliveredQuantity, entitlementQuantity } = payment;
 
     if (deliveredQuantity === null) {

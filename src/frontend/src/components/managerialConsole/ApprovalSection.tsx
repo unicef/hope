@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { FC, SetStateAction, useState } from 'react';
 import { BaseSection } from '@components/core/BaseSection';
 import {
   Table,
@@ -23,17 +23,17 @@ import { ProgramSelect, useSortAndFilter } from './useSortAndFilter';
 
 interface ApprovalSectionProps {
   selectedApproved: any[];
-  setSelectedApproved: (value: React.SetStateAction<any[]>) => void;
+  setSelectedApproved: (value: SetStateAction<any[]>) => void;
   handleSelect: (
     selected: any[],
-    setSelected: (value: React.SetStateAction<any[]>) => void,
+    setSelected: (value: SetStateAction<any[]>) => void,
     id: any,
   ) => void;
   handleSelectAll: (
     ids: any[],
     selected: any[],
     setSelected: {
-      (value: React.SetStateAction<any[]>): void;
+      (value: SetStateAction<any[]>): void;
       (arg0: any[]): void;
     },
   ) => void;
@@ -42,7 +42,7 @@ interface ApprovalSectionProps {
   enableSearch?: boolean;
 }
 
-export const ApprovalSection: React.FC<ApprovalSectionProps> = ({
+export const ApprovalSection: FC<ApprovalSectionProps> = ({
   selectedApproved,
   setSelectedApproved,
   handleSelect,

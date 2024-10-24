@@ -1,5 +1,4 @@
 import { Grid, Typography } from '@mui/material';
-import * as React from 'react';
 import { Pie } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -8,6 +7,7 @@ import { PaymentPlanQuery } from '@generated/graphql';
 import { LabelizedField } from '@core/LabelizedField';
 import { PaperContainer } from '../../../targeting/PaperContainer';
 import { FieldBorder } from '@core/FieldBorder';
+import { ReactElement } from 'react';
 
 const colors = {
   femaleChildren: '#5F02CF',
@@ -52,7 +52,7 @@ interface PeoplePaymentPlanDetailsResultsProps {
 
 export const PeoplePaymentPlanDetailsResults = ({
   paymentPlan,
-}: PeoplePaymentPlanDetailsResultsProps): React.ReactElement => {
+}: PeoplePaymentPlanDetailsResultsProps): ReactElement => {
   const { t } = useTranslation();
   const {
     femaleChildrenCount,

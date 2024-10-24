@@ -1,12 +1,12 @@
-import * as React from 'react';
 import { useRoutes } from 'react-router-dom';
 import { ProgramDetailsPage } from '../pages/program/ProgramDetailsPage';
 import { ProgramsPage } from '../pages/program/ProgramsPage';
 import { CreateProgramPage } from '../pages/program/CreateProgramPage';
 import { EditProgramPage } from '../pages/program/EditProgramPage';
 import { DuplicateProgramPage } from '../pages/program/DuplicateProgramPage';
+import { ReactElement } from 'react';
 
-export const ProgramRoutes = (): React.ReactElement => {
+export const ProgramRoutes = (): ReactElement => {
   const programRoutes = [
     {
       path: 'list',

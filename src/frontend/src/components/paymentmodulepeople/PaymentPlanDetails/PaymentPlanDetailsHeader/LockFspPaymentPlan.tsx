@@ -6,8 +6,7 @@ import {
   DialogContent,
   DialogTitle,
 } from '@mui/material';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
@@ -27,7 +26,7 @@ export interface LockFspPaymentPlanProps {
 export function LockFspPaymentPlan({
   paymentPlan,
   permissions,
-}: LockFspPaymentPlanProps): React.ReactElement {
+}: LockFspPaymentPlanProps): ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const { isActiveProgram } = useProgramContext();

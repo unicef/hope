@@ -5,8 +5,7 @@ import {
   DialogContent,
   DialogTitle,
 } from '@mui/material';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ProgramQuery,
@@ -28,7 +27,7 @@ interface ReactivateProgramProps {
 
 export function ReactivateProgram({
   program,
-}: ReactivateProgramProps): React.ReactElement {
+}: ReactivateProgramProps): ReactElement {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);

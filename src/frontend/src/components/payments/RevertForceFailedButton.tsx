@@ -1,6 +1,5 @@
 import { Box, Button, DialogContent, DialogTitle } from '@mui/material';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Field, Form, Formik } from 'formik';
 import * as Yup from 'yup';
@@ -21,7 +20,7 @@ export interface RevertForceFailedButtonProps {
 export function RevertForceFailedButton({
   paymentRecordId,
   disabled = false,
-}: RevertForceFailedButtonProps): React.ReactElement {
+}: RevertForceFailedButtonProps): ReactElement {
   const { t } = useTranslation();
   const [isOpenModal, setOpenModal] = useState(false);
   const { showMessage } = useSnackbar();

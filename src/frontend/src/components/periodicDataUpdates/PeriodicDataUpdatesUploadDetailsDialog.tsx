@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Dialog,
@@ -67,7 +67,7 @@ const NonFormErrorDisplay = ({ nonFormErrors }) => {
     </div>
   );
 };
-export const PeriodicDataUpdatesUploadDetailsDialog: React.FC<
+export const PeriodicDataUpdatesUploadDetailsDialog: FC<
   PeriodicDataUpdatesUploadDetailsDialogProps
 > = ({ open, onClose, uploadId }) => {
   const { t } = useTranslation();
@@ -91,7 +91,9 @@ export const PeriodicDataUpdatesUploadDetailsDialog: React.FC<
         <NonFormErrorDisplay
           nonFormErrors={uploadDetailsData?.errors_info?.non_form_errors}
         />
-        <FormErrorDisplay formErrors={uploadDetailsData?.errors_info?.form_errors} />
+        <FormErrorDisplay
+          formErrors={uploadDetailsData?.errors_info?.form_errors}
+        />
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>{t('Close')}</Button>

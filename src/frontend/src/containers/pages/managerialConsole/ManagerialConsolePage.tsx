@@ -14,12 +14,12 @@ import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box } from '@mui/material';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import React, { useState } from 'react';
+import React, { FC, SetStateAction, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 import { useLocation } from 'react-router-dom';
-export const ManagerialConsolePage: React.FC = () => {
+export const ManagerialConsolePage: FC = () => {
   const { t } = useTranslation();
   const { businessArea } = useBaseUrl();
   const location = useLocation();
@@ -31,7 +31,7 @@ export const ManagerialConsolePage: React.FC = () => {
   const handleSelect = (
     selected: any[],
     setSelected: {
-      (value: React.SetStateAction<any[]>): void;
+      (value: SetStateAction<any[]>): void;
       (arg0: any[]): void;
     },
     id: any,
@@ -46,7 +46,7 @@ export const ManagerialConsolePage: React.FC = () => {
   const handleSelectAll = (
     ids: any[],
     selected: any[],
-    setSelected: (value: React.SetStateAction<any[]>) => void,
+    setSelected: (value: SetStateAction<any[]>) => void,
   ) => {
     let newSelected;
     if (ids.every((id) => selected.includes(id))) {

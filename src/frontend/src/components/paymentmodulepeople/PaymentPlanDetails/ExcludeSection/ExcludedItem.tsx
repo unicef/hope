@@ -1,8 +1,8 @@
 import { Box, Button, IconButton } from '@mui/material';
 import { Delete } from '@mui/icons-material';
-import * as React from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
+import { ReactElement } from 'react';
 
 const StyledBox = styled(Box)`
   width: 100%;
@@ -32,7 +32,7 @@ export function ExcludedItem({
   onUndo,
   isDeleted,
   isEdit,
-}: ExcludedItemProps): React.ReactElement {
+}: ExcludedItemProps): ReactElement {
   const { t } = useTranslation();
 
   return (

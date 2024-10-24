@@ -2,7 +2,6 @@ import { Box, Grid, Typography } from '@mui/material';
 import styled from 'styled-components';
 import { Field } from 'formik';
 import get from 'lodash/get';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { AllTargetPopulationsQuery } from '@generated/graphql';
@@ -10,6 +9,7 @@ import { LoadingComponent } from '@core/LoadingComponent';
 import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
 import { PaperContainer } from '../../../targeting/PaperContainer';
+import { ReactElement } from 'react';
 
 const StyledBox = styled(Box)`
   width: 100%;
@@ -23,7 +23,7 @@ export function PaymentPlanTargeting({
   allTargetPopulations: AllTargetPopulationsQuery;
   loading: boolean;
   disabled?: boolean;
-}): React.ReactElement {
+}): ReactElement {
   const { t } = useTranslation();
   if (loading) return <LoadingComponent />;
 

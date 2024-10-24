@@ -1,11 +1,11 @@
 import { Box, Typography } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { PaymentRecordNode, PaymentVerificationNode } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ContentLink } from '@core/ContentLink';
 import { Title } from '@core/Title';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
+import { ReactElement } from 'react';
 
 type VerificationId = {
   id: PaymentVerificationNode['id'];
@@ -16,14 +16,12 @@ interface PaymentIdsProps {
   verifications: VerificationId[];
 }
 
-export function PaymentIds({
-  verifications,
-}: PaymentIdsProps): React.ReactElement {
+export function PaymentIds({ verifications }: PaymentIdsProps): ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
 
   const mappedIds = verifications.map(
-    (verification): React.ReactElement => (
+    (verification): ReactElement => (
       <Box key={verification.id} mb={1}>
         <ContentLink
           href={`/${baseUrl}/verification-records/${verification.id}`}

@@ -1,10 +1,10 @@
-import * as React from 'react';
 import {
   XlsxImportDataQueryResult,
   XlsxRowErrorNode,
 } from '@generated/graphql';
 import { ImportCounters } from '../ImportCounters';
 import { XlsxErrors } from './XlsxErrors';
+import { ReactElement } from 'react';
 
 export interface XlsxImportDataRepresentationPropTypes {
   xlsxImportData: XlsxImportDataQueryResult['data']['importData'];
@@ -13,7 +13,7 @@ export interface XlsxImportDataRepresentationPropTypes {
 export function XlsxImportDataRepresentation({
   xlsxImportData,
   loading,
-}: XlsxImportDataRepresentationPropTypes): React.ReactElement {
+}: XlsxImportDataRepresentationPropTypes): ReactElement {
   if (!xlsxImportData || loading) {
     return null;
   }

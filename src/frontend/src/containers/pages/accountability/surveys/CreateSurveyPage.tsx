@@ -12,8 +12,13 @@ import {
   Typography,
 } from '@mui/material';
 import { Field, Form, Formik } from 'formik';
-import * as React from 'react';
-import { ReactElement, useCallback, useEffect, useState } from 'react';
+import {
+  ReactElement,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -91,7 +96,7 @@ function prepareVariables(
   };
 }
 
-export const CreateSurveyPage = (): React.ReactElement => {
+export const CreateSurveyPage = (): ReactElement => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [mutate, { loading }] = useCreateSurveyAccountabilityMutation();
@@ -400,7 +405,7 @@ export const CreateSurveyPage = (): React.ReactElement => {
                   {steps.map((label) => {
                     const stepProps: { completed?: boolean } = {};
                     const labelProps: {
-                      optional?: React.ReactNode;
+                      optional?: ReactNode;
                     } = {};
                     return (
                       <Step key={label} {...stepProps}>

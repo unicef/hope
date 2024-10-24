@@ -1,7 +1,7 @@
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
-import * as React from 'react';
 import { styled } from '@mui/material/styles';
+import { ReactElement } from 'react';
 
 interface EnhancedTableToolbarProps {
   title: string;
@@ -20,7 +20,7 @@ const StyledTypography = styled(Typography)({
 
 export function EnhancedTableToolbar({
   title,
-}: EnhancedTableToolbarProps): React.ReactElement {
+}: EnhancedTableToolbarProps): ReactElement {
   return (
     <StyledToolbar>
       <StyledTypography data-cy="table-title" variant="h6">

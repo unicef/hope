@@ -1,6 +1,5 @@
 import { Grid, MenuItem } from '@mui/material';
 import GroupIcon from '@mui/icons-material/Group';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useRegistrationChoicesQuery } from '@generated/graphql';
@@ -11,6 +10,7 @@ import { NumberTextField } from '@core/NumberTextField';
 import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import { FiltersSection } from '@core/FiltersSection';
+import { ReactElement } from 'react';
 
 interface RegistrationFiltersProps {
   filter;
@@ -26,7 +26,7 @@ export const RegistrationPeopleFilters = ({
   initialFilter,
   appliedFilter,
   setAppliedFilter,
-}: RegistrationFiltersProps): React.ReactElement => {
+}: RegistrationFiltersProps): ReactElement => {
   const navigate = useNavigate();
   const location = useLocation();
 

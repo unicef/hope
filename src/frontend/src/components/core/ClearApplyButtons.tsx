@@ -1,5 +1,5 @@
 import { Box, Button, Grid } from '@mui/material';
-import { useCallback, useEffect } from 'react';
+import { ReactElement, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface ClearApplyButtonsProps {
@@ -10,7 +10,7 @@ interface ClearApplyButtonsProps {
 export function ClearApplyButtons({
   clearHandler,
   applyHandler,
-}: ClearApplyButtonsProps): React.ReactElement {
+}: ClearApplyButtonsProps): ReactElement {
   const { t } = useTranslation();
 
   const handleKeyPress = useCallback(

@@ -5,8 +5,7 @@ import {
   DialogTitle,
   Typography,
 } from '@mui/material';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dialog } from '@containers/dialogs/Dialog';
 import { DialogActions } from '@containers/dialogs/DialogActions';
@@ -27,7 +26,7 @@ export interface FinishVerificationPlanProps {
 
 export function FinishVerificationPlan({
   verificationPlan,
-}: FinishVerificationPlanProps): React.ReactElement {
+}: FinishVerificationPlanProps): ReactElement {
   const { t } = useTranslation();
   const [finishDialogOpen, setFinishDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();

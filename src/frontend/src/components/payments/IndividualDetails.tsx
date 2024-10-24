@@ -1,12 +1,12 @@
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Overview } from '@components/payments/Overview';
 import { Title } from '@core/Title';
 import { Grid, Typography } from '@mui/material';
 import { LabelizedField } from '@core/LabelizedField';
 import { getPhoneNoLabel } from '@utils/utils';
+import { ReactElement } from 'react';
 
-export const IndividualDetails = ({ individual }): React.ReactElement => {
+export const IndividualDetails = ({ individual }): ReactElement => {
   const { t } = useTranslation();
   return (
     <Overview>
@@ -21,10 +21,7 @@ export const IndividualDetails = ({ individual }): React.ReactElement => {
           />
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField
-            label={t('INDIVIDUAL')}
-            value={individual.fullName}
-          />
+          <LabelizedField label={t('INDIVIDUAL')} value={individual.fullName} />
         </Grid>
         <Grid item xs={3}>
           <LabelizedField

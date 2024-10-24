@@ -10,7 +10,6 @@ import {
   Typography,
 } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -23,6 +22,7 @@ import {
 import { useConfirmation } from '@core/ConfirmationDialog';
 import { Title } from '@core/Title';
 import { VerifyPaymentGrievance } from '../VerifyPaymentGrievance/VerifyPaymentGrievance';
+import { ReactElement } from 'react';
 
 const StyledBox = styled(Paper)`
   display: flex;
@@ -43,7 +43,7 @@ export function PaymentGrievanceDetails({
 }: {
   ticket: GrievanceTicketQuery['grievanceTicket'];
   canApprovePaymentVerification: boolean;
-}): React.ReactElement {
+}): ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const [mutate] = useApprovePaymentDetailsMutation();
@@ -109,7 +109,7 @@ export function PaymentGrievanceDetails({
             >
               {approveStatus ? t('Disapprove') : t('Approve')}
             </Button>
-            ) : null}
+          ) : null}
         </Box>
       </Title>
       <StyledTable>

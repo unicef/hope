@@ -13,7 +13,7 @@ import {
   TextField,
 } from '@mui/material';
 import styled from 'styled-components';
-import { useState } from 'react';
+import { ReactElement, ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 
@@ -42,7 +42,7 @@ interface ManagerialConsoleBaseModalProps {
   buttonTitle: string;
   dialogTitle: string;
   title: string;
-  children?: React.ReactNode;
+  children?: ReactNode;
   onSave: (plans, comment) => Promise<void>;
   disabledSave?: boolean;
 }
@@ -56,13 +56,13 @@ export const ManagerialConsoleBaseModal = ({
   children,
   onSave,
   disabledSave,
-}: ManagerialConsoleBaseModalProps): React.ReactElement => {
+}: ManagerialConsoleBaseModalProps): ReactElement => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [comment, setComment] = useState('');
   const { t } = useTranslation();
   const { isActiveProgram } = useProgramContext();
 
-  const renderButton = (): React.ReactElement => (
+  const renderButton = (): ReactElement => (
     <Button
       variant="outlined"
       color="primary"

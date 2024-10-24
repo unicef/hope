@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { AllPaymentPlansForTableQuery } from '@generated/graphql';
 import styled from 'styled-components';
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -37,7 +37,7 @@ const BlackEyeIcon = styled(VisibilityIcon)`
 export const FollowUpPaymentPlansModal = ({
   paymentPlan,
   canViewDetails,
-}: FollowUpPaymentPlansModalProps): React.ReactElement => {
+}: FollowUpPaymentPlansModalProps): ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { baseUrl } = useBaseUrl();

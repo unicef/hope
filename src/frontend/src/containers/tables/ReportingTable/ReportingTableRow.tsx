@@ -1,6 +1,5 @@
 import { TableCell, TableRow } from '@mui/material';
 import { GetApp } from '@mui/icons-material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -10,6 +9,7 @@ import { UniversalMoment } from '@components/core/UniversalMoment';
 import { formatNumber, reportStatusToColor } from '@utils/utils';
 import { ReportNode } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { ReactElement } from 'react';
 
 const UnderlinedTableCell = styled(TableCell)`
   text-decoration: underline;
@@ -31,7 +31,7 @@ export function ReportingTableRow({
   report,
   typeChoices,
   statusChoices,
-}: ReportingTableRowProps): React.ReactElement {
+}: ReportingTableRowProps): ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const navigate = useNavigate();

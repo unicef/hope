@@ -1,9 +1,9 @@
 import { Box, IconButton } from '@mui/material';
 import { Delete } from '@mui/icons-material';
 import { Field } from 'formik';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { CriteriaAutocomplete } from './TargetingCriteriaDisplay/CriteriaAutocomplete';
+import { ReactElement } from 'react';
 
 export const FieldChooser = ({
   onChange,
@@ -21,7 +21,7 @@ export const FieldChooser = ({
   onDelete: () => void;
   baseName: string;
   showDelete: boolean;
-}): React.ReactElement => {
+}): ReactElement => {
   const { t } = useTranslation();
   return (
     <Box mb={2} display="flex" justifyContent="space-between">

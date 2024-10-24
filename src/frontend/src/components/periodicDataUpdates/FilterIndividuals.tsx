@@ -7,7 +7,7 @@ import { AdminAreaAutocompleteMultipleRest } from '@shared/autocompletes/rest/Ad
 import { RdiAutocompleteRest } from '@shared/autocompletes/rest/RdiAutocompleteRest';
 import { TargetPopulationAutocompleteRest } from '@shared/autocompletes/rest/TargetPopulationAutocompleteRest';
 import { t } from 'i18next';
-import React from 'react';
+import React, { FC } from 'react';
 
 interface FilterIndividualsProps {
   filter;
@@ -15,7 +15,7 @@ interface FilterIndividualsProps {
   isOnPaper: boolean;
 }
 
-export const FilterIndividuals: React.FC<FilterIndividualsProps> = ({
+export const FilterIndividuals: FC<FilterIndividualsProps> = ({
   filter,
   setFilter,
 

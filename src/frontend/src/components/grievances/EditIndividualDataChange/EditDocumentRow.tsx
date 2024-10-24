@@ -3,8 +3,7 @@ import { Delete } from '@mui/icons-material';
 import Close from '@mui/icons-material/Close';
 import { useLocation } from 'react-router-dom';
 import Edit from '@mui/icons-material/Edit';
-import * as React from 'react';
-import { useState } from 'react';
+import { Fragment, ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
@@ -40,7 +39,7 @@ export function EditDocumentRow({
   arrayHelpers,
   addIndividualFieldsData,
   id,
-}: EditDocumentRowProps): React.ReactElement {
+}: EditDocumentRowProps): ReactElement {
   const { t } = useTranslation();
   const [isEdited, setEdit] = useState(false);
   const location = useLocation();
@@ -86,7 +85,7 @@ export function EditDocumentRow({
       </Box>
     </>
   ) : (
-    <React.Fragment key={document.node.id}>
+    <Fragment key={document.node.id}>
       <Grid item xs={3}>
         <DisabledDiv disabled={removed}>
           <LabelizedField
@@ -147,6 +146,6 @@ export function EditDocumentRow({
           </Box>
         )}
       </Grid>
-    </React.Fragment>
+    </Fragment>
   );
 }

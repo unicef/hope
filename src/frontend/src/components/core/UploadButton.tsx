@@ -1,12 +1,11 @@
-import * as React from 'react';
-import { useRef } from 'react';
+import { ReactElement, useRef } from 'react';
 import Button from '@mui/material/Button';
 
 export function UploadButton({
   children,
   handleChange,
   ...otherProps
-}): React.ReactElement {
+}): ReactElement {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const onClickHandler = () => {

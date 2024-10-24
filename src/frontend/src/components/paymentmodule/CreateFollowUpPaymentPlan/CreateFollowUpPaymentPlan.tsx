@@ -11,8 +11,7 @@ import {
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { Field, Form, Formik } from 'formik';
 import moment from 'moment';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import { useNavigate } from 'react-router-dom';
@@ -42,7 +41,7 @@ export interface CreateFollowUpPaymentPlanProps {
 
 export function CreateFollowUpPaymentPlan({
   paymentPlan,
-}: CreateFollowUpPaymentPlanProps): React.ReactElement {
+}: CreateFollowUpPaymentPlanProps): ReactElement {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);

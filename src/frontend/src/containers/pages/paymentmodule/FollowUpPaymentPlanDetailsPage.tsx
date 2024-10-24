@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { useEffect } from 'react';
+import { ReactElement, useEffect } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { PaymentPlanStatus, usePaymentPlanQuery } from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
@@ -21,7 +20,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { SupportingDocumentsSection } from '@components/paymentmodule/PaymentPlanDetails/SupportingDocumentsSection/SupportingDocumentsSection';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
-export function FollowUpPaymentPlanDetailsPage(): React.ReactElement {
+export function FollowUpPaymentPlanDetailsPage(): ReactElement {
   const { paymentPlanId } = useParams();
   const permissions = usePermissions();
   const location = useLocation();

@@ -6,7 +6,7 @@ import {
   DialogTitle,
   Typography,
 } from '@mui/material';
-import { FC } from 'react';
+import { FC, ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
@@ -14,7 +14,7 @@ import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 export interface ConfirmationDialogOptions {
   catchOnCancel?: boolean;
   title?: string;
-  content?: string | React.ReactElement;
+  content?: string | ReactElement;
   continueText?: string;
   extraContent?: string;
   warningContent?: string | null;

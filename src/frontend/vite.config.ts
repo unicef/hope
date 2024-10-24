@@ -14,8 +14,8 @@ export default defineConfig({
     loader: 'tsx',
     include: /\.[jt]sx?$/,
     exclude: /node_modules/,
-    jsxFactory: 'React.createElement',
-    jsxFragment: 'React.Fragment',
+    jsxFactory: 'createElement',
+    jsxFragment: 'Fragment',
   },
   build: {
     outDir: 'build',

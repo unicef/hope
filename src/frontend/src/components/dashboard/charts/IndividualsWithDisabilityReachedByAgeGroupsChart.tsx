@@ -1,8 +1,8 @@
-import * as React from 'react';
 import { Bar } from 'react-chartjs-2';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { formatNumber, formatThousands, getPercentage } from '@utils/utils';
 import { AllChartsQuery } from '@generated/graphql';
+import { ReactElement } from 'react';
 
 interface IndividualsWithDisabilityReachedByAgeGroupsChartProps {
   data: AllChartsQuery['chartIndividualsWithDisabilityReachedByAge'];
@@ -10,7 +10,7 @@ interface IndividualsWithDisabilityReachedByAgeGroupsChartProps {
 
 export const IndividualsWithDisabilityReachedByAgeGroupsChart = ({
   data,
-}: IndividualsWithDisabilityReachedByAgeGroupsChartProps): React.ReactElement => {
+}: IndividualsWithDisabilityReachedByAgeGroupsChartProps): ReactElement => {
   if (!data) return null;
 
   const chartData = {

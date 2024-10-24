@@ -1,12 +1,9 @@
-import * as React from 'react';
 import { TargetPopulationHouseholdTable } from '@containers/tables/targeting/TargetPopulationHouseholdTable';
 import { useTargetPopulationHouseholdsQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { ReactElement } from 'react';
 
-export function TargetingHouseholds({
-  id,
-  canViewDetails,
-}): React.ReactElement {
+export function TargetingHouseholds({ id, canViewDetails }): ReactElement {
   const { businessArea } = useBaseUrl();
 
   return (

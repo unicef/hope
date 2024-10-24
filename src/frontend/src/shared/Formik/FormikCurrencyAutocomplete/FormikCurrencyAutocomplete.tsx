@@ -1,16 +1,16 @@
 import { TextField } from '@mui/material';
 import Autocomplete from '@mui/lab/Autocomplete';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import get from 'lodash/get';
 import { useCurrencyChoicesQuery } from '@generated/graphql';
+import { ReactElement } from 'react';
 
 export const FormikCurrencyAutocomplete = ({
   field,
   form,
   disabled,
   ...otherProps
-}): React.ReactElement => {
+}): ReactElement => {
   const { t } = useTranslation();
 
   const { data } = useCurrencyChoicesQuery();

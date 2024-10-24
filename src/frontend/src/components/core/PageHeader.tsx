@@ -1,8 +1,8 @@
 import { Box, Typography } from '@mui/material';
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
-import * as React from 'react';
 import { styled } from '@mui/system';
 import { BreadCrumbs, BreadCrumbsItem } from './BreadCrumbs';
+import { ReactElement, isValidElement } from 'react';
 
 const Wrapper = styled('div')({
   boxShadow:
@@ -61,12 +61,12 @@ const TitleContainer = styled('div')({
 });
 
 interface Props {
-  title: string | React.ReactElement;
-  children?: React.ReactElement;
+  title: string | ReactElement;
+  children?: ReactElement;
   breadCrumbs?: BreadCrumbsItem[];
-  tabs?: React.ReactElement;
+  tabs?: ReactElement;
   hasInputComponent?: boolean;
-  flags?: React.ReactElement;
+  flags?: ReactElement;
   handleBack?: () => void;
 }
 
@@ -78,13 +78,14 @@ export function PageHeader({
   hasInputComponent,
   flags,
   handleBack,
-}: Props): React.ReactElement {
+}: Props): ReactElement {
   return (
     <Wrapper data-cy="page-header-container">
       <Container>
         {breadCrumbs && breadCrumbs.length !== 0 ? (
           // Leaving breadcrumbs for permissions, but BackButton goes back to the previous page
-          <BackButton data-cy="arrow_back"
+          <BackButton
+            data-cy="arrow_back"
             onClick={() => (handleBack ? handleBack() : window.history.back())}
           >
             <ArrowBackRoundedIcon fontSize="large" />
@@ -92,7 +93,7 @@ export function PageHeader({
         ) : null}
         <HeaderContainer>
           <div>
-            {React.isValidElement(title) && hasInputComponent ? (
+            {isValidElement(title) && hasInputComponent ? (
               <TitleWrapper data-cy="page-header-title">{title}</TitleWrapper>
             ) : (
               <>

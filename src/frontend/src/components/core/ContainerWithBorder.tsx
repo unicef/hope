@@ -1,5 +1,5 @@
 import { Box, Paper } from '@mui/material';
-import * as React from 'react';
+import { ReactNode, ReactElement } from 'react';
 import styled from 'styled-components';
 
 const Container = styled(Paper)`
@@ -17,12 +17,12 @@ const Container = styled(Paper)`
   }
 `;
 interface ContainerWithBorderProps {
-  children: React.ReactNode;
+  children: ReactNode;
   column?: boolean;
 }
 export function ContainerWithBorder({
   children,
-}: ContainerWithBorderProps): React.ReactElement {
+}: ContainerWithBorderProps): ReactElement {
   return (
     <Container>
       <Box

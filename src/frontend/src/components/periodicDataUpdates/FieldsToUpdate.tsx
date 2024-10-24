@@ -11,7 +11,7 @@ import {
   TableRow,
 } from '@mui/material';
 import { FieldArray } from 'formik';
-import React, { useEffect, useRef } from 'react';
+import React, { ChangeEvent, FC, useEffect, useRef } from 'react';
 
 interface Field {
   field: string;
@@ -39,7 +39,7 @@ interface FieldsToUpdateProps {
   setCheckedFields?: (checkedFields: Record<string, boolean>) => void;
 }
 
-export const FieldsToUpdate: React.FC<FieldsToUpdateProps> = ({
+export const FieldsToUpdate: FC<FieldsToUpdateProps> = ({
   values,
   setFieldValue,
   checkedFields,
@@ -62,7 +62,7 @@ export const FieldsToUpdate: React.FC<FieldsToUpdateProps> = ({
   }, [values.roundsData, setCheckedFields]);
 
   const handleCheckboxChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
+    event: ChangeEvent<HTMLInputElement>,
     field: SelectedField,
   ) => {
     const updatedCheckedFields = {

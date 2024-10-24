@@ -1,6 +1,5 @@
 import { Grid } from '@mui/material';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { formatCurrencyWithSymbol } from '@utils/utils';
 import { AllChartsQuery } from '@generated/graphql';
@@ -11,13 +10,14 @@ import {
   DashboardCard,
   IconContainer,
 } from '../../DashboardCard';
+import { ReactElement } from 'react';
 
 interface TotalAmountTransferredSectionProps {
   data: AllChartsQuery['sectionTotalTransferred'];
 }
 export function TotalAmountTransferredSection({
   data,
-}: TotalAmountTransferredSectionProps): React.ReactElement {
+}: TotalAmountTransferredSectionProps): ReactElement {
   const { t } = useTranslation();
   if (!data) return null;
   return (

@@ -1,19 +1,16 @@
 import { Box, Paper } from '@mui/material';
-import * as React from 'react';
+import { ReactNode, ReactElement } from 'react';
 import styled from 'styled-components';
 
 interface DashboardPaperProps {
   title?: string;
-  children: React.ReactNode;
+  children: ReactNode;
   noMarginTop?: boolean;
   extraPaddingLeft?: boolean;
   extraPaddingTitle?: boolean;
   color?: string;
 }
-const StyledPaper = styled(
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  ({ noMarginTop, extraPaddingLeft, color, ...props }) => <Paper {...props} />,
-)`
+const StyledPaper = styled(({ ...props }) => <Paper {...props} />)`
   padding: 18px 24px;
   padding-left: ${(props) => (props.extraPaddingLeft ? '46px' : '24px')}
   margin-top: ${(props) => (props.noMarginTop ? '0' : '20px')};
@@ -30,7 +27,7 @@ export function DashboardPaper({
   extraPaddingLeft,
   extraPaddingTitle = true,
   color,
-}: DashboardPaperProps): React.ReactElement {
+}: DashboardPaperProps): ReactElement {
   return (
     <StyledPaper
       noMarginTop={noMarginTop}

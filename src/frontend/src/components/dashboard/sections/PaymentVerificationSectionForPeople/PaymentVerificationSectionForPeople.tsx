@@ -1,16 +1,16 @@
 import { Box, Typography } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { AllChartsQuery } from '@generated/graphql';
 import { PaymentVerificationChart } from '../../charts/PaymentVerificationChart';
 import { DashboardPaper } from '../../DashboardPaper';
+import { ReactElement } from 'react';
 
 interface PaymentVerificationSectionForPeopleProps {
   data: AllChartsQuery['chartPaymentVerificationForPeople'];
 }
 export function PaymentVerificationSectionForPeople({
   data,
-}: PaymentVerificationSectionForPeopleProps): React.ReactElement {
+}: PaymentVerificationSectionForPeopleProps): ReactElement {
   const { t } = useTranslation();
   if (!data) return null;
 

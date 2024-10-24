@@ -1,7 +1,6 @@
 import { Dialog, DialogContent, IconButton } from '@mui/material';
 import { Close } from '@mui/icons-material';
-import * as React from 'react';
-import { useState } from 'react';
+import { ChangeEvent, ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import TargetingDiagramImage from '../../../../assets/TargetingDiagramImage.png';
@@ -57,13 +56,10 @@ export interface TargetingInfoDialogProps {
 export const TargetingInfoDialog = ({
   open,
   setOpen,
-}: TargetingInfoDialogProps): React.ReactElement => {
+}: TargetingInfoDialogProps): ReactElement => {
   const { t } = useTranslation();
   const [selectedTab, setTab] = useState(0);
-  const changeTab = (
-    _event: React.ChangeEvent<object>,
-    newValue: number,
-  ): void => {
+  const changeTab = (_event: ChangeEvent<object>, newValue: number): void => {
     setTab(newValue);
   };
   const HeaderTabs = (

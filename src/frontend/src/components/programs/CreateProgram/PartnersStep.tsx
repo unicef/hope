@@ -1,8 +1,7 @@
 import { Box, Button, Grid } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import { Field, FieldArray } from 'formik';
-import * as React from 'react';
-import { useEffect } from 'react';
+import { FC, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { AllAreasTreeQuery, ProgramPartnerAccess } from '@generated/graphql';
@@ -24,7 +23,7 @@ interface PartnersStepProps {
   programId?: string;
 }
 
-export const PartnersStep: React.FC<PartnersStepProps> = ({
+export const PartnersStep: FC<PartnersStepProps> = ({
   values,
   allAreasTreeData,
   partnerChoices,

@@ -1,9 +1,9 @@
-import * as React from 'react';
 import { PhotoModal } from '@core/PhotoModal/PhotoModal';
 import {
   ImportedIndividualDetailedFragment,
   useImportedIndividualPhotosQuery,
 } from '@generated/graphql';
+import { ReactElement } from 'react';
 
 interface DocumentRegistrationPhotoModalProps {
   individual: ImportedIndividualDetailedFragment;
@@ -15,7 +15,7 @@ export function DocumentRegistrationPhotoModal({
   individual,
   documentNumber,
   documentId,
-}: DocumentRegistrationPhotoModalProps): React.ReactElement {
+}: DocumentRegistrationPhotoModalProps): ReactElement {
   const { data } = useImportedIndividualPhotosQuery({
     variables: { id: individual?.id },
     fetchPolicy: 'network-only',

@@ -1,5 +1,4 @@
 import { Grid, Typography } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { AccountabilityCommunicationMessageQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -10,6 +9,7 @@ import { LabelizedField } from '@core/LabelizedField';
 import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
+import { ReactElement } from 'react';
 
 interface CommunicationDetailsProps {
   message: AccountabilityCommunicationMessageQuery['accountabilityCommunicationMessage'];
@@ -17,7 +17,7 @@ interface CommunicationDetailsProps {
 
 export function CommunicationDetails({
   message,
-}: CommunicationDetailsProps): React.ReactElement {
+}: CommunicationDetailsProps): ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   return (

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { FC, SetStateAction, useState } from 'react';
 import { BaseSection } from '@components/core/BaseSection';
 import {
   Table,
@@ -23,17 +23,17 @@ import { ProgramSelect, useSortAndFilter } from './useSortAndFilter';
 
 interface AuthorizationSectionProps {
   selectedAuthorized: any[];
-  setSelectedAuthorized: (value: React.SetStateAction<any[]>) => void;
+  setSelectedAuthorized: (value: SetStateAction<any[]>) => void;
   handleSelect: (
     selected: any[],
-    setSelected: (value: React.SetStateAction<any[]>) => void,
+    setSelected: (value: SetStateAction<any[]>) => void,
     id: any,
   ) => void;
   handleSelectAll: (
     ids: any[],
     selected: any[],
     setSelected: {
-      (value: React.SetStateAction<any[]>): void;
+      (value: SetStateAction<any[]>): void;
       (arg0: any[]): void;
     },
   ) => void;
@@ -42,7 +42,7 @@ interface AuthorizationSectionProps {
   enableSearch?: boolean;
 }
 
-export const AuthorizationSection: React.FC<AuthorizationSectionProps> = ({
+export const AuthorizationSection: FC<AuthorizationSectionProps> = ({
   selectedAuthorized,
   setSelectedAuthorized,
   handleSelect,

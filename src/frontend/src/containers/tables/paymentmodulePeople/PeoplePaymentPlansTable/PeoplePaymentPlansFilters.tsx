@@ -1,6 +1,5 @@
 import { Box, Checkbox, FormControlLabel, Grid, MenuItem } from '@mui/material';
 import moment from 'moment';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
@@ -13,6 +12,7 @@ import { NumberTextField } from '@components/core/NumberTextField';
 import { SearchTextField } from '@components/core/SearchTextField';
 import { SelectFilter } from '@components/core/SelectFilter';
 import { createHandleApplyFilterChange } from '@utils/utils';
+import { ReactElement } from 'react';
 
 export type FilterProps = Pick<
   AllPaymentPlansForTableQueryVariables,
@@ -38,7 +38,7 @@ export const PeoplePaymentPlansFilters = ({
   initialFilter,
   appliedFilter,
   setAppliedFilter,
-}: PeoplePaymentPlansFiltersProps): React.ReactElement => {
+}: PeoplePaymentPlansFiltersProps): ReactElement => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();

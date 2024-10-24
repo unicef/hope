@@ -1,6 +1,5 @@
-import * as React from 'react';
 import CircularProgress from '@mui/material/CircularProgress';
-import { useEffect, useRef } from 'react';
+import { ReactElement, ReactNode, useEffect, useRef } from 'react';
 import { StyledAutocomplete, StyledTextField } from './StyledAutocomplete';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -44,8 +43,8 @@ export function BaseAutocomplete({
   inputValue: string;
   onInputTextChange: (value) => void;
   debouncedInputText: string;
-  startAdornment?: React.ReactNode;
-}): React.ReactElement {
+  startAdornment?: ReactNode;
+}): ReactElement {
   const prevValueRef = useRef(value);
 
   useEffect(() => {

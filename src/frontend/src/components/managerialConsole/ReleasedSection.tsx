@@ -14,7 +14,7 @@ import {
   TableSortLabel,
   TextField,
 } from '@mui/material';
-import React, { useState } from 'react';
+import React, { FC, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ProgramSelect, useSortAndFilter } from './useSortAndFilter';
 
@@ -22,9 +22,7 @@ interface ReleasedSectionProps {
   releasedData: any;
 }
 
-export const ReleasedSection: React.FC<ReleasedSectionProps> = ({
-  releasedData,
-}) => {
+export const ReleasedSection: FC<ReleasedSectionProps> = ({ releasedData }) => {
   const { t } = useTranslation();
   const { businessArea } = useBaseUrl();
   const [searchText, setSearchText] = useState('');

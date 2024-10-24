@@ -1,9 +1,8 @@
-import * as React from 'react';
-import { useCallback, useEffect } from 'react';
+import { ReactElement, useCallback, useEffect } from 'react';
 import { useIdleTimer } from 'react-idle-timer';
 import { AUTO_LOGOUT_MILLIS } from '../../config';
 
-export function AutoLogout(): React.ReactElement {
+export function AutoLogout(): ReactElement {
   const handleOnIdle = (): void => {
     if (!localStorage.getItem('AUTHENTICATED')) {
       return;

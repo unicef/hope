@@ -1,7 +1,7 @@
 import { Box } from '@mui/material';
-import * as React from 'react';
 import styled from 'styled-components';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import { ReactElement } from 'react';
 
 const WarningBox = styled(Box)`
   width: 70%;
@@ -20,7 +20,7 @@ interface DeliveryMechanismWarningProps {
 
 export function DeliveryMechanismWarning({
   warning,
-}: DeliveryMechanismWarningProps): React.ReactElement {
+}: DeliveryMechanismWarningProps): ReactElement {
   return (
     <WarningBox
       data-cy="warning-box"

@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react';
+import { FC, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { usePaymentVerificationPlanQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 
-export const CashPlanVerificationRedirectPage: React.FC = () => {
+export const CashPlanVerificationRedirectPage: FC = () => {
   const { id } = useParams();
   const { data, loading } = usePaymentVerificationPlanQuery({
     variables: { id },

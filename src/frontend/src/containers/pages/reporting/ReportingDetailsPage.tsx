@@ -2,8 +2,7 @@ import { Button, Grid, Typography } from '@mui/material';
 import { GetApp } from '@mui/icons-material';
 import CheckIcon from '@mui/icons-material/Check';
 import EmailIcon from '@mui/icons-material/Email';
-import * as React from 'react';
-import { useEffect } from 'react';
+import { ReactElement, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -50,7 +49,7 @@ const IconsContainer = styled.div`
   align-items: center;
   font-size: 50px;
 `;
-export function ReportingDetailsPage(): React.ReactElement {
+export function ReportingDetailsPage(): ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
   const { baseUrl, businessArea } = useBaseUrl();
@@ -101,7 +100,7 @@ export function ReportingDetailsPage(): React.ReactElement {
 
   const FieldsArray: {
     label: string;
-    value: React.ReactElement | string;
+    value: ReactElement | string;
     size: boolean | 3 | 6 | 8 | 11 | 'auto' | 1 | 2 | 4 | 5 | 7 | 9 | 10 | 12;
   }[] = [
     {

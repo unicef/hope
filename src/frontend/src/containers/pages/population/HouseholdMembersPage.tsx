@@ -1,6 +1,5 @@
 import { Box, Fade, Tooltip } from '@mui/material';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import {
@@ -21,7 +20,7 @@ import { PeriodicDataUpdates } from '@components/periodicDataUpdates/PeriodicDat
 import { useProgramContext } from 'src/programContext';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
-export const HouseholdMembersPage = (): React.ReactElement => {
+export const HouseholdMembersPage = (): ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
   const { programHasPdu } = useProgramContext();

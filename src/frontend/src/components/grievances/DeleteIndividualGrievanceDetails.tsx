@@ -1,6 +1,5 @@
 import { Box, Button, Grid, Typography } from '@mui/material';
 import snakeCase from 'lodash/snakeCase';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
@@ -19,6 +18,7 @@ import { LoadingComponent } from '@core/LoadingComponent';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
+import { ReactElement } from 'react';
 
 export type RoleReassignData = {
   role: IndividualRoleInHouseholdRole | string;
@@ -32,7 +32,7 @@ export function DeleteIndividualGrievanceDetails({
 }: {
   ticket: GrievanceTicketQuery['grievanceTicket'];
   canApproveDataChange: boolean;
-}): React.ReactElement {
+}): ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const confirm = useConfirmation();
@@ -120,7 +120,7 @@ export function DeleteIndividualGrievanceDetails({
             textValue = textValue === 'A_' ? null : textValue;
             textValue = textValue
               ? fieldAttribute.choices.find((item) => item.value === textValue)
-                ?.labelEn
+                  ?.labelEn
               : '-';
           }
         }

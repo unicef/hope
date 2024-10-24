@@ -1,5 +1,4 @@
 import { Grid } from '@mui/material';
-import * as React from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import {
   useGrievancesChoiceDataQuery,
@@ -20,8 +19,9 @@ import { isPermissionDeniedError } from '@utils/utils';
 import { UniversalActivityLogTable } from '../../../tables/UniversalActivityLogTable';
 import { grievancePermissions } from './grievancePermissions';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { ReactElement } from 'react';
 
-export const GrievancesDetailsPage = (): React.ReactElement => {
+export const GrievancesDetailsPage = (): ReactElement => {
   const { id } = useParams();
   const location = useLocation();
   const permissions = usePermissions();

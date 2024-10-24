@@ -1,12 +1,12 @@
 import { Box, Grid } from '@mui/material';
 import { FieldArray } from 'formik';
-import * as React from 'react';
 import { useLocation } from 'react-router-dom';
 import {
   AllAddIndividualFieldsQuery,
   IndividualQuery,
 } from '@generated/graphql';
 import { EditIdentityRow } from './EditIdentityRow';
+import { ReactElement } from 'react';
 
 export interface ExistingIdentityFieldArrayProps {
   setFieldValue;
@@ -20,7 +20,7 @@ export function ExistingIdentityFieldArray({
   values,
   individual,
   addIndividualFieldsData,
-}: ExistingIdentityFieldArrayProps): React.ReactElement {
+}: ExistingIdentityFieldArrayProps): ReactElement {
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
 

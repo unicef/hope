@@ -5,7 +5,7 @@ import {
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import styled from 'styled-components';
-import * as React from 'react';
+import React, { ReactElement } from 'react';
 
 interface StyledTextFieldProps extends OutlinedTextFieldProps {
   $borderRadius?: string;
@@ -27,7 +27,7 @@ export function SearchTextField({
   fullWidth = true,
   placeholder = 'Search',
   ...props
-}): React.ReactElement {
+}): ReactElement {
   return (
     <StyledTextField
       {...props}
@@ -42,7 +42,7 @@ export function SearchTextField({
       InputProps={{
         startAdornment: (
           <InputAdornment position="start">
-            {(icon as JSX.Element) || <SearchIcon />}
+            {(icon as React.JSX.Element) || <SearchIcon />}
           </InputAdornment>
         ),
       }}

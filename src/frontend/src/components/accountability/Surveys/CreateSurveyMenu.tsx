@@ -3,7 +3,7 @@ import { Menu, MenuItem, Button, Tooltip, ListItemText } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import { useState } from 'react';
+import { ReactElement, useState, MouseEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SurveyCategory } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -24,14 +24,14 @@ const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
   },
 }));
 
-export function CreateSurveyMenu(): React.ReactElement {
+export function CreateSurveyMenu(): ReactElement {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { baseUrl } = useBaseUrl();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const { isActiveProgram } = useProgramContext();
 
-  const handleClick = (event: React.MouseEvent<HTMLElement>): void => {
+  const handleClick = (event: MouseEvent<HTMLElement>): void => {
     setAnchorEl(event.currentTarget);
   };
 

@@ -8,8 +8,7 @@ import {
   TableBody,
   Typography,
 } from '@mui/material';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { Dialog } from '@containers/dialogs/Dialog';
@@ -36,10 +35,10 @@ const StyledDialog = styled(Dialog)`
 
 interface BulkBaseModalProps {
   selectedTickets: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'][];
-  icon: React.ReactElement;
+  icon: ReactElement;
   buttonTitle: string;
   title: string;
-  children?: React.ReactNode;
+  children?: ReactNode;
   onSave: (
     tickets: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'][],
   ) => Promise<void>;
@@ -54,12 +53,12 @@ export function BulkBaseModal({
   children,
   onSave,
   disabledSave,
-}: BulkBaseModalProps): React.ReactElement {
+}: BulkBaseModalProps): ReactElement {
   const [dialogOpen, setDialogOpen] = useState(false);
   const { t } = useTranslation();
   const { isActiveProgram } = useProgramContext();
 
-  const renderButton = (): React.ReactElement => (
+  const renderButton = (): ReactElement => (
     <Button
       variant="outlined"
       color="primary"
@@ -109,7 +108,8 @@ export function BulkBaseModal({
         </DialogContent>
         <DialogFooter>
           <DialogActions>
-            <Button data-cy="button-cancel"
+            <Button
+              data-cy="button-cancel"
               onClick={() => {
                 setDialogOpen(false);
               }}

@@ -18,7 +18,7 @@ module.exports = {
         module.exports = {
           __esModule: true,
           default: ${assetFilename},
-          ReactComponent: React.forwardRef(function ${componentName}(props, ref) {
+          ReactComponent: forwardRef(function ${componentName}(props, ref) {
             return {
               $$typeof: Symbol.for('react.element'),
               type: 'svg',

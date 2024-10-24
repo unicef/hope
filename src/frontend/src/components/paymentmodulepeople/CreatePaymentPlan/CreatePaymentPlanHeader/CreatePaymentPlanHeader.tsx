@@ -1,11 +1,11 @@
 import { Box, Button } from '@mui/material';
 import { Link } from 'react-router-dom';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { BreadCrumbsItem } from '@core/BreadCrumbs';
 import { PageHeader } from '@core/PageHeader';
 import { LoadingButton } from '@core/LoadingButton';
+import { ReactElement } from 'react';
 
 interface CreatePaymentPlanHeaderProps {
   handleSubmit: () => Promise<void>;
@@ -19,7 +19,7 @@ export function CreatePaymentPlanHeader({
   baseUrl,
   permissions,
   loadingCreate,
-}: CreatePaymentPlanHeaderProps): React.ReactElement {
+}: CreatePaymentPlanHeaderProps): ReactElement {
   const { t } = useTranslation();
 
   const breadCrumbsItems: BreadCrumbsItem[] = [

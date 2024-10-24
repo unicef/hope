@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { FC } from 'react';
 import { Box, Button } from '@mui/material';
 import RemoveIcon from '@mui/icons-material/Remove';
 import { useConfirmation } from '@components/core/ConfirmationDialog';
@@ -25,9 +25,7 @@ interface NeedsAdjudicationActionsProps {
   setSelectedIndividualIds: (individualIds: string[]) => void;
 }
 
-export const NeedsAdjudicationActions: React.FC<
-  NeedsAdjudicationActionsProps
-> = ({
+export const NeedsAdjudicationActions: FC<NeedsAdjudicationActionsProps> = ({
   ticket,
   isEditable,
   canApprove,
@@ -52,7 +50,8 @@ export const NeedsAdjudicationActions: React.FC<
   const { isActiveProgram } = useProgramContext();
   const actionsDisabled =
     !isTicketForApproval || !isActiveProgram || !selectedIndividualIds.length;
-  const { dedupEngineSimilarityPair } = ticket.needsAdjudicationTicketDetails.extraData;
+  const { dedupEngineSimilarityPair } =
+    ticket.needsAdjudicationTicketDetails.extraData;
 
   return (
     <Box

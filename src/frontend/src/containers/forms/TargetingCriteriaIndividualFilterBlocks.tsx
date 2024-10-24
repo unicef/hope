@@ -1,7 +1,7 @@
 import { Box, Button } from '@mui/material';
 import { AddCircleOutline } from '@mui/icons-material';
 import { FieldArray } from 'formik';
-import { Fragment } from 'react';
+import { Fragment, ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { chooseFieldType, clearField } from '@utils/targetingUtils';
@@ -80,7 +80,7 @@ export function TargetingCriteriaIndividualFilterBlocks({
   values;
   choicesToDict;
   onDelete: () => void;
-}): React.ReactElement {
+}): ReactElement {
   const { t } = useTranslation();
   const shouldShowAndDivider =
     blockIndex + 1 < values.individualsFiltersBlocks.length;

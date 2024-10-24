@@ -1,5 +1,4 @@
 import { Box, TableCell } from '@mui/material';
-import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCashPlanVerificationStatusChoicesQuery } from '@generated/graphql';
 import { BlackLink } from '@components/core/BlackLink';
@@ -11,6 +10,7 @@ import {
   paymentPlanStatusToColor,
 } from '@utils/utils';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { ReactElement } from 'react';
 
 interface PeoplePaymentPlanTableRowProps {
   plan;
@@ -20,7 +20,7 @@ interface PeoplePaymentPlanTableRowProps {
 export const PeoplePaymentPlanTableRow = ({
   plan,
   canViewDetails,
-}: PeoplePaymentPlanTableRowProps): React.ReactElement => {
+}: PeoplePaymentPlanTableRowProps): ReactElement => {
   const navigate = useNavigate();
   const { baseUrl } = useBaseUrl();
   const paymentPlanPath = `/${baseUrl}/payment-module/${
@@ -34,7 +34,7 @@ export const PeoplePaymentPlanTableRow = ({
 
   if (!statusChoicesData) return null;
 
-  const followUpLinks = (): React.ReactElement => {
+  const followUpLinks = (): ReactElement => {
     if (!plan.followUps?.edges?.length) return <>-</>;
     return (
       <Box display="flex" flexDirection="column">

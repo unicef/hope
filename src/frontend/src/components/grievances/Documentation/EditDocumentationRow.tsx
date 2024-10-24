@@ -1,8 +1,7 @@
 import { Box, Button, Grid, IconButton } from '@mui/material';
 import { Delete } from '@mui/icons-material';
 import Edit from '@mui/icons-material/Edit';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { GrievanceTicketQuery } from '@generated/graphql';
@@ -32,7 +31,7 @@ export function EditDocumentationRow({
   document,
   arrayHelpers,
   index,
-}: EditDocumentationRowProps): React.ReactElement {
+}: EditDocumentationRowProps): ReactElement {
   const { t } = useTranslation();
   const [isEdited, setEdit] = useState(false);
   const documentsToRemove = values?.documentationToDelete || [];

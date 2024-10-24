@@ -1,5 +1,4 @@
 import { Box, Button, Grid, Typography } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
 import { PaymentPlanQuery, PaymentPlanStatus } from '@generated/graphql';
@@ -8,6 +7,7 @@ import { DividerLine } from '@core/DividerLine';
 import { LabelizedField } from '@core/LabelizedField';
 import { useProgramContext } from '../../../../programContext';
 import { VolumeByDeliveryMechanismSection } from './VolumeByDeliveryMechanismSection';
+import { ReactElement } from 'react';
 
 interface FspSectionProps {
   baseUrl: string;
@@ -17,7 +17,7 @@ interface FspSectionProps {
 export const FspSection = ({
   baseUrl,
   paymentPlan,
-}: FspSectionProps): React.ReactElement => {
+}: FspSectionProps): ReactElement => {
   const { t } = useTranslation();
   const { paymentPlanId } = useParams();
   const { isActiveProgram } = useProgramContext();

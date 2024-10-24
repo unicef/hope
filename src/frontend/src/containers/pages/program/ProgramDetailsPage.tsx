@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -19,6 +18,7 @@ import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTabl
 import { ProgramDetailsPageHeader } from '../headers/ProgramDetailsPageHeader';
 import { ProgramCyclesTableProgramDetails } from '@containers/tables/ProgramCycle/ProgramCyclesTableProgramDetails';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { ReactElement } from 'react';
 
 const Container = styled.div`
   && {
@@ -45,7 +45,7 @@ const NoCashPlansTitle = styled.div`
   text-align: center;
 `;
 
-export function ProgramDetailsPage(): React.ReactElement {
+export function ProgramDetailsPage(): ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
   const { id } = useParams();

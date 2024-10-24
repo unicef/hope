@@ -3,9 +3,9 @@ import { EditProgramMenu } from '@components/programs/EditProgram/EditProgramMen
 import { ProgramQuery, useCashAssistUrlPrefixQuery } from '@generated/graphql';
 import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
 import { Box, Button } from '@mui/material';
-import * as React from 'react';
 import { DuplicateProgramButtonLink } from '../../dialogs/programs/DuplicateProgramButtonLink';
 import { FinishProgram } from '../../dialogs/programs/FinishProgram';
+import { ReactElement } from 'react';
 
 export interface ActiveProgramDetailsPageHeaderPropTypes {
   program: ProgramQuery['program'];
@@ -20,7 +20,7 @@ export function ActiveProgramDetailsPageHeaderButtons({
   canEdit,
   canDuplicate,
   isPaymentPlanApplicable,
-}: ActiveProgramDetailsPageHeaderPropTypes): React.ReactElement {
+}: ActiveProgramDetailsPageHeaderPropTypes): ReactElement {
   const { data, loading } = useCashAssistUrlPrefixQuery({
     fetchPolicy: 'cache-first',
   });

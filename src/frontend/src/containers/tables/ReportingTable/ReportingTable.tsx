@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { TableWrapper } from '@components/core/TableWrapper';
 import { choicesToDict, dateToIsoString } from '@utils/utils';
 import {
@@ -11,6 +10,7 @@ import {
 import { UniversalTable } from '../UniversalTable';
 import { headCells } from './ReportingHeadCells';
 import { ReportingTableRow } from './ReportingTableRow';
+import { ReactElement } from 'react';
 
 interface ReportingTableProps {
   businessArea: string;
@@ -23,7 +23,7 @@ export function ReportingTable({
   filter,
   choicesData,
   meData,
-}: ReportingTableProps): React.ReactElement {
+}: ReportingTableProps): ReactElement {
   const initialVariables = {
     businessArea,
     createdFrom: dateToIsoString(filter.createdFrom, 'startOfDay'),

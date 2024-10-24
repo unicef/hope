@@ -1,12 +1,10 @@
 import { Box, Button, Dialog, DialogActions, DialogTitle } from '@mui/material';
 import { Publish } from '@mui/icons-material';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { useSnackbar } from '@hooks/useSnackBar';
-
 import { DropzoneField } from '@core/DropzoneField';
 import { LoadingButton } from '@core/LoadingButton';
 import { useProgramContext } from 'src/programContext';
@@ -30,7 +28,7 @@ const DisabledUploadIcon = styled(Publish)`
   color: #00000042;
 `;
 
-export const PeriodDataUpdatesUploadDialog = (): React.ReactElement => {
+export const PeriodDataUpdatesUploadDialog = (): ReactElement => {
   const { showMessage } = useSnackbar();
   const { businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();

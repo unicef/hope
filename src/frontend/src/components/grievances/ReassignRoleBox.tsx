@@ -2,7 +2,6 @@ import { Box, Paper, Typography } from '@mui/material';
 import WarningIcon from '@mui/icons-material/Warning';
 import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { GrievanceTicketQuery } from '@generated/graphql';
@@ -12,6 +11,7 @@ import { ContentLink } from '@core/ContentLink';
 import { LabelizedField } from '@core/LabelizedField';
 import { LookUpReassignRole } from './LookUps/LookUpReassignRole/LookUpReassignRole';
 import { ReassignRoleUnique } from './LookUps/LookUpReassignRole/ReassignRoleUnique';
+import { ReactElement } from 'react';
 
 const StyledBox = styled(Paper)`
   border: 1px solid ${({ theme }) => theme.hctPalette.orange};
@@ -41,7 +41,7 @@ export const ReassignRoleBox = ({
   ticket: GrievanceTicketQuery['grievanceTicket'];
   shouldDisplayButton?: boolean;
   shouldDisableButton?: boolean;
-}): React.ReactElement => {
+}): ReactElement => {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   let { individual } = ticket;
@@ -126,7 +126,7 @@ export const ReassignRoleBox = ({
       </Box>
     ));
 
-  const showMessage = (): React.ReactElement => {
+  const showMessage = (): ReactElement => {
     if (
       (ticket.issueType.toString() ===
         GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL &&

@@ -1,6 +1,5 @@
 import { TableRow } from '@mui/material';
 import TableCell from '@mui/material/TableCell';
-import * as React from 'react';
 import { BlackLink } from '@core/BlackLink';
 import { StatusBox } from '@core/StatusBox';
 import { AnonTableCell } from '@core/Table/AnonTableCell';
@@ -11,6 +10,7 @@ import {
 } from '@utils/utils';
 import { PaymentVerificationNode } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { ReactElement } from 'react';
 
 interface VerificationRecordsTableRowProps {
   paymentVerification: PaymentVerificationNode;
@@ -22,7 +22,7 @@ export function PeopleVerificationRecordsTableRow({
   paymentVerification,
   canViewRecordDetails,
   showStatusColumn = true,
-}: VerificationRecordsTableRowProps): React.ReactElement {
+}: VerificationRecordsTableRowProps): ReactElement {
   const { baseUrl } = useBaseUrl();
 
   const nodeType = atob(paymentVerification.payment.id).split(':')[0];

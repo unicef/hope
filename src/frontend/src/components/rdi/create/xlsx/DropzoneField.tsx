@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { ReactElement, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import styled from 'styled-components';
 import { useField } from 'formik';
@@ -25,7 +25,7 @@ const DropzoneContainer = styled.div<DropzoneContainerProps>`
   ${({ disabled }) => (disabled ? 'filter: grayscale(100%);' : '')}
 `;
 
-export const DropzoneField = ({ loading }): React.ReactElement => {
+export const DropzoneField = ({ loading }): ReactElement => {
   const [, , helpers] = useField('file');
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();

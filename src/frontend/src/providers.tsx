@@ -7,7 +7,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { CssBaseline } from '@mui/material';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
-import { ReactNode, useEffect, useState } from 'react';
+import { FC, ReactNode, useEffect, useState } from 'react';
 import { ThemeProvider as StyledThemeProvider } from 'styled-components';
 import { getClient } from './apollo/client';
 import { ConfirmationDialogProvider } from '@core/ConfirmationDialog';
@@ -23,7 +23,7 @@ interface ProvidersProps {
 
 const queryClient = new QueryClient();
 
-export const Providers: React.FC<ProvidersProps> = ({ children }) => {
+export const Providers: FC<ProvidersProps> = ({ children }) => {
   const [apolloClient, setApolloClient] = useState<
     ApolloClient<NormalizedCacheObject> | undefined
   >();

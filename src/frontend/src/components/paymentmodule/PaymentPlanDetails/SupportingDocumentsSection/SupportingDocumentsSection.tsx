@@ -33,7 +33,7 @@ import {
   Typography,
 } from '@mui/material';
 import { useMutation } from '@tanstack/react-query';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import styled from 'styled-components';
@@ -57,7 +57,7 @@ interface SupportingDocumentsSectionProps {
 export const SupportingDocumentsSection = ({
   initialOpen = false,
   paymentPlan,
-}: SupportingDocumentsSectionProps): React.ReactElement => {
+}: SupportingDocumentsSectionProps): ReactElement => {
   const permissions = usePermissions();
   const confirm = useConfirmation();
   const { t } = useTranslation();

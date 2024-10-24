@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import styled from 'styled-components';
 import { useInterval } from '@hooks/useInterval';
 
@@ -14,7 +13,7 @@ const Value = styled.span<ValueProps>`
   color: ${({ missing }) => (missing ? 'red' : 'black')};
 `;
 
-export function Missing(): React.ReactElement {
+export function Missing(): ReactElement {
   const [missing, setMissing] = useState(false);
   useInterval(() => {
     setMissing(!missing);

@@ -1,8 +1,8 @@
-import * as React from 'react';
+import { ReactNode, ReactElement } from 'react';
 import styled, { css } from 'styled-components';
 
 interface TabPanelProps {
-  children: React.ReactNode;
+  children: ReactNode;
   index: number;
   value: number;
 }
@@ -19,7 +19,7 @@ export function TabPanel({
   children,
   index,
   value,
-}: TabPanelProps): React.ReactElement {
+}: TabPanelProps): ReactElement {
   return (
     <StyledDiv index={index} value={value}>
       {children}

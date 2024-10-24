@@ -1,5 +1,4 @@
 import { Box } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import {
@@ -18,6 +17,7 @@ import { LockedFspPaymentPlanHeaderButtons } from './HeaderButtons/LockedFspPaym
 import { LockedPaymentPlanHeaderButtons } from './HeaderButtons/LockedPaymentPlanHeaderButtons';
 import { OpenPaymentPlanHeaderButtons } from './HeaderButtons/OpenPaymentPlanHeaderButtons';
 import { AdminButton } from '@core/AdminButton';
+import { ReactElement } from 'react';
 
 interface PaymentPlanDetailsHeaderProps {
   baseUrl: string;
@@ -29,7 +29,7 @@ export function PaymentPlanDetailsHeader({
   baseUrl,
   permissions,
   paymentPlan,
-}: PaymentPlanDetailsHeaderProps): React.ReactElement {
+}: PaymentPlanDetailsHeaderProps): ReactElement {
   const { t } = useTranslation();
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -72,7 +72,7 @@ export function PaymentPlanDetailsHeader({
   const canSplit =
     hasPermissions(PERMISSIONS.PM_SPLIT, permissions) && paymentPlan.canSplit;
 
-  let buttons: React.ReactElement | null = null;
+  let buttons: ReactElement | null = null;
   switch (paymentPlan.status) {
     case 'OPEN':
       buttons = (

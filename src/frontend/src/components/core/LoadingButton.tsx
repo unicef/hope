@@ -1,11 +1,11 @@
 import { Button, CircularProgress } from '@mui/material';
-import * as React from 'react';
+import { ReactElement } from 'react';
 
 export function LoadingButton({
   loading,
   children,
   ...otherProps
-}): React.ReactElement {
+}): ReactElement {
   return (
     <Button
       {...otherProps}

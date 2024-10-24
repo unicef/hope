@@ -1,5 +1,4 @@
 import TableCell from '@mui/material/TableCell';
-import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PaymentRecordAndPaymentNode } from '@generated/graphql';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
@@ -12,6 +11,7 @@ import {
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { ReactElement } from 'react';
 
 interface PaymentRecordAndPaymentPeopleTableRowrops {
   paymentRecordOrPayment: PaymentRecordAndPaymentNode;
@@ -23,7 +23,7 @@ export function PaymentRecordAndPaymentPeopleTableRow({
   paymentRecordOrPayment,
   openInNewTab,
   canViewDetails,
-}: PaymentRecordAndPaymentPeopleTableRowrops): React.ReactElement {
+}: PaymentRecordAndPaymentPeopleTableRowrops): ReactElement {
   const { baseUrl } = useBaseUrl();
   const navigate = useNavigate();
   const paymentRecordDetailsPath = `/${baseUrl}/payment-records/${paymentRecordOrPayment.id}`;

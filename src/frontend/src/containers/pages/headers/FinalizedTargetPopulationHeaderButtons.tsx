@@ -1,8 +1,7 @@
 import { Box, Button } from '@mui/material';
 import { FileCopy } from '@mui/icons-material';
 import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import styled from 'styled-components';
 import {
   BusinessAreaDataQuery,
@@ -33,7 +32,7 @@ export function FinalizedTargetPopulationHeaderButtons({
   targetPopulation,
   canDuplicate,
   businessAreaData,
-}: FinalizedTargetPopulationHeaderButtonsPropTypes): React.ReactElement {
+}: FinalizedTargetPopulationHeaderButtonsPropTypes): ReactElement {
   const [openDuplicate, setOpenDuplicate] = useState(false);
   const { data, loading } = useCashAssistUrlPrefixQuery({
     fetchPolicy: 'cache-first',

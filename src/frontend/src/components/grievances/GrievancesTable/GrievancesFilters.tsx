@@ -1,6 +1,6 @@
 import { Grid, MenuItem } from '@mui/material';
 import { AccountBalance } from '@mui/icons-material';
-import { useMemo } from 'react';
+import { ReactElement, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
@@ -47,7 +47,7 @@ export const GrievancesFilters = ({
   initialFilter,
   appliedFilter,
   setAppliedFilter,
-}: GrievancesFiltersProps): React.ReactElement => {
+}: GrievancesFiltersProps): ReactElement => {
   const { t } = useTranslation();
   const { isAllPrograms } = useBaseUrl();
   const navigate = useNavigate();

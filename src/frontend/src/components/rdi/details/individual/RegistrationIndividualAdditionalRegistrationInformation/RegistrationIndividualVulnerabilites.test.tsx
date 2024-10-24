@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { RegistrationIndividualAdditionalRegistrationInformation } from '.';
 import { fakeAllIndividualsFlexFieldsAttributes } from '../../../../../../fixtures/core/fakeAllIndividualsFlexFieldsAttributes';
 import { fakeImportedIndividualDetailedFragment } from '../../../../../../fixtures/registration/fakeImportedIndividualDetailedFragment';

@@ -5,7 +5,6 @@ import {
   SummaryValue,
 } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsResults/Styles';
 import { LabelizedField } from '@core/LabelizedField';
-import * as React from 'react';
 import { PaymentPlanQuery } from '@generated/graphql';
 
 interface ResultsForHouseholdsProps {

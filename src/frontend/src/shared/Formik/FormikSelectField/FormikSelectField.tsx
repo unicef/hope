@@ -10,8 +10,8 @@ import {
 } from '@mui/material';
 import { Close } from '@mui/icons-material';
 import get from 'lodash/get';
-import * as React from 'react';
 import styled from 'styled-components';
+import { ReactElement } from 'react';
 
 const StartInputAdornment = styled(InputAdornment)`
   margin-right: 0;
@@ -32,7 +32,7 @@ export function FormikSelectField({
   disableClearable = false,
   onChange,
   ...otherProps
-}): React.ReactElement {
+}): ReactElement {
   const isInvalid = Boolean(
     get(form.errors, field.name) &&
       (get(form.touched, field.name) || form.submitCount > 0 || form.errors),

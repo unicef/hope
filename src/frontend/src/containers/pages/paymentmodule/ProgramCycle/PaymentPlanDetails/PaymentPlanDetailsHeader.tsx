@@ -4,7 +4,7 @@ import { PaymentPlanQuery } from '@generated/graphql';
 import { useTranslation } from 'react-i18next';
 import { BreadCrumbsItem } from '@core/BreadCrumbs';
 import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { OpenPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/OpenPaymentPlanHeaderButtons';
 import { LockedPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/LockedPaymentPlanHeaderButtons';
 import { LockedFspPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/LockedFspPaymentPlanHeaderButtons';
@@ -37,7 +37,7 @@ interface PaymentPlanDetailsHeaderProps {
 export const PaymentPlanDetailsHeader = ({
   permissions,
   paymentPlan,
-}: PaymentPlanDetailsHeaderProps): React.ReactElement => {
+}: PaymentPlanDetailsHeaderProps): ReactElement => {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
   const { programCycleId } = useParams();
@@ -117,7 +117,7 @@ export const PaymentPlanDetailsHeader = ({
     hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) &&
     paymentPlan.canSendToPaymentGateway;
 
-  let buttons: React.ReactElement | null = null;
+  let buttons: ReactElement | null = null;
   switch (paymentPlan.status) {
     case 'OPEN':
       buttons = (

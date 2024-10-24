@@ -1,5 +1,4 @@
 import { Grid, MenuItem } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useFeedbackIssueTypeChoicesQuery } from '@generated/graphql';
@@ -12,6 +11,7 @@ import { LoadingComponent } from '@core/LoadingComponent';
 import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import { ProgramAutocomplete } from '@shared/autocompletes/ProgramAutocomplete';
+import { ReactElement } from 'react';
 
 interface FeedbackFiltersProps {
   setFilter: (filter) => void;
@@ -26,7 +26,7 @@ export const FeedbackFilters = ({
   appliedFilter,
   setAppliedFilter,
   filter,
-}: FeedbackFiltersProps): React.ReactElement => {
+}: FeedbackFiltersProps): ReactElement => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();

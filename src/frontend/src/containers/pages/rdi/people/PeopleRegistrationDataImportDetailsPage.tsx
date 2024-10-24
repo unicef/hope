@@ -1,5 +1,5 @@
 import { Typography } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { ReactElement, ReactNode, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -42,15 +42,11 @@ const TabsContainer = styled.div`
 `;
 
 interface TabPanelProps {
-  children: React.ReactNode;
+  children: ReactNode;
   index: number;
   value: number;
 }
-const TabPanel = ({
-  children,
-  index,
-  value,
-}: TabPanelProps): React.ReactElement => {
+const TabPanel = ({ children, index, value }: TabPanelProps): ReactElement => {
   return (
     <div style={{ display: index !== value ? 'none' : 'block' }}>
       {children}
@@ -58,128 +54,126 @@ const TabPanel = ({
   );
 };
 
-export const PeopleRegistrationDataImportDetailsPage =
-  (): React.ReactElement => {
-    const { t } = useTranslation();
-    const { id } = useParams();
-    const location = useLocation();
-    const permissions = usePermissions();
-    const { businessArea, programId } = useBaseUrl();
-    const { data: programData } = useProgramQuery({
-      variables: { id: programId },
+export const PeopleRegistrationDataImportDetailsPage = (): ReactElement => {
+  const { t } = useTranslation();
+  const { id } = useParams();
+  const location = useLocation();
+  const permissions = usePermissions();
+  const { businessArea, programId } = useBaseUrl();
+  const { data: programData } = useProgramQuery({
+    variables: { id: programId },
+  });
+  const { data, loading, error, stopPolling, startPolling } =
+    useRegistrationDataImportQuery({
+      variables: { id },
+      fetchPolicy: 'cache-and-network',
     });
-    const { data, loading, error, stopPolling, startPolling } =
-      useRegistrationDataImportQuery({
-        variables: { id },
-        fetchPolicy: 'cache-and-network',
-      });
-    const { data: choicesData, loading: choicesLoading } =
-      useHouseholdChoiceDataQuery();
+  const { data: choicesData, loading: choicesLoading } =
+    useHouseholdChoiceDataQuery();
 
-    const [selectedTab, setSelectedTab] = useState(0);
+  const [selectedTab, setSelectedTab] = useState(0);
 
-    const status = data?.registrationDataImport?.status;
-    useEffect(() => {
-      if (
-        [
-          RegistrationDataImportStatus.Loading,
-          RegistrationDataImportStatus.Deduplication,
-          RegistrationDataImportStatus.ImportScheduled,
-          RegistrationDataImportStatus.Importing,
-          RegistrationDataImportStatus.MergeScheduled,
-          RegistrationDataImportStatus.Merging,
-        ].includes(status)
-      ) {
-        startPolling(30000);
-      } else {
-        stopPolling();
-      }
-      return stopPolling;
-    }, [status, startPolling, stopPolling]);
-
-    if (loading || choicesLoading) return <LoadingComponent />;
-    if (isPermissionDeniedError(error)) return <PermissionDenied />;
-    if (!data?.registrationDataImport || !choicesData || permissions === null) {
-      return null;
+  const status = data?.registrationDataImport?.status;
+  useEffect(() => {
+    if (
+      [
+        RegistrationDataImportStatus.Loading,
+        RegistrationDataImportStatus.Deduplication,
+        RegistrationDataImportStatus.ImportScheduled,
+        RegistrationDataImportStatus.Importing,
+        RegistrationDataImportStatus.MergeScheduled,
+        RegistrationDataImportStatus.Merging,
+      ].includes(status)
+    ) {
+      startPolling(30000);
+    } else {
+      stopPolling();
     }
+    return stopPolling;
+  }, [status, startPolling, stopPolling]);
 
-    const isMerged =
-      RegistrationDataImportStatus.Merged ===
-      data.registrationDataImport.status;
+  if (loading || choicesLoading) return <LoadingComponent />;
+  if (isPermissionDeniedError(error)) return <PermissionDenied />;
+  if (!data?.registrationDataImport || !choicesData || permissions === null) {
+    return null;
+  }
 
-    const canMerge = hasPermissions(PERMISSIONS.RDI_MERGE_IMPORT, permissions);
+  const isMerged =
+    RegistrationDataImportStatus.Merged === data.registrationDataImport.status;
 
-    function RegistrationContainer({
-      isErased,
-    }: {
-      isErased: boolean;
-    }): React.ReactElement {
-      return (
-        <Container>
-          <RegistrationDetails
-            registration={data.registrationDataImport}
-            isSocialWorkerProgram={programData.program.isSocialWorkerProgram}
-          />
-          {isErased ? null : (
-            <TableWrapper>
-              <ContainerColumnWithBorder>
-                <Title>
-                  <Typography variant="h6">
-                    {isMerged ? t('Population Preview') : t('Import Preview')}
-                  </Typography>
-                </Title>
-                <TabsContainer>
-                  <StyledTabs
-                    value={selectedTab}
-                    onChange={(_, newValue: number) => setSelectedTab(newValue)}
-                    indicatorColor="primary"
-                    textColor="primary"
-                    variant="fullWidth"
-                    aria-label="full width tabs example"
-                  >
-                    <Tab data-cy="tab-Individuals" label={t('People')} />
-                  </StyledTabs>
-                </TabsContainer>
-                <TabPanel value={selectedTab} index={0}>
-                  <ImportedPeopleTable
-                    showCheckbox
-                    rdiId={id}
-                    isMerged={isMerged}
-                    businessArea={businessArea}
-                    key={`${data.registrationDataImport.status}-individual`}
-                    choicesData={choicesData}
-                  />
-                </TabPanel>
-              </ContainerColumnWithBorder>
-            </TableWrapper>
-          )}
-        </Container>
-      );
-    }
+  const canMerge = hasPermissions(PERMISSIONS.RDI_MERGE_IMPORT, permissions);
 
+  function RegistrationContainer({
+    isErased,
+  }: {
+    isErased: boolean;
+  }): ReactElement {
     return (
-      <UniversalErrorBoundary
-        location={location}
-        beforeCapture={(scope) => {
-          scope.setTag('location', location.pathname);
-          scope.setTag(
-            'component',
-            'PeopleRegistrationDataImportDetailsPage.tsx',
-          );
-        }}
-        componentName="PeopleRegistrationDataImportDetailsPage"
-      >
-        <RegistrationDataImportDetailsPageHeader
+      <Container>
+        <RegistrationDetails
           registration={data.registrationDataImport}
-          canMerge={canMerge}
-          canRerunDedupe={hasPermissions(
-            PERMISSIONS.RDI_RERUN_DEDUPE,
-            permissions,
-          )}
-          canViewList={hasPermissions(PERMISSIONS.RDI_VIEW_LIST, permissions)}
-          canRefuse={hasPermissions(PERMISSIONS.RDI_REFUSE_IMPORT, permissions)}
+          isSocialWorkerProgram={programData.program.isSocialWorkerProgram}
         />
-        <RegistrationContainer isErased={data.registrationDataImport.erased} />
-      </UniversalErrorBoundary>
+        {isErased ? null : (
+          <TableWrapper>
+            <ContainerColumnWithBorder>
+              <Title>
+                <Typography variant="h6">
+                  {isMerged ? t('Population Preview') : t('Import Preview')}
+                </Typography>
+              </Title>
+              <TabsContainer>
+                <StyledTabs
+                  value={selectedTab}
+                  onChange={(_, newValue: number) => setSelectedTab(newValue)}
+                  indicatorColor="primary"
+                  textColor="primary"
+                  variant="fullWidth"
+                  aria-label="full width tabs example"
+                >
+                  <Tab data-cy="tab-Individuals" label={t('People')} />
+                </StyledTabs>
+              </TabsContainer>
+              <TabPanel value={selectedTab} index={0}>
+                <ImportedPeopleTable
+                  showCheckbox
+                  rdiId={id}
+                  isMerged={isMerged}
+                  businessArea={businessArea}
+                  key={`${data.registrationDataImport.status}-individual`}
+                  choicesData={choicesData}
+                />
+              </TabPanel>
+            </ContainerColumnWithBorder>
+          </TableWrapper>
+        )}
+      </Container>
     );
-  };
+  }
+
+  return (
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag(
+          'component',
+          'PeopleRegistrationDataImportDetailsPage.tsx',
+        );
+      }}
+      componentName="PeopleRegistrationDataImportDetailsPage"
+    >
+      <RegistrationDataImportDetailsPageHeader
+        registration={data.registrationDataImport}
+        canMerge={canMerge}
+        canRerunDedupe={hasPermissions(
+          PERMISSIONS.RDI_RERUN_DEDUPE,
+          permissions,
+        )}
+        canViewList={hasPermissions(PERMISSIONS.RDI_VIEW_LIST, permissions)}
+        canRefuse={hasPermissions(PERMISSIONS.RDI_REFUSE_IMPORT, permissions)}
+      />
+      <RegistrationContainer isErased={data.registrationDataImport.erased} />
+    </UniversalErrorBoundary>
+  );
+};

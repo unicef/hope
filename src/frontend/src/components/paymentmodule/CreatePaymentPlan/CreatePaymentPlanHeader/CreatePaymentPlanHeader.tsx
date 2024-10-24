@@ -1,6 +1,5 @@
 import { Box, Button } from '@mui/material';
 import { Link, useParams } from 'react-router-dom';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { BreadCrumbsItem } from '@core/BreadCrumbs';
@@ -10,6 +9,7 @@ import { decodeIdString } from '@utils/utils';
 import { useQuery } from '@tanstack/react-query';
 import { fetchProgramCycle } from '@api/programCycleApi';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { ReactElement } from 'react';
 
 interface CreatePaymentPlanHeaderProps {
   handleSubmit: () => Promise<void>;
@@ -21,7 +21,7 @@ export function CreatePaymentPlanHeader({
   handleSubmit,
   permissions,
   loadingCreate,
-}: CreatePaymentPlanHeaderProps): React.ReactElement {
+}: CreatePaymentPlanHeaderProps): ReactElement {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
   const { programCycleId } = useParams();

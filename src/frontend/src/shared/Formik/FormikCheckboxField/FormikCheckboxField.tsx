@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { useEffect } from 'react';
+import { ReactElement, useEffect } from 'react';
 import {
   FormControlLabel,
   Checkbox,
@@ -17,7 +16,7 @@ export function Check({
   displayValue = '',
   container = true,
   ...otherProps
-}): React.ReactElement {
+}): ReactElement {
   const handleChange = (): void => {
     form.setFieldValue(field.name, !field.value);
   };
@@ -61,7 +60,9 @@ export function Check({
         </Grid>
       )}
       {isInvalid && get(form.errors, field.name) && (
-        <FormHelperText error data-cy="checkbox-error">{get(form.errors, field.name)}</FormHelperText>
+        <FormHelperText error data-cy="checkbox-error">
+          {get(form.errors, field.name)}
+        </FormHelperText>
       )}
     </Grid>
   );

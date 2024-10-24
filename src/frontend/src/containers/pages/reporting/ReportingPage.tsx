@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { useMeQuery, useReportChoiceDataQuery } from '@generated/graphql';
@@ -23,7 +22,7 @@ const initialFilter = {
   onlyMy: false,
 };
 
-export function ReportingPage(): React.ReactElement {
+export function ReportingPage(): ReactElement {
   const { t } = useTranslation();
   const { businessArea } = useBaseUrl();
   const permissions = usePermissions();

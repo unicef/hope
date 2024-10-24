@@ -1,5 +1,5 @@
 import { Field, Form, Formik } from 'formik';
-import React, { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
@@ -38,7 +38,7 @@ interface SplitIntoPaymentListsProps {
 export const SplitIntoPaymentLists = ({
   paymentPlan,
   canSplit,
-}: SplitIntoPaymentListsProps): React.ReactElement => {
+}: SplitIntoPaymentListsProps): ReactElement => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const { t } = useTranslation();
   const [mutate, { loading }] = useSplitPpMutation();
@@ -61,10 +61,7 @@ export const SplitIntoPaymentLists = ({
         schema
           .required('Payments Number is required')
           .min(10, minPaymentsNoMessage)
-          .max(
-            paymentPlan.paymentItems.totalCount,
-            maxPaymentsNoMessage,
-          ),
+          .max(paymentPlan.paymentItems.totalCount, maxPaymentsNoMessage),
     }),
   });
 

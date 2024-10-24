@@ -1,5 +1,4 @@
 import { Grid, MenuItem } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { GrievancesChoiceDataQuery } from '@generated/graphql';
@@ -9,6 +8,7 @@ import { DatePickerFilter } from '@core/DatePickerFilter';
 import { FiltersSection } from '@core/FiltersSection';
 import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
+import { ReactElement } from 'react';
 
 interface LookUpLinkedTicketsFiltersProps {
   filter;
@@ -25,7 +25,7 @@ export function LookUpLinkedTicketsFilters({
   initialFilter,
   appliedFilter,
   setAppliedFilter,
-}: LookUpLinkedTicketsFiltersProps): React.ReactElement {
+}: LookUpLinkedTicketsFiltersProps): ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();

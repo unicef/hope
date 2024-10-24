@@ -1,12 +1,12 @@
 import { Box, Button } from '@mui/material';
 import { EditRounded } from '@mui/icons-material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { PaymentPlanQuery } from '@generated/graphql';
 import { DeletePaymentPlan } from '../DeletePaymentPlan';
 import { LockPaymentPlan } from '../LockPaymentPlan';
 import { useProgramContext } from '../../../../../programContext';
+import { ReactElement } from 'react';
 
 export interface OpenPaymentPlanHeaderButtonsProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
@@ -20,7 +20,7 @@ export function OpenPaymentPlanHeaderButtons({
   canRemove,
   canEdit,
   canLock,
-}: OpenPaymentPlanHeaderButtonsProps): React.ReactElement {
+}: OpenPaymentPlanHeaderButtonsProps): ReactElement {
   const { t } = useTranslation();
   const { isActiveProgram } = useProgramContext();
 

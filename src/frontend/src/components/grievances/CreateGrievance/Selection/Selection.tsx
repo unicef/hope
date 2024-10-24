@@ -1,6 +1,5 @@
 import { Grid } from '@mui/material';
 import { Field } from 'formik';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { GrievancesChoiceDataQuery } from '@generated/graphql';
 import { useArrayToDict } from '@hooks/useArrayToDict';
@@ -13,9 +12,10 @@ import {
 } from '@utils/constants';
 import { DividerLine } from '@core/DividerLine';
 import { LabelizedField } from '@core/LabelizedField';
+import { ChangeEvent, ReactElement } from 'react';
 
 export interface SelectionProps {
-  handleChange: (e: React.ChangeEvent) => void;
+  handleChange: (e: ChangeEvent) => void;
   choicesData: GrievancesChoiceDataQuery;
   setFieldValue: (field: string, value, shouldValidate?: boolean) => void;
   showIssueType: (values) => boolean;
@@ -30,7 +30,7 @@ export function Selection({
   showIssueType,
   values,
   redirectedFromRelatedTicket,
-}: SelectionProps): React.ReactElement {
+}: SelectionProps): ReactElement {
   const { t } = useTranslation();
   const issueTypeDict = useArrayToDict(
     choicesData?.grievanceTicketIssueTypeChoices,

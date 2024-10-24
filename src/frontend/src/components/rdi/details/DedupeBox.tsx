@@ -1,8 +1,8 @@
-import * as React from 'react';
 import styled from 'styled-components';
 import { Box, Grid } from '@mui/material';
 import { MiśTheme } from '../../../theme';
 import { CountAndPercentageNode } from '@generated/graphql';
+import { ReactElement } from 'react';
 
 const GreyBox = styled.div`
   background-color: #f5f5f5;
@@ -40,10 +40,7 @@ export interface DedupeBoxProps {
   options: OptionType[];
 }
 
-export const DedupeBox = ({
-  label,
-  options,
-}: DedupeBoxProps): React.ReactElement => {
+export const DedupeBox = ({ label, options }: DedupeBoxProps): ReactElement => {
   return (
     <GreyBox>
       <Grid container spacing={3}>

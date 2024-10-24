@@ -1,5 +1,4 @@
 import { Grid, Typography } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { targetPopulationStatusToColor } from '@utils/utils';
 import { TargetPopulationQuery } from '@generated/graphql';
@@ -9,6 +8,7 @@ import { OverviewContainer } from '@core/OverviewContainer';
 import { StatusBox } from '@core/StatusBox';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
+import { ReactElement } from 'react';
 
 interface ProgramDetailsProps {
   targetPopulation: TargetPopulationQuery['targetPopulation'];
@@ -16,7 +16,7 @@ interface ProgramDetailsProps {
 
 export function TargetPopulationDetails({
   targetPopulation,
-}: ProgramDetailsProps): React.ReactElement {
+}: ProgramDetailsProps): ReactElement {
   const {
     createdBy,
     finalizedBy,

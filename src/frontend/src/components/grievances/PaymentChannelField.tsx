@@ -2,12 +2,12 @@ import { Grid, IconButton } from '@mui/material';
 import { Delete } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { Field } from 'formik';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { AllIndividualsQuery } from '@generated/graphql';
 import { LabelizedField } from '@core/LabelizedField';
 import { getIndexForId } from './utils/helpers';
+import { ReactElement } from 'react';
 
 export interface PaymentChannelProps {
   id: string;
@@ -25,7 +25,7 @@ export function PaymentChannelField({
   isEdited,
   paymentChannel,
   values,
-}: PaymentChannelProps): React.ReactElement {
+}: PaymentChannelProps): ReactElement {
   const { t } = useTranslation();
   const paymentChannelFieldName = `${baseName}.${getIndexForId(
     values[baseName],

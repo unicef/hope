@@ -1,6 +1,5 @@
 import { Box, Button } from '@mui/material';
 import EditIcon from '@mui/icons-material/EditRounded';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -24,6 +23,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from '../../programContext';
 import { getGrievanceEditPath } from './utils/createGrievanceUtils';
 import { AdminButton } from '@core/AdminButton';
+import { ReactElement } from 'react';
 
 const Separator = styled.div`
   width: 1px;
@@ -68,7 +68,7 @@ export const GrievanceDetailsToolbar = ({
   canSendBack: boolean;
   canClose: boolean;
   canAssign: boolean;
-}): React.ReactElement => {
+}): ReactElement => {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const { baseUrl } = useBaseUrl();

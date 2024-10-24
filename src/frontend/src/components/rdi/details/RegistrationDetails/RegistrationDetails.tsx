@@ -1,5 +1,4 @@
 import { Box, Grid, Typography } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
@@ -18,6 +17,7 @@ import {
 } from '@generated/graphql';
 import { DedupeBox, OptionType } from '../DedupeBox';
 import { Title } from '@core/Title';
+import { ReactElement } from 'react';
 
 export const BigValueContainer = styled.div`
   padding: ${({ theme }) => theme.spacing(6)};
@@ -54,7 +54,7 @@ interface RegistrationDetailsProps {
 export function RegistrationDetails({
   registration,
   isSocialWorkerProgram,
-}: RegistrationDetailsProps): React.ReactElement {
+}: RegistrationDetailsProps): ReactElement {
   const { t } = useTranslation();
   const withinBatchOptions: OptionType[] = [
     {
@@ -87,7 +87,7 @@ export function RegistrationDetails({
     return '-';
   };
 
-  let numbersComponent: React.ReactElement;
+  let numbersComponent: ReactElement;
   if (isSocialWorkerProgram) {
     numbersComponent = (
       <Grid item xs={4}>

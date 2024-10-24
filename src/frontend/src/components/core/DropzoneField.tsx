@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { Box } from '@mui/material';
-import { useCallback } from 'react';
+import { ReactElement, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -44,7 +44,7 @@ export const DropzoneField = ({
       '.xlsx',
     ],
   },
-}: DropzoneFieldProps): React.ReactElement => {
+}: DropzoneFieldProps): ReactElement => {
   const { t } = useTranslation();
   const onDrop = useCallback((acceptedFiles: File[]) => {
     onChange(acceptedFiles);

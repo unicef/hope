@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { useState } from 'react';
+import { MouseEvent, ReactElement, useState } from 'react';
 import styled from 'styled-components';
 import {
   AllHouseholdsForPopulationTableQueryVariables,
@@ -47,7 +46,7 @@ export function LookUpHouseholdTableCommunication({
   householdMultiSelect,
   redirectedFromRelatedTicket,
   isFeedbackWithHouseholdOnly,
-}: LookUpHouseholdTableCommunicationProps): React.ReactElement {
+}: LookUpHouseholdTableCommunicationProps): ReactElement {
   const { programId } = useBaseUrl();
   const matchWithdrawnValue = (): boolean | undefined => {
     if (filter.withdrawn === 'true') {
@@ -80,9 +79,7 @@ export function LookUpHouseholdTableCommunication({
   );
 
   const handleCheckboxClick = (
-    _event:
-      | React.MouseEvent<HTMLButtonElement, MouseEvent>
-      | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
+    _event: MouseEvent<HTMLTableRowElement> | MouseEvent<HTMLButtonElement>,
     name: string,
   ): void => {
     const selectedIndex = selected.indexOf(name);
@@ -126,7 +123,7 @@ export function LookUpHouseholdTableCommunication({
     setFieldValue('identityVerified', false);
   };
 
-  const renderTable = (): React.ReactElement => (
+  const renderTable = (): ReactElement => (
     <UniversalTable<
       AllHouseholdsQuery['allHouseholds']['edges'][number]['node'],
       AllHouseholdsQueryVariables

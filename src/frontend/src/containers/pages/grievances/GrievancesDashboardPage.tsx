@@ -1,5 +1,4 @@
 import { Box, Grid } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
@@ -15,8 +14,9 @@ import { useAllGrievanceDashboardChartsQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 import { useLocation } from 'react-router-dom';
+import { ReactElement } from 'react';
 
-export function GrievancesDashboardPage(): React.ReactElement {
+export function GrievancesDashboardPage(): ReactElement {
   const { t } = useTranslation();
   const { businessArea } = useBaseUrl();
   const location = useLocation();

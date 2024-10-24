@@ -6,8 +6,7 @@ import {
   handleOptionSelected,
 } from '@utils/utils';
 import get from 'lodash/get';
-import * as React from 'react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { ReactElement, useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAllUsersForFiltersLazyQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -36,7 +35,7 @@ export function AssigneeAutocomplete({
   setAppliedFilter: (filter) => void;
   setFilter: (filter) => void;
   dataCy?: string;
-}): React.ReactElement {
+}): ReactElement {
   const navigate = useNavigate();
   const location = useLocation();
   const [inputValue, onInputTextChange] = useState('');

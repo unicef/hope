@@ -1,6 +1,6 @@
-import * as React from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
+import { ReactElement } from 'react';
 
 interface StyledLinkProps {
   fullWidth?: boolean;
@@ -23,7 +23,7 @@ export const BlackLink = ({
   newTab = false,
   to = '/',
   ...props
-}): React.ReactElement => {
+}): ReactElement => {
   return newTab ? (
     <StyledLinkA
       {...props}

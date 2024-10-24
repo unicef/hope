@@ -1,6 +1,6 @@
 import { TextField } from '@mui/material';
-import * as React from 'react';
+import { ReactElement } from 'react';
 
-export const StyledTextField = ({ ...props }): React.ReactElement => {
+export const StyledTextField = ({ ...props }): ReactElement => {
   return <TextField {...props} variant="outlined" size="small" />;
 };

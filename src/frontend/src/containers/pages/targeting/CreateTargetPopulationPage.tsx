@@ -1,7 +1,6 @@
 import { Box, Divider, Grid, Typography } from '@mui/material';
 import { Field, FieldArray, Form, Formik } from 'formik';
 import { useLocation, useNavigate } from 'react-router-dom';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import {
@@ -25,8 +24,9 @@ import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { TargetingCriteriaDisplay } from '@components/targeting/TargetingCriteriaDisplay/TargetingCriteriaDisplay';
 import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { ReactElement } from 'react';
 
-export const CreateTargetPopulationPage = (): React.ReactElement => {
+export const CreateTargetPopulationPage = (): ReactElement => {
   const { t } = useTranslation();
   const { programId } = useBaseUrl();
   const { selectedProgram, isSocialDctType, isStandardDctType } =

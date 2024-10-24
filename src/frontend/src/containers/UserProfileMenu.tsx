@@ -8,11 +8,11 @@ import {
   Paper,
   Popper,
 } from '@mui/material';
-import * as React from 'react';
 import styled from 'styled-components';
 import { MeQuery } from '@generated/graphql';
 import { clearCache } from '@utils/utils';
 import { getClient } from '../apollo/client';
+import React, { ReactElement, useState, useRef, useEffect } from 'react';
 
 const UserProfileButton = styled(Button)`
   && {
@@ -27,14 +27,14 @@ interface UserProfileMenuProps {
 }
 export function UserProfileMenu({
   meData,
-}: UserProfileMenuProps): React.ReactElement {
-  const [open, setOpen] = React.useState(false);
-  const anchorRef = React.useRef<HTMLButtonElement>(null);
+}: UserProfileMenuProps): ReactElement {
+  const [open, setOpen] = useState(false);
+  const anchorRef = useRef<HTMLButtonElement>(null);
   // return focus to the button when we transitioned from !open -> open
-  const prevOpen = React.useRef(open);
-  React.useEffect(() => {
+  const prevOpen = useRef(open);
+  useEffect(() => {
     if (prevOpen.current === true && open === false) {
-      anchorRef.current.focus();
+      anchorRef.current?.focus();
     }
 
     prevOpen.current = open;
@@ -49,13 +49,7 @@ export function UserProfileMenu({
     await clearCache(client);
   };
 
-  const handleClose = (
-    event:
-      | React.MouseEvent<HTMLAnchorElement, MouseEvent>
-      | React.TouchEvent<HTMLAnchorElement>
-      | MouseEvent
-      | TouchEvent,
-  ): void => {
+  const handleClose = (event): void => {
     if (
       anchorRef.current &&
       anchorRef.current.contains(event.target as HTMLElement)
@@ -66,13 +60,7 @@ export function UserProfileMenu({
     setOpen(false);
   };
 
-  const handleLogout = (
-    event:
-      | React.MouseEvent<HTMLAnchorElement, MouseEvent>
-      | React.TouchEvent<HTMLAnchorElement>
-      | MouseEvent
-      | TouchEvent,
-  ): void => {
+  const handleLogout = (event: React.MouseEvent<HTMLAnchorElement>): void => {
     window.location.assign('/api/logout');
     localStorage.removeItem('AUTHENTICATED');
     handleClose(event);
@@ -122,6 +110,7 @@ export function UserProfileMenu({
             <Paper>
               <ClickAwayListener onClickAway={handleClose}>
                 <MenuList
+                  component="ul"
                   autoFocusItem={open}
                   id="menu-list-grow"
                   onKeyDown={handleListKeyDown}

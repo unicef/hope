@@ -1,5 +1,4 @@
 import { Form, Formik } from 'formik';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { format, parseISO } from 'date-fns';
 import * as Yup from 'yup';
@@ -19,8 +18,9 @@ import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { ReactElement } from 'react';
 
-export const CreatePeoplePaymentPlanPage = (): React.ReactElement => {
+export const CreatePeoplePaymentPlanPage = (): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const location = useLocation();

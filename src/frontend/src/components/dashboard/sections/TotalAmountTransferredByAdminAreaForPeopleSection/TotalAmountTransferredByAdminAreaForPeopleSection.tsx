@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCountryChartsLazyQuery } from '@generated/graphql';
 import { LoadingComponent } from '@core/LoadingComponent';
@@ -14,7 +14,7 @@ interface TotalAmountTransferredSectionByAdminAreaSectionForPeopleProps {
 export function TotalAmountTransferredSectionByAdminAreaForPeopleSection({
   year,
   filter,
-}: TotalAmountTransferredSectionByAdminAreaSectionForPeopleProps): React.ReactElement {
+}: TotalAmountTransferredSectionByAdminAreaSectionForPeopleProps): ReactElement {
   const { t } = useTranslation();
   const [orderBy, setOrderBy] = useState('totalCashTransferred');
   const [order, setOrder] = useState('desc');

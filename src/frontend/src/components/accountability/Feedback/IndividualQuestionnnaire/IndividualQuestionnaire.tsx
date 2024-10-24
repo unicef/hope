@@ -1,10 +1,10 @@
 import { Grid } from '@mui/material';
 import { Field } from 'formik';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { ContentLink } from '@core/ContentLink';
+import { ReactElement } from 'react';
 
 interface IndividualQuestionnaireProps {
   values;
@@ -12,7 +12,7 @@ interface IndividualQuestionnaireProps {
 
 export const IndividualQuestionnaire = ({
   values,
-}: IndividualQuestionnaireProps): React.ReactElement => {
+}: IndividualQuestionnaireProps): ReactElement => {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const selectedIndividualData =

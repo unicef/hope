@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -7,7 +7,7 @@ const ConsentText = styled.p`
   color: #585858;
 `;
 
-export function Consent(): React.ReactElement {
+export function Consent(): ReactElement {
   const { t } = useTranslation();
   return (
     <ConsentText>

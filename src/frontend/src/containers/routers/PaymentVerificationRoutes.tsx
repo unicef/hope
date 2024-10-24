@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { useRoutes } from 'react-router-dom';
 import { CashPlanDetailsPage } from '../pages/payments/CashPlanDetailsPage';
 import { CashPlanVerificationDetailsPage } from '../pages/payments/CashPlanVerificationDetailsPage';
@@ -7,8 +6,9 @@ import { PaymentPlanVerificationDetailsPage } from '../pages/payments/PaymentPla
 import { PaymentVerificationPage } from '../pages/payments/PaymentVerificationPage';
 import { VerificationPaymentDetailsPage } from '../pages/payments/VerificationPaymentDetailsPage';
 import { VerificationPaymentRecordDetailsPage } from '../pages/payments/VerificationPaymentRecordDetailsPage';
+import { ReactElement } from 'react';
 
-export const PaymentVerificationRoutes = (): React.ReactElement => {
+export const PaymentVerificationRoutes = (): ReactElement => {
   const paymentVerificationRoutes = [
     {
       path: 'cashplans/:id',

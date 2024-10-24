@@ -1,5 +1,4 @@
 import CssBaseline from '@mui/material/CssBaseline';
-import * as React from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useAllBusinessAreasQuery } from '@generated/graphql';
@@ -9,6 +8,7 @@ import { LoadingComponent } from '@components/core/LoadingComponent';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { styled as MuiStyled } from '@mui/system';
 import { theme } from 'src/theme';
+import { FC, useState } from 'react';
 
 const Root = styled.div`
   display: flex;
@@ -28,8 +28,8 @@ const AppBarSpacer = MuiStyled('div')(() => ({
   ...theme.mixins.toolbar,
 }));
 
-export const BaseHomeRouter: React.FC = () => {
-  const [open, setOpen] = React.useState(true);
+export const BaseHomeRouter: FC = () => {
+  const [open, setOpen] = useState(true);
   const { businessArea } = useBaseUrl();
   const location = useLocation();
   const navigate = useNavigate();

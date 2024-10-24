@@ -1,6 +1,5 @@
 import { Box } from '@mui/material';
-import * as React from 'react';
-import { useState } from 'react';
+import { ChangeEvent, ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
@@ -45,7 +44,7 @@ export function LookUpHouseholdIndividualSelectionDetail({
   setSelectedHousehold;
   redirectedFromRelatedTicket?: boolean;
   isFeedbackWithHouseholdOnly?: boolean;
-}): React.ReactElement {
+}): ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
   const { businessArea, isAllPrograms, programId } = useBaseUrl();
@@ -123,7 +122,7 @@ export function LookUpHouseholdIndividualSelectionDetail({
         <Box id="scroll-dialog-title">
           <StyledTabs
             value={selectedTab}
-            onChange={(_event: React.ChangeEvent<object>, newValue: number) => {
+            onChange={(_event: ChangeEvent<object>, newValue: number) => {
               setSelectedTab(newValue);
             }}
             indicatorColor="primary"
@@ -131,9 +130,7 @@ export function LookUpHouseholdIndividualSelectionDetail({
             variant="fullWidth"
             aria-label="look up tabs"
           >
-            <Tab
-             data-cy="look-up-household"
-             label={t('LOOK UP HOUSEHOLD')} />
+            <Tab data-cy="look-up-household" label={t('LOOK UP HOUSEHOLD')} />
             <Tab
               disabled={
                 initialValues.issueType ===
@@ -142,7 +139,7 @@ export function LookUpHouseholdIndividualSelectionDetail({
                   GRIEVANCE_ISSUE_TYPES.DELETE_HOUSEHOLD ||
                 initialValues.issueType === GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD
               }
-             data-cy="look-up-individual"
+              data-cy="look-up-individual"
               label={t('LOOK UP INDIVIDUAL')}
             />
           </StyledTabs>

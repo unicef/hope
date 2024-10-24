@@ -1,5 +1,4 @@
 import { Box, Grid, Typography } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../config/permissions';
@@ -16,6 +15,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { TargetPopulationPeopleTable } from '@containers/tables/targeting/TargetPopulationPeopleTable';
 import { ResultsForPeople } from '@components/targeting/ResultsForPeople';
 import { TargetingCriteriaDisplay } from './TargetingCriteriaDisplay/TargetingCriteriaDisplay';
+import { ReactElement } from 'react';
 
 const Label = styled.p`
   color: #b1b1b5;
@@ -47,7 +47,7 @@ export const TargetPopulationCore = ({
   isStandardDctType,
   isSocialDctType,
   category,
-}: TargetPopulationCoreProps): React.ReactElement => {
+}: TargetPopulationCoreProps): ReactElement => {
   const { t } = useTranslation();
   const { businessArea } = useBaseUrl();
   if (!targetPopulation) return null;

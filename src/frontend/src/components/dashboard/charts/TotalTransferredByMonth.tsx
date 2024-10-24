@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { Bar } from 'react-chartjs-2';
 import {
   formatCurrencyWithSymbol,
@@ -6,6 +5,7 @@ import {
   getPercentage,
 } from '@utils/utils';
 import { AllChartsQuery } from '@generated/graphql';
+import { ReactElement } from 'react';
 
 interface TotalTransferredByMonthProps {
   data: AllChartsQuery['chartTotalTransferredByMonth'];
@@ -13,7 +13,7 @@ interface TotalTransferredByMonthProps {
 
 export function TotalTransferredByMonth({
   data,
-}: TotalTransferredByMonthProps): React.ReactElement {
+}: TotalTransferredByMonthProps): ReactElement {
   if (!data) return null;
 
   const chartdata: any = {

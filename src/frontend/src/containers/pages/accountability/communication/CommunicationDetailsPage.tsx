@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router-dom';
 import { Box } from '@mui/material';
@@ -17,8 +16,9 @@ import { RecipientsTable } from '../../../tables/Communication/RecipientsTable/R
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { AdminButton } from '@core/AdminButton';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { ReactElement } from 'react';
 
-export function CommunicationDetailsPage(): React.ReactElement {
+export function CommunicationDetailsPage(): ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
   const location = useLocation();

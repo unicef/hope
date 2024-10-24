@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   AllIndividualsForPopulationTableQueryVariables,
@@ -12,6 +11,7 @@ import { UniversalTable } from '../../UniversalTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { headCells } from './PeopleListTableHeadCells';
 import { PeopleListTableRow } from './PeopleListTableRow';
+import { ReactElement } from 'react';
 
 interface PeopleListTableProps {
   filter;
@@ -23,7 +23,7 @@ export const PeopleListTable = ({
   businessArea,
   filter,
   canViewDetails,
-}: PeopleListTableProps): React.ReactElement => {
+}: PeopleListTableProps): ReactElement => {
   const { t } = useTranslation();
   const { programId } = useBaseUrl();
   const initialVariables: AllIndividualsForPopulationTableQueryVariables = {

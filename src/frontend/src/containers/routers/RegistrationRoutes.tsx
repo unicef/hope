@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { useRoutes } from 'react-router-dom';
 import { RegistrationDataImportDetailsPage } from '../pages/rdi/RegistrationDataImportDetailsPage';
 import { RegistrationDataImportPage } from '../pages/rdi/RegistrationDataImportPage';
@@ -8,8 +7,9 @@ import { useProgramContext } from '../../programContext';
 import { PeopleRegistrationDataImportPage } from '@containers/pages/rdi/people/PeopleRegistrationDataImportPage';
 import { PeopleRegistrationDetailsPage } from '@containers/pages/rdi/people/PeopleRegistrationDetailsPage';
 import { PeopleRegistrationDataImportDetailsPage } from '@containers/pages/rdi/people/PeopleRegistrationDataImportDetailsPage';
+import { ReactElement } from 'react';
 
-export const RegistrationRoutes = (): React.ReactElement => {
+export const RegistrationRoutes = (): ReactElement => {
   const { isSocialDctType } = useProgramContext();
 
   let children = [];

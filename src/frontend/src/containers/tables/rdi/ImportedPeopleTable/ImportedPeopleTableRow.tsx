@@ -1,5 +1,4 @@
 import TableCell from '@mui/material/TableCell';
-import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { HouseholdChoiceDataQuery } from '@generated/graphql';
 import { BlackLink } from '@components/core/BlackLink';
@@ -9,6 +8,7 @@ import { UniversalMoment } from '@components/core/UniversalMoment';
 import { DedupeResults } from '@components/rdi/details/DedupeResults';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { choicesToDict, sexToCapitalize } from '@utils/utils';
+import { ReactElement } from 'react';
 
 interface ImportedIndividualsTableRowProps {
   individual;
@@ -20,7 +20,7 @@ export function ImportedPeopleTableRow({
   individual,
   choices,
   isMerged,
-}: ImportedIndividualsTableRowProps): React.ReactElement {
+}: ImportedIndividualsTableRowProps): ReactElement {
   const navigate = useNavigate();
   const { baseUrl } = useBaseUrl();
 

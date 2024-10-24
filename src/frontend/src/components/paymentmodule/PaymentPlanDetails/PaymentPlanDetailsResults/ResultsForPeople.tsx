@@ -6,7 +6,6 @@ import {
   SummaryValue,
 } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsResults/Styles';
 import { LabelizedField } from '@core/LabelizedField';
-import * as React from 'react';
 
 interface ResultsForPeopleProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];

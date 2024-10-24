@@ -1,6 +1,6 @@
 import { Box, Collapse, Grid } from '@mui/material';
 import Paper from '@mui/material/Paper';
-import { ReactElement, useState } from 'react';
+import { FC, ReactElement, useState } from 'react';
 import styled from 'styled-components';
 import { ClearApplyButtons } from './ClearApplyButtons';
 
@@ -18,7 +18,7 @@ const FiltersPaper = styled(Paper)`
   padding: 8px 44px;
 `;
 
-export const FiltersSection: React.FC<FiltersSectionProps> = ({
+export const FiltersSection: FC<FiltersSectionProps> = ({
   children,
   clearHandler,
   applyHandler,

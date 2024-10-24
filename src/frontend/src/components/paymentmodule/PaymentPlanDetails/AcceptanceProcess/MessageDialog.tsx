@@ -5,8 +5,7 @@ import {
   DialogTitle,
   IconButton,
 } from '@mui/material';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import MessageIcon from '@mui/icons-material/Message';
 import styled from 'styled-components';
@@ -49,7 +48,7 @@ export function MessageDialog({
   comment,
   author,
   date,
-}: MessageDialogProps): React.ReactElement {
+}: MessageDialogProps): ReactElement {
   const { t } = useTranslation();
   const [MessageDialogOpen, setMessageDialogOpen] = useState(false);
   return (

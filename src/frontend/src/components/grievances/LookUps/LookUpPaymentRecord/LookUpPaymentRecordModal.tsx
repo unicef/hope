@@ -6,19 +6,19 @@ import {
   DialogTitle,
 } from '@mui/material';
 import { Formik } from 'formik';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 import { LookUpPaymentRecordTable } from '../LookUpPaymentRecordTable/LookUpPaymentRecordTable';
+import { ReactElement } from 'react';
 
 export function LookUpPaymentRecordModal({
   onValueChange,
   initialValues,
   lookUpDialogOpen,
   setLookUpDialogOpen,
-}): React.ReactElement {
+}): ReactElement {
   const { t } = useTranslation();
   return (
     <Formik

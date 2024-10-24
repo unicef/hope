@@ -1,10 +1,10 @@
 import { Box } from '@mui/material';
-import * as React from 'react';
 import {
   AllAddIndividualFieldsQuery,
   useIndividualFlexFieldsQuery,
 } from '@generated/graphql';
 import { PhotoModal } from '@core/PhotoModal/PhotoModal';
+import { ReactElement } from 'react';
 
 export interface GrievanceFlexFieldPhotoModalNewIndividualProps {
   flexField: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'][number];
@@ -14,7 +14,7 @@ export interface GrievanceFlexFieldPhotoModalNewIndividualProps {
 export function GrievanceFlexFieldPhotoModalNewIndividual({
   flexField,
   individualId,
-}: GrievanceFlexFieldPhotoModalNewIndividualProps): React.ReactElement {
+}: GrievanceFlexFieldPhotoModalNewIndividualProps): ReactElement {
   const { data } = useIndividualFlexFieldsQuery({
     variables: { id: individualId },
     fetchPolicy: 'network-only',

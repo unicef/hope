@@ -1,5 +1,4 @@
 import { Typography } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
@@ -7,12 +6,13 @@ import { LabelizedField } from '@core/LabelizedField';
 import { Missing } from '@core/Missing';
 import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
+import { ReactElement } from 'react';
 
 const PastContainer = styled.div`
   padding: 22px 22px 22px 0;
 `;
 
-export function PastTickets({ tickets }): React.ReactElement {
+export function PastTickets({ tickets }): ReactElement {
   const { t } = useTranslation();
   const formattedTickets = (strings: string[]) =>
     strings ? strings.join(', ') : t('No past tickets');

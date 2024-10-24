@@ -1,5 +1,4 @@
 import TableCell from '@mui/material/TableCell';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -8,6 +7,7 @@ import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { WarningTooltip } from '@components/core/WarningTooltip';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { ReactElement } from 'react';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -27,7 +27,7 @@ export function ImportedHouseholdTableRow({
   isMerged,
   household,
   rdi,
-}: ImportedHouseholdTableRowProps): React.ReactElement {
+}: ImportedHouseholdTableRowProps): ReactElement {
   const { baseUrl, businessArea } = useBaseUrl();
   const { t } = useTranslation();
   const navigate = useNavigate();

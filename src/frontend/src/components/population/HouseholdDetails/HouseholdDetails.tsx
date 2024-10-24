@@ -1,5 +1,4 @@
 import { Box, Grid, Paper, Typography } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
@@ -17,6 +16,7 @@ import {
   BigValueContainer,
 } from '../../rdi/details/RegistrationDetails/RegistrationDetails';
 import { LinkedGrievancesModal } from '../LinkedGrievancesModal/LinkedGrievancesModal';
+import { ReactElement } from 'react';
 
 const Container = styled.div`
   display: flex;
@@ -59,7 +59,7 @@ export function HouseholdDetails({
   baseUrl,
   businessArea,
   grievancesChoices,
-}: HouseholdDetailsProps): React.ReactElement {
+}: HouseholdDetailsProps): ReactElement {
   const { t } = useTranslation();
   const residenceChoicesDict = choicesToDict(
     choicesData.residenceStatusChoices,

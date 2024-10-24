@@ -1,6 +1,5 @@
 import { Button } from '@mui/material';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -61,7 +60,7 @@ const initialFilter = {
   paymentVerificationPlan: '',
 };
 
-export function CashPlanVerificationDetailsPage(): React.ReactElement {
+export function CashPlanVerificationDetailsPage(): ReactElement {
   const { t } = useTranslation();
   const { isSocialDctType } = useProgramContext();
   const permissions = usePermissions();

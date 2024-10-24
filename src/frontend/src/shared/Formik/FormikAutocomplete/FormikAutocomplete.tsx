@@ -1,13 +1,13 @@
 import Autocomplete from '@mui/lab/Autocomplete';
 import { Box, TextField } from '@mui/material';
-import * as React from 'react';
+import { ReactElement } from 'react';
 
 export function FormikAutocomplete({
   field,
   form,
   choices,
   label,
-}): React.ReactElement {
+}): ReactElement {
   const realSelectedValue = choices.find((item) => item.value === field.value);
 
   const handleChange = (e, option): void => {

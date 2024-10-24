@@ -1,7 +1,7 @@
-import * as React from 'react';
 import { Bar } from 'react-chartjs-2';
 import { formatThousands } from '@utils/utils';
 import { AllChartsQuery } from '@generated/graphql';
+import { ReactElement } from 'react';
 
 interface ProgrammesBySectorProps {
   data: AllChartsQuery['chartProgrammesBySector'];
@@ -9,7 +9,7 @@ interface ProgrammesBySectorProps {
 
 export const ProgrammesBySector = ({
   data,
-}: ProgrammesBySectorProps): React.ReactElement => {
+}: ProgrammesBySectorProps): ReactElement => {
   if (!data) return null;
 
   const chartData: any = {

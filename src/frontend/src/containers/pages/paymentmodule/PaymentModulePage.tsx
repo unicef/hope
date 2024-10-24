@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { PageHeader } from '@components/core/PageHeader';
@@ -22,7 +21,7 @@ const initialFilter = {
   isFollowUp: '',
 };
 
-export function PaymentModulePage(): React.ReactElement {
+export function PaymentModulePage(): ReactElement {
   const { t } = useTranslation();
   const permissions = usePermissions();
   const location = useLocation();

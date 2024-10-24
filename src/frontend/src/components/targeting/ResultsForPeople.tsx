@@ -1,5 +1,4 @@
 import { Grid, Typography } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
@@ -11,6 +10,7 @@ import { LabelizedField } from '@core/LabelizedField';
 import { PaperContainer } from './PaperContainer';
 import { FieldBorder } from '@core/FieldBorder';
 import { Pie } from 'react-chartjs-2';
+import { ReactElement } from 'react';
 
 const colors = {
   femaleChildren: '#5F02CF',
@@ -55,7 +55,7 @@ interface ResultsProps {
 
 export function ResultsForPeople({
   targetPopulation,
-}: ResultsProps): React.ReactElement {
+}: ResultsProps): ReactElement {
   const { t } = useTranslation();
   if (targetPopulation.buildStatus !== TargetPopulationBuildStatus.Ok) {
     return null;

@@ -9,7 +9,6 @@ import {
   Typography,
 } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
@@ -17,6 +16,7 @@ import { GrievanceTicketQuery } from '@generated/graphql';
 import { PhotoModal } from '@core/PhotoModal/PhotoModal';
 import { TableTitle } from '@core/TableTitle';
 import { handleSelected } from '../utils/helpers';
+import { ReactElement } from 'react';
 
 const GreenIcon = styled.div`
   color: #28cb15;
@@ -49,16 +49,16 @@ export function DocumentsToEditTable({
   countriesDict,
   index,
   document,
-}: DocumentsToEditTableProps): React.ReactElement {
+}: DocumentsToEditTableProps): ReactElement {
   const { t } = useTranslation();
-  const renderNewOrNotUpdated = (prev, curr): React.ReactElement => {
+  const renderNewOrNotUpdated = (prev, curr): ReactElement => {
     if (prev === curr) {
       return <GreyText>{t('Not updated')}</GreyText>;
     }
     return <span>{curr}</span>;
   };
   const { selectedDocumentsToEdit } = values;
-  const renderCurrentPhoto = (doc): React.ReactElement => {
+  const renderCurrentPhoto = (doc): ReactElement => {
     if (doc.value?.photo === doc.previous_value?.photo) {
       return <GreyText>{t('Not updated')}</GreyText>;
     }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { FC, SetStateAction, useState } from 'react';
 import { BaseSection } from '@components/core/BaseSection';
 import {
   Table,
@@ -23,17 +23,17 @@ import { ProgramSelect, useSortAndFilter } from './useSortAndFilter';
 
 interface PendingForReleaseSectionProps {
   selectedInReview: any[];
-  setSelectedInReview: (value: React.SetStateAction<any[]>) => void;
+  setSelectedInReview: (value: SetStateAction<any[]>) => void;
   handleSelect: (
     selected: any[],
-    setSelected: (value: React.SetStateAction<any[]>) => void,
+    setSelected: (value: SetStateAction<any[]>) => void,
     id: any,
   ) => void;
   handleSelectAll: (
     ids: any[],
     selected: any[],
     setSelected: {
-      (value: React.SetStateAction<any[]>): void;
+      (value: SetStateAction<any[]>): void;
       (arg0: any[]): void;
     },
   ) => void;
@@ -42,9 +42,7 @@ interface PendingForReleaseSectionProps {
   enableSearch?: boolean;
 }
 
-export const PendingForReleaseSection: React.FC<
-  PendingForReleaseSectionProps
-> = ({
+export const PendingForReleaseSection: FC<PendingForReleaseSectionProps> = ({
   selectedInReview,
   setSelectedInReview,
   handleSelect,

@@ -1,8 +1,7 @@
 import { Box, Button } from '@mui/material';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { Bar } from 'react-chartjs-2';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   formatCurrencyWithSymbol,
@@ -17,7 +16,7 @@ interface TotalAmountTransferredByCountryChartProps {
 
 export function TotalAmountTransferredByCountryChart({
   data,
-}: TotalAmountTransferredByCountryChartProps): React.ReactElement {
+}: TotalAmountTransferredByCountryChartProps): ReactElement {
   const lessDataCount = 5;
   const [showAll, setShowAll] = useState(false);
   const { t } = useTranslation();

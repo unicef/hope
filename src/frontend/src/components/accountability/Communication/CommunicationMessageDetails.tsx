@@ -1,5 +1,4 @@
 import { Box, Grid, Paper, Typography } from '@mui/material';
-import * as React from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { renderUserName } from '@utils/utils';
@@ -7,6 +6,7 @@ import { AccountabilityCommunicationMessageQuery } from '@generated/graphql';
 import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
+import { ReactElement } from 'react';
 
 const StyledBox = styled(Paper)`
   display: flex;
@@ -21,7 +21,7 @@ interface CommunicationMessageDetailsProps {
 
 export const CommunicationMessageDetails = ({
   message,
-}: CommunicationMessageDetailsProps): React.ReactElement => {
+}: CommunicationMessageDetailsProps): ReactElement => {
   const { t } = useTranslation();
   return (
     <Grid item xs={8} data-cy="communication-message-details">

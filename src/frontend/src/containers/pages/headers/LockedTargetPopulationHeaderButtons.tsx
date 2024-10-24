@@ -1,7 +1,6 @@
 import { Box, Button, Tooltip } from '@mui/material';
 import { FileCopy } from '@mui/icons-material';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { LoadingButton } from '@components/core/LoadingButton';
@@ -42,7 +41,7 @@ export function LockedTargetPopulationHeaderButtons({
   canDuplicate,
   canUnlock,
   businessAreaData,
-}: ApprovedTargetPopulationHeaderButtonsPropTypes): React.ReactElement {
+}: ApprovedTargetPopulationHeaderButtonsPropTypes): ReactElement {
   const { t } = useTranslation();
   const [openDuplicate, setOpenDuplicate] = useState(false);
   const [openFinalize, setOpenFinalize] = useState(false);

@@ -8,7 +8,7 @@ import {
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/EditRounded';
 import { Field, Form, Formik } from 'formik';
-import { useEffect, useState } from 'react';
+import { ChangeEvent, ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
@@ -119,7 +119,7 @@ export const EditVerificationPlan = ({
   paymentVerificationPlanNode,
   cashOrPaymentPlanId,
   isPaymentPlan,
-}: Props): React.ReactElement => {
+}: Props): ReactElement => {
   const refetchQueries = usePaymentRefetchQueries(cashOrPaymentPlanId);
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -297,7 +297,7 @@ export const EditVerificationPlan = ({
                     <StyledTabs
                       value={selectedTab}
                       onChange={(
-                        _event: React.ChangeEvent<object>,
+                        _event: ChangeEvent<object>,
                         newValue: number,
                       ) => {
                         setValues(initialValues);

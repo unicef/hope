@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -34,7 +34,7 @@ interface DeleteProgramCycleProps {
 export const DeleteProgramCycle = ({
   program,
   programCycle,
-}: DeleteProgramCycleProps): React.ReactElement => {
+}: DeleteProgramCycleProps): ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { businessArea } = useBaseUrl();
@@ -68,7 +68,11 @@ export const DeleteProgramCycle = ({
 
   return (
     <>
-      <IconButton color="primary" data-cy="delete-programme-cycle" onClick={() => setOpen(true)}>
+      <IconButton
+        color="primary"
+        data-cy="delete-programme-cycle"
+        onClick={() => setOpen(true)}
+      >
         <DeleteIcon />
       </IconButton>
       <Dialog open={open} onClose={() => setOpen(false)} scroll="paper">

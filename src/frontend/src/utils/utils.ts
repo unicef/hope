@@ -16,7 +16,6 @@ import {
   TargetPopulationBuildStatus,
   TargetPopulationStatus,
 } from '@generated/graphql';
-
 import {
   GRIEVANCE_CATEGORIES,
   PAYMENT_PLAN_BACKGROUND_ACTION_STATES,

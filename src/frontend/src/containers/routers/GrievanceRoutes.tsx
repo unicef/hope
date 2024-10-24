@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { useRoutes } from 'react-router-dom';
 import { CreateFeedbackPage } from '../pages/accountability/feedback/CreateFeedbackPage';
 import { EditFeedbackPage } from '../pages/accountability/feedback/EditFeedbackPage';
@@ -9,8 +8,9 @@ import { EditGrievancePage } from '../pages/grievances/EditGrievancePage';
 import { GrievancesDashboardPage } from '../pages/grievances/GrievancesDashboardPage';
 import { GrievancesDetailsPage } from '../pages/grievances/GrievancesDetailsPage/GrievancesDetailsPage';
 import { GrievancesTablePage } from '../pages/grievances/GrievancesTablePage';
+import { ReactElement } from 'react';
 
-export const GrievanceRoutes = (): React.ReactElement => {
+export const GrievanceRoutes = (): ReactElement => {
   const grievanceRoutes = [
     {
       path: 'grievance/new-ticket',

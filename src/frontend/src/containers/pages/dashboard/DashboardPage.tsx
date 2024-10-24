@@ -1,6 +1,5 @@
 import { Typography } from '@mui/material';
-import * as React from 'react';
-import { useState } from 'react';
+import { ChangeEvent, ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { useDashboardYearsChoiceDataQuery } from '@generated/graphql';
@@ -19,7 +18,7 @@ import { DashboardYearPage } from './DashboardYearPage';
 import { TabPanel } from '@components/core/TabPanel';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
-export function DashboardPage(): React.ReactElement {
+export function DashboardPage(): ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
   const permissions = usePermissions();
@@ -57,7 +56,7 @@ export function DashboardPage(): React.ReactElement {
   const tabs = (
     <Tabs
       value={selectedTab}
-      onChange={(_event: React.ChangeEvent<object>, newValue: number) => {
+      onChange={(_event: ChangeEvent<object>, newValue: number) => {
         setSelectedTab(newValue);
       }}
       indicatorColor="primary"

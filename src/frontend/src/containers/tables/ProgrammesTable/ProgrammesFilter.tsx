@@ -1,7 +1,6 @@
 import { Grid, MenuItem } from '@mui/material';
 import GroupIcon from '@mui/icons-material/Group';
 import moment from 'moment';
-import * as React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ProgrammeChoiceDataQuery } from '@generated/graphql';
 import { DatePickerFilter } from '@components/core/DatePickerFilter';
@@ -10,6 +9,7 @@ import { NumberTextField } from '@components/core/NumberTextField';
 import { SearchTextField } from '@components/core/SearchTextField';
 import { SelectFilter } from '@components/core/SelectFilter';
 import { createHandleApplyFilterChange } from '@utils/utils';
+import { ReactElement } from 'react';
 
 interface ProgrammesFilterProps {
   filter;
@@ -26,7 +26,7 @@ export function ProgrammesFilters({
   initialFilter,
   appliedFilter,
   setAppliedFilter,
-}: ProgrammesFilterProps): React.ReactElement {
+}: ProgrammesFilterProps): ReactElement {
   const navigate = useNavigate();
   const location = useLocation();
 
