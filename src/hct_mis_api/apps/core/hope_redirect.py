@@ -89,6 +89,7 @@ class HopeRedirectProgram(HopeRedirect):
 
 
 class HopeRedirectCashPlan(HopeRedirect):
+    # TODO TP what is this?
     def url(self) -> str:
         business_area_slug = self.get_business_area_slug()
 
@@ -108,6 +109,7 @@ class HopeRedirectCashPlan(HopeRedirect):
 
 
 class HopeRedirectPayment(HopeRedirect):
+    # TODO TP what is this?
     def url(self) -> str:
         business_area_slug = self.get_business_area_slug()
 
@@ -128,6 +130,7 @@ class HopeRedirectPayment(HopeRedirect):
 
 
 class HopeRedirectTargetPopulation(HopeRedirect):
+    # TODO TP what is this?
     def url(self) -> str:
         business_area_slug = self.get_business_area_slug()
 

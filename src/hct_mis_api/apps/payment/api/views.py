@@ -71,7 +71,7 @@ class PaymentPlanViewSet(BusinessAreaProgramMixin, PaymentPlanMixin, mixins.List
     def get_queryset(self) -> QuerySet:
         business_area = self.get_business_area()
         program = self.get_program()
-        return PaymentPlan.objects.filter(business_area=business_area, program=program)
+        return PaymentPlan.objects.filter(business_area=business_area, program_cycle__program=program)
 
 
 class PaymentPlanManagerialViewSet(BusinessAreaMixin, PaymentPlanMixin, mixins.ListModelMixin, GenericViewSet):

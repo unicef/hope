@@ -88,9 +88,9 @@ def update_ticket_based_on_payment_record_service(
     if payment_record_id := input_data.get("payment_record"):
         node_name, obj_id = b64decode(payment_record_id).decode().split(":")
 
-        payment_record: Union["Payment", "PaymentRecord"] = get_object_or_404(  # type: ignore
-            Payment if node_name == "PaymentNode" else PaymentRecord, id=obj_id
+        payment_record: "Payment" = get_object_or_404(  # type: ignore
+            Payment, id=obj_id
         )
-        ticket_details.payment_obj = payment_record
+        ticket_details.payment = payment_record
     ticket_details.save()
     return grievance_ticket
