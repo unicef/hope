@@ -30,6 +30,7 @@ import {
   ProgramStepper,
 } from '@components/programs/CreateProgram/ProgramStepper';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { omit } from 'lodash';
 
 export const DuplicateProgramPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -68,8 +69,8 @@ export const DuplicateProgramPage = (): ReactElement => {
             areaAccess,
           }))
         : [];
-    const { ...requestValues } = values;
 
+    const requestValues = omit(values, ['editMode']);
     const initialPduFieldState = {
       label: '',
       pduData: {
