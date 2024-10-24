@@ -1,9 +1,12 @@
 import base64
 from typing import Any, Dict, Optional
 
+from django.shortcuts import get_object_or_404
+
 from rest_framework import serializers
 
 from hct_mis_api.apps.account.api.fields import Base64ModelField
+from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.payment.models import PaymentPlan, PaymentPlanSupportingDocument
 
 
@@ -61,6 +64,7 @@ class PaymentPlanBulkActionSerializer(serializers.Serializer):
 
 class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):
     id = serializers.SerializerMethodField()
+    file = serializers.FileField(use_url=False)
 
     class Meta:
         model = PaymentPlanSupportingDocument
@@ -81,7 +85,10 @@ class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):
         return file
 
     def validate(self, data: Dict) -> Dict:
-        payment_plan = self.context["payment_plan"]
+        payment_plan_id = self.context["request"].parser_context["kwargs"]["payment_plan_id"]
+        payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
+        data["payment_plan"] = payment_plan
+        data["created_by"] = self.context["request"].user
         if payment_plan.status not in [PaymentPlan.Status.OPEN, PaymentPlan.Status.LOCKED]:
             raise serializers.ValidationError("Payment plan must be within status OPEN or LOCKED.")
 
@@ -90,3 +97,6 @@ class PaymentPlanSupportingDocumentSerializer(serializers.ModelSerializer):
                 f"Payment plan already has the maximum of {PaymentPlanSupportingDocument.FILE_LIMIT} supporting documents."
             )
         return data
+
+    def create(self, validated_data: Dict[str, Any]) -> PaymentPlanSupportingDocument:
+        return super().create(validated_data)
