@@ -71,7 +71,6 @@ from hct_mis_api.apps.grievance.models import (
 from hct_mis_api.apps.grievance.utils import (
     filter_grievance_tickets_based_on_partner_areas_2,
 )
-from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
 from hct_mis_api.apps.payment.schema import PaymentRecordAndPaymentNode
 from hct_mis_api.apps.program.models import Program
@@ -227,14 +226,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObje
 
     @staticmethod
     def resolve_target_id(grievance_ticket: GrievanceTicket, info: Any) -> str:
-        if grievance_ticket.has_social_worker_program:
-            ticket_details = grievance_ticket.ticket_details
-            if ticket_details and getattr(ticket_details, "individual", None):
-                return ticket_details.individual.unicef_id if ticket_details.individual else ""
-            # get IND unicef_id from HH
-            individual = Individual.objects.filter(household__unicef_id=grievance_ticket.household_unicef_id).first()
-            return individual.unicef_id if individual else ""
-        return grievance_ticket.household_unicef_id
+        return grievance_ticket.target_id
 
 
 class TicketNoteNode(DjangoObjectType):
