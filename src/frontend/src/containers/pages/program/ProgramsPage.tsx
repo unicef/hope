@@ -12,6 +12,7 @@ import { usePermissions } from '@hooks/usePermissions';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { ProgrammesTable } from '../../tables/ProgrammesTable';
 import { ProgrammesFilters } from '../../tables/ProgrammesTable/ProgrammesFilter';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
 const initialFilter = {
   search: '',
@@ -68,7 +69,14 @@ export function ProgramsPage(): React.ReactElement {
   );
 
   return (
-    <div>
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'ProgramsPage.tsx');
+      }}
+      componentName="ProgramsPage"
+    >
       {hasPermissions(PERMISSIONS.PROGRAMME_CREATE, permissions) && toolbar}
       <ProgrammesFilters
         filter={filter}
@@ -83,6 +91,6 @@ export function ProgramsPage(): React.ReactElement {
         choicesData={choicesData}
         filter={appliedFilter}
       />
-    </div>
+    </UniversalErrorBoundary>
   );
 }

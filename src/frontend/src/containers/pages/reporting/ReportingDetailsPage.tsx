@@ -5,7 +5,7 @@ import EmailIcon from '@mui/icons-material/Email';
 import * as React from 'react';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { ALL_REPORTS_QUERY } from '../../../apollo/queries/reporting/AllReports';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
@@ -30,6 +30,7 @@ import {
   useRestartCreateReportMutation,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
 const IconContainer = styled.div`
   color: #d1d1d1;
@@ -55,6 +56,7 @@ export function ReportingDetailsPage(): React.ReactElement {
   const { baseUrl, businessArea } = useBaseUrl();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
+  const location = useLocation();
 
   const [mutate, { loading: restartReportLoading }] =
     useRestartCreateReportMutation();
@@ -195,7 +197,14 @@ export function ReportingDetailsPage(): React.ReactElement {
   };
 
   return (
-    <>
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'ReportingDetailsPage.tsx');
+      }}
+      componentName="ReportingDetailsPage"
+    >
       <PageHeader
         title={
           <span>
@@ -269,6 +278,6 @@ export function ReportingDetailsPage(): React.ReactElement {
           </GreyText>
         </>
       )}
-    </>
+    </UniversalErrorBoundary>
   );
 }

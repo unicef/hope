@@ -1,7 +1,7 @@
 import { Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import {
   RegistrationDataImportStatus,
@@ -22,6 +22,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError } from '@utils/utils';
 import { ImportedPeopleTable } from '@containers/tables/rdi/ImportedPeopleTable';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
 const Container = styled.div`
   && {
@@ -61,6 +62,7 @@ export const PeopleRegistrationDataImportDetailsPage =
   (): React.ReactElement => {
     const { t } = useTranslation();
     const { id } = useParams();
+    const location = useLocation();
     const permissions = usePermissions();
     const { businessArea, programId } = useBaseUrl();
     const { data: programData } = useProgramQuery({
@@ -156,7 +158,17 @@ export const PeopleRegistrationDataImportDetailsPage =
     }
 
     return (
-      <div>
+      <UniversalErrorBoundary
+        location={location}
+        beforeCapture={(scope) => {
+          scope.setTag('location', location.pathname);
+          scope.setTag(
+            'component',
+            'PeopleRegistrationDataImportDetailsPage.tsx',
+          );
+        }}
+        componentName="PeopleRegistrationDataImportDetailsPage"
+      >
         <RegistrationDataImportDetailsPageHeader
           registration={data.registrationDataImport}
           canMerge={canMerge}
@@ -168,6 +180,6 @@ export const PeopleRegistrationDataImportDetailsPage =
           canRefuse={hasPermissions(PERMISSIONS.RDI_REFUSE_IMPORT, permissions)}
         />
         <RegistrationContainer isErased={data.registrationDataImport.erased} />
-      </div>
+      </UniversalErrorBoundary>
     );
   };

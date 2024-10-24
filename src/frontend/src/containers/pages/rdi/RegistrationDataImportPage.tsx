@@ -17,6 +17,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { useDeduplicationFlagsQuery } from '@generated/graphql';
 import { ButtonTooltip } from '@core/ButtonTooltip';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
 const initialFilter = {
   search: '',
@@ -90,23 +91,33 @@ export function RegistrationDataImportPage(): React.ReactElement {
       </Box>
     </PageHeader>
   );
+
   return (
-    <div>
-      {toolbar}
-      <RegistrationFilters
-        filter={filter}
-        setFilter={setFilter}
-        initialFilter={initialFilter}
-        appliedFilter={appliedFilter}
-        setAppliedFilter={setAppliedFilter}
-      />
-      <RegistrationDataImportTable
-        filter={appliedFilter}
-        canViewDetails={hasPermissions(
-          PERMISSIONS.RDI_VIEW_DETAILS,
-          permissions,
-        )}
-      />
-    </div>
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'RegistrationDataImportPage.tsx');
+      }}
+      componentName="RegistrationDataImportPage"
+    >
+      <div>
+        {toolbar}
+        <RegistrationFilters
+          filter={filter}
+          setFilter={setFilter}
+          initialFilter={initialFilter}
+          appliedFilter={appliedFilter}
+          setAppliedFilter={setAppliedFilter}
+        />
+        <RegistrationDataImportTable
+          filter={appliedFilter}
+          canViewDetails={hasPermissions(
+            PERMISSIONS.RDI_VIEW_DETAILS,
+            permissions,
+          )}
+        />
+      </div>
+    </UniversalErrorBoundary>
   );
 }

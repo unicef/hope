@@ -1,7 +1,7 @@
 import { Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import {
   RegistrationDataImportStatus,
@@ -22,6 +22,7 @@ import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError } from '@utils/utils';
 import { ImportedHouseholdTable } from '../../tables/rdi/ImportedHouseholdsTable';
 import { ImportedIndividualsTable } from '../../tables/rdi/ImportedIndividualsTable';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
 const Container = styled.div`
   && {
@@ -61,6 +62,8 @@ export const RegistrationDataImportDetailsPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
   const permissions = usePermissions();
+  const location = useLocation();
+
   const { businessArea } = useBaseUrl();
   const { data, loading, error, stopPolling, startPolling } =
     useRegistrationDataImportQuery({
@@ -155,7 +158,14 @@ export const RegistrationDataImportDetailsPage = (): React.ReactElement => {
   }
 
   return (
-    <div>
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'RegistrationDataImportDetailsPage.tsx');
+      }}
+      componentName="RegistrationDataImportDetailsPage"
+    >
       <RegistrationDataImportDetailsPageHeader
         registration={data.registrationDataImport}
         canMerge={hasPermissions(PERMISSIONS.RDI_MERGE_IMPORT, permissions)}
@@ -167,6 +177,6 @@ export const RegistrationDataImportDetailsPage = (): React.ReactElement => {
         canRefuse={hasPermissions(PERMISSIONS.RDI_REFUSE_IMPORT, permissions)}
       />
       <RegistrationContainer isErased={data.registrationDataImport.erased} />
-    </div>
+    </UniversalErrorBoundary>
   );
 };
