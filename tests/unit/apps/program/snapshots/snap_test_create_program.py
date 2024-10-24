@@ -12,6 +12,9 @@ snapshots['TestCreateProgram::test_create_program_authenticated_0_with_permissio
         'createProgram': {
             'program': {
                 'administrativeAreasOfImplementation': 'Lorem Ipsum',
+                'beneficiaryGroup': {
+                    'name': 'Household'
+                },
                 'budget': '20000000',
                 'cashPlus': True,
                 'dataCollectingType': {
@@ -178,6 +181,9 @@ snapshots['TestCreateProgram::test_create_program_with_partners_0_valid 1'] = {
         'createProgram': {
             'program': {
                 'administrativeAreasOfImplementation': 'Lorem Ipsum',
+                'beneficiaryGroup': {
+                    'name': 'Household'
+                },
                 'budget': '20000000',
                 'cashPlus': True,
                 'dataCollectingType': {
@@ -288,6 +294,9 @@ snapshots['TestCreateProgram::test_create_program_with_partners_all_partners_acc
         'createProgram': {
             'program': {
                 'administrativeAreasOfImplementation': 'Lorem Ipsum',
+                'beneficiaryGroup': {
+                    'name': 'Household'
+                },
                 'budget': '20000000',
                 'cashPlus': True,
                 'dataCollectingType': {
@@ -346,6 +355,9 @@ snapshots['TestCreateProgram::test_create_program_with_partners_none_partners_ac
         'createProgram': {
             'program': {
                 'administrativeAreasOfImplementation': 'Lorem Ipsum',
+                'beneficiaryGroup': {
+                    'name': 'Household'
+                },
                 'budget': '20000000',
                 'cashPlus': True,
                 'dataCollectingType': {
@@ -392,6 +404,9 @@ snapshots['TestCreateProgram::test_create_program_with_pdu_fields 1'] = {
         'createProgram': {
             'program': {
                 'administrativeAreasOfImplementation': 'Lorem Ipsum',
+                'beneficiaryGroup': {
+                    'name': 'Household'
+                },
                 'budget': '20000000',
                 'cashPlus': True,
                 'dataCollectingType': {
@@ -508,6 +523,9 @@ snapshots['TestCreateProgram::test_create_program_with_pdu_fields_existing_field
         'createProgram': {
             'program': {
                 'administrativeAreasOfImplementation': 'Lorem Ipsum',
+                'beneficiaryGroup': {
+                    'name': 'Household'
+                },
                 'budget': '20000000',
                 'cashPlus': True,
                 'dataCollectingType': {

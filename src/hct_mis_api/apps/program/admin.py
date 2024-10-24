@@ -204,5 +204,5 @@ class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, AdminAutoCom
 @admin.register(BeneficiaryGroup)
 class BeneficiaryGroupAdmin(LastSyncDateResetMixin, HOPEModelAdminBase):
     list_display = ("name", "group_label", "member_label", "master_detail")
-    search_fields = ("name", "group_label", "member_label")
+    search_fields = ("name",)
     ordering = ("name",)

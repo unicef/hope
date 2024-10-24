@@ -52,6 +52,9 @@ class TestCreateProgram(APITestCase):
             active
             individualFiltersAvailable
           }
+          beneficiaryGroup {
+            name
+          }
           partners {
             name
             areas {

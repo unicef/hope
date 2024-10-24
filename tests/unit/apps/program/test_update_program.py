@@ -45,6 +45,9 @@ class TestUpdateProgram(APITestCase):
             label
             code
           }
+          beneficiaryGroup {
+            name
+          }
           pduFields {
             name
             label
@@ -85,7 +88,7 @@ class TestUpdateProgram(APITestCase):
 
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.business_area.data_collecting_types.set(DataCollectingType.objects.all().values_list("id", flat=True))
-
+        beneficiary_group = BeneficiaryGroupFactory()
         cls.program = ProgramFactory.create(
             name="initial name",
             status=Program.DRAFT,
@@ -94,11 +97,13 @@ class TestUpdateProgram(APITestCase):
             partner_access=Program.NONE_PARTNERS_ACCESS,
             version=123,
             biometric_deduplication_enabled=True,
+            beneficiary_group=beneficiary_group,
         )
         cls.program_finished = ProgramFactory.create(
             status=Program.FINISHED,
             business_area=cls.business_area,
             partner_access=Program.NONE_PARTNERS_ACCESS,
+            beneficiary_group=beneficiary_group,
         )
 
         cls.partner = PartnerFactory(name="WFP")
@@ -307,11 +312,24 @@ class TestUpdateProgram(APITestCase):
             },
         )
 
+    def test_update_program_beneficiary_group(self) -> None:
+        beneficiary_group2 = BeneficiaryGroupFactory(name="Other Group")
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=self.UPDATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables={
+                "programData": {
+                    "id": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "beneficiaryGroup": str(beneficiary_group2.id),
+                },
+                "version": self.program.version,
+            },
+        )
+
     def test_update_program_beneficiary_group_when_imported_population(self) -> None:
-        beneficiary_group1 = BeneficiaryGroupFactory()
-        beneficiary_group2 = BeneficiaryGroupFactory()
-        self.program.beneficiary_group = beneficiary_group1
-        self.program.save()
+        beneficiary_group2 = BeneficiaryGroupFactory(name="Other Group")
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
         RegistrationDataImportFactory(program=self.program)
 

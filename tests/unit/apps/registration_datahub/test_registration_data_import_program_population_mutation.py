@@ -109,7 +109,7 @@ class TestRegistrationDataProgramPopulationImportMutations(APITestCase):
     def test_registration_data_import_different_beneficiary_group(self) -> None:
         user = UserFactory(partner=self.partner)
         beneficiary_group1 = BeneficiaryGroupFactory()
-        beneficiary_group2 = BeneficiaryGroupFactory()
+        beneficiary_group2 = BeneficiaryGroupFactory(name="Other Group")
         self.import_to_program.beneficiary_group = beneficiary_group1
         self.import_to_program.save()
         self.import_from_program.beneficiary_group = beneficiary_group2

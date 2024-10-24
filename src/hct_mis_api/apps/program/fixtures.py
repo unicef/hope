@@ -43,6 +43,14 @@ class ProgramCycleFactory(DjangoModelFactory):
     program = factory.SubFactory("program.fixtures.ProgramFactory")
 
 
+class BeneficiaryGroupFactory(DjangoModelFactory):
+    name = "Household"
+
+    class Meta:
+        model = BeneficiaryGroup
+        django_get_or_create = ("name",)
+
+
 class ProgramFactory(DjangoModelFactory):
     class Meta:
         model = Program
@@ -96,6 +104,7 @@ class ProgramFactory(DjangoModelFactory):
     programme_code = factory.LazyAttribute(
         lambda o: "".join(random.choice(string.ascii_uppercase + string.digits) for _ in range(4))
     )
+    beneficiary_group = factory.SubFactory(BeneficiaryGroupFactory)
 
     @factory.post_generation
     def cycle(self, create: bool, extracted: bool, **kwargs: Any) -> None:
@@ -117,11 +126,3 @@ def get_program_with_dct_type_and_name(
         **kwargs,
     )
     return program
-
-
-class BeneficiaryGroupFactory(DjangoModelFactory):
-    name = factory.Faker("word")
-
-    class Meta:
-        model = BeneficiaryGroup
-        django_get_or_create = ("name",)

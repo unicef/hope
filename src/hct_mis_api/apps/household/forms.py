@@ -247,7 +247,10 @@ class MassEnrollForm(forms.Form):
                     break  # Exit the loop after the first incompatible household
 
             if self.households.exclude(program__beneficiary_group=program_for_enroll.beneficiary_group).exists():
-                self.add_error(None, "Some households belong to a different beneficiary group than selected program.")
+                self.add_error(
+                    None,
+                    "Some households belong to a different beneficiary group than the selected program.",
+                )
 
             if warning_message:
                 # Add the warning message as a non-field error
