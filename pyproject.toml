@@ -138,7 +138,7 @@ distribution = true
 
 [project]
 name = "hope"
-version = "3.0.0"
+version = "2.12.0"
 description = "HCT MIS is UNICEF's humanitarian cash transfer platform."
 authors = [
     { name = "Tivix" },
@@ -237,6 +237,7 @@ dependencies = [
     "django-rest-extensions>=0.2.0",
     "pydyf==0.10.0",
     "elastic-transport==8.13.0",
+    "flower>=2.0.1",
 ]
 requires-python = "==3.11.*"
 readme = "README.md"

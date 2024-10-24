@@ -13,6 +13,7 @@ import { getFilterFromQueryParams } from '@utils/utils';
 import { ReportingFilters } from '../../tables/ReportingTable/ReportingFilters';
 import { ReportingTable } from '../../tables/ReportingTable/ReportingTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
 const initialFilter = {
   type: '',
@@ -49,7 +50,14 @@ export function ReportingPage(): React.ReactElement {
     return <PermissionDenied />;
 
   return (
-    <>
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'ReportingPage.tsx');
+      }}
+      componentName="ReportingPage"
+    >
       <PageHeader title={t('Reporting')}>
         <NewReportForm />
       </PageHeader>
@@ -67,6 +75,6 @@ export function ReportingPage(): React.ReactElement {
         choicesData={choicesData}
         meData={meData}
       />
-    </>
+    </UniversalErrorBoundary>
   );
 }

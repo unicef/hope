@@ -51,6 +51,7 @@ import {
   hasPermissions,
 } from '../../../config/permissions';
 import { useProgramContext } from 'src/programContext';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
 const InnerBoxPadding = styled.div`
   .MuiPaper-root {
@@ -228,216 +229,227 @@ export const CreateGrievancePage = (): React.ReactElement => {
   }
 
   return (
-    <Formik
-      initialValues={initialValues}
-      onSubmit={async (values) => {
-        if (activeStep === GrievanceSteps.Description) {
-          try {
-            const { data } = await mutate(
-              prepareVariables(businessArea, values),
-            );
-            const grievanceTicket =
-              data.createGrievanceTicket.grievanceTickets[0];
-            let msg: string;
-            let url: string;
-            const paymentsNumber = values.selectedPaymentRecords.length;
-            if (paymentsNumber > 1) {
-              msg = `${paymentsNumber} ${t('Grievance Tickets created')}.`;
-              url = `/${baseUrl}/grievance/tickets/user-generated`;
-            } else {
-              msg = t('Grievance Ticket created.');
-              url = getGrievanceDetailsPath(
-                grievanceTicket.id,
-                grievanceTicket.category,
-                baseUrl,
-              );
-            }
-            showMessage(msg);
-            navigate(url);
-          } catch (e) {
-            e.graphQLErrors.map((x) => showMessage(x.message));
-          }
-        } else {
-          setValidateData(false);
-          handleNext();
-          // if creating a linked G&F ticket from Feedback page and IND and HH selected skip Look Up
-          if (
-            activeStep === 0 &&
-            linkedFeedbackId &&
-            selectedHousehold &&
-            selectedIndividual
-          ) {
-            handleNext();
-          }
-        }
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'CreateGrievancePage.tsx');
       }}
-      validateOnChange={
-        activeStep < GrievanceSteps.Verification || validateData
-      }
-      validateOnBlur={activeStep < GrievanceSteps.Verification || validateData}
-      validate={(values) =>
-        validateUsingSteps(
-          values,
-          allAddIndividualFieldsData,
-          individualFieldsDict,
-          householdFieldsDict,
-          activeStep,
-          setValidateData,
-        )
-      }
-      validationSchema={validationSchemaWithSteps(activeStep)}
+      componentName="CreateGrievancePage"
     >
-      {({
-        submitForm,
-        values,
-        setFieldValue,
-        errors,
-        touched,
-        handleChange,
-      }) => {
-        const DataChangeComponent = thingForSpecificGrievanceType(
-          values,
-          dataChangeComponentDict,
-          EmptyComponent,
-        );
-
-        const issueTypeToDisplay = (): string =>
-          selectedIssueType(
+      <Formik
+        initialValues={initialValues}
+        onSubmit={async (values) => {
+          if (activeStep === GrievanceSteps.Description) {
+            try {
+              const { data } = await mutate(
+                prepareVariables(businessArea, values),
+              );
+              const grievanceTicket =
+                data.createGrievanceTicket.grievanceTickets[0];
+              let msg: string;
+              let url: string;
+              const paymentsNumber = values.selectedPaymentRecords.length;
+              if (paymentsNumber > 1) {
+                msg = `${paymentsNumber} ${t('Grievance Tickets created')}.`;
+                url = `/${baseUrl}/grievance/tickets/user-generated`;
+              } else {
+                msg = t('Grievance Ticket created.');
+                url = getGrievanceDetailsPath(
+                  grievanceTicket.id,
+                  grievanceTicket.category,
+                  baseUrl,
+                );
+              }
+              showMessage(msg);
+              navigate(url);
+            } catch (e) {
+              e.graphQLErrors.map((x) => showMessage(x.message));
+            }
+          } else {
+            setValidateData(false);
+            handleNext();
+            // if creating a linked G&F ticket from Feedback page and IND and HH selected skip Look Up
+            if (
+              activeStep === 0 &&
+              linkedFeedbackId &&
+              selectedHousehold &&
+              selectedIndividual
+            ) {
+              handleNext();
+            }
+          }
+        }}
+        validateOnChange={
+          activeStep < GrievanceSteps.Verification || validateData
+        }
+        validateOnBlur={
+          activeStep < GrievanceSteps.Verification || validateData
+        }
+        validate={(values) =>
+          validateUsingSteps(
             values,
-            choicesData.grievanceTicketIssueTypeChoices,
+            allAddIndividualFieldsData,
+            individualFieldsDict,
+            householdFieldsDict,
+            activeStep,
+            setValidateData,
+          )
+        }
+        validationSchema={validationSchemaWithSteps(activeStep)}
+      >
+        {({
+          submitForm,
+          values,
+          setFieldValue,
+          errors,
+          touched,
+          handleChange,
+        }) => {
+          const DataChangeComponent = thingForSpecificGrievanceType(
+            values,
+            dataChangeComponentDict,
+            EmptyComponent,
           );
 
-        const disableNextOnFirstStep = (): boolean => {
-          if (!values.category) return true;
-          if (showIssueType(values)) {
-            if (!values.issueType) return true;
-          }
-          return false;
-        };
+          const issueTypeToDisplay = (): string =>
+            selectedIssueType(
+              values,
+              choicesData.grievanceTicketIssueTypeChoices,
+            );
 
-        return (
-          <>
-            <AutoSubmitFormOnEnter />
-            <PageHeader
-              title="New Ticket"
-              breadCrumbs={
-                hasPermissionInModule('GRIEVANCES_VIEW_LIST', permissions)
-                  ? breadCrumbsItems
-                  : null
-              }
-            />
-            <Grid container spacing={3}>
-              <Grid item xs={12}>
-                <NewTicket>
-                  <InnerBoxPadding>
-                    <ContainerColumnWithBorder>
-                      <CreateGrievanceStepper
-                        activeStep={activeStep}
-                        steps={steps}
-                      />
-                      {activeStep === GrievanceSteps.Selection && (
-                        <Selection
-                          handleChange={handleChange}
-                          choicesData={choicesData}
-                          setFieldValue={setFieldValue}
-                          showIssueType={showIssueType}
-                          values={values}
-                          redirectedFromRelatedTicket={
-                            redirectedFromRelatedTicket
-                          }
-                        />
-                      )}
-                      {activeStep === GrievanceSteps.Lookup && (
-                        <BoxWithBorders>
-                          <Box display="flex" flexDirection="column">
-                            <LookUpHouseholdIndividualSelection
-                              values={values}
-                              onValueChange={setFieldValue}
-                              errors={errors}
-                              touched={touched}
-                              redirectedFromRelatedTicket={
-                                redirectedFromRelatedTicket
-                              }
-                              isFeedbackWithHouseholdOnly={
-                                isFeedbackWithHouseholdOnly
-                              }
-                            />
-                          </Box>
-                        </BoxWithBorders>
-                      )}
-                      {activeStep === GrievanceSteps.Verification && (
-                        <Verification values={values} />
-                      )}
-                      {activeStep === GrievanceSteps.Description && (
-                        <>
-                          <Description
-                            values={values}
-                            showIssueType={showIssueType}
-                            selectedIssueType={issueTypeToDisplay}
-                            baseUrl={baseUrl}
-                            choicesData={choicesData}
-                            programsData={programsData}
-                            setFieldValue={setFieldValue}
-                            errors={errors}
-                            permissions={permissions}
-                          />
-                          <DataChangeComponent
-                            values={values}
-                            setFieldValue={setFieldValue}
-                          />
-                        </>
-                      )}
-                      {dataChangeErrors(errors)}
-                      <Box pt={3} display="flex" flexDirection="row">
-                        <Box mr={3}>
-                          <Button
-                            component={Link}
-                            to={`/${baseUrl}/grievance/tickets/user-generated`}
-                          >
-                            {t('Cancel')}
-                          </Button>
-                        </Box>
-                        <Box display="flex" ml="auto">
-                          <Button
-                            disabled={activeStep === 0}
-                            onClick={handleBack}
-                          >
-                            {t('Back')}
-                          </Button>
-                          <LoadingButton
-                            loading={loading}
-                            color="primary"
-                            variant="contained"
-                            onClick={submitForm}
-                            data-cy="button-submit"
-                            disabled={disableNextOnFirstStep()}
-                          >
-                            {activeStep === GrievanceSteps.Description
-                              ? t('Save')
-                              : t('Next')}
-                          </LoadingButton>
-                        </Box>
-                      </Box>
-                    </ContainerColumnWithBorder>
-                  </InnerBoxPadding>
-                </NewTicket>
-              </Grid>
-              {activeStep === GrievanceSteps.Selection && (
+          const disableNextOnFirstStep = (): boolean => {
+            if (!values.category) return true;
+            if (showIssueType(values)) {
+              if (!values.issueType) return true;
+            }
+            return false;
+          };
+
+          return (
+            <>
+              <AutoSubmitFormOnEnter />
+              <PageHeader
+                title="New Ticket"
+                breadCrumbs={
+                  hasPermissionInModule('GRIEVANCES_VIEW_LIST', permissions)
+                    ? breadCrumbsItems
+                    : null
+                }
+              />
+              <Grid container spacing={3}>
                 <Grid item xs={12}>
                   <NewTicket>
-                    <Grid container spacing={3}>
-                      <TicketsAlreadyExist values={values} />
-                      <Grid item xs={6}>
-                        <OtherRelatedTicketsCreate values={values} />
-                      </Grid>
-                    </Grid>
+                    <InnerBoxPadding>
+                      <ContainerColumnWithBorder>
+                        <CreateGrievanceStepper
+                          activeStep={activeStep}
+                          steps={steps}
+                        />
+                        {activeStep === GrievanceSteps.Selection && (
+                          <Selection
+                            handleChange={handleChange}
+                            choicesData={choicesData}
+                            setFieldValue={setFieldValue}
+                            showIssueType={showIssueType}
+                            values={values}
+                            redirectedFromRelatedTicket={
+                              redirectedFromRelatedTicket
+                            }
+                          />
+                        )}
+                        {activeStep === GrievanceSteps.Lookup && (
+                          <BoxWithBorders>
+                            <Box display="flex" flexDirection="column">
+                              <LookUpHouseholdIndividualSelection
+                                values={values}
+                                onValueChange={setFieldValue}
+                                errors={errors}
+                                touched={touched}
+                                redirectedFromRelatedTicket={
+                                  redirectedFromRelatedTicket
+                                }
+                                isFeedbackWithHouseholdOnly={
+                                  isFeedbackWithHouseholdOnly
+                                }
+                              />
+                            </Box>
+                          </BoxWithBorders>
+                        )}
+                        {activeStep === GrievanceSteps.Verification && (
+                          <Verification values={values} />
+                        )}
+                        {activeStep === GrievanceSteps.Description && (
+                          <>
+                            <Description
+                              values={values}
+                              showIssueType={showIssueType}
+                              selectedIssueType={issueTypeToDisplay}
+                              baseUrl={baseUrl}
+                              choicesData={choicesData}
+                              programsData={programsData}
+                              setFieldValue={setFieldValue}
+                              errors={errors}
+                              permissions={permissions}
+                            />
+                            <DataChangeComponent
+                              values={values}
+                              setFieldValue={setFieldValue}
+                            />
+                          </>
+                        )}
+                        {dataChangeErrors(errors)}
+                        <Box pt={3} display="flex" flexDirection="row">
+                          <Box mr={3}>
+                            <Button
+                              component={Link}
+                              to={`/${baseUrl}/grievance/tickets/user-generated`}
+                            >
+                              {t('Cancel')}
+                            </Button>
+                          </Box>
+                          <Box display="flex" ml="auto">
+                            <Button
+                              disabled={activeStep === 0}
+                              onClick={handleBack}
+                            >
+                              {t('Back')}
+                            </Button>
+                            <LoadingButton
+                              loading={loading}
+                              color="primary"
+                              variant="contained"
+                              onClick={submitForm}
+                              data-cy="button-submit"
+                              disabled={disableNextOnFirstStep()}
+                            >
+                              {activeStep === GrievanceSteps.Description
+                                ? t('Save')
+                                : t('Next')}
+                            </LoadingButton>
+                          </Box>
+                        </Box>
+                      </ContainerColumnWithBorder>
+                    </InnerBoxPadding>
                   </NewTicket>
                 </Grid>
-              )}
-            </Grid>
-          </>
-        );
-      }}
-    </Formik>
+                {activeStep === GrievanceSteps.Selection && (
+                  <Grid item xs={12}>
+                    <NewTicket>
+                      <Grid container spacing={3}>
+                        <TicketsAlreadyExist values={values} />
+                        <Grid item xs={6}>
+                          <OtherRelatedTicketsCreate values={values} />
+                        </Grid>
+                      </Grid>
+                    </NewTicket>
+                  </Grid>
+                )}
+              </Grid>
+            </>
+          );
+        }}
+      </Formik>
+    </UniversalErrorBoundary>
   );
 };
