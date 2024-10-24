@@ -619,16 +619,29 @@ class TestGrievanceTickets:
         pageGrievanceTickets: GrievanceTickets,
         pageGrievanceNewTicket: NewTicket,
         pageGrievanceDetailsPage: GrievanceDetailsPage,
-        test_data: dict,
         household_social_worker: Household,
     ) -> None:
+        pageGrievanceTickets.selectGlobalProgramFilter("Social Program")
         pageGrievanceTickets.getNavGrievance().click()
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
         pageGrievanceTickets.getButtonNewTicket().click()
         pageGrievanceNewTicket.getSelectCategory().click()
-        pageGrievanceNewTicket.select_option_by_name(test_data["category"])
+        pageGrievanceNewTicket.select_listbox_element("Data Change")
         pageGrievanceNewTicket.getIssueType().click()
-        pageGrievanceNewTicket.select_listbox_element(test_data["type"])
+        select_element = pageGrievanceNewTicket.wait_for('ul[role="listbox"]')
+        items = select_element.find_elements("tag name", "li")
+
+        check_list = {
+            "Add Individual": "true",
+            "Household Data Update": "true",
+            "Individual Data Update": "None",
+            "Withdraw Individual": "None",
+            "Withdraw Household": "true",
+        }
+
+        for item in items:
+            sleep(0.5)
+            assert str(item.get_attribute("aria-disabled")) in check_list[item.text]
 
     def test_grievance_tickets_create_new_ticket_Data_Change_Add_Individual_All_Fields(
         self,
