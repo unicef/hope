@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { isInvalid } from '@utils/utils';
 import { LookUpHouseholdIndividualSelectionDetail } from './LookUpHouseholdIndividualSelectionDetail';
 import { LookUpHouseholdIndividualSelectionDisplay } from './LookUpHouseholdIndividualSelectionDisplay';
+import { useProgramContext } from 'src/programContext';
 
 export function LookUpHouseholdIndividualSelection({
   onValueChange,
@@ -19,6 +20,7 @@ export function LookUpHouseholdIndividualSelection({
   redirectedFromRelatedTicket?: boolean;
   isFeedbackWithHouseholdOnly?: boolean;
 }): React.ReactElement {
+  const { isSocialDctType } = useProgramContext();
   const [selectedHousehold, setSelectedHousehold] = useState(
     values.selectedHousehold,
   );
@@ -62,11 +64,13 @@ export function LookUpHouseholdIndividualSelection({
         />
         {isInvalid('selectedIndividual', errors, touched) && (
           <Grid container spacing={4}>
-            <Grid item xs={4} />
+            {!isSocialDctType && <Grid item xs={4} />}
             <Grid item xs={4}>
-              <FormHelperText error>
-                {errors?.selectedIndividual}
-              </FormHelperText>
+              {!selectedIndividual && (
+                <FormHelperText error>
+                  {errors?.selectedIndividual}
+                </FormHelperText>
+              )}
             </Grid>
           </Grid>
         )}

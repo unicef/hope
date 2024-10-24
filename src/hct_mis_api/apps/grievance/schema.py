@@ -118,6 +118,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObje
     partner = graphene.Field(PartnerType)
     programs = graphene.List(ProgramNode)
     documentation = graphene.List(GrievanceDocumentNode)
+    target_id = graphene.String()
 
     @classmethod
     def check_node_permission(cls, info: Any, object_instance: GrievanceTicket) -> None:
@@ -222,6 +223,10 @@ class GrievanceTicketNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObje
     @staticmethod
     def resolve_documentation(grievance_ticket: GrievanceTicket, info: Any) -> "QuerySet[GrievanceDocument]":
         return grievance_ticket.support_documents.order_by("-created_at")
+
+    @staticmethod
+    def resolve_target_id(grievance_ticket: GrievanceTicket, info: Any) -> str:
+        return grievance_ticket.target_id
 
 
 class TicketNoteNode(DjangoObjectType):

@@ -35,5 +35,6 @@ module.exports = {
     '^@hooks/(.*)$': '<rootDir>/src/hooks/$1',
     '^@generated/(.*)$': '<rootDir>/src/__generated__/$1',
     '^@restgenerated/(.*)$': '<rootDir>/src/restgenerated/$1',
+    '^src/(.*)$': '<rootDir>/src/$1',
   },
 };
