@@ -1,8 +1,11 @@
+import logging
 from typing import Any, List
 
 from django.apps import apps
 from django.db import transaction
 from django.utils import timezone
+
+logger = logging.getLogger(__name__)
 
 
 def _get_model_list_is_original() -> List[Any]:
@@ -28,7 +31,7 @@ def remove_migrated_data_is_original(batch_size: int = 1000) -> None:
             model_qs = model.all_objects
 
         queryset_is_original = model_qs.filter(is_original=True).only("id")
-        print(f"Removing objects with 'is_original=True': {model.__name__}.")
+        logger.info(f"Removing objects with 'is_original=True': {model.__name__}.")
 
         ids_to_delete = [
             str(obj_id) for obj_id in queryset_is_original.values_list("id", flat=True).iterator(chunk_size=batch_size)
@@ -44,12 +47,12 @@ def remove_migrated_data_is_original(batch_size: int = 1000) -> None:
                 deleted_count += deleted
 
             if i % (batch_size * 10) == 0:
-                print(
+                logger.info(
                     f"Progress: Deleted {deleted_count:,} {model.__name__} and related objects. "
                     f"{model.__name__} list contains {total_to_delete:,} records."
                 )
-        print(f"Deleted {model.__name__} and related objects: {deleted_count:,}.\n")
-    print(f"Completed in {timezone.now() - start_time}\n", "*" * 60)
+        logger.info(f"Deleted {model.__name__} and related objects: {deleted_count:,}.\n")
+    logger.info(f"Completed in {timezone.now() - start_time}\n", "*" * 60)
 
 
 def get_statistic_is_original() -> None:
@@ -65,7 +68,13 @@ def get_statistic_is_original() -> None:
             queryset_all = model.all_objects.all().only("is_original", "id")
             queryset_is_original = queryset_all.filter(is_original=True)
         print(
+            f"* {model.__name__} All objects: {queryset_all.count():,}. "
+            f"Will remove objects with 'is_original=True': {queryset_is_original.count():,}"
+        )
+        logger.info(
             f"*** {model.__name__} All objects: {queryset_all.count():,}. "
             f"Will remove objects with 'is_original=True': {queryset_is_original.count():,}"
         )
-    print(f"Completed in {timezone.now() - start_time}\n", "*" * 55)
+
+    print(f"Completed in {timezone.now() - start_time}\n", "*" * 22)
+    logger.info(f"Completed in {timezone.now() - start_time}\n", "*" * 55)
