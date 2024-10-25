@@ -1,5 +1,11 @@
-import * as React from 'react';
-import { createContext, ReactNode, useContext, useRef, useState } from 'react';
+import {
+  createContext,
+  ReactElement,
+  ReactNode,
+  useContext,
+  useRef,
+  useState,
+} from 'react';
 import { ConfirmationDialog } from './ConfirmationDialog';
 
 const ConfirmationDialogContext = createContext<
@@ -9,7 +15,7 @@ const ConfirmationDialogContext = createContext<
 export interface ConfirmationDialogOptions {
   catchOnCancel?: boolean;
   title?: string;
-  content?: string | React.ReactElement;
+  content?: string | ReactElement;
   continueText?: string;
   extraContent?: string;
   warningContent?: string | null;

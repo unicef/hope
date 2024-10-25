@@ -1,10 +1,10 @@
 import { Button, Typography } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { Logo } from '@components/core/Logo';
 import { LOGIN_URL } from '../../../config';
+import { ReactElement } from 'react';
 
 const Container = styled.div`
   width: 100vw;
@@ -47,7 +47,7 @@ const LoginButton = styled(Button)`
   }
 `;
 
-export function LoginPage(): React.ReactElement {
+export function LoginPage(): ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
   const params = new URLSearchParams(location.search);

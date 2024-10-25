@@ -3,7 +3,7 @@ import { IndividualNode } from '@generated/graphql';
 import { Grid, Paper, Typography } from '@mui/material';
 import { Title } from '@core/Title';
 import { t } from 'i18next';
-import React from 'react';
+import React, { FC } from 'react';
 import styled from 'styled-components';
 import { LabelizedField } from '@components/core/LabelizedField';
 import { renderSomethingOrDash } from '@utils/utils';
@@ -21,7 +21,7 @@ const Overview = styled(Paper)`
   margin-bottom: ${({ theme }) => theme.spacing(4)};
 `;
 
-export const IndividualDeliveryMechanisms: React.FC<
+export const IndividualDeliveryMechanisms: FC<
   IndividualDeliveryMechanismsProps
 > = ({ individual }) => {
   const permissions = usePermissions();

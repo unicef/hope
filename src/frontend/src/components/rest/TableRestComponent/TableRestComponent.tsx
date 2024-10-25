@@ -16,9 +16,8 @@ import {
   TablePagination,
 } from '@mui/material';
 import TablePaginationActions from '@mui/material/TablePagination/TablePaginationActions';
-import * as React from 'react';
+import { ReactElement, ChangeEvent, MouseEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-
 import styled from 'styled-components';
 
 export type Order = 'asc' | 'desc';
@@ -94,29 +93,23 @@ const Icon = styled(FindInPageIcon)`
 
 interface TableRestComponentProps<T extends { [key: string]: any }> {
   data: T[];
-  renderRow: (row: T) => React.ReactElement;
+  renderRow: (row: T) => ReactElement;
   headCells: HeadCell<T>[];
   rowsPerPageOptions: number[];
   rowsPerPage: number;
   page: number;
   itemsCount: number;
   handleChangePage: (event: unknown, newPage: number) => void;
-  handleChangeRowsPerPage: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  handleRequestSort: (
-    event: React.MouseEvent<unknown>,
-    property: string,
-  ) => void;
+  handleChangeRowsPerPage: (event: ChangeEvent<HTMLInputElement>) => void;
+  handleRequestSort: (event: MouseEvent<unknown>, property: string) => void;
   orderBy: string;
   order: Order;
   title?: string;
   loading?: boolean;
   allowSort?: boolean;
   isOnPaper?: boolean;
-  actions?: Array<React.ReactElement>;
-  onSelectAllClick?: (
-    event: React.ChangeEvent<HTMLInputElement>,
-    rows: T[],
-  ) => void;
+  actions?: Array<ReactElement>;
+  onSelectAllClick?: (event: ChangeEvent<HTMLInputElement>, rows: T[]) => void;
   numSelected?: number;
 }
 
@@ -140,7 +133,7 @@ export function TableRestComponent<T>({
   isOnPaper = true,
   actions = [],
   numSelected = 0,
-}: TableRestComponentProps<T>): React.ReactElement {
+}: TableRestComponentProps<T>): ReactElement {
   const { t } = useTranslation();
 
   const emptyRows =

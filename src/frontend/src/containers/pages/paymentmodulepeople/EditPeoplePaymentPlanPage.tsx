@@ -1,5 +1,4 @@
 import { Form, Formik } from 'formik';
-import * as React from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import moment from 'moment';
@@ -21,8 +20,9 @@ import { EditPaymentPlanHeader } from '@components/paymentmodule/EditPaymentPlan
 import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { ReactElement } from 'react';
 
-export const EditPeoplePaymentPlanPage = (): React.ReactElement => {
+export const EditPeoplePaymentPlanPage = (): ReactElement => {
   const navigate = useNavigate();
   const location = useLocation();
   const { paymentPlanId } = useParams();

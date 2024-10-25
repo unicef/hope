@@ -1,5 +1,4 @@
 import { Grid } from '@mui/material';
-import * as React from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { useFeedbackQuery } from '@generated/graphql';
 import { FeedbackDetails } from '@components/accountability/Feedback/FeedbackDetails/FeedbackDetails';
@@ -12,8 +11,9 @@ import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError } from '@utils/utils';
 import { UniversalActivityLogTable } from '../../../tables/UniversalActivityLogTable';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { ReactElement } from 'react';
 
-export function FeedbackDetailsPage(): React.ReactElement {
+export function FeedbackDetailsPage(): ReactElement {
   const { id } = useParams();
   const location = useLocation();
   const permissions = usePermissions();

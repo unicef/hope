@@ -1,5 +1,4 @@
 import { Box, Grid } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { PaymentPlanQuery } from '@generated/graphql';
@@ -7,6 +6,7 @@ import { renderUserName } from '@utils/utils';
 import { DividerLine } from '@core/DividerLine';
 import { AcceptanceProcessStepper } from './AcceptanceProcessStepper/AcceptanceProcessStepper';
 import { GreyInfoCard } from './GreyInfoCard';
+import { ReactElement } from 'react';
 
 const StyledBox = styled(Box)`
   width: 100%;
@@ -20,7 +20,7 @@ interface AcceptanceProcessRowProps {
 export function AcceptanceProcessRow({
   acceptanceProcess,
   paymentPlan,
-}: AcceptanceProcessRowProps): React.ReactElement {
+}: AcceptanceProcessRowProps): ReactElement {
   const { t } = useTranslation();
   const {
     actions,

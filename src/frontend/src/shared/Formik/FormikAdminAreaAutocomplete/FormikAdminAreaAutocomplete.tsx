@@ -1,7 +1,7 @@
 import { Box } from '@mui/material';
-import * as React from 'react';
 import { FieldLabel } from '@components/core/FieldLabel';
 import { AdminAreaFixedAutocomplete } from '../../autocompletes/AdminAreaFixedAutocomplete';
+import { ReactElement } from 'react';
 
 export function FormikAdminAreaAutocomplete({
   field,
@@ -13,7 +13,7 @@ export function FormikAdminAreaAutocomplete({
   additionalOnChange,
   dataCy,
   ...props
-}): React.ReactElement {
+}): ReactElement {
   const { label } = props;
   const handleChange = (_, option): void => {
     if (!option) {

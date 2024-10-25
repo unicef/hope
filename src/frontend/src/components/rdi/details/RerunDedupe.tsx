@@ -5,8 +5,7 @@ import {
   DialogContent,
   DialogTitle,
 } from '@mui/material';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DialogDescription } from '@containers/dialogs/DialogDescription';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
@@ -25,7 +24,7 @@ interface RerunDedupeProps {
 
 export const RerunDedupe = ({
   registration,
-}: RerunDedupeProps): React.ReactElement => {
+}: RerunDedupeProps): ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();

@@ -1,16 +1,16 @@
-import * as React from 'react';
 import Button from '@mui/material/Button';
 import { Tooltip } from '@mui/material';
+import { ReactNode, FC } from 'react';
 
 interface ButtonTooltipProps {
-  children: React.ReactNode;
+  children: ReactNode;
   onClick?: () => void;
   title?: string;
   disabled?: boolean;
   [key: string]: any;
 }
 
-export const ButtonTooltip: React.FC<ButtonTooltipProps> = ({
+export const ButtonTooltip: FC<ButtonTooltipProps> = ({
   children,
   onClick = () => null,
   title = 'Permission denied',
