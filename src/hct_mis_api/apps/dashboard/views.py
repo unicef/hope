@@ -11,7 +11,7 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
+from django.utils.translation import gettext_lazy as _
 from hct_mis_api.apps.account.permissions import Permissions, check_permissions
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.dashboard.celery_tasks import generate_dash_report_task
@@ -41,7 +41,7 @@ class DashboardDataView(APIView):
 
         if not check_permissions(request.user, [Permissions.DASHBOARD_VIEW_COUNTRY], business_area=business_area):
             return Response(
-                {"detail": "You do not have permission to view this dashboard."}, status=status.HTTP_403_FORBIDDEN
+                {"detail": _("You do not have permission to view this dashboard.")}, status=status.HTTP_403_FORBIDDEN
             )
 
         data = DashboardDataCache.get_data(business_area_slug)
@@ -77,7 +77,7 @@ class CreateOrUpdateDashReportView(APIView):
             cache.delete(cache_key)
 
             return Response(
-                {"detail": "DashReport generation task has been triggered."}, status=status.HTTP_202_ACCEPTED
+                {"detail": _("DashReport generation task has been triggered.")}, status=status.HTTP_202_ACCEPTED
             )
 
         except BusinessArea.DoesNotExist:
@@ -99,7 +99,7 @@ class DashboardReportView(LoginRequiredMixin, TemplateView):
         business_area = get_object_or_404(BusinessArea, slug=business_area_slug)
 
         if not check_permissions(self.request.user, [Permissions.DASHBOARD_VIEW_COUNTRY], business_area=business_area):
-            raise PermissionDenied("You do not have permission to view this dashboard.")
+            raise PermissionDenied(_("You do not have permission to view this dashboard."))
 
         context["business_area_slug"] = business_area_slug
         return context
