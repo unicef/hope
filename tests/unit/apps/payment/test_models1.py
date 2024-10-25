@@ -240,12 +240,19 @@ class TestPaymentModel(TestCase):
             program=program,
             program_cycle=program_cycle,
         )
+        pp5 = PaymentPlanFactory(
+            status=PaymentPlan.Status.ACCEPTED,
+            program=program,
+            program_cycle=program_cycle,
+            is_removed=True,
+        )
         p1 = PaymentFactory(parent=pp1, conflicted=False, currency="PLN")
         p2 = PaymentFactory(parent=pp2, household=p1.household, conflicted=False, currency="PLN")
         p3 = PaymentFactory(parent=pp3, household=p1.household, conflicted=False, currency="PLN")
         p4 = PaymentFactory(parent=pp4, household=p1.household, conflicted=False, currency="PLN")
+        p5 = PaymentFactory(parent=pp5, household=p1.household, conflicted=False, currency="PLN")
 
-        for obj in [pp1, pp2, pp3, pp4, p1, p2, p3, p4]:
+        for obj in [pp1, pp2, pp3, pp4, p1, p2, p3, p4, p5]:
             obj.refresh_from_db()  # update unicef_id from trigger
 
         p1_data = Payment.objects.filter(id=p1.id).values()[0]
