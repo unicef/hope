@@ -22,7 +22,7 @@ from django.core.validators import (
     MaxLengthValidator,
     MaxValueValidator,
     MinLengthValidator,
-    MinValueValidator,
+    MinValueValidator, ProhibitNullCharactersValidator,
 )
 from django.db import models
 from django.db.models import (
@@ -65,7 +65,7 @@ from hct_mis_api.apps.core.field_attributes.fields_types import (
     Scope,
 )
 from hct_mis_api.apps.core.mixins import LimitBusinessAreaModelMixin
-from hct_mis_api.apps.core.models import BusinessArea, FileTemp, FlexibleAttribute
+from hct_mis_api.apps.core.models import BusinessArea, FileTemp, FlexibleAttribute, StorageFile
 from hct_mis_api.apps.geo.models import Area, Country
 from hct_mis_api.apps.household.models import FEMALE, MALE, Individual
 from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
@@ -83,6 +83,7 @@ from hct_mis_api.apps.utils.models import (
     TimeStampedUUIDModel,
     UnicefIdentifiedModel, InternalDataFieldModel,
 )
+from hct_mis_api.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.account.models import User
@@ -432,6 +433,68 @@ class PaymentPlanSplit(TimeStampedUUIDModel):
 
 
 class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel, AdminUrlMixin, InternalDataFieldModel):
+    TP_MIGRATION_MAPPING = {
+        # tp.field: payment_plan.field
+        # if value has internal_data__ will story in json
+        "name": "name",
+        "ca_id": "internal_data__ca_id",
+        "ca_hash_id": "internal_data__ca_hash_id",
+        "created_by": "created_by",
+        "change_date": "status_date",
+        "business_area": "business_area",
+        "status": "status",
+        "build_status": "build_status",
+        "program": "program",
+        "program_cycle": "program_cycle",
+        "targeting_criteria": "targeting_criteria",
+        "sent_to_datahub": "internal_data__sent_to_datahub",
+        "steficon_rule": "steficon_rule",
+        "steficon_applied_date": "steficon_applied_date",
+        "vulnerability_score_min": "vulnerability_score_min",
+        "vulnerability_score_max": "vulnerability_score_max",
+        "excluded_ids": "excluded_ids",
+        "exclusion_reason": "exclusion_reason",
+        "total_households_count": "total_households_count",
+        "total_individuals_count": "total_individuals_count",
+        "child_male_count": "male_children_count",
+        "child_female_count": "female_children_count",
+        "adult_male_count": "male_adults_count",
+        "adult_female_count": "female_adults_count",
+        "storage_file": "storage_file",
+    }
+
+    # ACTIVITY_LOG_MAPPING from TP
+    # TODO: merge it with exists
+    ACTIVITY_LOG_MAPPING_TP = create_mapping_dict(
+            [
+                "name",
+                "created_by",
+                "change_date",
+                "changed_by",
+                "finalized_at",
+                "finalized_by",
+                "status",
+                "child_male_count",
+                "child_female_count",
+                "adult_male_count",
+                "adult_female_count",
+                "total_households_count",
+                "total_individuals_count",
+                "program",
+                "targeting_criteria_string",
+                "sent_to_datahub",
+                "steficon_rule",
+                "exclusion_reason",
+                "excluded_ids",
+            ],
+            {
+                "steficon_rule": "additional_formula",
+                "steficon_applied_date": "additional_formula_applied_date",
+                "vulnerability_score_min": "score_min",
+                "vulnerability_score_max": "score_max",
+            },
+        )
+
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "status",
@@ -451,6 +514,18 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
             "steficon_applied_date",
             "exclusion_reason",
         ]
+    )
+
+    BUILD_STATUS_PENDING = "PENDING"
+    BUILD_STATUS_BUILDING = "BUILDING"
+    BUILD_STATUS_FAILED = "FAILED"
+    BUILD_STATUS_OK = "OK"
+
+    BUILD_STATUS_CHOICES = (
+        (BUILD_STATUS_PENDING, _("Pending")),
+        (BUILD_STATUS_BUILDING, _("Building")),
+        (BUILD_STATUS_FAILED, _("Failed")),
+        (BUILD_STATUS_OK, _("Ok")),
     )
 
     class Status(models.TextChoices):
@@ -525,6 +600,10 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
         null=True,
         choices=BackgroundActionStatus.choices,
     )
+    build_status = models.CharField(
+        max_length=256, choices=BUILD_STATUS_CHOICES, default=BUILD_STATUS_PENDING, db_index=True
+    )
+    built_at = models.DateTimeField(null=True, blank=True)
     target_population = models.ForeignKey(
         "targeting.TargetPopulation",
         on_delete=models.CASCADE,
@@ -574,6 +653,7 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
         "self", null=True, blank=True, on_delete=models.CASCADE, related_name="follow_ups"
     )
     is_follow_up = models.BooleanField(default=False)
+    excluded_ids = models.TextField(blank=True)
     exclusion_reason = models.TextField(blank=True)
     exclude_household_error = models.TextField(blank=True)
     name = models.CharField(
@@ -581,10 +661,35 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
         validators=[
             MinLengthValidator(3),
             MaxLengthValidator(255),
+            DoubleSpaceValidator,
+            StartEndSpaceValidator,
+            ProhibitNullCharactersValidator(),
         ],
         null=True,
         blank=True,
     )
+    targeting_criteria = models.OneToOneField(
+        "TargetingCriteria",
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="target_population",
+    )
+    vulnerability_score_min = models.DecimalField(
+        null=True,
+        decimal_places=3,
+        max_digits=6,
+        help_text="Written by a tool such as Corticon.",
+        blank=True,
+    )
+    vulnerability_score_max = models.DecimalField(
+        null=True,
+        decimal_places=3,
+        max_digits=6,
+        help_text="Written by a tool such as Corticon.",
+        blank=True,
+    )
+    storage_file = models.OneToOneField(StorageFile, blank=True, null=True, on_delete=models.SET_NULL)
 
     class Meta:
         verbose_name = "Payment Plan"
