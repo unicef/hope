@@ -1,6 +1,7 @@
-import React, {
+import {
   createContext,
   ReactElement,
+  ReactNode,
   useContext,
   useState,
 } from 'react';
@@ -37,7 +38,7 @@ export const ProgramContext = createContext(null);
 export function ProgramProvider({
   children,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
 }): ReactElement {
   const [selectedProgram, setSelectedProgram] =
     useState<ProgramContextType>(null);

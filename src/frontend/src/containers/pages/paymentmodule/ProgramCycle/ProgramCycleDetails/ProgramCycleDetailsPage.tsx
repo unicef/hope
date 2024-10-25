@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { ReactElement, useState } from 'react';
 import { decodeIdString, getFilterFromQueryParams } from '@utils/utils';
 import { useQuery } from '@tanstack/react-query';
 import { fetchProgramCycle } from '@api/programCycleApi';
@@ -23,7 +23,7 @@ const initialFilter = {
   isFollowUp: false,
 };
 
-export const ProgramCycleDetailsPage = (): React.ReactElement => {
+export const ProgramCycleDetailsPage = (): ReactElement => {
   const { businessArea, programId } = useBaseUrl();
   const { programCycleId } = useParams();
   const location = useLocation();

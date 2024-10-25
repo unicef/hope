@@ -1,4 +1,3 @@
-import * as React from 'react';
 import TableCell from '@mui/material/TableCell';
 import { useNavigate } from 'react-router-dom';
 import { Radio } from '@mui/material';
@@ -12,6 +11,7 @@ import {
 } from '@utils/utils';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { BlackLink } from '@components/core/BlackLink';
+import { ReactElement } from 'react';
 
 interface LookUpTargetPopulationTableRowCommunicationProps {
   targetPopulation: TargetPopulationNode;
@@ -25,7 +25,7 @@ export function LookUpTargetPopulationTableRowCommunication({
   canViewDetails,
   radioChangeHandler,
   selectedTargetPopulation,
-}: LookUpTargetPopulationTableRowCommunicationProps): React.ReactElement {
+}: LookUpTargetPopulationTableRowCommunicationProps): ReactElement {
   const navigate = useNavigate();
   const businessArea = useBusinessArea();
   const targetPopulationDetailsPath = `/${businessArea}/target-population/${targetPopulation.id}`;

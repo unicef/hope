@@ -1,5 +1,4 @@
 import { Button, DialogContent, DialogTitle } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { LoadingButton } from '@components/core/LoadingButton';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -11,6 +10,7 @@ import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useNavigate } from 'react-router-dom';
+import { ReactElement } from 'react';
 
 export interface LockTargetPopulationDialogProps {
   open: boolean;
@@ -22,7 +22,7 @@ export const LockTargetPopulationDialog = ({
   open,
   setOpen,
   targetPopulationId,
-}: LockTargetPopulationDialogProps): React.ReactElement => {
+}: LockTargetPopulationDialogProps): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();

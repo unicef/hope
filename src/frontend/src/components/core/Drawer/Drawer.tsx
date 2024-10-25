@@ -4,7 +4,7 @@ import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import List from '@mui/material/List';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import { useEffect, useState } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useBackendVersion } from '@hooks/useBackendVersion';
 import { useFrontendVersion } from '@hooks/useFrontendVersion';
@@ -132,7 +132,7 @@ export const Drawer = ({
   handleDrawerClose,
   currentLocation,
   dataCy,
-}: DrawerProps): React.ReactElement => {
+}: DrawerProps): ReactElement => {
   const { t } = useTranslation();
   const [showMismatchedDialog, setShowMismatchedDialog] = useState(false);
   const { selectedProgram } = useProgramContext();

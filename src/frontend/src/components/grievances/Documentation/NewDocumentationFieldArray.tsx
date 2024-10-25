@@ -1,9 +1,9 @@
 import { Button, FormHelperText, Grid } from '@mui/material';
 import { AddCircleOutline } from '@mui/icons-material';
 import { FieldArray } from 'formik';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { DocumentationField } from './DocumentationField';
+import { ReactElement } from 'react';
 
 export interface NewDocumentationFieldArrayProps {
   values;
@@ -15,7 +15,7 @@ export function NewDocumentationFieldArray({
   values,
   setFieldValue,
   errors,
-}: NewDocumentationFieldArrayProps): React.ReactElement {
+}: NewDocumentationFieldArrayProps): ReactElement {
   const { t } = useTranslation();
   return (
     <Grid container spacing={3}>

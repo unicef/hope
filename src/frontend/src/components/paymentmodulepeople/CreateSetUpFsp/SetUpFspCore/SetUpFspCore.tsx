@@ -4,8 +4,7 @@ import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
 import Stepper from '@mui/material/Stepper';
 import { FieldArray, Form, Formik } from 'formik';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSnackbar } from '@hooks/useSnackBar';
 import {
@@ -39,7 +38,7 @@ interface SetUpFspCoreProps {
 export const SetUpFspCore = ({
   permissions,
   initialValues,
-}: SetUpFspCoreProps): React.ReactElement => {
+}: SetUpFspCoreProps): ReactElement => {
   const { baseUrl } = useBaseUrl();
   const navigate = useNavigate();
   const { t } = useTranslation();

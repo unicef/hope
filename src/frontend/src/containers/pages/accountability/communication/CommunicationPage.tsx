@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router-dom';
 import { useGrievancesChoiceDataQuery } from '@generated/graphql';
@@ -19,7 +18,7 @@ import { ButtonTooltip } from '@components/core/ButtonTooltip';
 import { useProgramContext } from '../../../../programContext';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
-export function CommunicationPage(): React.ReactElement {
+export function CommunicationPage(): ReactElement {
   const { baseUrl } = useBaseUrl();
   const permissions = usePermissions();
   const location = useLocation();

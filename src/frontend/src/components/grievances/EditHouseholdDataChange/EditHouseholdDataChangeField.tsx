@@ -1,7 +1,6 @@
 import { Grid } from '@mui/material';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { Field } from 'formik';
-import * as React from 'react';
 import { useLocation } from 'react-router-dom';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
 import { FormikDecimalField } from '@shared/Formik/FormikDecimalField';
@@ -17,6 +16,7 @@ import { GrievanceFlexFieldPhotoModalEditable } from '../GrievancesPhotoModals/G
 import { FormikAutocomplete } from '@shared/Formik/FormikAutocomplete';
 import { FormikAsyncAutocomplete } from '@shared/Formik/FormikAsyncAutocomplete';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { ReactElement } from 'react';
 
 export interface EditHouseholdDataChangeFieldProps {
   field: AllEditHouseholdFieldsQuery['allEditHouseholdFieldsAttributes'][number];
@@ -25,7 +25,7 @@ export interface EditHouseholdDataChangeFieldProps {
 export const EditHouseholdDataChangeField = ({
   name,
   field,
-}: EditHouseholdDataChangeFieldProps): React.ReactElement => {
+}: EditHouseholdDataChangeFieldProps): ReactElement => {
   const { businessArea } = useBaseUrl();
   const location = useLocation();
   const isNewTicket = location.pathname.indexOf('new-ticket') !== -1;

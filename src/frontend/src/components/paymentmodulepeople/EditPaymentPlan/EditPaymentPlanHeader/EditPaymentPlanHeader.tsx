@@ -1,5 +1,4 @@
 import { Box, Button } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
@@ -12,6 +11,7 @@ import { PaymentPlanQuery } from '@generated/graphql';
 import { BreadCrumbsItem } from '@core/BreadCrumbs';
 import { PageHeader } from '@core/PageHeader';
 import { StatusBox } from '@core/StatusBox';
+import { ReactElement } from 'react';
 
 const StatusWrapper = styled.div`
   width: 140px;
@@ -30,7 +30,7 @@ export function EditPaymentPlanHeader({
   baseUrl,
   permissions,
   paymentPlan,
-}: EditPaymentPlanHeaderProps): React.ReactElement {
+}: EditPaymentPlanHeaderProps): ReactElement {
   const { t } = useTranslation();
   const { id, isFollowUp } = paymentPlan;
 

@@ -1,8 +1,7 @@
 import { Box, Button, Dialog, DialogActions, DialogTitle } from '@mui/material';
 import { Publish } from '@mui/icons-material';
 import get from 'lodash/get';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
@@ -33,7 +32,7 @@ interface ImportXlsxPaymentPlanPaymentListProps {
 export function ImportXlsxPaymentPlanPaymentList({
   paymentPlan,
   permissions,
-}: ImportXlsxPaymentPlanPaymentListProps): React.ReactElement {
+}: ImportXlsxPaymentPlanPaymentListProps): ReactElement {
   const { showMessage } = useSnackbar();
   const [open, setOpenImport] = useState(false);
   const [fileToImport, setFileToImport] = useState<File | null>(null);
@@ -131,11 +130,11 @@ export function ImportXlsxPaymentPlanPaymentList({
                 {error
                   ? error.graphQLErrors.map((x) => (
                       <p key={x.message}>{x.message}</p>
-                  ))
+                    ))
                   : null}
                 <ImportErrors errors={xlsxErrors} />
               </Error>
-              ) : null}
+            ) : null}
           </>
           <DialogActions>
             <Button

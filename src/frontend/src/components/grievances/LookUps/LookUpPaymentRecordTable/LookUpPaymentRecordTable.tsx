@@ -1,4 +1,4 @@
-import { ReactElement, useState } from 'react';
+import { MouseEvent, ReactElement, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import {
   LookUpPaymentRecordsQueryVariables,
@@ -33,9 +33,7 @@ export function LookUpPaymentRecordTable({
   );
 
   const handleCheckboxClick = (
-    _event:
-    | React.MouseEvent<HTMLButtonElement, MouseEvent>
-    | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
+    _event: MouseEvent<HTMLTableRowElement> | MouseEvent<HTMLButtonElement>,
     selectedPaymentRecord,
   ): void => {
     const selectedIndex = selected.indexOf(selectedPaymentRecord);
@@ -65,8 +63,8 @@ export function LookUpPaymentRecordTable({
   if (isEditTicket) {
     return (
       <UniversalTable<
-      PaymentRecordAndPaymentNode,
-      LookUpPaymentRecordsQueryVariables
+        PaymentRecordAndPaymentNode,
+        LookUpPaymentRecordsQueryVariables
       >
         headCells={headCells}
         query={useLookUpPaymentRecordsQuery}
@@ -86,8 +84,8 @@ export function LookUpPaymentRecordTable({
   }
   return (
     <UniversalTable<
-    PaymentRecordAndPaymentNode,
-    LookUpPaymentRecordsQueryVariables
+      PaymentRecordAndPaymentNode,
+      LookUpPaymentRecordsQueryVariables
     >
       headCells={headCells}
       query={useAllPaymentRecordsAndPaymentsQuery}

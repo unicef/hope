@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useGrievancesChoiceDataQuery } from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
@@ -25,7 +25,7 @@ import { t } from 'i18next';
 import { useProgramContext } from 'src/programContext';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
-export const GrievancesTablePage = (): React.ReactElement => {
+export const GrievancesTablePage = (): ReactElement => {
   const { baseUrl } = useBaseUrl();
   const { isActiveProgram } = useProgramContext();
   const permissions = usePermissions();

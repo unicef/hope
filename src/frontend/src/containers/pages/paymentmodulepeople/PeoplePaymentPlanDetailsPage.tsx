@@ -1,6 +1,5 @@
 import { Box } from '@mui/material';
-import * as React from 'react';
-import { useEffect } from 'react';
+import { ReactElement, useEffect } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import {
   PaymentPlanBackgroundActionStatus,
@@ -26,7 +25,7 @@ import { ExcludeSection } from '@components/paymentmodulepeople/PaymentPlanDetai
 import { SupportingDocumentsSection } from '@components/paymentmodule/PaymentPlanDetails/SupportingDocumentsSection/SupportingDocumentsSection';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
-export const PeoplePaymentPlanDetailsPage = (): React.ReactElement => {
+export const PeoplePaymentPlanDetailsPage = (): ReactElement => {
   const { paymentPlanId } = useParams();
   const permissions = usePermissions();
   const location = useLocation();

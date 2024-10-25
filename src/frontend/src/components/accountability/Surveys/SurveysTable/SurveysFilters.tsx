@@ -1,5 +1,4 @@
 import { Grid } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { CreatedByAutocomplete } from '@shared/autocompletes/CreatedByAutocomplete';
@@ -8,6 +7,7 @@ import { createHandleApplyFilterChange } from '@utils/utils';
 import { DatePickerFilter } from '@core/DatePickerFilter';
 import { FiltersSection } from '@core/FiltersSection';
 import { SearchTextField } from '@core/SearchTextField';
+import { ReactElement } from 'react';
 
 interface SurveysFiltersProps {
   filter;
@@ -22,7 +22,7 @@ export function SurveysFilters({
   initialFilter,
   appliedFilter,
   setAppliedFilter,
-}: SurveysFiltersProps): React.ReactElement {
+}: SurveysFiltersProps): ReactElement {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation();

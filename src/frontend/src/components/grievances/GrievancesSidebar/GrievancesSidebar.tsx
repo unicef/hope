@@ -1,6 +1,5 @@
 import { Box, Grid } from '@mui/material';
 import { isEmpty } from 'lodash';
-import * as React from 'react';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
@@ -11,12 +10,13 @@ import { PaymentIds } from '../PaymentIds';
 import { ReassignMultipleRoleBox } from '../ReassignMultipleRoleBox';
 import { ReassignRoleBox } from '../ReassignRoleBox';
 import { GrievanceTicketQuery } from '@generated/graphql';
+import { ReactElement } from 'react';
 
 export function GrievancesSidebar({
   ticket,
 }: {
   ticket: GrievanceTicketQuery['grievanceTicket'];
-}): React.ReactElement {
+}): ReactElement {
   const shouldShowReassignBoxDataChange = (): boolean => {
     let { individual, household } = ticket;
     const { category, issueType, status } = ticket;
@@ -70,7 +70,7 @@ export function GrievancesSidebar({
     ticket.category.toString() === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION &&
     ticket.needsAdjudicationTicketDetails.isMultipleDuplicatesVersion;
 
-  const renderRightSection = (): React.ReactElement => {
+  const renderRightSection = (): ReactElement => {
     if (
       ticket.category.toString() === GRIEVANCE_CATEGORIES.PAYMENT_VERIFICATION
     ) {

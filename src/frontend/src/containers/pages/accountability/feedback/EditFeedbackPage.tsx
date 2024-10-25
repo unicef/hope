@@ -1,6 +1,5 @@
 import { Box, Button, Divider, Grid } from '@mui/material';
 import { Field, Formik } from 'formik';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import * as Yup from 'yup';
@@ -32,6 +31,7 @@ import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutoc
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { ReactElement } from 'react';
 
 export const validationSchema = Yup.object().shape({
   issueType: Yup.string().required('Issue Type is required').nullable(),
@@ -43,7 +43,7 @@ export const validationSchema = Yup.object().shape({
   comments: Yup.string().nullable(),
 });
 
-export const EditFeedbackPage = (): React.ReactElement => {
+export const EditFeedbackPage = (): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { id } = useParams();

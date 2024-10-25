@@ -1,9 +1,9 @@
 import { Box, Button } from '@mui/material';
-import * as React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ProgramForm } from '@containers/forms/ProgramForm';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { FC } from 'react';
 
 interface DetailsStepProps {
   values;
@@ -12,7 +12,7 @@ interface DetailsStepProps {
   programId?: string;
 }
 
-export const DetailsStep: React.FC<DetailsStepProps> = ({
+export const DetailsStep: FC<DetailsStepProps> = ({
   values,
   handleNext,
   errors,

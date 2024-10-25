@@ -1,7 +1,7 @@
 import { Box, Radio, RadioGroup, Typography } from '@mui/material';
-import * as React from 'react';
 import styled from 'styled-components';
 import { GreyBox } from '@components/core/GreyBox';
+import { ReactElement } from 'react';
 
 const FormLabelContainer = styled.div`
   margin-bottom: ${({ theme }) => theme.spacing(3)};
@@ -22,7 +22,7 @@ export function FormikRadioGroup({
   withGreyBox = false,
   alignItems = 'start',
   ...otherProps
-}): React.ReactElement {
+}): ReactElement {
   const handleChange = (event): void => {
     form.setFieldValue(field.name, event.target.value);
     if (otherProps.onChange) {
@@ -46,7 +46,7 @@ export function FormikRadioGroup({
         {otherProps.choices.map(
           (each: {
             value: string;
-            optionLabel?: string | React.ReactElement;
+            optionLabel?: string | ReactElement;
             name: string;
           }) => (
             <Box p={2} mb={2} key={each.value}>
