@@ -208,6 +208,7 @@ class AreaAdmin(ValidityManagerMixin, FieldsetMixin, SyncMixin, HOPEModelAdminBa
                         d = len(row) // 2
                         area_types = [*row][:d]
                         admin_area = [*row][d:]
+                        import ipdb; ipdb.set_trace()
                         country = country or Country.objects.get(short_name=row["Country"])
                         for area_level, area_type_name in enumerate(area_types[1:], 1):
                             area_type, _ = AreaType.objects.get_or_create(
