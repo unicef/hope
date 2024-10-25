@@ -20,10 +20,10 @@ class TestFixProgramPopulationIncorrectHhIndRelation(TestCase):
         program = ProgramFactory(business_area=business_area)
         copied_from_hh = HouseholdFactory(program=program)
         program2 = ProgramFactory(business_area=business_area)
-        program3 = ProgramFactory(business_area=business_area)
 
         rdi = RegistrationDataImportFactory(program=program2, data_source=RegistrationDataImport.PROGRAM_POPULATION)
         rdi2 = RegistrationDataImportFactory(program=program2, data_source=RegistrationDataImport.PROGRAM_POPULATION)
+        rdi3 = RegistrationDataImportFactory(program=program2, data_source=RegistrationDataImport.PROGRAM_POPULATION)
         household1, individuals1 = create_household_and_individuals(
             {
                 "program": program2,
@@ -32,11 +32,12 @@ class TestFixProgramPopulationIncorrectHhIndRelation(TestCase):
                 "registration_data_import": rdi,
                 "copied_from": copied_from_hh,
             },
-            [{"rdi_merge_status": Household.PENDING}, {"rdi_merge_status": Household.MERGED}],
+            [
+                {"rdi_merge_status": Household.PENDING},
+                {"rdi_merge_status": Household.PENDING},
+            ],
         )
-        for ind in individuals1:
-            ind.registration_data_import = rdi2
-            ind.save()
+
         household2, individuals2 = create_household_and_individuals(
             {
                 "program": program2,
@@ -45,65 +46,53 @@ class TestFixProgramPopulationIncorrectHhIndRelation(TestCase):
                 "registration_data_import": rdi2,
                 "copied_from": copied_from_hh,
             },
-            [{"rdi_merge_status": Household.PENDING}, {"rdi_merge_status": Household.MERGED}],
+            [{"rdi_merge_status": Household.PENDING}, {"rdi_merge_status": Household.PENDING}],
         )
-        fix_program_population_import_incorrect_hh_ind_relation()
-        ind1 = individuals1[0]
-        ind2 = individuals1[1]
-        ind1.refresh_from_db()
-        ind2.refresh_from_db()
-        self.assertEqual(ind1.household, household2)
-        self.assertEqual(ind2.household, household2)
-        self.assertEqual(household1.individuals(manager="all_objects").count(), 0)
-        self.assertEqual(household2.individuals(manager="all_objects").count(), 4)
-        household2_individuals = [x for x in household2.individuals(manager="all_objects").values_list("id", flat=True)]
-        # hhs not to be fixed
+        ind2_1 = individuals2[0]
+        ind2_1.household = household1
+        ind2_1.save()
 
-        # different program
-        household, individuals = create_household_and_individuals(
-            {
-                "program": program3,
-                "unicef_id": "HH-01",
-                "rdi_merge_status": Household.PENDING,
-                "registration_data_import": rdi,
-                "copied_from": copied_from_hh,
-            },
-            [{}, {}],
-        )
-        for ind in individuals:
-            ind.registration_data_import = rdi2
-            ind.save()
-
-        # different unicef_id
-        household, individuals = create_household_and_individuals(
-            {
-                "program": program2,
-                "unicef_id": "HH-100",
-                "rdi_merge_status": Household.PENDING,
-                "registration_data_import": rdi,
-                "copied_from": copied_from_hh,
-            },
-            [{}, {}],
-        )
-        for ind in individuals:
-            ind.registration_data_import = rdi2
-            ind.save()
-
-        # hhs and inds have the same rdi
-        create_household_and_individuals(
+        household3, individuals3 = create_household_and_individuals(
             {
                 "program": program2,
                 "unicef_id": "HH-01",
-                "rdi_merge_status": Household.PENDING,
-                "registration_data_import": rdi,
+                "rdi_merge_status": Household.MERGED,
+                "registration_data_import": rdi3,
                 "copied_from": copied_from_hh,
             },
-            [{}, {}],
+            [{"rdi_merge_status": Household.MERGED}, {"rdi_merge_status": Household.MERGED}],
         )
+        ind3_1 = individuals3[0]
+        ind3_1.household = household1
+        ind3_1.save()
+        ind3_2 = individuals3[1]
+        ind3_2.household = household2
+        ind3_2.save()
+
+        # check incorrect data
+        self.assertEqual(household1.individuals(manager="all_objects").count(), 4)
+        self.assertEqual(household2.individuals(manager="all_objects").count(), 2)
+        self.assertEqual(household3.individuals(manager="all_objects").count(), 0)
+
+        self.assertNotEqual(ind2_1.household.registration_data_import, household2.registration_data_import)
+        self.assertNotEqual(ind3_1.household.registration_data_import, household3.registration_data_import)
+        self.assertNotEqual(ind3_2.household.registration_data_import, household3.registration_data_import)
 
         fix_program_population_import_incorrect_hh_ind_relation()
-        self.assertEqual(household2.individuals(manager="all_objects").count(), 4)
-        self.assertEqual(
-            household2_individuals,
-            [x for x in household2.individuals(manager="all_objects").values_list("id", flat=True)],
-        )
+
+        ind2_1.refresh_from_db()
+        ind3_1.refresh_from_db()
+        ind3_2.refresh_from_db()
+
+        self.assertEqual(household1.individuals(manager="all_objects").count(), 2)
+
+        self.assertEqual(ind2_1.household, household2)
+        self.assertEqual(household2.individuals(manager="all_objects").count(), 2)
+
+        self.assertEqual(ind3_1.household, household3)
+        self.assertEqual(ind3_2.household, household3)
+        self.assertEqual(household3.individuals(manager="all_objects").count(), 2)
+
+        self.assertEqual(ind2_1.household.registration_data_import, household2.registration_data_import)
+        self.assertEqual(ind3_1.household.registration_data_import, household3.registration_data_import)
+        self.assertEqual(ind3_2.household.registration_data_import, household3.registration_data_import)
