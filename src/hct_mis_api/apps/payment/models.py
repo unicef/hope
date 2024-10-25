@@ -81,7 +81,7 @@ from hct_mis_api.apps.utils.models import (
     PendingManager,
     SignatureMixin,
     TimeStampedUUIDModel,
-    UnicefIdentifiedModel,
+    UnicefIdentifiedModel, InternalDataFieldModel,
 )
 
 if TYPE_CHECKING:
@@ -431,7 +431,7 @@ class PaymentPlanSplit(TimeStampedUUIDModel):
         return self.payment_plan.delivery_mechanisms.first().delivery_mechanism
 
 
-class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel, AdminUrlMixin):
+class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel, AdminUrlMixin, InternalDataFieldModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "status",
@@ -454,6 +454,16 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
     )
 
     class Status(models.TextChoices):
+        # new from TP
+        TP_OPEN = "TP_OPEN", "Open"
+        TP_LOCKED = "TP_LOCKED", "Locked"
+        TP_PROCESSING = "PROCESSING", "Processing"
+        TP_STEFICON_WAIT = "STEFICON_WAIT", "Steficon Wait"
+        TP_STEFICON_RUN = "STEFICON_RUN", "Steficon Run"
+        TP_STEFICON_COMPLETED = "STEFICON_COMPLETED", "Steficon Completed"
+        TP_STEFICON_ERROR = "STEFICON_ERROR", "Steficon Error"
+
+        DRAFT = "DRAFT", "Draft"
         PREPARING = "PREPARING", "Preparing"
         OPEN = "OPEN", "Open"
         LOCKED = "LOCKED", "Locked"
