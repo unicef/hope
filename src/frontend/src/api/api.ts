@@ -45,7 +45,6 @@ export const api = {
     // Handle download if URL includes "download"
     if (url.includes('download')) {
       const blob = await response.blob();
-      console.log(response);
       const downloadUrl = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = downloadUrl;
