@@ -19,7 +19,7 @@ export const api = {
     return params.toString();
   },
 
-  async get(url: string, params: Record<string, any> = {}) {
+  async get(url: string, params: Record<string, any> = {}, filename?: string) {
     const query = this.buildParams(params);
     const cacheKey = url + (query ? `?${query}` : '');
 
@@ -40,6 +40,21 @@ export const api = {
 
     if (!response.ok) {
       throw new Error(`Error fetching data from ${url}`);
+    }
+
+    // Handle download if URL includes "download"
+    if (url.includes('download')) {
+      const blob = await response.blob();
+      console.log(response);
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = downloadUrl;
+      a.download = filename || url.split('/').pop() || 'download';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(downloadUrl);
+      return;
     }
 
     const etag = response.headers.get('ETag');
