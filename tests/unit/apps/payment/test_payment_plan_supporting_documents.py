@@ -216,4 +216,4 @@ class PaymentPlanSupportingDocumentViewTests(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsInstance(response, FileResponse)
-        self.assertEqual(response["Content-Disposition"], f'attachment; filename="{self.document.file.name}"')
+        self.assertEqual(response["Content-Disposition"], f"attachment; filename={self.document.file.name}")

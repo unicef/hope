@@ -1,4 +1,5 @@
 import logging
+import mimetypes
 from typing import Any, Optional
 
 from django.db import transaction
@@ -209,9 +210,7 @@ class PaymentPlanSupportingDocumentViewSet(
     @action(detail=True, methods=["get"])
     def download(self, request: Request, *args: Any, **kwargs: Any) -> FileResponse:
         document = self.get_object()
-        return FileResponse(
-            document.file.open(),
-            as_attachment=True,
-            filename=document.file.name,
-            content_type="application/json",
-        )
+        file_mimetype, _ = mimetypes.guess_type(document.file.path)
+        response = FileResponse(document.file.open(), content_type=file_mimetype or "application/octet-stream")
+        response["Content-Disposition"] = f"attachment; filename={document.file.name.split('/')[-1]}"
+        return response
