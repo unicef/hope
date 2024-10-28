@@ -492,6 +492,10 @@ class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, Uni
             issue_type_choices_dict.update(value)
         return issue_type_choices_dict[self.issue_type]
 
+    @property
+    def has_social_worker_program(self) -> bool:
+        return any(program.is_social_worker_program for program in self.programs.all())
+
     class Meta:
         ordering = (
             "status",
