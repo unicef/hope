@@ -43,7 +43,7 @@ export const NeedsAdjudicationTable = ({
 }: NeedsAdjudicationTableProps) => {
   const { t } = useTranslation();
   const { baseUrl, isAllPrograms } = useBaseUrl();
-  const { isActiveProgram } = useProgramContext();
+  const { isActiveProgram, isSocialDctType } = useProgramContext();
   const details = ticket?.needsAdjudicationTicketDetails;
 
   const handleSelect = (id: string) => {
@@ -134,20 +134,22 @@ export const NeedsAdjudicationTable = ({
           <span data-cy="individual-id">{possibleDuplicate?.unicefId}</span>
         )}
       </TableCell>
-      <TableCell align="left" data-cy="household-id-cell">
-        {!isAllPrograms ? (
-          <BlackLink
-            to={`/${baseUrl}/population/household/${possibleDuplicate?.household?.id}`}
-            data-cy="household-link"
-          >
-            {possibleDuplicate?.household?.unicefId || '-'}
-          </BlackLink>
-        ) : (
-          <span data-cy="household-id">
-            {possibleDuplicate?.household?.unicefId || '-'}
-          </span>
-        )}
-      </TableCell>
+      {!isSocialDctType && (
+        <TableCell align="left" data-cy="household-id-cell">
+          {!isAllPrograms ? (
+            <BlackLink
+              to={`/${baseUrl}/population/household/${possibleDuplicate?.household?.id}`}
+              data-cy="household-link"
+            >
+              {possibleDuplicate?.household?.unicefId || '-'}
+            </BlackLink>
+          ) : (
+            <span data-cy="household-id">
+              {possibleDuplicate?.household?.unicefId || '-'}
+            </span>
+          )}
+        </TableCell>
+      )}
       <TableCell align="left" data-cy="full-name-cell">
         {possibleDuplicate?.fullName}
       </TableCell>
@@ -199,9 +201,11 @@ export const NeedsAdjudicationTable = ({
           <TableCell data-cy="table-cell-individual-id" align="left">
             {t('Individual ID')}
           </TableCell>
-          <TableCell data-cy="table-cell-household-id" align="left">
-            {t('Household ID')}
-          </TableCell>
+          {!isSocialDctType && (
+            <TableCell data-cy="table-cell-household-id" align="left">
+              {t('Household ID')}
+            </TableCell>
+          )}
           <TableCell data-cy="table-cell-full-name" align="left">
             {t('Full Name')}
           </TableCell>
@@ -275,20 +279,22 @@ export const NeedsAdjudicationTable = ({
               </span>
             )}
           </TableCell>
-          <TableCell align="left" data-cy="household-id-cell">
-            {!isAllPrograms ? (
-              <BlackLink
-                to={`/${baseUrl}/population/household/${details.goldenRecordsIndividual?.household?.id}`}
-                data-cy="household-link"
-              >
-                {details.goldenRecordsIndividual?.household?.unicefId || '-'}
-              </BlackLink>
-            ) : (
-              <span data-cy="household-id">
-                {details.goldenRecordsIndividual?.household?.unicefId || '-'}
-              </span>
-            )}
-          </TableCell>
+          {!isSocialDctType && (
+            <TableCell align="left" data-cy="household-id-cell">
+              {!isAllPrograms ? (
+                <BlackLink
+                  to={`/${baseUrl}/population/household/${details.goldenRecordsIndividual?.household?.id}`}
+                  data-cy="household-link"
+                >
+                  {details.goldenRecordsIndividual?.household?.unicefId || '-'}
+                </BlackLink>
+              ) : (
+                <span data-cy="household-id">
+                  {details.goldenRecordsIndividual?.household?.unicefId || '-'}
+                </span>
+              )}
+            </TableCell>
+          )}
           <TableCell align="left" data-cy="full-name-cell">
             {details.goldenRecordsIndividual?.fullName}
           </TableCell>
