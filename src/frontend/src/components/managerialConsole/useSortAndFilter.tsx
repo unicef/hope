@@ -8,7 +8,7 @@ import {
   SelectChangeEvent,
 } from '@mui/material';
 import moment from 'moment';
-import { useState } from 'react';
+import { FC, useState } from 'react';
 
 interface UseSortAndFilterProps {
   initialSortField: string | null;
@@ -21,7 +21,7 @@ interface ProgramSelectProps {
   dataCy: string;
 }
 
-export const ProgramSelect: React.FC<ProgramSelectProps> = ({
+export const ProgramSelect: FC<ProgramSelectProps> = ({
   selectedProgram,
   setSelectedProgram,
   programs,

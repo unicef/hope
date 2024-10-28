@@ -6,8 +6,7 @@ import {
   DialogTitle,
 } from '@mui/material';
 import { Formik, FormikValues } from 'formik';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { useGrievancesChoiceDataQuery } from '@generated/graphql';
@@ -25,11 +24,12 @@ export const LookUpLinkedTicketsModal = ({
   initialValues,
   lookUpDialogOpen,
   setLookUpDialogOpen,
-}): React.ReactElement => {
+}): ReactElement => {
   const { businessArea } = useBaseUrl();
   const { t } = useTranslation();
   const location = useLocation();
-  const { data: choicesData, loading: choicesLoading } = useGrievancesChoiceDataQuery();
+  const { data: choicesData, loading: choicesLoading } =
+    useGrievancesChoiceDataQuery();
   const initialFilter = {
     search: '',
     documentType: choicesData?.documentTypeChoices?.[0]?.value,

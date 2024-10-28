@@ -1,6 +1,5 @@
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
@@ -17,6 +16,8 @@ import {
 } from '@generated/graphql';
 import { HouseholdImportedIndividualsTable } from '../../tables/rdi/HouseholdImportedIndividualsTable/HouseholdImportedIndividualsTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { ReactElement } from 'react';
 
 const Container = styled.div`
   padding: 20px;
@@ -27,11 +28,13 @@ const Container = styled.div`
   }
 `;
 
-export function RegistrationHouseholdDetailsPage(): React.ReactElement {
+export function RegistrationHouseholdDetailsPage(): ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
   const { baseUrl } = useBaseUrl();
   const permissions = usePermissions();
+  const location = useLocation();
+
   const { data, loading, error } = useImportedHouseholdQuery({
     variables: { id },
     fetchPolicy: 'cache-and-network',
@@ -64,7 +67,14 @@ export function RegistrationHouseholdDetailsPage(): React.ReactElement {
   ];
 
   return (
-    <div>
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'RegistrationHouseholdDetailsPage.tsx');
+      }}
+      componentName="RegistrationHouseholdDetailsPage"
+    >
       <PageHeader
         title={`${'Household ID'}: ${importedHousehold.importId}`}
         breadCrumbs={breadCrumbsItems}
@@ -86,6 +96,6 @@ export function RegistrationHouseholdDetailsPage(): React.ReactElement {
           detailId={importedHousehold.detailId}
         />
       </Container>
-    </div>
+    </UniversalErrorBoundary>
   );
 }

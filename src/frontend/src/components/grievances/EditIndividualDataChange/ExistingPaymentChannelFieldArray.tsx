@@ -1,9 +1,9 @@
 import { Box, Grid } from '@mui/material';
 import { useLocation } from 'react-router-dom';
 import { FieldArray } from 'formik';
-import * as React from 'react';
 import { IndividualQuery } from '@generated/graphql';
 import { EditPaymentChannelRow } from './EditPaymentChannelRow';
+import { ReactElement } from 'react';
 
 export interface ExistingPaymentChannelFieldArrayProps {
   setFieldValue;
@@ -15,7 +15,7 @@ export function ExistingPaymentChannelFieldArray({
   setFieldValue,
   values,
   individual,
-}: ExistingPaymentChannelFieldArrayProps): React.ReactElement {
+}: ExistingPaymentChannelFieldArrayProps): ReactElement {
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   return (

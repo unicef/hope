@@ -1,8 +1,7 @@
 import { Button } from '@mui/material';
 import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { CashPlanDetails } from '@components/core/CashPlanDetails/CashPlanDetails';
@@ -21,6 +20,8 @@ import {
 } from '@generated/graphql';
 import { PaymentRecordTable } from '../../tables/payments/PaymentRecordTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { ReactElement } from 'react';
 
 const Container = styled.div`
   && {
@@ -30,9 +31,10 @@ const Container = styled.div`
   }
 `;
 
-export function CashPlanDetailsPage(): React.ReactElement {
+export function CashPlanDetailsPage(): ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
+  const location = useLocation();
   const permissions = usePermissions();
   const { baseUrl, isAllPrograms, businessArea } = useBaseUrl();
   const { data: businessAreaData, loading: businessAreaDataLoading } =
@@ -67,38 +69,47 @@ export function CashPlanDetailsPage(): React.ReactElement {
 
   const cashPlan = data.cashPlan as CashPlanNode;
   return (
-    <div>
-      <PageHeader
-        title={`${t('Payment Plan')} #${data.cashPlan.caId}`}
-        breadCrumbs={
-          hasPermissions(
-            PERMISSIONS.PROGRAMME_VIEW_LIST_AND_DETAILS,
-            permissions,
-          )
-            ? breadCrumbsItems
-            : null
-        }
-      >
-        {!businessAreaData.businessArea.isPaymentPlanApplicable && (
-          <Button
-            variant="contained"
-            color="primary"
-            component="a"
-            disabled={!data.cashPlan.caHashId}
-            target="_blank"
-            href={`${caData.cashAssistUrlPrefix}&pagetype=entityrecord&etn=progres_cashplan&id=${data.cashPlan.caHashId}`}
-            startIcon={<OpenInNewRoundedIcon />}
-          >
-            {t('Open in CashAssist')}
-          </Button>
-        )}
-      </PageHeader>
-      <Container>
-        <CashPlanDetails cashPlan={cashPlan} baseUrl={baseUrl} />
-        <TableWrapper>
-          <PaymentRecordTable cashPlan={cashPlan} />
-        </TableWrapper>
-      </Container>
-    </div>
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'CashPlanDetailsPage.tsx');
+      }}
+      componentName="CashPlanDetailsPage"
+    >
+      <div>
+        <PageHeader
+          title={`${t('Payment Plan')} #${data.cashPlan.caId}`}
+          breadCrumbs={
+            hasPermissions(
+              PERMISSIONS.PROGRAMME_VIEW_LIST_AND_DETAILS,
+              permissions,
+            )
+              ? breadCrumbsItems
+              : null
+          }
+        >
+          {!businessAreaData.businessArea.isPaymentPlanApplicable && (
+            <Button
+              variant="contained"
+              color="primary"
+              component="a"
+              disabled={!data.cashPlan.caHashId}
+              target="_blank"
+              href={`${caData.cashAssistUrlPrefix}&pagetype=entityrecord&etn=progres_cashplan&id=${data.cashPlan.caHashId}`}
+              startIcon={<OpenInNewRoundedIcon />}
+            >
+              {t('Open in CashAssist')}
+            </Button>
+          )}
+        </PageHeader>
+        <Container>
+          <CashPlanDetails cashPlan={cashPlan} baseUrl={baseUrl} />
+          <TableWrapper>
+            <PaymentRecordTable cashPlan={cashPlan} />
+          </TableWrapper>
+        </Container>
+      </div>
+    </UniversalErrorBoundary>
   );
 }

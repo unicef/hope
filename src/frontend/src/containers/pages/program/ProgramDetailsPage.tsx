@@ -1,6 +1,5 @@
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import {
   ProgramStatus,
@@ -18,6 +17,8 @@ import { isPermissionDeniedError } from '@utils/utils';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { ProgramDetailsPageHeader } from '../headers/ProgramDetailsPageHeader';
 import { ProgramCyclesTableProgramDetails } from '@containers/tables/ProgramCycle/ProgramCyclesTableProgramDetails';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { ReactElement } from 'react';
 
 const Container = styled.div`
   && {
@@ -44,8 +45,9 @@ const NoCashPlansTitle = styled.div`
   text-align: center;
 `;
 
-export function ProgramDetailsPage(): React.ReactElement {
+export function ProgramDetailsPage(): ReactElement {
   const { t } = useTranslation();
+  const location = useLocation();
   const { id } = useParams();
   const { data, loading, error } = useProgramQuery({
     variables: { id },
@@ -65,15 +67,19 @@ export function ProgramDetailsPage(): React.ReactElement {
 
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
-  if (!data?.program || !choices || !businessAreaData || permissions === null)
-    return null;
+  if (!choices || !businessAreaData || permissions === null) return null;
 
   const { program } = data;
-  const canFinish =
-    program.canFinish &&
-    hasPermissions(PERMISSIONS.PROGRAMME_FINISH, permissions);
+  const canFinish = hasPermissions(PERMISSIONS.PROGRAMME_FINISH, permissions);
   return (
-    <div>
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'ProgramDetailsPage.tsx');
+      }}
+      componentName="ProgramDetailsPage"
+    >
       <ProgramDetailsPageHeader
         program={program}
         canActivate={hasPermissions(
@@ -108,6 +114,6 @@ export function ProgramDetailsPage(): React.ReactElement {
           <UniversalActivityLogTable objectId={program.id} />
         )}
       </Container>
-    </div>
+    </UniversalErrorBoundary>
   );
 }

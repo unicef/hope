@@ -1,9 +1,9 @@
 import { Box, Grid } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-import * as React from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { StyledBox, BlueText, DarkGrey } from '../LookUpStyles';
+import { ReactElement } from 'react';
 
 const Types = { household: 'household', individual: 'individual' };
 
@@ -30,7 +30,7 @@ export const LookUpHouseholdIndividualSelectionDisplay = ({
   setSelectedHousehold,
   selectedIndividual,
   setSelectedIndividual,
-}: LookUpHouseholdIndividualSelectionDisplayProps): React.ReactElement => {
+}: LookUpHouseholdIndividualSelectionDisplayProps): ReactElement => {
   const { t } = useTranslation();
   const handleRemove = (type): void => {
     if (type === Types.household) {

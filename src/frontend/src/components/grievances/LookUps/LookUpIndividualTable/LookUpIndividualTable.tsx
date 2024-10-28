@@ -1,4 +1,3 @@
-import * as React from 'react';
 import styled from 'styled-components';
 import {
   AllIndividualsForPopulationTableQuery,
@@ -11,6 +10,7 @@ import { TableWrapper } from '@core/TableWrapper';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { headCells } from './LookUpIndividualTableHeadCells';
 import { LookUpIndividualTableRow } from './LookUpIndividualTableRow';
+import { ReactElement } from 'react';
 
 interface LookUpIndividualTableProps {
   filter;
@@ -44,7 +44,7 @@ export function LookUpIndividualTable({
   ticket,
   excludedId,
   noTableStyling = false,
-}: LookUpIndividualTableProps): React.ReactElement {
+}: LookUpIndividualTableProps): ReactElement {
   const { programId, isAllPrograms } = useBaseUrl();
 
   const handleRadioChange = (individual): void => {
@@ -102,10 +102,10 @@ export function LookUpIndividualTable({
     ? headCellsWithProgramColumn
     : headCells;
 
-  const renderTable = (): React.ReactElement => (
+  const renderTable = (): ReactElement => (
     <UniversalTable<
-    AllIndividualsForPopulationTableQuery['allIndividuals']['edges'][number]['node'],
-    AllIndividualsForPopulationTableQueryVariables
+      AllIndividualsForPopulationTableQuery['allIndividuals']['edges'][number]['node'],
+      AllIndividualsForPopulationTableQueryVariables
     >
       headCells={preparedHeadcells}
       allowSort={false}

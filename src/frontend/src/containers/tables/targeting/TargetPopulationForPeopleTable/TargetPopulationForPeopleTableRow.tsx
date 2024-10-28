@@ -1,5 +1,4 @@
 import TableCell from '@mui/material/TableCell';
-import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Radio } from '@mui/material';
 import { BlackLink } from '@components/core/BlackLink';
@@ -9,6 +8,7 @@ import { UniversalMoment } from '@components/core/UniversalMoment';
 import { targetPopulationStatusToColor } from '@utils/utils';
 import { TargetPopulationNode } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { ReactElement } from 'react';
 
 interface TargetPopulationTableRowProps {
   targetPopulation: TargetPopulationNode;
@@ -22,7 +22,7 @@ export function TargetPopulationForPeopleTableRow({
   canViewDetails,
   radioChangeHandler,
   selectedTargetPopulation,
-}: TargetPopulationTableRowProps): React.ReactElement {
+}: TargetPopulationTableRowProps): ReactElement {
   const navigate = useNavigate();
   const { baseUrl } = useBaseUrl();
   const targetPopulationDetailsPath = `/${baseUrl}/target-population/${targetPopulation.id}`;

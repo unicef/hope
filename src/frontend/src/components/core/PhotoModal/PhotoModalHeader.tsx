@@ -1,7 +1,7 @@
 import { Box, DialogTitle } from '@mui/material';
-import * as React from 'react';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { RotateImg } from './RotateImg';
+import { Dispatch, SetStateAction, ReactElement } from 'react';
 
 export function PhotoModalHeader({
   turnAngle,
@@ -10,10 +10,10 @@ export function PhotoModalHeader({
   showRotate,
 }: {
   turnAngle: number;
-  setTurnAngle: React.Dispatch<React.SetStateAction<number>>;
+  setTurnAngle: Dispatch<SetStateAction<number>>;
   title: string;
   showRotate: boolean;
-}): React.ReactElement {
+}): ReactElement {
   return (
     <DialogTitleWrapper>
       <DialogTitle>

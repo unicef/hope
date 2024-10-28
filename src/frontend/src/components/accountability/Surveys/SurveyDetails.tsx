@@ -1,5 +1,4 @@
 import { Grid, Typography } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { choicesToDict, renderUserName } from '@utils/utils';
 import { SurveyQuery, SurveysChoiceDataQuery } from '@generated/graphql';
@@ -10,6 +9,7 @@ import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { ReactElement } from 'react';
 
 interface SurveyDetailsProps {
   survey: SurveyQuery['survey'];
@@ -19,7 +19,7 @@ interface SurveyDetailsProps {
 export function SurveyDetails({
   survey,
   choicesData,
-}: SurveyDetailsProps): React.ReactElement {
+}: SurveyDetailsProps): ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const {

@@ -1,5 +1,4 @@
 import TableCell from '@mui/material/TableCell';
-import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BlackLink } from '@components/core/BlackLink';
 import { StatusBox } from '@components/core/StatusBox';
@@ -14,6 +13,7 @@ import {
 } from '@utils/utils';
 import { PaymentRecordNode } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { ReactElement } from 'react';
 
 interface PaymentRecordTableRowProps {
   paymentRecord: PaymentRecordNode;
@@ -23,7 +23,7 @@ interface PaymentRecordTableRowProps {
 export function PaymentRecordTableRow({
   paymentRecord,
   openInNewTab,
-}: PaymentRecordTableRowProps): React.ReactElement {
+}: PaymentRecordTableRowProps): ReactElement {
   const { baseUrl } = useBaseUrl();
   const navigate = useNavigate();
   const paymentRecordPath = `/${baseUrl}/payment-records/${paymentRecord.id}`;
