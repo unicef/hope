@@ -171,6 +171,18 @@ class Common:
         sleep(delay_sec)
         self.driver.get_screenshot_as_file(os.path.join(f"{file_path}", f"{file_name}.{file_type}"))
 
+    def scroll(
+        self, scroll_by: int = 600, wait_after_start_scrolling: int = 2, execute: int = 1
+    ) -> None:
+        for _ in range(execute):
+            self.driver.execute_script(
+                f"""
+                container = document.querySelector("div[data-cy='main-content']")
+                container.scrollBy(0,{scroll_by})
+                """
+            )
+            sleep(wait_after_start_scrolling)
+
     def get_value_of_attributes(self, attribute: str = "data-cy") -> None:
         sleep(1)
         ids = self.driver.find_elements(By.XPATH, f"//*[@{attribute}]")

@@ -556,18 +556,82 @@ class TestPaymentVerification:
             active_program: Program,
             add_payment_verification: PV,
             pagePaymentVerification: PaymentVerification,
-            browser: Chrome
+            pagePaymentVerificationDetails: PaymentVerificationDetails,
+            pagePaymentRecord: PaymentRecord,
     ) -> None:
-        # program_url_id = base64.b64encode(f"ProgramNode:{str(active_program.id)}".encode()).decode()
-        # payment_url_id = base64.b64encode(f"PaymentPlanNode:{str(add_payment_verification.payment_obj.parent.id)}".encode()).decode()
-        # print(f"{active_program.id}")
-        # browser.get(f"{browser.live_server.url}/afghanistan/programs/{program_url_id}")
-        pagePaymentVerification.navigate_to_page(active_program.business_area.slug, str(active_program.id))
-        sleep(5)
-        pagePaymentVerification.screenshot("0", file_path="./")
+        pagePaymentVerification.selectGlobalProgramFilter("Active Program")
+        pagePaymentVerification.getNavPaymentVerification().click()
+        pagePaymentVerification.getCashPlanTableRow().click()
+        pagePaymentVerificationDetails.getButtonActivatePlan().click()
+        pagePaymentVerificationDetails.getButtonSubmit().click()
+
+        assert 1 == len(pagePaymentVerificationDetails.getRows())
+        pagePaymentVerificationDetails.scroll(execute=2)
+        pagePaymentVerificationDetails.getRows()[0].find_element(By.TAG_NAME, "a").click()
+        quantity = pagePaymentRecord.getLabelDeliveredQuantity().text
+        pagePaymentRecord.getButtonEdPlan().click()
+        pagePaymentRecord.getInputReceivedamount().send_keys(quantity)
+        pagePaymentRecord.getButtonSubmit().click()
+        pagePaymentRecord.getArrowBack().click()
+
+        assert "RECEIVED" in pagePaymentRecord.getStatusContainer().text
 
     def test_payment_verification_successful_not_received(
-            self, active_program: Program, add_payment_verification: PV, pagePaymentVerification: PaymentVerification
+            self,
+            active_program: Program,
+            add_payment_verification: PV,
+            pagePaymentVerification: PaymentVerification,
+            pagePaymentVerificationDetails: PaymentVerificationDetails,
+            pagePaymentRecord: PaymentRecord,
+    ) -> None:
+        pagePaymentVerification.selectGlobalProgramFilter("Active Program")
+        pagePaymentVerification.getNavPaymentVerification().click()
+        pagePaymentVerification.getCashPlanTableRow().click()
+        pagePaymentVerificationDetails.getButtonActivatePlan().click()
+        pagePaymentVerificationDetails.getButtonSubmit().click()
+
+        assert 1 == len(pagePaymentVerificationDetails.getRows())
+        pagePaymentVerificationDetails.scroll(execute=2)
+        pagePaymentVerificationDetails.getRows()[0].find_element(By.TAG_NAME, "a").click()
+        pagePaymentRecord.getChoiceNotReceived().click()
+        pagePaymentRecord.getButtonEdPlan().click()
+        pagePaymentRecord.getButtonSubmit().click()
+        pagePaymentRecord.getArrowBack().click()
+
+        assert "RECEIVED" in pagePaymentRecord.getStatusContainer().text
+
+    def test_payment_verification_partially_successful_received(
+            self,
+            active_program: Program,
+            add_payment_verification: PV,
+            pagePaymentVerification: PaymentVerification,
+            pagePaymentVerificationDetails: PaymentVerificationDetails,
+            pagePaymentRecord: PaymentRecord,
     ) -> None:
         pagePaymentVerification.selectGlobalProgramFilter("Active Program")
 
+        pagePaymentVerification.getNavPaymentVerification().click()
+        pagePaymentVerification.getCashPlanTableRow().click()
+        pagePaymentVerificationDetails.getButtonActivatePlan().click()
+        pagePaymentVerificationDetails.getButtonSubmit().click()
+
+        assert 1 == len(pagePaymentVerificationDetails.getRows())
+        pagePaymentVerificationDetails.scroll(execute=2)
+        pagePaymentVerificationDetails.getRows()[0].find_element(By.TAG_NAME, "a").click()
+        quantity = float(pagePaymentRecord.getLabelDeliveredQuantity().text)-1
+        pagePaymentRecord.getButtonEdPlan().click()
+        pagePaymentRecord.getInputReceivedamount().send_keys(str(quantity))
+        pagePaymentRecord.getButtonSubmit().click()
+        pagePaymentRecord.getArrowBack().click()
+
+        assert "RECEIVED" in pagePaymentRecord.getStatusContainer().text
+
+    def test_payment_verification_by_payment_related_complaint(
+            self,
+            active_program: Program,
+            add_payment_verification: PV,
+            pagePaymentVerification: PaymentVerification,
+            pagePaymentVerificationDetails: PaymentVerificationDetails,
+            pagePaymentRecord: PaymentRecord,
+    ) -> None:
+        pagePaymentVerification.selectGlobalProgramFilter("Active Program")
