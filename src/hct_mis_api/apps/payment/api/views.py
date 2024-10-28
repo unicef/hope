@@ -3,6 +3,7 @@ from typing import Any, Optional
 
 from django.db import transaction
 from django.db.models import QuerySet
+from django.http import FileResponse
 
 from constance import config
 from django_filters import rest_framework as filters
@@ -199,15 +200,6 @@ class PaymentPlanSupportingDocumentViewSet(
             PaymentPlanSupportingDocument, id=decode_id_string(self.kwargs.get("file_id")), payment_plan=payment_plan
         )
 
-    def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(kwargs.get("payment_plan_id")))
-        request.data["created_by"] = request.user.pk
-        serializer = self.get_serializer(data=request.data, context={"payment_plan": payment_plan})
-        if serializer.is_valid():
-            serializer.save(payment_plan=payment_plan)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
     def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         self.permission_classes = [PaymentPlanSupportingDocumentDeletePermission]
         document = self.get_object()
@@ -215,6 +207,11 @@ class PaymentPlanSupportingDocumentViewSet(
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, methods=["get"])
-    def download(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def download(self, request: Request, *args: Any, **kwargs: Any) -> FileResponse:
         document = self.get_object()
-        return Response({"url": document.file.url}, status=status.HTTP_200_OK)
+        return FileResponse(
+            document.file.open(),
+            as_attachment=True,
+            filename=document.file.name,
+            content_type="application/json",
+        )
