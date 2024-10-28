@@ -5,7 +5,6 @@ from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db.models import QuerySet
 from django.http import FileResponse
 
-
 from constance import config
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins, status
@@ -165,10 +164,10 @@ class PeriodicDataUpdateUploadViewSet(
         if serializer.is_valid():
             serializer.validated_data["created_by"] = request.user
             try:
-                serializer.validated_data["template"] = (
-                    PeriodicDataUpdateImportService.read_periodic_data_update_template_object(
-                        serializer.validated_data["file"]
-                    )
+                serializer.validated_data[
+                    "template"
+                ] = PeriodicDataUpdateImportService.read_periodic_data_update_template_object(
+                    serializer.validated_data["file"]
                 )
             except DjangoValidationError as e:
                 return Response(
