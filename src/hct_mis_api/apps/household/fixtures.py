@@ -454,7 +454,8 @@ def create_household_and_individuals(
             individual.relationship = "HEAD"
         individual.household = household
         individuals_to_update.append(individual)
-    Individual.objects.bulk_update(individuals_to_update, ("relationship", "household"))
+
+    Individual.all_objects.bulk_update(individuals_to_update, ("relationship", "household"))
 
     return household, individuals
 
