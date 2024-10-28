@@ -830,11 +830,11 @@ class TestGrievanceNode(TestCase):
         create_afghanistan()
         cls.program = ProgramFactory(data_collecting_type__type=DataCollectingType.Type.STANDARD)
         cls.sw_program = ProgramFactory(data_collecting_type__type=DataCollectingType.Type.SOCIAL)
-        cls.hh, individuals = create_household({"size": 1, "unicef_id": "HH-001-001"})
+        cls.hh, individuals = create_household({"size": 1, "unicef_id": "HH-001-002"})
         cls.individual_1 = individuals[0]
 
         cls.grievance_sw_with_ind_in_details = GrievanceTicketFactory(
-            household_unicef_id="HH-001-001",
+            household_unicef_id="HH-001-002",
         )
         cls.grievance_sw_with_ind_in_details.programs.set([cls.sw_program])
         cls.grievance_sw_without_ind_in_details = GrievanceTicketFactory(
@@ -861,7 +861,7 @@ class TestGrievanceNode(TestCase):
         self.grievance_sw_without_ind_in_details.refresh_from_db()
 
         # return HH_id
-        self.assertEqual(self.grievance_non_sw_program.target_id, "HH-001-001")
+        self.assertEqual(self.grievance_non_sw_program.target_id, "HH-001-002")
         # return Ind_id
         self.assertEqual(self.grievance_sw_with_ind_in_details.target_id, self.individual_1.unicef_id)
         self.assertEqual(self.grievance_sw_without_ind_in_details.target_id, self.individual_1.unicef_id)
