@@ -340,3 +340,32 @@ class TestPaymentNotification(APITestCase):
             mock_post.call_count,
             3,
         )
+
+    @mock.patch("hct_mis_api.apps.utils.mailjet.requests.post")
+    @override_config(
+        SEND_PAYMENT_PLANS_NOTIFICATION=True, ENABLE_MAILJET=True, MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION=1
+    )
+    @override_settings(ENV="prod")
+    def test_send_email_notification_exclude_superuser(self, mock_post: Any) -> None:
+        self.user_with_approval_permission_partner_unicef.is_superuser = True
+        self.user_with_approval_permission_partner_unicef.save()
+        payment_notification = PaymentNotification(
+            self.payment_plan,
+            PaymentPlan.Action.SEND_FOR_APPROVAL.name,
+            self.user_action_user,
+            f"{timezone.now():%-d %B %Y}",
+        )
+        payment_notification.send_email_notification()
+        for mailjet_client in payment_notification.emails:
+            self.assertIn(
+                mailjet_client.recipients[0],
+                [
+                    self.user_with_approval_permission_partner_with_program_access.email,
+                    self.user_with_partner_action_permissions_and_program_access.email,
+                ],
+            )
+        self.assertNotIn(self.user_with_approval_permission_partner_unicef.email, payment_notification.emails)
+        self.assertEqual(
+            mock_post.call_count,
+            2,
+        )
