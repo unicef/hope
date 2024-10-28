@@ -1,6 +1,5 @@
 import { Checkbox, Radio } from '@mui/material';
 import TableCell from '@mui/material/TableCell';
-import * as React from 'react';
 import {
   AllHouseholdsForPopulationTableQuery,
   HouseholdChoiceDataQuery,
@@ -9,6 +8,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { BlackLink } from '@core/BlackLink';
 import { ClickableTableRow } from '@core/Table/ClickableTableRow';
 import { UniversalMoment } from '@core/UniversalMoment';
+import { MouseEvent, ReactElement } from 'react';
 
 interface LookUpHouseholdTableRowProps {
   household: AllHouseholdsForPopulationTableQuery['allHouseholds']['edges'][number]['node'];
@@ -18,9 +18,7 @@ interface LookUpHouseholdTableRowProps {
   selectedHousehold: AllHouseholdsForPopulationTableQuery['allHouseholds']['edges'][number]['node'];
   choicesData: HouseholdChoiceDataQuery;
   checkboxClickHandler?: (
-    event:
-    | React.MouseEvent<HTMLButtonElement, MouseEvent>
-    | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
+    event: MouseEvent<HTMLTableRowElement> | MouseEvent<HTMLButtonElement>,
     number,
   ) => void;
   selected?: Array<string>;
@@ -38,7 +36,7 @@ export function LookUpHouseholdTableRow({
   householdMultiSelect,
   redirectedFromRelatedTicket,
   isFeedbackWithHouseholdOnly,
-}: LookUpHouseholdTableRowProps): React.ReactElement {
+}: LookUpHouseholdTableRowProps): ReactElement {
   const { baseUrl, isAllPrograms } = useBaseUrl();
   const isSelected = (id: string): boolean => selected.includes(id);
   const isItemSelected = isSelected(household.id);

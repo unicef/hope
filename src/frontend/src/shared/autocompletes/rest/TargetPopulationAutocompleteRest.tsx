@@ -1,7 +1,7 @@
 import { fetchTargetPopulations } from '@api/targetPopulationApi';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { handleOptionSelected } from '@utils/utils';
-import React, { useState } from 'react';
+import React, { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BaseAutocompleteRest } from './BaseAutocompleteRest';
 
@@ -11,7 +11,7 @@ export const TargetPopulationAutocompleteRest = ({
 }: {
   value;
   onChange: (e) => void;
-}): React.ReactElement => {
+}): ReactElement => {
   const { t } = useTranslation();
   const [queryParams, setQueryParams] = useState({});
   const { businessArea, programId } = useBaseUrl();

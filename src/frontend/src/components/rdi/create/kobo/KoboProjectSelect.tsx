@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useField } from 'formik';
 import {
@@ -12,6 +11,7 @@ import styled from 'styled-components';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useAllKoboProjectsQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { ReactElement } from 'react';
 
 const ComboBox = styled(Select)`
   & {
@@ -25,7 +25,7 @@ const StyledInputLabel = styled(InputLabel)`
   background-color: #fff;
 `;
 
-export function KoboProjectSelect(): React.ReactElement {
+export function KoboProjectSelect(): ReactElement {
   const { t } = useTranslation();
   const { businessArea } = useBaseUrl();
   const [field] = useField('koboAssetId');

@@ -1,6 +1,5 @@
 import { Box, Button, FormHelperText, Grid, Typography } from '@mui/material';
 import { Field, Formik } from 'formik';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -72,6 +71,7 @@ import {
 } from '@utils/utils';
 import { grievancePermissions } from './GrievancesDetailsPage/grievancePermissions';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { ReactElement } from 'react';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -85,7 +85,7 @@ const BoxWithBottomBorders = styled.div`
   padding: 15px 0;
 `;
 
-export const EditGrievancePage = (): React.ReactElement => {
+export const EditGrievancePage = (): ReactElement => {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation();
@@ -206,7 +206,7 @@ export const EditGrievancePage = (): React.ReactElement => {
       parseInt(GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE, 10) ||
     values.category === parseInt(GRIEVANCE_CATEGORIES.DATA_CHANGE, 10) ||
     values.category === parseInt(GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT, 10);
-  const dataChangeErrors = (errors, touched): React.ReactElement[] =>
+  const dataChangeErrors = (errors, touched): ReactElement[] =>
     [
       'householdDataUpdateFields',
       'individualDataUpdateFields',

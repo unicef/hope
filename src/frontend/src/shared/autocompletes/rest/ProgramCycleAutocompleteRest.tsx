@@ -1,6 +1,6 @@
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { handleOptionSelected } from '@utils/utils';
-import React, { useState } from 'react';
+import React, { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BaseAutocompleteRest } from './BaseAutocompleteRest';
 import { fetchProgramCycles, ProgramCyclesQuery } from '@api/programCycleApi';
@@ -15,7 +15,7 @@ export const ProgramCycleAutocompleteRest = ({
   onChange: (e) => void;
   required?: boolean;
   error?: string;
-}): React.ReactElement => {
+}): ReactElement => {
   const { t } = useTranslation();
   const [queryParams, setQueryParams] = useState<ProgramCyclesQuery>({
     offset: 0,

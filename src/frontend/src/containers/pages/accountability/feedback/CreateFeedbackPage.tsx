@@ -9,8 +9,7 @@ import {
   Typography,
 } from '@mui/material';
 import { Field, Formik } from 'formik';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -147,7 +146,7 @@ export const validationSchemaWithSteps = (currentStep: number): unknown => {
 //   return errors;
 // }
 
-export function CreateFeedbackPage(): React.ReactElement {
+export function CreateFeedbackPage(): ReactElement {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation();
@@ -307,7 +306,7 @@ export function CreateFeedbackPage(): React.ReactElement {
                             {steps.map((label) => {
                               const stepProps: { completed?: boolean } = {};
                               const labelProps: {
-                                optional?: React.ReactNode;
+                                optional?: ReactNode;
                               } = {};
                               return (
                                 <Step key={label} {...stepProps}>

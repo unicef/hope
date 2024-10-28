@@ -1,6 +1,5 @@
 import { Box, Button, DialogContent, DialogTitle } from '@mui/material';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dialog } from '@containers/dialogs/Dialog';
 import { DialogActions } from '@containers/dialogs/DialogActions';
@@ -17,7 +16,7 @@ export interface ActivateVerificationPlanProps {
 
 export function ActivateVerificationPlan({
   paymentVerificationPlanId,
-}: ActivateVerificationPlanProps): React.ReactElement {
+}: ActivateVerificationPlanProps): ReactElement {
   const { t } = useTranslation();
   const [activateDialogOpen, setActivateDialogOpen] = useState(false);
   const { isActiveProgram } = useProgramContext();

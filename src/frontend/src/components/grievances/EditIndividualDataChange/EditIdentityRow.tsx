@@ -3,8 +3,7 @@ import { Delete } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import Close from '@mui/icons-material/Close';
 import Edit from '@mui/icons-material/Edit';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
@@ -38,7 +37,7 @@ export function EditIdentityRow({
   arrayHelpers,
   addIndividualFieldsData,
   id,
-}: EditIdentityRowProps): React.ReactElement {
+}: EditIdentityRowProps): ReactElement {
   const location = useLocation();
   const isEditTicket = location.pathname.includes('edit-ticket');
   const { t } = useTranslation();

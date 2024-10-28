@@ -9,13 +9,13 @@ import {
   Typography,
 } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { GrievanceTicketQuery } from '@generated/graphql';
 import { TableTitle } from '@core/TableTitle';
 import { handleSelected } from '../utils/helpers';
+import { ReactElement } from 'react';
 
 const GreenIcon = styled.div`
   color: #28cb15;
@@ -46,10 +46,10 @@ export function IdentitiesToEditTable({
   countriesDict,
   index,
   identity,
-}: IdentitiesToEditTableProps): React.ReactElement {
+}: IdentitiesToEditTableProps): ReactElement {
   const { t } = useTranslation();
   const { selectedIdentitiesToEdit } = values;
-  const renderNewOrNotUpdated = (prev, curr): React.ReactElement => {
+  const renderNewOrNotUpdated = (prev, curr): ReactElement => {
     if (prev === curr) {
       return <GreyText>{t('Not updated')}</GreyText>;
     }

@@ -2,7 +2,6 @@ import { Grid } from '@mui/material';
 import { Field } from 'formik';
 import { useLocation } from 'react-router-dom';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
-import * as React from 'react';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
 import { FormikDecimalField } from '@shared/Formik/FormikDecimalField';
 import { FormikFileField } from '@shared/Formik/FormikFileField';
@@ -11,6 +10,7 @@ import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { AllAddIndividualFieldsQuery } from '@generated/graphql';
 import { FormikBoolFieldGrievances } from '../FormikBoolFieldGrievances';
 import { GrievanceFlexFieldPhotoModalEditable } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModalEditable';
+import { ReactElement } from 'react';
 
 export interface EditIndividualDataChangeFieldProps {
   field: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'][number];
@@ -19,7 +19,7 @@ export interface EditIndividualDataChangeFieldProps {
 export const EditIndividualDataChangeField = ({
   name,
   field,
-}: EditIndividualDataChangeFieldProps): React.ReactElement => {
+}: EditIndividualDataChangeFieldProps): ReactElement => {
   const location = useLocation();
   const isNewTicket = location.pathname.indexOf('new-ticket') !== -1;
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;

@@ -1,5 +1,4 @@
 import { Box, Grid, Typography } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { MiśTheme } from '../../../theme';
@@ -12,6 +11,7 @@ import { OverviewContainer } from '../OverviewContainer';
 import { StatusBox } from '../StatusBox';
 import { Title } from '../Title';
 import { UniversalMoment } from '../UniversalMoment';
+import { ReactElement } from 'react';
 
 const NumberOfHouseHolds = styled.div`
   padding: ${({ theme }) => theme.spacing(8)};
@@ -35,7 +35,7 @@ interface CashPlanProps {
 export function CashPlanDetails({
   cashPlan,
   baseUrl,
-}: CashPlanProps): React.ReactElement {
+}: CashPlanProps): ReactElement {
   const { t } = useTranslation();
 
   const filteredTps = (): Array<{
@@ -56,9 +56,7 @@ export function CashPlanDetails({
     return uniques;
   };
 
-  const renderTargetPopulations = ():
-    | React.ReactElement
-    | Array<React.ReactElement> =>
+  const renderTargetPopulations = (): ReactElement | Array<ReactElement> =>
     filteredTps().length ? (
       filteredTps().map((el) => (
         <span key={el.id}>

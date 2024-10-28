@@ -1,6 +1,5 @@
 import { Button, DialogContent, DialogTitle, Grid } from '@mui/material';
 import { Field, Formik } from 'formik';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
@@ -16,6 +15,7 @@ import { DialogTitleWrapper } from '../DialogTitleWrapper';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useNavigate } from 'react-router-dom';
 import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
+import { ReactElement } from 'react';
 
 const validationSchema = Yup.object().shape({
   name: Yup.string().required('Name is required'),
@@ -34,7 +34,7 @@ export const DuplicateTargetPopulation = ({
   open,
   setOpen,
   targetPopulationId,
-}: DuplicateTargetPopulationProps): React.ReactElement => {
+}: DuplicateTargetPopulationProps): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [mutate, { loading }] = useCopyTargetPopulationMutation();

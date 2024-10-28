@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ChangeEvent } from 'react';
 import { BlackLink } from '@core/BlackLink';
 import { UniversalMoment } from '@core/UniversalMoment';
 import PeopleIcon from '@mui/icons-material/People';
@@ -66,7 +66,7 @@ export const NeedsAdjudicationTable = ({
     return allIds;
   };
 
-  const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSelectAll = (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
       setSelectedIndividualIds(getAllIds());
     } else {
@@ -80,13 +80,13 @@ export const NeedsAdjudicationTable = ({
   };
 
   const duplicateTooltip = (
-    <Tooltip data-cy='people-icon-tooltip' title="Marked as Duplicate" >
+    <Tooltip data-cy="people-icon-tooltip" title="Marked as Duplicate">
       <PeopleIcon data-cy="people-icon" color="primary" />
     </Tooltip>
   );
 
   const distinctTooltip = (
-    <Tooltip data-cy='person-icon-tooltip' title="Marked as Distinct" >
+    <Tooltip data-cy="person-icon-tooltip" title="Marked as Distinct">
       <PersonIcon data-cy="person-icon" color="primary" />
     </Tooltip>
   );

@@ -33,13 +33,13 @@ import {
   formatCurrencyWithSymbol,
   isPermissionDeniedError,
 } from '@utils/utils';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { ReactElement } from 'react';
 
 const Container = styled.div`
   padding: 20px 20px 00px 20px;
@@ -63,7 +63,7 @@ const SubTitle = styled(Typography)`
   }
 `;
 
-export const PeopleDetailsPage = (): React.ReactElement => {
+export const PeopleDetailsPage = (): ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
   const { baseUrl, businessArea, programId } = useBaseUrl();

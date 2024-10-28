@@ -1,7 +1,6 @@
 import { Grid, MenuItem } from '@mui/material';
 import GroupIcon from '@mui/icons-material/Group';
 import moment from 'moment';
-import * as React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ProgrammeChoiceDataQuery } from '@generated/graphql';
 import { createHandleApplyFilterChange } from '@utils/utils';
@@ -10,6 +9,7 @@ import { FiltersSection } from '@core/FiltersSection';
 import { NumberTextField } from '@core/NumberTextField';
 import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
+import { ReactElement } from 'react';
 
 interface LookUpProgrammesFiltersSurveysProps {
   filter;
@@ -26,7 +26,7 @@ export function LookUpProgrammesFiltersSurveys({
   initialFilter,
   appliedFilter,
   setAppliedFilter,
-}: LookUpProgrammesFiltersSurveysProps): React.ReactElement {
+}: LookUpProgrammesFiltersSurveysProps): ReactElement {
   const navigate = useNavigate();
   const location = useLocation();
 

@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { ReactElement } from 'react';
 import styled from 'styled-components';
 
 const Container = styled.div`
@@ -7,6 +7,6 @@ const Container = styled.div`
   flex-direction: row;
 `;
 
-export function OverviewContainer({ children }): React.ReactElement {
+export function OverviewContainer({ children }): ReactElement {
   return <Container>{children}</Container>;
 }
