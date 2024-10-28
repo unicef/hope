@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   AllPaymentPlansForTableQueryVariables,
   usePaymentPlanStatusChoicesQueryQuery,
@@ -18,6 +17,7 @@ import { Box } from '@mui/system';
 import { DatePickerFilter } from '@core/DatePickerFilter';
 import moment from 'moment';
 import { ClearApplyButtons } from '@core/ClearApplyButtons';
+import { ReactElement } from 'react';
 
 export type FilterProps = Pick<
   AllPaymentPlansForTableQueryVariables,
@@ -48,7 +48,7 @@ export const PaymentPlansFilters = ({
   initialFilter,
   appliedFilter,
   setAppliedFilter,
-}: PaymentPlansFilterProps): React.ReactElement => {
+}: PaymentPlansFilterProps): ReactElement => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();

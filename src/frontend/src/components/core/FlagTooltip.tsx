@@ -1,6 +1,6 @@
-import * as React from 'react';
 import FlagIcon from '@mui/icons-material/Flag';
 import { Tooltip } from '@mui/material';
+import { ReactElement } from 'react';
 import styled from 'styled-components';
 
 interface StyledFlagProps {
@@ -20,7 +20,7 @@ export function FlagTooltip({
   confirmed,
   message = '',
   handleClick,
-}: FlagTooltipProps): React.ReactElement {
+}: FlagTooltipProps): ReactElement {
   return (
     <Tooltip onClick={handleClick} title={message}>
       <StyledFlag confirmed={confirmed} />

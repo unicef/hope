@@ -1,5 +1,5 @@
 import { Box, FormHelperText, Grid } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 import { isInvalid } from '@utils/utils';
 import { LookUpHouseholdIndividualSelectionDetail } from './LookUpHouseholdIndividualSelectionDetail';
 import { LookUpHouseholdIndividualSelectionDisplay } from './LookUpHouseholdIndividualSelectionDisplay';
@@ -19,7 +19,7 @@ export function LookUpHouseholdIndividualSelection({
   touched?;
   redirectedFromRelatedTicket?: boolean;
   isFeedbackWithHouseholdOnly?: boolean;
-}): React.ReactElement {
+}): ReactElement {
   const { isSocialDctType } = useProgramContext();
   const [selectedHousehold, setSelectedHousehold] = useState(
     values.selectedHousehold,

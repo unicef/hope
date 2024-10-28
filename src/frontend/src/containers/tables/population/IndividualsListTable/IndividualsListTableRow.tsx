@@ -1,5 +1,4 @@
 import TableCell from '@mui/material/TableCell';
-import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { HouseholdChoiceDataQuery, IndividualNode } from '@generated/graphql';
 import { BlackLink } from '@components/core/BlackLink';
@@ -8,6 +7,7 @@ import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { IndividualFlags } from '@components/population/IndividualFlags';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { choicesToDict, sexToCapitalize } from '@utils/utils';
+import { ReactElement } from 'react';
 
 interface IndividualsListTableRowProps {
   individual: IndividualNode;
@@ -19,7 +19,7 @@ export function IndividualsListTableRow({
   individual,
   canViewDetails,
   choicesData,
-}: IndividualsListTableRowProps): React.ReactElement {
+}: IndividualsListTableRowProps): ReactElement {
   const navigate = useNavigate();
   const { baseUrl } = useBaseUrl();
 

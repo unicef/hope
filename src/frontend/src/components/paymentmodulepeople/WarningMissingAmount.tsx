@@ -1,8 +1,8 @@
 import { Box } from '@mui/material';
 import WarningIcon from '@mui/icons-material/Warning';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import { ReactElement } from 'react';
 
 const WarnIcon = styled(WarningIcon)`
   color: ${({ theme }) => theme.hctPalette.orange};
@@ -16,7 +16,7 @@ interface WarningMissingAmountProps {
 export function WarningMissingAmount({
   amount,
   currency,
-}: WarningMissingAmountProps): React.ReactElement {
+}: WarningMissingAmountProps): ReactElement {
   const { t } = useTranslation();
 
   return (

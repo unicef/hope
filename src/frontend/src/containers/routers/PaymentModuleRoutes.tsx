@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { useRoutes } from 'react-router-dom';
 import { EditFollowUpPaymentPlanPage } from '../pages/paymentmodule/EditFollowUpPaymentPlanPage';
 import { EditFollowUpSetUpFspPage } from '../pages/paymentmodule/EditFollowUpSetUpFspPage';
@@ -22,8 +21,9 @@ import { ProgramCycleDetailsPage } from '@containers/pages/paymentmodule/Program
 import { PaymentPlanDetailsPage } from '@containers/pages/paymentmodule/ProgramCycle/PaymentPlanDetails/PaymentPlanDetailsPage';
 import { CreatePaymentPlanPage } from '@containers/pages/paymentmodule/ProgramCycle/CreatePaymentPlanPage';
 import { EditPeoplePaymentPlanPage } from '@containers/pages/paymentmodulepeople/EditPeoplePaymentPlanPage';
+import { ReactElement } from 'react';
 
-export const PaymentModuleRoutes = (): React.ReactElement => {
+export const PaymentModuleRoutes = (): ReactElement => {
   const { isSocialDctType } = useProgramContext();
   let children = [];
 

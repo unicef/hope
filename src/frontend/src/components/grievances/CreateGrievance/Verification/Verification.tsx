@@ -1,6 +1,5 @@
 import { Box, Typography } from '@mui/material';
 import { Field } from 'formik';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
@@ -8,6 +7,7 @@ import { Consent } from '../../Consent';
 import { HouseholdQuestionnaire } from '../../HouseholdQuestionnaire/HouseholdQuestionnaire';
 import { IndividualQuestionnaire } from '../../IndividualQuestionnnaire/IndividualQuestionnaire';
 import { useProgramContext } from 'src/programContext';
+import { ReactElement } from 'react';
 
 const BoxWithBorders = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -24,9 +24,7 @@ export interface VerificationProps {
   values;
 }
 
-export function Verification({
-  values,
-}: VerificationProps): React.ReactElement {
+export function Verification({ values }: VerificationProps): ReactElement {
   const { t } = useTranslation();
   const { isSocialDctType } = useProgramContext();
   return (

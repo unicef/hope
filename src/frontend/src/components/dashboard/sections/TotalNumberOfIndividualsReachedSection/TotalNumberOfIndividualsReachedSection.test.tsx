@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { render } from '../../../../testUtils/testUtils';
 import { TotalNumberOfIndividualsReachedSection } from './TotalNumberOfIndividualsReachedSection';
 import { fakeSectionIndividualsReached } from '../../../../../fixtures/dashboard/fakeSectionIndividualsReached';

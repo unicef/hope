@@ -1,4 +1,3 @@
-import * as React from 'react';
 import styled from 'styled-components';
 import {
   AllIndividualsForPopulationTableQuery,
@@ -15,6 +14,7 @@ import {
 } from './LookUpIndividualTableHeadCells';
 import { LookUpIndividualTableRow } from './LookUpIndividualTableRow';
 import { useProgramContext } from 'src/programContext';
+import { ReactElement } from 'react';
 
 interface LookUpIndividualTableProps {
   filter;
@@ -48,7 +48,7 @@ export function LookUpIndividualTable({
   ticket,
   excludedId,
   noTableStyling = false,
-}: LookUpIndividualTableProps): React.ReactElement {
+}: LookUpIndividualTableProps): ReactElement {
   const { isSocialDctType } = useProgramContext();
   const { programId, isAllPrograms } = useBaseUrl();
 
@@ -111,7 +111,7 @@ export function LookUpIndividualTable({
     ? headCellsWithProgramColumn
     : headCells;
 
-  const renderTable = (): React.ReactElement => (
+  const renderTable = (): ReactElement => (
     <UniversalTable<
       AllIndividualsForPopulationTableQuery['allIndividuals']['edges'][number]['node'],
       AllIndividualsForPopulationTableQueryVariables
