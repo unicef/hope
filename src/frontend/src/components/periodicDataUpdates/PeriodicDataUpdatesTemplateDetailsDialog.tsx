@@ -20,7 +20,7 @@ import {
 } from '@mui/material';
 import { PeriodicDataUpdateTemplateList } from '@restgenerated/models/PeriodicDataUpdateTemplateList';
 import { useQuery } from '@tanstack/react-query';
-import React, { FC } from 'react';
+import { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface PeriodicDataUpdatesTemplateDetailsDialogProps {
