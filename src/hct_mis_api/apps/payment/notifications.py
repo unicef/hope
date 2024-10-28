@@ -93,9 +93,12 @@ class PaymentNotification:
             if permission in DEFAULT_PERMISSIONS_LIST_FOR_IS_UNICEF_PARTNER
             else Q()
         )
-        return User.objects.filter(
+        users = User.objects.filter(
             (Q(user_roles__in=user_roles) & program_access_q) | Q(partner_role_q & program_access_q) | unicef_q
         ).distinct()
+        if settings.ENV == "prod":
+            users = users.exclude(is_superuser=True)
+        return users
 
     def _prepare_emails(self) -> List[MailjetClient]:
         return [self._prepare_email(user) for user in self.user_recipients.exclude(id=self.action_user.id)]
