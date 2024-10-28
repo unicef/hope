@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -19,6 +18,7 @@ import {
   useImportedIndividualQuery,
 } from '@generated/graphql';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { ReactElement } from 'react';
 
 const Container = styled.div`
   padding: 20px;
@@ -29,7 +29,7 @@ const Container = styled.div`
   }
 `;
 
-export const PeopleRegistrationDetailsPage = (): React.ReactElement => {
+export const PeopleRegistrationDetailsPage = (): ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
   const permissions = usePermissions();

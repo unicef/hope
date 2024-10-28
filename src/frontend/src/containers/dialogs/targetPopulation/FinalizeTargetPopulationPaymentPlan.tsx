@@ -1,5 +1,4 @@
 import { Button, DialogContent, DialogTitle, Typography } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { LoadingButton } from '@components/core/LoadingButton';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -12,6 +11,7 @@ import { DialogTitleWrapper } from '../DialogTitleWrapper';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from '../../../programContext';
+import { ReactElement } from 'react';
 
 export interface FinalizeTargetPopulationPaymentPlanProps {
   open: boolean;
@@ -25,7 +25,7 @@ export const FinalizeTargetPopulationPaymentPlan = ({
   setOpen,
   totalHouseholds,
   targetPopulationId,
-}: FinalizeTargetPopulationPaymentPlanProps): React.ReactElement => {
+}: FinalizeTargetPopulationPaymentPlanProps): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();

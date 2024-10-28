@@ -1,5 +1,5 @@
 import { Button } from '@mui/material';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -60,7 +60,7 @@ const initialFilter = {
   paymentVerificationPlan: '',
 };
 
-export function PaymentPlanVerificationDetailsPage(): React.ReactElement {
+export function PaymentPlanVerificationDetailsPage(): ReactElement {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const permissions = usePermissions();

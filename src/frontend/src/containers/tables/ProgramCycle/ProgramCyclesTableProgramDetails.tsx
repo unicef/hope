@@ -72,19 +72,19 @@ export const ProgramCyclesTableProgramDetails = ({
         </TableCell>
         <TableCell
           align="right"
-          data-cy="program-cycle-total-entitled-quantity"
+          data-cy="program-cycle-total-entitled-quantity-usd"
         >
           {row.total_entitled_quantity_usd || '-'}
         </TableCell>
         <TableCell
           align="right"
-          data-cy="program-cycle-total-undelivered-quantity"
+          data-cy="program-cycle-total-undelivered-quantity-usd"
         >
           {row.total_undelivered_quantity_usd || '-'}
         </TableCell>
         <TableCell
           align="right"
-          data-cy="program-cycle-total-delivered-quantity"
+          data-cy="program-cycle-total-delivered-quantity-usd"
         >
           {row.total_delivered_quantity_usd || '-'}
         </TableCell>

@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import Button from '@mui/material/Button';
 import { Box } from '@mui/material';
 import { useTranslation } from 'react-i18next';
@@ -15,7 +14,7 @@ interface RelatedFollowUpPaymentPlansProps {
 export function RelatedFollowUpPaymentPlans({
   followUps,
   baseUrl,
-}: RelatedFollowUpPaymentPlansProps): React.ReactElement {
+}: RelatedFollowUpPaymentPlansProps): ReactElement {
   const { t } = useTranslation();
   const [showAll, setShowAll] = useState(false);
 

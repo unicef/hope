@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { useEffect, useState } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 import get from 'lodash/get';
 import { Checkbox } from '@mui/material';
 import { useTranslation } from 'react-i18next';
@@ -25,9 +24,9 @@ export function AdminAreaAutocompleteMultiple({
   level?: number;
   disabled?: boolean;
   parentId?: string;
-}): React.ReactElement {
+}): ReactElement {
   const { t } = useTranslation();
-  const [inputValue, setInputTextChange] = React.useState('');
+  const [inputValue, setInputTextChange] = useState('');
 
   const debouncedInputText = useDebounce(inputValue, 400);
   const [newValue, setNewValue] = useState([]);

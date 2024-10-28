@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { ReactElement, useState } from 'react';
 import { PageHeader } from '@core/PageHeader';
 import { useTranslation } from 'react-i18next';
 import { ProgramCyclesFilters } from '@containers/tables/ProgramCyclesTablePaymentModule/ProgramCyclesFilters';
@@ -21,7 +21,7 @@ const initialFilter = {
   end_date: '',
 };
 
-export const ProgramCyclePage = (): React.ReactElement => {
+export const ProgramCyclePage = (): ReactElement => {
   const { t } = useTranslation();
   const permissions = usePermissions();
   const location = useLocation();

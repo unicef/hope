@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
@@ -31,7 +30,7 @@ export function BulkAssignModal({
   selectedTickets,
   businessArea,
   setSelected,
-}: BulkAssignModalProps): React.ReactElement {
+}: BulkAssignModalProps): ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const [value, setValue] =

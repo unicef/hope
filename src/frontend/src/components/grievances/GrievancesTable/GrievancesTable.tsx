@@ -21,7 +21,7 @@ import {
 } from '@utils/constants';
 import { choicesToDict, dateToIsoString } from '@utils/utils';
 import get from 'lodash/get';
-import { useEffect, useState } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   PERMISSIONS,
@@ -45,7 +45,7 @@ interface GrievancesTableProps {
 
 export const GrievancesTable = ({
   filter,
-}: GrievancesTableProps): React.ReactElement => {
+}: GrievancesTableProps): ReactElement => {
   const { businessArea, programId, isAllPrograms } = useBaseUrl();
   const { isSocialDctType } = useProgramContext();
   const { t } = useTranslation();

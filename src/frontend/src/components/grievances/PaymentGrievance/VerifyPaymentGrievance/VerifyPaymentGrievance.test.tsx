@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { MockedProvider } from '@apollo/react-testing';
 import { render } from '../../../../testUtils/testUtils';
 import { fakeApolloUpdateGrievanceDetailsPaymentVerificationMutation } from '../../../../../fixtures/grievances/fakeApolloUpdateGrievanceDetailsPaymentVerificationMutation';

@@ -1,6 +1,5 @@
 import { Box } from '@mui/material';
-import * as React from 'react';
-import { useState } from 'react';
+import { ChangeEvent, ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
@@ -46,7 +45,7 @@ export function LookUpHouseholdIndividualSelectionDetail({
   setSelectedHousehold;
   redirectedFromRelatedTicket?: boolean;
   isFeedbackWithHouseholdOnly?: boolean;
-}): React.ReactElement {
+}): ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
   const { businessArea, isAllPrograms, programId } = useBaseUrl();
@@ -125,7 +124,7 @@ export function LookUpHouseholdIndividualSelectionDetail({
         <Box id="scroll-dialog-title">
           <StyledTabs
             value={isSocialDctType ? 0 : selectedTab}
-            onChange={(_event: React.ChangeEvent<object>, newValue: number) => {
+            onChange={(_event: ChangeEvent<object>, newValue: number) => {
               setSelectedTab(newValue);
             }}
             indicatorColor="primary"

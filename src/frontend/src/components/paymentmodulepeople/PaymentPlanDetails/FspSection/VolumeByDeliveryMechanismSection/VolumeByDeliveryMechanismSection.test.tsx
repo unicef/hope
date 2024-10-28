@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { fakeApolloPaymentPlan } from '../../../../../../fixtures/paymentmodule/fakeApolloPaymentPlan';
 import { render } from '../../../../../testUtils/testUtils';
 import { VolumeByDeliveryMechanismSection } from './VolumeByDeliveryMechanismSection';

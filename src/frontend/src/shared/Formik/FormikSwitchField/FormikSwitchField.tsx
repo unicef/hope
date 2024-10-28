@@ -1,5 +1,5 @@
-import * as React from 'react';
 import { FormHelperText, Switch } from '@mui/material';
+import { ReactElement } from 'react';
 import styled from 'styled-components';
 
 const StyledSwitch = styled.div`
@@ -18,7 +18,7 @@ export function FormikSwitchField({
   field,
   form,
   ...otherProps
-}): React.ReactElement {
+}): ReactElement {
   const isInvalid = form.errors[field.name] && form.touched[field.name];
   return (
     <>

@@ -1,6 +1,5 @@
 import { Box } from '@mui/material';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { useHouseholdChoiceDataQuery } from '@generated/graphql';
@@ -15,7 +14,7 @@ import { getFilterFromQueryParams } from '@utils/utils';
 import { HouseholdTable } from '../../tables/population/HouseholdTable';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
-export function PopulationHouseholdPage(): React.ReactElement {
+export function PopulationHouseholdPage(): ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
   const { data: choicesData, loading: choicesLoading } =

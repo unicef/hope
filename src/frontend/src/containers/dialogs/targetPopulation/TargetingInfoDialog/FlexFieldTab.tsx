@@ -1,12 +1,12 @@
 import { Box, Grid, MenuItem } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SearchTextField } from '@components/core/SearchTextField';
 import { SelectFilter } from '@components/core/SelectFilter';
 import { useAllFieldsAttributesQuery } from '@generated/graphql';
 import { FlexFieldsTable } from '../../../tables/targeting/TargetPopulation/FlexFields';
 
-export function FlexFieldTab(): React.ReactElement {
+export function FlexFieldTab(): ReactElement {
   const { t } = useTranslation();
   const { data } = useAllFieldsAttributesQuery();
   const [searchValue, setSearchValue] = useState('');
