@@ -248,6 +248,7 @@ class CopyProgramPopulation:
             .filter(
                 program=self.program,
                 copied_from_id=new_individual.household_id,
+                registration_data_import=self.rdi,
             )
             .first()
         )
