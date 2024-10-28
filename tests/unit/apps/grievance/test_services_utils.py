@@ -408,6 +408,52 @@ class TestGrievanceUtils(TestCase):
         assert ind_1.duplicate is False
         assert ind_2.duplicate is True
 
+    def test_close_needs_adjudication_ticket_service_individual_without_household(self) -> None:
+        user = UserFactory()
+        ba = BusinessAreaFactory(slug="afghanistan")
+        program = ProgramFactory(business_area=ba)
+
+        grievance = GrievanceTicketFactory(
+            category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+            business_area=ba,
+            status=GrievanceTicket.STATUS_FOR_APPROVAL,
+            description="GrievanceTicket",
+        )
+        grievance.programs.add(program)
+        ind_data = {
+            "given_name": "John",
+            "family_name": "Doe",
+            "middle_name": "",
+            "full_name": "John Doe",
+        }
+        ind_1 = IndividualFactory(household=None, program=program, **ind_data)
+        document = DocumentFactory(individual=ind_1, status=Document.STATUS_INVALID)
+        _, individuals_2 = create_household(
+            {"size": 1, "business_area": ba, "program": program},
+            ind_data,
+        )
+        ind_2 = individuals_2[0]
+
+        ticket_details = TicketNeedsAdjudicationDetailsFactory(
+            ticket=grievance,
+            golden_records_individual=ind_1,
+            is_multiple_duplicates_version=True,
+            selected_individual=None,
+        )
+        ticket_details.selected_distinct.set([ind_1, ind_2])
+        ticket_details.ticket = grievance
+        ticket_details.save()
+
+        close_needs_adjudication_ticket_service(grievance, user)
+
+        ind_1.refresh_from_db()
+        ind_2.refresh_from_db()
+        document.refresh_from_db()
+
+        self.assertEqual(ind_1.duplicate, False)
+        self.assertEqual(ind_2.duplicate, False)
+        self.assertEqual(document.status, Document.STATUS_VALID)
+
     def test_close_needs_adjudication_ticket_service_when_just_duplicates(self) -> None:
         user = UserFactory()
         ba = BusinessAreaFactory(slug="afghanistan")
