@@ -32,6 +32,10 @@ class PaymentVerificationDetails(BaseComponents):
     verificationPlan = 'h6[data-cy="verification-plan-{}"]'
     verificationPlanPrefix = 'h6[data-cy^="verification-plan"]'
     buttonActivatePlan = 'button[data-cy="button-activate-plan"]'
+    exportXlsx = 'button[data-cy="export-xlsx"]'
+    downloadXlsx = 'button[data-cy="download-xlsx"]'
+    importXlsx = 'div[data-cy="import-xlsx"]'
+    buttonImportEntitlement = 'button[data-cy="button-import-entitlement"]'
     verificationPlanStatus = 'div[data-cy="verification-plan-status"]'
     labelSampling = 'div[data-cy="label-SAMPLING"]'
     labelResponded = 'div[data-cy="label-RESPONDED"]'
@@ -130,6 +134,18 @@ class PaymentVerificationDetails(BaseComponents):
 
     def getButtonActivatePlan(self) -> WebElement:
         return self.wait_for(self.buttonActivatePlan)
+
+    def getExportXlsx(self) -> WebElement:
+        return self.wait_for(self.exportXlsx)
+
+    def getDownloadXlsx(self) -> WebElement:
+        return self.wait_for(self.downloadXlsx)
+
+    def getImportXlsx(self) -> WebElement:
+        return self.wait_for(self.importXlsx)
+
+    def getButtonImportEntitlement(self) -> WebElement:
+        return self.wait_for(self.buttonImportEntitlement)
 
     def getVerificationPlanStatus(self) -> WebElement:
         return self.wait_for(self.verificationPlanStatus)

@@ -199,6 +199,7 @@ class BaseComponents(Common):
         return self.wait_for(self.breadcrumbsChevronIcon)
 
     def getArrowBack(self) -> WebElement:
+        self.scroll(scroll_by=-600)
         return self.wait_for(self.arrowBack)
 
     def getNavProgramLog(self) -> WebElement:
