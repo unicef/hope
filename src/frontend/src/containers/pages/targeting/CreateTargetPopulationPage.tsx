@@ -19,7 +19,6 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { getTargetingCriteriaVariables } from '@utils/targetingUtils';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { useProgramContext } from 'src/programContext';
-import { AndDivider, AndDividerLabel } from '@components/targeting/AndDivider';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { TargetingCriteriaDisplay } from '@components/targeting/TargetingCriteriaDisplay/TargetingCriteriaDisplay';
 import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
@@ -29,8 +28,7 @@ import { ReactElement } from 'react';
 export const CreateTargetPopulationPage = (): ReactElement => {
   const { t } = useTranslation();
   const { programId } = useBaseUrl();
-  const { selectedProgram, isSocialDctType, isStandardDctType } =
-    useProgramContext();
+  const { isSocialDctType, isStandardDctType } = useProgramContext();
   const initialValues = {
     name: '',
     criterias: [],
@@ -45,6 +43,7 @@ export const CreateTargetPopulationPage = (): ReactElement => {
     flagExcludeIfOnSanctionList: false,
     householdIds: '',
     individualIds: '',
+    collectorIds: '',
   };
   const [mutate, { loading }] = useCreateTpMutation();
   const { showMessage } = useSnackbar();
@@ -52,7 +51,6 @@ export const CreateTargetPopulationPage = (): ReactElement => {
   const permissions = usePermissions();
   const navigate = useNavigate();
   const location = useLocation();
-  const category = location.state?.category;
 
   const { data: businessAreaData } = useBusinessAreaDataQuery({
     variables: { businessAreaSlug: businessArea },
@@ -64,10 +62,6 @@ export const CreateTargetPopulationPage = (): ReactElement => {
     return <PermissionDenied />;
 
   const screenBeneficiary = businessAreaData?.businessArea?.screenBeneficiary;
-  const individualFiltersAvailable =
-    selectedProgram?.dataCollectingType?.individualFiltersAvailable;
-  const householdFiltersAvailable =
-    selectedProgram?.dataCollectingType?.householdFiltersAvailable;
 
   const idValidation = Yup.string().test(
     'testName',
@@ -144,7 +138,6 @@ export const CreateTargetPopulationPage = (): ReactElement => {
               values={values}
               baseUrl={baseUrl}
               permissions={permissions}
-              category={category}
             />
             <PaperContainer>
               <Box pt={3} pb={3}>
@@ -180,7 +173,7 @@ export const CreateTargetPopulationPage = (): ReactElement => {
               <Box pt={6} pb={6}>
                 <Divider />
               </Box>
-              {values.program && category === 'filters' ? (
+              {values.program ? (
                 <FieldArray
                   name="criterias"
                   render={(arrayHelpers) => (
@@ -190,110 +183,71 @@ export const CreateTargetPopulationPage = (): ReactElement => {
                       screenBeneficiary={screenBeneficiary}
                       isStandardDctType={isStandardDctType}
                       isSocialDctType={isSocialDctType}
-                      category={category}
                       isEdit
                     />
                   )}
                 />
               ) : null}
-              {category === 'ids' ? (
-                <>
+              <>
+                <Box mt={3} p={3}>
                   <Grid container spacing={3}>
-                    {householdFiltersAvailable && (
-                      <Grid item xs={12}>
+                    {isStandardDctType && (
+                      <Grid item xs={6}>
                         <Field
-                          data-cy="input-included-household-ids"
-                          name="householdIds"
-                          fullWidth
-                          variant="outlined"
-                          label={t('Household IDs')}
-                          component={FormikTextField}
+                          name="flagExcludeIfActiveAdjudicationTicket"
+                          label={t(
+                            'Exclude Households with Active Adjudication Ticket',
+                          )}
+                          color="primary"
+                          component={FormikCheckboxField}
+                          data-cy="input-active-households-adjudication-ticket"
                         />
                       </Grid>
                     )}
-                    {householdFiltersAvailable &&
-                      individualFiltersAvailable && (
-                        <Grid item xs={12}>
-                          <AndDivider>
-                            <AndDividerLabel>OR</AndDividerLabel>
-                          </AndDivider>
-                        </Grid>
-                      )}
-                    {individualFiltersAvailable && (
-                      <Grid item xs={12}>
-                        <Box pb={3}>
-                          <Field
-                            data-cy="input-included-individual-ids"
-                            name="individualIds"
-                            fullWidth
-                            variant="outlined"
-                            label={t('Individual IDs')}
-                            component={FormikTextField}
-                          />
-                        </Box>
+                    {isSocialDctType && (
+                      <Grid item xs={6}>
+                        <Field
+                          name="flagExcludeIfActiveAdjudicationTicket"
+                          label={t(
+                            'Exclude People with Active Adjudication Ticket',
+                          )}
+                          color="primary"
+                          component={FormikCheckboxField}
+                          data-cy="input-active-people-adjudication-ticket"
+                        />
+                      </Grid>
+                    )}
+                    {screenBeneficiary && isSocialDctType && (
+                      <Grid item xs={6}>
+                        <Field
+                          name="flagExcludeIfOnSanctionList"
+                          label={t(
+                            'Exclude People with an Active Sanction Screen Flag',
+                          )}
+                          color="primary"
+                          component={FormikCheckboxField}
+                          data-cy="input-active-people-sanction-flag"
+                        />
+                      </Grid>
+                    )}
+                    {screenBeneficiary && isStandardDctType && (
+                      <Grid item xs={6}>
+                        <Field
+                          name="flagExcludeIfOnSanctionList"
+                          label={t(
+                            'Exclude Households with an Active Sanction Screen Flag',
+                          )}
+                          color="primary"
+                          component={FormikCheckboxField}
+                          data-cy="input-active-sanction-flag"
+                        />
                       </Grid>
                     )}
                   </Grid>
-                  <Box mt={3} p={3}>
-                    <Grid container spacing={3}>
-                      {isStandardDctType && (
-                        <Grid item xs={6}>
-                          <Field
-                            name="flagExcludeIfActiveAdjudicationTicket"
-                            label={t(
-                              'Exclude Households with Active Adjudication Ticket',
-                            )}
-                            color="primary"
-                            component={FormikCheckboxField}
-                            data-cy="input-active-households-adjudication-ticket"
-                          />
-                        </Grid>
-                      )}
-                      {isSocialDctType && (
-                        <Grid item xs={6}>
-                          <Field
-                            name="flagExcludeIfActiveAdjudicationTicket"
-                            label={t(
-                              'Exclude People with Active Adjudication Ticket',
-                            )}
-                            color="primary"
-                            component={FormikCheckboxField}
-                            data-cy="input-active-people-adjudication-ticket"
-                          />
-                        </Grid>
-                      )}
-                      {screenBeneficiary && isSocialDctType && (
-                        <Grid item xs={6}>
-                          <Field
-                            name="flagExcludeIfOnSanctionList"
-                            label={t(
-                              'Exclude People with an Active Sanction Screen Flag',
-                            )}
-                            color="primary"
-                            component={FormikCheckboxField}
-                            data-cy="input-active-people-sanction-flag"
-                          />
-                        </Grid>
-                      )}
-                      {screenBeneficiary && isStandardDctType && (
-                        <Grid item xs={6}>
-                          <Field
-                            name="flagExcludeIfOnSanctionList"
-                            label={t(
-                              'Exclude Households with an Active Sanction Screen Flag',
-                            )}
-                            color="primary"
-                            component={FormikCheckboxField}
-                            data-cy="input-active-sanction-flag"
-                          />
-                        </Grid>
-                      )}
-                    </Grid>
-                  </Box>
-                </>
-              ) : null}
+                </Box>
+              </>
             </PaperContainer>
-            {category === 'filters' && <Exclusions />}
+            <Exclusions />
             <Box
               pt={3}
               pb={3}

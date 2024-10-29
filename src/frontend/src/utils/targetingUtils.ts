@@ -116,22 +116,33 @@ export function mapFiltersToInitialValues(filters): any[] {
   return mappedFilters;
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+function mapBlockFilters(blocks, blockKey) {
+  return blocks.map((block) => ({
+    [`${blockKey}BlockFilters`]: mapFiltersToInitialValues(
+      block[`${blockKey}BlockFilters`],
+    ).map((filter) => {
+      return {
+        ...filter,
+        isNull: filter.comparisonMethod === 'IS_NULL' || filter.isNull,
+      };
+    }),
+  }));
+}
+
 export function mapCriteriaToInitialValues(criteria) {
   const filters = criteria.filters || [];
   const individualsFiltersBlocks = criteria.individualsFiltersBlocks || [];
+  const collectorsFiltersBlocks = criteria.collectorsFiltersBlocks || [];
   return {
     filters: mapFiltersToInitialValues(filters),
-    individualsFiltersBlocks: individualsFiltersBlocks.map((block) => ({
-      individualBlockFilters: mapFiltersToInitialValues(
-        block.individualBlockFilters,
-      ).map((filter) => {
-        return {
-          ...filter,
-          isNull: filter.comparisonMethod === 'IS_NULL' || filter.isNull,
-        };
-      }),
-    })),
+    individualsFiltersBlocks: mapBlockFilters(
+      individualsFiltersBlocks,
+      'individual',
+    ),
+    collectorsFiltersBlocks: mapBlockFilters(
+      collectorsFiltersBlocks,
+      'collector',
+    ),
   };
 }
 

@@ -84,7 +84,6 @@ interface TargetingCriteriaDisplayProps {
   screenBeneficiary: boolean;
   isSocialDctType: boolean;
   isStandardDctType: boolean;
-  category: string;
 }
 
 export const TargetingCriteriaDisplay = ({
@@ -95,7 +94,6 @@ export const TargetingCriteriaDisplay = ({
   screenBeneficiary,
   isSocialDctType,
   isStandardDctType,
-  category,
 }: TargetingCriteriaDisplayProps): ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
@@ -148,6 +146,9 @@ export const TargetingCriteriaDisplay = ({
     return closeModal();
   };
 
+  // const  collectorFiltersAvailable =
+  //   selectedProgram?.dataCollectingType?.collectorFiltersAvailable;
+
   let individualFiltersAvailable =
     selectedProgram?.dataCollectingType?.individualFiltersAvailable;
   let householdFiltersAvailable =
@@ -174,7 +175,7 @@ export const TargetingCriteriaDisplay = ({
           <div />
           {isEdit && (
             <>
-              {!!rules.length && category === 'filters' && (
+              {!!rules.length && (
                 <Button
                   variant="outlined"
                   color="primary"
@@ -195,6 +196,7 @@ export const TargetingCriteriaDisplay = ({
           isSocialWorkingProgram={isSocialWorkingProgram}
           individualFiltersAvailable={individualFiltersAvailable}
           householdFiltersAvailable={householdFiltersAvailable}
+          collectorsFiltersAvailable={true}
         />
         <ContentWrapper>
           <Box display="flex" flexDirection="column">
@@ -225,7 +227,7 @@ export const TargetingCriteriaDisplay = ({
                   ))
                 : null}
 
-              {category === 'filters' && !rules.length && (
+              {!rules.length && (
                 <AddCriteria
                   onClick={() => setOpen(true)}
                   data-cy="button-target-population-add-criteria"
