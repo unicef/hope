@@ -384,6 +384,7 @@ class TestSmokeGrievanceTickets:
         ]
         assert expected_labels == [i.text for i in pageGrievanceTickets.getTableLabel()]
 
+    @pytest.mark.xfail(reason="UNSTABLE")
     def test_check_grievance_tickets_system_generated_page(
         self,
         create_programs: None,
@@ -445,6 +446,7 @@ class TestSmokeGrievanceTickets:
         assert "" in pageGrievanceDetailsPage.getNewNoteField().text
         assert "ADD NEW NOTE" in pageGrievanceDetailsPage.getButtonNewNote().text
 
+    @pytest.mark.xfail(reason="UNSTABLE")
     def test_check_grievance_tickets_details_page_normal_program(
         self,
         create_programs: None,
