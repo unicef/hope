@@ -418,6 +418,7 @@ class TestGrievanceUtils(TestCase):
             business_area=ba,
             status=GrievanceTicket.STATUS_FOR_APPROVAL,
             description="GrievanceTicket",
+            issue_type=GrievanceTicket.ISSUE_TYPE_UNIQUE_IDENTIFIERS_SIMILARITY,
         )
         grievance.programs.add(program)
         ind_data = {
