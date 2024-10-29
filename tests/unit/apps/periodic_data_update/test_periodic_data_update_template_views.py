@@ -723,10 +723,10 @@ class TestPeriodicDataUpdateTemplateViews:
 
         self.pdu_template1.refresh_from_db()
         assert self.pdu_template1.status == PeriodicDataUpdateTemplate.Status.EXPORTED
-        self.assertIsInstance(response, FileResponse)
+        assert isinstance(response, FileResponse) is True
         assert f'filename="{file.file.name}"' in response["Content-Disposition"]
         assert response["Content-Type"] == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        assert response.content == b"Test content"
+        assert response.getvalue() == b"Test content"
 
     def test_download_periodic_data_update_template_not_exported(
         self,
