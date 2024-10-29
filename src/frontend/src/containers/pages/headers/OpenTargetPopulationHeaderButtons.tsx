@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Box, Button, IconButton } from '@mui/material';
 import {
@@ -32,7 +31,7 @@ export function OpenTargetPopulationHeaderButtons({
   canEdit,
   canLock,
   canRemove,
-}: InProgressTargetPopulationHeaderButtonsPropTypes): React.ReactElement {
+}: InProgressTargetPopulationHeaderButtonsPropTypes): ReactElement {
   const [openLock, setOpenLock] = useState(false);
   const [openDuplicate, setOpenDuplicate] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);

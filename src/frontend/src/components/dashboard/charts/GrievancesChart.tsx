@@ -1,15 +1,13 @@
 import { Box } from '@mui/material';
-import * as React from 'react';
 import { Doughnut } from 'react-chartjs-2';
 import { formatNumber, getPercentage } from '@utils/utils';
 import { AllChartsQuery } from '@generated/graphql';
+import { ReactElement } from 'react';
 
 interface GrievancesChartProps {
   data: AllChartsQuery['chartGrievances'];
 }
-export function GrievancesChart({
-  data,
-}: GrievancesChartProps): React.ReactElement {
+export function GrievancesChart({ data }: GrievancesChartProps): ReactElement {
   if (!data) return null;
 
   const chartData = {

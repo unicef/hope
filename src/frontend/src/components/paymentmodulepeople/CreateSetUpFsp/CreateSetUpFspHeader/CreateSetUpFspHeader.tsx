@@ -1,9 +1,9 @@
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useLocation } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { BreadCrumbsItem } from '@core/BreadCrumbs';
 import { PageHeader } from '@core/PageHeader';
+import { ReactElement } from 'react';
 
 interface CreateSetUpFspHeaderProps {
   baseUrl: string;
@@ -13,7 +13,7 @@ interface CreateSetUpFspHeaderProps {
 export function CreateSetUpFspHeader({
   baseUrl,
   permissions,
-}: CreateSetUpFspHeaderProps): React.ReactElement {
+}: CreateSetUpFspHeaderProps): ReactElement {
   const location = useLocation();
   const { t } = useTranslation();
   const { paymentPlanId } = useParams();

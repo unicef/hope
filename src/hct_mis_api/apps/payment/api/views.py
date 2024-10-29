@@ -201,6 +201,7 @@ class PaymentPlanSupportingDocumentViewSet(
 
     def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(kwargs.get("payment_plan_id")))
+        request.data["created_by"] = request.user.pk
         serializer = self.get_serializer(data=request.data, context={"payment_plan": payment_plan})
         if serializer.is_valid():
             serializer.save(payment_plan=payment_plan)

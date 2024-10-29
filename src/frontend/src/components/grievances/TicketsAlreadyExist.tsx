@@ -1,6 +1,5 @@
 import { Box, Grid, Paper, Typography } from '@mui/material';
 import WarningIcon from '@mui/icons-material/Warning';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useExistingGrievanceTicketsQuery } from '@generated/graphql';
@@ -9,6 +8,7 @@ import { decodeIdString } from '@utils/utils';
 import { ContentLink } from '@core/ContentLink';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { getGrievanceDetailsPath } from './utils/createGrievanceUtils';
+import { ReactElement } from 'react';
 
 const StyledBox = styled(Paper)`
   border: 1px solid ${({ theme }) => theme.hctPalette.orange};
@@ -29,7 +29,7 @@ const WarnIcon = styled(WarningIcon)`
   margin-right: 10px;
 `;
 
-export function TicketsAlreadyExist({ values }): React.ReactElement {
+export function TicketsAlreadyExist({ values }): ReactElement {
   const { baseUrl, businessArea } = useBaseUrl();
   const { t } = useTranslation();
   const { data, loading } = useExistingGrievanceTicketsQuery({

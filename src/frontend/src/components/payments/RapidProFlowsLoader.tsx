@@ -1,6 +1,6 @@
-import { useEffect } from 'react';
+import { FC, useEffect } from 'react';
 
-export const RapidProFlowsLoader: React.FC<{
+export const RapidProFlowsLoader: FC<{
   open: boolean;
   verificationChannel: string;
   loadRapidProFlows: () => void;

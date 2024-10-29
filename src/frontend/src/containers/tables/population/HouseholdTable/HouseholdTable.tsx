@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   AllHouseholdsForPopulationTableQueryVariables,
@@ -12,6 +11,7 @@ import { UniversalTable } from '../../UniversalTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { headCells } from './HouseholdTableHeadCells';
 import { HouseholdTableRow } from './HouseholdTableRow';
+import { ReactElement } from 'react';
 
 interface HouseholdTableProps {
   businessArea: string;
@@ -25,7 +25,7 @@ export function HouseholdTable({
   filter,
   choicesData,
   canViewDetails,
-}: HouseholdTableProps): React.ReactElement {
+}: HouseholdTableProps): ReactElement {
   const { t } = useTranslation();
   const { programId } = useBaseUrl();
   const matchWithdrawnValue = (): boolean | undefined => {

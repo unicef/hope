@@ -1,8 +1,7 @@
 import { Box, Button } from '@mui/material';
 import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
@@ -20,9 +19,12 @@ import {
 import { ForceFailedButton } from '@components/payments/ForceFailedButton';
 import { RevertForceFailedButton } from '@components/payments/RevertForceFailedButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { ReactElement } from 'react';
 
-export function PaymentRecordDetailsPage(): React.ReactElement {
+export function PaymentRecordDetailsPage(): ReactElement {
   const { t } = useTranslation();
+  const location = useLocation();
   const { id } = useParams();
   const { businessArea } = useBaseUrl();
   const { data: businessAreaData, loading: businessAreaDataLoading } =
@@ -70,8 +72,8 @@ export function PaymentRecordDetailsPage(): React.ReactElement {
   }
   const paymentRecord = data.paymentRecord as PaymentRecordNode;
 
-  const renderButtons = (): Array<React.ReactElement> => {
-    const buttons: Array<React.ReactElement> = [];
+  const renderButtons = (): Array<ReactElement> => {
+    const buttons: Array<ReactElement> = [];
 
     if (
       hasPermissions(
@@ -111,7 +113,15 @@ export function PaymentRecordDetailsPage(): React.ReactElement {
   };
 
   return (
-    <>
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'PaymentRecordDetailsPage.tsx');
+      }}
+      componentName="PaymentRecordDetailsPage"
+    >
+      {' '}
       <PageHeader
         title={`Payment ID ${paymentRecord.caId}`}
         breadCrumbs={breadCrumbsItems}
@@ -127,6 +137,6 @@ export function PaymentRecordDetailsPage(): React.ReactElement {
           )}
         />
       </Box>
-    </>
+    </UniversalErrorBoundary>
   );
 }

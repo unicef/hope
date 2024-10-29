@@ -19,6 +19,7 @@ class ProgramCyclePage(BaseComponents):
     headCellProgrammeCyclesTitle = 'th[data-cy="head-cell-programme-cycles-title"]'
     headCellStatus = 'th[data-cy="head-cell-status"]'
     headCellTotalEntitledQuantity = 'th[data-cy="head-cell-total-entitled-quantity"]'
+    headCellTotalEntitledQuantityUSD = 'th[data-cy="head-cell-total-entitled-quantity-usd"]'
     headCellStartDate = 'th[data-cy="head-cell-start-date"]'
     headCellEndDate = 'th[data-cy="head-cell-end-date"]'
     headCellEmpty = 'th[data-cy="head-cell-empty"]'
@@ -26,7 +27,7 @@ class ProgramCyclePage(BaseComponents):
     programCycleId = 'td[data-cy="program-cycle-id"]'
     programCycleTitle = 'td[data-cy="program-cycle-title"]'
     programCycleStatus = 'td[data-cy="program-cycle-status"]'
-    programCycleTotalEntitledQuantity = 'td[data-cy="program-cycle-total-entitled-quantity"]'
+    programCycleTotalEntitledQuantityUSD = 'td[data-cy="program-cycle-total-entitled-quantity-usd"]'
     programCycleStartDate = 'td[data-cy="program-cycle-start-date"]'
     programCycleEndDate = 'td[data-cy="program-cycle-end-date"]'
     programCycleDetailsBtn = 'td[data-cy="program-cycle-details-btn"]'
@@ -71,8 +72,8 @@ class ProgramCyclePage(BaseComponents):
     def getHeadCellStatus(self) -> WebElement:
         return self.wait_for(self.headCellStatus)
 
-    def getHeadCellTotalEntitledQuantity(self) -> WebElement:
-        return self.wait_for(self.headCellTotalEntitledQuantity)
+    def getHeadCellTotalEntitledQuantityUSD(self) -> WebElement:
+        return self.wait_for(self.headCellTotalEntitledQuantityUSD)
 
     def getHeadCellStartDate(self) -> WebElement:
         return self.wait_for(self.headCellStartDate)
@@ -90,8 +91,8 @@ class ProgramCyclePage(BaseComponents):
     def getProgramCycleStatus(self) -> WebElement:
         return self.wait_for(self.programCycleStatus)
 
-    def getProgramCycleTotalEntitledQuantity(self) -> WebElement:
-        return self.wait_for(self.programCycleTotalEntitledQuantity)
+    def getProgramCycleTotalEntitledQuantityUSD(self) -> WebElement:
+        return self.wait_for(self.programCycleTotalEntitledQuantityUSD)
 
     def getProgramCycleStartDate(self) -> WebElement:
         return self.wait_for(self.programCycleStartDate)

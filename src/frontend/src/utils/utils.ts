@@ -16,7 +16,6 @@ import {
   TargetPopulationBuildStatus,
   TargetPopulationStatus,
 } from '@generated/graphql';
-
 import {
   GRIEVANCE_CATEGORIES,
   PAYMENT_PLAN_BACKGROUND_ACTION_STATES,
@@ -406,6 +405,20 @@ export function userStatusToColor(
 }
 
 export function householdStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  switch (status) {
+    case 'ACTIVE':
+      return theme.hctPalette.green;
+    case 'INACTIVE':
+      return theme.palette.error.main;
+    default:
+      return theme.palette.error.main;
+  }
+}
+
+export function individualStatusToColor(
   theme: typeof themeObj,
   status: string,
 ): string {

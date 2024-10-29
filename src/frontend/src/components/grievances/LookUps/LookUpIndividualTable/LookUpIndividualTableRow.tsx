@@ -1,12 +1,12 @@
 import { Radio } from '@mui/material';
 import TableCell from '@mui/material/TableCell';
-import * as React from 'react';
 import { AllIndividualsForPopulationTableQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { sexToCapitalize } from '@utils/utils';
 import { BlackLink } from '@core/BlackLink';
 import { ClickableTableRow } from '@core/Table/ClickableTableRow';
 import { UniversalMoment } from '@core/UniversalMoment';
+import { ReactElement } from 'react';
 
 interface LookUpIndividualTableRowProps {
   individual: AllIndividualsForPopulationTableQuery['allIndividuals']['edges'][number]['node'];
@@ -20,7 +20,7 @@ export function LookUpIndividualTableRow({
   individual,
   radioChangeHandler,
   selectedIndividual,
-}: LookUpIndividualTableRowProps): React.ReactElement {
+}: LookUpIndividualTableRowProps): ReactElement {
   const { baseUrl, isAllPrograms } = useBaseUrl();
 
   return (

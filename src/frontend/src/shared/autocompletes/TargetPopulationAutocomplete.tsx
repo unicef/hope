@@ -1,6 +1,5 @@
 import get from 'lodash/get';
-import * as React from 'react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { ReactElement, useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAllTargetPopulationForChoicesLazyQuery } from '@generated/graphql';
@@ -36,7 +35,7 @@ export function TargetPopulationAutocomplete({
   appliedFilter;
   setAppliedFilter: (filter) => void;
   setFilter: (filter) => void;
-}): React.ReactElement {
+}): ReactElement {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();

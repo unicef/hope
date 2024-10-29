@@ -1,6 +1,5 @@
 import { Box, Button } from '@mui/material';
 import { GetApp } from '@mui/icons-material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { LoadingButton } from '../../../../core/LoadingButton';
@@ -14,6 +13,7 @@ import {
   useExportXlsxPpListPerFspMutation,
 } from '../../../../../__generated__/graphql';
 import { SplitIntoPaymentLists } from '../SplitIntoPaymentLists';
+import { ReactElement } from 'react';
 
 export interface AcceptedPaymentPlanHeaderButtonsProps {
   canDownloadXlsx: boolean;
@@ -29,7 +29,7 @@ export function AcceptedPaymentPlanHeaderButtons({
   canSendToPaymentGateway,
   canSplit,
   paymentPlan,
-}: AcceptedPaymentPlanHeaderButtonsProps): React.ReactElement {
+}: AcceptedPaymentPlanHeaderButtonsProps): ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const { isActiveProgram } = useProgramContext();
