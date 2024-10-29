@@ -649,6 +649,8 @@ class TestPaymentVerification:
             pagePaymentRecord: PaymentRecord,
     ) -> None:
         pagePaymentVerification.selectGlobalProgramFilter("Active Program")
+        # pagePaymentVerificationDetails.
+        # pagePaymentVerificationDetails.upload_file()
 
     def test_payment_verification_xlsx_partially_successful(
             self,
