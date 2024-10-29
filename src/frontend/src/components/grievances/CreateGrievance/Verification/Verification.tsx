@@ -6,6 +6,7 @@ import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { Consent } from '../../Consent';
 import { HouseholdQuestionnaire } from '../../HouseholdQuestionnaire/HouseholdQuestionnaire';
 import { IndividualQuestionnaire } from '../../IndividualQuestionnnaire/IndividualQuestionnaire';
+import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
 
 const BoxWithBorders = styled.div`
@@ -25,6 +26,7 @@ export interface VerificationProps {
 
 export function Verification({ values }: VerificationProps): ReactElement {
   const { t } = useTranslation();
+  const { isSocialDctType } = useProgramContext();
   return (
     <BoxWithBorders>
       <>
@@ -34,7 +36,7 @@ export function Verification({ values }: VerificationProps): ReactElement {
             {t('Select correctly answered questions (minimum 5)')}
           </Typography>
         )} */}
-        {values.selectedHousehold && (
+        {values.selectedHousehold && !isSocialDctType && (
           <Box py={4}>
             <Typography variant="subtitle2">
               {t('Household Questionnaire')}
