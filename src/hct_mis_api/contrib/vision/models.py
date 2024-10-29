@@ -1,11 +1,9 @@
 from django.db import models
 
-from model_utils.models import TimeStampedModel
-
 from hct_mis_api.apps.core.models import BusinessArea
 
 
-class FundsCommitment(TimeStampedModel):
+class FundsCommitment(models.Model):
     rec_serial_number = models.IntegerField(primary_key=True)
     business_area = models.CharField(max_length=4, blank=True, null=True)
     funds_commitment_number = models.CharField(max_length=10, blank=True, null=True)
@@ -42,11 +40,11 @@ class FundsCommitment(TimeStampedModel):
     vision_approval = models.CharField(max_length=1, blank=True, null=True)
     document_reference = models.CharField(max_length=16, null=True)
     fc_status = models.CharField(max_length=1, blank=True, null=True)
-    create_date = models.DateTimeField(null=True, blank=True, auto_now_add=True)
     funds_commitment_item = models.CharField(max_length=3, null=True, blank=True, default="")
     wbs_element = models.CharField(max_length=24, null=True, blank=True, default="")
     grant_number = models.CharField(max_length=20, null=True, blank=True, default="")
 
+    create_date = models.DateTimeField(null=True, blank=True, auto_now_add=True)
     created_by = models.CharField(max_length=20, null=True, blank=True, default="")
     update_date = models.DateTimeField(null=True, blank=True)
     updated_by = models.CharField(max_length=20, blank=True, null=True, default="")
@@ -68,16 +66,14 @@ class FundsCommitment(TimeStampedModel):
     def __str__(self) -> str:
         return self.funds_commitment_number
 
-    class Meta:
-        unique_together = ("funds_commitment_number", "funds_commitment_item")
 
-
-class DownPayment(TimeStampedModel):
-    rec_serial_number = models.CharField(max_length=10, primary_key=True)
+class DownPayment(models.Model):
+    rec_serial_number = models.IntegerField(primary_key=True)
     business_area = models.CharField(max_length=4)
     down_payment_reference = models.CharField(max_length=20)
     document_type = models.CharField(max_length=10)
     consumed_fc_number = models.CharField(max_length=10)
+    consumed_fc_item_number = models.CharField(max_length=3, null=True, blank=True)
     total_down_payment_amount_local = models.DecimalField(
         decimal_places=2,
         max_digits=15,

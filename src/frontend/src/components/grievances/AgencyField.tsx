@@ -2,12 +2,12 @@ import { Grid, IconButton } from '@mui/material';
 import { Delete } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { Field } from 'formik';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { AllAddIndividualFieldsQuery } from '@generated/graphql';
 import { getIndexForId } from './utils/helpers';
+import { ReactElement } from 'react';
 
 export interface AgencyFieldProps {
   id: string;
@@ -29,7 +29,7 @@ export function AgencyField({
   identityTypeChoices,
   isEdited,
   values,
-}: AgencyFieldProps): React.ReactElement {
+}: AgencyFieldProps): ReactElement {
   const { t } = useTranslation();
   const agencyFieldName = `${baseName}.${getIndexForId(
     baseNameArray || values[baseName],

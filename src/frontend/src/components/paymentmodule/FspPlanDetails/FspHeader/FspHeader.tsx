@@ -1,11 +1,11 @@
 import { Box, Button } from '@mui/material';
 import { Link } from 'react-router-dom';
 import EditIcon from '@mui/icons-material/EditRounded';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { BreadCrumbsItem } from '@core/BreadCrumbs';
 import { PageHeader } from '@core/PageHeader';
+import { ReactElement } from 'react';
 
 interface FspHeaderProps {
   baseUrl: string;
@@ -15,7 +15,7 @@ interface FspHeaderProps {
 export function FspHeader({
   baseUrl,
   permissions,
-}: FspHeaderProps): React.ReactElement {
+}: FspHeaderProps): ReactElement {
   const { t } = useTranslation();
 
   const breadCrumbsItems: BreadCrumbsItem[] = [

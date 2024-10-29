@@ -790,6 +790,6 @@ class TestProgrammeDetails:
     ) -> None:
         pageProgrammeDetails.selectGlobalProgramFilter("Active Programme")
         assert "ACTIVE" in pageProgrammeDetails.getProgramStatus().text
-        assert "1234.99" in pageProgrammeDetails.getProgramCycleTotalEntitledQuantity()[0].text
-        assert "1184.98" in pageProgrammeDetails.getProgramCycleTotalUndeliveredQuantity()[0].text
-        assert "50.01" in pageProgrammeDetails.getProgramCycleTotalDeliveredQuantity()[0].text
+        assert "1234.99" in pageProgrammeDetails.getProgramCycleTotalEntitledQuantityUSD()[0].text
+        assert "1184.98" in pageProgrammeDetails.getProgramCycleTotalUndeliveredQuantityUSD()[0].text
+        assert "50.01" in pageProgrammeDetails.getProgramCycleTotalDeliveredQuantityUSD()[0].text

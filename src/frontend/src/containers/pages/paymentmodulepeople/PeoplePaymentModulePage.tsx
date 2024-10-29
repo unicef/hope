@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { PageHeader } from '@components/core/PageHeader';
@@ -10,6 +9,7 @@ import { usePermissions } from '@hooks/usePermissions';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { PeoplePaymentPlansTable } from '@containers/tables/paymentmodulePeople/PeoplePaymentPlansTable';
 import { PeoplePaymentPlansFilters } from '@containers/tables/paymentmodulePeople/PeoplePaymentPlansTable/PeoplePaymentPlansFilters';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
 const initialFilter = {
   search: '',
@@ -21,7 +21,7 @@ const initialFilter = {
   isFollowUp: '',
 };
 
-export const PeoplePaymentModulePage = (): React.ReactElement => {
+export const PeoplePaymentModulePage = (): ReactElement => {
   const { t } = useTranslation();
   const permissions = usePermissions();
   const location = useLocation();
@@ -39,24 +39,33 @@ export const PeoplePaymentModulePage = (): React.ReactElement => {
     return <PermissionDenied />;
 
   return (
-    <>
-      <PageHeader title={t('Payment Module')} />
-      <PeoplePaymentPlansFilters
-        filter={filter}
-        setFilter={setFilter}
-        initialFilter={initialFilter}
-        appliedFilter={appliedFilter}
-        setAppliedFilter={setAppliedFilter}
-      />
-      <TableWrapper>
-        <PeoplePaymentPlansTable
-          filter={appliedFilter}
-          canViewDetails={hasPermissions(
-            PERMISSIONS.PM_VIEW_DETAILS,
-            permissions,
-          )}
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'PeoplePaymentModulePage.tsx');
+      }}
+      componentName="PeoplePaymentModulePage"
+    >
+      <>
+        <PageHeader title={t('Payment Module')} />
+        <PeoplePaymentPlansFilters
+          filter={filter}
+          setFilter={setFilter}
+          initialFilter={initialFilter}
+          appliedFilter={appliedFilter}
+          setAppliedFilter={setAppliedFilter}
         />
-      </TableWrapper>
-    </>
+        <TableWrapper>
+          <PeoplePaymentPlansTable
+            filter={appliedFilter}
+            canViewDetails={hasPermissions(
+              PERMISSIONS.PM_VIEW_DETAILS,
+              permissions,
+            )}
+          />
+        </TableWrapper>
+      </>
+    </UniversalErrorBoundary>
   );
 };

@@ -1,6 +1,6 @@
 import { BaseSection } from '@components/core/BaseSection';
 import { Box, Tab, Tabs, Fade } from '@mui/material';
-import { useState } from 'react';
+import { ChangeEvent, ReactElement, useState } from 'react';
 import { Link } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
 import { PeriodicDataUpdatesTemplatesList } from './PeriodicDataUpdatesTemplatesList';
@@ -12,7 +12,7 @@ import { usePermissions } from '@hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { ButtonTooltip } from '@components/core/ButtonTooltip';
 
-export const PeriodicDataUpdates = (): React.ReactElement => {
+export const PeriodicDataUpdates = (): ReactElement => {
   const [value, setValue] = useState(0);
   const { baseUrl } = useBaseUrl();
   const { isSocialDctType } = useProgramContext();
@@ -23,10 +23,7 @@ export const PeriodicDataUpdates = (): React.ReactElement => {
     permissions,
   );
 
-  const handleChange = (
-    _event: React.ChangeEvent<object>,
-    newValue: number,
-  ) => {
+  const handleChange = (_event: ChangeEvent<object>, newValue: number) => {
     setValue(newValue);
   };
 

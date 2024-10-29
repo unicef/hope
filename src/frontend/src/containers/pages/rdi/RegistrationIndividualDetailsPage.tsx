@@ -1,6 +1,5 @@
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
@@ -19,6 +18,8 @@ import {
   useImportedIndividualQuery,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { ReactElement } from 'react';
 
 const Container = styled.div`
   padding: 20px;
@@ -29,10 +30,12 @@ const Container = styled.div`
   }
 `;
 
-export function RegistrationIndividualDetailsPage(): React.ReactElement {
+export function RegistrationIndividualDetailsPage(): ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
   const { baseUrl } = useBaseUrl();
+  const location = useLocation();
+
   const permissions = usePermissions();
   const { data: flexFieldsData, loading: flexFieldsDataLoading } =
     useAllIndividualsFlexFieldsAttributesQuery();
@@ -77,7 +80,14 @@ export function RegistrationIndividualDetailsPage(): React.ReactElement {
   }
 
   return (
-    <div>
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'RegistrationIndividualDetailsPage.tsx');
+      }}
+      componentName="RegistrationIndividualDetailsPage"
+    >
       <PageHeader
         title={`${t('Individual ID')}: ${importedIndividual.importId}`}
         breadCrumbs={breadCrumbsItems}
@@ -98,6 +108,6 @@ export function RegistrationIndividualDetailsPage(): React.ReactElement {
           flexFieldsData={flexFieldsData}
         />
       </Container>
-    </div>
+    </UniversalErrorBoundary>
   );
 }

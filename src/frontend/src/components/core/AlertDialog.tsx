@@ -4,8 +4,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-import * as React from 'react';
-import { useEffect } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 export function AlertDialog({
@@ -14,10 +13,10 @@ export function AlertDialog({
 }: {
   message: string;
   show: boolean;
-}): React.ReactElement {
+}): ReactElement {
   const { t } = useTranslation();
-  const [open, setOpen] = React.useState(false);
-  const [oldShow, setOldShow] = React.useState(false);
+  const [open, setOpen] = useState(false);
+  const [oldShow, setOldShow] = useState(false);
   useEffect(() => {
     if (!oldShow && show) {
       setOpen(true);

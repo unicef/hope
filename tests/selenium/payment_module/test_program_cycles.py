@@ -92,7 +92,7 @@ class TestSmokeProgramCycle:
         assert "Programme Cycles" in pageProgramCycle.getTableTitle().text
         assert "Programme Cycle Title" in pageProgramCycle.getHeadCellProgrammeCyclesTitle().text
         assert "Status" in pageProgramCycle.getHeadCellStatus().text
-        assert "Total Entitled Quantity" in pageProgramCycle.getHeadCellTotalEntitledQuantity().text
+        assert "Total Entitled Quantity (USD)" in pageProgramCycle.getHeadCellTotalEntitledQuantityUSD().text
         assert "Start Date" in pageProgramCycle.getHeadCellStartDate().text
         assert "End Date" in pageProgramCycle.getHeadCellEndDate().text
         assert "Rows per page: 5 1–3 of 3" in pageProgramCycle.getTablePagination().text.replace("\n", " ")
@@ -105,7 +105,8 @@ class TestSmokeProgramCycle:
         )
         assert "Active" in first_cycle.find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-status"]').text
         assert (
-            "-" in first_cycle.find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-total-entitled-quantity"]').text
+            "-"
+            in first_cycle.find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-total-entitled-quantity-usd"]').text
         )
         assert (
             "Test Programme Cycle 001"
@@ -114,7 +115,9 @@ class TestSmokeProgramCycle:
         assert "Active" in second_cycle.find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-status"]').text
         assert (
             "1833.99"
-            in second_cycle.find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-total-entitled-quantity"]').text
+            in second_cycle.find_element(
+                By.CSS_SELECTOR, 'td[data-cy="program-cycle-total-entitled-quantity-usd"]'
+            ).text
         )
         assert (
             "Programme Cycle in Draft"
@@ -122,7 +125,8 @@ class TestSmokeProgramCycle:
         )
         assert "Draft" in third_cycle.find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-status"]').text
         assert (
-            "-" in third_cycle.find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-total-entitled-quantity"]').text
+            "-"
+            in third_cycle.find_element(By.CSS_SELECTOR, 'td[data-cy="program-cycle-total-entitled-quantity-usd"]').text
         )
 
     def test_smoke_program_cycles_details(

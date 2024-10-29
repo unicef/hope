@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { InputAdornment, Tooltip, TextField } from '@mui/material';
 import moment from 'moment';
 import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
@@ -6,6 +5,7 @@ import styled from 'styled-components';
 import FormControl from '@mui/material/FormControl';
 import { parseISO } from 'date-fns';
 import get from 'lodash/get';
+import { ReactElement } from 'react';
 
 const FullWidthFormControl = styled(FormControl)`
   width: 100%;
@@ -20,7 +20,7 @@ export const FormikDateField = ({
   required = false,
   dataCy = 'date-picker-filter',
   ...otherProps
-}): React.ReactElement => {
+}): ReactElement => {
   const isInvalid =
     get(form.errors, field.name) &&
     (get(form.touched, field.name) || form.submitCount > 0);

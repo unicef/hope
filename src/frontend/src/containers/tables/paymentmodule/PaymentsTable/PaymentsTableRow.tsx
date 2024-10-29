@@ -1,5 +1,4 @@
 import TableCell from '@mui/material/TableCell';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import CheckCircleOutlineRoundedIcon from '@mui/icons-material/CheckCircleOutlineRounded';
@@ -17,6 +16,7 @@ import { AllPaymentsForTableQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { StatusBox } from '@components/core/StatusBox';
+import { ReactElement, SyntheticEvent } from 'react';
 
 const OrangeError = styled(ErrorOutlineRoundedIcon)`
   color: ${({ theme }) => theme.hctPalette.orange};
@@ -44,21 +44,19 @@ export function PaymentsTableRow({
   canViewDetails,
   onWarningClick,
   permissions,
-}: PaymentsTableRowProps): React.ReactElement {
+}: PaymentsTableRowProps): ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const paymentDetailsPath = `/${baseUrl}/payment-module/payments/${payment.id}`;
   const householdDetailsPath = `/${baseUrl}/population/household/${payment.household.id}`;
   const collectorDetailsPath = `/${baseUrl}/population/individuals/${payment.collector.id}`;
 
-  const handleDialogWarningOpen = (
-    e: React.SyntheticEvent<HTMLDivElement>,
-  ): void => {
+  const handleDialogWarningOpen = (e: SyntheticEvent<HTMLDivElement>): void => {
     e.stopPropagation();
     onWarningClick(payment);
   };
 
-  const renderDeliveredQuantity = (): React.ReactElement => {
+  const renderDeliveredQuantity = (): ReactElement => {
     const { deliveredQuantity, currency, deliveredQuantityUsd } = payment;
 
     if (deliveredQuantity === null) {
@@ -72,7 +70,7 @@ export function PaymentsTableRow({
     );
   };
 
-  const renderMark = (): React.ReactElement => {
+  const renderMark = (): ReactElement => {
     const { deliveredQuantity, entitlementQuantity } = payment;
 
     if (deliveredQuantity === null) {

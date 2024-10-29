@@ -61,8 +61,6 @@ HOUSEHOLD_FIELDS = (
     "male_age_group_12_17_disabled_count",
     "male_age_group_18_59_disabled_count",
     "male_age_group_60_disabled_count",
-    "first_registration_date",
-    "last_registration_date",
     "flex_fields",
     "start",
     "deviceid",
@@ -99,8 +97,6 @@ INDIVIDUAL_FIELDS = (
     "email",
     "disability",
     "flex_fields",
-    "first_registration_date",
-    "last_registration_date",
     "deduplication_batch_status",
     "deduplication_batch_results",
     "observed_disability",
@@ -277,6 +273,8 @@ class TestProgramPopulationToPendingObjects(APITestCase):
                 pending_household_field,
                 household_field,
             )
+        self.assertNotEqual(pending_household.first_registration_date, self.household.first_registration_date)
+        self.assertNotEqual(pending_household.last_registration_date, self.household.last_registration_date)
         self.assertEqual(
             pending_household.program_id,
             self.program_to.id,
@@ -318,6 +316,14 @@ class TestProgramPopulationToPendingObjects(APITestCase):
             imported_individual_field = getattr(head_of_household_pending_individual, field)
             individual_field = getattr(self.individuals[0], field)
             self.assertEqual(imported_individual_field, individual_field, field)
+        self.assertNotEqual(
+            head_of_household_pending_individual.first_registration_date,
+            self.individuals[0].first_registration_date,
+        )
+        self.assertNotEqual(
+            head_of_household_pending_individual.last_registration_date,
+            self.individuals[0].last_registration_date,
+        )
         for pending_individual in pending_individuals:
             self.assertEqual(
                 pending_individual.program_id,
@@ -450,6 +456,32 @@ class TestProgramPopulationToPendingObjects(APITestCase):
             pending_individual_role_in_household.individual,
             pending_individuals.exclude(relationship=HEAD).first(),
         )
+        for _ in range(10):
+            registration_data_import = RegistrationDataImportFactory(
+                business_area=self.afghanistan,
+                program=self.program_to,
+            )
+            import_program_population(
+                import_from_program_id=str(self.program_from.id),
+                import_to_program_id=str(self.program_to.id),
+                rdi=registration_data_import,
+            )
+            pending_household = Household.pending_objects.order_by("created_at").last()
+            pending_individual1 = Individual.pending_objects.order_by("-created_at")[0]
+            pending_individual2 = Individual.pending_objects.order_by("-created_at")[1]
+
+            self.assertIn(
+                pending_household.head_of_household,
+                [pending_individual1, pending_individual2],
+            )
+            self.assertEqual(
+                pending_individual1.household,
+                pending_household,
+            )
+            self.assertEqual(
+                pending_individual2.household,
+                pending_household,
+            )
 
     def test_not_import_excluded_objects(self) -> None:
         household_withdrawn, individuals = create_household_and_individuals(

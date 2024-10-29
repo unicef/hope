@@ -82,7 +82,7 @@ export function RegistrationDataImportTable({
     return header;
   };
 
-  const renderTable = (): React.ReactElement => (
+  const renderTable = (): ReactElement => (
     <TableWrapper>
       <UniversalTable<
         RegistrationDataImportNode,

@@ -63,7 +63,7 @@ def _clear_deduplication_individuals_fields(individuals: Sequence[Individual]) -
         ],
     )
 
-
+    
 def close_needs_adjudication_new_ticket(ticket_details: TicketNeedsAdjudicationDetails, user: AbstractUser) -> None:
     validate_all_individuals_before_close_needs_adjudication(ticket_details)
 

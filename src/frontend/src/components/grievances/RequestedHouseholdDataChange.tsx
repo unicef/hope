@@ -20,7 +20,7 @@ export function RequestedHouseholdDataChange({
 }: {
   ticket: GrievanceTicketQuery['grievanceTicket'];
   canApproveDataChange: boolean;
-}): React.ReactElement {
+}): ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const confirm = useConfirmation();

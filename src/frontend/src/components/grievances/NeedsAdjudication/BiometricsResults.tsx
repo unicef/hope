@@ -13,8 +13,7 @@ import {
   DialogTitle,
   Typography,
 } from '@mui/material';
-import * as React from 'react';
-import { useState } from 'react';
+import { FC, ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 
@@ -32,7 +31,7 @@ export interface BiometricsResultsProps {
   individual2?: Individual;
 }
 
-const Placeholder: React.FC = () => (
+const Placeholder: FC = () => (
   <Box
     display="flex"
     justifyContent="center"
@@ -51,7 +50,7 @@ export const BiometricsResults = ({
   similarityScore,
   individual1,
   individual2,
-}: BiometricsResultsProps): React.ReactElement => {
+}: BiometricsResultsProps): ReactElement => {
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const permissions = usePermissions();
@@ -78,7 +77,7 @@ export const BiometricsResults = ({
             }}
             data-cy="button-open-biometrics-results"
           >
-            {t('Open Biometrics Results')}
+            {t('View Biometrics Results')}
           </Button>
         </Box>
       )}
@@ -143,9 +142,7 @@ export const BiometricsResults = ({
                   {t('Algorithm similarity score:')} {similarityScore}
                 </strong>
               </div>
-              <div>
-                {t('Face images matching suggests: Duplicates')}
-              </div>
+              <div>{t('Face images matching suggests: Duplicates')}</div>
             </Box>
           </DialogContainer>
         </DialogContent>

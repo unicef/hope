@@ -1,5 +1,5 @@
 import { Formik } from 'formik';
-import { useEffect, useState } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
 import {
@@ -18,6 +18,7 @@ interface LookUpReassignRoleProps {
     | GrievanceTicketQuery['grievanceTicket']['individual']['householdsAndRoles'][number]['household'];
   individualToReassign: GrievanceTicketQuery['grievanceTicket']['individual'];
   initialSelectedIndividualId: string;
+  individual: GrievanceTicketQuery['grievanceTicket']['individual'];
   ticket: GrievanceTicketQuery['grievanceTicket'];
   individualRole: { role: string; id: string };
   shouldDisableButton?: boolean;
@@ -30,7 +31,8 @@ export function LookUpReassignRole({
   shouldDisableButton,
   individualToReassign,
   initialSelectedIndividualId,
-}: LookUpReassignRoleProps): React.ReactElement {
+  individual,
+}: LookUpReassignRoleProps): ReactElement {
   const { t } = useTranslation();
   const [selectedIndividualId, setSelectedIndividualId] = useState<string>(
     initialSelectedIndividualId,

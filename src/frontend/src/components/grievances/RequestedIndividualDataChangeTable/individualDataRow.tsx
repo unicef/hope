@@ -2,11 +2,11 @@ import { Checkbox, TableCell, TableRow } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import camelCase from 'lodash/camelCase';
 import mapKeys from 'lodash/mapKeys';
-import * as React from 'react';
 import styled from 'styled-components';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { CurrentValue } from './CurrentValue';
 import { NewValue } from './NewValue';
+import { ReactElement } from 'react';
 
 const GreenIcon = styled.div`
   color: #28cb15;
@@ -24,7 +24,7 @@ export const individualDataRow = (
   fieldsDict,
   isEdit,
   handleSelectBioData,
-): React.ReactElement => {
+): ReactElement => {
   const fieldName = camelCase(row[0]);
   const isItemSelected = isSelected(row[0]);
   const labelId = `enhanced-table-checkbox-${index}`;

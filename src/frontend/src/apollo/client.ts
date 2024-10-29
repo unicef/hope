@@ -46,60 +46,22 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
     );
 });
 
-const isDataNull = (data): boolean => {
-  return Object.values(data).some((value) => value === null);
-};
-
-const hasResponseErrors = (response): boolean => {
-  return response && (response?.error || response?.errors?.length > 0);
-};
-
 const redirectLink = new ApolloLink((operation, forward) => {
-  // Check if the app is not running on localhost, dev, or stg environment
-  const isNotLocalhostDevOrStg =
-    !window.location.hostname.includes('localhost') &&
-    !window.location.href.includes('dev') &&
-    !window.location.href.includes('stg');
-
-  const businessArea = window.location.pathname.split('/')[1];
-  const isAccessDeniedPage = window.location.pathname.includes('access-denied');
-  const isErrorPage = window.location.pathname.includes('error');
-
   return forward(operation).map((response) => {
-    // Check if the operation is a mutation
-    const isMutation = operation.query.definitions.some(
-      (definition) =>
-        definition.kind === 'OperationDefinition' &&
-        definition.operation === 'mutation',
-    );
-
     // Check if the error message is "Permission Denied"
     const isPermissionDenied = response?.errors?.some(
-      (error) => error.message === 'Permission Denied: User is not authenticated.',
+      (error) =>
+        error.message === 'Permission Denied: User is not authenticated.',
     );
 
     if (isPermissionDenied) {
       window.location.href = `${window.location.origin}/login?next=${window.location.pathname}`;
-    } else if (
-      ((isDataNull(response.data) && !isMutation)) &&
-      !isAccessDeniedPage &&
-      !isErrorPage
-    ) {
-      window.history.replaceState(null, '', `/access-denied/${businessArea}`);
-    } else if (hasResponseErrors(response)) {
-      // If it's a mutation, log the error to the console
-      if (isMutation)
-        console.error(response.data?.error || response.data?.errors);
-      // If it's not a mutation and the app is not running on localhost, dev, or stg environment, redirect to an error page
-      else if (isNotLocalhostDevOrStg)
-        window.location.href = `/error/${businessArea}`;
-      // If it's not a mutation and the app is running on localhost, dev, or stg environment, log the error to the console
-      else console.error(response.data?.error || response.data?.errors);
     }
 
     return response;
   });
 });
+
 function findValidationErrors(
   data,
   name = 'ROOT',

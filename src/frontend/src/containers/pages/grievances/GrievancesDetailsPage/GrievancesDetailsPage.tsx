@@ -1,6 +1,5 @@
 import { Grid } from '@mui/material';
-import * as React from 'react';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import {
   useGrievancesChoiceDataQuery,
   useGrievanceTicketQuery,
@@ -19,9 +18,12 @@ import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError } from '@utils/utils';
 import { UniversalActivityLogTable } from '../../../tables/UniversalActivityLogTable';
 import { grievancePermissions } from './grievancePermissions';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { ReactElement } from 'react';
 
-export const GrievancesDetailsPage = (): React.ReactElement => {
+export const GrievancesDetailsPage = (): ReactElement => {
   const { id } = useParams();
+  const location = useLocation();
   const permissions = usePermissions();
   const { data: currentUserData, loading: currentUserDataLoading } =
     useMeQuery();
@@ -68,7 +70,14 @@ export const GrievancesDetailsPage = (): React.ReactElement => {
   } = grievancePermissions(isCreator, isOwner, ticket, permissions);
 
   return (
-    <>
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'GrievancesDetailsPage.tsx');
+      }}
+      componentName="GrievancesDetailsPage"
+    >
       <GrievanceDetailsToolbar
         ticket={ticket}
         canEdit={canEdit}
@@ -100,6 +109,6 @@ export const GrievancesDetailsPage = (): React.ReactElement => {
       {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
         <UniversalActivityLogTable objectId={ticket.id} />
       )}
-    </>
+    </UniversalErrorBoundary>
   );
 };
