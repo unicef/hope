@@ -38,8 +38,6 @@ export function LookUpReassignRole({
   const { data: individualData, loading } = useIndividualQuery({
     variables: { id: selectedIndividualId },
   });
-  console.log('initialSelectedIndividualId', selectedIndividualId);
-  console.log('individualData zS', individualData?.individual?.unicefId);
   const [lookUpDialogOpen, setLookUpDialogOpen] = useState<boolean>(false);
   const [selectedHousehold, setSelectedHousehold] =
     useState<LookUpReassignRoleProps['household']>(null);
