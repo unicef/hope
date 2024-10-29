@@ -551,6 +551,10 @@ class TestPaymentVerification:
         # If the received value is 0, it should stay 0 even when a new verified value is provided in the ticket.
         # Check conversation with Jakub
 
+        # maybe merge with test: test_payment_verification_successful_not_received and
+        # test_payment_verification_partially_successful_received or
+        # test_payment_verification_by_payment_related_complaint
+
     def test_payment_verification_successful_received(
             self,
             active_program: Program,
@@ -574,7 +578,7 @@ class TestPaymentVerification:
         pagePaymentRecord.getButtonSubmit().click()
         pagePaymentRecord.getArrowBack().click()
 
-        assert "RECEIVED" in pagePaymentRecord.getStatusContainer().text
+        assert "RECEIVED" == pagePaymentRecord.getStatusContainer().text
 
     def test_payment_verification_successful_not_received(
             self,
@@ -593,12 +597,12 @@ class TestPaymentVerification:
         assert 1 == len(pagePaymentVerificationDetails.getRows())
         pagePaymentVerificationDetails.scroll(execute=2)
         pagePaymentVerificationDetails.getRows()[0].find_element(By.TAG_NAME, "a").click()
-        pagePaymentRecord.getChoiceNotReceived().click()
         pagePaymentRecord.getButtonEdPlan().click()
+        pagePaymentRecord.getChoiceNotReceived().click()
         pagePaymentRecord.getButtonSubmit().click()
         pagePaymentRecord.getArrowBack().click()
 
-        assert "RECEIVED" in pagePaymentRecord.getStatusContainer().text
+        assert "NOT RECEIVED" in pagePaymentRecord.getStatusContainer().text
 
     def test_payment_verification_partially_successful_received(
             self,
@@ -624,9 +628,39 @@ class TestPaymentVerification:
         pagePaymentRecord.getButtonSubmit().click()
         pagePaymentRecord.getArrowBack().click()
 
-        assert "RECEIVED" in pagePaymentRecord.getStatusContainer().text
+        assert "RECEIVED WITH ISSUES" in pagePaymentRecord.getStatusContainer().text
 
     def test_payment_verification_by_payment_related_complaint(
+            self,
+            active_program: Program,
+            add_payment_verification: PV,
+            pagePaymentVerification: PaymentVerification,
+            pagePaymentVerificationDetails: PaymentVerificationDetails,
+            pagePaymentRecord: PaymentRecord,
+    ) -> None:
+        pagePaymentVerification.selectGlobalProgramFilter("Active Program")
+
+    def test_payment_verification_xlsx_successful(
+            self,
+            active_program: Program,
+            add_payment_verification: PV,
+            pagePaymentVerification: PaymentVerification,
+            pagePaymentVerificationDetails: PaymentVerificationDetails,
+            pagePaymentRecord: PaymentRecord,
+    ) -> None:
+        pagePaymentVerification.selectGlobalProgramFilter("Active Program")
+
+    def test_payment_verification_xlsx_partially_successful(
+            self,
+            active_program: Program,
+            add_payment_verification: PV,
+            pagePaymentVerification: PaymentVerification,
+            pagePaymentVerificationDetails: PaymentVerificationDetails,
+            pagePaymentRecord: PaymentRecord,
+    ) -> None:
+        pagePaymentVerification.selectGlobalProgramFilter("Active Program")
+
+    def test_payment_verification_xlsx_not_received(
             self,
             active_program: Program,
             add_payment_verification: PV,
