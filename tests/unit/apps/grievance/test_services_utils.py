@@ -468,14 +468,20 @@ class TestGrievanceUtils(TestCase):
         ticket_details_2 = TicketNeedsAdjudicationDetailsFactory(
             ticket=gr,
             golden_records_individual=ind_1,
-            is_multiple_duplicates_version=False,
-            selected_individual=ind_2,
-            possible_duplicate=ind_1,
+            is_multiple_duplicates_version=True,
+            selected_individual=None,
         )
+
+        ticket_details_2.selected_individuals.add(ind_2)  # duplicate
+        ticket_details_2.possible_duplicates.add(ind_2)  # all possible duplicates
         ticket_details_2.ticket = gr
         ticket_details_2.save()
-
-        close_needs_adjudication_ticket_service(gr, user)
+        with pytest.raises(ValidationError) as e:
+            close_needs_adjudication_ticket_service(gr, user)
+            assert (
+                str(e.value)
+                == "Close ticket is possible when at least one individual is flagged as distinct or one of the individuals is withdrawn or duplicate"
+            )
 
     @patch.dict(
         "os.environ",

@@ -70,9 +70,6 @@ def close_needs_adjudication_new_ticket(ticket_details: TicketNeedsAdjudicationD
     distinct_individuals = ticket_details.selected_distinct.all()
     duplicate_individuals = ticket_details.selected_individuals.all()
     if duplicate_individuals:
-        reassign_roles_on_marking_as_duplicate_individual_service(
-            ticket_details.role_reassign_data, user, duplicate_individuals
-        )
         for individual_to_remove in duplicate_individuals:
             unique_individual = None
             household = individual_to_remove.household
@@ -80,6 +77,9 @@ def close_needs_adjudication_new_ticket(ticket_details: TicketNeedsAdjudicationD
                 individual_to_remove, unique_individual, household, user, ticket_details.ticket.programs.all()
             )
         _clear_deduplication_individuals_fields(duplicate_individuals)
+        reassign_roles_on_marking_as_duplicate_individual_service(
+            ticket_details.role_reassign_data, user, duplicate_individuals
+        )
     if distinct_individuals:
         for individual_to_distinct in distinct_individuals:
             mark_as_distinct_individual(individual_to_distinct, user, ticket_details.ticket.programs.all())

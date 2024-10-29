@@ -105,6 +105,8 @@ def reassign_roles_on_marking_as_duplicate_individual_service(
     # check if all households have head of household
     for individual in duplicated_individuals:
         household_to_check = Household.objects.get(id=individual.household.id)
+        if household_to_check.withdrawn:
+            continue
         if str(household_to_check.head_of_household.id) in duplicated_individuals_ids:
             raise ValidationError(
                 f"Role for head of household in household with unicef_id {household_to_check.unicef_id} was not reassigned, when individual ({individual.unicef_id}) was marked as duplicated"
@@ -112,6 +114,9 @@ def reassign_roles_on_marking_as_duplicate_individual_service(
 
     # check if all households have primary role:
     for household_id in duplicated_individuals_roles_households_ids:
+        household_to_check = Household.objects.get(id=household_id)
+        if household_to_check.withdrawn:
+            continue
         primary_role = IndividualRoleInHousehold.objects.filter(household=household_id, role=ROLE_PRIMARY).first()
         if primary_role is None:
             raise ValidationError(f"Household with id {household_id} was left without primary role")
