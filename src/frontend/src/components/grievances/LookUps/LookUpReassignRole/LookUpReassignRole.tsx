@@ -17,7 +17,6 @@ interface LookUpReassignRoleProps {
     | GrievanceTicketQuery['grievanceTicket']['individual']['householdsAndRoles'][number]['household'];
   individualToReassign: GrievanceTicketQuery['grievanceTicket']['individual'];
   initialSelectedIndividualId: string;
-  individual: GrievanceTicketQuery['grievanceTicket']['individual'];
   ticket: GrievanceTicketQuery['grievanceTicket'];
   individualRole: { role: string; id: string };
   shouldDisableButton?: boolean;
