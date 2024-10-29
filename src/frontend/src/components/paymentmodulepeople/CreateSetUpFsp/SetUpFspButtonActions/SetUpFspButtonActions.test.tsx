@@ -1,5 +1,5 @@
 import { act } from 'react';
-import * as React from 'react';
+
 import wait from 'waait';
 import { render } from '../../../../testUtils/testUtils';
 import { SetUpFspButtonActions } from './SetUpFspButtonActions';

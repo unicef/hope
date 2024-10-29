@@ -1,6 +1,5 @@
 import GroupIcon from '@mui/icons-material/Group';
 import { Grid } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useRegistrationChoicesQuery } from '@generated/graphql';
@@ -10,6 +9,7 @@ import { DatePickerFilter } from '@core/DatePickerFilter';
 import { FiltersSection } from '@core/FiltersSection';
 import { NumberTextField } from '@core/NumberTextField';
 import { SearchTextField } from '@core/SearchTextField';
+import { ReactElement } from 'react';
 
 interface LookUpRegistrationFiltersCommunicationProps {
   filter;
@@ -25,7 +25,7 @@ export function LookUpRegistrationFiltersCommunication({
   initialFilter,
   appliedFilter,
   setAppliedFilter,
-}: LookUpRegistrationFiltersCommunicationProps): React.ReactElement {
+}: LookUpRegistrationFiltersCommunicationProps): ReactElement {
   const navigate = useNavigate();
   const location = useLocation();
 

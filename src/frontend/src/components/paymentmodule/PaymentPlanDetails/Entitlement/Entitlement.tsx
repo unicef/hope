@@ -10,8 +10,7 @@ import {
 } from '@mui/material';
 import { GetApp } from '@mui/icons-material';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
@@ -97,7 +96,7 @@ interface EntitlementProps {
 export function Entitlement({
   paymentPlan,
   permissions,
-}: EntitlementProps): React.ReactElement {
+}: EntitlementProps): ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const { isActiveProgram } = useProgramContext();

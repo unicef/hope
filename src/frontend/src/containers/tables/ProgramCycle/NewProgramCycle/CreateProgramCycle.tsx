@@ -13,7 +13,6 @@ import { DialogDescription } from '@containers/dialogs/DialogDescription';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogActions } from '@containers/dialogs/DialogActions';
 import { LoadingButton } from '@core/LoadingButton';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ProgramQuery } from '@generated/graphql';
 import { Field, Form, Formik, FormikValues } from 'formik';

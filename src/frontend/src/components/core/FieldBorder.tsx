@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { ReactElement } from 'react';
 import styled from 'styled-components';
 
 const FieldBorderDiv = styled.div`
@@ -8,6 +8,6 @@ const FieldBorderDiv = styled.div`
   border-left-style: solid;
 `;
 
-export function FieldBorder({ color, children }): React.ReactElement {
+export function FieldBorder({ color, children }): ReactElement {
   return <FieldBorderDiv color={color}>{children}</FieldBorderDiv>;
 }

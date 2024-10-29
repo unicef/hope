@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { useSurveysChoiceDataQuery } from '@generated/graphql';
@@ -16,7 +15,7 @@ import { getFilterFromQueryParams } from '@utils/utils';
 import { SurveysTable } from '../../../tables/Surveys/SurveysTable/SurveysTable';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
-export function SurveysPage(): React.ReactElement {
+export function SurveysPage(): ReactElement {
   const permissions = usePermissions();
   const { t } = useTranslation();
   const { data: choicesData } = useSurveysChoiceDataQuery({

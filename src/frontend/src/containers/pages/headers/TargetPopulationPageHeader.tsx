@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
@@ -17,6 +16,7 @@ import { FinalizedTargetPopulationHeaderButtons } from './FinalizedTargetPopulat
 import { LockedTargetPopulationHeaderButtons } from './LockedTargetPopulationHeaderButtons';
 import { OpenTargetPopulationHeaderButtons } from './OpenTargetPopulationHeaderButtons';
 import { AdminButton } from '@core/AdminButton';
+import { ReactElement } from 'react';
 
 const HeaderWrapper = styled.div`
   display: flex;
@@ -50,7 +50,7 @@ export function TargetPopulationPageHeader({
   canLock,
   canUnlock,
   canSend,
-}: ProgramDetailsPageHeaderPropTypes): React.ReactElement {
+}: ProgramDetailsPageHeaderPropTypes): ReactElement {
   const { t } = useTranslation();
   const { baseUrl, businessArea } = useBaseUrl();
   const { data: businessAreaData, loading: businessAreaDataLoading } =

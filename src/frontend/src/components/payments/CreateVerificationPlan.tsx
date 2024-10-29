@@ -7,7 +7,7 @@ import {
   Typography,
 } from '@mui/material';
 import { Field, Form, Formik } from 'formik';
-import { useEffect, useState } from 'react';
+import { ChangeEvent, ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
@@ -120,7 +120,7 @@ export const CreateVerificationPlan = ({
   canCreatePaymentVerificationPlan,
   version,
   isPaymentPlan,
-}: Props): React.ReactElement => {
+}: Props): ReactElement => {
   const refetchQueries = usePaymentRefetchQueries(cashOrPaymentPlanId);
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -285,7 +285,7 @@ export const CreateVerificationPlan = ({
                       data-cy="tabs"
                       value={selectedTab}
                       onChange={(
-                        event: React.ChangeEvent<unknown>,
+                        event: ChangeEvent<unknown>,
                         newValue: number,
                       ) => {
                         setValues(initialValues);
