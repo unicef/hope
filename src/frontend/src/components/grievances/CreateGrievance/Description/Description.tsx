@@ -22,6 +22,7 @@ import { Title } from '@core/Title';
 import { NewDocumentationFieldArray } from '../../Documentation/NewDocumentationFieldArray';
 import { LookUpLinkedTickets } from '../../LookUps/LookUpLinkedTickets/LookUpLinkedTickets';
 import { LookUpPaymentRecord } from '../../LookUps/LookUpPaymentRecord/LookUpPaymentRecord';
+import { useProgramContext } from 'src/programContext';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -63,6 +64,8 @@ export function Description({
 }: DescriptionProps): ReactElement {
   const { t } = useTranslation();
   const { isAllPrograms } = useBaseUrl();
+  const { isSocialDctType } = useProgramContext();
+
   const { data: partnerChoicesData } = usePartnerForGrievanceChoicesQuery({
     variables: {
       householdId: values.selectedHousehold?.id,
@@ -160,7 +163,9 @@ export function Description({
                 size: 3,
               },
             ]
-              .filter((el) => el)
+              .filter((el) =>
+                isSocialDctType ? el.label !== 'Household ID' : el,
+              )
               .map((el) => (
                 <Grid key={el.label} item xs={el.size as GridSize}>
                   <LabelizedField label={el.label}>{el.value}</LabelizedField>

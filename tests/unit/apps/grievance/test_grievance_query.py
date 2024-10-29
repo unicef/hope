@@ -3,6 +3,7 @@ from typing import Any, List
 
 from django.core.cache import cache
 from django.core.management import call_command
+from django.test import TestCase
 from django.utils import timezone
 
 import pytest
@@ -13,11 +14,16 @@ from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
+from hct_mis_api.apps.grievance.fixtures import (
+    GrievanceTicketFactory,
+    TicketNeedsAdjudicationDetailsFactory,
+)
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketNeedsAdjudicationDetails,
+    TicketSensitiveDetails,
 )
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.program.fixtures import ProgramFactory
@@ -815,3 +821,47 @@ class TestGrievanceQuery(APITestCase):
             },
             variables={"scoreMin": 900, "scoreMax": 999},
         )
+
+
+class TestGrievanceNode(TestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        super().setUpTestData()
+        create_afghanistan()
+        cls.program = ProgramFactory(data_collecting_type__type=DataCollectingType.Type.STANDARD)
+        cls.sw_program = ProgramFactory(data_collecting_type__type=DataCollectingType.Type.SOCIAL)
+        cls.hh, individuals = create_household({"size": 1, "unicef_id": "HH-001-001"})
+        cls.individual_1 = individuals[0]
+
+        cls.grievance_sw_with_ind_in_details = GrievanceTicketFactory(
+            household_unicef_id="HH-001-001",
+        )
+        cls.grievance_sw_with_ind_in_details.programs.set([cls.sw_program])
+        cls.grievance_sw_without_ind_in_details = GrievanceTicketFactory(
+            household_unicef_id=cls.hh.unicef_id,
+        )
+        cls.grievance_sw_without_ind_in_details.programs.set([cls.sw_program])
+        cls.grievance_non_sw_program = GrievanceTicketFactory(
+            household_unicef_id=cls.hh.unicef_id,
+        )
+        cls.grievance_non_sw_program.programs.set([cls.program])
+
+    def test_get_target_id(self) -> None:
+        TicketSensitiveDetails.objects.create(
+            individual=self.individual_1,
+            household=self.hh,
+            ticket=self.grievance_sw_with_ind_in_details,
+        )
+
+        TicketNeedsAdjudicationDetailsFactory(
+            golden_records_individual=self.individual_1, ticket=self.grievance_sw_without_ind_in_details
+        )
+        self.grievance_non_sw_program.refresh_from_db()
+        self.grievance_sw_with_ind_in_details.refresh_from_db()
+        self.grievance_sw_without_ind_in_details.refresh_from_db()
+
+        # return HH_id
+        self.assertEqual(self.grievance_non_sw_program.target_id, "HH-001-001")
+        # return Ind_id
+        self.assertEqual(self.grievance_sw_with_ind_in_details.target_id, self.individual_1.unicef_id)
+        self.assertEqual(self.grievance_sw_without_ind_in_details.target_id, self.individual_1.unicef_id)
