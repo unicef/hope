@@ -25,6 +25,7 @@ class GrievanceDetailsPage(BaseComponents):
     ticketCategory = 'div[data-cy="label-Category"]'
     labelIssueType = 'div[data-cy="label-Issue Type"]'
     ticketHouseholdID = 'div[data-cy="label-Household ID"]'
+    ticketTargetID = 'div[data-cy="label-Target ID"]'
     ticketIndividualID = 'div[data-cy="label-Individual ID"]'
     ticketPaymentLabel = 'div[data-cy="label-Payment ID"]'
     labelPaymentPlan = 'div[data-cy="label-Payment Plan"]'
@@ -173,6 +174,10 @@ class GrievanceDetailsPage(BaseComponents):
     buttonRotateImage = 'button[data-cy="button-rotate-image"]'
     buttonCancel = 'button[data-cy="button-cancel"]'
     linkShowPhoto = 'a[data-cy="link-show-photo"]'
+    labelStatus = 'div[data-cy="label-Status"]'
+    statusContainer = 'div[data-cy="status-container"]'
+    labelPriority = 'div[data-cy="label-Priority"]'
+    labelUrgency = 'div[data-cy="label-Urgency"]'
 
     def getLabelGender(self) -> WebElement:
         return self.wait_for(self.labelGender)
@@ -261,6 +266,9 @@ class GrievanceDetailsPage(BaseComponents):
 
     def getTicketHouseholdID(self) -> WebElement:
         return self.wait_for(self.ticketHouseholdID)
+
+    def getTicketTargetID(self) -> WebElement:
+        return self.wait_for(self.ticketTargetID)
 
     def getTicketIndividualID(self) -> WebElement:
         return self.wait_for(self.ticketIndividualID)
@@ -665,3 +673,15 @@ class GrievanceDetailsPage(BaseComponents):
 
     def getLinkShowPhoto(self) -> WebElement:
         return self.wait_for(self.linkShowPhoto)
+
+    def getLabelStatus(self) -> WebElement:
+        return self.wait_for(self.labelStatus)
+
+    def getStatusContainer(self) -> WebElement:
+        return self.wait_for(self.statusContainer)
+
+    def getLabelPriority(self) -> WebElement:
+        return self.wait_for(self.labelPriority)
+
+    def getLabelUrgency(self) -> WebElement:
+        return self.wait_for(self.labelUrgency)
