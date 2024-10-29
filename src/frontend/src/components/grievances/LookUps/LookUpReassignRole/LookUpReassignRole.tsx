@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
 import {
   GrievanceTicketQuery,
-  useIndividualLazyQuery,
   useIndividualQuery,
 } from '@generated/graphql';
 import { LoadingComponent } from '@core/LoadingComponent';
@@ -31,7 +30,6 @@ export function LookUpReassignRole({
   shouldDisableButton,
   individualToReassign,
   initialSelectedIndividualId,
-  individual,
 }: LookUpReassignRoleProps): ReactElement {
   const { t } = useTranslation();
   const [selectedIndividualId, setSelectedIndividualId] = useState<string>(
