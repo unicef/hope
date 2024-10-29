@@ -1,4 +1,3 @@
-import { TargetingCriteriaForm } from '@containers/forms/TargetingCriteriaForm';
 import {
   DataCollectingTypeType,
   TargetPopulationQuery,
@@ -7,8 +6,7 @@ import { AddCircleOutline } from '@mui/icons-material';
 import { Box, Button, Checkbox, FormControlLabel, Grid } from '@mui/material';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { Field } from 'formik';
-import * as React from 'react';
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
@@ -21,6 +19,7 @@ import { VulnerabilityScoreComponent } from './VulnerabilityScoreComponent';
 import { useProgramContext } from 'src/programContext';
 import { useCachedImportedIndividualFieldsQuery } from '@hooks/useCachedImportedIndividualFields';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { TargetingCriteriaForm } from '@containers/forms/TargetingCriteriaForm';
 
 const Title = styled.div`
   padding: ${({ theme }) => theme.spacing(3)} ${({ theme }) => theme.spacing(4)};
@@ -97,7 +96,7 @@ export const TargetingCriteriaDisplay = ({
   isSocialDctType,
   isStandardDctType,
   category,
-}: TargetingCriteriaDisplayProps): React.ReactElement => {
+}: TargetingCriteriaDisplayProps): ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
   const { selectedProgram } = useProgramContext();

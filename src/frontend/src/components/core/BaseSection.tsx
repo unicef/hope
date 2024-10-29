@@ -40,7 +40,7 @@ export const BaseSection = ({
   noPaper = false,
   tabs = null,
   stepper = null,
-}: BaseSectionProps): React.ReactElement => {
+}: BaseSectionProps): ReactElement => {
   const { t } = useTranslation();
   const Container = noPaper ? BoxContainer : PaperContainer;
 

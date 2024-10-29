@@ -10,8 +10,7 @@ import {
 import styled from 'styled-components';
 import Edit from '@mui/icons-material/Edit';
 import { Field, Formik } from 'formik';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import { Dialog } from '@containers/dialogs/Dialog';
@@ -40,7 +39,7 @@ export interface ApproveDeleteHouseholdGrievanceDetailsProps {
 export const ApproveDeleteHouseholdGrievanceDetails = ({
   ticket,
   type,
-}: ApproveDeleteHouseholdGrievanceDetailsProps): React.ReactElement => {
+}: ApproveDeleteHouseholdGrievanceDetailsProps): ReactElement => {
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [mutate] = useApproveDeleteHouseholdDataChangeMutation();
@@ -160,11 +159,11 @@ export const ApproveDeleteHouseholdGrievanceDetails = ({
                     <Typography variant="body2">
                       {showWithdraw()
                         ? t(
-                          'Please provide the reason of withdrawal of this household.',
-                        )
+                            'Please provide the reason of withdrawal of this household.',
+                          )
                         : t(
-                          'You did not approve the following household to be withdrawn. Are you sure you want to continue?',
-                        )}
+                            'You did not approve the following household to be withdrawn. Are you sure you want to continue?',
+                          )}
                     </Typography>
                   </Box>
                   {showWithdraw() && (

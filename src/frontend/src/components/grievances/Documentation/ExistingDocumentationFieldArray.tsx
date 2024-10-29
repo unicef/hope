@@ -1,8 +1,8 @@
 import { FormHelperText, Grid } from '@mui/material';
 import { FieldArray } from 'formik';
-import * as React from 'react';
 import { GrievanceTicketQuery } from '@generated/graphql';
 import { EditDocumentationRow } from './EditDocumentationRow';
+import { ReactElement } from 'react';
 
 export interface ExistingDocumentationFieldArrayProps {
   values;
@@ -16,7 +16,7 @@ export function ExistingDocumentationFieldArray({
   setFieldValue,
   errors,
   ticket,
-}: ExistingDocumentationFieldArrayProps): React.ReactElement {
+}: ExistingDocumentationFieldArrayProps): ReactElement {
   return (
     <Grid container spacing={3}>
       <FieldArray

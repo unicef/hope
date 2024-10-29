@@ -8,7 +8,7 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -34,7 +34,7 @@ export const NeedsAdjudicationDetailsOld = ({
 }: {
   ticket: GrievanceTicketQuery['grievanceTicket'];
   canApprove: boolean;
-}): React.ReactElement => {
+}): ReactElement => {
   const { t } = useTranslation();
   const { baseUrl, isAllPrograms } = useBaseUrl();
   const navigate = useNavigate();

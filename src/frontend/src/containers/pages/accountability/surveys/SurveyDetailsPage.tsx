@@ -1,7 +1,6 @@
 import { Box, Button } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import { SurveyDetails } from '@components/accountability/Surveys/SurveyDetails';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
@@ -23,10 +22,13 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ButtonTooltip } from '@components/core/ButtonTooltip';
 import { useProgramContext } from '../../../../programContext';
 import { AdminButton } from '@core/AdminButton';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { ReactElement } from 'react';
 
-export function SurveyDetailsPage(): React.ReactElement {
+export function SurveyDetailsPage(): ReactElement {
   const { showMessage } = useSnackbar();
   const { t } = useTranslation();
+  const location = useLocation();
   const { id } = useParams();
   const { baseUrl } = useBaseUrl();
   const { isActiveProgram } = useProgramContext();
@@ -70,7 +72,7 @@ export function SurveyDetailsPage(): React.ReactElement {
     }
   };
 
-  const renderActions = (): React.ReactElement => {
+  const renderActions = (): ReactElement => {
     if (survey.category === SurveyCategory.RapidPro) {
       return (
         <ButtonTooltip
@@ -115,7 +117,14 @@ export function SurveyDetailsPage(): React.ReactElement {
   };
 
   return (
-    <>
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'SurveyDetailsPage.tsx');
+      }}
+      componentName="SurveyDetailsPage"
+    >
       <PageHeader
         title={`${survey.unicefId}`}
         breadCrumbs={
@@ -144,6 +153,6 @@ export function SurveyDetailsPage(): React.ReactElement {
           permissions,
         ) && <UniversalActivityLogTable objectId={id} />}
       </Box>
-    </>
+    </UniversalErrorBoundary>
   );
 }

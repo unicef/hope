@@ -1,7 +1,6 @@
 import { Typography } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useArrayToDict } from '@hooks/useArrayToDict';
@@ -12,6 +11,7 @@ import {
 import { LabelizedField } from '@core/LabelizedField';
 import { Title } from '@core/Title';
 import { IndividualFlexFieldPhotoModal } from '../IndividualFlexFieldPhotoModal';
+import { ReactElement } from 'react';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}
@@ -27,7 +27,7 @@ interface IndividualAdditionalRegistrationInformationProps {
 export const IndividualAdditionalRegistrationInformation = ({
   individual,
   flexFieldsData,
-}: IndividualAdditionalRegistrationInformationProps): React.ReactElement => {
+}: IndividualAdditionalRegistrationInformationProps): ReactElement => {
   const { t } = useTranslation();
   const flexAttributesDict = useArrayToDict(
     flexFieldsData?.allIndividualsFlexFieldsAttributes,

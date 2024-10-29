@@ -1,7 +1,6 @@
 import { Box, Button, DialogContent, DialogTitle } from '@mui/material';
 import ClearIcon from '@mui/icons-material/Clear';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dialog } from '@containers/dialogs/Dialog';
 import { DialogActions } from '@containers/dialogs/DialogActions';
@@ -23,7 +22,7 @@ export interface DeleteVerificationPlanProps {
 export function DeleteVerificationPlan({
   paymentVerificationPlanId,
   cashOrPaymentPlanId,
-}: DeleteVerificationPlanProps): React.ReactElement {
+}: DeleteVerificationPlanProps): ReactElement {
   const refetchQueries = usePaymentRefetchQueries(cashOrPaymentPlanId);
   const { t } = useTranslation();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);

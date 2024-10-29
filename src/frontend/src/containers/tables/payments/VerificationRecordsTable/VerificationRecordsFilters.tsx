@@ -1,5 +1,4 @@
 import { Grid, MenuItem } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { usePaymentVerificationChoicesQuery } from '@generated/graphql';
@@ -7,6 +6,7 @@ import { FiltersSection } from '@components/core/FiltersSection';
 import { SearchTextField } from '@components/core/SearchTextField';
 import { SelectFilter } from '@components/core/SelectFilter';
 import { createHandleApplyFilterChange } from '@utils/utils';
+import { ReactElement } from 'react';
 
 interface VerificationRecordsFiltersProps {
   filter;
@@ -23,7 +23,7 @@ export function VerificationRecordsFilters({
   initialFilter,
   appliedFilter,
   setAppliedFilter,
-}: VerificationRecordsFiltersProps): React.ReactElement {
+}: VerificationRecordsFiltersProps): ReactElement {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();

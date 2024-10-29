@@ -1,10 +1,10 @@
 import { Box } from '@mui/material';
-import * as React from 'react';
 import { useParams } from 'react-router-dom';
 import { useIndividualFlexFieldsQuery } from '@generated/graphql';
 import { PhotoModal } from '@core/PhotoModal/PhotoModal';
+import { ReactElement } from 'react';
 
-export function IndividualFlexFieldPhotoModal({ field }): React.ReactElement {
+export function IndividualFlexFieldPhotoModal({ field }): ReactElement {
   const { id } = useParams();
   const { data } = useIndividualFlexFieldsQuery({
     variables: { id },

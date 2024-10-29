@@ -9,7 +9,7 @@ import { Box, CircularProgress } from '@mui/material';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { Field, FormikProvider, useFormik } from 'formik';
-import { useEffect } from 'react';
+import { ReactElement, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -36,7 +36,7 @@ const validationSchema = Yup.object().shape({
 export function CreateImportFromXlsxForm({
   setSubmitForm,
   setSubmitDisabled,
-}): React.ReactElement {
+}): ReactElement {
   const {
     saveAndStartPolling,
     stopPollingImportData,
