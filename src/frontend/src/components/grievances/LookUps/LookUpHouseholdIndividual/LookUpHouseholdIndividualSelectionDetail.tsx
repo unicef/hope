@@ -19,6 +19,7 @@ import { HouseholdFilters } from '../../../population/HouseholdFilter';
 import { IndividualsFilter } from '../../../population/IndividualsFilter';
 import { LookUpHouseholdTable } from '../LookUpHouseholdTable/LookUpHouseholdTable';
 import { LookUpIndividualTable } from '../LookUpIndividualTable/LookUpIndividualTable';
+import { useProgramContext } from 'src/programContext';
 
 const StyledTabs = styled(Tabs)`
   && {
@@ -48,7 +49,8 @@ export function LookUpHouseholdIndividualSelectionDetail({
   const { t } = useTranslation();
   const location = useLocation();
   const { businessArea, isAllPrograms, programId } = useBaseUrl();
-  const [selectedTab, setSelectedTab] = useState(0);
+  const { isSocialDctType } = useProgramContext();
+  const [selectedTab, setSelectedTab] = useState(isSocialDctType ? 1 : 0);
   const { data: householdChoicesData, loading: householdChoicesLoading } =
     useHouseholdChoiceDataQuery();
   const { data: individualChoicesData, loading: individualChoicesLoading } =
@@ -121,7 +123,7 @@ export function LookUpHouseholdIndividualSelectionDetail({
       <Box>
         <Box id="scroll-dialog-title">
           <StyledTabs
-            value={selectedTab}
+            value={isSocialDctType ? 0 : selectedTab}
             onChange={(_event: ChangeEvent<object>, newValue: number) => {
               setSelectedTab(newValue);
             }}
@@ -130,7 +132,9 @@ export function LookUpHouseholdIndividualSelectionDetail({
             variant="fullWidth"
             aria-label="look up tabs"
           >
-            <Tab data-cy="look-up-household" label={t('LOOK UP HOUSEHOLD')} />
+            {!isSocialDctType && (
+              <Tab data-cy="look-up-household" label={t('LOOK UP HOUSEHOLD')} />
+            )}
             <Tab
               disabled={
                 initialValues.issueType ===
@@ -146,32 +150,35 @@ export function LookUpHouseholdIndividualSelectionDetail({
         </Box>
       </Box>
       <Box>
-        <TabPanel value={selectedTab} index={0}>
-          <Box mt={2}>
-            <HouseholdFilters
-              filter={filterHH}
+        {!isSocialDctType && (
+          <TabPanel value={selectedTab} index={0}>
+            <Box mt={2}>
+              <HouseholdFilters
+                filter={filterHH}
+                choicesData={householdChoicesData}
+                setFilter={setFilterHH}
+                initialFilter={initialFilterHH}
+                appliedFilter={appliedFilterHH}
+                setAppliedFilter={setAppliedFilterHH}
+                isOnPaper={false}
+                programs={programs}
+              />
+            </Box>
+            <LookUpHouseholdTable
+              filter={appliedFilterHH}
+              businessArea={businessArea}
               choicesData={householdChoicesData}
-              setFilter={setFilterHH}
-              initialFilter={initialFilterHH}
-              appliedFilter={appliedFilterHH}
-              setAppliedFilter={setAppliedFilterHH}
-              isOnPaper={false}
-              programs={programs}
+              setFieldValue={onSelect}
+              selectedHousehold={selectedHousehold}
+              setSelectedHousehold={setSelectedHousehold}
+              setSelectedIndividual={setSelectedIndividual}
+              redirectedFromRelatedTicket={redirectedFromRelatedTicket}
+              isFeedbackWithHouseholdOnly={isFeedbackWithHouseholdOnly}
+              noTableStyling
             />
-          </Box>
-          <LookUpHouseholdTable
-            filter={appliedFilterHH}
-            businessArea={businessArea}
-            choicesData={householdChoicesData}
-            setFieldValue={onSelect}
-            selectedHousehold={selectedHousehold}
-            setSelectedHousehold={setSelectedHousehold}
-            setSelectedIndividual={setSelectedIndividual}
-            redirectedFromRelatedTicket={redirectedFromRelatedTicket}
-            isFeedbackWithHouseholdOnly={isFeedbackWithHouseholdOnly}
-            noTableStyling
-          />
-        </TabPanel>
+          </TabPanel>
+        )}
+
         <TabPanel value={selectedTab} index={1}>
           <IndividualsFilter
             filter={filterIND}
