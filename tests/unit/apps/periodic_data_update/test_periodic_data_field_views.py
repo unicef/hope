@@ -137,7 +137,7 @@ class TestPeriodicFieldViews:
 
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 11
+            assert len(ctx.captured_queries) == 6
 
         # Test that reoccurring requests use cached data
         with CaptureQueriesContext(connection) as ctx:
@@ -146,7 +146,7 @@ class TestPeriodicFieldViews:
 
             etag_second_call = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 5
+            assert len(ctx.captured_queries) == 0
 
             assert etag_second_call == etag
 
@@ -159,7 +159,7 @@ class TestPeriodicFieldViews:
 
             etag_call_after_update = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 11
+            assert len(ctx.captured_queries) == 6
 
             assert etag_call_after_update != etag
 
@@ -170,7 +170,7 @@ class TestPeriodicFieldViews:
 
             etag_call_after_update_second_call = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 5
+            assert len(ctx.captured_queries) == 0
 
             assert etag_call_after_update_second_call == etag_call_after_update
 
@@ -183,6 +183,6 @@ class TestPeriodicFieldViews:
 
             etag_call_after_update_2 = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 11
+            assert len(ctx.captured_queries) == 6
 
             assert etag_call_after_update_2 != etag_call_after_update_second_call
