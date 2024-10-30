@@ -1,16 +1,4 @@
-import { Box, Grid, GridSize, Typography } from '@mui/material';
-import { useTranslation } from 'react-i18next';
-import {
-  GrievanceTicketQuery,
-  GrievancesChoiceDataQuery,
-} from '@generated/graphql';
-import { GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
-import {
-  choicesToDict,
-  grievanceTicketBadgeColors,
-  grievanceTicketStatusToColor,
-  renderUserName,
-} from '@utils/utils';
+import { BlackLink } from '@core/BlackLink';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { ContentLink } from '@core/ContentLink';
 import { LabelizedField } from '@core/LabelizedField';
@@ -19,9 +7,22 @@ import { PhotoModal } from '@core/PhotoModal/PhotoModal';
 import { StatusBox } from '@core/StatusBox';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
+import {
+  GrievanceTicketQuery,
+  GrievancesChoiceDataQuery,
+} from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { BlackLink } from '@core/BlackLink';
+import { Box, Grid, GridSize, Typography } from '@mui/material';
+import { GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
+import {
+  choicesToDict,
+  grievanceTicketBadgeColors,
+  grievanceTicketStatusToColor,
+  renderUserName,
+} from '@utils/utils';
 import { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useProgramContext } from 'src/programContext';
 
 interface GrievancesDetailsProps {
   ticket: GrievanceTicketQuery['grievanceTicket'];
@@ -40,6 +41,7 @@ export function GrievancesDetails({
 }: GrievancesDetailsProps): ReactElement {
   const { t } = useTranslation();
   const { isAllPrograms } = useBaseUrl();
+  const { isSocialDctType } = useProgramContext();
   const statusChoices: {
     [id: number]: string;
   } = choicesToDict(choicesData.grievanceTicketStatusChoices);
@@ -248,7 +250,7 @@ export function GrievancesDetails({
                 value: <span>{issueType}</span>,
                 size: 3,
               },
-              {
+              !isAllPrograms && {
                 label: t('Household ID'),
                 value: (
                   <span>
@@ -270,26 +272,30 @@ export function GrievancesDetails({
                 size: 3,
               },
               {
-                label: t('Individual ID'),
-                value: (
-                  <span>
-                    {ticket.individual?.id &&
-                    canViewIndividualDetails &&
-                    !isAllPrograms ? (
-                      <BlackLink
-                        to={`/${baseUrl}/population/individuals/${ticket.individual.id}`}
-                      >
-                        {ticket.individual.unicefId}
-                      </BlackLink>
-                    ) : (
-                      <div>
-                        {ticket.individual?.id
-                          ? ticket.individual.unicefId
-                          : '-'}
-                      </div>
-                    )}
-                  </span>
-                ),
+                label:
+                  isAllPrograms || isSocialDctType
+                    ? t('Target ID')
+                    : t('Individual ID'),
+                value:
+                  isAllPrograms || isSocialDctType ? (
+                    <div>{ticket?.targetId || '-'}</div>
+                  ) : (
+                    <span>
+                      {ticket.individual?.id && canViewIndividualDetails ? (
+                        <BlackLink
+                          to={`/${baseUrl}/population/individuals/${ticket.individual.id}`}
+                        >
+                          {ticket.individual.unicefId}
+                        </BlackLink>
+                      ) : (
+                        <div>
+                          {ticket.individual?.id
+                            ? ticket.individual.unicefId
+                            : '-'}
+                        </div>
+                      )}
+                    </span>
+                  ),
                 size: 3,
               },
               {
@@ -363,12 +369,21 @@ export function GrievancesDetails({
                 size: 12,
               },
             ]
-              .filter((el) => el)
-              .map((el) => (
-                <Grid key={el.label} item xs={el.size as GridSize}>
-                  <LabelizedField label={el.label}>{el.value}</LabelizedField>
-                </Grid>
-              ))}
+              .filter((el) =>
+                isSocialDctType ? el.label !== 'Household ID' : el,
+              )
+              .map(
+                (el) =>
+                  el.label &&
+                  el.value &&
+                  el.size && (
+                    <Grid key={el.label} item xs={el.size as GridSize}>
+                      <LabelizedField label={el.label}>
+                        {el.value}
+                      </LabelizedField>
+                    </Grid>
+                  ),
+              )}
           </Grid>
         </OverviewContainer>
       </ContainerColumnWithBorder>

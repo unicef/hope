@@ -5,6 +5,7 @@ from django.contrib.admin.options import get_content_type_for_model
 from django.core.cache import cache
 from django.core.files.base import ContentFile
 from django.db import connection
+from django.http import FileResponse
 from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 
@@ -722,8 +723,10 @@ class TestPeriodicDataUpdateTemplateViews:
 
         self.pdu_template1.refresh_from_db()
         assert self.pdu_template1.status == PeriodicDataUpdateTemplate.Status.EXPORTED
-        response_json = response.json()
-        assert response_json == {"url": file.file.url}
+        assert isinstance(response, FileResponse) is True
+        assert f'filename="{file.file.name}"' in response["Content-Disposition"]
+        assert response["Content-Type"] == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        assert response.getvalue() == b"Test content"
 
     def test_download_periodic_data_update_template_not_exported(
         self,
