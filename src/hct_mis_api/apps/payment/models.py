@@ -1388,9 +1388,6 @@ class FspXlsxTemplatePerDeliveryMechanism(TimeStampedUUIDModel):
     financial_service_provider = models.ForeignKey(
         "FinancialServiceProvider", on_delete=models.CASCADE, related_name="fsp_xlsx_template_per_delivery_mechanisms"
     )
-    delivery_mechanism_choice = models.CharField(
-        max_length=255, verbose_name=_("Delivery Mechanism"), choices=DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES
-    )  # TODO MB drop later
     delivery_mechanism = models.ForeignKey("DeliveryMechanism", on_delete=models.SET_NULL, null=True)
     xlsx_template = models.ForeignKey(
         "FinancialServiceProviderXlsxTemplate",
@@ -1533,9 +1530,6 @@ class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
         null=True,
     )
     status = FSMField(default=Status.NOT_SENT, protected=False, db_index=True)
-    delivery_mechanism_choice = models.CharField(
-        max_length=255, choices=DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES, db_index=True, null=True
-    )  # TODO MB drop later
     delivery_mechanism = models.ForeignKey("DeliveryMechanism", on_delete=models.SET_NULL, null=True)
     delivery_mechanism_order = models.PositiveIntegerField()
 
@@ -2287,13 +2281,6 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
     individual = models.ForeignKey(
         "household.Individual", on_delete=models.CASCADE, related_name="delivery_mechanisms_data"
     )
-    delivery_mechanism_choice = models.CharField(
-        max_length=255,
-        verbose_name=_("Delivery Mechanism"),
-        choices=DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES,
-        null=True,
-        blank=True,
-    )  # TODO MB drop later
     delivery_mechanism = models.ForeignKey("DeliveryMechanism", on_delete=models.PROTECT)
     data = JSONField(default=dict, blank=True)
 
