@@ -22,7 +22,8 @@ from django.core.validators import (
     MaxLengthValidator,
     MaxValueValidator,
     MinLengthValidator,
-    MinValueValidator, ProhibitNullCharactersValidator,
+    MinValueValidator,
+    ProhibitNullCharactersValidator,
 )
 from django.db import models
 from django.db.models import (
@@ -65,7 +66,12 @@ from hct_mis_api.apps.core.field_attributes.fields_types import (
     Scope,
 )
 from hct_mis_api.apps.core.mixins import LimitBusinessAreaModelMixin
-from hct_mis_api.apps.core.models import BusinessArea, FileTemp, FlexibleAttribute, StorageFile
+from hct_mis_api.apps.core.models import (
+    BusinessArea,
+    FileTemp,
+    FlexibleAttribute,
+    StorageFile,
+)
 from hct_mis_api.apps.geo.models import Area, Country
 from hct_mis_api.apps.household.models import FEMALE, MALE, Individual
 from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
@@ -76,14 +82,18 @@ from hct_mis_api.apps.steficon.models import RuleCommit
 from hct_mis_api.apps.utils.models import (
     AdminUrlMixin,
     ConcurrencyModel,
+    InternalDataFieldModel,
     MergedManager,
     MergeStatusModel,
     PendingManager,
     SignatureMixin,
     TimeStampedUUIDModel,
-    UnicefIdentifiedModel, InternalDataFieldModel,
+    UnicefIdentifiedModel,
 )
-from hct_mis_api.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
+from hct_mis_api.apps.utils.validators import (
+    DoubleSpaceValidator,
+    StartEndSpaceValidator,
+)
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.account.models import User
@@ -432,7 +442,14 @@ class PaymentPlanSplit(TimeStampedUUIDModel):
         return self.payment_plan.delivery_mechanisms.first().delivery_mechanism
 
 
-class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel, AdminUrlMixin, InternalDataFieldModel):
+class PaymentPlan(
+    ConcurrencyModel,
+    SoftDeletableModel,
+    GenericPaymentPlan,
+    UnicefIdentifiedModel,
+    AdminUrlMixin,
+    InternalDataFieldModel,
+):
     TP_MIGRATION_MAPPING = {
         # tp.field: payment_plan.field
         # if value has internal_data__ will story in json
@@ -466,34 +483,34 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
     # ACTIVITY_LOG_MAPPING from TP
     # TODO: merge it with exists
     ACTIVITY_LOG_MAPPING_TP = create_mapping_dict(
-            [
-                "name",
-                "created_by",
-                "change_date",
-                "changed_by",
-                "finalized_at",
-                "finalized_by",
-                "status",
-                "child_male_count",
-                "child_female_count",
-                "adult_male_count",
-                "adult_female_count",
-                "total_households_count",
-                "total_individuals_count",
-                "program",
-                "targeting_criteria_string",
-                "sent_to_datahub",
-                "steficon_rule",
-                "exclusion_reason",
-                "excluded_ids",
-            ],
-            {
-                "steficon_rule": "additional_formula",
-                "steficon_applied_date": "additional_formula_applied_date",
-                "vulnerability_score_min": "score_min",
-                "vulnerability_score_max": "score_max",
-            },
-        )
+        [
+            "name",
+            "created_by",
+            "change_date",
+            "changed_by",
+            "finalized_at",
+            "finalized_by",
+            "status",
+            "child_male_count",
+            "child_female_count",
+            "adult_male_count",
+            "adult_female_count",
+            "total_households_count",
+            "total_individuals_count",
+            "program",
+            "targeting_criteria_string",
+            "sent_to_datahub",
+            "steficon_rule",
+            "exclusion_reason",
+            "excluded_ids",
+        ],
+        {
+            "steficon_rule": "additional_formula",
+            "steficon_applied_date": "additional_formula_applied_date",
+            "vulnerability_score_min": "score_min",
+            "vulnerability_score_max": "score_max",
+        },
+    )
 
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
