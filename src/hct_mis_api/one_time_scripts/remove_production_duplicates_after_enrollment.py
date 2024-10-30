@@ -7,7 +7,7 @@ from hct_mis_api.apps.household.models import Household
 logger = logging.getLogger(__name__)
 
 
-def remove_production_duplicates_after_enrollment():
+def remove_production_duplicates_after_enrollment() -> None:
     # Exceptions from the further rules
     for household in Household.objects.filter(
         id__in=[
