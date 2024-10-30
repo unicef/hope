@@ -35,20 +35,26 @@ class APICountriesTests(HOPEApiTestCase):
         url = reverse("api:country-list")
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             response = self.client.get(url)
-        assert response.status_code == status.HTTP_200_OK
-        assert response.json() == [
-            {
-                "name": country_afghanistan.name,
-                "short_name": country_afghanistan.short_name,
-                "iso_code2": country_afghanistan.iso_code2,
-                "iso_code3": country_afghanistan.iso_code3,
-                "iso_num": country_afghanistan.iso_num,
-            },
-            {
-                "name": country_poland.name,
-                "short_name": country_poland.short_name,
-                "iso_code2": country_poland.iso_code2,
-                "iso_code3": country_poland.iso_code3,
-                "iso_num": country_poland.iso_num,
-            },
-        ]
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            response.json()["results"],
+            [
+                {
+                    "name": country_afghanistan.name,
+                    "short_name": country_afghanistan.short_name,
+                    "iso_code2": country_afghanistan.iso_code2,
+                    "iso_code3": country_afghanistan.iso_code3,
+                    "iso_num": country_afghanistan.iso_num,
+                },
+                {
+                    "name": country_poland.name,
+                    "short_name": country_poland.short_name,
+                    "iso_code2": country_poland.iso_code2,
+                    "iso_code3": country_poland.iso_code3,
+                    "iso_num": country_poland.iso_num,
+                },
+            ],
+        )
+        self.assertNotIn("count", response.json())
+        self.assertIn("next", response.json())
+        self.assertIn("previous", response.json())
