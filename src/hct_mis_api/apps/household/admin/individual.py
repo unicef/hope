@@ -54,8 +54,8 @@ logger = logging.getLogger(__name__)
 class IndividualDeliveryMechanismDataInline(admin.TabularInline):
     model = DeliveryMechanismData
     extra = 0
-    fields = ("delivery_mechanism_choice", "delivery_mechanism", "data", "is_valid")
-    readonly_fields = ("delivery_mechanism_choice", "delivery_mechanism", "data", "is_valid")
+    fields = ("delivery_mechanism", "data", "is_valid")
+    readonly_fields = ("delivery_mechanism", "data", "is_valid")
     show_change_link = True
     can_delete = False
 
