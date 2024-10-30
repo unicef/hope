@@ -657,7 +657,7 @@ class TestPaymentVerification:
 
         assert "RECEIVED WITH ISSUES" in pagePaymentRecord.getStatusContainer().text
 
-        pageGrievanceTickets
+        # pageGrievanceTickets
 
     def test_payment_verification_by_payment_related_complaint(
         self,
@@ -807,9 +807,15 @@ class TestPaymentVerification:
     def test_payment_verification_discard(
         self,
         active_program: Program,
-        add_payment_verification: PV,
+        add_payment_verification_xlsx: PV,
         pagePaymentVerification: PaymentVerification,
         pagePaymentVerificationDetails: PaymentVerificationDetails,
         pagePaymentRecord: PaymentRecord,
     ) -> None:
         pagePaymentVerification.selectGlobalProgramFilter("Active Program")
+
+        pagePaymentVerification.getNavPaymentVerification().click()
+        pagePaymentVerification.getCashPlanTableRow().click()
+        pagePaymentVerificationDetails.getButtonActivatePlan().click()
+        pagePaymentVerificationDetails.getButtonSubmit().click()
+
