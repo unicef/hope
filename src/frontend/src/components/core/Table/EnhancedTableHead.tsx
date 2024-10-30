@@ -1,4 +1,3 @@
-import * as React from 'react';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
@@ -7,6 +6,7 @@ import TableSortLabel from '@mui/material/TableSortLabel';
 import { Checkbox } from '@mui/material';
 import { hasPermissions } from '../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
+import { MouseEvent, ReactElement } from 'react';
 
 type Order = 'asc' | 'desc';
 
@@ -45,7 +45,7 @@ const StyledLabel = styled.span`
 
 interface EnhancedTableProps<T> {
   onRequestSort: (
-    event: React.MouseEvent<unknown>,
+    event: MouseEvent<unknown>,
     property: keyof T | string,
   ) => void;
   order: Order;
@@ -60,7 +60,7 @@ interface EnhancedTableProps<T> {
 
 export function EnhancedTableHead<T>(
   props: EnhancedTableProps<T>,
-): React.ReactElement {
+): ReactElement {
   const {
     order,
     orderBy,
@@ -73,7 +73,7 @@ export function EnhancedTableHead<T>(
     data = [],
   } = props;
   const createSortHandler =
-    (property: keyof T | string) => (event: React.MouseEvent<unknown>) => {
+    (property: keyof T | string) => (event: MouseEvent<unknown>) => {
       onRequestSort(event, property);
     };
   const permissions = usePermissions();

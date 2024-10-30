@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { Grid, Typography } from '@mui/material';
 import { Pie } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
@@ -7,6 +6,7 @@ import { PaymentPlanQuery } from '@generated/graphql';
 import { PaperContainer } from '../../../targeting/PaperContainer';
 import { LabelizedField } from '@core/LabelizedField';
 import { FieldBorder } from '@core/FieldBorder';
+import { ReactElement } from 'react';
 
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(2)};
@@ -32,7 +32,7 @@ interface ReconciliationSummaryProps {
 
 export function ReconciliationSummary({
   paymentPlan,
-}: ReconciliationSummaryProps): React.ReactElement {
+}: ReconciliationSummaryProps): ReactElement {
   const { t } = useTranslation();
 
   const {

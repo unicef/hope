@@ -5,12 +5,19 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Grid,
   Typography,
 } from '@mui/material';
-import * as React from 'react';
 import { AddCircleOutline } from '@mui/icons-material';
-import { FieldArray, Formik } from 'formik';
-import { useEffect, useRef, useState } from 'react';
+import { Field, FieldArray, Formik } from 'formik';
+import {
+  Component,
+  ReactElement,
+  ReactNode,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import * as Yup from 'yup';
@@ -31,6 +38,7 @@ import { DialogTitleWrapper } from '../dialogs/DialogTitleWrapper';
 import { TargetingCriteriaIndividualFilterBlocks } from './TargetingCriteriaIndividualFilterBlocks';
 import { AndDivider, AndDividerLabel } from '@components/targeting/AndDivider';
 import { TargetingCriteriaHouseholdFilter } from './TargetingCriteriaHouseholdFilter';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
 
 const ButtonBox = styled.div`
   width: 300px;
@@ -79,19 +87,47 @@ const validationSchema = Yup.object().shape({
       ),
     }),
   ),
+  collectorsFiltersBlocks: Yup.array().of(
+    Yup.object().shape({
+      collectorBlockFilters: Yup.array().of(
+        Yup.object().shape({
+          fieldName: Yup.string().required('Field Type is required'),
+          fieldAttribute: Yup.object().shape({
+            type: Yup.string().required(),
+          }),
+          roundNumber: Yup.string()
+            .nullable()
+            .when(
+              ['fieldName', 'fieldAttribute'],
+              (fieldName, fieldAttribute, schema) => {
+                const parent = schema.parent;
+                if (
+                  parent &&
+                  parent.fieldAttribute &&
+                  parent.fieldAttribute.type === 'PDU'
+                ) {
+                  return Yup.string().required('Round Number is required');
+                }
+                return Yup.string().notRequired();
+              },
+            ),
+        }),
+      ),
+    }),
+  ),
 });
 
 interface ArrayFieldWrapperProps {
   arrayHelpers;
-  children: React.ReactNode;
+  children: ReactNode;
 }
-class ArrayFieldWrapper extends React.Component<ArrayFieldWrapperProps> {
+class ArrayFieldWrapper extends Component<ArrayFieldWrapperProps> {
   getArrayHelpers(): object {
     const { arrayHelpers } = this.props;
     return arrayHelpers;
   }
 
-  render(): React.ReactNode {
+  render(): ReactNode {
     const { children } = this.props;
     return children;
   }
@@ -104,6 +140,7 @@ interface TargetingCriteriaFormPropTypes {
   onClose: () => void;
   individualFiltersAvailable: boolean;
   householdFiltersAvailable: boolean;
+  collectorsFiltersAvailable: boolean;
   isSocialWorkingProgram: boolean;
 }
 
@@ -117,8 +154,9 @@ export const TargetingCriteriaForm = ({
   onClose,
   individualFiltersAvailable,
   householdFiltersAvailable,
+  collectorsFiltersAvailable,
   isSocialWorkingProgram,
-}: TargetingCriteriaFormPropTypes): React.ReactElement => {
+}: TargetingCriteriaFormPropTypes): ReactElement => {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
 
@@ -129,6 +167,7 @@ export const TargetingCriteriaForm = ({
 
   const filtersArrayWrapperRef = useRef(null);
   const individualsFiltersBlocksWrapperRef = useRef(null);
+  const collectorsFiltersBlocksWrapperRef = useRef(null);
   const initialValue = mapCriteriaToInitialValues(criteria);
   const [individualData, setIndividualData] = useState(null);
   const [householdData, setHouseholdData] = useState(null);
@@ -283,6 +322,28 @@ export const TargetingCriteriaForm = ({
                     ? ''
                     : 'All rules defined below have to be true for the entire household.'}
                 </DialogDescription>
+                <Grid container spacing={3}>
+                  {householdFiltersAvailable && (
+                    <Grid item xs={12}>
+                      <Field
+                        data-cy="input-included-household-ids"
+                        name="householdIds"
+                        fullWidth
+                        multiline
+                        variant="outlined"
+                        label={t('Household IDs')}
+                        component={FormikTextField}
+                      />
+                    </Grid>
+                  )}
+                  {householdFiltersAvailable && individualFiltersAvailable && (
+                    <Grid item xs={12}>
+                      <AndDivider>
+                        <AndDividerLabel>AND</AndDividerLabel>
+                      </AndDivider>
+                    </Grid>
+                  )}
+                </Grid>
                 <FieldArray
                   name="filters"
                   render={(arrayHelpers) => (
@@ -341,6 +402,27 @@ export const TargetingCriteriaForm = ({
                         <AndDividerLabel>And</AndDividerLabel>
                       </AndDivider>
                     ) : null}
+                    <Grid container spacing={3}>
+                      <>
+                        <Grid item xs={12}>
+                          <Box pb={3}>
+                            <Field
+                              data-cy="input-included-individual-ids"
+                              name="individualIds"
+                              fullWidth
+                              variant="outlined"
+                              label={t('Individual IDs')}
+                              component={FormikTextField}
+                            />
+                          </Box>
+                        </Grid>
+                        <Grid item xs={12}>
+                          <AndDivider>
+                            <AndDividerLabel>AND</AndDividerLabel>
+                          </AndDivider>
+                        </Grid>
+                      </>
+                    </Grid>
                     <FieldArray
                       name="individualsFiltersBlocks"
                       render={(arrayHelpers) => (
@@ -379,6 +461,73 @@ export const TargetingCriteriaForm = ({
                           startIcon={<AddCircleOutline />}
                         >
                           ADD INDIVIDUAL RULE GROUP
+                        </Button>
+                      </ButtonBox>
+                    </Box>
+                  </>
+                ) : null}
+                {collectorsFiltersAvailable ? (
+                  <>
+                    <AndDivider>
+                      <AndDividerLabel>And</AndDividerLabel>
+                    </AndDivider>
+                    <Grid container spacing={3}>
+                      <>
+                        <Grid item xs={12}>
+                          <Box pb={3}>
+                            <Field
+                              data-cy="input-included-collector-ids"
+                              name="collectorIds"
+                              fullWidth
+                              variant="outlined"
+                              label={t('Collector IDs')}
+                              component={FormikTextField}
+                            />
+                          </Box>
+                        </Grid>
+                        <Grid item xs={12}>
+                          <AndDivider>
+                            <AndDividerLabel>AND</AndDividerLabel>
+                          </AndDivider>
+                        </Grid>
+                      </>
+                    </Grid>
+                    <FieldArray
+                      name="collectorsFiltersBlocks"
+                      render={(arrayHelpers) => (
+                        <ArrayFieldWrapper
+                          arrayHelpers={arrayHelpers}
+                          ref={collectorsFiltersBlocksWrapperRef}
+                        >
+                          {values.collectorsFiltersBlocks.map((each, index) => (
+                            <TargetingCriteriaIndividualFilterBlocks
+                              // eslint-disable-next-line
+                              key={index}
+                              blockIndex={index}
+                              data={individualData}
+                              values={values}
+                              choicesToDict={allDataChoicesDict}
+                              onDelete={() => arrayHelpers.remove(index)}
+                            />
+                          ))}
+                        </ArrayFieldWrapper>
+                      )}
+                    />
+                    <Box display="flex" flexDirection="column">
+                      <ButtonBox>
+                        <Button
+                          data-cy="button-collector-rule"
+                          onClick={() =>
+                            collectorsFiltersBlocksWrapperRef.current
+                              .getArrayHelpers()
+                              .push({
+                                collectorBlockFilters: [{ fieldName: '' }],
+                              })
+                          }
+                          color="primary"
+                          startIcon={<AddCircleOutline />}
+                        >
+                          ADD COLLECTOR RULE GROUP
                         </Button>
                       </ButtonBox>
                     </Box>

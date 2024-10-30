@@ -1,11 +1,11 @@
 import { Box, Button } from '@mui/material';
-import * as React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { BreadCrumbsItem } from '@core/BreadCrumbs';
 import { LoadingButton } from '@core/LoadingButton';
 import { PageHeader } from '@core/PageHeader';
+import { ReactElement } from 'react';
 
 interface CreateTargetPopulationHeaderProps {
   handleSubmit: () => Promise<void>;
@@ -13,7 +13,6 @@ interface CreateTargetPopulationHeaderProps {
   baseUrl: string;
   permissions: string[];
   loading: boolean;
-  category: string;
 }
 
 export const CreateTargetPopulationHeader = ({
@@ -22,22 +21,16 @@ export const CreateTargetPopulationHeader = ({
   baseUrl,
   permissions,
   loading,
-  category,
-}: CreateTargetPopulationHeaderProps): React.ReactElement => {
+}: CreateTargetPopulationHeaderProps): ReactElement => {
   const { t } = useTranslation();
 
   const isSubmitDisabled = () => {
-    if (category === 'filters') {
-      return values.criterias?.length === 0 || !values.name || loading;
-    }
-    if (category === 'ids') {
-      return (
-        !(values.individualIds || values.householdIds) ||
-        !values.name ||
-        loading
-      );
-    }
-    return true;
+    return (
+      (!values.criterias?.length &&
+        !(values.individualIds || values.householdIds)) ||
+      !values.name ||
+      loading
+    );
   };
 
   const breadCrumbsItems: BreadCrumbsItem[] = [

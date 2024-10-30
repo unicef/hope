@@ -1,6 +1,5 @@
 import { Form, Formik } from 'formik';
 import moment from 'moment';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import * as Yup from 'yup';
@@ -21,8 +20,9 @@ import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { today } from '@utils/utils';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { ReactElement } from 'react';
 
-export const EditPeopleFollowUpPaymentPlanPage = (): React.ReactElement => {
+export const EditPeopleFollowUpPaymentPlanPage = (): ReactElement => {
   const navigate = useNavigate();
   const location = useLocation();
   const { paymentPlanId } = useParams();

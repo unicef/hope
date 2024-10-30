@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { useEffect, useState } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 import { Checkbox } from '@mui/material';
 import { useDebounce } from '@hooks/useDebounce';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -26,8 +25,8 @@ export function AdminAreaAutocompleteMultipleRest({
   disabled?: boolean;
   parentId?: string;
   dataCy: string;
-}): React.ReactElement {
-  const [inputValue, setInputTextChange] = React.useState('');
+}): ReactElement {
+  const [inputValue, setInputTextChange] = useState('');
   const debouncedInputText = useDebounce(inputValue, 400);
   const [newValue, setNewValue] = useState([]);
   const { businessArea } = useBaseUrl();

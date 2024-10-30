@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -17,7 +16,7 @@ import { ButtonTooltip } from '@components/core/ButtonTooltip';
 import { useProgramContext } from '../../../../programContext';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
-export function FeedbackPage(): React.ReactElement {
+export function FeedbackPage(): ReactElement {
   const { baseUrl, isAllPrograms } = useBaseUrl();
   const permissions = usePermissions();
   const { t } = useTranslation();

@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { useEffect, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import Autocomplete from '@mui/lab/Autocomplete';
 import styled from 'styled-components';
 import { TextField } from '@mui/material';
@@ -33,7 +32,7 @@ interface AssignedToDropdownProps {
   disableClearable?: boolean;
 }
 
-export const AssignedToDropdown: React.FC<AssignedToDropdownProps> = ({
+export const AssignedToDropdown: FC<AssignedToDropdownProps> = ({
   fullWidth,
   onFilterChange,
   value,

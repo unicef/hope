@@ -16,6 +16,7 @@ import { useTranslation } from 'react-i18next';
 import { useArrayToDict } from '@hooks/useArrayToDict';
 import { IndividualNode } from '@generated/graphql';
 import { UniversalMoment } from '@core/UniversalMoment';
+import { ReactElement } from 'react';
 
 const StyledTableCell = styled(MuiTableCell)`
   color: #adadad !important;
@@ -30,7 +31,7 @@ interface ProgrammeTimeSeriesFieldsProps {
 export const ProgrammeTimeSeriesFields = ({
   individual,
   periodicFieldsData,
-}: ProgrammeTimeSeriesFieldsProps): React.ReactElement => {
+}: ProgrammeTimeSeriesFieldsProps): ReactElement => {
   const { t } = useTranslation();
   const pduDataDict = useArrayToDict(
     periodicFieldsData?.results || [],

@@ -1,4 +1,3 @@
-import { TargetingCriteriaForm } from '@containers/forms/TargetingCriteriaForm';
 import {
   DataCollectingTypeType,
   TargetPopulationQuery,
@@ -7,8 +6,7 @@ import { AddCircleOutline } from '@mui/icons-material';
 import { Box, Button, Checkbox, FormControlLabel, Grid } from '@mui/material';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { Field } from 'formik';
-import * as React from 'react';
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
@@ -21,6 +19,7 @@ import { VulnerabilityScoreComponent } from './VulnerabilityScoreComponent';
 import { useProgramContext } from 'src/programContext';
 import { useCachedImportedIndividualFieldsQuery } from '@hooks/useCachedImportedIndividualFields';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { TargetingCriteriaForm } from '@containers/forms/TargetingCriteriaForm';
 
 const Title = styled.div`
   padding: ${({ theme }) => theme.spacing(3)} ${({ theme }) => theme.spacing(4)};
@@ -85,7 +84,6 @@ interface TargetingCriteriaDisplayProps {
   screenBeneficiary: boolean;
   isSocialDctType: boolean;
   isStandardDctType: boolean;
-  category: string;
 }
 
 export const TargetingCriteriaDisplay = ({
@@ -96,8 +94,7 @@ export const TargetingCriteriaDisplay = ({
   screenBeneficiary,
   isSocialDctType,
   isStandardDctType,
-  category,
-}: TargetingCriteriaDisplayProps): React.ReactElement => {
+}: TargetingCriteriaDisplayProps): ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
   const { selectedProgram } = useProgramContext();
@@ -149,6 +146,9 @@ export const TargetingCriteriaDisplay = ({
     return closeModal();
   };
 
+  // const  collectorFiltersAvailable =
+  //   selectedProgram?.dataCollectingType?.collectorFiltersAvailable;
+
   let individualFiltersAvailable =
     selectedProgram?.dataCollectingType?.individualFiltersAvailable;
   let householdFiltersAvailable =
@@ -175,7 +175,7 @@ export const TargetingCriteriaDisplay = ({
           <div />
           {isEdit && (
             <>
-              {!!rules.length && category === 'filters' && (
+              {!!rules.length && (
                 <Button
                   variant="outlined"
                   color="primary"
@@ -196,6 +196,7 @@ export const TargetingCriteriaDisplay = ({
           isSocialWorkingProgram={isSocialWorkingProgram}
           individualFiltersAvailable={individualFiltersAvailable}
           householdFiltersAvailable={householdFiltersAvailable}
+          collectorsFiltersAvailable={true}
         />
         <ContentWrapper>
           <Box display="flex" flexDirection="column">
@@ -226,7 +227,7 @@ export const TargetingCriteriaDisplay = ({
                   ))
                 : null}
 
-              {category === 'filters' && !rules.length && (
+              {!rules.length && (
                 <AddCriteria
                   onClick={() => setOpen(true)}
                   data-cy="button-target-population-add-criteria"

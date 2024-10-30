@@ -1,7 +1,7 @@
 import { fetchRegistrationDataImports } from '@api/rdiApi';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { handleOptionSelected } from '@utils/utils';
-import React, { useState } from 'react';
+import React, { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BaseAutocompleteRest } from './BaseAutocompleteRest';
 
@@ -13,7 +13,7 @@ export const RdiAutocompleteRest = ({
   disabled?;
   value?: string;
   onChange: (e) => void;
-}): React.ReactElement => {
+}): ReactElement => {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
   const [queryParams, setQueryParams] = useState({});
