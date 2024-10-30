@@ -59,6 +59,8 @@ export const fetchPeriodicDataUpdateTemplate = async (
 ): Promise<any> => {
   const response = await api.get(
     `${businessAreaSlug}/programs/${programId}/periodic-data-update/periodic-data-update-templates/${templateId}/download/`,
+    {},
+    `Periodic_Data_Update_Template_${templateId}`,
   );
   return response;
 };

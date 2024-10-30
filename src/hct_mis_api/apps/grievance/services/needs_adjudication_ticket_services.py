@@ -322,7 +322,7 @@ def mark_as_distinct_individual(
         individual_to_distinct,
     )
     individual_marked_as_distinct.send(sender=Individual, instance=individual_to_distinct)
-    household = individual_to_distinct.household
-    household.refresh_from_db()
-    if household.active_individuals.count() > 0:
-        household.unwithdraw()
+    if household := individual_to_distinct.household:
+        household.refresh_from_db()
+        if household.active_individuals.count() > 0:
+            household.unwithdraw()

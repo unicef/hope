@@ -91,9 +91,17 @@ export const fetchSupportingDocument = async (
   programId: string,
   paymentPlanId: string,
   fileId: string,
+  fileName: string,
 ): Promise<any> => {
-  const response = await api.get(
-    `${businessAreaSlug}/programs/${programId}/payment-plans/${paymentPlanId}/supporting-documents/${fileId}/download/`,
-  );
-  return response;
+  try {
+    const response = await api.get(
+      `${businessAreaSlug}/programs/${programId}/payment-plans/${paymentPlanId}/supporting-documents/${fileId}/download/`,
+      {},
+      fileName,
+    );
+    return response;
+  } catch (error: any) {
+    const errorMessage = error?.message || 'An unknown error occurred';
+    throw new Error(`Failed to fetch supporting document: ${errorMessage}`);
+  }
 };
