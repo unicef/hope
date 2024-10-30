@@ -171,11 +171,9 @@ class Common:
         sleep(delay_sec)
         self.driver.get_screenshot_as_file(os.path.join(f"{file_path}", f"{file_name}.{file_type}"))
 
-    def scroll(
-        self, scroll_by: int = 600, wait_after_start_scrolling: int = 2, execute: int = 1
-    ) -> None:
+    def scroll(self, scroll_by: int = 600, wait_after_start_scrolling: int = 2, execute: int = 1) -> None:
         for _ in range(execute):
-            self.driver.execute_script(
+            self.driver.execute_script(  # type: ignore
                 f"""
                 container = document.querySelector("div[data-cy='main-content']")
                 container.scrollBy(0,{scroll_by})

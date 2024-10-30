@@ -64,7 +64,6 @@ class BaseComponents(Common):
         encoded_program_id = encode_id_base64(program_id, "Program")
         return f"{self.driver.live_server.url}/{business_area_slug}/programs/{encoded_program_id}"
 
-
     def getMainContent(self) -> WebElement:
         return self.wait_for(self.mainContent)
 
