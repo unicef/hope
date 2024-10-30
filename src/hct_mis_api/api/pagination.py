@@ -14,4 +14,6 @@ class LimitOffsetPaginationWithoutCount(LimitOffsetPagination):
     def get_paginated_response_schema(self, schema: Any) -> dict:
         response_schema = super().get_paginated_response_schema(schema)
         del response_schema["properties"]["count"]
+        if "required" in response_schema:
+            response_schema["required"].remove("count")
         return response_schema
