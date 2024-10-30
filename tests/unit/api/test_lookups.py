@@ -55,6 +55,6 @@ class APICountriesTests(HOPEApiTestCase):
                 },
             ],
         )
-        self.assertNotIn("count", response.json())
+        self.assertIn("count", response.json())
         self.assertIn("next", response.json())
         self.assertIn("previous", response.json())

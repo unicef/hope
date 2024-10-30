@@ -5,7 +5,6 @@ from rest_framework.response import Response
 
 from hct_mis_api.api.endpoints.base import HOPEAPIView
 from hct_mis_api.api.endpoints.serializers import CountrySerializer
-from hct_mis_api.api.pagination import LimitOffsetPaginationWithoutCount
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.household.models import (
     COLLECT_TYPES,
@@ -31,7 +30,6 @@ class DocumentType(HOPEAPIView):
 class CountryAPIView(HOPEAPIView, ListAPIView):
     queryset = Country.objects.all()
     serializer_class = CountrySerializer
-    pagination_class = LimitOffsetPaginationWithoutCount
 
 
 class ResidenceStatus(HOPEAPIView):
