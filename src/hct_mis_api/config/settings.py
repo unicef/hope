@@ -151,7 +151,9 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "hijack.middleware.HijackUserMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
-    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    # "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    # Replace the default XFrameOptionsMiddleware with the custom one to enable Dashboard iframe
+    "hct_mis_api.middlewares.xframe.AllowSpecificIframeDomainsMiddleware",
     "hct_mis_api.middlewares.sentry.SentryScopeMiddleware",
     "hct_mis_api.middlewares.version.VersionMiddleware",
 ]
@@ -490,6 +492,8 @@ FLOWER_ADDRESS = env("FLOWER_ADDRESS")
 
 ADMIN_SYNC_CONFIG = "admin_sync.conf.DjangoConstance"
 DEFAULT_EMPTY_PARTNER = "Default Empty Partner"
+X_FRAME_OPTIONS = "SAMEORIGIN"
+
 
 from hct_mis_api.config.fragments.celery import *  # noqa: F403, F401, E402
 from hct_mis_api.config.fragments.constance import *  # noqa: F403, F401, E402
