@@ -3,7 +3,6 @@ from unittest.mock import patch
 
 import pytest
 
-from hct_mis_api.apps.account.fixtures import BusinessAreaFactory
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.dashboard.celery_tasks import (
     generate_dash_report_task,
@@ -27,13 +26,10 @@ def test_update_dashboard_figures(mock_business_area_objects: patch, mock_refres
 
 
 @pytest.mark.django_db(databases=["default", "read_only"])
-def test_generate_dash_report_task(mocker: Callable[..., None]) -> None:
+def test_generate_dash_report_task(mocker: Callable[..., None], afghanistan: Callable) -> None:
     """
     Test that generate_dash_report_task refreshes data for the given business area.
     """
     mock_refresh_data = mocker.patch.object(DashboardDataCache, "refresh_data")
-    business_area_slug = "test-area"
-    BusinessAreaFactory(slug=business_area_slug, active=True)
-
-    generate_dash_report_task.apply(args=[business_area_slug])
-    mock_refresh_data.assert_called_once_with(business_area_slug)
+    generate_dash_report_task.apply(args=[afghanistan.slug])
+    mock_refresh_data.assert_called_once_with(afghanistan.slug)
