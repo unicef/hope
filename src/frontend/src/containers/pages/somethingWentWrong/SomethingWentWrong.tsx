@@ -11,7 +11,7 @@ import { FC } from 'react';
 const Container = styled.div`
   background-color: #ffffff;
   text-align: center;
-  padding-top: 150px;
+  padding-top: 30px;
   font-family: 'Roboto', sans-serif;
   height: 100vh;
 `;
@@ -43,7 +43,7 @@ const Title = styled.h1`
 `;
 
 const Paragraph = styled.p`
-  font-size: 24px;
+  font-size: 18px;
   color: #666666;
   line-height: 32px;
 `;
@@ -83,14 +83,14 @@ export const SomethingWentWrong: FC<SomethingWentWrongProps> = ({
   return (
     <Container>
       <LogoContainer>
-        <img src={HopeLogo} alt="Hope Logo" width="186" height="101" />
+        <img src={HopeLogo} alt="Hope Logo" width="130" height="71" />{' '}
       </LogoContainer>
       <SquareLogo>
         <img
           src={SomethingWentWrongGraphic}
           alt="Sad face"
-          width="354"
-          height="293"
+          width="248"
+          height="205"
         />
       </SquareLogo>
       <TextContainer>
