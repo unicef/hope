@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-shadow */
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { Field, useFormikContext } from 'formik';
 import { FC, useEffect } from 'react';
@@ -51,6 +52,11 @@ interface Values {
       isNull?: boolean;
     }[];
   }[];
+  collectorsFiltersBlocks?: {
+    collectorBlockFilters?: {
+      isNull?: boolean;
+    }[];
+  }[];
 }
 
 interface SubFieldProps {
@@ -78,11 +84,15 @@ export const SubField: FC<SubFieldProps> = ({
     }
   }
 
+  const checkIsNullInBlocks = (blocks, blockIndex, index) => {
+    return blockIndex !== undefined && index !== undefined
+      ? blocks?.[blockIndex]?.blockFilters?.[index]?.isNull ?? false
+      : false;
+  };
+
   const isNullSelected =
-    (blockIndex !== undefined && index !== undefined
-      ? values?.individualsFiltersBlocks?.[blockIndex]
-          ?.individualBlockFilters?.[index]?.isNull ?? false
-      : false) ||
+    checkIsNullInBlocks(values?.individualsFiltersBlocks, blockIndex, index) ||
+    checkIsNullInBlocks(values?.collectorsFiltersBlocks, blockIndex, index) ||
     (values.filters?.some((filter) => filter.isNull) ?? false);
 
   useEffect(() => {
