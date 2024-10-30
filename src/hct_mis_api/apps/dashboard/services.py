@@ -6,7 +6,7 @@ from django.core.cache import cache
 from hct_mis_api.apps.dashboard.serializers import DashboardHouseholdSerializer
 from hct_mis_api.apps.household.models import Household
 
-CACHE_TIMEOUT = 60 * 60 * 6  # 6 hours
+CACHE_TIMEOUT = 60 * 60 * 24  # 24 hours
 
 
 class DashboardDataCache:

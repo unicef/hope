@@ -9,15 +9,15 @@ from hct_mis_api.apps.utils.sentry import sentry_tags, set_sentry_business_area_
 
 logger = logging.getLogger(__name__)
 
-CACHE_TIMEOUT = 60 * 60 * 6  # 6 hours
+CACHE_TIMEOUT = 60 * 60 * 24  # 24 hours
 
 
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def update_dashboard_figures_every_6_hours(self: Any) -> None:
+def update_dashboard_figures(self: Any) -> None:
     """
-    Celery task that runs every 6 hours to refresh dashboard data for all business areas
+    Celery task that runs every 24 hours to refresh dashboard data for all business areas
     with households.
     """
     business_areas_with_households = BusinessArea.objects.using("read_only").filter(active=True)
