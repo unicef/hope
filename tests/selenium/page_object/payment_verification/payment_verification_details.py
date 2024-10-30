@@ -50,6 +50,7 @@ class PaymentVerificationDetails(BaseComponents):
     buttonSubmit = 'button[data-cy="button-submit"]'
     buttonFinish = 'button[data-cy="button-ed-plan"]'
     rows = 'tr[role="checkbox"]'
+    buttonDiscard = 'button[data-cy="button-discard-plan"]'
 
     def getPageHeaderContainer(self) -> WebElement:
         return self.wait_for(self.pageHeaderContainer)
@@ -136,10 +137,13 @@ class PaymentVerificationDetails(BaseComponents):
         return self.wait_for(self.buttonActivatePlan)
 
     def getExportXlsx(self) -> WebElement:
-        return self.wait_for(self.exportXlsx)
+        return self.wait_for(self.exportXlsx, timeout=120)
 
     def getDownloadXlsx(self) -> WebElement:
         return self.wait_for(self.downloadXlsx)
+
+    def getButtonDiscard(self) -> WebElement:
+        return self.wait_for(self.buttonDiscard)
 
     def getImportXlsx(self) -> WebElement:
         return self.wait_for(self.importXlsx)

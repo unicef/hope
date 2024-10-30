@@ -657,7 +657,11 @@ class TestPaymentVerification:
 
         assert "RECEIVED WITH ISSUES" in pagePaymentRecord.getStatusContainer().text
 
-        # pageGrievanceTickets
+        pageGrievanceTickets.getNavGrievance().click()
+        pageGrievanceTickets.getTabSystemGenerated().click()
+        sleep(5)
+        print(pageGrievanceTickets.getRows())
+        pageGrievanceTickets.screenshot("0", file_path="./")
 
     def test_payment_verification_by_payment_related_complaint(
         self,
@@ -818,4 +822,25 @@ class TestPaymentVerification:
         pagePaymentVerification.getCashPlanTableRow().click()
         pagePaymentVerificationDetails.getButtonActivatePlan().click()
         pagePaymentVerificationDetails.getButtonSubmit().click()
+        pagePaymentVerificationDetails.getButtonDiscard().click()
+        pagePaymentVerificationDetails.getButtonSubmit().click()
 
+        pagePaymentVerificationDetails.getButtonActivatePlan().click()
+        pagePaymentVerificationDetails.getButtonSubmit().click()
+
+        # ToDo: Workaround
+        sleep(2)
+        pagePaymentVerificationDetails.driver.refresh()
+
+        pagePaymentVerificationDetails.getExportXlsx().click()
+
+        # ToDo: Workaround
+        sleep(2)
+        pagePaymentVerificationDetails.driver.refresh()
+
+        pagePaymentVerificationDetails.getDownloadXlsx().click()
+
+        pagePaymentVerificationDetails.getButtonDiscard().click()
+        pagePaymentVerificationDetails.getButtonSubmit().click()
+
+        pagePaymentVerificationDetails.checkAlert("You cant discard if xlsx file was downloaded or imported")
