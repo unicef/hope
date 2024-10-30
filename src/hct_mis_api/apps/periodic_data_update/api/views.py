@@ -3,6 +3,7 @@ from typing import Any
 
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db.models import QuerySet
+from django.http import FileResponse
 
 from constance import config
 from django_filters.rest_framework import DjangoFilterBackend
@@ -104,7 +105,7 @@ class PeriodicDataUpdateTemplateViewSet(
         return Response(status=status.HTTP_200_OK, data={"message": "Exporting template"})
 
     @action(detail=True, methods=["get"])
-    def download(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def download(self, request: Request, *args: Any, **kwargs: Any) -> FileResponse:
         pdu_template = self.get_object()
 
         if pdu_template.status != PeriodicDataUpdateTemplate.Status.EXPORTED:
@@ -115,7 +116,12 @@ class PeriodicDataUpdateTemplateViewSet(
             logger.error(f"XLSX File not found. PeriodicDataUpdateTemplate ID: {pdu_template.id}")
             raise ValidationError("Template file is missing")
 
-        return Response({"url": pdu_template.file.file.url}, status=status.HTTP_200_OK)
+        return FileResponse(
+            pdu_template.file.file.open(),
+            as_attachment=True,
+            filename=pdu_template.file.file.name,
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
 
 
 class PeriodicDataUpdateUploadViewSet(

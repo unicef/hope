@@ -198,12 +198,16 @@ export const SupportingDocumentsSection = ({
     'Are you sure you want to delete this file? This action cannot be reversed.',
   );
 
-  const handleSupportingDocumentDownloadClick = (fileId: string) => {
+  const handleSupportingDocumentDownloadClick = (
+    fileId: string,
+    fileName: string,
+  ) => {
     downloadSupportingDocument({
       businessAreaSlug: businessArea,
       programId,
       paymentPlanId: paymentPlan.id,
       fileId: fileId.toString(),
+      fileName: fileName,
     });
   };
 
@@ -273,7 +277,10 @@ export const SupportingDocumentsSection = ({
                       {canDownloadFile && (
                         <IconButton
                           onClick={() =>
-                            handleSupportingDocumentDownloadClick(doc.id)
+                            handleSupportingDocumentDownloadClick(
+                              doc.id,
+                              doc.file,
+                            )
                           }
                           data-cy="download-button"
                         >

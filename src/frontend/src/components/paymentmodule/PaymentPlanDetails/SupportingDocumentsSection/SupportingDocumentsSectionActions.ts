@@ -8,23 +8,21 @@ export const useDownloadSupportingDocument = () => {
       programId: mutationProgramId,
       paymentPlanId: mutationPaymentPlanId,
       fileId: mutationFileId,
+      fileName: mutationFileName,
     }: {
       businessAreaSlug: string;
       programId: string;
       paymentPlanId: string;
       fileId: string;
+      fileName: string;
     }) => {
       return fetchSupportingDocument(
         mutationBusinessAreaSlug,
         mutationProgramId,
         mutationPaymentPlanId,
         mutationFileId,
+        mutationFileName,
       );
-    },
-    onSuccess: (data) => {
-      if (data.url) {
-        window.open(data.url);
-      }
     },
   });
 };
