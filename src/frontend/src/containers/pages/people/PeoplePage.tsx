@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import {
@@ -18,8 +17,9 @@ import { PeopleListTable } from '@containers/tables/people/PeopleListTable';
 import { PeopleFilter } from '@components/people/PeopleFilter';
 import { Box, Tabs, Tab, Fade, Tooltip } from '@mui/material';
 import { useProgramContext } from 'src/programContext';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
-export const PeoplePage = (): React.ReactElement => {
+export const PeoplePage = (): ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
   const { programHasPdu } = useProgramContext();
@@ -72,7 +72,14 @@ export const PeoplePage = (): React.ReactElement => {
     return <PermissionDenied />;
 
   return (
-    <>
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'PeoplePage.tsx');
+      }}
+      componentName="PeoplePage"
+    >
       <PageHeader
         title={t('People')}
         tabs={
@@ -139,6 +146,6 @@ export const PeoplePage = (): React.ReactElement => {
           )}
         </Box>
       </Fade>
-    </>
+    </UniversalErrorBoundary>
   );
 };

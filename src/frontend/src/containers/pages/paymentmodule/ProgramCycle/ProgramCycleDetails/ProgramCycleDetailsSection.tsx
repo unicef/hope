@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { Title } from '@core/Title';
 import { Typography } from '@mui/material';
@@ -17,7 +17,7 @@ interface ProgramCycleDetailsSectionProps {
 
 export const ProgramCycleDetailsSection = ({
   programCycle,
-}: ProgramCycleDetailsSectionProps): React.ReactElement => {
+}: ProgramCycleDetailsSectionProps): ReactElement => {
   const { t } = useTranslation();
   return (
     <Grid item xs={12}>

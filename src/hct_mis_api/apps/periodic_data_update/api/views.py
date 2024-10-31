@@ -3,8 +3,10 @@ from typing import Any
 
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db.models import QuerySet
+from django.http import FileResponse
 
 from constance import config
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
@@ -22,6 +24,7 @@ from hct_mis_api.apps.account.api.permissions import (
     PDUUploadPermission,
     PDUViewListAndDetailsPermission,
 )
+from hct_mis_api.apps.core.api.filters import UpdatedAtFilter
 from hct_mis_api.apps.core.api.mixins import (
     ActionMixin,
     BusinessAreaProgramMixin,
@@ -69,7 +72,8 @@ class PeriodicDataUpdateTemplateViewSet(
         "export": [PDUTemplateCreatePermission],
         "download": [PDUTemplateDownloadPermission],
     }
-    filter_backends = (OrderingFilter,)
+    filter_backends = (OrderingFilter, DjangoFilterBackend)
+    filterset_class = UpdatedAtFilter
 
     def get_queryset(self) -> QuerySet:
         business_area = self.get_business_area()
@@ -101,7 +105,7 @@ class PeriodicDataUpdateTemplateViewSet(
         return Response(status=status.HTTP_200_OK, data={"message": "Exporting template"})
 
     @action(detail=True, methods=["get"])
-    def download(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def download(self, request: Request, *args: Any, **kwargs: Any) -> FileResponse:
         pdu_template = self.get_object()
 
         if pdu_template.status != PeriodicDataUpdateTemplate.Status.EXPORTED:
@@ -112,7 +116,12 @@ class PeriodicDataUpdateTemplateViewSet(
             logger.error(f"XLSX File not found. PeriodicDataUpdateTemplate ID: {pdu_template.id}")
             raise ValidationError("Template file is missing")
 
-        return Response({"url": pdu_template.file.file.url}, status=status.HTTP_200_OK)
+        return FileResponse(
+            pdu_template.file.file.open(),
+            as_attachment=True,
+            filename=pdu_template.file.file.name,
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
 
 
 class PeriodicDataUpdateUploadViewSet(
@@ -132,7 +141,8 @@ class PeriodicDataUpdateUploadViewSet(
         "retrieve": [PDUViewListAndDetailsPermission],
         "upload": [PDUUploadPermission],
     }
-    filter_backends = (OrderingFilter,)
+    filter_backends = (OrderingFilter, DjangoFilterBackend)
+    filterset_class = UpdatedAtFilter
 
     def get_queryset(self) -> QuerySet:
         business_area = self.get_business_area()
@@ -183,7 +193,8 @@ class PeriodicFieldViewSet(
 ):
     serializer_class = PeriodicFieldSerializer
     permission_classes = [PDUViewListAndDetailsPermission]
-    filter_backends = (OrderingFilter,)
+    filter_backends = (OrderingFilter, DjangoFilterBackend)
+    filterset_class = UpdatedAtFilter
 
     def get_queryset(self) -> QuerySet:
         program = self.get_program()

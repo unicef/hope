@@ -3,7 +3,7 @@
 exports[`components/dashboard/GrievancesSection should render 1`] = `
 <div>
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-beySPh ldQDzj css-1ps6pg7-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-blHHSb gWCsLz css-1ps6pg7-MuiPaper-root"
   >
     <div
       class="MuiBox-root css-i3pbo"
@@ -17,7 +17,7 @@ exports[`components/dashboard/GrievancesSection should render 1`] = `
         class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
       >
         <div
-          class="sc-guDLey fqsSHH"
+          class="sc-gtLWhw BkKdc"
         >
           TOTAL NUMBER OF GRIEVANCES
         </div>
@@ -32,7 +32,7 @@ exports[`components/dashboard/GrievancesSection should render 1`] = `
         class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
       >
         <div
-          class="sc-guDLey fqsSHH"
+          class="sc-gtLWhw BkKdc"
         >
           TOTAL NUMBER OF FEEDBACK
         </div>
@@ -55,7 +55,7 @@ exports[`components/dashboard/GrievancesSection should render 1`] = `
       />
     </div>
     <div
-      class="sc-guDLey fqsSHH"
+      class="sc-gtLWhw BkKdc"
     >
       NUMBER OF OPEN SENSITIVE GRIEVANCES
     </div>

@@ -1,7 +1,7 @@
-import * as React from 'react';
 import styled from 'styled-components';
 import { Tooltip, TooltipProps } from '@mui/material';
 import WarningIcon from '@mui/icons-material/Warning';
+import { ReactElement } from 'react';
 
 interface StyledWarningProps {
   confirmed: boolean;
@@ -22,7 +22,7 @@ export function WarningTooltip({
   confirmed = false,
   message = '',
   handleClick,
-}: WarningTooltipProps): React.ReactElement {
+}: WarningTooltipProps): ReactElement {
   return (
     <Tooltip onClick={handleClick} title={message}>
       <StyledWarning confirmed={confirmed} />

@@ -115,16 +115,8 @@ class Command(BaseCommand):
             call_command("migratealldb")
 
         # Flush databases
-        databases = [
-            "default",
-            "cash_assist_datahub_mis",
-            "cash_assist_datahub_ca",
-            "cash_assist_datahub_erp",
-        ]
         self.stdout.write("Flushing databases...")
-        for db in databases:
-            self.stdout.write(f"Flushing database: {db}")
-            call_command("flush", "--noinput", database=db)
+        call_command("flush", "--noinput")
 
         # Load fixtures
         fixtures = [

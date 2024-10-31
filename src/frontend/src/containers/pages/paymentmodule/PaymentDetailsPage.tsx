@@ -1,7 +1,6 @@
 import { Box } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
@@ -19,9 +18,12 @@ import { RevertForceFailedButton } from '@components/paymentmodule/RevertForceFa
 import { ForceFailedButton } from '@components/paymentmodule/ForceFailedButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { AdminButton } from '@core/AdminButton';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { ReactElement } from 'react';
 
-export function PaymentDetailsPage(): React.ReactElement {
+export function PaymentDetailsPage(): ReactElement {
   const { t } = useTranslation();
+  const location = useLocation();
   const { paymentId } = useParams();
   const { data: caData, loading: caLoading } = useCashAssistUrlPrefixQuery({
     fetchPolicy: 'cache-first',
@@ -56,7 +58,7 @@ export function PaymentDetailsPage(): React.ReactElement {
     },
   ];
 
-  const renderButton = (): React.ReactElement | null => {
+  const renderButton = (): ReactElement | null => {
     if (
       (hasPermissions(PERMISSIONS.PM_MARK_PAYMENT_AS_FAILED, permissions) &&
         paymentPlanStatus === PaymentPlanStatus.Accepted) ||
@@ -77,24 +79,33 @@ export function PaymentDetailsPage(): React.ReactElement {
   );
 
   return (
-    <>
-      <PageHeader
-        title={`Payment ${payment.unicefId}`}
-        breadCrumbs={breadCrumbsItems}
-        flags={<AdminButton adminUrl={payment.adminUrl} />}
-      >
-        {renderButton()}
-      </PageHeader>
-      <Box display="flex" flexDirection="column">
-        <PaymentDetails
-          payment={payment}
-          canViewActivityLog={hasPermissions(
-            PERMISSIONS.ACTIVITY_LOG_VIEW,
-            permissions,
-          )}
-          canViewHouseholdDetails={canViewHouseholdDetails}
-        />
-      </Box>
-    </>
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'PaymentDetailsPage.tsx');
+      }}
+      componentName="PaymentDetailsPage"
+    >
+      <>
+        <PageHeader
+          title={`Payment ${payment.unicefId}`}
+          breadCrumbs={breadCrumbsItems}
+          flags={<AdminButton adminUrl={payment.adminUrl} />}
+        >
+          {renderButton()}
+        </PageHeader>
+        <Box display="flex" flexDirection="column">
+          <PaymentDetails
+            payment={payment}
+            canViewActivityLog={hasPermissions(
+              PERMISSIONS.ACTIVITY_LOG_VIEW,
+              permissions,
+            )}
+            canViewHouseholdDetails={canViewHouseholdDetails}
+          />
+        </Box>
+      </>
+    </UniversalErrorBoundary>
   );
 }

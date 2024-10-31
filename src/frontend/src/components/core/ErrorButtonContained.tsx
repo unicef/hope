@@ -1,6 +1,6 @@
-import * as React from 'react';
 import { Button } from '@mui/material';
 import { styled } from '@mui/system';
+import { ReactElement } from 'react';
 
 const ErrorButton = styled(Button)({
   backgroundColor: '#C21313',
@@ -13,7 +13,7 @@ const ErrorButton = styled(Button)({
 export function ErrorButtonContained({
   children,
   ...otherProps
-}): React.ReactElement {
+}): ReactElement {
   return (
     <ErrorButton variant="contained" {...otherProps}>
       {children}

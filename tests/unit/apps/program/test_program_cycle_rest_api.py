@@ -99,6 +99,16 @@ class ProgramCycleAPITestCase(HOPEApiTestCase):
         cycles = ProgramCycle.objects.filter(program=self.program)
         self.assertEqual(int(response.data["count"]), cycles.count())
 
+        results = response.data["results"]
+        first_cycle = results[0]
+        second_cycle = results[1]
+        last_cycle = results[2]
+        # check can_remove_cycle
+        self.assertEqual(first_cycle["can_remove_cycle"], False)
+        self.assertEqual(second_cycle["can_remove_cycle"], False)
+        self.assertEqual(last_cycle["status"], "Draft")
+        self.assertEqual(last_cycle["can_remove_cycle"], True)
+
     def test_retrieve_program_cycle(self) -> None:
         self.client.force_authenticate(user=self.user)
         response = self.client.get(self.cycle_1_detail_url)

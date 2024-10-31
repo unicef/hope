@@ -39,9 +39,6 @@ known_first_party = [
     "mptt",
     "django_extensions",
     "registration_data",
-    "cash_assist_datahub",
-    "mis_datahub",
-    "erp_datahub",
     "sanction_list",
     "accountability",
 ]
@@ -240,6 +237,7 @@ dependencies = [
     "django-rest-extensions>=0.2.0",
     "pydyf==0.10.0",
     "elastic-transport==8.13.0",
+    "flower>=2.0.1",
 ]
 requires-python = "==3.11.*"
 readme = "README.md"

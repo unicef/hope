@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import styled from 'styled-components';
 import { IconButton, Collapse } from '@mui/material';
 import { ExpandLessRounded, ExpandMoreRounded } from '@mui/icons-material';
@@ -19,7 +18,7 @@ export function ErrorsKobo({
   errors,
 }: {
   errors: KoboErrorNode[];
-}): React.ReactElement {
+}): ReactElement {
   const [expanded, setExpanded] = useState(false);
   if (!errors || !errors.length) {
     return null;

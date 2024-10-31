@@ -1,7 +1,6 @@
 import { Box, Paper, Typography } from '@mui/material';
 import WarningIcon from '@mui/icons-material/Warning';
 import capitalize from 'lodash/capitalize';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
@@ -12,6 +11,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ContentLink } from '@core/ContentLink';
 import { LabelizedField } from '@core/LabelizedField';
 import { LookUpReassignRole } from './LookUps/LookUpReassignRole/LookUpReassignRole';
+import { ReactElement } from 'react';
 
 const StyledBox = styled(Paper)`
   border: 1px solid ${({ theme }) => theme.hctPalette.orange};
@@ -37,7 +37,7 @@ export function ReassignMultipleRoleBox({
   ticket,
 }: {
   ticket: GrievanceTicketQuery['grievanceTicket'];
-}): React.ReactElement {
+}): ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
 
@@ -47,13 +47,13 @@ export function ReassignMultipleRoleBox({
         el.role === IndividualRoleInHouseholdRole.Primary || el.role === 'HEAD',
     );
 
-  const mappedReassignLookups = (): React.ReactElement => (
+  const mappedReassignLookups = (): ReactElement => (
     <>
       {selectedIndividualsToReassign.map((selectedIndividualToReassign) => {
         const { household } = selectedIndividualToReassign;
 
         const householdsAndRoles =
-          selectedIndividualToReassign?.householdsAndRoles;
+          selectedIndividualToReassign?.householdsAndRoles || [];
 
         const shouldShowReassignHoH =
           selectedIndividualToReassign?.id === household?.headOfHousehold?.id;

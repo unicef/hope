@@ -1,8 +1,8 @@
 import { Box } from '@mui/material';
-import * as React from 'react';
 import { PaymentPlanQuery } from '@generated/graphql';
 import { MarkAsReleasedPaymentPlan } from '../MarkAsReleasedPaymentPlan';
 import { RejectPaymentPlan } from '../RejectPaymentPlan';
+import { ReactElement } from 'react';
 
 export interface InReviewPaymentPlanHeaderButtonsProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
@@ -14,7 +14,7 @@ export function InReviewPaymentPlanHeaderButtons({
   paymentPlan,
   canReject,
   canMarkAsReleased,
-}: InReviewPaymentPlanHeaderButtonsProps): React.ReactElement {
+}: InReviewPaymentPlanHeaderButtonsProps): ReactElement {
   return (
     <Box display="flex" alignItems="center">
       {canReject && <RejectPaymentPlan paymentPlanId={paymentPlan.id} />}

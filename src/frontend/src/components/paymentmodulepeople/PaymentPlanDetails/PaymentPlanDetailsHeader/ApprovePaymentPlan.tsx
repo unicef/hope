@@ -8,8 +8,7 @@ import {
 } from '@mui/material';
 import * as Yup from 'yup';
 import { Field, Form, Formik } from 'formik';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
@@ -29,7 +28,7 @@ export interface ApprovePaymentPlanProps {
 
 export function ApprovePaymentPlan({
   paymentPlan,
-}: ApprovePaymentPlanProps): React.ReactElement {
+}: ApprovePaymentPlanProps): ReactElement {
   const { t } = useTranslation();
   const { isActiveProgram } = useProgramContext();
 

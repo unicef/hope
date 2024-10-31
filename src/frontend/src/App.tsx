@@ -10,8 +10,7 @@ import { AllProgramsRoutesSwitch } from '@containers/routers/AllProgramsRoutesSw
 import { BaseHomeRouter } from '@containers/routers/BaseHomeRouter';
 import { SelectedProgramRoutesSwitch } from '@containers/routers/SelectedProgramRoutesSwitch';
 import { AutoLogout } from '@core/AutoLogout';
-
-import React from 'react';
+import React, { FC, useEffect } from 'react';
 import {
   createBrowserRouter,
   Route,
@@ -23,24 +22,24 @@ import {
 import { Providers } from './providers';
 import * as Sentry from '@sentry/react';
 
-const RedirectToPrograms: React.FC = () => {
+const RedirectToPrograms: FC = () => {
   const navigate = useNavigate();
   const { businessArea } = useParams();
 
-  React.useEffect(() => {
+  useEffect(() => {
     navigate(`/${businessArea}/programs/all/list`);
   }, [navigate, businessArea]);
 
   return null;
 };
 
-const Root: React.FC = () => (
+const Root: FC = () => (
   <Routes>
     <Route path="/login/*" element={<LoginPage />} />
     <Route path="/maintenance/*" element={<MaintenancePage />} />
     <Route path="/404/*" element={<PageNotFound />} />
-    <Route path="/error/*" element={<SomethingWentWrong />} />
     <Route path="/access-denied/*" element={<AccessDenied />} />
+    <Route path="/error/*" element={<SomethingWentWrong />} />
     <Route
       path="/sentry-check"
       element={
@@ -75,7 +74,7 @@ const sentryCreateBrowserRouter =
   Sentry.wrapCreateBrowserRouter(createBrowserRouter);
 const router = sentryCreateBrowserRouter([{ path: '*', Component: Root }]);
 
-export const App: React.FC = () => (
+export const App: FC = () => (
   <Providers>
     <AutoLogout />
     <RouterProvider router={router} />

@@ -144,6 +144,7 @@ class TestCopyProgram(APITestCase):
             name="flex_field_1",
             type=FlexibleAttribute.STRING,
             associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+            label={"English(EN)": "value"},
         )
         cls.individual.flex_fields = {
             pdu_field.name: {
