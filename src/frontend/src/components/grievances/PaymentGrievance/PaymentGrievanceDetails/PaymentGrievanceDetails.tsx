@@ -74,6 +74,7 @@ export function PaymentGrievanceDetails({
           {canApprovePaymentVerification &&
           ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL ? (
             <Button
+              data-cy="grievance-approve"
               onClick={() =>
                 confirm({
                   title: t('Approve'),

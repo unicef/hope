@@ -152,6 +152,10 @@ class GrievanceDetailsPage(BaseComponents):
     logRow = 'div[data-cy="log-row"]'
     paymentRecord = 'span[data-cy="payment-record"]'
     labelGender = 'div[data-cy="label-GENDER"]'
+    grievanceVerify = '[data-cy="grievance-verify"]'
+    inputNewReceivedAmount = '[data-cy="input-newReceivedAmount"]'
+    buttonSubmit = 'button[data-cy="button-submit"]'
+    grievanceApprove = '[data-cy="grievance-approve"]'
 
     # Texts
     textTitle = "Ticket ID: "
@@ -667,3 +671,15 @@ class GrievanceDetailsPage(BaseComponents):
 
     def getLinkShowPhoto(self) -> WebElement:
         return self.wait_for(self.linkShowPhoto)
+
+    def getGrievanceVerify(self) -> WebElement:
+        return self.wait_for(self.grievanceVerify)
+
+    def getInputNewReceivedAmount(self) -> WebElement:
+        return self.wait_for(self.inputNewReceivedAmount)
+
+    def getButtonSubmit(self) -> WebElement:
+        return self.wait_for(self.buttonSubmit)
+
+    def getGrievanceApprove(self) -> WebElement:
+        return self.wait_for(self.grievanceApprove)

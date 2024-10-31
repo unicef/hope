@@ -448,14 +448,6 @@ class TestPaymentVerification:
         assert channel.upper() in pagePaymentVerificationDetails.getLabelVerificationChannel().text
         assert "Full list" in pagePaymentVerificationDetails.getLabelSampling().text
 
-    # @pytest.mark.parametrize(
-    #     "channel",
-    #     [
-    #         "manual",
-    #         "rapidpro",
-    #         "xlsx",
-    #     ],
-    # )
     def test_payment_verification_create_verification_plan_random_sampling_manual(
         self,
         active_program: Program,
@@ -567,19 +559,6 @@ class TestPaymentVerification:
             assert channel in pagePaymentVerificationDetails.getLabelVerificationChannel().text
         assert "Full list" in pagePaymentVerificationDetails.getLabelSampling().text
 
-    def test_payment_verification_create_grievance_ticket_same_value(
-        self, active_program: Program, add_payment_verification: PV, pagePaymentVerification: PaymentVerification
-    ) -> None:
-        pagePaymentVerification.selectGlobalProgramFilter("Active Program")
-        # Upon resolving the Payment Verification grievance ticket,
-        # the received value changes with the new verified value.
-        # If the received value is 0, it should stay 0 even when a new verified value is provided in the ticket.
-        # Check conversation with Jakub
-
-        # maybe merge with test: test_payment_verification_successful_not_received and
-        # test_payment_verification_partially_successful_received or
-        # test_payment_verification_by_payment_related_complaint
-
     def test_payment_verification_successful_received(
         self,
         active_program: Program,
@@ -629,7 +608,7 @@ class TestPaymentVerification:
 
         assert "NOT RECEIVED" in pagePaymentRecord.getStatusContainer().text
 
-    def test_payment_verification_partially_successful_received(
+    def test_payment_verification_partially_successful_received_and_grievance_ticket(
         self,
         active_program: Program,
         add_payment_verification: PV,
@@ -657,10 +636,33 @@ class TestPaymentVerification:
 
         assert "RECEIVED WITH ISSUES" in pagePaymentRecord.getStatusContainer().text
 
+        pagePaymentVerificationDetails.getButtonFinish().click()
+        pagePaymentVerificationDetails.getButtonSubmit().click()
+
         pageGrievanceTickets.getNavGrievance().click()
         pageGrievanceTickets.getTabSystemGenerated().click()
-        sleep(5)
-        print(pageGrievanceTickets.getRows())
+        assert 1 == len(pageGrievanceTickets.getTicketListRow())
+        pageGrievanceTickets.getTicketListRow()[0].click()
+        pageGrievanceDetailsPage.getButtonAssignToMe().click()
+        pageGrievanceDetailsPage.getButtonSetInProgress().click()
+
+        pageGrievanceDetailsPage.getGrievanceVerify().click()
+        pageGrievanceDetailsPage.getInputNewReceivedAmount().send_keys(str(quantity + 1))
+        pageGrievanceDetailsPage.getButtonSubmit().click()
+
+        pageGrievanceDetailsPage.getButtonSendForApproval().click()
+        pageGrievanceDetailsPage.getGrievanceApprove().click()
+        pageGrievanceDetailsPage.getButtonConfirm().click()
+
+        pageGrievanceDetailsPage.getButtonCloseTicket().click()
+        pageGrievanceDetailsPage.getButtonConfirm().click()
+
+        pagePaymentVerification.getNavPaymentVerification().click()
+        pagePaymentVerification.getCashPlanTableRow().click()
+
+        assert "RECEIVED" == pagePaymentRecord.getStatusContainer().text
+
+        pageGrievanceTickets.scroll(execute=2)
         pageGrievanceTickets.screenshot("0", file_path="./")
 
     def test_payment_verification_by_payment_related_complaint(
