@@ -693,7 +693,7 @@ class TestPaymentVerification:
 
         pagePaymentVerificationDetails.getExportXlsx().click()
 
-        # ToDo: Workaround
+        # ToDo: Workaround: Bug 220111
         sleep(2)
         pagePaymentVerificationDetails.driver.refresh()
 
@@ -742,7 +742,7 @@ class TestPaymentVerification:
 
         pagePaymentVerificationDetails.getExportXlsx().click()
 
-        # ToDo: Workaround
+        # ToDo: Workaround: Bug 220111
         sleep(2)
         pagePaymentVerificationDetails.driver.refresh()
 
@@ -785,7 +785,7 @@ class TestPaymentVerification:
 
         pagePaymentVerificationDetails.getExportXlsx().click()
 
-        # ToDo: Workaround
+        # ToDo: Workaround: Bug 220111
         sleep(2)
         pagePaymentVerificationDetails.driver.refresh()
 
@@ -831,13 +831,13 @@ class TestPaymentVerification:
         pagePaymentVerificationDetails.getButtonActivatePlan().click()
         pagePaymentVerificationDetails.getButtonSubmit().click()
 
-        # ToDo: Workaround
+        # ToDo: Workaround: Bug 220111
         sleep(2)
         pagePaymentVerificationDetails.driver.refresh()
 
         pagePaymentVerificationDetails.getExportXlsx().click()
 
-        # ToDo: Workaround
+        # ToDo: Workaround: Bug 220111
         sleep(2)
         pagePaymentVerificationDetails.driver.refresh()
 
@@ -847,3 +847,39 @@ class TestPaymentVerification:
         pagePaymentVerificationDetails.getButtonSubmit().click()
 
         pagePaymentVerificationDetails.checkAlert("You cant discard if xlsx file was downloaded or imported")
+
+    def test_payment_verification_xlsx_invalid(
+        self,
+        clear_downloaded_files: None,
+        active_program: Program,
+        add_payment_verification_xlsx: PV,
+        pagePaymentVerification: PaymentVerification,
+        pagePaymentVerificationDetails: PaymentVerificationDetails,
+        pagePaymentRecord: PaymentRecord,
+    ) -> None:
+        pagePaymentVerification.selectGlobalProgramFilter("Active Program")
+
+        pagePaymentVerification.getNavPaymentVerification().click()
+        pagePaymentVerification.getCashPlanTableRow().click()
+        pagePaymentVerificationDetails.getButtonActivatePlan().click()
+        pagePaymentVerificationDetails.getButtonSubmit().click()
+
+        pagePaymentVerificationDetails.getExportXlsx().click()
+
+        # ToDo: Workaround: Bug 220111
+        sleep(2)
+        pagePaymentVerificationDetails.driver.refresh()
+
+        pagePaymentVerificationDetails.getDownloadXlsx().click()
+
+        # ToDo: Workaround: Bug 220111
+        sleep(2)
+        pagePaymentVerificationDetails.driver.refresh()
+
+        pagePaymentVerificationDetails.getButtonMarkAsInvalid().click()
+
+        # ToDo: Workaround: Bug 220111
+        sleep(2)
+        pagePaymentVerificationDetails.driver.refresh()
+
+        assert "INVALID" in pagePaymentVerificationDetails.getVerificationPlanStatus().text

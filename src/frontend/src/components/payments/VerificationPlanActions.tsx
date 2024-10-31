@@ -206,6 +206,7 @@ export function VerificationPlanActions({
                       loading={loadingInvalid}
                       color="primary"
                       variant="outlined"
+                      data-cy="button-mark-as-invalid"
                       onClick={async () => {
                         try {
                           await mutateInvalid({

@@ -34,6 +34,7 @@ class PaymentVerificationDetails(BaseComponents):
     buttonActivatePlan = 'button[data-cy="button-activate-plan"]'
     exportXlsx = 'button[data-cy="export-xlsx"]'
     downloadXlsx = 'button[data-cy="download-xlsx"]'
+    buttonMarkAsInvalid = '[data-cy="button-mark-as-invalid"]'
     importXlsx = 'div[data-cy="import-xlsx"]'
     buttonImportEntitlement = 'button[data-cy="button-import-entitlement"]'
     verificationPlanStatus = 'div[data-cy="verification-plan-status"]'
@@ -141,6 +142,9 @@ class PaymentVerificationDetails(BaseComponents):
 
     def getDownloadXlsx(self) -> WebElement:
         return self.wait_for(self.downloadXlsx)
+
+    def getButtonMarkAsInvalid(self) -> WebElement:
+        return self.wait_for(self.buttonMarkAsInvalid)
 
     def getButtonDiscard(self) -> WebElement:
         return self.wait_for(self.buttonDiscard)
