@@ -812,6 +812,7 @@ class TestPaymentVerification:
 
     def test_payment_verification_discard(
         self,
+        clear_downloaded_files: None,
         active_program: Program,
         add_payment_verification_xlsx: PV,
         pagePaymentVerification: PaymentVerification,

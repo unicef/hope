@@ -51,6 +51,7 @@ export function VerificationRecordsTableRow({
       </TableCell>
       <TableCell align="left">
         <StatusBox
+          data-cy="verification-status"
           status={paymentVerification.status}
           statusToColor={verificationRecordsStatusToColor}
         />
