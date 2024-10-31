@@ -41,7 +41,6 @@ class TestReassignRolesOnUpdate(APITestCase):
         cls.household.save()
         cls.primary_collector_individual.household = cls.household
         cls.primary_collector_individual.save()
-
         cls.household.refresh_from_db()
         cls.primary_collector_individual.refresh_from_db()
 
@@ -151,7 +150,7 @@ class TestReassignRolesOnUpdate(APITestCase):
             )
         self.assertEqual(
             str(error.exception.messages[0]),
-            "Individual (IND-0) was not marked as duplicated",
+            f"Individual ({self.primary_collector_individual.unicef_id}) was not marked as duplicated",
         )
 
     def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_new_individual_is_duplicate(
@@ -181,5 +180,5 @@ class TestReassignRolesOnUpdate(APITestCase):
             )
         self.assertEqual(
             str(error.exception.messages[0]),
-            "Individual(IND-2) which get role PRIMARY was marked as duplicated",
+            f"Individual({self.no_role_individual.unicef_id}) which get role PRIMARY was marked as duplicated",
         )
