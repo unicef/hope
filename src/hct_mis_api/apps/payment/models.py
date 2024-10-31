@@ -520,18 +520,6 @@ class PaymentPlan(
         },
     )
 
-    BUILD_STATUS_PENDING = "PENDING"
-    BUILD_STATUS_BUILDING = "BUILDING"
-    BUILD_STATUS_FAILED = "FAILED"
-    BUILD_STATUS_OK = "OK"
-
-    BUILD_STATUS_CHOICES = (
-        (BUILD_STATUS_PENDING, _("Pending")),
-        (BUILD_STATUS_BUILDING, _("Building")),
-        (BUILD_STATUS_FAILED, _("Failed")),
-        (BUILD_STATUS_OK, _("Ok")),
-    )
-
     class Status(models.TextChoices):
         # new from TP
         TP_OPEN = "TP_OPEN", "Open"
@@ -552,6 +540,12 @@ class PaymentPlan(
         IN_REVIEW = "IN_REVIEW", "In Review"
         ACCEPTED = "ACCEPTED", "Accepted"
         FINISHED = "FINISHED", "Finished"
+
+    class BuildStatus(models.TextChoices):
+        BUILD_STATUS_PENDING = "PENDING", "Pending"
+        BUILD_STATUS_BUILDING = "BUILDING", "Building"
+        BUILD_STATUS_FAILED = "FAILED", "Failed"
+        BUILD_STATUS_OK = "OK", "Ok"
 
     class BackgroundActionStatus(models.TextChoices):
         RULE_ENGINE_RUN = "RULE_ENGINE_RUN", "Rule Engine Running"
@@ -606,9 +600,10 @@ class PaymentPlan(
         choices=BackgroundActionStatus.choices,
     )
     build_status = models.CharField(
-        max_length=256, choices=BUILD_STATUS_CHOICES, default=BUILD_STATUS_PENDING, db_index=True
+        max_length=256, choices=BuildStatus.choices, default=BuildStatus.BUILD_STATUS_PENDING, db_index=True
     )
     built_at = models.DateTimeField(null=True, blank=True)
+    # TODO: remove this field after migrations
     target_population = models.ForeignKey(
         "targeting.TargetPopulation",
         on_delete=models.CASCADE,
@@ -674,11 +669,11 @@ class PaymentPlan(
         blank=True,
     )
     targeting_criteria = models.OneToOneField(
-        "TargetingCriteria",
+        "targeting.TargetingCriteria",
         blank=True,
         null=True,
         on_delete=models.SET_NULL,
-        related_name="target_population",
+        related_name="payment_plans",
     )
     vulnerability_score_min = models.DecimalField(
         null=True,
@@ -1940,6 +1935,9 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel, AdminUr
         max_length=128, blank=True, null=True, help_text="Use this field for reconciliation data"
     )
     fsp_auth_code = models.CharField(max_length=128, blank=True, null=True, help_text="FSP Auth Code")
+    vulnerability_score = models.DecimalField(
+        blank=True, null=True, decimal_places=3, max_digits=6, help_text="Written by Steficon", db_index=True
+    )
 
     @property
     def full_name(self) -> str:

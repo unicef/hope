@@ -312,6 +312,13 @@ class PaymentPlanService:
 
     @staticmethod
     def create_payments(payment_plan: PaymentPlan) -> None:
+        # TODO: copied from TP?
+        # households = Household.objects.filter(
+        #     business_area=payment_plan.business_area, program=payment_plan.program
+        # )
+        # households = households.filter(payment_plan.targeting_criteria.get_query())
+        # households = households.only("id")
+
         payments_to_create = []
         households = (
             payment_plan.target_population.households.annotate(
@@ -745,3 +752,13 @@ class PaymentPlanService:
                 payment_plan_splits_to_create[i].payments.add(*chunk)
 
         return self.payment_plan
+
+    def full_rebuild(self) -> None:
+        payment_plan: PaymentPlan = self.payment_plan
+        # remove all payment and recreate
+        payment_plan.payment_items.all().delete()
+
+        # TODO: get all new HH list?
+        self.create_payments(payment_plan)
+
+        payment_plan.update_population_count_fields()
