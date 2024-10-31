@@ -39,6 +39,7 @@ from django.db.models.functions import Coalesce
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils import timezone
+from django.utils.text import Truncator
 from django.utils.translation import gettext_lazy as _
 
 from dateutil.relativedelta import relativedelta
@@ -72,6 +73,7 @@ from hct_mis_api.apps.core.models import (
     FlexibleAttribute,
     StorageFile,
 )
+from hct_mis_api.apps.core.utils import map_unicef_ids_to_households_unicef_ids
 from hct_mis_api.apps.geo.models import Area, Country
 from hct_mis_api.apps.household.models import FEMALE, MALE, Individual
 from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
@@ -304,7 +306,7 @@ class GenericPayment(TimeStampedUUIDModel):
         choices=STATUS_CHOICE,
         default=STATUS_PENDING,
     )
-    status_date = models.DateTimeField()
+    status_date = models.DateTimeField(null=True, blank=True)
     household = models.ForeignKey("household.Household", on_delete=models.CASCADE)
     head_of_household = models.ForeignKey("household.Individual", on_delete=models.CASCADE, null=True)
     delivery_type_choice = models.CharField(
@@ -452,7 +454,7 @@ class PaymentPlan(
 ):
     TP_MIGRATION_MAPPING = {
         # tp.field: payment_plan.field
-        # if value has internal_data__ will story in json
+        # if value has internal_data__ will story into json
         "name": "name",
         "ca_id": "internal_data__ca_id",
         "ca_hash_id": "internal_data__ca_hash_id",
@@ -461,6 +463,7 @@ class PaymentPlan(
         "business_area": "business_area",
         "status": "status",
         "build_status": "build_status",
+        "built_at": "built_at",
         "program": "program",
         "program_cycle": "program_cycle",
         "targeting_criteria": "targeting_criteria",
@@ -480,40 +483,10 @@ class PaymentPlan(
         "storage_file": "storage_file",
     }
 
-    # ACTIVITY_LOG_MAPPING from TP
-    # TODO: merge it with exists
-    ACTIVITY_LOG_MAPPING_TP = create_mapping_dict(
+    ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "name",
             "created_by",
-            "change_date",
-            "changed_by",
-            "finalized_at",
-            "finalized_by",
-            "status",
-            "child_male_count",
-            "child_female_count",
-            "adult_male_count",
-            "adult_female_count",
-            "total_households_count",
-            "total_individuals_count",
-            "program",
-            "targeting_criteria_string",
-            "sent_to_datahub",
-            "steficon_rule",
-            "exclusion_reason",
-            "excluded_ids",
-        ],
-        {
-            "steficon_rule": "additional_formula",
-            "steficon_applied_date": "additional_formula_applied_date",
-            "vulnerability_score_min": "score_min",
-            "vulnerability_score_max": "score_max",
-        },
-    )
-
-    ACTIVITY_LOG_MAPPING = create_mapping_dict(
-        [
             "status",
             "status_date",
             "target_population",
@@ -530,7 +503,21 @@ class PaymentPlan(
             "steficon_rule",
             "steficon_applied_date",
             "exclusion_reason",
-        ]
+            "male_children_count",
+            "female_children_count",
+            "male_adults_count",
+            "female_adults_count",
+            "total_households_count",
+            "total_individuals_count",
+            "targeting_criteria_string",
+            "excluded_ids",
+        ],
+        {
+            "steficon_rule": "additional_formula",
+            "steficon_applied_date": "additional_formula_applied_date",
+            "vulnerability_score_min": "score_min",
+            "vulnerability_score_max": "score_max",
+        },
     )
 
     BUILD_STATUS_PENDING = "PENDING"
@@ -608,6 +595,7 @@ class PaymentPlan(
         on_delete=models.PROTECT,
         related_name="created_payment_plans",
     )
+    # TODO: update default maybe
     status = FSMField(default=Status.OPEN, protected=False, db_index=True, choices=Status.choices)
     background_action_status = FSMField(
         default=None,
@@ -741,6 +729,29 @@ class PaymentPlan(
             else list(self.payment_items.filter(excluded=True).values_list("household__unicef_id", flat=True))
         )
         return beneficiaries_ids
+
+    @property
+    def excluded_household_ids(self) -> List:
+        # TODO: moved from TP, maybe remove because we have excluded_beneficiaries_ids()
+        return map_unicef_ids_to_households_unicef_ids(self.excluded_ids)
+
+    def get_criteria_string(self) -> str:
+        try:
+            return self.targeting_criteria.get_criteria_string()
+        except Exception:
+            return ""
+
+    @property
+    def targeting_criteria_string(self) -> str:
+        return Truncator(self.get_criteria_string()).chars(390, "...")
+
+    @property
+    def has_empty_criteria(self) -> bool:
+        return self.targeting_criteria is None or self.targeting_criteria.rules.count() == 0
+
+    @property
+    def has_empty_ids_criteria(self) -> bool:
+        return not bool(self.targeting_criteria.household_ids) and not bool(self.targeting_criteria.individual_ids)
 
     @transition(
         field=background_action_status,
