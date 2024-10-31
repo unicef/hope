@@ -141,7 +141,7 @@ distribution = true
 
 [project]
 name = "hope"
-version = "2.12.0"
+version = "2.12.1"
 description = "HCT MIS is UNICEF's humanitarian cash transfer platform."
 authors = [
     { name = "Tivix" },
