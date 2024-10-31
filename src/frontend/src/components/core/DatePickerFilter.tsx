@@ -1,8 +1,8 @@
 import { Box, FormControl } from '@mui/material';
 import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
 import { formatISO, parseISO } from 'date-fns';
-import * as React from 'react';
 import { FieldLabel } from './FieldLabel';
+import { ReactElement } from 'react';
 
 export const DatePickerFilter = ({
   topLabel = null,
@@ -10,7 +10,7 @@ export const DatePickerFilter = ({
   value = null,
   dataCy = 'date-picker-filter',
   ...props
-}): React.ReactElement => {
+}): ReactElement => {
   const datePickerValue = value ? parseISO(value) : null;
   const calculatedDataCy =
     dataCy === 'date-picker-filter'

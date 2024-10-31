@@ -1,18 +1,21 @@
 import ArrowCircleRightIcon from '@mui/icons-material/ArrowCircleRight';
-import * as React from 'react';
-
+import { FC } from 'react';
 
 interface AdminButtonProps {
-    adminUrl: string;
-    [key: string]: any;
+  adminUrl: string;
+  [key: string]: any;
 }
 
-export const AdminButton: React.FC<AdminButtonProps> = ({
-    adminUrl,
-    ...otherProps
+export const AdminButton: FC<AdminButtonProps> = ({
+  adminUrl,
+  ...otherProps
 }) => {
-    if (adminUrl) {
-        return <a href={adminUrl}><ArrowCircleRightIcon color="primary" {...otherProps}/></a>;
-    }
-    return null;
+  if (adminUrl) {
+    return (
+      <a href={adminUrl}>
+        <ArrowCircleRightIcon color="primary" {...otherProps} />
+      </a>
+    );
+  }
+  return null;
 };

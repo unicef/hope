@@ -1,6 +1,6 @@
-import * as React from 'react';
 import styled from 'styled-components';
 import { MiśTheme } from '../../theme';
+import { ReactNode, ReactElement } from 'react';
 
 const Label = styled.span`
   ${({ theme }: { theme: MiśTheme }) => theme.styledMixins.label}
@@ -16,8 +16,8 @@ const Value = styled.span`
 `;
 
 export interface Props {
-  value?: React.ReactNode;
-  children?: React.ReactNode;
+  value?: ReactNode;
+  children?: ReactNode;
   label: string;
   dataCy?: string;
   dashed?: boolean;
@@ -29,7 +29,7 @@ export function LabelizedField({
   label,
   dataCy,
   dashed = true,
-}: Props): React.ReactElement {
+}: Props): ReactElement {
   let fieldValue;
   if (children !== undefined) {
     fieldValue = children;

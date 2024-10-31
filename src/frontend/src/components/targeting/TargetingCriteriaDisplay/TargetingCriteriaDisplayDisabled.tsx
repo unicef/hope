@@ -1,8 +1,8 @@
-import * as React from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { Tooltip, Box } from '@mui/material';
 import { AddCircleOutline } from '@mui/icons-material';
+import { ReactElement } from 'react';
 
 export const ContentWrapper = styled(Box)`
   display: flex;
@@ -33,7 +33,7 @@ const AddCriteria = styled.div`
 
 export function TargetingCriteriaDisplayDisabled({
   showTooltip = false,
-}): React.ReactElement {
+}): ReactElement {
   const { t } = useTranslation();
   return (
     <>

@@ -1,9 +1,9 @@
 import { Box, Grid } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { BlueText, DarkGrey, LightGrey, StyledBox } from '../LookUpStyles';
+import { ReactElement } from 'react';
 
 interface LookUpPaymentRecordDisplayProps {
   values;
@@ -17,15 +17,17 @@ export const LookUpPaymentRecordDisplay = ({
   setLookUpDialogOpen,
   onValueChange,
   disabled = false,
-}: LookUpPaymentRecordDisplayProps): React.ReactElement => {
+}: LookUpPaymentRecordDisplayProps): ReactElement => {
   const { t } = useTranslation();
   const handleRemove = (): void => {
     onValueChange('selectedPaymentRecords', []);
   };
-  const renderPaymentRecords = (): React.ReactElement => {
+  const renderPaymentRecords = (): ReactElement => {
     if (values.selectedPaymentRecords.length) {
       return values.selectedPaymentRecords.map((record) => (
-        <BlueText key={record.caId}  data-cy="payment-record">{record.caId}</BlueText>
+        <BlueText key={record.caId} data-cy="payment-record">
+          {record.caId}
+        </BlueText>
       ));
     }
     return <BlueText>-</BlueText>;

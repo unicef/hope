@@ -27,10 +27,6 @@ class Command(BaseCommand):
 
         reset_business_area_sequences()
         call_command("flush", "--noinput")
-        call_command("flush", "--noinput", database="cash_assist_datahub_mis")
-        call_command("flush", "--noinput", database="cash_assist_datahub_ca")
-        call_command("flush", "--noinput", database="cash_assist_datahub_erp")
-
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/core/fixtures/data.json")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/account/fixtures/data.json")

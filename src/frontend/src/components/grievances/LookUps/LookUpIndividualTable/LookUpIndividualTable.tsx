@@ -1,4 +1,3 @@
-import * as React from 'react';
 import styled from 'styled-components';
 import {
   AllIndividualsForPopulationTableQuery,
@@ -9,8 +8,13 @@ import { UniversalTable } from '@containers/tables/UniversalTable';
 import { decodeIdString } from '@utils/utils';
 import { TableWrapper } from '@core/TableWrapper';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { headCells } from './LookUpIndividualTableHeadCells';
+import {
+  headCellsSocialProgram,
+  headCellsStandardProgram,
+} from './LookUpIndividualTableHeadCells';
 import { LookUpIndividualTableRow } from './LookUpIndividualTableRow';
+import { useProgramContext } from 'src/programContext';
+import { ReactElement } from 'react';
 
 interface LookUpIndividualTableProps {
   filter;
@@ -44,13 +48,14 @@ export function LookUpIndividualTable({
   ticket,
   excludedId,
   noTableStyling = false,
-}: LookUpIndividualTableProps): React.ReactElement {
+}: LookUpIndividualTableProps): ReactElement {
+  const { isSocialDctType } = useProgramContext();
   const { programId, isAllPrograms } = useBaseUrl();
 
   const handleRadioChange = (individual): void => {
     setSelectedIndividual(individual);
 
-    if (individual.household) {
+    if (individual.household && !isSocialDctType) {
       setSelectedHousehold(individual.household);
       setFieldValue('selectedHousehold', individual.household);
     }
@@ -87,6 +92,10 @@ export function LookUpIndividualTable({
     isActiveProgram: filter.programState === 'active' ? true : null,
   };
 
+  const headCells = isSocialDctType
+    ? headCellsSocialProgram
+    : headCellsStandardProgram;
+
   const headCellsWithProgramColumn = [
     ...headCells,
     {
@@ -102,10 +111,10 @@ export function LookUpIndividualTable({
     ? headCellsWithProgramColumn
     : headCells;
 
-  const renderTable = (): React.ReactElement => (
+  const renderTable = (): ReactElement => (
     <UniversalTable<
-    AllIndividualsForPopulationTableQuery['allIndividuals']['edges'][number]['node'],
-    AllIndividualsForPopulationTableQueryVariables
+      AllIndividualsForPopulationTableQuery['allIndividuals']['edges'][number]['node'],
+      AllIndividualsForPopulationTableQueryVariables
     >
       headCells={preparedHeadcells}
       allowSort={false}

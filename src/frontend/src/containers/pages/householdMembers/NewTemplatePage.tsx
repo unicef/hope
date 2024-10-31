@@ -6,6 +6,7 @@ import { BaseSection } from '@components/core/BaseSection';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 import { FieldsToUpdate } from '@components/periodicDataUpdates/FieldsToUpdate';
 import { FilterIndividuals } from '@components/periodicDataUpdates/FilterIndividuals';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -15,12 +16,12 @@ import { Box, Button, Step, StepLabel, Stepper } from '@mui/material';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Formik } from 'formik';
 import moment from 'moment';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 
-export const NewTemplatePage = (): React.ReactElement => {
+export const NewTemplatePage = (): ReactElement => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
@@ -143,7 +144,8 @@ export const NewTemplatePage = (): React.ReactElement => {
       return null;
     };
     const filters = {
-      registration_data_import_id: filter.registrationDataImportId?.value || null,
+      registration_data_import_id:
+        filter.registrationDataImportId?.value || null,
       target_population_id: filter.targetPopulationId?.value || null,
       gender: filter.gender,
       age: {
@@ -210,103 +212,112 @@ export const NewTemplatePage = (): React.ReactElement => {
   };
 
   return (
-    <Formik initialValues={initialValues} onSubmit={handleSubmit}>
-      {({ values, setFieldValue, submitForm }) => {
-        const roundsDataToSend = values.roundsData
-          .filter((el) => checkedFields[el.field] === true)
-          .map((data) => ({
-            field: data.field,
-            rounds: data.rounds
-              .filter((round) => round.checked)
-              .map((round) => ({
-                round: round.round,
-                round_name: round.round_name,
-              })),
-          }));
-        return (
-          <form onSubmit={handleSubmit}>
-            <PageHeader
-              title={t('New Template Page')}
-              breadCrumbs={
-                hasPermissions(
-                  PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_LIST,
-                  permissions,
-                )
-                  ? breadCrumbsItems
-                  : null
-              }
-            />
-            <BaseSection>
-              <Stepper activeStep={activeStep} alternativeLabel>
-                {steps.map((label) => (
-                  <Step data-cy="label-key" key={label}>
-                    <StepLabel>{label}</StepLabel>
-                  </Step>
-                ))}
-              </Stepper>
-              {activeStep === 0 && (
-                <FilterIndividuals
-                  isOnPaper={false}
-                  filter={filter}
-                  setFilter={setFilter}
-                />
-              )}
-              {activeStep === 1 && (
-                <FieldsToUpdate
-                  values={values}
-                  setFieldValue={setFieldValue}
-                  checkedFields={checkedFields}
-                  setCheckedFields={setCheckedFields}
-                />
-              )}
-              <Box
-                display="flex"
-                mt={4}
-                justifyContent="flex-start"
-                width="100%"
-              >
-                <Box mr={2}>
-                  <Button
-                    variant="outlined"
-                    color="secondary"
-                    component={Link}
-                    to={`/${baseUrl}/population/individuals`}
-                    data-cy="cancel-button"
-                  >
-                    Cancel
-                  </Button>
-                </Box>
-                <Box display="flex">
-                  {activeStep === 1 && (
-                    <Box mr={2}>
-                      <Button
-                        data-cy="back-button"
-                        variant="outlined"
-                        onClick={handleBack}
-                      >
-                        Back
-                      </Button>
-                    </Box>
-                  )}
-                  <Box>
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'NewTemplatePage.tsx');
+      }}
+      componentName="NewTemplatePage"
+    >
+      <Formik initialValues={initialValues} onSubmit={handleSubmit}>
+        {({ values, setFieldValue, submitForm }) => {
+          const roundsDataToSend = values.roundsData
+            .filter((el) => checkedFields[el.field] === true)
+            .map((data) => ({
+              field: data.field,
+              rounds: data.rounds
+                .filter((round) => round.checked)
+                .map((round) => ({
+                  round: round.round,
+                  round_name: round.round_name,
+                })),
+            }));
+          return (
+            <form onSubmit={handleSubmit}>
+              <PageHeader
+                title={t('New Template Page')}
+                breadCrumbs={
+                  hasPermissions(
+                    PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_LIST,
+                    permissions,
+                  )
+                    ? breadCrumbsItems
+                    : null
+                }
+              />
+              <BaseSection>
+                <Stepper activeStep={activeStep} alternativeLabel>
+                  {steps.map((label) => (
+                    <Step data-cy="label-key" key={label}>
+                      <StepLabel>{label}</StepLabel>
+                    </Step>
+                  ))}
+                </Stepper>
+                {activeStep === 0 && (
+                  <FilterIndividuals
+                    isOnPaper={false}
+                    filter={filter}
+                    setFilter={setFilter}
+                  />
+                )}
+                {activeStep === 1 && (
+                  <FieldsToUpdate
+                    values={values}
+                    setFieldValue={setFieldValue}
+                    checkedFields={checkedFields}
+                    setCheckedFields={setCheckedFields}
+                  />
+                )}
+                <Box
+                  display="flex"
+                  mt={4}
+                  justifyContent="flex-start"
+                  width="100%"
+                >
+                  <Box mr={2}>
                     <Button
-                      variant="contained"
-                      color="primary"
-                      data-cy="submit-button"
-                      disabled={
-                        activeStep === 1 && roundsDataToSend.length === 0
-                      }
-                      onClick={activeStep === 1 ? submitForm : handleNext}
+                      variant="outlined"
+                      color="secondary"
+                      component={Link}
+                      to={`/${baseUrl}/population/individuals`}
+                      data-cy="cancel-button"
                     >
-                      {activeStep === 1 ? 'Generate Template' : 'Next'}
+                      Cancel
                     </Button>
                   </Box>
+                  <Box display="flex">
+                    {activeStep === 1 && (
+                      <Box mr={2}>
+                        <Button
+                          data-cy="back-button"
+                          variant="outlined"
+                          onClick={handleBack}
+                        >
+                          Back
+                        </Button>
+                      </Box>
+                    )}
+                    <Box>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        data-cy="submit-button"
+                        disabled={
+                          activeStep === 1 && roundsDataToSend.length === 0
+                        }
+                        onClick={activeStep === 1 ? submitForm : handleNext}
+                      >
+                        {activeStep === 1 ? 'Generate Template' : 'Next'}
+                      </Button>
+                    </Box>
+                  </Box>
                 </Box>
-              </Box>
-            </BaseSection>
-          </form>
-        );
-      }}
-    </Formik>
+              </BaseSection>
+            </form>
+          );
+        }}
+      </Formik>
+    </UniversalErrorBoundary>
   );
 };

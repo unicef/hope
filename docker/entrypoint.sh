@@ -30,6 +30,10 @@ else
     "celery-worker")
       watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- celery -A hct_mis_api.apps.core.celery worker -E -l info -Q default,priority
       ;;
+    "celery-flower")
+      waitforit -host=backend -port=8000 --timeout 300 && \
+      celery -A hct_mis_api.apps.core.celery flower --port=5555
+      ;;
     *)
       exec "$@"
       ;;

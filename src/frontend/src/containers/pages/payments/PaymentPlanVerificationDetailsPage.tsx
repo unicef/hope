@@ -1,5 +1,5 @@
 import { Button } from '@mui/material';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -31,6 +31,7 @@ import { VerificationsTable } from '../../tables/payments/VerificationRecordsTab
 import { VerificationRecordsFilters } from '../../tables/payments/VerificationRecordsTable/VerificationRecordsFilters';
 import { useProgramContext } from '../../../programContext';
 import { PeopleVerificationsTable } from '@containers/tables/payments/VerificationRecordsTable/People/PeopleVerificationsTable';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
 const Container = styled.div`
   display: flex;
@@ -59,7 +60,7 @@ const initialFilter = {
   paymentVerificationPlan: '',
 };
 
-export function PaymentPlanVerificationDetailsPage(): React.ReactElement {
+export function PaymentPlanVerificationDetailsPage(): ReactElement {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const permissions = usePermissions();
@@ -198,7 +199,14 @@ export function PaymentPlanVerificationDetailsPage(): React.ReactElement {
   };
 
   return (
-    <>
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'PaymentPlanVerificationDetailsPage.tsx');
+      }}
+      componentName="PaymentPlanVerificationDetailsPage"
+    >
       {toolbar}
       <Container>
         <CashPlanDetailsSection planNode={paymentPlan} />
@@ -234,7 +242,6 @@ export function PaymentPlanVerificationDetailsPage(): React.ReactElement {
           {t('To see more details please activate Verification Plan')}
         </BottomTitle>
       ) : null}
-
       {canSeeCreationMessage() ? (
         <BottomTitle>
           {t('To see more details please create Verification Plan')}
@@ -247,6 +254,6 @@ export function PaymentPlanVerificationDetailsPage(): React.ReactElement {
             objectType="PaymentPlan"
           />
         )}
-    </>
+    </UniversalErrorBoundary>
   );
 }

@@ -19,12 +19,12 @@ export const headCells: HeadCell<ProgramCycle>[] = [
     dataCy: 'head-cell-status',
   },
   {
-    id: 'total_entitled_quantity',
+    id: 'total_entitled_quantity_usd',
     numeric: true,
     disablePadding: false,
-    label: 'Total Entitled Quantity',
+    label: 'Total Entitled Quantity (USD)',
     disableSort: true,
-    dataCy: 'head-cell-total-entitled-quantity',
+    dataCy: 'head-cell-total-entitled-quantity-usd',
   },
   {
     id: 'start_date',

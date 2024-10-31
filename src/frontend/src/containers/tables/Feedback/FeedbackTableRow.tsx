@@ -1,4 +1,3 @@
-import * as React from 'react';
 import TableCell from '@mui/material/TableCell';
 import { useNavigate } from 'react-router-dom';
 import { FeedbackIssueType, FeedbackNode } from '@generated/graphql';
@@ -8,6 +7,7 @@ import { BlackLink } from '@components/core/BlackLink';
 import { renderSomethingOrDash, renderUserName } from '@utils/utils';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { getGrievanceDetailsPath } from '@components/grievances/utils/createGrievanceUtils';
+import { ReactElement } from 'react';
 
 interface FeedbackTableRowProps {
   feedback: FeedbackNode;
@@ -17,17 +17,17 @@ interface FeedbackTableRowProps {
 export function FeedbackTableRow({
   feedback,
   canViewDetails,
-}: FeedbackTableRowProps): React.ReactElement {
+}: FeedbackTableRowProps): ReactElement {
   const navigate = useNavigate();
   const { baseUrl, isAllPrograms } = useBaseUrl();
   const feedbackDetailsPath = `/${baseUrl}/grievance/feedback/${feedback.id}`;
   const householdDetailsPath = `/${baseUrl}/population/household/${feedback.householdLookup?.id}`;
   const grievanceDetailsPath = feedback.linkedGrievance
     ? getGrievanceDetailsPath(
-      feedback.linkedGrievance?.id,
-      feedback.linkedGrievance?.category,
-      baseUrl,
-    )
+        feedback.linkedGrievance?.id,
+        feedback.linkedGrievance?.category,
+        baseUrl,
+      )
     : null;
   const handleClick = (): void => {
     navigate(feedbackDetailsPath);

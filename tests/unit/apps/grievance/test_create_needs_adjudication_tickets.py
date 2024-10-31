@@ -3,6 +3,7 @@ from django.core.files.base import ContentFile
 import pytest
 
 from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
@@ -17,6 +18,7 @@ from hct_mis_api.apps.grievance.services.needs_adjudication_ticket_services impo
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import DeduplicationEngineSimilarityPair
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 
@@ -163,6 +165,7 @@ class TestCreateNeedsAdjudicationTicketsBiometrics(APITestCase):
         cls.rdi = cls.household.registration_data_import
         individuals_to_create = [
             {
+                "id": "11111111-1111-1111-1111-111111111111",
                 "full_name": "test name",
                 "given_name": "test",
                 "family_name": "name",
@@ -174,6 +177,7 @@ class TestCreateNeedsAdjudicationTicketsBiometrics(APITestCase):
                 "photo": ContentFile(b"aaa", name="fooa.png"),
             },
             {
+                "id": "22222222-2222-2222-2222-222222222222",
                 "full_name": "Test2 Name2",
                 "given_name": "Test2",
                 "family_name": "Name2",
@@ -187,6 +191,7 @@ class TestCreateNeedsAdjudicationTicketsBiometrics(APITestCase):
         ]
         individuals_to_create_2 = [
             {
+                "id": "33333333-3333-3333-3333-333333333333",
                 "full_name": "test name",
                 "given_name": "test",
                 "family_name": "name",
@@ -274,3 +279,61 @@ class TestCreateNeedsAdjudicationTicketsBiometrics(APITestCase):
         )
         self.assertEqual(GrievanceTicket.objects.all().count(), 2)
         self.assertEqual(TicketNeedsAdjudicationDetails.objects.all().count(), 2)
+
+    def test_ticket_biometric_query_response(self) -> None:
+        query_all = """
+            query AllGrievanceTicket {
+              allGrievanceTicket(businessArea: "afghanistan", orderBy: "created_at") {
+                totalCount
+                edges {
+                  node {
+                    status
+                    category
+                    issueType
+                    needsAdjudicationTicketDetails {
+                      extraData {
+                        goldenRecords {
+                          fullName
+                        }
+                        possibleDuplicate {
+                          fullName
+                        }
+                        dedupEngineSimilarityPair {
+                          individual1 {
+                            fullName
+                          }
+                          individual2 {
+                            fullName
+                          }
+                          similarityScore
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            """
+
+        self.create_user_role_with_permissions(
+            self.user,
+            [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE, Permissions.GRIEVANCES_VIEW_BIOMETRIC_RESULTS],
+            self.business_area,
+        )
+        create_needs_adjudication_tickets_for_biometrics(
+            DeduplicationEngineSimilarityPair.objects.filter(pk=self.dedup_engine_similarity_pair.pk),
+            self.rdi,
+        )
+        program = Program.objects.get(name="Test HOPE")
+
+        self.snapshot_graphql_request(
+            request_string=query_all,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+            variables={},
+        )

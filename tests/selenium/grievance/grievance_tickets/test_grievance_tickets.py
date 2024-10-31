@@ -82,6 +82,13 @@ def household_without_disabilities() -> Household:
 
 
 @pytest.fixture
+def household_social_worker() -> Household:
+    yield create_custom_household(
+        observed_disability=[], program_name="Social Program", dct_type=DataCollectingType.Type.SOCIAL
+    )
+
+
+@pytest.fixture
 def hh_with_payment_record(household_without_disabilities: Household) -> PaymentRecord:
     targeting_criteria = TargetingCriteriaFactory()
 
@@ -110,6 +117,11 @@ def find_text_of_label(element: WebElement) -> str:
     return element.find_element(By.XPATH, "..").find_element(By.XPATH, "..").text
 
 
+@pytest.fixture
+def social_worker_program() -> Program:
+    yield create_program("Social Program", dct_type=DataCollectingType.Type.SOCIAL)
+
+
 def create_program(
     name: str, dct_type: str = DataCollectingType.Type.STANDARD, status: str = Program.ACTIVE
 ) -> Program:
@@ -125,8 +137,13 @@ def create_program(
     return program
 
 
-def create_custom_household(observed_disability: list[str], residence_status: str = HOST) -> Household:
-    program = get_program_with_dct_type_and_name("Test Program", "1234")
+def create_custom_household(
+    observed_disability: list[str],
+    residence_status: str = HOST,
+    program_name: str = "Test Program",
+    dct_type: str = DataCollectingType.Type.STANDARD,
+) -> Household:
+    program = get_program_with_dct_type_and_name(program_name, "1234", dct_type=dct_type)
     household, _ = create_household_and_individuals(
         household_data={
             "unicef_id": "HH-20-0000.0001",
@@ -275,6 +292,14 @@ def create_four_grievance_tickets() -> [GrievanceTicket]:
     yield grievance
 
 
+@pytest.fixture
+def create_grievance_tickets_social_program() -> GrievanceTicket:
+    grievance = create_grievance_referral(assigned_to="", household_unicef_id="HH-20-0000.0001")
+    grievance.programs.add(Program.objects.filter(name="Social Program").first())
+    grievance.save()
+    yield grievance
+
+
 def create_grievance_referral(
     unicef_id: str = "GRV-0000001",
     status: int = GrievanceTicket.STATUS_NEW,
@@ -317,7 +342,7 @@ def create_grievance_referral(
     from hct_mis_api.apps.grievance.models import TicketReferralDetails
 
     TicketReferralDetails.objects.create(
-        ticket=grievance_ticket,
+        ticket=grievance_ticket, individual=Individual.objects.filter(unicef_id="IND-00-0000.0011").first()
     )
 
     return grievance_ticket
@@ -352,7 +377,7 @@ class TestSmokeGrievanceTickets:
             "Assigned to",
             "Category",
             "Issue Type",
-            "Household ID",
+            "Target ID",
             "Priority",
             "Urgency",
             "Linked Tickets",
@@ -413,20 +438,82 @@ class TestSmokeGrievanceTickets:
         assert "Urgent" in pageGrievanceDetailsPage.getTicketUrgency().text
         assert "-" in pageGrievanceDetailsPage.getTicketAssigment().text
         assert "Referral" in pageGrievanceDetailsPage.getTicketCategory().text
+        assert "HH-20-0000.0002" in pageGrievanceDetailsPage.getTicketTargetID().text
+        assert "-" in pageGrievanceDetailsPage.getTicketPaymentLabel().text
+        assert "-" in pageGrievanceDetailsPage.getLabelPaymentPlan().text
+        assert "-" in pageGrievanceDetailsPage.getLabelPaymentPlanVerification().text
+        assert "Andarab" in pageGrievanceDetailsPage.getAdministrativeLevel().text
+        assert "English | English" in pageGrievanceDetailsPage.getLanguagesSpoken().text
+        assert "-" in pageGrievanceDetailsPage.getDocumentation().text
+        assert "Test 4" in pageGrievanceDetailsPage.getTicketDescription().text
+        assert "" in pageGrievanceDetailsPage.getNewNoteField().text
+        assert "ADD NEW NOTE" in pageGrievanceDetailsPage.getButtonNewNote().text
+
+    def test_check_grievance_tickets_details_page_normal_program(
+        self,
+        create_programs: None,
+        add_households: None,
+        add_grievance: None,
+        pageGrievanceTickets: GrievanceTickets,
+        pageGrievanceDetailsPage: GrievanceDetailsPage,
+    ) -> None:
+        """
+        Go to Grievance tickets details page
+        Check if all elements on page exist
+        """
+        pageGrievanceTickets.selectGlobalProgramFilter("Test Programm")
+        # Go to Grievance Tickets
+        pageGrievanceTickets.getNavGrievance().click()
+        assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
+        pageGrievanceTickets.getTicketListRow()[0].click()
+        pageGrievanceDetailsPage.getTicketStatus()
+        assert "Ticket ID" in pageGrievanceDetailsPage.getTitle().text
+        assert "EDIT" in pageGrievanceDetailsPage.getButtonEdit().text
+        assert "SEND BACK" in pageGrievanceDetailsPage.getButtonSendBack().text
+        assert "CLOSE TICKET" in pageGrievanceDetailsPage.getButtonCloseTicket().text
+        assert "For Approval" in pageGrievanceDetailsPage.getTicketStatus().text
+        assert "Medium" in pageGrievanceDetailsPage.getTicketPriority().text
+        assert "Urgent" in pageGrievanceDetailsPage.getTicketUrgency().text
+        assert "-" in pageGrievanceDetailsPage.getTicketAssigment().text
+        assert "Referral" in pageGrievanceDetailsPage.getTicketCategory().text
         assert "HH-20-0000.0002" in pageGrievanceDetailsPage.getTicketHouseholdID().text
         assert "IND-74-0000.0001" in pageGrievanceDetailsPage.getTicketIndividualID().text
-        assert "-" in pageGrievanceDetailsPage.getTicketPaymentLabel().text
         assert "-" in pageGrievanceDetailsPage.getLabelPaymentPlan().text
         assert "-" in pageGrievanceDetailsPage.getLabelPaymentPlanVerification().text
         assert "Test Program" in pageGrievanceDetailsPage.getLabelProgramme().text
         assert "Andarab" in pageGrievanceDetailsPage.getAdministrativeLevel().text
-        assert "-" in pageGrievanceDetailsPage.getAreaVillage().text
         assert "English | English" in pageGrievanceDetailsPage.getLanguagesSpoken().text
         assert "-" in pageGrievanceDetailsPage.getDocumentation().text
         assert "Test 4" in pageGrievanceDetailsPage.getTicketDescription().text
-        assert "-" in pageGrievanceDetailsPage.getLabelComments().text
         assert "" in pageGrievanceDetailsPage.getNewNoteField().text
         assert "ADD NEW NOTE" in pageGrievanceDetailsPage.getButtonNewNote().text
+
+    def test_check_grievance_tickets_details_page_social_worker_program(
+        self,
+        household_social_worker: Household,
+        create_grievance_tickets_social_program: GrievanceTicket,
+        pageGrievanceTickets: GrievanceTickets,
+        pageGrievanceDetailsPage: GrievanceDetailsPage,
+    ) -> None:
+        """
+        Go to Grievance tickets details page
+        Check if all elements on page exist
+        """
+        pageGrievanceTickets.selectGlobalProgramFilter("Social Program")
+        # Go to Grievance Tickets
+        pageGrievanceTickets.getNavGrievance().click()
+        assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
+        pageGrievanceTickets.getTicketListRow()[0].click()
+        pageGrievanceDetailsPage.getTicketStatus()
+        assert "Ticket ID" in pageGrievanceDetailsPage.getTitle().text
+        assert "EDIT" in pageGrievanceDetailsPage.getButtonEdit().text
+        assert "ASSIGN TO ME" in pageGrievanceDetailsPage.getButtonAssignToMe().text
+        assert "New" in pageGrievanceDetailsPage.getLabelStatus().text
+        assert "High" in pageGrievanceDetailsPage.getLabelPriority().text
+        assert "Very urgent" in pageGrievanceDetailsPage.getLabelUrgency().text
+        assert "Referral" in pageGrievanceDetailsPage.getTicketCategory().text
+        assert "Social Program" in pageGrievanceDetailsPage.getLabelProgramme().text
+        assert "IND-00-0000.0011" in pageGrievanceDetailsPage.getTicketTargetID().text
 
 
 @pytest.mark.usefixtures("login")
@@ -526,6 +613,35 @@ class TestGrievanceTickets:
         assert "New" in pageGrievanceDetailsPage.getTicketStatus().text
         assert "Not set" in pageGrievanceDetailsPage.getTicketPriority().text
         assert "Not set" in pageGrievanceDetailsPage.getTicketUrgency().text
+
+    def test_grievance_tickets_create_new_tickets_social_program(
+        self,
+        pageGrievanceTickets: GrievanceTickets,
+        pageGrievanceNewTicket: NewTicket,
+        pageGrievanceDetailsPage: GrievanceDetailsPage,
+        household_social_worker: Household,
+    ) -> None:
+        pageGrievanceTickets.selectGlobalProgramFilter("Social Program")
+        pageGrievanceTickets.getNavGrievance().click()
+        assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
+        pageGrievanceTickets.getButtonNewTicket().click()
+        pageGrievanceNewTicket.getSelectCategory().click()
+        pageGrievanceNewTicket.select_listbox_element("Data Change")
+        pageGrievanceNewTicket.getIssueType().click()
+        select_element = pageGrievanceNewTicket.wait_for('ul[role="listbox"]')
+        items = select_element.find_elements("tag name", "li")
+
+        check_list = {
+            "Add Individual": "true",
+            "Household Data Update": "true",
+            "Individual Data Update": "None",
+            "Withdraw Individual": "None",
+            "Withdraw Household": "true",
+        }
+
+        for item in items:
+            sleep(0.5)
+            assert str(item.get_attribute("aria-disabled")) in check_list[item.text]
 
     def test_grievance_tickets_create_new_ticket_Data_Change_Add_Individual_All_Fields(
         self,
@@ -646,15 +762,12 @@ class TestGrievanceTickets:
         assert "-" in pageGrievanceDetailsPage.getTicketAssigment().text
         assert "Data Change" in pageGrievanceDetailsPage.getTicketCategory().text
         assert "Add Individual" in pageGrievanceDetailsPage.getLabelIssueType().text
-        assert household_without_disabilities.unicef_id in pageGrievanceDetailsPage.getTicketHouseholdID().text
+        assert household_without_disabilities.unicef_id in pageGrievanceDetailsPage.getTicketTargetID().text
         assert "Test Program" in pageGrievanceDetailsPage.getLabelProgramme().text
         assert datetime.now().strftime("%-d %b %Y") in pageGrievanceDetailsPage.getLabelDateCreation().text
         assert datetime.now().strftime("%-d %b %Y") in pageGrievanceDetailsPage.getLabelLastModifiedDate().text
-        assert "-" in pageGrievanceDetailsPage.getLabelAdministrativeLevel2().text
-        assert "-" in pageGrievanceDetailsPage.getLabelLanguagesSpoken().text
         assert "-" in pageGrievanceDetailsPage.getLabelDocumentation().text
         assert "Add Individual - TEST" in pageGrievanceDetailsPage.getLabelDescription().text
-        assert "-" in pageGrievanceDetailsPage.getLabelComments().text
         assert "Male" in pageGrievanceDetailsPage.getLabelGender().text
         assert "Alternate collector" in pageGrievanceDetailsPage.getLabelRole().text
         assert "Krido" in pageGrievanceDetailsPage.getLabelFullName().text

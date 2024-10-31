@@ -2,7 +2,6 @@ import { Box, Paper, Typography } from '@mui/material';
 import WarningIcon from '@mui/icons-material/Warning';
 import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { GrievanceTicketQuery } from '@generated/graphql';
@@ -12,6 +11,7 @@ import { ContentLink } from '@core/ContentLink';
 import { LabelizedField } from '@core/LabelizedField';
 import { LookUpReassignRole } from './LookUps/LookUpReassignRole/LookUpReassignRole';
 import { ReassignRoleUnique } from './LookUps/LookUpReassignRole/ReassignRoleUnique';
+import { ReactElement } from 'react';
 
 const StyledBox = styled(Paper)`
   border: 1px solid ${({ theme }) => theme.hctPalette.orange};
@@ -41,7 +41,7 @@ export const ReassignRoleBox = ({
   ticket: GrievanceTicketQuery['grievanceTicket'];
   shouldDisplayButton?: boolean;
   shouldDisableButton?: boolean;
-}): React.ReactElement => {
+}): ReactElement => {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   let { individual } = ticket;
@@ -68,7 +68,7 @@ export const ReassignRoleBox = ({
       ticket.systemFlaggingTicketDetails.roleReassignData,
     );
   }
-  let householdsAndRoles = individual?.householdsAndRoles;
+  let householdsAndRoles = individual?.householdsAndRoles || [];
   let shouldShowReassignHoH = individual?.id === household?.headOfHousehold?.id;
 
   if (
@@ -113,7 +113,8 @@ export const ReassignRoleBox = ({
           />
         ) : null}
         {shouldDisplayButton &&
-        ticket.category.toString() === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION &&
+        ticket.category.toString() ===
+          GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION &&
         reassignData[el.id]?.individual !== uniqueIndividual.id ? (
           <ReassignRoleUnique
             individualRole={{ role: el.role, id: el.id }}
@@ -121,11 +122,11 @@ export const ReassignRoleBox = ({
             household={el.household}
             individual={uniqueIndividual}
           />
-          ) : null}
+        ) : null}
       </Box>
     ));
 
-  const showMessage = (): React.ReactElement => {
+  const showMessage = (): ReactElement => {
     if (
       (ticket.issueType.toString() ===
         GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL &&
@@ -140,7 +141,7 @@ export const ReassignRoleBox = ({
             ?.value === 'NO_ROLE'))
     ) {
       return (
-        <Typography variant='body2'>
+        <Typography variant="body2">
           {t(
             'Upon removing you will need to select new individual(s) for this role.',
           )}

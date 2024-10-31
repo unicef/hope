@@ -10,7 +10,7 @@ import {
   Select,
 } from '@mui/material';
 import ExitToAppRoundedIcon from '@mui/icons-material/ExitToAppRounded';
-import { useEffect, useState } from 'react';
+import { ChangeEvent, ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { Dialog } from '@containers/dialogs/Dialog';
@@ -42,7 +42,7 @@ const StyledDialogFooter = styled(DialogFooter)`
   }
 `;
 
-export const RegistrationDataImportCreateDialog = (): React.ReactElement => {
+export const RegistrationDataImportCreateDialog = (): ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [importType, setImportType] = useState('');
@@ -140,7 +140,7 @@ export const RegistrationDataImportCreateDialog = (): React.ReactElement => {
               defaultValue=""
               variant="outlined"
               label=""
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
                 setImportType(e.target.value)
               }
               fullWidth

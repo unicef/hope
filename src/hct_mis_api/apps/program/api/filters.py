@@ -7,11 +7,12 @@ from django.db.models.functions import Coalesce
 
 from django_filters import rest_framework as filters
 
+from hct_mis_api.apps.core.api.filters import UpdatedAtFilter
 from hct_mis_api.apps.core.utils import decode_id_string_required
 from hct_mis_api.apps.program.models import ProgramCycle
 
 
-class ProgramCycleFilter(filters.FilterSet):
+class ProgramCycleFilter(UpdatedAtFilter):
     search = filters.CharFilter(method="search_filter")
     status = filters.MultipleChoiceFilter(
         choices=ProgramCycle.STATUS_CHOICE,

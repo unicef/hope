@@ -9,7 +9,6 @@ import {
   Typography,
 } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
@@ -17,6 +16,7 @@ import { GrievanceTicketQuery } from '@generated/graphql';
 import { PhotoModal } from '@core/PhotoModal/PhotoModal';
 import { TableTitle } from '@core/TableTitle';
 import { handleSelected } from '../utils/helpers';
+import { ReactElement } from 'react';
 
 const StyledTable = styled(Table)`
   color: #9e9e9e;
@@ -44,7 +44,7 @@ export function DocumentsTable({
   documents,
   documentTypeDict,
   countriesDict,
-}: DocumentsTableProps): React.ReactElement {
+}: DocumentsTableProps): ReactElement {
   const { t } = useTranslation();
   const { selectedDocuments } = values;
   const handleSelectDocument = (documentIndex): void => {

@@ -10,7 +10,6 @@ import {
 } from '@mui/material';
 import styled from 'styled-components';
 import moment from 'moment';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { DATE_FORMAT } from '../../config';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
@@ -25,6 +24,7 @@ import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 import { ViewSanctionList } from './ViewSanctionList';
+import { ReactElement } from 'react';
 
 const StyledTable = styled(Table)`
   min-width: 100px;
@@ -36,7 +36,7 @@ export const FlagDetails = ({
 }: {
   ticket: GrievanceTicketQuery['grievanceTicket'];
   canApproveFlag: boolean;
-}): React.ReactElement => {
+}): ReactElement => {
   const { t } = useTranslation();
   const confirm = useConfirmation();
 

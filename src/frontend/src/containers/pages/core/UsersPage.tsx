@@ -1,6 +1,5 @@
 import { Button } from '@mui/material';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { PageHeader } from '@components/core/PageHeader';
@@ -11,6 +10,7 @@ import { usePermissions } from '@hooks/usePermissions';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { UsersTable } from '../../tables/UsersTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
 const initialFilter = {
   search: '',
@@ -19,7 +19,7 @@ const initialFilter = {
   status: '',
 };
 
-export function UsersPage(): React.ReactElement {
+export function UsersPage(): ReactElement {
   const { businessArea } = useBaseUrl();
   const permissions = usePermissions();
   const { t } = useTranslation();
@@ -37,7 +37,14 @@ export function UsersPage(): React.ReactElement {
     return <PermissionDenied />;
 
   return (
-    <>
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'UsersPage.tsx');
+      }}
+      componentName="UsersPage"
+    >
       <PageHeader title={t('Programme Users')}>
         <>
           <Button
@@ -60,6 +67,6 @@ export function UsersPage(): React.ReactElement {
         setAppliedFilter={setAppliedFilter}
       />
       <UsersTable filter={appliedFilter} />
-    </>
+    </UniversalErrorBoundary>
   );
 }

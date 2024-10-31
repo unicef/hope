@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { ReactElement } from 'react';
 import styled from 'styled-components';
 
 const DividerContainer = styled.div`
@@ -13,7 +13,7 @@ const Divider = styled.div`
   width: 100%;
 `;
 
-export function DividerLine(): React.ReactElement {
+export function DividerLine(): ReactElement {
   return (
     <DividerContainer>
       <Divider />
