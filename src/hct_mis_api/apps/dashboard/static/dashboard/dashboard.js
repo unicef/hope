@@ -1,11 +1,5 @@
- document.getElementById('toggle-btn').addEventListener('click', function () {
-            const sidebar = document.getElementById('sidebar');
-            const mainContent = document.getElementById('main-content');
-            sidebar.classList.toggle('collapsed');
-            mainContent.classList.toggle('collapsed');
-        });
-
-        function fetchDataForCountry(country) {
+document.addEventListener("DOMContentLoaded", function() {
+        function fetchDataForCountry() {
 
             dc.config.defaultColors(d3.schemeTableau10);
             const numberFormatter = d3.format(",.2f");
@@ -19,7 +13,7 @@
                 document.getElementById(chartId).innerHTML = '';
             }
 
-            const url = "{% url 'api:household-data' business_area_slug %}";
+            const url = householdDataUrl;
 
             function updateTotals(ndx, successfulPaymentsCount, totalPaymentsCount, pendingPaymentsCount) {
                 const totalLocal = ndx.groupAll().reduceSum(d => d.delivered_quantity).value();
@@ -273,4 +267,5 @@
             }
             createDashboard();
         }
-        fetchDataForCountry("{{ business_area_slug }}");
+        fetchDataForCountry();
+    });
