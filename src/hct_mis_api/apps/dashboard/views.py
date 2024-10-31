@@ -4,6 +4,7 @@ from typing import Any, Dict
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.cache import cache
 from django.shortcuts import get_object_or_404
+from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import TemplateView
 
@@ -92,7 +93,7 @@ class DashboardReportView(LoginRequiredMixin, TemplateView):
     View to render the dashboard template for a specific business area.
     """
 
-    template_name = "dashboard.html"
+    template_name = "dashboard/dashboard.html"
 
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         context = super().get_context_data(**kwargs)
@@ -103,4 +104,5 @@ class DashboardReportView(LoginRequiredMixin, TemplateView):
             raise PermissionDenied(_("You do not have permission to view this dashboard."))
 
         context["business_area_slug"] = business_area_slug
+        context["household_data_url"] = reverse("api:household-data", args=[business_area_slug])
         return context
