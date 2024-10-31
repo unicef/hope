@@ -1,0 +1,185 @@
+from django.core.exceptions import ValidationError
+from django.core.management import call_command
+
+from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import encode_id_base64
+from hct_mis_api.apps.grievance.services.reassign_roles_services import (
+    reassign_roles_on_marking_as_duplicate_individual_service,
+)
+from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
+from hct_mis_api.apps.household.models import (
+    ROLE_ALTERNATE,
+    ROLE_PRIMARY,
+    UNKNOWN,
+    Individual,
+    IndividualRoleInHousehold,
+)
+from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.utils.models import MergeStatusModel
+
+
+class TestReassignRolesOnUpdate(APITestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        super().setUpTestData()
+        call_command("loadbusinessareas")
+
+        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.program_one = ProgramFactory(name="Test program ONE", business_area=cls.business_area)
+
+        cls.household = HouseholdFactory.build(id="b5cb9bb2-a4f3-49f0-a9c8-a2f260026054", program=cls.program_one)
+        cls.household.household_collection.save()
+        cls.household.registration_data_import.imported_by.save()
+        cls.household.registration_data_import.program = cls.program_one
+        cls.household.registration_data_import.save()
+        cls.household.programs.add(cls.program_one)
+
+        cls.primary_collector_individual = IndividualFactory(household=None, program=cls.program_one)
+        cls.household.head_of_household = cls.primary_collector_individual
+        cls.household.save()
+        cls.primary_collector_individual.household = cls.household
+        cls.primary_collector_individual.save()
+
+        cls.household.refresh_from_db()
+        cls.primary_collector_individual.refresh_from_db()
+
+        cls.primary_role = IndividualRoleInHousehold.objects.create(
+            household=cls.household,
+            individual=cls.primary_collector_individual,
+            role=ROLE_PRIMARY,
+            rdi_merge_status=MergeStatusModel.MERGED,
+        )
+
+        cls.alternate_collector_individual = IndividualFactory(household=None, program=cls.program_one)
+        cls.alternate_collector_individual.household = cls.household
+        cls.alternate_collector_individual.save()
+
+        cls.alternate_role = IndividualRoleInHousehold.objects.create(
+            household=cls.household,
+            individual=cls.alternate_collector_individual,
+            role=ROLE_ALTERNATE,
+            rdi_merge_status=MergeStatusModel.MERGED,
+        )
+
+        cls.no_role_individual = IndividualFactory(household=cls.household, program=cls.program_one)
+        cls.user = UserFactory()
+
+    def test_reassign_roles_on_marking_as_duplicate_individual_service(self) -> None:
+        duplicated_individuals = Individual.objects.filter(id=self.primary_collector_individual.id)
+        role_reassign_data = {
+            ROLE_PRIMARY: {
+                "role": ROLE_PRIMARY,
+                "new_individual": encode_id_base64(str(self.no_role_individual.id), "Individual"),
+                "household": encode_id_base64(str(self.household.id), "Household"),
+                "individual": encode_id_base64(str(self.primary_collector_individual.id), "Individual"),
+            },
+            str(self.primary_collector_individual.id): {
+                "role": "HEAD",
+                "new_individual": encode_id_base64(str(self.no_role_individual.id), "Individual"),
+                "household": encode_id_base64(str(self.household.id), "Household"),
+                "individual": encode_id_base64(str(self.primary_collector_individual.id), "Individual"),
+            },
+        }
+        reassign_roles_on_marking_as_duplicate_individual_service(role_reassign_data, self.user, duplicated_individuals)
+        self.assertEqual(
+            IndividualRoleInHousehold.objects.filter(
+                household=self.household, individual=self.no_role_individual, role=ROLE_PRIMARY
+            ).count(),
+            1,
+        )
+        self.assertEqual(
+            IndividualRoleInHousehold.objects.filter(
+                household=self.household, individual=self.primary_collector_individual, role=ROLE_PRIMARY
+            ).count(),
+            0,
+        )
+        self.household.refresh_from_db()
+        self.assertEqual(self.household.head_of_household, self.no_role_individual)
+        for individual in self.household.individuals.exclude(id=self.no_role_individual.id):
+            self.assertEqual(individual.relationship, UNKNOWN)
+
+    def test_reassign_roles_on_marking_as_duplicate_individual_service_wrong_program(self) -> None:
+        program_two = ProgramFactory(name="Test program TWO", business_area=self.business_area)
+        self.no_role_individual.program = program_two
+        self.no_role_individual.save()
+        duplicated_individuals = Individual.objects.filter(id=self.primary_collector_individual.id)
+        role_reassign_data = {
+            ROLE_PRIMARY: {
+                "role": ROLE_PRIMARY,
+                "new_individual": encode_id_base64(str(self.no_role_individual.id), "Individual"),
+                "household": encode_id_base64(str(self.household.id), "Household"),
+                "individual": encode_id_base64(str(self.primary_collector_individual.id), "Individual"),
+            },
+            str(self.primary_collector_individual.id): {
+                "role": "HEAD",
+                "new_individual": encode_id_base64(str(self.no_role_individual.id), "Individual"),
+                "household": encode_id_base64(str(self.household.id), "Household"),
+                "individual": encode_id_base64(str(self.primary_collector_individual.id), "Individual"),
+            },
+        }
+        with self.assertRaises(ValidationError) as error:
+            reassign_roles_on_marking_as_duplicate_individual_service(
+                role_reassign_data, self.user, duplicated_individuals
+            )
+        self.assertEqual(
+            str(error.exception.messages[0]),
+            "Cannot reassign role to individual from different program",
+        )
+
+    def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_without_duplicate(self) -> None:
+        duplicated_individuals = Individual.objects.none()
+        role_reassign_data = {
+            ROLE_PRIMARY: {
+                "role": ROLE_PRIMARY,
+                "new_individual": encode_id_base64(str(self.no_role_individual.id), "Individual"),
+                "household": encode_id_base64(str(self.household.id), "Household"),
+                "individual": encode_id_base64(str(self.primary_collector_individual.id), "Individual"),
+            },
+            str(self.primary_collector_individual.id): {
+                "role": "HEAD",
+                "new_individual": encode_id_base64(str(self.no_role_individual.id), "Individual"),
+                "household": encode_id_base64(str(self.household.id), "Household"),
+                "individual": encode_id_base64(str(self.primary_collector_individual.id), "Individual"),
+            },
+        }
+
+        with self.assertRaises(ValidationError) as error:
+            reassign_roles_on_marking_as_duplicate_individual_service(
+                role_reassign_data, self.user, duplicated_individuals
+            )
+        self.assertEqual(
+            str(error.exception.messages[0]),
+            "Individual (IND-0) was not marked as duplicated",
+        )
+
+    def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_new_individual_is_duplicate(
+        self,
+    ) -> None:
+        duplicated_individuals = Individual.objects.filter(
+            id__in=[self.no_role_individual.id, self.primary_collector_individual.id]
+        )
+        role_reassign_data = {
+            ROLE_PRIMARY: {
+                "role": ROLE_PRIMARY,
+                "new_individual": encode_id_base64(str(self.no_role_individual.id), "Individual"),
+                "household": encode_id_base64(str(self.household.id), "Household"),
+                "individual": encode_id_base64(str(self.primary_collector_individual.id), "Individual"),
+            },
+            str(self.primary_collector_individual.id): {
+                "role": "HEAD",
+                "new_individual": encode_id_base64(str(self.no_role_individual.id), "Individual"),
+                "household": encode_id_base64(str(self.household.id), "Household"),
+                "individual": encode_id_base64(str(self.primary_collector_individual.id), "Individual"),
+            },
+        }
+
+        with self.assertRaises(ValidationError) as error:
+            reassign_roles_on_marking_as_duplicate_individual_service(
+                role_reassign_data, self.user, duplicated_individuals
+            )
+        self.assertEqual(
+            str(error.exception.messages[0]),
+            "Individual(IND-2) which get role PRIMARY was marked as duplicated",
+        )

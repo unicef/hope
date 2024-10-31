@@ -60,7 +60,7 @@ def reassign_roles_on_marking_as_duplicate_individual_service(
         individual_which_loses_role = get_object_or_404(Individual, id=decode_id_string(role_data.get("individual")))
 
         if new_individual.program != individual_which_loses_role.program:
-            raise ValidationError("Cannot reassign head of household to individual from different program")
+            raise ValidationError("Cannot reassign role to individual from different program")
 
         if str(individual_which_loses_role.id) not in duplicated_individuals_ids:
             raise ValidationError(f"Individual ({individual_which_loses_role.unicef_id}) was not marked as duplicated")
@@ -72,6 +72,7 @@ def reassign_roles_on_marking_as_duplicate_individual_service(
             reassign_head_of_household_relationship_for_need_adjudication_ticket(
                 household, individual_which_loses_role, new_individual, old_individual_to_log, user
             )
+            household.individuals.exclude(id=new_individual.id).update(relationship=RELATIONSHIP_UNKNOWN)
             continue
 
         if new_individual_current_role := IndividualRoleInHousehold.objects.filter(
