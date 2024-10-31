@@ -14,7 +14,7 @@ class AreaSerializer(serializers.ModelSerializer):
 
 
 class AreaList(ListAPIView):
-    queryset = Area.objects.all()
+    queryset = Area.objects.all().order_by("name")
     serializer_class = AreaSerializer
     filter_backends = (OrderingFilter, DjangoFilterBackend, SearchFilter)
     filterset_class = AreaFilter
@@ -28,7 +28,7 @@ class AreaTypeSerializer(serializers.ModelSerializer):
 
 
 class AreaTypeList(ListAPIView):
-    queryset = AreaType.objects.all()
+    queryset = AreaType.objects.all().order_by("name")
     serializer_class = AreaTypeSerializer
     filter_backends = (OrderingFilter, DjangoFilterBackend, SearchFilter)
     filterset_class = AreaTypeFilter
