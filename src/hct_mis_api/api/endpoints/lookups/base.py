@@ -30,7 +30,6 @@ class DocumentType(HOPEAPIView):
 class CountryAPIView(HOPEAPIView, ListAPIView):
     queryset = Country.objects.all()
     serializer_class = CountrySerializer
-    pagination_class = None
 
 
 class ResidenceStatus(HOPEAPIView):

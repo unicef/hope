@@ -21,6 +21,7 @@ import { UniversalMoment } from '@core/UniversalMoment';
 import { LinkedTicketsModal } from '../LinkedTicketsModal/LinkedTicketsModal';
 import { AssignedToDropdown } from './AssignedToDropdown';
 import { getGrievanceDetailsPath } from '../utils/createGrievanceUtils';
+import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
 
 interface GrievancesTableRowProps {
@@ -55,6 +56,7 @@ export function GrievancesTableRow({
   initialVariables,
 }: GrievancesTableRowProps): ReactElement {
   const { baseUrl, businessArea, isAllPrograms } = useBaseUrl();
+  const { isSocialDctType } = useProgramContext();
   const navigate = useNavigate();
   const { showMessage } = useSnackbar();
   const detailsPath = getGrievanceDetailsPath(
@@ -120,6 +122,14 @@ export function GrievancesTableRow({
 
   const mappedPrograms = getMappedPrograms();
 
+  //TODO: add target to the query
+  const getTargetUnicefId = (_ticket) => {
+    return isSocialDctType || isAllPrograms
+      ? _ticket?.targetId
+      : _ticket?.household?.unicefId;
+  };
+  const targetId = getTargetUnicefId(ticket);
+
   return (
     <ClickableTableRow
       onClick={handleRowClick}
@@ -168,7 +178,7 @@ export function GrievancesTableRow({
       </TableCell>
       <TableCell align="left">{categoryChoices[ticket.category]}</TableCell>
       <TableCell align="left">{issueType}</TableCell>
-      <TableCell align="left">{ticket.household?.unicefId || '-'}</TableCell>
+      <TableCell align="left">{targetId || '-'}</TableCell>
       <TableCell align="left">
         <StatusBox
           status={
