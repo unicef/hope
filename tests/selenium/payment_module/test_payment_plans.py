@@ -74,7 +74,7 @@ def social_worker_program() -> Program:
 def create_program(name: str = "Test Program", dct_type: str = DataCollectingType.Type.STANDARD) -> Program:
     BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
     dct = DataCollectingTypeFactory(type=dct_type)
-    yield ProgramFactory(
+    return ProgramFactory(
         name=name,
         programme_code="1234",
         start_date=datetime.now() - relativedelta(months=1),
