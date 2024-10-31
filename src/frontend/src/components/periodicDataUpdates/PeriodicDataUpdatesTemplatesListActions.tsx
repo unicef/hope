@@ -6,7 +6,6 @@ import {
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 export const useDownloadPeriodicDataUpdateTemplate = () => {
-  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({
       businessAreaSlug: mutationBusinessAreaSlug,
@@ -22,14 +21,6 @@ export const useDownloadPeriodicDataUpdateTemplate = () => {
         mutationProgramId,
         mutationTemplateId,
       );
-    },
-    onSuccess: (data) => {
-      if (data.url) {
-        window.open(data.url);
-      }
-      queryClient.invalidateQueries({
-        queryKey: ['periodicDataUpdateTemplates'],
-      });
     },
   });
 };
