@@ -4,6 +4,7 @@ from time import sleep
 from typing import Literal, Union
 
 from selenium.common import NoSuchElementException
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver import Chrome, Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
@@ -42,8 +43,6 @@ class Common:
             raise Exception("No elements found")
 
     def wait_for(self, locator: str, element_type: str = By.CSS_SELECTOR, timeout: int = DEFAULT_TIMEOUT) -> WebElement:
-        from selenium.common.exceptions import TimeoutException
-
         try:
             return self._wait(timeout).until(EC.visibility_of_element_located((element_type, locator)))
         except TimeoutException:
@@ -63,7 +62,14 @@ class Common:
     def wait_for_text(
         self, text: str, locator: str, element_type: str = By.CSS_SELECTOR, timeout: int = DEFAULT_TIMEOUT
     ) -> Union[Literal[False, True], bool]:
-        return self._wait(timeout).until(EC.text_to_be_present_in_element((element_type, locator), text))
+        try:
+            return self._wait(timeout).until(EC.text_to_be_present_in_element((element_type, locator), text))
+        except TimeoutException:
+            pass
+        raise NoSuchElementException(
+            f"Element: {text} not found in {locator}. Displayed text:"
+            f" {self.driver.find_element(element_type, locator).text}"
+        )
 
     def wait_for_new_url(self, old_url: str, retry: int = 5) -> str:
         for _ in range(retry):

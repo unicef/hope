@@ -582,6 +582,7 @@ class TestPaymentVerification:
         pagePaymentRecord.getButtonSubmit().click()
         pagePaymentRecord.getArrowBack().click()
 
+        assert pagePaymentRecord.waitForStatusContainer("RECEIVED")
         assert "RECEIVED" == pagePaymentRecord.getStatusContainer().text
 
     def test_payment_verification_successful_not_received(
@@ -606,7 +607,7 @@ class TestPaymentVerification:
         pagePaymentRecord.getButtonSubmit().click()
         pagePaymentRecord.getArrowBack().click()
 
-        assert "NOT RECEIVED" in pagePaymentRecord.getStatusContainer().text
+        assert pagePaymentRecord.waitForStatusContainer("NOT RECEIVED")
 
     def test_payment_verification_partially_successful_received_and_grievance_ticket(
         self,
@@ -634,7 +635,7 @@ class TestPaymentVerification:
         pagePaymentRecord.getButtonSubmit().click()
         pagePaymentRecord.getArrowBack().click()
 
-        assert "RECEIVED WITH ISSUES" in pagePaymentRecord.getStatusContainer().text
+        assert pagePaymentRecord.waitForStatusContainer("RECEIVED WITH ISSUES")
 
         pagePaymentVerificationDetails.getButtonFinish().click()
         pagePaymentVerificationDetails.getButtonSubmit().click()
@@ -660,6 +661,7 @@ class TestPaymentVerification:
         pagePaymentVerification.getNavPaymentVerification().click()
         pagePaymentVerification.getCashPlanTableRow().click()
 
+        assert pagePaymentRecord.waitForStatusContainer("RECEIVED")
         assert "RECEIVED" == pagePaymentRecord.getStatusContainer().text
 
         pageGrievanceTickets.scroll(execute=2)
@@ -716,6 +718,7 @@ class TestPaymentVerification:
 
         pagePaymentVerificationDetails.getButtonImportEntitlement().click()
 
+        assert pagePaymentRecord.waitForStatusContainer("RECEIVED")
         assert "RECEIVED" == pagePaymentRecord.getStatusContainer().text
 
     def test_payment_verification_xlsx_partially_successful(
@@ -765,7 +768,7 @@ class TestPaymentVerification:
 
         pagePaymentVerificationDetails.getButtonImportEntitlement().click()
 
-        assert "RECEIVED WITH ISSUES" == pagePaymentRecord.getStatusContainer().text
+        assert pagePaymentRecord.waitForStatusContainer("RECEIVED WITH ISSUES")
 
     def test_payment_verification_xlsx_not_received(
         self,
@@ -808,7 +811,7 @@ class TestPaymentVerification:
 
         pagePaymentVerificationDetails.getButtonImportEntitlement().click()
 
-        assert "NOT RECEIVED" in pagePaymentRecord.getStatusContainer().text
+        assert pagePaymentRecord.waitForStatusContainer("NOT RECEIVED")
 
     def test_payment_verification_discard(
         self,
