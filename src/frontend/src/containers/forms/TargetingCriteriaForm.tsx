@@ -39,6 +39,7 @@ import { TargetingCriteriaIndividualFilterBlocks } from './TargetingCriteriaIndi
 import { AndDivider, AndDividerLabel } from '@components/targeting/AndDivider';
 import { TargetingCriteriaHouseholdFilter } from './TargetingCriteriaHouseholdFilter';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { TargetingCriteriaCollectorFilterBlocks } from './TargetingCriteriaCollectorFilterBlocks';
 
 const ButtonBox = styled.div`
   width: 300px;
@@ -505,7 +506,7 @@ export const TargetingCriteriaForm = ({
                           ref={collectorsFiltersBlocksWrapperRef}
                         >
                           {values.collectorsFiltersBlocks.map((each, index) => (
-                            <TargetingCriteriaIndividualFilterBlocks
+                            <TargetingCriteriaCollectorFilterBlocks
                               // eslint-disable-next-line
                               key={index}
                               blockIndex={index}

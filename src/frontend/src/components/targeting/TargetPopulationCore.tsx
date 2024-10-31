@@ -14,8 +14,8 @@ import { TargetingHouseholds } from './TargetingHouseholds';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { TargetPopulationPeopleTable } from '@containers/tables/targeting/TargetPopulationPeopleTable';
 import { ResultsForPeople } from '@components/targeting/ResultsForPeople';
-import { TargetingCriteriaDisplay } from './TargetingCriteriaDisplay/TargetingCriteriaDisplay';
 import { ReactElement } from 'react';
+import { AddFilterTargetingCriteriaDisplay } from './TargetingCriteriaDisplay/AddFilterTargetingCriteriaDisplay';
 
 const Label = styled.p`
   color: #b1b1b5;
@@ -36,7 +36,6 @@ interface TargetPopulationCoreProps {
   screenBeneficiary: boolean;
   isStandardDctType: boolean;
   isSocialDctType: boolean;
-  category: string;
 }
 
 export const TargetPopulationCore = ({
@@ -46,7 +45,6 @@ export const TargetPopulationCore = ({
   screenBeneficiary,
   isStandardDctType,
   isSocialDctType,
-  category,
 }: TargetPopulationCoreProps): ReactElement => {
   const { t } = useTranslation();
   const { businessArea } = useBaseUrl();
@@ -111,13 +109,12 @@ export const TargetPopulationCore = ({
               {individualIds}
             </IdContainer>
           )}
-          <TargetingCriteriaDisplay
+          <AddFilterTargetingCriteriaDisplay
             rules={targetPopulation.targetingCriteria?.rules || []}
             targetPopulation={targetPopulation}
             screenBeneficiary={screenBeneficiary}
             isStandardDctType={isStandardDctType}
             isSocialDctType={isSocialDctType}
-            category={category}
           />
         </PaperContainer>
       ) : null}

@@ -1,29 +1,29 @@
-import { Box, Divider, Grid, Typography } from '@mui/material';
-import { Field, FieldArray, Form, Formik } from 'formik';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import * as Yup from 'yup';
+import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { CreateTargetPopulationHeader } from '@components/targeting/CreateTargetPopulation/CreateTargetPopulationHeader';
+import { Exclusions } from '@components/targeting/CreateTargetPopulation/Exclusions';
+import { PaperContainer } from '@components/targeting/PaperContainer';
+import { AddFilterTargetingCriteriaDisplay } from '@components/targeting/TargetingCriteriaDisplay/AddFilterTargetingCriteriaDisplay';
 import {
   useBusinessAreaDataQuery,
   useCreateTpMutation,
 } from '@generated/graphql';
-import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
-import { PermissionDenied } from '@components/core/PermissionDenied';
-import { CreateTargetPopulationHeader } from '@components/targeting/CreateTargetPopulation/CreateTargetPopulationHeader';
-import { Exclusions } from '@components/targeting/CreateTargetPopulation/Exclusions';
-import { PaperContainer } from '@components/targeting/PaperContainer';
-import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { getTargetingCriteriaVariables } from '@utils/targetingUtils';
+import { Box, Divider, Grid, Typography } from '@mui/material';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { useProgramContext } from 'src/programContext';
-import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
-import { TargetingCriteriaDisplay } from '@components/targeting/TargetingCriteriaDisplay/TargetingCriteriaDisplay';
 import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { getTargetingCriteriaVariables } from '@utils/targetingUtils';
+import { Field, FieldArray, Form, Formik } from 'formik';
 import { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useProgramContext } from 'src/programContext';
+import * as Yup from 'yup';
+import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
+import { CreateAndEditTPCheckboxes } from './CreateAndEditTPCheckboxes';
 
 export const CreateTargetPopulationPage = (): ReactElement => {
   const { t } = useTranslation();
@@ -177,7 +177,7 @@ export const CreateTargetPopulationPage = (): ReactElement => {
                 <FieldArray
                   name="criterias"
                   render={(arrayHelpers) => (
-                    <TargetingCriteriaDisplay
+                    <AddFilterTargetingCriteriaDisplay
                       helpers={arrayHelpers}
                       rules={values.criterias}
                       screenBeneficiary={screenBeneficiary}
@@ -188,64 +188,11 @@ export const CreateTargetPopulationPage = (): ReactElement => {
                   )}
                 />
               ) : null}
-              <>
-                <Box mt={3} p={3}>
-                  <Grid container spacing={3}>
-                    {isStandardDctType && (
-                      <Grid item xs={6}>
-                        <Field
-                          name="flagExcludeIfActiveAdjudicationTicket"
-                          label={t(
-                            'Exclude Households with Active Adjudication Ticket',
-                          )}
-                          color="primary"
-                          component={FormikCheckboxField}
-                          data-cy="input-active-households-adjudication-ticket"
-                        />
-                      </Grid>
-                    )}
-                    {isSocialDctType && (
-                      <Grid item xs={6}>
-                        <Field
-                          name="flagExcludeIfActiveAdjudicationTicket"
-                          label={t(
-                            'Exclude People with Active Adjudication Ticket',
-                          )}
-                          color="primary"
-                          component={FormikCheckboxField}
-                          data-cy="input-active-people-adjudication-ticket"
-                        />
-                      </Grid>
-                    )}
-                    {screenBeneficiary && isSocialDctType && (
-                      <Grid item xs={6}>
-                        <Field
-                          name="flagExcludeIfOnSanctionList"
-                          label={t(
-                            'Exclude People with an Active Sanction Screen Flag',
-                          )}
-                          color="primary"
-                          component={FormikCheckboxField}
-                          data-cy="input-active-people-sanction-flag"
-                        />
-                      </Grid>
-                    )}
-                    {screenBeneficiary && isStandardDctType && (
-                      <Grid item xs={6}>
-                        <Field
-                          name="flagExcludeIfOnSanctionList"
-                          label={t(
-                            'Exclude Households with an Active Sanction Screen Flag',
-                          )}
-                          color="primary"
-                          component={FormikCheckboxField}
-                          data-cy="input-active-sanction-flag"
-                        />
-                      </Grid>
-                    )}
-                  </Grid>
-                </Box>
-              </>
+              <CreateAndEditTPCheckboxes
+                isStandardDctType={isStandardDctType}
+                isSocialDctType={isSocialDctType}
+                screenBeneficiary={screenBeneficiary}
+              />
             </PaperContainer>
             <Exclusions />
             <Box
