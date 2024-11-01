@@ -311,7 +311,6 @@ class PaymentAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
 class DeliveryMechanismPerPaymentPlanAdmin(HOPEModelAdminBase):
     list_display = ("delivery_mechanism_order", "delivery_mechanism", "payment_plan", "status")
     raw_id_fields = ("payment_plan", "financial_service_provider", "created_by", "sent_by")
-    exclude = ("delivery_mechanism_choice",)
 
 
 @admin.register(FinancialServiceProviderXlsxTemplate)
@@ -392,7 +391,6 @@ class FspXlsxTemplatePerDeliveryMechanismAdmin(HOPEModelAdminBase):
     list_display = ("financial_service_provider", "delivery_mechanism", "xlsx_template", "created_by")
     fields = ("financial_service_provider", "delivery_mechanism", "xlsx_template")
     autocomplete_fields = ("financial_service_provider", "xlsx_template")
-    exclude = ("delivery_mechanism_choice",)
     form = FspXlsxTemplatePerDeliveryMechanismForm
 
     def save_model(
@@ -450,7 +448,6 @@ class FspXlsxTemplatePerDeliveryMechanismAdminInline(admin.TabularInline):
     extra = 0
     readonly_fields = ("created_by",)
     raw_id_fields = ("financial_service_provider",)
-    exclude = ("delivery_mechanism_choice",)
 
 
 @admin.register(FinancialServiceProvider)
@@ -512,7 +509,6 @@ class DeliveryMechanismDataAdmin(HOPEModelAdminBase):
     list_display = ("individual", "delivery_mechanism", "is_valid")
     raw_id_fields = ("individual", "possible_duplicate_of")
     readonly_fields = ("possible_duplicate_of", "unique_key", "signature_hash", "validation_errors")
-    exclude = ("delivery_mechanism_choice",)
 
 
 @admin.register(DeliveryMechanism)
