@@ -1,22 +1,9 @@
-import contextlib
-from typing import Iterator
-
 from rest_framework.reverse import reverse
 
-from hct_mis_api.api.models import APIToken, Grant
+from hct_mis_api.api.models import Grant
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory
 from hct_mis_api.apps.core.models import BusinessArea
-from tests.unit.api.base import HOPEApiTestCase
-
-
-@contextlib.contextmanager
-def token_grant_permission(token: APIToken, grant: Grant) -> Iterator:
-    old = token.grants
-    token.grants += [grant.name]
-    token.save()
-    yield
-    token.grants = old
-    token.save()
+from tests.unit.api.base import HOPEApiTestCase, token_grant_permission
 
 
 class APIBusinessAreaTests(HOPEApiTestCase):

@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { render } from '../../../../testUtils/testUtils';
 import { fakeHousehold } from '../../../../../fixtures/population/fakeHousehold';
 import { HouseholdCompositionTable } from '.';

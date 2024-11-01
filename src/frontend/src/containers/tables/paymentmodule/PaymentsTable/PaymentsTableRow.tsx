@@ -1,5 +1,4 @@
 import TableCell from '@mui/material/TableCell';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import CheckCircleOutlineRoundedIcon from '@mui/icons-material/CheckCircleOutlineRounded';
@@ -9,35 +8,15 @@ import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { WarningTooltip } from '@components/core/WarningTooltip';
 import {
   formatCurrencyWithSymbol,
-  opacityToHex,
+  paymentStatusDisplayMap,
+  paymentStatusToColor,
   renderSomethingOrDash,
 } from '@utils/utils';
-import { AllPaymentsForTableQuery, PaymentStatus } from '@generated/graphql';
+import { AllPaymentsForTableQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
-
-export const StyledLink = styled.div`
-  color: #000;
-  text-decoration: underline;
-  cursor: pointer;
-  display: flex;
-  align-content: center;
-`;
-
-const RoutedBox = styled.div`
-  color: ${({ theme }) => theme.hctPalette.red};
-  background-color: ${({ theme }) =>
-    `${theme.hctPalette.red}${opacityToHex(0.15)}`};
-  border-radius: 16px;
-  font-family: Roboto;
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 1.2px;
-  line-height: 16px;
-  padding: ${({ theme }) => theme.spacing(1)};
-  text-align: center;
-  margin-right: 20px;
-`;
+import { StatusBox } from '@components/core/StatusBox';
+import { ReactElement, SyntheticEvent } from 'react';
 
 const OrangeError = styled(ErrorOutlineRoundedIcon)`
   color: ${({ theme }) => theme.hctPalette.orange};
@@ -65,31 +44,23 @@ export function PaymentsTableRow({
   canViewDetails,
   onWarningClick,
   permissions,
-}: PaymentsTableRowProps): React.ReactElement {
+}: PaymentsTableRowProps): ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const paymentDetailsPath = `/${baseUrl}/payment-module/payments/${payment.id}`;
   const householdDetailsPath = `/${baseUrl}/population/household/${payment.household.id}`;
   const collectorDetailsPath = `/${baseUrl}/population/individuals/${payment.collector.id}`;
 
-  const handleDialogWarningOpen = (
-    e: React.SyntheticEvent<HTMLDivElement>,
-  ): void => {
+  const handleDialogWarningOpen = (e: SyntheticEvent<HTMLDivElement>): void => {
     e.stopPropagation();
     onWarningClick(payment);
   };
 
-  const renderDeliveredQuantity = (): React.ReactElement => {
-    const { deliveredQuantity, currency, deliveredQuantityUsd, status } =
-      payment;
-    if (status === PaymentStatus.TransactionErroneous) {
-      return <RoutedBox>UNSUCCESSFUL</RoutedBox>;
-    }
-    if (status === PaymentStatus.ManuallyCancelled) {
-      return <RoutedBox>CANCELLED</RoutedBox>;
-    }
+  const renderDeliveredQuantity = (): ReactElement => {
+    const { deliveredQuantity, currency, deliveredQuantityUsd } = payment;
+
     if (deliveredQuantity === null) {
-      return <></>;
+      return <>-</>;
     }
     return (
       <>
@@ -99,7 +70,7 @@ export function PaymentsTableRow({
     );
   };
 
-  const renderMark = (): React.ReactElement => {
+  const renderMark = (): ReactElement => {
     const { deliveredQuantity, entitlementQuantity } = payment;
 
     if (deliveredQuantity === null) {
@@ -175,6 +146,13 @@ export function PaymentsTableRow({
       </TableCell>
       <TableCell data-cy="delivered-quantity-cell" align="left">
         {renderDeliveredQuantity()}
+      </TableCell>
+      <TableCell>
+        <StatusBox
+          status={payment.status}
+          statusToColor={paymentStatusToColor}
+          statusNameMapping={paymentStatusDisplayMap}
+        />
       </TableCell>
       {hasPermissions(PERMISSIONS.PM_VIEW_FSP_AUTH_CODE, permissions) && (
         <TableCell data-cy="fsp-auth-code-cell" align="left">

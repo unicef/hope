@@ -12,8 +12,13 @@ import {
   Typography,
 } from '@mui/material';
 import { Field, Form, Formik } from 'formik';
-import * as React from 'react';
-import { ReactElement, useCallback, useEffect, useState } from 'react';
+import {
+  ReactElement,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -49,6 +54,7 @@ import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { SurveySteps, SurveyTabsValues } from '@utils/constants';
 import { getPercentage } from '@utils/utils';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
 const steps = ['Recipients Look up', 'Sample Size', 'Details'];
 const sampleSizeTabs = ['Full List', 'Random Sampling'];
@@ -90,7 +96,7 @@ function prepareVariables(
   };
 }
 
-export const CreateSurveyPage = (): React.ReactElement => {
+export const CreateSurveyPage = (): ReactElement => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [mutate, { loading }] = useCreateSurveyAccountabilityMutation();
@@ -337,126 +343,245 @@ export const CreateSurveyPage = (): React.ReactElement => {
   };
 
   return (
-    <Formik
-      initialValues={initialValues}
-      validationSchema={validationSchema}
-      validate={(values) => validate(values)}
-      validateOnBlur={validateData}
-      validateOnChange={validateData}
-      onSubmit={(values) => {
-        if (activeStep === steps.length - 1) {
-          confirm({
-            title: t('Confirmation'),
-            content:
-              category === SurveyCategory.Manual
-                ? t('Are you sure you want to save this survey?')
-                : t('Are you sure you want to send this survey?'),
-            continueText:
-              category === SurveyCategory.Manual ? t('Save') : t('Send'),
-          }).then(async () => {
-            try {
-              const response = await mutate({
-                variables: prepareMutationVariables(values),
-              });
-              showMessage(t('Survey created.'));
-              navigate(
-                `/${baseUrl}/accountability/surveys/${response.data.createSurvey.survey.id}`,
-              );
-            } catch (e) {
-              e.graphQLErrors.map((x) => showMessage(x.message));
-            }
-          });
-        } else {
-          setFormValues(values);
-          handleNext();
-        }
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'CreateSurveyPage.tsx');
       }}
+      componentName="CreateSurveyPage"
     >
-      {({ submitForm, setValues, values, setFieldValue, errors }) => (
-        <>
-          <PageHeader
-            title={`${'New Survey'} > ${matchCategory(category)}`}
-            breadCrumbs={
-              hasPermissions(
-                PERMISSIONS.ACCOUNTABILITY_SURVEY_VIEW_CREATE,
-                permissions,
-              )
-                ? breadCrumbsItems
-                : null
-            }
-          />
-          <PaperContainer>
-            <Grid xs={12} item>
-              <Stepper activeStep={activeStep}>
-                {steps.map((label) => {
-                  const stepProps: { completed?: boolean } = {};
-                  const labelProps: {
-                    optional?: React.ReactNode;
-                  } = {};
-                  return (
-                    <Step key={label} {...stepProps}>
-                      <StepLabel {...labelProps}>{label}</StepLabel>
-                    </Step>
-                  );
-                })}
-              </Stepper>
-            </Grid>
-            <Form>
-              <FormikEffect
-                values={values}
-                onChange={() => setFormValues(values)}
-              />
-              {activeStep === SurveySteps.LookUp && (
-                <Box display="flex" flexDirection="column">
-                  <LookUpSelectionSurveys
-                    businessArea={businessArea}
-                    values={values}
-                    onValueChange={setFieldValue}
-                    setValues={setValues}
-                    selectedTab={selectedTab}
-                    setSelectedTab={setSelectedTab}
-                  />
-                </Box>
-              )}
-              {activeStep === SurveySteps.SampleSize && (
-                <Box px={8}>
-                  <Box display="flex" alignItems="center">
-                    <Box pl={5} pr={5} fontWeight="500" fontSize="medium">
-                      {t('Sample Size')}:
-                    </Box>
-                    <RadioGroup
-                      aria-labelledby="selection-radio-buttons-group"
-                      value={selectedSampleSizeType}
-                      row
-                      name="radio-buttons-group"
-                    >
-                      {sampleSizeTabs.map((tab, index) => (
-                        <FormControlLabel
-                          value={index}
-                          data-cy={`radio-button-${tab}`}
-                          onChange={() => {
-                            setFormValues(values);
-                            setSelectedSampleSizeType(index);
-                          }}
-                          key={tab}
-                          control={<Radio color="primary" />}
-                          label={tab}
-                        />
-                      ))}
-                    </RadioGroup>
+      <Formik
+        initialValues={initialValues}
+        validationSchema={validationSchema}
+        validate={(values) => validate(values)}
+        validateOnBlur={validateData}
+        validateOnChange={validateData}
+        onSubmit={(values) => {
+          if (activeStep === steps.length - 1) {
+            confirm({
+              title: t('Confirmation'),
+              content:
+                category === SurveyCategory.Manual
+                  ? t('Are you sure you want to save this survey?')
+                  : t('Are you sure you want to send this survey?'),
+              continueText:
+                category === SurveyCategory.Manual ? t('Save') : t('Send'),
+            }).then(async () => {
+              try {
+                const response = await mutate({
+                  variables: prepareMutationVariables(values),
+                });
+                showMessage(t('Survey created.'));
+                navigate(
+                  `/${baseUrl}/accountability/surveys/${response.data.createSurvey.survey.id}`,
+                );
+              } catch (e) {
+                e.graphQLErrors.map((x) => showMessage(x.message));
+              }
+            });
+          } else {
+            setFormValues(values);
+            handleNext();
+          }
+        }}
+      >
+        {({ submitForm, setValues, values, setFieldValue, errors }) => (
+          <>
+            <PageHeader
+              title={`${'New Survey'} > ${matchCategory(category)}`}
+              breadCrumbs={
+                hasPermissions(
+                  PERMISSIONS.ACCOUNTABILITY_SURVEY_VIEW_CREATE,
+                  permissions,
+                )
+                  ? breadCrumbsItems
+                  : null
+              }
+            />
+            <PaperContainer>
+              <Grid xs={12} item>
+                <Stepper activeStep={activeStep}>
+                  {steps.map((label) => {
+                    const stepProps: { completed?: boolean } = {};
+                    const labelProps: {
+                      optional?: ReactNode;
+                    } = {};
+                    return (
+                      <Step key={label} {...stepProps}>
+                        <StepLabel {...labelProps}>{label}</StepLabel>
+                      </Step>
+                    );
+                  })}
+                </Stepper>
+              </Grid>
+              <Form>
+                <FormikEffect
+                  values={values}
+                  onChange={() => setFormValues(values)}
+                />
+                {activeStep === SurveySteps.LookUp && (
+                  <Box display="flex" flexDirection="column">
+                    <LookUpSelectionSurveys
+                      businessArea={businessArea}
+                      values={values}
+                      onValueChange={setFieldValue}
+                      setValues={setValues}
+                      selectedTab={selectedTab}
+                      setSelectedTab={setSelectedTab}
+                    />
                   </Box>
-                  <TabPanel value={selectedSampleSizeType} index={0}>
-                    <Box pt={6}>
-                      {mappedAdminAreas && (
-                        <Field
-                          name="excludedAdminAreasFull"
-                          choices={mappedAdminAreas}
-                          variant="outlined"
-                          label={t('Filter Out Administrative Level Areas')}
-                          component={FormikMultiSelectField}
-                        />
-                      )}
+                )}
+                {activeStep === SurveySteps.SampleSize && (
+                  <Box px={8}>
+                    <Box display="flex" alignItems="center">
+                      <Box pl={5} pr={5} fontWeight="500" fontSize="medium">
+                        {t('Sample Size')}:
+                      </Box>
+                      <RadioGroup
+                        aria-labelledby="selection-radio-buttons-group"
+                        value={selectedSampleSizeType}
+                        row
+                        name="radio-buttons-group"
+                      >
+                        {sampleSizeTabs.map((tab, index) => (
+                          <FormControlLabel
+                            value={index}
+                            data-cy={`radio-button-${tab}`}
+                            onChange={() => {
+                              setFormValues(values);
+                              setSelectedSampleSizeType(index);
+                            }}
+                            key={tab}
+                            control={<Radio color="primary" />}
+                            label={tab}
+                          />
+                        ))}
+                      </RadioGroup>
+                    </Box>
+                    <TabPanel value={selectedSampleSizeType} index={0}>
+                      <Box pt={6}>
+                        {mappedAdminAreas && (
+                          <Field
+                            name="excludedAdminAreasFull"
+                            choices={mappedAdminAreas}
+                            variant="outlined"
+                            label={t('Filter Out Administrative Level Areas')}
+                            component={FormikMultiSelectField}
+                          />
+                        )}
+                        <Box pt={3}>
+                          <Box
+                            pb={3}
+                            pt={3}
+                            fontSize={16}
+                            fontWeight="fontWeightBold"
+                          >
+                            Sample size:{' '}
+                            {
+                              sampleSizesData?.accountabilitySampleSize
+                                ?.sampleSize
+                            }{' '}
+                            out of{' '}
+                            {
+                              sampleSizesData?.accountabilitySampleSize
+                                ?.numberOfRecipients
+                            }{' '}
+                            {getSampleSizePercentage()}
+                          </Box>
+                        </Box>
+                      </Box>
+                    </TabPanel>
+                    <TabPanel value={selectedSampleSizeType} index={1}>
                       <Box pt={3}>
+                        <Field
+                          name="confidenceInterval"
+                          label={t('Confidence Interval')}
+                          min={90}
+                          max={99}
+                          component={FormikSliderField}
+                          suffix="%"
+                        />
+                        <Field
+                          name="marginOfError"
+                          label={t('Margin of Error')}
+                          min={0}
+                          max={9}
+                          component={FormikSliderField}
+                          suffix="%"
+                        />
+                        <Typography variant="caption">
+                          {t('Cluster Filters')}
+                        </Typography>
+                        <Box flexDirection="column" display="flex">
+                          <Box display="flex">
+                            <Field
+                              name="adminCheckbox"
+                              label={t('Administrative Level')}
+                              component={FormikCheckboxField}
+                            />
+                            <Field
+                              name="ageCheckbox"
+                              label={t('Age of HoH')}
+                              component={FormikCheckboxField}
+                            />
+                            <Field
+                              name="sexCheckbox"
+                              label={t('Gender of HoH')}
+                              component={FormikCheckboxField}
+                            />
+                          </Box>
+                          {values.adminCheckbox && (
+                            <Field
+                              name="excludedAdminAreasRandom"
+                              choices={mappedAdminAreas}
+                              variant="outlined"
+                              label={t('Filter Out Administrative Level Areas')}
+                              component={FormikMultiSelectField}
+                            />
+                          )}
+
+                          <Grid container>
+                            {values.ageCheckbox && (
+                              <Grid item xs={12}>
+                                <Grid container>
+                                  <Grid item xs={4}>
+                                    <Field
+                                      name="filterAgeMin"
+                                      label={t('Minimum Age')}
+                                      type="number"
+                                      color="primary"
+                                      component={FormikTextField}
+                                    />
+                                  </Grid>
+                                  <Grid item xs={4}>
+                                    <Field
+                                      name="filterAgeMax"
+                                      label={t('Maximum Age')}
+                                      type="number"
+                                      color="primary"
+                                      component={FormikTextField}
+                                    />
+                                  </Grid>
+                                </Grid>
+                              </Grid>
+                            )}
+                            {values.sexCheckbox && (
+                              <Grid item xs={5}>
+                                <Field
+                                  name="filterSex"
+                                  label={t('Gender')}
+                                  color="primary"
+                                  choices={[
+                                    { value: 'FEMALE', name: t('Female') },
+                                    { value: 'MALE', name: t('Male') },
+                                  ]}
+                                  component={FormikSelectField}
+                                />
+                              </Grid>
+                            )}
+                          </Grid>
+                        </Box>
                         <Box
                           pb={3}
                           pt={3}
@@ -476,212 +601,109 @@ export const CreateSurveyPage = (): React.ReactElement => {
                           {getSampleSizePercentage()}
                         </Box>
                       </Box>
-                    </Box>
-                  </TabPanel>
-                  <TabPanel value={selectedSampleSizeType} index={1}>
-                    <Box pt={3}>
-                      <Field
-                        name="confidenceInterval"
-                        label={t('Confidence Interval')}
-                        min={90}
-                        max={99}
-                        component={FormikSliderField}
-                        suffix="%"
-                      />
-                      <Field
-                        name="marginOfError"
-                        label={t('Margin of Error')}
-                        min={0}
-                        max={9}
-                        component={FormikSliderField}
-                        suffix="%"
-                      />
-                      <Typography variant="caption">
-                        {t('Cluster Filters')}
-                      </Typography>
-                      <Box flexDirection="column" display="flex">
-                        <Box display="flex">
+                    </TabPanel>
+                  </Box>
+                )}
+                {activeStep === SurveySteps.Details && (
+                  <>
+                    <Border />
+                    <Box my={3}>
+                      <Grid item xs={12}>
+                        {category === SurveyCategory.RapidPro ? (
                           <Field
-                            name="adminCheckbox"
-                            label={t('Administrative Level')}
-                            component={FormikCheckboxField}
+                            name="title"
+                            label={t('Title')}
+                            color="primary"
+                            choices={mappedFlows}
+                            component={FormikSelectField}
+                            required
+                            data-cy="input-title"
                           />
+                        ) : (
                           <Field
-                            name="ageCheckbox"
-                            label={t('Age of HoH')}
-                            component={FormikCheckboxField}
-                          />
-                          <Field
-                            name="sexCheckbox"
-                            label={t('Gender of HoH')}
-                            component={FormikCheckboxField}
-                          />
-                        </Box>
-                        {values.adminCheckbox && (
-                          <Field
-                            name="excludedAdminAreasRandom"
-                            choices={mappedAdminAreas}
+                            name="title"
+                            label={t('Title')}
+                            fullWidth
+                            required
                             variant="outlined"
-                            label={t('Filter Out Administrative Level Areas')}
-                            component={FormikMultiSelectField}
+                            component={FormikTextField}
+                            data-cy="input-title"
                           />
                         )}
-
-                        <Grid container>
-                          {values.ageCheckbox && (
-                            <Grid item xs={12}>
-                              <Grid container>
-                                <Grid item xs={4}>
-                                  <Field
-                                    name="filterAgeMin"
-                                    label={t('Minimum Age')}
-                                    type="number"
-                                    color="primary"
-                                    component={FormikTextField}
-                                  />
-                                </Grid>
-                                <Grid item xs={4}>
-                                  <Field
-                                    name="filterAgeMax"
-                                    label={t('Maximum Age')}
-                                    type="number"
-                                    color="primary"
-                                    component={FormikTextField}
-                                  />
-                                </Grid>
-                              </Grid>
-                            </Grid>
-                          )}
-                          {values.sexCheckbox && (
-                            <Grid item xs={5}>
-                              <Field
-                                name="filterSex"
-                                label={t('Gender')}
-                                color="primary"
-                                choices={[
-                                  { value: 'FEMALE', name: t('Female') },
-                                  { value: 'MALE', name: t('Male') },
-                                ]}
-                                component={FormikSelectField}
-                              />
-                            </Grid>
-                          )}
+                      </Grid>
+                    </Box>
+                    {category === SurveyCategory.Sms && (
+                      <Box my={3}>
+                        <Grid item xs={12}>
+                          <Field
+                            name="body"
+                            required
+                            multiline
+                            fullWidth
+                            variant="outlined"
+                            label={t('Message')}
+                            component={FormikTextField}
+                            data-cy="input-message"
+                          />
                         </Grid>
                       </Box>
+                    )}
+                    <Grid item xs={12}>
                       <Box
                         pb={3}
                         pt={3}
                         fontSize={16}
                         fontWeight="fontWeightBold"
                       >
-                        Sample size:{' '}
-                        {sampleSizesData?.accountabilitySampleSize?.sampleSize}{' '}
-                        out of{' '}
-                        {
-                          sampleSizesData?.accountabilitySampleSize
-                            ?.numberOfRecipients
-                        }{' '}
-                        {getSampleSizePercentage()}
+                        {t('Number of selected recipients')}:{' '}
+                        {sampleSizesData?.accountabilitySampleSize?.sampleSize}
                       </Box>
-                    </Box>
-                  </TabPanel>
-                </Box>
-              )}
-              {activeStep === SurveySteps.Details && (
-                <>
-                  <Border />
-                  <Box my={3}>
-                    <Grid item xs={12}>
-                      {category === SurveyCategory.RapidPro ? (
-                        <Field
-                          name="title"
-                          label={t('Title')}
-                          color="primary"
-                          choices={mappedFlows}
-                          component={FormikSelectField}
-                          required
-                          data-cy="input-title"
-                        />
-                      ) : (
-                        <Field
-                          name="title"
-                          label={t('Title')}
-                          fullWidth
-                          required
-                          variant="outlined"
-                          component={FormikTextField}
-                          data-cy="input-title"
-                        />
-                      )}
                     </Grid>
-                  </Box>
-                  {category === SurveyCategory.Sms && (
-                    <Box my={3}>
-                      <Grid item xs={12}>
-                        <Field
-                          name="body"
-                          required
-                          multiline
-                          fullWidth
-                          variant="outlined"
-                          label={t('Message')}
-                          component={FormikTextField}
-                          data-cy="input-message"
-                        />
-                      </Grid>
-                    </Box>
-                  )}
-                  <Grid item xs={12}>
-                    <Box
-                      pb={3}
-                      pt={3}
-                      fontSize={16}
-                      fontWeight="fontWeightBold"
-                    >
-                      {t('Number of selected recipients')}:{' '}
-                      {sampleSizesData?.accountabilitySampleSize?.sampleSize}
-                    </Box>
-                  </Grid>
-                </>
-              )}
-              {dataChangeErrors(errors)}
-            </Form>
-            <Box pt={3} display="flex" flexDirection="row">
-              <Box mr={3}>
-                <Button
-                  component={Link}
-                  data-cy="button-cancel"
-                  to={`/${baseUrl}/accountability/surveys`}
-                >
-                  {t('Cancel')}
-                </Button>
+                  </>
+                )}
+                {dataChangeErrors(errors)}
+              </Form>
+              <Box pt={3} display="flex" flexDirection="row">
+                <Box mr={3}>
+                  <Button
+                    component={Link}
+                    data-cy="button-cancel"
+                    to={`/${baseUrl}/accountability/surveys`}
+                  >
+                    {t('Cancel')}
+                  </Button>
+                </Box>
+                <Box display="flex" ml="auto">
+                  <Button
+                    disabled={activeStep === SurveySteps.LookUp}
+                    onClick={handleBack}
+                    data-cy="button-back"
+                  >
+                    {t('Back')}
+                  </Button>
+                  <LoadingButton
+                    loading={loading}
+                    color="primary"
+                    variant="contained"
+                    onClick={submitForm}
+                    data-cy="button-submit"
+                  >
+                    {t(
+                      activeStep === steps.length - 1
+                        ? t(
+                            category === SurveyCategory.Manual
+                              ? 'Save'
+                              : 'Send',
+                          )
+                        : 'Next',
+                    )}
+                  </LoadingButton>
+                </Box>
               </Box>
-              <Box display="flex" ml="auto">
-                <Button
-                  disabled={activeStep === SurveySteps.LookUp}
-                  onClick={handleBack}
-                  data-cy="button-back"
-                >
-                  {t('Back')}
-                </Button>
-                <LoadingButton
-                  loading={loading}
-                  color="primary"
-                  variant="contained"
-                  onClick={submitForm}
-                  data-cy="button-submit"
-                >
-                  {t(
-                    activeStep === steps.length - 1
-                      ? t(category === SurveyCategory.Manual ? 'Save' : 'Send')
-                      : 'Next',
-                  )}
-                </LoadingButton>
-              </Box>
-            </Box>
-          </PaperContainer>
-        </>
-      )}
-    </Formik>
+            </PaperContainer>
+          </>
+        )}
+      </Formik>
+    </UniversalErrorBoundary>
   );
 };

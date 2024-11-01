@@ -1,5 +1,4 @@
 import camelCase from 'lodash/camelCase';
-import * as React from 'react';
 import {
   GrievanceTicketQuery,
   PaymentRecordAndPaymentNode,
@@ -12,6 +11,7 @@ import {
 import { AddIndividualDataChange } from '../AddIndividualDataChange';
 import { EditHouseholdDataChange } from '../EditHouseholdDataChange/EditHouseholdDataChange';
 import { EditIndividualDataChange } from '../EditIndividualDataChange/EditIndividualDataChange';
+import { ReactElement } from 'react';
 
 interface EditValuesTypes {
   priority?: number | string;
@@ -216,7 +216,7 @@ export function prepareInitialValues(
   return initialValues;
 }
 
-export function EmptyComponent(): React.ReactElement {
+export function EmptyComponent(): ReactElement {
   return null;
 }
 export const dataChangeComponentDict = {

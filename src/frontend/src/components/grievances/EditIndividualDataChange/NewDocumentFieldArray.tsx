@@ -2,11 +2,11 @@ import { Button, Grid } from '@mui/material';
 import { useLocation } from 'react-router-dom';
 import { AddCircleOutline } from '@mui/icons-material';
 import { FieldArray } from 'formik';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { AllAddIndividualFieldsQuery } from '@generated/graphql';
 import { DocumentField } from '../DocumentField';
 import { removeItemById } from '../utils/helpers';
+import { ReactElement } from 'react';
 
 export interface NewDocumentFieldArrayProps {
   addIndividualFieldsData: AllAddIndividualFieldsQuery;
@@ -18,7 +18,7 @@ export function NewDocumentFieldArray({
   addIndividualFieldsData,
   values,
   setFieldValue,
-}: NewDocumentFieldArrayProps): React.ReactElement {
+}: NewDocumentFieldArrayProps): ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;

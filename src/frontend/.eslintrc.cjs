@@ -35,7 +35,13 @@ module.exports = {
     'jest',
     '@tanstack/query',
   ],
-  ignorePatterns: ['**/*.test.tsx', '**/*.test.ts', '**/__generated__/*'],
+  ignorePatterns: [
+    '**/*.test.tsx',
+    '**/*.test.ts',
+    '**/__generated__/*',
+    'src/restgenerated/',
+    'node_modules/',
+  ],
   settings: {
     react: {
       version: 'detect',
@@ -61,10 +67,12 @@ module.exports = {
     '@typescript-eslint/no-unsafe-member-access': 'off',
     '@typescript-eslint/no-unsafe-return': 'off',
     '@typescript-eslint/no-misused-promises': 'off',
-    '@typescript-eslint/no-unused-vars': 'warn',
+    '@typescript-eslint/no-unused-vars': 'error',
+    "no-unused-vars": "error",
+    "no-undef": "error",
     'import/no-unresolved': 'off',
     'import/named': 'off',
-    'import/default': 'off',
+    'import/default':  'off',
     'import/namespace': 'off',
     'import/no-extraneous-dependencies': 'off',
     'import/prefer-default-export': 'off',
@@ -82,5 +90,9 @@ module.exports = {
     'import/extensions': 'off',
     'import/no-named-as-default': 'off',
     'import/no-named-as-default-member': 'off',
+    "padding-line-between-statements": [
+      "error",
+      { "blankLine": "never", "prev": "import", "next": "import" }
+    ]
   },
 };

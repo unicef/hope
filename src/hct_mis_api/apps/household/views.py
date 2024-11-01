@@ -1,4 +1,5 @@
-from typing import Dict, Optional
+import logging
+from typing import Dict, Optional, Union
 
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
@@ -10,7 +11,6 @@ from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.filters import _prepare_kobo_asset_id_value
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_TAX_ID,
-    Document,
     Household,
     PendingDocument,
     PendingHousehold,
@@ -22,33 +22,25 @@ from hct_mis_api.apps.household.serializers import (
 )
 from hct_mis_api.apps.utils.profiling import profiling
 
+logger = logging.getLogger(__name__)
+
 
 def get_individual(tax_id: str, business_area_code: Optional[str]) -> PendingIndividual:
-    documents = (
-        Document.objects.all()
-        if not business_area_code
-        else Document.objects.filter(individual__household__business_area__code=business_area_code)
-    ).filter(type__key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID], document_number=tax_id)
-    if documents.count() > 1:
-        raise Exception(f"Multiple documents ({documents.count()}) with given tax_id found")
-    if documents.count() == 1:
-        return documents.first().individual
-
-    imported_documents = (
+    pending_documents = (
         PendingDocument.objects.all()
         if not business_area_code
         else PendingDocument.objects.filter(
             individual__household__registration_data_import__business_area__code=business_area_code
         )
     ).filter(type__key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID], document_number=tax_id)
-    if imported_documents.count() > 1:
-        raise Exception(f"Multiple imported documents ({imported_documents.count()}) with given tax_id found")
-    if imported_documents.count() == 1:
-        return imported_documents.first().individual
+    if pending_documents.count() > 1:
+        raise Exception(f"Multiple imported documents ({pending_documents.count()}) with given tax_id found")
+    if pending_documents.count() == 1:
+        return pending_documents.first().individual
     raise Exception("Document with given tax_id not found")
 
 
-def get_household(registration_id: str, business_area_code: Optional[str]) -> PendingHousehold:
+def get_household(registration_id: str, business_area_code: Optional[str]) -> Union[PendingHousehold, Household]:
     kobo_asset_value = _prepare_kobo_asset_id_value(registration_id)
     households = (
         Household.objects.all()
@@ -61,17 +53,17 @@ def get_household(registration_id: str, business_area_code: Optional[str]) -> Pe
         return households.first()  # type: ignore
 
     if business_area_code is None:
-        imported_households_by_business_area = PendingHousehold.objects.all()
+        pending_households_by_business_area = PendingHousehold.objects.all()
     else:
         business_areas = BusinessArea.objects.filter(code=business_area_code)
         if not business_areas:
             raise Exception(f"Business area with code {business_area_code} not found")
         business_area = business_areas.first()  # code is unique, so no need to worry here
-        imported_households_by_business_area = PendingHousehold.objects.filter(
+        pending_households_by_business_area = PendingHousehold.objects.filter(
             registration_data_import__business_area__slug=business_area.slug
         )
 
-    imported_households = imported_households_by_business_area.filter(detail_id__endswith=kobo_asset_value)
+    imported_households = pending_households_by_business_area.filter(detail_id__endswith=kobo_asset_value)
     if imported_households.count() > 1:
         raise Exception(
             f"Multiple imported households ({imported_households.count()}) with given registration_id found"
@@ -111,7 +103,8 @@ class HouseholdStatusView(APIView):
 
         try:
             data = get_household_or_individual(tax_id, registration_id, business_area_code)
-        except Exception as exception:
-            return Response({"status": "not found", "error_message": str(exception)}, status=404)
+        except Exception as e:  # pragma: no cover
+            logger.exception(e)
+            return Response({"status": "not found", "error_message": "Household not Found"}, status=404)
 
         return Response(data, status=200)

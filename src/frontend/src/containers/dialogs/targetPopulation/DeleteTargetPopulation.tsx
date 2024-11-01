@@ -6,7 +6,6 @@ import {
   DialogTitle,
 } from '@mui/material';
 import { Formik } from 'formik';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 import { LoadingButton } from '@components/core/LoadingButton';
@@ -17,6 +16,7 @@ import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useNavigate } from 'react-router-dom';
+import { ReactElement } from 'react';
 
 export interface DeleteTargetPopulationProps {
   open: boolean;
@@ -28,7 +28,7 @@ export const DeleteTargetPopulation = ({
   open,
   setOpen,
   targetPopulationId,
-}: DeleteTargetPopulationProps): React.ReactElement => {
+}: DeleteTargetPopulationProps): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [mutate, { loading }] = useDeleteTargetPopulationMutation();

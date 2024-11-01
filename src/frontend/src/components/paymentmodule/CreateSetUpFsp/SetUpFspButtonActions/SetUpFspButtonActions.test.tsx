@@ -1,5 +1,4 @@
-import { act } from '@testing-library/react';
-import * as React from 'react';
+import { act } from 'react';
 import wait from 'waait';
 import { render } from '../../../../testUtils/testUtils';
 import { SetUpFspButtonActions } from './SetUpFspButtonActions';

@@ -1,6 +1,5 @@
 import { Box } from '@mui/material';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { FormikFileField } from '@shared/Formik/FormikFileField';
 import {
@@ -23,7 +22,7 @@ export function GrievanceFlexFieldPhotoModalEditable({
   field,
   form,
   flexField,
-}: GrievanceFlexFieldPhotoModalEditableProps): React.ReactElement {
+}: GrievanceFlexFieldPhotoModalEditableProps): ReactElement {
   const [isEdited, setEdit] = useState(false);
   const { id } = useParams();
   const { data } = useGrievanceTicketFlexFieldsQuery({
@@ -37,9 +36,9 @@ export function GrievanceFlexFieldPhotoModalEditable({
 
   const flexFields = isIndividual
     ? data.grievanceTicket?.individualDataUpdateTicketDetails?.individualData
-      ?.flex_fields
+        ?.flex_fields
     : data.grievanceTicket?.householdDataUpdateTicketDetails?.householdData
-      ?.flex_fields;
+        ?.flex_fields;
 
   const picUrl: string = isCurrent
     ? flexFields[flexField.name]?.previous_value

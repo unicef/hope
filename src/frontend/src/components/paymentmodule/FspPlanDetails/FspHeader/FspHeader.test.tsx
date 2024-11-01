@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { PERMISSIONS } from '../../../../config/permissions';
 import { render } from '../../../../testUtils/testUtils';
 import { FspHeader } from './FspHeader';

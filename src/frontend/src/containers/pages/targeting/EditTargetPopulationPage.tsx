@@ -1,6 +1,5 @@
-import * as React from 'react';
-import { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { ReactElement, useEffect } from 'react';
+import { useLocation, useParams } from 'react-router-dom';
 import {
   TargetPopulationBuildStatus,
   useBusinessAreaDataQuery,
@@ -12,10 +11,13 @@ import { EditTargetPopulation } from '@components/targeting/EditTargetPopulation
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError } from '@utils/utils';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
-export const EditTargetPopulationPage = (): React.ReactElement => {
+export const EditTargetPopulationPage = (): ReactElement => {
   const { id } = useParams();
   const permissions = usePermissions();
+  const location = useLocation();
+
   const { data, loading, error, startPolling, stopPolling } =
     useTargetPopulationQuery({
       variables: { id },
@@ -50,9 +52,18 @@ export const EditTargetPopulationPage = (): React.ReactElement => {
   const { targetPopulation } = data;
 
   return (
-    <EditTargetPopulation
-      targetPopulation={targetPopulation}
-      screenBeneficiary={businessAreaData?.businessArea?.screenBeneficiary}
-    />
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'EditTargetPopulationPage.tsx');
+      }}
+      componentName="EditTargetPopulationPage"
+    >
+      <EditTargetPopulation
+        targetPopulation={targetPopulation}
+        screenBeneficiary={businessAreaData?.businessArea?.screenBeneficiary}
+      />
+    </UniversalErrorBoundary>
   );
 };

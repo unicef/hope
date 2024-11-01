@@ -1,6 +1,5 @@
 import { IconButton } from '@mui/material';
 import { Delete, Edit } from '@mui/icons-material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import GreaterThanEqual from '../../../assets/GreaterThanEqual.svg';
@@ -8,6 +7,8 @@ import LessThanEqual from '../../../assets/LessThanEqual.svg';
 import { TargetingCriteriaRuleObjectType } from '@generated/graphql';
 import { Box } from '@mui/system';
 import { BlueText } from '@components/grievances/LookUps/LookUpStyles';
+import { ReactElement } from 'react';
+import { Fragment } from 'react/jsx-runtime';
 
 interface CriteriaElementProps {
   alternative?: boolean;
@@ -74,7 +75,7 @@ const PduDataBox = styled(Box)`
   margin: ${({ theme }) => theme.spacing(3)};
 `;
 
-const CriteriaField = ({ field, choicesDict }): React.ReactElement => {
+const CriteriaField = ({ field, choicesDict }): ReactElement => {
   const extractChoiceLabel = (choiceField, argument) => {
     let choices = choicesDict?.[choiceField.fieldName];
     if (!choices) {
@@ -167,12 +168,12 @@ const CriteriaField = ({ field, choicesDict }): React.ReactElement => {
         <p>
           {field.fieldAttribute.labelEn || field.fieldName}:{' '}
           {field.arguments?.map((argument, index) => (
-            <React.Fragment key={index}>
+            <Fragment key={index}>
               <span>
                 {displayValueOrEmpty(extractChoiceLabel(field, argument))}
               </span>
               {index !== field.arguments.length - 1 && ', '}
-            </React.Fragment>
+            </Fragment>
           ))}
         </p>
       );
@@ -234,7 +235,7 @@ export function Criteria({
   choicesDict,
   alternative = null,
   individualsFiltersBlocks,
-}: CriteriaProps): React.ReactElement {
+}: CriteriaProps): ReactElement {
   return (
     <CriteriaElement alternative={alternative} data-cy="criteria-container">
       {(rules || []).map((each, index) => (

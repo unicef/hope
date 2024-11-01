@@ -1,10 +1,10 @@
 import { Box } from '@mui/material';
-import * as React from 'react';
 import {
   AllEditHouseholdFieldsQuery,
   useHouseholdFlexFieldsQuery,
 } from '@generated/graphql';
 import { PhotoModal } from '@core/PhotoModal/PhotoModal';
+import { ReactElement } from 'react';
 
 export interface GrievanceFlexFieldPhotoModalNewHouseholdProps {
   flexField: AllEditHouseholdFieldsQuery['allEditHouseholdFieldsAttributes'][number];
@@ -14,7 +14,7 @@ export interface GrievanceFlexFieldPhotoModalNewHouseholdProps {
 export function GrievanceFlexFieldPhotoModalNewHousehold({
   flexField,
   householdId,
-}: GrievanceFlexFieldPhotoModalNewHouseholdProps): React.ReactElement {
+}: GrievanceFlexFieldPhotoModalNewHouseholdProps): ReactElement {
   const { data } = useHouseholdFlexFieldsQuery({
     variables: { id: householdId },
     fetchPolicy: 'network-only',

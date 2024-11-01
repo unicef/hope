@@ -1,6 +1,6 @@
 import { MockedProvider } from '@apollo/react-testing';
-import { act } from '@testing-library/react';
-import * as React from 'react';
+import { act } from 'react';
+
 import wait from 'waait';
 import { fakeApolloAllTargetPopulation } from '../../../../../fixtures/targeting/fakeApolloAllTargetPopulation';
 import { ApolloLoadingLink, render } from '../../../../testUtils/testUtils';
@@ -29,10 +29,7 @@ describe('containers/tables/targeting/TargetPopulation/TargetPopulationTable', (
 
   it('should render loading', () => {
     const { container } = render(
-      <MockedProvider
-        addTypename={false}
-        mocks={fakeApolloAllTargetPopulation}
-      >
+      <MockedProvider addTypename={false} mocks={fakeApolloAllTargetPopulation}>
         <TargetPopulationTable filter={initialFilter} canViewDetails />
       </MockedProvider>,
     );

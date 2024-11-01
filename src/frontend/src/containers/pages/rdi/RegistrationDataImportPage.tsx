@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { PageHeader } from '@components/core/PageHeader';
@@ -17,6 +16,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { useDeduplicationFlagsQuery } from '@generated/graphql';
 import { ButtonTooltip } from '@core/ButtonTooltip';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
 const initialFilter = {
   search: '',
@@ -28,7 +28,7 @@ const initialFilter = {
   importDateRangeMax: '',
 };
 
-export function RegistrationDataImportPage(): React.ReactElement {
+export function RegistrationDataImportPage(): ReactElement {
   const location = useLocation();
   const permissions = usePermissions();
   const { t } = useTranslation();
@@ -90,23 +90,33 @@ export function RegistrationDataImportPage(): React.ReactElement {
       </Box>
     </PageHeader>
   );
+
   return (
-    <div>
-      {toolbar}
-      <RegistrationFilters
-        filter={filter}
-        setFilter={setFilter}
-        initialFilter={initialFilter}
-        appliedFilter={appliedFilter}
-        setAppliedFilter={setAppliedFilter}
-      />
-      <RegistrationDataImportTable
-        filter={appliedFilter}
-        canViewDetails={hasPermissions(
-          PERMISSIONS.RDI_VIEW_DETAILS,
-          permissions,
-        )}
-      />
-    </div>
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'RegistrationDataImportPage.tsx');
+      }}
+      componentName="RegistrationDataImportPage"
+    >
+      <div>
+        {toolbar}
+        <RegistrationFilters
+          filter={filter}
+          setFilter={setFilter}
+          initialFilter={initialFilter}
+          appliedFilter={appliedFilter}
+          setAppliedFilter={setAppliedFilter}
+        />
+        <RegistrationDataImportTable
+          filter={appliedFilter}
+          canViewDetails={hasPermissions(
+            PERMISSIONS.RDI_VIEW_DETAILS,
+            permissions,
+          )}
+        />
+      </div>
+    </UniversalErrorBoundary>
   );
 }

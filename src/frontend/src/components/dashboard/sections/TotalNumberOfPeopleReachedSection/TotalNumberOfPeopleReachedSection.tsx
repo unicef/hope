@@ -1,7 +1,6 @@
 import { Box, Button, DialogContent, Grid } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { Dialog } from '@containers/dialogs/Dialog';
@@ -36,7 +35,7 @@ export function TotalNumberOfPeopleReachedSection({
   data,
   chartDataPeople,
   chartDataPeopleDisability,
-}: TotalNumberOfPeopleReachedSectionProps): React.ReactElement {
+}: TotalNumberOfPeopleReachedSectionProps): ReactElement {
   const [dialogOpen, setDialogOpen] = useState(false);
   const { t } = useTranslation();
   if (!data) return null;
