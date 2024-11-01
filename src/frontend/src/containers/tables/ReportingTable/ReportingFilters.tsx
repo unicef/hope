@@ -1,11 +1,11 @@
 import { Checkbox, FormControlLabel, Grid, MenuItem } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { DatePickerFilter } from '@components/core/DatePickerFilter';
 import { FiltersSection } from '@components/core/FiltersSection';
 import { SelectFilter } from '@components/core/SelectFilter';
 import { createHandleApplyFilterChange } from '@utils/utils';
+import { ReactElement } from 'react';
 
 interface ReportingFiltersProps {
   filter;
@@ -23,7 +23,7 @@ export function ReportingFilters({
   initialFilter,
   appliedFilter,
   setAppliedFilter,
-}: ReportingFiltersProps): React.ReactElement {
+}: ReportingFiltersProps): ReactElement {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();

@@ -11,7 +11,6 @@ import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { getTargetingCriteriaVariables } from '@utils/targetingUtils';
 import { Field, FieldArray, Form, Formik } from 'formik';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
@@ -22,6 +21,7 @@ import { PaperContainer } from '../PaperContainer';
 import { EditTargetPopulationHeader } from './EditTargetPopulationHeader';
 import { TargetingCriteriaDisplay } from '../TargetingCriteriaDisplay/TargetingCriteriaDisplay';
 import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
+import { ReactElement } from 'react';
 
 interface EditTargetPopulationProps {
   targetPopulation: TargetPopulationQuery['targetPopulation'];
@@ -31,7 +31,7 @@ interface EditTargetPopulationProps {
 export const EditTargetPopulation = ({
   targetPopulation,
   screenBeneficiary,
-}: EditTargetPopulationProps): React.ReactElement => {
+}: EditTargetPopulationProps): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const initialValues = {

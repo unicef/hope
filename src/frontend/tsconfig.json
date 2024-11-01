@@ -30,7 +30,8 @@
       "@shared/*": ["src/shared/*"],
       "@utils/*": ["src/utils/*"],
       "@hooks/*": ["src/hooks/*"],
-      "@generated/*": ["src/__generated__/*"]
+      "@generated/*": ["src/__generated__/*"],
+      "@restgenerated/*": ["src/restgenerated/*"]
     }
   },
   "include": [
@@ -42,6 +43,6 @@
     ".eslintrc.cjs",
     "jest.config"
   ],
-  "exclude": ["node_modules", "frontend/jest"],
+  "exclude": ["node_modules", "frontend/jest", "src/restgenerated"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

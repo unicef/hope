@@ -1,6 +1,6 @@
 import { MockedProvider } from '@apollo/react-testing';
-import { act } from '@testing-library/react';
-import * as React from 'react';
+import { act } from 'react';
+
 import wait from 'waait';
 import { PaymentRecordTable } from '.';
 import { fakeApolloAllPaymentRecords } from '../../../../../fixtures/payments/fakeApolloAllPaymentRecords';
@@ -21,10 +21,7 @@ describe('containers/tables/payments/PaymentRecordTable', () => {
 
   it('should render loading', () => {
     const { container } = render(
-      <MockedProvider
-        addTypename={false}
-        mocks={fakeApolloAllPaymentRecords}
-      >
+      <MockedProvider addTypename={false} mocks={fakeApolloAllPaymentRecords}>
         <PaymentRecordTable cashPlan={fakeCashPlan} openInNewTab={false} />
       </MockedProvider>,
     );

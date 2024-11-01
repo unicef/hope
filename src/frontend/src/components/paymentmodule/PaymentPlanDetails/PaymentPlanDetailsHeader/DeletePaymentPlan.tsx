@@ -7,8 +7,7 @@ import {
   DialogTitle,
   IconButton,
 } from '@mui/material';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Delete } from '@mui/icons-material';
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
@@ -27,7 +26,7 @@ export interface DeletePaymentPlanProps {
 
 export function DeletePaymentPlan({
   paymentPlan,
-}: DeletePaymentPlanProps): React.ReactElement {
+}: DeletePaymentPlanProps): ReactElement {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -56,6 +55,7 @@ export function DeletePaymentPlan({
         <IconButton
           onClick={() => setDeleteDialogOpen(true)}
           disabled={!isActiveProgram}
+          data-cy="button-delete-pp"
         >
           <Delete />
         </IconButton>

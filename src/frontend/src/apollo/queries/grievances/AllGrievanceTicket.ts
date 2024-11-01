@@ -78,6 +78,7 @@ export const AllGrievanceTicket = gql`
         cursor
         node {
           id
+          targetId
           status
           assignedTo {
             id

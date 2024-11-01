@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { UniversalTable } from '@containers/tables/UniversalTable';
 import {
   AllSanctionListIndividualsQueryVariables,
@@ -7,16 +6,17 @@ import {
 } from '@generated/graphql';
 import { SanctionListIndividualsTableRow } from './SanctionListIndividualsTableRow';
 import { headCells } from './SanctionListIndividualsHeadCells';
+import { ReactElement } from 'react';
 
-export function SanctionListIndividualsTable({ filter }): React.ReactElement {
+export function SanctionListIndividualsTable({ filter }): ReactElement {
   const initialVariables = {
     fullNameContains: filter.fullName,
     referenceNumber: filter.referenceNumber,
   };
   return (
     <UniversalTable<
-    AllSanctionListIndividualsQuery['allSanctionListIndividuals']['edges'][number]['node'],
-    AllSanctionListIndividualsQueryVariables
+      AllSanctionListIndividualsQuery['allSanctionListIndividuals']['edges'][number]['node'],
+      AllSanctionListIndividualsQueryVariables
     >
       headCells={headCells}
       query={useAllSanctionListIndividualsQuery}

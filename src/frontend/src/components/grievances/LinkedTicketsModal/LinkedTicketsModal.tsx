@@ -11,7 +11,7 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -60,7 +60,7 @@ export function LinkedTicketsModal({
   canViewDetails,
   baseUrl,
   issueTypeChoicesData,
-}: LinkedTicketsModalProps): React.ReactElement {
+}: LinkedTicketsModalProps): ReactElement {
   const [dialogOpen, setDialogOpen] = useState(false);
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -86,7 +86,7 @@ export function LinkedTicketsModal({
       .subCategories.find((el) => el.value === row.issueType.toString()).name;
   };
 
-  const renderRow = (row): React.ReactElement => {
+  const renderRow = (row): ReactElement => {
     const issueType = renderIssueTypeName(row);
     const grievanceDetailsPath = getGrievanceDetailsPath(
       row.id,
@@ -120,7 +120,7 @@ export function LinkedTicketsModal({
     );
   };
 
-  const renderLink = (): React.ReactElement => {
+  const renderLink = (): ReactElement => {
     const ticketsCount = ticket.relatedTickets.length;
     if (ticketsCount === 0) {
       return <span>-</span>;
@@ -138,7 +138,7 @@ export function LinkedTicketsModal({
     );
   };
 
-  const renderRows = (): React.ReactElement => {
+  const renderRows = (): ReactElement => {
     if (loading) return <LoadingComponent />;
     if (!data) return null;
 

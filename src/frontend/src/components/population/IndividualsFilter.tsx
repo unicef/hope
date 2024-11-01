@@ -1,7 +1,6 @@
 import { Grid, MenuItem } from '@mui/material';
 import CakeIcon from '@mui/icons-material/Cake';
 import FlashOnIcon from '@mui/icons-material/FlashOn';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
@@ -20,6 +19,7 @@ import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import { useProgramContext } from '../../programContext';
 import { DocumentSearchField } from '@core/DocumentSearchField';
+import { ReactElement } from 'react';
 
 interface IndividualsFilterProps {
   filter;
@@ -41,7 +41,7 @@ export function IndividualsFilter({
   appliedFilter,
   setAppliedFilter,
   isOnPaper = true,
-}: IndividualsFilterProps): React.ReactElement {
+}: IndividualsFilterProps): ReactElement {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();

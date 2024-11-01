@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import styled from 'styled-components';
 import TableCell from '@mui/material/TableCell';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
@@ -17,9 +16,7 @@ interface UsersTableRowProps {
   user: UserNode;
 }
 
-export const UsersTableRow = ({
-  user,
-}: UsersTableRowProps): React.ReactElement => {
+export const UsersTableRow = ({ user }: UsersTableRowProps): ReactElement => {
   const [open, setOpen] = useState(false);
 
   const mappedRoles = user?.userRoles?.map((el) => (
@@ -79,7 +76,9 @@ export const UsersTableRow = ({
                 <Box margin={1} data-cy="partner-role">
                   <GreyText>Partner Roles</GreyText>
                 </Box>
-                <Box margin={1} data-cy="mapped-partner-role">{mappedPartnerRoles}</Box>
+                <Box margin={1} data-cy="mapped-partner-role">
+                  {mappedPartnerRoles}
+                </Box>
               </>
             )}
           </Collapse>

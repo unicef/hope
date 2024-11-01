@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { PageHeader } from '@components/core/PageHeader';
@@ -11,6 +10,7 @@ import { usePermissions } from '@hooks/usePermissions';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { PaymentVerificationTable } from '../../tables/payments/PaymentVerificationTable';
 import { PaymentVerificationFilters } from '../../tables/payments/PaymentVerificationTable/PaymentVerificationFilters';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
 const initialFilter = {
   search: '',
@@ -21,7 +21,7 @@ const initialFilter = {
   endDate: '',
 };
 
-export function PaymentVerificationPage(): React.ReactElement {
+export function PaymentVerificationPage(): ReactElement {
   const { t } = useTranslation();
   const { businessArea } = useBaseUrl();
   const permissions = usePermissions();
@@ -39,7 +39,14 @@ export function PaymentVerificationPage(): React.ReactElement {
     return <PermissionDenied />;
 
   return (
-    <>
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'PaymentVerificationPage.tsx');
+      }}
+      componentName="PaymentVerificationPage"
+    >
       <PageHeader title={t('Payment Verification')} />
       <PaymentVerificationFilters
         filter={filter}
@@ -58,6 +65,6 @@ export function PaymentVerificationPage(): React.ReactElement {
           )}
         />
       </TableWrapper>
-    </>
+    </UniversalErrorBoundary>
   );
 }

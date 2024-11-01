@@ -348,25 +348,34 @@ class ProgramCycle(AdminUrlMixin, TimeStampedUUIDModel, UnicefIdentifiedModel, C
         return f"{self.title} ({self.status})"
 
     @property
+    def can_remove_cycle(self) -> bool:
+        return (
+            not self.target_populations.exists()
+            and not self.payment_plans.exists()
+            and self.program.cycles.count() > 1
+            and self.status == ProgramCycle.DRAFT
+        )
+
+    @property
     def total_entitled_quantity_usd(self) -> Decimal:
-        total_entitled = self.payment_plans.aggregate(total_entitled=Sum("total_entitled_quantity_usd"))[
-            "total_entitled"
+        total_entitled_usd = self.payment_plans.aggregate(total_entitled_usd=Sum("total_entitled_quantity_usd"))[
+            "total_entitled_usd"
         ]
-        return total_entitled or Decimal(0.0)
+        return total_entitled_usd or Decimal(0.0)
 
     @property
     def total_undelivered_quantity_usd(self) -> Decimal:
-        total_undelivered = self.payment_plans.aggregate(total_undelivered=Sum("total_undelivered_quantity_usd"))[
-            "total_undelivered"
-        ]
-        return total_undelivered or Decimal(0.0)
+        total_undelivered_usd = self.payment_plans.aggregate(
+            total_undelivered_usd=Sum("total_undelivered_quantity_usd")
+        )["total_undelivered_usd"]
+        return total_undelivered_usd or Decimal(0.0)
 
     @property
     def total_delivered_quantity_usd(self) -> Decimal:
-        total_delivered = self.payment_plans.aggregate(total_delivered=Sum("total_delivered_quantity_usd"))[
-            "total_delivered"
+        total_delivered_usd = self.payment_plans.aggregate(total_delivered_usd=Sum("total_delivered_quantity_usd"))[
+            "total_delivered_usd"
         ]
-        return total_delivered or Decimal(0.0)
+        return total_delivered_usd or Decimal(0.0)
 
     @property
     def program_start_date(self) -> date:

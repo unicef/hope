@@ -1,5 +1,4 @@
 import { Box, Grid, IconButton, Tooltip, Typography } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { PaymentPlanQuery } from '@generated/graphql';
 import { renderUserName } from '@utils/utils';
@@ -10,6 +9,7 @@ import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { Info } from '@mui/icons-material';
+import { ReactElement } from 'react';
 
 interface FollowUpPaymentPlanDetailsProps {
   baseUrl: string;
@@ -19,7 +19,7 @@ interface FollowUpPaymentPlanDetailsProps {
 export function FollowUpPaymentPlanDetails({
   baseUrl,
   paymentPlan,
-}: FollowUpPaymentPlanDetailsProps): React.ReactElement {
+}: FollowUpPaymentPlanDetailsProps): ReactElement {
   const { t } = useTranslation();
   const {
     createdBy,

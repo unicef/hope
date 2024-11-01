@@ -1,11 +1,11 @@
 import { Box } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { usePaymentPlanAction } from '@hooks/usePaymentPlanAction';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Action, PaymentPlanQuery } from '@generated/graphql';
 import { LoadingButton } from '@core/LoadingButton';
 import { useProgramContext } from '../../../../../programContext';
+import { ReactElement } from 'react';
 
 export interface LockedFspPaymentPlanHeaderButtonsProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
@@ -17,7 +17,7 @@ export function LockedFspPaymentPlanHeaderButtons({
   paymentPlan,
   canUnlock,
   canSendForApproval,
-}: LockedFspPaymentPlanHeaderButtonsProps): React.ReactElement {
+}: LockedFspPaymentPlanHeaderButtonsProps): ReactElement {
   const { t } = useTranslation();
   const { id } = paymentPlan;
   const { showMessage } = useSnackbar();
@@ -44,6 +44,7 @@ export function LockedFspPaymentPlanHeaderButtons({
             color="primary"
             onClick={() => unlock()}
             disabled={!isActiveProgram}
+            data-cy="button-unlock-fsp"
           >
             {t('Unlock FSP')}
           </LoadingButton>

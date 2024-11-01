@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { useMeQuery, useReportChoiceDataQuery } from '@generated/graphql';
@@ -13,6 +12,7 @@ import { getFilterFromQueryParams } from '@utils/utils';
 import { ReportingFilters } from '../../tables/ReportingTable/ReportingFilters';
 import { ReportingTable } from '../../tables/ReportingTable/ReportingTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
 const initialFilter = {
   type: '',
@@ -22,7 +22,7 @@ const initialFilter = {
   onlyMy: false,
 };
 
-export function ReportingPage(): React.ReactElement {
+export function ReportingPage(): ReactElement {
   const { t } = useTranslation();
   const { businessArea } = useBaseUrl();
   const permissions = usePermissions();
@@ -49,7 +49,14 @@ export function ReportingPage(): React.ReactElement {
     return <PermissionDenied />;
 
   return (
-    <>
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'ReportingPage.tsx');
+      }}
+      componentName="ReportingPage"
+    >
       <PageHeader title={t('Reporting')}>
         <NewReportForm />
       </PageHeader>
@@ -67,6 +74,6 @@ export function ReportingPage(): React.ReactElement {
         choicesData={choicesData}
         meData={meData}
       />
-    </>
+    </UniversalErrorBoundary>
   );
 }

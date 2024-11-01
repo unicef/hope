@@ -1,11 +1,11 @@
 import { Box, Button } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
 import { TargetPopulationQuery } from '@generated/graphql';
 import { BreadCrumbsItem } from '@core/BreadCrumbs';
 import { LoadingButton } from '@core/LoadingButton';
 import { PageHeader } from '@core/PageHeader';
+import { ReactElement } from 'react';
 
 interface EditTargetPopulationProps {
   handleSubmit: () => Promise<void>;
@@ -23,7 +23,7 @@ export const EditTargetPopulationHeader = ({
   targetPopulation,
   loading,
   category,
-}: EditTargetPopulationProps): React.ReactElement => {
+}: EditTargetPopulationProps): ReactElement => {
   const { t } = useTranslation();
 
   const isSubmitDisabled = () => {

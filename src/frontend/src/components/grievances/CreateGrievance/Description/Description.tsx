@@ -1,7 +1,6 @@
 import { Box, FormHelperText, Grid, GridSize, Typography } from '@mui/material';
 import { Field } from 'formik';
-import * as React from 'react';
-import { useEffect } from 'react';
+import { ReactElement, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
@@ -23,6 +22,7 @@ import { Title } from '@core/Title';
 import { NewDocumentationFieldArray } from '../../Documentation/NewDocumentationFieldArray';
 import { LookUpLinkedTickets } from '../../LookUps/LookUpLinkedTickets/LookUpLinkedTickets';
 import { LookUpPaymentRecord } from '../../LookUps/LookUpPaymentRecord/LookUpPaymentRecord';
+import { useProgramContext } from 'src/programContext';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -61,9 +61,11 @@ export function Description({
   setFieldValue,
   errors,
   permissions,
-}: DescriptionProps): React.ReactElement {
+}: DescriptionProps): ReactElement {
   const { t } = useTranslation();
   const { isAllPrograms } = useBaseUrl();
+  const { isSocialDctType } = useProgramContext();
+
   const { data: partnerChoicesData } = usePartnerForGrievanceChoicesQuery({
     variables: {
       householdId: values.selectedHousehold?.id,
@@ -161,7 +163,9 @@ export function Description({
                 size: 3,
               },
             ]
-              .filter((el) => el)
+              .filter((el) =>
+                isSocialDctType ? el.label !== 'Household ID' : el,
+              )
               .map((el) => (
                 <Grid key={el.label} item xs={el.size as GridSize}>
                   <LabelizedField label={el.label}>{el.value}</LabelizedField>

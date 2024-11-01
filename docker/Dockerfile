@@ -9,7 +9,7 @@ FROM curl as certs
 RUN curl -o /data/psql-cert.crt -L https://dl.cacerts.digicert.com/DigiCertGlobalRootCA.crt.pem
 
 # Base image
-FROM python:3.11.7-slim-bookworm as base
+FROM python:3.12.7-slim-bookworm as base
 
 ARG UID=82
 
@@ -42,7 +42,7 @@ RUN apt-get update \
 ENV PDM_PACKAGES=/packages
 ENV CODE=/code
 ENV PDM_PROJECT=$PDM_PACKAGES
-ENV PYPACKAGES=$PDM_PACKAGES/__pypackages__/3.11
+ENV PYPACKAGES=$PDM_PACKAGES/__pypackages__/3.12
 ENV PYTHONPYCACHEPREFIX=/tmp/pycache \
     PYTHONPATH=$PYPACKAGES/lib:$PYTHONPATH \
     PATH=$PYPACKAGES/bin:$PATH \
@@ -55,7 +55,8 @@ COPY --from=waitforit /data/waitforit /usr/local/bin/waitforit
 # Dist builder image
 FROM base as pdm
 RUN pip install --upgrade pip &&\
-    pip install pdm==2.15.2 &&\
+    pip install pdm==2.19.2 &&\
+    pip install pdm-backend &&\
     pip install setuptools==71.1.0 &&\
     pdm config cache_dir /var/cache/pdm &&\
     pdm config python.use_venv false &&\

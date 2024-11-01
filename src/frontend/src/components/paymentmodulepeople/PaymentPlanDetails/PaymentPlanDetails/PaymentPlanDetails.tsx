@@ -1,5 +1,4 @@
 import { Box, Grid, IconButton, Tooltip, Typography } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { renderUserName } from '@utils/utils';
 import { PaymentPlanQuery } from '@generated/graphql';
@@ -12,6 +11,7 @@ import { UniversalMoment } from '@core/UniversalMoment';
 import { FieldBorder } from '@core/FieldBorder';
 import { RelatedFollowUpPaymentPlans } from './RelatedFollowUpPaymentPlans';
 import { Info } from '@mui/icons-material';
+import { ReactElement } from 'react';
 
 interface PaymentPlanDetailsProps {
   baseUrl: string;
@@ -21,7 +21,7 @@ interface PaymentPlanDetailsProps {
 export const PaymentPlanDetails = ({
   baseUrl,
   paymentPlan,
-}: PaymentPlanDetailsProps): React.ReactElement => {
+}: PaymentPlanDetailsProps): ReactElement => {
   const { t } = useTranslation();
   const {
     createdBy,

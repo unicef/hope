@@ -1,6 +1,5 @@
 import { Grid } from '@mui/material';
 import ChildCareIcon from '@mui/icons-material/ChildCare';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { formatNumber } from '@utils/utils';
 import { AllChartsQuery } from '@generated/graphql';
@@ -10,6 +9,7 @@ import {
   DashboardCard,
   IconContainer,
 } from '../../DashboardCard';
+import { ReactElement } from 'react';
 
 interface TotalNumberOfChildrenReachedSectionProps {
   data: AllChartsQuery['sectionChildReached'];
@@ -17,7 +17,7 @@ interface TotalNumberOfChildrenReachedSectionProps {
 
 export function TotalNumberOfChildrenReachedSection({
   data,
-}: TotalNumberOfChildrenReachedSectionProps): React.ReactElement {
+}: TotalNumberOfChildrenReachedSectionProps): ReactElement {
   const { t } = useTranslation();
   return (
     <DashboardCard color="#4CD0E0">

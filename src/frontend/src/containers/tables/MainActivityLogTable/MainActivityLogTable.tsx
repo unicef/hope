@@ -1,4 +1,4 @@
-import { ReactElement, useState } from 'react';
+import { ChangeEvent, ReactElement, useState } from 'react';
 import styled from 'styled-components';
 import Collapse from '@mui/material/Collapse';
 import { Box, IconButton, Paper } from '@mui/material';
@@ -46,7 +46,7 @@ interface MainActivityLogTableProps {
   rowsPerPage: number;
   page: number;
   onChangePage: (event: unknown, newPage: number) => void;
-  onChangeRowsPerPage: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onChangeRowsPerPage: (event: ChangeEvent<HTMLInputElement>) => void;
   actionChoices: AllLogEntriesQuery['logEntryActionChoices'];
   loading: boolean;
 }
@@ -60,8 +60,7 @@ export function MainActivityLogTable({
   actionChoices,
   loading = false,
 }: MainActivityLogTableProps): ReactElement {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [expanded, setExpanded] = useState(true);
+  const [expanded] = useState(true);
   const choicesDict = useArrayToDict(actionChoices, 'value', 'name');
 
   const TablePaginationActions = () => {

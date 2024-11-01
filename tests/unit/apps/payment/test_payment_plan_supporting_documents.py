@@ -1,13 +1,14 @@
 import base64
 from io import BytesIO
 
+from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import InMemoryUploadedFile, SimpleUploadedFile
+from django.http import FileResponse
 from django.test import TestCase
 from django.urls import reverse
 
 from rest_framework import status
-from rest_framework.response import Response
-from rest_framework.test import APIClient
+from rest_framework.test import APIClient, APIRequestFactory
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.models import Role, UserRole
@@ -26,7 +27,15 @@ class PaymentPlanSupportingDocumentSerializerTests(TestCase):
         cls.payment_plan = PaymentPlanFactory(
             status=PaymentPlan.Status.OPEN,
         )
-        cls.context = {"payment_plan": cls.payment_plan}
+        factory = APIRequestFactory()
+        cls.request = factory.post("/just_any_url/")
+        cls.request.user = cls.client  # type: ignore
+        cls.request.parser_context = {
+            "kwargs": {
+                "payment_plan_id": base64.b64encode(f"PaymentPlanNode:{str(cls.payment_plan.id)}".encode()).decode(),
+            }
+        }
+        cls.context = {"payment_plan": cls.payment_plan, "request": cls.request}
         cls.file = SimpleUploadedFile("test.pdf", b"123", content_type="application/pdf")
 
     def test_validate_file_size_success(self) -> None:
@@ -118,7 +127,13 @@ class PaymentPlanSupportingDocumentUploadViewTests(TestCase):
                 "payment_plan_id": payment_plan_id_base64,
             },
         )
-        cls.file = SimpleUploadedFile("test.pdf", b"abc", content_type="application/pdf")
+        cls.file = SimpleUploadedFile("test_file.pdf", b"abc", content_type="application/pdf")
+
+    def tearDown(self) -> None:
+        for document in PaymentPlanSupportingDocument.objects.all():
+            if default_storage.exists(document.file.name):
+                default_storage.delete(document.file.name)
+        PaymentPlanSupportingDocument.objects.all().delete()
 
     def test_post_successful_upload(self) -> None:
         self.client.force_authenticate(user=self.user)
@@ -127,8 +142,12 @@ class PaymentPlanSupportingDocumentUploadViewTests(TestCase):
         response = self.client.post(self.url, data, format="multipart")
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertIn("id", response.data)
         self.assertEqual(PaymentPlanSupportingDocument.objects.count(), 1)
+        self.assertIn("id", response.data)
+        self.assertIn("uploaded_at", response.data)
+        self.assertEqual(response.data["file"], "test_file.pdf")
+        self.assertEqual(response.data["title"], "Test Document")
+        self.assertEqual(response.data["created_by"], self.user.pk)
 
     def test_post_invalid_upload(self) -> None:
         self.client.force_authenticate(user=self.user)
@@ -196,4 +215,5 @@ class PaymentPlanSupportingDocumentViewTests(TestCase):
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIsInstance(response, Response)
+        self.assertIsInstance(response, FileResponse)
+        self.assertEqual(response["Content-Disposition"], f"attachment; filename={self.document.file.name}")

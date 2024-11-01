@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { FC } from 'react';
 import { Stepper, Step, StepButton } from '@mui/material';
 
 interface StepData {
@@ -44,7 +44,7 @@ export const handleNext = async ({
   }
 };
 
-export const ProgramStepper: React.FC<ProgramStepperProps> = ({
+export const ProgramStepper: FC<ProgramStepperProps> = ({
   step,
   setStep,
   stepsData,

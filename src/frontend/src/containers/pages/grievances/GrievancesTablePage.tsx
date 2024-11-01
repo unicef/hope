@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useGrievancesChoiceDataQuery } from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
@@ -23,8 +23,9 @@ import { Tabs, Tab } from '@core/Tabs';
 import { ButtonTooltip } from '@components/core/ButtonTooltip';
 import { t } from 'i18next';
 import { useProgramContext } from 'src/programContext';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
-export const GrievancesTablePage = (): React.ReactElement => {
+export const GrievancesTablePage = (): ReactElement => {
   const { baseUrl } = useBaseUrl();
   const { isActiveProgram } = useProgramContext();
   const permissions = usePermissions();
@@ -120,7 +121,14 @@ export const GrievancesTablePage = (): React.ReactElement => {
   if (!choicesData) return null;
 
   return (
-    <>
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'GrievancesTablePage.tsx');
+      }}
+      componentName="GrievancesTablePage"
+    >
       <PageHeader tabs={tabs} title="Grievance Tickets">
         {hasPermissions(PERMISSIONS.GRIEVANCES_CREATE, permissions) && (
           <ButtonTooltip
@@ -148,6 +156,6 @@ export const GrievancesTablePage = (): React.ReactElement => {
         selectedTab={selectedTab}
       />
       <GrievancesTable filter={appliedFilter} selectedTab={selectedTab} />
-    </>
+    </UniversalErrorBoundary>
   );
 };

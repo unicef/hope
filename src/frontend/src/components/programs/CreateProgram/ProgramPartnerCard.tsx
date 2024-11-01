@@ -4,8 +4,7 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { TreeItem, TreeView } from '@mui/x-tree-view';
 import { Field } from 'formik';
-import * as React from 'react';
-import { useState } from 'react';
+import { FC, ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { AllAreasTreeQuery, UserPartnerChoicesQuery } from '@generated/graphql';
@@ -44,7 +43,7 @@ const SmallText = styled(Box)`
   color: #49454f;
 `;
 
-export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
+export const ProgramPartnerCard: FC<ProgramPartnerCardProps> = ({
   values,
   partner,
   index,
@@ -53,11 +52,11 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
   partnerChoices,
   setFieldValue,
   canDeleteProgramPartner,
-}): React.ReactElement => {
+}): ReactElement => {
   const { t } = useTranslation();
   const [isAdminAreaExpanded, setIsAdminAreaExpanded] = useState(false);
 
-  const [allAreasTree, setAllAreasTree] = React.useState<AreaTreeNode[]>(() =>
+  const [allAreasTree, setAllAreasTree] = useState<AreaTreeNode[]>(() =>
     AreaTreeNode.buildTree(allAreasTreeData, values.partners[index]?.areas),
   );
   const description = t(
@@ -83,7 +82,7 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
     setAllAreasTree([...allAreasTree]);
   };
 
-  const renderNode = (node: AreaTreeNode): React.ReactElement => (
+  const renderNode = (node: AreaTreeNode): ReactElement => (
     <TreeItem
       key={node.id}
       nodeId={node.id}

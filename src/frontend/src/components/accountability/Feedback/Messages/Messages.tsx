@@ -1,6 +1,5 @@
 import { Avatar, Box, Grid, Paper, Typography } from '@mui/material';
 import { Field, Form, Formik } from 'formik';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -17,6 +16,7 @@ import { LoadingButton } from '@core/LoadingButton';
 import { OverviewContainerColumn } from '@core/OverviewContainerColumn';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
+import { ReactElement } from 'react';
 
 const Name = styled.span`
   font-size: 16px;
@@ -43,7 +43,7 @@ interface MessagesProps {
 export function Messages({
   messages,
   canAddMessage,
-}: MessagesProps): React.ReactElement {
+}: MessagesProps): ReactElement {
   const { t } = useTranslation();
   const { data: meData, loading: meLoading } = useMeQuery({
     fetchPolicy: 'cache-and-network',
@@ -61,7 +61,7 @@ export function Messages({
     date: string,
     description: string,
     noteId: string,
-  ): React.ReactElement => (
+  ): ReactElement => (
     <Grid container key={noteId}>
       <Grid item xs={2}>
         <Avatar alt={`${name} picture`} src="/static/images/avatar/1.jpg" />
