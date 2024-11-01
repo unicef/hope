@@ -1,5 +1,0 @@
-{
-  "dependencies": {
-    "@cypress/request": "^3.0.5"
-  }
-}
