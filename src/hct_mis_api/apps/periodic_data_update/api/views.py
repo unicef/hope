@@ -11,6 +11,7 @@ from rest_framework import mixins, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.filters import OrderingFilter
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.serializers import BaseSerializer
@@ -192,7 +193,7 @@ class PeriodicFieldViewSet(
     GenericViewSet,
 ):
     serializer_class = PeriodicFieldSerializer
-    permission_classes = [PDUViewListAndDetailsPermission]
+    permission_classes = [IsAuthenticated]
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = UpdatedAtFilter
 
