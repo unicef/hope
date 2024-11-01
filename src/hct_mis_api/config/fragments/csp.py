@@ -26,4 +26,4 @@ if DEBUG:
     CSP_STYLE_SRC += (FRONTEND_HOST,)
     CSP_MANIFEST_SRC += (FRONTEND_HOST,)
 
-    ALLOWED_HOSTS.extend(["backend", "localhost", "127.0.0.1", "10.0.2.2", env("DOMAIN", default="")])
+    ALLOWED_HOSTS.extend(["backend", "localhost", "127.0.0.1", "10.0.2.2", env("DOMAIN")])
