@@ -44,8 +44,9 @@ class DashboardHouseholdSerializer(serializers.ModelSerializer):
     payments = serializers.SerializerMethodField()
     program = serializers.CharField(source="program.name")
     sector = serializers.CharField(source="program.sector")
-    admin1 = serializers.SerializerMethodField()
-    admin2 = serializers.SerializerMethodField()
+    admin1 = serializers.CharField(source="admin1.name")
+    admin2 = serializers.CharField(source="admin2.name")
+    pwd_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Household
@@ -59,17 +60,8 @@ class DashboardHouseholdSerializer(serializers.ModelSerializer):
             "admin2",
             "sector",
             "children_count",
+            "pwd_count",
         ]
-
-    def get_admin1(self, obj: Household) -> Optional[str]:
-        if obj.admin1:
-            return obj.admin1.name
-        return None
-
-    def get_admin2(self, obj: Household) -> Optional[str]:
-        if obj.admin2:
-            return obj.admin2.name
-        return None
 
     def get_payments(self, obj: Household) -> List[dict]:
         payments = (
@@ -88,3 +80,20 @@ class DashboardHouseholdSerializer(serializers.ModelSerializer):
         payment_records_data = list(PaymentRecordSerializer(payment_records, many=True).data)
 
         return payments_data + payment_records_data
+
+    def get_pwd_count(self, obj: Household) -> Optional[int]:
+        pwd = sum(
+            [
+                obj.female_age_group_0_5_disabled_count or 0,
+                obj.female_age_group_6_11_disabled_count or 0,
+                obj.female_age_group_12_17_disabled_count or 0,
+                obj.female_age_group_18_59_disabled_count or 0,
+                obj.female_age_group_60_disabled_count or 0,
+                obj.male_age_group_0_5_disabled_count or 0,
+                obj.male_age_group_6_11_disabled_count or 0,
+                obj.male_age_group_12_17_disabled_count or 0,
+                obj.male_age_group_18_59_disabled_count or 0,
+                obj.male_age_group_60_disabled_count or 0,
+            ]
+        )
+        return pwd
