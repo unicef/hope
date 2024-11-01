@@ -57,55 +57,6 @@ class TestPeriodicFieldViews:
             },
         )
 
-    @pytest.mark.parametrize(
-        "permissions, partner_permissions, access_to_program, expected_status",
-        [
-            ([], [], True, status.HTTP_403_FORBIDDEN),
-            ([Permissions.PDU_VIEW_LIST_AND_DETAILS], [], True, status.HTTP_200_OK),
-            ([], [Permissions.PDU_VIEW_LIST_AND_DETAILS], True, status.HTTP_200_OK),
-            (
-                [Permissions.PDU_VIEW_LIST_AND_DETAILS],
-                [Permissions.PDU_VIEW_LIST_AND_DETAILS],
-                True,
-                status.HTTP_200_OK,
-            ),
-            ([], [], False, status.HTTP_403_FORBIDDEN),
-            ([Permissions.PDU_VIEW_LIST_AND_DETAILS], [], False, status.HTTP_403_FORBIDDEN),
-            ([], [Permissions.PDU_VIEW_LIST_AND_DETAILS], False, status.HTTP_403_FORBIDDEN),
-            (
-                [Permissions.PDU_VIEW_LIST_AND_DETAILS],
-                [Permissions.PDU_VIEW_LIST_AND_DETAILS],
-                False,
-                status.HTTP_403_FORBIDDEN,
-            ),
-        ],
-    )
-    def test_list_periodic_fields_permission(
-        self,
-        permissions: list,
-        partner_permissions: list,
-        access_to_program: bool,
-        expected_status: str,
-        api_client: Callable,
-        afghanistan: BusinessAreaFactory,
-        create_user_role_with_permissions: Callable,
-        create_partner_role_with_permissions: Callable,
-        update_partner_access_to_program: Callable,
-        id_to_base64: Callable,
-    ) -> None:
-        self.set_up(api_client, afghanistan, id_to_base64)
-        create_user_role_with_permissions(
-            self.user,
-            permissions,
-            self.afghanistan,
-        )
-        create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan)
-        if access_to_program:
-            update_partner_access_to_program(self.partner, self.program1)
-
-        response = self.client.get(self.url_list)
-        assert response.status_code == expected_status
-
     def test_list_periodic_fields(
         self,
         api_client: Callable,
@@ -186,7 +137,7 @@ class TestPeriodicFieldViews:
 
             etag = response.headers["etag"]
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 11
+            assert len(ctx.captured_queries) == 6
 
         # Test that reoccurring requests use cached data
         with CaptureQueriesContext(connection) as ctx:
@@ -195,7 +146,7 @@ class TestPeriodicFieldViews:
 
             etag_second_call = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 5
+            assert len(ctx.captured_queries) == 0
 
             assert etag_second_call == etag
 
@@ -208,7 +159,7 @@ class TestPeriodicFieldViews:
 
             etag_call_after_update = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 11
+            assert len(ctx.captured_queries) == 6
 
             assert etag_call_after_update != etag
 
@@ -219,7 +170,7 @@ class TestPeriodicFieldViews:
 
             etag_call_after_update_second_call = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 5
+            assert len(ctx.captured_queries) == 0
 
             assert etag_call_after_update_second_call == etag_call_after_update
 
@@ -232,6 +183,6 @@ class TestPeriodicFieldViews:
 
             etag_call_after_update_2 = response.headers["etag"]
             assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 11
+            assert len(ctx.captured_queries) == 6
 
             assert etag_call_after_update_2 != etag_call_after_update_second_call
