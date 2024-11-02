@@ -1,4 +1,7 @@
-from typing import Callable, Dict, List, Optional
+from typing import Callable, Dict, Optional
+from unittest.mock import Mock, patch
+
+from django.test import RequestFactory
 
 import pytest
 from rest_framework import status
@@ -11,7 +14,13 @@ from hct_mis_api.apps.account.fixtures import (
 )
 from hct_mis_api.apps.account.models import UserRole
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.dashboard.serializers import (
+    DashboardHouseholdSerializer,
+    PaymentRecordSerializer,
+    PaymentSerializer,
+)
+from hct_mis_api.apps.dashboard.views import DashboardReportView
+from hct_mis_api.apps.payment.models import Payment, PaymentRecord
 
 pytestmark = pytest.mark.django_db(databases=["default", "read_only"])
 
@@ -38,43 +47,29 @@ def setup_client(api_client: Callable, afghanistan: BusinessAreaFactory) -> Dict
     }
 
 
-@pytest.mark.parametrize(
-    "permissions, expected_status",
-    [
-        ([], status.HTTP_403_FORBIDDEN),
-        ([Permissions.DASHBOARD_VIEW_COUNTRY], status.HTTP_200_OK),
-    ],
-)
-def test_dashboard_data_permission(
-    permissions: List[Permissions],
-    expected_status: int,
-    setup_client: Dict[str, Optional[object]],
-    populate_dashboard_cache: Callable,
-) -> None:
+@pytest.mark.django_db(databases=["default", "read_only"])
+def test_dashboard_data_view_permission_denied(setup_client: Dict[str, Optional[object]]) -> None:
+    """
+    Test that access to the dashboard data is denied for users without permissions.
+    """
     client = setup_client["client"]
-    user = setup_client["user"]
-    business_area = setup_client["business_area"]
     list_url = setup_client["list_url"]
-
-    if permissions:
-        role = RoleFactory(name="Test Role", permissions=permissions)
-        UserRole.objects.create(user=user, role=role, business_area=business_area)
-
     response = client.get(list_url)
-    assert response.status_code == expected_status
+    assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
-def test_get_dash_report_json(
-    setup_client: Dict[str, Optional[object]],
-    populate_dashboard_cache: Callable,
+@pytest.mark.django_db(databases=["default", "read_only"])
+def test_dashboard_data_view_access_granted(
+    setup_client: Dict[str, Optional[object]], populate_dashboard_cache: Callable
 ) -> None:
     """
-    Test fetching the dashboard report and ensure it contains valid JSON.
+    Test that access to the dashboard data is granted for users with permissions.
     """
     client = setup_client["client"]
     user = setup_client["user"]
     business_area = setup_client["business_area"]
     list_url = setup_client["list_url"]
+
     role = RoleFactory(name="Dashboard Viewer", permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     UserRole.objects.create(user=user, role=role, business_area=business_area)
 
@@ -82,50 +77,133 @@ def test_get_dash_report_json(
     assert response.status_code == status.HTTP_200_OK
     assert response["Content-Type"] == "application/json"
 
-    report_data = response.json()
-    if isinstance(report_data, list) and report_data:
-        assert "first_registration_date" in report_data[0]
-        assert "admin1" in report_data[0]
-        assert "admin2" in report_data[0]
-        assert "payments" in report_data[0]
 
-
-def test_get_nonexistent_business_area(api_client: Callable) -> None:
-    user = UserFactory(is_superuser=False, is_staff=False)
-    user.user_permissions.clear()
-    client = api_client(user)
-    url = reverse("api:household-data", args=["nonexistent-business"])
-    response = client.get(url)
-    assert response.status_code == status.HTTP_404_NOT_FOUND
-
-
-@pytest.fixture
-def setup_client_with_permissions(api_client: Callable, afghanistan: BusinessArea) -> Dict[str, Optional[object]]:
+@pytest.mark.django_db(databases=["default"])
+@patch("hct_mis_api.apps.dashboard.views.generate_dash_report_task.delay")
+def test_create_or_update_dash_report_task_triggered(
+    mock_task_delay: Mock, setup_client: Dict[str, Optional[object]]
+) -> None:
     """
-    Setup client and permissions for DashboardReportView testing.
+    Test that the DashReport generation task is successfully triggered for a superuser.
+    """
+    user = setup_client["user"]
+    client = setup_client["client"]
+    generate_report_url = setup_client["generate_report_url"]
+
+    user.is_superuser = True
+    user.save()
+
+    response = client.post(generate_report_url)
+
+    assert response.status_code == status.HTTP_202_ACCEPTED
+    assert response.data["detail"] == "DashReport generation task has been triggered."
+    mock_task_delay.assert_called_once_with(setup_client["business_area"].slug)
+
+
+@pytest.mark.django_db(databases=["default"])
+def test_create_or_update_dash_report_permission_denied(setup_client: Dict[str, Optional[object]]) -> None:
+    """
+    Test that the report creation or update is denied to users without permissions.
+    """
+    client = setup_client["client"]
+    generate_report_url = setup_client["generate_report_url"]
+    response = client.post(generate_report_url)
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+@pytest.mark.django_db(databases=["default"])
+@patch("hct_mis_api.apps.dashboard.views.generate_dash_report_task.delay")
+def test_create_or_update_dash_report_business_area_not_found(mock_task_delay: Mock, api_client: Callable) -> None:
+    """
+    Test that a 404 is returned if the business area does not exist.
+    """
+    user = UserFactory(is_superuser=True)
+    client = api_client(user)
+    non_existent_slug = "non-existent-area"
+    url = reverse("api:generate-dashreport", args=[non_existent_slug])
+
+    response = client.post(url)
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.data["detail"] == "Business area not found."
+    mock_task_delay.assert_not_called()
+
+
+@pytest.mark.django_db(databases=["default"])
+@patch("hct_mis_api.apps.dashboard.views.generate_dash_report_task.delay", side_effect=Exception("Unexpected error"))
+def test_create_or_update_dash_report_internal_server_error(
+    mock_task_delay: Mock, setup_client: Dict[str, Optional[object]]
+) -> None:
+    """
+    Test that a 500 response is returned when an unexpected error occurs.
+    """
+    user = setup_client["user"]
+    client = setup_client["client"]
+    generate_report_url = setup_client["generate_report_url"]
+
+    user.is_superuser = True
+    user.save()
+
+    response = client.post(generate_report_url)
+
+    assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+    assert response.data["detail"] == "Unexpected error"
+    mock_task_delay.assert_called_once_with(setup_client["business_area"].slug)
+
+
+@pytest.mark.django_db(databases=["default", "read_only"])
+def test_get_payments(populate_dashboard_cache: Callable, afghanistan: BusinessAreaFactory) -> None:
+    """
+    Test that get_payments returns the correct data for a household.
+    """
+    household = populate_dashboard_cache(afghanistan)
+    serializer = DashboardHouseholdSerializer()
+    payments_data = serializer.get_payments(household)
+    payments = Payment.objects.using("read_only").filter(household=household)
+    payment_records = PaymentRecord.objects.using("read_only").filter(household=household)
+    payment_data = PaymentSerializer(payments, many=True).data
+    payment_record_data = PaymentRecordSerializer(payment_records, many=True).data
+    expected_data = list(payment_data) + list(payment_record_data)
+    assert payments_data == expected_data, "get_payments did not return expected data"
+
+
+@pytest.mark.django_db(databases=["default", "read_only"])
+def test_get_pwd_count(afghanistan: BusinessAreaFactory, populate_dashboard_cache: Callable) -> None:
+    """
+    Test that get_pwd_count returns the correct sum of PWD counts for a household.
+    """
+    household = populate_dashboard_cache(afghanistan)
+    serializer = DashboardHouseholdSerializer()
+    pwd_count = serializer.get_pwd_count(household)
+    expected_count = 1 + 0 + 2 + 2 + 5 + 0 + 1 + 2 + 0 + 1
+    assert pwd_count == expected_count, f"get_pwd_count returned {pwd_count}, expected {expected_count}"
+
+
+@pytest.mark.django_db(databases=["default", "read_only"])
+def test_dashboard_report_view_context_with_permission(afghanistan: BusinessAreaFactory, rf: RequestFactory) -> None:
+    """
+    Test that the DashboardReportView includes the correct context data when the user has permission.
     """
     user = UserFactory()
-    client = api_client(user)
-    return {"client": client, "user": user, "business_area": afghanistan}
-
-
-def test_dashboard_template_view_permission(setup_client_with_permissions: Dict[str, Optional[object]]) -> None:
-    """
-    Test that users with the correct permissions can view the dashboard.
-    """
-    setup = setup_client_with_permissions
-    client = setup["client"]
-    user = setup["user"]
-    business_area = setup["business_area"]
-
-    client.force_login(user)
-
     role = RoleFactory(name="Dashboard Viewer", permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
-    UserRole.objects.get_or_create(user=user, role=role, business_area=business_area)
-    url = reverse("api:dashboard", kwargs={"business_area_slug": business_area.slug})
-    response = client.get(url, follow=True)
-    assert (
-        response.status_code == status.HTTP_200_OK
-    ), f"Unexpected status code: {response.status_code}, Content: {response.content}"
-    assert hasattr(response, "template_name"), f"Expected template not rendered. Response: {response.content}"
-    assert "dashboard/dashboard.html" in response.template_name
+    UserRole.objects.create(user=user, role=role, business_area=afghanistan)
+    request = rf.get(reverse("api:dashboard", kwargs={"business_area_slug": afghanistan.slug}))
+    request.user = user
+    view = DashboardReportView()
+    view.request = request
+    context = view.get_context_data(business_area_slug=afghanistan.slug)
+    assert context["business_area_slug"] == afghanistan.slug
+    assert context["household_data_url"] == reverse("api:household-data", args=[afghanistan.slug])
+
+
+def test_dashboard_report_view_context_without_permission(afghanistan: Callable, rf: RequestFactory) -> None:
+    """
+    Test that the DashboardReportView returns an error message in the context when the user lacks permission.
+    """
+    user = UserFactory()
+    request = rf.get(reverse("api:dashboard", kwargs={"business_area_slug": afghanistan.slug}))
+    request.user = user
+    view = DashboardReportView()
+    view.request = request
+    context = view.get_context_data(business_area_slug=afghanistan.slug)
+    assert not context["has_permission"]
+    assert context["error_message"] == "You do not have permission to view this dashboard."

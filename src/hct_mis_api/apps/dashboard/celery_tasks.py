@@ -28,7 +28,6 @@ def update_dashboard_figures(self: Any) -> None:
             DashboardDataCache.refresh_data(business_area.slug)
 
         except Exception as e:
-            logger.exception(f"Failed to refresh dashboard data for {business_area.slug}: {e}")
             raise self.retry(exc=e)
 
 
@@ -47,5 +46,4 @@ def generate_dash_report_task(self: Any, business_area_slug: str) -> None:
     except BusinessArea.DoesNotExist:
         logger.error(f"Business area with slug {business_area_slug} not found.")
     except Exception as e:
-        logger.error(f"Failed to refresh dashboard data for {business_area_slug}: {e}")
         raise self.retry(exc=e, countdown=60)
