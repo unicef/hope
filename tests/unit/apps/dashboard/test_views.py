@@ -128,4 +128,4 @@ def test_dashboard_template_view_permission(setup_client_with_permissions: Dict[
         response.status_code == status.HTTP_200_OK
     ), f"Unexpected status code: {response.status_code}, Content: {response.content}"
     assert hasattr(response, "template_name"), f"Expected template not rendered. Response: {response.content}"
-    assert "dashboard.html" in response.template_name
+    assert "dashboard/dashboard.html" in response.template_name
