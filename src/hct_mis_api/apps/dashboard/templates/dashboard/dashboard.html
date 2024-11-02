@@ -175,7 +175,7 @@
                     document.getElementById(chartId).innerHTML = '';
                 }
 
-                const url = "{% url 'api:household-data' business_area_slug %}";
+                const url = "{{household_data_url}}";
 
                 function createDashboard() {
                     ["payments-by-fsp", "payments-by-delivery", "payments-by-sector", "volume-by-program", "payments-by-quarter", "payments-by-month"].forEach(showSpinner);
@@ -275,7 +275,7 @@
                             .innerRadius(40)
                             .renderLabel(true)
                             .useViewBoxResizing(true)
-                            .label(d => `${d.key}`)
+                            .label(d => `${d.key} ${(d.value / monthGroup.all().reduce((sum, g) => sum + g.value, 0) * 100).toFixed(0)}%`)
                             .title(d => `${d.key}: ${numberFormatter(d.value)} USD`);
 
                         const quarterChart = dc.pieChart("#payments-by-quarter")
@@ -285,7 +285,7 @@
                             .innerRadius(40)
                             .renderLabel(true)
                             .useViewBoxResizing(true)
-                            .label(d => `${d.key}`)
+                            .label(d => `${d.key} ${(d.value / quarterGroup.all().reduce((sum, g) => sum + g.value, 0) * 100).toFixed(0)}%`)
                             .title(d => `${d.key}: ${numberFormatter(d.value)} USD`);
 
 
