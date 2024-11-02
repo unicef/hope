@@ -21,6 +21,7 @@
   </head>
   <body class="bg-gray-100">
     <div class="main-content max-w-7xl mx-auto p-4 space-y-8">
+      {% if has_permission %}
       <div id="year-tabs" class="tabs">
         <div class="mb-4 tab-list flex justify-start space-x-4 border-b border-gray-200 dark:border-gray-700"></div>
       </div>
@@ -99,21 +100,21 @@
           </h3>
           <div id="payments-by-sector" class="dc-chart"></div>
         </div>
-        <div class="bg-white p-4 rounded shadow">
+        <div class="bg-white p-6 rounded shadow">
           <h3 class="text-lg font-semibold">
             <span class="icon icon-people-targeted icon-blue"></span>
             {% translate "Volume by Programme" %}
           </h3>
           <div id="volume-by-program" class="dc-chart"></div>
         </div>
-        <div class="bg-white p-4 rounded shadow">
+        <div class="bg-white p-3 rounded shadow">
           <h3 class="text-lg font-semibold">
             <span class="icon icon-calendar icon-blue"></span>
             {% translate "Payments by Quarter" %}
           </h3>
           <div id="payments-by-quarter" class="dc-chart"></div>
         </div>
-        <div class="bg-white p-4 rounded shadow">
+        <div class="bg-white p-3 rounded shadow">
           <h3 class="text-lg font-semibold">
             <span class="icon icon-calendar icon-blue"></span>
             {% translate "Payments by Month" %}
@@ -156,6 +157,11 @@
           <p>{% translate "Verification of sampling sites" %}</p>
         </div>
       </div>
+      {% else %}
+      <div class="error-message">
+          {{ error_message }}
+      </div>
+      {% endif %}
     </div>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
@@ -342,7 +348,6 @@
                                 (p, v) => p - (v.children_count || 0),
                                 () => 0
                             ).value();
-                            console.log(successfulPaymentsCountUSD.sum, totalPaymentsCount, pendingPaymentsGroupUSD.count);
 
                             document.getElementById("number-of-payments").innerHTML = `${successfulPaymentsCountUSD}`;
                             document.getElementById("outstanding-payments").innerHTML = `${numberFormatter(pendingPaymentsGroupUSD.sum)} USD`;

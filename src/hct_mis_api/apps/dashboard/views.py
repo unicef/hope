@@ -101,8 +101,10 @@ class DashboardReportView(LoginRequiredMixin, TemplateView):
         business_area = get_object_or_404(BusinessArea, slug=business_area_slug)
 
         if not check_permissions(self.request.user, [Permissions.DASHBOARD_VIEW_COUNTRY], business_area=business_area):
-            raise PermissionDenied(_("You do not have permission to view this dashboard."))
-
-        context["business_area_slug"] = business_area_slug
-        context["household_data_url"] = reverse("api:household-data", args=[business_area_slug])
+            context["error_message"] = _("You do not have permission to view this dashboard.")
+            context["has_permission"] = False
+        else:
+            context["business_area_slug"] = business_area_slug
+            context["household_data_url"] = reverse("api:household-data", args=[business_area_slug])
+            context["has_permission"] = True
         return context
