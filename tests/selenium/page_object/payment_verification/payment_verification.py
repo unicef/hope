@@ -27,7 +27,6 @@ class PaymentVerification(BaseComponents):
     statusContainer = 'div[data-cy="status-container"]'
     tablePagination = 'div[data-cy="table-pagination"]'
     buttonNewPlan = 'button[data-cy="button-new-plan"]'
-
     tabFullList = 'button[data-cy="tab-full-list"]'
     tabRandomSampling = 'button[data-cy="tab-random-sampling"]'
     selectExcludedadminareasfull = 'div[data-cy="select-excludedAdminAreasFull"]'
