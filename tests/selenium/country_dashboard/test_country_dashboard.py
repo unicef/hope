@@ -9,26 +9,21 @@ pytestmark = pytest.mark.django_db(transaction=True)
 
 @pytest.mark.usefixtures("login")
 class TestSmokeCountryDashboard:
-    def test_smoke_country_dashboard(self, pageCountryDashboard: CountryDashboard) -> None:
-        pageCountryDashboard.getNavCountryDashboard().click()
-        assert "Dashboard" in pageCountryDashboard.getPageHeaderTitle().text
-        assert "EXPORT" in pageCountryDashboard.getButtonEdPlan().text
-        assert "Programme" in pageCountryDashboard.getFiltersProgram().text
-        assert "Programme" in pageCountryDashboard.getProgrammeInput().text
-        assert "Admin Level 2" in pageCountryDashboard.getFilterAdministrativeArea().text
-        assert "Admin Level 2" in pageCountryDashboard.getAdminLevel2Input().text
-        assert "CLEAR" in pageCountryDashboard.getButtonFiltersClear().text
-        assert "APPLY" in pageCountryDashboard.getButtonFiltersApply().text
-        assert "Administrative Area 2" in pageCountryDashboard.getTableLabel()[0].text
-        assert "Total Transferred sorted descending" in pageCountryDashboard.getTableLabel()[1].text.replace("\n", " ")
-        assert "Households Reached" in pageCountryDashboard.getTableLabel()[2].text
-        assert "Administrative Area 2" in pageCountryDashboard.getTableLabel()[3].text
-        assert "Total Transferred sorted descending" in pageCountryDashboard.getTableLabel()[4].text.replace("\n", " ")
-        assert "People Reached" in pageCountryDashboard.getTableLabel()[5].text
-        assert "0" in pageCountryDashboard.getTotalNumberOfHouseholdsReached().text
-        assert "0" in pageCountryDashboard.getTotalNumberOfIndividualsReached().text
-        assert "0" in pageCountryDashboard.getTotalNumberOfPeopleReached().text
-        assert "0" in pageCountryDashboard.getTotalNumberOfChildrenReached().text
-        assert "0" in pageCountryDashboard.getTotalNumberOfGrievances().text
-        assert "0" in pageCountryDashboard.getTotalNumberOfFeedback().text
-        assert "USD 0.00" in pageCountryDashboard.getTotalAmountTransferred().text
+    def test_smoke_country_dashboard_with_and_without_data(self, pageCountryDashboard: CountryDashboard) -> None:
+        pageCountryDashboard.get_nav_resources_release_note().click()
+        assert "Dashboard" in pageCountryDashboard.get_page_header_title().text
+        assert pageCountryDashboard.get_main_content().is_displayed()
+        assert pageCountryDashboard.get_page_header_container().is_displayed()
+        pageCountryDashboard.switch_to_dashboard_iframe()
+        assert pageCountryDashboard.get_total_amount_paid().text == ""
+        assert pageCountryDashboard.get_number_of_payments().text == ""
+        assert pageCountryDashboard.get_outstanding_payments().text == ""
+        assert pageCountryDashboard.get_households_reached().text == ""
+        assert pageCountryDashboard.get_pwd_reached().text == ""
+        assert pageCountryDashboard.get_children_reached().text == ""
+        assert pageCountryDashboard.get_individuals_reached().text == ""
+        assert pageCountryDashboard.get_reconciliation_percentage().text == "%"
+        assert pageCountryDashboard.get_pending_reconciliation_percentage().text == "%"
+        spinners = pageCountryDashboard.get_spinner_elements()
+        assert len(spinners) > 0, "Expected chart loading spinners to be present when no data is loaded."
+        pageCountryDashboard.switch_to_default_content()

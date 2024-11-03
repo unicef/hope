@@ -1,3 +1,5 @@
+from typing import List
+
 from selenium.webdriver.remote.webelement import WebElement
 
 from tests.selenium.page_object.base_components import BaseComponents
@@ -8,69 +10,64 @@ class CountryDashboard(BaseComponents):
     mainContent = 'div[data-cy="main-content"]'
     pageHeaderContainer = 'div[data-cy="page-header-container"]'
     pageHeaderTitle = 'h5[data-cy="page-header-title"]'
-    buttonEdPlan = 'button[data-cy="button-ed-plan"]'
-    filtersProgram = 'div[data-cy="filters-program"]'
-    programmeInput = 'div[data-cy="Programme-input"]'
-    filterAdministrativeArea = 'div[data-cy="filter-administrative-area"]'
-    adminLevel2Input = 'div[data-cy="Admin Level 2-input"]'
-    buttonFiltersClear = 'button[data-cy="button-filters-clear"]'
-    buttonFiltersApply = 'button[data-cy="button-filters-apply"]'
-    tableLabel = 'span[data-cy="table-label"]'
-    totalNumberOfHouseholdsReached = 'div[data-cy="total-number-of-households-reached"]'
-    totalNumberOfIndividualsReached = 'div[data-cy="total-number-of-individuals-reached"]'
-    totalNumberOfPeopleReached = 'div[data-cy="total-number-of-people-reached"]'
-    totalNumberOfChildrenReached = 'div[data-cy="total-number-of-children-reached"]'
-    totalNumberOfGrievances = 'span[data-cy="total-number-of-grievances"]'
-    totalNumberOfFeedback = 'span[data-cy="total-number-of-feedback"]'
-    totalAmountTransferred = 'div[data-cy="total-amount-transferred"]'
+    # Locator for iframe
+    iframe_locator = 'iframe[title="Dashboard"]'
+    total_amount_paid = "div#total-amount-paid"
+    number_of_payments = "div#number-of-payments"
+    outstanding_payments = "div#outstanding-payments"
+    households_reached = "div#households-reached"
+    pwd_reached = "div#pwd-reached"
+    children_reached = "div#children-reached"
+    individuals_reached = "div#individuals-reached"
+    spinner_selector = ".spinner-border"
+    reconciliation_percentage = "div.reconciliation-percentage"
+    pending_reconciliation_percentage = "div.pending-reconciliation-percentage"
 
-    def getPageHeaderContainer(self) -> WebElement:
+    def switch_to_dashboard_iframe(self) -> None:
+        iframe = self.wait_for(self.iframe_locator)
+        self.driver.switch_to.frame(iframe)
+
+    def switch_to_default_content(self) -> None:
+        self.driver.switch_to.default_content()
+
+    def get_nav_resources_release_note(self) -> WebElement:
+        return self.wait_for(self.navResourcesReleaseNote)
+
+    def get_main_content(self) -> WebElement:
+        return self.wait_for(self.mainContent)
+
+    def get_page_header_container(self) -> WebElement:
         return self.wait_for(self.pageHeaderContainer)
 
-    def getPageHeaderTitle(self) -> WebElement:
+    def get_page_header_title(self) -> WebElement:
         return self.wait_for(self.pageHeaderTitle)
 
-    def getButtonEdPlan(self) -> WebElement:
-        return self.wait_for(self.buttonEdPlan)
+    def get_total_amount_paid(self) -> WebElement:
+        return self.wait_for(self.total_amount_paid)
 
-    def getFiltersProgram(self) -> WebElement:
-        return self.wait_for(self.filtersProgram)
+    def get_number_of_payments(self) -> WebElement:
+        return self.wait_for(self.number_of_payments)
 
-    def getProgrammeInput(self) -> WebElement:
-        return self.wait_for(self.programmeInput)
+    def get_outstanding_payments(self) -> WebElement:
+        return self.wait_for(self.outstanding_payments)
 
-    def getFilterAdministrativeArea(self) -> WebElement:
-        return self.wait_for(self.filterAdministrativeArea)
+    def get_households_reached(self) -> WebElement:
+        return self.wait_for(self.households_reached)
 
-    def getAdminLevel2Input(self) -> WebElement:
-        return self.wait_for(self.adminLevel2Input)
+    def get_pwd_reached(self) -> WebElement:
+        return self.wait_for(self.pwd_reached)
 
-    def getButtonFiltersClear(self) -> WebElement:
-        return self.wait_for(self.buttonFiltersClear)
+    def get_children_reached(self) -> WebElement:
+        return self.wait_for(self.children_reached)
 
-    def getButtonFiltersApply(self) -> WebElement:
-        return self.wait_for(self.buttonFiltersApply)
+    def get_individuals_reached(self) -> WebElement:
+        return self.wait_for(self.individuals_reached)
 
-    def getTableLabel(self) -> [WebElement]:
-        return self.get_elements(self.tableLabel)
+    def get_reconciliation_percentage(self) -> WebElement:
+        return self.wait_for(self.reconciliation_percentage)
 
-    def getTotalNumberOfHouseholdsReached(self) -> WebElement:
-        return self.wait_for(self.totalNumberOfHouseholdsReached)
+    def get_pending_reconciliation_percentage(self) -> WebElement:
+        return self.wait_for(self.pending_reconciliation_percentage)
 
-    def getTotalNumberOfIndividualsReached(self) -> WebElement:
-        return self.wait_for(self.totalNumberOfIndividualsReached)
-
-    def getTotalNumberOfPeopleReached(self) -> WebElement:
-        return self.wait_for(self.totalNumberOfPeopleReached)
-
-    def getTotalNumberOfChildrenReached(self) -> WebElement:
-        return self.wait_for(self.totalNumberOfChildrenReached)
-
-    def getTotalNumberOfGrievances(self) -> WebElement:
-        return self.wait_for(self.totalNumberOfGrievances)
-
-    def getTotalNumberOfFeedback(self) -> WebElement:
-        return self.wait_for(self.totalNumberOfFeedback)
-
-    def getTotalAmountTransferred(self) -> WebElement:
-        return self.wait_for(self.totalAmountTransferred)
+    def get_spinner_elements(self) -> List[WebElement]:
+        return self.get_elements(self.spinner_selector)
