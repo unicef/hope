@@ -256,7 +256,7 @@ export function Criteria({
       ))}
       {collectorsFiltersBlocks.map((item, index) => (
         <CriteriaSetBox key={index}>
-          {item.collectorsFiltersBlocks.map((filter, filterIndex) => (
+          {item.collectorBlockFilters.map((filter, filterIndex) => (
             <CriteriaField
               choicesDict={choicesDict}
               key={filterIndex}

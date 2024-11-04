@@ -7,7 +7,6 @@ import {
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Divider, Grid, Typography } from '@mui/material';
-import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { getTargetingCriteriaVariables } from '@utils/targetingUtils';
 import { Field, FieldArray, Form, Formik } from 'formik';
@@ -19,9 +18,10 @@ import { AndDivider, AndDividerLabel } from '../AndDivider';
 import { Exclusions } from '../CreateTargetPopulation/Exclusions';
 import { PaperContainer } from '../PaperContainer';
 import { EditTargetPopulationHeader } from './EditTargetPopulationHeader';
-import { TargetingCriteriaDisplay } from '../TargetingCriteriaDisplay/TargetingCriteriaDisplay';
+import { AddFilterTargetingCriteriaDisplay } from '../TargetingCriteriaDisplay/AddFilterTargetingCriteriaDisplay';
 import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
 import { ReactElement } from 'react';
+import { CreateAndEditTPCheckboxes } from '@containers/pages/targeting/CreateAndEditTPCheckboxes';
 
 interface EditTargetPopulationProps {
   targetPopulation: TargetPopulationQuery['targetPopulation'];
@@ -193,14 +193,13 @@ export const EditTargetPopulation = ({
               <FieldArray
                 name="targetingCriteria"
                 render={(arrayHelpers) => (
-                  <TargetingCriteriaDisplay
+                  <AddFilterTargetingCriteriaDisplay
                     helpers={arrayHelpers}
                     rules={values.targetingCriteria}
                     isEdit
                     screenBeneficiary={screenBeneficiary}
                     isStandardDctType={isStandardDctType}
                     isSocialDctType={isSocialDctType}
-                    category={category}
                   />
                 )}
               />
@@ -242,62 +241,11 @@ export const EditTargetPopulation = ({
                     </Grid>
                   )}
                 </Grid>
-                <Box mt={3} p={3}>
-                  <Grid container spacing={3}>
-                    {isStandardDctType && (
-                      <Grid item xs={6}>
-                        <Field
-                          name="flagExcludeIfActiveAdjudicationTicket"
-                          label={t(
-                            'Exclude Households with Active Adjudication Ticket',
-                          )}
-                          color="primary"
-                          component={FormikCheckboxField}
-                          data-cy="input-active-households-adjudication-ticket"
-                        />
-                      </Grid>
-                    )}
-                    {isSocialDctType && (
-                      <Grid item xs={6}>
-                        <Field
-                          name="flagExcludeIfActiveAdjudicationTicket"
-                          label={t(
-                            'Exclude People with Active Adjudication Ticket',
-                          )}
-                          color="primary"
-                          component={FormikCheckboxField}
-                          data-cy="input-active-people-adjudication-ticket"
-                        />
-                      </Grid>
-                    )}
-                    {screenBeneficiary && isSocialDctType && (
-                      <Grid item xs={6}>
-                        <Field
-                          name="flagExcludeIfOnSanctionList"
-                          label={t(
-                            'Exclude People with an Active Sanction Screen Flag',
-                          )}
-                          color="primary"
-                          component={FormikCheckboxField}
-                          data-cy="input-active-people-sanction-flag"
-                        />
-                      </Grid>
-                    )}
-                    {screenBeneficiary && isStandardDctType && (
-                      <Grid item xs={6}>
-                        <Field
-                          name="flagExcludeIfOnSanctionList"
-                          label={t(
-                            'Exclude Households with an Active Sanction Screen Flag',
-                          )}
-                          color="primary"
-                          component={FormikCheckboxField}
-                          data-cy="input-active-sanction-flag"
-                        />
-                      </Grid>
-                    )}
-                  </Grid>
-                </Box>
+                <CreateAndEditTPCheckboxes
+                  isStandardDctType={isStandardDctType}
+                  isSocialDctType={isSocialDctType}
+                  screenBeneficiary={screenBeneficiary}
+                />
               </>
             ) : null}
           </PaperContainer>
