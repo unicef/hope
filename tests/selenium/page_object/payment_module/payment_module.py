@@ -147,9 +147,11 @@ class PaymentModule(BaseComponents):
         return self.wait_for(self.tablePagination)
 
     def getRows(self) -> [WebElement]:
+        self.wait_for(self.rows)
         return self.get_elements(self.rows)
 
     def getRow(self, number: int) -> WebElement:
+        self.wait_for(self.rows)
         try:
             sleep(0.5)
             return self.get_elements(self.rows)[number]

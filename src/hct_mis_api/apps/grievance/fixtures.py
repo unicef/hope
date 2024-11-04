@@ -61,9 +61,11 @@ class GrievanceTicketFactory(DjangoModelFactory):
     business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first())
     created_at = factory.Faker("date_time_this_decade", before_now=False, after_now=True, tzinfo=utc)
     issue_type = factory.LazyAttribute(
-        lambda o: factory.fuzzy.FuzzyChoice(list(GrievanceTicket.ISSUE_TYPES_CHOICES.get(o.category, {}).keys())).fuzz()
-        if GrievanceTicket.ISSUE_TYPES_CHOICES.get(o.category)
-        else None
+        lambda o: (
+            factory.fuzzy.FuzzyChoice(list(GrievanceTicket.ISSUE_TYPES_CHOICES.get(o.category, {}).keys())).fuzz()
+            if GrievanceTicket.ISSUE_TYPES_CHOICES.get(o.category)
+            else None
+        )
     )
 
 
