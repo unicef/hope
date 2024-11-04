@@ -17,29 +17,15 @@ def data_migration_financialserviceprovider_delivery_mechanisms(apps, schema_edi
 
 
 def data_migration_deliverymechanismdata_delivery_mechanism(apps, schema_editor):
-    DeliveryMechanismData = apps.get_model("payment", "DeliveryMechanismData")
-    DeliveryMechanism = apps.get_model("payment", "DeliveryMechanism")
-
-    for dm in DeliveryMechanism.objects.all():
-        DeliveryMechanismData.objects.filter(delivery_mechanism_choice=dm.name).update(delivery_mechanism=dm)
+    pass
 
 
 def data_migration_deliverymechanismperpaymentplan_delivery_mechanism(apps, schema_editor):
-    DeliveryMechanismPerPaymentPlan = apps.get_model("payment", "DeliveryMechanismPerPaymentPlan")
-    DeliveryMechanism = apps.get_model("payment", "DeliveryMechanism")
-
-    for dm in DeliveryMechanism.objects.all():
-        DeliveryMechanismPerPaymentPlan.objects.filter(delivery_mechanism_choice=dm.name).update(delivery_mechanism=dm)
+    pass
 
 
 def data_migration_fspxlsxtemplateperdeliverymechanism_delivery_mechanism(apps, schema_editor):
-    FspXlsxTemplatePerDeliveryMechanism = apps.get_model("payment", "FspXlsxTemplatePerDeliveryMechanism")
-    DeliveryMechanism = apps.get_model("payment", "DeliveryMechanism")
-
-    for dm in DeliveryMechanism.objects.all():
-        FspXlsxTemplatePerDeliveryMechanism.objects.filter(delivery_mechanism_choice=dm.name).update(
-            delivery_mechanism=dm
-        )
+    pass
 
 
 def data_migration_payment_delivery_type(apps, schema_editor):
