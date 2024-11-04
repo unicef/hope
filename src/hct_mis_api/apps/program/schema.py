@@ -271,7 +271,7 @@ class Query(graphene.ObjectType):
     def resolve_is_deduplication_disabled(self, info: Any, **kwargs: Any) -> bool:
         encoded_program_id = info.context.headers.get("Program")
         if encoded_program_id == "all":
-            return False
+            return True
 
         program = Program.objects.only("id").get(id=decode_id_string(encoded_program_id))
         # deduplication engine in progress
