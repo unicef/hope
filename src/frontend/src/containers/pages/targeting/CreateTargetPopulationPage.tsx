@@ -43,7 +43,6 @@ export const CreateTargetPopulationPage = (): ReactElement => {
     flagExcludeIfOnSanctionList: false,
     householdIds: '',
     individualIds: '',
-    collectorIds: '',
   };
   const [mutate, { loading }] = useCreateTpMutation();
   const { showMessage } = useSnackbar();

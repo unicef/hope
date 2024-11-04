@@ -477,27 +477,6 @@ export const TargetingCriteriaForm = ({
                     <AndDivider>
                       <AndDividerLabel>And</AndDividerLabel>
                     </AndDivider>
-                    <Grid container spacing={3}>
-                      <>
-                        <Grid item xs={12}>
-                          <Box pb={3}>
-                            <Field
-                              data-cy="input-included-collector-ids"
-                              name="collectorIds"
-                              fullWidth
-                              variant="outlined"
-                              label={t('Collector IDs')}
-                              component={FormikTextField}
-                            />
-                          </Box>
-                        </Grid>
-                        <Grid item xs={12}>
-                          <AndDivider>
-                            <AndDividerLabel>AND</AndDividerLabel>
-                          </AndDivider>
-                        </Grid>
-                      </>
-                    </Grid>
                     <FieldArray
                       name="collectorsFiltersBlocks"
                       render={(arrayHelpers) => (
