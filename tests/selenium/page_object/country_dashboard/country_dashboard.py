@@ -52,6 +52,7 @@ class CountryDashboard(BaseComponents):
         return self.wait_for(self.buttonFiltersApply)
 
     def getTableLabel(self) -> [WebElement]:
+        self.wait_for(self.tableLabel)
         return self.get_elements(self.tableLabel)
 
     def getTotalNumberOfHouseholdsReached(self) -> WebElement:
