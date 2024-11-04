@@ -262,11 +262,17 @@ class Query(graphene.ObjectType):
 
     def resolve_can_run_deduplication(self, info: Any, **kwargs: Any) -> bool:
         encoded_program_id = info.context.headers.get("Program")
+        if encoded_program_id == "all":
+            return False
+
         program = Program.objects.only("biometric_deduplication_enabled").get(id=decode_id_string(encoded_program_id))
         return program.biometric_deduplication_enabled
 
     def resolve_is_deduplication_disabled(self, info: Any, **kwargs: Any) -> bool:
         encoded_program_id = info.context.headers.get("Program")
+        if encoded_program_id == "all":
+            return False
+
         program = Program.objects.only("id").get(id=decode_id_string(encoded_program_id))
         # deduplication engine in progress
         is_still_processing = RegistrationDataImport.objects.filter(
