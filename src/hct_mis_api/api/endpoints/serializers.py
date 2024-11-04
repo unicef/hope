@@ -14,4 +14,14 @@ class RejectPolicy(models.TextChoices):
 class CountrySerializer(serializers.ModelSerializer):
     class Meta:
         model = Country
-        fields = "__all__"
+        fields = (
+            "id",
+            "name",
+            "short_name",
+            "iso_code2",
+            "iso_code3",
+            "iso_num",
+            "valid_from",
+            "valid_until",
+            "updated_at",
+        )
