@@ -39,6 +39,7 @@ import { TargetingCriteriaIndividualFilterBlocks } from './TargetingCriteriaIndi
 import { AndDivider, AndDividerLabel } from '@components/targeting/AndDivider';
 import { TargetingCriteriaHouseholdFilter } from './TargetingCriteriaHouseholdFilter';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { TargetingCriteriaCollectorFilterBlocks } from './TargetingCriteriaCollectorFilterBlocks';
 
 const ButtonBox = styled.div`
   width: 300px;
@@ -71,7 +72,7 @@ const validationSchema = Yup.object().shape({
             .nullable()
             .when(
               ['fieldName', 'fieldAttribute'],
-              (fieldName, fieldAttribute, schema) => {
+              (_fieldName, _fieldAttribute, schema) => {
                 const parent = schema.parent;
                 if (
                   parent &&
@@ -99,7 +100,7 @@ const validationSchema = Yup.object().shape({
             .nullable()
             .when(
               ['fieldName', 'fieldAttribute'],
-              (fieldName, fieldAttribute, schema) => {
+              (_fieldName, _fieldAttribute, schema) => {
                 const parent = schema.parent;
                 if (
                   parent &&
@@ -199,65 +200,70 @@ export const TargetingCriteriaForm = ({
 
   if (!data) return null;
 
-  const validate = ({
-    filters,
-    individualsFiltersBlocks,
-  }): { nonFieldErrors?: string[] } => {
-    const filterNullOrNoSelections = (filter): boolean =>
-      !filter.isNull &&
-      (filter.value === null ||
-        filter.value === '' ||
-        (filter?.fieldAttribute?.type === 'SELECT_MANY' &&
-          filter.value &&
-          filter.value.length === 0));
+  const filterNullOrNoSelections = (filter): boolean =>
+    !filter.isNull &&
+    (filter.value === null ||
+      filter.value === '' ||
+      (filter?.fieldAttribute?.type === 'SELECT_MANY' &&
+        filter.value &&
+        filter.value.length === 0));
 
-    const filterEmptyFromTo = (filter): boolean =>
-      !filter.isNull &&
-      typeof filter.value === 'object' &&
-      filter.value !== null &&
-      Object.prototype.hasOwnProperty.call(filter.value, 'from') &&
-      Object.prototype.hasOwnProperty.call(filter.value, 'to') &&
-      !filter.value.from &&
-      !filter.value.to;
+  const filterEmptyFromTo = (filter): boolean =>
+    !filter.isNull &&
+    typeof filter.value === 'object' &&
+    filter.value !== null &&
+    Object.prototype.hasOwnProperty.call(filter.value, 'from') &&
+    Object.prototype.hasOwnProperty.call(filter.value, 'to') &&
+    !filter.value.from &&
+    !filter.value.to;
 
-    const hasFiltersNullValues = Boolean(
-      filters.filter(filterNullOrNoSelections).length,
-    );
-
-    const hasFiltersEmptyFromToValues = Boolean(
-      filters.filter(filterEmptyFromTo).length,
-    );
-
+  const validate = (values) => {
     const hasFiltersErrors =
-      hasFiltersNullValues || hasFiltersEmptyFromToValues;
+      values.filters.some(filterNullOrNoSelections) ||
+      values.filters.some(filterEmptyFromTo);
 
-    const hasIndividualsFiltersBlocksErrors = individualsFiltersBlocks.some(
-      (block) => {
-        const hasNulls = block.individualBlockFilters.some(
-          filterNullOrNoSelections,
-        );
-        const hasFromToError =
-          block.individualBlockFilters.some(filterEmptyFromTo);
-
+    const hasBlockFiltersErrors = (blocks) => {
+      return blocks.some((block) => {
+        const hasNulls = block.blockFilters.some(filterNullOrNoSelections);
+        const hasFromToError = block.blockFilters.some(filterEmptyFromTo);
         return hasNulls || hasFromToError;
-      },
+      });
+    };
+
+    const hasIndividualsFiltersBlocksErrors = hasBlockFiltersErrors(
+      values.individualsFiltersBlocks,
+    );
+    const hasCollectorsFiltersBlocksErrors = hasBlockFiltersErrors(
+      values.collectorsFiltersBlocks,
     );
 
     const errors: { nonFieldErrors?: string[] } = {};
-    if (hasFiltersErrors || hasIndividualsFiltersBlocksErrors) {
+    if (
+      hasFiltersErrors ||
+      hasIndividualsFiltersBlocksErrors ||
+      hasCollectorsFiltersBlocksErrors
+    ) {
       errors.nonFieldErrors = ['You need to fill out missing values.'];
     }
-    if (filters.length + individualsFiltersBlocks.length === 0) {
+    if (
+      values.filters.length +
+        values.individualsFiltersBlocks.length +
+        values.collectorsFiltersBlocks.length ===
+      0
+    ) {
       errors.nonFieldErrors = [
-        'You need to add at least one household filter or an individual block filter.',
+        'You need to add at least one household filter, an individual block filter, or a collector block filter.',
       ];
     } else if (
-      individualsFiltersBlocks.filter(
-        (block) => block.individualBlockFilters.length === 0,
+      values.individualsFiltersBlocks.filter(
+        (block) => block.blockFilters.length === 0,
+      ).length > 0 ||
+      values.collectorsFiltersBlocks.filter(
+        (block) => block.blockFilters.length === 0,
       ).length > 0
     ) {
       errors.nonFieldErrors = [
-        'You need to add at least one household filter or an individual block filter.',
+        'You need to add at least one household filter, an individual block filter, or a collector block filter.',
       ];
     }
     return errors;
@@ -500,7 +506,7 @@ export const TargetingCriteriaForm = ({
                           ref={collectorsFiltersBlocksWrapperRef}
                         >
                           {values.collectorsFiltersBlocks.map((each, index) => (
-                            <TargetingCriteriaIndividualFilterBlocks
+                            <TargetingCriteriaCollectorFilterBlocks
                               // eslint-disable-next-line
                               key={index}
                               blockIndex={index}

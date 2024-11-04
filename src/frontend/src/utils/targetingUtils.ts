@@ -302,6 +302,10 @@ export function getTargetingCriteriaVariables(values) {
               block.individualBlockFilters.map(mapFilterToVariable),
           }),
         ),
+        collectorsFiltersBlocks: rule.collectorsFiltersBlocks.map((block) => ({
+          collectorsFiltersBlocks:
+            block.collectorsFiltersBlocks.map(mapFilterToVariable),
+        })),
       })),
     },
   };

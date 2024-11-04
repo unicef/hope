@@ -218,6 +218,7 @@ const CriteriaField = ({ field, choicesDict }): ReactElement => {
 interface CriteriaProps {
   rules: [TargetingCriteriaRuleObjectType];
   individualsFiltersBlocks;
+  collectorsFiltersBlocks;
   removeFunction?;
   editFunction?;
   isEdit: boolean;
@@ -235,6 +236,7 @@ export function Criteria({
   choicesDict,
   alternative = null,
   individualsFiltersBlocks,
+  collectorsFiltersBlocks,
 }: CriteriaProps): ReactElement {
   return (
     <CriteriaElement alternative={alternative} data-cy="criteria-container">
@@ -244,6 +246,17 @@ export function Criteria({
       {individualsFiltersBlocks.map((item, index) => (
         <CriteriaSetBox key={index}>
           {item.individualBlockFilters.map((filter, filterIndex) => (
+            <CriteriaField
+              choicesDict={choicesDict}
+              key={filterIndex}
+              field={filter}
+            />
+          ))}
+        </CriteriaSetBox>
+      ))}
+      {collectorsFiltersBlocks.map((item, index) => (
+        <CriteriaSetBox key={index}>
+          {item.collectorBlockFilters.map((filter, filterIndex) => (
             <CriteriaField
               choicesDict={choicesDict}
               key={filterIndex}

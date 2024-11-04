@@ -1,25 +1,24 @@
+import { TargetingCriteriaForm } from '@containers/forms/TargetingCriteriaForm';
 import {
   DataCollectingTypeType,
   TargetPopulationQuery,
 } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useCachedImportedIndividualFieldsQuery } from '@hooks/useCachedImportedIndividualFields';
 import { AddCircleOutline } from '@mui/icons-material';
-import { Box, Button, Checkbox, FormControlLabel, Grid } from '@mui/material';
-import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
-import { Field } from 'formik';
+import { Box, Button } from '@mui/material';
 import { Fragment, ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
+import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import { Criteria } from './Criteria';
+import { ExcludeCheckboxes } from './ExcludeCheckboxes';
 import {
   ContentWrapper,
   TargetingCriteriaDisplayDisabled,
 } from './TargetingCriteriaDisplayDisabled';
 import { VulnerabilityScoreComponent } from './VulnerabilityScoreComponent';
-import { useProgramContext } from 'src/programContext';
-import { useCachedImportedIndividualFieldsQuery } from '@hooks/useCachedImportedIndividualFields';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { TargetingCriteriaForm } from '@containers/forms/TargetingCriteriaForm';
 
 const Title = styled.div`
   padding: ${({ theme }) => theme.spacing(3)} ${({ theme }) => theme.spacing(4)};
@@ -72,11 +71,7 @@ const AddCriteria = styled.div`
   }
 `;
 
-const NoWrapCheckbox = styled(FormControlLabel)`
-  white-space: nowrap;
-`;
-
-interface TargetingCriteriaDisplayProps {
+interface AddFilterTargetingCriteriaDisplayProps {
   rules?;
   helpers?;
   targetPopulation?: TargetPopulationQuery['targetPopulation'];
@@ -86,7 +81,7 @@ interface TargetingCriteriaDisplayProps {
   isStandardDctType: boolean;
 }
 
-export const TargetingCriteriaDisplay = ({
+export const AddFilterTargetingCriteriaDisplay = ({
   rules,
   helpers,
   targetPopulation,
@@ -94,7 +89,7 @@ export const TargetingCriteriaDisplay = ({
   screenBeneficiary,
   isSocialDctType,
   isStandardDctType,
-}: TargetingCriteriaDisplayProps): ReactElement => {
+}: AddFilterTargetingCriteriaDisplayProps): ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
   const { selectedProgram } = useProgramContext();
@@ -213,6 +208,9 @@ export const TargetingCriteriaDisplay = ({
                         individualsFiltersBlocks={
                           criteria.individualsFiltersBlocks || []
                         }
+                        collectorsFiltersBlocks={
+                          criteria.collectorsFiltersBlocks || []
+                        }
                         editFunction={() => editCriteria(criteria, index)}
                         removeFunction={() => helpers.remove(index)}
                       />
@@ -237,151 +235,13 @@ export const TargetingCriteriaDisplay = ({
                 </AddCriteria>
               )}
             </Box>
-            <Box>
-              {isDetailsPage ? (
-                <Box mt={3} p={3}>
-                  <Grid container spacing={3}>
-                    <Grid item xs={6}>
-                      {isStandardDctType && (
-                        <NoWrapCheckbox
-                          disabled
-                          control={
-                            <Checkbox
-                              name="flagExcludeIfActiveAdjudicationTicket"
-                              color="primary"
-                              data-cy="checkbox-exclude-if-active-adjudication-ticket"
-                              checked={Boolean(
-                                targetPopulation?.targetingCriteria
-                                  ?.flagExcludeIfActiveAdjudicationTicket,
-                              )}
-                            />
-                          }
-                          label={t(
-                            'Exclude Households with Active Adjudication Ticket',
-                          )}
-                        />
-                      )}
-                      {isSocialDctType && (
-                        <NoWrapCheckbox
-                          disabled
-                          control={
-                            <Checkbox
-                              name="flagExcludeIfActiveAdjudicationTicket"
-                              color="primary"
-                              data-cy="checkbox-exclude-people-if-active-adjudication-ticket"
-                              checked={Boolean(
-                                targetPopulation?.targetingCriteria
-                                  ?.flagExcludeIfActiveAdjudicationTicket,
-                              )}
-                            />
-                          }
-                          label={t(
-                            'Exclude People with Active Adjudication Ticket',
-                          )}
-                        />
-                      )}
-                    </Grid>
-                    <Grid item xs={6}>
-                      {screenBeneficiary && isSocialDctType && (
-                        <NoWrapCheckbox
-                          disabled
-                          control={
-                            <Checkbox
-                              name="flagExcludeIfOnSanctionList"
-                              color="primary"
-                              data-cy="checkbox-exclude-if-on-sanction-list"
-                            />
-                          }
-                          checked={Boolean(
-                            targetPopulation?.targetingCriteria
-                              ?.flagExcludeIfOnSanctionList,
-                          )}
-                          label={t(
-                            'Exclude People with an Active Sanction Screen Flag',
-                          )}
-                        />
-                      )}
-                      {screenBeneficiary && isStandardDctType && (
-                        <NoWrapCheckbox
-                          disabled
-                          control={
-                            <Checkbox
-                              name="flagExcludeIfOnSanctionList"
-                              color="primary"
-                              data-cy="checkbox-exclude-if-on-sanction-list"
-                            />
-                          }
-                          checked={Boolean(
-                            targetPopulation?.targetingCriteria
-                              ?.flagExcludeIfOnSanctionList,
-                          )}
-                          label={t(
-                            'Exclude Households with an Active Sanction Screen Flag',
-                          )}
-                        />
-                      )}
-                    </Grid>
-                  </Grid>
-                </Box>
-              ) : (
-                <Box mt={3} p={3}>
-                  <Grid container spacing={3}>
-                    {isStandardDctType && (
-                      <Grid item xs={6}>
-                        <Field
-                          name="flagExcludeIfActiveAdjudicationTicket"
-                          label={t(
-                            'Exclude Households with Active Adjudication Ticket',
-                          )}
-                          color="primary"
-                          component={FormikCheckboxField}
-                          data-cy="input-active-adjudication-ticket"
-                        />
-                      </Grid>
-                    )}
-                    {isSocialDctType && (
-                      <Grid item xs={6}>
-                        <Field
-                          name="flagExcludePeopleWithActiveAdjudicationTicket"
-                          label={t(
-                            'Exclude People with Active Adjudication Ticket',
-                          )}
-                          color="primary"
-                          component={FormikCheckboxField}
-                          data-cy="input-active-adjudication-ticket"
-                        />
-                      </Grid>
-                    )}
-                    {screenBeneficiary && isStandardDctType && (
-                      <Grid item xs={6}>
-                        <Field
-                          name="flagExcludeIfOnSanctionList"
-                          label={t(
-                            'Exclude Households with an Active Sanction Screen Flag',
-                          )}
-                          color="primary"
-                          component={FormikCheckboxField}
-                          data-cy="input-active-sanction-flag"
-                        />
-                      </Grid>
-                    )}
-                    {screenBeneficiary && isSocialDctType && (
-                      <Grid item xs={6}>
-                        <Field
-                          name="flagExcludeIfOnSanctionList"
-                          label={t(
-                            'Exclude People with an Active Sanction Screen Flag',
-                          )}
-                          color="primary"
-                          component={FormikCheckboxField}
-                          data-cy="input-active-sanction-flag"
-                        />
-                      </Grid>
-                    )}
-                  </Grid>
-                </Box>
-              )}
-            </Box>
+            <ExcludeCheckboxes
+              isStandardDctType={isStandardDctType}
+              isSocialDctType={isSocialDctType}
+              screenBeneficiary={screenBeneficiary}
+              isDetailsPage={isDetailsPage}
+              targetPopulation={targetPopulation}
+            />
           </Box>
         </ContentWrapper>
         {targetPopulation && (
