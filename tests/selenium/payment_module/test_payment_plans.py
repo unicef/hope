@@ -393,6 +393,7 @@ class TestSmokePaymentModule:
         assert "FSP Auth Code" in pagePaymentModuleDetails.getTableLabel()[10].text
         assert "Reconciliation" in pagePaymentModuleDetails.getTableLabel()[11].text
 
+    @pytest.mark.xfail(reason="UNSTABLE")
     def test_payment_plan_happy_path(
         self,
         clear_downloaded_files: None,

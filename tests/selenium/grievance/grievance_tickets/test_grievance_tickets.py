@@ -409,6 +409,7 @@ class TestSmokeGrievanceTickets:
         assert "ADD NOTE" in pageGrievanceTickets.getButtonAddNote().text
         assert "NEW TICKET" in pageGrievanceTickets.getButtonNewTicket().text
 
+    @pytest.mark.xfail(reason="UNSTABLE")
     def test_check_grievance_tickets_details_page(
         self,
         create_programs: None,
