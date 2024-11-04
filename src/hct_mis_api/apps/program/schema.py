@@ -43,8 +43,8 @@ from hct_mis_api.apps.core.schema import (
 from hct_mis_api.apps.core.utils import (
     chart_filters_decoder,
     chart_permission_decorator,
-    decode_id_string,
     to_choice_object,
+    get_program_id_from_headers,
 )
 from hct_mis_api.apps.payment.filters import (
     CashPlanFilter,
@@ -261,19 +261,19 @@ class Query(graphene.ObjectType):
     is_deduplication_disabled = graphene.Boolean()
 
     def resolve_can_run_deduplication(self, info: Any, **kwargs: Any) -> bool:
-        encoded_program_id = info.context.headers.get("Program")
-        if encoded_program_id == "all":
+        program_id = get_program_id_from_headers(info.context.headers)
+        if not program_id:
             return False
 
-        program = Program.objects.only("biometric_deduplication_enabled").get(id=decode_id_string(encoded_program_id))
+        program = Program.objects.only("biometric_deduplication_enabled").get(id=program_id)
         return program.biometric_deduplication_enabled
 
     def resolve_is_deduplication_disabled(self, info: Any, **kwargs: Any) -> bool:
-        encoded_program_id = info.context.headers.get("Program")
-        if encoded_program_id == "all":
+        program_id = get_program_id_from_headers(info.context.headers)
+        if not program_id:
             return True
 
-        program = Program.objects.only("id").get(id=decode_id_string(encoded_program_id))
+        program = Program.objects.only("id").get(id=program_id)
         # deduplication engine in progress
         is_still_processing = RegistrationDataImport.objects.filter(
             program=program,
