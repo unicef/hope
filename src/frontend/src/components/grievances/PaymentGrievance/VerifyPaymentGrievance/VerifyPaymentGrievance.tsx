@@ -74,6 +74,7 @@ export function VerifyPaymentGrievance({
             <Button
               color="primary"
               variant="contained"
+              data-cy="grievance-verify"
               onClick={() => setVerifyManualDialogOpen(true)}
             >
               {t('Verify')}
