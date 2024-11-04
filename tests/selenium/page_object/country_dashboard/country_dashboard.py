@@ -1,6 +1,11 @@
+from time import sleep
 from typing import List
 
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
+from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 
 from tests.selenium.page_object.base_components import BaseComponents
 
@@ -10,7 +15,6 @@ class CountryDashboard(BaseComponents):
     mainContent = 'div[data-cy="main-content"]'
     pageHeaderContainer = 'div[data-cy="page-header-container"]'
     pageHeaderTitle = 'h5[data-cy="page-header-title"]'
-    # Locator for iframe
     iframe_locator = 'iframe[title="Dashboard"]'
     total_amount_paid = "div#total-amount-paid"
     number_of_payments = "div#number-of-payments"
@@ -24,8 +28,18 @@ class CountryDashboard(BaseComponents):
     pending_reconciliation_percentage = "div.pending-reconciliation-percentage"
 
     def switch_to_dashboard_iframe(self) -> None:
-        iframe = self.wait_for(self.iframe_locator)
-        self.driver.switch_to.frame(iframe)
+        retries = 3
+        for attempt in range(retries):
+            try:
+                iframe = WebDriverWait(self.driver, 20).until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, 'iframe[title="Dashboard"]'))
+                )
+                self.driver.switch_to.frame(iframe)
+                return
+            except TimeoutException:
+                print(f"Attempt {attempt + 1} - Could not locate iframe 'Dashboard'. Checking all iframes on page.")
+            sleep(2)
+        raise NoSuchElementException("Could not locate iframe with title 'Dashboard' after multiple attempts.")
 
     def switch_to_default_content(self) -> None:
         self.driver.switch_to.default_content()

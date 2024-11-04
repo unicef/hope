@@ -38,7 +38,7 @@ export USE_DUMMY_EXCHANGE_RATES=yes
 export ELASTICSEARCH_HOST=http://localhost:9200
 export CELERY_TASK_ALWAYS_EAGER=true
 export LIBRARY_PATHS=true
-SCRIPT_DIR=/home/stock/dEV/hct-mis/development_tools
+SCRIPT_DIR=$(realpath "$(dirname $0)")
 MAIN_DIR=$(realpath $SCRIPT_DIR/..)
 echo "SCRIPT_DIR: $SCRIPT_DIR"
 export PYTHONPATH=$MAIN_DIR/src:$PYTHONPATH
