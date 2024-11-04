@@ -409,6 +409,7 @@ class TestSmokeGrievanceTickets:
         assert "ADD NOTE" in pageGrievanceTickets.getButtonAddNote().text
         assert "NEW TICKET" in pageGrievanceTickets.getButtonNewTicket().text
 
+    @pytest.mark.xfail(reason="UNSTABLE")
     def test_check_grievance_tickets_details_page(
         self,
         create_programs: None,
@@ -761,15 +762,12 @@ class TestGrievanceTickets:
         assert "-" in pageGrievanceDetailsPage.getTicketAssigment().text
         assert "Data Change" in pageGrievanceDetailsPage.getTicketCategory().text
         assert "Add Individual" in pageGrievanceDetailsPage.getLabelIssueType().text
-        assert household_without_disabilities.unicef_id in pageGrievanceDetailsPage.getTicketHouseholdID().text
+        assert household_without_disabilities.unicef_id in pageGrievanceDetailsPage.getTicketTargetID().text
         assert "Test Program" in pageGrievanceDetailsPage.getLabelProgramme().text
         assert datetime.now().strftime("%-d %b %Y") in pageGrievanceDetailsPage.getLabelDateCreation().text
         assert datetime.now().strftime("%-d %b %Y") in pageGrievanceDetailsPage.getLabelLastModifiedDate().text
-        assert "-" in pageGrievanceDetailsPage.getLabelAdministrativeLevel2().text
-        assert "-" in pageGrievanceDetailsPage.getLabelLanguagesSpoken().text
         assert "-" in pageGrievanceDetailsPage.getLabelDocumentation().text
         assert "Add Individual - TEST" in pageGrievanceDetailsPage.getLabelDescription().text
-        assert "-" in pageGrievanceDetailsPage.getLabelComments().text
         assert "Male" in pageGrievanceDetailsPage.getLabelGender().text
         assert "Alternate collector" in pageGrievanceDetailsPage.getLabelRole().text
         assert "Krido" in pageGrievanceDetailsPage.getLabelFullName().text

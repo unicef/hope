@@ -221,8 +221,10 @@ def driver() -> Chrome:
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--window-size=1920,1080")
     chrome_options.add_argument("--disable-dev-shm-usage")
-    if not os.path.exists(settings.DOWNLOAD_DIRECTORY):
+    try:
         os.makedirs(settings.DOWNLOAD_DIRECTORY)
+    except FileExistsError:
+        pass
     prefs = {
         "download.default_directory": settings.DOWNLOAD_DIRECTORY,
     }
