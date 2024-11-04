@@ -132,6 +132,8 @@ export const AddFilterTargetingCriteriaDisplay = ({
     const criteria = {
       filters: [...values.filters],
       individualsFiltersBlocks: [...values.individualsFiltersBlocks],
+      householdIds: values.householdIds,
+      individualIds: values.individualIds,
     };
     if (criteriaIndex !== null) {
       helpers.replace(criteriaIndex, criteria);
@@ -211,6 +213,8 @@ export const AddFilterTargetingCriteriaDisplay = ({
                         collectorsFiltersBlocks={
                           criteria.collectorsFiltersBlocks || []
                         }
+                        householdIds={criteria.householdIds}
+                        individualIds={criteria.individualIds}
                         editFunction={() => editCriteria(criteria, index)}
                         removeFunction={() => helpers.remove(index)}
                       />

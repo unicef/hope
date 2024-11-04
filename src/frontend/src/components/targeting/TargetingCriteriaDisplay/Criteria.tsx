@@ -1,4 +1,17 @@
-import { IconButton } from '@mui/material';
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Typography,
+} from '@mui/material';
 import { Delete, Edit } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -7,7 +20,7 @@ import LessThanEqual from '../../../assets/LessThanEqual.svg';
 import { TargetingCriteriaRuleObjectType } from '@generated/graphql';
 import { Box } from '@mui/system';
 import { BlueText } from '@components/grievances/LookUps/LookUpStyles';
-import { ReactElement } from 'react';
+import { ReactElement, useState } from 'react';
 import { Fragment } from 'react/jsx-runtime';
 
 interface CriteriaElementProps {
@@ -225,6 +238,8 @@ interface CriteriaProps {
   canRemove: boolean;
   alternative?: boolean;
   choicesDict;
+  householdIds: string;
+  individualIds: string;
 }
 
 export function Criteria({
@@ -237,14 +252,52 @@ export function Criteria({
   alternative = null,
   individualsFiltersBlocks,
   collectorsFiltersBlocks,
+  householdIds,
+  individualIds,
 }: CriteriaProps): ReactElement {
+  const [open, setOpen] = useState(false);
+  const [currentIds, setCurrentIds] = useState<string[]>([]);
+
+  const handleOpen = (ids: string): void => {
+    setCurrentIds(ids.split(','));
+    setOpen(true);
+  };
+
+  const handleClose = (): void => {
+    setOpen(false);
+    setCurrentIds([]);
+  };
+  console.log(householdIds, individualIds);
+
   return (
     <CriteriaElement alternative={alternative} data-cy="criteria-container">
+      {householdIds && (
+        <div>
+          <Typography variant="body1">Household Ids:</Typography>
+          <BlueText
+            onClick={() => handleOpen(householdIds)}
+            style={{ textDecoration: 'underline', cursor: 'pointer' }}
+          >
+            {householdIds.split(',').length}
+          </BlueText>
+        </div>
+      )}
       {(rules || []).map((each, index) => (
         <CriteriaField choicesDict={choicesDict} key={index} field={each} />
       ))}
       {individualsFiltersBlocks.map((item, index) => (
         <CriteriaSetBox key={index}>
+          {individualIds && index === 0 && (
+            <div>
+              <Typography variant="body1">Individual Ids:</Typography>
+              <BlueText
+                onClick={() => handleOpen(individualIds)}
+                style={{ textDecoration: 'underline', cursor: 'pointer' }}
+              >
+                {individualIds.split(',').length}
+              </BlueText>
+            </div>
+          )}
           {item.individualBlockFilters.map((filter, filterIndex) => (
             <CriteriaField
               choicesDict={choicesDict}
@@ -277,6 +330,34 @@ export function Criteria({
           )}
         </ButtonsContainer>
       )}
+      <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+        <DialogTitle>
+          {currentIds.some((id) => id.startsWith('HH'))
+            ? 'Selected Households'
+            : 'Selected Individuals'}
+        </DialogTitle>
+        <DialogContent>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>ID</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {currentIds.map((id, index) => (
+                <TableRow key={index}>
+                  <TableCell>{id}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </DialogContent>
+        <DialogActions>
+          <Button color="primary" onClick={handleClose}>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
     </CriteriaElement>
   );
 }

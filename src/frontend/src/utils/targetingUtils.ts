@@ -289,8 +289,8 @@ function mapFilterToVariable(filter: Filter): Result {
 export function getTargetingCriteriaVariables(values) {
   return {
     targetingCriteria: {
-      householdIds: values.householdIds,
-      individualIds: values.individualIds,
+      householdIds: values.criterias.householdIds,
+      individualIds: values.criterias.individualIds,
       flagExcludeIfActiveAdjudicationTicket:
         values.flagExcludeIfActiveAdjudicationTicket,
       flagExcludeIfOnSanctionList: values.flagExcludeIfOnSanctionList,

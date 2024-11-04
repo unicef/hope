@@ -128,88 +128,92 @@ export const CreateTargetPopulationPage = (): ReactElement => {
         validationSchema={validationSchema}
         onSubmit={handleSubmit}
       >
-        {({ submitForm, values, setFieldValue, errors }) => (
-          <Form>
-            <AutoSubmitFormOnEnter />
-            <CreateTargetPopulationHeader
-              handleSubmit={submitForm}
-              loading={loading}
-              values={values}
-              baseUrl={baseUrl}
-              permissions={permissions}
-            />
-            <PaperContainer>
-              <Box pt={3} pb={3}>
-                <Typography variant="h6">{t('Targeting Criteria')}</Typography>
-              </Box>
-              <Grid container mb={5}>
-                <Grid item xs={6}>
-                  <ProgramCycleAutocompleteRest
-                    value={values.programCycleId}
-                    onChange={async (e) => {
-                      await setFieldValue('programCycleId', e);
-                    }}
-                    required
-                    // @ts-ignore
-                    error={errors.programCycleId?.value}
-                  />
-                </Grid>
-              </Grid>
-              <Grid container>
-                <Grid item xs={6}>
-                  <Field
-                    name="name"
-                    label={t('Target Population Name')}
-                    type="text"
-                    fullWidth
-                    required
-                    component={FormikTextField}
-                    variant="outlined"
-                    data-cy="input-name"
-                  />
-                </Grid>
-              </Grid>
-              <Box pt={6} pb={6}>
-                <Divider />
-              </Box>
-              {values.program ? (
-                <FieldArray
-                  name="criterias"
-                  render={(arrayHelpers) => (
-                    <AddFilterTargetingCriteriaDisplay
-                      helpers={arrayHelpers}
-                      rules={values.criterias}
-                      screenBeneficiary={screenBeneficiary}
-                      isStandardDctType={isStandardDctType}
-                      isSocialDctType={isSocialDctType}
-                      isEdit
-                    />
-                  )}
-                />
-              ) : null}
-              <CreateAndEditTPCheckboxes
-                isStandardDctType={isStandardDctType}
-                isSocialDctType={isSocialDctType}
-                screenBeneficiary={screenBeneficiary}
+        {({ submitForm, values, setFieldValue, errors }) => {
+          return (
+            <Form>
+              <AutoSubmitFormOnEnter />
+              <CreateTargetPopulationHeader
+                handleSubmit={submitForm}
+                loading={loading}
+                values={values}
+                baseUrl={baseUrl}
+                permissions={permissions}
               />
-            </PaperContainer>
-            <Exclusions />
-            <Box
-              pt={3}
-              pb={3}
-              display="flex"
-              flexDirection="column"
-              alignItems="center"
-            >
-              <Typography style={{ color: '#b1b1b5' }} variant="h6">
-                {t('Save to see the list of households')}
-              </Typography>
-              <Typography style={{ color: '#b1b1b5' }} variant="subtitle1">
-                {t('List of households will be available after saving')}
-              </Typography>
-            </Box>
-          </Form>
-        )}
+              <PaperContainer>
+                <Box pt={3} pb={3}>
+                  <Typography variant="h6">
+                    {t('Targeting Criteria')}
+                  </Typography>
+                </Box>
+                <Grid container mb={5}>
+                  <Grid item xs={6}>
+                    <ProgramCycleAutocompleteRest
+                      value={values.programCycleId}
+                      onChange={async (e) => {
+                        await setFieldValue('programCycleId', e);
+                      }}
+                      required
+                      // @ts-ignore
+                      error={errors.programCycleId?.value}
+                    />
+                  </Grid>
+                </Grid>
+                <Grid container>
+                  <Grid item xs={6}>
+                    <Field
+                      name="name"
+                      label={t('Target Population Name')}
+                      type="text"
+                      fullWidth
+                      required
+                      component={FormikTextField}
+                      variant="outlined"
+                      data-cy="input-name"
+                    />
+                  </Grid>
+                </Grid>
+                <Box pt={6} pb={6}>
+                  <Divider />
+                </Box>
+                {values.program ? (
+                  <FieldArray
+                    name="criterias"
+                    render={(arrayHelpers) => (
+                      <AddFilterTargetingCriteriaDisplay
+                        helpers={arrayHelpers}
+                        rules={values.criterias}
+                        screenBeneficiary={screenBeneficiary}
+                        isStandardDctType={isStandardDctType}
+                        isSocialDctType={isSocialDctType}
+                        isEdit
+                      />
+                    )}
+                  />
+                ) : null}
+                <CreateAndEditTPCheckboxes
+                  isStandardDctType={isStandardDctType}
+                  isSocialDctType={isSocialDctType}
+                  screenBeneficiary={screenBeneficiary}
+                />
+              </PaperContainer>
+              <Exclusions />
+              <Box
+                pt={3}
+                pb={3}
+                display="flex"
+                flexDirection="column"
+                alignItems="center"
+              >
+                <Typography style={{ color: '#b1b1b5' }} variant="h6">
+                  {t('Save to see the list of households')}
+                </Typography>
+                <Typography style={{ color: '#b1b1b5' }} variant="subtitle1">
+                  {t('List of households will be available after saving')}
+                </Typography>
+              </Box>
+            </Form>
+          );
+        }}
       </Formik>
     </UniversalErrorBoundary>
   );

@@ -24,6 +24,7 @@ export const CreateTargetPopulationHeader = ({
 }: CreateTargetPopulationHeaderProps): ReactElement => {
   const { t } = useTranslation();
 
+  console.log('values', values);
   const isSubmitDisabled = () => {
     return (
       (!values.criterias?.length &&

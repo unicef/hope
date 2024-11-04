@@ -223,7 +223,15 @@ export const TargetingCriteriaForm = ({
       values.filters.some(filterEmptyFromTo);
 
     const hasBlockFiltersErrors = (blocks) => {
+      if (!blocks || !Array.isArray(blocks)) {
+        return false;
+      }
+
       return blocks.some((block) => {
+        if (!block.blockFilters || !Array.isArray(block.blockFilters)) {
+          return false;
+        }
+
         const hasNulls = block.blockFilters.some(filterNullOrNoSelections);
         const hasFromToError = block.blockFilters.some(filterEmptyFromTo);
         return hasNulls || hasFromToError;
@@ -249,21 +257,23 @@ export const TargetingCriteriaForm = ({
       values.filters.length +
         values.individualsFiltersBlocks.length +
         values.collectorsFiltersBlocks.length ===
-      0
+        0 &&
+      (!values.householdIds || values.householdIds.length === 0) &&
+      (!values.individualIds || values.individualIds.length === 0)
     ) {
       errors.nonFieldErrors = [
-        'You need to add at least one household filter, an individual block filter, or a collector block filter.',
+        'You need to add at least one household filter, an individual block filter, a collector block filter, a household ID, or an individual ID.',
       ];
     } else if (
       values.individualsFiltersBlocks.filter(
-        (block) => block.blockFilters.length === 0,
+        (block) => block.blockFilters && block.blockFilters.length === 0,
       ).length > 0 ||
       values.collectorsFiltersBlocks.filter(
-        (block) => block.blockFilters.length === 0,
+        (block) => block.blockFilters && block.blockFilters.length === 0,
       ).length > 0
     ) {
       errors.nonFieldErrors = [
-        'You need to add at least one household filter, an individual block filter, or a collector block filter.',
+        'You need to add at least one household filter, an individual block filter, a collector block filter, a household IDs, or an individual IDs.',
       ];
     }
     return errors;
@@ -271,11 +281,18 @@ export const TargetingCriteriaForm = ({
 
   const handleSubmit = (values, bag): void => {
     const filters = formatCriteriaFilters(values.filters);
-
+    const individualIds = values.individualIds;
+    const householdIds = values.householdIds;
     const individualsFiltersBlocks = formatCriteriaIndividualsFiltersBlocks(
       values.individualsFiltersBlocks,
     );
-    addCriteria({ filters, individualsFiltersBlocks });
+
+    addCriteria({
+      filters,
+      individualsFiltersBlocks,
+      individualIds,
+      householdIds,
+    });
     return bag.resetForm();
   };
   if (loading || !open) return null;
@@ -290,6 +307,8 @@ export const TargetingCriteriaForm = ({
         enableReinitialize
       >
         {({ submitForm, values, resetForm, errors }) => {
+          console.log('values', values);
+
           return (
             <Dialog
               open={open}
