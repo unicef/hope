@@ -29,7 +29,14 @@ class PaymentVerificationDetails(BaseComponents):
     labelizedFieldContainerSummaryNumberOfPlans = 'div[data-cy="labelized-field-container-summary-number-of-plans"]'
     labelNumberOfVerificationPlans = 'div[data-cy="label-Number of Verification Plans"]'
     buttonDeletePlan = 'button[data-cy="button-delete-plan"]'
+    verificationPlan = 'h6[data-cy="verification-plan-{}"]'
+    verificationPlanPrefix = 'h6[data-cy^="verification-plan"]'
     buttonActivatePlan = 'button[data-cy="button-activate-plan"]'
+    exportXlsx = 'button[data-cy="export-xlsx"]'
+    downloadXlsx = 'button[data-cy="download-xlsx"]'
+    buttonMarkAsInvalid = '[data-cy="button-mark-as-invalid"]'
+    importXlsx = 'div[data-cy="import-xlsx"]'
+    buttonImportEntitlement = 'button[data-cy="button-import-entitlement"]'
     verificationPlanStatus = 'div[data-cy="verification-plan-status"]'
     labelSampling = 'div[data-cy="label-SAMPLING"]'
     labelResponded = 'div[data-cy="label-RESPONDED"]'
@@ -44,6 +51,7 @@ class PaymentVerificationDetails(BaseComponents):
     buttonSubmit = 'button[data-cy="button-submit"]'
     buttonFinish = 'button[data-cy="button-ed-plan"]'
     rows = 'tr[role="checkbox"]'
+    buttonDiscard = 'button[data-cy="button-discard-plan"]'
 
     def getPageHeaderContainer(self) -> WebElement:
         return self.wait_for(self.pageHeaderContainer)
@@ -117,8 +125,35 @@ class PaymentVerificationDetails(BaseComponents):
     def getButtonDeletePlan(self) -> WebElement:
         return self.wait_for(self.buttonDeletePlan)
 
+    def deleteVerificationPlanByNumber(self, number: int) -> None:
+        self.get_elements(self.buttonDeletePlan)[number].click()
+
+    def getVerificationPlanName(self, name: str) -> WebElement:
+        return self.wait_for(self.verificationPlan.format(name))
+
+    def getVerificationPlanPrefix(self) -> [WebElement]:
+        return self.get_elements(self.verificationPlanPrefix)
+
     def getButtonActivatePlan(self) -> WebElement:
         return self.wait_for(self.buttonActivatePlan)
+
+    def getExportXlsx(self) -> WebElement:
+        return self.wait_for(self.exportXlsx, timeout=120)
+
+    def getDownloadXlsx(self) -> WebElement:
+        return self.wait_for(self.downloadXlsx)
+
+    def getButtonMarkAsInvalid(self) -> WebElement:
+        return self.wait_for(self.buttonMarkAsInvalid)
+
+    def getButtonDiscard(self) -> WebElement:
+        return self.wait_for(self.buttonDiscard)
+
+    def getImportXlsx(self) -> WebElement:
+        return self.wait_for(self.importXlsx)
+
+    def getButtonImportEntitlement(self) -> WebElement:
+        return self.wait_for(self.buttonImportEntitlement)
 
     def getVerificationPlanStatus(self) -> WebElement:
         return self.wait_for(self.verificationPlanStatus)
