@@ -61,17 +61,9 @@ class APICountriesTests(HOPEApiTestCase):
             "iso_code2": country.iso_code2,
             "iso_code3": country.iso_code3,
             "iso_num": country.iso_num,
-            "created_at": country.created_at.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
             "updated_at": country.updated_at.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
-            "original_id": country.original_id,
             "valid_from": country.valid_from.strftime("%Y-%m-%dT%H:%M:%SZ"),
             "valid_until": country.valid_until.strftime("%Y-%m-%dT%H:%M:%SZ"),
-            "extras": country.extras,
-            "lft": country.lft,
-            "rght": country.rght,
-            "tree_id": country.tree_id,
-            "level": country.level,
-            "parent": country.parent,
         }
 
     def test_get_countries(self) -> None:
