@@ -305,6 +305,10 @@ def get_fields_attr_generators(
                 business_area_slug=business_area_slug, program_id=program_id
             )
 
+def get_collector_fields_attr_generator(
+) -> Generator:
+        yield from FieldFactory.from_scope(Scope.DELIVERY_MECHANISM).filtered_by_types(FILTERABLE_TYPES)
+
 
 def resolve_asset(business_area_slug: str, uid: str) -> Dict:
     try:
@@ -356,6 +360,11 @@ class Query(graphene.ObjectType):
         business_area_slug=graphene.String(required=False, description="The business area slug"),
         program_id=graphene.String(required=False, description="program id"),
         description="All field datatype meta.",
+    )
+    all_collector_fields_attributes = graphene.List(
+        FieldAttributeNode,
+        flex_field=graphene.Boolean(),
+        description="All collectors fields.",
     )
     all_pdu_fields = graphene.List(
         FieldAttributeNode,
@@ -437,6 +446,18 @@ class Query(graphene.ObjectType):
                 attr
                 for attr in get_fields_attr_generators(flex_field, business_area_slug, program_id)
                 if not is_a_killer_filter(attr)
+            ),
+            "label.English(EN)",
+        )
+
+    def resolve_all_collector_fields_attributes(
+        parent,
+        info: Any,
+    ) -> List[Any]:
+        return sort_by_attr(
+            (
+                attr
+                for attr in get_collector_fields_attr_generator()
             ),
             "label.English(EN)",
         )

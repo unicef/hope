@@ -199,3 +199,4 @@ class TargetingCriteriaObjectType(graphene.InputObjectType):
     flag_exclude_if_on_sanction_list = graphene.Boolean()
     household_ids = graphene.String()
     individual_ids = graphene.String()
+    collector_rules = graphene.List(TargetingCriteriaRuleFilterObjectType)

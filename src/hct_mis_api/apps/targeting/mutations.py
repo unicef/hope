@@ -117,6 +117,7 @@ def from_input_to_targeting_criteria(targeting_criteria_input: Dict, program: Pr
     rules = targeting_criteria_input.pop("rules", [])
     household_ids = targeting_criteria_input.get("household_ids")
     individual_ids = targeting_criteria_input.get("individual_ids")
+    collector_rules = targeting_criteria_input.get("collector_rules", [])
     if household_ids:
         targeting_criteria_input["household_ids"] = get_unicef_ids(household_ids, "household", program)
     if individual_ids:
@@ -138,6 +139,9 @@ def from_input_to_targeting_criteria(targeting_criteria_input: Dict, program: Pr
                     individuals_filters_block=block, **individual_block_filters_input
                 )
                 individual_block_filters.save()
+        for collector_rule in collector_rules:
+            rule_filter = TargetingCriteriaRuleFilter(targeting_criteria_rule=rule, **collector_rule)
+            rule_filter.save()
     return targeting_criteria
 
 
