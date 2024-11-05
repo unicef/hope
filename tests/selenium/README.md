@@ -15,7 +15,7 @@ sh -c "cd .. && docker build . -f ./docker/Dockerfile --target dev --tag unicef/
 
 <b><h3>Installation:</h3></b>
 ```bash
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 curl https://pyenv.run | bash
 brew install pyenv
 vim ~/.zshrc
@@ -30,8 +30,8 @@ eval "$(pyenv virtualenv-init -)"
 
 - In new terminal tab
 ```bash
-pyenv install 3.11.7
-pyenv virtualenv 3.11.7 new-venv
+pyenv install 3.12.7
+pyenv virtualenv 3.12.7 new-venv
 pyenv activate new-venv
 brew install pdm
 curl -sSL https://pdm-project.org/install-pdm.py | python -
@@ -45,10 +45,10 @@ brew install wkhtmltopdf pango postgis gdal
 ```bash
 pyenv activate new-venv
 cd src
-source ../development_tools/local_selenium_env.sh 
+source ../development_tools/local_selenium_init.sh 
 
 # second tab: 
-docker compose -f ../development_tools/compose.selenium.local.yml up --build 
+docker compose -f ./development_tools/compose.yml --profile services up --build
 # first tab: 
-python -m pytest -svvv ../tests/selenium --html-report=../tests/selenium/report/report.html
+python -m pytest -n auto -rP --reuse-db -p no:warnings --cov-report= --capture=sys --html-report=$OUTPUT_DATA_ROOT/report/report.html tests/selenium
 ```
