@@ -222,11 +222,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         collectors_to_create = defaultdict(list)
         household_hash_list = []
         household_batch_size = 50
-        logger.info(f"Processing {len(self.reduced_submissions)} households")
-        chunk_index = 0
         for reduced_submission_chunk in chunks(self.reduced_submissions, household_batch_size):
-            chunk_index += 1
-            logger.info(f"Processing chunk {chunk_index}/{len(self.reduced_submissions) // household_batch_size}")
             for household in reduced_submission_chunk:
                 # AB#199540
                 household_hash = calculate_hash_for_kobo_submission(household)
