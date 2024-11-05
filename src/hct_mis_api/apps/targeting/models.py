@@ -423,6 +423,9 @@ class TargetingCriteriaRule(TimeStampedUUIDModel, TargetingCriteriaRuleQueryingB
     def get_individuals_filters_blocks(self) -> "QuerySet":
         return self.individuals_filters_blocks.all()
 
+    def get_collectors_filters_blocks(self) -> "QuerySet":
+        return self.collectors_filters_blocks.all()
+
 
 class TargetingIndividualRuleFilterBlock(
     TimeStampedUUIDModel,
@@ -524,3 +527,26 @@ class TargetingIndividualBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteria
 
     def get_lookup_prefix(self, associated_with: Any) -> str:
         return ""
+
+
+class TargetingCollectorRuleFilterBlock(
+    TimeStampedUUIDModel,
+    TargetingIndividualRuleFilterBlockBase,
+):
+    targeting_criteria_rule = models.ForeignKey(
+        "TargetingCriteriaRule",
+        on_delete=models.CASCADE,
+        related_name="collector_filters_blocks",
+    )
+
+
+class TargetingCollectorBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterBase):
+    """
+    This is one field like 'bank_account_number__transfer_to_account':
+    """
+    collector_block_filters = models.ForeignKey(
+        "TargetingCollectorRuleFilterBlock",
+        related_name="collector_block_filters",
+        on_delete=models.CASCADE,
+    )
+    field_name = models.CharField(max_length=120)

@@ -136,6 +136,8 @@ class TargetingCriteriaRuleInputValidator:
         total_len = 0
         filters = rule.get("filters")
         individuals_filters_blocks = rule.get("individuals_filters_blocks", [])
+        collectors_filters_blocks = rule.get("collectors_filters_blocks", [])
+
         if filters is not None:
             total_len += len(filters)
         if individuals_filters_blocks is not None:
@@ -150,6 +152,13 @@ class TargetingCriteriaRuleInputValidator:
             individual_block_filters = individuals_filters_block.get("individual_block_filters", [])
             for individual_block_filter in individual_block_filters:
                 TargetingCriteriaRuleFilterInputValidator.validate(rule_filter=individual_block_filter, program=program)
+
+        for collectors_filters_block in collectors_filters_blocks:
+            collector_block_filters = collectors_filters_block.get("collector_block_filters", [])
+            for collector_block_filter in collector_block_filters:
+                TargetingCriteriaRuleFilterInputValidator.validate(rule_filter=collector_block_filter, program=program)
+
+
 
 
 class TargetingCriteriaInputValidator:

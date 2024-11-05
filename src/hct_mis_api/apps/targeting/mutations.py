@@ -44,7 +44,7 @@ from hct_mis_api.apps.targeting.models import (
     TargetingCriteriaRuleFilter,
     TargetingIndividualBlockRuleFilter,
     TargetingIndividualRuleFilterBlock,
-    TargetPopulation,
+    TargetPopulation, TargetingCollectorRuleFilterBlock,
 )
 from hct_mis_api.apps.targeting.schema import TargetPopulationNode
 from hct_mis_api.apps.targeting.validators import (
@@ -117,7 +117,6 @@ def from_input_to_targeting_criteria(targeting_criteria_input: Dict, program: Pr
     rules = targeting_criteria_input.pop("rules", [])
     household_ids = targeting_criteria_input.get("household_ids")
     individual_ids = targeting_criteria_input.get("individual_ids")
-    # collector_rules = targeting_criteria_input.get("collector_rules", [])
     if household_ids:
         targeting_criteria_input["household_ids"] = get_unicef_ids(household_ids, "household", program)
     if individual_ids:
@@ -141,11 +140,11 @@ def from_input_to_targeting_criteria(targeting_criteria_input: Dict, program: Pr
                 individual_block_filters.save()
 
         for collector_block_input in rule_input.get("collectors_filters_blocks", []):
-            collector_block = TargetingIndividualRuleFilterBlock(targeting_criteria_rule=rule)  # TODO: Collector block
+            collector_block = TargetingCollectorRuleFilterBlock(targeting_criteria_rule=rule)
             collector_block.save()
             for collector_block_filters_input in collector_block_input.get("collector_block_filters"):
-                collector_block_filters = TargetingIndividualBlockRuleFilter(
-                    individuals_filters_block=collector_block, **collector_block_filters_input  # TODO: Collector block
+                collector_block_filters = TargetingCollectorBlockRuleFilter(
+                    individuals_filters_block=collector_block, **collector_block_filters_input
                 )
                 collector_block_filters.save()
 

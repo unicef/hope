@@ -107,17 +107,23 @@ class TargetingCriteriaRuleQueryingBase:
     combines individual filters block with household filters
     """
 
-    def __init__(self, filters: Optional[Any] = None, individuals_filters_blocks: Optional[Any] = None) -> None:
+    def __init__(self, filters: Optional[Any] = None, individuals_filters_blocks: Optional[Any] = None, collectors_filters_blocks: Optional[Any] = None,) -> None:
         if filters is not None:
             self.filters = filters
         if individuals_filters_blocks is not None:
             self.individuals_filters_blocks = individuals_filters_blocks
+
+        if collectors_filters_blocks is not None:
+            self.collectors_filters_blocks = collectors_filters_blocks
 
     def get_filters(self) -> Any:
         return self.filters
 
     def get_individuals_filters_blocks(self) -> Any:
         return self.individuals_filters_blocks
+
+    def get_collectors_filters_blocks(self) -> Any:
+        return self.collectors_filters_blocks
 
     def get_criteria_string(self) -> str:
         filters = self.get_filters()
