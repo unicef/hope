@@ -34,7 +34,7 @@ export function RegistrationDetails({
   const { t } = useTranslation();
   const { data } = useRegistrationDataImportQuery({
     variables: {
-      id: btoa(`RegistrationDataImportNode:${hctId}`),
+      id: hctId,
     },
   });
   if (!data) {
