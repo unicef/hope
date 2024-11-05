@@ -3,7 +3,7 @@ from typing import Any, Callable, Iterable, List, Optional
 import pytest
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory
-from hct_mis_api.apps.account.models import Partner, Role, User, UserRole
+from hct_mis_api.apps.account.models import Partner, Role, User, RoleAssignment
 from hct_mis_api.apps.core.models import BusinessArea, BusinessAreaPartnerThrough
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.program.models import Program, ProgramPartnerThrough
@@ -58,10 +58,10 @@ def create_user_role_with_permissions(update_partner_access_to_program: Any) -> 
         program: Optional[Program] = None,
         areas: Optional[List[Area]] = None,
         name: Optional[str] = "Role with Permissions",
-    ) -> UserRole:
+    ) -> RoleAssignment:
         permission_list = [perm.value for perm in permissions]
         role, created = Role.objects.update_or_create(name=name, defaults={"permissions": permission_list})
-        user_role, _ = UserRole.objects.get_or_create(user=user, role=role, business_area=business_area)
+        user_role, _ = RoleAssignment.objects.get_or_create(user=user, role=role, business_area=business_area)
 
         # update Partner permissions for the program
         if program:

@@ -201,7 +201,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
         return list of permissions based on User Role BA and User Partner
         if program_id is in arguments need to check if partner has access to this program
         """
-        user_roles_query = UserRole.objects.filter(user=self, business_area__slug=business_area_slug).exclude(
+        user_roles_query = RoleAssignment.objects.filter(user=self, business_area__slug=business_area_slug).exclude(
             expiry_date__lt=timezone.now()
         )
         all_user_roles_permissions_list = list(
@@ -243,8 +243,8 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
         return permission in self.permissions_in_business_area(business_area.slug, program_id)
 
     @test_conditional(lru_cache())
-    def cached_user_roles(self) -> QuerySet["UserRole"]:
-        return self.user_roles.all().select_related("business_area")
+    def cached_role_assignments(self) -> QuerySet["RoleAssignment"]:
+        return self.role_assignments.all().select_related("business_area")
 
     def can_download_storage_files(self) -> bool:
         return any(
@@ -319,19 +319,48 @@ class HorizontalChoiceArrayField(ArrayField):
         return super(ArrayField, self).formfield(**defaults)
 
 
-class UserRole(NaturalKeyModel, TimeStampedUUIDModel):
-    business_area = models.ForeignKey("core.BusinessArea", related_name="user_roles", on_delete=models.CASCADE)
-    user = models.ForeignKey("account.User", related_name="user_roles", on_delete=models.CASCADE)
-    role = models.ForeignKey("account.Role", related_name="user_roles", on_delete=models.CASCADE)
+class RoleAssignment(NaturalKeyModel, TimeStampedUUIDModel):
+    business_area = models.ForeignKey("core.BusinessArea", related_name="role_assignments", on_delete=models.CASCADE)
+    user = models.ForeignKey("account.User", related_name="role_assignments", on_delete=models.CASCADE, null=True, blank=True)
+    partner = models.ForeignKey("account.Partner", related_name="role_assignments", on_delete=models.CASCADE, null=True, blank=True)
+    role = models.ForeignKey("account.Role", related_name="role_assignments", on_delete=models.CASCADE)
+    program = models.ForeignKey("program.Program", related_name="role_assignments", on_delete=models.CASCADE, null=True, blank=True)
+    areas = models.ManyToManyField("geo.Area", related_name="role_assignments", blank=True)
+    full_area_access = models.BooleanField(default=False)
     expiry_date = models.DateField(
-        blank=True, null=True, help_text="After expiry date this User Role will be inactive."
+        blank=True, null=True, help_text="After expiry date this Role Assignment will be inactive."
     )
 
     class Meta:
-        unique_together = ("business_area", "user", "role")
+        constraints = [
+            # user can have only one role in BA
+            models.UniqueConstraint(
+                fields=["business_area", "role", "user"],
+                condition=Q(user__isnull=False),
+                name="unique_user_role_assignment"
+            ),
+            # either user or partner should be assigned; not both
+            models.CheckConstraint(
+                check=(Q(user__isnull=False, partner__isnull=True) | Q(user__isnull=True, partner__isnull=False)),
+                name="user_or_partner_not_both"
+            )
+        ]
+
+    def clean(self) -> None:
+        super().clean()
+        # Ensure either user or partner is set, but not both
+        if bool(self.user) == bool(self.partner):
+            raise ValidationError("Either user or partner must be set, but not both.")
+
+
+    def save(self, *args: Any, **kwargs: Any) -> None:
+        self.clean()
+        super().save(*args, **kwargs)
+
 
     def __str__(self) -> str:
-        return f"{self.user} {self.role} in {self.business_area}"
+        role_holder = self.user if self.user else self.partner
+        return f"{role_holder} {self.role} in {self.business_area}"
 
 
 class UserGroup(NaturalKeyModel, models.Model):
@@ -374,6 +403,9 @@ class Role(NaturalKeyModel, TimeStampedUUIDModel):
         null=True,
         blank=True,
     )
+    group = models.ForeignKey(Group, related_name="roles", on_delete=models.CASCADE, null=True, blank=True)
+    is_visible_on_ui = models.BooleanField(default=True)
+    is_available_for_partner = models.BooleanField(default=True)
 
     def natural_key(self) -> Tuple:
         return self.name, self.subsystem
@@ -395,11 +427,11 @@ class Role(NaturalKeyModel, TimeStampedUUIDModel):
 
 
 class IncompatibleRolesManager(models.Manager):
-    def validate_user_role(self, user: User, business_area: "BusinessArea", role: UserRole) -> None:
+    def validate_user_role(self, user: User, business_area: "BusinessArea", role: RoleAssignment) -> None:
         incompatible_roles = list(
             IncompatibleRoles.objects.filter(role_one=role).values_list("role_two", flat=True)
         ) + list(IncompatibleRoles.objects.filter(role_two=role).values_list("role_one", flat=True))
-        incompatible_userroles = UserRole.objects.filter(
+        incompatible_userroles = RoleAssignment.objects.filter(
             business_area=business_area,
             role__id__in=incompatible_roles,
             user=user,
@@ -443,8 +475,8 @@ class IncompatibleRoles(NaturalKeyModel, TimeStampedUUIDModel):
         failing_users = set()
 
         for role_pair in ((self.role_one, self.role_two), (self.role_two, self.role_one)):
-            for userrole in UserRole.objects.filter(role=role_pair[0]):
-                if UserRole.objects.filter(
+            for userrole in RoleAssignment.objects.filter(role=role_pair[0]):
+                if RoleAssignment.objects.filter(
                     user=userrole.user,
                     business_area=userrole.business_area,
                     role=role_pair[1],

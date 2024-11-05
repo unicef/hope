@@ -1,7 +1,7 @@
 from django.test import TestCase
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
-from hct_mis_api.apps.account.models import Role, User, UserRole
+from hct_mis_api.apps.account.models import Role, User, RoleAssignment
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea, BusinessAreaPartnerThrough
 from hct_mis_api.apps.geo.fixtures import AreaFactory
@@ -37,12 +37,12 @@ class UserPartnerTest(TestCase):
         program_unicef_through.areas.set([cls.area_1, cls.area_2])
         cls.unicef_user = UserFactory(partner=cls.unicef_partner)
 
-        UserRole.objects.create(
+        RoleAssignment.objects.create(
             business_area=cls.business_area,
             user=cls.unicef_user,
             role=cls.role_1,
         )
-        UserRole.objects.create(
+        RoleAssignment.objects.create(
             business_area=cls.business_area,
             user=cls.other_user,
             role=cls.role_1,

@@ -1,7 +1,7 @@
 from django.core.cache import cache
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory, RoleFactory, UserFactory
-from hct_mis_api.apps.account.models import UserRole
+from hct_mis_api.apps.account.models import RoleAssignment
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -42,7 +42,7 @@ class TestCrossAreaFilter(APITestCase):
         cls.user = UserFactory(partner=partner_unicef)
 
         role = RoleFactory(name="GRIEVANCES CROSS AREA FILTER", permissions=["GRIEVANCES_CROSS_AREA_FILTER"])
-        UserRole.objects.create(business_area=cls.business_area, user=cls.user, role=role)
+        RoleAssignment.objects.create(business_area=cls.business_area, user=cls.user, role=role)
 
         cls.admin_area1 = AreaFactory(name="Admin Area 1", level=2, p_code="AREA1")
         cls.admin_area2 = AreaFactory(name="Admin Area 2", level=2, p_code="AREA2")

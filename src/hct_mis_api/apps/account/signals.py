@@ -5,20 +5,22 @@ from django.db.models.signals import m2m_changed, post_save, pre_delete, pre_sav
 from django.dispatch import receiver
 from django.utils import timezone
 
-from hct_mis_api.apps.account.models import Partner, Role, User, UserRole
+from hct_mis_api.apps.account.models import Partner, Role, User, RoleAssignment
 from hct_mis_api.apps.core.models import BusinessArea, BusinessAreaPartnerThrough
 
 
-@receiver(post_save, sender=UserRole)
-def post_save_userrole(sender: Any, instance: User, *args: Any, **kwargs: Any) -> None:
-    instance.user.last_modify_date = timezone.now()
-    instance.user.save()
+@receiver(post_save, sender=RoleAssignment)
+def post_save_pre_delete_roleassignment(sender: Any, instance: User, *args: Any, **kwargs: Any) -> None:
+    if instance.user:
+        instance.user.last_modify_date = timezone.now()
+        instance.user.save()
 
 
-@receiver(pre_delete, sender=UserRole)
-def pre_delete_userrole(sender: Any, instance: User, *args: Any, **kwargs: Any) -> None:
-    instance.user.last_modify_date = timezone.now()
-    instance.user.save()
+@receiver(pre_delete, sender=RoleAssignment)
+def pre_delete_roleassignment(sender: Any, instance: User, *args: Any, **kwargs: Any) -> None:
+    if instance.user:
+        instance.user.last_modify_date = timezone.now()
+        instance.user.save()
 
 
 @receiver(pre_save, sender=get_user_model())
@@ -35,7 +37,7 @@ def post_save_user(sender: Any, instance: User, created: bool, *args: Any, **kwa
     business_area = BusinessArea.objects.filter(slug="global").first()
     role = Role.objects.filter(name="Basic User").first()
     if business_area and role:
-        UserRole.objects.get_or_create(business_area=business_area, user=instance, role=role)
+        RoleAssignment.objects.get_or_create(business_area=business_area, user=instance, role=role)
 
 
 @receiver(m2m_changed, sender=Partner.allowed_business_areas.through)

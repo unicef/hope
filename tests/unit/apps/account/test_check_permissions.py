@@ -2,7 +2,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.test import TestCase
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory, RoleFactory, UserFactory
-from hct_mis_api.apps.account.models import Role, User, UserRole
+from hct_mis_api.apps.account.models import Role, User, RoleAssignment
 from hct_mis_api.apps.account.permissions import Permissions, check_permissions
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea, BusinessAreaPartnerThrough
@@ -42,7 +42,7 @@ class TestCheckPermissions(TestCase):
         partner = PartnerFactory(name="UNICEF")
         self.user.partner = partner
         self.user.save()
-        UserRole.objects.create(business_area=self.business_area, user=self.user, role=self.role)
+        RoleAssignment.objects.create(business_area=self.business_area, user=self.user, role=self.role)
 
         arguments = {
             "business_area": self.business_area.slug,
@@ -67,7 +67,7 @@ class TestCheckPermissions(TestCase):
         self.user.partner = partner
         self.user.save()
 
-        UserRole.objects.create(business_area=self.business_area, user=self.user, role=self.role)
+        RoleAssignment.objects.create(business_area=self.business_area, user=self.user, role=self.role)
 
         arguments = {
             "business_area": self.business_area.slug,
@@ -83,7 +83,7 @@ class TestCheckPermissions(TestCase):
         self.user.partner = partner
         self.user.save()
 
-        UserRole.objects.create(business_area=self.business_area, user=self.user, role=self.role)
+        RoleAssignment.objects.create(business_area=self.business_area, user=self.user, role=self.role)
 
         arguments = {
             "business_area": self.business_area.slug,

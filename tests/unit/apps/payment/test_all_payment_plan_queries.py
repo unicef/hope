@@ -358,9 +358,9 @@ class TestPaymentPlanQueries(APITestCase):
 
     @freeze_time("2020-10-10")
     def test_fetch_all_payments_for_open_payment_plan(self) -> None:
-        from hct_mis_api.apps.account.models import UserRole
+        from hct_mis_api.apps.account.models import RoleAssignment
 
-        role = UserRole.objects.get(user=self.user).role
+        role = RoleAssignment.objects.get(user=self.user).role
         role.permissions.append("PM_VIEW_FSP_AUTH_CODE")
         role.save()
 
