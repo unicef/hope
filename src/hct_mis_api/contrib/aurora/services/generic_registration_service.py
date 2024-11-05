@@ -202,7 +202,6 @@ class GenericRegistrationService(BaseRegistrationService):
         flex_fields = household_payload.pop("flex_fields", dict())
 
         flex_fields.update(**self.get_extra_ff(mapping.get("flex_fields", list()), record_data_dict))
-        individuals_key = mapping["defaults"].get("individuals_key", "individuals")
         household_data = {
             **household_payload,
             # "flex_registrations_record": record,
@@ -215,7 +214,6 @@ class GenericRegistrationService(BaseRegistrationService):
             "country": str(Country.objects.get(iso_code2=mapping["defaults"][COUNTRY]).pk),
             "consent": True,
             "collect_individual_data": YES,
-            "size": len(record_data_dict[individuals_key]),
             "flex_fields": flex_fields,
         }
         return self._create_object_and_validate(household_data, PendingHousehold)
@@ -353,7 +351,6 @@ class GenericRegistrationService(BaseRegistrationService):
             mapping,
         )
 
-        household.size = len(individuals)
         if head:
             household.head_of_household = head
 
@@ -366,6 +363,7 @@ class GenericRegistrationService(BaseRegistrationService):
                 individual=sec_collector, household=household, role=ROLE_ALTERNATE
             )
 
-        household.registration_id = record.source_id
+        household.registration_id = record.source_id  # TODO to be removed
+        household.detail_id = record.source_id
         household.save()
         record.mark_as_imported()
