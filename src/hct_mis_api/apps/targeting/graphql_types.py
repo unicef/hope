@@ -186,6 +186,7 @@ class TargetingCriteriaRuleFilterObjectType(graphene.InputObjectType):
 
 class TargetingIndividualRuleFilterBlockObjectType(graphene.InputObjectType):
     individual_block_filters = graphene.List(TargetingCriteriaRuleFilterObjectType)
+    individual_ids = graphene.String()
 
 
 class TargetingCollectorRuleFilterBlockObjectType(graphene.InputObjectType):
@@ -196,11 +197,10 @@ class TargetingCriteriaRuleObjectType(graphene.InputObjectType):
     filters = graphene.List(TargetingCriteriaRuleFilterObjectType)
     individuals_filters_blocks = graphene.List(TargetingIndividualRuleFilterBlockObjectType)
     collectors_filters_blocks = graphene.List(TargetingCollectorRuleFilterBlockObjectType)
+    household_ids = graphene.String()
 
 
 class TargetingCriteriaObjectType(graphene.InputObjectType):
     rules = graphene.List(TargetingCriteriaRuleObjectType)
     flag_exclude_if_active_adjudication_ticket = graphene.Boolean()
     flag_exclude_if_on_sanction_list = graphene.Boolean()
-    household_ids = graphene.String()
-    individual_ids = graphene.String()
