@@ -19,7 +19,7 @@ from graphene.test import Client
 from snapshottest.django import TestCase as SnapshotTestTestCase
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory
-from hct_mis_api.apps.account.models import Role, UserRole
+from hct_mis_api.apps.account.models import Role, RoleAssignment
 from hct_mis_api.apps.core.models import BusinessAreaPartnerThrough
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_CHOICE, DocumentType
@@ -171,10 +171,10 @@ class APITestCase(SnapshotTestTestCase):
         program: Optional["Program"] = None,
         areas: Optional[List["Area"]] = None,
         name: Optional[str] = "Role with Permissions",
-    ) -> UserRole:
+    ) -> RoleAssignment:
         permission_list = [perm.value for perm in permissions]
         role, created = Role.objects.update_or_create(name=name, defaults={"permissions": permission_list})
-        user_role, _ = UserRole.objects.get_or_create(user=user, role=role, business_area=business_area)
+        user_role, _ = RoleAssignment.objects.get_or_create(user=user, role=role, business_area=business_area)
 
         # update Partner permissions for the program
         if program:

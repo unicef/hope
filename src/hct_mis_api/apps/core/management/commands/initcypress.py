@@ -4,7 +4,7 @@ from typing import Any
 from django.conf import settings
 from django.core.management import BaseCommand, call_command
 
-from hct_mis_api.apps.account.models import Partner, Role, User, UserRole
+from hct_mis_api.apps.account.models import Partner, Role, User, RoleAssignment
 from hct_mis_api.apps.core.management.commands.reset_business_area_sequences import (
     reset_business_area_sequences,
 )
@@ -42,7 +42,7 @@ class Command(BaseCommand):
 
         partner = Partner.objects.get(name="UNICEF")
 
-        UserRole.objects.create(
+        RoleAssignment.objects.create(
             user=User.objects.create_superuser(
                 "cypress-username",
                 "cypress@cypress.com",

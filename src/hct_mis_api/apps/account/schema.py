@@ -20,7 +20,7 @@ from hct_mis_api.apps.account.models import (
     Partner,
     Role,
     User,
-    UserRole,
+    RoleAssignment,
 )
 from hct_mis_api.apps.account.permissions import (
     ALL_GRIEVANCES_CREATE_MODIFY,
@@ -45,7 +45,7 @@ if TYPE_CHECKING:
     from graphene import Node
 
 
-def permissions_resolver(user_roles: "QuerySet[UserRole]") -> Set:
+def permissions_resolver(user_roles: "QuerySet[RoleAssignment]") -> Set:
     all_user_roles = user_roles
     permissions_set = set()
     for user_role in all_user_roles:
@@ -54,9 +54,9 @@ def permissions_resolver(user_roles: "QuerySet[UserRole]") -> Set:
     return permissions_set
 
 
-class UserRoleNode(DjangoObjectType):
+class RoleAssignmentNode(DjangoObjectType):
     class Meta:
-        model = UserRole
+        model = RoleAssignment
         exclude = ("id", "user")
 
 

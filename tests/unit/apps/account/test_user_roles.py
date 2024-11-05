@@ -5,11 +5,11 @@ from django.forms.utils import ErrorList
 from django.test import TestCase
 
 from hct_mis_api.apps.account.admin.forms import (
-    UserRoleAdminForm,
-    UserRoleInlineFormSet,
+    RoleAssignmentAdminForm,
+    RoleAssignmentInlineFormSet,
 )
 from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
-from hct_mis_api.apps.account.models import IncompatibleRoles, Role, User, UserRole
+from hct_mis_api.apps.account.models import IncompatibleRoles, Role, User, RoleAssignment
 from hct_mis_api.apps.account.permissions import (
     DEFAULT_PERMISSIONS_IS_UNICEF_PARTNER,
     Permissions,
@@ -18,7 +18,7 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan, create_ukraine
 from hct_mis_api.apps.core.models import BusinessArea
 
 
-class UserRolesTest(TestCase):
+class RoleAssignmentsTest(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
@@ -32,15 +32,15 @@ class UserRolesTest(TestCase):
 
     def test_user_can_be_assigned_role(self) -> None:
         data = {"role": self.role_1.id, "user": self.user.id, "business_area": self.business_area_afg.id}
-        form = UserRoleAdminForm(data=data)
+        form = RoleAssignmentAdminForm(data=data)
         self.assertTrue(form.is_valid())
 
     def test_user_cannot_be_assigned_incompatible_role_in_same_business_area(self) -> None:
         IncompatibleRoles.objects.create(role_one=self.role_1, role_two=self.role_2)
-        user_role = UserRole.objects.create(role=self.role_1, business_area=self.business_area_afg, user=self.user)
+        user_role = RoleAssignment.objects.create(role=self.role_1, business_area=self.business_area_afg, user=self.user)
 
         data = {"role": self.role_2.id, "user": self.user.id, "business_area": self.business_area_afg.id}
-        form = UserRoleAdminForm(data=data)
+        form = RoleAssignmentAdminForm(data=data)
         self.assertFalse(form.is_valid())
         self.assertIn("role", form.errors.keys())
         self.assertIn(f"This role is incompatible with {self.role_1.name}", form.errors["role"])
@@ -49,7 +49,7 @@ class UserRolesTest(TestCase):
         user_role.role = self.role_2
         user_role.save()
         data["role"] = self.role_1.id
-        form = UserRoleAdminForm(data=data)
+        form = RoleAssignmentAdminForm(data=data)
         self.assertFalse(form.is_valid())
         self.assertIn("role", form.errors.keys())
         self.assertIn(f"This role is incompatible with {self.role_2.name}", form.errors["role"])
@@ -63,8 +63,8 @@ class UserRolesTest(TestCase):
             "user_roles-0-business_area": self.business_area_afg.id,
             "user_roles-1-business_area": self.business_area_afg.id,
         }
-        UserRoleFormSet = inlineformset_factory(User, UserRole, fields=("__all__"), formset=UserRoleInlineFormSet)
-        formset = UserRoleFormSet(instance=self.user, data=data)
+        RoleAssignmentFormSet = inlineformset_factory(User, RoleAssignment, fields=("__all__"), formset=RoleAssignmentInlineFormSet)
+        formset = RoleAssignmentFormSet(instance=self.user, data=data)
         self.assertTrue(formset.is_valid())
 
     def test_assign_multiple_roles_for_user_at_the_same_time_fails_for_incompatible_roles(self) -> None:
@@ -78,8 +78,8 @@ class UserRolesTest(TestCase):
             "user_roles-0-business_area": self.business_area_afg.id,
             "user_roles-1-business_area": self.business_area_afg.id,
         }
-        UserRoleFormSet = inlineformset_factory(User, UserRole, fields=("__all__"), formset=UserRoleInlineFormSet)
-        formset = UserRoleFormSet(instance=self.user, data=data)
+        RoleAssignmentFormSet = inlineformset_factory(User, RoleAssignment, fields=("__all__"), formset=RoleAssignmentInlineFormSet)
+        formset = RoleAssignmentFormSet(instance=self.user, data=data)
         self.assertFalse(formset.is_valid())
         self.assertEqual(len(formset.errors), 2)
 
@@ -92,15 +92,15 @@ class UserRolesTest(TestCase):
         role_1 = Role.objects.create(name="111", permissions=[Permissions.RDI_VIEW_LIST.value])
         role_2 = Role.objects.create(name="222", permissions=[Permissions.REPORTING_EXPORT.value])
         # user_role_active
-        user_role_1 = UserRole.objects.create(
+        user_role_1 = RoleAssignment.objects.create(
             role=role_1, business_area=self.business_area_afg, user=user_not_unicef_partner
         )
         # user_role_inactive
-        user_role_2 = UserRole.objects.create(
+        user_role_2 = RoleAssignment.objects.create(
             role=role_2, business_area=self.business_area_afg, user=user_not_unicef_partner, expiry_date="2024-02-16"
         )
         # user_role_active_but_sharing_same_role_with_user_role_inactive
-        UserRole.objects.create(
+        RoleAssignment.objects.create(
             role=role_2,
             business_area=self.business_area_ukr,
             user=user_not_unicef_partner,
@@ -142,7 +142,7 @@ class UserRolesTest(TestCase):
         partner = PartnerFactory(name="UNICEF")
         user = UserFactory(partner=partner)
         role = Role.objects.create(name="111", permissions=[Permissions.GRIEVANCES_CREATE.value])
-        UserRole.objects.create(role=role, business_area=self.business_area_afg, user=user)
+        RoleAssignment.objects.create(role=role, business_area=self.business_area_afg, user=user)
 
         self.assertIn(
             Permissions.GRIEVANCES_CREATE.value, user.permissions_in_business_area(self.business_area_afg.slug)

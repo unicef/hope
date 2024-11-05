@@ -28,7 +28,7 @@ from hct_mis_api.apps.account.admin.forms import (
     ImportCSVForm,
 )
 from hct_mis_api.apps.account.admin.mixins import KoboAccessMixin
-from hct_mis_api.apps.account.admin.user_role import UserRoleInline
+from hct_mis_api.apps.account.admin.user_role import RoleAssignmentInline
 from hct_mis_api.apps.utils.admin import HopeModelAdminMixin
 
 if TYPE_CHECKING:
@@ -123,7 +123,7 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
             },
         ),
     )
-    inlines = (UserRoleInline,)
+    inlines = (RoleAssignmentInline,)
     actions = ["create_kobo_user_qs", "add_business_area_role"]
     formfield_overrides = {
         JSONField: {"widget": JSONEditor},

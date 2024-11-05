@@ -18,7 +18,7 @@ from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
 
 from hct_mis_api.apps.account.fixtures import RoleFactory, UserFactory
-from hct_mis_api.apps.account.models import Partner, Role, User, UserRole
+from hct_mis_api.apps.account.models import Partner, Role, User, RoleAssignment
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.models import (
     BusinessArea,
@@ -524,7 +524,7 @@ def create_super_user(business_area: BusinessArea) -> User:
         email="test@example.com",
         partner=partner,
     )
-    UserRole.objects.create(
+    RoleAssignment.objects.create(
         user=user,
         role=Role.objects.get(name="Role"),
         business_area=business_area,
