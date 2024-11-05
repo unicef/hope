@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Any, Dict
+from typing import TYPE_CHECKING, Any, Dict, List
 
 from django.core.exceptions import ValidationError
 
@@ -132,7 +132,7 @@ class TargetingCriteriaRuleFilterInputValidator:
 
 class TargetingCriteriaRuleInputValidator:
     @staticmethod
-    def validate(rule: "Rule", program: "Program") -> None:
+    def validate(rule: "Dict", program: "Program") -> None:
         total_len = 0
         filters = rule.get("filters")
         individuals_filters_blocks = rule.get("individuals_filters_blocks", [])
@@ -156,13 +156,9 @@ class TargetingCriteriaInputValidator:
     @staticmethod
     def validate(targeting_criteria: Dict, program: Program) -> None:
         program_dct = program.data_collecting_type
-        rules = targeting_criteria.get("rules", [])
+        rules: List = targeting_criteria.get("rules", [])
         household_ids = targeting_criteria.get("household_ids")
         individual_ids = targeting_criteria.get("individual_ids")
-        # TODO: is it possible to have both ???
-        if rules and (household_ids or individual_ids):
-            logger.error("Target criteria can only have filters or ids, not possible to have both")
-            raise ValidationError("Target criteria can only have filters or ids, not possible to have both")
 
         if household_ids and not (
             program_dct.household_filters_available or program_dct.type == DataCollectingType.Type.SOCIAL
