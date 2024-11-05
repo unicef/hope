@@ -215,9 +215,10 @@ class GenericRegistrationService(BaseRegistrationService):
             "country": str(Country.objects.get(iso_code2=mapping["defaults"][COUNTRY]).pk),
             "consent": True,
             "collect_individual_data": YES,
-            "size": len(record_data_dict[individuals_key]),
             "flex_fields": flex_fields,
         }
+        if "size" not in household_data:
+            household_data["size"] = len(record_data_dict[individuals_key])
         return self._create_object_and_validate(household_data, PendingHousehold)
 
     def create_individuals(
