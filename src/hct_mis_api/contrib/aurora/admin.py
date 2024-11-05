@@ -6,7 +6,7 @@ from django import forms
 from django.contrib import admin, messages
 from django.contrib.admin.views.main import ChangeList
 from django.core.signing import BadSignature, Signer
-from django.db.models import QuerySet
+from django.db.models import JSONField, QuerySet
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from django.template.response import TemplateResponse
@@ -24,6 +24,7 @@ from adminfilters.depot.widget import DepotManager
 from adminfilters.json import JsonFieldFilter
 from adminfilters.numbers import NumberFilter
 from adminfilters.querystring import QueryStringFilter
+from jsoneditor.forms import JSONEditor
 from requests.auth import HTTPBasicAuth
 from smart_admin.decorators import smart_register
 
@@ -101,6 +102,9 @@ class RegistrationAdmin(ExtraButtonsMixin, admin.ModelAdmin):
     readonly_fields = ("name", "project", "slug", "extra", "metadata")
     list_filter = ("rdi_policy", "project")
     raw_id_fields = ("steficon_rule",)
+    formfield_overrides = {
+        JSONField: {"widget": JSONEditor},
+    }
 
 
 class BaseRDIForm(forms.Form):
