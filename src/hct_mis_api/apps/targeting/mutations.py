@@ -117,7 +117,7 @@ def from_input_to_targeting_criteria(targeting_criteria_input: Dict, program: Pr
     rules = targeting_criteria_input.pop("rules", [])
     household_ids = targeting_criteria_input.get("household_ids")
     individual_ids = targeting_criteria_input.get("individual_ids")
-    collector_rules = targeting_criteria_input.get("collector_rules", [])
+    # collector_rules = targeting_criteria_input.get("collector_rules", [])
     if household_ids:
         targeting_criteria_input["household_ids"] = get_unicef_ids(household_ids, "household", program)
     if individual_ids:
@@ -139,9 +139,16 @@ def from_input_to_targeting_criteria(targeting_criteria_input: Dict, program: Pr
                     individuals_filters_block=block, **individual_block_filters_input
                 )
                 individual_block_filters.save()
-        for collector_rule in collector_rules:
-            rule_filter = TargetingCriteriaRuleFilter(targeting_criteria_rule=rule, **collector_rule)
-            rule_filter.save()
+
+        for collector_block_input in rule_input.get("collectors_filters_blocks", []):
+            collector_block = TargetingIndividualRuleFilterBlock(targeting_criteria_rule=rule)  # TODO: Collector block
+            collector_block.save()
+            for collector_block_filters_input in collector_block_input.get("collector_block_filters"):
+                collector_block_filters = TargetingIndividualBlockRuleFilter(
+                    individuals_filters_block=collector_block, **collector_block_filters_input  # TODO: Collector block
+                )
+                collector_block_filters.save()
+
     return targeting_criteria
 
 

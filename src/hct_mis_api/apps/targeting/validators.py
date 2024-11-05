@@ -157,7 +157,6 @@ class TargetingCriteriaInputValidator:
     def validate(targeting_criteria: Dict, program: Program) -> None:
         program_dct = program.data_collecting_type
         rules = targeting_criteria.get("rules", [])
-        collector_rules = targeting_criteria.get("collector_rules", [])  # ??? need add validation here OR just skip it for now???
         household_ids = targeting_criteria.get("household_ids")
         individual_ids = targeting_criteria.get("individual_ids")
         # TODO: is it possible to have both ???
