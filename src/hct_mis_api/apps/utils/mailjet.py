@@ -52,7 +52,6 @@ class MailjetClient:
 
         email_body = self._get_email_body()
         attachments = {"Attachments": self.attachments} if self.attachments else {}
-
         data = {
             "Messages": [
                 {
