@@ -216,6 +216,7 @@ class GenericRegistrationService(BaseRegistrationService):
             program=household.program,
             first_registration_date=record.timestamp,
             last_registration_date=record.timestamp,
+            detail_id=record.source_id,
         )
 
         record_data_dict = record.get_data()
