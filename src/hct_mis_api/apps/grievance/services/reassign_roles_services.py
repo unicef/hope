@@ -20,10 +20,10 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 from hct_mis_api.apps.utils.querysets import evaluate_qs
 
-if TYPE_CHECKING:
-    from django.contrib.auth.models import AbstractUser
+if TYPE_CHECKING:  # pragma: no cover
+    from django.contrib.auth.models import AbstractUser  # pragma: no cover
 
-    from hct_mis_api.apps.program.models import Program
+    from hct_mis_api.apps.program.models import Program  # pragma: no cover
 
 """
 Reassing data structure:
