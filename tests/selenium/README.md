@@ -13,13 +13,31 @@ sh -c "cd .. && docker build . -f ./docker/Dockerfile --target dev --tag unicef/
 
 <b><h2>How to run tests locally on Macs with M1/M2/M3:</h2></b>
 
+<b><h3>Preconditions:</h3></b>
+- Check your arch
+```bash
+arch
+```
+The result should be **arm64**.
+
+
 <b><h3>Installation:</h3></b>
 ```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+- Check your brew config
+```bash
+brew config
+```
+The result of HOMEBREW_PREFIX should be /opt/homebrew
+
+```bash
 curl https://pyenv.run | bash
 brew install pyenv
 vim ~/.zshrc
 ```
+
 Include the following in the file:
 ```bash
 export PYENV_ROOT="$HOME/.pyenv"
@@ -45,6 +63,18 @@ brew install wkhtmltopdf pango postgis gdal
 ```bash
 pyenv activate new-venv
 cd src
+brew install nvm
+nano ~/.bash_profile
+```
+- Include the following in the file:
+```bash
+export NVM_DIR=~/.nvm
+source $(brew --prefix nvm)/nvm.sh
+. "$HOME/.cargo/env"
+```
+- In terminal:
+```bash
+source ~/.bash_profile
 source ../development_tools/local_selenium_init.sh 
 
 # second tab: 
