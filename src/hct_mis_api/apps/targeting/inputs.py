@@ -27,7 +27,6 @@ class CreateTargetPopulationInput(graphene.InputObjectType):
     name = graphene.String(required=True)
     targeting_criteria = TargetingCriteriaObjectType(required=True)
     business_area_slug = graphene.String(required=True)
-    program_id = graphene.ID(required=True)
     program_cycle_id = graphene.ID(required=True)
     excluded_ids = graphene.String(required=True)
     exclusion_reason = graphene.String()
