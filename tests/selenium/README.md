@@ -82,3 +82,10 @@ docker compose -f ./development_tools/compose.yml --profile services up --build
 # first tab: 
 python -m pytest -n auto -rP --reuse-db -p no:warnings --cov-report= --capture=sys --html-report=$OUTPUT_DATA_ROOT/report/report.html tests/selenium
 ```
+
+<b><h3>Hints:</h3></b>
+- Uninstall brew from wrong path (in this case /usr/local):
+```bash
+curl -fsSLO https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh
+/bin/bash uninstall.sh --path /usr/local
+```
