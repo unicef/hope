@@ -9,16 +9,13 @@ from hct_mis_api.apps.core.models import DataCollectingType, FlexibleAttribute
 from hct_mis_api.apps.core.utils import get_attr_value
 from hct_mis_api.apps.core.validators import BaseValidator
 from hct_mis_api.apps.household.models import Household, Individual
+from hct_mis_api.apps.payment.models import DeliveryMechanism
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.choices import FlexFieldClassification
 from hct_mis_api.apps.targeting.models import (
     TargetingCriteriaRuleFilter,
     TargetPopulation,
 )
-
-if TYPE_CHECKING:
-    from hct_mis_api.apps.steficon.models import Rule
-
 
 logger = logging.getLogger(__name__)
 
@@ -130,24 +127,26 @@ class TargetingCriteriaRuleFilterInputValidator:
             )
 
 
+class TargetingCriteriaCollectorRuleFilterInputValidator:
+    @staticmethod
+    def validate(rule_filter: Any) -> None:
+        field_name = rule_filter["field_name"]
+        if not [f for f in DeliveryMechanism.get_all_core_fields_definitions() if f["name"] == field_name]:
+            raise ValidationError(f"Can't field field '{field_name}' in Delivery Mechanism data")
+
+
 class TargetingCriteriaRuleInputValidator:
     @staticmethod
     def validate(rule: "Dict", program: "Program") -> None:
-        total_len = 0
-        filters = rule.get("filters")
+        households_filters_blocks = rule.get("households_filters_blocks", [])
         individuals_filters_blocks = rule.get("individuals_filters_blocks", [])
         collectors_filters_blocks = rule.get("collectors_filters_blocks", [])
 
-        if filters is not None:
-            total_len += len(filters)
-        if individuals_filters_blocks is not None:
-            total_len += len(individuals_filters_blocks)
+        for households_block_filter in households_filters_blocks:
+            household_block_filters = households_block_filter.get("household_block_filters", [])
+            for household_block_filter in household_block_filters:
+                TargetingCriteriaRuleFilterInputValidator.validate(rule_filter=household_block_filter, program=program)
 
-        if total_len < 1:
-            logger.error("There should be at least 1 filter or block in rules")
-            raise ValidationError("There should be at least 1 filter or block in rules")
-        for rule_filter in filters:
-            TargetingCriteriaRuleFilterInputValidator.validate(rule_filter=rule_filter, program=program)
         for individuals_filters_block in individuals_filters_blocks:
             individual_block_filters = individuals_filters_block.get("individual_block_filters", [])
             for individual_block_filter in individual_block_filters:
@@ -156,9 +155,7 @@ class TargetingCriteriaRuleInputValidator:
         for collectors_filters_block in collectors_filters_blocks:
             collector_block_filters = collectors_filters_block.get("collector_block_filters", [])
             for collector_block_filter in collector_block_filters:
-                TargetingCriteriaRuleFilterInputValidator.validate(rule_filter=collector_block_filter, program=program)
-
-
+                TargetingCriteriaCollectorRuleFilterInputValidator.validate(rule_filter=collector_block_filter)
 
 
 class TargetingCriteriaInputValidator:
@@ -166,38 +163,43 @@ class TargetingCriteriaInputValidator:
     def validate(targeting_criteria: Dict, program: Program) -> None:
         program_dct = program.data_collecting_type
         rules: List = targeting_criteria.get("rules", [])
-        household_ids = targeting_criteria.get("household_ids")
-        individual_ids = targeting_criteria.get("individual_ids")
 
-        if household_ids and not (
-            program_dct.household_filters_available or program_dct.type == DataCollectingType.Type.SOCIAL
-        ):
-            logger.error("Target criteria can only have individual ids")
-            raise ValidationError("Target criteria can only have individual ids")
-        if individual_ids and not program_dct.individual_filters_available:
-            logger.error("Target criteria can only have household ids")
-            raise ValidationError("Target criteria can only have household ids")
+        for rule in rules:
+            household_ids = rule.get("household_ids")
+            individual_ids = rule.get("individual_ids")
 
-        if household_ids:
-            ids_list = household_ids.split(",")
-            ids_list = [i.strip() for i in ids_list]
-            ids_list = [i for i in ids_list if i.startswith("HH")]
-            if not Household.objects.filter(unicef_id__in=ids_list, program=program).exists():
-                logger.error("The given households do not exist in the current program")
-                raise ValidationError("The given households do not exist in the current program")
+            if household_ids and not (
+                program_dct.household_filters_available or program_dct.type == DataCollectingType.Type.SOCIAL
+            ):
+                logger.error("Target criteria can only have individual ids")
+                raise ValidationError("Target criteria can only have individual ids")
+            if individual_ids and not program_dct.individual_filters_available:
+                logger.error("Target criteria can only have household ids")
+                raise ValidationError("Target criteria can only have household ids")
 
-        if individual_ids:
-            ids_list = individual_ids.split(",")
-            ids_list = [i.strip() for i in ids_list]
-            ids_list = [i for i in ids_list if i.startswith("IND")]
-            if not Individual.objects.filter(unicef_id__in=ids_list, program=program).exists():
-                logger.error("The given individuals do not exist in the current program")
-                raise ValidationError("The given individuals do not exist in the current program")
+            if household_ids:
+                ids_list = household_ids.split(",")
+                ids_list = [i.strip() for i in ids_list]
+                ids_list = [i for i in ids_list if i.startswith("HH")]
+                if not Household.objects.filter(unicef_id__in=ids_list, program=program).exists():
+                    logger.error("The given households do not exist in the current program")
+                    raise ValidationError("The given households do not exist in the current program")
 
-        if len(rules) < 1 and not household_ids and not individual_ids:
-            logger.error("There should be at least 1 rule in target criteria")
-            raise ValidationError("There should be at least 1 rule in target criteria")
+            if individual_ids:
+                ids_list = individual_ids.split(",")
+                ids_list = [i.strip() for i in ids_list]
+                ids_list = [i for i in ids_list if i.startswith("IND")]
+                if not Individual.objects.filter(unicef_id__in=ids_list, program=program).exists():
+                    logger.error("The given individuals do not exist in the current program")
+                    raise ValidationError("The given individuals do not exist in the current program")
 
-        if not household_ids and not individual_ids:
-            for rule in rules:
-                TargetingCriteriaRuleInputValidator.validate(rule=rule, program=program)
+            is_empty_rules = all(
+                len(rule.get(key, [])) == 0
+                for key in ["households_filters_blocks", "individuals_filters_blocks", "collectors_filters_blocks"]
+            )
+
+            if is_empty_rules and not household_ids and not individual_ids:
+                logger.error("There should be at least 1 rule in target criteria")
+                raise ValidationError("There should be at least 1 rule in target criteria")
+
+            TargetingCriteriaRuleInputValidator.validate(rule=rule, program=program)

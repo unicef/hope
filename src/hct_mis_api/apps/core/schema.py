@@ -305,9 +305,9 @@ def get_fields_attr_generators(
                 business_area_slug=business_area_slug, program_id=program_id
             )
 
-def get_collector_fields_attr_generator(
-) -> Generator:
-        yield from FieldFactory.from_scope(Scope.DELIVERY_MECHANISM).filtered_by_types(FILTERABLE_TYPES)
+
+def get_collector_fields_attr_generator() -> Generator:
+    yield from FieldFactory.from_scope(Scope.DELIVERY_MECHANISM)
 
 
 def resolve_asset(business_area_slug: str, uid: str) -> Dict:
@@ -364,7 +364,7 @@ class Query(graphene.ObjectType):
     all_collector_fields_attributes = graphene.List(
         FieldAttributeNode,
         flex_field=graphene.Boolean(),
-        description="All collectors fields.",
+        description="All collectors fields for Delivery Mechanism Data.",
     )
     all_pdu_fields = graphene.List(
         FieldAttributeNode,
@@ -455,10 +455,7 @@ class Query(graphene.ObjectType):
         info: Any,
     ) -> List[Any]:
         return sort_by_attr(
-            (
-                attr
-                for attr in get_collector_fields_attr_generator()
-            ),
+            (attr for attr in get_collector_fields_attr_generator()),
             "label.English(EN)",
         )
 

@@ -62,6 +62,11 @@ class FlexFieldClassificationChoices(graphene.Enum):
     FLEX_FIELD_PDU = "FLEX_FIELD_PDU"
 
 
+class TargetingCollectorFieldChoices(graphene.Enum):
+    YES = "YES"
+    NO = "NO"
+
+
 class TargetingCriteriaRuleFilterNode(DjangoObjectType):
     arguments = graphene.List(Arg)
     field_attribute = graphene.Field(FieldAttributeNode)
@@ -184,22 +189,12 @@ class TargetingCriteriaRuleFilterObjectType(graphene.InputObjectType):
     round_number = graphene.Int()
 
 
-class TargetingCriteriaRuleFilterCollectorObjectType(graphene.InputObjectType):
-    field_name = graphene.String(required=True)
-    arguments = graphene.List(Arg, required=True)
-
-
-class TargetingCollectorRuleFilterBlockObjectType(graphene.InputObjectType):
-    collector_block_filters = graphene.List(TargetingCriteriaRuleFilterCollectorObjectType)
-
-
 class TargetingCriteriaRuleObjectType(graphene.InputObjectType):
     households_filters_blocks = graphene.List(TargetingCriteriaRuleFilterObjectType)
     household_ids = graphene.String()
     individuals_filters_blocks = graphene.List(TargetingCriteriaRuleFilterObjectType)
     individual_ids = graphene.String()
-    collectors_filters_blocks = graphene.List(TargetingCollectorRuleFilterBlockObjectType)
-
+    collectors_filters_blocks = graphene.List(TargetingCriteriaRuleFilterObjectType)
 
 
 class TargetingCriteriaObjectType(graphene.InputObjectType):

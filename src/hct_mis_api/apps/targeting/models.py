@@ -374,7 +374,9 @@ class TargetingCriteria(TimeStampedUUIDModel, TargetingCriteriaQueryingBase):
         default=False,
         help_text=_("Exclude households with individuals (members or collectors) on sanction list."),
     )
+    # TODO: deprecated and move 'TargetingCriteriaRule'
     household_ids = models.TextField(blank=True)
+    # TODO: deprecated and move 'TargetingCriteriaRule'
     individual_ids = models.TextField(blank=True)
 
     def get_rules(self) -> "QuerySet":
@@ -416,6 +418,8 @@ class TargetingCriteriaRule(TimeStampedUUIDModel, TargetingCriteriaRuleQueryingB
         related_name="rules",
         on_delete=models.CASCADE,
     )
+    household_ids = models.TextField(blank=True)
+    individual_ids = models.TextField(blank=True)
 
     def get_filters(self) -> "QuerySet":
         return self.filters.all()
@@ -425,6 +429,23 @@ class TargetingCriteriaRule(TimeStampedUUIDModel, TargetingCriteriaRuleQueryingB
 
     def get_collectors_filters_blocks(self) -> "QuerySet":
         return self.collectors_filters_blocks.all()
+
+    def get_query(self) -> Q:
+        query = super().get_query()
+
+        q_hh_ids = Q(unicef_id__in=self.household_ids.split(", "))
+        q_ind_ids = Q(individuals__unicef_id__in=self.individual_ids.split(", "))
+
+        if self.household_ids and self.individual_ids:
+            query &= Q(q_hh_ids | q_ind_ids)
+            return query
+
+        if self.household_ids:
+            query &= q_hh_ids
+        if self.individual_ids:
+            query &= q_ind_ids
+
+        return query
 
 
 class TargetingIndividualRuleFilterBlock(
@@ -539,14 +560,34 @@ class TargetingCollectorRuleFilterBlock(
         related_name="collector_filters_blocks",
     )
 
+    # TODO: upd get_query() ??
+
 
 class TargetingCollectorBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterBase):
     """
     This is one field like 'bank_account_number__transfer_to_account':
     """
+
     collector_block_filters = models.ForeignKey(
         "TargetingCollectorRuleFilterBlock",
         related_name="collector_block_filters",
         on_delete=models.CASCADE,
     )
     field_name = models.CharField(max_length=120)
+    comparison_method = models.CharField(
+        max_length=20,
+        choices=TargetingCriteriaFilterBase.COMPARISON_CHOICES,
+    )
+    flex_field_classification = models.CharField(
+        max_length=20,
+        choices=FlexFieldClassification.choices,
+        default=FlexFieldClassification.NOT_FLEX_FIELD,
+    )
+    arguments = JSONField(
+        help_text="""
+                Array of arguments
+                """
+    )
+    round_number = models.PositiveIntegerField(null=True, blank=True)
+
+    # TODO: upd get_query()
