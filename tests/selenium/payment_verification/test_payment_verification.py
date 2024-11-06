@@ -486,27 +486,6 @@ class TestPaymentVerification:
         pagePaymentVerificationDetails.getButtonActivatePlan().click()
         pagePaymentVerificationDetails.getButtonSubmit().click()
 
-        pagePaymentVerificationDetails.driver.execute_script(
-            """
-            container = document.querySelector("div[data-cy='main-content']")
-            container.scrollBy(0,600)
-            """
-        )
-        sleep(2)
-        pagePaymentVerificationDetails.driver.execute_script(
-            """
-            container = document.querySelector("div[data-cy='main-content']")
-            container.scrollBy(0,600)
-            """
-        )
-        sleep(2)
-        pagePaymentVerification.screenshot("0", file_path="./")
-        from tests.selenium.tools.tag_name_finder import printing
-
-        printing("Mapping", pagePaymentVerification.driver)
-        printing("Methods", pagePaymentVerification.driver)
-        printing("Assert", pagePaymentVerification.driver)
-
     def test_payment_verification_delete(
         self,
         active_program: Program,
