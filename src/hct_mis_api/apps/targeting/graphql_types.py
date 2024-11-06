@@ -30,7 +30,10 @@ if TYPE_CHECKING:
 
     from graphene.types.structures import List as GrapheneList
 
-    from hct_mis_api.apps.targeting.models import TargetingIndividualBlockRuleFilter
+    from hct_mis_api.apps.targeting.models import (
+        TargetingCollectorRuleFilterBlock,
+        TargetingIndividualRuleFilterBlock,
+    )
 
 
 def get_field_by_name(field_name: str, target_population: target_models.TargetPopulation) -> Dict:
@@ -60,11 +63,6 @@ class FlexFieldClassificationChoices(graphene.Enum):
     NOT_FLEX_FIELD = "NOT_FLEX_FIELD"
     FLEX_FIELD_BASIC = "FLEX_FIELD_BASIC"
     FLEX_FIELD_PDU = "FLEX_FIELD_PDU"
-
-
-class TargetingCollectorFieldChoices(graphene.Enum):
-    YES = "YES"
-    NO = "NO"
 
 
 class TargetingCriteriaRuleFilterNode(DjangoObjectType):
@@ -117,6 +115,16 @@ class TargetingIndividualBlockRuleFilterNode(DjangoObjectType):
         model = target_models.TargetingIndividualBlockRuleFilter
 
 
+class TargetingCollectorBlockRuleFilterNode(DjangoObjectType):
+    arguments = graphene.List(Arg)
+
+    def resolve_arguments(self, info: Any) -> "GrapheneList":
+        return self.arguments
+
+    class Meta:
+        model = target_models.TargetingCollectorBlockRuleFilter
+
+
 class TargetingIndividualRuleFilterBlockNode(DjangoObjectType):
     individual_block_filters = graphene.List(TargetingIndividualBlockRuleFilterNode)
 
@@ -127,18 +135,35 @@ class TargetingIndividualRuleFilterBlockNode(DjangoObjectType):
         model = target_models.TargetingIndividualRuleFilterBlock
 
 
-class TargetingCriteriaRuleNode(DjangoObjectType):
-    filters = graphene.List(TargetingCriteriaRuleFilterNode)
-    individuals_filters_blocks = graphene.List(TargetingIndividualRuleFilterBlockNode)
+class TargetingCollectorRuleFilterBlockNode(DjangoObjectType):
+    collector_block_filters = graphene.List(TargetingCollectorBlockRuleFilterNode)
 
-    def resolve_individuals_filters_blocks(self, info: Any) -> "QuerySet[TargetingIndividualBlockRuleFilter]":
+    def resolve_collector_block_filters(self, info: Any) -> "QuerySet":
+        return self.collector_block_filters.all()
+
+    class Meta:
+        model = target_models.TargetingCollectorRuleFilterBlock
+
+
+class TargetingCriteriaRuleNode(DjangoObjectType):
+    households_filters_blocks = graphene.List(TargetingCriteriaRuleFilterNode)
+    individuals_filters_blocks = graphene.List(TargetingIndividualRuleFilterBlockNode)
+    collectors_filters_blocks = graphene.List(TargetingCollectorRuleFilterBlockNode)
+
+    def resolve_individuals_filters_blocks(self, info: Any) -> "QuerySet[TargetingIndividualRuleFilterBlock]":
         return self.individuals_filters_blocks.all()
 
-    def resolve_filters(self, info: Any) -> "QuerySet[TargetPopulationFilter]":
+    def resolve_households_filters_blocks(self, info: Any) -> "QuerySet[TargetPopulationFilter]":
         return self.filters.all()
+
+    def resolve_collectors_filters_blocks(self, info: Any) -> "QuerySet[TargetingCollectorRuleFilterBlock]":
+        return self.collector_filters_blocks.all()
 
     class Meta:
         model = target_models.TargetingCriteriaRule
+        exclude_fields = [
+            "filters",
+        ]
 
 
 class TargetingCriteriaNode(DjangoObjectType):

@@ -280,6 +280,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
 
     @property
     def has_empty_ids_criteria(self) -> bool:
+        # TODO: update
         return not bool(self.targeting_criteria.household_ids) and not bool(self.targeting_criteria.individual_ids)
 
     @property
@@ -560,12 +561,10 @@ class TargetingCollectorRuleFilterBlock(
         related_name="collector_filters_blocks",
     )
 
-    # TODO: upd get_query() ??
-
 
 class TargetingCollectorBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterBase):
     """
-    This is one field like 'bank_account_number__transfer_to_account':
+    This is one field like 'bank_account_number__transfer_to_account'
     """
 
     collector_block_filters = models.ForeignKey(
@@ -590,4 +589,11 @@ class TargetingCollectorBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteriaF
     )
     round_number = models.PositiveIntegerField(null=True, blank=True)
 
-    # TODO: upd get_query()
+    def get_query(self) -> Q:
+        query = super().get_query()
+
+        # check if collector has all fields from 'field_name'
+        # TODO: update query
+        # Ind collector.delivery_mechanisms_data
+
+        return query

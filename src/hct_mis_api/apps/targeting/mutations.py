@@ -15,7 +15,6 @@ from hct_mis_api.apps.account.permissions import (
 )
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core import utils
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.permissions import is_authenticated
 from hct_mis_api.apps.core.scalars import BigInt
 from hct_mis_api.apps.core.utils import (
@@ -540,6 +539,7 @@ class CopyTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
 
     @classmethod
     def copy_target_criteria(cls, targeting_criteria: TargetingCriteria) -> TargetingCriteria:
+        # TODO: update copy collectors rule
         targeting_criteria_copy = TargetingCriteria()
         targeting_criteria_copy.save()
         for rule in targeting_criteria.rules.all():
