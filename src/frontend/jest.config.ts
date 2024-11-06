@@ -24,6 +24,7 @@ module.exports = {
     '/script/',
     '/src/serviceWorker.ts',
     '.*\\.d\\.ts',
+    '/src/restgenerated/',
   ],
   moduleNameMapper: {
     '^@components/(.*)$': '<rootDir>/src/components/$1',
@@ -33,5 +34,7 @@ module.exports = {
     '^@utils/(.*)$': '<rootDir>/src/utils/$1',
     '^@hooks/(.*)$': '<rootDir>/src/hooks/$1',
     '^@generated/(.*)$': '<rootDir>/src/__generated__/$1',
+    '^@restgenerated/(.*)$': '<rootDir>/src/restgenerated/$1',
+    '^src/(.*)$': '<rootDir>/src/$1',
   },
 };

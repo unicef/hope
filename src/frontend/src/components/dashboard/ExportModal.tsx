@@ -11,8 +11,7 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import * as React from 'react';
-import { useEffect, useState } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dialog } from '@containers/dialogs/Dialog';
 import { DialogActions } from '@containers/dialogs/DialogActions';
@@ -27,7 +26,7 @@ import {
 import { LoadingComponent } from '@core/LoadingComponent';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 
-export function ExportModal({ filter, year }): React.ReactElement {
+export function ExportModal({ filter, year }): ReactElement {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selected, setSelected] = useState([]);
   const { businessArea, programId, isAllPrograms } = useBaseUrl();
@@ -73,7 +72,7 @@ export function ExportModal({ filter, year }): React.ReactElement {
     setSelected(newSelected);
   };
 
-  const renderRows = (): Array<React.ReactElement> =>
+  const renderRows = (): Array<ReactElement> =>
     data.map((el) => {
       const isItemSelected = isSelected(el.id);
       return (

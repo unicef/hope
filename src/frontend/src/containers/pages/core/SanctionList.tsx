@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import * as React from 'react';
-import { useState } from 'react';
+
+import { ReactElement, useState } from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { Button, Box, Paper, SnackbarContent, Snackbar } from '@mui/material';
@@ -13,7 +13,7 @@ const ButtonsContainer = styled.div`
   width: 500px;
 `;
 
-export function SanctionList(): React.ReactElement {
+export function SanctionList(): ReactElement {
   const [snackbarShow, setSnackbarShow] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [fileToImport, setFileToImport] = useState(null);

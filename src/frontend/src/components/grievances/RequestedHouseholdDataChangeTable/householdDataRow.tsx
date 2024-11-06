@@ -2,11 +2,11 @@ import { Checkbox, TableCell, TableRow } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import camelCase from 'lodash/camelCase';
 import mapKeys from 'lodash/mapKeys';
-import * as React from 'react';
 import styled from 'styled-components';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { CurrentValue } from './CurrentValue';
 import { NewValue } from './NewValue';
+import { ReactElement } from 'react';
 
 const GreenIcon = styled.div`
   color: #28cb15;
@@ -24,7 +24,7 @@ export const householdDataRow = (
   ticket,
   isEdit,
   handleSelectBioData,
-): React.ReactElement => {
+): ReactElement => {
   const fieldName = row[0];
   const field = fieldsDict[row[0]];
   const isItemSelected = isSelected(fieldName);

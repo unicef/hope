@@ -1,13 +1,13 @@
-import * as React from 'react';
 import { AllEditHouseholdFieldsQuery } from '@generated/graphql';
 import { GrievanceFlexFieldPhotoModal } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModal';
+import { ReactElement } from 'react';
 
 export interface NewValueProps {
   field: AllEditHouseholdFieldsQuery['allEditHouseholdFieldsAttributes'][number];
   value;
 }
 
-export function NewValue({ field, value }: NewValueProps): React.ReactElement {
+export function NewValue({ field, value }: NewValueProps): ReactElement {
   let displayValue;
   switch (field?.type) {
     case 'SELECT_ONE':

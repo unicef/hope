@@ -1,4 +1,3 @@
-import * as React from 'react';
 import {
   Button,
   Dialog,
@@ -12,13 +11,14 @@ import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { useSnackbar } from '@hooks/useSnackBar';
+import { ReactElement } from 'react';
 
 const RefuseRdiForm = ({
   registration,
   refuseMutate,
   open,
   onClose,
-}): React.ReactElement => {
+}): ReactElement => {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const { id, name } = registration;

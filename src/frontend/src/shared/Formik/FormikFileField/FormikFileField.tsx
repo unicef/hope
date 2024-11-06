@@ -1,7 +1,7 @@
 import { Box } from '@mui/material';
-import * as React from 'react';
+import { ReactElement } from 'react';
 
-export function FormikFileField({ field, form }): React.ReactElement {
+export function FormikFileField({ field, form }): ReactElement {
   return (
     <Box style={{ height: '100%' }} display="flex" alignItems="center">
       <input

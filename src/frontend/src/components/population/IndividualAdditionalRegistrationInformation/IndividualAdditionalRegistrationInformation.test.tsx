@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { fakeAllIndividualsFlexFieldsAttributes } from '../../../../fixtures/core/fakeAllIndividualsFlexFieldsAttributes';
 import { fakeIndividual } from '../../../../fixtures/population/fakeIndividual';
 import { render } from '../../../testUtils/testUtils';

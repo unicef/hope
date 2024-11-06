@@ -1,9 +1,10 @@
 from django_filters import rest_framework as filters
 
+from hct_mis_api.apps.core.api.filters import UpdatedAtFilter
 from hct_mis_api.apps.geo.models import Area
 
 
-class AreaFilter(filters.FilterSet):
+class AreaFilter(UpdatedAtFilter):
     level = filters.NumberFilter(
         field_name="area_type__area_level",
     )

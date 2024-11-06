@@ -1,10 +1,10 @@
-import * as React from 'react';
 import { ProgrammeChoiceDataQuery } from '@generated/graphql';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { LookUpProgrammesTableSurveys } from '@containers/tables/Surveys/LookUpProgrammesTableSurveys/LookUpProgrammesTableSurveys';
 import { LookUpTargetPopulationTableSurveys } from '@containers/tables/Surveys/LookUpTargetPopulationTableSurveys';
 import { usePermissions } from '@hooks/usePermissions';
 import { SurveyTabsValues } from '@utils/constants';
+import { ReactElement } from 'react';
 
 interface LookUpSelectionTablesSurveysProps {
   selectedTab: number;
@@ -25,7 +25,7 @@ export function LookUpSelectionTablesSurveys({
   businessArea,
   onValueChange,
   handleChange,
-}: LookUpSelectionTablesSurveysProps): React.ReactElement {
+}: LookUpSelectionTablesSurveysProps): ReactElement {
   const permissions = usePermissions();
 
   return (

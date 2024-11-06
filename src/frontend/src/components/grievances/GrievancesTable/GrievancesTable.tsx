@@ -21,18 +21,22 @@ import {
 } from '@utils/constants';
 import { choicesToDict, dateToIsoString } from '@utils/utils';
 import get from 'lodash/get';
-import { useEffect, useState } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   PERMISSIONS,
   hasCreatorOrOwnerPermissions,
 } from '../../../config/permissions';
-import { headCells } from './GrievancesTableHeadCells';
+import {
+  headCellsStandardProgram,
+  headCellsSocialProgram,
+} from './GrievancesTableHeadCells';
 import { GrievancesTableRow } from './GrievancesTableRow';
 import { BulkAddNoteModal } from './bulk/BulkAddNoteModal';
 import { BulkAssignModal } from './bulk/BulkAssignModal';
 import { BulkSetPriorityModal } from './bulk/BulkSetPriorityModal';
 import { BulkSetUrgencyModal } from './bulk/BulkSetUrgencyModal';
+import { useProgramContext } from 'src/programContext';
 
 interface GrievancesTableProps {
   filter;
@@ -41,8 +45,9 @@ interface GrievancesTableProps {
 
 export const GrievancesTable = ({
   filter,
-}: GrievancesTableProps): React.ReactElement => {
+}: GrievancesTableProps): ReactElement => {
   const { businessArea, programId, isAllPrograms } = useBaseUrl();
+  const { isSocialDctType } = useProgramContext();
   const { t } = useTranslation();
 
   const initialVariables: AllGrievanceTicketQueryVariables = {
@@ -195,16 +200,29 @@ export const GrievancesTable = ({
     setSelectedTickets([]);
   };
 
-  const headCellsWithProgramColumn = [
-    ...headCells,
-    {
-      disablePadding: false,
-      label: 'Programmes',
-      id: 'programs',
-      numeric: false,
-      dataCy: 'programs',
-    },
-  ];
+  const getHeadCells = () => {
+    const baseCells =
+      isSocialDctType || isAllPrograms
+        ? headCellsSocialProgram
+        : headCellsStandardProgram;
+
+    if (isAllPrograms) {
+      return [
+        ...baseCells,
+        {
+          disablePadding: false,
+          label: 'Programmes',
+          id: 'programs',
+          numeric: false,
+          dataCy: 'programs',
+        },
+      ];
+    }
+
+    return baseCells;
+  };
+
+  const headCells = getHeadCells();
 
   return (
     <Box display="flex" flexDirection="column" px={5} pt={5}>
@@ -275,7 +293,7 @@ export const GrievancesTable = ({
             AllGrievanceTicketQueryVariables
           >
             isOnPaper={false}
-            headCells={isAllPrograms ? headCellsWithProgramColumn : headCells}
+            headCells={headCells}
             rowsPerPageOptions={[10, 15, 20, 40]}
             query={useAllGrievanceTicketQuery}
             onSelectAllClick={handleSelectAllCheckboxesClick}

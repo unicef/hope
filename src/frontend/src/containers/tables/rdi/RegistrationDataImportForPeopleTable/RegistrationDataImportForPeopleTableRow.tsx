@@ -1,6 +1,5 @@
 import TableCell from '@mui/material/TableCell';
 import { useNavigate } from 'react-router-dom';
-import * as React from 'react';
 import { Radio } from '@mui/material';
 import { RegistrationDataImportNode } from '@generated/graphql';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
@@ -9,6 +8,7 @@ import { registrationDataImportStatusToColor } from '@utils/utils';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { ReactElement } from 'react';
 
 interface PaymentRecordTableRowProps {
   registrationDataImport: RegistrationDataImportNode;
@@ -22,7 +22,7 @@ export function RegistrationDataImportForPeopleTableRow({
   canViewDetails,
   selectedRDI,
   radioChangeHandler,
-}: PaymentRecordTableRowProps): React.ReactElement {
+}: PaymentRecordTableRowProps): ReactElement {
   const navigate = useNavigate();
   const { baseUrl } = useBaseUrl();
   const importDetailsForPeoplePath = `/${baseUrl}/registration-data-import/${registrationDataImport.id}`;

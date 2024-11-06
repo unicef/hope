@@ -1,6 +1,5 @@
 import { Avatar, Box, Grid, Paper, Typography } from '@mui/material';
 import { Field, Form, Formik } from 'formik';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -18,6 +17,7 @@ import { OverviewContainerColumn } from '@core/OverviewContainerColumn';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { useProgramContext } from '../../../programContext';
+import { ReactElement } from 'react';
 
 const Name = styled.span`
   font-size: 16px;
@@ -42,7 +42,7 @@ export function Notes({
 }: {
   notes: GrievanceTicketQuery['grievanceTicket']['ticketNotes'];
   canAddNote: boolean;
-}): React.ReactElement {
+}): ReactElement {
   const { t } = useTranslation();
   const { data: meData, loading: meLoading } = useMeQuery({
     fetchPolicy: 'cache-and-network',
@@ -61,14 +61,18 @@ export function Notes({
     date: string,
     description: string,
     noteId: string,
-  ): React.ReactElement => (
-    <Grid container key={noteId}  data-cy="note-row">
+  ): ReactElement => (
+    <Grid container key={noteId} data-cy="note-row">
       <Grid item xs={2}>
         <Avatar alt={`${name} picture`} src="/static/images/avatar/1.jpg" />
       </Grid>
       <Grid item xs={10}>
         <Grid item xs={12}>
-          <Box display="flex" justifyContent="space-between" data-cy="note-name">
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            data-cy="note-name"
+          >
             <Name>{name}</Name>
             <Date>
               <UniversalMoment withTime>{date}</UniversalMoment>

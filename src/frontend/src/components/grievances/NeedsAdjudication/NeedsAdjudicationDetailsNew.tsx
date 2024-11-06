@@ -1,7 +1,7 @@
 import { Title } from '@core/Title';
 import { Box, Typography } from '@mui/material';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ApproveBox } from '../GrievancesApproveSection/ApproveSectionStyles';
 import { NeedsAdjudicationActions } from './NeedsAdjudicationActions';
@@ -14,7 +14,7 @@ export const NeedsAdjudicationDetailsNew = ({
 }: {
   ticket: GrievanceTicketQuery['grievanceTicket'];
   canApprove: boolean;
-}): React.ReactElement => {
+}): ReactElement => {
   const { t } = useTranslation();
   const details = ticket.needsAdjudicationTicketDetails;
   const {

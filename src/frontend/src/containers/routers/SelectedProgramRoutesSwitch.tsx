@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { useRoutes } from 'react-router-dom';
 import { ActivityLogPage } from '../pages/core/MainActivityLogPage';
 import { UsersPage } from '../pages/core/UsersPage';
@@ -14,8 +13,9 @@ import { ProgramRoutes } from './ProgramRoutes';
 import { RegistrationRoutes } from './RegistrationRoutes';
 import { TargetingRoutes } from './TargetingRoutes';
 import { AccountabilityRoutes } from './AccountabilityRoutes';
+import { ReactElement } from 'react';
 
-export const SelectedProgramRoutesSwitch = (): React.ReactElement => {
+export const SelectedProgramRoutesSwitch = (): ReactElement => {
   const routes = useRoutes([
     {
       path: 'country-dashboard',
