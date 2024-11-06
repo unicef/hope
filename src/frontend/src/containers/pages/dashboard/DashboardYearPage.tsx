@@ -1,6 +1,5 @@
 import { Box, Grid } from '@mui/material';
-import * as React from 'react';
-import { useEffect } from 'react';
+import { ReactElement, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
@@ -67,7 +66,7 @@ interface DashboardYearPageProps {
 export const DashboardYearPage = ({
   year,
   filter,
-}: DashboardYearPageProps): React.ReactElement => {
+}: DashboardYearPageProps): ReactElement => {
   const { t } = useTranslation();
   const { businessArea, isGlobal, isAllPrograms, programId } = useBaseUrl();
   const { isSocialDctType } = useProgramContext();
@@ -231,9 +230,7 @@ export const DashboardYearPage = ({
                     noMarginTop
                     extraPaddingTitle={false}
                   >
-                    <CardTextLight large>
-                      {t('Delivery Type')}
-                    </CardTextLight>
+                    <CardTextLight large>{t('Delivery Type')}</CardTextLight>
                     <VolumeByDeliveryMechanism
                       data={data.chartVolumeByDeliveryMechanism}
                     />

@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { PageHeader } from '@components/core/PageHeader';
@@ -17,6 +16,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { useDeduplicationFlagsQuery } from '@generated/graphql';
 import { ButtonTooltip } from '@core/ButtonTooltip';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
 const initialFilter = {
   search: '',
@@ -28,7 +28,7 @@ const initialFilter = {
   importDateRangeMax: '',
 };
 
-export function PeopleRegistrationDataImportPage(): React.ReactElement {
+export function PeopleRegistrationDataImportPage(): ReactElement {
   const location = useLocation();
   const permissions = usePermissions();
   const { t } = useTranslation();
@@ -91,7 +91,14 @@ export function PeopleRegistrationDataImportPage(): React.ReactElement {
     </PageHeader>
   );
   return (
-    <div>
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'PeopleRegistrationDataImportPage.tsx');
+      }}
+      componentName="PeopleRegistrationDataImportPage"
+    >
       {toolbar}
       <RegistrationPeopleFilters
         filter={filter}
@@ -107,6 +114,6 @@ export function PeopleRegistrationDataImportPage(): React.ReactElement {
           permissions,
         )}
       />
-    </div>
+    </UniversalErrorBoundary>
   );
 }

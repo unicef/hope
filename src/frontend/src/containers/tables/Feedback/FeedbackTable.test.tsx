@@ -1,6 +1,6 @@
 import { MockedProvider } from '@apollo/react-testing';
-import { act } from '@testing-library/react';
-import * as React from 'react';
+import { act } from 'react';
+
 import wait from 'waait';
 import { fakeApolloAllFeedbacks } from '../../../../fixtures/feedback/fakeApolloAllFeedbacks';
 import { ApolloLoadingLink, render } from '../../../testUtils/testUtils';
@@ -29,10 +29,7 @@ describe('containers/tables//Feedback/FeedbackTable', () => {
 
   it('should render loading', () => {
     const { container } = render(
-      <MockedProvider
-        addTypename={false}
-        mocks={fakeApolloAllFeedbacks}
-      >
+      <MockedProvider addTypename={false} mocks={fakeApolloAllFeedbacks}>
         <FeedbackTable
           filter={{
             feedbackId: '',

@@ -60,7 +60,7 @@ export function RegistrationDataImportForPeopleTable({
     handleChange(id);
   };
 
-  const renderTable = (): React.ReactElement => (
+  const renderTable = (): ReactElement => (
     <TableWrapper>
       <UniversalTable<
         RegistrationDataImportNode,

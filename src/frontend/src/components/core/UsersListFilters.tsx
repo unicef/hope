@@ -1,5 +1,4 @@
 import { Grid, MenuItem } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useUserChoiceDataQuery } from '@generated/graphql';
@@ -7,6 +6,7 @@ import { createHandleApplyFilterChange } from '@utils/utils';
 import { FiltersSection } from './FiltersSection';
 import { SearchTextField } from './SearchTextField';
 import { SelectFilter } from './SelectFilter';
+import { ReactElement } from 'react';
 
 interface UsersListFiltersProps {
   filter;
@@ -22,7 +22,7 @@ export function UsersListFilters({
   initialFilter,
   appliedFilter,
   setAppliedFilter,
-}: UsersListFiltersProps): React.ReactElement {
+}: UsersListFiltersProps): ReactElement {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();

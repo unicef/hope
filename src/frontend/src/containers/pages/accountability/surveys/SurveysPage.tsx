@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { useSurveysChoiceDataQuery } from '@generated/graphql';
@@ -14,8 +13,9 @@ import {
 import { usePermissions } from '@hooks/usePermissions';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { SurveysTable } from '../../../tables/Surveys/SurveysTable/SurveysTable';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
-export function SurveysPage(): React.ReactElement {
+export function SurveysPage(): ReactElement {
   const permissions = usePermissions();
   const { t } = useTranslation();
   const { data: choicesData } = useSurveysChoiceDataQuery({
@@ -52,7 +52,14 @@ export function SurveysPage(): React.ReactElement {
   );
 
   return (
-    <>
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'SurveysPage.tsx');
+      }}
+      componentName="SurveysPage"
+    >
       <PageHeader title={t('Surveys')}>
         <CreateSurveyMenu />
       </PageHeader>
@@ -68,6 +75,6 @@ export function SurveysPage(): React.ReactElement {
         canViewDetails={canViewDetails}
         choicesData={choicesData}
       />
-    </>
+    </UniversalErrorBoundary>
   );
 }

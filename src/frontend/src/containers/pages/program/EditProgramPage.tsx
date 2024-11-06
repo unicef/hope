@@ -33,6 +33,8 @@ import {
   editPartnersValidationSchema,
   editProgramDetailsValidationSchema,
 } from '@components/programs/CreateProgram/editProgramValidationSchema';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { omit } from 'lodash';
 
 export const EditProgramPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -131,7 +133,7 @@ export const EditProgramPage = (): ReactElement => {
 
     const pduFieldsToSend = values.pduFields
       .filter((item) => item.label !== '')
-      .map(({ __typename, pduData, ...rest }) => ({
+      .map(({ pduData, ...rest }) => ({
         ...rest,
         pduData: pduData
           ? {
@@ -159,14 +161,12 @@ export const EditProgramPage = (): ReactElement => {
       }));
 
     try {
-      const {
-        editMode,
-        partners: _partners,
-        partnerAccess: _partnerAccess,
-        pduFields: _pduFields,
-        ...requestValuesDetails
-      } = values;
-
+      const requestValuesDetails = omit(values, [
+        'editMode',
+        'partners',
+        'partnerAccess',
+        'pduFields',
+      ]);
       const response = await updateProgramDetails({
         variables: {
           programData: {
@@ -305,7 +305,14 @@ export const EditProgramPage = (): ReactElement => {
   ];
 
   return (
-    <>
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'EditProgramPage.tsx');
+      }}
+      componentName="EditProgramPage"
+    >
       <PageHeader
         title={`${t('Edit Programme')}: (${name})`}
         breadCrumbs={
@@ -432,6 +439,6 @@ export const EditProgramPage = (): ReactElement => {
           }}
         </Formik>
       )}
-    </>
+    </UniversalErrorBoundary>
   );
 };

@@ -21,7 +21,6 @@ from admin_extra_buttons.mixins import confirm_action
 from adminfilters.autocomplete import LinkedAutoCompleteFilter
 from adminfilters.depot.widget import DepotManager
 from adminfilters.querystring import QueryStringFilter
-from power_query.mixin import PowerQueryMixin
 from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 
 from hct_mis_api.apps.core.models import BusinessArea
@@ -201,7 +200,6 @@ class HouseholdAdmin(
     SoftDeletableAdminMixin,
     LastSyncDateResetMixin,
     LinkedObjectsManagerMixin,
-    PowerQueryMixin,
     SmartFieldsetMixin,
     CursorPaginatorAdmin,
     HouseholdWithDrawnMixin,

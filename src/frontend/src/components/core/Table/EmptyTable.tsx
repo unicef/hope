@@ -1,5 +1,5 @@
 import { Paper, Typography } from '@mui/material';
-import * as React from 'react';
+import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -11,7 +11,7 @@ const PaperContainer = styled(Paper)`
   text-align: center;
 `;
 
-export function EmptyTable(): React.ReactElement {
+export function EmptyTable(): ReactElement {
   const { t } = useTranslation();
   return (
     <PaperContainer>

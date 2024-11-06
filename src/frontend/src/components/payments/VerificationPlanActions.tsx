@@ -1,6 +1,5 @@
 import { Box, Button } from '@mui/material';
 import { GetApp } from '@mui/icons-material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
@@ -23,6 +22,7 @@ import { DiscardVerificationPlan } from './DiscardVerificationPlan';
 import { EditVerificationPlan } from './EditVerificationPlan';
 import { FinishVerificationPlan } from './FinishVerificationPlan';
 import { ImportXlsx } from './ImportXlsx';
+import { ReactElement } from 'react';
 
 const StyledLink = styled.a`
   text-decoration: none;
@@ -38,7 +38,7 @@ export function VerificationPlanActions({
   verificationPlan,
   samplingChoicesData,
   planNode,
-}: VerificationPlanActionsProps): React.ReactElement {
+}: VerificationPlanActionsProps): ReactElement {
   const { t } = useTranslation();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();

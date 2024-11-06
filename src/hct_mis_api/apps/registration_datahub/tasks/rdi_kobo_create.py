@@ -35,6 +35,7 @@ from hct_mis_api.apps.household.models import (
     PendingIndividualIdentity,
     PendingIndividualRoleInHousehold,
 )
+from hct_mis_api.apps.payment.models import PendingDeliveryMechanismData
 from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hct_mis_api.apps.registration_data.models import (
     ImportData,
@@ -224,6 +225,9 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         household_batch_size = 50
         logger.info(f"Processing {len(self.reduced_submissions)} households")
         chunk_index = 0
+        delivery_mechanism_xlsx_fields = PendingDeliveryMechanismData.get_scope_delivery_mechanisms_fields(
+            by="xlsx_field"
+        )
         for reduced_submission_chunk in chunks(self.reduced_submissions, household_batch_size):
             chunk_index += 1
             logger.info(f"Processing chunk {chunk_index}/{len(self.reduced_submissions) // household_batch_size}")
@@ -251,12 +255,14 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                     households_to_create,
                     individuals_ids_hash_dict,
                     submission_meta_data,
+                    delivery_mechanism_xlsx_fields,
                 )
             self.bulk_creates(bank_accounts_to_create, head_of_households_mapping, households_to_create)
             bank_accounts_to_create = []
             head_of_households_mapping = {}
             households_to_create = []
         self._handle_collectors(collectors_to_create, individuals_ids_hash_dict)
+        self._create_delivery_mechanisms_data()
 
         rdi_mis = RegistrationDataImport.objects.get(id=self.registration_data_import.id)
         rdi_mis.status = RegistrationDataImport.IN_REVIEW
@@ -305,6 +311,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         households_to_create: list[PendingHousehold],
         individuals_ids_hash_dict: dict,
         submission_meta_data: dict,
+        delivery_mechanism_xlsx_fields: list[str],
     ) -> None:
         individuals_to_create_list = []
         documents_and_identities_to_create = []
@@ -352,6 +359,10 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                                 self._cast_and_assign(i_value, i_field, household_obj)
                             except Exception as e:
                                 self._handle_exception("Household", i_field, e)
+                        elif i_field in delivery_mechanism_xlsx_fields:
+                            self._handle_delivery_mechanism_fields(
+                                i_value, i_field, len(individuals_to_create_list), individual_obj
+                            )
                         else:
                             try:
                                 self._cast_and_assign(i_value, i_field, individual_obj)

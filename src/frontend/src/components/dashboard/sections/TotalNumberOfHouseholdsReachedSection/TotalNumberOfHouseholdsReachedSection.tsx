@@ -1,6 +1,5 @@
 import { Grid } from '@mui/material';
 import PeopleIcon from '@mui/icons-material/People';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { formatNumber } from '@utils/utils';
 import { AllChartsQuery } from '@generated/graphql';
@@ -10,6 +9,7 @@ import {
   DashboardCard,
   IconContainer,
 } from '../../DashboardCard';
+import { ReactElement } from 'react';
 
 interface TotalNumberOfHouseholdsReachedSectionProps {
   data: AllChartsQuery['sectionHouseholdsReached'];
@@ -17,7 +17,7 @@ interface TotalNumberOfHouseholdsReachedSectionProps {
 
 export function TotalNumberOfHouseholdsReachedSection({
   data,
-}: TotalNumberOfHouseholdsReachedSectionProps): React.ReactElement {
+}: TotalNumberOfHouseholdsReachedSectionProps): ReactElement {
   const { t } = useTranslation();
   if (!data) return null;
   return (

@@ -1,5 +1,4 @@
 import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import AlarmAddIcon from '@mui/icons-material/AlarmAdd';
@@ -10,6 +9,7 @@ import {
   useGrievancesChoiceDataQuery,
 } from '@generated/graphql';
 import { BulkBaseModal } from './BulkBaseModal';
+import { ReactElement, useState } from 'react';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -29,10 +29,10 @@ export const BulkSetPriorityModal = ({
   selectedTickets,
   businessArea,
   setSelected,
-}: BulkSetPriorityModalProps): React.ReactElement => {
+}: BulkSetPriorityModalProps): ReactElement => {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
-  const [value, setValue] = React.useState<number>(0);
+  const [value, setValue] = useState<number>(0);
   const [mutate] = useBulkUpdateGrievancePriorityMutation();
   const { data: choices } = useGrievancesChoiceDataQuery();
   const priorityChoices = choices.grievanceTicketPriorityChoices;

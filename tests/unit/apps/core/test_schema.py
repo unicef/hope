@@ -132,7 +132,7 @@ class TestAllPduFields(APITestCase):
         # Create a non-PDU field
         FlexibleAttribute.objects.create(
             type=FlexibleAttribute.STRING,
-            label="Not PDU Field",
+            label={"English(EN)": "value", "Not PDU Field": ""},
             associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
         )
 

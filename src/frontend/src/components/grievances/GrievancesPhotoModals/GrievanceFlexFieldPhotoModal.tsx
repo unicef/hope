@@ -1,11 +1,11 @@
 import { Box } from '@mui/material';
-import * as React from 'react';
 import { useParams } from 'react-router-dom';
 import {
   AllAddIndividualFieldsQuery,
   useGrievanceTicketFlexFieldsQuery,
 } from '@generated/graphql';
 import { PhotoModal } from '@core/PhotoModal/PhotoModal';
+import { ReactElement } from 'react';
 
 export interface GrievanceFlexFieldPhotoModalProps {
   field: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'][number];
@@ -17,7 +17,7 @@ export function GrievanceFlexFieldPhotoModal({
   field,
   isCurrent,
   isIndividual,
-}: GrievanceFlexFieldPhotoModalProps): React.ReactElement {
+}: GrievanceFlexFieldPhotoModalProps): ReactElement {
   const { id } = useParams();
   const { data } = useGrievanceTicketFlexFieldsQuery({
     variables: { id },
@@ -29,9 +29,9 @@ export function GrievanceFlexFieldPhotoModal({
 
   const flexFields = isIndividual
     ? data.grievanceTicket?.individualDataUpdateTicketDetails?.individualData
-      ?.flex_fields
+        ?.flex_fields
     : data.grievanceTicket?.householdDataUpdateTicketDetails?.householdData
-      ?.flex_fields;
+        ?.flex_fields;
 
   const picUrl: string = isCurrent
     ? flexFields[field.name]?.previous_value

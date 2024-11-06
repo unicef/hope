@@ -1,10 +1,5 @@
-import {
-  fetchSupportingDocument,
-  uploadSupportingDocument,
-} from '@api/paymentModuleApi';
+import { fetchSupportingDocument } from '@api/paymentModuleApi';
 import { useMutation } from '@tanstack/react-query';
-import { t } from 'i18next';
-import { title } from 'process';
 
 export const useDownloadSupportingDocument = () => {
   return useMutation({
@@ -13,23 +8,21 @@ export const useDownloadSupportingDocument = () => {
       programId: mutationProgramId,
       paymentPlanId: mutationPaymentPlanId,
       fileId: mutationFileId,
+      fileName: mutationFileName,
     }: {
       businessAreaSlug: string;
       programId: string;
       paymentPlanId: string;
       fileId: string;
+      fileName: string;
     }) => {
       return fetchSupportingDocument(
         mutationBusinessAreaSlug,
         mutationProgramId,
         mutationPaymentPlanId,
         mutationFileId,
+        mutationFileName,
       );
-    },
-    onSuccess: (data) => {
-      if (data.url) {
-        window.open(data.url);
-      }
     },
   });
 };

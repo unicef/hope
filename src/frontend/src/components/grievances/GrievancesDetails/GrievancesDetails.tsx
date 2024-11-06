@@ -1,17 +1,4 @@
-import { Box, Grid, GridSize, Typography } from '@mui/material';
-import * as React from 'react';
-import { useTranslation } from 'react-i18next';
-import {
-  GrievanceTicketQuery,
-  GrievancesChoiceDataQuery,
-} from '@generated/graphql';
-import { GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
-import {
-  choicesToDict,
-  grievanceTicketBadgeColors,
-  grievanceTicketStatusToColor,
-  renderUserName,
-} from '@utils/utils';
+import { BlackLink } from '@core/BlackLink';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { ContentLink } from '@core/ContentLink';
 import { LabelizedField } from '@core/LabelizedField';
@@ -20,8 +7,22 @@ import { PhotoModal } from '@core/PhotoModal/PhotoModal';
 import { StatusBox } from '@core/StatusBox';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
+import {
+  GrievanceTicketQuery,
+  GrievancesChoiceDataQuery,
+} from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { BlackLink } from '@core/BlackLink';
+import { Box, Grid, GridSize, Typography } from '@mui/material';
+import { GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
+import {
+  choicesToDict,
+  grievanceTicketBadgeColors,
+  grievanceTicketStatusToColor,
+  renderUserName,
+} from '@utils/utils';
+import { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useProgramContext } from 'src/programContext';
 
 interface GrievancesDetailsProps {
   ticket: GrievanceTicketQuery['grievanceTicket'];
@@ -37,9 +38,10 @@ export function GrievancesDetails({
   baseUrl,
   canViewHouseholdDetails,
   canViewIndividualDetails,
-}: GrievancesDetailsProps): React.ReactElement {
+}: GrievancesDetailsProps): ReactElement {
   const { t } = useTranslation();
   const { isAllPrograms } = useBaseUrl();
+  const { isSocialDctType } = useProgramContext();
   const statusChoices: {
     [id: number]: string;
   } = choicesToDict(choicesData.grievanceTicketStatusChoices);
@@ -71,7 +73,7 @@ export function GrievancesDetails({
   const showPartner =
     ticket.issueType === +GRIEVANCE_ISSUE_TYPES.PARTNER_COMPLAINT;
 
-  const mappedDocumentation = (): React.ReactElement => (
+  const mappedDocumentation = (): ReactElement => (
     <Box display="flex" flexDirection="column">
       {ticket.documentation?.length
         ? ticket.documentation.map((doc) => {
@@ -100,7 +102,7 @@ export function GrievancesDetails({
     objType: string,
     href: string,
     displayedId: string,
-  ): React.ReactElement => {
+  ): ReactElement => {
     if (isAllPrograms) {
       return <>{displayedId}</>;
     }
@@ -127,7 +129,7 @@ export function GrievancesDetails({
     }
   };
 
-  const renderPaymentUrl = (): React.ReactElement => {
+  const renderPaymentUrl = (): ReactElement => {
     const paymentRecord = ticket?.paymentRecord;
     if (paymentRecord) {
       return renderUrl(
@@ -140,7 +142,7 @@ export function GrievancesDetails({
     return <>-</>;
   };
 
-  const renderPaymentPlanUrl = (): React.ReactElement => {
+  const renderPaymentPlanUrl = (): ReactElement => {
     const parent = ticket?.paymentRecord?.parent;
     if (parent) {
       return renderUrl(
@@ -153,7 +155,7 @@ export function GrievancesDetails({
     return <>-</>;
   };
 
-  const renderPaymentPlanVerificationUrl = (): React.ReactElement => {
+  const renderPaymentPlanVerificationUrl = (): ReactElement => {
     const parent = ticket?.paymentRecord?.parent;
     if (parent) {
       const url = `/${baseUrl}/payment-verification/${
@@ -164,7 +166,7 @@ export function GrievancesDetails({
     return <>-</>;
   };
 
-  const mappedPrograms = (): React.ReactElement => {
+  const mappedPrograms = (): ReactElement => {
     if (!ticket.programs?.length) {
       return <>-</>;
     }
@@ -248,7 +250,7 @@ export function GrievancesDetails({
                 value: <span>{issueType}</span>,
                 size: 3,
               },
-              {
+              !isAllPrograms && {
                 label: t('Household ID'),
                 value: (
                   <span>
@@ -270,26 +272,30 @@ export function GrievancesDetails({
                 size: 3,
               },
               {
-                label: t('Individual ID'),
-                value: (
-                  <span>
-                    {ticket.individual?.id &&
-                    canViewIndividualDetails &&
-                    !isAllPrograms ? (
-                      <BlackLink
-                        to={`/${baseUrl}/population/individuals/${ticket.individual.id}`}
-                      >
-                        {ticket.individual.unicefId}
-                      </BlackLink>
-                    ) : (
-                      <div>
-                        {ticket.individual?.id
-                          ? ticket.individual.unicefId
-                          : '-'}
-                      </div>
-                    )}
-                  </span>
-                ),
+                label:
+                  isAllPrograms || isSocialDctType
+                    ? t('Target ID')
+                    : t('Individual ID'),
+                value:
+                  isAllPrograms || isSocialDctType ? (
+                    <div>{ticket?.targetId || '-'}</div>
+                  ) : (
+                    <span>
+                      {ticket.individual?.id && canViewIndividualDetails ? (
+                        <BlackLink
+                          to={`/${baseUrl}/population/individuals/${ticket.individual.id}`}
+                        >
+                          {ticket.individual.unicefId}
+                        </BlackLink>
+                      ) : (
+                        <div>
+                          {ticket.individual?.id
+                            ? ticket.individual.unicefId
+                            : '-'}
+                        </div>
+                      )}
+                    </span>
+                  ),
                 size: 3,
               },
               {
@@ -363,12 +369,21 @@ export function GrievancesDetails({
                 size: 12,
               },
             ]
-              .filter((el) => el)
-              .map((el) => (
-                <Grid key={el.label} item xs={el.size as GridSize}>
-                  <LabelizedField label={el.label}>{el.value}</LabelizedField>
-                </Grid>
-              ))}
+              .filter((el) =>
+                isSocialDctType ? el.label !== 'Household ID' : el,
+              )
+              .map(
+                (el) =>
+                  el.label &&
+                  el.value &&
+                  el.size && (
+                    <Grid key={el.label} item xs={el.size as GridSize}>
+                      <LabelizedField label={el.label}>
+                        {el.value}
+                      </LabelizedField>
+                    </Grid>
+                  ),
+              )}
           </Grid>
         </OverviewContainer>
       </ContainerColumnWithBorder>

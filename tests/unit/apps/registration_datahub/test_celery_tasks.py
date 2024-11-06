@@ -555,12 +555,6 @@ def run_automate_rdi_creation_task(*args: Any, **kwargs: Any) -> Any:
     "hct_mis_api.contrib.aurora.services.base_flex_registration_service.BaseRegistrationService.validate_data_collection_type"
 )
 class TestAutomatingRDICreationTask(TestCase):
-    databases = {
-        "default",
-        "cash_assist_datahub_ca",
-        "cash_assist_datahub_erp",
-        "cash_assist_datahub_mis",
-    }
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod

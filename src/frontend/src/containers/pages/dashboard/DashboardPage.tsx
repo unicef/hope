@@ -1,6 +1,5 @@
 import { Typography } from '@mui/material';
-import * as React from 'react';
-import { useState } from 'react';
+import { ChangeEvent, ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { useDashboardYearsChoiceDataQuery } from '@generated/graphql';
@@ -17,8 +16,9 @@ import { usePermissions } from '@hooks/usePermissions';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { DashboardYearPage } from './DashboardYearPage';
 import { TabPanel } from '@components/core/TabPanel';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
-export function DashboardPage(): React.ReactElement {
+export function DashboardPage(): ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
   const permissions = usePermissions();
@@ -56,7 +56,7 @@ export function DashboardPage(): React.ReactElement {
   const tabs = (
     <Tabs
       value={selectedTab}
-      onChange={(_event: React.ChangeEvent<object>, newValue: number) => {
+      onChange={(_event: ChangeEvent<object>, newValue: number) => {
         setSelectedTab(newValue);
       }}
       indicatorColor="primary"
@@ -68,8 +68,16 @@ export function DashboardPage(): React.ReactElement {
       {mappedTabs}
     </Tabs>
   );
+
   return (
-    <>
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'DashboardPage.tsx');
+      }}
+      componentName="DashboardPage"
+    >
       <PageHeader tabs={tabs} title={t('Dashboard')}>
         {hasPermissionToExport && (
           <ExportModal filter={appliedFilter} year={years[selectedTab]} />
@@ -104,6 +112,6 @@ export function DashboardPage(): React.ReactElement {
       ) : (
         <PermissionDenied />
       )}
-    </>
+    </UniversalErrorBoundary>
   );
 }

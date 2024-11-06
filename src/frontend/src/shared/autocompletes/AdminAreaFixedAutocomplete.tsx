@@ -1,6 +1,6 @@
 import { Box, TextField, CircularProgress } from '@mui/material';
 import Autocomplete from '@mui/lab/Autocomplete';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useAllAdminAreasQuery } from '@generated/graphql';
@@ -23,7 +23,7 @@ export const AdminAreaFixedAutocomplete = ({
   onClear,
   additionalOnChange,
   dataCy,
-}): React.ReactElement => {
+}): ReactElement => {
   const { t } = useTranslation();
   const [inputValue, setInputValue] = useState('');
   const debouncedInputText = useDebounce(inputValue, 800);
