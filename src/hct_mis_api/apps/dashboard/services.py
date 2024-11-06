@@ -1,12 +1,33 @@
+import calendar
 import json
+from collections import defaultdict
 from typing import Any, Dict, Optional
 
 from django.core.cache import cache
+from django.db.models import Count, F, Sum
+from django.db.models.functions import ExtractMonth, ExtractYear
 
+from rest_framework.utils.serializer_helpers import ReturnDict
+
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.dashboard.serializers import DashboardHouseholdSerializer
-from hct_mis_api.apps.household.models import Household
+from hct_mis_api.apps.payment.models import Payment, PaymentRecord
 
 CACHE_TIMEOUT = 60 * 60 * 24  # 24 hours
+
+pwdSum = Sum(
+    F("household__female_age_group_0_5_disabled_count")
+    + F("household__female_age_group_6_11_disabled_count")
+    + F("household__female_age_group_12_17_disabled_count")
+    + F("household__female_age_group_18_59_disabled_count")
+    + F("household__female_age_group_60_disabled_count")
+    + F("household__male_age_group_0_5_disabled_count")
+    + F("household__male_age_group_6_11_disabled_count")
+    + F("household__male_age_group_12_17_disabled_count")
+    + F("household__male_age_group_18_59_disabled_count")
+    + F("household__male_age_group_60_disabled_count"),
+    default=0,
+)
 
 
 class DashboardDataCache:
@@ -38,12 +59,143 @@ class DashboardDataCache:
         cache.set(cache_key, json.dumps(data), CACHE_TIMEOUT)
 
     @classmethod
-    def refresh_data(cls, business_area_slug: str) -> Dict[str, Any]:
+    def refresh_data(cls, business_area_slug: str) -> ReturnDict:
         """
         Generate and store updated data for a given business area.
         """
-        households = Household.objects.using("read_only").filter(business_area__slug=business_area_slug)
-        serialized_data = DashboardHouseholdSerializer(households, many=True).data
+        list_country = []
+        business_area_ = BusinessArea.objects.using("read_only")
+        if business_area_slug:
+            list_country = business_area_.filter(slug=business_area_slug)
+        else:
+            list_country = business_area_.filter(active=True)
+        result = []
+        for area in list_country:
+            payments_aggregated = (
+                Payment.objects.using("read_only")
+                .select_related("business_area", "household", "program")
+                .filter(business_area=area)
+                .annotate(
+                    month=ExtractMonth("status_date"),
+                    year=ExtractYear("status_date"),
+                    programs=F("household__program__name"),
+                    sectors=F("household__program__sector"),
+                    admin1=F("household__admin1__name"),
+                    fsp=F("financial_service_provider__name"),
+                    delivery_types=F("delivery_type__name"),
+                )
+                .distinct()
+                .values(
+                    "year",
+                    "month",
+                    "status",
+                    "programs",
+                    "sectors",
+                    "admin1",
+                    "fsp",
+                    "delivery_types",
+                )
+                .annotate(
+                    total_usd=Sum("delivered_quantity_usd"),
+                    total_quantity=Sum("delivered_quantity"),
+                    total_payments=Count("id", distinct=True),
+                    individuals=Sum("household__size"),
+                    households=Count("household", distinct=True),
+                    children_counts=Sum("household__children_count"),
+                    pwd_counts=pwdSum,
+                )
+            )
+
+            payment_records_aggregated = (
+                PaymentRecord.objects.using("read_only")
+                .select_related("business_area", "household", "program")
+                .filter(business_area=area)
+                .annotate(
+                    month=ExtractMonth("status_date"),
+                    year=ExtractYear("status_date"),
+                    programs=F("household__program__name"),
+                    sectors=F("household__program__sector"),
+                    admin1=F("household__admin1__name"),
+                    fsp=F("service_provider__short_name"),
+                    delivery_types=F("delivery_type__name"),
+                )
+                .distinct()
+                .values(
+                    "year",
+                    "month",
+                    "status",
+                    "programs",
+                    "sectors",
+                    "admin1",
+                    "fsp",
+                    "delivery_types",
+                )
+                .annotate(
+                    total_usd=Sum("delivered_quantity_usd"),
+                    total_quantity=Sum("delivered_quantity"),
+                    total_payments=Count("id", distinct=True),
+                    individuals=Sum("household__size"),
+                    households=Count("household", distinct=True),
+                    children_counts=Sum("household__children_count"),
+                    pwd_counts=pwdSum,
+                )
+            )
+
+            combined_list = list(payments_aggregated) + list(payment_records_aggregated)
+
+            summary = defaultdict(
+                lambda: {
+                    "total_usd": 0,
+                    "total_quantity": 0,
+                    "total_payments": 0,
+                    "sizes": 0,
+                    "children_counts": 0,
+                    "individuals": 0,
+                    "households": 0,
+                    "pwd_counts": 0,
+                }
+            )
+            for item in combined_list:
+                key = (
+                    item["year"],
+                    item["month"],
+                    item["programs"],
+                    item["sectors"],
+                    item["status"],
+                    item["admin1"],
+                    item["fsp"],
+                    item["delivery_types"],
+                )
+                summary[key]["total_usd"] += item["total_usd"] or 0
+                summary[key]["total_quantity"] += item["total_quantity"] or 0
+                summary[key]["total_payments"] += item["total_payments"] or 0
+                summary[key]["individuals"] += item["individuals"] or 0
+                summary[key]["households"] += item["households"] or 0
+                summary[key]["children_counts"] += item["children_counts"] or 0
+                summary[key]["pwd_counts"] += item["pwd_counts"] or 0
+
+            for (year, month, program, sector, status, admin1, fsp, delivery_type), totals in summary.items():
+                result.append(
+                    {
+                        "business_area_name": area.slug,
+                        "total_delivered_quantity_usd": totals["total_usd"],
+                        "total_delivered_quantity": totals["total_quantity"],
+                        "payments": totals["total_payments"],
+                        "individuals": totals["individuals"],
+                        "households": totals["households"],
+                        "children_counts": totals["children_counts"],
+                        "month": calendar.month_name[month],
+                        "year": year,
+                        "program": program,
+                        "sector": sector,
+                        "status": status,
+                        "admin1": admin1,
+                        "fsp": fsp,
+                        "delivery_types": delivery_type,
+                        "pwd_counts": totals["pwd_counts"],
+                    }
+                )
+        serialized_data = DashboardHouseholdSerializer(result, many=True).data
 
         cls.store_data(business_area_slug, serialized_data)
         return serialized_data

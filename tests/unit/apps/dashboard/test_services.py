@@ -1,14 +1,16 @@
 import json
-from typing import Any, Dict, List, Optional
-from unittest.mock import MagicMock, patch
+from typing import Any, Callable, Dict, Optional
+
+from django.core.cache import cache
 
 import pytest
+from rest_framework.utils.serializer_helpers import ReturnDict
 
+from hct_mis_api.apps.account.fixtures import BusinessAreaFactory
+from hct_mis_api.apps.dashboard.serializers import DashboardHouseholdSerializer
 from hct_mis_api.apps.dashboard.services import DashboardDataCache
-from hct_mis_api.apps.household.models import Household
 
 
-@pytest.mark.django_db(databases=["default", "read_only"])
 def test_get_cache_key() -> None:
     """Test that get_cache_key returns the expected key."""
     business_area_slug: str = "test-area"
@@ -17,50 +19,45 @@ def test_get_cache_key() -> None:
 
 
 @pytest.mark.django_db(databases=["default", "read_only"])
-@patch("hct_mis_api.apps.dashboard.services.cache")
-def test_get_data_cache_hit(mock_cache: MagicMock) -> None:
+def test_get_data_cache_hit() -> None:
     """Test get_data when data is found in the cache."""
     business_area_slug: str = "test-area"
-    mock_cache.get.return_value = json.dumps({"test": "data"})
+    cache.set("dashboard_data_test-area", json.dumps({"test": "data"}), 60 * 60 * 24)  # Set cache directly
     data: Optional[Dict[str, Any]] = DashboardDataCache.get_data(business_area_slug)
     assert data == {"test": "data"}
-    mock_cache.get.assert_called_once_with("dashboard_data_test-area")
 
 
 @pytest.mark.django_db(databases=["default", "read_only"])
-@patch("hct_mis_api.apps.dashboard.services.cache")
-def test_get_data_cache_miss(mock_cache: MagicMock) -> None:
+def test_get_data_cache_miss() -> None:
     """Test get_data when data is not found in the cache."""
     business_area_slug: str = "test-area"
-    mock_cache.get.return_value = None
+    cache.delete("dashboard_data_test-area")
     data: Optional[Dict[str, Any]] = DashboardDataCache.get_data(business_area_slug)
     assert data is None
-    mock_cache.get.assert_called_once_with("dashboard_data_test-area")
 
 
 @pytest.mark.django_db(databases=["default", "read_only"])
-@patch("hct_mis_api.apps.dashboard.services.cache")
-def test_store_data(mock_cache: MagicMock) -> None:
+def test_store_data() -> None:
     """Test that store_data correctly stores data in the cache."""
     business_area_slug: str = "test-area"
     data: Dict[str, Any] = {"test": "data"}
     DashboardDataCache.store_data(business_area_slug, data)
-    mock_cache.set.assert_called_once_with("dashboard_data_test-area", json.dumps(data), 60 * 60 * 24)
+    cached_data = cache.get("dashboard_data_test-area")
+    assert cached_data is not None
+    assert json.loads(cached_data) == data
 
 
-@pytest.mark.django_db(databases=["default", "read_only"])
-@patch("hct_mis_api.apps.dashboard.services.DashboardHouseholdSerializer")
-@patch("hct_mis_api.apps.household.models.Household.objects")
-def test_refresh_data(mock_household_objects: MagicMock, mock_serializer: MagicMock) -> None:
-    """Test that refresh_data generates and stores updated data."""
-    business_area_slug: str = "test-area"
-    mock_households: List[Household] = [Household(id=1), Household(id=2)]
-    mock_household_objects.using.return_value.filter.return_value = mock_households
-    mock_serializer.return_value.data = {"id": 1, "name": "test"}
-
-    with patch.object(DashboardDataCache, "store_data") as mock_store_data:
-        data: Dict[str, Any] = DashboardDataCache.refresh_data(business_area_slug)
-
-    assert data == {"id": 1, "name": "test"}
-    mock_serializer.assert_called_once_with(mock_households, many=True)
-    mock_store_data.assert_called_once_with(business_area_slug, {"id": 1, "name": "test"})
+@pytest.mark.django_db(transaction=True, databases=["default", "read_only"])
+def test_refresh_data(afghanistan: BusinessAreaFactory, populate_dashboard_cache: Callable) -> None:
+    cache_key = DashboardDataCache.get_cache_key(afghanistan.slug)
+    cache.delete(cache_key)
+    _ = populate_dashboard_cache(afghanistan)
+    data: ReturnDict = DashboardDataCache.refresh_data(afghanistan.slug)
+    assert len(data) > 0
+    assert any(item["business_area_name"] == afghanistan.slug for item in data)
+    assert sum(item["payments"] for item in data) == 8
+    all_fields = DashboardHouseholdSerializer().get_fields().keys()
+    assert data[0].keys() >= all_fields
+    cache_key = DashboardDataCache.get_cache_key(afghanistan.slug)
+    cached_data = cache.get(cache_key)
+    assert cached_data is not None

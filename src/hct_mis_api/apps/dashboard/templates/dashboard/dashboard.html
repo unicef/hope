@@ -192,41 +192,36 @@
                             return;
                         }
 
-                        let processedPayments = data.flatMap(household =>
-                            household.payments.map(payment => {
-                                const deliveryDate = payment.delivery_date ? new Date(payment.delivery_date) : null;
-                                return {
-                                    delivered_quantity: payment.delivered_quantity ? parseFloat(payment.delivered_quantity) : 0,
-                                    delivered_quantity_usd: payment.delivered_quantity_usd ? parseFloat(payment.delivered_quantity_usd) : 0,
-                                    payment_status: payment.status,
-                                    delivery_date: payment.delivery_date ? new Date(payment.delivery_date) : null,
-                                    year: deliveryDate ? deliveryDate.getFullYear() : 'Unknown',
-                                    month: deliveryDate ? deliveryDate.getMonth() : 'Unknown',
-                                    quarter: deliveryDate ? Math.floor(deliveryDate.getMonth() / 3) + 1 : 'Unknown',
-                                    program: household.program,
-                                    sector: household.sector,
-                                    fsp: payment.fsp,
-                                    delivery_type: payment.delivery_type,
-                                    size: household.size,
-                                    children_count: household.children_count || 0,
-                                    id: household.id,
-                                    pwd_count: household.pwd_count || 0
-                                }
-                            })
-                        );
+                        let processedPayments = data.map(item => ({
+                          business_area_name: item.business_area_name,
+                          delivered_quantity_usd: parseFloat(item.total_delivered_quantity_usd),
+                          delivered_quantity: parseFloat(item.total_delivered_quantity),
+                          payments: item.payments,
+                          individuals: item.individuals,
+                          households: item.households,
+                          children_counts: item.children_counts,
+                          month: item.month,
+                          year: item.year,
+                          program: item.program,
+                          sector: item.sector,
+                          payment_status: item.status,
+                          admin1: item.admin1,
+                          fsp: item.fsp,
+                          delivery_types: item.delivery_types,
+                          pwd_counts: item.pwd_counts
+                      }));
 
                         const ndx = crossfilter(processedPayments);
 
                         // Define dimensions and groups
                         const yearDim = ndx.dimension(d => d.year);
                         const fspDim = ndx.dimension(d => d.fsp);
-                        const deliveryDim = ndx.dimension(d => d.delivery_type);
+                        const deliveryDim = ndx.dimension(d => d.delivery_types);
                         const sectorDim = ndx.dimension(d => d.sector);
                         const volumeDim = ndx.dimension(d => d.program);
                         const idDim = ndx.dimension(d => d.id);
-                        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-                        const monthDim = ndx.dimension(d => monthNames[d.month]);
-                        const quarterDim = ndx.dimension(d => `Q${d.quarter}`);
+                        const monthDim = ndx.dimension(d => d.month);
+                        const quarterDim = ndx.dimension(d => d.month);
 
                         const fspGroup = fspDim.group().reduceSum(d => d.delivered_quantity_usd);
                         const deliveryGroup = deliveryDim.group().reduceSum(d => d.delivered_quantity_usd);
@@ -340,12 +335,12 @@
                                     sum: 0
                                 })
                             ).value();
-                            const householdsReached = idDim.groupAll().reduceCount().value();
-                            const individualsReached = ndx.groupAll().reduceSum(d => d.size).value();
-                            const pwdReached = ndx.groupAll().reduceSum(d => d.pwd_count).value();
+                            const householdsReached = idDim.groupAll().reduceSum(d => d.households).value();
+                            const individualsReached = ndx.groupAll().reduceSum(d => d.individuals).value();
+                            const pwdReached = ndx.groupAll().reduceSum(d => d.pwd_counts).value();
                             const childrenReached = ndx.groupAll().reduce(
-                                (p, v) => p + (v.children_count || 0),
-                                (p, v) => p - (v.children_count || 0),
+                                (p, v) => p + (v.children_counts || 0),
+                                (p, v) => p - (v.children_counts || 0),
                                 () => 0
                             ).value();
 
