@@ -185,8 +185,52 @@ def create_payment_plan_lock_social_worker(social_worker_program: Program) -> Pa
 
 
 @pytest.fixture
-def create_payment_plan_open() -> PaymentPlan:
-    yield PaymentPlanFactory(status=PaymentPlan.Status.OPEN)
+def create_payment_plan_open(social_worker_program: Program) -> PaymentPlan:
+    program_cycle = ProgramCycleFactory(
+        program=social_worker_program,
+        title="Cycle for PaymentPlan",
+        status=ProgramCycle.ACTIVE,
+        start_date=datetime.now() + relativedelta(days=10),
+        end_date=datetime.now() + relativedelta(days=15),
+    )
+
+    payment_plan = PaymentPlanFactory(
+        status=PaymentPlan.Status.PREPARING,
+        is_follow_up=False,
+        program=social_worker_program,
+        program_cycle=program_cycle,
+        business_area=social_worker_program.business_area,
+        dispersion_start_date=datetime.now().date(),
+    )
+    hoh1 = IndividualFactory(household=None)
+    household_1 = HouseholdFactory(
+        id="3d7087be-e8f8-478d-9ca2-4ca6d5e96f51", unicef_id="HH-17-0000.3340", head_of_household=hoh1, size=2
+    )
+    IndividualFactory(
+        household=household_1,
+        program=social_worker_program,
+        sex="MALE",
+        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=11, maximum_age=16),
+    )
+    PaymentFactory(parent=payment_plan, household=household_1, excluded=False, currency="PLN")
+
+    payment_plan.update_population_count_fields()
+    payment_plan.update_money_fields()
+
+    payment_plan.status_open()
+    payment_plan.save(update_fields=("status",))
+
+    PaymentPlanFactory(
+        status=PaymentPlan.Status.LOCKED,
+        program=social_worker_program,
+        program_cycle=program_cycle,
+        business_area=social_worker_program.business_area,
+        dispersion_start_date=datetime.now().date(),
+        is_follow_up=True,
+        source_payment_plan=payment_plan,
+    )
+
+    yield payment_plan
 
 
 def payment_plan_create(program: Program, status: str = PaymentPlan.Status.LOCKED) -> PaymentPlan:
@@ -615,7 +659,6 @@ class TestPaymentPlans:
 
         assert "6" in pagePaymentModuleDetails.getLabelTargetedIndividuals().text
 
-    @pytest.mark.skip("Fix problem with fixtures")
     def test_payment_plan_delete(
         self,
         create_payment_plan_open: PaymentPlan,
@@ -626,12 +669,19 @@ class TestPaymentPlans:
         pagePaymentModule.selectGlobalProgramFilter("Test Program")
         pagePaymentModule.getNavPaymentModule().click()
         pagePaymentModule.getNavPaymentPlans().click()
-        payment_plan = pagePaymentModule.getRow(0).text
-        pagePaymentModule.getRow(0).click()
+        pagePaymentModule.getRows()
+        for i in range(len(pagePaymentModule.getRows())):
+            if "OPEN" in pagePaymentModule.getRow(i).text:
+                payment_plan = pagePaymentModule.getRow(i).text
+                pagePaymentModule.getRow(i).click()
+                break
+        else:
+            raise AssertionError("No payment plan has Open status")
         pagePaymentModuleDetails.getDeleteButton().click()
         pagePaymentModuleDetails.getButtonSubmit().click()
         pagePaymentModule.getRow(0)
         assert payment_plan not in pagePaymentModule.getRow(0).text
+        assert "LOCKED" in pagePaymentModule.getRow(0).text
 
     def test_payment_plan_creation_error(
         self,
