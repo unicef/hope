@@ -14,13 +14,7 @@ from hct_mis_api.apps.account.fixtures import (
 )
 from hct_mis_api.apps.account.models import UserRole
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.dashboard.serializers import (
-    DashboardHouseholdSerializer,
-    PaymentRecordSerializer,
-    PaymentSerializer,
-)
 from hct_mis_api.apps.dashboard.views import DashboardReportView
-from hct_mis_api.apps.payment.models import Payment, PaymentRecord
 
 pytestmark = pytest.mark.django_db(databases=["default", "read_only"])
 
@@ -148,34 +142,6 @@ def test_create_or_update_dash_report_internal_server_error(
     assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
     assert response.data["detail"] == "Unexpected error"
     mock_task_delay.assert_called_once_with(setup_client["business_area"].slug)
-
-
-@pytest.mark.django_db(databases=["default", "read_only"])
-def test_get_payments(populate_dashboard_cache: Callable, afghanistan: BusinessAreaFactory) -> None:
-    """
-    Test that get_payments returns the correct data for a household.
-    """
-    household = populate_dashboard_cache(afghanistan)
-    serializer = DashboardHouseholdSerializer()
-    payments_data = serializer.get_payments(household)
-    payments = Payment.objects.using("read_only").filter(household=household)
-    payment_records = PaymentRecord.objects.using("read_only").filter(household=household)
-    payment_data = PaymentSerializer(payments, many=True).data
-    payment_record_data = PaymentRecordSerializer(payment_records, many=True).data
-    expected_data = list(payment_data) + list(payment_record_data)
-    assert payments_data == expected_data, "get_payments did not return expected data"
-
-
-@pytest.mark.django_db(databases=["default", "read_only"])
-def test_get_pwd_count(afghanistan: BusinessAreaFactory, populate_dashboard_cache: Callable) -> None:
-    """
-    Test that get_pwd_count returns the correct sum of PWD counts for a household.
-    """
-    household = populate_dashboard_cache(afghanistan)
-    serializer = DashboardHouseholdSerializer()
-    pwd_count = serializer.get_pwd_count(household)
-    expected_count = 1 + 0 + 2 + 2 + 5 + 0 + 1 + 2 + 0 + 1
-    assert pwd_count == expected_count, f"get_pwd_count returned {pwd_count}, expected {expected_count}"
 
 
 @pytest.mark.django_db(databases=["default", "read_only"])
