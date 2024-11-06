@@ -173,8 +173,9 @@ class CreateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         program_id = get_program_id_from_headers(info.context.headers)
         program = get_object_or_404(Program, pk=program_id)
         program_cycle = get_object_or_404(ProgramCycle, pk=decode_id_string(input_data.get("program_cycle_id")))
+        business_area = program.business_area
 
-        cls.has_permission(info, Permissions.TARGETING_CREATE, program.business_area)
+        cls.has_permission(info, Permissions.TARGETING_CREATE, business_area)
 
         if program.status != Program.ACTIVE:
             raise ValidationError("Only Active program can be assigned to Targeting")
@@ -186,7 +187,6 @@ class CreateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
             raise ValidationError(f"Target population with name: {tp_name} and program: {program.name} already exists.")
         targeting_criteria_input = input_data.get("targeting_criteria")
 
-        business_area = BusinessArea.objects.get(slug=input_data.pop("business_area_slug"))
         TargetingCriteriaInputValidator.validate(targeting_criteria_input, program)
         targeting_criteria = from_input_to_targeting_criteria(targeting_criteria_input, program)
         target_population = TargetPopulation(
