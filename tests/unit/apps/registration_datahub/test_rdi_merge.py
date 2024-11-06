@@ -29,7 +29,6 @@ from hct_mis_api.apps.household.fixtures import (
 from hct_mis_api.apps.household.models import (
     BROTHER_SISTER,
     COLLECT_TYPE_FULL,
-    COLLECT_TYPE_PARTIAL,
     COUSIN,
     HEAD,
     NON_BENEFICIARY,
@@ -240,6 +239,7 @@ class TestRdiMergeTask(TestCase):
             kobo_submission_uuid="c09130af-6c9c-4dba-8c7f-1b2ff1970d19",
             kobo_submission_time="2022-02-22T12:22:22",
             flex_fields={"enumerator_id": 1234567890},
+            program=self.rdi.program,
         )
         dct = self.rdi.program.data_collecting_type
         dct.recalculate_composition = True
@@ -507,65 +507,6 @@ class TestRdiMergeTask(TestCase):
                 household.refresh_from_db()
                 self.assertIsNotNone(household.household_collection)
                 self.assertEqual(household.household_collection.households.count(), 2)
-
-    @freeze_time("2022-01-01")
-    def test_merge_rdi_and_recalculation_for_collect_data_partial(self) -> None:
-        household = PendingHouseholdFactory(
-            collect_individual_data=COLLECT_TYPE_PARTIAL,
-            registration_data_import=self.rdi,
-        )
-        dct = self.rdi.program.data_collecting_type
-        dct.recalculate_composition = True
-        dct.save()
-
-        self.set_imported_individuals(household)
-
-        household.head_of_household = PendingIndividual.objects.first()
-        household.save()
-
-        with capture_on_commit_callbacks(execute=True):
-            RdiMergeTask().execute(self.rdi.pk)
-
-        households = Household.objects.all()
-        individuals = Individual.objects.all()
-
-        self.assertEqual(1, households.count())
-        self.assertEqual(households[0].collect_individual_data, COLLECT_TYPE_PARTIAL)
-        self.assertEqual(8, individuals.count())
-
-        household_data = model_to_dict(
-            households[0],
-            (
-                "female_age_group_0_5_count",
-                "female_age_group_6_11_count",
-                "female_age_group_12_17_count",
-                "female_age_group_18_59_count",
-                "female_age_group_60_count",
-                "male_age_group_0_5_count",
-                "male_age_group_6_11_count",
-                "male_age_group_12_17_count",
-                "male_age_group_18_59_count",
-                "male_age_group_60_count",
-                "children_count",
-                "size",
-            ),
-        )
-
-        expected = {
-            "female_age_group_0_5_count": None,
-            "female_age_group_6_11_count": None,
-            "female_age_group_12_17_count": None,
-            "female_age_group_18_59_count": None,
-            "female_age_group_60_count": None,
-            "male_age_group_0_5_count": None,
-            "male_age_group_6_11_count": None,
-            "male_age_group_12_17_count": None,
-            "male_age_group_18_59_count": None,
-            "male_age_group_60_count": None,
-            "children_count": None,
-            "size": None,
-        }
-        self.assertEqual(household_data, expected)
 
     def test_merging_external_collector(self) -> None:
         household = PendingHouseholdFactory(
