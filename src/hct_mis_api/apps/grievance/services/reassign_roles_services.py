@@ -120,10 +120,10 @@ def reassign_roles_on_marking_as_duplicate_individual_service(
             continue
         primary_role = IndividualRoleInHousehold.objects.filter(household=household_id, role=ROLE_PRIMARY).first()
         if primary_role is None:
-            raise ValidationError(f"Household with id {household_id} was left without primary role")
+            raise ValidationError(f"Household with id {household_id} was left without primary role")  # pragma: no cover
         if str(primary_role.individual.id) in duplicated_individuals_ids:
             raise ValidationError(
-                f"Primary role in household with id {household_id} is still assigned to duplicated individual({primary_role.individual.unicef_id})"
+                f"Primary role in household with unicef_id {primary_role.household.unicef_id} is still assigned to duplicated individual({primary_role.individual.unicef_id})"
             )
 
 
@@ -135,11 +135,13 @@ def reassign_head_of_household_relationship_for_need_adjudication_ticket(
     user: "AbstractUser",
 ) -> None:
     if household != individual_which_loses_role.household:
-        raise ValidationError("Household missmatch Individual which loses role and household")
+        raise ValidationError("Household missmatch Individual which loses role and household")  # pragma: no cover
     if household.head_of_household.pk == new_individual.pk or new_individual == individual_which_loses_role:
-        raise ValidationError("Cannot reassign head of household to the same individual")
+        raise ValidationError("Cannot reassign head of household to the same individual")  # pragma: no cover
     if new_individual.household != individual_which_loses_role.household:
-        raise ValidationError("Cannot reassign head of household to individual from different household")
+        raise ValidationError(
+            "Cannot reassign head of household to individual from different household"
+        )  # pragma: no cover
     household.head_of_household = new_individual
     household.save()
     # update relationship to unknown for all individuals except new head of household

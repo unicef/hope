@@ -319,3 +319,24 @@ class TestReassignRolesOnUpdate(APITestCase):
             ""
             f"Role for head of household in household with unicef_id {self.household.unicef_id} was not reassigned, when individual ({self.primary_collector_individual.unicef_id}) was marked as duplicated",
         )
+
+    def test_reassign_roles_on_marking_as_duplicate_individual_service_reassign_primary_not_reassigned(
+        self,
+    ) -> None:
+        duplicated_individuals = Individual.objects.filter(id__in=[self.primary_collector_individual.id])
+        role_reassign_data = {
+            str(self.primary_collector_individual.id): {
+                "role": "HEAD",
+                "new_individual": encode_id_base64(str(self.no_role_individual.id), "Individual"),
+                "household": encode_id_base64(str(self.household.id), "Household"),
+                "individual": encode_id_base64(str(self.primary_collector_individual.id), "Individual"),
+            },
+        }
+        with self.assertRaises(ValidationError) as error:
+            reassign_roles_on_marking_as_duplicate_individual_service(
+                role_reassign_data, self.user, duplicated_individuals
+            )
+        self.assertEqual(
+            str(error.exception.messages[0]),
+            f"Primary role in household with unicef_id {self.household.unicef_id} is still assigned to duplicated individual({self.primary_collector_individual.unicef_id})",
+        )

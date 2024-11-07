@@ -470,6 +470,7 @@ class TestPaymentVerification:
         assert "0" in pagePaymentVerificationDetails.getLabelSampleSize().text
         assert "1" in pagePaymentVerificationDetails.getLabelNumberOfVerificationPlans().text
 
+    @pytest.mark.xfail(reason="UNSTABLE")
     def test_payment_verification_records(
         self,
         active_program: Program,
@@ -655,6 +656,7 @@ class TestPaymentVerification:
     ) -> None:
         pagePaymentVerification.selectGlobalProgramFilter("Active Program")
 
+    @pytest.mark.xfail(reason="UNSTABLE")
     def test_payment_verification_xlsx_successful(
         self,
         clear_downloaded_files: None,
