@@ -164,6 +164,9 @@ class TargetingCriteriaInputValidator:
         program_dct = program.data_collecting_type
         rules: List = targeting_criteria.get("rules", [])
 
+        if len(rules) < 1:
+            raise ValidationError("There should be at least 1 rule in target criteria")
+
         for rule in rules:
             household_ids = rule.get("household_ids")
             individual_ids = rule.get("individual_ids")

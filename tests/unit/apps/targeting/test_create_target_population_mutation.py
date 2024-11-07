@@ -41,7 +41,9 @@ class TestCreateTargetPopulationMutation(APITestCase):
             householdIds
             individualIds
             rules {
-              filters {
+              householdIds
+              individualIds
+              householdsFiltersBlocks {
                 comparisonMethod
                 fieldName
                 arguments
@@ -54,6 +56,11 @@ class TestCreateTargetPopulationMutation(APITestCase):
                     arguments
                     flexFieldClassification
                     roundNumber
+                }
+              }
+              collectorsFiltersBlocks{
+                collectorBlockFilters{
+                  fieldName
                 }
               }
             }
@@ -101,14 +108,12 @@ class TestCreateTargetPopulationMutation(APITestCase):
         cls.variables = {
             "createTargetPopulationInput": {
                 "name": "Example name 5",
-                "businessAreaSlug": "afghanistan",
-                "programId": cls.id_to_base64(cls.program.id, "ProgramNode"),
                 "programCycleId": cls.id_to_base64(cls.program_cycle.id, "ProgramCycleNode"),
                 "excludedIds": "",
                 "targetingCriteria": {
                     "rules": [
                         {
-                            "filters": [
+                            "householdsFiltersBlocks": [
                                 {
                                     "comparisonMethod": "EQUALS",
                                     "fieldName": "size",
@@ -120,6 +125,14 @@ class TestCreateTargetPopulationMutation(APITestCase):
                     ]
                 },
             }
+        }
+
+        cls.context = {
+            "user": cls.user,
+            "headers": {
+                "Business-Area": cls.business_area.slug,
+                "program": cls.id_to_base64(cls.program.id, "ProgramNode"),
+            },
         }
 
     @parameterized.expand(
@@ -134,14 +147,12 @@ class TestCreateTargetPopulationMutation(APITestCase):
         variables = {
             "createTargetPopulationInput": {
                 "name": "Example name 5 ",
-                "businessAreaSlug": "afghanistan",
-                "programId": self.id_to_base64(self.program.id, "ProgramNode"),
                 "programCycleId": self.id_to_base64(self.program_cycle.id, "ProgramCycleNode"),
                 "excludedIds": "",
                 "targetingCriteria": {
                     "rules": [
                         {
-                            "filters": [
+                            "householdsFiltersBlocks": [
                                 {
                                     "comparisonMethod": "EQUALS",
                                     "fieldName": "size",
@@ -156,7 +167,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
         }
         self.snapshot_graphql_request(
             request_string=TestCreateTargetPopulationMutation.MUTATION_QUERY,
-            context={"user": self.user},
+            context=self.context,
             variables=variables,
         )
 
@@ -172,14 +183,12 @@ class TestCreateTargetPopulationMutation(APITestCase):
         variables = {
             "createTargetPopulationInput": {
                 "name": "Example name 5 ",
-                "businessAreaSlug": "afghanistan",
-                "programId": self.id_to_base64(self.program.id, "ProgramNode"),
                 "programCycleId": self.id_to_base64(self.program_cycle.id, "ProgramCycleNode"),
                 "excludedIds": "",
                 "targetingCriteria": {
                     "rules": [
                         {
-                            "filters": [
+                            "householdsFiltersBlocks": [
                                 {
                                     "comparisonMethod": "CONTAINS",
                                     "arguments": [],
@@ -195,7 +204,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
         }
         self.snapshot_graphql_request(
             request_string=TestCreateTargetPopulationMutation.MUTATION_QUERY,
-            context={"user": self.user},
+            context=self.context,
             variables=variables,
         )
 
@@ -206,7 +215,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
 
         response_error = self.graphql_request(
             request_string=TestCreateTargetPopulationMutation.MUTATION_QUERY,
-            context={"user": self.user},
+            context=self.context,
             variables=self.variables,
         )
         self.assertEqual(TargetPopulation.objects.count(), 0)
@@ -224,7 +233,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
         # First, response is ok and tp is created
         response_ok = self.graphql_request(
             request_string=TestCreateTargetPopulationMutation.MUTATION_QUERY,
-            context={"user": self.user},
+            context=self.context,
             variables=self.variables,
         )
         assert "errors" not in response_ok
@@ -233,7 +242,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
         # Second, response has error due to unique constraints
         response_error = self.graphql_request(
             request_string=TestCreateTargetPopulationMutation.MUTATION_QUERY,
-            context={"user": self.user},
+            context=self.context,
             variables=self.variables,
         )
         assert "errors" in response_error
@@ -250,7 +259,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
         # Fourth, we can create tp with the same name, program and business area like removed one
         response_ok = self.graphql_request(
             request_string=TestCreateTargetPopulationMutation.MUTATION_QUERY,
-            context={"user": self.user},
+            context=self.context,
             variables=self.variables,
         )
         assert "errors" not in response_ok
@@ -272,23 +281,21 @@ class TestCreateTargetPopulationMutation(APITestCase):
         ind_hh_3.save()
 
         targeting_criteria_list = [
-            {"householdIds": "HH-1,", "individualIds": "", "rules": []},
-            {"householdIds": "HH-1, HH-2, HH-3, ", "individualIds": "IND-33, IND-33, ", "rules": []},
-            {"householdIds": "HH-1", "individualIds": "IND-33", "rules": []},
-            {"householdIds": "", "individualIds": "IND-33", "rules": []},
-            {"householdIds": "", "individualIds": "IND-33, IND-666", "rules": []},
-            {"householdIds": "", "individualIds": "IND-666", "rules": []},
-            {"householdIds": "HH-1, HH-666", "individualIds": "", "rules": []},
-            {"householdIds": "HH-666", "individualIds": "", "rules": []},
-            {"householdIds": "", "individualIds": "", "rules": []},
+            {"rules": [{"householdIds": "HH-1,", "individualIds": ""}]},
+            {"rules": [{"householdIds": "HH-1, HH-2, HH-3, ", "individualIds": "IND-33, IND-33, "}]},
+            {"rules": [{"householdIds": "HH-1", "individualIds": "IND-33"}]},
+            {"rules": [{"householdIds": "", "individualIds": "IND-33"}]},
+            {"rules": [{"householdIds": "", "individualIds": "IND-33, IND-666"}]},
+            {"rules": [{"householdIds": "", "individualIds": "IND-666"}]},
+            {"rules": [{"householdIds": "HH-1, HH-666", "individualIds": ""}]},
+            {"rules": [{"householdIds": "HH-666", "individualIds": ""}]},
+            {"rules": [{"householdIds": "", "individualIds": ""}]},
         ]
 
         for num, targeting_criteria in enumerate(targeting_criteria_list, 1):
             variables = {
                 "createTargetPopulationInput": {
                     "name": f"Test name {num}",
-                    "businessAreaSlug": "afghanistan",
-                    "programId": self.id_to_base64(self.program.id, "ProgramNode"),
                     "programCycleId": self.id_to_base64(self.program_cycle.id, "ProgramCycleNode"),
                     "excludedIds": "",
                     "targetingCriteria": targeting_criteria,
@@ -296,7 +303,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
             }
             self.snapshot_graphql_request(
                 request_string=TestCreateTargetPopulationMutation.MUTATION_QUERY,
-                context={"user": self.user},
+                context=self.context,
                 variables=variables,
             )
 
@@ -306,24 +313,18 @@ class TestCreateTargetPopulationMutation(APITestCase):
         variables = {
             "createTargetPopulationInput": {
                 "name": "Example name 5 ",
-                "businessAreaSlug": "afghanistan",
-                "programId": self.id_to_base64(self.program.id, "ProgramNode"),
                 "excludedIds": "",
                 "programCycleId": self.id_to_base64(self.program_cycle.id, "ProgramCycleNode"),
                 "targetingCriteria": {
                     "rules": [
                         {
-                            "filters": [],
+                            "householdsFiltersBlocks": [],
                             "individualsFiltersBlocks": [
                                 {
-                                    "individualBlockFilters": [
-                                        {
-                                            "comparisonMethod": "CONTAINS",
-                                            "arguments": ["Average"],
-                                            "fieldName": "flex_field_1",
-                                            "flexFieldClassification": "FLEX_FIELD_BASIC",
-                                        }
-                                    ]
+                                    "comparisonMethod": "CONTAINS",
+                                    "arguments": ["Average"],
+                                    "fieldName": "flex_field_1",
+                                    "flexFieldClassification": "FLEX_FIELD_BASIC",
                                 }
                             ],
                         }
@@ -333,7 +334,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
         }
         self.snapshot_graphql_request(
             request_string=TestCreateTargetPopulationMutation.MUTATION_QUERY,
-            context={"user": self.user},
+            context=self.context,
             variables=variables,
         )
 
@@ -343,25 +344,19 @@ class TestCreateTargetPopulationMutation(APITestCase):
         variables = {
             "createTargetPopulationInput": {
                 "name": "Example name 5 ",
-                "businessAreaSlug": "afghanistan",
-                "programId": self.id_to_base64(self.program.id, "ProgramNode"),
                 "excludedIds": "",
                 "programCycleId": self.id_to_base64(self.program_cycle.id, "ProgramCycleNode"),
                 "targetingCriteria": {
                     "rules": [
                         {
-                            "filters": [],
+                            "householdsFiltersBlocks": [],
                             "individualsFiltersBlocks": [
                                 {
-                                    "individualBlockFilters": [
-                                        {
-                                            "comparisonMethod": "RANGE",
-                                            "arguments": ["2", "3.5"],
-                                            "fieldName": "pdu_field_1",
-                                            "flexFieldClassification": "FLEX_FIELD_PDU",
-                                            "roundNumber": "1",
-                                        }
-                                    ]
+                                    "comparisonMethod": "RANGE",
+                                    "arguments": ["2", "3.5"],
+                                    "fieldName": "pdu_field_1",
+                                    "flexFieldClassification": "FLEX_FIELD_PDU",
+                                    "roundNumber": "1",
                                 }
                             ],
                         }
@@ -371,7 +366,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
         }
         self.snapshot_graphql_request(
             request_string=TestCreateTargetPopulationMutation.MUTATION_QUERY,
-            context={"user": self.user},
+            context=self.context,
             variables=variables,
         )
 
@@ -399,14 +394,12 @@ class TestCreateTargetPopulationMutation(APITestCase):
         variables = {
             "createTargetPopulationInput": {
                 "name": "Example name 10 ",
-                "businessAreaSlug": "afghanistan",
-                "programId": self.id_to_base64(program_sw.id, "ProgramNode"),
                 "excludedIds": "",
                 "programCycleId": self.id_to_base64(program_cycle.id, "ProgramCycleNode"),
                 "targetingCriteria": {
                     "rules": [
                         {
-                            "filters": [
+                            "householdsFiltersBlocks": [
                                 {
                                     "comparisonMethod": "RANGE",
                                     "arguments": ["2", "3.5"],
@@ -423,7 +416,13 @@ class TestCreateTargetPopulationMutation(APITestCase):
         }
         self.snapshot_graphql_request(
             request_string=TestCreateTargetPopulationMutation.MUTATION_QUERY,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                    "program": self.id_to_base64(program_sw.id, "ProgramNode"),
+                },
+            },
             variables=variables,
         )
 
@@ -434,7 +433,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
 
         response_error = self.graphql_request(
             request_string=TestCreateTargetPopulationMutation.MUTATION_QUERY,
-            context={"user": self.user},
+            context=self.context,
             variables=self.variables,
         )
         self.assertEqual(TargetPopulation.objects.count(), 0)
