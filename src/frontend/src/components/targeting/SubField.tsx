@@ -46,7 +46,7 @@ interface Filter {
 }
 
 interface Values {
-  filters?: Filter[];
+  householdsFiltersBlocks?: Filter[];
   individualsFiltersBlocks?: {
     individualBlockFilters?: {
       isNull?: boolean;
@@ -93,7 +93,7 @@ export const SubField: FC<SubFieldProps> = ({
   const isNullSelected =
     checkIsNullInBlocks(values?.individualsFiltersBlocks, blockIndex, index) ||
     checkIsNullInBlocks(values?.collectorsFiltersBlocks, blockIndex, index) ||
-    (values.filters?.some((filter) => filter.isNull) ?? false);
+    (values.householdsFiltersBlocks?.some((filter) => filter.isNull) ?? false);
 
   useEffect(() => {
     if (isNullSelected) {

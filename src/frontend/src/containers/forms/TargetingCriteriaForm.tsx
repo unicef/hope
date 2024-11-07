@@ -29,6 +29,8 @@ import {
   clearField,
   formatCriteriaFilters,
   formatCriteriaIndividualsFiltersBlocks,
+  HhIdValidation,
+  IndIdValidation,
   mapCriteriaToInitialValues,
 } from '@utils/targetingUtils';
 import { DialogContainer } from '../dialogs/DialogContainer';
@@ -40,6 +42,7 @@ import { AndDivider, AndDividerLabel } from '@components/targeting/AndDivider';
 import { TargetingCriteriaHouseholdFilter } from './TargetingCriteriaHouseholdFilter';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { TargetingCriteriaCollectorFilterBlocks } from './TargetingCriteriaCollectorFilterBlocks';
+import { useAllCollectorFieldsAttributesQuery } from '@generated/graphql';
 
 const ButtonBox = styled.div`
   width: 300px;
@@ -55,6 +58,8 @@ const StyledBox = styled(Box)`
 `;
 
 const validationSchema = Yup.object().shape({
+  householdIds: HhIdValidation,
+  individualIds: IndIdValidation,
   filters: Yup.array().of(
     Yup.object().shape({
       fieldName: Yup.string().required('Field Type is required'),
@@ -96,22 +101,6 @@ const validationSchema = Yup.object().shape({
           fieldAttribute: Yup.object().shape({
             type: Yup.string().required(),
           }),
-          roundNumber: Yup.string()
-            .nullable()
-            .when(
-              ['fieldName', 'fieldAttribute'],
-              (_fieldName, _fieldAttribute, schema) => {
-                const parent = schema.parent;
-                if (
-                  parent &&
-                  parent.fieldAttribute &&
-                  parent.fieldAttribute.type === 'PDU'
-                ) {
-                  return Yup.string().required('Round Number is required');
-                }
-                return Yup.string().notRequired();
-              },
-            ),
         }),
       ),
     }),
@@ -165,6 +154,10 @@ export const TargetingCriteriaForm = ({
     businessArea,
     programId,
   );
+  const { data: allCollectorFieldsAttributesData } =
+    useAllCollectorFieldsAttributesQuery({
+      fetchPolicy: 'cache-first',
+    });
 
   const filtersArrayWrapperRef = useRef(null);
   const individualsFiltersBlocksWrapperRef = useRef(null);
@@ -173,6 +166,7 @@ export const TargetingCriteriaForm = ({
   const [individualData, setIndividualData] = useState(null);
   const [householdData, setHouseholdData] = useState(null);
   const [allDataChoicesDict, setAllDataChoicesDict] = useState(null);
+  useState(null);
   useEffect(() => {
     if (loading) return;
     const filteredIndividualData = {
@@ -218,9 +212,9 @@ export const TargetingCriteriaForm = ({
     !filter.value.to;
 
   const validate = (values) => {
-    const hasFiltersErrors =
-      values.filters.some(filterNullOrNoSelections) ||
-      values.filters.some(filterEmptyFromTo);
+    const hasHouseholdsFiltersBlocksErrors =
+      values.householdsFiltersBlocks.some(filterNullOrNoSelections) ||
+      values.householdsFiltersBlocks.some(filterEmptyFromTo);
 
     const hasBlockFiltersErrors = (blocks) => {
       if (!blocks || !Array.isArray(blocks)) {
@@ -247,14 +241,14 @@ export const TargetingCriteriaForm = ({
 
     const errors: { nonFieldErrors?: string[] } = {};
     if (
-      hasFiltersErrors ||
+      hasHouseholdsFiltersBlocksErrors ||
       hasIndividualsFiltersBlocksErrors ||
       hasCollectorsFiltersBlocksErrors
     ) {
       errors.nonFieldErrors = ['You need to fill out missing values.'];
     }
     if (
-      values.filters.length +
+      values.householdsFiltersBlocks.length +
         values.individualsFiltersBlocks.length +
         values.collectorsFiltersBlocks.length ===
         0 &&
@@ -280,7 +274,9 @@ export const TargetingCriteriaForm = ({
   };
 
   const handleSubmit = (values, bag): void => {
-    const filters = formatCriteriaFilters(values.filters);
+    const householdsFiltersBlocks = formatCriteriaFilters(
+      values.householdsFiltersBlocks,
+    );
     const individualIds = values.individualIds;
     const householdIds = values.householdIds;
     const individualsFiltersBlocks = formatCriteriaIndividualsFiltersBlocks(
@@ -288,7 +284,7 @@ export const TargetingCriteriaForm = ({
     );
 
     addCriteria({
-      filters,
+      householdsFiltersBlocks,
       individualsFiltersBlocks,
       individualIds,
       householdIds,
@@ -370,13 +366,13 @@ export const TargetingCriteriaForm = ({
                   )}
                 </Grid>
                 <FieldArray
-                  name="filters"
+                  name="householdsFiltersBlocks"
                   render={(arrayHelpers) => (
                     <ArrayFieldWrapper
                       arrayHelpers={arrayHelpers}
                       ref={filtersArrayWrapperRef}
                     >
-                      {values.filters.map((each, index) => (
+                      {values.householdsFiltersBlocks.map((each, index) => (
                         <TargetingCriteriaHouseholdFilter
                           // eslint-disable-next-line
                           key={index}
@@ -510,7 +506,9 @@ export const TargetingCriteriaForm = ({
                               blockIndex={index}
                               data={individualData}
                               values={values}
-                              choicesToDict={allDataChoicesDict}
+                              choices={
+                                allCollectorFieldsAttributesData?.allCollectorFieldsAttributes
+                              }
                               onDelete={() => arrayHelpers.remove(index)}
                             />
                           ))}

@@ -8,7 +8,12 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Divider, Grid, Typography } from '@mui/material';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { getTargetingCriteriaVariables } from '@utils/targetingUtils';
+import {
+  getTargetingCriteriaVariables,
+  HhIdValidation,
+  HhIndIdValidation,
+  IndIdValidation,
+} from '@utils/targetingUtils';
 import { Field, FieldArray, Form, Formik } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -46,8 +51,6 @@ export const EditTargetPopulation = ({
         .flagExcludeIfActiveAdjudicationTicket || false,
     flagExcludeIfOnSanctionList:
       targetPopulation.targetingCriteria.flagExcludeIfOnSanctionList || false,
-    householdIds: targetPopulation.targetingCriteria.householdIds,
-    individualIds: targetPopulation.targetingCriteria.individualIds,
     programCycleId: {
       value: targetPopulation.programCycle.id,
       name: targetPopulation.programCycle.title,
@@ -78,27 +81,13 @@ export const EditTargetPopulation = ({
     return errors;
   };
 
-  const idValidation = Yup.string().test(
-    'testName',
-    'ID is not in the correct format',
-    (ids) => {
-      if (!ids?.length) {
-        return true;
-      }
-      const idsArr = ids.split(',');
-      return idsArr.every((el) =>
-        /^\s*(IND|HH)-\d{2}-\d{4}\.\d{4}\s*$/.test(el),
-      );
-    },
-  );
-
   const validationSchema = Yup.object().shape({
     name: Yup.string()
       .min(3, 'Targeting name should have at least 3 characters.')
       .max(255, 'Targeting name should have at most 255 characters.'),
-    excludedIds: idValidation,
-    householdIds: idValidation,
-    individualIds: idValidation,
+    excludedIds: HhIndIdValidation,
+    householdIds: HhIdValidation,
+    individualIds: IndIdValidation,
     exclusionReason: Yup.string().max(500, t('Too long')),
     programCycleId: Yup.object().shape({
       value: Yup.string().required('Program Cycle is required'),
@@ -111,7 +100,6 @@ export const EditTargetPopulation = ({
         variables: {
           input: {
             id: values.id,
-            programId: values.program,
             excludedIds: values.excludedIds,
             exclusionReason: values.exclusionReason,
             programCycleId: values.programCycleId.value,
@@ -123,8 +111,6 @@ export const EditTargetPopulation = ({
                 values.flagExcludeIfActiveAdjudicationTicket,
               flagExcludeIfOnSanctionList: values.flagExcludeIfOnSanctionList,
               criterias: values.targetingCriteria,
-              householdIds: values.householdIds,
-              individualIds: values.individualIds,
             }),
           },
         },

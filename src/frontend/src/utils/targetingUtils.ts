@@ -1,3 +1,41 @@
+import * as Yup from 'yup';
+
+export const HhIndIdValidation = Yup.string().test(
+  'testName',
+  'ID is not in the correct format',
+  (ids) => {
+    if (!ids?.length) {
+      return true;
+    }
+    const idsArr = ids.split(',');
+    return idsArr.every((el) => /^\s*(IND|HH)-\d{2}-\d{4}\.\d{4}\s*$/.test(el));
+  },
+);
+
+export const HhIdValidation = Yup.string().test(
+  'testName',
+  'Household ID is not in the correct format',
+  (ids) => {
+    if (!ids?.length) {
+      return true;
+    }
+    const idsArr = ids.split(',');
+    return idsArr.every((el) => /^\s*(HH)-\d{2}-\d{4}\.\d{4}\s*$/.test(el));
+  },
+);
+
+export const IndIdValidation = Yup.string().test(
+  'testName',
+  'Individual ID is not in the correct format',
+  (ids) => {
+    if (!ids?.length) {
+      return true;
+    }
+    const idsArr = ids.split(',');
+    return idsArr.every((el) => /^\s*(IND)-\d{2}-\d{4}\.\d{4}\s*$/.test(el));
+  },
+);
+
 export const chooseFieldType = (fieldValue, arrayHelpers, index): void => {
   let flexFieldClassification;
   if (fieldValue.isFlexField === false) {
@@ -130,11 +168,11 @@ function mapBlockFilters(blocks, blockKey) {
 }
 
 export function mapCriteriaToInitialValues(criteria) {
-  const filters = criteria.filters || [];
+  const householdsFiltersBlocks = criteria.householdsFiltersBlocks || [];
   const individualsFiltersBlocks = criteria.individualsFiltersBlocks || [];
   const collectorsFiltersBlocks = criteria.collectorsFiltersBlocks || [];
   return {
-    filters: mapFiltersToInitialValues(filters),
+    householdsFiltersBlocks: mapFiltersToInitialValues(householdsFiltersBlocks),
     individualsFiltersBlocks: mapBlockFilters(
       individualsFiltersBlocks,
       'individual',
@@ -289,23 +327,26 @@ function mapFilterToVariable(filter: Filter): Result {
 export function getTargetingCriteriaVariables(values) {
   return {
     targetingCriteria: {
-      householdIds: values.criterias.householdIds,
-      individualIds: values.criterias.individualIds,
       flagExcludeIfActiveAdjudicationTicket:
         values.flagExcludeIfActiveAdjudicationTicket,
       flagExcludeIfOnSanctionList: values.flagExcludeIfOnSanctionList,
-      rules: values.criterias.map((rule) => ({
-        filters: rule.filters.map(mapFilterToVariable),
-        individualsFiltersBlocks: rule.individualsFiltersBlocks.map(
+      rules: values.criterias.map((criteria) => ({
+        individualIds: criteria.individualIds,
+        householdIds: criteria.householdIds,
+        householdsFiltersBlocks:
+          criteria.householdsFiltersBlocks.map(mapFilterToVariable),
+        individualsFiltersBlocks: criteria.individualsFiltersBlocks.map(
           (block) => ({
             individualBlockFilters:
               block.individualBlockFilters.map(mapFilterToVariable),
           }),
         ),
-        collectorsFiltersBlocks: rule.collectorsFiltersBlocks.map((block) => ({
-          collectorsFiltersBlocks:
-            block.collectorsFiltersBlocks.map(mapFilterToVariable),
-        })),
+        collectorsFiltersBlocks: criteria.collectorsFiltersBlocks.map(
+          (block) => ({
+            collectorBlockFilters:
+              block.collectorBlockFilters.map(mapFilterToVariable),
+          }),
+        ),
       })),
     },
   };

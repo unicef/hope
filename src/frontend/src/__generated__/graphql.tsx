@@ -370,7 +370,6 @@ export type BankAccountInfoNode = Node & {
   createdAt: Scalars['DateTime']['output'];
   id: Scalars['ID']['output'];
   individual: IndividualNode;
-  isMigrationHandled: Scalars['Boolean']['output'];
   isOriginal: Scalars['Boolean']['output'];
   isRemoved: Scalars['Boolean']['output'];
   lastSyncAt?: Maybe<Scalars['DateTime']['output']>;
@@ -1283,12 +1282,10 @@ export type CreateSurveyMutation = {
 };
 
 export type CreateTargetPopulationInput = {
-  businessAreaSlug: Scalars['String']['input'];
   excludedIds: Scalars['String']['input'];
   exclusionReason?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
   programCycleId: Scalars['ID']['input'];
-  programId: Scalars['ID']['input'];
   targetingCriteria: TargetingCriteriaObjectType;
 };
 
@@ -1445,29 +1442,11 @@ export type DeliveredQuantityNode = {
   totalDeliveredQuantity?: Maybe<Scalars['Decimal']['output']>;
 };
 
-export enum DeliveryMechanismDataDeliveryMechanismChoice {
-  AtmCard = 'ATM_CARD',
-  CardlessCashWithdrawal = 'CARDLESS_CASH_WITHDRAWAL',
-  Cash = 'CASH',
-  CashByFsp = 'CASH_BY_FSP',
-  CashOverTheCounter = 'CASH_OVER_THE_COUNTER',
-  Cheque = 'CHEQUE',
-  DepositToCard = 'DEPOSIT_TO_CARD',
-  MobileMoney = 'MOBILE_MONEY',
-  PrePaidCard = 'PRE_PAID_CARD',
-  Referral = 'REFERRAL',
-  Transfer = 'TRANSFER',
-  TransferToAccount = 'TRANSFER_TO_ACCOUNT',
-  TransferToDigitalWallet = 'TRANSFER_TO_DIGITAL_WALLET',
-  Voucher = 'VOUCHER'
-}
-
 export type DeliveryMechanismDataNode = Node & {
   __typename?: 'DeliveryMechanismDataNode';
   createdAt: Scalars['DateTime']['output'];
   data: Scalars['JSONString']['output'];
   deliveryMechanism: DeliveryMechanismNode;
-  deliveryMechanismChoice?: Maybe<DeliveryMechanismDataDeliveryMechanismChoice>;
   id: Scalars['ID']['output'];
   individual: IndividualNode;
   individualTabData?: Maybe<Scalars['JSONString']['output']>;
@@ -1599,23 +1578,6 @@ export type DeliveryMechanismNodeEdge = {
   node?: Maybe<DeliveryMechanismNode>;
 };
 
-export enum DeliveryMechanismPerPaymentPlanDeliveryMechanismChoice {
-  AtmCard = 'ATM_CARD',
-  CardlessCashWithdrawal = 'CARDLESS_CASH_WITHDRAWAL',
-  Cash = 'CASH',
-  CashByFsp = 'CASH_BY_FSP',
-  CashOverTheCounter = 'CASH_OVER_THE_COUNTER',
-  Cheque = 'CHEQUE',
-  DepositToCard = 'DEPOSIT_TO_CARD',
-  MobileMoney = 'MOBILE_MONEY',
-  PrePaidCard = 'PRE_PAID_CARD',
-  Referral = 'REFERRAL',
-  Transfer = 'TRANSFER',
-  TransferToAccount = 'TRANSFER_TO_ACCOUNT',
-  TransferToDigitalWallet = 'TRANSFER_TO_DIGITAL_WALLET',
-  Voucher = 'VOUCHER'
-}
-
 export type DeliveryMechanismPerPaymentPlanNode = Node & {
   __typename?: 'DeliveryMechanismPerPaymentPlanNode';
   chosenConfiguration?: Maybe<Scalars['String']['output']>;
@@ -1623,7 +1585,6 @@ export type DeliveryMechanismPerPaymentPlanNode = Node & {
   createdAt: Scalars['DateTime']['output'];
   createdBy: UserNode;
   deliveryMechanism?: Maybe<DeliveryMechanismNode>;
-  deliveryMechanismChoice?: Maybe<DeliveryMechanismPerPaymentPlanDeliveryMechanismChoice>;
   deliveryMechanismOrder: Scalars['Int']['output'];
   financialServiceProvider?: Maybe<FinancialServiceProviderNode>;
   fsp?: Maybe<FinancialServiceProviderNode>;
@@ -6098,6 +6059,7 @@ export type Query = {
   allBusinessAreas?: Maybe<BusinessAreaNodeConnection>;
   allCashPlans?: Maybe<CashPlanNodeConnection>;
   allCashPlansAndPaymentPlans?: Maybe<PaginatedCashPlanAndPaymentPlanNode>;
+  allCollectorFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>;
   allDeliveryMechanisms?: Maybe<Array<Maybe<ChoiceObject>>>;
   allEditHouseholdFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>;
   allFeedbacks?: Maybe<FeedbackNodeConnection>;
@@ -6432,6 +6394,11 @@ export type QueryAllCashPlansAndPaymentPlansArgs = {
   serviceProvider?: InputMaybe<Scalars['String']['input']>;
   startDateGte?: InputMaybe<Scalars['String']['input']>;
   verificationStatus?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+};
+
+
+export type QueryAllCollectorFieldsAttributesArgs = {
+  flexField?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 
@@ -8429,8 +8396,6 @@ export type TargetingCriteriaNode = {
 export type TargetingCriteriaObjectType = {
   flagExcludeIfActiveAdjudicationTicket?: InputMaybe<Scalars['Boolean']['input']>;
   flagExcludeIfOnSanctionList?: InputMaybe<Scalars['Boolean']['input']>;
-  householdIds?: InputMaybe<Scalars['String']['input']>;
-  individualIds?: InputMaybe<Scalars['String']['input']>;
   rules?: InputMaybe<Array<InputMaybe<TargetingCriteriaRuleObjectType>>>;
 };
 
@@ -8478,15 +8443,20 @@ export type TargetingCriteriaRuleNode = {
   __typename?: 'TargetingCriteriaRuleNode';
   createdAt: Scalars['DateTime']['output'];
   filters?: Maybe<Array<Maybe<TargetingCriteriaRuleFilterNode>>>;
+  householdIds: Scalars['String']['output'];
   id: Scalars['UUID']['output'];
+  individualIds: Scalars['String']['output'];
   individualsFiltersBlocks?: Maybe<Array<Maybe<TargetingIndividualRuleFilterBlockNode>>>;
   targetingCriteria: TargetingCriteriaNode;
   updatedAt: Scalars['DateTime']['output'];
 };
 
 export type TargetingCriteriaRuleObjectType = {
-  filters?: InputMaybe<Array<InputMaybe<TargetingCriteriaRuleFilterObjectType>>>;
-  individualsFiltersBlocks?: InputMaybe<Array<InputMaybe<TargetingIndividualRuleFilterBlockObjectType>>>;
+  collectorsFiltersBlocks?: InputMaybe<Array<InputMaybe<TargetingCriteriaRuleFilterObjectType>>>;
+  householdIds?: InputMaybe<Scalars['String']['input']>;
+  householdsFiltersBlocks?: InputMaybe<Array<InputMaybe<TargetingCriteriaRuleFilterObjectType>>>;
+  individualIds?: InputMaybe<Scalars['String']['input']>;
+  individualsFiltersBlocks?: InputMaybe<Array<InputMaybe<TargetingCriteriaRuleFilterObjectType>>>;
 };
 
 export enum TargetingIndividualBlockRuleFilterComparisonMethod {
@@ -8529,10 +8499,6 @@ export type TargetingIndividualRuleFilterBlockNode = {
   targetOnlyHoh: Scalars['Boolean']['output'];
   targetingCriteriaRule: TargetingCriteriaRuleNode;
   updatedAt: Scalars['DateTime']['output'];
-};
-
-export type TargetingIndividualRuleFilterBlockObjectType = {
-  individualBlockFilters?: InputMaybe<Array<InputMaybe<TargetingCriteriaRuleFilterObjectType>>>;
 };
 
 export type TicketAddIndividualDetailsNode = Node & {
@@ -9080,7 +9046,6 @@ export type UpdateTargetPopulationInput = {
   id: Scalars['ID']['input'];
   name?: InputMaybe<Scalars['String']['input']>;
   programCycleId?: InputMaybe<Scalars['ID']['input']>;
-  programId?: InputMaybe<Scalars['ID']['input']>;
   targetingCriteria?: InputMaybe<TargetingCriteriaObjectType>;
   vulnerabilityScoreMax?: InputMaybe<Scalars['Decimal']['input']>;
   vulnerabilityScoreMin?: InputMaybe<Scalars['Decimal']['input']>;
@@ -11579,6 +11544,11 @@ export type AllActiveTargetPopulationsQueryVariables = Exact<{
 
 
 export type AllActiveTargetPopulationsQuery = { __typename?: 'Query', allActiveTargetPopulations?: { __typename?: 'TargetPopulationNodeConnection', totalCount?: number | null, edgeCount?: number | null, edges: Array<{ __typename?: 'TargetPopulationNodeEdge', cursor: string, node?: { __typename?: 'TargetPopulationNode', id: string, name: string, status: TargetPopulationStatus, totalHouseholdsCount?: number | null, totalHouseholdsCountWithValidPhoneNo?: number | null, createdAt: any, updatedAt: any, program: { __typename?: 'ProgramNode', id: string, name: string }, createdBy?: { __typename?: 'UserNode', id: string, email: string, firstName: string, lastName: string } | null } | null } | null> } | null };
+
+export type AllCollectorFieldsAttributesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type AllCollectorFieldsAttributesQuery = { __typename?: 'Query', allCollectorFieldsAttributes?: Array<{ __typename?: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, associatedWith?: string | null, isFlexField?: boolean | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', labelEn?: string | null, value?: string | null, admin?: string | null, listName?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null> | null };
 
 export type AllFieldsAttributesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -24305,6 +24275,62 @@ export type AllActiveTargetPopulationsQueryHookResult = ReturnType<typeof useAll
 export type AllActiveTargetPopulationsLazyQueryHookResult = ReturnType<typeof useAllActiveTargetPopulationsLazyQuery>;
 export type AllActiveTargetPopulationsSuspenseQueryHookResult = ReturnType<typeof useAllActiveTargetPopulationsSuspenseQuery>;
 export type AllActiveTargetPopulationsQueryResult = Apollo.QueryResult<AllActiveTargetPopulationsQuery, AllActiveTargetPopulationsQueryVariables>;
+export const AllCollectorFieldsAttributesDocument = gql`
+    query AllCollectorFieldsAttributes {
+  allCollectorFieldsAttributes {
+    id
+    name
+    labelEn
+    associatedWith
+    isFlexField
+    type
+    choices {
+      labelEn
+      value
+      admin
+      listName
+    }
+    pduData {
+      id
+      subtype
+      numberOfRounds
+      roundsNames
+    }
+  }
+}
+    `;
+
+/**
+ * __useAllCollectorFieldsAttributesQuery__
+ *
+ * To run a query within a React component, call `useAllCollectorFieldsAttributesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllCollectorFieldsAttributesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllCollectorFieldsAttributesQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useAllCollectorFieldsAttributesQuery(baseOptions?: Apollo.QueryHookOptions<AllCollectorFieldsAttributesQuery, AllCollectorFieldsAttributesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<AllCollectorFieldsAttributesQuery, AllCollectorFieldsAttributesQueryVariables>(AllCollectorFieldsAttributesDocument, options);
+      }
+export function useAllCollectorFieldsAttributesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllCollectorFieldsAttributesQuery, AllCollectorFieldsAttributesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<AllCollectorFieldsAttributesQuery, AllCollectorFieldsAttributesQueryVariables>(AllCollectorFieldsAttributesDocument, options);
+        }
+export function useAllCollectorFieldsAttributesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<AllCollectorFieldsAttributesQuery, AllCollectorFieldsAttributesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<AllCollectorFieldsAttributesQuery, AllCollectorFieldsAttributesQueryVariables>(AllCollectorFieldsAttributesDocument, options);
+        }
+export type AllCollectorFieldsAttributesQueryHookResult = ReturnType<typeof useAllCollectorFieldsAttributesQuery>;
+export type AllCollectorFieldsAttributesLazyQueryHookResult = ReturnType<typeof useAllCollectorFieldsAttributesLazyQuery>;
+export type AllCollectorFieldsAttributesSuspenseQueryHookResult = ReturnType<typeof useAllCollectorFieldsAttributesSuspenseQuery>;
+export type AllCollectorFieldsAttributesQueryResult = Apollo.QueryResult<AllCollectorFieldsAttributesQuery, AllCollectorFieldsAttributesQueryVariables>;
 export const AllFieldsAttributesDocument = gql`
     query AllFieldsAttributes {
   allFieldsAttributes {
@@ -24858,7 +24884,6 @@ export type ResolversTypes = {
   DeleteTargetPopulationMutationInput: DeleteTargetPopulationMutationInput;
   DeleteTargetPopulationMutationPayload: ResolverTypeWrapper<DeleteTargetPopulationMutationPayload>;
   DeliveredQuantityNode: ResolverTypeWrapper<DeliveredQuantityNode>;
-  DeliveryMechanismDataDeliveryMechanismChoice: DeliveryMechanismDataDeliveryMechanismChoice;
   DeliveryMechanismDataNode: ResolverTypeWrapper<DeliveryMechanismDataNode>;
   DeliveryMechanismDataNodeConnection: ResolverTypeWrapper<DeliveryMechanismDataNodeConnection>;
   DeliveryMechanismDataNodeEdge: ResolverTypeWrapper<DeliveryMechanismDataNodeEdge>;
@@ -24868,7 +24893,6 @@ export type ResolversTypes = {
   DeliveryMechanismNode: ResolverTypeWrapper<DeliveryMechanismNode>;
   DeliveryMechanismNodeConnection: ResolverTypeWrapper<DeliveryMechanismNodeConnection>;
   DeliveryMechanismNodeEdge: ResolverTypeWrapper<DeliveryMechanismNodeEdge>;
-  DeliveryMechanismPerPaymentPlanDeliveryMechanismChoice: DeliveryMechanismPerPaymentPlanDeliveryMechanismChoice;
   DeliveryMechanismPerPaymentPlanNode: ResolverTypeWrapper<DeliveryMechanismPerPaymentPlanNode>;
   DeliveryMechanismPerPaymentPlanNodeConnection: ResolverTypeWrapper<DeliveryMechanismPerPaymentPlanNodeConnection>;
   DeliveryMechanismPerPaymentPlanNodeEdge: ResolverTypeWrapper<DeliveryMechanismPerPaymentPlanNodeEdge>;
@@ -25199,7 +25223,6 @@ export type ResolversTypes = {
   TargetingIndividualBlockRuleFilterFlexFieldClassification: TargetingIndividualBlockRuleFilterFlexFieldClassification;
   TargetingIndividualBlockRuleFilterNode: ResolverTypeWrapper<TargetingIndividualBlockRuleFilterNode>;
   TargetingIndividualRuleFilterBlockNode: ResolverTypeWrapper<TargetingIndividualRuleFilterBlockNode>;
-  TargetingIndividualRuleFilterBlockObjectType: TargetingIndividualRuleFilterBlockObjectType;
   TicketAddIndividualDetailsNode: ResolverTypeWrapper<TicketAddIndividualDetailsNode>;
   TicketAddIndividualDetailsNodeConnection: ResolverTypeWrapper<TicketAddIndividualDetailsNodeConnection>;
   TicketAddIndividualDetailsNodeEdge: ResolverTypeWrapper<TicketAddIndividualDetailsNodeEdge>;
@@ -25672,7 +25695,6 @@ export type ResolversParentTypes = {
   TargetingCriteriaRuleObjectType: TargetingCriteriaRuleObjectType;
   TargetingIndividualBlockRuleFilterNode: TargetingIndividualBlockRuleFilterNode;
   TargetingIndividualRuleFilterBlockNode: TargetingIndividualRuleFilterBlockNode;
-  TargetingIndividualRuleFilterBlockObjectType: TargetingIndividualRuleFilterBlockObjectType;
   TicketAddIndividualDetailsNode: TicketAddIndividualDetailsNode;
   TicketAddIndividualDetailsNodeConnection: TicketAddIndividualDetailsNodeConnection;
   TicketAddIndividualDetailsNodeEdge: TicketAddIndividualDetailsNodeEdge;
@@ -25921,7 +25943,6 @@ export type BankAccountInfoNodeResolvers<ContextType = any, ParentType extends R
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   individual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>;
-  isMigrationHandled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   isOriginal?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   lastSyncAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
@@ -26482,7 +26503,6 @@ export type DeliveryMechanismDataNodeResolvers<ContextType = any, ParentType ext
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   data?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>;
   deliveryMechanism?: Resolver<ResolversTypes['DeliveryMechanismNode'], ParentType, ContextType>;
-  deliveryMechanismChoice?: Resolver<Maybe<ResolversTypes['DeliveryMechanismDataDeliveryMechanismChoice']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   individual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>;
   individualTabData?: Resolver<Maybe<ResolversTypes['JSONString']>, ParentType, ContextType>;
@@ -26550,7 +26570,6 @@ export type DeliveryMechanismPerPaymentPlanNodeResolvers<ContextType = any, Pare
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   createdBy?: Resolver<ResolversTypes['UserNode'], ParentType, ContextType>;
   deliveryMechanism?: Resolver<Maybe<ResolversTypes['DeliveryMechanismNode']>, ParentType, ContextType>;
-  deliveryMechanismChoice?: Resolver<Maybe<ResolversTypes['DeliveryMechanismPerPaymentPlanDeliveryMechanismChoice']>, ParentType, ContextType>;
   deliveryMechanismOrder?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   financialServiceProvider?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNode']>, ParentType, ContextType>;
   fsp?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNode']>, ParentType, ContextType>;
@@ -28601,6 +28620,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   allBusinessAreas?: Resolver<Maybe<ResolversTypes['BusinessAreaNodeConnection']>, ParentType, ContextType, Partial<QueryAllBusinessAreasArgs>>;
   allCashPlans?: Resolver<Maybe<ResolversTypes['CashPlanNodeConnection']>, ParentType, ContextType, Partial<QueryAllCashPlansArgs>>;
   allCashPlansAndPaymentPlans?: Resolver<Maybe<ResolversTypes['PaginatedCashPlanAndPaymentPlanNode']>, ParentType, ContextType, RequireFields<QueryAllCashPlansAndPaymentPlansArgs, 'businessArea'>>;
+  allCollectorFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType, Partial<QueryAllCollectorFieldsAttributesArgs>>;
   allDeliveryMechanisms?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
   allEditHouseholdFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType>;
   allFeedbacks?: Resolver<Maybe<ResolversTypes['FeedbackNodeConnection']>, ParentType, ContextType, Partial<QueryAllFeedbacksArgs>>;
@@ -29439,7 +29459,9 @@ export type TargetingCriteriaRuleFilterNodeResolvers<ContextType = any, ParentTy
 export type TargetingCriteriaRuleNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TargetingCriteriaRuleNode'] = ResolversParentTypes['TargetingCriteriaRuleNode']> = {
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   filters?: Resolver<Maybe<Array<Maybe<ResolversTypes['TargetingCriteriaRuleFilterNode']>>>, ParentType, ContextType>;
+  householdIds?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>;
+  individualIds?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   individualsFiltersBlocks?: Resolver<Maybe<Array<Maybe<ResolversTypes['TargetingIndividualRuleFilterBlockNode']>>>, ParentType, ContextType>;
   targetingCriteria?: Resolver<ResolversTypes['TargetingCriteriaNode'], ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;

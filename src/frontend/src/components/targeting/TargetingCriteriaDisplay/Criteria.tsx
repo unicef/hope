@@ -237,7 +237,8 @@ interface CriteriaProps {
   isEdit: boolean;
   canRemove: boolean;
   alternative?: boolean;
-  choicesDict;
+  allDataFieldsChoicesDict;
+  allCollectorFieldsChoicesDict;
   householdIds: string;
   individualIds: string;
 }
@@ -248,7 +249,8 @@ export function Criteria({
   editFunction = () => null,
   isEdit,
   canRemove,
-  choicesDict,
+  allDataFieldsChoicesDict,
+  allCollectorFieldsChoicesDict,
   alternative = null,
   individualsFiltersBlocks,
   collectorsFiltersBlocks,
@@ -267,7 +269,6 @@ export function Criteria({
     setOpen(false);
     setCurrentIds([]);
   };
-  console.log(householdIds, individualIds);
 
   return (
     <CriteriaElement alternative={alternative} data-cy="criteria-container">
@@ -283,7 +284,11 @@ export function Criteria({
         </div>
       )}
       {(rules || []).map((each, index) => (
-        <CriteriaField choicesDict={choicesDict} key={index} field={each} />
+        <CriteriaField
+          choicesDict={allDataFieldsChoicesDict}
+          key={index}
+          field={each}
+        />
       ))}
       {individualsFiltersBlocks.map((item, index) => (
         <CriteriaSetBox key={index}>
@@ -300,7 +305,7 @@ export function Criteria({
           )}
           {item.individualBlockFilters.map((filter, filterIndex) => (
             <CriteriaField
-              choicesDict={choicesDict}
+              choicesDict={allDataFieldsChoicesDict}
               key={filterIndex}
               field={filter}
             />
@@ -311,7 +316,7 @@ export function Criteria({
         <CriteriaSetBox key={index}>
           {item.collectorBlockFilters.map((filter, filterIndex) => (
             <CriteriaField
-              choicesDict={choicesDict}
+              choicesDict={allCollectorFieldsChoicesDict}
               key={filterIndex}
               field={filter}
             />

@@ -24,13 +24,13 @@ export const CreateTargetPopulationHeader = ({
 }: CreateTargetPopulationHeaderProps): ReactElement => {
   const { t } = useTranslation();
 
-  console.log('values', values);
-  const isSubmitDisabled = () => {
-    return (
-      (!values.criterias?.length &&
-        !(values.individualIds || values.householdIds)) ||
-      !values.name ||
-      loading
+  const isSubmitDisabled = (criterias) => {
+    return criterias?.some(
+      (criteria) =>
+        !criteria.householdsFiltersBlocks.length &&
+        !criteria.individualFiltersBlocks.length &&
+        !criteria.individualIds &&
+        !criteria.householdIds,
     );
   };
 
@@ -61,7 +61,7 @@ export const CreateTargetPopulationHeader = ({
             variant="contained"
             color="primary"
             onClick={handleSubmit}
-            disabled={isSubmitDisabled()}
+            disabled={isSubmitDisabled(values.criterias)}
             loading={loading}
             data-cy="button-target-population-create"
           >

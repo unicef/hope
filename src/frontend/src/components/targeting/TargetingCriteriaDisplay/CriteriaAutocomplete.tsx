@@ -16,6 +16,7 @@ export function CriteriaAutocomplete({ field, ...otherProps }): ReactElement {
   const [newValue, setNewValue] = useState(null);
   const [choicesWithoutDuplicates, setChoicesWithoutDuplicates] = useState();
 
+  console.log('CriteriaAutocomplete', field, otherProps);
   useEffect(() => {
     const optionValue =
       otherProps.choices.find((choice) => choice.name === field.value) || null;
