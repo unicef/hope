@@ -182,7 +182,7 @@ class BaseComponents(Common):
         self.getGlobalProgramFilter().click()
         self.getGlobalProgramFilterSearchInput().clear()
         self.getGlobalProgramFilterSearchInput().send_keys(Keys.CONTROL + "a")  # Select all (use COMMAND on Mac)
-        for i in range(len(self.getGlobalProgramFilterSearchInput().get_attribute("value"))):
+        for _i in range(len(self.getGlobalProgramFilterSearchInput().get_attribute("value"))):  # type: ignore
             self.getGlobalProgramFilterSearchInput().send_keys(Keys.BACKSPACE)
         self.getGlobalProgramFilterSearchInput().send_keys(Keys.DELETE)
         self.getGlobalProgramFilterSearchButton().click()
