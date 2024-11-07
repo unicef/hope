@@ -210,7 +210,17 @@ def create_session(host: str, username: str, password: str, csrf: str = "") -> o
 
 
 @pytest.fixture(scope="session")
-def driver() -> Chrome:
+def download_path(worker_id: str) -> str:
+    try:
+        worker_id = worker_id
+        assert worker_id is not None
+        yield f"{settings.DOWNLOAD_DIRECTORY}/{worker_id}"
+    except BaseException:
+        yield settings.DOWNLOAD_DIRECTORY
+
+
+@pytest.fixture(scope="session")
+def driver(download_path: str) -> Chrome:
     chrome_options = Options()
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
@@ -222,15 +232,19 @@ def driver() -> Chrome:
     chrome_options.add_argument("--window-size=1920,1080")
     chrome_options.add_argument("--disable-dev-shm-usage")
     try:
-        os.makedirs(settings.DOWNLOAD_DIRECTORY)
+        os.makedirs(download_path)
     except FileExistsError:
         pass
     prefs = {
-        "download.default_directory": settings.DOWNLOAD_DIRECTORY,
+        "download.default_directory": download_path,
     }
     chrome_options.add_experimental_option("prefs", prefs)
     driver = webdriver.Chrome(options=chrome_options)
     yield driver
+    # try:
+    #     shutil.rmtree(download_path)
+    # except FileNotFoundError:
+    #     pass
 
 
 @pytest.fixture(scope="session")
@@ -512,6 +526,15 @@ def business_area() -> BusinessArea:
         **{"name": "ALLOW_ACCOUNTABILITY_MODULE", "condition": "boolean", "value": "True", "required": False}
     )
     yield business_area
+
+
+@pytest.fixture
+def clear_downloaded_files(download_path: str) -> None:
+    for file in os.listdir(download_path):
+        os.remove(os.path.join(download_path, file))
+    yield
+    for file in os.listdir(download_path):
+        os.remove(os.path.join(download_path, file))
 
 
 @pytest.fixture

@@ -7,7 +7,6 @@ import openpyxl
 import pytest
 from dateutil.relativedelta import relativedelta
 from selenium.webdriver.common.by import By
-from sorl.thumbnail.conf import settings
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
@@ -250,12 +249,12 @@ def payment_verification_creator(channel: str = PaymentVerificationPlan.VERIFICA
 
 
 @pytest.fixture
-def clear_downloaded_files() -> None:
-    for file in os.listdir(settings.DOWNLOAD_DIRECTORY):
-        os.remove(os.path.join(settings.DOWNLOAD_DIRECTORY, file))
+def clear_downloaded_files(download_path: str) -> None:
+    for file in os.listdir(download_path):
+        os.remove(os.path.join(download_path, file))
     yield
-    for file in os.listdir(settings.DOWNLOAD_DIRECTORY):
-        os.remove(os.path.join(settings.DOWNLOAD_DIRECTORY, file))
+    for file in os.listdir(download_path):
+        os.remove(os.path.join(download_path, file))
 
 
 @pytest.mark.usefixtures("login")
@@ -663,6 +662,7 @@ class TestPaymentVerification:
         add_payment_verification_xlsx: PV,
         pagePaymentVerification: PaymentVerification,
         pagePaymentVerificationDetails: PaymentVerificationDetails,
+        download_path: str,
         pagePaymentRecord: PaymentRecord,
     ) -> None:
         pagePaymentVerification.selectGlobalProgramFilter("Active Program")
@@ -680,24 +680,24 @@ class TestPaymentVerification:
 
         pagePaymentVerificationDetails.getDownloadXlsx().click()
 
-        xlsx_file = find_file(".xlsx", number_of_ties=10)
-        wb1 = openpyxl.load_workbook(os.path.join(settings.DOWNLOAD_DIRECTORY, xlsx_file))
+        xlsx_file = find_file(".xlsx", number_of_ties=10, search_in_dir=download_path)
+        wb1 = openpyxl.load_workbook(os.path.join(download_path, xlsx_file))
         ws1 = wb1.active
         for cell in ws1["N:N"]:
             if cell.row >= 2:
                 ws1.cell(row=cell.row, column=3, value="YES")
                 ws1.cell(row=cell.row, column=16, value=ws1.cell(row=cell.row, column=15).value)
 
-        wb1.save(os.path.join(settings.DOWNLOAD_DIRECTORY, xlsx_file))
+        wb1.save(os.path.join(download_path, "new_" + xlsx_file))
+        find_file("new_" + xlsx_file, number_of_ties=10, search_in_dir=download_path)
         pagePaymentVerificationDetails.getImportXlsx().click()
 
         pagePaymentVerificationDetails.upload_file(
-            os.path.abspath(os.path.join(settings.DOWNLOAD_DIRECTORY, xlsx_file)), timeout=120
+            os.path.abspath(os.path.join(download_path, "new_" + xlsx_file)), timeout=120
         )
-
         pagePaymentVerificationDetails.getButtonImportEntitlement().click()
 
-        assert pagePaymentRecord.waitForStatusContainer("RECEIVED")
+        assert pagePaymentRecord.waitForStatusContainer("RECEIVED", timeout=60)
         assert "RECEIVED" == pagePaymentRecord.getStatusContainer().text
 
     def test_payment_verification_xlsx_partially_successful(
@@ -708,6 +708,7 @@ class TestPaymentVerification:
         pagePaymentVerification: PaymentVerification,
         pagePaymentVerificationDetails: PaymentVerificationDetails,
         pagePaymentRecord: PaymentRecord,
+        download_path: str,
     ) -> None:
         pagePaymentVerification.selectGlobalProgramFilter("Active Program")
 
@@ -730,20 +731,18 @@ class TestPaymentVerification:
 
         pagePaymentVerificationDetails.getDownloadXlsx().click()
 
-        xlsx_file = find_file(".xlsx", number_of_ties=10)
-        wb1 = openpyxl.load_workbook(os.path.join(settings.DOWNLOAD_DIRECTORY, xlsx_file))
+        xlsx_file = find_file(".xlsx", number_of_ties=10, search_in_dir=download_path)
+        wb1 = openpyxl.load_workbook(os.path.join(download_path, xlsx_file))
         ws1 = wb1.active
         for cell in ws1["N:N"]:
             if cell.row >= 2:
                 ws1.cell(row=cell.row, column=3, value="YES")
                 ws1.cell(row=cell.row, column=16, value=float(quantity) - 1.0)
 
-        wb1.save(os.path.join(settings.DOWNLOAD_DIRECTORY, xlsx_file))
+        wb1.save(os.path.join(download_path, xlsx_file))
         pagePaymentVerificationDetails.getImportXlsx().click()
 
-        pagePaymentVerificationDetails.upload_file(
-            os.path.abspath(os.path.join(settings.DOWNLOAD_DIRECTORY, xlsx_file)), timeout=120
-        )
+        pagePaymentVerificationDetails.upload_file(os.path.abspath(os.path.join(download_path, xlsx_file)), timeout=120)
 
         pagePaymentVerificationDetails.getButtonImportEntitlement().click()
 
@@ -757,6 +756,7 @@ class TestPaymentVerification:
         pagePaymentVerification: PaymentVerification,
         pagePaymentVerificationDetails: PaymentVerificationDetails,
         pagePaymentRecord: PaymentRecord,
+        download_path: str,
     ) -> None:
         pagePaymentVerification.selectGlobalProgramFilter("Active Program")
 
@@ -773,20 +773,18 @@ class TestPaymentVerification:
 
         pagePaymentVerificationDetails.getDownloadXlsx().click()
 
-        xlsx_file = find_file(".xlsx", number_of_ties=10)
-        wb1 = openpyxl.load_workbook(os.path.join(settings.DOWNLOAD_DIRECTORY, xlsx_file))
+        xlsx_file = find_file(".xlsx", number_of_ties=10, search_in_dir=download_path)
+        wb1 = openpyxl.load_workbook(os.path.join(download_path, xlsx_file))
         ws1 = wb1.active
         for cell in ws1["N:N"]:
             if cell.row >= 2:
                 ws1.cell(row=cell.row, column=3, value="NO")
                 ws1.cell(row=cell.row, column=16, value=0)
 
-        wb1.save(os.path.join(settings.DOWNLOAD_DIRECTORY, xlsx_file))
+        wb1.save(os.path.join(download_path, xlsx_file))
         pagePaymentVerificationDetails.getImportXlsx().click()
 
-        pagePaymentVerificationDetails.upload_file(
-            os.path.abspath(os.path.join(settings.DOWNLOAD_DIRECTORY, xlsx_file)), timeout=120
-        )
+        pagePaymentVerificationDetails.upload_file(os.path.abspath(os.path.join(download_path, xlsx_file)), timeout=120)
 
         pagePaymentVerificationDetails.getButtonImportEntitlement().click()
 

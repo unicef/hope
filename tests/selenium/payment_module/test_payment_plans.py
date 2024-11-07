@@ -137,15 +137,6 @@ def create_targeting(create_test_program: Program) -> None:
 
 
 @pytest.fixture
-def clear_downloaded_files() -> None:
-    for file in os.listdir(settings.DOWNLOAD_DIRECTORY):
-        os.remove(os.path.join(settings.DOWNLOAD_DIRECTORY, file))
-    yield
-    for file in os.listdir(settings.DOWNLOAD_DIRECTORY):
-        os.remove(os.path.join(settings.DOWNLOAD_DIRECTORY, file))
-
-
-@pytest.fixture
 def create_payment_plan(create_targeting: None) -> PaymentPlan:
     tp = TargetPopulation.objects.get(program__name="Test Program")
     cycle = ProgramCycleFactory(
@@ -447,6 +438,7 @@ class TestSmokePaymentModule:
         pageNewPaymentPlan: NewPaymentPlan,
         pageProgramCycle: ProgramCyclePage,
         pageProgramCycleDetails: ProgramCycleDetailsPage,
+        download_path: str,
     ) -> None:
         targeting = TargetPopulation.objects.first()
         pageProgramCycle.selectGlobalProgramFilter("Test Program")
@@ -521,23 +513,21 @@ class TestSmokePaymentModule:
         pagePaymentModule.driver.refresh()
         pagePaymentModuleDetails.getButtonDownloadXlsx().click()
 
-        zip_file = find_file(".zip", number_of_ties=15)
-        with zipfile.ZipFile(os.path.join(settings.DOWNLOAD_DIRECTORY, zip_file), "r") as zip_ref:
-            zip_ref.extractall(settings.DOWNLOAD_DIRECTORY)
+        zip_file = find_file(".zip", number_of_ties=15, search_in_dir=download_path)
+        with zipfile.ZipFile(os.path.join(download_path, zip_file), "r") as zip_ref:
+            zip_ref.extractall(download_path)
 
-        xlsx_file = find_file(".xlsx")
-        wb1 = openpyxl.load_workbook(os.path.join(settings.DOWNLOAD_DIRECTORY, xlsx_file))
+        xlsx_file = find_file(".xlsx", search_in_dir=download_path)
+        wb1 = openpyxl.load_workbook(os.path.join(download_path, xlsx_file))
         ws1 = wb1.active
         for cell in ws1["N:N"]:
             if cell.row >= 2:
                 ws1.cell(row=cell.row, column=16, value=cell.value)
 
-        wb1.save(os.path.join(settings.DOWNLOAD_DIRECTORY, xlsx_file))
+        wb1.save(os.path.join(download_path, xlsx_file))
 
         pagePaymentModuleDetails.getButtonUploadReconciliationInfo().click()
-        pagePaymentModuleDetails.upload_file(
-            os.path.abspath(os.path.join(settings.DOWNLOAD_DIRECTORY, xlsx_file)), timeout=120
-        )
+        pagePaymentModuleDetails.upload_file(os.path.abspath(os.path.join(download_path, xlsx_file)), timeout=120)
         pagePaymentModuleDetails.getButtonImportSubmit().click()
         pagePaymentModuleDetails.checkStatus("FINISHED")
         assert "14 (100%)" in pagePaymentModuleDetails.getLabelReconciled().text

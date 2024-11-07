@@ -642,6 +642,8 @@ class TestComeBackScenarios:
         assert "Test Name" in pageProgrammeManagement.getInputProgrammeName().get_attribute("value")
         pageProgrammeManagement.getInputProgrammeName().send_keys(Keys.CONTROL, "a")
         pageProgrammeManagement.getInputProgrammeName().send_keys(Keys.DELETE)
+        for _ in range(len(pageProgrammeManagement.getInputProgrammeName().get_attribute("value"))):
+            pageProgrammeManagement.getInputProgrammeName().send_keys(Keys.BACKSPACE)
         assert "Programme Name is required" in pageProgrammeManagement.getLabelProgrammeName().text.split("\n")
         pageProgrammeManagement.getInputProgrammeName().send_keys(test_data["program_name"])
         # 2nd step (Time Series Fields)

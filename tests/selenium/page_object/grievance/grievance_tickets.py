@@ -213,7 +213,7 @@ class GrievanceTickets(BaseComponents):
     def getTabUserGenerated(self) -> WebElement:
         return self.wait_for(self.tabUserGenerated)
 
-    def getTicketListRow(self) -> WebElement:
+    def getTicketListRow(self) -> [WebElement]:
         self.wait_for(self.ticketListRow)
         return self.get_elements(self.ticketListRow)
 
