@@ -140,6 +140,7 @@ class AreaListTests(HOPEApiTestCase):
         cls.area2 = AreaFactory(
             name="area2",
             area_type=cls.area_type2,
+            parent=cls.area1,
         )
         cls.area2.valid_from = datetime(2020, 1, 1, tzinfo=pytz.UTC)
         cls.area2.valid_until = datetime(2020, 12, 31, tzinfo=pytz.UTC)
@@ -162,7 +163,7 @@ class AreaListTests(HOPEApiTestCase):
             "rght": area.rght,
             "tree_id": area.tree_id,
             "level": area.level,
-            "parent": area.parent,
+            "parent": str(area.parent.id) if area.parent else None,
             "area_type": str(area.area_type.id),
         }
 
@@ -189,6 +190,10 @@ class AreaListTests(HOPEApiTestCase):
             ({"valid_until_after": "2021-01-01"}, []),
             ({"area_type_area_level": 1}, [self.area1]),
             ({"area_type_area_level": 2}, [self.area2]),
+            ({"parent_id": str(self.area1.id)}, [self.area2]),
+            ({"parent_p_code": self.area1.p_code}, [self.area2]),
+            ({"parent_id": str(self.area2.id)}, []),
+            ({"parent_p_code": self.area2.p_code}, []),
         ):
             with token_grant_permission(self.token, Grant.API_READ_ONLY):
                 response = self.client.get(self.url, filter_data)  # type: ignore
