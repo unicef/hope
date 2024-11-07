@@ -242,4 +242,15 @@ class Migration(migrations.Migration):
             model_name='grievanceticketthrough',
             constraint=models.UniqueConstraint(fields=('main_ticket', 'linked_ticket'), name='unique_main_linked_ticket'),
         ),
+        migrations.RunSQL(
+            sql='ALTER TABLE grievance_grievanceticket ADD unicef_id_index SERIAL',
+            reverse_sql='ALTER TABLE grievance_grievanceticket DROP unicef_id_index',
+        ),
+        migrations.RunSQL(
+            sql="\n            CREATE OR REPLACE FUNCTION create_gt_unicef_id() RETURNS trigger\n                LANGUAGE plpgsql\n                AS $$\n            begin\n              NEW.unicef_id := format('GRV-%s', trim(to_char(NEW.unicef_id_index,'0000000')));\n              return NEW;\n            end\n            $$;\n            ",
+        ),
+        migrations.RunSQL(sql="""
+        CREATE TRIGGER create_gt_unicef_id
+        BEFORE INSERT ON grievance_grievanceticket FOR EACH ROW EXECUTE PROCEDURE create_gt_unicef_id();                                                                               
+        """),
     ]
