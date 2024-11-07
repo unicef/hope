@@ -321,4 +321,8 @@ class Migration(migrations.Migration):
             model_name='document',
             constraint=models.UniqueConstraint(condition=models.Q(models.Q(('is_removed', False), ('status', 'VALID'), ('rdi_merge_status', 'MERGED'))), fields=('document_number', 'type', 'country', 'program', 'is_original'), name='unique_if_not_removed_and_valid_for_representations'),
         ),
+        migrations.RunSQL(
+            "CREATE INDEX IF NOT EXISTS household_household_default_page_index ON public.household_household USING btree (created_at, business_area_id, is_removed) WHERE NOT is_removed;",
+            "DROP INDEX IF EXISTS household_household_default_page_index;",
+        ),
     ]
