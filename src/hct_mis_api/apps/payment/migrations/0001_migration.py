@@ -614,10 +614,10 @@ class Migration(migrations.Migration):
             constraint=models.UniqueConstraint(fields=('individual', 'delivery_mechanism'), name='unique_individual_delivery_mechanism'),
         ),
         migrations.RunSQL(
-            sql='ALTER TABLE payment_paymentverification ADD unicef_id_index SERIAL',
+            sql='ALTER TABLE payment_paymentverificationplan ADD unicef_id_index SERIAL',
         ),
         migrations.RunSQL(
-            sql="\n        CREATE OR REPLACE FUNCTION create_pvp_unicef_id() RETURNS trigger\n            LANGUAGE plpgsql\n            AS $$\n        BEGIN\n            NEW.unicef_id := format('PVP-%s', NEW.unicef_id_index);\n            return NEW;\n        END\n        $$;\n        \n        CREATE TRIGGER create_pvp_unicef_id BEFORE INSERT ON payment_paymentverification FOR EACH ROW EXECUTE PROCEDURE create_pvp_unicef_id();\n        ",
+            sql="\n        CREATE OR REPLACE FUNCTION create_pvp_unicef_id() RETURNS trigger\n            LANGUAGE plpgsql\n            AS $$\n        BEGIN\n            NEW.unicef_id := format('PVP-%s', NEW.unicef_id_index);\n            return NEW;\n        END\n        $$;\n        \n        CREATE TRIGGER create_pvp_unicef_id BEFORE INSERT ON payment_paymentverificationplan FOR EACH ROW EXECUTE PROCEDURE create_pvp_unicef_id();\n        ",
         ),
         migrations.RunSQL(
             sql="\n            CREATE OR REPLACE FUNCTION payment_plan_fill_unicef_id_per_business_area_seq() RETURNS trigger\n                LANGUAGE plpgsql\n                AS $$\n                DECLARE businessAreaID varchar;\n                DECLARE businessAreaCode varchar;\n            begin\n                SELECT INTO businessAreaID translate(ba.id::text, '-','_') FROM core_businessarea ba WHERE ba.id=NEW.business_area_id;\n                SELECT INTO businessAreaCode ba.code FROM core_businessarea ba WHERE ba.id=NEW.business_area_id;\n\n                NEW.unicef_id := format('PP-%s-%s-%s', trim(businessAreaCode), to_char(NEW.created_at, 'yy'), trim(replace(to_char(nextval('payment_plan_business_area_seq_' || businessAreaID),'00000000'),',','.')));\n                RETURN NEW;\n            end\n            $$;\n            ",
