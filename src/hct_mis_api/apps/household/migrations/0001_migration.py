@@ -1082,6 +1082,12 @@ class Migration(migrations.Migration):
         ),
         # Create triggers for unicef_id generation houeshold individual
         migrations.RunSQL(
+            sql="ALTER TABLE household_household ADD unicef_id_index SERIAL",
+        ),
+        migrations.RunSQL(
+            sql="ALTER TABLE household_individual ADD unicef_id_index SERIAL",
+        ),
+        migrations.RunSQL(
             """
             CREATE OR REPLACE FUNCTION create_hh_unicef_id() RETURNS trigger
                 LANGUAGE plpgsql
