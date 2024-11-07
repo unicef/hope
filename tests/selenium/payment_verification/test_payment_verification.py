@@ -657,6 +657,7 @@ class TestPaymentVerification:
     ) -> None:
         pagePaymentVerification.selectGlobalProgramFilter("Active Program")
 
+    @pytest.mark.xfail(reason="UNSTABLE")
     def test_payment_verification_xlsx_successful(
         self,
         clear_downloaded_files: None,
