@@ -115,24 +115,9 @@ class GenericRegistrationService(BaseRegistrationService):
                     my_dict.update(cls._create_household_dict(data_dict[key], mapping_dict[key]))
 
         # update admin areas values
-        admin2 = cls.get(data_dict, "admin2_h_c")
-        admin3 = cls.get(data_dict, "admin3_h_c")
-        admin4 = cls.get(data_dict, "admin4_h_c")
-
-        my_dict["admin2"] = str(Area.objects.get(p_code=admin2).id) if admin2 else None
-        my_dict["admin3"] = str(Area.objects.get(p_code=admin3).id) if admin3 else None
-        my_dict["admin4"] = str(Area.objects.get(p_code=admin4).id) if admin4 else None
-
-        if admin2 and Area.objects.filter(p_code=admin2).exists():
-            my_dict["admin1"] = str(Area.objects.get(p_code=admin2).parent.id)
-
-        if admin4 and Area.objects.filter(p_code=admin4).exists():
-            my_dict["admin_area"] = str(Area.objects.get(p_code=admin4).id)
-        elif admin3 and Area.objects.filter(p_code=admin3).exists():
-            my_dict["admin_area"] = str(Area.objects.get(p_code=admin3).id)
-        elif admin2 and Area.objects.filter(p_code=admin2).exists():
-            my_dict["admin_area"] = str(Area.objects.get(p_code=admin2).id)
-
+        for key in ["admin1", "admin2", "admin3", "admin4"]:
+            if key in my_dict and Area.objects.filter(p_code=my_dict[key]).exists():
+                my_dict[key] = str(Area.objects.get(p_code=my_dict[key]).id)
         return my_dict
 
     @staticmethod
@@ -202,7 +187,6 @@ class GenericRegistrationService(BaseRegistrationService):
         flex_fields = household_payload.pop("flex_fields", dict())
 
         flex_fields.update(**self.get_extra_ff(mapping.get("flex_fields", list()), record_data_dict))
-        individuals_key = mapping["defaults"].get("individuals_key", "individuals")
         household_data = {
             **household_payload,
             # "flex_registrations_record": record,
@@ -215,7 +199,6 @@ class GenericRegistrationService(BaseRegistrationService):
             "country": str(Country.objects.get(iso_code2=mapping["defaults"][COUNTRY]).pk),
             "consent": True,
             "collect_individual_data": YES,
-            "size": len(record_data_dict[individuals_key]),
             "flex_fields": flex_fields,
         }
         return self._create_object_and_validate(household_data, PendingHousehold)
@@ -233,6 +216,7 @@ class GenericRegistrationService(BaseRegistrationService):
             program=household.program,
             first_registration_date=record.timestamp,
             last_registration_date=record.timestamp,
+            detail_id=record.source_id,
         )
 
         record_data_dict = record.get_data()
@@ -353,7 +337,6 @@ class GenericRegistrationService(BaseRegistrationService):
             mapping,
         )
 
-        household.size = len(individuals)
         if head:
             household.head_of_household = head
 
@@ -366,6 +349,7 @@ class GenericRegistrationService(BaseRegistrationService):
                 individual=sec_collector, household=household, role=ROLE_ALTERNATE
             )
 
-        household.registration_id = record.source_id
+        household.registration_id = record.source_id  # TODO to be removed
+        household.detail_id = record.source_id
         household.save()
         record.mark_as_imported()
