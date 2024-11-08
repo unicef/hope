@@ -6,6 +6,7 @@ from django.db import transaction
 from django.db.models import QuerySet
 from django.http import FileResponse
 
+import requests
 from constance import config
 from django_filters import rest_framework as filters
 from rest_framework import mixins, status
@@ -210,7 +211,9 @@ class PaymentPlanSupportingDocumentViewSet(
     @action(detail=True, methods=["get"])
     def download(self, request: Request, *args: Any, **kwargs: Any) -> FileResponse:
         document = self.get_object()
-        file_mimetype, _ = mimetypes.guess_type(document.file.path)
-        response = FileResponse(document.file.open(), content_type=file_mimetype or "application/octet-stream")
+        file_url = document.file.url
+        file_mimetype, _ = mimetypes.guess_type(file_url)
+        response = requests.get(file_url, stream=True)
+        response = FileResponse(response.raw, content_type=file_mimetype or "application/octet-stream")
         response["Content-Disposition"] = f"attachment; filename={document.file.name.split('/')[-1]}"
         return response
