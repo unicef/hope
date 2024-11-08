@@ -143,19 +143,13 @@ class TargetingCriteriaRuleInputValidator:
         collectors_filters_blocks = rule.get("collectors_filters_blocks", [])
 
         for households_block_filter in households_filters_blocks:
-            household_block_filters = households_block_filter.get("household_block_filters", [])
-            for household_block_filter in household_block_filters:
-                TargetingCriteriaRuleFilterInputValidator.validate(rule_filter=household_block_filter, program=program)
+            TargetingCriteriaRuleFilterInputValidator.validate(rule_filter=households_block_filter, program=program)
 
         for individuals_filters_block in individuals_filters_blocks:
-            individual_block_filters = individuals_filters_block.get("individual_block_filters", [])
-            for individual_block_filter in individual_block_filters:
-                TargetingCriteriaRuleFilterInputValidator.validate(rule_filter=individual_block_filter, program=program)
+            TargetingCriteriaRuleFilterInputValidator.validate(rule_filter=individuals_filters_block, program=program)
 
         for collectors_filters_block in collectors_filters_blocks:
-            collector_block_filters = collectors_filters_block.get("collector_block_filters", [])
-            for collector_block_filter in collector_block_filters:
-                TargetingCriteriaCollectorRuleFilterInputValidator.validate(rule_filter=collector_block_filter)
+            TargetingCriteriaCollectorRuleFilterInputValidator.validate(rule_filter=collectors_filters_block)
 
 
 class TargetingCriteriaInputValidator:
