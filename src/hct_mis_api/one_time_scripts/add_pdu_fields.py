@@ -10,14 +10,14 @@ from hct_mis_api.apps.program.models import Program
 
 
 def add_pdu_fields(program: Program, label: str, subtype: str, rounds_names: List) -> None:
-    flexible_attribute = FlexibleAttribute.objects.create(
+    flexible_attribute, _ = FlexibleAttribute.objects.get_or_create(
         label={"English(EN)": label},
         name=field_label_to_field_name(label),
         type=FlexibleAttribute.PDU,
         associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
         program=program,
     )
-    flexible_attribute.pdu_data = PeriodicFieldData.objects.create(
+    flexible_attribute.pdu_data, _ = PeriodicFieldData.objects.get_or_create(
         subtype=subtype, number_of_rounds=len(rounds_names), rounds_names=rounds_names
     )
     flexible_attribute.save()
