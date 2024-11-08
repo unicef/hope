@@ -415,6 +415,7 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_with_compari
                             'householdsFiltersBlocks': [
                                 {
                                     'arguments': [
+                                        'Average'
                                     ],
                                     'comparisonMethod': 'CONTAINS',
                                     'fieldName': 'registration_data_import',

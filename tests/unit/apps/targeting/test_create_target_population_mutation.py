@@ -191,7 +191,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
                             "householdsFiltersBlocks": [
                                 {
                                     "comparisonMethod": "CONTAINS",
-                                    "arguments": [],
+                                    "arguments": ["Average"],
                                     "fieldName": "registration_data_import",
                                     "flexFieldClassification": "NOT_FLEX_FIELD",
                                 }
