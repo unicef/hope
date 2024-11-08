@@ -78,6 +78,7 @@ export const CreateTargetPopulationPage = (): ReactElement => {
   });
 
   const handleSubmit = async (values): Promise<void> => {
+    console.log('valuses', values);
     try {
       const res = await mutate({
         variables: {

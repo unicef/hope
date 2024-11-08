@@ -5,12 +5,8 @@ import { Fragment, ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { chooseFieldType, clearField } from '@utils/targetingUtils';
-import {
-  AllCollectorFieldsAttributesQuery,
-  ImportedIndividualFieldsQuery,
-} from '@generated/graphql';
+import { AllCollectorFieldsAttributesQuery } from '@generated/graphql';
 import { TargetingCriteriaCollectorBlockFilter } from './TargetingCriteriaCollectorBlockFilter';
-import { choicesToDict } from '@utils/utils';
 
 const Divider = styled.div`
   border-top: 1px solid #e2e2e2;
@@ -74,21 +70,24 @@ const FilterWrapper = styled.div`
 `;
 export const TargetingCriteriaCollectorFilterBlocks = ({
   blockIndex,
+  data,
   values,
-  choices,
+  choicesToDict,
   onDelete,
 }: {
   blockIndex: number;
+  data: AllCollectorFieldsAttributesQuery;
   values;
-  choices: AllCollectorFieldsAttributesQuery['allCollectorFieldsAttributes'];
+  choicesToDict;
   onDelete: () => void;
 }): ReactElement => {
   const { t } = useTranslation();
   const shouldShowAndDivider =
     blockIndex + 1 < values.collectorsFiltersBlocks.length;
+
   return (
     <div>
-      Set Individual Criteria
+      Set Collector Criteria
       <FieldArray
         name={`collectorsFiltersBlocks[${blockIndex}].collectorBlockFilters`}
         render={(arrayHelpers) => (
@@ -107,8 +106,9 @@ export const TargetingCriteriaCollectorFilterBlocks = ({
                       <TargetingCriteriaCollectorBlockFilter
                         blockIndex={blockIndex}
                         index={index}
+                        data={data}
                         each={each}
-                        choices={choices}
+                        choicesDict={choicesToDict}
                         onChange={(e, object) => {
                           if (object) {
                             return chooseFieldType(object, arrayHelpers, index);

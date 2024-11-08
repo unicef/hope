@@ -153,6 +153,7 @@ export const AddFilterTargetingCriteriaDisplay = ({
     const criteria = {
       householdsFiltersBlocks: [...values.householdsFiltersBlocks],
       individualsFiltersBlocks: [...values.individualsFiltersBlocks],
+      collectorsFiltersBlocks: [...values.collectorsFiltersBlocks],
       householdIds: values.householdIds,
       individualIds: values.individualIds,
     };

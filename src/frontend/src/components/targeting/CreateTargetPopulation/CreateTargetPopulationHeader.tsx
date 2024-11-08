@@ -25,13 +25,21 @@ export const CreateTargetPopulationHeader = ({
   const { t } = useTranslation();
 
   const isSubmitDisabled = (criterias) => {
-    return criterias?.some(
-      (criteria) =>
-        !criteria.householdsFiltersBlocks.length &&
-        !criteria.individualFiltersBlocks.length &&
-        !criteria.individualIds &&
-        !criteria.householdIds,
-    );
+    return criterias?.some((criteria) => {
+      const householdsFiltersBlocks = criteria.householdsFiltersBlocks || [];
+      const individualsFiltersBlocks = criteria.individualsFiltersBlocks || [];
+      const collectorsFiltersBlocks = criteria.collectorsFiltersBlocks || [];
+      const individualIds = criteria.individualIds || [];
+      const householdIds = criteria.householdIds || [];
+
+      return (
+        householdsFiltersBlocks.length === 0 &&
+        individualsFiltersBlocks.length === 0 &&
+        collectorsFiltersBlocks.length === 0 &&
+        individualIds.length === 0 &&
+        householdIds.length === 0
+      );
+    });
   };
 
   const breadCrumbsItems: BreadCrumbsItem[] = [

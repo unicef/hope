@@ -29,6 +29,7 @@ import {
   clearField,
   formatCriteriaFilters,
   formatCriteriaIndividualsFiltersBlocks,
+  formatCriteriaCollectorsFiltersBlocks,
   HhIdValidation,
   IndIdValidation,
   mapCriteriaToInitialValues,
@@ -158,17 +159,21 @@ export const TargetingCriteriaForm = ({
     useAllCollectorFieldsAttributesQuery({
       fetchPolicy: 'cache-first',
     });
+  console.log('1criteria', criteria);
 
-  const filtersArrayWrapperRef = useRef(null);
+  const householdsFiltersBlocksWrapperRef = useRef(null);
   const individualsFiltersBlocksWrapperRef = useRef(null);
   const collectorsFiltersBlocksWrapperRef = useRef(null);
   const initialValue = mapCriteriaToInitialValues(criteria);
   const [individualData, setIndividualData] = useState(null);
   const [householdData, setHouseholdData] = useState(null);
   const [allDataChoicesDict, setAllDataChoicesDict] = useState(null);
-  useState(null);
+  const [allCollectorFieldsChoicesDict, setAllCollectorFieldsChoicesDict] =
+    useState(null);
+
   useEffect(() => {
     if (loading) return;
+
     const filteredIndividualData = {
       allFieldsAttributes: data?.allFieldsAttributes
         ?.filter(associatedWith('Individual'))
@@ -182,6 +187,7 @@ export const TargetingCriteriaForm = ({
       ),
     };
     setHouseholdData(filteredHouseholdData);
+
     const allDataChoicesDictTmp = data?.allFieldsAttributes?.reduce(
       (acc, item) => {
         acc[item.name] = item.choices;
@@ -190,9 +196,19 @@ export const TargetingCriteriaForm = ({
       {},
     );
     setAllDataChoicesDict(allDataChoicesDictTmp);
-  }, [data, loading]);
 
-  if (!data) return null;
+    const allCollectorFieldsChoicesDictTmp =
+      allCollectorFieldsAttributesData?.allCollectorFieldsAttributes?.reduce(
+        (acc, item) => {
+          acc[item.name] = item.choices;
+          return acc;
+        },
+        {},
+      );
+    setAllCollectorFieldsChoicesDict(allCollectorFieldsChoicesDictTmp);
+  }, [data, loading, allCollectorFieldsAttributesData]);
+
+  if (!data || !allCollectorFieldsAttributesData) return null;
 
   const filterNullOrNoSelections = (filter): boolean =>
     !filter.isNull &&
@@ -282,10 +298,14 @@ export const TargetingCriteriaForm = ({
     const individualsFiltersBlocks = formatCriteriaIndividualsFiltersBlocks(
       values.individualsFiltersBlocks,
     );
+    const collectorsFiltersBlocks = formatCriteriaCollectorsFiltersBlocks(
+      values.collectorsFiltersBlocks,
+    );
 
     addCriteria({
       householdsFiltersBlocks,
       individualsFiltersBlocks,
+      collectorsFiltersBlocks,
       individualIds,
       householdIds,
     });
@@ -370,7 +390,7 @@ export const TargetingCriteriaForm = ({
                   render={(arrayHelpers) => (
                     <ArrayFieldWrapper
                       arrayHelpers={arrayHelpers}
-                      ref={filtersArrayWrapperRef}
+                      ref={householdsFiltersBlocksWrapperRef}
                     >
                       {values.householdsFiltersBlocks.map((each, index) => (
                         <TargetingCriteriaHouseholdFilter
@@ -402,7 +422,7 @@ export const TargetingCriteriaForm = ({
                     <ButtonBox>
                       <Button
                         onClick={() =>
-                          filtersArrayWrapperRef.current
+                          householdsFiltersBlocksWrapperRef.current
                             .getArrayHelpers()
                             .push({ fieldName: '' })
                         }
@@ -504,11 +524,9 @@ export const TargetingCriteriaForm = ({
                               // eslint-disable-next-line
                               key={index}
                               blockIndex={index}
-                              data={individualData}
+                              data={allCollectorFieldsAttributesData}
                               values={values}
-                              choices={
-                                allCollectorFieldsAttributesData?.allCollectorFieldsAttributes
-                              }
+                              choicesToDict={allCollectorFieldsChoicesDict}
                               onDelete={() => arrayHelpers.remove(index)}
                             />
                           ))}

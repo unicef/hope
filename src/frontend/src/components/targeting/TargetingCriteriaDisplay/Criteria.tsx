@@ -22,6 +22,7 @@ import { Box } from '@mui/system';
 import { BlueText } from '@components/grievances/LookUps/LookUpStyles';
 import { ReactElement, useState } from 'react';
 import { Fragment } from 'react/jsx-runtime';
+import { t } from 'i18next';
 
 interface CriteriaElementProps {
   alternative?: boolean;
@@ -257,29 +258,53 @@ export function Criteria({
   householdIds,
   individualIds,
 }: CriteriaProps): ReactElement {
-  const [open, setOpen] = useState(false);
-  const [currentIds, setCurrentIds] = useState<string[]>([]);
+  const [openHH, setOpenHH] = useState(false);
+  const [openIND, setOpenIND] = useState(false);
+  const [currentHouseholdIds, setCurrentHouseholdIds] = useState<string[]>([]);
+  const [currentIndividualIds, setCurrentIndividualIds] = useState<string[]>(
+    [],
+  );
 
-  const handleOpen = (ids: string): void => {
-    setCurrentIds(ids.split(','));
-    setOpen(true);
+  const handleOpenHouseholdIds = (ids: string): void => {
+    setCurrentHouseholdIds(ids.split(','));
+    setOpenHH(true);
+  };
+
+  const handleOpenIndividualIds = (ids: string): void => {
+    setCurrentIndividualIds(ids.split(','));
+    setOpenIND(true);
   };
 
   const handleClose = (): void => {
-    setOpen(false);
-    setCurrentIds([]);
+    setOpenHH(false);
+    setOpenIND(false);
   };
 
   return (
     <CriteriaElement alternative={alternative} data-cy="criteria-container">
       {householdIds && (
         <div>
-          <Typography variant="body1">Household Ids:</Typography>
+          <Typography variant="body1">
+            {t('Household IDs selected')}:
+          </Typography>
           <BlueText
-            onClick={() => handleOpen(householdIds)}
+            onClick={() => handleOpenHouseholdIds(householdIds)}
             style={{ textDecoration: 'underline', cursor: 'pointer' }}
           >
             {householdIds.split(',').length}
+          </BlueText>
+        </div>
+      )}
+      {individualIds && (
+        <div>
+          <Typography variant="body1">
+            {t('Individual IDs selected')}:
+          </Typography>
+          <BlueText
+            onClick={() => handleOpenIndividualIds(individualIds)}
+            style={{ textDecoration: 'underline', cursor: 'pointer' }}
+          >
+            {individualIds.split(',').length}
           </BlueText>
         </div>
       )}
@@ -292,17 +317,6 @@ export function Criteria({
       ))}
       {individualsFiltersBlocks.map((item, index) => (
         <CriteriaSetBox key={index}>
-          {individualIds && index === 0 && (
-            <div>
-              <Typography variant="body1">Individual Ids:</Typography>
-              <BlueText
-                onClick={() => handleOpen(individualIds)}
-                style={{ textDecoration: 'underline', cursor: 'pointer' }}
-              >
-                {individualIds.split(',').length}
-              </BlueText>
-            </div>
-          )}
           {item.individualBlockFilters.map((filter, filterIndex) => (
             <CriteriaField
               choicesDict={allDataFieldsChoicesDict}
@@ -335,12 +349,8 @@ export function Criteria({
           )}
         </ButtonsContainer>
       )}
-      <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-        <DialogTitle>
-          {currentIds.some((id) => id.startsWith('HH'))
-            ? 'Selected Households'
-            : 'Selected Individuals'}
-        </DialogTitle>
+      <Dialog open={openHH} onClose={handleClose} maxWidth="sm" fullWidth>
+        <DialogTitle>{t('Selected Households')}</DialogTitle>
         <DialogContent>
           <Table>
             <TableHead>
@@ -349,7 +359,31 @@ export function Criteria({
               </TableRow>
             </TableHead>
             <TableBody>
-              {currentIds.map((id, index) => (
+              {currentHouseholdIds.map((id, index) => (
+                <TableRow key={index}>
+                  <TableCell>{id}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </DialogContent>
+        <DialogActions>
+          <Button color="primary" onClick={handleClose}>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog open={openIND} onClose={handleClose} maxWidth="sm" fullWidth>
+        <DialogTitle>{t('Selected Individuals')}</DialogTitle>
+        <DialogContent>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>ID</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {currentIndividualIds.map((id, index) => (
                 <TableRow key={index}>
                   <TableCell>{id}</TableCell>
                 </TableRow>

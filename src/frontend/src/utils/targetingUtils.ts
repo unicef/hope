@@ -168,10 +168,16 @@ function mapBlockFilters(blocks, blockKey) {
 }
 
 export function mapCriteriaToInitialValues(criteria) {
+  console.log('111criteria', criteria);
+  const individualIds = criteria.individualIds || '';
+  const householdIds = criteria.householdIds || '';
   const householdsFiltersBlocks = criteria.householdsFiltersBlocks || [];
   const individualsFiltersBlocks = criteria.individualsFiltersBlocks || [];
   const collectorsFiltersBlocks = criteria.collectorsFiltersBlocks || [];
+
   return {
+    individualIds,
+    householdIds,
     householdsFiltersBlocks: mapFiltersToInitialValues(householdsFiltersBlocks),
     individualsFiltersBlocks: mapBlockFilters(
       individualsFiltersBlocks,
@@ -187,6 +193,7 @@ export function mapCriteriaToInitialValues(criteria) {
 // TODO Marącin make Type to this function
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function formatCriteriaFilters(filters) {
+  console.log('filters', filters);
   return filters.map((each) => {
     let comparisonMethod;
     let values;
@@ -283,6 +290,12 @@ export function formatCriteriaIndividualsFiltersBlocks(
 ) {
   return individualsFiltersBlocks.map((block) => ({
     individualBlockFilters: formatCriteriaFilters(block.individualBlockFilters),
+  }));
+}
+
+export function formatCriteriaCollectorsFiltersBlocks(collectorsFiltersBlocks) {
+  return collectorsFiltersBlocks.map((block) => ({
+    collectorBlockFilters: formatCriteriaFilters(block.collectorBlockFilters),
   }));
 }
 

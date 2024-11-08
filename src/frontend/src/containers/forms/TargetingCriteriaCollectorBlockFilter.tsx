@@ -1,38 +1,47 @@
-import { Field } from 'formik';
 import { AllCollectorFieldsAttributesQuery } from '@generated/graphql';
+import { FieldChooser } from '@components/targeting/FieldChooser';
+import { SubField } from '@components/targeting/SubField';
 import { ReactElement } from 'react';
-import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 
-export const TargetingCriteriaCollectorBlockFilter = ({
+export function TargetingCriteriaCollectorBlockFilter({
   blockIndex,
   index,
+  data,
   each,
   onChange,
-  choices,
+  onDelete,
+  choicesDict,
 }: {
   blockIndex: number;
   index: number;
-  choices: AllCollectorFieldsAttributesQuery['allCollectorFieldsAttributes'];
+  data: AllCollectorFieldsAttributesQuery;
   each;
+  choicesDict;
   onChange: (e, object) => void;
   onDelete: () => void;
-}): ReactElement => {
-  const name = `collectorsFiltersBlocks[${blockIndex}].collectorBlockFilters[${index}]`;
-
+}): ReactElement {
   return (
     <div>
-      <Field
-        component={FormikSelectField}
-        name={name}
-        choices={choices}
+      <FieldChooser
+        index={index}
+        choices={data.allCollectorFieldsAttributes}
+        fieldName={each.fieldName}
         onChange={onChange}
+        onDelete={onDelete}
+        showDelete
+        baseName={`collectorsFiltersBlocks[${blockIndex}].collectorBlockFilters[${index}]`}
       />
       {each.fieldName && (
         <div data-cy="autocomplete-target-criteria-values">
-          <Field component={FormikTextField} name={name} />
+          <SubField
+            field={each}
+            blockIndex={blockIndex}
+            index={index}
+            choicesDict={choicesDict}
+            baseName={`collectorsFiltersBlocks[${blockIndex}].collectorBlockFilters[${index}]`}
+          />
         </div>
       )}
     </div>
   );
-};
+}
