@@ -366,13 +366,15 @@ class TestPaymentPlanReconciliation(APITestCase):
 
         create_target_population_response = self.graphql_request(
             request_string=CREATE_TARGET_POPULATION_MUTATION,
-            context={"user": self.user, "headers": {
-                "Business-Area": self.business_area.slug,
-                "program": program_id,
-            }},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                    "program": program_id,
+                },
+            },
             variables={
                 "input": {
-
                     "programCycleId": program_cycle_id,
                     "name": "TargP",
                     "excludedIds": "",
