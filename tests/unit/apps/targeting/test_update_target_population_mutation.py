@@ -228,10 +228,13 @@ class TestUpdateTargetPopulationMutation(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=MUTATION_QUERY,
-            context={"user": self.user, "headers": {
-                "Program": self.id_to_base64(self.program.id, "ProgramNode"),
-                "Business-Area": self.business_area.slug,
-            }},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables=variables,
         )
         updated_target_population = TargetPopulation.objects.get(id=self.target_populations[population_index].id)
@@ -260,10 +263,13 @@ class TestUpdateTargetPopulationMutation(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=MUTATION_QUERY,
-            context={"user": self.user, "headers": {
-                "Program": self.id_to_base64(self.program.id, "ProgramNode"),
-                "Business-Area": self.business_area.slug,
-            }},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables=variables,
         )
         updated_target_population = TargetPopulation.objects.get(id=self.draft_target_population.id)
@@ -280,10 +286,13 @@ class TestUpdateTargetPopulationMutation(APITestCase):
 
         response_error = self.graphql_request(
             request_string=MUTATION_QUERY,
-            context={"user": self.user, "headers": {
-                "Program": self.id_to_base64(self.program.id, "ProgramNode"),
-                "Business-Area": self.business_area.slug,
-            }},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables=variables,
         )
         assert "errors" in response_error
@@ -314,10 +323,13 @@ class TestUpdateTargetPopulationMutation(APITestCase):
 
         response_error = self.graphql_request(
             request_string=MUTATION_QUERY,
-            context={"user": self.user, "headers": {
-                "Program": self.id_to_base64(self.program.id, "ProgramNode"),
-                "Business-Area": self.business_area.slug,
-            }},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables=variables,
         )
         assert "errors" in response_error
@@ -342,10 +354,13 @@ class TestUpdateTargetPopulationMutation(APITestCase):
 
         response_error = self.graphql_request(
             request_string=MUTATION_QUERY,
-            context={"user": self.user, "headers": {
-                "Program": self.id_to_base64(self.program.id, "ProgramNode"),
-                "Business-Area": self.business_area.slug,
-            }},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables=variables,
         )
         assert "errors" in response_error
@@ -360,10 +375,13 @@ class TestUpdateTargetPopulationMutation(APITestCase):
         )
         response_ok = self.graphql_request(
             request_string=MUTATION_QUERY,
-            context={"user": self.user, "headers": {
-                "Program": self.id_to_base64(self.program.id, "ProgramNode"),
-                "Business-Area": self.business_area.slug,
-            }},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables=variables,
         )
         assert "errors" not in response_ok
