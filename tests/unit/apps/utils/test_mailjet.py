@@ -12,6 +12,7 @@ from constance.test import override_config
 from openpyxl import Workbook
 
 from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.utils.mailjet import MailjetClient
 
 
@@ -343,7 +344,7 @@ class TestMailjet:
     @patch("hct_mis_api.apps.utils.mailjet.requests.post")
     @override_settings(EMAIL_SUBJECT_PREFIX="test")
     @override_config(ENABLE_MAILJET=True)
-    def test_email_user_via_mailjet(self, mocked_requests_post: Any) -> None:
+    def test_email_user_via_mailjet(self, mocked_requests_post: Any, partner_unicef: Partner) -> None:
         user = UserFactory(email="testuser@email.com", username="testuser")
         user.email_user(
             subject="Test subject",
