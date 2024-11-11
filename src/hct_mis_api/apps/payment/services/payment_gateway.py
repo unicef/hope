@@ -54,7 +54,7 @@ class PaymentInstructionStatus(Enum):
 
 class PaymentInstructionFromDeliveryMechanismPerPaymentPlanSerializer(ReadOnlyModelSerializer):
     remote_id = serializers.CharField(source="id")
-    unicef_id = serializers.CharField(source="payment_plan.unicef_id")
+    external_code = serializers.CharField(source="payment_plan.unicef_id")
     fsp = serializers.SerializerMethodField()
     payload = serializers.SerializerMethodField()
     extra = serializers.SerializerMethodField()
@@ -78,7 +78,7 @@ class PaymentInstructionFromDeliveryMechanismPerPaymentPlanSerializer(ReadOnlyMo
         model = DeliveryMechanismPerPaymentPlan
         fields = [
             "remote_id",
-            "unicef_id",
+            "external_code",
             "fsp",
             "payload",
             "extra",
@@ -86,16 +86,16 @@ class PaymentInstructionFromDeliveryMechanismPerPaymentPlanSerializer(ReadOnlyMo
 
 
 class PaymentInstructionFromSplitSerializer(PaymentInstructionFromDeliveryMechanismPerPaymentPlanSerializer):
-    unicef_id = serializers.SerializerMethodField()  # type: ignore
+    external_code = serializers.SerializerMethodField()  # type: ignore
 
-    def get_unicef_id(self, obj: Any) -> str:
+    def get_external_code(self, obj: Any) -> str:
         return f"{obj.payment_plan.unicef_id}-{obj.order}"
 
     class Meta:
         model = PaymentPlanSplit
         fields = [
             "remote_id",
-            "unicef_id",
+            "external_code",
             "fsp",
             "payload",
             "extra",
@@ -210,7 +210,7 @@ class PaymentRecordData(FlexibleArgumentsDataclassMixin):
 @dataclasses.dataclass()
 class PaymentInstructionData(FlexibleArgumentsDataclassMixin):
     remote_id: str
-    unicef_id: str
+    external_code: str
     status: str  # "DRAFT"
     fsp: str
     system: int
