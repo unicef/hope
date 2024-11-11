@@ -28,6 +28,7 @@ def update_dashboard_figures(self: Any) -> None:
             DashboardDataCache.refresh_data(business_area.slug)
 
         except Exception as e:
+            logger.error(f"Failed to refresh dashboard data for {business_area.slug}: {e}")
             raise self.retry(exc=e)
 
 
