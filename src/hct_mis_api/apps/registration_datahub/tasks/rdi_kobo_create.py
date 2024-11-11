@@ -88,6 +88,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         super().__init__()
 
     def _handle_image_field(self, value: Any, is_flex_field: bool) -> Optional[Union[str, File]]:
+        logger.info(f"Processing image field: {value}")
         if not self.registration_data_import.pull_pictures:
             return None
         if self.attachments is None:
@@ -102,6 +103,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         file = File(image_bytes, name=value)
         if is_flex_field:
             return default_storage.save(value, file)
+        logger.info(f"Image field processed: {value}")
         return file
 
     def _handle_geopoint_field(self, value: Any, is_flex_field: bool) -> Point:
@@ -221,10 +223,14 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         collectors_to_create = defaultdict(list)
         household_hash_list = []
         household_batch_size = 50
+        logger.info(f"Processing {len(self.reduced_submissions)} households")
+        chunk_index = 0
         delivery_mechanism_xlsx_fields = PendingDeliveryMechanismData.get_scope_delivery_mechanisms_fields(
             by="xlsx_field"
         )
         for reduced_submission_chunk in chunks(self.reduced_submissions, household_batch_size):
+            chunk_index += 1
+            logger.info(f"Processing chunk {chunk_index}/{len(self.reduced_submissions) // household_batch_size}")
             for household in reduced_submission_chunk:
                 # AB#199540
                 household_hash = calculate_hash_for_kobo_submission(household)
