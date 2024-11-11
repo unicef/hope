@@ -1,4 +1,3 @@
-import time
 from typing import Callable
 
 from django.db import transaction
@@ -13,6 +12,7 @@ from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentRecordFacto
 
 
 @pytest.fixture()
+@pytest.mark.django_db(databases=["default", "read_only"])
 def populate_dashboard_cache() -> Callable[[BusinessAreaFactory], Household]:
     """
     Fixture to populate the dashboard cache for a specific business area,
@@ -44,9 +44,6 @@ def populate_dashboard_cache() -> Callable[[BusinessAreaFactory], Household]:
             )
             PaymentFactory.create_batch(5, household=household)
             PaymentRecordFactory.create_batch(3, household=household)
-
-        transaction.commit(using="default")
-        time.sleep(1)  # give time for replication to read_only db
 
         return household
 
