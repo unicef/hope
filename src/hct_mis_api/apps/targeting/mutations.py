@@ -142,17 +142,19 @@ def from_input_to_targeting_criteria(targeting_criteria_input: Dict, program: Pr
 
         ind_block = TargetingIndividualRuleFilterBlock(targeting_criteria_rule=tc_rule)
         ind_block.save()
-        for ind_filter in individuals_filters_blocks:
-            individual_filter = TargetingIndividualBlockRuleFilter(individuals_filters_block=ind_block, **ind_filter)
-            individual_filter.save()
+        for ind_filter_block in individuals_filters_blocks:
+            for ind_filter in ind_filter_block.get("individual_block_filters", []):
+                individual_filter = TargetingIndividualBlockRuleFilter(individuals_filters_block=ind_block, **ind_filter)
+                individual_filter.save()
 
         collector_block = TargetingCollectorRuleFilterBlock(targeting_criteria_rule=tc_rule)
         collector_block.save()
-        for collector_filter in collectors_filters_blocks:
-            collector_block_filters = TargetingCollectorBlockRuleFilter(
-                collector_block_filters=collector_block, **collector_filter
-            )
-            collector_block_filters.save()
+        for collector_filter_block in collectors_filters_blocks:
+            for collectors_filter in collector_filter_block.get("collector_block_filters", []):
+                collector_block_filters = TargetingCollectorBlockRuleFilter(
+                    collector_block_filters=collector_block, **collectors_filter
+                )
+                collector_block_filters.save()
 
     return targeting_criteria
 

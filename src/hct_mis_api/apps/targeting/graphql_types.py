@@ -214,12 +214,20 @@ class TargetingCriteriaRuleFilterObjectType(graphene.InputObjectType):
     round_number = graphene.Int()
 
 
+class TargetingIndividualRuleFilterBlockObjectType(graphene.InputObjectType):
+    individual_block_filters = graphene.List(TargetingCriteriaRuleFilterObjectType)
+
+
+class TargetingCollectorRuleFilterBlockObjectType(graphene.InputObjectType):
+    collector_block_filters = graphene.List(TargetingCriteriaRuleFilterObjectType)
+
+
 class TargetingCriteriaRuleObjectType(graphene.InputObjectType):
     households_filters_blocks = graphene.List(TargetingCriteriaRuleFilterObjectType)
     household_ids = graphene.String()
-    individuals_filters_blocks = graphene.List(TargetingCriteriaRuleFilterObjectType)
+    individuals_filters_blocks = graphene.List(TargetingIndividualRuleFilterBlockObjectType)
     individual_ids = graphene.String()
-    collectors_filters_blocks = graphene.List(TargetingCriteriaRuleFilterObjectType)
+    collectors_filters_blocks = graphene.List(TargetingCollectorRuleFilterBlockObjectType)
 
 
 class TargetingCriteriaObjectType(graphene.InputObjectType):
