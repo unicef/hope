@@ -268,7 +268,13 @@
                             .label(d => `${d.key}: ${numberFormatter(d.value)} USD (${(d.value / volumeGroup.all().reduce((sum, g) => sum + g.value, 0) * 100).toFixed(0)}%)`)
                             .title(d => `${d.key}: ${numberFormatter(d.value)} USD`)
                             .xAxis().ticks(4);
-
+                        
+                        const monthOrder = {
+                              "January": 1, "February": 2, "March": 3, "April": 4, 
+                              "May": 5, "June": 6, "July": 7, "August": 8, 
+                              "September": 9, "October": 10, "November": 11, "December": 12
+                          };
+                        
                         const monthChart = dc.pieChart("#payments-by-month")
                             .dimension(monthDim)
                             .group(monthGroup)
@@ -277,7 +283,8 @@
                             .renderLabel(true)
                             .useViewBoxResizing(true)
                             .label(d => `${d.key} ${(d.value / monthGroup.all().reduce((sum, g) => sum + g.value, 0) * 100).toFixed(0)}%`)
-                            .title(d => `${d.key}: ${numberFormatter(d.value)} USD`);
+                            .title(d => `${d.key}: ${numberFormatter(d.value)} USD`)
+                            .ordering(d => monthOrder[d.key]);
 
                         const quarterChart = dc.pieChart("#payments-by-quarter")
                             .dimension(quarterDim)
