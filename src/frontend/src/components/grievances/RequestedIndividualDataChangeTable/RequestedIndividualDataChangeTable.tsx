@@ -48,9 +48,11 @@ export function RequestedIndividualDataChangeTable({
     payment_channels_to_edit: paymentChannelsToEdit,
     previous_payment_channels: previousPaymentChannels,
     flex_fields: flexFields,
-    delivery_mechanism_data: deliveryMechanismData,
+    // eslint-disable-next-line
+    delivery_mechanism_data: _deliveryMechanismData,
     delivery_mechanism_data_to_edit: deliveryMechanismDataToEdit,
-    delivery_mechanism_data_to_remove: deliveryMechanismDataToRemove,
+    // eslint-disable-next-line
+    delivery_mechanism_data_to_remove: _deliveryMechanismDataToRemove,
     ...restIndividualData
   } = individualData;
   const entries = restIndividualData && Object.entries(restIndividualData);
