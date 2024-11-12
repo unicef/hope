@@ -48,8 +48,7 @@ def setup_household_and_payments(business_area: Callable) -> tuple:
 @pytest.mark.usefixtures("login", "setup_household_and_payments")
 class TestSmokeCountryDashboard:
     def test_smoke_country_dashboard(self, pageCountryDashboard: CountryDashboard, business_area: Callable) -> None:
-        see = DashboardDataCache.refresh_data(business_area.slug)
-        print(see)
+        DashboardDataCache.refresh_data(business_area.slug)
         pageCountryDashboard.getNavCountryDashboard().click()
         pageCountryDashboard.switch_to_dashboard_iframe()
         assert pageCountryDashboard.get_total_amount_paid().text != "", "Expected total amount paid to be populated."
