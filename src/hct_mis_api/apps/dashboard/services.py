@@ -76,8 +76,8 @@ class DashboardDataCache:
                 .select_related("business_area", "household", "program")
                 .filter(business_area=area)
                 .annotate(
-                    month=ExtractMonth("status_date"),
-                    year=ExtractYear("status_date"),
+                    month=ExtractMonth("delivery_date"),
+                    year=ExtractYear("delivery_date"),
                     programs=F("household__program__name"),
                     sectors=F("household__program__sector"),
                     admin1=F("household__admin1__name"),
@@ -111,8 +111,8 @@ class DashboardDataCache:
                 .select_related("business_area", "household", "program")
                 .filter(business_area=area)
                 .annotate(
-                    month=ExtractMonth("status_date"),
-                    year=ExtractYear("status_date"),
+                    month=ExtractMonth("delivery_date"),
+                    year=ExtractYear("delivery_date"),
                     programs=F("household__program__name"),
                     sectors=F("household__program__sector"),
                     admin1=F("household__admin1__name"),
