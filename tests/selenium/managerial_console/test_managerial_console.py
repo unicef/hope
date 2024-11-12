@@ -1,5 +1,6 @@
 import warnings
 from datetime import datetime
+from time import sleep
 from typing import Optional
 
 from django.utils import timezone
@@ -101,8 +102,6 @@ def create_payment_plan(create_active_test_program: Program, second_test_program
 
 @pytest.mark.usefixtures("login")
 class TestSmokeManagerialConsole:
-    from django.test import override_settings
-
     def test_managerial_console_smoke_test(
         self, pageManagerialConsole: ManagerialConsole, create_active_test_program: Program
     ) -> None:
@@ -154,6 +153,7 @@ class TestSmokeManagerialConsole:
             pageManagerialConsole.getProgramSelectApproval()
         except BaseException:
             # ToDo: Workaround for cache issues
+            sleep(2)
             with pytest.warns(Warning):
                 warnings.warn("Clear cache did not reload data. Clear cache was triggered reload again.", Warning)
             payment.refresh_from_db()
