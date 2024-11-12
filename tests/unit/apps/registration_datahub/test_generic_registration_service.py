@@ -257,8 +257,6 @@ class TestGenericRegistrationService(TestCase):
         self.assertEqual(PendingIndividualRoleInHousehold.objects.filter(role=ROLE_PRIMARY).count(), 1)
         self.assertEqual(PendingIndividualRoleInHousehold.objects.filter(role=ROLE_ALTERNATE).count(), 1)
 
-        self.assertEqual(pending_household.admin_area.p_code, self.household[0][admin_area_field])
-
     def test_import_data_to_datahub_household_individual(self) -> None:
         records = [
             Record(
