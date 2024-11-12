@@ -130,7 +130,7 @@ export const ExcludeCheckboxes: FC<ExcludeCheckboxesProps> = ({
             {isSocialDctType && (
               <Grid item xs={6}>
                 <Field
-                  name="flagExcludePeopleWithActiveAdjudicationTicket"
+                  name="flagExcludeIfActiveAdjudicationTicket"
                   label={t('Exclude People with Active Adjudication Ticket')}
                   color="primary"
                   component={FormikCheckboxField}

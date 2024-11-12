@@ -19,14 +19,12 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 import * as Yup from 'yup';
-import { AndDivider, AndDividerLabel } from '../AndDivider';
 import { Exclusions } from '../CreateTargetPopulation/Exclusions';
 import { PaperContainer } from '../PaperContainer';
 import { EditTargetPopulationHeader } from './EditTargetPopulationHeader';
 import { AddFilterTargetingCriteriaDisplay } from '../TargetingCriteriaDisplay/AddFilterTargetingCriteriaDisplay';
 import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
 import { ReactElement } from 'react';
-import { CreateAndEditTPCheckboxes } from '@containers/pages/targeting/CreateAndEditTPCheckboxes';
 
 interface EditTargetPopulationProps {
   targetPopulation: TargetPopulationQuery['targetPopulation'];
@@ -59,23 +57,14 @@ export const EditTargetPopulation = ({
   const [mutate, { loading }] = useUpdateTpMutation();
   const { showMessage } = useSnackbar();
   const { baseUrl } = useBaseUrl();
-  const { selectedProgram, isSocialDctType, isStandardDctType } =
-    useProgramContext();
-
-  const category =
-    targetPopulation.targetingCriteria?.rules.length !== 0 ? 'filters' : 'ids';
-
-  const individualFiltersAvailable =
-    selectedProgram?.dataCollectingType?.individualFiltersAvailable;
-  const householdFiltersAvailable =
-    selectedProgram?.dataCollectingType?.householdFiltersAvailable;
+  const { isSocialDctType, isStandardDctType } = useProgramContext();
 
   const handleValidate = (values): { targetingCriteria?: string } => {
-    const { targetingCriteria } = values;
+    const { targetingCriteria, householdIds, individualIds } = values;
     const errors: { targetingCriteria?: string } = {};
-    if (!targetingCriteria.length && category === 'filters') {
+    if (!targetingCriteria.length && !householdIds && !individualIds) {
       errors.targetingCriteria = t(
-        'You need to select at least one targeting criteria',
+        'You need to select at least one targeting criteria or individual ID or household ID',
       );
     }
     return errors;
@@ -138,7 +127,6 @@ export const EditTargetPopulation = ({
             loading={loading}
             baseUrl={baseUrl}
             targetPopulation={targetPopulation}
-            category={category}
           />
           <PaperContainer>
             <Box pt={3} pb={3}>
@@ -175,69 +163,21 @@ export const EditTargetPopulation = ({
             <Box pt={6} pb={6}>
               <Divider />
             </Box>
-            {category === 'filters' ? (
-              <FieldArray
-                name="targetingCriteria"
-                render={(arrayHelpers) => (
-                  <AddFilterTargetingCriteriaDisplay
-                    helpers={arrayHelpers}
-                    rules={values.targetingCriteria}
-                    isEdit
-                    screenBeneficiary={screenBeneficiary}
-                    isStandardDctType={isStandardDctType}
-                    isSocialDctType={isSocialDctType}
-                  />
-                )}
-              />
-            ) : null}
-            {category === 'ids' ? (
-              <>
-                <Grid container spacing={3}>
-                  {householdFiltersAvailable && (
-                    <Grid item xs={12}>
-                      <Field
-                        data-cy="input-included-household-ids"
-                        name="householdIds"
-                        fullWidth
-                        variant="outlined"
-                        label={t('Household IDs')}
-                        component={FormikTextField}
-                      />
-                    </Grid>
-                  )}
-                  {householdFiltersAvailable && individualFiltersAvailable && (
-                    <Grid item xs={12}>
-                      <AndDivider>
-                        <AndDividerLabel>OR</AndDividerLabel>
-                      </AndDivider>
-                    </Grid>
-                  )}
-                  {individualFiltersAvailable && (
-                    <Grid item xs={12}>
-                      <Box pb={3}>
-                        <Field
-                          data-cy="input-included-individual-ids"
-                          name="individualIds"
-                          fullWidth
-                          variant="outlined"
-                          label={t('Individual IDs')}
-                          component={FormikTextField}
-                        />
-                      </Box>
-                    </Grid>
-                  )}
-                </Grid>
-                <CreateAndEditTPCheckboxes
+            <FieldArray
+              name="targetingCriteria"
+              render={(arrayHelpers) => (
+                <AddFilterTargetingCriteriaDisplay
+                  helpers={arrayHelpers}
+                  rules={values.targetingCriteria}
+                  isEdit
+                  screenBeneficiary={screenBeneficiary}
                   isStandardDctType={isStandardDctType}
                   isSocialDctType={isSocialDctType}
-                  screenBeneficiary={screenBeneficiary}
                 />
-              </>
-            ) : null}
+              )}
+            />
           </PaperContainer>
-          {category === 'filters' && (
-            <Exclusions initialOpen={Boolean(values.excludedIds)} />
-          )}
+          <Exclusions initialOpen={Boolean(values.excludedIds)} />
           <Box
             pt={3}
             pb={3}

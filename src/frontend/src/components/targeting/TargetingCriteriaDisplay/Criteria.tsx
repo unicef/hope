@@ -13,7 +13,6 @@ import {
   Typography,
 } from '@mui/material';
 import { Delete, Edit } from '@mui/icons-material';
-import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import GreaterThanEqual from '../../../assets/GreaterThanEqual.svg';
 import LessThanEqual from '../../../assets/LessThanEqual.svg';
@@ -93,7 +92,7 @@ const CriteriaField = ({ field, choicesDict }): ReactElement => {
   const extractChoiceLabel = (choiceField, argument) => {
     let choices = choicesDict?.[choiceField.fieldName];
     if (!choices) {
-      choices = choiceField.fieldAttribute.choices;
+      choices = choiceField?.fieldAttribute?.choices;
     }
     return choices?.length
       ? choices.find((each) => each.value === argument)?.labelEn
@@ -102,14 +101,13 @@ const CriteriaField = ({ field, choicesDict }): ReactElement => {
 
   const displayValueOrEmpty = (value) => (value ? value : 'Empty');
 
-  const { t } = useTranslation();
   let fieldElement;
 
   switch (field.comparisonMethod) {
     case 'NOT_EQUALS':
       fieldElement = (
         <p>
-          {field.fieldAttribute.labelEn || field.fieldName}:{' '}
+          {field.fieldAttribute?.labelEn || field.fieldName}:{' '}
           <span>{displayValueOrEmpty(field.arguments?.[0])}</span>
         </p>
       );
@@ -117,7 +115,7 @@ const CriteriaField = ({ field, choicesDict }): ReactElement => {
     case 'RANGE':
       fieldElement = (
         <p>
-          {field.fieldAttribute.labelEn || field.fieldName}:{' '}
+          {field.fieldAttribute?.labelEn || field.fieldName}:{' '}
           <span>
             {displayValueOrEmpty(field.arguments?.[0])} -{' '}
             {displayValueOrEmpty(field.arguments?.[1])}
@@ -128,7 +126,7 @@ const CriteriaField = ({ field, choicesDict }): ReactElement => {
     case 'EQUALS':
       fieldElement = (
         <p>
-          {field.fieldAttribute.labelEn || field.fieldName}:{' '}
+          {field.fieldAttribute?.labelEn || field.fieldName}:{' '}
           {field.isNull === true || field.comparisonMethod === 'IS_NULL' ? (
             <BlueText>{t('Empty')}</BlueText>
           ) : typeof field.arguments?.[0] === 'boolean' ? (
@@ -163,14 +161,14 @@ const CriteriaField = ({ field, choicesDict }): ReactElement => {
       break;
     case 'LESS_THAN':
     case 'GREATER_THAN': {
-      const isLessThan = field.type === 'LESS_THAN';
+      const isLessThan = field?.type === 'LESS_THAN';
       const MathSignComponent = isLessThan ? LessThanEqual : GreaterThanEqual;
       const altText = isLessThan ? 'less_than' : 'greater_than';
       const displayValue = field.arguments?.[0];
 
       fieldElement = (
         <p>
-          {field.fieldAttribute.labelEn || field.fieldName}:{' '}
+          {field.fieldAttribute?.labelEn || field.fieldName}:{' '}
           {displayValue && <MathSign src={MathSignComponent} alt={altText} />}
           <span>{displayValueOrEmpty(displayValue)}</span>
         </p>
@@ -180,15 +178,17 @@ const CriteriaField = ({ field, choicesDict }): ReactElement => {
     case 'CONTAINS':
       fieldElement = (
         <p>
-          {field.fieldAttribute.labelEn || field.fieldName}:{' '}
-          {field.arguments?.map((argument, index) => (
-            <Fragment key={index}>
-              <span>
-                {displayValueOrEmpty(extractChoiceLabel(field, argument))}
-              </span>
-              {index !== field.arguments.length - 1 && ', '}
-            </Fragment>
-          ))}
+          {field.fieldAttribute?.labelEn || field.fieldName}:{' '}
+          {field._typename === 'TargetingCollectorBlockRuleFilterNode'
+            ? field.arguments?.[0]
+            : field.arguments?.map((argument, index) => (
+                <Fragment key={index}>
+                  <span>
+                    {displayValueOrEmpty(extractChoiceLabel(field, argument))}
+                  </span>
+                  {index !== field.arguments.length - 1 && ', '}
+                </Fragment>
+              ))}
         </p>
       );
       break;
@@ -205,7 +205,7 @@ const CriteriaField = ({ field, choicesDict }): ReactElement => {
   return (
     <>
       {fieldElement}
-      {field.fieldAttribute.type === 'PDU' &&
+      {field.fieldAttribute?.type === 'PDU' &&
         (field.pduData || field.fieldAttribute.pduData) && (
           <PduDataBox data-cy="round-number-round-name-display">
             Round {field.roundNumber}

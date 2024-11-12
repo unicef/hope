@@ -13,7 +13,6 @@ interface EditTargetPopulationProps {
   baseUrl: string;
   targetPopulation: TargetPopulationQuery['targetPopulation'];
   loading: boolean;
-  category: string;
 }
 
 export const EditTargetPopulationHeader = ({
@@ -22,22 +21,24 @@ export const EditTargetPopulationHeader = ({
   baseUrl,
   targetPopulation,
   loading,
-  category,
 }: EditTargetPopulationProps): ReactElement => {
   const { t } = useTranslation();
 
-  const isSubmitDisabled = () => {
-    if (category === 'filters') {
-      return values.criterias?.length === 0 || !values.name || loading;
-    }
-    if (category === 'ids') {
+  const isSubmitDisabled = (criterias) => {
+    return criterias?.some((criteria) => {
+      const householdsFiltersBlocks = criteria.householdsFiltersBlocks || [];
+      const individualsFiltersBlocks = criteria.individualsFiltersBlocks || [];
+      const collectorsFiltersBlocks = criteria.collectorsFiltersBlocks || [];
+      const individualIds = criteria.individualIds || [];
+      const householdIds = criteria.householdIds || [];
       return (
-        !(values.individualIds || values.householdIds) ||
-        !values.name ||
-        loading
+        householdsFiltersBlocks.length === 0 &&
+        individualsFiltersBlocks.length === 0 &&
+        collectorsFiltersBlocks.length === 0 &&
+        individualIds.length === 0 &&
+        householdIds.length === 0
       );
-    }
-    return true;
+    });
   };
 
   const { id } = useParams();
@@ -72,7 +73,7 @@ export const EditTargetPopulationHeader = ({
             variant="contained"
             color="primary"
             onClick={handleSubmit}
-            disabled={isSubmitDisabled()}
+            disabled={isSubmitDisabled(values.criterias)}
             loading={loading}
             data-cy="button-save"
           >

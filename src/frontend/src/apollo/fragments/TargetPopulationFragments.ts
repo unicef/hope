@@ -122,7 +122,23 @@ export const targetPopulationDetailed = gql`
             }
           }
         }
-        filters {
+        collectorsFiltersBlocks {
+          __typename
+          id
+          createdAt
+          updatedAt
+          collectorBlockFilters {
+            __typename
+            id
+            createdAt
+            updatedAt
+            fieldName
+            comparisonMethod
+            flexFieldClassification
+            arguments
+          }
+        }
+        householdsFiltersBlocks {
           __typename
           id
           fieldName

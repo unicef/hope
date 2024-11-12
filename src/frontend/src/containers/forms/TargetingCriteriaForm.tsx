@@ -83,7 +83,7 @@ const validationSchema = Yup.object().shape({
                 if (
                   parent &&
                   parent.fieldAttribute &&
-                  parent.fieldAttribute.type === 'PDU'
+                  parent.fieldAttribute?.type === 'PDU'
                 ) {
                   return Yup.string().required('Round Number is required');
                 }
@@ -99,9 +99,7 @@ const validationSchema = Yup.object().shape({
       collectorBlockFilters: Yup.array().of(
         Yup.object().shape({
           fieldName: Yup.string().required('Field Type is required'),
-          fieldAttribute: Yup.object().shape({
-            type: Yup.string().required(),
-          }),
+          value: Yup.string().required('Field Value is required'),
         }),
       ),
     }),
@@ -136,7 +134,7 @@ interface TargetingCriteriaFormPropTypes {
 }
 
 const associatedWith = (type) => (item) => item.associatedWith === type;
-const isNot = (type) => (item) => item.type !== type;
+const isNot = (type) => (item) => item?.type !== type;
 
 export const TargetingCriteriaForm = ({
   criteria,
@@ -159,7 +157,6 @@ export const TargetingCriteriaForm = ({
     useAllCollectorFieldsAttributesQuery({
       fetchPolicy: 'cache-first',
     });
-  console.log('1criteria', criteria);
 
   const householdsFiltersBlocksWrapperRef = useRef(null);
   const individualsFiltersBlocksWrapperRef = useRef(null);
@@ -323,8 +320,6 @@ export const TargetingCriteriaForm = ({
         enableReinitialize
       >
         {({ submitForm, values, resetForm, errors }) => {
-          console.log('values', values);
-
           return (
             <Dialog
               open={open}

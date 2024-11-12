@@ -4785,6 +4785,48 @@ enum TargetPopulationStatus {
   ASSIGNED
 }
 
+enum TargetingCollectorBlockRuleFilterComparisonMethod {
+  EQUALS
+  NOT_EQUALS
+  CONTAINS
+  NOT_CONTAINS
+  RANGE
+  NOT_IN_RANGE
+  GREATER_THAN
+  LESS_THAN
+  IS_NULL
+}
+
+enum TargetingCollectorBlockRuleFilterFlexFieldClassification {
+  NOT_FLEX_FIELD
+  FLEX_FIELD_BASIC
+  FLEX_FIELD_PDU
+}
+
+type TargetingCollectorBlockRuleFilterNode {
+  id: UUID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  collectorBlockFilters: TargetingCollectorRuleFilterBlockNode!
+  fieldName: String!
+  comparisonMethod: TargetingCollectorBlockRuleFilterComparisonMethod!
+  flexFieldClassification: TargetingCollectorBlockRuleFilterFlexFieldClassification!
+  arguments: [Arg]
+  roundNumber: Int
+}
+
+type TargetingCollectorRuleFilterBlockNode {
+  id: UUID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  targetingCriteriaRule: TargetingCriteriaRuleNode!
+  collectorBlockFilters: [TargetingCollectorBlockRuleFilterNode]
+}
+
+input TargetingCollectorRuleFilterBlockObjectType {
+  collectorBlockFilters: [TargetingCriteriaRuleFilterObjectType]
+}
+
 type TargetingCriteriaNode {
   id: UUID!
   createdAt: DateTime!
@@ -4850,15 +4892,17 @@ type TargetingCriteriaRuleNode {
   householdIds: String!
   individualIds: String!
   individualsFiltersBlocks: [TargetingIndividualRuleFilterBlockNode]
-  filters: [TargetingCriteriaRuleFilterNode]
+  collectorFiltersBlocks: [TargetingCollectorRuleFilterBlockNode!]!
+  householdsFiltersBlocks: [TargetingCriteriaRuleFilterNode]
+  collectorsFiltersBlocks: [TargetingCollectorRuleFilterBlockNode]
 }
 
 input TargetingCriteriaRuleObjectType {
   householdsFiltersBlocks: [TargetingCriteriaRuleFilterObjectType]
   householdIds: String
-  individualsFiltersBlocks: [TargetingCriteriaRuleFilterObjectType]
+  individualsFiltersBlocks: [TargetingIndividualRuleFilterBlockObjectType]
   individualIds: String
-  collectorsFiltersBlocks: [TargetingCriteriaRuleFilterObjectType]
+  collectorsFiltersBlocks: [TargetingCollectorRuleFilterBlockObjectType]
 }
 
 enum TargetingIndividualBlockRuleFilterComparisonMethod {
@@ -4899,6 +4943,10 @@ type TargetingIndividualRuleFilterBlockNode {
   targetingCriteriaRule: TargetingCriteriaRuleNode!
   targetOnlyHoh: Boolean!
   individualBlockFilters: [TargetingIndividualBlockRuleFilterNode]
+}
+
+input TargetingIndividualRuleFilterBlockObjectType {
+  individualBlockFilters: [TargetingCriteriaRuleFilterObjectType]
 }
 
 type TicketAddIndividualDetailsNode implements Node {

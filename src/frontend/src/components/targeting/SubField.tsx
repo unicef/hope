@@ -239,7 +239,7 @@ export const SubField: FC<SubFieldProps> = ({
         return (
           <Field
             name={`${baseName}.value`}
-            label={`${field.fieldAttribute.labelEn}`}
+            label={`${field.fieldAttribute?.labelEn || field.fieldName}`}
             fullWidth
             variant="outlined"
             component={FormikTextField}
@@ -323,5 +323,5 @@ export const SubField: FC<SubFieldProps> = ({
     }
   };
 
-  return renderFieldByType(field.fieldAttribute.type);
+  return renderFieldByType(field.fieldAttribute?.type || 'STRING');
 };

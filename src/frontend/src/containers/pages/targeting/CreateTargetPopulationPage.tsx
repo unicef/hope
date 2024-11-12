@@ -26,7 +26,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 import * as Yup from 'yup';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
-import { CreateAndEditTPCheckboxes } from './CreateAndEditTPCheckboxes';
 
 export const CreateTargetPopulationPage = (): ReactElement => {
   const { t } = useTranslation();
@@ -78,7 +77,6 @@ export const CreateTargetPopulationPage = (): ReactElement => {
   });
 
   const handleSubmit = async (values): Promise<void> => {
-    console.log('valuses', values);
     try {
       const res = await mutate({
         variables: {
@@ -176,13 +174,9 @@ export const CreateTargetPopulationPage = (): ReactElement => {
                     )}
                   />
                 ) : null}
-                <CreateAndEditTPCheckboxes
-                  isStandardDctType={isStandardDctType}
-                  isSocialDctType={isSocialDctType}
-                  screenBeneficiary={screenBeneficiary}
-                />
               </PaperContainer>
               <Exclusions />
+
               <Box
                 pt={3}
                 pb={3}

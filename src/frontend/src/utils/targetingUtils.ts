@@ -168,7 +168,6 @@ function mapBlockFilters(blocks, blockKey) {
 }
 
 export function mapCriteriaToInitialValues(criteria) {
-  console.log('111criteria', criteria);
   const individualIds = criteria.individualIds || '';
   const householdIds = criteria.householdIds || '';
   const householdsFiltersBlocks = criteria.householdsFiltersBlocks || [];
@@ -193,11 +192,10 @@ export function mapCriteriaToInitialValues(criteria) {
 // TODO Marącin make Type to this function
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function formatCriteriaFilters(filters) {
-  console.log('filters', filters);
   return filters.map((each) => {
     let comparisonMethod;
     let values;
-    switch (each.fieldAttribute.type) {
+    switch (each.fieldAttribute?.type) {
       case 'SELECT_ONE':
         comparisonMethod = 'EQUALS';
         values = [each.value];

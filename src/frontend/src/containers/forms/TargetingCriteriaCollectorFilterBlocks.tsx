@@ -87,7 +87,6 @@ export const TargetingCriteriaCollectorFilterBlocks = ({
 
   return (
     <div>
-      Set Collector Criteria
       <FieldArray
         name={`collectorsFiltersBlocks[${blockIndex}].collectorBlockFilters`}
         render={(arrayHelpers) => (

@@ -135,6 +135,7 @@ export const AddFilterTargetingCriteriaDisplay = ({
 
   const regex = /(create|edit-tp)/;
   const isDetailsPage = !regex.test(location.pathname);
+
   const openModal = (criteria): void => {
     setCriteria(criteria);
     setOpen(true);
