@@ -3,8 +3,9 @@ from typing import Any, Dict, Optional
 
 from django.conf import settings
 
-import requests
 from constance import config
+
+from hct_mis_api.apps.utils.celery_tasks import send_email_task
 
 
 class MailjetClient:
@@ -44,9 +45,9 @@ class MailjetClient:
         if self.mailjet_template_id and not self.variables:
             raise ValueError("You need to provide body variables for template email")
 
-    def send_email(self) -> bool:
+    def send_email(self) -> None:
         if not config.ENABLE_MAILJET:
-            return False
+            return
 
         self._validate_email_data()
 
@@ -75,12 +76,7 @@ class MailjetClient:
             ]
         }
         data_json = json.dumps(data)
-        res = requests.post(
-            "https://api.mailjet.com/v3.1/send",
-            auth=(settings.MAILJET_API_KEY, settings.MAILJET_SECRET_KEY),
-            data=data_json,
-        )
-        return res.status_code == 200
+        send_email_task.delay(data_json)
 
     def _get_email_body(self) -> Dict[str, Any]:
         """
