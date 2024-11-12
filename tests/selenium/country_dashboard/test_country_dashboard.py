@@ -77,6 +77,9 @@ class TestSmokeCountryDashboard:
         assert pageCountryDashboard.driver.find_element(
             By.ID, "payments-by-sector"
         ).is_displayed(), "Payments by Sector chart should be displayed."
+        assert pageCountryDashboard.driver.find_element(
+            By.ID, "payments-by-admin1"
+        ).is_displayed(), "Payments by Admin 1 chart should be displayed."
 
         pageCountryDashboard.switch_to_default_content()
         print("All checks in the Country Dashboard iframe passed successfully.")

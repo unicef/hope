@@ -109,10 +109,10 @@
         </div>
         <div class="bg-white p-3 rounded shadow">
           <h3 class="text-lg font-semibold">
-            <span class="icon icon-calendar icon-blue"></span>
-            {% translate "Payments by Quarter" %}
+            <span class="icon icon-cash-transfer icon-blue"></span>
+            {% translate "Payments by Admin 1" %}
           </h3>
-          <div id="payments-by-quarter" class="dc-chart"></div>
+          <div id="payments-by-admin1" class="dc-chart"></div>
         </div>
         <div class="bg-white p-3 rounded shadow">
           <h3 class="text-lg font-semibold">
@@ -184,7 +184,7 @@
                 const url = "{{household_data_url}}";
 
                 function createDashboard() {
-                    ["payments-by-fsp", "payments-by-delivery", "payments-by-sector", "volume-by-program", "payments-by-quarter", "payments-by-month"].forEach(showSpinner);
+                    ["payments-by-fsp", "payments-by-delivery", "payments-by-sector", "volume-by-program", "payments-by-admin1", "payments-by-month"].forEach(showSpinner);
 
                     d3.json(url).then(function(data) {
                         if (!data || data.length === 0) {
@@ -221,13 +221,13 @@
                         const volumeDim = ndx.dimension(d => d.program);
                         const idDim = ndx.dimension(d => d.id);
                         const monthDim = ndx.dimension(d => d.month);
-                        const quarterDim = ndx.dimension(d => d.month);
+                        const admin1Dim = ndx.dimension(d => d.admin1);
 
                         const fspGroup = fspDim.group().reduceSum(d => d.delivered_quantity_usd);
                         const deliveryGroup = deliveryDim.group().reduceSum(d => d.delivered_quantity_usd);
                         const sectorGroup = sectorDim.group().reduceSum(d => d.delivered_quantity_usd);
                         const volumeGroup = volumeDim.group().reduceSum(d => d.delivered_quantity_usd);
-                        const quarterGroup = quarterDim.group().reduceSum(d => d.delivered_quantity_usd);
+                        const admin1Group = admin1Dim.group().reduceSum(d => d.delivered_quantity_usd);
                         const monthGroup = monthDim.group().reduceSum(d => d.delivered_quantity_usd);
 
                         // Define charts
@@ -286,14 +286,14 @@
                             .title(d => `${d.key}: ${numberFormatter(d.value)} USD`)
                             .ordering(d => monthOrder[d.key]);
 
-                        const quarterChart = dc.pieChart("#payments-by-quarter")
-                            .dimension(quarterDim)
-                            .group(quarterGroup)
-                            .radius(100)
+                        const admin1Chart = dc.pieChart("#payments-by-admin1")
+                            .dimension(admin1Dim)
+                            .group(admin1Group)
+                            .radius(280)
                             .innerRadius(40)
                             .renderLabel(true)
                             .useViewBoxResizing(true)
-                            .label(d => `${d.key} ${(d.value / quarterGroup.all().reduce((sum, g) => sum + g.value, 0) * 100).toFixed(0)}%`)
+                            .label(d => `${d.key} ${(d.value / admin1Group.all().reduce((sum, g) => sum + g.value, 0) * 100).toFixed(0)}%`)
                             .title(d => `${d.key}: ${numberFormatter(d.value)} USD`);
 
 
@@ -392,7 +392,7 @@
                         if (uniqueYears.includes(currentYear)) changeYear(currentYear);
                         else if (uniqueYears.length > 0) changeYear(uniqueYears[0]);
 
-                        const dcCharts = [fspChart, deliveryChart, sectorChart, volumeChart, quarterChart, monthChart];
+                        const dcCharts = [fspChart, deliveryChart, sectorChart, volumeChart, admin1Chart, monthChart];
                         dcCharts.forEach(chart => {
                             if (chart.on) chart.on('filtered', updateTopMetrics);
                         });
@@ -400,7 +400,7 @@
                         hideSpinner("payments-by-delivery");
                         hideSpinner("payments-by-sector");
                         hideSpinner("volume-by-program");
-                        hideSpinner("payments-by-quarter");
+                        hideSpinner("payments-by-admin1");
                         hideSpinner("payments-by-month");
                         dc.renderAll();
                         isChartsInitialized = true;
