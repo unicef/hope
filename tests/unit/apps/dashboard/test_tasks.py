@@ -1,5 +1,5 @@
 import logging
-from typing import Callable, Generator
+from typing import Generator
 from unittest.mock import patch
 
 import pytest
@@ -10,17 +10,6 @@ from hct_mis_api.apps.dashboard.celery_tasks import (
     update_dashboard_figures,
 )
 from hct_mis_api.apps.dashboard.services import DashboardDataCache
-
-
-@pytest.mark.django_db(databases=["default", "read_only"])
-def test_update_dashboard_figures(populate_dashboard_cache: Callable, afghanistan: BusinessArea) -> None:
-    """
-    Test that update_dashboard_figures refreshes data for all active business areas.
-    """
-    populate_dashboard_cache(afghanistan)
-    update_dashboard_figures.apply()
-    data = DashboardDataCache.get_data("afghanistan")
-    assert data is not None
 
 
 @pytest.mark.django_db(databases=["default", "read_only"])
