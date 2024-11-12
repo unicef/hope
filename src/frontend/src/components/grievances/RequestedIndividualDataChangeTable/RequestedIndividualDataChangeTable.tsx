@@ -50,7 +50,7 @@ export function RequestedIndividualDataChangeTable({
     flex_fields: flexFields,
     delivery_mechanism_data: deliveryMechanismData,
     delivery_mechanism_data_to_edit: deliveryMechanismDataToEdit,
-    delivery_mechanism_data_to_remove: deliveryMechanismDataToEditToRemove,
+    delivery_mechanism_data_to_remove: deliveryMechanismDataToRemove,
     ...restIndividualData
   } = individualData;
   const entries = restIndividualData && Object.entries(restIndividualData);
