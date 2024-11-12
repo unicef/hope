@@ -144,7 +144,9 @@ def from_input_to_targeting_criteria(targeting_criteria_input: Dict, program: Pr
         ind_block.save()
         for ind_filter_block in individuals_filters_blocks:
             for ind_filter in ind_filter_block.get("individual_block_filters", []):
-                individual_filter = TargetingIndividualBlockRuleFilter(individuals_filters_block=ind_block, **ind_filter)
+                individual_filter = TargetingIndividualBlockRuleFilter(
+                    individuals_filters_block=ind_block, **ind_filter
+                )
                 individual_filter.save()
 
         collector_block = TargetingCollectorRuleFilterBlock(targeting_criteria_rule=tc_rule)
