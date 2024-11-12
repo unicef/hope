@@ -213,7 +213,7 @@ class PaymentPlanSupportingDocumentViewSet(
         document = self.get_object()
         file_url = document.file.url
         file_mimetype, _ = mimetypes.guess_type(file_url)
-        response = requests.get(file_url, stream=True)
-        response = FileResponse(response.raw, content_type=file_mimetype or "application/octet-stream")
+        resp = requests.get(file_url, stream=True)
+        response = FileResponse(resp.raw, content_type=file_mimetype or "application/octet-stream")
         response["Content-Disposition"] = f"attachment; filename={document.file.name.split('/')[-1]}"
         return response
