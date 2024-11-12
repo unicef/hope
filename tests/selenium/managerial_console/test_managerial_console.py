@@ -1,4 +1,6 @@
+import warnings
 from datetime import datetime
+from typing import Optional
 
 from django.utils import timezone
 
@@ -7,7 +9,7 @@ from dateutil.relativedelta import relativedelta
 from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.account.models import User
+from hct_mis_api.apps.account.models import Partner, User
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.payment.fixtures import ApprovalProcessFactory, PaymentPlanFactory
@@ -28,7 +30,7 @@ pytestmark = pytest.mark.django_db(transaction=True)
 
 @pytest.fixture
 def create_active_test_program() -> Program:
-    yield create_program("Test Programm")
+    yield create_program("Test Programm", partner=Partner.objects.filter(name="UNHCR").first())
 
 
 @pytest.fixture
@@ -37,7 +39,10 @@ def second_test_program() -> Program:
 
 
 def create_program(
-    name: str, dct_type: str = DataCollectingType.Type.STANDARD, status: str = Program.ACTIVE
+    name: str,
+    dct_type: str = DataCollectingType.Type.STANDARD,
+    status: str = Program.ACTIVE,
+    partner: Optional[Partner] = None,
 ) -> Program:
     BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
     dct = DataCollectingTypeFactory(type=dct_type)
@@ -48,6 +53,8 @@ def create_program(
         data_collecting_type=dct,
         status=status,
     )
+    if partner:
+        program.partners.add(partner.id)
     return program
 
 
@@ -94,6 +101,8 @@ def create_payment_plan(create_active_test_program: Program, second_test_program
 
 @pytest.mark.usefixtures("login")
 class TestSmokeManagerialConsole:
+    from django.test import override_settings
+
     def test_managerial_console_smoke_test(
         self, pageManagerialConsole: ManagerialConsole, create_active_test_program: Program
     ) -> None:
@@ -116,25 +125,44 @@ class TestSmokeManagerialConsole:
             status=PaymentPlan.Status.IN_APPROVAL,
             business_area=BusinessArea.objects.filter(slug="afghanistan").first(),
         )
+        program.refresh_from_db()
         PaymentPlanFactory(
             program=program,
             status=PaymentPlan.Status.IN_AUTHORIZATION,
             business_area=BusinessArea.objects.filter(slug="afghanistan").first(),
         )
+        program.refresh_from_db()
         PaymentPlanFactory(
             program=program,
             status=PaymentPlan.Status.IN_REVIEW,
             business_area=BusinessArea.objects.filter(slug="afghanistan").first(),
         )
-        PaymentPlanFactory(
+        program.refresh_from_db()
+        payment = PaymentPlanFactory(
             program=program,
             status=PaymentPlan.Status.ACCEPTED,
             business_area=BusinessArea.objects.filter(slug="afghanistan").first(),
         )
-        pageManagerialConsole.driver.refresh()
+        program.refresh_from_db()
+        program.save()
+        program.refresh_from_db()
+        pageManagerialConsole.getMenuUserProfile().click()
+        pageManagerialConsole.getMenuItemClearCache().click()
 
-        pageManagerialConsole.getSelectAllApproval()
-        pageManagerialConsole.getProgramSelectApproval()
+        try:
+            pageManagerialConsole.getSelectAllApproval()
+            pageManagerialConsole.getProgramSelectApproval()
+        except BaseException:
+            # ToDo: Workaround for cache issues
+            with pytest.warns(Warning):
+                warnings.warn("Clear cache did not reload data. Clear cache was triggered reload again.", Warning)
+            payment.refresh_from_db()
+            pageManagerialConsole.driver.refresh()
+            pageManagerialConsole.getMenuUserProfile().click()
+            pageManagerialConsole.getMenuItemClearCache().click()
+            pageManagerialConsole.getSelectAllApproval()
+            pageManagerialConsole.getProgramSelectApproval()
+
         with pytest.raises(Exception):
             pageManagerialConsole.getApproveButton().click()
 
