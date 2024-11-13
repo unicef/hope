@@ -118,8 +118,8 @@ class TargetingIndividualBlockRuleFilterNode(DjangoObjectType):
 class TargetingCollectorBlockRuleFilterNode(DjangoObjectType):
     arguments = graphene.List(Arg)
 
-    def resolve_arguments(self, info: Any) -> "GrapheneList":
-        return self.arguments
+    def resolve_arguments(parent, info: Any) -> "GrapheneList":
+        return parent.arguments
 
     class Meta:
         model = target_models.TargetingCollectorBlockRuleFilter
@@ -128,8 +128,8 @@ class TargetingCollectorBlockRuleFilterNode(DjangoObjectType):
 class TargetingIndividualRuleFilterBlockNode(DjangoObjectType):
     individual_block_filters = graphene.List(TargetingIndividualBlockRuleFilterNode)
 
-    def resolve_individual_block_filters(self, info: Any) -> "QuerySet":
-        return self.individual_block_filters.all()
+    def resolve_individual_block_filters(parent, info: Any) -> "QuerySet":
+        return parent.individual_block_filters.all()
 
     class Meta:
         model = target_models.TargetingIndividualRuleFilterBlock
@@ -138,8 +138,8 @@ class TargetingIndividualRuleFilterBlockNode(DjangoObjectType):
 class TargetingCollectorRuleFilterBlockNode(DjangoObjectType):
     collector_block_filters = graphene.List(TargetingCollectorBlockRuleFilterNode)
 
-    def resolve_collector_block_filters(self, info: Any) -> "QuerySet":
-        return self.collector_block_filters.all()
+    def resolve_collector_block_filters(parent, info: Any) -> "QuerySet":
+        return parent.collector_block_filters.all()
 
     class Meta:
         model = target_models.TargetingCollectorRuleFilterBlock
@@ -148,16 +148,12 @@ class TargetingCollectorRuleFilterBlockNode(DjangoObjectType):
 class TargetingCriteriaRuleNode(DjangoObjectType):
     households_filters_blocks = graphene.List(TargetingCriteriaRuleFilterNode)
     individuals_filters_blocks = graphene.List(TargetingIndividualRuleFilterBlockNode)
-    collectors_filters_blocks = graphene.List(TargetingCollectorRuleFilterBlockNode)
 
     def resolve_individuals_filters_blocks(self, info: Any) -> "QuerySet[TargetingIndividualRuleFilterBlock]":
         return self.individuals_filters_blocks.all()
 
     def resolve_households_filters_blocks(self, info: Any) -> "QuerySet[TargetPopulationFilter]":
         return self.filters.all()
-
-    def resolve_collectors_filters_blocks(self, info: Any) -> "QuerySet[TargetingCollectorRuleFilterBlock]":
-        return self.collector_filters_blocks.all()
 
     class Meta:
         model = target_models.TargetingCriteriaRule

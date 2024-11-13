@@ -9,7 +9,7 @@ from django.core.validators import (
     ProhibitNullCharactersValidator,
 )
 from django.db import models
-from django.db.models import JSONField, Q
+from django.db.models import JSONField, Q, OuterRef, Subquery
 from django.db.models.constraints import UniqueConstraint
 from django.utils.text import Truncator
 from django.utils.translation import gettext_lazy as _
@@ -22,7 +22,7 @@ from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldF
 from hct_mis_api.apps.core.field_attributes.fields_types import Scope
 from hct_mis_api.apps.core.models import StorageFile
 from hct_mis_api.apps.core.utils import map_unicef_ids_to_households_unicef_ids
-from hct_mis_api.apps.household.models import Household
+from hct_mis_api.apps.household.models import Household, IndividualRoleInHousehold, ROLE_PRIMARY, Individual
 from hct_mis_api.apps.steficon.models import Rule, RuleCommit
 from hct_mis_api.apps.targeting.choices import FlexFieldClassification
 from hct_mis_api.apps.targeting.services.targeting_service import (
@@ -429,8 +429,8 @@ class TargetingCriteriaRule(TimeStampedUUIDModel, TargetingCriteriaRuleQueryingB
     def get_individuals_filters_blocks(self) -> "QuerySet":
         return self.individuals_filters_blocks.all()
 
-    def get_collectors_filters_blocks(self) -> "QuerySet":
-        return self.collectors_filters_blocks.all()
+    # def get_collectors_filters_blocks(self) -> "QuerySet":
+    #     return self.collectors_filters_blocks.all()
 
     def get_query(self) -> Q:
         query = super().get_query()
@@ -565,7 +565,7 @@ class TargetingCollectorRuleFilterBlock(
 
 class TargetingCollectorBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterBase):
     """
-    This is one field like 'bank_account_number__transfer_to_account'
+    This is one field like 'bank_account_number__transfer_to_account' - YES, NO
     """
 
     collector_block_filters = models.ForeignKey(
@@ -593,16 +593,24 @@ class TargetingCollectorBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteriaF
     def get_query(self) -> Q:
         query = super().get_query()
 
-        # check if collector has all fields from 'field_name'
-        # TODO: update query
-        # Ind collector.delivery_mechanisms_data
-
-        # Filter individuals where at least one related delivery_mechanism_data has the "data22" key
-        # if YES
-        # individuals_with_bank_account = Individual.objects.filter(
-        #     delivery_mechanisms_data__data__has_key="bank_account"
-        # )
-        # if NO
-        # ~Q(delivery_mechanisms_data__data__has_key="bank_account")
-
+        collector_subquery = IndividualRoleInHousehold.objects.filter(
+            household=OuterRef("pk"),
+            role=ROLE_PRIMARY
+        ).values("individual")[:1]
+        # TODO: add if else based on arguments?
+        # if argument is YES
+        individuals_with_field_sub_query = Individual.objects.filter(
+            pk__in=Subquery(collector_subquery),
+            delivery_mechanisms_data__is_valid=True,
+            delivery_mechanisms_data__data__has_key=self.field_name
+        )
+        # else argument is NO
+        individuals_with_field_sub_query = Individual.objects.exclude(
+            pk__in=Subquery(collector_subquery),
+            delivery_mechanisms_data__is_valid=True,
+            delivery_mechanisms_data__data__has_key=self.field_name
+        )
+        query &= Q(
+            pk__in=Subquery(individuals_with_field_sub_query.values("household"))
+        )
         return query
