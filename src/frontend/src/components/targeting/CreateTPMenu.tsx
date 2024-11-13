@@ -22,7 +22,7 @@ export const CreateTPMenu = (): ReactElement => {
           )}
           component={Link}
           to={`/${baseUrl}/target-population/create`}
-          data-cy="button-target-population-create-new"
+          dataCy="button-new-tp-disabled"
           disabled={!isActiveProgram}
         >
           {t('Create New')}

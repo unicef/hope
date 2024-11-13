@@ -60,7 +60,11 @@ export const CreateTargetPopulationHeader = ({
     >
       <>
         <Box m={2}>
-          <Button component={Link} to={`/${baseUrl}/target-population`}>
+          <Button
+            data-cy="button-cancel"
+            component={Link}
+            to={`/${baseUrl}/target-population`}
+          >
             {t('Cancel')}
           </Button>
         </Box>

@@ -89,7 +89,7 @@ const PduDataBox = styled(Box)`
   margin: ${({ theme }) => theme.spacing(3)};
 `;
 
-const CriteriaField = ({ field, choicesDict }): ReactElement => {
+const CriteriaField = ({ field, choicesDict, dataCy }): ReactElement => {
   const extractChoiceLabel = (choiceField, argument) => {
     let choices = choicesDict?.[choiceField.fieldName];
     if (!choices) {
@@ -205,7 +205,7 @@ const CriteriaField = ({ field, choicesDict }): ReactElement => {
 
   return (
     <>
-      {fieldElement}
+      <div data-cy={dataCy}>{fieldElement}</div>
       {field.fieldAttribute?.type === 'PDU' &&
         (field.pduData || field.fieldAttribute.pduData) && (
           <PduDataBox data-cy="round-number-round-name-display">
@@ -338,17 +338,22 @@ export function Criteria({
           choicesDict={allDataFieldsChoicesDict}
           key={index}
           field={each}
+          dataCy={`criteria-field-${index}`}
         />
       ))}
       {individualsFiltersBlocks.map(
         (item, index) =>
           item.individualBlockFilters.length > 0 && (
-            <CriteriaSetBox key={index}>
+            <CriteriaSetBox
+              key={index}
+              data-cy={`individuals-criteria-set-box-${index}`}
+            >
               {item.individualBlockFilters.map((filter, filterIndex) => (
                 <CriteriaField
                   choicesDict={allDataFieldsChoicesDict}
                   key={filterIndex}
                   field={filter}
+                  dataCy={`individuals-criteria-field-${filterIndex}`}
                 />
               ))}
             </CriteriaSetBox>
@@ -357,12 +362,16 @@ export function Criteria({
       {collectorsFiltersBlocks.map(
         (item, index) =>
           item.collectorBlockFilters.length > 0 && (
-            <CriteriaSetBox key={index}>
+            <CriteriaSetBox
+              key={index}
+              data-cy={`collectors-criteria-set-box-${index}`}
+            >
               {item.collectorBlockFilters.map((filter, filterIndex) => (
                 <CriteriaField
                   choicesDict={allCollectorFieldsChoicesDict}
                   key={filterIndex}
                   field={filter}
+                  dataCy={`collectors-criteria-field-${filterIndex}`}
                 />
               ))}
             </CriteriaSetBox>

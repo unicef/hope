@@ -119,7 +119,7 @@ export const EditTargetPopulation = ({
       onSubmit={handleSubmit}
     >
       {({ values, submitForm, errors, setFieldValue }) => (
-        <Form>
+        <Form data-cy="edit-target-population-form">
           <AutoSubmitFormOnEnter />
           <EditTargetPopulationHeader
             handleSubmit={submitForm}
@@ -127,8 +127,9 @@ export const EditTargetPopulation = ({
             loading={loading}
             baseUrl={baseUrl}
             targetPopulation={targetPopulation}
+            data-cy="edit-target-population-header"
           />
-          <PaperContainer>
+          <PaperContainer data-cy="paper-container">
             <Box pt={3} pb={3}>
               <Typography variant="h6">{t('Targeting Criteria')}</Typography>
             </Box>
@@ -142,6 +143,7 @@ export const EditTargetPopulation = ({
                   required
                   // @ts-ignore
                   error={errors.programCycleId?.value}
+                  data-cy="program-cycle-autocomplete"
                 />
               </Grid>
             </Grid>
@@ -155,7 +157,6 @@ export const EditTargetPopulation = ({
                   required
                   component={FormikTextField}
                   variant="outlined"
-                  data-cy="input-name"
                   disabled={targetPopulation.status === 'LOCKED'}
                 />
               </Grid>
@@ -173,17 +174,22 @@ export const EditTargetPopulation = ({
                   screenBeneficiary={screenBeneficiary}
                   isStandardDctType={isStandardDctType}
                   isSocialDctType={isSocialDctType}
+                  data-cy="add-filter-targeting-criteria-display"
                 />
               )}
             />
           </PaperContainer>
-          <Exclusions initialOpen={Boolean(values.excludedIds)} />
+          <Exclusions
+            initialOpen={Boolean(values.excludedIds)}
+            data-cy="exclusions"
+          />
           <Box
             pt={3}
             pb={3}
             display="flex"
             flexDirection="column"
             alignItems="center"
+            data-cy="save-message-box"
           >
             <Typography style={{ color: '#b1b1b5' }} variant="h6">
               {t('Save to see the list of households')}
