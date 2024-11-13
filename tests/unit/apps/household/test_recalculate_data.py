@@ -24,6 +24,7 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.household.services.household_recalculate_data import (
     recalculate_data,
 )
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 
 
@@ -32,12 +33,16 @@ class TestRecalculateData(TestCase):
     def setUpTestData(cls) -> None:
         super().setUpTestData()
         create_afghanistan()
-
+        cls.program = ProgramFactory()
+        data_collecting_type = cls.program.data_collecting_type
+        data_collecting_type.recalculate_composition = True
+        data_collecting_type.save()
         business_area = BusinessArea.objects.first()
         registration_data_import = RegistrationDataImportFactory(business_area=business_area)
 
         cls.household_data = {
             "business_area": business_area,
+            "program": cls.program,
             "registration_data_import": registration_data_import,
             "female_age_group_0_5_count": 2,
             "female_age_group_6_11_count": 1,
@@ -76,6 +81,7 @@ class TestRecalculateData(TestCase):
                 "pregnant": True,
                 "first_registration_date": timezone.make_aware(datetime.datetime.strptime("2020-10-29", "%Y-%m-%d")),
                 "physical_disability": "LOT_DIFFICULTY",
+                "program": cls.program,
             },
             {
                 "registration_data_import": registration_data_import,
@@ -86,6 +92,7 @@ class TestRecalculateData(TestCase):
                 "pregnant": True,
                 "first_registration_date": timezone.make_aware(datetime.datetime.strptime("2021-07-03", "%Y-%m-%d")),
                 "selfcare_disability": "CANNOT_DO",
+                "program": cls.program,
             },
             {
                 "registration_data_import": registration_data_import,
@@ -96,6 +103,7 @@ class TestRecalculateData(TestCase):
                 "pregnant": False,
                 "first_registration_date": timezone.make_aware(datetime.datetime.strptime("2021-01-11", "%Y-%m-%d")),
                 "memory_disability": "LOT_DIFFICULTY",
+                "program": cls.program,
             },
             {
                 "registration_data_import": registration_data_import,
@@ -111,6 +119,7 @@ class TestRecalculateData(TestCase):
                 "memory_disability": "LOT_DIFFICULTY",
                 "selfcare_disability": "LOT_DIFFICULTY",
                 "comms_disability": "LOT_DIFFICULTY",
+                "program": cls.program,
             },
             {
                 "registration_data_import": registration_data_import,
@@ -121,6 +130,7 @@ class TestRecalculateData(TestCase):
                 "pregnant": False,
                 "first_registration_date": timezone.make_aware(datetime.datetime.strptime("2021-01-11", "%Y-%m-%d")),
                 "hearing_disability": "CANNOT_DO",
+                "program": cls.program,
             },
             {
                 "registration_data_import": registration_data_import,
@@ -131,6 +141,7 @@ class TestRecalculateData(TestCase):
                 "pregnant": False,
                 "first_registration_date": timezone.make_aware(datetime.datetime.strptime("2021-01-11", "%Y-%m-%d")),
                 "hearing_disability": "CANNOT_DO",
+                "program": cls.program,
             },
             {
                 "registration_data_import": registration_data_import,
@@ -142,6 +153,7 @@ class TestRecalculateData(TestCase):
                 "first_registration_date": timezone.make_aware(datetime.datetime.strptime("2020-10-29", "%Y-%m-%d")),
                 "memory_disability": "LOT_DIFFICULTY",
                 "comms_disability": "LOT_DIFFICULTY",
+                "program": cls.program,
             },
         ]
 

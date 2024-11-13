@@ -136,7 +136,7 @@ def pytest_configure(config) -> None:  # type: ignore
 
     settings.EXCHANGE_RATE_CACHE_EXPIRY = 0
     settings.USE_DUMMY_EXCHANGE_RATES = True
-
+    settings.DATABASES["read_only"]["TEST"] = {"MIRROR": "default"}
     settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
     settings.CSRF_COOKIE_SECURE = False
     settings.CSRF_COOKIE_HTTPONLY = False
