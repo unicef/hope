@@ -5,16 +5,11 @@ import { BlackLink } from '@core/BlackLink';
 import { StatusBox } from '@core/StatusBox';
 import { ClickableTableRow } from '@core/Table/ClickableTableRow';
 import { UniversalMoment } from '@core/UniversalMoment';
-import { TargetPopulationQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import TableCell from '@mui/material/TableCell';
 import { useQuery } from '@tanstack/react-query';
 import { targetPopulationStatusToColor } from '@utils/utils';
 import { ReactElement, useState } from 'react';
-
-interface TargetPopulationTableProps {
-  program: TargetPopulationQuery['program'];
-}
 
 const headCells: HeadCell<TargetPopulation>[] = [
   {
@@ -72,9 +67,7 @@ interface TargetPopulation {
   createdBy: string;
 }
 
-export const TargetPopulationTableRest = ({
-  program,
-}: TargetPopulationTableProps) => {
+export const TargetPopulationTableRest = ({ program }) => {
   const [queryVariables, setQueryVariables] = useState({
     offset: 0,
     limit: 5,
