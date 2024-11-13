@@ -431,9 +431,9 @@ export const TargetingCriteriaForm = ({
                     </ButtonBox>
                   </Box>
                 ) : null}
-                {individualFiltersAvailable && !isSocialWorkingProgram ? (
+                {individualFiltersAvailable ? (
                   <>
-                    {householdFiltersAvailable ? (
+                    {individualFiltersAvailable ? (
                       <AndDivider>
                         <AndDividerLabel>And</AndDividerLabel>
                       </AndDivider>
@@ -514,17 +514,19 @@ export const TargetingCriteriaForm = ({
                           arrayHelpers={arrayHelpers}
                           ref={collectorsFiltersBlocksWrapperRef}
                         >
-                          {values.collectorsFiltersBlocks.map((each, index) => (
-                            <TargetingCriteriaCollectorFilterBlocks
-                              // eslint-disable-next-line
-                              key={index}
-                              blockIndex={index}
-                              data={allCollectorFieldsAttributesData}
-                              values={values}
-                              choicesToDict={allCollectorFieldsChoicesDict}
-                              onDelete={() => arrayHelpers.remove(index)}
-                            />
-                          ))}
+                          {values.collectorsFiltersBlocks.map(
+                            (_each, index) => (
+                              <TargetingCriteriaCollectorFilterBlocks
+                                // eslint-disable-next-line
+                                key={index}
+                                blockIndex={index}
+                                data={allCollectorFieldsAttributesData}
+                                values={values}
+                                choicesToDict={allCollectorFieldsChoicesDict}
+                                onDelete={() => arrayHelpers.remove(index)}
+                              />
+                            ),
+                          )}
                         </ArrayFieldWrapper>
                       )}
                     />

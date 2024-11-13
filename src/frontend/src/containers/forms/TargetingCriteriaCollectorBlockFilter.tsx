@@ -39,6 +39,7 @@ export function TargetingCriteriaCollectorBlockFilter({
             index={index}
             choicesDict={choicesDict}
             baseName={`collectorsFiltersBlocks[${blockIndex}].collectorBlockFilters[${index}]`}
+            fieldTypeProp="BOOL"
           />
         </div>
       )}
