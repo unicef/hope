@@ -108,7 +108,7 @@ export const TargetingCriteriaCollectorFilterBlocks = ({
                         data={data}
                         each={each}
                         choicesDict={choicesToDict}
-                        onChange={(e, object) => {
+                        onChange={(_e, object) => {
                           if (object) {
                             return chooseFieldType(object, arrayHelpers, index);
                           }

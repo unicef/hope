@@ -72,7 +72,7 @@ const MathSign = styled.img`
 `;
 
 const CriteriaSetBox = styled.div`
-  border: 1px solid #607cab;
+  border: '1px solid #607cab';
   border-radius: 3px;
   padding: 0 ${({ theme }) => theme.spacing(2)};
   margin: ${({ theme }) => theme.spacing(2)} 0;
@@ -340,28 +340,34 @@ export function Criteria({
           field={each}
         />
       ))}
-      {individualsFiltersBlocks.map((item, index) => (
-        <CriteriaSetBox key={index}>
-          {item.individualBlockFilters.map((filter, filterIndex) => (
-            <CriteriaField
-              choicesDict={allDataFieldsChoicesDict}
-              key={filterIndex}
-              field={filter}
-            />
-          ))}
-        </CriteriaSetBox>
-      ))}
-      {collectorsFiltersBlocks.map((item, index) => (
-        <CriteriaSetBox key={index}>
-          {item.collectorBlockFilters.map((filter, filterIndex) => (
-            <CriteriaField
-              choicesDict={allCollectorFieldsChoicesDict}
-              key={filterIndex}
-              field={filter}
-            />
-          ))}
-        </CriteriaSetBox>
-      ))}
+      {individualsFiltersBlocks.map(
+        (item, index) =>
+          item.individualBlockFilters.length > 0 && (
+            <CriteriaSetBox key={index}>
+              {item.individualBlockFilters.map((filter, filterIndex) => (
+                <CriteriaField
+                  choicesDict={allDataFieldsChoicesDict}
+                  key={filterIndex}
+                  field={filter}
+                />
+              ))}
+            </CriteriaSetBox>
+          ),
+      )}
+      {collectorsFiltersBlocks.map(
+        (item, index) =>
+          item.collectorBlockFilters.length > 0 && (
+            <CriteriaSetBox key={index}>
+              {item.collectorBlockFilters.map((filter, filterIndex) => (
+                <CriteriaField
+                  choicesDict={allCollectorFieldsChoicesDict}
+                  key={filterIndex}
+                  field={filter}
+                />
+              ))}
+            </CriteriaSetBox>
+          ),
+      )}
       {isEdit && (
         <ButtonsContainer>
           <IconButton data-cy="button-edit" onClick={editFunction}>
