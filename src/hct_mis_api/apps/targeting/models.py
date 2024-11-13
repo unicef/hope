@@ -14,6 +14,7 @@ from django.db.models.constraints import UniqueConstraint
 from django.utils.text import Truncator
 from django.utils.translation import gettext_lazy as _
 
+from model_utils import Choices
 from model_utils.models import SoftDeletableModel
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
@@ -575,7 +576,7 @@ class TargetingCollectorBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteriaF
     field_name = models.CharField(max_length=120)
     comparison_method = models.CharField(
         max_length=20,
-        choices=TargetingCriteriaFilterBase.COMPARISON_CHOICES,
+        choices=Choices(("EQUALS", _("Equals"))),
     )
     flex_field_classification = models.CharField(
         max_length=20,
@@ -595,5 +596,13 @@ class TargetingCollectorBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteriaF
         # check if collector has all fields from 'field_name'
         # TODO: update query
         # Ind collector.delivery_mechanisms_data
+
+        # Filter individuals where at least one related delivery_mechanism_data has the "data22" key
+        # if YES
+        # individuals_with_bank_account = Individual.objects.filter(
+        #     delivery_mechanisms_data__data__has_key="bank_account"
+        # )
+        # if NO
+        # ~Q(delivery_mechanisms_data__data__has_key="bank_account")
 
         return query
