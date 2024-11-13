@@ -19,6 +19,8 @@ class AreaFilter(UpdatedAtFilter):
     country_iso_code2 = CharFilter(field_name="area_type__country__iso_code2")
     country_iso_code3 = CharFilter(field_name="area_type__country__iso_code3")
     area_type_area_level = NumberFilter(field_name="area_type__area_level")
+    parent_id = CharFilter(field_name="parent__id")
+    parent_p_code = CharFilter(field_name="parent__p_code")
 
     class Meta:
         model = Area
@@ -28,6 +30,8 @@ class AreaFilter(UpdatedAtFilter):
             "area_type_area_level",
             "valid_from",
             "valid_until",
+            "parent_id",
+            "parent_p_code",
         )
 
 

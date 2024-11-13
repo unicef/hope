@@ -6,7 +6,7 @@ from rest_framework.reverse import reverse
 
 from hct_mis_api.api.models import Grant
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
-from hct_mis_api.apps.geo.models import Area, AreaType
+from hct_mis_api.apps.geo.models import Area, AreaType, Country
 from hct_mis_api.apps.program.models import Program
 from tests.unit.api.base import HOPEApiTestCase, token_grant_permission
 
@@ -53,6 +53,19 @@ class APICountriesTests(HOPEApiTestCase):
         cls.country_afghanistan.save(update_fields=["valid_from", "valid_until"])
         cls.url = reverse("api:country-list")
 
+    def get_response(self, country: Country) -> dict:
+        return {
+            "id": str(country.id),
+            "name": country.name,
+            "short_name": country.short_name,
+            "iso_code2": country.iso_code2,
+            "iso_code3": country.iso_code3,
+            "iso_num": country.iso_num,
+            "updated_at": country.updated_at.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
+            "valid_from": country.valid_from.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "valid_until": country.valid_until.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        }
+
     def test_get_countries(self) -> None:
         with token_grant_permission(self.token, Grant.API_READ_ONLY):
             response = self.client.get(self.url)
@@ -60,20 +73,8 @@ class APICountriesTests(HOPEApiTestCase):
         self.assertEqual(
             response.json()["results"],
             [
-                {
-                    "name": self.country_afghanistan.name,
-                    "short_name": self.country_afghanistan.short_name,
-                    "iso_code2": self.country_afghanistan.iso_code2,
-                    "iso_code3": self.country_afghanistan.iso_code3,
-                    "iso_num": self.country_afghanistan.iso_num,
-                },
-                {
-                    "name": self.country_poland.name,
-                    "short_name": self.country_poland.short_name,
-                    "iso_code2": self.country_poland.iso_code2,
-                    "iso_code3": self.country_poland.iso_code3,
-                    "iso_num": self.country_poland.iso_num,
-                },
+                self.get_response(self.country_afghanistan),
+                self.get_response(self.country_poland),
             ],
         )
         self.assertIn("count", response.json())
@@ -93,13 +94,7 @@ class APICountriesTests(HOPEApiTestCase):
             self.assertEqual(len(response.json()["results"]), len(expected_result), filter_data)
             for result in expected_result:
                 self.assertIn(
-                    {
-                        "name": result.name,
-                        "short_name": result.short_name,
-                        "iso_code2": result.iso_code2,
-                        "iso_code3": result.iso_code3,
-                        "iso_num": result.iso_num,
-                    },
+                    self.get_response(result),
                     response.json()["results"],
                     filter_data,
                 )
@@ -117,13 +112,7 @@ class APICountriesTests(HOPEApiTestCase):
             self.assertEqual(response.status_code, status.HTTP_200_OK, filter_data)
             self.assertEqual(len(response.json()["results"]), 1, filter_data)
             self.assertIn(
-                {
-                    "name": expected_result.name,
-                    "short_name": expected_result.short_name,
-                    "iso_code2": expected_result.iso_code2,
-                    "iso_code3": expected_result.iso_code3,
-                    "iso_num": expected_result.iso_num,
-                },
+                self.get_response(expected_result),
                 response.json()["results"],
                 filter_data,
             )
@@ -151,6 +140,7 @@ class AreaListTests(HOPEApiTestCase):
         cls.area2 = AreaFactory(
             name="area2",
             area_type=cls.area_type2,
+            parent=cls.area1,
         )
         cls.area2.valid_from = datetime(2020, 1, 1, tzinfo=pytz.UTC)
         cls.area2.valid_until = datetime(2020, 12, 31, tzinfo=pytz.UTC)
@@ -173,7 +163,7 @@ class AreaListTests(HOPEApiTestCase):
             "rght": area.rght,
             "tree_id": area.tree_id,
             "level": area.level,
-            "parent": area.parent,
+            "parent": str(area.parent.id) if area.parent else None,
             "area_type": str(area.area_type.id),
         }
 
@@ -200,6 +190,10 @@ class AreaListTests(HOPEApiTestCase):
             ({"valid_until_after": "2021-01-01"}, []),
             ({"area_type_area_level": 1}, [self.area1]),
             ({"area_type_area_level": 2}, [self.area2]),
+            ({"parent_id": str(self.area1.id)}, [self.area2]),
+            ({"parent_p_code": self.area1.p_code}, [self.area2]),
+            ({"parent_id": str(self.area2.id)}, []),
+            ({"parent_p_code": self.area2.p_code}, []),
         ):
             with token_grant_permission(self.token, Grant.API_READ_ONLY):
                 response = self.client.get(self.url, filter_data)  # type: ignore
