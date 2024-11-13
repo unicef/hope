@@ -117,6 +117,7 @@ class TargetingIndividualBlockRuleFilterNode(DjangoObjectType):
 
 class TargetingCollectorBlockRuleFilterNode(DjangoObjectType):
     arguments = graphene.List(Arg)
+    comparison_method = graphene.String()
 
     def resolve_arguments(parent, info: Any) -> "GrapheneList":
         return parent.arguments
