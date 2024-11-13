@@ -65,6 +65,7 @@ interface SubFieldProps {
   index?: number;
   field?: any; // Adjust the type of field as necessary
   choicesDict?: any; // Adjust the type of choicesDict as necessary
+  fieldTypeProp?: string;
 }
 
 export const SubField: FC<SubFieldProps> = ({
@@ -73,6 +74,7 @@ export const SubField: FC<SubFieldProps> = ({
   index,
   field,
   choicesDict,
+  fieldTypeProp,
 }) => {
   const { t } = useTranslation();
   const { values, setFieldValue } = useFormikContext<Values>();
@@ -107,7 +109,8 @@ export const SubField: FC<SubFieldProps> = ({
     return null;
   }
   const renderFieldByType = (type: string) => {
-    switch (type) {
+    const typeForSwitch = fieldTypeProp || type;
+    switch (typeForSwitch) {
       case 'DECIMAL':
         return (
           <FlexWrapper>
@@ -323,5 +326,5 @@ export const SubField: FC<SubFieldProps> = ({
     }
   };
 
-  return renderFieldByType(field.fieldAttribute?.type || 'STRING');
+  return renderFieldByType(field.fieldAttribute?.type);
 };

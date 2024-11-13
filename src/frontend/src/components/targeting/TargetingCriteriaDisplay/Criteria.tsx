@@ -9,6 +9,7 @@ import {
   TableBody,
   TableCell,
   TableHead,
+  TablePagination,
   TableRow,
   Typography,
 } from '@mui/material';
@@ -264,6 +265,28 @@ export function Criteria({
   const [currentIndividualIds, setCurrentIndividualIds] = useState<string[]>(
     [],
   );
+  const [pageHH, setPageHH] = useState(0);
+  const [rowsPerPageHH, setRowsPerPageHH] = useState(5);
+  const [pageIND, setPageIND] = useState(0);
+  const [rowsPerPageIND, setRowsPerPageIND] = useState(5);
+
+  const handleChangePageHH = (_event, newPage) => {
+    setPageHH(newPage);
+  };
+
+  const handleChangeRowsPerPageHH = (event) => {
+    setRowsPerPageHH(parseInt(event.target.value, 10));
+    setPageHH(0);
+  };
+
+  const handleChangePageIND = (_event, newPage) => {
+    setPageIND(newPage);
+  };
+
+  const handleChangeRowsPerPageIND = (event) => {
+    setRowsPerPageIND(parseInt(event.target.value, 10));
+    setPageIND(0);
+  };
 
   const handleOpenHouseholdIds = (ids: string): void => {
     setCurrentHouseholdIds(ids.split(','));
@@ -284,12 +307,13 @@ export function Criteria({
     <CriteriaElement alternative={alternative} data-cy="criteria-container">
       {householdIds && (
         <div>
-          <Typography variant="body1">
+          <Typography data-cy="household-ids-modal-title" variant="body1">
             {t('Household IDs selected')}:
           </Typography>
           <BlueText
             onClick={() => handleOpenHouseholdIds(householdIds)}
             style={{ textDecoration: 'underline', cursor: 'pointer' }}
+            data-cy="button-household-ids-open"
           >
             {householdIds.split(',').length}
           </BlueText>
@@ -297,12 +321,13 @@ export function Criteria({
       )}
       {individualIds && (
         <div>
-          <Typography variant="body1">
+          <Typography data-cy="individual-ids-modal-title" variant="body1">
             {t('Individual IDs selected')}:
           </Typography>
           <BlueText
             onClick={() => handleOpenIndividualIds(individualIds)}
             style={{ textDecoration: 'underline', cursor: 'pointer' }}
+            data-cy="button-individual-ids-open"
           >
             {individualIds.split(',').length}
           </BlueText>
@@ -359,20 +384,35 @@ export function Criteria({
               </TableRow>
             </TableHead>
             <TableBody>
-              {currentHouseholdIds.map((id, index) => (
-                <TableRow key={index}>
-                  <TableCell>{id}</TableCell>
-                </TableRow>
-              ))}
+              {currentHouseholdIds
+                .slice(
+                  pageHH * rowsPerPageHH,
+                  pageHH * rowsPerPageHH + rowsPerPageHH,
+                )
+                .map((id, index) => (
+                  <TableRow key={index}>
+                    <TableCell data-cy={`table-cell-hh-${id}`}>{id}</TableCell>
+                  </TableRow>
+                ))}
             </TableBody>
           </Table>
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25]}
+            component="div"
+            count={currentHouseholdIds.length}
+            rowsPerPage={rowsPerPageHH}
+            page={pageHH}
+            onPageChange={handleChangePageHH}
+            onRowsPerPageChange={handleChangeRowsPerPageHH}
+          />
         </DialogContent>
         <DialogActions>
-          <Button color="primary" onClick={handleClose}>
+          <Button data-cy="button-close" color="primary" onClick={handleClose}>
             Close
           </Button>
         </DialogActions>
       </Dialog>
+
       <Dialog open={openIND} onClose={handleClose} maxWidth="sm" fullWidth>
         <DialogTitle>{t('Selected Individuals')}</DialogTitle>
         <DialogContent>
@@ -383,16 +423,30 @@ export function Criteria({
               </TableRow>
             </TableHead>
             <TableBody>
-              {currentIndividualIds.map((id, index) => (
-                <TableRow key={index}>
-                  <TableCell>{id}</TableCell>
-                </TableRow>
-              ))}
+              {currentIndividualIds
+                .slice(
+                  pageIND * rowsPerPageIND,
+                  pageIND * rowsPerPageIND + rowsPerPageIND,
+                )
+                .map((id, index) => (
+                  <TableRow key={index}>
+                    <TableCell data-cy={`table-cell-ind-${id}`}>{id}</TableCell>
+                  </TableRow>
+                ))}
             </TableBody>
           </Table>
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25]}
+            component="div"
+            count={currentIndividualIds.length}
+            rowsPerPage={rowsPerPageIND}
+            page={pageIND}
+            onPageChange={handleChangePageIND}
+            onRowsPerPageChange={handleChangeRowsPerPageIND}
+          />
         </DialogContent>
         <DialogActions>
-          <Button color="primary" onClick={handleClose}>
+          <Button data-cy="button-close" color="primary" onClick={handleClose}>
             Close
           </Button>
         </DialogActions>
