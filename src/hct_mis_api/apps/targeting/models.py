@@ -559,7 +559,7 @@ class TargetingCollectorRuleFilterBlock(
     targeting_criteria_rule = models.ForeignKey(
         "TargetingCriteriaRule",
         on_delete=models.CASCADE,
-        related_name="collector_filters_blocks",
+        related_name="collectors_filters_blocks",
     )
 
 
@@ -592,6 +592,7 @@ class TargetingCollectorBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteriaF
 
     def get_query(self) -> Q:
         query = super().get_query()
+        print("Get query===>>>> ======>>>>>>>> ", self.field_name, self.arguments)
 
         collector_subquery = IndividualRoleInHousehold.objects.filter(
             household=OuterRef("pk"),
