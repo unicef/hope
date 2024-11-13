@@ -4,8 +4,8 @@ from collections import defaultdict
 from typing import Any, Dict, Optional
 
 from django.core.cache import cache
-from django.db.models import Count, F, Sum
-from django.db.models.functions import ExtractMonth, ExtractYear
+from django.db.models import Count, F, Sum, Value
+from django.db.models.functions import Coalesce, ExtractMonth, ExtractYear
 
 from rest_framework.utils.serializer_helpers import ReturnDict
 
@@ -16,16 +16,16 @@ from hct_mis_api.apps.payment.models import Payment, PaymentRecord
 CACHE_TIMEOUT = 60 * 60 * 24  # 24 hours
 
 pwdSum = Sum(
-    F("household__female_age_group_0_5_disabled_count")
-    + F("household__female_age_group_6_11_disabled_count")
-    + F("household__female_age_group_12_17_disabled_count")
-    + F("household__female_age_group_18_59_disabled_count")
-    + F("household__female_age_group_60_disabled_count")
-    + F("household__male_age_group_0_5_disabled_count")
-    + F("household__male_age_group_6_11_disabled_count")
-    + F("household__male_age_group_12_17_disabled_count")
-    + F("household__male_age_group_18_59_disabled_count")
-    + F("household__male_age_group_60_disabled_count"),
+    Coalesce(F("household__female_age_group_0_5_disabled_count"), 0)
+    + Coalesce(F("household__female_age_group_6_11_disabled_count"), 0)
+    + Coalesce(F("household__female_age_group_12_17_disabled_count"), 0)
+    + Coalesce(F("household__female_age_group_18_59_disabled_count"), 0)
+    + Coalesce(F("household__female_age_group_60_disabled_count"), 0)
+    + Coalesce(F("household__male_age_group_0_5_disabled_count"), 0)
+    + Coalesce(F("household__male_age_group_6_11_disabled_count"), 0)
+    + Coalesce(F("household__male_age_group_12_17_disabled_count"), 0)
+    + Coalesce(F("household__male_age_group_18_59_disabled_count"), 0)
+    + Coalesce(F("household__male_age_group_60_disabled_count"), 0),
     default=0,
 )
 
@@ -73,16 +73,23 @@ class DashboardDataCache:
         for area in list_country:
             payments_aggregated = (
                 Payment.objects.using("read_only")
-                .select_related("business_area", "household", "program")
-                .filter(business_area=area)
+                .select_related(
+                    "business_area",
+                    "household",
+                    "program",
+                    "household__admin1",
+                    "financial_service_provider",
+                    "delivery_type",
+                )
+                .filter(business_area=area, household__is_removed=False)
                 .annotate(
-                    month=ExtractMonth("delivery_date"),
-                    year=ExtractYear("delivery_date"),
-                    programs=F("household__program__name"),
+                    year=ExtractYear(Coalesce("delivery_date", "entitlement_date", "status_date")),
+                    month=ExtractMonth(Coalesce("delivery_date", "entitlement_date", "status_date")),
+                    programs=Coalesce(F("household__program__name"), Value("Unknown")),
                     sectors=F("household__program__sector"),
-                    admin1=F("household__admin1__name"),
-                    fsp=F("financial_service_provider__name"),
-                    delivery_types=F("delivery_type__name"),
+                    admin1=Coalesce(F("household__admin1__name"), Value("Unknown")),
+                    fsp=Coalesce(F("financial_service_provider__name"), Value("Unknown")),
+                    delivery_types=Coalesce(F("delivery_type__name"), F("delivery_type_choice")),
                 )
                 .distinct()
                 .values(
@@ -96,8 +103,8 @@ class DashboardDataCache:
                     "delivery_types",
                 )
                 .annotate(
-                    total_usd=Sum("delivered_quantity_usd"),
-                    total_quantity=Sum("delivered_quantity"),
+                    total_usd=Sum("delivered_quantity_usd", default=0),
+                    total_quantity=Sum("delivered_quantity", default=0),
                     total_payments=Count("id", distinct=True),
                     individuals=Sum("household__size"),
                     households=Count("household", distinct=True),
@@ -108,16 +115,18 @@ class DashboardDataCache:
 
             payment_records_aggregated = (
                 PaymentRecord.objects.using("read_only")
-                .select_related("business_area", "household", "program")
-                .filter(business_area=area)
+                .select_related(
+                    "business_area", "household", "program", "household__admin1", "service_provider", "delivery_type"
+                )
+                .filter(business_area=area, household__is_removed=False)
                 .annotate(
-                    month=ExtractMonth("delivery_date"),
-                    year=ExtractYear("delivery_date"),
-                    programs=F("household__program__name"),
+                    year=ExtractYear(Coalesce("delivery_date", "status_date")),
+                    month=ExtractMonth(Coalesce("delivery_date", "status_date")),
+                    programs=Coalesce(F("household__program__name"), Value("Unknown")),
                     sectors=F("household__program__sector"),
-                    admin1=F("household__admin1__name"),
-                    fsp=F("service_provider__short_name"),
-                    delivery_types=F("delivery_type__name"),
+                    admin1=Coalesce(F("household__admin1__name"), Value("Unknown")),
+                    fsp=Coalesce(F("service_provider__short_name"), Value("Unknown")),
+                    delivery_types=Coalesce(F("delivery_type__name"), F("delivery_type_choice")),
                 )
                 .distinct()
                 .values(
@@ -131,8 +140,8 @@ class DashboardDataCache:
                     "delivery_types",
                 )
                 .annotate(
-                    total_usd=Sum("delivered_quantity_usd"),
-                    total_quantity=Sum("delivered_quantity"),
+                    total_usd=Sum("delivered_quantity_usd", default=0),
+                    total_quantity=Sum("delivered_quantity", default=0),
                     total_payments=Count("id", distinct=True),
                     individuals=Sum("household__size"),
                     households=Count("household", distinct=True),
