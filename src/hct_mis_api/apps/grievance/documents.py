@@ -6,8 +6,8 @@ from django.db.models import Model, QuerySet
 
 from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
-from elasticsearch import Elasticsearch
 
+from elasticsearch import Elasticsearch
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
