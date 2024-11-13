@@ -85,10 +85,10 @@ class DashboardDataCache:
                 .annotate(
                     year=ExtractYear(Coalesce("delivery_date", "entitlement_date", "status_date")),
                     month=ExtractMonth(Coalesce("delivery_date", "entitlement_date", "status_date")),
-                    programs=Coalesce(F("household__program__name"), Value("Unknown")),
-                    sectors=F("household__program__sector"),
-                    admin1=Coalesce(F("household__admin1__name"), Value("Unknown")),
-                    fsp=Coalesce(F("financial_service_provider__name"), Value("Unknown")),
+                    programs=Coalesce(F("household__program__name"), Value("Unknown program")),
+                    sectors=Coalesce(F("household__program__sector"), Value("Unknown sector")),
+                    admin1=Coalesce(F("household__admin1__name"), Value("Unknown admin1")),
+                    fsp=Coalesce(F("financial_service_provider__name"), Value("Unknown fsp")),
                     delivery_types=Coalesce(F("delivery_type__name"), F("delivery_type_choice")),
                 )
                 .distinct()
@@ -122,10 +122,10 @@ class DashboardDataCache:
                 .annotate(
                     year=ExtractYear(Coalesce("delivery_date", "status_date")),
                     month=ExtractMonth(Coalesce("delivery_date", "status_date")),
-                    programs=Coalesce(F("household__program__name"), Value("Unknown")),
-                    sectors=F("household__program__sector"),
-                    admin1=Coalesce(F("household__admin1__name"), Value("Unknown")),
-                    fsp=Coalesce(F("service_provider__short_name"), Value("Unknown")),
+                    programs=Coalesce(F("household__program__name"), Value("Unknown program")),
+                    sectors=Coalesce(F("household__program__sector"), Value("Unknown sector")),
+                    admin1=Coalesce(F("household__admin1__name"), Value("Unknown admin1")),
+                    fsp=Coalesce(F("service_provider__short_name"), Value("Unknown fsp")),
                     delivery_types=Coalesce(F("delivery_type__name"), F("delivery_type_choice")),
                 )
                 .distinct()
