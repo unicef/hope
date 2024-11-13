@@ -227,7 +227,10 @@
                         const deliveryGroup = deliveryDim.group().reduceSum(d => d.delivered_quantity_usd);
                         const sectorGroup = sectorDim.group().reduceSum(d => d.delivered_quantity_usd);
                         const volumeGroup = volumeDim.group().reduceSum(d => d.delivered_quantity_usd);
-                        const admin1Group = admin1Dim.group().reduceSum(d => d.delivered_quantity_usd);
+                        const admin1Group = admin1Dim.group().reduceSum(d => d.delivered_quantity_usd).order((d) => -d);
+                        const topAdmin1Group = {
+                            all: () => admin1Group.all().slice(0, 20) // Top 20 admin1
+                        };
                         const monthGroup = monthDim.group().reduceSum(d => d.delivered_quantity_usd);
 
                         // Define charts
@@ -286,15 +289,14 @@
                             .title(d => `${d.key}: ${numberFormatter(d.value)} USD`)
                             .ordering(d => monthOrder[d.key]);
 
-                        const admin1Chart = dc.pieChart("#payments-by-admin1")
+                        const admin1Chart = dc.rowChart("#payments-by-admin1")
                             .dimension(admin1Dim)
-                            .group(admin1Group)
-                            .radius(280)
-                            .innerRadius(40)
-                            .renderLabel(true)
-                            .useViewBoxResizing(true)
-                            .label(d => `${d.key} ${(d.value / admin1Group.all().reduce((sum, g) => sum + g.value, 0) * 100).toFixed(0)}%`)
-                            .title(d => `${d.key}: ${numberFormatter(d.value)} USD`);
+                            .group(topAdmin1Group)
+                            .elasticX(true)
+                            .height(400) 
+                            .label(d => `${d.key}: ${numberFormatter(d.value)} USD (${(d.value / admin1Group.all().reduce((sum, g) => sum + g.value, 0) * 100).toFixed(0)}%)`)
+                            .title(d => `${d.key}: ${numberFormatter(d.value)} USD`)
+                            .xAxis().ticks(5);
 
 
                         function updateTopMetrics() {
