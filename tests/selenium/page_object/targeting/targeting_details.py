@@ -57,8 +57,8 @@ class TargetingDetails(BaseComponents):
     tableLabel = 'span[data-cy="table-label"]'
     tablePagination = 'div[data-cy="table-pagination"]'
     statusContainer = 'div[data-cy="status-container"]'
-    householdSizeFrom = 'input[data-cy="input-filters[0].value.from"]'
-    householdSizeTo = 'input[data-cy="input-filters[0].value.to"]'
+    householdSizeFrom = 'input[data-cy="input-householdsFiltersBlocks[0].value.from"]'
+    householdSizeTo = 'input[data-cy="input-householdsFiltersBlocks[0].value.to"]'
     dialogBox = 'div[role="dialog"]'
 
     # Texts
