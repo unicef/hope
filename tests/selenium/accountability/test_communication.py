@@ -18,7 +18,7 @@ from tests.selenium.page_object.accountability.comunication_details import (
     AccountabilityCommunicationDetails,
 )
 
-pytestmark = pytest.mark.django_db(transaction=True)
+pytestmark = pytest.mark.django_db()
 
 
 @pytest.fixture

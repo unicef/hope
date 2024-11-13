@@ -45,7 +45,7 @@ from tests.selenium.page_object.programme_population.households_details import (
 )
 from tests.selenium.page_object.programme_population.individuals import Individuals
 
-pytestmark = pytest.mark.django_db(transaction=True)
+pytestmark = pytest.mark.django_db()
 
 
 def id_to_base64(object_id: str, name: str) -> str:

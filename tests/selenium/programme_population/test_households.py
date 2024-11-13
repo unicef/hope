@@ -8,7 +8,7 @@ from tests.selenium.page_object.programme_population.households_details import (
     HouseholdsDetails,
 )
 
-pytestmark = pytest.mark.django_db(transaction=True)
+pytestmark = pytest.mark.django_db()
 
 
 @pytest.fixture

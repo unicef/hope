@@ -1,6 +1,4 @@
-import warnings
 from datetime import datetime
-from time import sleep
 from typing import Optional
 
 from django.utils import timezone
@@ -26,7 +24,7 @@ from tests.selenium.page_object.managerial_console.managerial_console import (
     ManagerialConsole,
 )
 
-pytestmark = pytest.mark.django_db(transaction=True)
+pytestmark = pytest.mark.django_db()
 
 
 @pytest.fixture
@@ -137,7 +135,7 @@ class TestSmokeManagerialConsole:
             business_area=BusinessArea.objects.filter(slug="afghanistan").first(),
         )
         program.refresh_from_db()
-        payment = PaymentPlanFactory(
+        PaymentPlanFactory(
             program=program,
             status=PaymentPlan.Status.ACCEPTED,
             business_area=BusinessArea.objects.filter(slug="afghanistan").first(),
@@ -148,20 +146,8 @@ class TestSmokeManagerialConsole:
         pageManagerialConsole.getMenuUserProfile().click()
         pageManagerialConsole.getMenuItemClearCache().click()
 
-        try:
-            pageManagerialConsole.getSelectAllApproval()
-            pageManagerialConsole.getProgramSelectApproval()
-        except BaseException:
-            # ToDo: Workaround for cache issues
-            sleep(2)
-            with pytest.warns(Warning):
-                warnings.warn("Clear cache did not reload data. Clear cache was triggered reload again.", Warning)
-            payment.refresh_from_db()
-            pageManagerialConsole.driver.refresh()
-            pageManagerialConsole.getMenuUserProfile().click()
-            pageManagerialConsole.getMenuItemClearCache().click()
-            pageManagerialConsole.getSelectAllApproval()
-            pageManagerialConsole.getProgramSelectApproval()
+        pageManagerialConsole.getSelectAllApproval()
+        pageManagerialConsole.getProgramSelectApproval()
 
         with pytest.raises(Exception):
             pageManagerialConsole.getApproveButton().click()

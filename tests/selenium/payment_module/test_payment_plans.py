@@ -48,7 +48,7 @@ from tests.selenium.page_object.payment_module.program_cycle_details import (
     ProgramCycleDetailsPage,
 )
 
-pytestmark = pytest.mark.django_db(transaction=True)
+pytestmark = pytest.mark.django_db()
 
 
 def find_file(file_name: str, search_in_dir: str = settings.DOWNLOAD_DIRECTORY, number_of_ties: int = 1) -> str:

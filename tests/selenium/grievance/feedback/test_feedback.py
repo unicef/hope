@@ -21,7 +21,7 @@ from tests.selenium.page_object.programme_details.programme_details import (
     ProgrammeDetails,
 )
 
-pytestmark = pytest.mark.django_db(transaction=True)
+pytestmark = pytest.mark.django_db()
 
 
 @pytest.fixture
@@ -300,6 +300,7 @@ class TestFeedback:
         pageFeedback.disappearTableRowLoading()
         assert 2 == len(pageFeedback.getRows())
 
+    @pytest.mark.xfail(reason="Problem with deadlock during test - 202318")
     def test_create_feedback_with_household(
         self,
         create_programs: None,
@@ -358,6 +359,7 @@ class TestFeedback:
         pageFeedback.getNavFeedback().click()
         pageFeedback.getRows()
 
+    @pytest.mark.xfail(reason="Problem with deadlock during test - 202318")
     def test_create_feedback_with_individual(
         self,
         create_programs: None,

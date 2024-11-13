@@ -46,7 +46,7 @@ from tests.selenium.page_object.payment_verification.payment_verification_detail
 )
 from tests.selenium.payment_module.test_payment_plans import find_file
 
-pytestmark = pytest.mark.django_db(transaction=True)
+pytestmark = pytest.mark.django_db()
 
 
 @pytest.fixture
@@ -501,9 +501,11 @@ class TestPaymentVerification:
         before_list_of_verification_plans = [i.text for i in pagePaymentVerificationDetails.getVerificationPlanPrefix()]
         pagePaymentVerificationDetails.deleteVerificationPlanByNumber(1)
         pagePaymentVerificationDetails.getButtonSubmit().click()
+        pagePaymentVerificationDetails.checkAlert("Verification plan has been deleted.")
         for _ in range(50):
             if 2 == len(pagePaymentVerificationDetails.getVerificationPlanPrefix()):
                 break
+            sleep(0.1)
         else:
             raise AssertionError("Verification Plan was not deleted")
         assert before_list_of_verification_plans[1] not in pagePaymentVerificationDetails.getVerificationPlanPrefix()

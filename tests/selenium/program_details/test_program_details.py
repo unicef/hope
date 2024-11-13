@@ -33,7 +33,7 @@ from tests.selenium.page_object.programme_management.programme_management import
     ProgrammeManagement,
 )
 
-pytestmark = pytest.mark.django_db(transaction=True)
+pytestmark = pytest.mark.django_db()
 
 
 @pytest.fixture

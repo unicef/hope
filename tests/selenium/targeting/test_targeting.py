@@ -45,7 +45,7 @@ from tests.selenium.page_object.targeting.targeting import Targeting
 from tests.selenium.page_object.targeting.targeting_create import TargetingCreate
 from tests.selenium.page_object.targeting.targeting_details import TargetingDetails
 
-pytestmark = pytest.mark.django_db(transaction=True)
+pytestmark = pytest.mark.django_db()
 
 
 @pytest.fixture

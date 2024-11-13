@@ -26,7 +26,7 @@ from tests.selenium.page_object.programme_population.periodic_data_update_templa
     PeriodicDatUpdateTemplatesDetails,
 )
 
-pytestmark = pytest.mark.django_db(transaction=True)
+pytestmark = pytest.mark.django_db()
 
 
 @pytest.fixture
@@ -249,6 +249,7 @@ class TestPeriodicDataTemplates:
             in pagePeriodicDataUpdateTemplates.getTemplateNumberOfIndividuals(0).text
         )
 
+    # ToDo: Does not work locally
     @pytest.mark.night
     def test_periodic_data_template_create_and_download(
         self,
@@ -259,6 +260,7 @@ class TestPeriodicDataTemplates:
         pagePeriodicDataUpdateTemplatesDetails: PeriodicDatUpdateTemplatesDetails,
         individual: Individual,
         download_path: str,
+        clear_downloaded_files: None,
     ) -> None:
         populate_pdu_with_null_values(program, individual.flex_fields)
         individual.save()

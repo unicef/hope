@@ -49,7 +49,7 @@ from tests.selenium.programme_population.test_periodic_data_update_upload import
     prepare_xlsx_file,
 )
 
-pytestmark = pytest.mark.django_db(transaction=True)
+pytestmark = pytest.mark.django_db()
 
 
 @pytest.fixture
