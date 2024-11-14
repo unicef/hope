@@ -20,6 +20,7 @@ from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.core.schema import ExtendedConnection, FieldAttributeNode
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.household.schema import HouseholdNode
+from hct_mis_api.apps.payment.models import DeliveryMechanism
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.choices import FlexFieldClassification
 from hct_mis_api.apps.targeting.filters import HouseholdFilter, TargetPopulationFilter
@@ -118,9 +119,17 @@ class TargetingIndividualBlockRuleFilterNode(DjangoObjectType):
 class TargetingCollectorBlockRuleFilterNode(DjangoObjectType):
     arguments = graphene.List(Arg)
     comparison_method = graphene.String()
+    label_en = graphene.String()
 
     def resolve_arguments(parent, info: Any) -> "GrapheneList":
         return parent.arguments
+
+    def resolve_label_en(parent, info: Any) -> Optional[str]:
+        # TODO: refactor that
+        for field in DeliveryMechanism.get_all_core_fields_definitions():
+            if field["name"] == parent.field_name:
+                return field["label"]["English(EN)"]
+        return ""
 
     class Meta:
         model = target_models.TargetingCollectorBlockRuleFilter
