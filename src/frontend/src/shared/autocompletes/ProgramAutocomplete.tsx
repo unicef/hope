@@ -1,8 +1,7 @@
 import { InputAdornment } from '@mui/material';
 import FlashOnIcon from '@mui/icons-material/FlashOn';
 import get from 'lodash/get';
-import * as React from 'react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { ReactElement, useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAllProgramsForChoicesLazyQuery } from '@generated/graphql';
@@ -35,7 +34,7 @@ export function ProgramAutocomplete({
   setAppliedFilter: (filter) => void;
   setFilter: (filter) => void;
   dataCy?: string;
-}): React.ReactElement {
+}): ReactElement {
   const { businessArea } = useBaseUrl();
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);

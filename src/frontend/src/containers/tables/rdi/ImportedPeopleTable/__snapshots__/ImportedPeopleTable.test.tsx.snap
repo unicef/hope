@@ -6,20 +6,20 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render loading 1`
     data-cy="imported-individuals-table"
   >
     <div
-      class="sc-iBdnpw dcYiFg"
+      class="sc-kLhKbu blzheD"
     >
       <div
-        class="MuiTableContainer-root sc-irLvIq css-rorn0c-MuiTableContainer-root"
+        class="MuiTableContainer-root sc-dpBQxM css-rorn0c-MuiTableContainer-root"
       >
         <div
-          class="sc-csKJxZ enzmTw MuiBox-root css-0"
+          class="sc-jwIPbr gFzJhR MuiBox-root css-0"
         >
           <div
-            class="sc-csKJxZ enzmTw MuiBox-root css-1ruxp1v"
+            class="sc-jwIPbr gFzJhR MuiBox-root css-1ruxp1v"
           />
         </div>
         <table
-          class="MuiTable-root sc-qZrbh sc-eTNRI haQfFY bGeKmT css-b1kpk9-MuiTable-root"
+          class="MuiTable-root sc-khLCKb sc-cHqXqK kpTumY jRUhWR css-b1kpk9-MuiTable-root"
         >
           <thead
             class="MuiTableHead-root css-15wwp11-MuiTableHead-root"
@@ -32,7 +32,7 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render loading 1`
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -56,7 +56,7 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render loading 1`
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -80,7 +80,7 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render loading 1`
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -104,7 +104,7 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render loading 1`
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -128,7 +128,7 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render loading 1`
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -152,7 +152,7 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render loading 1`
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -176,7 +176,7 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render loading 1`
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -200,7 +200,7 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render loading 1`
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -225,11 +225,11 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render loading 1`
             class="MuiTableBody-root css-apqrd9-MuiTableBody-root"
           >
             <tr
-              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jGuQtF css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit jOWCee css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -239,11 +239,11 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render loading 1`
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jGuQtF css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit jOWCee css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -253,11 +253,11 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render loading 1`
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jGuQtF css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit jOWCee css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -267,11 +267,11 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render loading 1`
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jGuQtF css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit jOWCee css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -281,11 +281,11 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render loading 1`
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jGuQtF css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit jOWCee css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -295,11 +295,11 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render loading 1`
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jGuQtF css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit jOWCee css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -309,11 +309,11 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render loading 1`
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jGuQtF css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit jOWCee css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -323,11 +323,11 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render loading 1`
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jGuQtF css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit jOWCee css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -337,11 +337,11 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render loading 1`
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jGuQtF css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit jOWCee css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -351,11 +351,11 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render loading 1`
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jGuQtF css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit jOWCee css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -477,20 +477,20 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
     data-cy="imported-individuals-table"
   >
     <div
-      class="sc-iBdnpw dcYiFg"
+      class="sc-kLhKbu blzheD"
     >
       <div
-        class="MuiTableContainer-root sc-irLvIq css-rorn0c-MuiTableContainer-root"
+        class="MuiTableContainer-root sc-dpBQxM css-rorn0c-MuiTableContainer-root"
       >
         <div
-          class="sc-csKJxZ enzmTw MuiBox-root css-0"
+          class="sc-jwIPbr gFzJhR MuiBox-root css-0"
         >
           <div
-            class="sc-csKJxZ enzmTw MuiBox-root css-1ruxp1v"
+            class="sc-jwIPbr gFzJhR MuiBox-root css-1ruxp1v"
           />
         </div>
         <table
-          class="MuiTable-root sc-qZrbh sc-eTNRI haQfFY bGeKmT css-b1kpk9-MuiTable-root"
+          class="MuiTable-root sc-khLCKb sc-cHqXqK kpTumY jRUhWR css-b1kpk9-MuiTable-root"
         >
           <thead
             class="MuiTableHead-root css-15wwp11-MuiTableHead-root"
@@ -503,7 +503,7 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -527,7 +527,7 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -551,7 +551,7 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -575,7 +575,7 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -599,7 +599,7 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -623,7 +623,7 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -647,7 +647,7 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -671,7 +671,7 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -696,11 +696,11 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
             class="MuiTableBody-root css-apqrd9-MuiTableBody-root"
           >
             <tr
-              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jGuQtF css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit jOWCee css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -710,11 +710,11 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jGuQtF css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit jOWCee css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -724,11 +724,11 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jGuQtF css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit jOWCee css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -738,11 +738,11 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jGuQtF css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit jOWCee css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -752,11 +752,11 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jGuQtF css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit jOWCee css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -766,11 +766,11 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jGuQtF css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit jOWCee css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -780,11 +780,11 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jGuQtF css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit jOWCee css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -794,11 +794,11 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jGuQtF css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit jOWCee css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -808,11 +808,11 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jGuQtF css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit jOWCee css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -822,14 +822,14 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root MuiTableRow-hover sc-ifyrAs ctljOF css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root MuiTableRow-hover sc-gQaihK hWQrsg css-n2dwpd-MuiTableRow-root"
               role="checkbox"
             >
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
                 <a
-                  class="sc-fHejqy itrONR"
+                  class="sc-eauhAA efYrfP"
                   href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/registration-data-import/people/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTozYjcwYzY4MC0xZWI2LTQ0ODAtOWExNS0yMDMwNDFhZTI4NzY="
                 />
               </td>

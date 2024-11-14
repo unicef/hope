@@ -1,7 +1,6 @@
 import { Box, Button, DialogContent, DialogTitle, Grid } from '@mui/material';
 import { Field, Form, Formik } from 'formik';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dialog } from '@containers/dialogs/Dialog';
 import { DialogActions } from '@containers/dialogs/DialogActions';
@@ -23,7 +22,7 @@ export interface VerifyPaymentGrievanceProps {
 }
 export function VerifyPaymentGrievance({
   ticket,
-}: VerifyPaymentGrievanceProps): React.ReactElement {
+}: VerifyPaymentGrievanceProps): ReactElement {
   const { t } = useTranslation();
   const [verifyManualDialogOpen, setVerifyManualDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
@@ -75,6 +74,7 @@ export function VerifyPaymentGrievance({
             <Button
               color="primary"
               variant="contained"
+              data-cy="grievance-verify"
               onClick={() => setVerifyManualDialogOpen(true)}
             >
               {t('Verify')}

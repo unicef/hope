@@ -3,20 +3,20 @@
 exports[`containers/tables/rdi/ImportedHouseholdTable should render loading 1`] = `
 <div>
   <div
-    class="sc-iBdnpw dcYiFg"
+    class="sc-kLhKbu blzheD"
   >
     <div
-      class="MuiTableContainer-root sc-irLvIq css-rorn0c-MuiTableContainer-root"
+      class="MuiTableContainer-root sc-dpBQxM css-rorn0c-MuiTableContainer-root"
     >
       <div
-        class="sc-csKJxZ enzmTw MuiBox-root css-0"
+        class="sc-jwIPbr gFzJhR MuiBox-root css-0"
       >
         <div
-          class="sc-csKJxZ enzmTw MuiBox-root css-1ruxp1v"
+          class="sc-jwIPbr gFzJhR MuiBox-root css-1ruxp1v"
         />
       </div>
       <table
-        class="MuiTable-root sc-qZrbh sc-eTNRI haQfFY bGeKmT css-b1kpk9-MuiTable-root"
+        class="MuiTable-root sc-khLCKb sc-cHqXqK kpTumY jRUhWR css-b1kpk9-MuiTable-root"
       >
         <thead
           class="MuiTableHead-root css-15wwp11-MuiTableHead-root"
@@ -29,7 +29,7 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render loading 1`] 
               scope="col"
             >
               <span
-                class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                 data-cy="table-label"
                 role="button"
                 tabindex="0"
@@ -52,7 +52,7 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render loading 1`] 
               scope="col"
             >
               <span
-                class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                 data-cy="table-label"
                 role="button"
                 tabindex="0"
@@ -76,7 +76,7 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render loading 1`] 
               scope="col"
             >
               <span
-                class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                 data-cy="table-label"
                 role="button"
                 tabindex="0"
@@ -100,7 +100,7 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render loading 1`] 
               scope="col"
             >
               <span
-                class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                 data-cy="table-label"
                 role="button"
                 tabindex="0"
@@ -124,7 +124,7 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render loading 1`] 
               scope="col"
             >
               <span
-                class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                 data-cy="table-label"
                 role="button"
                 tabindex="0"
@@ -148,7 +148,7 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render loading 1`] 
               scope="col"
             >
               <span
-                class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                 data-cy="table-label"
                 role="button"
                 tabindex="0"
@@ -173,11 +173,11 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render loading 1`] 
           class="MuiTableBody-root css-apqrd9-MuiTableBody-root"
         >
           <tr
-            class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+            class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
             data-cy="table-row"
           >
             <td
-              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH bXtomf css-1ex1afd-MuiTableCell-root"
+              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit gJRWKk css-1ex1afd-MuiTableCell-root"
               colspan="6"
             >
               <span
@@ -187,11 +187,11 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render loading 1`] 
             </td>
           </tr>
           <tr
-            class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+            class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
             data-cy="table-row"
           >
             <td
-              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH bXtomf css-1ex1afd-MuiTableCell-root"
+              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit gJRWKk css-1ex1afd-MuiTableCell-root"
               colspan="6"
             >
               <span
@@ -201,11 +201,11 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render loading 1`] 
             </td>
           </tr>
           <tr
-            class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+            class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
             data-cy="table-row"
           >
             <td
-              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH bXtomf css-1ex1afd-MuiTableCell-root"
+              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit gJRWKk css-1ex1afd-MuiTableCell-root"
               colspan="6"
             >
               <span
@@ -215,11 +215,11 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render loading 1`] 
             </td>
           </tr>
           <tr
-            class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+            class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
             data-cy="table-row"
           >
             <td
-              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH bXtomf css-1ex1afd-MuiTableCell-root"
+              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit gJRWKk css-1ex1afd-MuiTableCell-root"
               colspan="6"
             >
               <span
@@ -229,11 +229,11 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render loading 1`] 
             </td>
           </tr>
           <tr
-            class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+            class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
             data-cy="table-row"
           >
             <td
-              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH bXtomf css-1ex1afd-MuiTableCell-root"
+              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit gJRWKk css-1ex1afd-MuiTableCell-root"
               colspan="6"
             >
               <span
@@ -243,11 +243,11 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render loading 1`] 
             </td>
           </tr>
           <tr
-            class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+            class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
             data-cy="table-row"
           >
             <td
-              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH bXtomf css-1ex1afd-MuiTableCell-root"
+              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit gJRWKk css-1ex1afd-MuiTableCell-root"
               colspan="6"
             >
               <span
@@ -257,11 +257,11 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render loading 1`] 
             </td>
           </tr>
           <tr
-            class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+            class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
             data-cy="table-row"
           >
             <td
-              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH bXtomf css-1ex1afd-MuiTableCell-root"
+              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit gJRWKk css-1ex1afd-MuiTableCell-root"
               colspan="6"
             >
               <span
@@ -271,11 +271,11 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render loading 1`] 
             </td>
           </tr>
           <tr
-            class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+            class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
             data-cy="table-row"
           >
             <td
-              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH bXtomf css-1ex1afd-MuiTableCell-root"
+              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit gJRWKk css-1ex1afd-MuiTableCell-root"
               colspan="6"
             >
               <span
@@ -285,11 +285,11 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render loading 1`] 
             </td>
           </tr>
           <tr
-            class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+            class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
             data-cy="table-row"
           >
             <td
-              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH bXtomf css-1ex1afd-MuiTableCell-root"
+              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit gJRWKk css-1ex1afd-MuiTableCell-root"
               colspan="6"
             >
               <span
@@ -299,11 +299,11 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render loading 1`] 
             </td>
           </tr>
           <tr
-            class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+            class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
             data-cy="table-row"
           >
             <td
-              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH bXtomf css-1ex1afd-MuiTableCell-root"
+              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit gJRWKk css-1ex1afd-MuiTableCell-root"
               colspan="6"
             >
               <span
@@ -421,20 +421,20 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render loading 1`] 
 exports[`containers/tables/rdi/ImportedHouseholdTable should render with data 1`] = `
 <div>
   <div
-    class="sc-iBdnpw dcYiFg"
+    class="sc-kLhKbu blzheD"
   >
     <div
-      class="MuiTableContainer-root sc-irLvIq css-rorn0c-MuiTableContainer-root"
+      class="MuiTableContainer-root sc-dpBQxM css-rorn0c-MuiTableContainer-root"
     >
       <div
-        class="sc-csKJxZ enzmTw MuiBox-root css-0"
+        class="sc-jwIPbr gFzJhR MuiBox-root css-0"
       >
         <div
-          class="sc-csKJxZ enzmTw MuiBox-root css-1ruxp1v"
+          class="sc-jwIPbr gFzJhR MuiBox-root css-1ruxp1v"
         />
       </div>
       <table
-        class="MuiTable-root sc-qZrbh sc-eTNRI haQfFY bGeKmT css-b1kpk9-MuiTable-root"
+        class="MuiTable-root sc-khLCKb sc-cHqXqK kpTumY jRUhWR css-b1kpk9-MuiTable-root"
       >
         <thead
           class="MuiTableHead-root css-15wwp11-MuiTableHead-root"
@@ -447,7 +447,7 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render with data 1`
               scope="col"
             >
               <span
-                class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                 data-cy="table-label"
                 role="button"
                 tabindex="0"
@@ -470,7 +470,7 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render with data 1`
               scope="col"
             >
               <span
-                class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                 data-cy="table-label"
                 role="button"
                 tabindex="0"
@@ -494,7 +494,7 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render with data 1`
               scope="col"
             >
               <span
-                class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                 data-cy="table-label"
                 role="button"
                 tabindex="0"
@@ -518,7 +518,7 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render with data 1`
               scope="col"
             >
               <span
-                class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                 data-cy="table-label"
                 role="button"
                 tabindex="0"
@@ -542,7 +542,7 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render with data 1`
               scope="col"
             >
               <span
-                class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                 data-cy="table-label"
                 role="button"
                 tabindex="0"
@@ -566,7 +566,7 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render with data 1`
               scope="col"
             >
               <span
-                class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                class="MuiButtonBase-root MuiTableSortLabel-root sc-ivxoEo dvXuCE css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                 data-cy="table-label"
                 role="button"
                 tabindex="0"
@@ -591,11 +591,11 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render with data 1`
           class="MuiTableBody-root css-apqrd9-MuiTableBody-root"
         >
           <tr
-            class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+            class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
             data-cy="table-row"
           >
             <td
-              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH bXtomf css-1ex1afd-MuiTableCell-root"
+              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit gJRWKk css-1ex1afd-MuiTableCell-root"
               colspan="6"
             >
               <span
@@ -605,11 +605,11 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render with data 1`
             </td>
           </tr>
           <tr
-            class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+            class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
             data-cy="table-row"
           >
             <td
-              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH bXtomf css-1ex1afd-MuiTableCell-root"
+              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit gJRWKk css-1ex1afd-MuiTableCell-root"
               colspan="6"
             >
               <span
@@ -619,11 +619,11 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render with data 1`
             </td>
           </tr>
           <tr
-            class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+            class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
             data-cy="table-row"
           >
             <td
-              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH bXtomf css-1ex1afd-MuiTableCell-root"
+              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit gJRWKk css-1ex1afd-MuiTableCell-root"
               colspan="6"
             >
               <span
@@ -633,11 +633,11 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render with data 1`
             </td>
           </tr>
           <tr
-            class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+            class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
             data-cy="table-row"
           >
             <td
-              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH bXtomf css-1ex1afd-MuiTableCell-root"
+              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit gJRWKk css-1ex1afd-MuiTableCell-root"
               colspan="6"
             >
               <span
@@ -647,11 +647,11 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render with data 1`
             </td>
           </tr>
           <tr
-            class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+            class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
             data-cy="table-row"
           >
             <td
-              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH bXtomf css-1ex1afd-MuiTableCell-root"
+              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit gJRWKk css-1ex1afd-MuiTableCell-root"
               colspan="6"
             >
               <span
@@ -661,11 +661,11 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render with data 1`
             </td>
           </tr>
           <tr
-            class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+            class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
             data-cy="table-row"
           >
             <td
-              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH bXtomf css-1ex1afd-MuiTableCell-root"
+              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit gJRWKk css-1ex1afd-MuiTableCell-root"
               colspan="6"
             >
               <span
@@ -675,11 +675,11 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render with data 1`
             </td>
           </tr>
           <tr
-            class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+            class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
             data-cy="table-row"
           >
             <td
-              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH bXtomf css-1ex1afd-MuiTableCell-root"
+              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit gJRWKk css-1ex1afd-MuiTableCell-root"
               colspan="6"
             >
               <span
@@ -689,11 +689,11 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render with data 1`
             </td>
           </tr>
           <tr
-            class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+            class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
             data-cy="table-row"
           >
             <td
-              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH bXtomf css-1ex1afd-MuiTableCell-root"
+              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit gJRWKk css-1ex1afd-MuiTableCell-root"
               colspan="6"
             >
               <span
@@ -703,11 +703,11 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render with data 1`
             </td>
           </tr>
           <tr
-            class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+            class="MuiTableRow-root sc-dstKZu jnFIvZ css-n2dwpd-MuiTableRow-root"
             data-cy="table-row"
           >
             <td
-              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH bXtomf css-1ex1afd-MuiTableCell-root"
+              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-keTIit gJRWKk css-1ex1afd-MuiTableCell-root"
               colspan="6"
             >
               <span
@@ -717,7 +717,7 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render with data 1`
             </td>
           </tr>
           <tr
-            class="MuiTableRow-root MuiTableRow-hover sc-fHejqy hlUStu css-n2dwpd-MuiTableRow-root"
+            class="MuiTableRow-root MuiTableRow-hover sc-eauhAA jlJSmQ css-n2dwpd-MuiTableRow-root"
             data-cy="imported-households-row"
             role="checkbox"
           >
@@ -728,7 +728,7 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render with data 1`
               class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
             >
               <div
-                class="sc-ifyrAs lhnZom"
+                class="sc-gQaihK bSofiv"
               />
             </td>
             <td

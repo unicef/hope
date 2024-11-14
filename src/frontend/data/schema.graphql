@@ -1608,6 +1608,7 @@ type GrievanceTicketNode implements Node {
   relatedTickets: [GrievanceTicketNode]
   totalDays: String
   documentation: [GrievanceDocumentNode]
+  targetId: String
 }
 
 type GrievanceTicketNodeConnection {
@@ -4196,6 +4197,7 @@ enum RegistrationDataImportDeduplicationEngineStatus {
   PENDING
   UPLOADED
   IN_PROGRESS
+  PROCESSING
   FINISHED
   ERROR
   UPLOAD_ERROR
@@ -4766,8 +4768,8 @@ type TargetPopulationNode implements Node {
   buildStatus: TargetPopulationBuildStatus!
   builtAt: DateTime
   households(offset: Int, before: String, after: String, first: Int, last: Int, orderBy: String, businessArea: String): HouseholdNodeConnection
-  program: ProgramNode
-  programCycle: ProgramCycleNode
+  program: ProgramNode!
+  programCycle: ProgramCycleNode!
   targetingCriteria: TargetingCriteriaNode
   sentToDatahub: Boolean!
   steficonRule: RuleCommitNode

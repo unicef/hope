@@ -1,6 +1,5 @@
 import { Box, Grid } from '@mui/material';
 import { isEmpty } from 'lodash';
-import * as React from 'react';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
@@ -11,13 +10,14 @@ import { PaymentIds } from '../PaymentIds';
 import { ReassignMultipleRoleBox } from '../ReassignMultipleRoleBox';
 import { ReassignRoleBox } from '../ReassignRoleBox';
 import { GrievanceTicketQuery } from '@generated/graphql';
+import { ReactElement } from 'react';
 import { useProgramContext } from 'src/programContext';
 
 export function GrievancesSidebar({
   ticket,
 }: {
   ticket: GrievanceTicketQuery['grievanceTicket'];
-}): React.ReactElement {
+}): ReactElement {
   const { isSocialDctType } = useProgramContext();
   const shouldShowReassignBoxDataChange = (): boolean => {
     let { individual, household } = ticket;
@@ -45,7 +45,7 @@ export function GrievancesSidebar({
     const isRightStatus = status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
     if (!isRightStatus) return false;
 
-    const householdsAndRoles = individual?.householdsAndRoles;
+    const householdsAndRoles = individual?.householdsAndRoles || [];
     const isHeadOfHousehold = individual?.id === household?.headOfHousehold?.id;
     const hasRolesToReassign =
       householdsAndRoles?.filter((el) => el.role !== 'NO_ROLE').length > 0;
@@ -77,7 +77,7 @@ export function GrievancesSidebar({
     ticket.needsAdjudicationTicketDetails.isMultipleDuplicatesVersion &&
     !isSocialDctType;
 
-  const renderRightSection = (): React.ReactElement => {
+  const renderRightSection = (): ReactElement => {
     if (
       ticket.category.toString() === GRIEVANCE_CATEGORIES.PAYMENT_VERIFICATION
     ) {

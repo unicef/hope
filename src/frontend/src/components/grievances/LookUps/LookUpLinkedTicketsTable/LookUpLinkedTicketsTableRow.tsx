@@ -1,5 +1,4 @@
 import TableCell from '@mui/material/TableCell';
-import * as React from 'react';
 import { Checkbox } from '@mui/material';
 import { ClickableTableRow } from '@core/Table/ClickableTableRow';
 import { StatusBox } from '@core/StatusBox';
@@ -8,14 +7,13 @@ import { AllGrievanceTicketQuery } from '@generated/graphql';
 import { BlackLink } from '@core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { getGrievanceDetailsPath } from '@components/grievances/utils/createGrievanceUtils';
+import { MouseEvent, ReactElement } from 'react';
 
 interface LookUpLinkedTicketsTableRowProps {
   ticket: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'];
   selected: Array<string>;
   checkboxClickHandler: (
-    event:
-    | React.MouseEvent<HTMLButtonElement, MouseEvent>
-    | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
+    event: MouseEvent<HTMLTableRowElement> | MouseEvent<HTMLButtonElement>,
     number,
   ) => void;
   statusChoices: { [id: number]: string };
@@ -28,7 +26,7 @@ export function LookUpLinkedTicketsTableRow({
   checkboxClickHandler,
   statusChoices,
   categoryChoices,
-}: LookUpLinkedTicketsTableRowProps): React.ReactElement {
+}: LookUpLinkedTicketsTableRowProps): ReactElement {
   const { baseUrl } = useBaseUrl();
   const isSelected = (name: string): boolean => selected.includes(name);
   const isItemSelected = isSelected(ticket.id);

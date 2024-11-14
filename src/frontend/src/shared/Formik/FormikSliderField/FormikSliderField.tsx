@@ -1,8 +1,8 @@
-import * as React from 'react';
 import { styled } from '@mui/system';
 import Grid from '@mui/material/Grid';
 import Slider from '@mui/material/Slider';
 import { Typography, Box } from '@mui/material';
+import { ReactElement } from 'react';
 
 const StyledBox = styled(Box)({
   width: 400,
@@ -16,7 +16,7 @@ export const FormikSliderField = ({
   max,
   dataCy,
   ...otherProps
-}): React.ReactElement => {
+}): ReactElement => {
   const handleSliderChange = (_, newValue): void => {
     form.setFieldValue(field.name, newValue);
   };

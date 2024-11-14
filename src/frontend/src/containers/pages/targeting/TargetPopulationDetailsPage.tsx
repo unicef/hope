@@ -1,6 +1,5 @@
-import * as React from 'react';
-import { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { ReactElement, useEffect } from 'react';
+import { useLocation, useParams } from 'react-router-dom';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { TargetPopulationCore } from '@components/targeting/TargetPopulationCore';
@@ -16,10 +15,12 @@ import {
 import { TargetPopulationPageHeader } from '../headers/TargetPopulationPageHeader';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from 'src/programContext';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
-export const TargetPopulationDetailsPage = (): React.ReactElement => {
+export const TargetPopulationDetailsPage = (): ReactElement => {
   const { id } = useParams();
   const { isStandardDctType, isSocialDctType } = useProgramContext();
+  const location = useLocation();
   const permissions = usePermissions();
   const { data, loading, error, startPolling, stopPolling } =
     useTargetPopulationQuery({
@@ -63,7 +64,14 @@ export const TargetPopulationDetailsPage = (): React.ReactElement => {
     Boolean(targetPopulation.targetingCriteria);
 
   return (
-    <>
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'TargetPopulationDetailsPage.tsx');
+      }}
+      componentName="TargetPopulationDetailsPage"
+    >
       <TargetPopulationPageHeader
         targetPopulation={targetPopulation}
         canEdit={hasPermissions(PERMISSIONS.TARGETING_UPDATE, permissions)}
@@ -83,6 +91,6 @@ export const TargetPopulationDetailsPage = (): React.ReactElement => {
         permissions={permissions}
         screenBeneficiary={businessAreaData?.businessArea?.screenBeneficiary}
       />
-    </>
+    </UniversalErrorBoundary>
   );
 };

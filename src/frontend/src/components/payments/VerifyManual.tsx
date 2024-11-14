@@ -1,7 +1,6 @@
 import { Box, Button, DialogContent, DialogTitle, Grid } from '@mui/material';
 import { Field, Form, Formik } from 'formik';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dialog } from '@containers/dialogs/Dialog';
 import { DialogActions } from '@containers/dialogs/DialogActions';
@@ -29,7 +28,7 @@ export function VerifyManual({
   status,
   enabled,
   receivedAmount,
-}: Props): React.ReactElement {
+}: Props): ReactElement {
   const { t } = useTranslation();
   const [verifyManualDialogOpen, setVerifyManualDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
@@ -101,8 +100,8 @@ export function VerifyManual({
                       label="Status"
                       style={{ flexDirection: 'row' }}
                       choices={[
-                        { value: 'RECEIVED', name: t('Received') },
-                        { value: 'NOT_RECEIVED', name: t('Not Received') },
+                        { value: 'RECEIVED', name: t('Received'), dataCy: 'choice-received' },
+                        { value: 'NOT_RECEIVED', name: t('Not Received'), dataCy: 'choice-not-received' },
                       ]}
                       component={FormikRadioGroup}
                     />

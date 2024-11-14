@@ -218,7 +218,7 @@ class NewTicket(BaseComponents):
         return self.get_elements(self.individualTableRow)[number]
 
     def getReceivedConsent(self) -> WebElement:
-        return self.wait_for(self.receivedConsent)
+        return self.wait_for(self.receivedConsent, timeout=100)
 
     def getDescription(self) -> WebElement:
         return self.wait_for(self.description)
@@ -511,6 +511,13 @@ class NewTicket(BaseComponents):
         return self.wait_for(self.inputFile)
 
     def getInputQuestionnaire_size(self) -> WebElement:
+        self.driver.execute_script(
+            """
+            container = document.querySelector("div[data-cy='main-content']")
+            container.scrollBy(0,-600)
+            """
+        )
+        sleep(2)
         return self.wait_for(self.inputQuestionnaire_size)
 
     def getLabelHouseholdSize(self) -> WebElement:

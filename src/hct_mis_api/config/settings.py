@@ -23,8 +23,8 @@ PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
 # domains/hosts etc.
 DOMAIN_NAME = env("DOMAIN")
 WWW_ROOT = "http://{}/".format(DOMAIN_NAME)
-ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=[DOMAIN_NAME])
-FRONTEND_HOST = env("HCT_MIS_FRONTEND_HOST", default=DOMAIN_NAME)
+ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS")
+FRONTEND_HOST = env("HCT_MIS_FRONTEND_HOST")
 ADMIN_PANEL_URL = env("ADMIN_PANEL_URL")
 
 ####
@@ -121,45 +121,17 @@ RO_CONN.update(
 DATABASES = {
     "default": env.db(),
     "read_only": RO_CONN,
-    "cash_assist_datahub_mis": env.db("DATABASE_URL_HUB_MIS"),
-    "cash_assist_datahub_ca": env.db("DATABASE_URL_HUB_CA"),
-    "cash_assist_datahub_erp": env.db("DATABASE_URL_HUB_ERP"),
-    "registration_datahub": env.db("DATABASE_URL_HUB_REGISTRATION"),
 }
 DATABASES["default"].update({"CONN_MAX_AGE": 60})
 
-if env("POSTGRES_SSL", default=False):
+if env("POSTGRES_SSL"):
     DATABASES["default"]["OPTIONS"] = {
-        "sslmode": "verify-full",
-        "sslrootcert": "/certs/psql-cert.crt",
-    }
-    DATABASES["cash_assist_datahub_mis"]["OPTIONS"] = {
-        "sslmode": "verify-full",
-        "sslrootcert": "/certs/psql-cert.crt",
-        "options": "-c search_path=mis",
-    }
-    DATABASES["cash_assist_datahub_ca"]["OPTIONS"] = {
-        "sslmode": "verify-full",
-        "sslrootcert": "/certs/psql-cert.crt",
-        "options": "-c search_path=ca",
-    }
-    DATABASES["cash_assist_datahub_erp"]["OPTIONS"] = {
-        "sslmode": "verify-full",
-        "sslrootcert": "/certs/psql-cert.crt",
-        "options": "-c search_path=erp",
-    }
-    DATABASES["registration_datahub"]["OPTIONS"] = {
         "sslmode": "verify-full",
         "sslrootcert": "/certs/psql-cert.crt",
     }
 
 # If app is not specified here it will use default db
-DATABASE_APPS_MAPPING: Dict[str, str] = {
-    "cash_assist_datahub": "cash_assist_datahub_ca",
-    "mis_datahub": "cash_assist_datahub_mis",
-    "erp_datahub": "cash_assist_datahub_erp",
-    "registration_datahub": "registration_datahub",
-}
+DATABASE_APPS_MAPPING: Dict[str, str] = {}
 
 DATABASE_ROUTERS = ("hct_mis_api.apps.core.dbrouters.DbRouter",)
 
@@ -220,15 +192,10 @@ PROJECT_APPS = [
     "hct_mis_api.apps.payment.apps.PaymentConfig",
     "hct_mis_api.apps.program.apps.ProgramConfig",
     "hct_mis_api.apps.changelog.apps.ChangelogConfig",
-    "power_query.apps.Config",
-    # "hct_mis_api.apps.targeting",
     "hct_mis_api.apps.targeting.apps.TargetingConfig",
     "hct_mis_api.apps.utils.apps.UtilsConfig",
     "hct_mis_api.apps.registration_datahub.apps.Config",
     "hct_mis_api.apps.registration_data.apps.RegistrationDataConfig",
-    "hct_mis_api.apps.cash_assist_datahub.apps.Config",
-    "hct_mis_api.apps.mis_datahub.apps.Config",
-    "hct_mis_api.apps.erp_datahub.apps.Config",
     "hct_mis_api.apps.sanction_list.apps.SanctionListConfig",
     "hct_mis_api.apps.steficon.apps.SteficonConfig",
     "hct_mis_api.apps.reporting.apps.ReportingConfig",
@@ -247,6 +214,7 @@ DJANGO_APPS = [
     "smart_admin.apps.SmartTemplateConfig",
     "hct_mis_api.apps.administration.apps.Config",
     "admin_sync.apps.Config",
+    "smart_env",
     "django_sysinfo",
     "django.contrib.auth",
     "django.contrib.humanize",
@@ -309,7 +277,6 @@ PASSWORD_RESET_TIMEOUT = 60 * 60 * 24 * 31
 ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 7
 
 AUTHENTICATION_BACKENDS = [
-    "hct_mis_api.libs.power_query.backends.PowerQueryBackend",
     "django.contrib.auth.backends.ModelBackend",
     "social_core.backends.azuread_tenant.AzureADTenantOAuth2",
 ]
@@ -324,19 +291,17 @@ def extend_list_avoid_repeats(list_to_extend: List, extend_with: List) -> None:
     list_to_extend.extend(filter(lambda x: not list_to_extend.count(x), extend_with))
 
 
-GIT_VERSION = env("GIT_VERSION", default="UNKNOWN")
+GIT_VERSION = env("GIT_VERSION")
 HIJACK_PERMISSION_CHECK = "hct_mis_api.apps.utils.security.can_hijack"
 
-REDIS_INSTANCE = env("REDIS_INSTANCE", default="redis:6379")
-
-CACHE_ENABLED = env("CACHE_ENABLED", default=True)
+CACHE_ENABLED = env("CACHE_ENABLED")
 
 CACHES: Dict[str, Any]
 if CACHE_ENABLED:
     CACHES = {
         "default": {
             "BACKEND": "django_redis.cache.RedisCache",
-            "LOCATION": env("CACHE_LOCATION", default=f"redis://{REDIS_INSTANCE}/1"),
+            "LOCATION": env("CACHE_LOCATION"),
             "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
         }
     }
@@ -406,7 +371,7 @@ ROOT_TOKEN = env.str("ROOT_ACCESS_TOKEN", uuid4().hex)
 
 CORS_ALLOWED_ORIGIN_REGEXES = [r"https://\w+.blob.core.windows.net$"]
 
-EXCHANGE_RATE_CACHE_EXPIRY = env.int("EXCHANGE_RATE_CACHE_EXPIRY", default=1 * 60 * 60 * 24)
+EXCHANGE_RATE_CACHE_EXPIRY = env.int("EXCHANGE_RATE_CACHE_EXPIRY")
 
 VERSION = get_version(__name__, Path(PROJECT_ROOT).parent, default_return=None)
 
@@ -449,9 +414,6 @@ SYSINFO = {
 
 EXPLORER_CONNECTIONS = {
     "default": "default",
-    "HUB MIS": "cash_assist_datahub_mis",
-    "HUB CA": "cash_assist_datahub_ca",
-    "HUB ERP": "cash_assist_datahub_erp",
 }
 EXPLORER_DEFAULT_CONNECTION = "default"
 EXPLORER_PERMISSION_VIEW = lambda r: r.user.has_perm("explorer.view_query")
@@ -470,7 +432,7 @@ POWER_QUERY_EXTRA_CONNECTIONS = [
 
 CONCURRENCY_ENABLED = False
 
-PROFILING = env("PROFILING", default="off") == "on"
+PROFILING = env("PROFILING") == "on"
 if PROFILING:
     # SILK
     INSTALLED_APPS.append("silk")
@@ -486,7 +448,7 @@ SWAGGER_SETTINGS = {
 }
 
 MAX_STORAGE_FILE_SIZE = 30
-USE_DUMMY_EXCHANGE_RATES = env("USE_DUMMY_EXCHANGE_RATES", default="no") == "yes"
+USE_DUMMY_EXCHANGE_RATES = env("USE_DUMMY_EXCHANGE_RATES") == "yes"
 
 FLAGS_STATE_LOGGING = DEBUG
 FLAGS = {
@@ -502,18 +464,6 @@ MARKDOWNIFY = {
         "WHITELIST_TAGS": ["a", "abbr", "acronym", "b", "blockquote", "em", "i", "li", "ol", "p", "strong", "ul" "br"]
     }
 }
-
-SHELL_PLUS_DONT_LOAD = [
-    "mis_datahub.Individual",
-    "mis_datahub.Household",
-]
-
-CYPRESS_TESTING = env("CYPRESS_TESTING", default="no") == "yes"
-
-if CYPRESS_TESTING and ENV != "dev":
-    from django.core.exceptions import ImproperlyConfigured
-
-    raise ImproperlyConfigured(f"CYPRESS_TESTING can only be used in development env: ENV={ENV}")
 
 CSRF_COOKIE_HTTPONLY = env.bool("CSRF_COOKIE_HTTPONLY")
 CSRF_COOKIE_SECURE = env.bool("CSRF_COOKIE_SECURE")
@@ -542,7 +492,7 @@ from hct_mis_api.config.fragments.smart_admin import *  # noqa: F403, F401, E402
 from hct_mis_api.config.fragments.social_auth import *  # noqa: F403, F401, E402
 from hct_mis_api.config.fragments.storages import *  # noqa: F403, F401, E402
 
-LIBRARY_PATHS: bool = env("LIBRARY_PATHS", default=False)
+LIBRARY_PATHS: bool = env("LIBRARY_PATHS")
 if LIBRARY_PATHS:
     GDAL_LIBRARY_PATH = "/opt/homebrew/opt/gdal/lib/libgdal.dylib"
     GEOS_LIBRARY_PATH = "/opt/homebrew/opt/geos/lib/libgeos_c.dylib"

@@ -1,7 +1,6 @@
 import { Box, Button, DialogContent, DialogTitle } from '@mui/material';
 import ClearIcon from '@mui/icons-material/Clear';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dialog } from '@containers/dialogs/Dialog';
 import { DialogActions } from '@containers/dialogs/DialogActions';
@@ -20,7 +19,7 @@ export interface DiscardVerificationPlanProps {
 
 export function DiscardVerificationPlan({
   paymentVerificationPlanId,
-}: DiscardVerificationPlanProps): React.ReactElement {
+}: DiscardVerificationPlanProps): ReactElement {
   const { t } = useTranslation();
   const [discardDialogOpen, setDiscardDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();

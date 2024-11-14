@@ -1,5 +1,4 @@
 import { Form, Formik } from 'formik';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { format, parseISO } from 'date-fns';
 import * as Yup from 'yup';
@@ -17,11 +16,14 @@ import {
 } from '@generated/graphql';
 import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { ReactElement } from 'react';
 
-export const CreatePaymentPlanPage = (): React.ReactElement => {
+export const CreatePaymentPlanPage = (): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const location = useLocation();
   const [mutate, { loading: loadingCreate }] = useCreatePpMutation();
   const { showMessage } = useSnackbar();
   const { businessArea, programId } = useBaseUrl();
@@ -103,28 +105,37 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
   };
 
   return (
-    <Formik
-      initialValues={initialValues}
-      validationSchema={validationSchema}
-      onSubmit={handleSubmit}
-      validateOnChange
-      validateOnBlur
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'CreatePaymentPlanPage.tsx');
+      }}
+      componentName="CreatePaymentPlanPage"
     >
-      {({ submitForm, values }) => (
-        <Form>
-          <AutoSubmitFormOnEnter />
-          <CreatePaymentPlanHeader
-            handleSubmit={submitForm}
-            permissions={permissions}
-            loadingCreate={loadingCreate}
-          />
-          <PaymentPlanTargeting
-            allTargetPopulations={allTargetPopulationsData}
-            loading={loadingTargetPopulations}
-          />
-          <PaymentPlanParameters values={values} />
-        </Form>
-      )}
-    </Formik>
+      <Formik
+        initialValues={initialValues}
+        validationSchema={validationSchema}
+        onSubmit={handleSubmit}
+        validateOnChange
+        validateOnBlur
+      >
+        {({ submitForm, values }) => (
+          <Form>
+            <AutoSubmitFormOnEnter />
+            <CreatePaymentPlanHeader
+              handleSubmit={submitForm}
+              permissions={permissions}
+              loadingCreate={loadingCreate}
+            />
+            <PaymentPlanTargeting
+              allTargetPopulations={allTargetPopulationsData}
+              loading={loadingTargetPopulations}
+            />
+            <PaymentPlanParameters values={values} />
+          </Form>
+        )}
+      </Formik>
+    </UniversalErrorBoundary>
   );
 };

@@ -1,6 +1,5 @@
-import * as React from 'react';
-import { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { ReactElement, useEffect } from 'react';
+import { useLocation, useParams } from 'react-router-dom';
 import { PaymentPlanStatus, usePaymentPlanQuery } from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
@@ -19,10 +18,12 @@ import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTabl
 import { ExcludeSection } from '@components/paymentmodule/PaymentPlanDetails/ExcludeSection';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { SupportingDocumentsSection } from '@components/paymentmodule/PaymentPlanDetails/SupportingDocumentsSection/SupportingDocumentsSection';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
-export function FollowUpPaymentPlanDetailsPage(): React.ReactElement {
+export function FollowUpPaymentPlanDetailsPage(): ReactElement {
   const { paymentPlanId } = useParams();
   const permissions = usePermissions();
+  const location = useLocation();
   const { baseUrl, businessArea } = useBaseUrl();
   const { data, loading, startPolling, stopPolling, error } =
     usePaymentPlanQuery({
@@ -62,35 +63,47 @@ export function FollowUpPaymentPlanDetailsPage(): React.ReactElement {
 
   const { paymentPlan } = data;
   return (
-    <>
-      <FollowUpPaymentPlanDetailsHeader
-        paymentPlan={paymentPlan}
-        baseUrl={baseUrl}
-        permissions={permissions}
-      />
-      <FollowUpPaymentPlanDetails baseUrl={baseUrl} paymentPlan={paymentPlan} />
-      <AcceptanceProcess paymentPlan={paymentPlan} />
-      {shouldDisplayEntitlement && (
-        <Entitlement paymentPlan={paymentPlan} permissions={permissions} />
-      )}
-      {shouldDisplayFsp && (
-        <FspSection baseUrl={baseUrl} paymentPlan={paymentPlan} />
-      )}
-      <ExcludeSection paymentPlan={paymentPlan} />
-      <SupportingDocumentsSection paymentPlan={paymentPlan} />
-      <PaymentPlanDetailsResults paymentPlan={paymentPlan} />
-      <PaymentsTable
-        businessArea={businessArea}
-        paymentPlan={paymentPlan}
-        permissions={permissions}
-        canViewDetails
-      />
-      {shouldDisplayReconciliationSummary && (
-        <ReconciliationSummary paymentPlan={paymentPlan} />
-      )}
-      {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
-        <UniversalActivityLogTable objectId={paymentPlan.id} />
-      )}
-    </>
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'FollowUpPaymentPlanDetailsPage.tsx');
+      }}
+      componentName="FollowUpPaymentPlanDetailsPage"
+    >
+      <>
+        <FollowUpPaymentPlanDetailsHeader
+          paymentPlan={paymentPlan}
+          baseUrl={baseUrl}
+          permissions={permissions}
+        />
+        <FollowUpPaymentPlanDetails
+          baseUrl={baseUrl}
+          paymentPlan={paymentPlan}
+        />
+        <AcceptanceProcess paymentPlan={paymentPlan} />
+        {shouldDisplayEntitlement && (
+          <Entitlement paymentPlan={paymentPlan} permissions={permissions} />
+        )}
+        {shouldDisplayFsp && (
+          <FspSection baseUrl={baseUrl} paymentPlan={paymentPlan} />
+        )}
+        <ExcludeSection paymentPlan={paymentPlan} />
+        <SupportingDocumentsSection paymentPlan={paymentPlan} />
+        <PaymentPlanDetailsResults paymentPlan={paymentPlan} />
+        <PaymentsTable
+          businessArea={businessArea}
+          paymentPlan={paymentPlan}
+          permissions={permissions}
+          canViewDetails
+        />
+        {shouldDisplayReconciliationSummary && (
+          <ReconciliationSummary paymentPlan={paymentPlan} />
+        )}
+        {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
+          <UniversalActivityLogTable objectId={paymentPlan.id} />
+        )}
+      </>
+    </UniversalErrorBoundary>
   );
 }

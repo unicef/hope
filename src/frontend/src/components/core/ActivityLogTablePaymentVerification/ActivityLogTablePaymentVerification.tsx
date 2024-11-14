@@ -5,7 +5,7 @@ import TablePagination from '@mui/material/TablePagination';
 import Typography from '@mui/material/Typography';
 import ExpandLessIcon from '@mui/icons-material/ExpandLessRounded';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMoreRounded';
-import { ReactElement, useState } from 'react';
+import { ChangeEvent, ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { PaymentVerificationLogEntryNode } from '@generated/graphql';
@@ -54,7 +54,7 @@ interface ActivityLogTablePaymentVerificationProps {
   rowsPerPage: number;
   page: number;
   onChangePage: (event: unknown, newPage: number) => void;
-  onChangeRowsPerPage: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onChangeRowsPerPage: (event: ChangeEvent<HTMLInputElement>) => void;
 }
 export function ActivityLogTablePaymentVerification({
   logEntries,

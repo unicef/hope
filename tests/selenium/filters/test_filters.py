@@ -546,3 +546,11 @@ class TestSmokeFilters:
         pageGrievanceTickets.getNavGrievance().click()
         assert "Grievance Tickets" in pageGrievanceTickets.getGrievanceTitle().text
         pageGrievanceTickets.getButtonNewTicket().click()
+
+    @pytest.mark.skip("ToDo")
+    def test_payment_verification_details_filters(
+        self,
+        pageGrievanceTickets: GrievanceTickets,
+        filters: Filters,
+    ) -> None:
+        pageGrievanceTickets.getNavPaymentVerification().click()

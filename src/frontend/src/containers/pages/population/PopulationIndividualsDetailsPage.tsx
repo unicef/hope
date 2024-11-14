@@ -1,7 +1,6 @@
 import { Box } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import {
   IndividualNode,
@@ -28,6 +27,8 @@ import { ProgrammeTimeSeriesFields } from '@components/population/ProgrammeTimeS
 import { fetchPeriodicFields } from '@api/periodicDataUpdateApi';
 import { useQuery } from '@tanstack/react-query';
 import { IndividualDeliveryMechanisms } from '@components/population/IndividualDeliveryMechanisms';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { ReactElement } from 'react';
 
 const Container = styled.div`
   padding: 20px;
@@ -38,9 +39,11 @@ const Container = styled.div`
   }
 `;
 
-export const PopulationIndividualsDetailsPage = (): React.ReactElement => {
+export const PopulationIndividualsDetailsPage = (): ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
+  const location = useLocation();
+
   const { baseUrl, businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
 
@@ -98,7 +101,14 @@ export const PopulationIndividualsDetailsPage = (): React.ReactElement => {
   const { individual } = data;
 
   return (
-    <>
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'PopulationIndividualsDetailsPage.tsx');
+      }}
+      componentName="PopulationIndividualsDetailsPage"
+    >
       <PageHeader
         title={`${t('Individual ID')}: ${individual?.unicefId}`}
         breadCrumbs={
@@ -122,7 +132,6 @@ export const PopulationIndividualsDetailsPage = (): React.ReactElement => {
           ) : null}
         </Box>
       </PageHeader>
-
       <Container>
         <IndividualBioData
           baseUrl={baseUrl}
@@ -146,6 +155,6 @@ export const PopulationIndividualsDetailsPage = (): React.ReactElement => {
           <UniversalActivityLogTable objectId={individual?.id} />
         )}
       </Container>
-    </>
+    </UniversalErrorBoundary>
   );
 };

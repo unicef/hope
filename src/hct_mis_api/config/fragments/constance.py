@@ -2,9 +2,8 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils.translation import gettext_lazy as _
 
 from hct_mis_api.config.env import env
-from hct_mis_api.config.settings import REDIS_INSTANCE
 
-CONSTANCE_REDIS_CONNECTION = env("CONSTANCE_REDIS_CONNECTION", default=f"redis://{REDIS_INSTANCE}/0")
+CONSTANCE_REDIS_CONNECTION = env("CONSTANCE_REDIS_CONNECTION")
 CONSTANCE_REDIS_CACHE_TIMEOUT = 1
 CONSTANCE_ADDITIONAL_FIELDS = {
     "percentages": (
@@ -148,7 +147,6 @@ CONSTANCE_CONFIG = {
     ),
     "QUICK_LINKS": (
         """Kobo,https://kf-hope.unitst.org/
-CashAssist,https://cashassist-trn.crm4.dynamics.com/
 Sentry,https://excubo.unicef.io/sentry/hct-mis-stg/
 elasticsearch,hope-elasticsearch-coordinating-only:9200
 Datamart,https://datamart.unicef.io

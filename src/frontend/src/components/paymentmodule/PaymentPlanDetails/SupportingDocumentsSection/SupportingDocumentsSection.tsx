@@ -1,46 +1,53 @@
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import DownloadIcon from '@mui/icons-material/Download';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { PaperContainer } from '@components/targeting/PaperContainer';
-import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
-import { GreyText } from '@components/core/GreyText';
-import { LoadingButton } from '@components/core/LoadingButton';
-import {
-  Typography,
-  IconButton,
-  Collapse,
-  Dialog,
-  DialogTitle,
-  TextField,
-  DialogActions,
-  Button,
-  Box,
-  Grid,
-  DialogContent,
-  FormHelperText,
-} from '@mui/material';
-import { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
-import { usePermissions } from '@hooks/usePermissions';
-import { useTranslation } from 'react-i18next';
-import {
-  PaymentPlanQuery,
-  PaymentPlanStatus,
-  usePaymentPlanLazyQuery,
-} from '@generated/graphql';
-import { DropzoneField } from '@components/core/DropzoneField';
-import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import {
   deleteSupportingDocument,
   uploadSupportingDocument,
 } from '@api/paymentModuleApi';
-import { useSnackbar } from '@hooks/useSnackBar';
-import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useConfirmation } from '@components/core/ConfirmationDialog';
+import { DropzoneField } from '@components/core/DropzoneField';
 import { GreyBox } from '@components/core/GreyBox';
+import { GreyText } from '@components/core/GreyText';
+import { LoadingButton } from '@components/core/LoadingButton';
 import { BlueText } from '@components/grievances/LookUps/LookUpStyles';
+import { PaperContainer } from '@components/targeting/PaperContainer';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { PaymentPlanQuery, PaymentPlanStatus } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { useSnackbar } from '@hooks/useSnackBar';
+import DeleteIcon from '@mui/icons-material/Delete';
+import DownloadIcon from '@mui/icons-material/Download';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import {
+  Box,
+  Button,
+  Collapse,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormHelperText,
+  Grid,
+  IconButton,
+  TextField,
+  Typography,
+} from '@mui/material';
+import { useMutation } from '@tanstack/react-query';
+import { ReactElement, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
+import styled from 'styled-components';
 import { useDownloadSupportingDocument } from './SupportingDocumentsSectionActions';
+
+const StyledBox = styled(Box)`
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background-color: ${({ theme }) => theme.palette.grey[200]};
+  padding: 4px;
+  margin-bottom: 4px;
+`;
 
 interface SupportingDocumentsSectionProps {
   initialOpen?: boolean;
@@ -50,7 +57,7 @@ interface SupportingDocumentsSectionProps {
 export const SupportingDocumentsSection = ({
   initialOpen = false,
   paymentPlan,
-}: SupportingDocumentsSectionProps): React.ReactElement => {
+}: SupportingDocumentsSectionProps): ReactElement => {
   const permissions = usePermissions();
   const confirm = useConfirmation();
   const { t } = useTranslation();
@@ -191,12 +198,16 @@ export const SupportingDocumentsSection = ({
     'Are you sure you want to delete this file? This action cannot be reversed.',
   );
 
-  const handleSupportingDocumentDownloadClick = (fileId: string) => {
+  const handleSupportingDocumentDownloadClick = (
+    fileId: string,
+    fileName: string,
+  ) => {
     downloadSupportingDocument({
       businessAreaSlug: businessArea,
       programId,
       paymentPlanId: paymentPlan.id,
       fileId: fileId.toString(),
+      fileName: fileName,
     });
   };
 
@@ -255,14 +266,21 @@ export const SupportingDocumentsSection = ({
                     alignItems="center"
                   >
                     <Box display="flex" flexDirection="column">
-                      <BlueText>{doc.title}</BlueText>
-                      <BlueText>{doc.file}</BlueText>
+                      <StyledBox>
+                        <BlueText>{doc.title}</BlueText>
+                      </StyledBox>
+                      <StyledBox>
+                        <BlueText>{doc.file}</BlueText>
+                      </StyledBox>
                     </Box>
                     <Box>
                       {canDownloadFile && (
                         <IconButton
                           onClick={() =>
-                            handleSupportingDocumentDownloadClick(doc.id)
+                            handleSupportingDocumentDownloadClick(
+                              doc.id,
+                              doc.file,
+                            )
                           }
                           data-cy="download-button"
                         >

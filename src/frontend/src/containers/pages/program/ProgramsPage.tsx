@@ -1,6 +1,5 @@
 import { Button } from '@mui/material';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router-dom';
 import { useProgrammeChoiceDataQuery } from '@generated/graphql';
@@ -12,6 +11,7 @@ import { usePermissions } from '@hooks/usePermissions';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { ProgrammesTable } from '../../tables/ProgrammesTable';
 import { ProgrammesFilters } from '../../tables/ProgrammesTable/ProgrammesFilter';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
 const initialFilter = {
   search: '',
@@ -26,7 +26,7 @@ const initialFilter = {
   dataCollectingType: '',
 };
 
-export function ProgramsPage(): React.ReactElement {
+export function ProgramsPage(): ReactElement {
   const location = useLocation();
 
   const [filter, setFilter] = useState(
@@ -68,7 +68,14 @@ export function ProgramsPage(): React.ReactElement {
   );
 
   return (
-    <div>
+    <UniversalErrorBoundary
+      location={location}
+      beforeCapture={(scope) => {
+        scope.setTag('location', location.pathname);
+        scope.setTag('component', 'ProgramsPage.tsx');
+      }}
+      componentName="ProgramsPage"
+    >
       {hasPermissions(PERMISSIONS.PROGRAMME_CREATE, permissions) && toolbar}
       <ProgrammesFilters
         filter={filter}
@@ -83,6 +90,6 @@ export function ProgramsPage(): React.ReactElement {
         choicesData={choicesData}
         filter={appliedFilter}
       />
-    </div>
+    </UniversalErrorBoundary>
   );
 }

@@ -11,16 +11,9 @@ import { fetchPeriodicDataUpdateUpdates } from '@api/periodicDataUpdateApi';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { PeriodicDataUpdatesUploadDetailsDialog } from '@components/periodicDataUpdates/PeriodicDataUpdatesUploadDetailsDialog';
+import { PeriodicDataUpdateUploadList } from '@restgenerated/models/PeriodicDataUpdateUploadList';
 
-interface Update {
-  id: string;
-  template: string;
-  created_at: string;
-  created_by: string;
-  status: string;
-}
-
-const updatesHeadCells: HeadCell<Update>[] = [
+const updatesHeadCells: HeadCell<PeriodicDataUpdateUploadList>[] = [
   {
     id: 'id',
     numeric: false,
@@ -107,7 +100,7 @@ export const PeriodicDataUpdatesUpdatesList = (): ReactElement => {
     setSelectedUploadId(null);
   };
 
-  const renderUpdateRow = (row: Update): ReactElement => (
+  const renderUpdateRow = (row: PeriodicDataUpdateUploadList): ReactElement => (
     <ClickableTableRow key={row.id} data-cy={`update-row-${row.id}`}>
       <TableCell data-cy={`update-id-${row.id}`}>{row.id}</TableCell>
       <TableCell data-cy={`update-template-${row.id}`}>
