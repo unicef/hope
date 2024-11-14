@@ -35,6 +35,8 @@ from hct_mis_api.apps.household.models import (
     PendingDocument,
     PendingHousehold,
     PendingIndividual,
+    PendingIndividualIdentity,
+    PendingIndividualRoleInHousehold,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
@@ -166,11 +168,27 @@ class IndividualIdentityFactory(DjangoModelFactory):
     number = factory.Faker("pystr", min_chars=None, max_chars=20)
 
 
+class PendingIndividualIdentityFactory(DjangoModelFactory):
+    rdi_merge_status = MergeStatusModel.PENDING
+
+    class Meta:
+        model = PendingIndividualIdentity
+
+    number = factory.Faker("pystr", min_chars=None, max_chars=20)
+
+
 class IndividualRoleInHouseholdFactory(DjangoModelFactory):
     rdi_merge_status = MergeStatusModel.MERGED
 
     class Meta:
         model = IndividualRoleInHousehold
+
+
+class PendingIndividualRoleInHouseholdFactory(DjangoModelFactory):
+    rdi_merge_status = MergeStatusModel.PENDING
+
+    class Meta:
+        model = PendingIndividualRoleInHousehold
 
 
 class IndividualCollectionFactory(DjangoModelFactory):

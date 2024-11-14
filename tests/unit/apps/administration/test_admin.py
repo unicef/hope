@@ -49,13 +49,6 @@ def model_admins() -> Tuple:
 
 
 class TestAdminSite(WebTest):
-    databases = [
-        "default",
-        "cash_assist_datahub_ca",
-        "cash_assist_datahub_erp",
-        "cash_assist_datahub_mis",
-    ]
-
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()

@@ -1,9 +1,13 @@
+import os
 from datetime import datetime
+from decimal import Decimal
 from time import sleep
 
+import openpyxl
 import pytest
 from dateutil.relativedelta import relativedelta
 from selenium.webdriver.common.by import By
+from sorl.thumbnail.conf import settings
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
@@ -12,21 +16,28 @@ from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.fixtures import (
     CashPlanFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
     PaymentRecordFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
+    PaymentVerificationSummaryFactory,
 )
-from hct_mis_api.apps.payment.models import GenericPayment
+from hct_mis_api.apps.payment.models import GenericPayment, PaymentPlan
 from hct_mis_api.apps.payment.models import PaymentRecord as PR
 from hct_mis_api.apps.payment.models import PaymentVerification as PV
 from hct_mis_api.apps.payment.models import PaymentVerificationPlan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
     TargetPopulationFactory,
 )
+from tests.selenium.page_object.grievance.details_grievance_page import (
+    GrievanceDetailsPage,
+)
+from tests.selenium.page_object.grievance.grievance_tickets import GrievanceTickets
 from tests.selenium.page_object.payment_verification.payment_record import PaymentRecord
 from tests.selenium.page_object.payment_verification.payment_verification import (
     PaymentVerification,
@@ -34,6 +45,7 @@ from tests.selenium.page_object.payment_verification.payment_verification import
 from tests.selenium.page_object.payment_verification.payment_verification_details import (
     PaymentVerificationDetails,
 )
+from tests.selenium.payment_module.test_payment_plans import find_file
 
 pytestmark = pytest.mark.django_db(transaction=True)
 
@@ -59,8 +71,129 @@ def get_program_with_dct_type_and_name(
     return program
 
 
+def create_program(name: str = "Test Program", dct_type: str = DataCollectingType.Type.STANDARD) -> Program:
+    BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
+    dct = DataCollectingTypeFactory(type=dct_type)
+    yield ProgramFactory(
+        name=name,
+        programme_code="1234",
+        start_date=datetime.now() - relativedelta(months=1),
+        end_date=datetime.now() + relativedelta(months=1),
+        data_collecting_type=dct,
+        status=Program.ACTIVE,
+        cycle__title="First cycle for Test Program",
+        cycle__status=ProgramCycle.DRAFT,
+        cycle__start_date=datetime.now() - relativedelta(days=5),
+        cycle__end_date=datetime.now() + relativedelta(days=5),
+    )
+
+
+@pytest.fixture
+def social_worker_program() -> Program:
+    yield create_program(dct_type=DataCollectingType.Type.SOCIAL)
+
+
+@pytest.fixture
+def payment_verification_3() -> None:
+    payment_verification_multiple_verification_plans(3)
+
+
+def payment_verification_multiple_verification_plans(number_verification_plans: int) -> None:
+    registration_data_import = RegistrationDataImportFactory(
+        imported_by=User.objects.first(), business_area=BusinessArea.objects.first()
+    )
+    program = Program.objects.filter(name="Active Program").first()
+    households = list()
+    for _ in range(number_verification_plans):
+        household, _ = create_household(
+            {
+                "registration_data_import": registration_data_import,
+                "admin_area": Area.objects.order_by("?").first(),
+                "program": program,
+            },
+            {"registration_data_import": registration_data_import},
+        )
+        households.append(household)
+
+    payment_plan = PaymentPlanFactory(
+        program=program,
+        status=PaymentPlan.Status.FINISHED,
+        business_area=BusinessArea.objects.filter(slug="afghanistan").first(),
+    )
+    payments = list()
+    for hh in households:
+        payments.append(
+            PaymentFactory(
+                parent=payment_plan,
+                business_area=BusinessArea.objects.first(),
+                household=hh,
+                head_of_household=household.head_of_household,
+                entitlement_quantity=Decimal("21.36"),
+                delivered_quantity=Decimal("21.36"),
+                currency="PLN",
+                status=GenericPayment.STATUS_DISTRIBUTION_SUCCESS,
+            )
+        )
+
+    PaymentVerificationSummaryFactory(payment_plan_obj=payment_plan)
+
+    for payment in payments:
+        payment_verification_plan = PaymentVerificationPlanFactory(
+            payment_plan_obj=payment_plan,
+            verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL,
+        )
+
+        PaymentVerificationFactory(
+            payment_obj=payment,
+            payment_verification_plan=payment_verification_plan,
+            status=PV.STATUS_PENDING,
+        )
+
+
+@pytest.fixture
+def empty_payment_verification(social_worker_program: Program) -> None:
+    registration_data_import = RegistrationDataImportFactory(
+        imported_by=User.objects.first(), business_area=BusinessArea.objects.first()
+    )
+    program = Program.objects.filter(name="Active Program").first()
+    household, individuals = create_household(
+        {
+            "registration_data_import": registration_data_import,
+            "admin_area": Area.objects.order_by("?").first(),
+            "program": program,
+        },
+        {"registration_data_import": registration_data_import},
+    )
+
+    payment_plan = PaymentPlanFactory(
+        program=program,
+        status=PaymentPlan.Status.FINISHED,
+        business_area=BusinessArea.objects.filter(slug="afghanistan").first(),
+    )
+    PaymentFactory(
+        parent=payment_plan,
+        business_area=BusinessArea.objects.first(),
+        household=household,
+        head_of_household=household.head_of_household,
+        entitlement_quantity=Decimal("21.36"),
+        delivered_quantity=Decimal("21.36"),
+        currency="PLN",
+        status=GenericPayment.STATUS_DISTRIBUTION_SUCCESS,
+    )
+    PaymentVerificationSummaryFactory(payment_plan_obj=payment_plan)
+
+
 @pytest.fixture
 def add_payment_verification() -> PV:
+    yield payment_verification_creator()
+
+
+@pytest.fixture
+def add_payment_verification_xlsx() -> PV:
+    yield payment_verification_creator(channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX)
+
+
+def payment_verification_creator(channel: str = PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL) -> PV:
     registration_data_import = RegistrationDataImportFactory(
         imported_by=User.objects.first(), business_area=BusinessArea.objects.first()
     )
@@ -101,7 +234,7 @@ def add_payment_verification() -> PV:
     )
     payment_verification_plan = PaymentVerificationPlanFactory(
         payment_plan_obj=cash_plan,
-        verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL,
+        verification_channel=channel,
     )
 
     pv_summary = cash_plan.get_payment_verification_summary
@@ -114,6 +247,15 @@ def add_payment_verification() -> PV:
         status=PV.STATUS_PENDING,
     )
     return pv
+
+
+@pytest.fixture
+def clear_downloaded_files() -> None:
+    for file in os.listdir(settings.DOWNLOAD_DIRECTORY):
+        os.remove(os.path.join(settings.DOWNLOAD_DIRECTORY, file))
+    yield
+    for file in os.listdir(settings.DOWNLOAD_DIRECTORY):
+        os.remove(os.path.join(settings.DOWNLOAD_DIRECTORY, file))
 
 
 @pytest.mark.usefixtures("login")
@@ -279,12 +421,468 @@ class TestSmokePaymentVerification:
 
 @pytest.mark.usefixtures("login")
 class TestPaymentVerification:
-    @pytest.mark.skip("ToDo: Old and same value - maybe parametrization with values")
-    def test_payment_verification_create_grievance_ticket_same_value(
-        self, active_program: Program, add_payment_verification: PV, pagePaymentVerification: PaymentVerification
+    @pytest.mark.parametrize(
+        "channel",
+        [
+            "manual",
+            "rapidpro",
+            "xlsx",
+        ],
+    )
+    def test_payment_verification_create_verification_plan_full_list(
+        self,
+        channel: str,
+        active_program: Program,
+        empty_payment_verification: None,
+        pagePaymentVerification: PaymentVerification,
+        pagePaymentVerificationDetails: PaymentVerificationDetails,
     ) -> None:
         pagePaymentVerification.selectGlobalProgramFilter("Active Program")
-        # Upon resolving the Payment Verification grievance ticket,
-        # the received value changes with the new verified value.
-        # If the received value is 0, it should stay 0 even when a new verified value is provided in the ticket.
-        # Check conversation with Jakub
+        pagePaymentVerification.getNavPaymentVerification().click()
+        pagePaymentVerification.getCashPlanTableRow().click()
+        pagePaymentVerification.getButtonNewPlan().click()
+        pagePaymentVerification.getRadioVerificationChannel(channel).click()
+        pagePaymentVerification.getButtonSubmit().click()
+        assert "PENDING" in pagePaymentVerificationDetails.getVerificationPlansSummaryStatus().text
+        assert "PENDING" in pagePaymentVerificationDetails.getVerificationPlanStatus().text
+        assert channel.upper() in pagePaymentVerificationDetails.getLabelVerificationChannel().text
+        assert "Full list" in pagePaymentVerificationDetails.getLabelSampling().text
+
+    def test_payment_verification_create_verification_plan_random_sampling_manual(
+        self,
+        active_program: Program,
+        empty_payment_verification: None,
+        pagePaymentVerification: PaymentVerification,
+        pagePaymentVerificationDetails: PaymentVerificationDetails,
+    ) -> None:
+        pagePaymentVerification.selectGlobalProgramFilter("Active Program")
+        pagePaymentVerification.getNavPaymentVerification().click()
+        pagePaymentVerification.getCashPlanTableRow().click()
+        pagePaymentVerification.getButtonNewPlan().click()
+        pagePaymentVerification.getTabRandomSampling().click()
+        pagePaymentVerification.getInputAdmincheckbox().click()
+        pagePaymentVerification.getInputAgecheckbox().click()
+        pagePaymentVerification.getInputSexcheckbox().click()
+        pagePaymentVerification.getButtonSubmit().click()
+        assert "PENDING" in pagePaymentVerificationDetails.getVerificationPlansSummaryStatus().text
+        assert "PENDING" in pagePaymentVerificationDetails.getVerificationPlanStatus().text
+        assert "MANUAL" in pagePaymentVerificationDetails.getLabelVerificationChannel().text
+        assert "Random sampling" in pagePaymentVerificationDetails.getLabelSampling().text
+        assert "0" in pagePaymentVerificationDetails.getLabelSampleSize().text
+        assert "1" in pagePaymentVerificationDetails.getLabelNumberOfVerificationPlans().text
+
+    def test_payment_verification_records(
+        self,
+        active_program: Program,
+        payment_verification_3: None,
+        pagePaymentVerification: PaymentVerification,
+        pagePaymentVerificationDetails: PaymentVerificationDetails,
+        pagePaymentRecord: PaymentRecord,
+    ) -> None:
+        pagePaymentVerification.selectGlobalProgramFilter("Active Program")
+        pagePaymentVerification.getNavPaymentVerification().click()
+        pagePaymentVerification.getCashPlanTableRow().click()
+        assert "3" in pagePaymentVerificationDetails.getLabelPaymentRecords().text
+        pagePaymentVerificationDetails.getButtonActivatePlan().click()
+        pagePaymentVerificationDetails.getButtonSubmit().click()
+
+        pagePaymentVerificationDetails.driver.execute_script(
+            """
+            container = document.querySelector("div[data-cy='main-content']")
+            container.scrollBy(0,600)
+            """
+        )
+        sleep(2)
+        pagePaymentVerificationDetails.driver.execute_script(
+            """
+            container = document.querySelector("div[data-cy='main-content']")
+            container.scrollBy(0,600)
+            """
+        )
+        sleep(2)
+        pagePaymentVerification.screenshot("0", file_path="./")
+        from tests.selenium.tools.tag_name_finder import printing
+
+        printing("Mapping", pagePaymentVerification.driver)
+        printing("Methods", pagePaymentVerification.driver)
+        printing("Assert", pagePaymentVerification.driver)
+
+    def test_payment_verification_delete(
+        self,
+        active_program: Program,
+        payment_verification_3: None,
+        pagePaymentVerification: PaymentVerification,
+        pagePaymentVerificationDetails: PaymentVerificationDetails,
+        pagePaymentRecord: PaymentRecord,
+    ) -> None:
+        pagePaymentVerification.selectGlobalProgramFilter("Active Program")
+        pagePaymentVerification.getNavPaymentVerification().click()
+        pagePaymentVerification.getCashPlanTableRow().click()
+        pagePaymentVerificationDetails.getButtonDeletePlan()
+        before_list_of_verification_plans = [i.text for i in pagePaymentVerificationDetails.getVerificationPlanPrefix()]
+        pagePaymentVerificationDetails.deleteVerificationPlanByNumber(1)
+        pagePaymentVerificationDetails.getButtonSubmit().click()
+        for _ in range(50):
+            if 2 == len(pagePaymentVerificationDetails.getVerificationPlanPrefix()):
+                break
+        else:
+            raise AssertionError("Verification Plan was not deleted")
+        assert before_list_of_verification_plans[1] not in pagePaymentVerificationDetails.getVerificationPlanPrefix()
+
+    def test_payment_verification_edit(
+        self,
+        active_program: Program,
+        payment_verification_3: None,
+        pagePaymentVerification: PaymentVerification,
+        pagePaymentVerificationDetails: PaymentVerificationDetails,
+        pagePaymentRecord: PaymentRecord,
+    ) -> None:
+        pagePaymentVerification.selectGlobalProgramFilter("Active Program")
+        pagePaymentVerification.getNavPaymentVerification().click()
+        pagePaymentVerification.getCashPlanTableRow().click()
+        pagePaymentVerificationDetails.getButtonEditPlan().click()
+        pagePaymentVerification.getTabFullList().click()
+        if "MANUAL" in pagePaymentVerificationDetails.getLabelVerificationChannel().text:
+            pagePaymentVerification.getRadioVerificationChannel("xlsx").click()
+            channel = "XLSX"
+        else:
+            pagePaymentVerification.getRadioVerificationChannel("manual").click()
+            channel = "MANUAL"
+
+        pagePaymentVerification.getButtonSubmit().click()
+        assert "PENDING" in pagePaymentVerificationDetails.getVerificationPlansSummaryStatus().text
+        assert "PENDING" in pagePaymentVerificationDetails.getVerificationPlanStatus().text
+        for _ in range(50):
+            if channel in pagePaymentVerificationDetails.getLabelVerificationChannel().text:
+                break
+        else:
+            assert channel in pagePaymentVerificationDetails.getLabelVerificationChannel().text
+        assert "Full list" in pagePaymentVerificationDetails.getLabelSampling().text
+
+    def test_payment_verification_successful_received(
+        self,
+        active_program: Program,
+        add_payment_verification: PV,
+        pagePaymentVerification: PaymentVerification,
+        pagePaymentVerificationDetails: PaymentVerificationDetails,
+        pagePaymentRecord: PaymentRecord,
+    ) -> None:
+        pagePaymentVerification.selectGlobalProgramFilter("Active Program")
+        pagePaymentVerification.getNavPaymentVerification().click()
+        pagePaymentVerification.getCashPlanTableRow().click()
+        pagePaymentVerificationDetails.getButtonActivatePlan().click()
+        pagePaymentVerificationDetails.getButtonSubmit().click()
+
+        assert 1 == len(pagePaymentVerificationDetails.getRows())
+        pagePaymentVerificationDetails.scroll(execute=2)
+        pagePaymentVerificationDetails.getRows()[0].find_element(By.TAG_NAME, "a").click()
+        quantity = pagePaymentRecord.getLabelDeliveredQuantity().text
+        pagePaymentRecord.getButtonEdPlan().click()
+        pagePaymentRecord.getInputReceivedamount().send_keys(quantity)
+        pagePaymentRecord.getButtonSubmit().click()
+        pagePaymentRecord.getArrowBack().click()
+
+        assert pagePaymentRecord.waitForStatusContainer("RECEIVED")
+        assert "RECEIVED" == pagePaymentRecord.getStatusContainer().text
+
+    def test_payment_verification_successful_not_received(
+        self,
+        active_program: Program,
+        add_payment_verification: PV,
+        pagePaymentVerification: PaymentVerification,
+        pagePaymentVerificationDetails: PaymentVerificationDetails,
+        pagePaymentRecord: PaymentRecord,
+    ) -> None:
+        pagePaymentVerification.selectGlobalProgramFilter("Active Program")
+        pagePaymentVerification.getNavPaymentVerification().click()
+        pagePaymentVerification.getCashPlanTableRow().click()
+        pagePaymentVerificationDetails.getButtonActivatePlan().click()
+        pagePaymentVerificationDetails.getButtonSubmit().click()
+
+        assert 1 == len(pagePaymentVerificationDetails.getRows())
+        pagePaymentVerificationDetails.scroll(execute=2)
+        pagePaymentVerificationDetails.getRows()[0].find_element(By.TAG_NAME, "a").click()
+        pagePaymentRecord.getButtonEdPlan().click()
+        pagePaymentRecord.getChoiceNotReceived().click()
+        pagePaymentRecord.getButtonSubmit().click()
+        pagePaymentRecord.getArrowBack().click()
+
+        assert pagePaymentRecord.waitForStatusContainer("NOT RECEIVED")
+
+    def test_payment_verification_partially_successful_received_and_grievance_ticket(
+        self,
+        active_program: Program,
+        add_payment_verification: PV,
+        pagePaymentVerification: PaymentVerification,
+        pagePaymentVerificationDetails: PaymentVerificationDetails,
+        pagePaymentRecord: PaymentRecord,
+        pageGrievanceTickets: GrievanceTickets,
+        pageGrievanceDetailsPage: GrievanceDetailsPage,
+    ) -> None:
+        pagePaymentVerification.selectGlobalProgramFilter("Active Program")
+
+        pagePaymentVerification.getNavPaymentVerification().click()
+        pagePaymentVerification.getCashPlanTableRow().click()
+        pagePaymentVerificationDetails.getButtonActivatePlan().click()
+        pagePaymentVerificationDetails.getButtonSubmit().click()
+
+        assert 1 == len(pagePaymentVerificationDetails.getRows())
+        pagePaymentVerificationDetails.scroll(execute=2)
+        pagePaymentVerificationDetails.getRows()[0].find_element(By.TAG_NAME, "a").click()
+        quantity = float(pagePaymentRecord.getLabelDeliveredQuantity().text) - 1
+        pagePaymentRecord.getButtonEdPlan().click()
+        pagePaymentRecord.getInputReceivedamount().send_keys(str(quantity))
+        pagePaymentRecord.getButtonSubmit().click()
+        pagePaymentRecord.getArrowBack().click()
+
+        assert pagePaymentRecord.waitForStatusContainer("RECEIVED WITH ISSUES")
+
+        pagePaymentVerificationDetails.getButtonFinish().click()
+        pagePaymentVerificationDetails.getButtonSubmit().click()
+
+        pageGrievanceTickets.getNavGrievance().click()
+        pageGrievanceTickets.getTabSystemGenerated().click()
+        assert 1 == len(pageGrievanceTickets.getTicketListRow())
+        pageGrievanceTickets.getTicketListRow()[0].click()
+        pageGrievanceDetailsPage.getButtonAssignToMe().click()
+        pageGrievanceDetailsPage.getButtonSetInProgress().click()
+
+        pageGrievanceDetailsPage.getGrievanceVerify().click()
+        pageGrievanceDetailsPage.getInputNewReceivedAmount().send_keys(str(quantity + 1))
+        pageGrievanceDetailsPage.getButtonSubmit().click()
+
+        pageGrievanceDetailsPage.getButtonSendForApproval().click()
+        pageGrievanceDetailsPage.getGrievanceApprove().click()
+        pageGrievanceDetailsPage.getButtonConfirm().click()
+
+        pageGrievanceDetailsPage.getButtonCloseTicket().click()
+        pageGrievanceDetailsPage.getButtonConfirm().click()
+
+        pagePaymentVerification.getNavPaymentVerification().click()
+        pagePaymentVerification.getCashPlanTableRow().click()
+
+        assert pagePaymentRecord.waitForStatusContainer("RECEIVED")
+        assert "RECEIVED" == pagePaymentRecord.getStatusContainer().text
+
+        pageGrievanceTickets.scroll(execute=2)
+        pageGrievanceTickets.screenshot("0", file_path="./")
+
+    def test_payment_verification_by_payment_related_complaint(
+        self,
+        active_program: Program,
+        add_payment_verification: PV,
+        pagePaymentVerification: PaymentVerification,
+        pagePaymentVerificationDetails: PaymentVerificationDetails,
+        pagePaymentRecord: PaymentRecord,
+    ) -> None:
+        pagePaymentVerification.selectGlobalProgramFilter("Active Program")
+
+    def test_payment_verification_xlsx_successful(
+        self,
+        clear_downloaded_files: None,
+        active_program: Program,
+        add_payment_verification_xlsx: PV,
+        pagePaymentVerification: PaymentVerification,
+        pagePaymentVerificationDetails: PaymentVerificationDetails,
+        pagePaymentRecord: PaymentRecord,
+    ) -> None:
+        pagePaymentVerification.selectGlobalProgramFilter("Active Program")
+
+        pagePaymentVerification.getNavPaymentVerification().click()
+        pagePaymentVerification.getCashPlanTableRow().click()
+        pagePaymentVerificationDetails.getButtonActivatePlan().click()
+        pagePaymentVerificationDetails.getButtonSubmit().click()
+
+        pagePaymentVerificationDetails.getExportXlsx().click()
+
+        # ToDo: Workaround: Bug 220111
+        sleep(2)
+        pagePaymentVerificationDetails.driver.refresh()
+
+        pagePaymentVerificationDetails.getDownloadXlsx().click()
+
+        xlsx_file = find_file(".xlsx", number_of_ties=10)
+        wb1 = openpyxl.load_workbook(os.path.join(settings.DOWNLOAD_DIRECTORY, xlsx_file))
+        ws1 = wb1.active
+        for cell in ws1["N:N"]:
+            if cell.row >= 2:
+                ws1.cell(row=cell.row, column=3, value="YES")
+                ws1.cell(row=cell.row, column=16, value=ws1.cell(row=cell.row, column=15).value)
+
+        wb1.save(os.path.join(settings.DOWNLOAD_DIRECTORY, xlsx_file))
+        pagePaymentVerificationDetails.getImportXlsx().click()
+
+        pagePaymentVerificationDetails.upload_file(
+            os.path.abspath(os.path.join(settings.DOWNLOAD_DIRECTORY, xlsx_file)), timeout=120
+        )
+
+        pagePaymentVerificationDetails.getButtonImportEntitlement().click()
+
+        assert pagePaymentRecord.waitForStatusContainer("RECEIVED")
+        assert "RECEIVED" == pagePaymentRecord.getStatusContainer().text
+
+    def test_payment_verification_xlsx_partially_successful(
+        self,
+        clear_downloaded_files: None,
+        active_program: Program,
+        add_payment_verification_xlsx: PV,
+        pagePaymentVerification: PaymentVerification,
+        pagePaymentVerificationDetails: PaymentVerificationDetails,
+        pagePaymentRecord: PaymentRecord,
+    ) -> None:
+        pagePaymentVerification.selectGlobalProgramFilter("Active Program")
+
+        pagePaymentVerification.getNavPaymentVerification().click()
+        pagePaymentVerification.getCashPlanTableRow().click()
+        pagePaymentVerificationDetails.getButtonActivatePlan().click()
+        pagePaymentVerificationDetails.getButtonSubmit().click()
+
+        assert 1 == len(pagePaymentVerificationDetails.getRows())
+        pagePaymentVerificationDetails.scroll(execute=2)
+        pagePaymentVerificationDetails.getRows()[0].find_element(By.TAG_NAME, "a").click()
+        quantity = pagePaymentRecord.getLabelDeliveredQuantity().text
+        pagePaymentRecord.getArrowBack().click()
+
+        pagePaymentVerificationDetails.getExportXlsx().click()
+
+        # ToDo: Workaround: Bug 220111
+        sleep(2)
+        pagePaymentVerificationDetails.driver.refresh()
+
+        pagePaymentVerificationDetails.getDownloadXlsx().click()
+
+        xlsx_file = find_file(".xlsx", number_of_ties=10)
+        wb1 = openpyxl.load_workbook(os.path.join(settings.DOWNLOAD_DIRECTORY, xlsx_file))
+        ws1 = wb1.active
+        for cell in ws1["N:N"]:
+            if cell.row >= 2:
+                ws1.cell(row=cell.row, column=3, value="YES")
+                ws1.cell(row=cell.row, column=16, value=float(quantity) - 1.0)
+
+        wb1.save(os.path.join(settings.DOWNLOAD_DIRECTORY, xlsx_file))
+        pagePaymentVerificationDetails.getImportXlsx().click()
+
+        pagePaymentVerificationDetails.upload_file(
+            os.path.abspath(os.path.join(settings.DOWNLOAD_DIRECTORY, xlsx_file)), timeout=120
+        )
+
+        pagePaymentVerificationDetails.getButtonImportEntitlement().click()
+
+        assert pagePaymentRecord.waitForStatusContainer("RECEIVED WITH ISSUES")
+
+    def test_payment_verification_xlsx_not_received(
+        self,
+        clear_downloaded_files: None,
+        active_program: Program,
+        add_payment_verification_xlsx: PV,
+        pagePaymentVerification: PaymentVerification,
+        pagePaymentVerificationDetails: PaymentVerificationDetails,
+        pagePaymentRecord: PaymentRecord,
+    ) -> None:
+        pagePaymentVerification.selectGlobalProgramFilter("Active Program")
+
+        pagePaymentVerification.getNavPaymentVerification().click()
+        pagePaymentVerification.getCashPlanTableRow().click()
+        pagePaymentVerificationDetails.getButtonActivatePlan().click()
+        pagePaymentVerificationDetails.getButtonSubmit().click()
+
+        pagePaymentVerificationDetails.getExportXlsx().click()
+
+        # ToDo: Workaround: Bug 220111
+        sleep(2)
+        pagePaymentVerificationDetails.driver.refresh()
+
+        pagePaymentVerificationDetails.getDownloadXlsx().click()
+
+        xlsx_file = find_file(".xlsx", number_of_ties=10)
+        wb1 = openpyxl.load_workbook(os.path.join(settings.DOWNLOAD_DIRECTORY, xlsx_file))
+        ws1 = wb1.active
+        for cell in ws1["N:N"]:
+            if cell.row >= 2:
+                ws1.cell(row=cell.row, column=3, value="NO")
+                ws1.cell(row=cell.row, column=16, value=0)
+
+        wb1.save(os.path.join(settings.DOWNLOAD_DIRECTORY, xlsx_file))
+        pagePaymentVerificationDetails.getImportXlsx().click()
+
+        pagePaymentVerificationDetails.upload_file(
+            os.path.abspath(os.path.join(settings.DOWNLOAD_DIRECTORY, xlsx_file)), timeout=120
+        )
+
+        pagePaymentVerificationDetails.getButtonImportEntitlement().click()
+
+        assert pagePaymentRecord.waitForStatusContainer("NOT RECEIVED")
+
+    def test_payment_verification_discard(
+        self,
+        clear_downloaded_files: None,
+        active_program: Program,
+        add_payment_verification_xlsx: PV,
+        pagePaymentVerification: PaymentVerification,
+        pagePaymentVerificationDetails: PaymentVerificationDetails,
+        pagePaymentRecord: PaymentRecord,
+    ) -> None:
+        pagePaymentVerification.selectGlobalProgramFilter("Active Program")
+
+        pagePaymentVerification.getNavPaymentVerification().click()
+        pagePaymentVerification.getCashPlanTableRow().click()
+        pagePaymentVerificationDetails.getButtonActivatePlan().click()
+        pagePaymentVerificationDetails.getButtonSubmit().click()
+        pagePaymentVerificationDetails.getButtonDiscard().click()
+        pagePaymentVerificationDetails.getButtonSubmit().click()
+
+        pagePaymentVerificationDetails.getButtonActivatePlan().click()
+        pagePaymentVerificationDetails.getButtonSubmit().click()
+
+        # ToDo: Workaround: Bug 220111
+        sleep(2)
+        pagePaymentVerificationDetails.driver.refresh()
+
+        pagePaymentVerificationDetails.getExportXlsx().click()
+
+        # ToDo: Workaround: Bug 220111
+        sleep(2)
+        pagePaymentVerificationDetails.driver.refresh()
+
+        pagePaymentVerificationDetails.getDownloadXlsx().click()
+
+        pagePaymentVerificationDetails.getButtonDiscard().click()
+        pagePaymentVerificationDetails.getButtonSubmit().click()
+
+        pagePaymentVerificationDetails.checkAlert("You cant discard if xlsx file was downloaded or imported")
+
+    def test_payment_verification_xlsx_invalid(
+        self,
+        clear_downloaded_files: None,
+        active_program: Program,
+        add_payment_verification_xlsx: PV,
+        pagePaymentVerification: PaymentVerification,
+        pagePaymentVerificationDetails: PaymentVerificationDetails,
+        pagePaymentRecord: PaymentRecord,
+    ) -> None:
+        pagePaymentVerification.selectGlobalProgramFilter("Active Program")
+
+        pagePaymentVerification.getNavPaymentVerification().click()
+        pagePaymentVerification.getCashPlanTableRow().click()
+        pagePaymentVerificationDetails.getButtonActivatePlan().click()
+        pagePaymentVerificationDetails.getButtonSubmit().click()
+
+        pagePaymentVerificationDetails.getExportXlsx().click()
+
+        # ToDo: Workaround: Bug 220111
+        sleep(2)
+        pagePaymentVerificationDetails.driver.refresh()
+
+        pagePaymentVerificationDetails.getDownloadXlsx().click()
+
+        # ToDo: Workaround: Bug 220111
+        sleep(2)
+        pagePaymentVerificationDetails.driver.refresh()
+
+        pagePaymentVerificationDetails.getButtonMarkAsInvalid().click()
+
+        # ToDo: Workaround: Bug 220111
+        sleep(2)
+        pagePaymentVerificationDetails.driver.refresh()
+
+        assert "INVALID" in pagePaymentVerificationDetails.getVerificationPlanStatus().text

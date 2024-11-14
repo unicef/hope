@@ -1,6 +1,5 @@
 import { Box, Typography } from '@mui/material';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useExistingGrievanceTicketsQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -16,7 +15,7 @@ import {
 } from './GrievancesApproveSection/ApproveSectionStyles';
 import { getGrievanceDetailsPath } from './utils/createGrievanceUtils';
 
-export function OtherRelatedTicketsCreate({ values }): React.ReactElement {
+export function OtherRelatedTicketsCreate({ values }): ReactElement {
   const { t } = useTranslation();
   const { baseUrl, businessArea } = useBaseUrl();
   const [show, setShow] = useState(false);
@@ -35,33 +34,33 @@ export function OtherRelatedTicketsCreate({ values }): React.ReactElement {
   if (!data) return null;
 
   const existingTickets = data.existingGrievanceTickets.edges;
-  const renderIds = (tickets): React.ReactElement =>
+  const renderIds = (tickets): ReactElement =>
     tickets.length
       ? tickets.map((edge) => {
-        const grievanceDetailsPath = getGrievanceDetailsPath(
-          edge.node.id,
-          edge.node.category,
-          baseUrl,
-        );
-        return (
+          const grievanceDetailsPath = getGrievanceDetailsPath(
+            edge.node.id,
+            edge.node.category,
+            baseUrl,
+          );
+          return (
             <Box key={edge.node.id} mb={1}>
               <ContentLink href={grievanceDetailsPath}>
                 {edge.node.unicefId}
               </ContentLink>
             </Box>
-        );
-      })
+          );
+        })
       : '-';
 
   const openExistingTickets = existingTickets.length
     ? existingTickets.filter(
-      (edge) => edge.node.status !== GRIEVANCE_TICKET_STATES.CLOSED,
-    )
+        (edge) => edge.node.status !== GRIEVANCE_TICKET_STATES.CLOSED,
+      )
     : [];
   const closedExistingTickets = existingTickets.length
     ? existingTickets.filter(
-      (edge) => edge.node.status === GRIEVANCE_TICKET_STATES.CLOSED,
-    )
+        (edge) => edge.node.status === GRIEVANCE_TICKET_STATES.CLOSED,
+      )
     : [];
 
   return existingTickets.length ? (

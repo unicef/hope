@@ -1,4 +1,3 @@
-import * as React from 'react';
 import TableCell from '@mui/material/TableCell';
 import { useNavigate } from 'react-router-dom';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
@@ -7,6 +6,7 @@ import { renderUserName } from '@utils/utils';
 import { CommunicationMessageNode } from '@generated/graphql';
 import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { ReactElement } from 'react';
 
 interface CommunicationTableRowProps {
   message: CommunicationMessageNode;
@@ -16,7 +16,7 @@ interface CommunicationTableRowProps {
 export function CommunicationTableRow({
   message,
   canViewDetails,
-}: CommunicationTableRowProps): React.ReactElement {
+}: CommunicationTableRowProps): ReactElement {
   const navigate = useNavigate();
   const { baseUrl } = useBaseUrl();
   const messageDetailsPath = `/${baseUrl}/accountability/communication/${message.id}`;

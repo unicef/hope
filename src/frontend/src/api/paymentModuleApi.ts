@@ -1,9 +1,10 @@
 import { api } from './api';
+import { PaymentPlan } from '@restgenerated/models/PaymentPlan';
 
 export const fetchPaymentPlansManagerial = async (
   businessAreaSlug,
   params = {},
-) => {
+): Promise<PaymentPlan[]> => {
   const paramsWithNoLimit = {
     ...params,
     limit: 10000,
@@ -16,12 +17,19 @@ export const fetchPaymentPlansManagerial = async (
   return response;
 };
 
-export const bulkActionPaymentPlansManagerial = async (
+interface BulkActionPaymentPlansManagerialProps {
+  businessAreaSlug: string;
+  ids: string[];
+  action: string;
+  comment: string;
+}
+
+export const bulkActionPaymentPlansManagerial = async ({
   businessAreaSlug,
   ids,
   action,
   comment,
-) => {
+}: BulkActionPaymentPlansManagerialProps) => {
   const payload: { ids: typeof ids; action: typeof action; comment?: string } =
     {
       ids,
@@ -83,9 +91,17 @@ export const fetchSupportingDocument = async (
   programId: string,
   paymentPlanId: string,
   fileId: string,
+  fileName: string,
 ): Promise<any> => {
-  const response = await api.get(
-    `${businessAreaSlug}/programs/${programId}/payment-plans/${paymentPlanId}/supporting-documents/${fileId}/download/`,
-  );
-  return response;
+  try {
+    const response = await api.get(
+      `${businessAreaSlug}/programs/${programId}/payment-plans/${paymentPlanId}/supporting-documents/${fileId}/download/`,
+      {},
+      fileName,
+    );
+    return response;
+  } catch (error: any) {
+    const errorMessage = error?.message || 'An unknown error occurred';
+    throw new Error(`Failed to fetch supporting document: ${errorMessage}`);
+  }
 };

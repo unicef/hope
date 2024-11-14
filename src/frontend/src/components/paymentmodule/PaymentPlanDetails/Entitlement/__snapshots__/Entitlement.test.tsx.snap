@@ -1,3 +1,251 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`components/paymentmodule/PaymentPlanDetails/Entitlement should render 1`] = `<div />`;
+exports[`components/paymentmodule/PaymentPlanDetails/Entitlement should render 1`] = `
+<div>
+  <div
+    class="MuiBox-root css-zwiamn"
+  >
+    <div
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-blHHSb kPa-dfK css-1ps6pg7-MuiPaper-root"
+    >
+      <div
+        class="MuiBox-root css-1yuhvjn"
+      >
+        <div
+          class="sc-dntaoT hJhDMc"
+        >
+          <h6
+            class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
+          >
+            Entitlement
+          </h6>
+        </div>
+        <p
+          class="sc-iuUfFv tBMPQ"
+        >
+          Select Entitlement Formula
+        </p>
+        <div
+          class="MuiGrid-root MuiGrid-container css-1vam7s3-MuiGrid-root"
+        >
+          <div
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-11 css-ykovpn-MuiGrid-root"
+          >
+            <div
+              class="MuiFormControl-root MuiFormControl-fullWidth css-q8hpuo-MuiFormControl-root"
+            >
+              <div
+                class="MuiBox-root css-1itv5e3"
+              >
+                <label
+                  class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeSmall MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeSmall MuiInputLabel-outlined css-n5t7lh-MuiFormLabel-root-MuiInputLabel-root"
+                  data-shrink="false"
+                >
+                  Entitlement Formula
+                </label>
+              </div>
+              <div
+                class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall css-26qevy-MuiInputBase-root-MuiOutlinedInput-root-MuiSelect-root"
+                data-cy="input-entitlement-formula"
+              >
+                <div
+                  aria-controls=":r0:"
+                  aria-expanded="false"
+                  aria-haspopup="listbox"
+                  class="MuiSelect-select MuiSelect-outlined MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall css-jedpe8-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input"
+                  role="combobox"
+                  tabindex="0"
+                >
+                  <span
+                    class="notranslate"
+                  >
+                    ​
+                  </span>
+                </div>
+                <input
+                  aria-hidden="true"
+                  aria-invalid="false"
+                  class="MuiSelect-nativeInput css-yf8vq0-MuiSelect-nativeInput"
+                  tabindex="-1"
+                  value=""
+                />
+                <svg
+                  aria-hidden="true"
+                  class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSelect-icon MuiSelect-iconOutlined css-hfutr2-MuiSvgIcon-root-MuiSelect-icon"
+                  data-testid="ArrowDropDownIcon"
+                  focusable="false"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M7 10l5 5 5-5z"
+                  />
+                </svg>
+                <fieldset
+                  aria-hidden="true"
+                  class="MuiOutlinedInput-notchedOutline css-1d3z3hw-MuiOutlinedInput-notchedOutline"
+                >
+                  <legend
+                    class="css-ihdtdm"
+                  >
+                    <span
+                      class="notranslate"
+                    >
+                      ​
+                    </span>
+                  </legend>
+                </fieldset>
+              </div>
+            </div>
+          </div>
+          <div
+            class="MuiGrid-root MuiGrid-item css-13i4rnv-MuiGrid-root"
+          >
+            <div
+              class="MuiBox-root css-1isemmb"
+            >
+              <button
+                class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary Mui-disabled MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary css-dl1jos-MuiButtonBase-root-MuiButton-root"
+                data-cy="button-apply-steficon"
+                disabled=""
+                tabindex="-1"
+                type="button"
+              >
+                Apply
+              </button>
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiBox-root css-70qvj9"
+        >
+          <div
+            class="sc-eUlrpB jGrimq"
+          />
+          <div
+            class="sc-hJRrWL bjdJAt"
+          >
+            Or
+          </div>
+          <div
+            class="sc-eUlrpB jGrimq"
+          />
+        </div>
+      </div>
+      <div
+        class="MuiBox-root css-k008qs"
+      >
+        <div
+          class="MuiBox-root css-11ze7cv"
+        >
+          <div
+            class="sc-bMTdWJ gVUDoh MuiBox-root css-7jugx5"
+          >
+            <button
+              class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary css-11ph28e-MuiButtonBase-root-MuiButton-root"
+              data-cy="button-export-xlsx"
+              tabindex="0"
+              type="button"
+            >
+              <span
+                class="MuiButton-icon MuiButton-startIcon MuiButton-iconSizeMedium css-1d6wzja-MuiButton-startIcon"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-i4bv87-MuiSvgIcon-root"
+                  data-testid="GetAppIcon"
+                  focusable="false"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M19 9h-4V3H9v6H5l7 7zM5 18v2h14v-2z"
+                  />
+                </svg>
+              </span>
+              Export Xlsx
+              <span
+                class="MuiTouchRipple-root css-8je8zh-MuiTouchRipple-root"
+              />
+            </button>
+            <p
+              class="sc-dprtRQ fhOqfo"
+            >
+              Template contains payment list with all targeted households
+            </p>
+          </div>
+        </div>
+        <div
+          class="MuiBox-root css-11ze7cv"
+        >
+          <div
+            class="MuiBox-root css-7jugx5"
+          >
+            <div
+              class="MuiBox-root css-0"
+            >
+              <div
+                class="MuiBox-root css-0"
+              >
+                <button
+                  class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary Mui-disabled MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary css-11ph28e-MuiButtonBase-root-MuiButton-root"
+                  data-cy="button-import"
+                  disabled=""
+                  tabindex="-1"
+                  type="button"
+                >
+                  <span
+                    class="MuiButton-icon MuiButton-startIcon MuiButton-iconSizeMedium css-1d6wzja-MuiButton-startIcon"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-i4bv87-MuiSvgIcon-root"
+                      data-testid="PublishIcon"
+                      focusable="false"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        d="M5 4v2h14V4zm0 10h4v6h6v-6h4l-7-7z"
+                      />
+                    </svg>
+                  </span>
+                  Upload File
+                </button>
+              </div>
+            </div>
+            <p
+              class="sc-dprtRQ fhOqfo"
+            >
+              Uploaded file should contain entitlement for each household
+            </p>
+          </div>
+        </div>
+      </div>
+      <div
+        class="sc-geXuza gvOJDy"
+      />
+      <div>
+        <span
+          class="sc-gtLWhw bkWrmx"
+          color="textSecondary"
+        >
+          Total Entitled Quantity
+        </span>
+        <div
+          data-cy="label-Total Entitled Quantity"
+        >
+          <span
+            class="sc-egkSDF XYdBd"
+            color="textSecondary"
+          >
+            <div
+              class="sc-cHqXqK iAzTMC"
+              data-cy="total-entitled-quantity-usd"
+            >
+              2691.69 PLN (376 USD)
+            </div>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

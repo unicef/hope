@@ -1,5 +1,4 @@
 import { Grid } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { CreatedByAutocomplete } from '@shared/autocompletes/CreatedByAutocomplete';
@@ -7,6 +6,7 @@ import { TargetPopulationAutocomplete } from '@shared/autocompletes/TargetPopula
 import { DatePickerFilter } from '@components/core/DatePickerFilter';
 import { FiltersSection } from '@components/core/FiltersSection';
 import { createHandleApplyFilterChange } from '@utils/utils';
+import { ReactElement } from 'react';
 
 interface CommunicationFiltersProps {
   filter;
@@ -21,7 +21,7 @@ export function CommunicationFilters({
   initialFilter,
   appliedFilter,
   setAppliedFilter,
-}: CommunicationFiltersProps): React.ReactElement {
+}: CommunicationFiltersProps): ReactElement {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();

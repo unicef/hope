@@ -1,6 +1,5 @@
 import { Radio } from '@mui/material';
 import TableCell from '@mui/material/TableCell';
-import * as React from 'react';
 import { AllProgramsQuery, ProgrammeChoiceDataQuery } from '@generated/graphql';
 import { BlackLink } from '@components/core/BlackLink';
 import { StatusBox } from '@components/core/StatusBox';
@@ -12,6 +11,7 @@ import {
   formatCurrency,
   programStatusToColor,
 } from '@utils/utils';
+import { ReactElement } from 'react';
 
 interface LookUpProgrammesTableRowSurveysProps {
   program: AllProgramsQuery['allPrograms']['edges'][number]['node'];
@@ -25,7 +25,7 @@ export function LookUpProgrammesTableRowSurveys({
   choicesData,
   radioChangeHandler,
   selectedProgram,
-}: LookUpProgrammesTableRowSurveysProps): React.ReactElement {
+}: LookUpProgrammesTableRowSurveysProps): ReactElement {
   const { baseUrl } = useBaseUrl();
   const programDetailsPath = `/${baseUrl}/details/${program.id}`;
   const handleClick = (): void => {

@@ -1,4 +1,3 @@
-import json
 import logging
 import traceback
 import uuid
@@ -11,7 +10,6 @@ from typing import Any, Callable, Dict, Optional, Union
 from django.contrib.gis.geos import Point
 from django.core.files import File
 from django.core.files.storage import default_storage
-from django.core.serializers.json import DjangoJSONEncoder
 from django.db import transaction
 from django.db.models import QuerySet
 from django.utils import timezone
@@ -47,10 +45,7 @@ from hct_mis_api.apps.household.models import (
     PendingIndividualIdentity,
     PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.models import (
-    DeliveryMechanism,
-    PendingDeliveryMechanismData,
-)
+from hct_mis_api.apps.payment.models import PendingDeliveryMechanismData
 from hct_mis_api.apps.periodic_data_update.service.periodic_data_update_import_service import (
     PeriodicDataUpdateImportService,
 )
@@ -62,7 +57,6 @@ from hct_mis_api.apps.registration_datahub.tasks.rdi_base_create import (
 )
 from hct_mis_api.apps.registration_datahub.tasks.utils import collectors_str_ids_to_list
 from hct_mis_api.apps.utils.age_at_registration import calculate_age_at_registration
-from hct_mis_api.apps.utils.models import MergeStatusModel
 from hct_mis_api.apps.utils.phone import is_valid_phone_number
 
 logger = logging.getLogger(__name__)
@@ -85,13 +79,8 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         self.individuals = []
         self.collectors = defaultdict(list)
         self.bank_accounts = defaultdict(dict)
-        self.delivery_mechanisms_data = defaultdict(dict)
         self.program = None
         self.pdu_flexible_attributes: Optional[QuerySet[FlexibleAttribute]] = None
-        self.delivery_mechanisms_required_fields_map = (
-            DeliveryMechanism.get_delivery_mechanisms_to_xlsx_fields_mapping()
-        )
-        self.available_delivery_mechanisms = DeliveryMechanism.objects.filter(is_active=True).in_bulk(field_name="code")
         super().__init__()
 
     @cached_property
@@ -137,29 +126,6 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
         self.bank_accounts[f"individual_{row_num}"]["individual"] = individual
         self.bank_accounts[f"individual_{row_num}"][name] = value
-
-    def _handle_delivery_mechanism_fields(
-        self,
-        value: Any,
-        header: str,
-        row_num: int,
-        individual: PendingIndividual,
-        *args: Any,
-        **kwargs: Any,
-    ) -> None:
-        if value is None:
-            return
-
-        name = header.replace("pp_", "")
-
-        self.delivery_mechanisms_data[f"individual_{row_num}"]["individual"] = individual
-        for delivery_mechanism, required_fields in self.delivery_mechanisms_required_fields_map.items():
-            if name in required_fields:
-                name = name.replace("_i_c", "")
-                if delivery_mechanism not in self.delivery_mechanisms_data[f"individual_{row_num}"]:
-                    self.delivery_mechanisms_data[f"individual_{row_num}"][delivery_mechanism] = {name: value}
-                else:
-                    self.delivery_mechanisms_data[f"individual_{row_num}"][delivery_mechanism].update({name: value})
 
     def _handle_document_fields(
         self,
@@ -438,21 +404,6 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         ]
 
         PendingBankAccountInfo.objects.bulk_create(bank_accounts_infos_to_create)
-
-    def _create_delivery_mechanisms_data(self) -> None:
-        imported_delivery_mechanism_data = []
-        for _, data in self.delivery_mechanisms_data.items():
-            individual = data.pop("individual")
-            for delivery_type, values in data.items():
-                imported_delivery_mechanism_data.append(
-                    PendingDeliveryMechanismData(
-                        individual=individual,
-                        delivery_mechanism=self.available_delivery_mechanisms[delivery_type],
-                        data=json.dumps(values, cls=DjangoJSONEncoder),
-                        rdi_merge_status=MergeStatusModel.PENDING,
-                    )
-                )
-        PendingDeliveryMechanismData.objects.bulk_create(imported_delivery_mechanism_data)
 
     def _create_documents(self) -> None:
         from hct_mis_api.apps.geo.models import Country as GeoCountry

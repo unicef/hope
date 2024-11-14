@@ -1,10 +1,9 @@
-import * as React from 'react';
-import { useEffect } from 'react';
+import { ReactElement, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useLoggedCheckerQuery } from '@generated/graphql';
 import { LOGIN_URL } from '../../../config';
 
-export const ProfilePage = (): React.ReactElement | null => {
+export const ProfilePage = (): ReactElement | null => {
   const location = useLocation();
   const navigate = useNavigate();
   const { error } = useLoggedCheckerQuery({ fetchPolicy: 'network-only' });

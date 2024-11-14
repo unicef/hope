@@ -7,8 +7,7 @@ import {
   DialogTitle,
 } from '@mui/material';
 import { Field, Form, Formik } from 'formik';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
@@ -30,7 +29,7 @@ export interface RejectPaymentPlanProps {
 
 export function RejectPaymentPlan({
   paymentPlanId,
-}: RejectPaymentPlanProps): React.ReactElement {
+}: RejectPaymentPlanProps): ReactElement {
   const { t } = useTranslation();
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
@@ -65,7 +64,10 @@ export function RejectPaymentPlan({
         <>
           {rejectDialogOpen && <AutoSubmitFormOnEnter />}
           <Box p={2}>
-            <ErrorButton onClick={() => setRejectDialogOpen(true)}>
+            <ErrorButton
+              data-cy="button-reject"
+              onClick={() => setRejectDialogOpen(true)}
+            >
               {t('Reject')}
             </ErrorButton>
           </Box>

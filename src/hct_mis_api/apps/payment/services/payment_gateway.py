@@ -54,7 +54,7 @@ class PaymentInstructionStatus(Enum):
 
 class PaymentInstructionFromDeliveryMechanismPerPaymentPlanSerializer(ReadOnlyModelSerializer):
     remote_id = serializers.CharField(source="id")
-    unicef_id = serializers.CharField(source="payment_plan.unicef_id")
+    external_code = serializers.CharField(source="payment_plan.unicef_id")
     fsp = serializers.SerializerMethodField()
     payload = serializers.SerializerMethodField()
     extra = serializers.SerializerMethodField()
@@ -78,7 +78,7 @@ class PaymentInstructionFromDeliveryMechanismPerPaymentPlanSerializer(ReadOnlyMo
         model = DeliveryMechanismPerPaymentPlan
         fields = [
             "remote_id",
-            "unicef_id",
+            "external_code",
             "fsp",
             "payload",
             "extra",
@@ -86,16 +86,16 @@ class PaymentInstructionFromDeliveryMechanismPerPaymentPlanSerializer(ReadOnlyMo
 
 
 class PaymentInstructionFromSplitSerializer(PaymentInstructionFromDeliveryMechanismPerPaymentPlanSerializer):
-    unicef_id = serializers.SerializerMethodField()  # type: ignore
+    external_code = serializers.SerializerMethodField()  # type: ignore
 
-    def get_unicef_id(self, obj: Any) -> str:
+    def get_external_code(self, obj: Any) -> str:
         return f"{obj.payment_plan.unicef_id}-{obj.order}"
 
     class Meta:
         model = PaymentPlanSplit
         fields = [
             "remote_id",
-            "unicef_id",
+            "external_code",
             "fsp",
             "payload",
             "extra",
@@ -122,22 +122,26 @@ class PaymentSerializer(ReadOnlyModelSerializer):
         return {}
 
     def get_payload(self, obj: Payment) -> Dict:
-        delivery_mechanism_data = obj.collector.delivery_mechanisms_data.filter(
-            delivery_mechanism=obj.delivery_type
-        ).first()
+        snapshot = getattr(obj, "household_snapshot", None)
+        if not snapshot:
+            logger.error(f"Not found snapshot for Payment {obj.unicef_id}")
+
+        snapshot_data = snapshot.snapshot_data
+        collector_data = snapshot_data.get("primary_collector") or snapshot_data.get("alternate_collector") or dict()
+        delivery_mech_data = collector_data.get("delivery_mechanisms_data", {}).get(obj.delivery_type.code, {})
 
         base_data = {
             "amount": obj.entitlement_quantity,
             "destination_currency": obj.currency,
-            "phone_no": str(obj.collector.phone_no),
-            "last_name": obj.collector.family_name,
-            "first_name": obj.collector.given_name,
-            "full_name": obj.full_name,
+            "phone_no": collector_data.get("phone_no", ""),
+            "last_name": collector_data.get("family_name", ""),
+            "first_name": collector_data.get("given_name", ""),
+            "full_name": collector_data.get("full_name", ""),
         }
-        if (
-            obj.delivery_type.code == "mobile_money" and not delivery_mechanism_data
-        ):  # this workaround need to be dropped
-            base_data["service_provider_code"] = obj.collector.flex_fields.get("service_provider_code_i_f", "")
+        if obj.delivery_type.code == "mobile_money" and not delivery_mech_data:  # this workaround need to be dropped
+            base_data["service_provider_code"] = collector_data.get("flex_fields", {}).get(
+                "service_provider_code_i_f", ""
+            )
 
         payload = PaymentPayloadSerializer(data=base_data)
         if not payload.is_valid():
@@ -145,8 +149,8 @@ class PaymentSerializer(ReadOnlyModelSerializer):
 
         payload_data = payload.data
 
-        if delivery_mechanism_data:
-            payload_data.update(delivery_mechanism_data.delivery_data)
+        if delivery_mech_data:
+            payload_data.update(delivery_mech_data)
 
         return payload_data
 
@@ -206,7 +210,7 @@ class PaymentRecordData(FlexibleArgumentsDataclassMixin):
 @dataclasses.dataclass()
 class PaymentInstructionData(FlexibleArgumentsDataclassMixin):
     remote_id: str
-    unicef_id: str
+    external_code: str
     status: str  # "DRAFT"
     fsp: str
     system: int
@@ -274,8 +278,8 @@ class PaymentGatewayAPI(BaseAPI):
     class PaymentGatewayMissingAPICredentialsException(Exception):
         pass
 
-    API_EXCEPTION_CLASS = PaymentGatewayAPIException
-    API_MISSING_CREDENTIALS_EXCEPTION_CLASS = PaymentGatewayMissingAPICredentialsException
+    API_EXCEPTION_CLASS = PaymentGatewayAPIException  # type: ignore
+    API_MISSING_CREDENTIALS_EXCEPTION_CLASS = PaymentGatewayMissingAPICredentialsException  # type: ignore
 
     class Endpoints:
         CREATE_PAYMENT_INSTRUCTION = "payment_instructions/"
@@ -303,7 +307,7 @@ class PaymentGatewayAPI(BaseAPI):
 
     def change_payment_instruction_status(self, status: PaymentInstructionStatus, remote_id: str) -> str:
         if status.value not in [s.value for s in PaymentInstructionStatus]:
-            raise self.API_EXCEPTION_CLASS(f"Can't set invalid Payment Instruction status: {status}")
+            raise self.API_EXCEPTION_CLASS(f"Can't set invalid Payment Instruction status: {status}")  # type: ignore
 
         action_endpoint_map = {
             PaymentInstructionStatus.ABORTED: self.Endpoints.ABORT_PAYMENT_INSTRUCTION_STATUS,

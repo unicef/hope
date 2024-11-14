@@ -1,5 +1,4 @@
 import TableCell from '@mui/material/TableCell';
-import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   AllProgramsForTableQuery,
@@ -15,6 +14,7 @@ import {
   formatCurrency,
   programStatusToColor,
 } from '@utils/utils';
+import { ReactElement } from 'react';
 
 interface ProgrammesTableRowProps {
   program: AllProgramsForTableQuery['allPrograms']['edges'][number]['node'];
@@ -24,7 +24,7 @@ interface ProgrammesTableRowProps {
 export function ProgrammesTableRow({
   program,
   choicesData,
-}: ProgrammesTableRowProps): React.ReactElement {
+}: ProgrammesTableRowProps): ReactElement {
   const navigate = useNavigate();
   const { baseUrl } = useBaseUrl();
   const programDetailsPath = `/${baseUrl}/details/${program.id}`;

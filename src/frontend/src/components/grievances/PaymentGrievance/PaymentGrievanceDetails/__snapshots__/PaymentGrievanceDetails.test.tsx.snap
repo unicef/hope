@@ -3,10 +3,10 @@
 exports[`components/grievances/PaymentGrievanceDetails should render with data 1`] = `
 <div>
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-iBdnpw elBrei css-1ps6pg7-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-kLhKbu esWYOh css-1ps6pg7-MuiPaper-root"
   >
     <div
-      class="sc-dmyCSP ljiJAm"
+      class="sc-egkSDF flCGEE"
     >
       <div
         class="MuiBox-root css-gg4vpm"
@@ -18,6 +18,7 @@ exports[`components/grievances/PaymentGrievanceDetails should render with data 1
         </h6>
         <button
           class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary css-dl1jos-MuiButtonBase-root-MuiButton-root"
+          data-cy="grievance-approve"
           tabindex="0"
           type="button"
         >
@@ -29,7 +30,7 @@ exports[`components/grievances/PaymentGrievanceDetails should render with data 1
       </div>
     </div>
     <table
-      class="MuiTable-root sc-fsYfdN kmqBts css-b1kpk9-MuiTable-root"
+      class="MuiTable-root sc-ixGGxD gmxGCz css-b1kpk9-MuiTable-root"
     >
       <thead
         class="MuiTableHead-root css-15wwp11-MuiTableHead-root"

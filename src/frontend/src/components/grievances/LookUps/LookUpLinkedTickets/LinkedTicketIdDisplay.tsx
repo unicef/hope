@@ -1,12 +1,12 @@
-import * as React from 'react';
 import { useGrievanceTicketUnicefIdQuery } from '@generated/graphql';
 import { BlueText } from '../LookUpStyles';
+import { ReactElement } from 'react';
 
 export function LinkedTicketIdDisplay({
   ticketId,
 }: {
   ticketId: string;
-}): React.ReactElement {
+}): ReactElement {
   const { data } = useGrievanceTicketUnicefIdQuery({
     variables: { id: ticketId },
   });

@@ -1,5 +1,4 @@
 import TableCell from '@mui/material/TableCell';
-import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CashPlanAndPaymentPlanNode } from '@generated/graphql';
 import { BlackLink } from '@components/core/BlackLink';
@@ -8,6 +7,7 @@ import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { paymentPlanStatusToColor, renderSomethingOrDash } from '@utils/utils';
+import { ReactElement } from 'react';
 
 interface CashPlanTableRowProps {
   cashAndPaymentPlan: CashPlanAndPaymentPlanNode;
@@ -15,7 +15,7 @@ interface CashPlanTableRowProps {
 
 export function CashPlanTableRow({
   cashAndPaymentPlan,
-}: CashPlanTableRowProps): React.ReactElement {
+}: CashPlanTableRowProps): ReactElement {
   const navigate = useNavigate();
   const { baseUrl, isAllPrograms } = useBaseUrl();
   const objectPath =

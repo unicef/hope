@@ -1,22 +1,18 @@
-import { Box, Grid, Typography } from '@mui/material';
-import * as React from 'react';
-import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
-import {
-  ProgrammeChoiceDataQuery,
-  ProgramPartnerAccess,
-  ProgramQuery,
-} from '@generated/graphql';
-import { MiśTheme } from '../../../theme';
-import { choicesToDict, programStatusToColor } from '@utils/utils';
+import { PartnerAccess } from '@components/programs/constants';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
+import { DividerLine } from '@core/DividerLine';
 import { LabelizedField } from '@core/LabelizedField';
 import { OverviewContainer } from '@core/OverviewContainer';
 import { StatusBox } from '@core/StatusBox';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
-import { PartnerAccess } from '@components/programs/constants';
-import { DividerLine } from '@core/DividerLine';
+import { ProgrammeChoiceDataQuery, ProgramQuery } from '@generated/graphql';
+import { Box, Grid, Typography } from '@mui/material';
+import { choicesToDict, programStatusToColor } from '@utils/utils';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+import { MiśTheme } from '../../../theme';
+import { ReactElement } from 'react';
 
 const NumberOfHouseHolds = styled.div`
   padding: ${({ theme }) => theme.spacing(8)};
@@ -45,7 +41,7 @@ interface ProgramDetailsProps {
 export const ProgramDetails = ({
   program,
   choices,
-}: ProgramDetailsProps): React.ReactElement => {
+}: ProgramDetailsProps): ReactElement => {
   const { t } = useTranslation();
   const { programFrequencyOfPaymentsChoices, programSectorChoices } = choices;
   const programFrequencyOfPaymentsChoicesDict = choicesToDict(
@@ -54,7 +50,7 @@ export const ProgramDetails = ({
   const programSectorChoicesDict = choicesToDict(programSectorChoices);
   const renderAdminAreasCount = (
     partner: ProgramQuery['program']['partners'][0],
-  ): React.ReactElement => {
+  ): ReactElement => {
     const counts = {
       1: 0,
       2: 0,

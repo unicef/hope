@@ -5,7 +5,6 @@ from django.contrib import admin, messages
 from django.contrib.admin.models import LogEntry
 from django.contrib.admin.templatetags.admin_urls import admin_urlname
 from django.core.exceptions import ValidationError
-from django.core.mail import send_mail
 from django.db.models import QuerySet
 from django.db.transaction import atomic
 from django.forms import Form
@@ -134,11 +133,10 @@ class APITokenAdmin(SmartModelAdmin):
 
     def _send_token_email(self, request: HttpRequest, obj: Any, template: str) -> None:
         try:
-            send_mail(
-                f"HOPE API Token {obj} infos",
-                template.format(**self._get_email_context(request, obj)),
-                None,
-                recipient_list=[obj.user.email],
+            user = obj.user
+            user.email_user(
+                subject=f"HOPE API Token {obj} infos",
+                text_body=template.format(**self._get_email_context(request, obj)),
             )
             self.message_user(request, f"Email sent to {obj.user.email}", messages.SUCCESS)
         except OSError:

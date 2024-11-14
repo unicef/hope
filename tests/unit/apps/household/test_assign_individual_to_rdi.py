@@ -1,4 +1,3 @@
-from django.core.management import call_command
 from django.db.models import Count
 from django.test import TransactionTestCase
 
@@ -12,8 +11,6 @@ from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 class TestMigrationIndAssignToRDI(TransactionTestCase):
     def test_assign_individual_to_rdi_migration(self) -> None:
-        call_command("migrate", "household", "0184_migration", verbosity=0)
-
         ba_afghanistan = create_afghanistan()
         program_1 = ProgramFactory(name="program_1", business_area=ba_afghanistan, biometric_deduplication_enabled=True)
         program_2 = ProgramFactory(name="program_2", business_area=ba_afghanistan, biometric_deduplication_enabled=True)

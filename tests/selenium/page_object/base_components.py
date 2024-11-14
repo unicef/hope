@@ -2,6 +2,7 @@ from time import sleep
 
 from selenium.webdriver.remote.webelement import WebElement
 
+from hct_mis_api.apps.core.utils import encode_id_base64
 from tests.selenium.helpers.helper import Common
 
 
@@ -55,6 +56,13 @@ class BaseComponents(Common):
 
     # Text
     globalProgramFilterText = "All Programmes"
+
+    def navigate_to_page(self, business_area_slug: str, program_id: str) -> None:
+        self.driver.get(self.get_page_url(business_area_slug, program_id))
+
+    def get_page_url(self, business_area_slug: str, program_id: str) -> str:
+        encoded_program_id = encode_id_base64(program_id, "Program")
+        return f"{self.driver.live_server.url}/{business_area_slug}/programs/{encoded_program_id}"
 
     def getMainContent(self) -> WebElement:
         return self.wait_for(self.mainContent)
@@ -190,6 +198,7 @@ class BaseComponents(Common):
         return self.wait_for(self.breadcrumbsChevronIcon)
 
     def getArrowBack(self) -> WebElement:
+        self.scroll(scroll_by=-600)
         return self.wait_for(self.arrowBack)
 
     def getNavProgramLog(self) -> WebElement:
@@ -207,10 +216,10 @@ class BaseComponents(Common):
 
     def checkAlert(self, text: str) -> None:
         self.getAlert()
-        for _ in range(10):
+        for _ in range(300):
             if text in self.getAlert().text:
                 break
-            sleep(1)
+            sleep(0.1)
         assert text in self.getAlert().text
 
     def waitForNumberOfRows(self, number: int) -> bool:

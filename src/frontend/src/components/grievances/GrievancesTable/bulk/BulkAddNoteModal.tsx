@@ -1,5 +1,4 @@
 import { TextField } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import CommentIcon from '@mui/icons-material/Comment';
@@ -9,6 +8,7 @@ import {
   useBulkUpdateGrievanceAddNoteMutation,
 } from '@generated/graphql';
 import { BulkBaseModal } from './BulkBaseModal';
+import { ReactElement, useState } from 'react';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -28,10 +28,10 @@ export function BulkAddNoteModal({
   selectedTickets,
   businessArea,
   setSelected,
-}: BulkAddNoteModalProps): React.ReactElement {
+}: BulkAddNoteModalProps): ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
-  const [value, setValue] = React.useState<string>('');
+  const [value, setValue] = useState<string>('');
   const [mutate] = useBulkUpdateGrievanceAddNoteMutation();
   const onSave = async (): Promise<void> => {
     try {
