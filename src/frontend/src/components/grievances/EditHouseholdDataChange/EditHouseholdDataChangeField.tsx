@@ -9,6 +9,7 @@ import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import {
   AllEditHouseholdFieldsQuery,
+  AllEditPeopleFieldsQuery,
   useAllAdminAreasLazyQuery,
 } from '@generated/graphql';
 import { FormikBoolFieldGrievances } from '../FormikBoolFieldGrievances';
@@ -19,7 +20,9 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
 
 export interface EditHouseholdDataChangeFieldProps {
-  field: AllEditHouseholdFieldsQuery['allEditHouseholdFieldsAttributes'][number];
+  field:
+    | AllEditHouseholdFieldsQuery['allEditHouseholdFieldsAttributes'][number]
+    | AllEditPeopleFieldsQuery['allEditPeopleFieldsAttributes'][number];
   name: string;
 }
 export const EditHouseholdDataChangeField = ({
