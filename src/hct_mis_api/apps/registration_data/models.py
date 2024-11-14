@@ -12,6 +12,7 @@ from django.db import models, transaction
 from django.db.models import Count, OuterRef, Q, Subquery
 from django.utils.translation import gettext_lazy as _
 
+from apps.household.models import DUPLICATE
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import (
@@ -19,6 +20,7 @@ from hct_mis_api.apps.household.models import (
     Individual,
     PendingHousehold,
     PendingIndividual,
+    NEEDS_ADJUDICATION,
 )
 from hct_mis_api.apps.registration_datahub.apis.deduplication_engine import (
     SimilarityPair,
@@ -241,19 +243,16 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
     def biometric_deduplication_enabled(self) -> bool:
         return self.program.biometric_deduplication_enabled
 
-    def update_needs_adjudication_tickets_statistic(self) -> None:
-        from hct_mis_api.apps.grievance.models import GrievanceTicket
-
-        # AB#201950
-        self.golden_record_possible_duplicates = (
-            self.grievanceticket_set.filter(
-                category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
-                registration_data_import=self,
-            )
-            .exclude(status=GrievanceTicket.STATUS_CLOSED)
-            .count()
-        )
-        self.save(update_fields=["golden_record_possible_duplicates"])
+    def update_duplicates_against_population_statistics(self) -> None:
+        self.golden_record_duplicates = Individual.objects.filter(
+            registration_data_import_id=self.id,
+            deduplication_golden_record_status=DUPLICATE,
+        ).count()
+        self.golden_record_possible_duplicates = Individual.objects.filter(
+            registration_data_import_id=self.id,
+            deduplication_golden_record_status=NEEDS_ADJUDICATION,
+        ).count()
+        self.save(update_fields=["golden_record_duplicates", "golden_record_possible_duplicates"])
 
     def bulk_update_household_size(self) -> None:
         # AB#208387
