@@ -115,9 +115,10 @@ class Targeting(BaseComponents):
             return self.get_elements(self.rows)[number]
 
     def countTargetPopulations(self, number: int) -> None:
-        for _ in range(5):
+        for _ in range(50):
             if len(self.getTargetPopulationsRows()) == number:
                 break
+            sleep(0.1)
         else:
             raise TimeoutError(f"{len(self.getTargetPopulationsRows())} target populations instead of {number}")
 

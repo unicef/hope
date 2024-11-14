@@ -2,9 +2,6 @@ import random
 from datetime import datetime
 from time import sleep
 
-from django.conf import settings
-from django.core.management import call_command
-
 import pytest
 from dateutil.relativedelta import relativedelta
 from selenium import webdriver
@@ -13,7 +10,13 @@ from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.account.fixtures import RoleFactory
 from hct_mis_api.apps.account.models import Partner
-from hct_mis_api.apps.core.models import BusinessArea, BusinessAreaPartnerThrough
+from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
+from hct_mis_api.apps.core.models import (
+    BusinessArea,
+    BusinessAreaPartnerThrough,
+    DataCollectingType,
+)
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from tests.selenium.helpers.date_time_format import FormatTime
@@ -29,9 +32,24 @@ pytestmark = pytest.mark.django_db()
 
 @pytest.fixture
 def create_programs() -> None:
-    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/core/fixtures/data-selenium.json")
-    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/program/fixtures/data-cypress.json")
+    create_program("Test Programm")
     yield
+
+
+def create_program(
+    name: str, dct_type: str = DataCollectingType.Type.STANDARD, status: str = Program.ACTIVE
+) -> Program:
+    BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
+    dct = DataCollectingTypeFactory(type=dct_type)
+    program = ProgramFactory(
+        name=name,
+        start_date=datetime.now() - relativedelta(months=1),
+        end_date=datetime.now() + relativedelta(months=1),
+        data_collecting_type=dct,
+        status=status,
+        budget=100,
+    )
+    return program
 
 
 @pytest.mark.usefixtures("login")
@@ -771,7 +789,7 @@ class TestManualCalendar:
         pageProgrammeManagement: ProgrammeManagement,
         pageProgrammeDetails: ProgrammeDetails,
     ) -> None:
-        pageProgrammeManagement.getNavProgrammeManagement().click()
+        pageProgrammeManagement.clickNavProgrammeManagement()
         pageProgrammeManagement.getTableRowByProgramName("Test Programm").click()
 
         pageProgrammeManagement.getButtonEditProgram().click()
