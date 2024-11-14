@@ -676,9 +676,7 @@ class Query(graphene.ObjectType):
 
     def resolve_all_edit_people_fields_attributes(self, info: Any, **kwargs: Any) -> List:
         business_area_slug = info.context.headers.get("Business-Area")
-        fields = FieldFactory.from_scopes([Scope.HOUSEHOLD_UPDATE, Scope.INDIVIDUAL_UPDATE]).apply_business_area(
-            business_area_slug
-        )
+        fields = FieldFactory.from_scope(Scope.PEOPLE_UPDATE).apply_business_area(business_area_slug)
         all_options = list(fields) + list(
             FlexibleAttribute.objects.filter(
                 associated_with__in=[
