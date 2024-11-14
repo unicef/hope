@@ -329,7 +329,6 @@ class GenericRegistrationService(BaseRegistrationService):
         }
 
         mapping = mergedicts(default_mapping, self.registration.mapping, [])
-
         household = self.create_household_data(record, registration_data_import, mapping)
         individuals, head, pr_collector, sec_collector = self.create_individuals(
             record,

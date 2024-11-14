@@ -1318,11 +1318,10 @@ class BankAccountInfo(SoftDeletableRepresentationMergeStatusModelWithDate, TimeS
         on_delete=models.CASCADE,
     )
     bank_name = models.CharField(max_length=255)
-    bank_account_number = models.CharField(max_length=64)
-    debit_card_number = models.CharField(max_length=255, blank=True, default="")
+    bank_account_number = models.CharField(max_length=64, db_index=True)
+    debit_card_number = models.CharField(max_length=255, blank=True, default="", db_index=True)
     bank_branch_name = models.CharField(max_length=255, blank=True, default="")
     account_holder_name = models.CharField(max_length=255, blank=True, default="")
-    is_migration_handled = models.BooleanField(default=False)
     copied_from = models.ForeignKey(
         "self",
         null=True,
