@@ -12,7 +12,6 @@ from django.db import models, transaction
 from django.db.models import Count, OuterRef, Q, Subquery
 from django.utils.translation import gettext_lazy as _
 
-from apps.household.models import DUPLICATE
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import (
@@ -21,6 +20,7 @@ from hct_mis_api.apps.household.models import (
     PendingHousehold,
     PendingIndividual,
     NEEDS_ADJUDICATION,
+    DUPLICATE
 )
 from hct_mis_api.apps.registration_datahub.apis.deduplication_engine import (
     SimilarityPair,
