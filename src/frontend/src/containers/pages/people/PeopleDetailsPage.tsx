@@ -40,6 +40,7 @@ import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 import { ReactElement } from 'react';
+import { IndividualDeliveryMechanisms } from '@components/population/IndividualDeliveryMechanisms';
 
 const Container = styled.div`
   padding: 20px 20px 00px 20px;
@@ -163,6 +164,9 @@ export const PeopleDetailsPage = (): ReactElement => {
             individual={individual as IndividualNode}
             choicesData={choicesData}
             grievancesChoices={grievancesChoices}
+          />
+          <IndividualDeliveryMechanisms
+            individual={individual as IndividualNode}
           />
           <IndividualAdditionalRegistrationInformation
             flexFieldsData={flexFieldsData}
