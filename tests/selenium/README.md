@@ -13,13 +13,31 @@ sh -c "cd .. && docker build . -f ./docker/Dockerfile --target dev --tag unicef/
 
 <b><h2>How to run tests locally on Macs with M1/M2/M3:</h2></b>
 
+<b><h3>Preconditions:</h3></b>
+- Check your arch
+```bash
+arch
+```
+The result should be **arm64**.
+
+
 <b><h3>Installation:</h3></b>
 ```bash
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+- Check your brew config
+```bash
+brew config
+```
+The result of HOMEBREW_PREFIX should be /opt/homebrew
+
+```bash
 curl https://pyenv.run | bash
 brew install pyenv
 vim ~/.zshrc
 ```
+
 Include the following in the file:
 ```bash
 export PYENV_ROOT="$HOME/.pyenv"
@@ -30,8 +48,8 @@ eval "$(pyenv virtualenv-init -)"
 
 - In new terminal tab
 ```bash
-pyenv install 3.11.7
-pyenv virtualenv 3.11.7 new-venv
+pyenv install 3.12.7
+pyenv virtualenv 3.12.7 new-venv
 pyenv activate new-venv
 brew install pdm
 curl -sSL https://pdm-project.org/install-pdm.py | python -
@@ -45,10 +63,29 @@ brew install wkhtmltopdf pango postgis gdal
 ```bash
 pyenv activate new-venv
 cd src
-source ../development_tools/local_selenium_env.sh 
+brew install nvm
+nano ~/.bash_profile
+```
+- Include the following in the file:
+```bash
+export NVM_DIR=~/.nvm
+source $(brew --prefix nvm)/nvm.sh
+. "$HOME/.cargo/env"
+```
+- In terminal:
+```bash
+source ~/.bash_profile
+source ../development_tools/local_selenium_init.sh 
 
 # second tab: 
-docker compose -f ../development_tools/compose.selenium.local.yml up --build 
+docker compose -f ./development_tools/compose.yml --profile services up --build
 # first tab: 
-python -m pytest -svvv ../tests/selenium --html-report=../tests/selenium/report/report.html
+python -m pytest -n auto -rP --reuse-db -p no:warnings --cov-report= --capture=sys --html-report=$OUTPUT_DATA_ROOT/report/report.html tests/selenium
+```
+
+<b><h3>Hints:</h3></b>
+- Uninstall brew from wrong path (in this case /usr/local):
+```bash
+curl -fsSLO https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh
+/bin/bash uninstall.sh --path /usr/local
 ```
