@@ -661,7 +661,9 @@ class TestCreateTargeting:
         assert pageTargetingDetails.getTitlePage().text == targeting_name
         assert pageTargetingDetails.getCriteriaContainer().text == expected_criteria_text
         assert Household.objects.count() == 3
-        assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == individual1.household.unicef_id
+        pageTargetingDetails.wait_for_text(
+            individual1.household.unicef_id, pageTargetingDetails.household_table_cell.format(1, 1)
+        )
         assert pageTargetingCreate.getTotalNumberOfHouseholdsCount().text == "1"
         assert len(pageTargetingDetails.getHouseholdTableRows()) == 1
 
