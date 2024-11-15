@@ -176,6 +176,18 @@ export function mapCriteriaToInitialValues(criteria) {
   const individualsFiltersBlocks = criteria.individualsFiltersBlocks || [];
   const collectorsFiltersBlocks = criteria.collectorsFiltersBlocks || [];
 
+  const adjustedCollectorsFiltersBlocks = collectorsFiltersBlocks.map(
+    (block) => ({
+      ...block,
+      collectorBlockFilters: block.collectorBlockFilters.map((filter) => ({
+        ...filter,
+        arguments: filter.arguments.map((arg) =>
+          arg === true ? 'Yes' : arg === false ? 'No' : arg,
+        ),
+      })),
+    }),
+  );
+
   return {
     individualIds,
     householdIds,
@@ -185,7 +197,7 @@ export function mapCriteriaToInitialValues(criteria) {
       'individual',
     ),
     collectorsFiltersBlocks: mapBlockFilters(
-      collectorsFiltersBlocks,
+      adjustedCollectorsFiltersBlocks,
       'collector',
     ),
   };
@@ -310,6 +322,7 @@ interface Filter {
   fieldName: string;
   flexFieldClassification: string;
   roundNumber?: number;
+  associatedWith: string;
 }
 
 interface Result {
@@ -321,13 +334,19 @@ interface Result {
 }
 
 function mapFilterToVariable(filter: Filter): Result {
-  const result: Result = {
-    comparisonMethod: filter.isNull ? 'IS_NULL' : filter.comparisonMethod,
-    arguments: filter.isNull
+  let preparedArguments = [];
+  if (filter?.associatedWith === 'DeliveryMechanismData') {
+    preparedArguments = filter.isNull ? [null] : filter.arguments;
+  } else {
+    preparedArguments = filter.isNull
       ? [null]
       : filter.arguments.map((arg) =>
           arg === 'Yes' ? true : arg === 'No' ? false : arg,
-        ),
+        );
+  }
+  const result: Result = {
+    comparisonMethod: filter.isNull ? 'IS_NULL' : filter.comparisonMethod,
+    arguments: preparedArguments,
     fieldName: filter.fieldName,
     flexFieldClassification: filter.flexFieldClassification,
   };
