@@ -120,7 +120,9 @@ export function mapFiltersToInitialValues(filters): any[] {
           return mappedFilters.push({
             ...each,
             value:
-              each.fieldAttribute.type === 'BOOL' ||
+              each.fieldAttribute?.type === 'BOOL' ||
+              each?.type === 'BOOL' ||
+              each?.fieldAttribute?.pduData?.subtype === 'BOOL' ||
               each.fieldAttribute?.pduData?.subtype
                 ? each.arguments[0]
                   ? 'Yes'
@@ -195,7 +197,8 @@ export function formatCriteriaFilters(filters) {
   return filters.map((each) => {
     let comparisonMethod;
     let values;
-    switch (each.fieldAttribute?.type) {
+    console.log('each', each);
+    switch (each?.fieldAttribute?.type || each?.type) {
       case 'SELECT_ONE':
         comparisonMethod = 'EQUALS';
         values = [each.value];
@@ -206,6 +209,9 @@ export function formatCriteriaFilters(filters) {
         break;
       case 'STRING':
         comparisonMethod = 'CONTAINS';
+        if (each.associatedWith === 'DeliveryMechanismData') {
+          comparisonMethod = 'EQUALS';
+        }
         values = [each.value];
         break;
       case 'DECIMAL':

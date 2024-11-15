@@ -108,18 +108,18 @@ const CriteriaField = ({ field, choicesDict, dataCy }): ReactElement => {
     case 'NOT_EQUALS':
       fieldElement = (
         <p>
-          {field.fieldAttribute?.labelEn || field.fieldName}:{' '}
-          <span>{displayValueOrEmpty(field.arguments?.[0])}</span>
+          {field.fieldAttribute?.labelEn || field.labelEn}:{' '}
+          {/* <span>{displayValueOrEmpty(field.arguments?.[0])}</span> */}
         </p>
       );
       break;
     case 'RANGE':
       fieldElement = (
         <p>
-          {field.fieldAttribute?.labelEn || field.fieldName}:{' '}
+          {field.fieldAttribute?.labelEn || field.labelEn}:{' '}
           <span>
-            {displayValueOrEmpty(field.arguments?.[0])} -{' '}
-            {displayValueOrEmpty(field.arguments?.[1])}
+            {/* {displayValueOrEmpty(field.arguments?.[0])} -{' '}
+            {displayValueOrEmpty(field.arguments?.[1])} */}
           </span>
         </p>
       );
@@ -127,7 +127,7 @@ const CriteriaField = ({ field, choicesDict, dataCy }): ReactElement => {
     case 'EQUALS':
       fieldElement = (
         <p>
-          {field.fieldAttribute?.labelEn || field.fieldName}:{' '}
+          {field.fieldAttribute?.labelEn || field.labelEn}:{' '}
           {field.isNull === true || field.comparisonMethod === 'IS_NULL' ? (
             <BlueText>{t('Empty')}</BlueText>
           ) : typeof field.arguments?.[0] === 'boolean' ? (
@@ -139,13 +139,7 @@ const CriteriaField = ({ field, choicesDict, dataCy }): ReactElement => {
           ) : (
             <>
               {field.arguments?.[0] != null ? (
-                typeof field.arguments[0] === 'boolean' ? (
-                  field.arguments[0] === true ? (
-                    <BlueText>{t('Yes')}</BlueText>
-                  ) : (
-                    <BlueText>{t('No')}</BlueText>
-                  )
-                ) : field.arguments[0] === 'Yes' ? (
+                field.arguments[0] === 'Yes' ? (
                   <BlueText>{t('Yes')}</BlueText>
                 ) : field.arguments[0] === 'No' ? (
                   <BlueText>{t('No')}</BlueText>
@@ -169,19 +163,33 @@ const CriteriaField = ({ field, choicesDict, dataCy }): ReactElement => {
 
       fieldElement = (
         <p>
-          {field.fieldAttribute?.labelEn || field.fieldName}:{' '}
+          {field.fieldAttribute?.labelEn || field.labelEn}:{' '}
           {displayValue && <MathSign src={MathSignComponent} alt={altText} />}
-          <span>{displayValueOrEmpty(displayValue)}</span>
+          {/* <span>{displayValueOrEmpty(displayValue)}</span> */}
         </p>
       );
       break;
     }
     case 'CONTAINS':
+      console.log(field);
       fieldElement = (
         <p>
-          {field.fieldAttribute?.labelEn || field.fieldName}:{' '}
-          {field._typename === 'TargetingCollectorBlockRuleFilterNode'
-            ? field.arguments?.[0]
+          {field.fieldAttribute?.labelEn || field.labelEn}:{' '}
+          {field.__typename === 'TargetingCollectorBlockRuleFilterNode'
+            ? field.arguments?.map((argument, index) => (
+                <Fragment key={index}>
+                  <span>
+                    {argument === true ? (
+                      <BlueText>{t('Yes')}</BlueText>
+                    ) : argument === false ? (
+                      <BlueText>{t('No')}</BlueText>
+                    ) : (
+                      displayValueOrEmpty(extractChoiceLabel(field, argument))
+                    )}
+                  </span>
+                  {index !== field.arguments.length - 1 && ', '}
+                </Fragment>
+              ))
             : field.arguments?.map((argument, index) => (
                 <Fragment key={index}>
                   <span>
@@ -302,6 +310,17 @@ export function Criteria({
     setOpenHH(false);
     setOpenIND(false);
   };
+  const adjustedCollectorsFiltersBlocks = collectorsFiltersBlocks.map(
+    (block) => ({
+      ...block,
+      collectorBlockFilters: block.collectorBlockFilters.map((filter) => ({
+        ...filter,
+        arguments: filter.arguments.map((arg) =>
+          arg === true ? 'Yes' : arg === false ? 'No' : arg,
+        ),
+      })),
+    }),
+  );
 
   return (
     <CriteriaElement alternative={alternative} data-cy="criteria-container">
@@ -359,7 +378,7 @@ export function Criteria({
             </CriteriaSetBox>
           ),
       )}
-      {collectorsFiltersBlocks.map(
+      {adjustedCollectorsFiltersBlocks.map(
         (item, index) =>
           item.collectorBlockFilters.length > 0 && (
             <CriteriaSetBox

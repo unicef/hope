@@ -242,7 +242,7 @@ export const SubField: FC<SubFieldProps> = ({
         return (
           <Field
             name={`${baseName}.value`}
-            label={`${field.fieldAttribute?.labelEn || field.fieldName}`}
+            label={`${field.fieldAttribute?.labelEn}`}
             fullWidth
             variant="outlined"
             component={FormikTextField}
@@ -254,7 +254,7 @@ export const SubField: FC<SubFieldProps> = ({
         return (
           <Field
             name={`${baseName}.value`}
-            label={`${field.fieldAttribute.labelEn}`}
+            label={`${field.fieldAttribute?.labelEn || field?.labelEn}`}
             choices={[
               {
                 admin: null,

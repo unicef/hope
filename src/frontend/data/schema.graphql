@@ -4785,18 +4785,6 @@ enum TargetPopulationStatus {
   ASSIGNED
 }
 
-enum TargetingCollectorBlockRuleFilterComparisonMethod {
-  EQUALS
-  NOT_EQUALS
-  CONTAINS
-  NOT_CONTAINS
-  RANGE
-  NOT_IN_RANGE
-  GREATER_THAN
-  LESS_THAN
-  IS_NULL
-}
-
 enum TargetingCollectorBlockRuleFilterFlexFieldClassification {
   NOT_FLEX_FIELD
   FLEX_FIELD_BASIC
@@ -4809,10 +4797,11 @@ type TargetingCollectorBlockRuleFilterNode {
   updatedAt: DateTime!
   collectorBlockFilters: TargetingCollectorRuleFilterBlockNode!
   fieldName: String!
-  comparisonMethod: TargetingCollectorBlockRuleFilterComparisonMethod!
+  comparisonMethod: String
   flexFieldClassification: TargetingCollectorBlockRuleFilterFlexFieldClassification!
   arguments: [Arg]
   roundNumber: Int
+  labelEn: String
 }
 
 type TargetingCollectorRuleFilterBlockNode {
@@ -4892,9 +4881,8 @@ type TargetingCriteriaRuleNode {
   householdIds: String!
   individualIds: String!
   individualsFiltersBlocks: [TargetingIndividualRuleFilterBlockNode]
-  collectorFiltersBlocks: [TargetingCollectorRuleFilterBlockNode!]!
+  collectorsFiltersBlocks: [TargetingCollectorRuleFilterBlockNode!]!
   householdsFiltersBlocks: [TargetingCriteriaRuleFilterNode]
-  collectorsFiltersBlocks: [TargetingCollectorRuleFilterBlockNode]
 }
 
 input TargetingCriteriaRuleObjectType {

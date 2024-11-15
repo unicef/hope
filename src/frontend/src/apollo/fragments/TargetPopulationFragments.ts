@@ -136,6 +136,7 @@ export const targetPopulationDetailed = gql`
             comparisonMethod
             flexFieldClassification
             arguments
+            labelEn
           }
         }
         householdsFiltersBlocks {
