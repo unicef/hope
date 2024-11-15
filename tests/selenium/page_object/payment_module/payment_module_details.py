@@ -73,7 +73,9 @@ class PaymentModuleDetails(BaseComponents):
         return self.wait_for(self.buttonLockPlan)
 
     def getButtonSubmit(self) -> WebElement:
-        return self.wait_for(self.buttonSubmit)
+        submit_button = self.wait_for(self.buttonSubmit)
+        self.element_clickable(self.buttonSubmit)
+        return submit_button
 
     def getPageHeaderContainer(self) -> WebElement:
         return self.wait_for(self.pageHeaderContainer)
@@ -237,21 +239,41 @@ class PaymentModuleDetails(BaseComponents):
     def getButtonSendForApproval(self) -> WebElement:
         return self.wait_for(self.buttonSendForApproval)
 
+    def clickButton(self, locator: str) -> None:
+        self.wait_for(locator)
+        self.element_clickable(locator)
+        sleep(5)
+        self.get(locator).click()
+
+    def clickButtonSendForApproval(self) -> None:
+        self.clickButton(self.buttonSendForApproval)
+
     def getButtonApprove(self) -> WebElement:
         return self.wait_for(self.buttonApprove)
 
+    def clickButtonApprove(self) -> None:
+        self.clickButton(self.buttonApprove)
+
+    def clickButtonLockPlan(self) -> None:
+        self.clickButton(self.buttonLockPlan)
+
     def getButtonAuthorize(self) -> WebElement:
         return self.wait_for(self.buttonAuthorize)
+
+    def clickButtonAuthorize(self) -> None:
+        self.clickButton(self.buttonAuthorize)
+
+    def clickButtonMarkAsReleased(self) -> None:
+        self.clickButton(self.buttonMarkAsReleased)
+
+    def clickButtonExportXlsx(self) -> None:
+        self.clickButton(self.buttonExportXlsx)
 
     def getButtonMarkAsReleased(self) -> WebElement:
         return self.wait_for(self.buttonMarkAsReleased)
 
     def checkStatus(self, status: str) -> None:
-        for _ in range(30):
-            if status == self.getStatusContainer().text:
-                break
-            sleep(1)
-        assert status in self.getStatusContainer().text
+        self.wait_for_text(status, self.statusContainer)
 
     def getSupportingDocumentsTitle(self) -> WebElement:
         return self.wait_for(self.supportingDocumentsTitle)
