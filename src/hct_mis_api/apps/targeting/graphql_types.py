@@ -124,12 +124,12 @@ class TargetingCollectorBlockRuleFilterNode(DjangoObjectType):
     def resolve_arguments(parent, info: Any) -> "GrapheneList":
         return parent.arguments
 
-    def resolve_label_en(parent, info: Any) -> Optional[str]:
-        # TODO: refactor that
-        for field in DeliveryMechanism.get_all_core_fields_definitions():
-            if field["name"] == parent.field_name:
-                return field["label"]["English(EN)"]
-        return ""
+    def resolve_label_en(parent, info: Any) -> str:
+        field_labels_dict = {
+            field["name"]: field["label"].get("English(EN)")
+            for field in DeliveryMechanism.get_all_core_fields_definitions()
+        }
+        return field_labels_dict.get(parent.field_name, "")
 
     class Meta:
         model = target_models.TargetingCollectorBlockRuleFilter
