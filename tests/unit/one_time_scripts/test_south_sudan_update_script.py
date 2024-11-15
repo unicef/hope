@@ -1,18 +1,18 @@
 import datetime
 
-import pytest
 from django.conf import settings
 from django.test import TestCase
 
-from hct_mis_api.apps.geo.models import Country, AreaType, Area
-from hct_mis_api.apps.household.models import Household, DocumentType, MALE
-from hct_mis_api.apps.household.fixtures import create_household_and_individuals
-
 from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.geo.models import Area, AreaType, Country
+from hct_mis_api.apps.household.fixtures import create_household_and_individuals
+from hct_mis_api.apps.household.models import MALE, DocumentType
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
-from hct_mis_api.one_time_scripts.south_sudan_update_script import south_sudan_update_script
+from hct_mis_api.one_time_scripts.south_sudan_update_script import (
+    south_sudan_update_script,
+)
 
 
 class TestSouthSudanUpdateScript(TestCase):
@@ -20,19 +20,17 @@ class TestSouthSudanUpdateScript(TestCase):
     def setUpTestData(cls) -> None:
         super().setUpTestData()
         business_area = create_afghanistan()
-        program = ProgramFactory(
-            name="Test Program for Household", status=Program.ACTIVE, business_area=business_area
-        )
+        program = ProgramFactory(name="Test Program for Household", status=Program.ACTIVE, business_area=business_area)
         cls.program = program
-        poland = Country.objects.create(name="Poland", iso_code2="PL", iso_code3='POL', iso_num='616')
-        germany = Country.objects.create(name="Germany", iso_code2="DE", iso_code3='DEU', iso_num='276')
+        poland = Country.objects.create(name="Poland", iso_code2="PL", iso_code3="POL", iso_num="616")
+        germany = Country.objects.create(name="Germany", iso_code2="DE", iso_code3="DEU", iso_num="276")
 
         business_area = create_afghanistan()
         business_area.countries.add(poland, germany)
         state = AreaType.objects.create(name="State", country=poland)
         district = AreaType.objects.create(name="District", parent=state, country=poland)
-        Area.objects.create(name="Kabul", area_type=state, p_code='AF11')
-        Area.objects.create(name="Kabul1", area_type=district, p_code='AF1115')
+        Area.objects.create(name="Kabul", area_type=state, p_code="AF11")
+        Area.objects.create(name="Kabul1", area_type=district, p_code="AF1115")
         DocumentType.objects.create(label="National ID", key="national_id")
         DocumentType.objects.create(label="Birth Certificate", key="birth_certificate")
         household, individuals = create_household_and_individuals(
@@ -48,17 +46,16 @@ class TestSouthSudanUpdateScript(TestCase):
             ],
         )
         individual = individuals[0]
-        individual.unicef_id = 'IND-0'
+        individual.unicef_id = "IND-0"
         individual.save()
         individual.refresh_from_db()
         cls.individual = individual
         rebuild_search_index()
 
-    # unicef_id	admin1_h_c	admin2_h_c	admin3_h_c	given_name_i_c	middle_name_i_c	family_name_i_c	full_name_i_c	birth_date	sex	ss_hw_lot_num_i_f	ss_health_facility_name_i_f	ss_hw_title_i_f	ss_hw_work_id_i_f	ss_hw_grade_i_f	ss_hw_qualifications_i_f	ss_hw_cadre_i_f	national_id_no_i_c	national_id_country_i_c	birth_certificate_no_i_c	birth_certificate_country_i_c
-    # IND-0	AF11	AF1115		Jan	Roman	Romaniak	Jan Romaniak	1991-11-18	MALE	32	ed	foo	bar	fooooo	baaaar	aaaaa	TEST123	Poland	TEST456	Germany
-    def test_south_sudan_update_script(self):
-        south_sudan_update_script(f"{settings.TESTS_ROOT}/one_time_scripts/files/update_script_sudan.xlsx",
-                                  self.program.id)
+    def test_south_sudan_update_script(self) -> None:
+        south_sudan_update_script(
+            f"{settings.TESTS_ROOT}/one_time_scripts/files/update_script_sudan.xlsx", self.program.id
+        )
         self.individual.refresh_from_db()
         individual = self.individual
         household = individual.household
