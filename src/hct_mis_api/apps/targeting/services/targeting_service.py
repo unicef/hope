@@ -214,7 +214,8 @@ class TargetingIndividualRuleFilterBlockBase:
 
 class TargetingCollectorRuleFilterBlockBase:
     def __init__(
-        self, collector_block_filters: Optional[Any] = None,
+        self,
+        collector_block_filters: Optional[Any] = None,
     ) -> None:
         if collector_block_filters is not None:
             self.collector_block_filters = collector_block_filters

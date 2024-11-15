@@ -9,7 +9,7 @@ from django.core.validators import (
     ProhibitNullCharactersValidator,
 )
 from django.db import models
-from django.db.models import JSONField, Q, OuterRef, Subquery
+from django.db.models import JSONField, OuterRef, Q, Subquery
 from django.db.models.constraints import UniqueConstraint
 from django.utils.text import Truncator
 from django.utils.translation import gettext_lazy as _
@@ -22,15 +22,20 @@ from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldF
 from hct_mis_api.apps.core.field_attributes.fields_types import Scope
 from hct_mis_api.apps.core.models import StorageFile
 from hct_mis_api.apps.core.utils import map_unicef_ids_to_households_unicef_ids
-from hct_mis_api.apps.household.models import Household, IndividualRoleInHousehold, ROLE_PRIMARY, Individual
+from hct_mis_api.apps.household.models import (
+    ROLE_PRIMARY,
+    Household,
+    Individual,
+    IndividualRoleInHousehold,
+)
 from hct_mis_api.apps.steficon.models import Rule, RuleCommit
 from hct_mis_api.apps.targeting.choices import FlexFieldClassification
 from hct_mis_api.apps.targeting.services.targeting_service import (
+    TargetingCollectorRuleFilterBlockBase,
     TargetingCriteriaFilterBase,
     TargetingCriteriaQueryingBase,
     TargetingCriteriaRuleQueryingBase,
     TargetingIndividualRuleFilterBlockBase,
-    TargetingCollectorRuleFilterBlockBase,
 )
 from hct_mis_api.apps.utils.models import (
     AdminUrlMixin,
@@ -594,8 +599,7 @@ class TargetingCollectorBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteriaF
     def get_query(self) -> Q:
         query = Q()
         collector_subquery = IndividualRoleInHousehold.objects.filter(
-            household=OuterRef("pk"),
-            role=ROLE_PRIMARY
+            household=OuterRef("pk"), role=ROLE_PRIMARY
         ).values("individual")[:1]
         argument = self.arguments[0] if len(self.arguments) else None
         if argument is not None:
@@ -604,16 +608,14 @@ class TargetingCollectorBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteriaF
                 individuals_with_field_sub_query = Individual.objects.filter(
                     pk__in=Subquery(collector_subquery),
                     delivery_mechanisms_data__is_valid=True,
-                    delivery_mechanisms_data__data__has_key=self.field_name
+                    delivery_mechanisms_data__data__has_key=self.field_name,
                 )
             # No
             if not argument:
                 individuals_with_field_sub_query = Individual.objects.exclude(
                     pk__in=Subquery(collector_subquery),
                     delivery_mechanisms_data__is_valid=True,
-                    delivery_mechanisms_data__data__has_key=self.field_name
+                    delivery_mechanisms_data__data__has_key=self.field_name,
                 )
-        query &= Q(
-            pk__in=list(individuals_with_field_sub_query.values_list("household_id", flat=True))
-        )
+        query &= Q(pk__in=list(individuals_with_field_sub_query.values_list("household_id", flat=True)))
         return query

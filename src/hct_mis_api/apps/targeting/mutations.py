@@ -153,10 +153,10 @@ def from_input_to_targeting_criteria(targeting_criteria_input: Dict, program: Pr
             collector_block = TargetingCollectorRuleFilterBlock(targeting_criteria_rule=tc_rule)
             collector_block.save()
             for collectors_filter in collector_filter_block.get("collector_block_filters", []):
-                    collector_block_filters = TargetingCollectorBlockRuleFilter(
-                        collector_block_filters=collector_block, **collectors_filter
-                    )
-                    collector_block_filters.save()
+                collector_block_filters = TargetingCollectorBlockRuleFilter(
+                    collector_block_filters=collector_block, **collectors_filter
+                )
+                collector_block_filters.save()
 
     return targeting_criteria
 

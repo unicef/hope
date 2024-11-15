@@ -31,10 +31,7 @@ if TYPE_CHECKING:
 
     from graphene.types.structures import List as GrapheneList
 
-    from hct_mis_api.apps.targeting.models import (
-        TargetingCollectorRuleFilterBlock,
-        TargetingIndividualRuleFilterBlock,
-    )
+    from hct_mis_api.apps.targeting.models import TargetingIndividualRuleFilterBlock
 
 
 def get_field_by_name(field_name: str, target_population: target_models.TargetPopulation) -> Dict:
