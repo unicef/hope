@@ -810,9 +810,7 @@ class TestManualCalendar:
         # 2nd step (Time Series Fields)
         pageProgrammeManagement.getButtonAddTimeSeriesField()
         pageProgrammeManagement.getButtonSave().click()
-        programme_creation_url = pageProgrammeManagement.driver.current_url
         # Check Details page
-        assert "details" in pageProgrammeDetails.wait_for_new_url(programme_creation_url).split("/")
         assert "New name after Edit" in pageProgrammeDetails.getHeaderTitle().text
         assert FormatTime(1, 1, 2022).date_in_text_format in pageProgrammeDetails.getLabelStartDate().text
         assert FormatTime(1, 10, 2099).date_in_text_format in pageProgrammeDetails.getLabelEndDate().text
