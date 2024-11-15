@@ -811,7 +811,7 @@ class TestManualCalendar:
         pageProgrammeManagement.getButtonAddTimeSeriesField()
         pageProgrammeManagement.getButtonSave().click()
         # Check Details page
-        assert "New name after Edit" in pageProgrammeDetails.getHeaderTitle().text
+        pageProgrammeDetails.wait_for_text("New name after Edit", pageProgrammeDetails.headerTitle)
         assert FormatTime(1, 1, 2022).date_in_text_format in pageProgrammeDetails.getLabelStartDate().text
         assert FormatTime(1, 10, 2099).date_in_text_format in pageProgrammeDetails.getLabelEndDate().text
 
