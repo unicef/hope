@@ -49,10 +49,9 @@ document_fields: List[Tuple[str, str]] = [
 
 
 @transaction.atomic
-def south_sudan_update_script() -> None:
-    file_path = "Update script test.xlsx"
-    business_area = BusinessArea.objects.get(slug="afghanistan")
-    program = Program.objects.get(name="Test Program", business_area=business_area)
+def south_sudan_update_script(file_path: str, program_id: str) -> None:
+    program = Program.objects.get(id=program_id)
+    business_area = program.business_area
     update = UniversalIndividualUpdateScript(
         business_area,
         program,
