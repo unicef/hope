@@ -2,7 +2,6 @@ from typing import Any, Dict, List, Tuple
 
 from django.db import transaction
 
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.one_time_scripts.universal_individual_update_script.universal_individual_update_script import (
     UniversalIndividualUpdateScript,
