@@ -93,6 +93,7 @@ class DashboardDataCache:
                 )
                 .distinct()
                 .values(
+                    "currency",
                     "year",
                     "month",
                     "status",
@@ -130,6 +131,7 @@ class DashboardDataCache:
                 )
                 .distinct()
                 .values(
+                    "currency",
                     "year",
                     "month",
                     "status",
@@ -166,6 +168,7 @@ class DashboardDataCache:
             )
             for item in combined_list:
                 key = (
+                    item["currency"],
                     item["year"],
                     item["month"],
                     item["programs"],
@@ -183,10 +186,10 @@ class DashboardDataCache:
                 summary[key]["children_counts"] += item["children_counts"] or 0
                 summary[key]["pwd_counts"] += item["pwd_counts"] or 0
 
-            for (year, month, program, sector, status, admin1, fsp, delivery_type), totals in summary.items():
+            for (currency, year, month, program, sector, status, admin1, fsp, delivery_type), totals in summary.items():
                 result.append(
                     {
-                        "business_area_name": area.slug,
+                        "currency": currency,
                         "total_delivered_quantity_usd": totals["total_usd"],
                         "total_delivered_quantity": totals["total_quantity"],
                         "payments": totals["total_payments"],
