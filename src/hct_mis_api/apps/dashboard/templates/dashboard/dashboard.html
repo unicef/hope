@@ -35,7 +35,7 @@
                                 <span class="icon icon-financing icon-blue"></span>
                                 {% translate "Total Amount Paid" %}
                             </h3>
-                            <div id="total-amount-paid" class="text-sm font-bold"></div>
+                            <div id="total-amount-paid" class="text-sm font-bold  text-center"></div>
                         </div>
                         <div class="bg-white p-4 rounded shadow">
                             <h3 class="text-sm font-semibold">
@@ -93,7 +93,7 @@
                             <span class="icon icon-calendar icon-blue"></span>
                             {% translate "Months" %}
                         </h3>
-                        <div id="payments-by-month" class="dc-chart"></div>
+                        <div id="payments-by-month" class="dc-cahrt w-full h-full"></div>
                     </div>
                 </div>
                 <!-- Other charts Section -->
@@ -103,35 +103,35 @@
                             <span class="icon icon-analysis icon-blue"></span>
                             {% translate "Payments by Sector" %}
                         </h3>
-                        <div id="payments-by-sector" class="dc-chart"></div>
+                        <div id="payments-by-sector" class="dc-cahrt w-full h-full"></div>
                     </div>
                     <div class="bg-white p-3 rounded shadow">
                         <h3 class="text-sm font-semibold">
                             <span class="icon icon-people-targeted icon-blue"></span>
                             {% translate "Payments by Programme" %}
                         </h3>
-                        <div id="volume-by-program" class="dc-chart"></div>
+                        <div id="volume-by-program" class="dc-cahrt w-full h-full"></div>
                     </div>
                     <div class="bg-white p-3 rounded shadow">
                         <h3 class="text-sm font-semibold">
                             <span class="icon icon-cash-transfer icon-blue"></span>
                             {% translate "Payments by Admin 1" %}
                         </h3>
-                        <div id="payments-by-admin1" class="dc-chart"></div>
+                        <div id="payments-by-admin1" class="dc-cahrt w-full h-full"></div>
                     </div>
                     <div class="bg-white p-3 rounded shadow">
                         <h3 class="text-sm font-semibold">
                             <span class="icon icon-logistics icon-blue"></span>
                             {% translate "Payments by FSP" %}
                         </h3>
-                        <div id="payments-by-fsp" class="dc-chart"></div>
+                        <div id="payments-by-fsp" class="dc-cahrt w-full h-full"></div>
                     </div>
                     <div class="bg-white p-4 rounded shadow">
                         <h3 class="text-sm font-semibold">
                             <span class="icon icon-financing icon-blue"></span>
                             {% translate "Payments by Delivery Mechanism" %}
                         </h3>
-                        <div id="payments-by-delivery" class="dc-chart"></div>
+                        <div id="payments-by-delivery" class="dc-cahrt w-full h-full"></div>
                     </div>
                 </div>
                 <!-- Bottom Section (Verification) -->
@@ -180,7 +180,7 @@
                     dc.config.defaultColors(d3.schemeTableau10);
                     const decimalnumberFormatter = d3.format(",.2f");
                     const simplenumberFormatter = d3.format(",");
-                    const truncateLabel = (label, maxLength = 20) => {
+                    const truncateLabel = (label, maxLength = 30) => {
                         return label.length > maxLength ? label.slice(0, maxLength) + '...' : label;
                     };
 
@@ -243,7 +243,7 @@
                             const programGroup = programDim.group().reduceSum(d => d.delivered_quantity_usd);
                             const admin1Group = admin1Dim.group().reduceSum(d => d.delivered_quantity_usd).order((d) => -d);
                             const topAdmin1Group = {
-                                all: () => admin1Group.all().slice(0, 20) // Top 20 admin1
+                                all: () => admin1Group.all().slice(0, 30) // Top 30 admin1
                             };
                             const monthGroup = monthDim.group().reduceSum(d => d.delivered_quantity_usd);
                             const localCurrency = processedPayments.find(item => item.currency)?.currency || "USD";
@@ -460,7 +460,7 @@
 
                             uniqueYears.forEach(year => {
                                 const yearTab = document.createElement("button");
-                                yearTab.className = "tab-link py-2 px-4 font-semibold rounded-lg focus:outline-none transition-colors duration-200 text-gray-900 bg-sky-50";
+                                yearTab.className = "tab-link py-2 px-4 font-semibold rounded-lg focus:outline-none transition-colors duration-300 text-gray-900 bg-sky-50";
                                 yearTab.id = `tab-${year}`;
                                 yearTab.textContent = year;
                                 yearTab.onclick = () => changeYear(year);
