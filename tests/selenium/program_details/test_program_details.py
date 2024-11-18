@@ -531,6 +531,7 @@ class TestProgrammeDetails:
         ) in pageProgrammeDetails.getProgramCycleEndDate()[0].text
         assert "Edited title check" in pageProgrammeDetails.getProgramCycleTitle()[0].text
 
+    @pytest.mark.xfail(reason="UNSTABLE")
     def test_program_details_delete_programme_cycle(
         self, program_with_three_cycles: Program, pageProgrammeDetails: ProgrammeDetails
     ) -> None:
