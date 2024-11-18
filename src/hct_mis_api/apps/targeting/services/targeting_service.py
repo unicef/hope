@@ -156,7 +156,7 @@ class TargetingCriteriaRuleQueryingBase:
         # filter individual block
         for individuals_filters_block in individuals_filters_blocks:
             query &= individuals_filters_block.get_query()
-
+        # filter collector block
         for collectors_filters_block in collectors_filters_blocks:
             query &= collectors_filters_block.get_query()
 

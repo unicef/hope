@@ -115,7 +115,7 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_target_by_id
                 },
                 'status': 'OPEN',
                 'targetingCriteria': {
-                    'householdIds': ' HH-3, HH-2,HH-1',
+                    'householdIds': 'HH-1, HH-2, HH-3',
                     'individualIds': 'IND-33',
                     'rules': [
                         {
@@ -184,7 +184,7 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_target_by_id
                 'status': 'OPEN',
                 'targetingCriteria': {
                     'householdIds': '',
-                    'individualIds': '',
+                    'individualIds': 'IND-33',
                     'rules': [
                         {
                             'collectorsFiltersBlocks': [
@@ -218,7 +218,7 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_target_by_id
                 'status': 'OPEN',
                 'targetingCriteria': {
                     'householdIds': '',
-                    'individualIds': '',
+                    'individualIds': 'IND-33',
                     'rules': [
                         {
                             'collectorsFiltersBlocks': [

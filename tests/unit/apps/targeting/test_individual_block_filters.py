@@ -93,7 +93,9 @@ class TestIndividualBlockFilter(TestCase):
         individuals_filters_block = TargetingIndividualRuleFilterBlockBase(
             individual_block_filters=[married_rule_filter, sex_filter], target_only_hoh=False
         )
-        tcr = TargetingCriteriaRuleQueryingBase(filters=[], individuals_filters_blocks=[individuals_filters_block])
+        tcr = TargetingCriteriaRuleQueryingBase(
+            filters=[], individuals_filters_blocks=[individuals_filters_block], collectors_filters_blocks=[]
+        )
         tc = TargetingCriteriaQueryingBase(rules=[tcr])
         query = query.filter(tc.get_query())
         self.assertEqual(query.count(), 1)
@@ -128,7 +130,9 @@ class TestIndividualBlockFilter(TestCase):
             individual_block_filters=[single_rule_filter, male_sex_filter], target_only_hoh=False
         )
         tcr = TargetingCriteriaRuleQueryingBase(
-            filters=[], individuals_filters_blocks=[individuals_filters_block1, individuals_filters_block2]
+            filters=[],
+            individuals_filters_blocks=[individuals_filters_block1, individuals_filters_block2],
+            collectors_filters_blocks=[],
         )
         tc = TargetingCriteriaQueryingBase(rules=[tcr])
         query = query.filter(tc.get_query())
