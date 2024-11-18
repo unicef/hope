@@ -109,7 +109,7 @@ const CriteriaField = ({ field, choicesDict, dataCy }): ReactElement => {
       fieldElement = (
         <p>
           {field.fieldAttribute?.labelEn || field.labelEn}:{' '}
-          {/* <span>{displayValueOrEmpty(field.arguments?.[0])}</span> */}
+          <span>{displayValueOrEmpty(field.arguments?.[0])}</span>
         </p>
       );
       break;
@@ -118,8 +118,8 @@ const CriteriaField = ({ field, choicesDict, dataCy }): ReactElement => {
         <p>
           {field.fieldAttribute?.labelEn || field.labelEn}:{' '}
           <span>
-            {/* {displayValueOrEmpty(field.arguments?.[0])} -{' '}
-            {displayValueOrEmpty(field.arguments?.[1])} */}
+            {displayValueOrEmpty(field.arguments?.[0])} -{' '}
+            {displayValueOrEmpty(field.arguments?.[1])}
           </span>
         </p>
       );
@@ -165,13 +165,12 @@ const CriteriaField = ({ field, choicesDict, dataCy }): ReactElement => {
         <p>
           {field.fieldAttribute?.labelEn || field.labelEn}:{' '}
           {displayValue && <MathSign src={MathSignComponent} alt={altText} />}
-          {/* <span>{displayValueOrEmpty(displayValue)}</span> */}
+          <span>{displayValueOrEmpty(displayValue)}</span>
         </p>
       );
       break;
     }
     case 'CONTAINS':
-      console.log(field);
       fieldElement = (
         <p>
           {field.fieldAttribute?.labelEn || field.labelEn}:{' '}
