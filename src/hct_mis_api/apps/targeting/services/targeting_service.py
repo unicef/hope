@@ -228,11 +228,8 @@ class TargetingCollectorRuleFilterBlockBase:
         filters_string = [x.get_criteria_string() for x in filters]
         return f"({' AND '.join(filters_string).strip()})"
 
-    def get_basic_hh_query(self) -> Q:
-        return Q(withdrawn=False)
-
     def get_query(self) -> Q:
-        hh_query = self.get_basic_hh_query()
+        hh_query = Q(withdrawn=False)
         filters = self.get_collector_block_filters()
 
         for collector_filter in filters:

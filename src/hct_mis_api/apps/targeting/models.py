@@ -594,28 +594,32 @@ class TargetingCollectorBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteriaF
                 Array of arguments
                 """
     )
-    round_number = models.PositiveIntegerField(null=True, blank=True)
 
     def get_query(self) -> Q:
-        query = Q()
-        collector_subquery = IndividualRoleInHousehold.objects.filter(
-            household=OuterRef("pk"), role=ROLE_PRIMARY
-        ).values("individual")[:1]
+        program = (
+            self.collector_block_filters.targeting_criteria_rule.targeting_criteria.target_population.program
+        )
         argument = self.arguments[0] if len(self.arguments) else None
-        if argument is not None:
-            # Yes
-            if argument:
-                individuals_with_field_sub_query = Individual.objects.filter(
-                    pk__in=Subquery(collector_subquery),
-                    delivery_mechanisms_data__is_valid=True,
-                    delivery_mechanisms_data__data__has_key=self.field_name,
-                )
-            # No
-            if not argument:
-                individuals_with_field_sub_query = Individual.objects.exclude(
-                    pk__in=Subquery(collector_subquery),
-                    delivery_mechanisms_data__is_valid=True,
-                    delivery_mechanisms_data__data__has_key=self.field_name,
-                )
-        query &= Q(pk__in=list(individuals_with_field_sub_query.values_list("household_id", flat=True)))
-        return query
+        if argument is None:
+            return Q()
+
+        collector_primary_qs = IndividualRoleInHousehold.objects.filter(
+            household__program=program,
+            role=ROLE_PRIMARY
+        ).values_list("individual", flat=True)
+
+        collectors_ind_query = Individual.objects.filter(
+            pk__in=list(collector_primary_qs),
+            delivery_mechanisms_data__is_valid=True,
+        )
+        # If argument is Yes
+        if argument:
+            individuals_with_field_query = collectors_ind_query.filter(
+                delivery_mechanisms_data__data__has_key=self.field_name
+            )
+        # If argument is No
+        else:
+            individuals_with_field_query = collectors_ind_query.exclude(
+                delivery_mechanisms_data__data__has_key=self.field_name
+            )
+        return Q(pk__in=list(individuals_with_field_query.values_list("household_id", flat=True)))
