@@ -321,10 +321,14 @@ class TestCreateTargetPopulationMutation(APITestCase):
                             "householdsFiltersBlocks": [],
                             "individualsFiltersBlocks": [
                                 {
-                                    "comparisonMethod": "CONTAINS",
-                                    "arguments": ["Average"],
-                                    "fieldName": "flex_field_1",
-                                    "flexFieldClassification": "FLEX_FIELD_BASIC",
+                                    "individualBlockFilters": [
+                                        {
+                                            "comparisonMethod": "CONTAINS",
+                                            "arguments": ["Average"],
+                                            "fieldName": "flex_field_1",
+                                            "flexFieldClassification": "FLEX_FIELD_BASIC"
+                                        }
+                                    ]
                                 }
                             ],
                         }
@@ -352,11 +356,15 @@ class TestCreateTargetPopulationMutation(APITestCase):
                             "householdsFiltersBlocks": [],
                             "individualsFiltersBlocks": [
                                 {
-                                    "comparisonMethod": "RANGE",
-                                    "arguments": ["2", "3.5"],
-                                    "fieldName": "pdu_field_1",
-                                    "flexFieldClassification": "FLEX_FIELD_PDU",
-                                    "roundNumber": "1",
+                                    "individualBlockFilters": [
+                                        {
+                                            "comparisonMethod": "RANGE",
+                                            "arguments": ["2", "3.5"],
+                                            "fieldName": "pdu_field_1",
+                                            "flexFieldClassification": "FLEX_FIELD_PDU",
+                                            "roundNumber": "1",
+                                        }
+                                    ]
                                 }
                             ],
                         }

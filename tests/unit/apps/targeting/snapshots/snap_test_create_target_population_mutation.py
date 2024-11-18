@@ -24,10 +24,6 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_0_with_permi
                     'rules': [
                         {
                             'collectorsFiltersBlocks': [
-                                {
-                                    'collectorBlockFilters': [
-                                    ]
-                                }
                             ],
                             'householdIds': '',
                             'householdsFiltersBlocks': [
@@ -42,10 +38,6 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_0_with_permi
                             ],
                             'individualIds': '',
                             'individualsFiltersBlocks': [
-                                {
-                                    'individualBlockFilters': [
-                                    ]
-                                }
                             ]
                         }
                     ]
@@ -89,25 +81,17 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_target_by_id
                 },
                 'status': 'OPEN',
                 'targetingCriteria': {
-                    'householdIds': '',
+                    'householdIds': 'HH-1',
                     'individualIds': '',
                     'rules': [
                         {
                             'collectorsFiltersBlocks': [
-                                {
-                                    'collectorBlockFilters': [
-                                    ]
-                                }
                             ],
                             'householdIds': 'HH-1',
                             'householdsFiltersBlocks': [
                             ],
                             'individualIds': '',
                             'individualsFiltersBlocks': [
-                                {
-                                    'individualBlockFilters': [
-                                    ]
-                                }
                             ]
                         }
                     ]
@@ -131,25 +115,17 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_target_by_id
                 },
                 'status': 'OPEN',
                 'targetingCriteria': {
-                    'householdIds': '',
-                    'individualIds': '',
+                    'householdIds': ' HH-3, HH-2,HH-1',
+                    'individualIds': 'IND-33',
                     'rules': [
                         {
                             'collectorsFiltersBlocks': [
-                                {
-                                    'collectorBlockFilters': [
-                                    ]
-                                }
                             ],
                             'householdIds': 'HH-1, HH-2, HH-3',
                             'householdsFiltersBlocks': [
                             ],
                             'individualIds': 'IND-33',
                             'individualsFiltersBlocks': [
-                                {
-                                    'individualBlockFilters': [
-                                    ]
-                                }
                             ]
                         }
                     ]
@@ -173,25 +149,17 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_target_by_id
                 },
                 'status': 'OPEN',
                 'targetingCriteria': {
-                    'householdIds': '',
-                    'individualIds': '',
+                    'householdIds': 'HH-1',
+                    'individualIds': 'IND-33',
                     'rules': [
                         {
                             'collectorsFiltersBlocks': [
-                                {
-                                    'collectorBlockFilters': [
-                                    ]
-                                }
                             ],
                             'householdIds': 'HH-1',
                             'householdsFiltersBlocks': [
                             ],
                             'individualIds': 'IND-33',
                             'individualsFiltersBlocks': [
-                                {
-                                    'individualBlockFilters': [
-                                    ]
-                                }
                             ]
                         }
                     ]
@@ -220,20 +188,12 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_target_by_id
                     'rules': [
                         {
                             'collectorsFiltersBlocks': [
-                                {
-                                    'collectorBlockFilters': [
-                                    ]
-                                }
                             ],
                             'householdIds': '',
                             'householdsFiltersBlocks': [
                             ],
                             'individualIds': 'IND-33',
                             'individualsFiltersBlocks': [
-                                {
-                                    'individualBlockFilters': [
-                                    ]
-                                }
                             ]
                         }
                     ]
@@ -262,20 +222,12 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_target_by_id
                     'rules': [
                         {
                             'collectorsFiltersBlocks': [
-                                {
-                                    'collectorBlockFilters': [
-                                    ]
-                                }
                             ],
                             'householdIds': '',
                             'householdsFiltersBlocks': [
                             ],
                             'individualIds': 'IND-33',
                             'individualsFiltersBlocks': [
-                                {
-                                    'individualBlockFilters': [
-                                    ]
-                                }
                             ]
                         }
                     ]
@@ -319,25 +271,17 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_target_by_id
                 },
                 'status': 'OPEN',
                 'targetingCriteria': {
-                    'householdIds': '',
+                    'householdIds': 'HH-1',
                     'individualIds': '',
                     'rules': [
                         {
                             'collectorsFiltersBlocks': [
-                                {
-                                    'collectorBlockFilters': [
-                                    ]
-                                }
                             ],
                             'householdIds': 'HH-1',
                             'householdsFiltersBlocks': [
                             ],
                             'individualIds': '',
                             'individualsFiltersBlocks': [
-                                {
-                                    'individualBlockFilters': [
-                                    ]
-                                }
                             ]
                         }
                     ]
@@ -406,10 +350,6 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_with_compari
                     'rules': [
                         {
                             'collectorsFiltersBlocks': [
-                                {
-                                    'collectorBlockFilters': [
-                                    ]
-                                }
                             ],
                             'householdIds': '',
                             'householdsFiltersBlocks': [
@@ -424,10 +364,6 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_with_compari
                             ],
                             'individualIds': '',
                             'individualsFiltersBlocks': [
-                                {
-                                    'individualBlockFilters': [
-                                    ]
-                                }
                             ]
                         }
                     ]
@@ -476,10 +412,6 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_with_flex_fi
                     'rules': [
                         {
                             'collectorsFiltersBlocks': [
-                                {
-                                    'collectorBlockFilters': [
-                                    ]
-                                }
                             ],
                             'householdIds': '',
                             'householdsFiltersBlocks': [
@@ -527,10 +459,6 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_with_pdu_fle
                     'rules': [
                         {
                             'collectorsFiltersBlocks': [
-                                {
-                                    'collectorBlockFilters': [
-                                    ]
-                                }
                             ],
                             'householdIds': '',
                             'householdsFiltersBlocks': [
@@ -579,10 +507,6 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_with_pdu_fle
                     'rules': [
                         {
                             'collectorsFiltersBlocks': [
-                                {
-                                    'collectorBlockFilters': [
-                                    ]
-                                }
                             ],
                             'householdIds': '',
                             'householdsFiltersBlocks': [
@@ -598,10 +522,6 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_with_pdu_fle
                             ],
                             'individualIds': '',
                             'individualsFiltersBlocks': [
-                                {
-                                    'individualBlockFilters': [
-                                    ]
-                                }
                             ]
                         }
                     ]
