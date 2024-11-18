@@ -809,6 +809,7 @@ class TestManualCalendar:
         pageProgrammeManagement.getButtonNext().click()
         # 2nd step (Time Series Fields)
         pageProgrammeManagement.getButtonAddTimeSeriesField()
+        pageProgrammeManagement.element_clickable(pageProgrammeManagement.buttonSave)
         pageProgrammeManagement.getButtonSave().click()
         # Check Details page
         pageProgrammeDetails.wait_for_text("New name after Edit", pageProgrammeDetails.headerTitle)
