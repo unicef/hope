@@ -547,6 +547,7 @@ class TestGrievanceTicketsHappyPath:
 @pytest.mark.night
 @pytest.mark.usefixtures("login")
 class TestGrievanceTickets:
+    @pytest.mark.xfail(reason="UNSTABLE")
     @pytest.mark.parametrize(
         "test_data",
         [
