@@ -13,16 +13,18 @@ import { ReactElement } from 'react';
 interface ImportedIndividualsTableRowProps {
   individual;
   choices: HouseholdChoiceDataQuery;
-  isMerged?: boolean;
+  isMerged: boolean;
+  rdi;
 }
 
 export function ImportedIndividualsTableRow({
   individual,
   choices,
   isMerged,
+  rdi,
 }: ImportedIndividualsTableRowProps): ReactElement {
   const navigate = useNavigate();
-  const { baseUrl } = useBaseUrl();
+  const { baseUrl, businessArea } = useBaseUrl();
 
   const relationshipChoicesDict = choicesToDict(choices.relationshipChoices);
   const roleChoicesDict = choicesToDict(choices.roleChoices);
@@ -33,23 +35,27 @@ export function ImportedIndividualsTableRow({
     choices.deduplicationGoldenRecordStatusChoices,
   );
 
-  const importedIndividualPath = `/${baseUrl}/registration-data-import/individual/${individual.id}`;
-  const mergedIndividualPath = `/${baseUrl}/population/individuals/${individual.id}`;
-  const url = isMerged ? mergedIndividualPath : importedIndividualPath;
+  const individualDetailsPath = `/${baseUrl}/population/individuals/${individual.id}`;
 
-  const handleClick = (e): void => {
-    e.stopPropagation();
-    navigate(url);
+  const handleClick = (): void => {
+    navigate(individualDetailsPath, {
+      state: {
+        breadcrumbTitle: `Registration Data Import: ${rdi.name}`,
+        breadcrumbUrl: `/${businessArea}/registration-data-import/${rdi.id}`,
+      },
+    });
   };
+
   return (
     <ClickableTableRow
       hover
-      onClick={(e) => handleClick(e)}
+      onClick={() => handleClick()}
       role="checkbox"
       key={individual.id}
+      data-cy="imported-individuals-row"
     >
       <TableCell align="left">
-        <BlackLink to={url}>
+        <BlackLink to={individualDetailsPath}>
           {isMerged ? individual.unicefId : individual.importId}
         </BlackLink>
       </TableCell>
