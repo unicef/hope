@@ -188,6 +188,8 @@ export const AddFilterTargetingCriteriaDisplay = ({
     householdFiltersAvailable = false;
   }
 
+  console.log(rules);
+
   if (householdFiltersAvailable || individualFiltersAvailable) {
     return (
       <Box display="flex" flexDirection="column">

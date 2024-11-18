@@ -4800,7 +4800,6 @@ type TargetingCollectorBlockRuleFilterNode {
   comparisonMethod: String
   flexFieldClassification: TargetingCollectorBlockRuleFilterFlexFieldClassification!
   arguments: [Arg]
-  roundNumber: Int
   labelEn: String
 }
 
@@ -4822,8 +4821,8 @@ type TargetingCriteriaNode {
   updatedAt: DateTime!
   flagExcludeIfActiveAdjudicationTicket: Boolean!
   flagExcludeIfOnSanctionList: Boolean!
-  householdIds: String!
-  individualIds: String!
+  householdIds: String
+  individualIds: String
   targetPopulation: TargetPopulationNode
   rules: [TargetingCriteriaRuleNode]
 }

@@ -21,14 +21,6 @@ const Label = styled.p`
   color: #b1b1b5;
 `;
 
-const IdContainer = styled.div`
-  background-color: #e6ecf4;
-  border: 1px solid #2f95fb;
-  border-radius: 5px;
-  padding: 10px;
-  white-space: pre-wrap;
-`;
-
 interface TargetPopulationCoreProps {
   id: string;
   targetPopulation: TargetPopulationQuery['targetPopulation'];
@@ -49,8 +41,7 @@ export const TargetPopulationCore = ({
   const { t } = useTranslation();
   const { businessArea } = useBaseUrl();
   if (!targetPopulation) return null;
-  const householdIds = targetPopulation.targetingCriteria?.householdIds;
-  const individualIds = targetPopulation.targetingCriteria?.individualIds;
+
   const ResultComponent = targetPopulation.program.isSocialWorkerProgram
     ? ResultsForPeople
     : ResultsForHouseholds;
@@ -97,18 +88,6 @@ export const TargetPopulationCore = ({
           <Box pt={3} pb={3}>
             <Typography variant="h6">{t('Targeting Criteria')}</Typography>
           </Box>
-          <Box mb={2}>
-            {householdIds.length > 0 && (
-              <IdContainer data-cy="household-ids-container">
-                {householdIds}
-              </IdContainer>
-            )}
-          </Box>
-          {individualIds.length > 0 && (
-            <IdContainer data-cy="household-ids-container">
-              {individualIds}
-            </IdContainer>
-          )}
           <AddFilterTargetingCriteriaDisplay
             rules={targetPopulation.targetingCriteria?.rules || []}
             targetPopulation={targetPopulation}

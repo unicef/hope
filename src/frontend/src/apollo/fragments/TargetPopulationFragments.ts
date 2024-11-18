@@ -92,6 +92,8 @@ export const targetPopulationDetailed = gql`
       rules {
         __typename
         id
+        householdIds
+        individualIds
         individualsFiltersBlocks {
           __typename
           individualBlockFilters {
