@@ -9,7 +9,7 @@ from django.core.validators import (
     ProhibitNullCharactersValidator,
 )
 from django.db import models
-from django.db.models import JSONField, OuterRef, Q, Subquery
+from django.db.models import JSONField, Q
 from django.db.models.constraints import UniqueConstraint
 from django.utils.text import Truncator
 from django.utils.translation import gettext_lazy as _
@@ -596,16 +596,13 @@ class TargetingCollectorBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteriaF
     )
 
     def get_query(self) -> Q:
-        program = (
-            self.collector_block_filters.targeting_criteria_rule.targeting_criteria.target_population.program
-        )
+        program = self.collector_block_filters.targeting_criteria_rule.targeting_criteria.target_population.program
         argument = self.arguments[0] if len(self.arguments) else None
         if argument is None:
             return Q()
 
         collector_primary_qs = IndividualRoleInHousehold.objects.filter(
-            household__program=program,
-            role=ROLE_PRIMARY
+            household__program=program, role=ROLE_PRIMARY
         ).values_list("individual", flat=True)
 
         collectors_ind_query = Individual.objects.filter(

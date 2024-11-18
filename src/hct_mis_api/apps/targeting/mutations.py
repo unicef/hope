@@ -543,11 +543,14 @@ class CopyTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
 
     @classmethod
     def copy_target_criteria(cls, targeting_criteria: TargetingCriteria) -> TargetingCriteria:
-        # TODO: update copy collectors rule
         targeting_criteria_copy = TargetingCriteria()
         targeting_criteria_copy.save()
         for rule in targeting_criteria.rules.all():
-            rule_copy = TargetingCriteriaRule(targeting_criteria=targeting_criteria_copy)
+            rule_copy = TargetingCriteriaRule(
+                targeting_criteria=targeting_criteria_copy,
+                household_ids=rule.household_ids,
+                individual_ids=rule.individual_ids,
+            )
             rule_copy.save()
             for hh_filter in rule.filters.all():
                 hh_filter.pk = None
@@ -562,6 +565,15 @@ class CopyTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
                     ind_filter.pk = None
                     ind_filter.individuals_filters_block = ind_filter_block_copy
                     ind_filter.save()
+
+            for col_filter_block in rule.collectors_filters_blocks.all():
+                col_filter_block_copy = TargetingCollectorRuleFilterBlock(targeting_criteria_rule=rule_copy)
+                col_filter_block_copy.save()
+                for col_filter in col_filter_block.collector_block_filters.all():
+                    col_filter.pk = None
+                    col_filter.collector_block_filters = col_filter_block_copy
+                    col_filter.save()
+        # TODO: will remove after refactoring
         targeting_criteria_copy.household_ids = targeting_criteria.household_ids
         targeting_criteria_copy.individual_ids = targeting_criteria.individual_ids
         targeting_criteria_copy.save()

@@ -177,13 +177,13 @@ class TargetingCriteriaNode(DjangoObjectType):
     def resolve_rules(parent, info: Any) -> "QuerySet":
         return parent.rules.all()
 
-    def resolve_individual_ids(parent, info: Any) -> List[str]:
+    def resolve_individual_ids(parent, info: Any) -> graphene.List:
         ind_ids = parent.individual_ids
         for rule in parent.rules.all():
             ind_ids += rule.individual_ids
         return ind_ids
 
-    def resolve_household_ids(parent, info: Any) -> List[str]:
+    def resolve_household_ids(parent, info: Any) -> graphene.List:
         ind_ids = parent.household_ids
         for rule in parent.rules.all():
             ind_ids += rule.household_ids
