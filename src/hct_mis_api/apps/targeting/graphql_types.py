@@ -171,23 +171,25 @@ class TargetingCriteriaRuleNode(DjangoObjectType):
 
 class TargetingCriteriaNode(DjangoObjectType):
     rules = graphene.List(TargetingCriteriaRuleNode)
-    household_ids = graphene.List(graphene.String)
-    individual_ids = graphene.List(graphene.String)
+    household_ids = graphene.String()
+    individual_ids = graphene.String()
 
     def resolve_rules(parent, info: Any) -> "QuerySet":
         return parent.rules.all()
 
-    def resolve_individual_ids(parent, info: Any) -> graphene.List:
-        ind_ids = parent.individual_ids
+    def resolve_individual_ids(parent, info: Any) -> str:
+        ind_ids = set(parent.individual_ids.split(",")) if parent.individual_ids else set()
         for rule in parent.rules.all():
-            ind_ids += rule.individual_ids
-        return ind_ids
+            if rule.household_ids:
+                ind_ids.update(rule.individual_ids.split(","))
+        return ",".join(ind_ids)
 
-    def resolve_household_ids(parent, info: Any) -> graphene.List:
-        ind_ids = parent.household_ids
+    def resolve_household_ids(parent, info: Any) -> str:
+        hh_ids = set(parent.household_ids.split(",")) if parent.household_ids else set()
         for rule in parent.rules.all():
-            ind_ids += rule.household_ids
-        return ind_ids
+            if rule.household_ids:
+                hh_ids.update(rule.household_ids.split(","))
+        return ",".join(hh_ids)
 
     class Meta:
         model = target_models.TargetingCriteria
