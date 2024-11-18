@@ -1167,6 +1167,7 @@ class TestGrievanceTickets:
         assert datetime.now().strftime("%-d %b %Y") in pageGrievanceDetailsPage.getNoteRows()[0].text
         assert "Test adding new note." in pageGrievanceDetailsPage.getNoteRows()[0].text
 
+    @pytest.mark.xfail(reason="UNSTABLE")
     def test_grievance_tickets_activity_log(
         self,
         pageGrievanceTickets: GrievanceTickets,

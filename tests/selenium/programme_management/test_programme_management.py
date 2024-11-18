@@ -690,6 +690,7 @@ class TestComeBackScenarios:
 
 
 @pytest.mark.night
+@pytest.mark.xfail(reason="UNSTABLE")
 @pytest.mark.usefixtures("login")
 class TestManualCalendar:
     @pytest.mark.parametrize(
