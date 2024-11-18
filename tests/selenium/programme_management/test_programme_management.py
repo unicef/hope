@@ -779,6 +779,8 @@ class TestManualCalendar:
         # 3rd step (Partners)
         pageProgrammeManagement.getAccessToProgram().click()
         pageProgrammeManagement.selectWhoAccessToProgram(test_data["partners_access"])
+        # ToDo: Workaround: Save button is clickable but Selenium clicking it too fast
+        sleep(5)
         pageProgrammeManagement.getButtonSave().click()
         assert test_data["partners_access"] in pageProgrammeDetails.getLabelPartnerAccess().text
         assert test_data["dataCollectingType"] in pageProgrammeDetails.getLabelDataCollectingType().text
@@ -810,6 +812,8 @@ class TestManualCalendar:
         # 2nd step (Time Series Fields)
         pageProgrammeManagement.getButtonAddTimeSeriesField()
         pageProgrammeManagement.element_clickable(pageProgrammeManagement.buttonSave)
+        # ToDo: Workaround: Save button is clickable but Selenium clicking it too fast
+        sleep(5)
         pageProgrammeManagement.getButtonSave().click()
         # Check Details page
         pageProgrammeDetails.wait_for_text("New name after Edit", pageProgrammeDetails.headerTitle)
