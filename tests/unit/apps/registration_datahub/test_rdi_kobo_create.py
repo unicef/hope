@@ -164,10 +164,9 @@ class TestRdiKoboCreateTask(TestCase):
         self.assertEqual(str(pending_household.kobo_submission_uuid), "c09130af-6c9c-4dba-8c7f-1b2ff1970d19")
         self.assertEqual(pending_household.kobo_submission_time.isoformat(), "2020-06-03T13:05:10+00:00")
 
-        self.assertEqual(PendingDeliveryMechanismData.objects.count(), 1)
-        dmd = PendingDeliveryMechanismData.objects.first()
+        self.assertEqual(PendingDeliveryMechanismData.objects.count(), 2)
+        dmd = PendingDeliveryMechanismData.objects.get(individual__full_name="Tesa Testowski")
         self.assertEqual(dmd.delivery_mechanism.code, "mobile_money")
-        print(dmd.data)
         self.assertEqual(
             json.loads(dmd.data),
             {
