@@ -8,11 +8,19 @@ from hct_mis_api.apps.core.fixtures import (
 )
 from hct_mis_api.apps.core.models import FlexibleAttribute, PeriodicFieldData
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
-from hct_mis_api.apps.household.models import FEMALE, MALE, Household, IndividualRoleInHousehold, ROLE_PRIMARY
+from hct_mis_api.apps.household.models import (
+    FEMALE,
+    MALE,
+    ROLE_PRIMARY,
+    Household,
+    IndividualRoleInHousehold,
+)
 from hct_mis_api.apps.payment.fixtures import DeliveryMechanismDataFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.targeting.choices import FlexFieldClassification
 from hct_mis_api.apps.targeting.models import (
+    TargetingCollectorBlockRuleFilter,
+    TargetingCollectorRuleFilterBlock,
     TargetingCriteria,
     TargetingCriteriaQueryingBase,
     TargetingCriteriaRule,
@@ -20,9 +28,11 @@ from hct_mis_api.apps.targeting.models import (
     TargetingIndividualBlockRuleFilter,
     TargetingIndividualRuleFilterBlock,
     TargetingIndividualRuleFilterBlockBase,
-    TargetPopulation, TargetingCollectorRuleFilterBlock, TargetingCollectorBlockRuleFilter,
+    TargetPopulation,
 )
-from hct_mis_api.apps.targeting.services.targeting_service import TargetingCollectorRuleFilterBlockBase
+from hct_mis_api.apps.targeting.services.targeting_service import (
+    TargetingCollectorRuleFilterBlockBase,
+)
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
 
@@ -374,13 +384,9 @@ class TestIndividualBlockFilter(TestCase):
         IndividualRoleInHousehold.objects.create(
             individual=hh.individuals.first(), household=hh, role=ROLE_PRIMARY, rdi_merge_status=MergeStatusModel.MERGED
         )
-        collector = IndividualRoleInHousehold.objects.get(
-            household_id=hh.pk, role=ROLE_PRIMARY
-        ).individual
+        collector = IndividualRoleInHousehold.objects.get(household_id=hh.pk, role=ROLE_PRIMARY).individual
         DeliveryMechanismDataFactory(
-            individual=collector,
-            is_valid=True,
-            data={"delivery_data_field__random_name": "test123"}
+            individual=collector, is_valid=True, data={"delivery_data_field__random_name": "test123"}
         )
         # Target population
         tp = TargetPopulation(program=hh.program)
@@ -397,9 +403,7 @@ class TestIndividualBlockFilter(TestCase):
             field_name="delivery_data_field__random_name",
             arguments=[True],
         )
-        collectors_filters_block = TargetingCollectorRuleFilterBlockBase(
-            collector_block_filters=[collector_filter]
-        )
+        collectors_filters_block = TargetingCollectorRuleFilterBlockBase(collector_block_filters=[collector_filter])
         tcr = TargetingCriteriaRuleQueryingBase(
             filters=[],
             individuals_filters_blocks=[],

@@ -471,15 +471,13 @@ class TestCreateTargetPopulationMutation(APITestCase):
                                     "collectorBlockFilters": [
                                         {
                                             "comparisonMethod": "EQUALS",
-                                            "arguments": [
-                                                False
-                                            ],
+                                            "arguments": [False],
                                             "fieldName": "mobile_phone_number__cash_over_the_counter",
-                                            "flexFieldClassification": "NOT_FLEX_FIELD"
+                                            "flexFieldClassification": "NOT_FLEX_FIELD",
                                         },
                                     ]
                                 }
-                            ]
+                            ],
                         }
                     ]
                 },
@@ -494,7 +492,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
     def test_create_mutation_with_collectors_field(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.TARGETING_CREATE], self.program.business_area)
         DeliveryMechanismFactory(
-            required_fields = ["mobile_phone_number__cash_over_the_counter"],
+            required_fields=["mobile_phone_number__cash_over_the_counter"],
         )
         variables = {
             "createTargetPopulationInput": {
@@ -511,15 +509,13 @@ class TestCreateTargetPopulationMutation(APITestCase):
                                     "collectorBlockFilters": [
                                         {
                                             "comparisonMethod": "EQUALS",
-                                            "arguments": [
-                                                False
-                                            ],
+                                            "arguments": [False],
                                             "fieldName": "mobile_phone_number__cash_over_the_counter",
-                                            "flexFieldClassification": "NOT_FLEX_FIELD"
+                                            "flexFieldClassification": "NOT_FLEX_FIELD",
                                         },
                                     ]
                                 }
-                            ]
+                            ],
                         }
                     ]
                 },
