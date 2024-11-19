@@ -14,7 +14,6 @@ import { StatusBox } from '@core/StatusBox';
 import { ReactElement } from 'react';
 
 const StatusWrapper = styled.div`
-  width: 140px;
   margin-left: 30px;
 `;
 
