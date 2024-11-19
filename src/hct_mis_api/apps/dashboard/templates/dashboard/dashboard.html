@@ -194,8 +194,8 @@
                     }
 
                     const url = "{{household_data_url}}";
-                    const pendingList = ["Sent to FSP", "Sent to Payment Gateway", "Pending"];
-                    const successfulList = ["Transaction Successful", "Distribution Successful", "Partially Distributed"];
+                    const pendingList = ["Sent to Payment Gateway", "Pending"];
+                    const successfulList = ["Distribution Successful", "Partially Distributed", "Sent to FSP", "Transaction Successful"];
 
                     function createDashboard() {
                         ["payments-by-fsp", "payments-by-delivery", "payments-by-sector", "volume-by-program", "payments-by-admin1", "payments-by-month"].forEach(showSpinner);
