@@ -24,37 +24,37 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Use Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: '18'
       - name: Cache dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: |
-            frontend/node_modules
-            frontend/.yarn
-            frontend/.yarn/cache
+            src/frontend/node_modules
+            src/frontend/.yarn
+            src/frontend/.yarn/cache
           key: ${{ runner.os }}-node-${{ hashFiles('frontend/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-node-
       - run: yarn install --frozen-lockfile
-        working-directory: frontend
+        working-directory: src/frontend
       - run: yarn lint
-        working-directory: frontend
+        working-directory: src/frontend
       - run: yarn test --watchAll=false
-        working-directory: frontend
+        working-directory: src/frontend
 
   build_and_push_dev:
     runs-on: ubuntu-latest
     steps:
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v3
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: DockerHub login
-        uses: docker/login-action@v1
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -93,9 +93,9 @@ jobs:
     needs: [build_and_push_dev]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: DockerHub login
-        uses: docker/login-action@v1
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -111,9 +111,9 @@ jobs:
     needs: [build_and_push_dev]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: DockerHub login
-        uses: docker/login-action@v1
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -129,9 +129,9 @@ jobs:
     needs: [build_and_push_dev]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: DockerHub login
-        uses: docker/login-action@v1
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -147,9 +147,9 @@ jobs:
     needs: [build_and_push_dev]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: DockerHub login
-        uses: docker/login-action@v1
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -165,11 +165,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v3
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: DockerHub login
-        uses: docker/login-action@v1
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -207,7 +207,7 @@ jobs:
             --push ./"
           
           if [ "${{ github.ref }}" = "refs/heads/master" ]; then
-            version=$(python3 -c "import sys; version=None; [version:=line.split('=')[1].strip().strip('\"') for line in open('backend/pyproject.toml', 'r') if line.strip().startswith('version =')]; print(version if version else sys.exit(1))")
+            version=$(python3 -c "import sys; version=None; [version:=line.split('=')[1].strip().strip('\"') for line in open('pyproject.toml', 'r') if line.strip().startswith('version =')]; print(version if version else sys.exit(1))")
             tagged_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-$version
             build_command="$build_command -t $tagged_image"
           fi
@@ -219,22 +219,23 @@ jobs:
     needs: [build_and_push_dev]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: DockerHub login
-        uses: docker/login-action@v1
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Unit tests
         run: |
-          backend_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev docker compose \
-            -f ./deployment/docker-compose.tst.yml \
+          dev_backend_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev docker compose \
+            -f ./.github/helpers/docker-compose.tst.yml \
+            --profile unit \
             run backend ./dev.sh test
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
-          files: ./backend/coverage.xml
+          files: ./tests/test-coverage/coverage.xml
           flags: unittests
           token: ${{ secrets.CODECOV_TOKEN }}
           verbose: true
@@ -244,37 +245,41 @@ jobs:
     needs: [build_and_push_dist]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: DockerHub login
-        uses: docker/login-action@v1
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: E2E tests
         run: |
-          exit 0 # TODO: remove this line when the e2e tests are working again
-          compose_file=./deployment/docker-compose.selenium-night.yml
+          extra_options=""
+          
           if [ "${{ github.event_name }}" = "pull_request" ]; then
-            compose_file=./deployment/docker-compose.selenium.yml
+            extra_options="-m 'not night'"
           fi
           dist_backend_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dist dev_backend_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev docker compose \
-            -f $compose_file \
-            run selenium
+            -f ./.github/helpers/docker-compose.tst.yml \
+            -f ./.github/helpers/docker-compose.selenium.yml \
+            run backend bash -c "
+              waitforit -host=db -port=5432 -timeout=30
+              pytest -x -svvv $extra_options ./tests/selenium --cov-report xml:test-coverage/coverage.xml --html-report=./tests/selenium/output_data/report/report.html --randomly-seed=42
+            "
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         if: always()
         continue-on-error: true
         with:
           name: report
-          path: ./backend/report/
+          path: ./tests/selenium/output_data/report/
           retention-days: 5
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         if: always()
         continue-on-error: true
         with:
-          files: ./backend/coverage.xml
+          files: ./test-coverage/coverage.xml
           flags: e2e
           token: ${{ secrets.CODECOV_TOKEN }}
           verbose: true
@@ -284,13 +289,14 @@ jobs:
     needs: [build_and_push_dist]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: DockerHub login
-        uses: docker/login-action@v1
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Run Trivy vulnerability scanner
+        continue-on-error: true # due to getting TOOMANYREQUESTS
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: '${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}'

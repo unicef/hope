@@ -9,7 +9,7 @@ FROM curl as certs
 RUN curl -o /data/psql-cert.crt -L https://dl.cacerts.digicert.com/DigiCertGlobalRootCA.crt.pem
 
 # Base image
-FROM python:3.11.7-slim-bookworm as base
+FROM python:3.12.7-slim-bookworm as base
 
 ARG UID=82
 
@@ -22,7 +22,6 @@ RUN apt-get update \
     libpq-dev \
     python3-psycopg2 \
     python3-gdal \
-    python3-dev \
     gdal-bin \
     libcairo2 \
     libcairo2-dev \
@@ -42,38 +41,39 @@ RUN apt-get update \
 
 ENV PDM_PACKAGES=/packages
 ENV CODE=/code
-ENV PDM_NO_SELF=True
 ENV PDM_PROJECT=$PDM_PACKAGES
-ENV PYPACKAGES=$PDM_PACKAGES/__pypackages__/3.11
+ENV PYPACKAGES=$PDM_PACKAGES/__pypackages__/3.12
 ENV PYTHONPYCACHEPREFIX=/tmp/pycache \
-    PYTHONPATH=$PYPACKAGES/lib:$CODE:$PYTHONPATH \
+    PYTHONPATH=$PYPACKAGES/lib:$PYTHONPATH \
     PATH=$PYPACKAGES/bin:$PATH \
     XDG_RUNTIME_DIR=/run/user/"${UID}"
-
+ENV DJANGO_SETTINGS_MODULE=hct_mis_api.config.settings
 WORKDIR $CODE
 
 COPY --from=waitforit /data/waitforit /usr/local/bin/waitforit
 
 # Dist builder image
-FROM base as builder
-
+FROM base as pdm
 RUN pip install --upgrade pip &&\
-    pip install pdm==2.15.2 &&\
+    pip install pdm==2.19.2 &&\
+    pip install pdm-backend &&\
     pip install setuptools==71.1.0 &&\
     pdm config cache_dir /var/cache/pdm &&\
     pdm config python.use_venv false &&\
     pdm config venv.in_project true &&\
     pdm config check_update false
-
 WORKDIR $PDM_PACKAGES
-COPY backend/pyproject.toml backend/pdm.lock ./
-RUN pdm sync --prod --no-editable --no-self --no-isolation
+COPY README.md LICENSE pyproject.toml pdm.lock ./
+
+
+
 
 # Dev image
-FROM builder AS dev
+FROM pdm AS dev
 
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
+    python3-dev \
     chromium-driver \
     chromium \
     ffmpeg \
@@ -83,23 +83,14 @@ RUN apt-get update \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
+ENV PYTHONPATH=$CODE/src:$CODE/test/:$PYTHONPATH
 RUN pdm sync --no-editable --no-self --no-isolation
 
 WORKDIR $CODE
-COPY ./backend ./
-
-COPY ./docker/entrypoint.sh /bin/
-ENTRYPOINT ["entrypoint.sh"]
-
-## Dist (backend only) image
-FROM base AS be-dist
-
-COPY --chown=hope:hope ./backend ./
-COPY --chown=hope:hope --from=builder $PDM_PACKAGES $PDM_PACKAGES
-COPY --chown=hope:hope --from=certs /data/psql-cert.crt /code/psql-cert.crt
-
-USER hope
-
+COPY ./src/ ./src/
+COPY ./tests ./tests
+COPY ./manage.py ./manage.py
+COPY .flake8 pyproject.toml pdm.lock ./
 COPY ./docker/entrypoint.sh /bin/
 ENTRYPOINT ["entrypoint.sh"]
 
@@ -108,13 +99,28 @@ ENTRYPOINT ["entrypoint.sh"]
 FROM node:18.19.0-buster-slim AS frontend-builder
 
 WORKDIR /fe-build
-COPY ./frontend/package.json ./frontend/yarn.lock ./
+COPY ./src/frontend/package.json ./src/frontend/yarn.lock ./
 # Network timeout is needed by the cross-platform build
 RUN yarn install --frozen-lockfile --network-timeout 600000
-COPY ./frontend ./
+COPY ./src/frontend ./
 RUN NODE_ENV="production" NODE_OPTIONS="--max-old-space-size=4096" yarn build
 
+# Dist builder image
+FROM pdm as dist-builder
+COPY ./src/ ./src/
+COPY --chown=hope:hope --from=frontend-builder /fe-build/build $PDM_PACKAGES/src/hct_mis_api/apps/web/static/web
+RUN pdm sync --prod --no-editable --no-isolation
 
-FROM be-dist AS dist
 
-COPY --chown=hope:hope --from=frontend-builder /fe-build/build ./hct_mis_api/apps/web/static/web
+## Dist (backend only) image
+FROM base AS dist
+
+
+COPY ./src/gunicorn_config.py /conf/gunicorn_config.py
+COPY --chown=hope:hope --from=dist-builder $PDM_PACKAGES $PDM_PACKAGES
+COPY --chown=hope:hope --from=certs /data/psql-cert.crt /certs/psql-cert.crt
+
+USER hope
+
+COPY ./docker/entrypoint.sh /bin/
+ENTRYPOINT ["entrypoint.sh"]

@@ -1,0 +1,47 @@
+import { Box, InputAdornment, TextField } from '@mui/material';
+import styled from 'styled-components';
+import { FieldLabel } from './FieldLabel';
+import { ReactElement } from 'react';
+
+const TextContainer = styled(TextField)`
+  input[type='number']::-webkit-inner-spin-button,
+  input[type='number']::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+  }
+  input[type='number'] {
+    -moz-appearance: textfield;
+  }
+`;
+
+export function NumberTextField({
+  topLabel = null,
+  value,
+  placeholder,
+  onChange,
+  icon = null,
+  ...otherProps
+}): ReactElement {
+  return (
+    <Box display="flex" flexDirection="column">
+      {topLabel ? <FieldLabel>{topLabel}</FieldLabel> : null}
+      <TextContainer
+        {...otherProps}
+        value={value}
+        size="small"
+        placeholder={placeholder}
+        onChange={onChange}
+        variant="outlined"
+        type="number"
+        InputProps={
+          icon
+            ? {
+                startAdornment: (
+                  <InputAdornment position="start">{icon}</InputAdornment>
+                ),
+              }
+            : null
+        }
+      />
+    </Box>
+  );
+}

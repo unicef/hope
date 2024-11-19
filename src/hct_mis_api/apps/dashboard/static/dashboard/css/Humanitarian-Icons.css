@@ -1,0 +1,49 @@
+@font-face {
+    font-family: 'ocha-icons';
+    src: url('../fonts/Humanitarian-Icons.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+.icon {
+    font-family: 'ocha-icons';
+    font-style: normal;
+    font-weight: normal;
+    display: inline-block;
+    vertical-align: middle;
+    text-transform: none;
+    speak: none;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Define each icon with its Unicode */
+.icon-advocacy:before { content: '\e904'; } /* Advocacy */
+.icon-analysis:before { content: '\e90f'; } /* Analysis */
+.icon-calendar:before { content: '\e92b'; } /* Calendar */
+.icon-cash-transfer:before { content: '\e930'; } /* Cash Transfer */
+.icon-chart:before { content: '\e932'; } /* Chart */
+.icon-child-protection:before { content: '\e937'; } /* Child Protection */
+.icon-children:before { content: '\e938'; } /* Children */
+.icon-data:before { content: '\e94c'; } /* Data */
+.icon-deployment:before { content: '\e94f'; } /* Deployment */
+.icon-financing:before { content: '\e96a'; } /* Financing */
+.icon-health:before { content: '\e981'; } /* Health */
+.icon-house:before { content: '\e992'; } /* House */
+.icon-information-management:before { content: '\e9a0'; } /* Information Management */
+.icon-livelihood:before { content: '\e9b1'; } /* Livelihood */
+.icon-logistics:before { content: '\e9b6'; } /* Logistics */
+.icon-notification:before { content: '\e9d3'; } /* Notification */
+.icon-water-sanitation:before { content: '\ea61'; } /* Water, Sanitation, and Hygiene */
+.icon-people-in-need:before { content: '\e9dd'; } /* People In Need */
+.icon-protection:before { content: '\e9fa'; } /* Protection */
+.icon-food:before { content: '\e972'; } /* Food */
+.icon-shelter:before { content: '\ea2d'; } /* Shelter */
+.icon-people-targeted:before { content: '\e9de'; } /* People Targeted */
+.icon-people-in-need:before { content: '\e9dd'; } /* People In Need */
+.icon-preparedness:before { content: '\e9f7'; } /* Preparedness */
+.icon-protection:before { content: '\e9fa'; } /* Protection */
+.icon-report:before { content: '\ea05'; } /* Report */
+.icon-reporting:before { content: '\ea06'; } /* Reporting */
+.icon-users:before { content: '\ea58'; } /* Users */
