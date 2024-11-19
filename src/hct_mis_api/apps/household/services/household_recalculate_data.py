@@ -6,7 +6,6 @@ from django.db.models import Count, Q
 from dateutil.relativedelta import relativedelta
 
 from hct_mis_api.apps.household.models import (
-    COLLECT_TYPE_FULL,
     COLLECT_TYPE_PARTIAL,
     DISABLED,
     FEMALE,
@@ -40,10 +39,7 @@ def recalculate_data(
 ) -> Tuple[Household, List[str]]:
     household = Household.objects.select_for_update().get(id=household.id)
 
-    if (
-        household.collect_individual_data not in (COLLECT_TYPE_FULL, COLLECT_TYPE_PARTIAL)
-        and not household.program.data_collecting_type.recalculate_composition
-    ):
+    if not household.program.data_collecting_type.recalculate_composition:
         return household, []
 
     individuals_to_update = []

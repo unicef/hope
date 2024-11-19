@@ -35,7 +35,7 @@ class TestApiToken(TestCase):
         )
         cls.token.valid_for.set([cls.afg])
 
-    @patch("hct_mis_api.apps.utils.mailjet.requests.post")
+    @patch("hct_mis_api.apps.utils.celery_tasks.requests.post")
     @patch.object(APITokenAdmin, "message_user", return_value=None)
     @patch.object(APITokenAdmin, "__init__", return_value=None)
     @override_settings(EMAIL_SUBJECT_PREFIX="test")
