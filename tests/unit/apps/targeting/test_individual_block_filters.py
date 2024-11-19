@@ -379,7 +379,7 @@ class TestIndividualBlockFilter(TestCase):
         self.assertEqual(query.first().id, self.household_1_indiv.id)
 
     def test_collector_blocks(self) -> None:
-        query = Household.objects.all()
+        query = Household.objects.all().order_by("unicef_id")
         hh = query.first()
         IndividualRoleInHousehold.objects.create(
             individual=hh.individuals.first(), household=hh, role=ROLE_PRIMARY, rdi_merge_status=MergeStatusModel.MERGED
@@ -412,4 +412,4 @@ class TestIndividualBlockFilter(TestCase):
         tc = TargetingCriteriaQueryingBase(rules=[tcr])
         query = query.filter(tc.get_query())
         self.assertEqual(query.count(), 1)
-        self.assertEqual(query.first().id, self.household_1_indiv.id)
+        self.assertEqual(query.first().unicef_id, self.household_1_indiv.unicef_id)
