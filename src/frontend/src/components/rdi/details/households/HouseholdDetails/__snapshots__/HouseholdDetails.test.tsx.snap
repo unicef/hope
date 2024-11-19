@@ -1,0 +1,252 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`components/rdi/details/households/HouseholdDetails should render 1`] = `
+<div>
+  <div
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-blHHSb kPa-dfK css-1ps6pg7-MuiPaper-root"
+  >
+    <div
+      class="sc-dntaoT hJhDMc"
+    >
+      <h6
+        class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
+      >
+        Details
+      </h6>
+    </div>
+    <div
+      class="sc-ivxoEo lgtXIC"
+    >
+      <div
+        class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-6 css-zow5z4-MuiGrid-root"
+      >
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+        >
+          <div>
+            <span
+              class="sc-egkSDF bUfwNm"
+              color="textSecondary"
+            >
+              Household Size
+            </span>
+            <div
+              data-cy="label-Household Size"
+            >
+              <span
+                class="sc-fAUdSK fuvdWP"
+                color="textSecondary"
+              >
+                4
+              </span>
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+        >
+          <div>
+            <span
+              class="sc-egkSDF bUfwNm"
+              color="textSecondary"
+            >
+              Country
+            </span>
+            <div
+              data-cy="label-Country"
+            >
+              <span
+                class="sc-fAUdSK fuvdWP"
+                color="textSecondary"
+              >
+                Isle of Man
+              </span>
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+        >
+          <div>
+            <span
+              class="sc-egkSDF bUfwNm"
+              color="textSecondary"
+            >
+              Residence Status
+            </span>
+            <div
+              data-cy="label-Residence Status"
+            >
+              <span
+                class="sc-fAUdSK fuvdWP"
+                color="textSecondary"
+              >
+                Displaced  |  Refugee / Asylum Seeker
+              </span>
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+        >
+          <div>
+            <span
+              class="sc-egkSDF bUfwNm"
+              color="textSecondary"
+            >
+              Country of Origin
+            </span>
+            <div
+              data-cy="label-Country of Origin"
+            >
+              <span
+                class="sc-fAUdSK fuvdWP"
+                color="textSecondary"
+              >
+                San Marino
+              </span>
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+        >
+          <div>
+            <span
+              class="sc-egkSDF bUfwNm"
+              color="textSecondary"
+            >
+              Head of Household
+            </span>
+            <div
+              data-cy="label-Head of Household"
+            >
+              <span
+                class="sc-fAUdSK fuvdWP"
+                color="textSecondary"
+              >
+                <a
+                  class="sc-gtLWhw flPTLU"
+                  href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTpmM2U0ODBiZC05MDYyLTRkMjktODljYy1kMWM3MGRhZDRmMjk="
+                >
+                  Agata Kowalska
+                </a>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+        >
+          <div>
+            <span
+              class="sc-egkSDF bUfwNm"
+              color="textSecondary"
+            >
+              FEMALE CHILD HEADED HOUSEHOLD
+            </span>
+            <div
+              data-cy="label-FEMALE CHILD HEADED HOUSEHOLD"
+            >
+              <span
+                class="sc-fAUdSK fuvdWP"
+                color="textSecondary"
+              >
+                No
+              </span>
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+        >
+          <div>
+            <span
+              class="sc-egkSDF bUfwNm"
+              color="textSecondary"
+            >
+              CHILD HEADED HOUSEHOLD
+            </span>
+            <div
+              data-cy="label-CHILD HEADED HOUSEHOLD"
+            >
+              <span
+                class="sc-fAUdSK fuvdWP"
+                color="textSecondary"
+              >
+                No
+              </span>
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+        >
+          <div>
+            <span
+              class="sc-egkSDF bUfwNm"
+              color="textSecondary"
+            >
+              ADMINISTRATIVE LEVEL 1
+            </span>
+            <div
+              data-cy="label-ADMINISTRATIVE LEVEL 1"
+            >
+              <span
+                class="sc-fAUdSK fuvdWP"
+                color="textSecondary"
+              >
+                Nangarhar
+              </span>
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+        >
+          <div>
+            <span
+              class="sc-egkSDF bUfwNm"
+              color="textSecondary"
+            >
+              ADMINISTRATIVE LEVEL 2
+            </span>
+            <div
+              data-cy="label-ADMINISTRATIVE LEVEL 2"
+            >
+              <span
+                class="sc-fAUdSK fuvdWP"
+                color="textSecondary"
+              >
+                Achin
+              </span>
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+        >
+          <div>
+            <span
+              class="sc-egkSDF bUfwNm"
+              color="textSecondary"
+            >
+              Data Collecting Type
+            </span>
+            <div
+              data-cy="label-Data Collecting Type"
+            >
+              <span
+                class="sc-fAUdSK fuvdWP"
+                color="textSecondary"
+              >
+                data collecting type
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
