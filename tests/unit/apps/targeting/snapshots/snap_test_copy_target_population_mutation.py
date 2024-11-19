@@ -53,6 +53,16 @@ snapshots['TestCopyTargetPopulationMutation::test_copy_target_0_with_permission 
                     'rules': [
                         {
                             'collectorsFiltersBlocks': [
+                                {
+                                    'collectorBlockFilters': [
+                                        {
+                                            'arguments': [
+                                                True
+                                            ],
+                                            'fieldName': 'delivery_data_field__random_name'
+                                        }
+                                    ]
+                                }
                             ],
                             'householdsFiltersBlocks': [
                                 {
@@ -63,12 +73,6 @@ snapshots['TestCopyTargetPopulationMutation::test_copy_target_0_with_permission 
                                     'fieldName': 'size',
                                     'flexFieldClassification': 'NOT_FLEX_FIELD'
                                 }
-                            ]
-                        },
-                        {
-                            'collectorsFiltersBlocks': [
-                            ],
-                            'householdsFiltersBlocks': [
                             ]
                         }
                     ]

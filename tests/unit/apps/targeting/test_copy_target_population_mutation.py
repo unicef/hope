@@ -21,6 +21,8 @@ from hct_mis_api.apps.targeting.models import (
     TargetingCriteria,
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
+    TargetingIndividualBlockRuleFilter,
+    TargetingIndividualRuleFilterBlock,
     TargetPopulation,
 )
 
@@ -95,13 +97,23 @@ class TestCopyTargetPopulationMutation(APITestCase):
             program=cls.program,
             program_cycle=cls.cycle,
         )
-
-        tp.targeting_criteria = cls.get_targeting_criteria_for_rule(
+        targeting_criteria = cls.get_targeting_criteria_for_rule(
             {"field_name": "size", "arguments": [1], "comparison_method": "EQUALS"}
         )
+        tcr: TargetingCriteriaRule = targeting_criteria.rules.first()
+        tp.targeting_criteria = targeting_criteria
         tp.save()
         tp.households.add(cls.household)
         cls.target_population = tp
+
+        # add ind filter
+        ind_block = TargetingIndividualRuleFilterBlock.objects.create(targeting_criteria_rule=tcr)
+        TargetingIndividualBlockRuleFilter.objects.create(
+            individuals_filters_block=ind_block,
+            comparison_method="RANGE",
+            field_name="pdu_field_test",
+            arguments=["1", "2"],
+        )
 
         # add collector filter
         DeliveryMechanismFactory(
@@ -111,11 +123,8 @@ class TestCopyTargetPopulationMutation(APITestCase):
         DeliveryMechanismDataFactory(
             individual=collector, is_valid=True, data={"delivery_data_field__random_name": "Name"}
         )
-        tcr = TargetingCriteriaRule()
-        tcr.targeting_criteria = tp.targeting_criteria
-        tcr.save()
-        col_block = TargetingCollectorRuleFilterBlock(targeting_criteria_rule=tcr)
-        TargetingCollectorBlockRuleFilter(
+        col_block = TargetingCollectorRuleFilterBlock.objects.create(targeting_criteria_rule=tcr)
+        TargetingCollectorBlockRuleFilter.objects.create(
             collector_block_filters=col_block,
             comparison_method="EQUALS",
             field_name="delivery_data_field__random_name",
