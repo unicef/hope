@@ -4,7 +4,7 @@ from collections import defaultdict
 from typing import Any, Dict, Optional
 
 from django.core.cache import cache
-from django.db.models import Count, F, Sum, Value
+from django.db.models import Count, DecimalField, F, Sum, Value
 from django.db.models.functions import Coalesce, ExtractMonth, ExtractYear
 
 from rest_framework.utils.serializer_helpers import ReturnDict
@@ -93,6 +93,7 @@ class DashboardDataCache:
                 )
                 .distinct()
                 .values(
+                    "currency",
                     "year",
                     "month",
                     "status",
@@ -103,8 +104,13 @@ class DashboardDataCache:
                     "delivery_types",
                 )
                 .annotate(
-                    total_usd=Sum("delivered_quantity_usd", default=0),
-                    total_quantity=Sum("delivered_quantity", default=0),
+                    total_usd=Sum(
+                        Coalesce("delivered_quantity_usd", "entitlement_quantity_usd", Value(0.0)),
+                        output_field=DecimalField(),
+                    ),
+                    total_quantity=Sum(
+                        Coalesce("delivered_quantity", "entitlement_quantity", Value(0.0)), output_field=DecimalField()
+                    ),
                     total_payments=Count("id", distinct=True),
                     individuals=Sum("household__size"),
                     households=Count("household", distinct=True),
@@ -130,6 +136,7 @@ class DashboardDataCache:
                 )
                 .distinct()
                 .values(
+                    "currency",
                     "year",
                     "month",
                     "status",
@@ -140,8 +147,13 @@ class DashboardDataCache:
                     "delivery_types",
                 )
                 .annotate(
-                    total_usd=Sum("delivered_quantity_usd", default=0),
-                    total_quantity=Sum("delivered_quantity", default=0),
+                    total_usd=Sum(
+                        Coalesce("delivered_quantity_usd", "entitlement_quantity_usd", Value(0.0)),
+                        output_field=DecimalField(),
+                    ),
+                    total_quantity=Sum(
+                        Coalesce("delivered_quantity", "entitlement_quantity", Value(0.0)), output_field=DecimalField()
+                    ),
                     total_payments=Count("id", distinct=True),
                     individuals=Sum("household__size"),
                     households=Count("household", distinct=True),
@@ -166,6 +178,7 @@ class DashboardDataCache:
             )
             for item in combined_list:
                 key = (
+                    item["currency"],
                     item["year"],
                     item["month"],
                     item["programs"],
@@ -183,10 +196,10 @@ class DashboardDataCache:
                 summary[key]["children_counts"] += item["children_counts"] or 0
                 summary[key]["pwd_counts"] += item["pwd_counts"] or 0
 
-            for (year, month, program, sector, status, admin1, fsp, delivery_type), totals in summary.items():
+            for (currency, year, month, program, sector, status, admin1, fsp, delivery_type), totals in summary.items():
                 result.append(
                     {
-                        "business_area_name": area.slug,
+                        "currency": currency,
                         "total_delivered_quantity_usd": totals["total_usd"],
                         "total_delivered_quantity": totals["total_quantity"],
                         "payments": totals["total_payments"],

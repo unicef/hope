@@ -17,6 +17,7 @@ class CountryDashboard(BaseComponents):
     pageHeaderTitle = 'h5[data-cy="page-header-title"]'
     iframe_locator = 'iframe[title="Dashboard"]'
     total_amount_paid = "div#total-amount-paid"
+    total_amount_paid_local = "div#total-amount-paid-local"
     number_of_payments = "div#number-of-payments"
     outstanding_payments = "div#outstanding-payments"
     households_reached = "div#households-reached"
@@ -58,6 +59,9 @@ class CountryDashboard(BaseComponents):
 
     def get_total_amount_paid(self) -> WebElement:
         return self.wait_for(self.total_amount_paid)
+
+    def get_total_amount_paid_local(self) -> WebElement:
+        return self.wait_for(self.total_amount_paid_local)
 
     def get_number_of_payments(self) -> WebElement:
         return self.wait_for(self.number_of_payments)
