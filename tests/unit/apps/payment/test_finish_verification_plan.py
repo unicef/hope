@@ -100,7 +100,7 @@ class TestFinishVerificationPlan(TestCase):
             EntitlementCardFactory(household=household)
         cls.verification = cash_plan.get_payment_verification_plans.first()
 
-    @mock.patch("hct_mis_api.apps.utils.mailjet.requests.post")
+    @mock.patch("hct_mis_api.apps.utils.celery_tasks.requests.post")
     @override_settings(EMAIL_SUBJECT_PREFIX="test")
     @override_config(SEND_GRIEVANCES_NOTIFICATION=True, ENABLE_MAILJET=True)
     def test_create_tickets_with_admin2_same_as_in_household(self, mocked_requests_post: Any) -> None:

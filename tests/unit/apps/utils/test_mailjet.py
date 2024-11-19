@@ -5,7 +5,7 @@ from typing import Any
 from unittest.mock import patch
 
 from django.conf import settings
-from django.test import override_settings
+from django.test import TestCase, override_settings
 
 import pytest
 from constance.test import override_config
@@ -16,11 +16,12 @@ from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.utils.mailjet import MailjetClient
 
 
-class TestMailjet:
-    @patch("hct_mis_api.apps.utils.mailjet.requests.post")
+class TestMailjet(TestCase):
+    @patch("hct_mis_api.apps.utils.celery_tasks.requests.post")
     @override_settings(EMAIL_SUBJECT_PREFIX="test")
     @override_config(ENABLE_MAILJET=True)
     def test_mailjet_body_with_template(self, mocked_requests_post: Any) -> None:
+        mocked_requests_post.return_value.status_code = 200
         mailjet = MailjetClient(
             mailjet_template_id=1,
             subject="Subject for email with Template",
@@ -63,12 +64,13 @@ class TestMailjet:
             data=expected_data,
         )
 
-    @patch("hct_mis_api.apps.utils.mailjet.requests.post")
+    @patch("hct_mis_api.apps.utils.celery_tasks.requests.post")
     @override_settings(
         EMAIL_SUBJECT_PREFIX="test", CATCH_ALL_EMAIL=["catchallemail@email.com", "catchallemail2@email.com"]
     )
     @override_config(ENABLE_MAILJET=True)
     def test_mailjet_body_with_template_with_catch_all(self, mocked_requests_post: Any) -> None:
+        mocked_requests_post.return_value.status_code = 200
         mailjet = MailjetClient(
             mailjet_template_id=1,
             subject="Subject for email with Template for Catch All",
@@ -111,10 +113,11 @@ class TestMailjet:
             data=expected_data,
         )
 
-    @patch("hct_mis_api.apps.utils.mailjet.requests.post")
+    @patch("hct_mis_api.apps.utils.celery_tasks.requests.post")
     @override_settings(EMAIL_SUBJECT_PREFIX="test")
     @override_config(ENABLE_MAILJET=True)
     def test_mailjet_body_with_html_and_text_body(self, mocked_requests_post: Any) -> None:
+        mocked_requests_post.return_value.status_code = 200
         mailjet = MailjetClient(
             html_body="<h1>HTML Body</h1>",
             text_body="Text Body",
@@ -156,10 +159,11 @@ class TestMailjet:
             data=expected_data,
         )
 
-    @patch("hct_mis_api.apps.utils.mailjet.requests.post")
+    @patch("hct_mis_api.apps.utils.celery_tasks.requests.post")
     @override_settings(EMAIL_SUBJECT_PREFIX="test")
     @override_config(ENABLE_MAILJET=True)
     def test_mailjet_body_with_text_body(self, mocked_requests_post: Any) -> None:
+        mocked_requests_post.return_value.status_code = 200
         mailjet = MailjetClient(
             text_body="Text Body",
             subject="Subject for email with Text body",
@@ -199,10 +203,11 @@ class TestMailjet:
             data=expected_data,
         )
 
-    @patch("hct_mis_api.apps.utils.mailjet.requests.post")
+    @patch("hct_mis_api.apps.utils.celery_tasks.requests.post")
     @override_settings(EMAIL_SUBJECT_PREFIX="test")
     @override_config(ENABLE_MAILJET=True)
     def test_mailjet_body_with_template_and_attachment(self, mocked_requests_post: Any) -> None:
+        mocked_requests_post.return_value.status_code = 200
         mailjet = MailjetClient(
             mailjet_template_id=1,
             subject="Subject for email with Template and Attachments",
@@ -280,7 +285,7 @@ class TestMailjet:
             data=expected_data,
         )
 
-    @patch("hct_mis_api.apps.utils.mailjet.requests.post")
+    @patch("hct_mis_api.apps.utils.celery_tasks.requests.post")
     @override_config(ENABLE_MAILJET=True)
     def test_mailjet_incorrect_body_with_template_and_html_body(self, mocked_requests_post: Any) -> None:
         mailjet = MailjetClient(
@@ -296,7 +301,7 @@ class TestMailjet:
             mocked_requests_post.assert_not_called()
         assert str(exc.value) == "You cannot use both template and custom email body"
 
-    @patch("hct_mis_api.apps.utils.mailjet.requests.post")
+    @patch("hct_mis_api.apps.utils.celery_tasks.requests.post")
     @override_config(ENABLE_MAILJET=True)
     def test_mailjet_incorrect_body_with_template_and_text_body(self, mocked_requests_post: Any) -> None:
         mailjet = MailjetClient(
@@ -312,7 +317,7 @@ class TestMailjet:
             mocked_requests_post.assert_not_called()
         assert str(exc.value) == "You cannot use both template and custom email body"
 
-    @patch("hct_mis_api.apps.utils.mailjet.requests.post")
+    @patch("hct_mis_api.apps.utils.celery_tasks.requests.post")
     @override_config(ENABLE_MAILJET=True)
     def test_mailjet_incorrect_body_with_template_and_without_variables(self, mocked_requests_post: Any) -> None:
         mailjet = MailjetClient(
@@ -326,7 +331,7 @@ class TestMailjet:
             mocked_requests_post.assert_not_called()
         assert str(exc.value) == "You need to provide body variables for template email"
 
-    @patch("hct_mis_api.apps.utils.mailjet.requests.post")
+    @patch("hct_mis_api.apps.utils.celery_tasks.requests.post")
     @override_config(ENABLE_MAILJET=True)
     def test_mailjet_incorrect_body_without_template_and_without_html_and_text_body(
         self, mocked_requests_post: Any
@@ -341,10 +346,11 @@ class TestMailjet:
             mocked_requests_post.assert_not_called()
         assert str(exc.value) == "You need to provide either template or custom email body"
 
-    @patch("hct_mis_api.apps.utils.mailjet.requests.post")
+    @patch("hct_mis_api.apps.utils.celery_tasks.requests.post")
     @override_settings(EMAIL_SUBJECT_PREFIX="test")
     @override_config(ENABLE_MAILJET=True)
-    def test_email_user_via_mailjet(self, mocked_requests_post: Any, partner_unicef: Partner) -> None:
+    def test_email_user_via_mailjet(self, mocked_requests_post: Any) -> None:
+        mocked_requests_post.return_value.status_code = 200
         user = UserFactory(email="testuser@email.com", username="testuser")
         user.email_user(
             subject="Test subject",
