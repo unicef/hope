@@ -320,9 +320,11 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         self.attachments = household.get("_attachments", [])
         registration_date = None
         current_individuals = []
+        ind_count = 0
         for hh_field, hh_value in household.items():
             if hh_field == KOBO_FORM_INDIVIDUALS_COLUMN_NAME:
                 for individual in hh_value:
+                    ind_count += 1
                     current_individual_docs_and_identities = defaultdict(dict)
                     current_individual_bank_account = {}
                     individual_obj = PendingIndividual()
@@ -361,7 +363,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                                 self._handle_exception("Household", i_field, e)
                         elif i_field in delivery_mechanism_xlsx_fields:
                             self._handle_delivery_mechanism_fields(
-                                i_value, i_field, len(individuals_to_create_list), individual_obj
+                                i_value, i_field, ind_count, individual_obj
                             )
                         else:
                             try:
