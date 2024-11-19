@@ -25,6 +25,7 @@ import { validationSchemaWithSteps } from '@components/grievances/utils/validati
 import {
   useAllAddIndividualFieldsQuery,
   useAllEditHouseholdFieldsQuery,
+  useAllEditPeopleFieldsQuery,
   useAllProgramsForChoicesQuery,
   useCreateGrievanceMutation,
   useGrievancesChoiceDataQuery,
@@ -141,18 +142,34 @@ export const CreateGrievancePage = (): ReactElement => {
     data: allAddIndividualFieldsData,
     loading: allAddIndividualFieldsDataLoading,
   } = useAllAddIndividualFieldsQuery();
+
   const { data: householdFieldsData, loading: householdFieldsLoading } =
     useAllEditHouseholdFieldsQuery();
+
+  const { data: allEditPeopleFieldsData, loading: allEditPeopleFieldsLoading } =
+    useAllEditPeopleFieldsQuery();
+
   const individualFieldsDict = useArrayToDict(
     allAddIndividualFieldsData?.allAddIndividualsFieldsAttributes,
     'name',
     '*',
   );
+
   const householdFieldsDict = useArrayToDict(
     householdFieldsData?.allEditHouseholdFieldsAttributes,
     'name',
     '*',
   );
+
+  const peopleFieldsDict = useArrayToDict(
+    allEditPeopleFieldsData?.allEditPeopleFieldsAttributes,
+    'name',
+    '*',
+  );
+
+  const householdFieldsDictByDctType = isSocialDctType
+    ? peopleFieldsDict
+    : householdFieldsDict;
 
   const showIssueType = (values): boolean =>
     values.category === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
@@ -163,7 +180,8 @@ export const CreateGrievancePage = (): ReactElement => {
     choicesLoading ||
     allAddIndividualFieldsDataLoading ||
     householdFieldsLoading ||
-    programsDataLoading
+    programsDataLoading ||
+    allEditPeopleFieldsLoading
   )
     return <LoadingComponent />;
   if (permissions === null) return null;
@@ -177,7 +195,8 @@ export const CreateGrievancePage = (): ReactElement => {
     !householdFieldsData ||
     !householdFieldsDict ||
     !individualFieldsDict ||
-    !programsData
+    !programsData ||
+    !peopleFieldsDict
   )
     return null;
 
@@ -291,9 +310,10 @@ export const CreateGrievancePage = (): ReactElement => {
             values,
             allAddIndividualFieldsData,
             individualFieldsDict,
-            householdFieldsDict,
+            householdFieldsDictByDctType,
             activeStep,
             setValidateData,
+            isSocialDctType,
           )
         }
         validationSchema={validationSchemaWithSteps(activeStep)}
