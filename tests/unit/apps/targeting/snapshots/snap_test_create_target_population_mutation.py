@@ -356,7 +356,8 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_with_collect
                                             'arguments': [
                                                 False
                                             ],
-                                            'fieldName': 'mobile_phone_number__cash_over_the_counter'
+                                            'fieldName': 'mobile_phone_number__cash_over_the_counter',
+                                            'labelEn': 'Mobile Phone Number Cash Over The Counter (UT Name Delivery Mechanism)'
                                         }
                                     ]
                                 }

@@ -63,6 +63,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
                 collectorBlockFilters{
                   fieldName
                   arguments
+                  labelEn
                 }
               }
             }
@@ -492,6 +493,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
     def test_create_mutation_with_collectors_field(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.TARGETING_CREATE], self.program.business_area)
         DeliveryMechanismFactory(
+            name="UT Name",
             required_fields=["mobile_phone_number__cash_over_the_counter"],
         )
         variables = {
