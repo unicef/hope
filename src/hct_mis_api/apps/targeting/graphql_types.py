@@ -177,19 +177,24 @@ class TargetingCriteriaNode(DjangoObjectType):
     def resolve_rules(parent, info: Any) -> "QuerySet":
         return parent.rules.all()
 
+    # TODO: can remove this one after refactoring/removing db fields
     def resolve_individual_ids(parent, info: Any) -> str:
-        ind_ids = set(parent.individual_ids.split(",")) if parent.individual_ids else set()
+        ind_ids_str = parent.individual_ids
+        ind_ids: set = (
+            set(ind_id.strip() for ind_id in ind_ids_str.split(",") if ind_id.strip()) if ind_ids_str else set()
+        )
         for rule in parent.rules.all():
-            if rule.household_ids:
-                ind_ids.update(rule.individual_ids.split(","))
-        return ",".join(ind_ids)
+            if rule.individual_ids:
+                ind_ids.update(ind_id.strip() for ind_id in rule.individual_ids.split(",") if ind_id.strip())
+        return ", ".join(sorted(ind_ids))
 
     def resolve_household_ids(parent, info: Any) -> str:
-        hh_ids = set(parent.household_ids.split(",")) if parent.household_ids else set()
+        hh_ids_str = parent.household_ids
+        hh_ids: set = set(hh_id.strip() for hh_id in hh_ids_str.split(",") if hh_id.strip()) if hh_ids_str else set()
         for rule in parent.rules.all():
             if rule.household_ids:
-                hh_ids.update(rule.household_ids.split(","))
-        return ",".join(hh_ids)
+                hh_ids.update(hh_id.strip() for hh_id in rule.household_ids.split(",") if hh_id.strip())
+        return ", ".join(sorted(hh_ids))
 
     class Meta:
         model = target_models.TargetingCriteria

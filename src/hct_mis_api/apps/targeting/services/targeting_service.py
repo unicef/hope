@@ -156,7 +156,7 @@ class TargetingCriteriaRuleQueryingBase:
         # filter individual block
         for individuals_filters_block in individuals_filters_blocks:
             query &= individuals_filters_block.get_query()
-
+        # filter collector block
         for collectors_filters_block in collectors_filters_blocks:
             query &= collectors_filters_block.get_query()
 
@@ -221,7 +221,7 @@ class TargetingCollectorRuleFilterBlockBase:
             self.collector_block_filters = collector_block_filters
 
     def get_collector_block_filters(self) -> Any:
-        return self.collector_block_filters.all()
+        return self.collector_block_filters
 
     def get_criteria_string(self) -> str:
         filters = self.get_collector_block_filters()
