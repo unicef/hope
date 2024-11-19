@@ -392,7 +392,6 @@ class TestCreateTargeting:
         )
         assert len(pageTargetingDetails.getPeopleTableRows()) == 1
 
-    @pytest.mark.xfail(reason="UNSTABLE")
     def test_create_targeting_for_normal_program(
         self,
         non_sw_program: Program,
