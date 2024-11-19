@@ -388,7 +388,6 @@ class TestCreateTargeting:
         )
         assert len(pageTargetingDetails.getPeopleTableRows()) == 1
 
-    @pytest.mark.xfail(reason="UNSTABLE")
     def test_create_targeting_for_normal_program(
         self,
         non_sw_program: Program,
@@ -408,9 +407,9 @@ class TestCreateTargeting:
         assert pageTargetingCreate.getAddPeopleRuleButton().text.upper() == "ADD HOUSEHOLD RULE"
         pageTargetingCreate.getAddHouseholdRuleButton().click()
         pageTargetingCreate.getTargetingCriteriaAutoComplete().click()
-        pageTargetingCreate.select_listbox_element("Residence Status")
+        pageTargetingCreate.select_listbox_element("Residence status")
         pageTargetingCreate.getTargetingCriteriaValue().click()
-        pageTargetingCreate.select_listbox_element(REFUGEE)
+        pageTargetingCreate.getSelectRefugee().click()
         pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
 
         disability_expected_criteria_text = "Residence status: Displaced | Refugee / Asylum Seeker"

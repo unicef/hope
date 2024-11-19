@@ -86,6 +86,7 @@ class TargetingCreate(BaseComponents):
     totalNumberOfPeopleCount = 'div[data-cy="label-Total Number of People"]'
     selectProgramCycleAutocomplete = 'div[data-cy="filters-program-cycle-autocomplete"]'
     programmeCycleInput = 'div[data-cy="Programme Cycle-input"]'
+    selectRefugee = 'li[data-cy="select-option-REFUGEE"]'
 
     # Texts
     textTargetingCriteria = "Targeting Criteria"
@@ -327,3 +328,6 @@ class TargetingCreate(BaseComponents):
 
     def getProgrammeCycleInput(self) -> WebElement:
         return self.wait_for(self.programmeCycleInput)
+
+    def getSelectRefugee(self) -> WebElement:
+        return self.wait_for(self.selectRefugee)
