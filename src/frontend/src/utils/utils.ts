@@ -1155,3 +1155,20 @@ export const isProgramNodeUuidFormat = (id: string): boolean => {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const arraysHaveSameContent = (a: any[], b: any[]): boolean =>
   a.length === b.length && a.every((val, index) => val === b[index]);
+
+export function adjustHeadCells(
+  headCells,
+  beneficiaryGroup: any | undefined,
+  replacements: {
+    [key: string]: (beneficiaryGroup) => string;
+  },
+) {
+  if (!beneficiaryGroup) return headCells;
+
+  return headCells.map((cell) => {
+    if (replacements[cell.id]) {
+      return { ...cell, label: replacements[cell.id](beneficiaryGroup) };
+    }
+    return cell;
+  });
+}

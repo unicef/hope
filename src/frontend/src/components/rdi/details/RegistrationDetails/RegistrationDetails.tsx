@@ -18,6 +18,7 @@ import {
 } from '@generated/graphql';
 import { DedupeBox, OptionType } from '../DedupeBox';
 import { Title } from '@core/Title';
+import { useProgramContext } from 'src/programContext';
 
 export const BigValueContainer = styled.div`
   padding: ${({ theme }) => theme.spacing(6)};
@@ -56,6 +57,9 @@ export function RegistrationDetails({
   isSocialWorkerProgram,
 }: RegistrationDetailsProps): React.ReactElement {
   const { t } = useTranslation();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const withinBatchOptions: OptionType[] = [
     {
       name: 'Unique',
@@ -112,7 +116,7 @@ export function RegistrationDetails({
           <Grid item xs={6}>
             <BigValueContainer>
               <LabelizedField
-                label={t('Total Number of Households')}
+                label={`Total Number of ${beneficiaryGroup?.groupLabelPlural}`}
                 dataCy="households"
               >
                 <BigValue>{registration?.numberOfHouseholds}</BigValue>
@@ -122,7 +126,7 @@ export function RegistrationDetails({
           <Grid item xs={6}>
             <BigValueContainer>
               <LabelizedField
-                label={t('Total Number of Registered Individuals')}
+                label={`Total Number of ${beneficiaryGroup?.memberLabelPlural}`}
                 dataCy="individuals"
               >
                 <BigValue>{registration?.numberOfIndividuals}</BigValue>

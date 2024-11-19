@@ -156,7 +156,8 @@ export const GlobalProgramSelect = () => {
         isMounted.current &&
         (!selectedProgram || selectedProgram?.id !== programId)
       ) {
-        const { id, name, status, dataCollectingType } = program;
+        const { id, name, status, dataCollectingType, beneficiaryGroup } =
+          program;
 
         setSelectedProgram({
           id,
@@ -173,6 +174,7 @@ export const GlobalProgramSelect = () => {
               dataCollectingType?.individualFiltersAvailable,
           },
           pduFields: program.pduFields,
+          beneficiaryGroup: beneficiaryGroup,
         });
       }
     } else {

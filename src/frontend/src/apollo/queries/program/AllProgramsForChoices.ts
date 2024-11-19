@@ -59,6 +59,17 @@ export const AllProgramsForChoices = gql`
             householdFiltersAvailable
             description
           }
+          beneficiaryGroup {
+            id
+            createdAt
+            updatedAt
+            name
+            groupLabel
+            groupLabelPlural
+            memberLabel
+            memberLabelPlural
+            masterDetail
+          }
           pduFields {
             id
           }

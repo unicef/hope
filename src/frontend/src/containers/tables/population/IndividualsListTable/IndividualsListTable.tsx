@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { useTranslation } from 'react-i18next';
 import {
   AllIndividualsForPopulationTableQueryVariables,
   AllIndividualsQueryVariables,
@@ -8,11 +7,12 @@ import {
   useAllIndividualsForPopulationTableQuery,
 } from '@generated/graphql';
 import { TableWrapper } from '@components/core/TableWrapper';
-import { dateToIsoString } from '@utils/utils';
+import { adjustHeadCells, dateToIsoString } from '@utils/utils';
 import { UniversalTable } from '../../UniversalTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { headCells } from './IndividualsListTableHeadCells';
 import { IndividualsListTableRow } from './IndividualsListTableRow';
+import { useProgramContext } from 'src/programContext';
 
 interface IndividualsListTableProps {
   filter;
@@ -27,8 +27,9 @@ export function IndividualsListTable({
   canViewDetails,
   choicesData,
 }: IndividualsListTableProps): React.ReactElement {
-  const { t } = useTranslation();
   const { programId } = useBaseUrl();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const initialVariables: AllIndividualsForPopulationTableQueryVariables = {
     age: JSON.stringify({ min: filter.ageMin, max: filter.ageMax }),
     businessArea,
@@ -46,11 +47,26 @@ export function IndividualsListTable({
     program: programId,
   };
 
+  const replacements = {
+    unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup.memberLabel} ID`,
+    fullName: (_beneficiaryGroup) => _beneficiaryGroup.memberLabel,
+    household__unicef_id: (_beneficiaryGroup) =>
+      `${_beneficiaryGroup.groupLabel} ID`,
+    relationship: (_beneficiaryGroup) =>
+      `Relationship to Head of ${_beneficiaryGroup.groupLabel}`,
+  };
+
+  const adjustedHeadCells = adjustHeadCells(
+    headCells,
+    beneficiaryGroup,
+    replacements,
+  );
+
   return (
     <TableWrapper>
       <UniversalTable<IndividualNode, AllIndividualsQueryVariables>
-        title={t('Individuals')}
-        headCells={headCells}
+        title={beneficiaryGroup?.memberLabelPlural}
+        headCells={adjustedHeadCells}
         rowsPerPageOptions={[10, 15, 20]}
         query={useAllIndividualsForPopulationTableQuery}
         queriedObjectName="allIndividuals"

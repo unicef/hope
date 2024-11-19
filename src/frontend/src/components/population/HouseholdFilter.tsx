@@ -15,6 +15,7 @@ import { NumberTextField } from '@core/NumberTextField';
 import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import { DocumentSearchField } from '@core/DocumentSearchField';
+import { useProgramContext } from 'src/programContext';
 
 interface HouseholdFiltersProps {
   filter;
@@ -38,6 +39,8 @@ export function HouseholdFilters({
   isOnPaper = true,
 }: HouseholdFiltersProps): React.ReactElement {
   const { t } = useTranslation();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const navigate = useNavigate();
   const location = useLocation();
   const { isAllPrograms } = useBaseUrl();
@@ -118,7 +121,7 @@ export function HouseholdFilters({
         </Grid>
         <Grid item xs={3}>
           <NumberTextField
-            topLabel={t('Household Size')}
+            topLabel={`${beneficiaryGroup?.groupLabel} ${t('Size')}`}
             value={filter.householdSizeMin}
             placeholder={t('From')}
             icon={<GroupIcon />}
