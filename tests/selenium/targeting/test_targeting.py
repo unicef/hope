@@ -770,7 +770,9 @@ class TestTargeting:
         assert "SAVE" in pageTargetingCreate.getButtonTargetPopulationCreate().text
         pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
         pageTargetingCreate.select_listbox_element("First Cycle In Programme")
+        pageTargetingCreate.getDivTargetPopulationAddCriteria().click()
         pageTargetingCreate.getInputHouseholdids().send_keys(household_with_disability.unicef_id)
+        pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
         pageTargetingCreate.getInputName().send_keys(f"Target Population for {household_with_disability.unicef_id}")
         pageTargetingCreate.clickButtonTargetPopulationCreate()
         target_population = TargetPopulation.objects.get(
