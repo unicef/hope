@@ -333,6 +333,70 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_target_by_id
     ]
 }
 
+snapshots['TestCreateTargetPopulationMutation::test_create_mutation_with_collectors_field 1'] = {
+    'data': {
+        'createTargetPopulation': {
+            'targetPopulation': {
+                'hasEmptyCriteria': False,
+                'hasEmptyIdsCriteria': True,
+                'name': 'Example name 5',
+                'programCycle': {
+                    'status': 'ACTIVE'
+                },
+                'status': 'OPEN',
+                'targetingCriteria': {
+                    'householdIds': '',
+                    'individualIds': '',
+                    'rules': [
+                        {
+                            'collectorsFiltersBlocks': [
+                                {
+                                    'collectorBlockFilters': [
+                                        {
+                                            'arguments': [
+                                                False
+                                            ],
+                                            'fieldName': 'mobile_phone_number__cash_over_the_counter'
+                                        }
+                                    ]
+                                }
+                            ],
+                            'householdIds': '',
+                            'householdsFiltersBlocks': [
+                            ],
+                            'individualIds': '',
+                            'individualsFiltersBlocks': [
+                            ]
+                        }
+                    ]
+                },
+                'totalHouseholdsCount': None,
+                'totalIndividualsCount': None
+            }
+        }
+    }
+}
+
+snapshots['TestCreateTargetPopulationMutation::test_create_mutation_with_collectors_field_validation_error 1'] = {
+    'data': {
+        'createTargetPopulation': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': '["Can\'t field field \'mobile_phone_number__cash_over_the_counter\' in Delivery Mechanism data"]',
+            'path': [
+                'createTargetPopulation'
+            ]
+        }
+    ]
+}
+
 snapshots['TestCreateTargetPopulationMutation::test_create_mutation_with_comparison_method_contains_0_with_permission 1'] = {
     'data': {
         'createTargetPopulation': {

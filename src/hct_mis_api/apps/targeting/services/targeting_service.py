@@ -221,7 +221,7 @@ class TargetingCollectorRuleFilterBlockBase:
             self.collector_block_filters = collector_block_filters
 
     def get_collector_block_filters(self) -> Any:
-        return self.collector_block_filters.all()
+        return self.collector_block_filters
 
     def get_criteria_string(self) -> str:
         filters = self.get_collector_block_filters()

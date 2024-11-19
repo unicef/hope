@@ -7,6 +7,7 @@ from django.test import TestCase
 from django.utils import timezone
 
 from freezegun import freeze_time
+from pytesseract.pytesseract import is_valid
 from pytz import utc
 
 from hct_mis_api.apps.core.fixtures import (
@@ -19,7 +20,8 @@ from hct_mis_api.apps.household.fixtures import (
     create_household,
     create_household_and_individuals,
 )
-from hct_mis_api.apps.household.models import Household, Individual
+from hct_mis_api.apps.household.models import Household, Individual, ROLE_PRIMARY, IndividualRoleInHousehold
+from hct_mis_api.apps.payment.fixtures import DeliveryMechanismDataFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.targeting.choices import FlexFieldClassification
 from hct_mis_api.apps.targeting.models import (
@@ -28,8 +30,9 @@ from hct_mis_api.apps.targeting.models import (
     TargetingCriteriaRuleFilter,
     TargetingIndividualBlockRuleFilter,
     TargetingIndividualRuleFilterBlock,
-    TargetPopulation,
+    TargetPopulation, TargetingCollectorRuleFilterBlock, TargetingCollectorBlockRuleFilter,
 )
+from hct_mis_api.apps.utils.models import MergeStatusModel
 
 
 class TargetingCriteriaRuleFilterTestCase(TestCase):
@@ -300,6 +303,94 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         query = rule_filter.get_query()
         queryset = self.get_households_queryset().filter(query).distinct()
         self.assertEqual(queryset.count(), 1)
+
+    def test_rule_filter_collector_arg_yes(self) -> None:
+        # add Ind role and wallet
+        hh = self.households[0]
+        IndividualRoleInHousehold.objects.create(
+            individual=hh.individuals.first(), household=hh, role=ROLE_PRIMARY, rdi_merge_status=MergeStatusModel.MERGED
+        )
+        collector = IndividualRoleInHousehold.objects.get(
+            household_id=hh.pk, role=ROLE_PRIMARY
+        ).individual
+        DeliveryMechanismDataFactory(
+            individual=collector,
+            is_valid=True,
+            data={"delivery_data_field__random_name": "test123"}
+        )
+        # Target population
+        tp = TargetPopulation(program=hh.program)
+        tc = TargetingCriteria()
+        tc.target_population = tp
+        tc.save()
+        tcr = TargetingCriteriaRule()
+        tcr.targeting_criteria = tc
+        tcr.save()
+        col_block = TargetingCollectorRuleFilterBlock(targeting_criteria_rule=tcr)
+        rule_filter = TargetingCollectorBlockRuleFilter(
+            collector_block_filters=col_block,
+            comparison_method="EQUALS",
+            field_name="delivery_data_field__random_name",
+            arguments=[True],
+        )
+        query = rule_filter.get_query()
+        queryset = self.get_households_queryset().filter(query).distinct()
+        self.assertEqual(queryset.count(), 1)
+        self.assertEqual(queryset.first().unicef_id, hh.unicef_id)
+
+    def test_rule_filter_collector_arg_no(self) -> None:
+        # add Ind role and wallet
+        hh = self.households[2]
+        IndividualRoleInHousehold.objects.create(
+            individual=hh.individuals.first(), household=hh, role=ROLE_PRIMARY, rdi_merge_status=MergeStatusModel.MERGED
+        )
+        collector = IndividualRoleInHousehold.objects.get(
+            household_id=hh.pk, role=ROLE_PRIMARY
+        ).individual
+        DeliveryMechanismDataFactory(
+            individual=collector,
+            is_valid=True,
+            data={"other__random_name": "test123"}
+        )
+        # Target population
+        tp = TargetPopulation(program=hh.program)
+        tc = TargetingCriteria()
+        tc.target_population = tp
+        tc.save()
+        tcr = TargetingCriteriaRule()
+        tcr.targeting_criteria = tc
+        tcr.save()
+        col_block = TargetingCollectorRuleFilterBlock(targeting_criteria_rule=tcr)
+        rule_filter = TargetingCollectorBlockRuleFilter(
+            collector_block_filters=col_block,
+            comparison_method="EQUALS",
+            field_name="delivery_data_field__random_name",
+            arguments=[False],
+        )
+        query = rule_filter.get_query()
+        queryset = self.get_households_queryset().filter(query).distinct()
+        self.assertEqual(queryset.count(), 1)
+        self.assertEqual(queryset.first().unicef_id, hh.unicef_id)
+
+    def test_rule_filter_collector_without_arg(self) -> None:
+        # all HH list, no collector' filter
+        tp = TargetPopulation(program=self.households[0].program)
+        tc = TargetingCriteria()
+        tc.target_population = tp
+        tc.save()
+        tcr = TargetingCriteriaRule()
+        tcr.targeting_criteria = tc
+        tcr.save()
+        col_block = TargetingCollectorRuleFilterBlock(targeting_criteria_rule=tcr)
+        rule_filter = TargetingCollectorBlockRuleFilter(
+            collector_block_filters=col_block,
+            comparison_method="EQUALS",
+            field_name="delivery_data_field__random_name",
+            arguments=[],
+        )
+        query = rule_filter.get_query()
+        queryset = self.get_households_queryset().filter(query).distinct()
+        self.assertEqual(queryset.count(), 4)
 
 
 class TargetingCriteriaFlexRuleFilterTestCase(TestCase):

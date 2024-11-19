@@ -18,6 +18,7 @@ from hct_mis_api.apps.core.models import (
 )
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.household.models import Household
+from hct_mis_api.apps.payment.fixtures import DeliveryMechanismFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.targeting.models import TargetPopulation
@@ -61,6 +62,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
               collectorsFiltersBlocks{
                 collectorBlockFilters{
                   fieldName
+                  arguments
                 }
               }
             }
@@ -449,4 +451,82 @@ class TestCreateTargetPopulationMutation(APITestCase):
         self.assertIn(
             "Not possible to assign Finished Program Cycle to Targeting",
             response_error["errors"][0]["message"],
+        )
+
+    def test_create_mutation_with_collectors_field_validation_error(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.TARGETING_CREATE], self.program.business_area)
+
+        variables = {
+            "createTargetPopulationInput": {
+                "name": "Example name 5 ",
+                "excludedIds": "",
+                "programCycleId": self.id_to_base64(self.program_cycle.id, "ProgramCycleNode"),
+                "targetingCriteria": {
+                    "rules": [
+                        {
+                            "householdsFiltersBlocks": [],
+                            "individualsFiltersBlocks": [],
+                            "collectorsFiltersBlocks": [
+                                {
+                                    "collectorBlockFilters": [
+                                        {
+                                            "comparisonMethod": "EQUALS",
+                                            "arguments": [
+                                                False
+                                            ],
+                                            "fieldName": "mobile_phone_number__cash_over_the_counter",
+                                            "flexFieldClassification": "NOT_FLEX_FIELD"
+                                        },
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+            }
+        }
+        self.snapshot_graphql_request(
+            request_string=TestCreateTargetPopulationMutation.MUTATION_QUERY,
+            context=self.context,
+            variables=variables,
+        )
+
+    def test_create_mutation_with_collectors_field(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.TARGETING_CREATE], self.program.business_area)
+        DeliveryMechanismFactory(
+            required_fields = ["mobile_phone_number__cash_over_the_counter"],
+        )
+        variables = {
+            "createTargetPopulationInput": {
+                "name": "Example name 5 ",
+                "excludedIds": "",
+                "programCycleId": self.id_to_base64(self.program_cycle.id, "ProgramCycleNode"),
+                "targetingCriteria": {
+                    "rules": [
+                        {
+                            "householdsFiltersBlocks": [],
+                            "individualsFiltersBlocks": [],
+                            "collectorsFiltersBlocks": [
+                                {
+                                    "collectorBlockFilters": [
+                                        {
+                                            "comparisonMethod": "EQUALS",
+                                            "arguments": [
+                                                False
+                                            ],
+                                            "fieldName": "mobile_phone_number__cash_over_the_counter",
+                                            "flexFieldClassification": "NOT_FLEX_FIELD"
+                                        },
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+            }
+        }
+        self.snapshot_graphql_request(
+            request_string=TestCreateTargetPopulationMutation.MUTATION_QUERY,
+            context=self.context,
+            variables=variables,
         )
