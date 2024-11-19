@@ -4,7 +4,7 @@ from collections import defaultdict
 from typing import Any, Dict, Optional
 
 from django.core.cache import cache
-from django.db.models import Count, DecimalField, F, Sum, Value 
+from django.db.models import Count, DecimalField, F, Sum, Value
 from django.db.models.functions import Coalesce, ExtractMonth, ExtractYear
 
 from rest_framework.utils.serializer_helpers import ReturnDict
@@ -104,8 +104,13 @@ class DashboardDataCache:
                     "delivery_types",
                 )
                 .annotate(
-                    total_usd=Sum(Coalesce("delivered_quantity_usd", "entitlement_quantity_usd", Value(0.0)), output_field=DecimalField()),
-                    total_quantity=Sum(Coalesce("delivered_quantity", "entitlement_quantity", Value(0.0)), output_field=DecimalField()),
+                    total_usd=Sum(
+                        Coalesce("delivered_quantity_usd", "entitlement_quantity_usd", Value(0.0)),
+                        output_field=DecimalField(),
+                    ),
+                    total_quantity=Sum(
+                        Coalesce("delivered_quantity", "entitlement_quantity", Value(0.0)), output_field=DecimalField()
+                    ),
                     total_payments=Count("id", distinct=True),
                     individuals=Sum("household__size"),
                     households=Count("household", distinct=True),
@@ -142,8 +147,13 @@ class DashboardDataCache:
                     "delivery_types",
                 )
                 .annotate(
-                    total_usd=Sum(Coalesce("delivered_quantity_usd", "entitlement_quantity_usd", Value(0.0)), output_field=DecimalField()),
-                    total_quantity=Sum(Coalesce("delivered_quantity", "entitlement_quantity", Value(0.0)), output_field=DecimalField()),
+                    total_usd=Sum(
+                        Coalesce("delivered_quantity_usd", "entitlement_quantity_usd", Value(0.0)),
+                        output_field=DecimalField(),
+                    ),
+                    total_quantity=Sum(
+                        Coalesce("delivered_quantity", "entitlement_quantity", Value(0.0)), output_field=DecimalField()
+                    ),
                     total_payments=Count("id", distinct=True),
                     individuals=Sum("household__size"),
                     households=Count("household", distinct=True),
