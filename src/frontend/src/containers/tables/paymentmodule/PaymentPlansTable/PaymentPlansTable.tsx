@@ -9,6 +9,8 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { UniversalTable } from '../../UniversalTable';
 import { PaymentPlanTableRow } from './PaymentPlanTableRow';
 import { headCells } from './PaymentPlansHeadCells';
+import { useProgramContext } from 'src/programContext';
+import { adjustHeadCells } from '@utils/utils';
 
 interface PaymentPlansTableProps {
   filter;
@@ -21,6 +23,9 @@ export function PaymentPlansTable({
 }: PaymentPlansTableProps): ReactElement {
   const { t } = useTranslation();
   const { programId, businessArea } = useBaseUrl();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const initialVariables: AllPaymentPlansForTableQueryVariables = {
     businessArea,
     search: filter.search,
@@ -32,12 +37,22 @@ export function PaymentPlansTable({
     isFollowUp: filter.isFollowUp ? true : null,
     program: programId,
   };
+  const replacements = {
+    totalHouseholdsCount: (_beneficiaryGroup) =>
+      `Num. of ${_beneficiaryGroup.groupLabelPlural}`,
+  };
+
+  const adjustedHeadCells = adjustHeadCells(
+    headCells,
+    beneficiaryGroup,
+    replacements,
+  );
 
   return (
     <UniversalTable<PaymentPlanNode, AllPaymentPlansForTableQueryVariables>
       defaultOrderBy="-createdAt"
       title={t('Payment Plans')}
-      headCells={headCells}
+      headCells={adjustedHeadCells}
       query={useAllPaymentPlansForTableQuery}
       queriedObjectName="allPaymentPlans"
       initialVariables={initialVariables}

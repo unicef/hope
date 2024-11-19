@@ -27,7 +27,6 @@ import {
   PERMISSIONS,
   hasCreatorOrOwnerPermissions,
 } from '../../../config/permissions';
-import { headCells } from './GrievancesTableHeadCells';
 import { GrievancesTableRow } from './GrievancesTableRow';
 import { BulkAddNoteModal } from './bulk/BulkAddNoteModal';
 import { BulkAssignModal } from './bulk/BulkAssignModal';
@@ -37,10 +36,12 @@ import { BulkSetUrgencyModal } from './bulk/BulkSetUrgencyModal';
 interface GrievancesTableProps {
   filter;
   selectedTab;
+  adjustedHeadCells;
 }
 
 export const GrievancesTable = ({
   filter,
+  adjustedHeadCells,
 }: GrievancesTableProps): React.ReactElement => {
   const { businessArea, programId, isAllPrograms } = useBaseUrl();
   const { t } = useTranslation();
@@ -196,7 +197,7 @@ export const GrievancesTable = ({
   };
 
   const headCellsWithProgramColumn = [
-    ...headCells,
+    ...adjustedHeadCells,
     {
       disablePadding: false,
       label: 'Programmes',
@@ -275,7 +276,9 @@ export const GrievancesTable = ({
             AllGrievanceTicketQueryVariables
           >
             isOnPaper={false}
-            headCells={isAllPrograms ? headCellsWithProgramColumn : headCells}
+            headCells={
+              isAllPrograms ? headCellsWithProgramColumn : adjustedHeadCells
+            }
             rowsPerPageOptions={[10, 15, 20, 40]}
             query={useAllGrievanceTicketQuery}
             onSelectAllClick={handleSelectAllCheckboxesClick}

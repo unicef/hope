@@ -8,10 +8,11 @@ import {
 } from '@generated/graphql';
 import { TableWrapper } from '@components/core/TableWrapper';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { dateToIsoString } from '@utils/utils';
+import { adjustHeadCells, dateToIsoString } from '@utils/utils';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './TargetPopulationTableHeadCells';
 import { TargetPopulationTableRow } from './TargetPopulationTableRow';
+import { useProgramContext } from 'src/programContext';
 
 interface TargetPopulationProps {
   filter;
@@ -40,6 +41,8 @@ export function TargetPopulationTable({
   noTitle,
 }: TargetPopulationProps): ReactElement {
   const { t } = useTranslation();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const { businessArea, programId } = useBaseUrl();
   const initialVariables: AllTargetPopulationsQueryVariables = {
     name: filter.name,
@@ -57,11 +60,24 @@ export function TargetPopulationTable({
     handleChange(id);
   };
 
+  const replacements = {
+    total_households_count: (_beneficiaryGroup) =>
+      `Total ${_beneficiaryGroup.groupLabelPlural} Count`,
+  };
+
+  const adjustedHeadCells = adjustHeadCells(
+    headCells,
+    beneficiaryGroup,
+    replacements,
+  );
+
   const renderTable = (): React.ReactElement => (
     <TableWrapper>
       <UniversalTable<TargetPopulationNode, AllTargetPopulationsQueryVariables>
         title={noTitle ? null : t('Target Populations')}
-        headCells={enableRadioButton ? headCells : headCells.slice(1)}
+        headCells={
+          enableRadioButton ? adjustedHeadCells : adjustedHeadCells.slice(1)
+        }
         rowsPerPageOptions={[10, 15, 20]}
         query={useAllTargetPopulationsQuery}
         queriedObjectName="allTargetPopulation"

@@ -18,16 +18,17 @@ import {
   GrievanceStatuses,
   GrievanceTypes,
 } from '@utils/constants';
-import { getFilterFromQueryParams } from '@utils/utils';
+import { adjustHeadCells, getFilterFromQueryParams } from '@utils/utils';
 import { Tabs, Tab } from '@core/Tabs';
 import { ButtonTooltip } from '@components/core/ButtonTooltip';
 import { t } from 'i18next';
 import { useProgramContext } from 'src/programContext';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
-
+import { headCells } from '@components/grievances/GrievancesTable/GrievancesTableHeadCells';
 export const GrievancesTablePage = (): React.ReactElement => {
   const { baseUrl } = useBaseUrl();
-  const { isActiveProgram } = useProgramContext();
+  const { isActiveProgram, selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const permissions = usePermissions();
   const { id, cashPlanId } = useParams();
   const location = useLocation();
@@ -120,6 +121,16 @@ export const GrievancesTablePage = (): React.ReactElement => {
     return <PermissionDenied />;
   if (!choicesData) return null;
 
+  const replacements = {
+    household_unicef_id: (_beneficiaryGroup) =>
+      `${_beneficiaryGroup.groupLabel} ID`,
+  };
+
+  const adjustedHeadCells = adjustHeadCells(
+    headCells,
+    beneficiaryGroup,
+    replacements,
+  );
   return (
     <UniversalErrorBoundary
       location={location}
@@ -155,7 +166,11 @@ export const GrievancesTablePage = (): React.ReactElement => {
         setAppliedFilter={setAppliedFilter}
         selectedTab={selectedTab}
       />
-      <GrievancesTable filter={appliedFilter} selectedTab={selectedTab} />
+      <GrievancesTable
+        filter={appliedFilter}
+        selectedTab={selectedTab}
+        adjustedHeadCells={adjustedHeadCells}
+      />
     </UniversalErrorBoundary>
   );
 };

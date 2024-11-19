@@ -11,6 +11,7 @@ import { MiśTheme } from '../../theme';
 import { FieldBorder } from '@core/FieldBorder';
 import { LabelizedField } from '@core/LabelizedField';
 import { PaperContainer } from './PaperContainer';
+import { useProgramContext } from 'src/programContext';
 
 const colors = {
   femaleChildren: '#5F02CF',
@@ -57,6 +58,9 @@ export function ResultsForHouseholds({
   targetPopulation,
 }: ResultsProps): React.ReactElement {
   const { t } = useTranslation();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   if (targetPopulation.buildStatus !== TargetPopulationBuildStatus.Ok) {
     return null;
   }
@@ -156,8 +160,10 @@ export function ResultsForHouseholds({
               <Grid container spacing={0} justifyContent="flex-end">
                 <Grid item xs={6}>
                   <SummaryBorder>
-                    <LabelizedField label={t('Total Number of Households')}>
-                      <SummaryValue data-cy='total-number-of-households-count'>
+                    <LabelizedField
+                      label={`Total Number of ${beneficiaryGroup?.groupLabelPlural}`}
+                    >
+                      <SummaryValue data-cy="total-number-of-households-count">
                         {targetPopulation.totalHouseholdsCount || '0'}
                       </SummaryValue>
                     </LabelizedField>
@@ -165,7 +171,9 @@ export function ResultsForHouseholds({
                 </Grid>
                 <Grid item xs={6}>
                   <SummaryBorder>
-                    <LabelizedField label={t('Targeted Individuals')}>
+                    <LabelizedField
+                      label={`Targeted ${beneficiaryGroup?.memberLabelPlural}`}
+                    >
                       <SummaryValue>
                         {targetPopulation.totalIndividualsCount || '0'}
                       </SummaryValue>
