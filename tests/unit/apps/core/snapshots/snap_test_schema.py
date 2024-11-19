@@ -11,7 +11,7 @@ snapshots['TestAllCollectorsFields::test_pdu_subtype_choices_data 1'] = {
     'data': {
         'allCollectorFieldsAttributes': [
             {
-                'labelEn': 'Delivery Data Field Random Name (Ability partner. Delivery Mechanism)',
+                'labelEn': 'Delivery Data Field Random Name (Test Name Delivery Mechanism)',
                 'name': 'delivery_data_field__random_name'
             }
         ]

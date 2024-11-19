@@ -163,8 +163,8 @@ class TestAllCollectorsFields(APITestCase):
         super().setUpTestData()
         cls.business_area = create_afghanistan()
         cls.user = UserFactory()
-
         DeliveryMechanismFactory(
+            name="Test Name",
             required_fields=["delivery_data_field__random_name"],
         )
 
