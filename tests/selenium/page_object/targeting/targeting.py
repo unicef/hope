@@ -117,6 +117,7 @@ class Targeting(BaseComponents):
         for _ in range(5):
             if len(self.getTargetPopulationsRows()) == number:
                 break
+            sleep(1)
         else:
             raise TimeoutError(f"{len(self.getTargetPopulationsRows())} target populations instead of {number}")
 

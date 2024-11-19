@@ -295,6 +295,7 @@ class TestSmokeTargeting:
         assert "New Target Population" in pageTargetingCreate.getPageHeaderTitle().text
         assert "SAVE" in pageTargetingCreate.getButtonTargetPopulationCreate().text
         pageTargetingCreate.getInputName()
+        pageTargetingCreate.getDivTargetPopulationAddCriteria().click()
         pageTargetingCreate.getInputIncludedHouseholdIds()
         pageTargetingCreate.getInputHouseholdids()
         pageTargetingCreate.getInputIncludedIndividualIds()
@@ -963,13 +964,6 @@ class TestTargeting:
         [
             pytest.param(
                 {
-                    "type": "SOCIAL",
-                    "text": "Exclude People with Active Adjudication Ticket",
-                },
-                id="People",
-            ),
-            pytest.param(
-                {
                     "type": "STANDARD",
                     "text": "Exclude Households with Active Adjudication Ticket",
                 },
@@ -995,7 +989,9 @@ class TestTargeting:
         pageTargeting.getButtonCreateNew().click()
         pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
         pageTargetingCreate.select_listbox_element("First Cycle In Programme")
+        pageTargetingCreate.getDivTargetPopulationAddCriteria().click()
         pageTargetingCreate.getInputHouseholdids().send_keys(household_with_disability.unicef_id)
+        pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
         pageTargetingCreate.getInputName().send_keys(f"Test {household_with_disability.unicef_id}")
         pageTargetingCreate.getInputFlagexcludeifactiveadjudicationticket().click()
         pageTargetingCreate.clickButtonTargetPopulationCreate()

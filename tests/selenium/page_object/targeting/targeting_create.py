@@ -25,7 +25,7 @@ class TargetingCreate(BaseComponents):
     buttonTargetPopulationCreate = 'button[data-cy="button-target-population-create"]'
     inputDivName = 'div[data-cy="input-name"]'
     inputIncludedHouseholdIds = 'div[data-cy="input-included-household-ids"]'
-    inputHouseholdids = 'input[data-cy="input-householdIds"]'
+    inputHouseholdids = '[data-cy="input-householdIds"]'
     inputIncludedIndividualIds = 'div[data-cy="input-included-individual-ids"]'
     inputIndividualids = 'input[data-cy="input-individualIds"]'
     inputFlagexcludeifonsanctionlist = 'span[data-cy="input-flagExcludeIfOnSanctionList"]'
