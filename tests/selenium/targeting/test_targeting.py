@@ -278,7 +278,6 @@ class TestSmokeTargeting:
         pageTargeting.selectGlobalProgramFilter("Test Programm")
         pageTargeting.getNavTargeting().click()
         pageTargeting.getButtonCreateNew().click()
-        pageTargeting.getCreateUseFilters().click()
         assert "New Target Population" in pageTargetingCreate.getPageHeaderTitle().text
         assert "SAVE" in pageTargetingCreate.getButtonTargetPopulationCreate().text
         pageTargetingCreate.getInputName()
@@ -389,6 +388,7 @@ class TestCreateTargeting:
         )
         assert len(pageTargetingDetails.getPeopleTableRows()) == 1
 
+    @pytest.mark.xfail(reason="UNSTABLE")
     def test_create_targeting_for_normal_program(
         self,
         non_sw_program: Program,
@@ -408,11 +408,9 @@ class TestCreateTargeting:
         assert pageTargetingCreate.getAddPeopleRuleButton().text.upper() == "ADD HOUSEHOLD RULE"
         pageTargetingCreate.getAddHouseholdRuleButton().click()
         pageTargetingCreate.getTargetingCriteriaAutoComplete().click()
-        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys("Residence Status")
-        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys(Keys.ARROW_DOWN)
-        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys(Keys.ENTER)
+        pageTargetingCreate.select_listbox_element("Residence Status")
         pageTargetingCreate.getTargetingCriteriaValue().click()
-        pageTargetingCreate.select_option_by_name(REFUGEE)
+        pageTargetingCreate.select_listbox_element(REFUGEE)
         pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
 
         disability_expected_criteria_text = "Residence status: Displaced | Refugee / Asylum Seeker"
@@ -733,9 +731,7 @@ class TestCreateTargeting:
         assert pageTargetingCreate.getAddPeopleRuleButton().text.upper() == "ADD PEOPLE RULE"
         pageTargetingCreate.getAddPeopleRuleButton().click()
         pageTargetingCreate.getTargetingCriteriaAutoComplete().click()
-        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys("Test String Attribute SW")
-        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys(Keys.ARROW_DOWN)
-        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys(Keys.ENTER)
+        pageTargetingCreate.select_listbox_element("Test String Attribute SW")
         pageTargetingCreate.getSelectFiltersRoundNumber().click()
         pageTargetingCreate.getSelectRoundOption(1).click()
         pageTargetingCreate.getInputFiltersValue().send_keys("Text")

@@ -15,7 +15,7 @@ class TargetingCreate(BaseComponents):
     titlePage = 'h5[data-cy="page-header-title"]'
     fieldName = 'input[data-cy="input-name"]'
     targetingCriteriaAutoComplete = 'input[data-cy="autocomplete-target-criteria-option-{}"]'
-    targetingCriteriaValue = '[data-cy="select-filters[{}].value"]'
+    targetingCriteriaValue = 'div[data-cy="autocomplete-target-criteria-values"]'
     targetingCriteriaAddDialogSaveButton = 'button[data-cy="button-target-population-add-criteria"]'
     targetingCriteriaAddDialogSaveButtonEdit = 'button[data-cy="button-target-population-add-criteria"]'
     criteriaContainer = 'div[data-cy="criteria-container"]'
@@ -47,9 +47,9 @@ class TargetingCreate(BaseComponents):
     buttonIndividualRule = 'button[data-cy="button-individual-rule"]'
     buttonTargetPopulationAddCriteria = 'button[data-cy="button-target-population-add-criteria"]'
     buttonSave = 'button[data-cy="button-save"]'
-    inputFiltersValueFrom = 'input[data-cy="input-filters[{}].value.from"]'
-    inputFiltersValueTo = 'input[data-cy="input-filters[{}].value.to"]'
-    inputFiltersValue = 'input[data-cy="input-filters[{}].value"]'
+    inputFiltersValueFrom = 'input[data-cy="input-householdsFiltersBlocks[{}].value.from"]'
+    inputFiltersValueTo = 'input[data-cy="input-householdsFiltersBlocks[{}].value.to"]'
+    inputFiltersValue = 'input[data-cy="input-householdsFiltersBlocks[{}].value"]'
     autocompleteTargetCriteriaValues = 'div[data-cy="autocomplete-target-criteria-values"]'
     selectMany = 'div[data-cy="select-many"]'
     buttonEdit = 'button[data-cy="button-edit"]'
@@ -59,7 +59,7 @@ class TargetingCreate(BaseComponents):
     selectIndividualsFiltersBlocksRoundNumber = (
         'div[data-cy="select-individualsFiltersBlocks[{}].individualBlockFilters[{}].roundNumber"]'
     )
-    selectFiltersRoundNumber = 'div[data-cy="select-filters[{}].roundNumber"]'
+    selectFiltersRoundNumber = 'div[data-cy="select-householdsFiltersBlocks[{}].roundNumber"]'
     selectRoundOption = 'li[data-cy="select-option-{}"]'
     selectIndividualsFiltersBlocksIsNull = (
         'span[data-cy="input-individualsFiltersBlocks[{}].individualBlockFilters[{}].isNull"]'
