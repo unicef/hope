@@ -52,6 +52,8 @@ snapshots['TestCopyTargetPopulationMutation::test_copy_target_0_with_permission 
                     'individualIds': '',
                     'rules': [
                         {
+                            'collectorsFiltersBlocks': [
+                            ],
                             'householdsFiltersBlocks': [
                                 {
                                     'arguments': [
@@ -61,6 +63,12 @@ snapshots['TestCopyTargetPopulationMutation::test_copy_target_0_with_permission 
                                     'fieldName': 'size',
                                     'flexFieldClassification': 'NOT_FLEX_FIELD'
                                 }
+                            ]
+                        },
+                        {
+                            'collectorsFiltersBlocks': [
+                            ],
+                            'householdsFiltersBlocks': [
                             ]
                         }
                     ]

@@ -7,6 +7,17 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
+snapshots['TestAllCollectorsFields::test_pdu_subtype_choices_data 1'] = {
+    'data': {
+        'allCollectorFieldsAttributes': [
+            {
+                'labelEn': 'Delivery Data Field Random Name (Ability partner. Delivery Mechanism)',
+                'name': 'delivery_data_field__random_name'
+            }
+        ]
+    }
+}
+
 snapshots['TestAllPduFields::test_pdu_subtype_choices_data 1'] = {
     'data': {
         'allPduFields': [

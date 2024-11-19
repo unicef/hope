@@ -388,6 +388,35 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         queryset = self.get_households_queryset().filter(query).distinct()
         self.assertEqual(queryset.count(), 4)
 
+    def test_tc_rule_query_for_ind_hh_ids(self) -> None:
+        tp = TargetPopulation(program=self.households[0].program)
+        tc = TargetingCriteria()
+        tc.target_population = tp
+        tc.save()
+        tcr = TargetingCriteriaRule(household_ids="HH-1, HH-2", individual_ids="IND-11, IND-22")
+        tcr.targeting_criteria = tc
+        tcr.save()
+
+        query = tcr.get_query()
+        self.assertEqual(
+            str(query),
+            "(AND: (OR: ('unicef_id__in', ['HH-1', 'HH-2']), ('individuals__unicef_id__in', ['IND-11', 'IND-22'])))",
+        )
+
+        tcr.household_ids = ""
+        tcr.individual_ids = "IND-33, IND-44"
+        tcr.save()
+        tcr.refresh_from_db()
+        query = tcr.get_query()
+        self.assertEqual(str(query), "(AND: ('individuals__unicef_id__in', ['IND-33', 'IND-44']))")
+
+        tcr.household_ids = "HH-88, HH-99"
+        tcr.individual_ids = ""
+        tcr.save()
+        tcr.refresh_from_db()
+        query = tcr.get_query()
+        self.assertEqual(str(query), "(AND: ('unicef_id__in', ['HH-88', 'HH-99']))")
+
 
 class TargetingCriteriaFlexRuleFilterTestCase(TestCase):
     @classmethod

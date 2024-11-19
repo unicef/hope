@@ -8,6 +8,7 @@ from hct_mis_api.apps.core.fixtures import (
 )
 from hct_mis_api.apps.core.models import FlexibleAttribute, PeriodicFieldData
 from hct_mis_api.apps.core.utils import encode_id_base64_required
+from hct_mis_api.apps.payment.fixtures import DeliveryMechanismFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
@@ -142,6 +143,36 @@ class TestAllPduFields(APITestCase):
             variables={
                 "businessAreaSlug": "afghanistan",
                 "programId": encode_id_base64_required(self.program.id, "Program"),
+            },
+            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+        )
+
+
+class TestAllCollectorsFields(APITestCase):
+    QUERY_ALL_COLLECTORS_FIELDS = """
+        query CollFields {
+          allCollectorFieldsAttributes {
+            name
+            labelEn
+          }
+        }
+    """
+
+    @classmethod
+    def setUpTestData(cls) -> None:
+        super().setUpTestData()
+        cls.business_area = create_afghanistan()
+        cls.user = UserFactory()
+
+        DeliveryMechanismFactory(
+            required_fields=["delivery_data_field__random_name"],
+        )
+
+    def test_pdu_subtype_choices_data(self) -> None:
+        self.snapshot_graphql_request(
+            request_string=self.QUERY_ALL_COLLECTORS_FIELDS,
+            variables={
+                "businessAreaSlug": "afghanistan",
             },
             context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
         )
