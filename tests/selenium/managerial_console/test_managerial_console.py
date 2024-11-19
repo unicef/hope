@@ -122,25 +122,21 @@ class TestSmokeManagerialConsole:
             status=PaymentPlan.Status.IN_APPROVAL,
             business_area=BusinessArea.objects.filter(slug="afghanistan").first(),
         )
-        program.refresh_from_db()
         PaymentPlanFactory(
             program=program,
             status=PaymentPlan.Status.IN_AUTHORIZATION,
             business_area=BusinessArea.objects.filter(slug="afghanistan").first(),
         )
-        program.refresh_from_db()
         PaymentPlanFactory(
             program=program,
             status=PaymentPlan.Status.IN_REVIEW,
             business_area=BusinessArea.objects.filter(slug="afghanistan").first(),
         )
-        program.refresh_from_db()
         PaymentPlanFactory(
             program=program,
             status=PaymentPlan.Status.ACCEPTED,
             business_area=BusinessArea.objects.filter(slug="afghanistan").first(),
         )
-        program.refresh_from_db()
         program.save()
         program.refresh_from_db()
         pageManagerialConsole.getMenuUserProfile().click()
