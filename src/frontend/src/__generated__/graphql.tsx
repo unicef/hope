@@ -6062,6 +6062,7 @@ export type Query = {
   allCollectorFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>;
   allDeliveryMechanisms?: Maybe<Array<Maybe<ChoiceObject>>>;
   allEditHouseholdFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>;
+  allEditPeopleFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>;
   allFeedbacks?: Maybe<FeedbackNodeConnection>;
   allFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>;
   allFinancialServiceProviderXlsxTemplates?: Maybe<FinancialServiceProviderXlsxTemplateNodeConnection>;
@@ -10619,6 +10620,11 @@ export type AllEditHouseholdFieldsQueryVariables = Exact<{ [key: string]: never;
 
 
 export type AllEditHouseholdFieldsQuery = { __typename?: 'Query', allEditHouseholdFieldsAttributes?: Array<{ __typename?: 'FieldAttributeNode', isFlexField?: boolean | null, id?: string | null, type?: string | null, name?: string | null, required?: boolean | null, associatedWith?: string | null, labelEn?: string | null, hint?: string | null, labels?: Array<{ __typename?: 'LabelNode', language?: string | null, label?: string | null } | null> | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', labelEn?: string | null, value?: string | null, admin?: string | null, listName?: string | null, labels?: Array<{ __typename?: 'LabelNode', label?: string | null, language?: string | null } | null> | null } | null> | null } | null> | null, countriesChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null };
+
+export type AllEditPeopleFieldsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type AllEditPeopleFieldsQuery = { __typename?: 'Query', allEditPeopleFieldsAttributes?: Array<{ __typename?: 'FieldAttributeNode', id?: string | null, type?: string | null, name?: string | null, required?: boolean | null, labelEn?: string | null, hint?: string | null, isFlexField?: boolean | null, labels?: Array<{ __typename?: 'LabelNode', language?: string | null, label?: string | null } | null> | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', labelEn?: string | null, value?: string | null, admin?: string | null, listName?: string | null, labels?: Array<{ __typename?: 'LabelNode', label?: string | null, language?: string | null } | null> | null } | null> | null } | null> | null };
 
 export type AllHouseholdsFlexFieldsAttributesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -17872,6 +17878,65 @@ export type AllEditHouseholdFieldsQueryHookResult = ReturnType<typeof useAllEdit
 export type AllEditHouseholdFieldsLazyQueryHookResult = ReturnType<typeof useAllEditHouseholdFieldsLazyQuery>;
 export type AllEditHouseholdFieldsSuspenseQueryHookResult = ReturnType<typeof useAllEditHouseholdFieldsSuspenseQuery>;
 export type AllEditHouseholdFieldsQueryResult = Apollo.QueryResult<AllEditHouseholdFieldsQuery, AllEditHouseholdFieldsQueryVariables>;
+export const AllEditPeopleFieldsDocument = gql`
+    query AllEditPeopleFields {
+  allEditPeopleFieldsAttributes {
+    id
+    type
+    name
+    required
+    labels {
+      language
+      label
+    }
+    labelEn
+    hint
+    choices {
+      labels {
+        label
+        language
+      }
+      labelEn
+      value
+      admin
+      listName
+    }
+    isFlexField
+  }
+}
+    `;
+
+/**
+ * __useAllEditPeopleFieldsQuery__
+ *
+ * To run a query within a React component, call `useAllEditPeopleFieldsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllEditPeopleFieldsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllEditPeopleFieldsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useAllEditPeopleFieldsQuery(baseOptions?: Apollo.QueryHookOptions<AllEditPeopleFieldsQuery, AllEditPeopleFieldsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<AllEditPeopleFieldsQuery, AllEditPeopleFieldsQueryVariables>(AllEditPeopleFieldsDocument, options);
+      }
+export function useAllEditPeopleFieldsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllEditPeopleFieldsQuery, AllEditPeopleFieldsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<AllEditPeopleFieldsQuery, AllEditPeopleFieldsQueryVariables>(AllEditPeopleFieldsDocument, options);
+        }
+export function useAllEditPeopleFieldsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<AllEditPeopleFieldsQuery, AllEditPeopleFieldsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<AllEditPeopleFieldsQuery, AllEditPeopleFieldsQueryVariables>(AllEditPeopleFieldsDocument, options);
+        }
+export type AllEditPeopleFieldsQueryHookResult = ReturnType<typeof useAllEditPeopleFieldsQuery>;
+export type AllEditPeopleFieldsLazyQueryHookResult = ReturnType<typeof useAllEditPeopleFieldsLazyQuery>;
+export type AllEditPeopleFieldsSuspenseQueryHookResult = ReturnType<typeof useAllEditPeopleFieldsSuspenseQuery>;
+export type AllEditPeopleFieldsQueryResult = Apollo.QueryResult<AllEditPeopleFieldsQuery, AllEditPeopleFieldsQueryVariables>;
 export const AllHouseholdsFlexFieldsAttributesDocument = gql`
     query AllHouseholdsFlexFieldsAttributes {
   allHouseholdsFlexFieldsAttributes {
@@ -28682,6 +28747,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   allCollectorFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType, Partial<QueryAllCollectorFieldsAttributesArgs>>;
   allDeliveryMechanisms?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
   allEditHouseholdFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType>;
+  allEditPeopleFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType>;
   allFeedbacks?: Resolver<Maybe<ResolversTypes['FeedbackNodeConnection']>, ParentType, ContextType, Partial<QueryAllFeedbacksArgs>>;
   allFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType, Partial<QueryAllFieldsAttributesArgs>>;
   allFinancialServiceProviderXlsxTemplates?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderXlsxTemplateNodeConnection']>, ParentType, ContextType, Partial<QueryAllFinancialServiceProviderXlsxTemplatesArgs>>;
