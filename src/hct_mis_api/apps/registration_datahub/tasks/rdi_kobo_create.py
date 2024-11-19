@@ -362,9 +362,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                             except Exception as e:
                                 self._handle_exception("Household", i_field, e)
                         elif i_field in delivery_mechanism_xlsx_fields:
-                            self._handle_delivery_mechanism_fields(
-                                i_value, i_field, ind_count, individual_obj
-                            )
+                            self._handle_delivery_mechanism_fields(i_value, i_field, ind_count, individual_obj)
                         else:
                             try:
                                 self._cast_and_assign(i_value, i_field, individual_obj)
