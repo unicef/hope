@@ -1,12 +1,17 @@
 import { Grid } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { AllEditHouseholdFieldsQuery } from '@generated/graphql';
+import {
+  AllEditHouseholdFieldsQuery,
+  AllEditPeopleFieldsQuery,
+} from '@generated/graphql';
 import { LabelizedField } from '@core/LabelizedField';
 import { GrievanceFlexFieldPhotoModalNewHousehold } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModalNewHousehold';
 import { ReactElement } from 'react';
 
 export interface CurrentValueProps {
-  field: AllEditHouseholdFieldsQuery['allEditHouseholdFieldsAttributes'][number];
+  field:
+    | AllEditHouseholdFieldsQuery['allEditHouseholdFieldsAttributes'][number]
+    | AllEditPeopleFieldsQuery['allEditPeopleFieldsAttributes'][number];
   value;
   values;
 }
