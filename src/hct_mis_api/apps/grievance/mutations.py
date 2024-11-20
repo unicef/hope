@@ -578,6 +578,16 @@ class GrievanceStatusChangeMutation(PermissionMutation):
             notifications.append(
                 GrievanceNotification(grievance_ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED)
             )
+        if status == GrievanceTicket.STATUS_CLOSED:
+            if isinstance(grievance_ticket.ticket_details, TicketNeedsAdjudicationDetails):
+                partner = user.partner
+
+                if not partner.is_unicef:
+                    for selected_individual in grievance_ticket.ticket_details.selected_individuals.all():
+                        if not partner.has_area_access(
+                            area_id=selected_individual.household.admin2.id, program_id=selected_individual.program.id
+                        ):
+                            raise PermissionDenied("Permission Denied: User does not have access to close ticket")
 
         if not grievance_ticket.can_change_status(status):
             log_and_raise("New status is incorrect")
@@ -590,16 +600,6 @@ class GrievanceStatusChangeMutation(PermissionMutation):
             notifications.append(GrievanceNotification(grievance_ticket, GrievanceNotification.ACTION_SEND_TO_APPROVAL))
 
         if grievance_ticket.status == GrievanceTicket.STATUS_CLOSED:
-            if isinstance(grievance_ticket.ticket_details, TicketNeedsAdjudicationDetails):
-                partner = user.partner
-
-                if not partner.is_unicef:
-                    for selected_individual in grievance_ticket.ticket_details.selected_individuals.all():
-                        if not partner.has_area_access(
-                            area_id=selected_individual.household.admin2.id, program_id=selected_individual.program.id
-                        ):
-                            raise PermissionDenied("Permission Denied: User does not have access to close ticket")
-
             clear_cache(grievance_ticket.ticket_details, grievance_ticket.business_area.slug)
 
         if (

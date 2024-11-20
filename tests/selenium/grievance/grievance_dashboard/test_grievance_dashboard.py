@@ -17,7 +17,7 @@ from tests.selenium.page_object.grievance.details_grievance_page import (
 from tests.selenium.page_object.grievance.grievance_dashboard import GrievanceDashboard
 from tests.selenium.page_object.grievance.grievance_tickets import GrievanceTickets
 
-pytestmark = pytest.mark.django_db(transaction=True)
+pytestmark = pytest.mark.django_db()
 
 
 @pytest.fixture

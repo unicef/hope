@@ -55,55 +55,55 @@ class ProgrammeDetails(BaseComponents):
     buttonDelete = 'button[data-cy="button-delete"]'
     buttonCancel = 'button[data-cy="button-cancel"]'
 
-    def getProgramCycleRow(self) -> WebElement:
+    def getProgramCycleRow(self) -> [WebElement]:
         self.wait_for(self.programCycleRow)
         return self.get_elements(self.programCycleRow)
 
-    def getDeleteProgrammeCycle(self) -> WebElement:
+    def getDeleteProgrammeCycle(self) -> [WebElement]:
         self.wait_for(self.deleteProgrammeCycle)
         return self.get_elements(self.deleteProgrammeCycle)
 
-    def getProgramCycleId(self) -> WebElement:
+    def getProgramCycleId(self) -> [WebElement]:
         self.wait_for(self.programCycleId)
         return self.get_elements(self.programCycleId)
 
-    def getProgramCycleTitle(self) -> WebElement:
+    def getProgramCycleTitle(self) -> [WebElement]:
         self.wait_for(self.programCycleTitle)
         return self.get_elements(self.programCycleTitle)
 
-    def getProgramCycleStatus(self) -> WebElement:
+    def getProgramCycleStatus(self) -> [WebElement]:
         self.wait_for(self.programCycleStatus)
         return self.get_elements(self.programCycleStatus)
 
-    def getStatusContainer(self) -> WebElement:
+    def getStatusContainer(self) -> [WebElement]:
         self.wait_for(self.statusContainer)
         return self.get_elements(self.statusContainer)
 
-    def getProgramCycleTotalEntitledQuantityUSD(self) -> WebElement:
+    def getProgramCycleTotalEntitledQuantityUSD(self) -> [WebElement]:
         self.wait_for(self.programCycleTotalEntitledQuantityUSD)
         return self.get_elements(self.programCycleTotalEntitledQuantityUSD)
 
-    def getProgramCycleTotalUndeliveredQuantityUSD(self) -> WebElement:
+    def getProgramCycleTotalUndeliveredQuantityUSD(self) -> [WebElement]:
         self.wait_for(self.programCycleTotalUndeliveredQuantityUSD)
         return self.get_elements(self.programCycleTotalUndeliveredQuantityUSD)
 
-    def getProgramCycleTotalDeliveredQuantityUSD(self) -> WebElement:
+    def getProgramCycleTotalDeliveredQuantityUSD(self) -> [WebElement]:
         self.wait_for(self.programCycleTotalDeliveredQuantityUSD)
         return self.get_elements(self.programCycleTotalDeliveredQuantityUSD)
 
-    def getProgramCycleStartDate(self) -> WebElement:
+    def getProgramCycleStartDate(self) -> [WebElement]:
         self.wait_for(self.programCycleStartDate)
         return self.get_elements(self.programCycleStartDate)
 
-    def getProgramCycleEndDate(self) -> WebElement:
+    def getProgramCycleEndDate(self) -> [WebElement]:
         self.wait_for(self.programCycleEndDate)
         return self.get_elements(self.programCycleEndDate)
 
-    def getProgramCycleDetailsBtn(self) -> WebElement:
+    def getProgramCycleDetailsBtn(self) -> [WebElement]:
         self.wait_for(self.programCycleDetailsBtn)
         return self.get_elements(self.programCycleDetailsBtn)
 
-    def getButtonEditProgramCycle(self) -> WebElement:
+    def getButtonEditProgramCycle(self) -> [WebElement]:
         self.wait_for(self.buttonEditProgramCycle)
         return self.get_elements(self.buttonEditProgramCycle)
 
