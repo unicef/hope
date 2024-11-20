@@ -92,47 +92,54 @@
                             <span class="icon icon-calendar icon-blue"></span>
                             {% translate "Months" %}
                         </h3>
-                        <div id="payments-by-month" class="dc-cahrt w-full h-full"></div>
+                        <div id="payments-by-month" class="dc-chart w-full h-full"></div>
                     </div>
                 </div>
                 <!-- Other charts Section -->
                 <div class="flex flex-grow grid grid-cols-3 gap-2 mt-8">
+                    <!-- Chart 1 -->
                     <div class="bg-white p-3 rounded shadow">
                         <h3 class="text-sm font-semibold">
                             <span class="icon icon-analysis icon-blue"></span>
                             {% translate "Payments by Sector" %}
                         </h3>
-                        <div id="payments-by-sector" class="dc-cahrt w-full h-full"></div>
+                        <div id="payments-by-sector" class="dc-chart w-full h-full"></div>
                     </div>
+                    <!-- Chart 2 -->
                     <div class="bg-white p-3 rounded shadow">
                         <h3 class="text-sm font-semibold">
                             <span class="icon icon-people-targeted icon-blue"></span>
                             {% translate "Payments by Programme" %}
                         </h3>
-                        <div id="volume-by-program" class="dc-cahrt w-full h-full"></div>
+                        <div id="volume-by-program" class="dc-chart w-full h-full"></div>
                     </div>
+                    <!-- Chart 3 -->
                     <div class="bg-white p-3 rounded shadow">
                         <h3 class="text-sm font-semibold">
                             <span class="icon icon-cash-transfer icon-blue"></span>
                             {% translate "Payments by Admin 1" %}
                         </h3>
-                        <div id="payments-by-admin1" class="dc-cahrt w-full h-full"></div>
+                        <div id="payments-by-admin1" class="dc-chart w-full h-full"></div>
                     </div>
-                    <div class="bg-white p-3 rounded shadow">
+                    <!-- Chart 4 -->
+                    <div class="bg-white p-4 rounded shadow">
                         <h3 class="text-sm font-semibold">
                             <span class="icon icon-logistics icon-blue"></span>
                             {% translate "Payments by FSP" %}
                         </h3>
-                        <div id="payments-by-fsp" class="dc-cahrt w-full h-full"></div>
+                        <div id="payments-by-fsp" class="dc-chart w-full h-full"></div>
                     </div>
+                    <!-- Chart 5 -->
                     <div class="bg-white p-4 rounded shadow">
                         <h3 class="text-sm font-semibold">
                             <span class="icon icon-financing icon-blue"></span>
                             {% translate "Payments by Delivery Mechanism" %}
                         </h3>
-                        <div id="payments-by-delivery" class="dc-cahrt w-full h-full"></div>
+                        <div id="payments-by-delivery" class="dc-chart w-full h-full"></div>
                     </div>
-                    <div class="flex flex-col gap-4 mt-4 ml-2">
+                    <!-- Reconciliation Cards Section -->
+                    <div class="flex flex-col gap-4 col-span-1">
+                        <!-- Reconciliation Card -->
                         <div class="bg-white p-4 rounded shadow text-center">
                             <h3 class="text-lg font-semibold">
                                 <span class="icon icon-report icon-blue"></span>
@@ -141,6 +148,7 @@
                             <div class="text-green-500 text-base font-bold reconciliation-percentage">%</div>
                             <p>{% translate "Payment records are reconciled" %}</p>
                         </div>
+                        <!-- Pending Reconciliation Card -->
                         <div class="bg-white p-4 rounded shadow text-center">
                             <h3 class="text-lg font-semibold">
                                 <span class="icon icon-report icon-blue"></span>
@@ -151,6 +159,7 @@
                         </div>
                     </div>
                 </div>
+                
             {% else %}
                 <div class="error-message">{{ error_message }}</div>
             {% endif %}
@@ -164,7 +173,7 @@
                     dc.config.defaultColors(d3.schemeTableau10);
                     const decimalnumberFormatter = d3.format(",.2f");
                     const simplenumberFormatter = d3.format(",");
-                    const truncateLabel = (label, maxLength = 30) => {
+                    const truncateLabel = (label, maxLength = 25) => {
                         return label.length > maxLength ?
                             `${label.slice(0, maxLength)}...` :
                             label;
@@ -180,11 +189,11 @@
                     }
 
                     const url = "{{household_data_url}}";
-                    const pendingList = ["Sent to Payment Gateway", "Pending"];
+                    const pendingList = ["Sent to Payment Gateway", "Sent to FSP"];
                     const successfulList = [
                         "Distribution Successful",
                         "Partially Distributed",
-                        "Sent to FSP",
+                        "Pending",
                         "Transaction Successful",
                     ];
 
@@ -301,7 +310,7 @@
                                 )
                                 .title((d) => `${d.key}: ${decimalnumberFormatter(d.value)} USD`)
                                 .xAxis()
-                                .ticks(4);
+                                .ticks(3);
 
                             const programChart = dc
                                 .rowChart("#volume-by-program")
@@ -314,8 +323,10 @@
                                     `${truncateLabel(d.key)}: ${decimalnumberFormatter(d.value)} USD (${((d.value / programGroup.all().reduce((sum, g) => sum + g.value, 0)) * 100).toFixed(0)}%)`,
                                 )
                                 .title((d) => `${d.key}: ${decimalnumberFormatter(d.value)} USD`)
+                                .labelOffsetX(10)
+                                .useViewBoxResizing(true)
                                 .xAxis()
-                                .ticks(5);
+                                .ticks(3);
 
                             const monthOrder = {
                                 January: 1,
@@ -346,7 +357,7 @@
                                 .title((d) => `${d.key}: ${decimalnumberFormatter(d.value)} USD`)
                                 .ordering((d) => monthOrder[d.key])
                                 .xAxis()
-                                .ticks(5);
+                                .ticks(3);
 
                             const admin1Chart = dc
                                 .rowChart("#payments-by-admin1")
@@ -360,7 +371,7 @@
                                 )
                                 .title((d) => `${d.key}: ${decimalnumberFormatter(d.value)} USD`)
                                 .xAxis()
-                                .ticks(5);
+                                .ticks(3);
 
                             function updateTopMetrics() {
                                 const totalPaymentsCount = ndx.groupAll().reduceCount().value();
