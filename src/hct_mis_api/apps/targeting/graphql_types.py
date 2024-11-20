@@ -20,6 +20,7 @@ from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.core.schema import ExtendedConnection, FieldAttributeNode
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.household.schema import HouseholdNode
+from hct_mis_api.apps.payment.models import DeliveryMechanism
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.choices import FlexFieldClassification
 from hct_mis_api.apps.targeting.filters import HouseholdFilter, TargetPopulationFilter
@@ -30,7 +31,7 @@ if TYPE_CHECKING:
 
     from graphene.types.structures import List as GrapheneList
 
-    from hct_mis_api.apps.targeting.models import TargetingIndividualBlockRuleFilter
+    from hct_mis_api.apps.targeting.models import TargetingIndividualRuleFilterBlock
 
 
 def get_field_by_name(field_name: str, target_population: target_models.TargetPopulation) -> Dict:
@@ -112,35 +113,88 @@ class TargetingIndividualBlockRuleFilterNode(DjangoObjectType):
         model = target_models.TargetingIndividualBlockRuleFilter
 
 
+class TargetingCollectorBlockRuleFilterNode(DjangoObjectType):
+    arguments = graphene.List(Arg)
+    comparison_method = graphene.String()
+    label_en = graphene.String()
+
+    def resolve_arguments(parent, info: Any) -> "GrapheneList":
+        return parent.arguments
+
+    def resolve_label_en(parent, info: Any) -> str:
+        field_labels_dict = {
+            field["name"]: field["label"].get("English(EN)")
+            for field in DeliveryMechanism.get_all_core_fields_definitions()
+        }
+        return field_labels_dict.get(parent.field_name, "")
+
+    class Meta:
+        model = target_models.TargetingCollectorBlockRuleFilter
+
+
 class TargetingIndividualRuleFilterBlockNode(DjangoObjectType):
     individual_block_filters = graphene.List(TargetingIndividualBlockRuleFilterNode)
 
-    def resolve_individual_block_filters(self, info: Any) -> "QuerySet":
-        return self.individual_block_filters.all()
+    def resolve_individual_block_filters(parent, info: Any) -> "QuerySet":
+        return parent.individual_block_filters.all()
 
     class Meta:
         model = target_models.TargetingIndividualRuleFilterBlock
 
 
+class TargetingCollectorRuleFilterBlockNode(DjangoObjectType):
+    collector_block_filters = graphene.List(TargetingCollectorBlockRuleFilterNode)
+
+    def resolve_collector_block_filters(parent, info: Any) -> "QuerySet":
+        return parent.collector_block_filters.all()
+
+    class Meta:
+        model = target_models.TargetingCollectorRuleFilterBlock
+
+
 class TargetingCriteriaRuleNode(DjangoObjectType):
-    filters = graphene.List(TargetingCriteriaRuleFilterNode)
+    households_filters_blocks = graphene.List(TargetingCriteriaRuleFilterNode)
     individuals_filters_blocks = graphene.List(TargetingIndividualRuleFilterBlockNode)
 
-    def resolve_individuals_filters_blocks(self, info: Any) -> "QuerySet[TargetingIndividualBlockRuleFilter]":
+    def resolve_individuals_filters_blocks(self, info: Any) -> "QuerySet[TargetingIndividualRuleFilterBlock]":
         return self.individuals_filters_blocks.all()
 
-    def resolve_filters(self, info: Any) -> "QuerySet[TargetPopulationFilter]":
+    def resolve_households_filters_blocks(self, info: Any) -> "QuerySet[TargetPopulationFilter]":
         return self.filters.all()
 
     class Meta:
         model = target_models.TargetingCriteriaRule
+        exclude_fields = [
+            "filters",
+        ]
 
 
 class TargetingCriteriaNode(DjangoObjectType):
     rules = graphene.List(TargetingCriteriaRuleNode)
+    household_ids = graphene.String()
+    individual_ids = graphene.String()
 
-    def resolve_rules(self, info: Any) -> "QuerySet":
-        return self.rules.all()
+    def resolve_rules(parent, info: Any) -> "QuerySet":
+        return parent.rules.all()
+
+    # TODO: can remove this one after refactoring/removing db fields
+    def resolve_individual_ids(parent, info: Any) -> str:
+        ind_ids_str = parent.individual_ids
+        ind_ids: set = (
+            set(ind_id.strip() for ind_id in ind_ids_str.split(",") if ind_id.strip()) if ind_ids_str else set()
+        )
+        for rule in parent.rules.all():
+            if rule.individual_ids:
+                ind_ids.update(ind_id.strip() for ind_id in rule.individual_ids.split(",") if ind_id.strip())
+        return ", ".join(sorted(ind_ids))
+
+    def resolve_household_ids(parent, info: Any) -> str:
+        hh_ids_str = parent.household_ids
+        hh_ids: set = set(hh_id.strip() for hh_id in hh_ids_str.split(",") if hh_id.strip()) if hh_ids_str else set()
+        for rule in parent.rules.all():
+            if rule.household_ids:
+                hh_ids.update(hh_id.strip() for hh_id in rule.household_ids.split(",") if hh_id.strip())
+        return ", ".join(sorted(hh_ids))
 
     class Meta:
         model = target_models.TargetingCriteria
@@ -188,14 +242,19 @@ class TargetingIndividualRuleFilterBlockObjectType(graphene.InputObjectType):
     individual_block_filters = graphene.List(TargetingCriteriaRuleFilterObjectType)
 
 
+class TargetingCollectorRuleFilterBlockObjectType(graphene.InputObjectType):
+    collector_block_filters = graphene.List(TargetingCriteriaRuleFilterObjectType)
+
+
 class TargetingCriteriaRuleObjectType(graphene.InputObjectType):
-    filters = graphene.List(TargetingCriteriaRuleFilterObjectType)
+    households_filters_blocks = graphene.List(TargetingCriteriaRuleFilterObjectType)
+    household_ids = graphene.String()
     individuals_filters_blocks = graphene.List(TargetingIndividualRuleFilterBlockObjectType)
+    individual_ids = graphene.String()
+    collectors_filters_blocks = graphene.List(TargetingCollectorRuleFilterBlockObjectType)
 
 
 class TargetingCriteriaObjectType(graphene.InputObjectType):
     rules = graphene.List(TargetingCriteriaRuleObjectType)
     flag_exclude_if_active_adjudication_ticket = graphene.Boolean()
     flag_exclude_if_on_sanction_list = graphene.Boolean()
-    household_ids = graphene.String()
-    individual_ids = graphene.String()
