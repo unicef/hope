@@ -178,6 +178,8 @@ export const GlobalProgramSelect = () => {
               dataCollectingType?.householdFiltersAvailable,
             individualFiltersAvailable:
               dataCollectingType?.individualFiltersAvailable,
+            // collectorFieldsAvailable:
+            //   dataCollectingType?.collectorFieldsAvailable,
           },
           pduFields: program.pduFields,
         });

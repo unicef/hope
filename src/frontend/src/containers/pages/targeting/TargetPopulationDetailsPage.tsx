@@ -56,9 +56,6 @@ export const TargetPopulationDetailsPage = (): ReactElement => {
 
   const { targetPopulation } = data;
 
-  const category =
-    targetPopulation.targetingCriteria?.rules.length !== 0 ? 'filters' : 'ids';
-
   const canDuplicate =
     hasPermissions(PERMISSIONS.TARGETING_DUPLICATE, permissions) &&
     Boolean(targetPopulation.targetingCriteria);
@@ -87,7 +84,6 @@ export const TargetPopulationDetailsPage = (): ReactElement => {
         targetPopulation={targetPopulation}
         isStandardDctType={isStandardDctType}
         isSocialDctType={isSocialDctType}
-        category={category}
         permissions={permissions}
         screenBeneficiary={businessAreaData?.businessArea?.screenBeneficiary}
       />
