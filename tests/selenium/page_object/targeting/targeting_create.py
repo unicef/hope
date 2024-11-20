@@ -15,7 +15,7 @@ class TargetingCreate(BaseComponents):
     titlePage = 'h5[data-cy="page-header-title"]'
     fieldName = 'input[data-cy="input-name"]'
     targetingCriteriaAutoComplete = 'input[data-cy="autocomplete-target-criteria-option-{}"]'
-    targetingCriteriaValue = '[data-cy="select-filters[{}].value"]'
+    targetingCriteriaValue = 'div[data-cy="autocomplete-target-criteria-values"]'
     targetingCriteriaAddDialogSaveButton = 'button[data-cy="button-target-population-add-criteria"]'
     targetingCriteriaAddDialogSaveButtonEdit = 'button[data-cy="button-target-population-add-criteria"]'
     criteriaContainer = 'div[data-cy="criteria-container"]'
@@ -25,7 +25,7 @@ class TargetingCreate(BaseComponents):
     buttonTargetPopulationCreate = 'button[data-cy="button-target-population-create"]'
     inputDivName = 'div[data-cy="input-name"]'
     inputIncludedHouseholdIds = 'div[data-cy="input-included-household-ids"]'
-    inputHouseholdids = 'input[data-cy="input-householdIds"]'
+    inputHouseholdids = '[data-cy="input-householdIds"]'
     inputIncludedIndividualIds = 'div[data-cy="input-included-individual-ids"]'
     inputIndividualids = 'input[data-cy="input-individualIds"]'
     inputFlagexcludeifonsanctionlist = 'span[data-cy="input-flagExcludeIfOnSanctionList"]'
@@ -47,9 +47,9 @@ class TargetingCreate(BaseComponents):
     buttonIndividualRule = 'button[data-cy="button-individual-rule"]'
     buttonTargetPopulationAddCriteria = 'button[data-cy="button-target-population-add-criteria"]'
     buttonSave = 'button[data-cy="button-save"]'
-    inputFiltersValueFrom = 'input[data-cy="input-filters[{}].value.from"]'
-    inputFiltersValueTo = 'input[data-cy="input-filters[{}].value.to"]'
-    inputFiltersValue = 'input[data-cy="input-filters[{}].value"]'
+    inputFiltersValueFrom = 'input[data-cy="input-householdsFiltersBlocks[{}].value.from"]'
+    inputFiltersValueTo = 'input[data-cy="input-householdsFiltersBlocks[{}].value.to"]'
+    inputFiltersValue = 'input[data-cy="input-householdsFiltersBlocks[{}].value"]'
     autocompleteTargetCriteriaValues = 'div[data-cy="autocomplete-target-criteria-values"]'
     selectMany = 'div[data-cy="select-many"]'
     buttonEdit = 'button[data-cy="button-edit"]'
@@ -59,7 +59,7 @@ class TargetingCreate(BaseComponents):
     selectIndividualsFiltersBlocksRoundNumber = (
         'div[data-cy="select-individualsFiltersBlocks[{}].individualBlockFilters[{}].roundNumber"]'
     )
-    selectFiltersRoundNumber = 'div[data-cy="select-filters[{}].roundNumber"]'
+    selectFiltersRoundNumber = 'div[data-cy="select-householdsFiltersBlocks[{}].roundNumber"]'
     selectRoundOption = 'li[data-cy="select-option-{}"]'
     selectIndividualsFiltersBlocksIsNull = (
         'span[data-cy="input-individualsFiltersBlocks[{}].individualBlockFilters[{}].isNull"]'
@@ -86,6 +86,7 @@ class TargetingCreate(BaseComponents):
     totalNumberOfPeopleCount = 'div[data-cy="label-Total Number of People"]'
     selectProgramCycleAutocomplete = 'div[data-cy="filters-program-cycle-autocomplete"]'
     programmeCycleInput = 'div[data-cy="Programme Cycle-input"]'
+    selectRefugee = 'li[data-cy="select-option-REFUGEE"]'
 
     # Texts
     textTargetingCriteria = "Targeting Criteria"
@@ -327,3 +328,6 @@ class TargetingCreate(BaseComponents):
 
     def getProgrammeCycleInput(self) -> WebElement:
         return self.wait_for(self.programmeCycleInput)
+
+    def getSelectRefugee(self) -> WebElement:
+        return self.wait_for(self.selectRefugee)
