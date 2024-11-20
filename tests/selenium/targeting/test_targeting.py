@@ -271,8 +271,6 @@ class TestSmokeTargeting:
         assert expected_column_names == [name.text for name in pageTargeting.getTabColumnLabel()]
         assert 2 == len(pageTargeting.getTargetPopulationsRows())
         pageTargeting.getButtonCreateNew().click()
-        assert "Use Filters" in pageTargeting.getCreateUseFilters().text
-        assert "Use IDs" in pageTargeting.getCreateUseIDs().text
 
     def test_smoke_targeting_create_use_filters(
         self, create_programs: None, add_targeting: None, pageTargeting: Targeting, pageTargetingCreate: TargetingCreate
@@ -280,7 +278,6 @@ class TestSmokeTargeting:
         pageTargeting.selectGlobalProgramFilter("Test Programm")
         pageTargeting.getNavTargeting().click()
         pageTargeting.getButtonCreateNew().click()
-        pageTargeting.getCreateUseFilters().click()
         assert "New Target Population" in pageTargetingCreate.getPageHeaderTitle().text
         assert "SAVE" in pageTargetingCreate.getButtonTargetPopulationCreate().text
         pageTargetingCreate.getInputName()
@@ -295,10 +292,10 @@ class TestSmokeTargeting:
         pageTargeting.selectGlobalProgramFilter("Test Programm")
         pageTargeting.getNavTargeting().click()
         pageTargeting.getButtonCreateNew().click()
-        pageTargeting.getCreateUseIDs().click()
         assert "New Target Population" in pageTargetingCreate.getPageHeaderTitle().text
         assert "SAVE" in pageTargetingCreate.getButtonTargetPopulationCreate().text
         pageTargetingCreate.getInputName()
+        pageTargetingCreate.getDivTargetPopulationAddCriteria().click()
         pageTargetingCreate.getInputIncludedHouseholdIds()
         pageTargetingCreate.getInputHouseholdids()
         pageTargetingCreate.getInputIncludedIndividualIds()
@@ -363,7 +360,7 @@ class TestCreateTargeting:
     ) -> None:
         pageTargeting.navigate_to_page("afghanistan", sw_program.id)
         pageTargeting.getButtonCreateNew().click()
-        pageTargeting.getButtonCreateNewByFilters().click()
+
         assert "New Target Population" in pageTargetingCreate.getTitlePage().text
         pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
         pageTargetingCreate.select_listbox_element("First Cycle In Programme")
@@ -405,7 +402,6 @@ class TestCreateTargeting:
     ) -> None:
         pageTargeting.navigate_to_page("afghanistan", non_sw_program.id)
         pageTargeting.getButtonCreateNew().click()
-        pageTargeting.getButtonCreateNewByFilters().click()
         assert "New Target Population" in pageTargetingCreate.getTitlePage().text
         pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
         pageTargetingCreate.select_listbox_element("First Cycle In Programme")
@@ -413,11 +409,9 @@ class TestCreateTargeting:
         assert pageTargetingCreate.getAddPeopleRuleButton().text.upper() == "ADD HOUSEHOLD RULE"
         pageTargetingCreate.getAddHouseholdRuleButton().click()
         pageTargetingCreate.getTargetingCriteriaAutoComplete().click()
-        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys("Residence Status")
-        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys(Keys.ARROW_DOWN)
-        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys(Keys.ENTER)
+        pageTargetingCreate.select_listbox_element("Residence status")
         pageTargetingCreate.getTargetingCriteriaValue().click()
-        pageTargetingCreate.select_option_by_name(REFUGEE)
+        pageTargetingCreate.getSelectRefugee().click()
         pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
 
         disability_expected_criteria_text = "Residence status: Displaced | Refugee / Asylum Seeker"
@@ -453,7 +447,6 @@ class TestCreateTargeting:
         individual(program)
         pageTargeting.navigate_to_page("afghanistan", program.id)
         pageTargeting.getButtonCreateNew().click()
-        pageTargeting.getButtonCreateNewByFilters().click()
         assert "New Target Population" in pageTargetingCreate.getTitlePage().text
         pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
         pageTargetingCreate.select_listbox_element("Cycle In Programme")
@@ -499,7 +492,6 @@ class TestCreateTargeting:
         individual(program)
         pageTargeting.navigate_to_page("afghanistan", program.id)
         pageTargeting.getButtonCreateNew().click()
-        pageTargeting.getButtonCreateNewByFilters().click()
         assert "New Target Population" in pageTargetingCreate.getTitlePage().text
         pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
         pageTargetingCreate.select_listbox_element("Cycle In Programme")
@@ -566,7 +558,6 @@ class TestCreateTargeting:
         individual(program)
         pageTargeting.navigate_to_page("afghanistan", program.id)
         pageTargeting.getButtonCreateNew().click()
-        pageTargeting.getButtonCreateNewByFilters().click()
         assert "New Target Population" in pageTargetingCreate.getTitlePage().text
         pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
         pageTargetingCreate.select_listbox_element("Cycle In Programme")
@@ -637,7 +628,6 @@ class TestCreateTargeting:
         individual(program)
         pageTargeting.navigate_to_page("afghanistan", program.id)
         pageTargeting.getButtonCreateNew().click()
-        pageTargeting.getButtonCreateNewByFilters().click()
         assert "New Target Population" in pageTargetingCreate.getTitlePage().text
         pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
         pageTargetingCreate.select_listbox_element("Cycle In Programme")
@@ -687,7 +677,6 @@ class TestCreateTargeting:
         individual3 = individual(program)
         pageTargeting.navigate_to_page("afghanistan", program.id)
         pageTargeting.getButtonCreateNew().click()
-        pageTargeting.getButtonCreateNewByFilters().click()
         assert "New Target Population" in pageTargetingCreate.getTitlePage().text
         pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
         pageTargetingCreate.select_listbox_element("Cycle In Programme")
@@ -739,7 +728,6 @@ class TestCreateTargeting:
         individual(sw_program)
         pageTargeting.navigate_to_page("afghanistan", sw_program.id)
         pageTargeting.getButtonCreateNew().click()
-        pageTargeting.getButtonCreateNewByFilters().click()
         assert "New Target Population" in pageTargetingCreate.getTitlePage().text
         pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
         pageTargetingCreate.select_listbox_element("First Cycle In Programme")
@@ -747,9 +735,7 @@ class TestCreateTargeting:
         assert pageTargetingCreate.getAddPeopleRuleButton().text.upper() == "ADD PEOPLE RULE"
         pageTargetingCreate.getAddPeopleRuleButton().click()
         pageTargetingCreate.getTargetingCriteriaAutoComplete().click()
-        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys("Test String Attribute SW")
-        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys(Keys.ARROW_DOWN)
-        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys(Keys.ENTER)
+        pageTargetingCreate.select_listbox_element("Test String Attribute SW")
         pageTargetingCreate.getSelectFiltersRoundNumber().click()
         pageTargetingCreate.getSelectRoundOption(1).click()
         pageTargetingCreate.getInputFiltersValue().send_keys("Text")
@@ -784,12 +770,13 @@ class TestTargeting:
         pageTargeting.selectGlobalProgramFilter("Test Programm")
         pageTargeting.getNavTargeting().click()
         pageTargeting.getButtonCreateNew().click()
-        pageTargeting.getCreateUseIDs().click()
         assert "New Target Population" in pageTargetingCreate.getPageHeaderTitle().text
         assert "SAVE" in pageTargetingCreate.getButtonTargetPopulationCreate().text
         pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
         pageTargetingCreate.select_listbox_element("First Cycle In Programme")
+        pageTargetingCreate.getDivTargetPopulationAddCriteria().click()
         pageTargetingCreate.getInputHouseholdids().send_keys(household_with_disability.unicef_id)
+        pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
         pageTargetingCreate.getInputName().send_keys(f"Target Population for {household_with_disability.unicef_id}")
         pageTargetingCreate.clickButtonTargetPopulationCreate()
         target_population = TargetPopulation.objects.get(
@@ -818,7 +805,6 @@ class TestTargeting:
         pageTargeting.selectGlobalProgramFilter("Test Programm")
         pageTargeting.getNavTargeting().click()
         pageTargeting.getButtonCreateNew().click()
-        pageTargeting.getCreateUseIDs().click()
         assert "New Target Population" in pageTargetingCreate.getPageHeaderTitle().text
         assert "SAVE" in pageTargetingCreate.getButtonTargetPopulationCreate().text
         pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
@@ -983,13 +969,6 @@ class TestTargeting:
         [
             pytest.param(
                 {
-                    "type": "SOCIAL",
-                    "text": "Exclude People with Active Adjudication Ticket",
-                },
-                id="People",
-            ),
-            pytest.param(
-                {
                     "type": "STANDARD",
                     "text": "Exclude Households with Active Adjudication Ticket",
                 },
@@ -1013,10 +992,11 @@ class TestTargeting:
         pageTargeting.selectGlobalProgramFilter("Test Programm")
         pageTargeting.getNavTargeting().click()
         pageTargeting.getButtonCreateNew().click()
-        pageTargeting.getCreateUseIDs().click()
         pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
         pageTargetingCreate.select_listbox_element("First Cycle In Programme")
+        pageTargetingCreate.getDivTargetPopulationAddCriteria().click()
         pageTargetingCreate.getInputHouseholdids().send_keys(household_with_disability.unicef_id)
+        pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
         pageTargetingCreate.getInputName().send_keys(f"Test {household_with_disability.unicef_id}")
         pageTargetingCreate.getInputFlagexcludeifactiveadjudicationticket().click()
         pageTargetingCreate.clickButtonTargetPopulationCreate()
@@ -1083,7 +1063,6 @@ class TestTargeting:
         pageTargeting.selectGlobalProgramFilter("Test Programm")
         pageTargeting.getNavTargeting().click()
         pageTargeting.getButtonCreateNew().click()
-        pageTargeting.getCreateUseIDs().click()
         pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
         pageTargetingCreate.select_listbox_element("First Cycle In Programme")
         pageTargetingCreate.getInputHouseholdids().send_keys(household_with_disability.unicef_id)
@@ -1199,7 +1178,6 @@ class TestTargeting:
         pageTargeting.selectGlobalProgramFilter("Test Programm")
         pageTargeting.getNavTargeting().click()
         pageTargeting.getButtonCreateNew().click()
-        pageTargeting.getButtonCreateNewByFilters().click()
         assert "New Target Population" in pageTargetingCreate.getTitlePage().text
         pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
         pageTargetingCreate.select_listbox_element("First Cycle In Programme")
@@ -1229,7 +1207,6 @@ class TestTargeting:
         pageTargeting.selectGlobalProgramFilter("Test Programm")
         pageTargeting.getNavTargeting().click()
         pageTargeting.getButtonCreateNew().click()
-        pageTargeting.getButtonCreateNewByFilters().click()
         assert "New Target Population" in pageTargetingCreate.getTitlePage().text
         pageTargetingCreate.getFiltersProgramCycleAutocomplete().click()
         pageTargetingCreate.select_listbox_element("First Cycle In Programme")

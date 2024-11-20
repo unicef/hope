@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-shadow */
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { Field, useFormikContext } from 'formik';
 import { FC, useEffect } from 'react';
@@ -45,9 +46,14 @@ interface Filter {
 }
 
 interface Values {
-  filters?: Filter[];
+  householdsFiltersBlocks?: Filter[];
   individualsFiltersBlocks?: {
     individualBlockFilters?: {
+      isNull?: boolean;
+    }[];
+  }[];
+  collectorsFiltersBlocks?: {
+    collectorBlockFilters?: {
       isNull?: boolean;
     }[];
   }[];
@@ -59,6 +65,7 @@ interface SubFieldProps {
   index?: number;
   field?: any; // Adjust the type of field as necessary
   choicesDict?: any; // Adjust the type of choicesDict as necessary
+  fieldTypeProp?: string;
 }
 
 export const SubField: FC<SubFieldProps> = ({
@@ -67,6 +74,7 @@ export const SubField: FC<SubFieldProps> = ({
   index,
   field,
   choicesDict,
+  fieldTypeProp,
 }) => {
   const { t } = useTranslation();
   const { values, setFieldValue } = useFormikContext<Values>();
@@ -78,12 +86,16 @@ export const SubField: FC<SubFieldProps> = ({
     }
   }
 
+  const checkIsNullInBlocks = (blocks, blockIndex, index) => {
+    return blockIndex !== undefined && index !== undefined
+      ? blocks?.[blockIndex]?.blockFilters?.[index]?.isNull ?? false
+      : false;
+  };
+
   const isNullSelected =
-    (blockIndex !== undefined && index !== undefined
-      ? values?.individualsFiltersBlocks?.[blockIndex]
-          ?.individualBlockFilters?.[index]?.isNull ?? false
-      : false) ||
-    (values.filters?.some((filter) => filter.isNull) ?? false);
+    checkIsNullInBlocks(values?.individualsFiltersBlocks, blockIndex, index) ||
+    checkIsNullInBlocks(values?.collectorsFiltersBlocks, blockIndex, index) ||
+    (values.householdsFiltersBlocks?.some((filter) => filter.isNull) ?? false);
 
   useEffect(() => {
     if (isNullSelected) {
@@ -97,7 +109,8 @@ export const SubField: FC<SubFieldProps> = ({
     return null;
   }
   const renderFieldByType = (type: string) => {
-    switch (type) {
+    const typeForSwitch = fieldTypeProp || type;
+    switch (typeForSwitch) {
       case 'DECIMAL':
         return (
           <FlexWrapper>
@@ -229,7 +242,7 @@ export const SubField: FC<SubFieldProps> = ({
         return (
           <Field
             name={`${baseName}.value`}
-            label={`${field.fieldAttribute.labelEn}`}
+            label={`${field.fieldAttribute?.labelEn}`}
             fullWidth
             variant="outlined"
             component={FormikTextField}
@@ -241,7 +254,7 @@ export const SubField: FC<SubFieldProps> = ({
         return (
           <Field
             name={`${baseName}.value`}
-            label={`${field.fieldAttribute.labelEn}`}
+            label={`${field.fieldAttribute?.labelEn || field?.labelEn}`}
             choices={[
               {
                 admin: null,
@@ -313,5 +326,5 @@ export const SubField: FC<SubFieldProps> = ({
     }
   };
 
-  return renderFieldByType(field.fieldAttribute.type);
+  return renderFieldByType(field.fieldAttribute?.type);
 };
