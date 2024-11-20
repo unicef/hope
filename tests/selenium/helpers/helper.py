@@ -3,6 +3,8 @@ import time
 from time import sleep
 from typing import Literal, Union
 
+from django.conf import settings
+
 from selenium.common import NoSuchElementException
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver import Chrome, Keys
@@ -14,7 +16,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 
 class Common:
-    DEFAULT_TIMEOUT = 60
+    DEFAULT_TIMEOUT = 20
 
     def __init__(self, driver: Chrome):
         self.driver = driver
@@ -123,9 +125,9 @@ class Common:
             raise AssertionError(f"Element: {name} is not in the list: {[item.text for item in items]}")
 
     def check_page_after_click(self, button: WebElement, url_fragment: str) -> None:
-        programme_creation_url = self.driver.current_url
+        current_page_url = self.driver.current_url
         button.click()
-        assert url_fragment in self.wait_for_new_url(programme_creation_url).split("/")[-1]
+        assert url_fragment in self.wait_for_new_url(current_page_url).split("/")[-1], (current_page_url, url_fragment)
 
     def upload_file(
         self, upload_file: str, xpath: str = "//input[@type='file']", timeout: int = DEFAULT_TIMEOUT
@@ -174,6 +176,8 @@ class Common:
     def screenshot(
         self, file_name: str = "test", file_type: str = "png", file_path: str = "screenshot", delay_sec: float = 1
     ) -> None:
+        if file_path is None:
+            file_path = settings.SCREENSHOT_DIRECTORY
         sleep(delay_sec)
         self.driver.get_screenshot_as_file(os.path.join(f"{file_path}", f"{file_name}.{file_type}"))
 

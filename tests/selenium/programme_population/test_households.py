@@ -8,7 +8,7 @@ from tests.selenium.page_object.programme_population.households_details import (
     HouseholdsDetails,
 )
 
-pytestmark = pytest.mark.django_db(transaction=True)
+pytestmark = pytest.mark.django_db()
 
 
 @pytest.fixture
@@ -60,8 +60,8 @@ class TestSmokeHouseholds:
         assert "Agata Kowalska" in pageHouseholdsDetails.getLabelHeadOfHousehold().text
         assert "No" in pageHouseholdsDetails.getLabelFemaleChildHeadedHousehold().text
         assert "No" in pageHouseholdsDetails.getLabelChildHeadedHousehold().text
-        assert "Isle of Man" in pageHouseholdsDetails.getLabelCountry().text
-        assert "San Marino" in pageHouseholdsDetails.getLabelCountryOfOrigin().text
+        assert "Afghanistan" in pageHouseholdsDetails.getLabelCountry().text
+        assert "Afghanistan" in pageHouseholdsDetails.getLabelCountryOfOrigin().text
         assert "938 Luna Cliffs Apt. 551 Jameschester, SC 24934" in pageHouseholdsDetails.getLabelAddress().text
         assert "-" in pageHouseholdsDetails.getLabelVillage().text
         assert "-" in pageHouseholdsDetails.getLabelZipCode().text

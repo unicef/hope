@@ -10,7 +10,7 @@ from tests.selenium.page_object.programme_details.programme_details import (
     ProgrammeDetails,
 )
 
-pytestmark = pytest.mark.django_db(transaction=True)
+pytestmark = pytest.mark.django_db()
 
 
 @pytest.fixture
