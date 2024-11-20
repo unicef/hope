@@ -1,7 +1,8 @@
-from typing import TYPE_CHECKING, Any, Dict, Optional
+from typing import TYPE_CHECKING, Any, Dict, Optional, List
 
 from django import forms
 from django.contrib import admin, messages
+from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.db.models import Q, QuerySet
 from django.http import HttpRequest, HttpResponseRedirect
@@ -37,12 +38,14 @@ from hct_mis_api.apps.payment.models import (
     PaymentVerificationPlan,
     ServiceProvider,
 )
+from hct_mis_api.apps.payment.celery_tasks import prepare_payment_plan_task
 from hct_mis_api.apps.payment.services.create_cash_plan_from_reconciliation import (
     CreateCashPlanReconciliationService,
 )
 from hct_mis_api.apps.payment.services.verification_plan_status_change_services import (
     VerificationPlanStatusChangeServices,
 )
+from hct_mis_api.apps.payment.utils import generate_cache_key
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, PaymentPlanCeleryTasksMixin
 from hct_mis_api.apps.utils.security import is_root
 
@@ -261,9 +264,40 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
     )
     raw_id_fields = ("business_area", "program", "target_population", "created_by", "program_cycle")
     search_fields = ("id", "unicef_id")
+    actions = ["restart_prepare_payment_plan_task"]
 
     def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
         return is_root(request)
+
+    @admin.action(
+        permissions=is_root,
+        description="Restart Prepare Payment Plan Task",
+    )
+    def restart_prepare_payment_plan_task(self, request: HttpRequest, queryset: QuerySet["PaymentPlan"]) -> None:
+        if queryset.exclude(status=PaymentPlan.Status.PREPARING).exists():
+            self.message_user(
+                request,
+                f"The Payment Plan(s) must have the status {PaymentPlan.Status.PREPARING}",
+                messages.WARNING
+            )
+        restarted_pp_unicef_ids: List[str]= []
+        for payment_plan in queryset:
+            # check if no task in a queue
+            cache_key = generate_cache_key({
+                "task_name": "prepare_payment_plan_task",
+                "payment_plan_id": str(payment_plan.id),
+            })
+            if cache.get(cache_key):
+                self.message_user(
+                            request,
+                            f"Task is already running for Payment Plan {payment_plan.unicef_id}.",
+                            messages.ERROR
+                        )
+                continue
+            prepare_payment_plan_task.delay(payment_plan.id)
+            restarted_pp_unicef_ids.append(payment_plan.unicef_id)
+
+        self.message_user(request, f"Task restarted for Payment Plan(s): {restarted_pp_unicef_ids}", messages.SUCCESS)
 
 
 class PaymentHouseholdSnapshotInline(admin.StackedInline):
