@@ -168,7 +168,7 @@ class TestAllCollectorsFields(APITestCase):
             required_fields=["delivery_data_field__random_name"],
         )
 
-    def test_pdu_subtype_choices_data(self) -> None:
+    def test_collectors_fields_choices_data(self) -> None:
         self.snapshot_graphql_request(
             request_string=self.QUERY_ALL_COLLECTORS_FIELDS,
             variables={
