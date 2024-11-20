@@ -6,7 +6,7 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.models import User
 from tests.selenium.page_object.admin_panel.admin_panel import AdminPanel
 
-pytestmark = pytest.mark.django_db(transaction=True)
+pytestmark = pytest.mark.django_db()
 
 
 def create_normal_user() -> User:

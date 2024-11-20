@@ -8,6 +8,7 @@ interface ButtonTooltipProps {
   title?: string;
   disabled?: boolean;
   [key: string]: any;
+  dataCy?: string;
 }
 
 export const ButtonTooltip: FC<ButtonTooltipProps> = ({
@@ -15,18 +16,29 @@ export const ButtonTooltip: FC<ButtonTooltipProps> = ({
   onClick = () => null,
   title = 'Permission denied',
   disabled,
+  dataCy,
   ...otherProps
 }) => {
   return disabled ? (
     <Tooltip title={title}>
       <span>
-        <Button disabled={disabled} onClick={onClick} {...otherProps}>
+        <Button
+          disabled={disabled}
+          onClick={onClick}
+          data-cy={dataCy}
+          {...otherProps}
+        >
           {children}
         </Button>
       </span>
     </Tooltip>
   ) : (
-    <Button disabled={disabled} onClick={onClick} {...otherProps}>
+    <Button
+      disabled={disabled}
+      onClick={onClick}
+      data-cy={dataCy}
+      {...otherProps}
+    >
       {children}
     </Button>
   );

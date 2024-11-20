@@ -15,7 +15,7 @@ class Targeting(BaseComponents):
     programFilter = 'div[data-cy="filters-program"]'
     minNumberOfHouseholds = 'div[data-cy="filters-total-households-count-min"]'
     maxNumberOfHouseholds = 'div[data-cy="filters-total-households-count-max"]'
-    buttonCreateNew = 'button[data-cy="button-new-tp"]'
+    buttonCreateNew = 'a[data-cy="button-new-tp"]'
     buttonCreateNewByFilters = 'li[data-cy="menu-item-filters"]'
     tabTitle = 'h6[data-cy="table-title"]'
     tabColumnLabel = 'span[data-cy="table-label"]'
@@ -53,6 +53,7 @@ class Targeting(BaseComponents):
 
     def navigate_to_page(self, business_area_slug: str, program_id: str) -> None:
         self.driver.get(self.get_page_url(business_area_slug, program_id))
+        self.driver.refresh()
 
     def get_page_url(self, business_area_slug: str, program_id: str) -> str:
         encoded_program_id = encode_id_base64(program_id, "Program")
@@ -114,9 +115,10 @@ class Targeting(BaseComponents):
             return self.get_elements(self.rows)[number]
 
     def countTargetPopulations(self, number: int) -> None:
-        for _ in range(5):
+        for _ in range(50):
             if len(self.getTargetPopulationsRows()) == number:
                 break
+            sleep(0.1)
         else:
             raise TimeoutError(f"{len(self.getTargetPopulationsRows())} target populations instead of {number}")
 

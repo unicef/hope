@@ -118,7 +118,7 @@ snapshots['TestUpdateTargetPopulationMutation::test_update_mutation_correct_vari
                     'flagExcludeIfOnSanctionList': True,
                     'rules': [
                         {
-                            'filters': [
+                            'householdsFiltersBlocks': [
                                 {
                                     'arguments': [
                                         3
