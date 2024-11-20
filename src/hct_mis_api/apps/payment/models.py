@@ -1213,7 +1213,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
 
             if main_key in {"admin1_id", "admin2_id", "admin3_id", "admin4_id", "admin_area_id"}:
                 area = Area.objects.filter(pk=household_data.get(main_key)).first()
-                return area.p_code if area else None
+                return area.name if area else None
 
             if main_key == "roles":
                 lookup_id = primary_collector.get("id") or alternate_collector.get("id")
