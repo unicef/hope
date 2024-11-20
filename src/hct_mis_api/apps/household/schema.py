@@ -61,6 +61,7 @@ from hct_mis_api.apps.household.models import (
     DUPLICATE_IN_BATCH,
     INDIVIDUAL_FLAGS_CHOICES,
     MARITAL_STATUS_CHOICE,
+    NEEDS_ADJUDICATION,
     OBSERVED_DISABILITY_CHOICE,
     RELATIONSHIP_CHOICE,
     RESIDENCE_STATUS_CHOICE,
@@ -231,6 +232,7 @@ class IndividualNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTyp
         hopePermissionClass(Permissions.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS),
         hopePermissionClass(Permissions.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS_AS_CREATOR),
         hopePermissionClass(Permissions.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS_AS_OWNER),
+        hopePermissionClass(Permissions.RDI_VIEW_DETAILS),
     )
     status = graphene.String()
     estimated_birth_date = graphene.Boolean(required=False)
@@ -252,6 +254,27 @@ class IndividualNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTyp
     payment_channels = graphene.List(BankAccountInfoNode)
     preferred_language = graphene.String()
     delivery_mechanisms_data = graphene.List(DeliveryMechanismDataNode)
+    email = graphene.String(source="email")
+    import_id = graphene.String()
+
+    documents = DjangoFilterConnectionField(
+        DocumentNode,
+    )
+    identities = DjangoFilterConnectionField(
+        IndividualIdentityNode,
+    )
+
+    @staticmethod
+    def resolve_documents(parent: Individual, info: Any) -> QuerySet[Document]:
+        return Document.all_merge_status_objects.filter(pk__in=parent.documents.values("id"))
+
+    @staticmethod
+    def resolve_identities(parent: Individual, info: Any) -> QuerySet[IndividualIdentity]:
+        return IndividualIdentity.all_merge_status_objects.filter(pk__in=parent.identities.values("id"))
+
+    @staticmethod
+    def resolve_import_id(parent: Individual, info: Any) -> str:
+        return f"{parent.unicef_id} (Detail ID {parent.detail_id})" if parent.unicef_id else parent.unicef_id
 
     @staticmethod
     def resolve_preferred_language(parent: Individual, info: Any) -> Optional[str]:
@@ -387,6 +410,7 @@ class HouseholdNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType
         hopePermissionClass(Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS),
         hopePermissionClass(Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_CREATOR),
         hopePermissionClass(Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_OWNER),
+        hopePermissionClass(Permissions.RDI_VIEW_DETAILS),
     )
     total_cash_received = graphene.Decimal()
     total_cash_received_usd = graphene.Decimal()
@@ -398,6 +422,9 @@ class HouseholdNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType
     sanction_list_possible_match = graphene.Boolean()
     sanction_list_confirmed_match = graphene.Boolean()
     has_duplicates = graphene.Boolean(description="Mark household if any of individuals has Duplicate status")
+    has_duplicates_for_rdi = graphene.Boolean(
+        description="Mark household if any of individuals has Duplicate or Duplicate In Batch or Needs Adjudication"
+    )
     consent_sharing = graphene.List(graphene.String)
     admin_area = graphene.Field(AreaNode)
     admin_area_title = graphene.String(description="Admin area title")
@@ -465,6 +492,13 @@ class HouseholdNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType
         if hasattr(parent, "has_duplicates_annotated"):
             return parent.has_duplicates_annotated
         return parent.individuals.filter(deduplication_golden_record_status=DUPLICATE).exists()
+
+    @staticmethod
+    def resolve_has_duplicates_for_rdi(parent: Household, info: Any) -> bool:
+        return parent.individuals.filter(
+            Q(deduplication_batch_status=DUPLICATE_IN_BATCH)
+            | Q(deduplication_golden_record_status__in=(DUPLICATE, NEEDS_ADJUDICATION))
+        ).exists()
 
     @staticmethod
     def resolve_flex_fields(parent: Household, info: Any) -> Dict:
@@ -657,7 +691,7 @@ class Query(graphene.ObjectType):
             if program and program.status == Program.DRAFT:
                 return Individual.objects.none()
 
-        queryset = Individual.objects.all()
+        queryset = Individual.all_merge_status_objects.all()
         if does_path_exist_in_query("edges.node.household", info):
             queryset = queryset.select_related("household")
         if does_path_exist_in_query("edges.node.household.admin2", info):
@@ -713,7 +747,7 @@ class Query(graphene.ObjectType):
             if program and program.status == Program.DRAFT:
                 return Household.objects.none()
 
-        queryset = Household.objects.all()
+        queryset = Household.all_merge_status_objects.all()
 
         if not user.partner.is_unicef:  # Unicef partner has full access to all AdminAreas
             business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
