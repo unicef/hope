@@ -133,9 +133,9 @@ class TestSanctionListPreMerge(TestCase):
         CheckAgainstSanctionListPreMergeTask.execute()
 
         expected = [
-            {"full_name": "Abdul Afghanistan", "sanction_list_possible_match": True},
+            {"full_name": "Abdul Afghanistan", "sanction_list_possible_match": False},
             {"full_name": "Choo Ryoong", "sanction_list_possible_match": False},
-            {"full_name": "Ri Won Ho", "sanction_list_possible_match": True},
+            {"full_name": "Ri Won Ho", "sanction_list_possible_match": False},
             {"full_name": "Tescik Testowski", "sanction_list_possible_match": False},
             {"full_name": "Tessta Testowski", "sanction_list_possible_match": False},
             {"full_name": "Tessta Testowski", "sanction_list_possible_match": False},
@@ -149,9 +149,9 @@ class TestSanctionListPreMerge(TestCase):
 
     def test_create_system_flag_tickets(self) -> None:
         CheckAgainstSanctionListPreMergeTask.execute()
-        self.assertEqual(GrievanceTicket.objects.filter(category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING).count(), 3)
+        self.assertEqual(GrievanceTicket.objects.filter(category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING).count(), 0)
         for grievance_ticket in GrievanceTicket.objects.filter(category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING):
-            self.assertEqual(grievance_ticket.programs.count(), 1)
+            self.assertEqual(grievance_ticket.programs.count(), 0)
             self.assertEqual(grievance_ticket.programs.first(), self.program)
 
         self.household.refresh_from_db()

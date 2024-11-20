@@ -4,6 +4,7 @@ import { useLocation } from 'react-router-dom';
 import { LookUpButton } from '../../LookUpButton';
 import { LookUpPaymentRecordDisplay } from './LookUpPaymentRecordDisplay';
 import { LookUpPaymentRecordModal } from './LookUpPaymentRecordModal';
+import { useProgramContext } from 'src/programContext';
 
 export function LookUpPaymentRecord({
   onValueChange,
@@ -16,10 +17,12 @@ export function LookUpPaymentRecord({
 }): ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
+  const { isSocialDctType } = useProgramContext();
   const isEditTicket = location.pathname.includes('edit-ticket');
   const [lookUpDialogOpen, setLookUpDialogOpen] = useState(false);
 
-  const shouldDisplayPlaceholder = (): boolean => !values.selectedHousehold;
+  const shouldDisplayPlaceholder = (): boolean =>
+    !values.selectedHousehold && !isSocialDctType;
 
   return (
     <>

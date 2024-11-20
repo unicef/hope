@@ -1,4 +1,5 @@
 import json
+import re
 from typing import Any, Callable, Dict, Optional
 
 from django.core.cache import cache
@@ -54,7 +55,7 @@ def test_refresh_data(afghanistan: BusinessAreaFactory, populate_dashboard_cache
     _ = populate_dashboard_cache(afghanistan)
     data: ReturnDict = DashboardDataCache.refresh_data(afghanistan.slug)
     assert len(data) > 0
-    assert any(item["business_area_name"] == afghanistan.slug for item in data)
+    assert all(re.match(r"^[A-Z]{3}$", item["currency"]) for item in data)
     assert sum(item["payments"] for item in data) == 8
     all_fields = DashboardHouseholdSerializer().get_fields().keys()
     assert data[0].keys() >= all_fields

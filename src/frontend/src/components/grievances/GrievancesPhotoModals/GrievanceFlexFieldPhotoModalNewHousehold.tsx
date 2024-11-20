@@ -1,13 +1,16 @@
 import { Box } from '@mui/material';
 import {
   AllEditHouseholdFieldsQuery,
+  AllEditPeopleFieldsQuery,
   useHouseholdFlexFieldsQuery,
 } from '@generated/graphql';
 import { PhotoModal } from '@core/PhotoModal/PhotoModal';
 import { ReactElement } from 'react';
 
 export interface GrievanceFlexFieldPhotoModalNewHouseholdProps {
-  flexField: AllEditHouseholdFieldsQuery['allEditHouseholdFieldsAttributes'][number];
+  flexField:
+    | AllEditHouseholdFieldsQuery['allEditHouseholdFieldsAttributes'][number]
+    | AllEditPeopleFieldsQuery['allEditPeopleFieldsAttributes'][number];
   householdId: string;
 }
 

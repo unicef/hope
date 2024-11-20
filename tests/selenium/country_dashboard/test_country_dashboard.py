@@ -54,6 +54,9 @@ class TestSmokeCountryDashboard:
         pageCountryDashboard.switch_to_dashboard_iframe()
         assert pageCountryDashboard.get_total_amount_paid().text != "", "Expected total amount paid to be populated."
         assert (
+            pageCountryDashboard.get_total_amount_paid_local().text != ""
+        ), "Expected total amount in local paid to be populated."
+        assert (
             int(pageCountryDashboard.get_number_of_payments().text) > 0
         ), "Expected number of payments to be greater than zero."
         assert (
@@ -83,4 +86,3 @@ class TestSmokeCountryDashboard:
         ).is_displayed(), "Payments by Admin 1 chart should be displayed."
 
         pageCountryDashboard.switch_to_default_content()
-        print("All checks in the Country Dashboard iframe passed successfully.")
