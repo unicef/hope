@@ -570,35 +570,6 @@ def withdraw_individual_and_reassign_roles(ticket_details: Any, individual_to_re
     withdraw_individual(individual_to_remove, info, old_individual, household, ticket_details.ticket.programs.all())
 
 
-def mark_as_duplicate_individual_and_reassign_roles(
-    ticket_details: Any, individual_to_remove: Individual, info: Any, unique_individual: Individual
-) -> None:
-    old_individual = Individual.objects.get(id=individual_to_remove.id)
-    if ticket_details.is_multiple_duplicates_version:
-        household = reassign_roles_on_disable_individual(
-            individual_to_remove,
-            ticket_details.role_reassign_data,
-            info,
-            ticket_details.programs.all(),
-            is_new_ticket=True,
-        )
-    else:
-        household = reassign_roles_on_disable_individual(
-            individual_to_remove,
-            ticket_details.role_reassign_data,
-            ticket_details.programs.all(),
-            info,
-        )
-    mark_as_duplicate_individual(
-        individual_to_remove,
-        info,
-        old_individual,
-        household,
-        unique_individual,
-        ticket_details.programs.all(),
-    )
-
-
 def get_data_from_role_data(role_data: Dict) -> Tuple[Optional[Any], Individual, Individual, Household]:
     role_name = role_data.get("role")
 

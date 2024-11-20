@@ -822,8 +822,6 @@ type CreateSurveyMutation {
 input CreateTargetPopulationInput {
   name: String!
   targetingCriteria: TargetingCriteriaObjectType!
-  businessAreaSlug: String!
-  programId: ID!
   programCycleId: ID!
   excludedIds: String!
   exclusionReason: String
@@ -3956,6 +3954,7 @@ type Query {
   businessArea(businessAreaSlug: String!): BusinessAreaNode
   allBusinessAreas(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, slug: String): BusinessAreaNodeConnection
   allFieldsAttributes(flexField: Boolean, businessAreaSlug: String, programId: String): [FieldAttributeNode]
+  allCollectorFieldsAttributes(flexField: Boolean): [FieldAttributeNode]
   allPduFields(businessAreaSlug: String!, programId: String!): [FieldAttributeNode]
   allGroupsWithFields: [GroupAttributeNode]
   koboProject(uid: String!, businessAreaSlug: String!): KoboAssetObject
@@ -4787,14 +4786,44 @@ enum TargetPopulationStatus {
   ASSIGNED
 }
 
+enum TargetingCollectorBlockRuleFilterFlexFieldClassification {
+  NOT_FLEX_FIELD
+  FLEX_FIELD_BASIC
+  FLEX_FIELD_PDU
+}
+
+type TargetingCollectorBlockRuleFilterNode {
+  id: UUID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  collectorBlockFilters: TargetingCollectorRuleFilterBlockNode!
+  fieldName: String!
+  comparisonMethod: String
+  flexFieldClassification: TargetingCollectorBlockRuleFilterFlexFieldClassification!
+  arguments: [Arg]
+  labelEn: String
+}
+
+type TargetingCollectorRuleFilterBlockNode {
+  id: UUID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  targetingCriteriaRule: TargetingCriteriaRuleNode!
+  collectorBlockFilters: [TargetingCollectorBlockRuleFilterNode]
+}
+
+input TargetingCollectorRuleFilterBlockObjectType {
+  collectorBlockFilters: [TargetingCriteriaRuleFilterObjectType]
+}
+
 type TargetingCriteriaNode {
   id: UUID!
   createdAt: DateTime!
   updatedAt: DateTime!
   flagExcludeIfActiveAdjudicationTicket: Boolean!
   flagExcludeIfOnSanctionList: Boolean!
-  householdIds: String!
-  individualIds: String!
+  householdIds: String
+  individualIds: String
   targetPopulation: TargetPopulationNode
   rules: [TargetingCriteriaRuleNode]
 }
@@ -4803,8 +4832,6 @@ input TargetingCriteriaObjectType {
   rules: [TargetingCriteriaRuleObjectType]
   flagExcludeIfActiveAdjudicationTicket: Boolean
   flagExcludeIfOnSanctionList: Boolean
-  householdIds: String
-  individualIds: String
 }
 
 enum TargetingCriteriaRuleFilterComparisonMethod {
@@ -4851,13 +4878,19 @@ type TargetingCriteriaRuleNode {
   createdAt: DateTime!
   updatedAt: DateTime!
   targetingCriteria: TargetingCriteriaNode!
+  householdIds: String!
+  individualIds: String!
   individualsFiltersBlocks: [TargetingIndividualRuleFilterBlockNode]
-  filters: [TargetingCriteriaRuleFilterNode]
+  collectorsFiltersBlocks: [TargetingCollectorRuleFilterBlockNode!]!
+  householdsFiltersBlocks: [TargetingCriteriaRuleFilterNode]
 }
 
 input TargetingCriteriaRuleObjectType {
-  filters: [TargetingCriteriaRuleFilterObjectType]
+  householdsFiltersBlocks: [TargetingCriteriaRuleFilterObjectType]
+  householdIds: String
   individualsFiltersBlocks: [TargetingIndividualRuleFilterBlockObjectType]
+  individualIds: String
+  collectorsFiltersBlocks: [TargetingCollectorRuleFilterBlockObjectType]
 }
 
 enum TargetingIndividualBlockRuleFilterComparisonMethod {
@@ -5379,7 +5412,6 @@ input UpdateTargetPopulationInput {
   id: ID!
   name: String
   targetingCriteria: TargetingCriteriaObjectType
-  programId: ID
   programCycleId: ID
   vulnerabilityScoreMin: Decimal
   vulnerabilityScoreMax: Decimal

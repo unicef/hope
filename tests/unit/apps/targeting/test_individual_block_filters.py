@@ -8,10 +8,19 @@ from hct_mis_api.apps.core.fixtures import (
 )
 from hct_mis_api.apps.core.models import FlexibleAttribute, PeriodicFieldData
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
-from hct_mis_api.apps.household.models import FEMALE, MALE, Household
+from hct_mis_api.apps.household.models import (
+    FEMALE,
+    MALE,
+    ROLE_PRIMARY,
+    Household,
+    IndividualRoleInHousehold,
+)
+from hct_mis_api.apps.payment.fixtures import DeliveryMechanismDataFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.targeting.choices import FlexFieldClassification
 from hct_mis_api.apps.targeting.models import (
+    TargetingCollectorBlockRuleFilter,
+    TargetingCollectorRuleFilterBlock,
     TargetingCriteria,
     TargetingCriteriaQueryingBase,
     TargetingCriteriaRule,
@@ -21,6 +30,10 @@ from hct_mis_api.apps.targeting.models import (
     TargetingIndividualRuleFilterBlockBase,
     TargetPopulation,
 )
+from hct_mis_api.apps.targeting.services.targeting_service import (
+    TargetingCollectorRuleFilterBlockBase,
+)
+from hct_mis_api.apps.utils.models import MergeStatusModel
 
 
 class TestIndividualBlockFilter(TestCase):
@@ -93,7 +106,9 @@ class TestIndividualBlockFilter(TestCase):
         individuals_filters_block = TargetingIndividualRuleFilterBlockBase(
             individual_block_filters=[married_rule_filter, sex_filter], target_only_hoh=False
         )
-        tcr = TargetingCriteriaRuleQueryingBase(filters=[], individuals_filters_blocks=[individuals_filters_block])
+        tcr = TargetingCriteriaRuleQueryingBase(
+            filters=[], individuals_filters_blocks=[individuals_filters_block], collectors_filters_blocks=[]
+        )
         tc = TargetingCriteriaQueryingBase(rules=[tcr])
         query = query.filter(tc.get_query())
         self.assertEqual(query.count(), 1)
@@ -128,7 +143,9 @@ class TestIndividualBlockFilter(TestCase):
             individual_block_filters=[single_rule_filter, male_sex_filter], target_only_hoh=False
         )
         tcr = TargetingCriteriaRuleQueryingBase(
-            filters=[], individuals_filters_blocks=[individuals_filters_block1, individuals_filters_block2]
+            filters=[],
+            individuals_filters_blocks=[individuals_filters_block1, individuals_filters_block2],
+            collectors_filters_blocks=[],
         )
         tc = TargetingCriteriaQueryingBase(rules=[tcr])
         query = query.filter(tc.get_query())
@@ -360,3 +377,39 @@ class TestIndividualBlockFilter(TestCase):
         query = query.filter(tc.get_query())
         self.assertEqual(query.count(), 1)
         self.assertEqual(query.first().id, self.household_1_indiv.id)
+
+    def test_collector_blocks(self) -> None:
+        query = Household.objects.all().order_by("unicef_id")
+        hh = query.first()
+        IndividualRoleInHousehold.objects.create(
+            individual=hh.individuals.first(), household=hh, role=ROLE_PRIMARY, rdi_merge_status=MergeStatusModel.MERGED
+        )
+        collector = IndividualRoleInHousehold.objects.get(household_id=hh.pk, role=ROLE_PRIMARY).individual
+        DeliveryMechanismDataFactory(
+            individual=collector, is_valid=True, data={"delivery_data_field__random_name": "test123"}
+        )
+        # Target population
+        tp = TargetPopulation(program=hh.program)
+        tc = TargetingCriteria()
+        tc.target_population = tp
+        tc.save()
+        tcr = TargetingCriteriaRule()
+        tcr.targeting_criteria = tc
+        tcr.save()
+        col_block = TargetingCollectorRuleFilterBlock(targeting_criteria_rule=tcr)
+        collector_filter = TargetingCollectorBlockRuleFilter(
+            collector_block_filters=col_block,
+            comparison_method="EQUALS",
+            field_name="delivery_data_field__random_name",
+            arguments=[True],
+        )
+        collectors_filters_block = TargetingCollectorRuleFilterBlockBase(collector_block_filters=[collector_filter])
+        tcr = TargetingCriteriaRuleQueryingBase(
+            filters=[],
+            individuals_filters_blocks=[],
+            collectors_filters_blocks=[collectors_filters_block],
+        )
+        tc = TargetingCriteriaQueryingBase(rules=[tcr])
+        query = query.filter(tc.get_query())
+        self.assertEqual(query.count(), 1)
+        self.assertEqual(query.first().unicef_id, self.household_1_indiv.unicef_id)

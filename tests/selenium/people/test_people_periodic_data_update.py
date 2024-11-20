@@ -2,8 +2,6 @@ import os
 from datetime import datetime
 from time import sleep
 
-from django.conf import settings
-
 import pytest
 from dateutil.relativedelta import relativedelta
 
@@ -51,14 +49,16 @@ from tests.selenium.programme_population.test_periodic_data_update_upload import
     prepare_xlsx_file,
 )
 
-pytestmark = pytest.mark.django_db(transaction=True)
+pytestmark = pytest.mark.django_db()
 
 
 @pytest.fixture
-def clear_downloaded_files() -> None:
+def clear_downloaded_files(download_path: str) -> None:
+    for file in os.listdir(download_path):
+        os.remove(os.path.join(download_path, file))
     yield
-    for file in os.listdir(settings.DOWNLOAD_DIRECTORY):
-        os.remove(os.path.join(settings.DOWNLOAD_DIRECTORY, file))
+    for file in os.listdir(download_path):
+        os.remove(os.path.join(download_path, file))
 
 
 @pytest.fixture
