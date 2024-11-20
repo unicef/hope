@@ -52,7 +52,19 @@ snapshots['TestCopyTargetPopulationMutation::test_copy_target_0_with_permission 
                     'individualIds': '',
                     'rules': [
                         {
-                            'filters': [
+                            'collectorsFiltersBlocks': [
+                                {
+                                    'collectorBlockFilters': [
+                                        {
+                                            'arguments': [
+                                                True
+                                            ],
+                                            'fieldName': 'delivery_data_field__random_name'
+                                        }
+                                    ]
+                                }
+                            ],
+                            'householdsFiltersBlocks': [
                                 {
                                     'arguments': [
                                         1

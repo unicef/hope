@@ -2,8 +2,6 @@ import os
 from tempfile import NamedTemporaryFile, _TemporaryFileWrapper
 from typing import Any
 
-from django.conf import settings
-
 import openpyxl
 import pytest
 
@@ -41,14 +39,16 @@ from tests.selenium.page_object.programme_population.periodic_data_update_upload
     PeriodicDataUpdateUploads,
 )
 
-pytestmark = pytest.mark.django_db(transaction=True)
+pytestmark = pytest.mark.django_db()
 
 
 @pytest.fixture
-def clear_downloaded_files() -> None:
+def clear_downloaded_files(download_path: str) -> None:
+    for file in os.listdir(download_path):
+        os.remove(os.path.join(download_path, file))
     yield
-    for file in os.listdir(settings.DOWNLOAD_DIRECTORY):
-        os.remove(os.path.join(settings.DOWNLOAD_DIRECTORY, file))
+    for file in os.listdir(download_path):
+        os.remove(os.path.join(download_path, file))
 
 
 @pytest.fixture

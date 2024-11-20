@@ -1,6 +1,3 @@
-from typing import Any
-from unittest.mock import patch
-
 from hct_mis_api.apps.account.fixtures import (
     BusinessAreaFactory,
     PartnerFactory,
@@ -469,10 +466,7 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
             },
         )
 
-    @patch(
-        "hct_mis_api.apps.grievance.services.needs_adjudication_ticket_services.mark_as_duplicate_individual_and_reassign_roles"
-    )
-    def test_close_ticket_when_partner_does_not_have_permission(self, mock: Any) -> None:
+    def test_close_ticket_when_partner_does_not_have_permission(self) -> None:
         partner = PartnerFactory(name="NOT_UNICEF")
         self.update_partner_access_to_program(partner, self.program, [self.burka])
         self.user.partner = partner

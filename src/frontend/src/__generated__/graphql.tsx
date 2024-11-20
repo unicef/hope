@@ -1282,12 +1282,10 @@ export type CreateSurveyMutation = {
 };
 
 export type CreateTargetPopulationInput = {
-  businessAreaSlug: Scalars['String']['input'];
   excludedIds: Scalars['String']['input'];
   exclusionReason?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
   programCycleId: Scalars['ID']['input'];
-  programId: Scalars['ID']['input'];
   targetingCriteria: TargetingCriteriaObjectType;
 };
 
@@ -6061,6 +6059,7 @@ export type Query = {
   allBusinessAreas?: Maybe<BusinessAreaNodeConnection>;
   allCashPlans?: Maybe<CashPlanNodeConnection>;
   allCashPlansAndPaymentPlans?: Maybe<PaginatedCashPlanAndPaymentPlanNode>;
+  allCollectorFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>;
   allDeliveryMechanisms?: Maybe<Array<Maybe<ChoiceObject>>>;
   allEditHouseholdFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>;
   allEditPeopleFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>;
@@ -6396,6 +6395,11 @@ export type QueryAllCashPlansAndPaymentPlansArgs = {
   serviceProvider?: InputMaybe<Scalars['String']['input']>;
   startDateGte?: InputMaybe<Scalars['String']['input']>;
   verificationStatus?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+};
+
+
+export type QueryAllCollectorFieldsAttributesArgs = {
+  flexField?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 
@@ -8377,14 +8381,46 @@ export enum TargetPopulationStatus {
   SteficonWait = 'STEFICON_WAIT'
 }
 
+export enum TargetingCollectorBlockRuleFilterFlexFieldClassification {
+  FlexFieldBasic = 'FLEX_FIELD_BASIC',
+  FlexFieldPdu = 'FLEX_FIELD_PDU',
+  NotFlexField = 'NOT_FLEX_FIELD'
+}
+
+export type TargetingCollectorBlockRuleFilterNode = {
+  __typename?: 'TargetingCollectorBlockRuleFilterNode';
+  arguments?: Maybe<Array<Maybe<Scalars['Arg']['output']>>>;
+  collectorBlockFilters: TargetingCollectorRuleFilterBlockNode;
+  comparisonMethod?: Maybe<Scalars['String']['output']>;
+  createdAt: Scalars['DateTime']['output'];
+  fieldName: Scalars['String']['output'];
+  flexFieldClassification: TargetingCollectorBlockRuleFilterFlexFieldClassification;
+  id: Scalars['UUID']['output'];
+  labelEn?: Maybe<Scalars['String']['output']>;
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+export type TargetingCollectorRuleFilterBlockNode = {
+  __typename?: 'TargetingCollectorRuleFilterBlockNode';
+  collectorBlockFilters?: Maybe<Array<Maybe<TargetingCollectorBlockRuleFilterNode>>>;
+  createdAt: Scalars['DateTime']['output'];
+  id: Scalars['UUID']['output'];
+  targetingCriteriaRule: TargetingCriteriaRuleNode;
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+export type TargetingCollectorRuleFilterBlockObjectType = {
+  collectorBlockFilters?: InputMaybe<Array<InputMaybe<TargetingCriteriaRuleFilterObjectType>>>;
+};
+
 export type TargetingCriteriaNode = {
   __typename?: 'TargetingCriteriaNode';
   createdAt: Scalars['DateTime']['output'];
   flagExcludeIfActiveAdjudicationTicket: Scalars['Boolean']['output'];
   flagExcludeIfOnSanctionList: Scalars['Boolean']['output'];
-  householdIds: Scalars['String']['output'];
+  householdIds?: Maybe<Scalars['String']['output']>;
   id: Scalars['UUID']['output'];
-  individualIds: Scalars['String']['output'];
+  individualIds?: Maybe<Scalars['String']['output']>;
   rules?: Maybe<Array<Maybe<TargetingCriteriaRuleNode>>>;
   targetPopulation?: Maybe<TargetPopulationNode>;
   updatedAt: Scalars['DateTime']['output'];
@@ -8393,8 +8429,6 @@ export type TargetingCriteriaNode = {
 export type TargetingCriteriaObjectType = {
   flagExcludeIfActiveAdjudicationTicket?: InputMaybe<Scalars['Boolean']['input']>;
   flagExcludeIfOnSanctionList?: InputMaybe<Scalars['Boolean']['input']>;
-  householdIds?: InputMaybe<Scalars['String']['input']>;
-  individualIds?: InputMaybe<Scalars['String']['input']>;
   rules?: InputMaybe<Array<InputMaybe<TargetingCriteriaRuleObjectType>>>;
 };
 
@@ -8440,16 +8474,22 @@ export type TargetingCriteriaRuleFilterObjectType = {
 
 export type TargetingCriteriaRuleNode = {
   __typename?: 'TargetingCriteriaRuleNode';
+  collectorsFiltersBlocks: Array<TargetingCollectorRuleFilterBlockNode>;
   createdAt: Scalars['DateTime']['output'];
-  filters?: Maybe<Array<Maybe<TargetingCriteriaRuleFilterNode>>>;
+  householdIds: Scalars['String']['output'];
+  householdsFiltersBlocks?: Maybe<Array<Maybe<TargetingCriteriaRuleFilterNode>>>;
   id: Scalars['UUID']['output'];
+  individualIds: Scalars['String']['output'];
   individualsFiltersBlocks?: Maybe<Array<Maybe<TargetingIndividualRuleFilterBlockNode>>>;
   targetingCriteria: TargetingCriteriaNode;
   updatedAt: Scalars['DateTime']['output'];
 };
 
 export type TargetingCriteriaRuleObjectType = {
-  filters?: InputMaybe<Array<InputMaybe<TargetingCriteriaRuleFilterObjectType>>>;
+  collectorsFiltersBlocks?: InputMaybe<Array<InputMaybe<TargetingCollectorRuleFilterBlockObjectType>>>;
+  householdIds?: InputMaybe<Scalars['String']['input']>;
+  householdsFiltersBlocks?: InputMaybe<Array<InputMaybe<TargetingCriteriaRuleFilterObjectType>>>;
+  individualIds?: InputMaybe<Scalars['String']['input']>;
   individualsFiltersBlocks?: InputMaybe<Array<InputMaybe<TargetingIndividualRuleFilterBlockObjectType>>>;
 };
 
@@ -9044,7 +9084,6 @@ export type UpdateTargetPopulationInput = {
   id: Scalars['ID']['input'];
   name?: InputMaybe<Scalars['String']['input']>;
   programCycleId?: InputMaybe<Scalars['ID']['input']>;
-  programId?: InputMaybe<Scalars['ID']['input']>;
   targetingCriteria?: InputMaybe<TargetingCriteriaObjectType>;
   vulnerabilityScoreMax?: InputMaybe<Scalars['Decimal']['input']>;
   vulnerabilityScoreMin?: InputMaybe<Scalars['Decimal']['input']>;
@@ -9750,7 +9789,7 @@ export type ImportedIndividualDetailedFragment = { __typename?: 'ImportedIndivid
 
 export type TargetPopulationMinimalFragment = { __typename: 'TargetPopulationNode', id: string, name: string, status: TargetPopulationStatus, createdAt: any, updatedAt: any, totalHouseholdsCount?: number | null, totalHouseholdsCountWithValidPhoneNo?: number | null, totalIndividualsCount?: number | null, program: { __typename: 'ProgramNode', id: string, name: string }, createdBy?: { __typename: 'UserNode', id: string, firstName: string, lastName: string } | null };
 
-export type TargetPopulationDetailedFragment = { __typename?: 'TargetPopulationNode', id: string, name: string, status: TargetPopulationStatus, adminUrl?: string | null, buildStatus: TargetPopulationBuildStatus, totalHouseholdsCount?: number | null, totalIndividualsCount?: number | null, childMaleCount?: number | null, childFemaleCount?: number | null, adultMaleCount?: number | null, adultFemaleCount?: number | null, caHashId?: string | null, excludedIds: string, exclusionReason: string, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, changeDate?: any | null, finalizedAt?: any | null, hasEmptyCriteria?: boolean | null, hasEmptyIdsCriteria?: boolean | null, steficonRule?: { __typename: 'RuleCommitNode', id: string, rule?: { __typename: 'SteficonRuleNode', id: string, name: string } | null } | null, finalizedBy?: { __typename: 'UserNode', id: string, firstName: string, lastName: string } | null, program: { __typename: 'ProgramNode', id: string, name: string, status: ProgramStatus, startDate: any, endDate?: any | null, isSocialWorkerProgram?: boolean | null }, programCycle: { __typename: 'ProgramCycleNode', id: string, title?: string | null }, createdBy?: { __typename: 'UserNode', id: string, email: string, firstName: string, lastName: string } | null, targetingCriteria?: { __typename: 'TargetingCriteriaNode', id: any, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, householdIds: string, individualIds: string, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingIndividualBlockRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null, filters?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingCriteriaRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null } | null };
+export type TargetPopulationDetailedFragment = { __typename?: 'TargetPopulationNode', id: string, name: string, status: TargetPopulationStatus, adminUrl?: string | null, buildStatus: TargetPopulationBuildStatus, totalHouseholdsCount?: number | null, totalIndividualsCount?: number | null, childMaleCount?: number | null, childFemaleCount?: number | null, adultMaleCount?: number | null, adultFemaleCount?: number | null, caHashId?: string | null, excludedIds: string, exclusionReason: string, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, changeDate?: any | null, finalizedAt?: any | null, hasEmptyCriteria?: boolean | null, hasEmptyIdsCriteria?: boolean | null, steficonRule?: { __typename: 'RuleCommitNode', id: string, rule?: { __typename: 'SteficonRuleNode', id: string, name: string } | null } | null, finalizedBy?: { __typename: 'UserNode', id: string, firstName: string, lastName: string } | null, program: { __typename: 'ProgramNode', id: string, name: string, status: ProgramStatus, startDate: any, endDate?: any | null, isSocialWorkerProgram?: boolean | null }, programCycle: { __typename: 'ProgramCycleNode', id: string, title?: string | null }, createdBy?: { __typename: 'UserNode', id: string, email: string, firstName: string, lastName: string } | null, targetingCriteria?: { __typename: 'TargetingCriteriaNode', id: any, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, householdIds?: string | null, individualIds?: string | null, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, householdIds: string, individualIds: string, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingIndividualBlockRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null, collectorsFiltersBlocks: Array<{ __typename: 'TargetingCollectorRuleFilterBlockNode', id: any, createdAt: any, updatedAt: any, collectorBlockFilters?: Array<{ __typename: 'TargetingCollectorBlockRuleFilterNode', id: any, createdAt: any, updatedAt: any, fieldName: string, comparisonMethod?: string | null, flexFieldClassification: TargetingCollectorBlockRuleFilterFlexFieldClassification, arguments?: Array<any | null> | null, labelEn?: string | null } | null> | null }>, householdsFiltersBlocks?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingCriteriaRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null } | null };
 
 export type CreateFeedbackTicketMutationVariables = Exact<{
   input: CreateFeedbackInput;
@@ -10350,35 +10389,35 @@ export type FinalizeTpMutationVariables = Exact<{
 }>;
 
 
-export type FinalizeTpMutation = { __typename?: 'Mutations', finalizeTargetPopulation?: { __typename?: 'FinalizeTargetPopulationMutation', targetPopulation?: { __typename?: 'TargetPopulationNode', id: string, name: string, status: TargetPopulationStatus, adminUrl?: string | null, buildStatus: TargetPopulationBuildStatus, totalHouseholdsCount?: number | null, totalIndividualsCount?: number | null, childMaleCount?: number | null, childFemaleCount?: number | null, adultMaleCount?: number | null, adultFemaleCount?: number | null, caHashId?: string | null, excludedIds: string, exclusionReason: string, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, changeDate?: any | null, finalizedAt?: any | null, hasEmptyCriteria?: boolean | null, hasEmptyIdsCriteria?: boolean | null, steficonRule?: { __typename: 'RuleCommitNode', id: string, rule?: { __typename: 'SteficonRuleNode', id: string, name: string } | null } | null, finalizedBy?: { __typename: 'UserNode', id: string, firstName: string, lastName: string } | null, program: { __typename: 'ProgramNode', id: string, name: string, status: ProgramStatus, startDate: any, endDate?: any | null, isSocialWorkerProgram?: boolean | null }, programCycle: { __typename: 'ProgramCycleNode', id: string, title?: string | null }, createdBy?: { __typename: 'UserNode', id: string, email: string, firstName: string, lastName: string } | null, targetingCriteria?: { __typename: 'TargetingCriteriaNode', id: any, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, householdIds: string, individualIds: string, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingIndividualBlockRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null, filters?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingCriteriaRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null } | null } | null } | null };
+export type FinalizeTpMutation = { __typename?: 'Mutations', finalizeTargetPopulation?: { __typename?: 'FinalizeTargetPopulationMutation', targetPopulation?: { __typename?: 'TargetPopulationNode', id: string, name: string, status: TargetPopulationStatus, adminUrl?: string | null, buildStatus: TargetPopulationBuildStatus, totalHouseholdsCount?: number | null, totalIndividualsCount?: number | null, childMaleCount?: number | null, childFemaleCount?: number | null, adultMaleCount?: number | null, adultFemaleCount?: number | null, caHashId?: string | null, excludedIds: string, exclusionReason: string, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, changeDate?: any | null, finalizedAt?: any | null, hasEmptyCriteria?: boolean | null, hasEmptyIdsCriteria?: boolean | null, steficonRule?: { __typename: 'RuleCommitNode', id: string, rule?: { __typename: 'SteficonRuleNode', id: string, name: string } | null } | null, finalizedBy?: { __typename: 'UserNode', id: string, firstName: string, lastName: string } | null, program: { __typename: 'ProgramNode', id: string, name: string, status: ProgramStatus, startDate: any, endDate?: any | null, isSocialWorkerProgram?: boolean | null }, programCycle: { __typename: 'ProgramCycleNode', id: string, title?: string | null }, createdBy?: { __typename: 'UserNode', id: string, email: string, firstName: string, lastName: string } | null, targetingCriteria?: { __typename: 'TargetingCriteriaNode', id: any, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, householdIds?: string | null, individualIds?: string | null, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, householdIds: string, individualIds: string, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingIndividualBlockRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null, collectorsFiltersBlocks: Array<{ __typename: 'TargetingCollectorRuleFilterBlockNode', id: any, createdAt: any, updatedAt: any, collectorBlockFilters?: Array<{ __typename: 'TargetingCollectorBlockRuleFilterNode', id: any, createdAt: any, updatedAt: any, fieldName: string, comparisonMethod?: string | null, flexFieldClassification: TargetingCollectorBlockRuleFilterFlexFieldClassification, arguments?: Array<any | null> | null, labelEn?: string | null } | null> | null }>, householdsFiltersBlocks?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingCriteriaRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null } | null } | null } | null };
 
 export type LockTpMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type LockTpMutation = { __typename?: 'Mutations', lockTargetPopulation?: { __typename?: 'LockTargetPopulationMutation', targetPopulation?: { __typename?: 'TargetPopulationNode', id: string, name: string, status: TargetPopulationStatus, adminUrl?: string | null, buildStatus: TargetPopulationBuildStatus, totalHouseholdsCount?: number | null, totalIndividualsCount?: number | null, childMaleCount?: number | null, childFemaleCount?: number | null, adultMaleCount?: number | null, adultFemaleCount?: number | null, caHashId?: string | null, excludedIds: string, exclusionReason: string, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, changeDate?: any | null, finalizedAt?: any | null, hasEmptyCriteria?: boolean | null, hasEmptyIdsCriteria?: boolean | null, steficonRule?: { __typename: 'RuleCommitNode', id: string, rule?: { __typename: 'SteficonRuleNode', id: string, name: string } | null } | null, finalizedBy?: { __typename: 'UserNode', id: string, firstName: string, lastName: string } | null, program: { __typename: 'ProgramNode', id: string, name: string, status: ProgramStatus, startDate: any, endDate?: any | null, isSocialWorkerProgram?: boolean | null }, programCycle: { __typename: 'ProgramCycleNode', id: string, title?: string | null }, createdBy?: { __typename: 'UserNode', id: string, email: string, firstName: string, lastName: string } | null, targetingCriteria?: { __typename: 'TargetingCriteriaNode', id: any, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, householdIds: string, individualIds: string, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingIndividualBlockRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null, filters?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingCriteriaRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null } | null } | null } | null };
+export type LockTpMutation = { __typename?: 'Mutations', lockTargetPopulation?: { __typename?: 'LockTargetPopulationMutation', targetPopulation?: { __typename?: 'TargetPopulationNode', id: string, name: string, status: TargetPopulationStatus, adminUrl?: string | null, buildStatus: TargetPopulationBuildStatus, totalHouseholdsCount?: number | null, totalIndividualsCount?: number | null, childMaleCount?: number | null, childFemaleCount?: number | null, adultMaleCount?: number | null, adultFemaleCount?: number | null, caHashId?: string | null, excludedIds: string, exclusionReason: string, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, changeDate?: any | null, finalizedAt?: any | null, hasEmptyCriteria?: boolean | null, hasEmptyIdsCriteria?: boolean | null, steficonRule?: { __typename: 'RuleCommitNode', id: string, rule?: { __typename: 'SteficonRuleNode', id: string, name: string } | null } | null, finalizedBy?: { __typename: 'UserNode', id: string, firstName: string, lastName: string } | null, program: { __typename: 'ProgramNode', id: string, name: string, status: ProgramStatus, startDate: any, endDate?: any | null, isSocialWorkerProgram?: boolean | null }, programCycle: { __typename: 'ProgramCycleNode', id: string, title?: string | null }, createdBy?: { __typename: 'UserNode', id: string, email: string, firstName: string, lastName: string } | null, targetingCriteria?: { __typename: 'TargetingCriteriaNode', id: any, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, householdIds?: string | null, individualIds?: string | null, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, householdIds: string, individualIds: string, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingIndividualBlockRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null, collectorsFiltersBlocks: Array<{ __typename: 'TargetingCollectorRuleFilterBlockNode', id: any, createdAt: any, updatedAt: any, collectorBlockFilters?: Array<{ __typename: 'TargetingCollectorBlockRuleFilterNode', id: any, createdAt: any, updatedAt: any, fieldName: string, comparisonMethod?: string | null, flexFieldClassification: TargetingCollectorBlockRuleFilterFlexFieldClassification, arguments?: Array<any | null> | null, labelEn?: string | null } | null> | null }>, householdsFiltersBlocks?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingCriteriaRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null } | null } | null } | null };
 
 export type RebuildTpMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type RebuildTpMutation = { __typename?: 'Mutations', targetPopulationRebuild?: { __typename?: 'RebuildTargetPopulationMutation', targetPopulation?: { __typename?: 'TargetPopulationNode', id: string, name: string, status: TargetPopulationStatus, adminUrl?: string | null, buildStatus: TargetPopulationBuildStatus, totalHouseholdsCount?: number | null, totalIndividualsCount?: number | null, childMaleCount?: number | null, childFemaleCount?: number | null, adultMaleCount?: number | null, adultFemaleCount?: number | null, caHashId?: string | null, excludedIds: string, exclusionReason: string, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, changeDate?: any | null, finalizedAt?: any | null, hasEmptyCriteria?: boolean | null, hasEmptyIdsCriteria?: boolean | null, steficonRule?: { __typename: 'RuleCommitNode', id: string, rule?: { __typename: 'SteficonRuleNode', id: string, name: string } | null } | null, finalizedBy?: { __typename: 'UserNode', id: string, firstName: string, lastName: string } | null, program: { __typename: 'ProgramNode', id: string, name: string, status: ProgramStatus, startDate: any, endDate?: any | null, isSocialWorkerProgram?: boolean | null }, programCycle: { __typename: 'ProgramCycleNode', id: string, title?: string | null }, createdBy?: { __typename: 'UserNode', id: string, email: string, firstName: string, lastName: string } | null, targetingCriteria?: { __typename: 'TargetingCriteriaNode', id: any, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, householdIds: string, individualIds: string, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingIndividualBlockRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null, filters?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingCriteriaRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null } | null } | null } | null };
+export type RebuildTpMutation = { __typename?: 'Mutations', targetPopulationRebuild?: { __typename?: 'RebuildTargetPopulationMutation', targetPopulation?: { __typename?: 'TargetPopulationNode', id: string, name: string, status: TargetPopulationStatus, adminUrl?: string | null, buildStatus: TargetPopulationBuildStatus, totalHouseholdsCount?: number | null, totalIndividualsCount?: number | null, childMaleCount?: number | null, childFemaleCount?: number | null, adultMaleCount?: number | null, adultFemaleCount?: number | null, caHashId?: string | null, excludedIds: string, exclusionReason: string, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, changeDate?: any | null, finalizedAt?: any | null, hasEmptyCriteria?: boolean | null, hasEmptyIdsCriteria?: boolean | null, steficonRule?: { __typename: 'RuleCommitNode', id: string, rule?: { __typename: 'SteficonRuleNode', id: string, name: string } | null } | null, finalizedBy?: { __typename: 'UserNode', id: string, firstName: string, lastName: string } | null, program: { __typename: 'ProgramNode', id: string, name: string, status: ProgramStatus, startDate: any, endDate?: any | null, isSocialWorkerProgram?: boolean | null }, programCycle: { __typename: 'ProgramCycleNode', id: string, title?: string | null }, createdBy?: { __typename: 'UserNode', id: string, email: string, firstName: string, lastName: string } | null, targetingCriteria?: { __typename: 'TargetingCriteriaNode', id: any, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, householdIds?: string | null, individualIds?: string | null, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, householdIds: string, individualIds: string, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingIndividualBlockRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null, collectorsFiltersBlocks: Array<{ __typename: 'TargetingCollectorRuleFilterBlockNode', id: any, createdAt: any, updatedAt: any, collectorBlockFilters?: Array<{ __typename: 'TargetingCollectorBlockRuleFilterNode', id: any, createdAt: any, updatedAt: any, fieldName: string, comparisonMethod?: string | null, flexFieldClassification: TargetingCollectorBlockRuleFilterFlexFieldClassification, arguments?: Array<any | null> | null, labelEn?: string | null } | null> | null }>, householdsFiltersBlocks?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingCriteriaRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null } | null } | null } | null };
 
 export type SetSteficonRuleOnTargetPopulationMutationVariables = Exact<{
   input: SetSteficonRuleOnTargetPopulationMutationInput;
 }>;
 
 
-export type SetSteficonRuleOnTargetPopulationMutation = { __typename?: 'Mutations', setSteficonRuleOnTargetPopulation?: { __typename?: 'SetSteficonRuleOnTargetPopulationMutationPayload', targetPopulation?: { __typename?: 'TargetPopulationNode', id: string, name: string, status: TargetPopulationStatus, adminUrl?: string | null, buildStatus: TargetPopulationBuildStatus, totalHouseholdsCount?: number | null, totalIndividualsCount?: number | null, childMaleCount?: number | null, childFemaleCount?: number | null, adultMaleCount?: number | null, adultFemaleCount?: number | null, caHashId?: string | null, excludedIds: string, exclusionReason: string, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, changeDate?: any | null, finalizedAt?: any | null, hasEmptyCriteria?: boolean | null, hasEmptyIdsCriteria?: boolean | null, steficonRule?: { __typename: 'RuleCommitNode', id: string, rule?: { __typename: 'SteficonRuleNode', id: string, name: string } | null } | null, finalizedBy?: { __typename: 'UserNode', id: string, firstName: string, lastName: string } | null, program: { __typename: 'ProgramNode', id: string, name: string, status: ProgramStatus, startDate: any, endDate?: any | null, isSocialWorkerProgram?: boolean | null }, programCycle: { __typename: 'ProgramCycleNode', id: string, title?: string | null }, createdBy?: { __typename: 'UserNode', id: string, email: string, firstName: string, lastName: string } | null, targetingCriteria?: { __typename: 'TargetingCriteriaNode', id: any, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, householdIds: string, individualIds: string, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingIndividualBlockRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null, filters?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingCriteriaRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null } | null } | null } | null };
+export type SetSteficonRuleOnTargetPopulationMutation = { __typename?: 'Mutations', setSteficonRuleOnTargetPopulation?: { __typename?: 'SetSteficonRuleOnTargetPopulationMutationPayload', targetPopulation?: { __typename?: 'TargetPopulationNode', id: string, name: string, status: TargetPopulationStatus, adminUrl?: string | null, buildStatus: TargetPopulationBuildStatus, totalHouseholdsCount?: number | null, totalIndividualsCount?: number | null, childMaleCount?: number | null, childFemaleCount?: number | null, adultMaleCount?: number | null, adultFemaleCount?: number | null, caHashId?: string | null, excludedIds: string, exclusionReason: string, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, changeDate?: any | null, finalizedAt?: any | null, hasEmptyCriteria?: boolean | null, hasEmptyIdsCriteria?: boolean | null, steficonRule?: { __typename: 'RuleCommitNode', id: string, rule?: { __typename: 'SteficonRuleNode', id: string, name: string } | null } | null, finalizedBy?: { __typename: 'UserNode', id: string, firstName: string, lastName: string } | null, program: { __typename: 'ProgramNode', id: string, name: string, status: ProgramStatus, startDate: any, endDate?: any | null, isSocialWorkerProgram?: boolean | null }, programCycle: { __typename: 'ProgramCycleNode', id: string, title?: string | null }, createdBy?: { __typename: 'UserNode', id: string, email: string, firstName: string, lastName: string } | null, targetingCriteria?: { __typename: 'TargetingCriteriaNode', id: any, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, householdIds?: string | null, individualIds?: string | null, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, householdIds: string, individualIds: string, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingIndividualBlockRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null, collectorsFiltersBlocks: Array<{ __typename: 'TargetingCollectorRuleFilterBlockNode', id: any, createdAt: any, updatedAt: any, collectorBlockFilters?: Array<{ __typename: 'TargetingCollectorBlockRuleFilterNode', id: any, createdAt: any, updatedAt: any, fieldName: string, comparisonMethod?: string | null, flexFieldClassification: TargetingCollectorBlockRuleFilterFlexFieldClassification, arguments?: Array<any | null> | null, labelEn?: string | null } | null> | null }>, householdsFiltersBlocks?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingCriteriaRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null } | null } | null } | null };
 
 export type UnlockTpMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type UnlockTpMutation = { __typename?: 'Mutations', unlockTargetPopulation?: { __typename?: 'UnlockTargetPopulationMutation', targetPopulation?: { __typename?: 'TargetPopulationNode', id: string, name: string, status: TargetPopulationStatus, adminUrl?: string | null, buildStatus: TargetPopulationBuildStatus, totalHouseholdsCount?: number | null, totalIndividualsCount?: number | null, childMaleCount?: number | null, childFemaleCount?: number | null, adultMaleCount?: number | null, adultFemaleCount?: number | null, caHashId?: string | null, excludedIds: string, exclusionReason: string, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, changeDate?: any | null, finalizedAt?: any | null, hasEmptyCriteria?: boolean | null, hasEmptyIdsCriteria?: boolean | null, steficonRule?: { __typename: 'RuleCommitNode', id: string, rule?: { __typename: 'SteficonRuleNode', id: string, name: string } | null } | null, finalizedBy?: { __typename: 'UserNode', id: string, firstName: string, lastName: string } | null, program: { __typename: 'ProgramNode', id: string, name: string, status: ProgramStatus, startDate: any, endDate?: any | null, isSocialWorkerProgram?: boolean | null }, programCycle: { __typename: 'ProgramCycleNode', id: string, title?: string | null }, createdBy?: { __typename: 'UserNode', id: string, email: string, firstName: string, lastName: string } | null, targetingCriteria?: { __typename: 'TargetingCriteriaNode', id: any, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, householdIds: string, individualIds: string, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingIndividualBlockRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null, filters?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingCriteriaRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null } | null } | null } | null };
+export type UnlockTpMutation = { __typename?: 'Mutations', unlockTargetPopulation?: { __typename?: 'UnlockTargetPopulationMutation', targetPopulation?: { __typename?: 'TargetPopulationNode', id: string, name: string, status: TargetPopulationStatus, adminUrl?: string | null, buildStatus: TargetPopulationBuildStatus, totalHouseholdsCount?: number | null, totalIndividualsCount?: number | null, childMaleCount?: number | null, childFemaleCount?: number | null, adultMaleCount?: number | null, adultFemaleCount?: number | null, caHashId?: string | null, excludedIds: string, exclusionReason: string, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, changeDate?: any | null, finalizedAt?: any | null, hasEmptyCriteria?: boolean | null, hasEmptyIdsCriteria?: boolean | null, steficonRule?: { __typename: 'RuleCommitNode', id: string, rule?: { __typename: 'SteficonRuleNode', id: string, name: string } | null } | null, finalizedBy?: { __typename: 'UserNode', id: string, firstName: string, lastName: string } | null, program: { __typename: 'ProgramNode', id: string, name: string, status: ProgramStatus, startDate: any, endDate?: any | null, isSocialWorkerProgram?: boolean | null }, programCycle: { __typename: 'ProgramCycleNode', id: string, title?: string | null }, createdBy?: { __typename: 'UserNode', id: string, email: string, firstName: string, lastName: string } | null, targetingCriteria?: { __typename: 'TargetingCriteriaNode', id: any, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, householdIds?: string | null, individualIds?: string | null, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, householdIds: string, individualIds: string, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingIndividualBlockRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null, collectorsFiltersBlocks: Array<{ __typename: 'TargetingCollectorRuleFilterBlockNode', id: any, createdAt: any, updatedAt: any, collectorBlockFilters?: Array<{ __typename: 'TargetingCollectorBlockRuleFilterNode', id: any, createdAt: any, updatedAt: any, fieldName: string, comparisonMethod?: string | null, flexFieldClassification: TargetingCollectorBlockRuleFilterFlexFieldClassification, arguments?: Array<any | null> | null, labelEn?: string | null } | null> | null }>, householdsFiltersBlocks?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingCriteriaRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null } | null } | null } | null };
 
 export type UpdateTpMutationVariables = Exact<{
   input: UpdateTargetPopulationInput;
@@ -11549,6 +11588,11 @@ export type AllActiveTargetPopulationsQueryVariables = Exact<{
 
 export type AllActiveTargetPopulationsQuery = { __typename?: 'Query', allActiveTargetPopulations?: { __typename?: 'TargetPopulationNodeConnection', totalCount?: number | null, edgeCount?: number | null, edges: Array<{ __typename?: 'TargetPopulationNodeEdge', cursor: string, node?: { __typename?: 'TargetPopulationNode', id: string, name: string, status: TargetPopulationStatus, totalHouseholdsCount?: number | null, totalHouseholdsCountWithValidPhoneNo?: number | null, createdAt: any, updatedAt: any, program: { __typename?: 'ProgramNode', id: string, name: string }, createdBy?: { __typename?: 'UserNode', id: string, email: string, firstName: string, lastName: string } | null } | null } | null> } | null };
 
+export type AllCollectorFieldsAttributesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type AllCollectorFieldsAttributesQuery = { __typename?: 'Query', allCollectorFieldsAttributes?: Array<{ __typename?: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, associatedWith?: string | null, isFlexField?: boolean | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', labelEn?: string | null, value?: string | null, admin?: string | null, listName?: string | null } | null> | null } | null> | null };
+
 export type AllFieldsAttributesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -11605,7 +11649,7 @@ export type TargetPopulationQueryVariables = Exact<{
 }>;
 
 
-export type TargetPopulationQuery = { __typename?: 'Query', targetPopulation?: { __typename?: 'TargetPopulationNode', id: string, name: string, status: TargetPopulationStatus, adminUrl?: string | null, buildStatus: TargetPopulationBuildStatus, totalHouseholdsCount?: number | null, totalIndividualsCount?: number | null, childMaleCount?: number | null, childFemaleCount?: number | null, adultMaleCount?: number | null, adultFemaleCount?: number | null, caHashId?: string | null, excludedIds: string, exclusionReason: string, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, changeDate?: any | null, finalizedAt?: any | null, hasEmptyCriteria?: boolean | null, hasEmptyIdsCriteria?: boolean | null, steficonRule?: { __typename: 'RuleCommitNode', id: string, rule?: { __typename: 'SteficonRuleNode', id: string, name: string } | null } | null, finalizedBy?: { __typename: 'UserNode', id: string, firstName: string, lastName: string } | null, program: { __typename: 'ProgramNode', id: string, name: string, status: ProgramStatus, startDate: any, endDate?: any | null, isSocialWorkerProgram?: boolean | null }, programCycle: { __typename: 'ProgramCycleNode', id: string, title?: string | null }, createdBy?: { __typename: 'UserNode', id: string, email: string, firstName: string, lastName: string } | null, targetingCriteria?: { __typename: 'TargetingCriteriaNode', id: any, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, householdIds: string, individualIds: string, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingIndividualBlockRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null, filters?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingCriteriaRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null } | null } | null };
+export type TargetPopulationQuery = { __typename?: 'Query', targetPopulation?: { __typename?: 'TargetPopulationNode', id: string, name: string, status: TargetPopulationStatus, adminUrl?: string | null, buildStatus: TargetPopulationBuildStatus, totalHouseholdsCount?: number | null, totalIndividualsCount?: number | null, childMaleCount?: number | null, childFemaleCount?: number | null, adultMaleCount?: number | null, adultFemaleCount?: number | null, caHashId?: string | null, excludedIds: string, exclusionReason: string, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, changeDate?: any | null, finalizedAt?: any | null, hasEmptyCriteria?: boolean | null, hasEmptyIdsCriteria?: boolean | null, steficonRule?: { __typename: 'RuleCommitNode', id: string, rule?: { __typename: 'SteficonRuleNode', id: string, name: string } | null } | null, finalizedBy?: { __typename: 'UserNode', id: string, firstName: string, lastName: string } | null, program: { __typename: 'ProgramNode', id: string, name: string, status: ProgramStatus, startDate: any, endDate?: any | null, isSocialWorkerProgram?: boolean | null }, programCycle: { __typename: 'ProgramCycleNode', id: string, title?: string | null }, createdBy?: { __typename: 'UserNode', id: string, email: string, firstName: string, lastName: string } | null, targetingCriteria?: { __typename: 'TargetingCriteriaNode', id: any, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, householdIds?: string | null, individualIds?: string | null, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, householdIds: string, individualIds: string, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingIndividualBlockRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null, collectorsFiltersBlocks: Array<{ __typename: 'TargetingCollectorRuleFilterBlockNode', id: any, createdAt: any, updatedAt: any, collectorBlockFilters?: Array<{ __typename: 'TargetingCollectorBlockRuleFilterNode', id: any, createdAt: any, updatedAt: any, fieldName: string, comparisonMethod?: string | null, flexFieldClassification: TargetingCollectorBlockRuleFilterFlexFieldClassification, arguments?: Array<any | null> | null, labelEn?: string | null } | null> | null }>, householdsFiltersBlocks?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingCriteriaRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null } | null } | null };
 
 export type TargetPopulationHouseholdsQueryVariables = Exact<{
   targetPopulation: Scalars['ID']['input'];
@@ -12933,6 +12977,8 @@ export const TargetPopulationDetailedFragmentDoc = gql`
     rules {
       __typename
       id
+      householdIds
+      individualIds
       individualsFiltersBlocks {
         __typename
         individualBlockFilters {
@@ -12962,7 +13008,24 @@ export const TargetPopulationDetailedFragmentDoc = gql`
           }
         }
       }
-      filters {
+      collectorsFiltersBlocks {
+        __typename
+        id
+        createdAt
+        updatedAt
+        collectorBlockFilters {
+          __typename
+          id
+          createdAt
+          updatedAt
+          fieldName
+          comparisonMethod
+          flexFieldClassification
+          arguments
+          labelEn
+        }
+      }
+      householdsFiltersBlocks {
         __typename
         id
         fieldName
@@ -24333,6 +24396,56 @@ export type AllActiveTargetPopulationsQueryHookResult = ReturnType<typeof useAll
 export type AllActiveTargetPopulationsLazyQueryHookResult = ReturnType<typeof useAllActiveTargetPopulationsLazyQuery>;
 export type AllActiveTargetPopulationsSuspenseQueryHookResult = ReturnType<typeof useAllActiveTargetPopulationsSuspenseQuery>;
 export type AllActiveTargetPopulationsQueryResult = Apollo.QueryResult<AllActiveTargetPopulationsQuery, AllActiveTargetPopulationsQueryVariables>;
+export const AllCollectorFieldsAttributesDocument = gql`
+    query AllCollectorFieldsAttributes {
+  allCollectorFieldsAttributes {
+    id
+    name
+    labelEn
+    associatedWith
+    isFlexField
+    type
+    choices {
+      labelEn
+      value
+      admin
+      listName
+    }
+  }
+}
+    `;
+
+/**
+ * __useAllCollectorFieldsAttributesQuery__
+ *
+ * To run a query within a React component, call `useAllCollectorFieldsAttributesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllCollectorFieldsAttributesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllCollectorFieldsAttributesQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useAllCollectorFieldsAttributesQuery(baseOptions?: Apollo.QueryHookOptions<AllCollectorFieldsAttributesQuery, AllCollectorFieldsAttributesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<AllCollectorFieldsAttributesQuery, AllCollectorFieldsAttributesQueryVariables>(AllCollectorFieldsAttributesDocument, options);
+      }
+export function useAllCollectorFieldsAttributesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllCollectorFieldsAttributesQuery, AllCollectorFieldsAttributesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<AllCollectorFieldsAttributesQuery, AllCollectorFieldsAttributesQueryVariables>(AllCollectorFieldsAttributesDocument, options);
+        }
+export function useAllCollectorFieldsAttributesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<AllCollectorFieldsAttributesQuery, AllCollectorFieldsAttributesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<AllCollectorFieldsAttributesQuery, AllCollectorFieldsAttributesQueryVariables>(AllCollectorFieldsAttributesDocument, options);
+        }
+export type AllCollectorFieldsAttributesQueryHookResult = ReturnType<typeof useAllCollectorFieldsAttributesQuery>;
+export type AllCollectorFieldsAttributesLazyQueryHookResult = ReturnType<typeof useAllCollectorFieldsAttributesLazyQuery>;
+export type AllCollectorFieldsAttributesSuspenseQueryHookResult = ReturnType<typeof useAllCollectorFieldsAttributesSuspenseQuery>;
+export type AllCollectorFieldsAttributesQueryResult = Apollo.QueryResult<AllCollectorFieldsAttributesQuery, AllCollectorFieldsAttributesQueryVariables>;
 export const AllFieldsAttributesDocument = gql`
     query AllFieldsAttributes {
   allFieldsAttributes {
@@ -25213,6 +25326,10 @@ export type ResolversTypes = {
   TargetPopulationNodeConnection: ResolverTypeWrapper<TargetPopulationNodeConnection>;
   TargetPopulationNodeEdge: ResolverTypeWrapper<TargetPopulationNodeEdge>;
   TargetPopulationStatus: TargetPopulationStatus;
+  TargetingCollectorBlockRuleFilterFlexFieldClassification: TargetingCollectorBlockRuleFilterFlexFieldClassification;
+  TargetingCollectorBlockRuleFilterNode: ResolverTypeWrapper<TargetingCollectorBlockRuleFilterNode>;
+  TargetingCollectorRuleFilterBlockNode: ResolverTypeWrapper<TargetingCollectorRuleFilterBlockNode>;
+  TargetingCollectorRuleFilterBlockObjectType: TargetingCollectorRuleFilterBlockObjectType;
   TargetingCriteriaNode: ResolverTypeWrapper<TargetingCriteriaNode>;
   TargetingCriteriaObjectType: TargetingCriteriaObjectType;
   TargetingCriteriaRuleFilterComparisonMethod: TargetingCriteriaRuleFilterComparisonMethod;
@@ -25690,6 +25807,9 @@ export type ResolversParentTypes = {
   TargetPopulationNode: TargetPopulationNode;
   TargetPopulationNodeConnection: TargetPopulationNodeConnection;
   TargetPopulationNodeEdge: TargetPopulationNodeEdge;
+  TargetingCollectorBlockRuleFilterNode: TargetingCollectorBlockRuleFilterNode;
+  TargetingCollectorRuleFilterBlockNode: TargetingCollectorRuleFilterBlockNode;
+  TargetingCollectorRuleFilterBlockObjectType: TargetingCollectorRuleFilterBlockObjectType;
   TargetingCriteriaNode: TargetingCriteriaNode;
   TargetingCriteriaObjectType: TargetingCriteriaObjectType;
   TargetingCriteriaRuleFilterNode: TargetingCriteriaRuleFilterNode;
@@ -28624,6 +28744,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   allBusinessAreas?: Resolver<Maybe<ResolversTypes['BusinessAreaNodeConnection']>, ParentType, ContextType, Partial<QueryAllBusinessAreasArgs>>;
   allCashPlans?: Resolver<Maybe<ResolversTypes['CashPlanNodeConnection']>, ParentType, ContextType, Partial<QueryAllCashPlansArgs>>;
   allCashPlansAndPaymentPlans?: Resolver<Maybe<ResolversTypes['PaginatedCashPlanAndPaymentPlanNode']>, ParentType, ContextType, RequireFields<QueryAllCashPlansAndPaymentPlansArgs, 'businessArea'>>;
+  allCollectorFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType, Partial<QueryAllCollectorFieldsAttributesArgs>>;
   allDeliveryMechanisms?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>;
   allEditHouseholdFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType>;
   allEditPeopleFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType>;
@@ -29433,13 +29554,35 @@ export type TargetPopulationNodeEdgeResolvers<ContextType = any, ParentType exte
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type TargetingCollectorBlockRuleFilterNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TargetingCollectorBlockRuleFilterNode'] = ResolversParentTypes['TargetingCollectorBlockRuleFilterNode']> = {
+  arguments?: Resolver<Maybe<Array<Maybe<ResolversTypes['Arg']>>>, ParentType, ContextType>;
+  collectorBlockFilters?: Resolver<ResolversTypes['TargetingCollectorRuleFilterBlockNode'], ParentType, ContextType>;
+  comparisonMethod?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  fieldName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  flexFieldClassification?: Resolver<ResolversTypes['TargetingCollectorBlockRuleFilterFlexFieldClassification'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>;
+  labelEn?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type TargetingCollectorRuleFilterBlockNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TargetingCollectorRuleFilterBlockNode'] = ResolversParentTypes['TargetingCollectorRuleFilterBlockNode']> = {
+  collectorBlockFilters?: Resolver<Maybe<Array<Maybe<ResolversTypes['TargetingCollectorBlockRuleFilterNode']>>>, ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>;
+  targetingCriteriaRule?: Resolver<ResolversTypes['TargetingCriteriaRuleNode'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type TargetingCriteriaNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TargetingCriteriaNode'] = ResolversParentTypes['TargetingCriteriaNode']> = {
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   flagExcludeIfActiveAdjudicationTicket?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   flagExcludeIfOnSanctionList?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  householdIds?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  householdIds?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>;
-  individualIds?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  individualIds?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   rules?: Resolver<Maybe<Array<Maybe<ResolversTypes['TargetingCriteriaRuleNode']>>>, ParentType, ContextType>;
   targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
@@ -29461,9 +29604,12 @@ export type TargetingCriteriaRuleFilterNodeResolvers<ContextType = any, ParentTy
 };
 
 export type TargetingCriteriaRuleNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TargetingCriteriaRuleNode'] = ResolversParentTypes['TargetingCriteriaRuleNode']> = {
+  collectorsFiltersBlocks?: Resolver<Array<ResolversTypes['TargetingCollectorRuleFilterBlockNode']>, ParentType, ContextType>;
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
-  filters?: Resolver<Maybe<Array<Maybe<ResolversTypes['TargetingCriteriaRuleFilterNode']>>>, ParentType, ContextType>;
+  householdIds?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  householdsFiltersBlocks?: Resolver<Maybe<Array<Maybe<ResolversTypes['TargetingCriteriaRuleFilterNode']>>>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>;
+  individualIds?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   individualsFiltersBlocks?: Resolver<Maybe<Array<Maybe<ResolversTypes['TargetingIndividualRuleFilterBlockNode']>>>, ParentType, ContextType>;
   targetingCriteria?: Resolver<ResolversTypes['TargetingCriteriaNode'], ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
@@ -30428,6 +30574,8 @@ export type Resolvers<ContextType = any> = {
   TargetPopulationNode?: TargetPopulationNodeResolvers<ContextType>;
   TargetPopulationNodeConnection?: TargetPopulationNodeConnectionResolvers<ContextType>;
   TargetPopulationNodeEdge?: TargetPopulationNodeEdgeResolvers<ContextType>;
+  TargetingCollectorBlockRuleFilterNode?: TargetingCollectorBlockRuleFilterNodeResolvers<ContextType>;
+  TargetingCollectorRuleFilterBlockNode?: TargetingCollectorRuleFilterBlockNodeResolvers<ContextType>;
   TargetingCriteriaNode?: TargetingCriteriaNodeResolvers<ContextType>;
   TargetingCriteriaRuleFilterNode?: TargetingCriteriaRuleFilterNodeResolvers<ContextType>;
   TargetingCriteriaRuleNode?: TargetingCriteriaRuleNodeResolvers<ContextType>;

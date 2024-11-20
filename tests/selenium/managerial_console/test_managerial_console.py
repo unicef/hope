@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 from django.utils import timezone
 
@@ -7,7 +8,7 @@ from dateutil.relativedelta import relativedelta
 from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.account.models import User
+from hct_mis_api.apps.account.models import Partner, User
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.payment.fixtures import ApprovalProcessFactory, PaymentPlanFactory
@@ -23,12 +24,12 @@ from tests.selenium.page_object.managerial_console.managerial_console import (
     ManagerialConsole,
 )
 
-pytestmark = pytest.mark.django_db(transaction=True)
+pytestmark = pytest.mark.django_db()
 
 
 @pytest.fixture
 def create_active_test_program() -> Program:
-    yield create_program("Test Programm")
+    yield create_program("Test Programm", partner=Partner.objects.filter(name="UNHCR").first())
 
 
 @pytest.fixture
@@ -37,7 +38,10 @@ def second_test_program() -> Program:
 
 
 def create_program(
-    name: str, dct_type: str = DataCollectingType.Type.STANDARD, status: str = Program.ACTIVE
+    name: str,
+    dct_type: str = DataCollectingType.Type.STANDARD,
+    status: str = Program.ACTIVE,
+    partner: Optional[Partner] = None,
 ) -> Program:
     BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
     dct = DataCollectingTypeFactory(type=dct_type)
@@ -48,6 +52,8 @@ def create_program(
         data_collecting_type=dct,
         status=status,
     )
+    if partner:
+        program.partners.add(partner.id)
     return program
 
 
@@ -131,10 +137,14 @@ class TestSmokeManagerialConsole:
             status=PaymentPlan.Status.ACCEPTED,
             business_area=BusinessArea.objects.filter(slug="afghanistan").first(),
         )
-        pageManagerialConsole.driver.refresh()
+        program.save()
+        program.refresh_from_db()
+        pageManagerialConsole.getMenuUserProfile().click()
+        pageManagerialConsole.getMenuItemClearCache().click()
 
         pageManagerialConsole.getSelectAllApproval()
         pageManagerialConsole.getProgramSelectApproval()
+
         with pytest.raises(Exception):
             pageManagerialConsole.getApproveButton().click()
 
