@@ -8,6 +8,7 @@ from constance import config
 from django_filters import (
     BooleanFilter,
     CharFilter,
+    ChoiceFilter,
     FilterSet,
     ModelMultipleChoiceFilter,
     MultipleChoiceFilter,
@@ -41,6 +42,7 @@ from hct_mis_api.apps.household.models import (
     Individual,
 )
 from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.utils.models import MergeStatusModel
 
 logger = logging.getLogger(__name__)
 
@@ -80,6 +82,7 @@ def _prepare_kobo_asset_id_value(code: str) -> str:  # pragma: no cover
 
 
 class HouseholdFilter(FilterSet):
+    rdi_id = CharFilter(method="filter_rdi_id")
     business_area = BusinessAreaSlugFilter()
     size = IntegerRangeFilter(field_name="size")
     search = CharFilter(method="search_filter")
@@ -91,6 +94,7 @@ class HouseholdFilter(FilterSet):
     withdrawn = BooleanFilter(field_name="withdrawn")
     country_origin = CharFilter(field_name="country_origin__iso_code3", lookup_expr="startswith")
     is_active_program = BooleanFilter(method="filter_is_active_program")
+    rdi_merge_status = ChoiceFilter(field_name="rdi_merge_status", choices=MergeStatusModel.STATUS_CHOICE)
 
     class Meta:
         model = Household
@@ -106,6 +110,7 @@ class HouseholdFilter(FilterSet):
             "residence_status": ["exact"],
             "withdrawn": ["exact"],
             "program": ["exact"],
+            "first_registration_date": ["exact"],
         }
 
     order_by = CustomOrderingFilter(
@@ -127,6 +132,9 @@ class HouseholdFilter(FilterSet):
             "first_registration_date",
         )
     )
+
+    def filter_rdi_id(self, queryset: "QuerySet", model_field: Any, value: str) -> "QuerySet":
+        return queryset.filter(registration_data_import__pk=decode_id_string(value))
 
     def phone_no_valid_filter(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
         """
@@ -280,6 +288,9 @@ class IndividualFilter(FilterSet):
     withdrawn = BooleanFilter(field_name="withdrawn")
     flags = MultipleChoiceFilter(choices=INDIVIDUAL_FLAGS_CHOICES, method="flags_filter")
     is_active_program = BooleanFilter(method="filter_is_active_program")
+    rdi_id = CharFilter(method="filter_rdi_id")
+    duplicates_only = BooleanFilter(method="filter_duplicates_only")
+    rdi_merge_status = ChoiceFilter(field_name="rdi_merge_status", choices=MergeStatusModel.STATUS_CHOICE)
 
     class Meta:
         model = Individual
@@ -421,6 +432,16 @@ class IndividualFilter(FilterSet):
             return qs.filter(program__status=Program.FINISHED)
         else:
             return qs
+
+    def filter_rdi_id(self, queryset: "QuerySet", model_field: Any, value: str) -> "QuerySet":
+        return queryset.filter(registration_data_import__pk=decode_id_string(value))
+
+    def filter_duplicates_only(self, queryset: "QuerySet", model_field: Any, value: bool) -> "QuerySet":
+        if value is True:
+            return queryset.filter(
+                Q(deduplication_golden_record_status=DUPLICATE) | Q(deduplication_batch_status=DUPLICATE_IN_BATCH)
+            )
+        return queryset
 
 
 class MergedHouseholdFilter(FilterSet):
