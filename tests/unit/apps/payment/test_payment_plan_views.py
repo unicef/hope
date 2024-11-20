@@ -132,6 +132,7 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
             response = _test_list()
             print("=====> All Headers:", response.headers)
             etag = response.headers["etag"]
+
             print("E-TAG>", etag)
 
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
