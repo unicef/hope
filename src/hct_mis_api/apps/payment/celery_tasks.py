@@ -27,7 +27,7 @@ from hct_mis_api.apps.payment.pdf.payment_plan_export_pdf_service import (
 from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
 )
-from hct_mis_api.apps.payment.utils import get_quantity_in_usd, generate_cache_key
+from hct_mis_api.apps.payment.utils import generate_cache_key, get_quantity_in_usd
 from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
     XlsxPaymentPlanImportPerFspService,
 )
@@ -391,10 +391,12 @@ def remove_old_payment_plan_payment_list_xlsx(self: Any, past_days: int = 30) ->
 @log_start_and_end
 @sentry_tags
 def prepare_payment_plan_task(self: Any, payment_plan_id: str) -> bool:
-    cache_key = generate_cache_key({
-        "task_name": "prepare_payment_plan_task",
-        "payment_plan_id": payment_plan_id,
-    })
+    cache_key = generate_cache_key(
+        {
+            "task_name": "prepare_payment_plan_task",
+            "payment_plan_id": payment_plan_id,
+        }
+    )
     if cache.get(cache_key):
         logger.info(f"Task prepare_payment_plan_task with payment_plan_id {payment_plan_id} already running.")
         return False

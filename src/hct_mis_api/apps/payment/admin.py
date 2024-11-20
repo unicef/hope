@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Dict, Optional, List
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from django import forms
 from django.contrib import admin, messages
@@ -20,6 +20,7 @@ from adminfilters.querystring import QueryStringFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 from smart_admin.mixins import LinkedObjectsMixin
 
+from hct_mis_api.apps.payment.celery_tasks import prepare_payment_plan_task
 from hct_mis_api.apps.payment.forms import ImportPaymentRecordsForm
 from hct_mis_api.apps.payment.models import (
     CashPlan,
@@ -38,7 +39,6 @@ from hct_mis_api.apps.payment.models import (
     PaymentVerificationPlan,
     ServiceProvider,
 )
-from hct_mis_api.apps.payment.celery_tasks import prepare_payment_plan_task
 from hct_mis_api.apps.payment.services.create_cash_plan_from_reconciliation import (
     CreateCashPlanReconciliationService,
 )
@@ -269,35 +269,39 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
     def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
         return is_root(request)
 
+    def has_restart_prepare_payment_plan_task_permission(self, request: HttpRequest) -> bool:
+        return is_root(request)
+
     @admin.action(
-        permissions=is_root,
+        permissions=["restart_prepare_payment_plan_task"],
         description="Restart Prepare Payment Plan Task",
     )
     def restart_prepare_payment_plan_task(self, request: HttpRequest, queryset: QuerySet["PaymentPlan"]) -> None:
         if queryset.exclude(status=PaymentPlan.Status.PREPARING).exists():
             self.message_user(
-                request,
-                f"The Payment Plan(s) must have the status {PaymentPlan.Status.PREPARING}",
-                messages.WARNING
+                request, f"The Payment Plan(s) must have the status {PaymentPlan.Status.PREPARING}", messages.WARNING
             )
-        restarted_pp_unicef_ids: List[str]= []
+            return None
+        restarted_pp_unicef_ids: List[str] = []
         for payment_plan in queryset:
             # check if no task in a queue
-            cache_key = generate_cache_key({
-                "task_name": "prepare_payment_plan_task",
-                "payment_plan_id": str(payment_plan.id),
-            })
+            cache_key = generate_cache_key(
+                {
+                    "task_name": "prepare_payment_plan_task",
+                    "payment_plan_id": str(payment_plan.id),
+                }
+            )
             if cache.get(cache_key):
                 self.message_user(
-                            request,
-                            f"Task is already running for Payment Plan {payment_plan.unicef_id}.",
-                            messages.ERROR
-                        )
+                    request, f"Task is already running for Payment Plan {payment_plan.unicef_id}.", messages.ERROR
+                )
                 continue
             prepare_payment_plan_task.delay(payment_plan.id)
             restarted_pp_unicef_ids.append(payment_plan.unicef_id)
 
-        self.message_user(request, f"Task restarted for Payment Plan(s): {restarted_pp_unicef_ids}", messages.SUCCESS)
+        self.message_user(
+            request, f"Task restarted for Payment Plan(s): {', '.join(restarted_pp_unicef_ids)}", messages.SUCCESS
+        )
 
 
 class PaymentHouseholdSnapshotInline(admin.StackedInline):

@@ -5,7 +5,7 @@ import typing
 from base64 import b64decode
 from decimal import Decimal
 from math import ceil
-from typing import TYPE_CHECKING, Dict, Optional, Union, Any
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
