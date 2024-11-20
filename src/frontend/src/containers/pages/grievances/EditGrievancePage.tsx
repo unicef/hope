@@ -72,6 +72,7 @@ import {
 } from '@utils/utils';
 import { grievancePermissions } from './GrievancesDetailsPage/grievancePermissions';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { useProgramContext } from 'src/programContext';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -93,6 +94,8 @@ export const EditGrievancePage = (): React.ReactElement => {
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
   const { id } = useParams();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const {
     data: ticketData,
@@ -298,6 +301,7 @@ export const EditGrievancePage = (): React.ReactElement => {
             allAddIndividualFieldsData,
             individualFieldsDict,
             householdFieldsDict,
+            beneficiaryGroup,
           )
         }
         validationSchema={validationSchema}
@@ -374,7 +378,9 @@ export const EditGrievancePage = (): React.ReactElement => {
                         )}
                         <Grid container xs={12} item>
                           <Grid item xs={3}>
-                            <LabelizedField label={t('Household ID')}>
+                            <LabelizedField
+                              label={`${beneficiaryGroup?.groupLabel}`}
+                            >
                               <span>
                                 {ticket.household?.id &&
                                 canViewHouseholdDetails &&

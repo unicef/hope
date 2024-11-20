@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { useTranslation } from 'react-i18next';
+import { TableWrapper } from '@components/core/TableWrapper';
 import {
   AllHouseholdsForPopulationTableQueryVariables,
   AllHouseholdsQueryVariables,
@@ -7,13 +6,13 @@ import {
   HouseholdNode,
   useAllHouseholdsForPopulationTableQuery,
 } from '@generated/graphql';
-import { TableWrapper } from '@components/core/TableWrapper';
-import { UniversalTable } from '../../UniversalTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { adjustHeadCells } from '@utils/utils';
+import * as React from 'react';
+import { useProgramContext } from 'src/programContext';
+import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './HouseholdTableHeadCells';
 import { HouseholdTableRow } from './HouseholdTableRow';
-import { useProgramContext } from 'src/programContext';
-import { adjustHeadCells } from '@utils/utils';
 
 interface HouseholdTableProps {
   businessArea: string;
@@ -30,7 +29,6 @@ export function HouseholdTable({
 }: HouseholdTableProps): React.ReactElement {
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
-  const { t } = useTranslation();
   const { programId } = useBaseUrl();
   const matchWithdrawnValue = (): boolean | undefined => {
     if (filter.withdrawn === 'true') {

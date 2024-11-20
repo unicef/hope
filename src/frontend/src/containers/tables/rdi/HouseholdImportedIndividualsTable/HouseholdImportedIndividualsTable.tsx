@@ -3,6 +3,8 @@ import { HeadCell } from '@components/core/Table/EnhancedTableHead';
 import { Order, TableComponent } from '@components/core/Table/TableComponent';
 import { ImportedIndividualMinimalFragment } from '@generated/graphql';
 import { ImportedIndividualsTableRow } from '../ImportedIndividualsTable/ImportedIndividualsTableRow';
+import { useProgramContext } from 'src/programContext';
+import { adjustHeadCells } from '@utils/utils';
 
 const headCells: HeadCell<ImportedIndividualMinimalFragment>[] = [
   {
@@ -63,6 +65,9 @@ export function HouseholdImportedIndividualsTable({
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [orderBy, setOrderBy] = useState(null);
   const [orderDirection, setOrderDirection] = useState('asc');
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const allIndividuals = household.individuals.edges.map((edge) => edge.node);
   if (orderBy) {
     if (orderDirection === 'asc') {
@@ -72,10 +77,25 @@ export function HouseholdImportedIndividualsTable({
     }
   }
 
+  const replacements = {
+    unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup.memberLabel} ID`,
+    fullName: (_beneficiaryGroup) => _beneficiaryGroup.memberLabel,
+    household__unicef_id: (_beneficiaryGroup) =>
+      `${_beneficiaryGroup.groupLabel} ID`,
+    relationship: (_beneficiaryGroup) =>
+      `Relationship to Head of ${_beneficiaryGroup.groupLabel}`,
+  };
+
+  const adjustedHeadCells = adjustHeadCells(
+    headCells,
+    beneficiaryGroup,
+    replacements,
+  );
+
   const totalCount = allIndividuals.length;
   return (
     <TableComponent<ImportedIndividualMinimalFragment>
-      title="Individuals in Household"
+      title={`${beneficiaryGroup?.memberLabelPlural} in ${beneficiaryGroup?.groupLabel}`}
       data={allIndividuals.slice(
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage,
@@ -88,19 +108,19 @@ export function HouseholdImportedIndividualsTable({
           individual={row}
         />
       )}
-      headCells={headCells}
+      headCells={adjustedHeadCells}
       rowsPerPageOptions={totalCount < 5 ? [totalCount] : [5, 10, 15]}
       rowsPerPage={totalCount > 5 ? rowsPerPage : totalCount}
       page={page}
       itemsCount={totalCount}
-      handleChangePage={(event, newPage) => {
+      handleChangePage={(_event, newPage) => {
         setPage(newPage);
       }}
       handleChangeRowsPerPage={(event) => {
         setRowsPerPage(Number(event.target.value));
         setPage(0);
       }}
-      handleRequestSort={(event, property) => {
+      handleRequestSort={(_event, property) => {
         let direction = 'asc';
         if (property === orderBy) {
           direction = orderDirection === 'asc' ? 'desc' : 'asc';

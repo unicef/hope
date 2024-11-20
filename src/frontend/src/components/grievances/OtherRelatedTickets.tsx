@@ -14,6 +14,7 @@ import {
   BlueBold,
 } from './GrievancesApproveSection/ApproveSectionStyles';
 import { getGrievanceDetailsPath } from './utils/createGrievanceUtils';
+import { useProgramContext } from 'src/programContext';
 
 export function OtherRelatedTickets({
   ticket,
@@ -23,6 +24,8 @@ export function OtherRelatedTickets({
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const { id } = useParams();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const [show, setShow] = useState(false);
   const { existingTickets, linkedTickets } = ticket;
@@ -30,48 +33,48 @@ export function OtherRelatedTickets({
   const renderIds = (tickets): React.ReactElement =>
     tickets.length
       ? tickets.map((edge) => {
-        const grievanceDetailsPath = getGrievanceDetailsPath(
-          edge.id,
-          edge.category,
-          baseUrl,
-        );
+          const grievanceDetailsPath = getGrievanceDetailsPath(
+            edge.id,
+            edge.category,
+            baseUrl,
+          );
 
-        return (
+          return (
             <Box key={edge.id} mb={1}>
               <ContentLink href={grievanceDetailsPath}>
                 {edge.unicefId}
               </ContentLink>
             </Box>
-        );
-      })
+          );
+        })
       : '-';
 
   const openExistingTickets =
     ticket.household?.id && existingTickets.length
       ? existingTickets.filter(
-        (edge) =>
-          edge.status !== GRIEVANCE_TICKET_STATES.CLOSED && edge.id !== id,
-      )
+          (edge) =>
+            edge.status !== GRIEVANCE_TICKET_STATES.CLOSED && edge.id !== id,
+        )
       : [];
   const closedExistingTickets =
     ticket.household?.id && existingTickets.length
       ? existingTickets.filter(
-        (edge) =>
-          edge.status === GRIEVANCE_TICKET_STATES.CLOSED && edge.id !== id,
-      )
+          (edge) =>
+            edge.status === GRIEVANCE_TICKET_STATES.CLOSED && edge.id !== id,
+        )
       : [];
 
   const openLinkedTickets = linkedTickets.length
     ? linkedTickets.filter(
-      (edge) =>
-        edge.status !== GRIEVANCE_TICKET_STATES.CLOSED && edge.id !== id,
-    )
+        (edge) =>
+          edge.status !== GRIEVANCE_TICKET_STATES.CLOSED && edge.id !== id,
+      )
     : [];
   const closedLinkedTickets = linkedTickets.length
     ? linkedTickets.filter(
-      (edge) =>
-        edge.status === GRIEVANCE_TICKET_STATES.CLOSED && edge.id !== id,
-    )
+        (edge) =>
+          edge.status === GRIEVANCE_TICKET_STATES.CLOSED && edge.id !== id,
+      )
     : [];
 
   return linkedTickets.length > 0 || existingTickets.length > 0 ? (
@@ -81,7 +84,7 @@ export function OtherRelatedTickets({
       </Title>
       <Box display="flex" flexDirection="column">
         <LabelizedField
-          label={`For Household ${ticket.household?.unicefId || '-'} `}
+          label={`For ${beneficiaryGroup?.groupLabel} ${ticket.household?.unicefId || '-'}`}
         >
           <>{renderIds(openExistingTickets)}</>
         </LabelizedField>
@@ -96,14 +99,12 @@ export function OtherRelatedTickets({
               {closedLinkedTickets.length + closedExistingTickets.length})
             </BlueBold>
           </Box>
-          ) : null}
+        ) : null}
         {show && (
           <Box mb={3} mt={3}>
             <Typography>{t('Closed Tickets')}</Typography>
             <LabelizedField
-              label={`${t('For Household')} ${
-                ticket.household?.unicefId || '-'
-              } `}
+              label={`${t(`For ${beneficiaryGroup?.groupLabel}`)} ${ticket.household?.unicefId || '-'}`}
             >
               <>{renderIds(closedExistingTickets)}</>
             </LabelizedField>
@@ -118,7 +119,7 @@ export function OtherRelatedTickets({
             {t('HIDE CLOSED TICKETS')} (
             {closedLinkedTickets.length + closedExistingTickets.length})
           </BlueBold>
-          ) : null}
+        ) : null}
       </Box>
     </ApproveBox>
   ) : null;

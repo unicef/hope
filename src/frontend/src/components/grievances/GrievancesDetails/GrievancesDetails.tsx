@@ -22,6 +22,7 @@ import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { BlackLink } from '@core/BlackLink';
+import { useProgramContext } from 'src/programContext';
 
 interface GrievancesDetailsProps {
   ticket: GrievanceTicketQuery['grievanceTicket'];
@@ -40,6 +41,9 @@ export function GrievancesDetails({
 }: GrievancesDetailsProps): React.ReactElement {
   const { t } = useTranslation();
   const { isAllPrograms } = useBaseUrl();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const statusChoices: {
     [id: number]: string;
   } = choicesToDict(choicesData.grievanceTicketStatusChoices);
@@ -249,7 +253,7 @@ export function GrievancesDetails({
                 size: 3,
               },
               {
-                label: t('Household ID'),
+                label: `${beneficiaryGroup?.groupLabel} ID`,
                 value: (
                   <span>
                     {ticket.household?.id &&
@@ -270,7 +274,7 @@ export function GrievancesDetails({
                 size: 3,
               },
               {
-                label: t('Individual ID'),
+                label: `${beneficiaryGroup?.memberLabel} ID`,
                 value: (
                   <span>
                     {ticket.individual?.id &&

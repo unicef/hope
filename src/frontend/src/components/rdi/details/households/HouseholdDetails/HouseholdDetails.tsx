@@ -34,6 +34,8 @@ export function HouseholdDetails({
   const residenceChoicesDict = choicesToDict(
     choicesData.residenceStatusChoices,
   );
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   return (
     <ContainerColumnWithBorder>
       <Title>

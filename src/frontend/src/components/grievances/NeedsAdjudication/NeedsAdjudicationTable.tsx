@@ -44,6 +44,9 @@ export const NeedsAdjudicationTable = ({
   const { t } = useTranslation();
   const { baseUrl, isAllPrograms } = useBaseUrl();
   const { isActiveProgram } = useProgramContext();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const details = ticket?.needsAdjudicationTicketDetails;
 
   const handleSelect = (id: string) => {
@@ -80,13 +83,13 @@ export const NeedsAdjudicationTable = ({
   };
 
   const duplicateTooltip = (
-    <Tooltip data-cy='people-icon-tooltip' title="Marked as Duplicate" >
+    <Tooltip data-cy="people-icon-tooltip" title="Marked as Duplicate">
       <PeopleIcon data-cy="people-icon" color="primary" />
     </Tooltip>
   );
 
   const distinctTooltip = (
-    <Tooltip data-cy='person-icon-tooltip' title="Marked as Distinct" >
+    <Tooltip data-cy="person-icon-tooltip" title="Marked as Distinct">
       <PersonIcon data-cy="person-icon" color="primary" />
     </Tooltip>
   );
@@ -197,10 +200,10 @@ export const NeedsAdjudicationTable = ({
             {t('Uniqueness')}
           </TableCell>
           <TableCell data-cy="table-cell-individual-id" align="left">
-            {t('Individual ID')}
+            {beneficiaryGroup?.memberLabel} ID
           </TableCell>
           <TableCell data-cy="table-cell-household-id" align="left">
-            {t('Household ID')}
+            {beneficiaryGroup?.groupLabel} ID
           </TableCell>
           <TableCell data-cy="table-cell-full-name" align="left">
             {t('Full Name')}

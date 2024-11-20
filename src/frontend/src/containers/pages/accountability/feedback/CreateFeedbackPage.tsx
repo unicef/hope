@@ -364,14 +364,18 @@ export function CreateFeedbackPage(): React.ReactElement {
                               </Typography> */}
                                 <Box py={4}>
                                   <Typography variant="subtitle2">
-                                    {t('Household Questionnaire')}
+                                    {t(
+                                      `${beneficiaryGroup?.groupLabel} Questionnaire`,
+                                    )}
                                   </Typography>
                                   <Box py={4}>
                                     <HouseholdQuestionnaire values={values} />
                                   </Box>
                                 </Box>
                                 <Typography variant="subtitle2">
-                                  {t('Individual Questionnaire')}
+                                  {t(
+                                    `${beneficiaryGroup?.memberLabel} Questionnaire`,
+                                  )}
                                 </Typography>
                                 <Box py={4}>
                                   <IndividualQuestionnaire values={values} />
@@ -411,12 +415,20 @@ export function CreateFeedbackPage(): React.ReactElement {
                                     </LabelizedField>
                                   </Grid>
                                   <Grid item xs={6}>
-                                    <LabelizedField label={t('Household')}>
+                                    <LabelizedField
+                                      label={t(
+                                        `${beneficiaryGroup?.groupLabel}`,
+                                      )}
+                                    >
                                       {values.selectedHousehold?.unicefId}
                                     </LabelizedField>
                                   </Grid>
                                   <Grid item xs={6}>
-                                    <LabelizedField label={t('Individual')}>
+                                    <LabelizedField
+                                      label={t(
+                                        `${beneficiaryGroup?.memberLabel}`,
+                                      )}
+                                    >
                                       {values.selectedIndividual?.unicefId}
                                     </LabelizedField>
                                   </Grid>

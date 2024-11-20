@@ -35,7 +35,8 @@ export function VerificationPaymentRecordDetails({
 }: VerificationPaymentRecordDetailsProps): React.ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
-  const { isSocialDctType } = useProgramContext();
+  const { isSocialDctType, selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   return (
     <>
@@ -54,7 +55,7 @@ export function VerificationPaymentRecordDetails({
             </LabelizedField>
           </Grid>
           <Grid item xs={3}>
-            <LabelizedField label={t('Household')}>
+            <LabelizedField label={beneficiaryGroup?.groupLabel}>
               <BlackLink
                 to={`/${baseUrl}/population/household/${paymentRecord.household.id}`}
               >

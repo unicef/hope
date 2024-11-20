@@ -23,6 +23,7 @@ import { Title } from '@core/Title';
 import { NewDocumentationFieldArray } from '../../Documentation/NewDocumentationFieldArray';
 import { LookUpLinkedTickets } from '../../LookUps/LookUpLinkedTickets/LookUpLinkedTickets';
 import { LookUpPaymentRecord } from '../../LookUps/LookUpPaymentRecord/LookUpPaymentRecord';
+import { useProgramContext } from 'src/programContext';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -71,6 +72,8 @@ export function Description({
     },
     fetchPolicy: 'network-only',
   });
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   // Set program value based on selected household or individual
   useEffect(() => {
@@ -123,7 +126,7 @@ export function Description({
                 size: 9,
               },
               {
-                label: t('Household ID'),
+                label: `${beneficiaryGroup?.groupLabel} ID`,
                 value: (
                   <span>
                     {values.selectedHousehold?.id &&
@@ -142,7 +145,7 @@ export function Description({
                 size: 3,
               },
               {
-                label: t('Individual ID'),
+                label: `${beneficiaryGroup?.memberLabel} ID`,
                 value: (
                   <span>
                     {values.selectedIndividual?.id &&

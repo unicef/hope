@@ -13,6 +13,7 @@ import {
 import { LoadingComponent } from '@core/LoadingComponent';
 import { Title } from '@core/Title';
 import { EditHouseholdDataChangeFieldRow } from './EditHouseholdDataChangeFieldRow';
+import { useProgramContext } from 'src/programContext';
 
 export interface EditHouseholdDataChangeProps {
   values;
@@ -24,6 +25,9 @@ export function EditHouseholdDataChange({
 }: EditHouseholdDataChangeProps): React.ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const isEditTicket = location.pathname.includes('edit-ticket');
   const household: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'] =
     values.selectedHousehold;
@@ -49,7 +53,9 @@ export function EditHouseholdDataChange({
   const { data: householdFieldsData, loading: householdFieldsLoading } =
     useAllEditHouseholdFieldsQuery();
   if (!household) {
-    return <div>{t('You have to select a household earlier')}</div>;
+    return (
+      <div>{`You have to select a ${beneficiaryGroup?.groupLabel} earlier`}</div>
+    );
   }
   if (fullHouseholdLoading || householdFieldsLoading || !fullHousehold) {
     return <LoadingComponent />;
@@ -61,7 +67,7 @@ export function EditHouseholdDataChange({
     !isEditTicket && (
       <>
         <Title>
-          <Typography variant="h6">{t('Household Data')}</Typography>
+          <Typography variant="h6">{`${beneficiaryGroup?.groupLabel} Data`}</Typography>
         </Title>
         <Grid container spacing={3}>
           <FieldArray

@@ -18,6 +18,7 @@ import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { BlackLink } from '@core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useProgramContext } from 'src/programContext';
 
 const Overview = styled(Paper)`
   margin: 20px;
@@ -36,6 +37,9 @@ export function PaymentRecordDetails({
 }: PaymentRecordDetailsProps): React.ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   let paymentVerification: PaymentVerificationNode = null;
   if (paymentRecord.verification) {
     paymentVerification = paymentRecord.verification;
@@ -57,7 +61,7 @@ export function PaymentRecordDetails({
             </LabelizedField>
           </Grid>
           <Grid item xs={3}>
-            <LabelizedField label={t('Household')}>
+            <LabelizedField label={`${beneficiaryGroup?.groupLabel}`}>
               <BlackLink
                 to={`/${baseUrl}/population/household/${paymentRecord.household.id}`}
               >
@@ -107,18 +111,18 @@ export function PaymentRecordDetails({
       ) : null}
       <Overview>
         <Title>
-          <Typography variant="h6">{t('Household')}</Typography>
+          <Typography variant="h6">{`${beneficiaryGroup?.groupLabel}`}</Typography>
         </Title>
         <Grid container spacing={3}>
           <Grid item xs={3}>
             <LabelizedField
-              label={t('HOUSEHOLD ID')}
+              label={`${beneficiaryGroup?.groupLabel} ID`}
               value={paymentRecord.household.unicefId}
             />
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
-              label={t('HEAD OF HOUSEHOLD')}
+              label={`HEAD OF ${beneficiaryGroup?.groupLabel}`}
               value={paymentRecord.fullName}
             />
           </Grid>

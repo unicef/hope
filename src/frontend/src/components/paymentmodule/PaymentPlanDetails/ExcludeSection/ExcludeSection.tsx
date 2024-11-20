@@ -43,6 +43,8 @@ export function ExcludeSection({
     exclusionReason,
     excludeHouseholdError,
   } = paymentPlan;
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const initialExcludedIds = paymentPlan?.excludedHouseholds?.map(
     (el) => el.unicefId,
@@ -66,9 +68,7 @@ export function ExcludeSection({
 
   const getTooltipText = (): string => {
     if (!hasOpenOrLockedStatus) {
-      return t(
-        'Households can only be excluded from a Payment Plan in status open or locked',
-      );
+      return `${beneficiaryGroup?.groupLabelPlural} can only be excluded from a Payment Plan in status open or locked`;
     }
     if (!hasExcludePermission) {
       return t('Permission denied');
@@ -115,7 +115,7 @@ export function ExcludeSection({
         awaitRefetchQueries: true,
       });
       if (!error) {
-        showMessage(t('Households exclusion started'));
+        showMessage(`${beneficiaryGroup?.groupLabelPlural} exclusion started`);
         setExclusionsOpen(false);
       }
     } catch (e) {
@@ -174,7 +174,11 @@ export function ExcludeSection({
 
   const numberOfExcluded = excludedIds.length - deletedIds.length;
 
-  const renderButtons = (submitForm, values, resetForm): React.ReactElement => {
+  const renderButtons = (
+    submitForm,
+    _values,
+    resetForm,
+  ): React.ReactElement => {
     const noExclusions = numberOfExcluded === 0;
     const editMode = isExclusionsOpen && isEdit;
     const previewMode =
@@ -311,7 +315,7 @@ export function ExcludeSection({
             <Grid item xs={6}>
               <Box mr={2}>
                 <StyledTextField
-                  label={t('Households Ids')}
+                  label={`${beneficiaryGroup?.groupLabelPlural} Ids`}
                   data-cy="input-households-ids"
                   value={idsValue}
                   onChange={handleIdsChange}
@@ -369,7 +373,9 @@ export function ExcludeSection({
               <Box mt={2} mb={2}>
                 <GreyText>
                   {`${numberOfExcluded} ${
-                    numberOfExcluded === 1 ? 'Household' : 'Households'
+                    numberOfExcluded === 1
+                      ? `${beneficiaryGroup?.groupLabel}`
+                      : `${beneficiaryGroup?.groupLabelPlural}`
                   } excluded`}
                 </GreyText>
               </Box>

@@ -17,15 +17,16 @@ export function Exclusions({
   const [isExclusionsOpen, setExclusionsOpen] = useState(initialOpen);
   const { t } = useTranslation();
   const { isSocialDctType } = useProgramContext();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   return (
     <PaperContainer>
       <Box display="flex" justifyContent="space-between">
         <Typography data-cy="title-excluded-entries" variant="h6">
           {isSocialDctType
             ? t('Excluded Target Population Entries')
-            : t(
-                'Excluded Target Population Entries (Households or Individuals)',
-              )}
+            : `Excluded Target Population Entries (${beneficiaryGroup?.groupLabelPlural} or ${beneficiaryGroup?.memberLabelPlural})`}
         </Typography>
         <Button
           variant="outlined"
@@ -50,8 +51,10 @@ export function Exclusions({
                 variant="outlined"
                 label={
                   isSocialDctType
-                    ? t('Individual IDs to exclude')
-                    : t('Household or Individual IDs to exclude')
+                    ? t(`${beneficiaryGroup?.memberLabel} IDs to exclude`)
+                    : t(
+                        `${beneficiaryGroup?.groupLabel} or ${beneficiaryGroup?.memberLabel} IDs to exclude`,
+                      )
                 }
                 component={FormikTextField}
               />

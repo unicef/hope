@@ -19,6 +19,7 @@ import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { DocumentRegistrationPhotoModal } from '../DocumentRegistrationPhotoModal';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useProgramContext } from 'src/programContext';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}
@@ -40,6 +41,9 @@ export function RegistrationIndividualBioData({
 }: RegistrationIndividualBioDataProps): React.ReactElement {
   const { baseUrl } = useBaseUrl();
   const { t } = useTranslation();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const relationshipChoicesDict = choicesToDict(
     choicesData.relationshipChoices,
   );
@@ -150,7 +154,8 @@ export function RegistrationIndividualBioData({
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label={t('Household ID')}>
+          <LabelizedField label={t(`${beneficiaryGroup?.groupLabel} ID`)}>
+            {' '}
             {individual?.household?.id ? (
               <ContentLink
                 href={`/${baseUrl}/registration-data-import/household/${individual?.household?.id}`}

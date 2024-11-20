@@ -13,6 +13,7 @@ import {
 } from '@utils/constants';
 import { DividerLine } from '@core/DividerLine';
 import { LabelizedField } from '@core/LabelizedField';
+import { useProgramContext } from 'src/programContext';
 
 export interface SelectionProps {
   handleChange: (e: React.ChangeEvent) => void;
@@ -38,9 +39,12 @@ export function Selection({
     '*',
   );
 
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const dataChangeIssueTypes = [
-    { name: 'Household Data Update', value: '13' },
-    { name: 'Individual Data Update', value: '14' },
+    { name: `${beneficiaryGroup?.groupLabel} Data Update`, value: '13' },
+    { name: `${beneficiaryGroup?.memberLabel} Data Update`, value: '14' },
   ];
 
   const categoryDescription =
