@@ -7,10 +7,11 @@ import {
 } from '@generated/graphql';
 import { TableWrapper } from '@components/core/TableWrapper';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { dateToIsoString, decodeIdString } from '@utils/utils';
+import { adjustHeadCells, dateToIsoString, decodeIdString } from '@utils/utils';
 import { UniversalTable } from '../UniversalTable';
 import { headCells } from './FeedbackTableHeadCells';
 import { FeedbackTableRow } from './FeedbackTableRow';
+import { useProgramContext } from 'src/programContext';
 
 interface FeedbackTableProps {
   filter;
@@ -22,6 +23,9 @@ export function FeedbackTable({
   canViewDetails,
 }: FeedbackTableProps): ReactElement {
   const { t } = useTranslation();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const { isAllPrograms, programId } = useBaseUrl();
   const initialVariables: AllFeedbacksQueryVariables = {
     feedbackId: filter.feedbackId,
@@ -30,16 +34,27 @@ export function FeedbackTable({
     createdAtRange:
       filter.createdAtRangeMin || filter.createdAtRangeMax
         ? JSON.stringify({
-          min: dateToIsoString(filter.createdAtRangeMin, 'startOfDay'),
-          max: dateToIsoString(filter.createdAtRangeMax, 'endOfDay'),
-        })
+            min: dateToIsoString(filter.createdAtRangeMin, 'startOfDay'),
+            max: dateToIsoString(filter.createdAtRangeMax, 'endOfDay'),
+          })
         : '',
     program: isAllPrograms ? filter.program : programId,
     isActiveProgram: filter.programState === 'active' ? 'true' : '',
   };
 
+  const replacements = {
+    household_lookup: (_beneficiaryGroup) =>
+      `${_beneficiaryGroup.groupLabel} ID`,
+  };
+
+  const adjustedHeadCells = adjustHeadCells(
+    headCells,
+    beneficiaryGroup,
+    replacements,
+  );
+
   const headCellsWithProgramColumn = [
-    ...headCells,
+    ...adjustedHeadCells,
     {
       disablePadding: false,
       label: 'Programme',
@@ -52,7 +67,9 @@ export function FeedbackTable({
   return (
     <TableWrapper>
       <UniversalTable<FeedbackNode, AllFeedbacksQueryVariables>
-        headCells={isAllPrograms ? headCellsWithProgramColumn : headCells}
+        headCells={
+          isAllPrograms ? headCellsWithProgramColumn : adjustedHeadCells
+        }
         title={t('Feedbacks List')}
         rowsPerPageOptions={[10, 15, 20]}
         query={useAllFeedbacksQuery}

@@ -24,6 +24,7 @@ import { StatusBox } from '@core/StatusBox';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useProgramContext } from 'src/programContext';
 
 const Overview = styled(Paper)`
   margin: 20px;
@@ -42,9 +43,10 @@ export function PaymentDetails({
   canViewActivityLog,
   canViewHouseholdDetails,
 }: PaymentDetailsProps): React.ReactElement {
-  const businessArea = useBusinessArea();
   const { t } = useTranslation();
-  const { programId } = useBaseUrl();
+  const { businessArea, programId } = useBaseUrl();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   let paymentVerification: PaymentQuery['payment']['verification'] = null;
   if (
@@ -149,11 +151,11 @@ export function PaymentDetails({
       ) : null}
       <Overview>
         <Title>
-          <Typography variant="h6">{t('Household')}</Typography>
+          <Typography variant="h6">{beneficiaryGroup?.groupLabel}</Typography>
         </Title>
         <Grid container spacing={3}>
           <Grid item xs={3}>
-            <LabelizedField label={t('HOUSEHOLD ID')}>
+            <LabelizedField label={`${beneficiaryGroup?.groupLabel}`}>
               {payment.household?.id && canViewHouseholdDetails ? (
                 <BlackLink
                   to={`/${businessArea}/programs/${programId}/population/household/${payment.household.id}`}

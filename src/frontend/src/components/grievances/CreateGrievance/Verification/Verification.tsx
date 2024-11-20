@@ -7,6 +7,7 @@ import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { Consent } from '../../Consent';
 import { HouseholdQuestionnaire } from '../../HouseholdQuestionnaire/HouseholdQuestionnaire';
 import { IndividualQuestionnaire } from '../../IndividualQuestionnnaire/IndividualQuestionnaire';
+import { useProgramContext } from 'src/programContext';
 
 const BoxWithBorders = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -27,6 +28,9 @@ export function Verification({
   values,
 }: VerificationProps): React.ReactElement {
   const { t } = useTranslation();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   return (
     <BoxWithBorders>
       <>
@@ -39,7 +43,7 @@ export function Verification({
         {values.selectedHousehold && (
           <Box py={4}>
             <Typography variant="subtitle2">
-              {t('Household Questionnaire')}
+              {`${beneficiaryGroup.groupLabel} Questionnaire`}
             </Typography>
             <Box py={4}>
               <HouseholdQuestionnaire values={values} />
@@ -49,7 +53,7 @@ export function Verification({
         {values.selectedIndividual && (
           <>
             <Typography variant="subtitle2">
-              {t('Individual Questionnaire')}
+              {`${beneficiaryGroup.memberLabel} Questionnaire`}
             </Typography>
             <Box py={4}>
               <IndividualQuestionnaire values={values} />

@@ -11,7 +11,7 @@ import { useProgramContext } from '../../../../programContext';
 import { TableWrapper } from '@core/TableWrapper';
 import { ProgramCyclesTablePaymentModule } from '@containers/tables/ProgramCyclesTablePaymentModule/ProgramCyclesTablePaymentModule';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
-import { headCells } from './ProgramCycleDetails/PaymentPlansHeadCells';
+import { headCells } from '@containers/tables/ProgramCyclesTablePaymentModule/HeadCells';
 
 const initialFilter = {
   search: '',

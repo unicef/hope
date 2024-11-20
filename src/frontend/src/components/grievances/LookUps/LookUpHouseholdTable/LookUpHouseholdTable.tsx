@@ -12,6 +12,8 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { TableWrapper } from '@core/TableWrapper';
 import { headCells } from './LookUpHouseholdTableHeadCells';
 import { LookUpHouseholdTableRow } from './LookUpHouseholdTableRow';
+import { useProgramContext } from 'src/programContext';
+import { adjustHeadCells } from '@utils/utils';
 
 interface LookUpHouseholdTableProps {
   businessArea: string;
@@ -48,6 +50,9 @@ export function LookUpHouseholdTable({
   isFeedbackWithHouseholdOnly,
 }: LookUpHouseholdTableProps): React.ReactElement {
   const { isAllPrograms, programId } = useBaseUrl();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const matchWithdrawnValue = (): boolean | undefined => {
     if (filter.withdrawn === 'true') {
       return true;
@@ -126,8 +131,21 @@ export function LookUpHouseholdTable({
     setFieldValue('identityVerified', false);
   };
 
+  const replacements = {
+    unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup.groupLabel} ID`,
+    head_of_household__full_name: (_beneficiaryGroup) =>
+      `Head of ${_beneficiaryGroup.groupLabel}`,
+    size: (_beneficiaryGroup) => `${_beneficiaryGroup.groupLabel} Size`,
+  };
+
+  const adjustedHeadCells = adjustHeadCells(
+    headCells,
+    beneficiaryGroup,
+    replacements,
+  );
+
   const headCellsWithProgramColumn = [
-    ...headCells,
+    ...adjustedHeadCells,
     {
       disablePadding: false,
       label: 'Programme',
@@ -139,7 +157,7 @@ export function LookUpHouseholdTable({
 
   const preparedHeadcells = isAllPrograms
     ? headCellsWithProgramColumn
-    : headCells;
+    : adjustedHeadCells;
 
   const renderTable = (): React.ReactElement => (
     <UniversalTable<

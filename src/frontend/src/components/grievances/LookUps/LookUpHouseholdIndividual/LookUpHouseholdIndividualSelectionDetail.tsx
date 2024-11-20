@@ -20,6 +20,7 @@ import { HouseholdFilters } from '../../../population/HouseholdFilter';
 import { IndividualsFilter } from '../../../population/IndividualsFilter';
 import { LookUpHouseholdTable } from '../LookUpHouseholdTable/LookUpHouseholdTable';
 import { LookUpIndividualTable } from '../LookUpIndividualTable/LookUpIndividualTable';
+import { useProgramContext } from 'src/programContext';
 
 const StyledTabs = styled(Tabs)`
   && {
@@ -97,6 +98,9 @@ export function LookUpHouseholdIndividualSelectionDetail({
     getFilterFromQueryParams(location, initialFilterHH),
   );
 
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const { data: programsData, loading: programsLoading } =
     useAllProgramsForChoicesQuery({
       variables: { businessArea, first: 100 },
@@ -132,8 +136,9 @@ export function LookUpHouseholdIndividualSelectionDetail({
             aria-label="look up tabs"
           >
             <Tab
-             data-cy="look-up-household"
-             label={t('LOOK UP HOUSEHOLD')} />
+              data-cy="look-up-household"
+              label={`LOOK UP ${beneficiaryGroup?.groupLabel}`}
+            />
             <Tab
               disabled={
                 initialValues.issueType ===
@@ -142,8 +147,8 @@ export function LookUpHouseholdIndividualSelectionDetail({
                   GRIEVANCE_ISSUE_TYPES.DELETE_HOUSEHOLD ||
                 initialValues.issueType === GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD
               }
-             data-cy="look-up-individual"
-              label={t('LOOK UP INDIVIDUAL')}
+              data-cy="look-up-individual"
+              label={`LOOK UP ${beneficiaryGroup?.memberLabel}`}
             />
           </StyledTabs>
         </Box>

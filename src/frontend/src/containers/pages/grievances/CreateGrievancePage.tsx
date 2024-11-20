@@ -51,6 +51,7 @@ import {
   hasPermissions,
 } from '../../../config/permissions';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { useProgramContext } from 'src/programContext';
 
 const InnerBoxPadding = styled.div`
   .MuiPaper-root {
@@ -85,6 +86,8 @@ export const CreateGrievancePage = (): React.ReactElement => {
   const { baseUrl, businessArea, programId, isAllPrograms } = useBaseUrl();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const [activeStep, setActiveStep] = useState(GrievanceSteps.Selection);
   const [validateData, setValidateData] = useState(false);
@@ -209,7 +212,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
 
   let steps = [
     'Category Selection',
-    'Household/Individual Look up',
+    `${beneficiaryGroup?.groupLabel}/${beneficiaryGroup?.memberLabel} Look up`,
     'Identity Verification',
     'Description',
   ];
@@ -284,6 +287,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
             householdFieldsDict,
             activeStep,
             setValidateData,
+            beneficiaryGroup,
           )
         }
         validationSchema={validationSchemaWithSteps(activeStep)}

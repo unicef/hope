@@ -131,6 +131,7 @@ export const GrievancesTablePage = (): React.ReactElement => {
     beneficiaryGroup,
     replacements,
   );
+
   return (
     <UniversalErrorBoundary
       location={location}

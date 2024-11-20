@@ -12,6 +12,7 @@ import { FiltersSection } from '@core/FiltersSection';
 import { NumberTextField } from '@core/NumberTextField';
 import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
+import { useProgramContext } from 'src/programContext';
 
 interface LookUpHouseholdFiltersCommunicationProps {
   filter;
@@ -33,6 +34,8 @@ export function LookUpHouseholdFiltersCommunication({
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const { handleFilterChange, applyFilterChanges, clearFilter } =
     createHandleApplyFilterChange(
@@ -102,7 +105,7 @@ export function LookUpHouseholdFiltersCommunication({
         </Grid>
         <Grid item xs={3}>
           <NumberTextField
-            topLabel={t('Household Size')}
+            topLabel={`${beneficiaryGroup?.groupLabel} Size`}
             value={filter.householdSizeMin}
             placeholder={t('From')}
             icon={<GroupIcon />}

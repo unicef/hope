@@ -14,8 +14,7 @@ import { LookUpHouseholdFiltersCommunication } from './LookUpHouseholdFiltersCom
 import { LookUpRegistrationFiltersCommunication } from './LookUpRegistrationFiltersCommunication';
 import { LookUpSelectionTablesCommunication } from './LookUpSelectionTablesCommunication';
 import { LookUpTargetPopulationFiltersCommunication } from './LookUpTargetPopulationFiltersCommunication';
-
-const communicationTabs = ['Household', 'Target Population', 'RDI'];
+import { useProgramContext } from 'src/programContext';
 
 const BoxWithBorderBottom = styled(Box)`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -38,6 +37,13 @@ export function LookUpSelectionCommunication({
   setSelectedTab;
 }): React.ReactElement {
   const location = useLocation();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const communicationTabs = [
+    `${beneficiaryGroup?.groupLabel}`,
+    'Target Population',
+    'RDI',
+  ];
 
   const initialFilterRDI = {
     search: '',

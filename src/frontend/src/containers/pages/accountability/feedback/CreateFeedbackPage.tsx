@@ -49,13 +49,7 @@ import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { FeedbackSteps } from '@utils/constants';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
-
-const steps = [
-  'Category Selection',
-  'Household/Individual Look up',
-  'Identity Verification',
-  'Description',
-];
+import { useProgramContext } from 'src/programContext';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -154,6 +148,15 @@ export function CreateFeedbackPage(): React.ReactElement {
   const { baseUrl, businessArea, isAllPrograms, programId } = useBaseUrl();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
+  const steps = [
+    'Category Selection',
+    `${beneficiaryGroup?.groupLabel}/${beneficiaryGroup?.memberLabel} Look up`,
+    'Identity Verification',
+    'Description',
+  ];
 
   const [activeStep, setActiveStep] = useState(FeedbackSteps.Selection);
   const [validateData, setValidateData] = useState(false);

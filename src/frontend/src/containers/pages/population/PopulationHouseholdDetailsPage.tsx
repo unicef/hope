@@ -33,6 +33,7 @@ import { AdminButton } from '@core/AdminButton';
 import { CollectorsTable } from '@containers/tables/population/CollectorsTable';
 import { HouseholdMembersTable } from '@containers/tables/population/HouseholdMembersTable';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { useProgramContext } from 'src/programContext';
 
 const Container = styled.div`
   padding: 20px;
@@ -62,8 +63,11 @@ export const PopulationHouseholdDetailsPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
   const { baseUrl, businessArea } = useBaseUrl();
+
   const location = useLocation();
   const permissions = usePermissions();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const { data, loading, error } = useHouseholdQuery({
     variables: { id },
@@ -97,7 +101,7 @@ export const PopulationHouseholdDetailsPage = (): React.ReactElement => {
 
   let breadCrumbsItems: BreadCrumbsItem[] = [
     {
-      title: t('Households'),
+      title: beneficiaryGroup?.groupLabelPlural,
       to: `/${baseUrl}/population/household`,
     },
   ];
@@ -125,7 +129,7 @@ export const PopulationHouseholdDetailsPage = (): React.ReactElement => {
       componentName="PopulationHouseholdDetailsPage"
     >
       <PageHeader
-        title={`${t('Household ID')}: ${renderSomethingOrDash(
+        title={`${beneficiaryGroup?.groupLabelPlural}: ${renderSomethingOrDash(
           household?.unicefId,
         )}`}
         breadCrumbs={
@@ -142,7 +146,7 @@ export const PopulationHouseholdDetailsPage = (): React.ReactElement => {
               {household?.hasDuplicates && (
                 <WarningTooltip
                   confirmed
-                  message={t('Houesehold has Duplicates')}
+                  message={`${beneficiaryGroup?.groupLabel} has Duplicates`}
                 />
               )}
             </Box>

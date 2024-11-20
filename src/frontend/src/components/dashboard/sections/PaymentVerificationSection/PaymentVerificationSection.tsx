@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { AllChartsQuery } from '@generated/graphql';
 import { PaymentVerificationChart } from '../../charts/PaymentVerificationChart';
 import { DashboardPaper } from '../../DashboardPaper';
+import { useProgramContext } from 'src/programContext';
 
 interface PaymentVerificationSectionProps {
   data: AllChartsQuery['chartPaymentVerification'];
@@ -12,12 +13,15 @@ export function PaymentVerificationSection({
   data,
 }: PaymentVerificationSectionProps): React.ReactElement {
   const { t } = useTranslation();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   if (!data) return null;
 
   const renderContacted = () => {
     return data.households === 1
-      ? t('Household contacted')
-      : t('Households contacted');
+      ? `${beneficiaryGroup?.groupLabel} contacted`
+      : `${beneficiaryGroup?.groupLabelPlural} contacted`;
   };
 
   return (

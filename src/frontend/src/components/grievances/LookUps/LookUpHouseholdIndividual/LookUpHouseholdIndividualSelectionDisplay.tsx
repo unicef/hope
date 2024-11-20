@@ -4,6 +4,7 @@ import * as React from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { StyledBox, BlueText, DarkGrey } from '../LookUpStyles';
+import { useProgramContext } from 'src/programContext';
 
 const Types = { household: 'household', individual: 'individual' };
 
@@ -32,6 +33,9 @@ export const LookUpHouseholdIndividualSelectionDisplay = ({
   setSelectedIndividual,
 }: LookUpHouseholdIndividualSelectionDisplayProps): React.ReactElement => {
   const { t } = useTranslation();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const handleRemove = (type): void => {
     if (type === Types.household) {
       onValueChange('selectedHousehold', null);
@@ -51,7 +55,7 @@ export const LookUpHouseholdIndividualSelectionDisplay = ({
           <Grid container alignItems="center" justifyContent="space-between">
             <Grid item>
               <Box display="flex">
-                {t('Household ID')}:
+                {`${beneficiaryGroup?.groupLabel} ID`}:
                 <BlueText>
                   &ensp;
                   {selectedHousehold?.unicefId || '-'}
@@ -79,7 +83,7 @@ export const LookUpHouseholdIndividualSelectionDisplay = ({
           <Grid container alignItems="center" justifyContent="space-between">
             <Grid item>
               <Box display="flex">
-                {t('Individual ID')}:
+                {`${beneficiaryGroup?.memberLabel} ID`}:
                 <BlueText>
                   &ensp;
                   {selectedIndividual?.unicefId || '-'}

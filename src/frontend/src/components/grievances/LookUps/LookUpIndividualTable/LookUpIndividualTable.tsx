@@ -6,11 +6,12 @@ import {
   useAllIndividualsForPopulationTableQuery,
 } from '@generated/graphql';
 import { UniversalTable } from '@containers/tables/UniversalTable';
-import { decodeIdString } from '@utils/utils';
+import { adjustHeadCells, decodeIdString } from '@utils/utils';
 import { TableWrapper } from '@core/TableWrapper';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { headCells } from './LookUpIndividualTableHeadCells';
 import { LookUpIndividualTableRow } from './LookUpIndividualTableRow';
+import { useProgramContext } from 'src/programContext';
 
 interface LookUpIndividualTableProps {
   filter;
@@ -46,6 +47,8 @@ export function LookUpIndividualTable({
   noTableStyling = false,
 }: LookUpIndividualTableProps): React.ReactElement {
   const { programId, isAllPrograms } = useBaseUrl();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const handleRadioChange = (individual): void => {
     setSelectedIndividual(individual);
@@ -87,8 +90,19 @@ export function LookUpIndividualTable({
     isActiveProgram: filter.programState === 'active' ? true : null,
   };
 
+  const replacements = {
+    unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup.memberLabel} ID`,
+    household__id: (_beneficiaryGroup) => `${_beneficiaryGroup.groupLabel} ID`,
+  };
+
+  const adjustedHeadCells = adjustHeadCells(
+    headCells,
+    beneficiaryGroup,
+    replacements,
+  );
+
   const headCellsWithProgramColumn = [
-    ...headCells,
+    ...adjustedHeadCells,
     {
       disablePadding: false,
       label: 'Programme',
@@ -100,12 +114,12 @@ export function LookUpIndividualTable({
 
   const preparedHeadcells = isAllPrograms
     ? headCellsWithProgramColumn
-    : headCells;
+    : adjustedHeadCells;
 
   const renderTable = (): React.ReactElement => (
     <UniversalTable<
-    AllIndividualsForPopulationTableQuery['allIndividuals']['edges'][number]['node'],
-    AllIndividualsForPopulationTableQueryVariables
+      AllIndividualsForPopulationTableQuery['allIndividuals']['edges'][number]['node'],
+      AllIndividualsForPopulationTableQueryVariables
     >
       headCells={preparedHeadcells}
       allowSort={false}
