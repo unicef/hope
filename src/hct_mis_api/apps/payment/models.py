@@ -2369,7 +2369,6 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
 
             unique_key = sha256.hexdigest()
             possible_duplicates = self.__class__.all_objects.filter(
-                rdi_merge_status=MergeStatusModel.MERGED,
                 is_valid=True,
                 unique_key__isnull=False,
                 unique_key=unique_key,
