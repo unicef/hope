@@ -470,7 +470,7 @@ class TestPaymentVerification:
         assert "0" in pagePaymentVerificationDetails.getLabelSampleSize().text
         assert "1" in pagePaymentVerificationDetails.getLabelNumberOfVerificationPlans().text
 
-    @pytest.mark.xfail(reason="UNSTABLE")
+    @pytest.mark.xfail(reason="Problem with deadlock during test - 202318")
     def test_payment_verification_records(
         self,
         active_program: Program,
