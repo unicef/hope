@@ -94,7 +94,9 @@ class HouseholdFilter(FilterSet):
     withdrawn = BooleanFilter(field_name="withdrawn")
     country_origin = CharFilter(field_name="country_origin__iso_code3", lookup_expr="startswith")
     is_active_program = BooleanFilter(method="filter_is_active_program")
-    rdi_merge_status = ChoiceFilter(field_name="rdi_merge_status", choices=MergeStatusModel.STATUS_CHOICE)
+    rdi_merge_status = ChoiceFilter(
+        field_name="rdi_merge_status", choices=MergeStatusModel.STATUS_CHOICE, required=True
+    )
 
     class Meta:
         model = Household
@@ -290,7 +292,9 @@ class IndividualFilter(FilterSet):
     is_active_program = BooleanFilter(method="filter_is_active_program")
     rdi_id = CharFilter(method="filter_rdi_id")
     duplicates_only = BooleanFilter(method="filter_duplicates_only")
-    rdi_merge_status = ChoiceFilter(field_name="rdi_merge_status", choices=MergeStatusModel.STATUS_CHOICE)
+    rdi_merge_status = ChoiceFilter(
+        field_name="rdi_merge_status", choices=MergeStatusModel.STATUS_CHOICE, required=True
+    )
 
     class Meta:
         model = Individual
