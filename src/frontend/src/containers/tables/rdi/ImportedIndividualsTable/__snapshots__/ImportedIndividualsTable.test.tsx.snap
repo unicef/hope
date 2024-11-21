@@ -109,7 +109,7 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render loading 1`
                   role="button"
                   tabindex="0"
                 >
-                  Relationship to HoH
+                  Relationship to Head of Household
                   <svg
                     aria-hidden="true"
                     class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
@@ -580,7 +580,7 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
                   role="button"
                   tabindex="0"
                 >
-                  Relationship to HoH
+                  Relationship to Head of Household
                   <svg
                     aria-hidden="true"
                     class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"

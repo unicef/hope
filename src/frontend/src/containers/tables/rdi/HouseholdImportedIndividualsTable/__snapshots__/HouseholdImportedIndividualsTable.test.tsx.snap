@@ -78,7 +78,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
                   class="sc-egkSDF buCIue"
                   data-cy="table-label"
                 >
-                  Relationship to HoH
+                  Relationship to Head of Household
                 </span>
               </th>
               <th
@@ -431,7 +431,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
                   class="sc-egkSDF buCIue"
                   data-cy="table-label"
                 >
-                  Relationship to HoH
+                  Relationship to Head of Household
                 </span>
               </th>
               <th
