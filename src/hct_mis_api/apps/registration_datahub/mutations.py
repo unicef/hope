@@ -269,7 +269,10 @@ class RegistrationProgramPopulationImportMutation(BaseValidator, PermissionMutat
         )
 
         created_obj_hct.status = RegistrationDataImport.IMPORT_SCHEDULED
-        created_obj_hct.save(update_fields=["status"])
+        created_obj_hct.deduplication_engine_status = (
+            RegistrationDataImport.DEDUP_ENGINE_PENDING if program.biometric_deduplication_enabled else None
+        )
+        created_obj_hct.save(update_fields=["status", "deduplication_engine_status"])
 
         transaction.on_commit(
             lambda: registration_program_population_import_task.delay(

@@ -17,15 +17,9 @@ class DeduplicationSetData:
 
 
 @dataclasses.dataclass
-class DeduplicationSetConfig:
-    face_distance_threshold: float  # 0.0 - 1.0
-
-
-@dataclasses.dataclass
 class DeduplicationSet:
     reference_pk: str  # program.id
     notification_url: str  # webhook url
-    config: DeduplicationSetConfig
 
 
 @dataclasses.dataclass
