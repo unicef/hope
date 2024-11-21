@@ -62,11 +62,10 @@ class Migration(migrations.Migration):
                 ("removed_date", models.DateTimeField(blank=True, null=True)),
                 ("last_sync_at", models.DateTimeField(blank=True, null=True)),
                 ("bank_name", models.CharField(max_length=255)),
-                ("bank_account_number", models.CharField(max_length=64)),
-                ("debit_card_number", models.CharField(blank=True, default="", max_length=255)),
+                ("bank_account_number",models.CharField(db_index=True, max_length=64)),
+                ("debit_card_number", models.CharField(blank=True, db_index=True, default='', max_length=255)),
                 ("bank_branch_name", models.CharField(blank=True, default="", max_length=255)),
                 ("account_holder_name", models.CharField(blank=True, default="", max_length=255)),
-                ("is_migration_handled", models.BooleanField(default=False)),
             ],
             options={
                 "abstract": False,
