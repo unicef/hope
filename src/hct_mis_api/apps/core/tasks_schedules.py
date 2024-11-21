@@ -49,4 +49,8 @@ TASKS_SCHEDULES = {
         "task": "hct_mis_api.apps.periodic_data_update.celery_tasks.remove_old_pdu_template_files_task",
         "schedule": crontab(hour="*/24"),
     },
+    "update_dashboard_figures_task": {
+        "task": "hct_mis_api.apps.dashboard.celery_tasks.update_dashboard_figures",
+        "schedule": crontab(hour="*/24"),
+    },
 }

@@ -27,7 +27,6 @@ const HeaderWrapper = styled.div`
   }
 `;
 const StatusWrapper = styled.div`
-  width: 140px;
   display: flex;
   flex-direction: row;
 `;
