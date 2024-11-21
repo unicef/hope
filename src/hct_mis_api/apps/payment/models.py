@@ -1213,7 +1213,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
 
             if main_key in {"admin1_id", "admin2_id", "admin3_id", "admin4_id", "admin_area_id"}:
                 area = Area.objects.filter(pk=household_data.get(main_key)).first()
-                return area.p_code if area else None
+                return f"{area.p_code} - {area.name}" if area else "" if area else None
 
             if main_key == "roles":
                 lookup_id = primary_collector.get("id") or alternate_collector.get("id")
@@ -2369,7 +2369,6 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
 
             unique_key = sha256.hexdigest()
             possible_duplicates = self.__class__.all_objects.filter(
-                rdi_merge_status=MergeStatusModel.MERGED,
                 is_valid=True,
                 unique_key__isnull=False,
                 unique_key=unique_key,
