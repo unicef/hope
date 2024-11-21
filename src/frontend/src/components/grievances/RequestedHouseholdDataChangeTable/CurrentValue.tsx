@@ -1,9 +1,14 @@
-import { AllEditHouseholdFieldsQuery } from '@generated/graphql';
+import {
+  AllEditHouseholdFieldsQuery,
+  AllEditPeopleFieldsQuery,
+} from '@generated/graphql';
 import { GrievanceFlexFieldPhotoModal } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModal';
 import { ReactElement } from 'react';
 
 export interface CurrentValueProps {
-  field: AllEditHouseholdFieldsQuery['allEditHouseholdFieldsAttributes'][number];
+  field:
+    | AllEditHouseholdFieldsQuery['allEditHouseholdFieldsAttributes'][number]
+    | AllEditPeopleFieldsQuery['allEditPeopleFieldsAttributes'][number];
   value;
 }
 

@@ -181,7 +181,7 @@ export function validate(
   if (
     category === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
     category === GRIEVANCE_CATEGORIES.DATA_CHANGE ||
-    category === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT  ||
+    category === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT ||
     category === GRIEVANCE_CATEGORIES.NEEDS_ADJUDICATION
   ) {
     if (!issueType) {
@@ -240,6 +240,7 @@ export function validateUsingSteps(
   householdFieldsDict,
   activeStep,
   setValidateData,
+  isSocialDctType,
 ) {
   const category = values.category?.toString();
   const issueType = values.issueType?.toString();
@@ -468,7 +469,8 @@ export function validateUsingSteps(
   if (
     activeStep === GrievanceSteps.Lookup &&
     !values.selectedHousehold &&
-    householdRequiredGrievanceTypes.includes(values.issueType)
+    householdRequiredGrievanceTypes.includes(values.issueType) &&
+    !isSocialDctType
   ) {
     errors.selectedHousehold = 'Household is Required';
   }
@@ -481,9 +483,9 @@ export function validateUsingSteps(
       GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD,
       GRIEVANCE_ISSUE_TYPES.DELETE_HOUSEHOLD,
     ];
-    const isHouseholdRequired = householdRequiredIssueTypes.includes(
-      values.issueType,
-    );
+    const isHouseholdRequired =
+      householdRequiredIssueTypes.includes(values.issueType) &&
+      !isSocialDctType;
     const isIndividualRequired = individualRequiredIssueTypes.includes(
       values.issueType,
     );
