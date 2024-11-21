@@ -415,7 +415,7 @@ def prepare_payment_plan_task(self: Any, payment_plan_id: str) -> bool:
 
             # double check Payment Plan status
             if payment_plan.status != PaymentPlan.Status.PREPARING:
-                logger.exception(f"The Payment Plan must have the status {PaymentPlan.Status.PREPARING}")
+                logger.info(f"The Payment Plan must have the status {PaymentPlan.Status.PREPARING}.")
                 return False
 
             PaymentPlanService.create_payments(payment_plan)
