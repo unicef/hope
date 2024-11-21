@@ -22,7 +22,6 @@ from hct_mis_api.apps.registration_datahub.apis.deduplication_engine import (
     DeduplicationEngineAPI,
     DeduplicationImage,
     DeduplicationSet,
-    DeduplicationSetConfig,
     DeduplicationSetData,
     IgnoredFilenamesPair,
     SimilarityPair,
@@ -70,9 +69,6 @@ class BiometricDeduplicationServiceTest(TestCase):
             DeduplicationSet(
                 reference_pk=str(self.program.id),
                 notification_url=f"https://{settings.DOMAIN_NAME}/api/rest/{self.program.business_area.slug}/programs/{str(self.program.id)}/registration-data/webhookdeduplication/",
-                config=DeduplicationSetConfig(
-                    face_distance_threshold=1 - (self.program.business_area.biometric_deduplication_threshold / 100)
-                ),
             )
         )
 
