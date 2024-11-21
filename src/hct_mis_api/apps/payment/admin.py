@@ -281,9 +281,8 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
             self.message_user(
                 request, f"The Payment Plan(s) must have the status {PaymentPlan.Status.PREPARING}", messages.WARNING
             )
-            return None
         restarted_pp_unicef_ids: List[str] = []
-        for payment_plan in queryset:
+        for payment_plan in queryset.filter(status=PaymentPlan.Status.PREPARING):
             # check if no task in a queue
             cache_key = generate_cache_key(
                 {
@@ -299,9 +298,10 @@ class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
             prepare_payment_plan_task.delay(payment_plan.id)
             restarted_pp_unicef_ids.append(payment_plan.unicef_id)
 
-        self.message_user(
-            request, f"Task restarted for Payment Plan(s): {', '.join(restarted_pp_unicef_ids)}", messages.SUCCESS
-        )
+        if restarted_pp_unicef_ids:
+            self.message_user(
+                request, f"Task restarted for Payment Plan(s): {', '.join(restarted_pp_unicef_ids)}", messages.SUCCESS
+            )
 
 
 class PaymentHouseholdSnapshotInline(admin.StackedInline):
