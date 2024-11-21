@@ -355,6 +355,7 @@ class HouseholdAdmin(
         active_individuals = hh.individuals(manager="all_objects").exclude(Q(duplicate=True) | Q(withdrawn=True))
         ghosts_individuals = hh.individuals(manager="all_objects").filter(Q(duplicate=True) | Q(withdrawn=True))
         all_individuals = hh.individuals(manager="all_objects").all()
+        # TODO 221086: Check if this is the correct way to check if individual data is collected
         if hh.collect_individual_data:
             if active_individuals.count() != hh.size:
                 warnings.append([messages.WARNING, "HH size does not match"])

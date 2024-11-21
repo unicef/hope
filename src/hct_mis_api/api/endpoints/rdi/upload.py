@@ -100,6 +100,7 @@ class DocumentSerializer(serializers.ModelSerializer):
         ]
 
 
+# TODO: 221086 - Shouldnt we use DCT model?
 class CollectDataMixin(serializers.Serializer):
     collect_individual_data = serializers.CharField(required=True)
 

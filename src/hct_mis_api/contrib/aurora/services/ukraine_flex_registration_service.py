@@ -173,7 +173,6 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
             country_origin=Country.objects.get(iso_code2="UA"),
             country=Country.objects.get(iso_code2="UA"),
             consent=True,
-            collect_individual_data=YES,
             size=household_dict.get("size_h_c"),
             business_area=registration_data_import.business_area,
             residence_status=household_dict.get("residence_status_h_c", BLANK),
