@@ -382,7 +382,6 @@ def deduplicate_documents(rdi_id: str) -> bool:
                 documents_query,
                 registration_data_import=rdi,
             )
-            rdi.update_needs_adjudication_tickets_statistic()
     return True
 
 
