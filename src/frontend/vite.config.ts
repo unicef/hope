@@ -1,13 +1,12 @@
-import { defineConfig } from 'vite';
+import { defineConfig, splitVendorChunkPlugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
 // https://vitejs.dev/config/
 export default defineConfig({
   assetsInclude: ['**/*.png'],
-  base: '/',
-  publicDir: 'public',
-  plugins: [tsconfigPaths(), react()],
+  base: '',
+  plugins: [tsconfigPaths(), react(), splitVendorChunkPlugin()],
   resolve: {
     mainFields: [],
   },
@@ -23,11 +22,6 @@ export default defineConfig({
     manifest: true,
     rollupOptions: {
       input: '/src/main.tsx',
-      output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-        },
-      },
     },
   },
   server: {
