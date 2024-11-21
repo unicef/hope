@@ -1,4 +1,3 @@
-import { Refresh } from '@mui/icons-material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { Box, Button } from '@mui/material';
 import { clearCache } from '@utils/utils';

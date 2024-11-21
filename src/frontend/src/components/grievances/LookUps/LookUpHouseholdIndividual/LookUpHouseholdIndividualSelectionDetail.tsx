@@ -1,26 +1,25 @@
-import { Box } from '@mui/material';
-import * as React from 'react';
-import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
-import styled from 'styled-components';
-import get from 'lodash/get';
+import { LoadingComponent } from '@core/LoadingComponent';
+import { TabPanel } from '@core/TabPanel';
+import { Tab, Tabs } from '@core/Tabs';
 import {
   useAllProgramsForChoicesQuery,
   useHouseholdChoiceDataQuery,
   useIndividualChoiceDataQuery,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { Box } from '@mui/material';
 import { GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
 import { getFilterFromQueryParams } from '@utils/utils';
-import { LoadingComponent } from '@core/LoadingComponent';
-import { Tab, Tabs } from '@core/Tabs';
-import { TabPanel } from '@core/TabPanel';
+import get from 'lodash/get';
+import * as React from 'react';
+import { useState } from 'react';
+import { useLocation } from 'react-router-dom';
+import { useProgramContext } from 'src/programContext';
+import styled from 'styled-components';
 import { HouseholdFilters } from '../../../population/HouseholdFilter';
 import { IndividualsFilter } from '../../../population/IndividualsFilter';
 import { LookUpHouseholdTable } from '../LookUpHouseholdTable/LookUpHouseholdTable';
 import { LookUpIndividualTable } from '../LookUpIndividualTable/LookUpIndividualTable';
-import { useProgramContext } from 'src/programContext';
 
 const StyledTabs = styled(Tabs)`
   && {
@@ -47,7 +46,6 @@ export function LookUpHouseholdIndividualSelectionDetail({
   redirectedFromRelatedTicket?: boolean;
   isFeedbackWithHouseholdOnly?: boolean;
 }): React.ReactElement {
-  const { t } = useTranslation();
   const location = useLocation();
   const { businessArea, isAllPrograms, programId } = useBaseUrl();
   const [selectedTab, setSelectedTab] = useState(0);

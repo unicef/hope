@@ -18,6 +18,7 @@ import {
 import { HouseholdImportedIndividualsTable } from '../../tables/rdi/HouseholdImportedIndividualsTable/HouseholdImportedIndividualsTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { useProgramContext } from 'src/programContext';
 
 const Container = styled.div`
   padding: 20px;
@@ -34,6 +35,8 @@ export function RegistrationHouseholdDetailsPage(): React.ReactElement {
   const { baseUrl } = useBaseUrl();
   const permissions = usePermissions();
   const location = useLocation();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const { data, loading, error } = useImportedHouseholdQuery({
     variables: { id },
@@ -76,7 +79,7 @@ export function RegistrationHouseholdDetailsPage(): React.ReactElement {
       componentName="RegistrationHouseholdDetailsPage"
     >
       <PageHeader
-        title={`${'Household ID'}: ${importedHousehold.importId}`}
+        title={`${beneficiaryGroup?.groupLabel} ID: ${importedHousehold.importId}`}
         breadCrumbs={breadCrumbsItems}
       />
       <HouseholdDetails

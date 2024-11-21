@@ -1,10 +1,9 @@
-import { Box, Grid } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { Box, Grid } from '@mui/material';
 import * as React from 'react';
-import styled from 'styled-components';
-import { useTranslation } from 'react-i18next';
-import { StyledBox, BlueText, DarkGrey } from '../LookUpStyles';
 import { useProgramContext } from 'src/programContext';
+import styled from 'styled-components';
+import { BlueText, DarkGrey, StyledBox } from '../LookUpStyles';
 
 const Types = { household: 'household', individual: 'individual' };
 
@@ -32,7 +31,6 @@ export const LookUpHouseholdIndividualSelectionDisplay = ({
   selectedIndividual,
   setSelectedIndividual,
 }: LookUpHouseholdIndividualSelectionDisplayProps): React.ReactElement => {
-  const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 

@@ -1,21 +1,4 @@
-import { Grid, Paper, Typography } from '@mui/material';
-import * as React from 'react';
-import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
-import {
-  PaymentQuery,
-  PaymentStatus,
-  PaymentVerificationStatus,
-} from '@generated/graphql';
 import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityLogTable';
-import { useBusinessArea } from '@hooks/useBusinessArea';
-import {
-  formatCurrencyWithSymbol,
-  getPhoneNoLabel,
-  paymentStatusDisplayMap,
-  paymentStatusToColor,
-  verificationRecordsStatusToColor,
-} from '@utils/utils';
 import { BlackLink } from '@core/BlackLink';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { DividerLine } from '@core/DividerLine';
@@ -23,8 +6,24 @@ import { LabelizedField } from '@core/LabelizedField';
 import { StatusBox } from '@core/StatusBox';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
+import {
+  PaymentQuery,
+  PaymentStatus,
+  PaymentVerificationStatus,
+} from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { Grid, Paper, Typography } from '@mui/material';
+import {
+  formatCurrencyWithSymbol,
+  getPhoneNoLabel,
+  paymentStatusDisplayMap,
+  paymentStatusToColor,
+  verificationRecordsStatusToColor,
+} from '@utils/utils';
+import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
+import styled from 'styled-components';
 
 const Overview = styled(Paper)`
   margin: 20px;

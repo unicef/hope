@@ -12,6 +12,7 @@ import { ContentLink } from '@core/ContentLink';
 import { LabelizedField } from '@core/LabelizedField';
 import { LookUpReassignRole } from './LookUps/LookUpReassignRole/LookUpReassignRole';
 import { ReassignRoleUnique } from './LookUps/LookUpReassignRole/ReassignRoleUnique';
+import { useProgramContext } from 'src/programContext';
 
 const StyledBox = styled(Paper)`
   border: 1px solid ${({ theme }) => theme.hctPalette.orange};
@@ -44,6 +45,9 @@ export const ReassignRoleBox = ({
 }): React.ReactElement => {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   let { individual } = ticket;
   let { household } = ticket;
   let reassignData;
@@ -143,7 +147,7 @@ export const ReassignRoleBox = ({
       return (
         <Typography variant="body2">
           {t(
-            'Upon removing you will need to select new individual(s) for this role.',
+            `Upon removing you will need to select new ${beneficiaryGroup?.memberLabelPlural} for this role.`,
           )}
         </Typography>
       );
@@ -156,7 +160,9 @@ export const ReassignRoleBox = ({
       <OrangeTitle>
         <Typography variant="h6">
           <WarnIcon />
-          {t('Individual is the HOH or the collector for the household')}
+          {t(
+            `${beneficiaryGroup?.memberLabel} is the Head of Household or the collector for the ${beneficiaryGroup?.groupLabel}`,
+          )}{' '}
         </Typography>
       </OrangeTitle>
       {showMessage()}

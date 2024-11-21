@@ -20,6 +20,7 @@ import { AgencyField } from './AgencyField';
 import { DocumentField } from './DocumentField';
 import { FormikBoolFieldGrievances } from './FormikBoolFieldGrievances';
 import { removeItemById } from './utils/helpers';
+import { useProgramContext } from 'src/programContext';
 
 export interface AddIndividualDataChangeFieldProps {
   field: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'][number];
@@ -122,6 +123,8 @@ export function AddIndividualDataChange({
   const { t } = useTranslation();
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const { data, loading } = useAllAddIndividualFieldsQuery();
   if (loading) {
@@ -138,7 +141,9 @@ export function AddIndividualDataChange({
     !isEditTicket && (
       <>
         <Title>
-          <Typography variant="h6">{t('Individual Data')}</Typography>
+          <Typography variant="h6">
+            {t(`${beneficiaryGroup?.memberLabel} Data`)}
+          </Typography>
         </Title>
         <Grid container spacing={3}>
           <Grid item xs={12}>

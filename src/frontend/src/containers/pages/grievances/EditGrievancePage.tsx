@@ -56,12 +56,12 @@ import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutoc
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import {
+  getGrievanceCategoryDescriptions,
+  getGrievanceIssueTypeDescriptions,
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_CATEGORIES_NAMES,
-  GRIEVANCE_CATEGORY_DESCRIPTIONS,
   GRIEVANCE_ISSUE_TYPES,
   GRIEVANCE_ISSUE_TYPES_NAMES,
-  GRIEVANCE_ISSUE_TYPE_DESCRIPTIONS,
   GRIEVANCE_TICKET_STATES,
 } from '@utils/constants';
 import {
@@ -239,15 +239,6 @@ export const EditGrievancePage = (): React.ReactElement => {
     baseUrl,
   );
 
-  const categoryDescription =
-    GRIEVANCE_CATEGORY_DESCRIPTIONS[
-      GRIEVANCE_CATEGORIES_NAMES[ticket.category]
-    ] || '';
-  const issueTypeDescription =
-    GRIEVANCE_ISSUE_TYPE_DESCRIPTIONS[
-      GRIEVANCE_ISSUE_TYPES_NAMES[ticket.issueType]
-    ] || '';
-
   const mappedProgramChoices = programsData?.allPrograms?.edges?.map(
     (element) => ({ name: element.node.name, value: element.node.id }),
   );
@@ -312,6 +303,18 @@ export const EditGrievancePage = (): React.ReactElement => {
             dataChangeComponentDict,
             EmptyComponent,
           );
+          const categoryDescriptions =
+            getGrievanceCategoryDescriptions(beneficiaryGroup);
+          const issueTypeDescriptions =
+            getGrievanceIssueTypeDescriptions(beneficiaryGroup);
+
+          const categoryDescription =
+            categoryDescriptions[GRIEVANCE_CATEGORIES_NAMES[values.category]] ||
+            '';
+          const issueTypeDescription =
+            issueTypeDescriptions[
+              GRIEVANCE_ISSUE_TYPES_NAMES[values.issueType]
+            ] || '';
           return (
             <>
               <AutoSubmitFormOnEnter />

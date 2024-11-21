@@ -31,6 +31,7 @@ import { DialogTitleWrapper } from '../dialogs/DialogTitleWrapper';
 import { TargetingCriteriaIndividualFilterBlocks } from './TargetingCriteriaIndividualFilterBlocks';
 import { AndDivider, AndDividerLabel } from '@components/targeting/AndDivider';
 import { TargetingCriteriaHouseholdFilter } from './TargetingCriteriaHouseholdFilter';
+import { useProgramContext } from 'src/programContext';
 
 const ButtonBox = styled.div`
   width: 300px;
@@ -121,6 +122,8 @@ export const TargetingCriteriaForm = ({
 }: TargetingCriteriaFormPropTypes): React.ReactElement => {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const { data, loading } = useCachedImportedIndividualFieldsQuery(
     businessArea,
@@ -210,7 +213,7 @@ export const TargetingCriteriaForm = ({
     }
     if (filters.length + individualsFiltersBlocks.length === 0) {
       errors.nonFieldErrors = [
-        'You need to add at least one household filter or an individual block filter.',
+        `You need to add at least one ${beneficiaryGroup?.groupLabel} filter or an ${beneficiaryGroup?.memberLabel} block filter.`,
       ];
     } else if (
       individualsFiltersBlocks.filter(
@@ -218,7 +221,7 @@ export const TargetingCriteriaForm = ({
       ).length > 0
     ) {
       errors.nonFieldErrors = [
-        'You need to add at least one household filter or an individual block filter.',
+        `You need to add at least one ${beneficiaryGroup?.groupLabel} filter or an ${beneficiaryGroup?.memberLabel} block filter.`,
       ];
     }
     return errors;
@@ -328,7 +331,10 @@ export const TargetingCriteriaForm = ({
                         startIcon={<AddCircleOutline />}
                         data-cy="button-household-rule"
                       >
-                        ADD {isSocialWorkingProgram ? 'PEOPLE' : 'HOUSEHOLD'}{' '}
+                        ADD{' '}
+                        {isSocialWorkingProgram
+                          ? 'PEOPLE'
+                          : beneficiaryGroup?.groupLabel.toUpperCase()}{' '}
                         RULE
                       </Button>
                     </ButtonBox>

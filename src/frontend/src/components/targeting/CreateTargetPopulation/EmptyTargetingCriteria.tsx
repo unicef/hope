@@ -3,6 +3,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { PaperContainer } from '../PaperContainer';
+import { useProgramContext } from 'src/programContext';
 
 const Label = styled.p`
   color: #b1b1b5;
@@ -10,10 +11,12 @@ const Label = styled.p`
 
 export function EmptyTargetingCriteria(): React.ReactElement {
   const { t } = useTranslation();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   return (
     <PaperContainer>
       <Typography variant="h6">
-        {t('Target Population Entries (Households)')}
+        {t(`Target Population Entries (${beneficiaryGroup?.groupLabelPlural})`)}
       </Typography>
       <Label>{t('Add targeting criteria to see results.')}</Label>
     </PaperContainer>

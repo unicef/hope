@@ -53,6 +53,7 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
   const navigate = useNavigate();
   const location = useLocation();
   const category = location.state?.category;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const { data: businessAreaData } = useBusinessAreaDataQuery({
     variables: { businessAreaSlug: businessArea },
@@ -206,7 +207,7 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
                           name="householdIds"
                           fullWidth
                           variant="outlined"
-                          label={t('Household IDs')}
+                          label={t(`${beneficiaryGroup?.groupLabel} IDs`)}
                           component={FormikTextField}
                         />
                       </Grid>
@@ -227,7 +228,7 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
                             name="individualIds"
                             fullWidth
                             variant="outlined"
-                            label={t('Individual IDs')}
+                            label={t(`${beneficiaryGroup?.memberLabel} IDs`)}
                             component={FormikTextField}
                           />
                         </Box>
@@ -241,7 +242,7 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
                           <Field
                             name="flagExcludeIfActiveAdjudicationTicket"
                             label={t(
-                              'Exclude Households with Active Adjudication Ticket',
+                              `Exclude ${beneficiaryGroup?.groupLabelPlural} with Active Adjudication Ticket`,
                             )}
                             color="primary"
                             component={FormikCheckboxField}
@@ -280,7 +281,7 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
                           <Field
                             name="flagExcludeIfOnSanctionList"
                             label={t(
-                              'Exclude Households with an Active Sanction Screen Flag',
+                              `Exclude ${beneficiaryGroup?.groupLabelPlural} with an Active Sanction Screen Flag`,
                             )}
                             color="primary"
                             component={FormikCheckboxField}
@@ -302,10 +303,14 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
               alignItems="center"
             >
               <Typography style={{ color: '#b1b1b5' }} variant="h6">
-                {t('Save to see the list of households')}
+                {t(
+                  `Save to see the list of ${beneficiaryGroup?.groupLabelPlural}`,
+                )}
               </Typography>
               <Typography style={{ color: '#b1b1b5' }} variant="subtitle1">
-                {t('List of households will be available after saving')}
+                {t(
+                  `List of ${beneficiaryGroup?.groupLabelPlural} will be available after saving`,
+                )}
               </Typography>
             </Box>
           </Form>

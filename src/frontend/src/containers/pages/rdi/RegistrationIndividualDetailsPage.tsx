@@ -20,6 +20,7 @@ import {
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { useProgramContext } from 'src/programContext';
 
 const Container = styled.div`
   padding: 20px;
@@ -35,6 +36,8 @@ export function RegistrationIndividualDetailsPage(): React.ReactElement {
   const { id } = useParams();
   const { baseUrl } = useBaseUrl();
   const location = useLocation();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const permissions = usePermissions();
   const { data: flexFieldsData, loading: flexFieldsDataLoading } =
@@ -74,7 +77,7 @@ export function RegistrationIndividualDetailsPage(): React.ReactElement {
 
   if (importedIndividual?.household?.id) {
     breadCrumbsItems.push({
-      title: `${t('HOUSEHOLD ID')}: ${importedIndividual?.household.importId}`,
+      title: `${t(`${beneficiaryGroup?.groupLabel.toUpperCase()} ID`)}: ${importedIndividual?.household.importId}`,
       to: `/${baseUrl}/registration-data-import/household/${importedIndividual?.household?.id}`,
     });
   }
@@ -89,7 +92,7 @@ export function RegistrationIndividualDetailsPage(): React.ReactElement {
       componentName="RegistrationIndividualDetailsPage"
     >
       <PageHeader
-        title={`${t('Individual ID')}: ${importedIndividual.importId}`}
+        title={`${t(`${beneficiaryGroup?.memberLabel} ID`)}: ${importedIndividual.importId}`}
         breadCrumbs={breadCrumbsItems}
       >
         {importedIndividual.photo ? (

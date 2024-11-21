@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { ContentLink } from '@core/ContentLink';
+import { useProgramContext } from 'src/programContext';
 
 interface IndividualQuestionnaireProps {
   values;
@@ -17,12 +18,15 @@ export const IndividualQuestionnaire = ({
   const { baseUrl } = useBaseUrl();
   const selectedIndividualData =
     values.selectedIndividual || values.selectedHousehold.headOfHousehold;
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   return (
     <Grid container spacing={6}>
       {[
         {
           name: 'questionnaire_fullName',
-          label: t('Individual Full Name'),
+          label: t(`${beneficiaryGroup?.memberLabel} Full Name`),
           value: (
             <ContentLink
               href={`/${baseUrl}/population/individuals/${selectedIndividualData.id}`}

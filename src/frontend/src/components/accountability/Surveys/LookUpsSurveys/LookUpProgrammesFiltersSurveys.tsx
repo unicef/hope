@@ -10,6 +10,7 @@ import { FiltersSection } from '@core/FiltersSection';
 import { NumberTextField } from '@core/NumberTextField';
 import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
+import { useProgramContext } from 'src/programContext';
 
 interface LookUpProgrammesFiltersSurveysProps {
   filter;
@@ -29,6 +30,8 @@ export function LookUpProgrammesFiltersSurveys({
 }: LookUpProgrammesFiltersSurveysProps): React.ReactElement {
   const navigate = useNavigate();
   const location = useLocation();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const { handleFilterChange, applyFilterChanges, clearFilter } =
     createHandleApplyFilterChange(
@@ -120,7 +123,7 @@ export function LookUpProgrammesFiltersSurveys({
         </Grid>
         <Grid item xs={3}>
           <NumberTextField
-            topLabel="Num. of Households"
+            topLabel={`Num. of ${beneficiaryGroup?.groupLabelPlural}`}
             placeholder="From"
             data-cy="filters-number-of-households-min"
             value={filter.numberOfHouseholdsMin}

@@ -20,6 +20,7 @@ import { NewDocumentFieldArray } from './NewDocumentFieldArray';
 import { NewIdentityFieldArray } from './NewIdentityFieldArray';
 import { ExistingPaymentChannelFieldArray } from './ExistingPaymentChannelFieldArray';
 import { NewPaymentChannelFieldArray } from './NewPaymentChannelFieldArray';
+import { useProgramContext } from 'src/programContext';
 
 const BoxWithBorders = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -39,6 +40,9 @@ export function EditIndividualDataChange({
 }: EditIndividualDataChangeProps): React.ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   const individual: AllIndividualsQuery['allIndividuals']['edges'][number]['node'] =
     values.selectedIndividual;
@@ -69,7 +73,11 @@ export function EditIndividualDataChange({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   if (!individual) {
-    return <div>{t('You have to select an individual earlier')}</div>;
+    return (
+      <div>
+        {t(`You have to select a ${beneficiaryGroup?.memberLabel} earlier`)}
+      </div>
+    );
   }
   if (
     addIndividualFieldsLoading ||

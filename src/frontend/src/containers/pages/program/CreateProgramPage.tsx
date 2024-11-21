@@ -29,6 +29,7 @@ import {
 } from '@components/programs/CreateProgram/ProgramStepper';
 import { programValidationSchema } from '@components/programs/CreateProgram/programValidationSchema';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { useProgramContext } from 'src/programContext';
 
 export const CreateProgramPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -38,6 +39,8 @@ export const CreateProgramPage = (): ReactElement => {
   const [step, setStep] = useState(0);
   const { showMessage } = useSnackbar();
   const { baseUrl, businessArea } = useBaseUrl();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const { data: treeData, loading: treeLoading } = useAllAreasTreeQuery({
     variables: { businessArea },
@@ -278,7 +281,7 @@ export const CreateProgramPage = (): ReactElement => {
             {
               title: t('Programme Time Series Fields'),
               description: t(
-                'The Time Series Fields feature allows serial updating of individual data through an XLSX file.',
+                `The Time Series Fields feature allows serial updating of ${beneficiaryGroup?.memberLabel} data through an XLSX file.`,
               ),
               dataCy: 'step-button-time-series-fields',
             },

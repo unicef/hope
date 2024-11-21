@@ -32,6 +32,7 @@ import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutoc
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { useProgramContext } from 'src/programContext';
 
 export const validationSchema = Yup.object().shape({
   issueType: Yup.string().required('Issue Type is required').nullable(),
@@ -51,6 +52,9 @@ export const EditFeedbackPage = (): React.ReactElement => {
   const { baseUrl, businessArea, isAllPrograms } = useBaseUrl();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const { data: feedbackData, loading: feedbackDataLoading } = useFeedbackQuery(
     {
       variables: { id },
@@ -219,7 +223,10 @@ export const EditFeedbackPage = (): React.ReactElement => {
                         </Grid>
                         <Grid container xs={6} spacing={6}>
                           <Grid item xs={6}>
-                            <LabelizedField label={t('Household ID')}>
+                            <LabelizedField
+                              label={t(`${beneficiaryGroup?.groupLabel} ID`)}
+                            >
+                              {' '}
                               {feedback.householdLookup?.id &&
                               canViewHouseholdDetails &&
                               !isAllPrograms ? (
@@ -238,7 +245,10 @@ export const EditFeedbackPage = (): React.ReactElement => {
                             </LabelizedField>
                           </Grid>
                           <Grid item xs={6}>
-                            <LabelizedField label={t('Individual ID')}>
+                            <LabelizedField
+                              label={t(`${beneficiaryGroup?.memberLabel} ID`)}
+                            >
+                              {' '}
                               {feedback.individualLookup?.id &&
                               canViewIndividualDetails &&
                               !isAllPrograms ? (

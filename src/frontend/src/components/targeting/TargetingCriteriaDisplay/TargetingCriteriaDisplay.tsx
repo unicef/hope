@@ -102,6 +102,7 @@ export const TargetingCriteriaDisplay = ({
   const location = useLocation();
   const { selectedProgram } = useProgramContext();
   const { businessArea, programId } = useBaseUrl();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const { data: allCoreFieldsAttributesData, loading } =
     useCachedImportedIndividualFieldsQuery(businessArea, programId);
@@ -256,7 +257,7 @@ export const TargetingCriteriaDisplay = ({
                             />
                           }
                           label={t(
-                            'Exclude Households with Active Adjudication Ticket',
+                            `Exclude ${beneficiaryGroup?.groupLabelPlural} with Active Adjudication Ticket`,
                           )}
                         />
                       )}
@@ -315,7 +316,7 @@ export const TargetingCriteriaDisplay = ({
                               ?.flagExcludeIfOnSanctionList,
                           )}
                           label={t(
-                            'Exclude Households with an Active Sanction Screen Flag',
+                            `Exclude ${beneficiaryGroup?.groupLabelPlural} with an Active Sanction Screen Flag`,
                           )}
                         />
                       )}
@@ -330,7 +331,7 @@ export const TargetingCriteriaDisplay = ({
                         <Field
                           name="flagExcludeIfActiveAdjudicationTicket"
                           label={t(
-                            'Exclude Households with Active Adjudication Ticket',
+                            `Exclude ${beneficiaryGroup?.groupLabelPlural} with Active Adjudication Ticket`,
                           )}
                           color="primary"
                           component={FormikCheckboxField}
@@ -356,7 +357,7 @@ export const TargetingCriteriaDisplay = ({
                         <Field
                           name="flagExcludeIfOnSanctionList"
                           label={t(
-                            'Exclude Households with an Active Sanction Screen Flag',
+                            `Exclude ${beneficiaryGroup?.groupLabelPlural} with an Active Sanction Screen Flag`,
                           )}
                           color="primary"
                           component={FormikCheckboxField}

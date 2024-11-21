@@ -15,10 +15,13 @@ import {
   BlueBold,
 } from './GrievancesApproveSection/ApproveSectionStyles';
 import { getGrievanceDetailsPath } from './utils/createGrievanceUtils';
+import { useProgramContext } from 'src/programContext';
 
 export function OtherRelatedTicketsCreate({ values }): React.ReactElement {
   const { t } = useTranslation();
   const { baseUrl, businessArea } = useBaseUrl();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const [show, setShow] = useState(false);
 
   const { data, loading } = useExistingGrievanceTicketsQuery({
@@ -38,30 +41,30 @@ export function OtherRelatedTicketsCreate({ values }): React.ReactElement {
   const renderIds = (tickets): React.ReactElement =>
     tickets.length
       ? tickets.map((edge) => {
-        const grievanceDetailsPath = getGrievanceDetailsPath(
-          edge.node.id,
-          edge.node.category,
-          baseUrl,
-        );
-        return (
+          const grievanceDetailsPath = getGrievanceDetailsPath(
+            edge.node.id,
+            edge.node.category,
+            baseUrl,
+          );
+          return (
             <Box key={edge.node.id} mb={1}>
               <ContentLink href={grievanceDetailsPath}>
                 {edge.node.unicefId}
               </ContentLink>
             </Box>
-        );
-      })
+          );
+        })
       : '-';
 
   const openExistingTickets = existingTickets.length
     ? existingTickets.filter(
-      (edge) => edge.node.status !== GRIEVANCE_TICKET_STATES.CLOSED,
-    )
+        (edge) => edge.node.status !== GRIEVANCE_TICKET_STATES.CLOSED,
+      )
     : [];
   const closedExistingTickets = existingTickets.length
     ? existingTickets.filter(
-      (edge) => edge.node.status === GRIEVANCE_TICKET_STATES.CLOSED,
-    )
+        (edge) => edge.node.status === GRIEVANCE_TICKET_STATES.CLOSED,
+      )
     : [];
 
   return existingTickets.length ? (
@@ -71,9 +74,7 @@ export function OtherRelatedTicketsCreate({ values }): React.ReactElement {
       </Title>
       <Box display="flex" flexDirection="column">
         <LabelizedField
-          label={`${t('For Household')} ${
-            values?.selectedHousehold?.unicefId || '-'
-          } `}
+          label={`For ${beneficiaryGroup?.groupLabel} ${values?.selectedHousehold?.unicefId || '-'}`}
         >
           <>{renderIds(openExistingTickets)}</>
         </LabelizedField>
@@ -88,9 +89,7 @@ export function OtherRelatedTicketsCreate({ values }): React.ReactElement {
           <Box mb={3} mt={3}>
             <Typography>{t('Closed Tickets')}</Typography>
             <LabelizedField
-              label={`${t('For Household')} ${
-                values?.selectedHousehold?.unicefId || '-'
-              } `}
+              label={`For ${beneficiaryGroup?.groupLabel} ${values?.selectedHousehold?.unicefId || '-'}`}
             >
               <>{renderIds(closedExistingTickets)}</>
             </LabelizedField>

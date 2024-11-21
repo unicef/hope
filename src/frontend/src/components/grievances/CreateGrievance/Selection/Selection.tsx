@@ -5,15 +5,15 @@ import { useTranslation } from 'react-i18next';
 import { GrievancesChoiceDataQuery } from '@generated/graphql';
 import { useArrayToDict } from '@hooks/useArrayToDict';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
-import {
-  GRIEVANCE_CATEGORIES_NAMES,
-  GRIEVANCE_CATEGORY_DESCRIPTIONS,
-  GRIEVANCE_ISSUE_TYPES_NAMES,
-  GRIEVANCE_ISSUE_TYPE_DESCRIPTIONS,
-} from '@utils/constants';
 import { DividerLine } from '@core/DividerLine';
 import { LabelizedField } from '@core/LabelizedField';
 import { useProgramContext } from 'src/programContext';
+import {
+  getGrievanceCategoryDescriptions,
+  getGrievanceIssueTypeDescriptions,
+  GRIEVANCE_CATEGORIES_NAMES,
+  GRIEVANCE_ISSUE_TYPES_NAMES,
+} from '@utils/constants';
 
 export interface SelectionProps {
   handleChange: (e: React.ChangeEvent) => void;
@@ -47,14 +47,15 @@ export function Selection({
     { name: `${beneficiaryGroup?.memberLabel} Data Update`, value: '14' },
   ];
 
+  const categoryDescriptions =
+    getGrievanceCategoryDescriptions(beneficiaryGroup);
+  const issueTypeDescriptions =
+    getGrievanceIssueTypeDescriptions(beneficiaryGroup);
+
   const categoryDescription =
-    GRIEVANCE_CATEGORY_DESCRIPTIONS[
-      GRIEVANCE_CATEGORIES_NAMES[values.category]
-    ] || '';
+    categoryDescriptions[GRIEVANCE_CATEGORIES_NAMES[values.category]] || '';
   const issueTypeDescription =
-    GRIEVANCE_ISSUE_TYPE_DESCRIPTIONS[
-      GRIEVANCE_ISSUE_TYPES_NAMES[values.issueType]
-    ] || '';
+    issueTypeDescriptions[GRIEVANCE_ISSUE_TYPES_NAMES[values.issueType]] || '';
 
   return (
     <Grid container spacing={3}>

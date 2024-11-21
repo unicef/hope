@@ -9,6 +9,7 @@ import { LabelizedField } from '@components/core/LabelizedField';
 import { renderSomethingOrDash } from '@utils/utils';
 import { usePermissions } from '@hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
+import { useProgramContext } from 'src/programContext';
 
 interface IndividualDeliveryMechanismsProps {
   individual: IndividualNode;
@@ -29,6 +30,9 @@ export const IndividualDeliveryMechanisms: React.FC<
     PERMISSIONS.POPULATION_VIEW_INDIVIDUAL_DELIVERY_MECHANISMS_SECTION,
     permissions,
   );
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   if (!individual.deliveryMechanismsData.length || !canViewDeliveryMechanisms) {
     return null;
   }
@@ -36,7 +40,7 @@ export const IndividualDeliveryMechanisms: React.FC<
     <Overview>
       <Title>
         <Typography variant="h6">
-          {t('Individual Delivery Mechanisms')}
+          {t(`${beneficiaryGroup?.memberLabel} Delivery Mechanisms`)}
         </Typography>
       </Title>
       <Grid container spacing={6}>

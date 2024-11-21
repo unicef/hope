@@ -5,24 +5,30 @@ import { Title } from '@core/Title';
 import { Grid, Typography } from '@mui/material';
 import { LabelizedField } from '@core/LabelizedField';
 import { getPhoneNoLabel } from '@utils/utils';
+import { useProgramContext } from 'src/programContext';
 
 export const IndividualDetails = ({ individual }): React.ReactElement => {
   const { t } = useTranslation();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   return (
     <Overview>
       <Title>
-        <Typography variant="h6">{t('Individual')}</Typography>
+        <Typography variant="h6">
+          {t(`${beneficiaryGroup?.memberLabel}`)}
+        </Typography>{' '}
       </Title>
       <Grid container spacing={3}>
         <Grid item xs={3}>
           <LabelizedField
-            label={t('INDIVIDUAL ID')}
+            label={t(`${beneficiaryGroup?.memberLabel.toUpperCase()} ID`)}
             value={individual.unicefId}
           />
         </Grid>
         <Grid item xs={3}>
           <LabelizedField
-            label={t('INDIVIDUAL')}
+            label={t(`${beneficiaryGroup?.memberLabel.toUpperCase()} ID`)}
             value={individual.fullName}
           />
         </Grid>

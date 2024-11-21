@@ -163,10 +163,10 @@ export const ApproveDeleteHouseholdGrievanceDetails = ({
                     <Typography variant="body2">
                       {showWithdraw()
                         ? t(
-                            'Please provide the reason of withdrawal of this household.',
+                            `Please provide the reason of withdrawal of this ${beneficiaryGroup?.groupLabel}.`,
                           )
                         : t(
-                            'You did not approve the following household to be withdrawn. Are you sure you want to continue?',
+                            `You did not approve the following ${beneficiaryGroup?.groupLabel} to be withdrawn. Are you sure you want to continue?`,
                           )}
                     </Typography>
                   </Box>
@@ -177,7 +177,7 @@ export const ApproveDeleteHouseholdGrievanceDetails = ({
                         choices={[
                           {
                             value: 'duplicate',
-                            name: 'This household is a duplicate of another household',
+                            name: `This ${beneficiaryGroup?.groupLabel} is a duplicate of another ${beneficiaryGroup?.groupLabel}`,
                           },
                         ]}
                         component={FormikRadioGroup}
