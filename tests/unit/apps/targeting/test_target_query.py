@@ -78,7 +78,7 @@ class TestTargetPopulationQuery(APITestCase):
             totalIndividualsCount
             targetingCriteria{
               rules{
-                filters{
+                householdsFiltersBlocks{
                   comparisonMethod
                   fieldName
                   flexFieldClassification

@@ -15,7 +15,7 @@ class Targeting(BaseComponents):
     programFilter = 'div[data-cy="filters-program"]'
     minNumberOfHouseholds = 'div[data-cy="filters-total-households-count-min"]'
     maxNumberOfHouseholds = 'div[data-cy="filters-total-households-count-max"]'
-    buttonCreateNew = 'button[data-cy="button-new-tp"]'
+    buttonCreateNew = 'a[data-cy="button-new-tp"]'
     buttonCreateNewByFilters = 'li[data-cy="menu-item-filters"]'
     tabTitle = 'h6[data-cy="table-title"]'
     tabColumnLabel = 'span[data-cy="table-label"]'

@@ -590,10 +590,7 @@ class TestAdminAreas:
         # 3rd step (Partners)
         pageProgrammeManagement.getAccessToProgram().click()
         pageProgrammeManagement.selectWhoAccessToProgram("Only Selected Partners within the business area")
-        from hct_mis_api.apps.account.models import User
 
-        print(User.objects.all())
-        print(User.objects.first().partner)
         pageProgrammeManagement.choosePartnerOption("UNHCR")
         pageProgrammeManagement.getLabelAdminArea().click()
         pageProgrammeManagement.chooseAreaAdmin1ByName("Kabul").click()
