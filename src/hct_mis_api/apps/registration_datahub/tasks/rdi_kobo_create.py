@@ -225,6 +225,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         household_batch_size = 50
         logger.info(f"Processing {len(self.reduced_submissions)} households")
         chunk_index = 0
+        household_count = 0
         delivery_mechanism_xlsx_fields = PendingDeliveryMechanismData.get_scope_delivery_mechanisms_fields(
             by="xlsx_field"
         )
@@ -232,6 +233,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
             chunk_index += 1
             logger.info(f"Processing chunk {chunk_index}/{len(self.reduced_submissions) // household_batch_size}")
             for household in reduced_submission_chunk:
+                household_count += 1
                 # AB#199540
                 household_hash = calculate_hash_for_kobo_submission(household)
                 submission_duplicate = household_hash in household_hash_list
@@ -256,6 +258,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                     individuals_ids_hash_dict,
                     submission_meta_data,
                     delivery_mechanism_xlsx_fields,
+                    household_count,
                 )
             self.bulk_creates(bank_accounts_to_create, head_of_households_mapping, households_to_create)
             bank_accounts_to_create = []
@@ -312,6 +315,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         individuals_ids_hash_dict: dict,
         submission_meta_data: dict,
         delivery_mechanism_xlsx_fields: list[str],
+        household_count: int,
     ) -> None:
         individuals_to_create_list = []
         documents_and_identities_to_create = []
@@ -362,7 +366,9 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                             except Exception as e:
                                 self._handle_exception("Household", i_field, e)
                         elif i_field in delivery_mechanism_xlsx_fields:
-                            self._handle_delivery_mechanism_fields(i_value, i_field, ind_count, individual_obj)
+                            self._handle_delivery_mechanism_fields(
+                                i_value, i_field, int(f"{household_count}{ind_count}"), individual_obj
+                            )
                         else:
                             try:
                                 self._cast_and_assign(i_value, i_field, individual_obj)
