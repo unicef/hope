@@ -374,7 +374,7 @@
                                 .ticks(3);
 
                             function updateTopMetrics() {
-                                const totalPaymentsCount = ndx.groupAll().reduceCount().value();
+                                const totalPaymentsCount = ndx.groupAll().reduceSum(d => d.payments || 0).value();
                                 const successfulPaymentsGroupUSD = ndx
                                     .groupAll()
                                     .reduce(
@@ -493,7 +493,7 @@
                                     .value();
 
                                 document.getElementById("number-of-payments").innerHTML =
-                                    `${simplenumberFormatter(successfulPaymentsCountUSD)}`;
+                                    `${simplenumberFormatter(totalPaymentsCount)}`;
                                 document.getElementById("outstanding-payments").innerHTML =
                                     `${decimalnumberFormatter(pendingPaymentsGroupUSD.sum)} USD`;
                                 document.getElementById("total-amount-paid").innerHTML =
