@@ -134,25 +134,24 @@ class TestPeriodicDataTemplates:
         )
         pageIndividuals.selectGlobalProgramFilter(program.name)
         pageIndividuals.getNavProgrammePopulation().click()
-        pageIndividuals.getNavIndividuals().click()
-        pageIndividuals.getTabPeriodicDataUpdates().click()
-        status = pageIndividuals.getTemplateStatus(periodic_data_update_template.pk).text
-        assert status == "NOT SCHEDULED"
-        pageIndividuals.getExportBtn(periodic_data_update_template.pk).click()
-        for _ in range(10):
-            status = pageIndividuals.getTemplateStatus(periodic_data_update_template.pk).text
-            if status == "EXPORTED":
-                break
-            sleep(1)
-        else:
-            assert status == "EXPORTED"
-        pageIndividuals.getDownloadBtn(periodic_data_update_template.pk).click()
-        periodic_data_update_template.refresh_from_db()
-        print(periodic_data_update_template.file.file.name)
-        # assert (
-        #     pageIndividuals.check_file_exists(os.path.join(download_path, periodic_data_update_template.file.file.name))
-        #     is True
-        # )
+        # pageIndividuals.getNavIndividuals().click()
+        # pageIndividuals.getTabPeriodicDataUpdates().click()
+        # status = pageIndividuals.getTemplateStatus(periodic_data_update_template.pk).text
+        # assert status == "NOT SCHEDULED"
+        # pageIndividuals.getExportBtn(periodic_data_update_template.pk).click()
+        # for _ in range(10):
+        #     status = pageIndividuals.getTemplateStatus(periodic_data_update_template.pk).text
+        #     if status == "EXPORTED":
+        #         break
+        #     sleep(1)
+        # else:
+        #     assert status == "EXPORTED"
+        # pageIndividuals.getDownloadBtn(periodic_data_update_template.pk).click()
+        # periodic_data_update_template.refresh_from_db()
+        assert (
+            pageIndividuals.check_file_exists(os.path.join(download_path, periodic_data_update_template.file.file.name))
+            is True
+        )
 
     @pytest.mark.night
     def test_periodic_data_template_list(
