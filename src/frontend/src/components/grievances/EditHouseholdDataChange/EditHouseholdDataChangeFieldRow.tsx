@@ -8,13 +8,16 @@ import { useTranslation } from 'react-i18next';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import {
   AllEditHouseholdFieldsQuery,
+  AllEditPeopleFieldsQuery,
   HouseholdQuery,
 } from '@generated/graphql';
 import { CurrentValue } from './CurrentValue';
 import { EditHouseholdDataChangeField } from './EditHouseholdDataChangeField';
 
 export interface EditHouseholdDataChangeFieldRowProps {
-  fields: AllEditHouseholdFieldsQuery['allEditHouseholdFieldsAttributes'];
+  fields:
+    | AllEditHouseholdFieldsQuery['allEditHouseholdFieldsAttributes']
+    | AllEditPeopleFieldsQuery['allEditPeopleFieldsAttributes'];
   household: HouseholdQuery['household'];
   itemValue: { fieldName: string; fieldValue: string | number | Date };
   index: number;

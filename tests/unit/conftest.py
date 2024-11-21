@@ -51,7 +51,7 @@ def pytest_configure(config: Config) -> None:
     settings.SECURE_HSTS_SECONDS = False
     settings.SECURE_CONTENT_TYPE_NOSNIFF = True
     settings.SECURE_REFERRER_POLICY = "same-origin"
-
+    settings.DATABASES["read_only"]["TEST"] = {"MIRROR": "default"}
     settings.CACHE_ENABLED = False
     settings.TESTS_ROOT = "/code/tests/unit"
     settings.CACHES = {
