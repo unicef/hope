@@ -17,7 +17,7 @@ class TestFilterHouseholdsByProgram(APITestCase):
 
     QUERY = """
         query AllHouseholds($program: ID){
-          allHouseholds(program: $program, orderBy: "size", businessArea: "afghanistan") {
+          allHouseholds(program: $program, orderBy: "size", businessArea: "afghanistan", rdiMergeStatus: "MERGED") {
             edges {
               node {
                 program {
