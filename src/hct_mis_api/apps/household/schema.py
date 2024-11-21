@@ -365,9 +365,13 @@ class IndividualNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTyp
                 if not areas_from_partner.filter(id__in=areas_from_household).exists():
                     raise PermissionDenied("Permission Denied")
 
-        # if user can't simply view all individuals, we check if they can do it because of grievance
+        # if user can't simply view all individuals, we check if they can do it because of grievance or rdi details
         if not user.has_permission(
             Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS.value,
+            object_instance.business_area,
+            object_instance.program_id,
+        ) and not user.has_permission(
+            Permissions.RDI_VIEW_DETAILS.value,
             object_instance.business_area,
             object_instance.program_id,
         ):
@@ -531,9 +535,13 @@ class HouseholdNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType
                 if not areas_from_partner.filter(id__in=areas_from_household).exists():
                     raise PermissionDenied("Permission Denied")
 
-        # if user doesn't have permission to view all households, we check based on their grievance tickets
+        # if user doesn't have permission to view all households or RDI details, we check based on their grievance tickets
         if not user.has_permission(
             Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS.value,
+            object_instance.business_area,
+            object_instance.program_id,
+        ) and not user.has_permission(
+            Permissions.RDI_VIEW_DETAILS.value,
             object_instance.business_area,
             object_instance.program_id,
         ):
@@ -567,7 +575,8 @@ class HouseholdNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType
                 default=Value(STATUS_ACTIVE),
             )
         )
-        return super().get_queryset(queryset, info)
+        qs = super().get_queryset(queryset, info)
+        return qs
 
     class Meta:
         model = Household
@@ -582,7 +591,9 @@ class Query(graphene.ObjectType):
         HouseholdNode,
         filterset_class=HouseholdFilter,
         permission_classes=(
-            hopeOneOfPermissionClass(Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST, *ALL_GRIEVANCES_CREATE_MODIFY),
+            hopeOneOfPermissionClass(
+                Permissions.RDI_VIEW_DETAILS, Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST, *ALL_GRIEVANCES_CREATE_MODIFY
+            ),
         ),
     )
     individual = relay.Node.Field(IndividualNode)
@@ -590,7 +601,11 @@ class Query(graphene.ObjectType):
         IndividualNode,
         filterset_class=IndividualFilter,
         permission_classes=(
-            hopeOneOfPermissionClass(Permissions.POPULATION_VIEW_INDIVIDUALS_LIST, *ALL_GRIEVANCES_CREATE_MODIFY),
+            hopeOneOfPermissionClass(
+                Permissions.RDI_VIEW_DETAILS,
+                Permissions.POPULATION_VIEW_INDIVIDUALS_LIST,
+                *ALL_GRIEVANCES_CREATE_MODIFY,
+            ),
         ),
     )
 
@@ -691,7 +706,7 @@ class Query(graphene.ObjectType):
             if program and program.status == Program.DRAFT:
                 return Individual.objects.none()
 
-        queryset = Individual.all_merge_status_objects.all()
+        queryset = Individual.objects.all()
         if does_path_exist_in_query("edges.node.household", info):
             queryset = queryset.select_related("household")
         if does_path_exist_in_query("edges.node.household.admin2", info):
@@ -747,7 +762,7 @@ class Query(graphene.ObjectType):
             if program and program.status == Program.DRAFT:
                 return Household.objects.none()
 
-        queryset = Household.all_merge_status_objects.all()
+        queryset = Household.objects.all()
 
         if not user.partner.is_unicef:  # Unicef partner has full access to all AdminAreas
             business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
