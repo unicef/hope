@@ -13,7 +13,7 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 class TestFilterIndividualsByProgram(APITestCase):
     QUERY = """
     query AllIndividuals($program: ID){
-      allIndividuals(businessArea: "afghanistan", program: $program) {
+      allIndividuals(businessArea: "afghanistan", program: $program, rdiMergeStatus: "MERGED") {
         edges {
           node {
             program {
