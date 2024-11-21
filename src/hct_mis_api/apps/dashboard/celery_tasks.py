@@ -17,8 +17,7 @@ CACHE_TIMEOUT = 60 * 60 * 24  # 24 hours
 @sentry_tags
 def update_dashboard_figures(self: Any) -> None:
     """
-    Celery task that runs every 24 hours to refresh dashboard data for all business areas
-    with households.
+    Celery task that runs every 24 hours to refresh dashboard data for allactive BA.
     """
     business_areas_with_households = BusinessArea.objects.using("read_only").filter(active=True)
 
@@ -28,7 +27,6 @@ def update_dashboard_figures(self: Any) -> None:
             DashboardDataCache.refresh_data(business_area.slug)
 
         except Exception as e:
-            logger.error(f"Failed to refresh dashboard data for {business_area.slug}: {e}")
             raise self.retry(exc=e)
 
 
@@ -45,6 +43,6 @@ def generate_dash_report_task(self: Any, business_area_slug: str) -> None:
         DashboardDataCache.refresh_data(business_area.slug)
 
     except BusinessArea.DoesNotExist:
-        logger.error(f"Business area with slug {business_area_slug} not found.")
+        raise ValueError(f"Business area with slug {business_area_slug} not found.")
     except Exception as e:
         raise self.retry(exc=e, countdown=60)
