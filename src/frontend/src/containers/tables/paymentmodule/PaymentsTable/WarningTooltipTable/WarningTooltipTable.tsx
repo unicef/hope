@@ -12,7 +12,6 @@ import {
   TableHead,
   TableRow,
 } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { BlackLink } from '@components/core/BlackLink';
@@ -29,6 +28,7 @@ import {
 import { DialogFooter } from '../../../../dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../../../dialogs/DialogTitleWrapper';
 import { useProgramContext } from 'src/programContext';
+import { ReactElement } from 'react';
 
 const StyledTable = styled(Table)`
   min-width: 100px;
@@ -56,13 +56,13 @@ export function WarningTooltipTable({
   setDialogOpen,
   baseUrl,
   canViewDetails = false,
-}: WarningTooltipTableProps): React.ReactElement {
+}: WarningTooltipTableProps): ReactElement {
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   if (!payment) return null;
-  const mappedPaymentPlanRows = (): React.ReactElement[] => {
+  const mappedPaymentPlanRows = (): ReactElement[] => {
     const {
       paymentPlanSoftConflicted,
       paymentPlanHardConflicted,
@@ -70,7 +70,7 @@ export function WarningTooltipTable({
       paymentPlanSoftConflictedData,
     } = payment;
 
-    const renderRow = (row: PaymentConflictDataNode): React.ReactElement => (
+    const renderRow = (row: PaymentConflictDataNode): ReactElement => (
       <ClickableTableRow hover>
         <TableCell align="left">
           {canViewDetails ? (

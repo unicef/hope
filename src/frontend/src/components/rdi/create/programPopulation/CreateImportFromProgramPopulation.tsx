@@ -10,7 +10,7 @@ import { Box } from '@mui/material';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { Field, FormikProvider, useFormik } from 'formik';
-import { useEffect } from 'react';
+import { ReactElement, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import * as Yup from 'yup';
@@ -27,7 +27,7 @@ const validationSchema = Yup.object().shape({
 export const CreateImportFromProgramPopulationForm = ({
   setSubmitForm,
   setSubmitDisabled,
-}): React.ReactElement => {
+}): ReactElement => {
   const { baseUrl, businessArea } = useBaseUrl();
   const { showMessage } = useSnackbar();
   const { t } = useTranslation();

@@ -1,6 +1,5 @@
 import { Box, Typography } from '@mui/material';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useExistingGrievanceTicketsQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -17,7 +16,7 @@ import {
 import { getGrievanceDetailsPath } from './utils/createGrievanceUtils';
 import { useProgramContext } from 'src/programContext';
 
-export function OtherRelatedTicketsCreate({ values }): React.ReactElement {
+export function OtherRelatedTicketsCreate({ values }): ReactElement {
   const { t } = useTranslation();
   const { baseUrl, businessArea } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
@@ -38,7 +37,7 @@ export function OtherRelatedTicketsCreate({ values }): React.ReactElement {
   if (!data) return null;
 
   const existingTickets = data.existingGrievanceTickets.edges;
-  const renderIds = (tickets): React.ReactElement =>
+  const renderIds = (tickets): ReactElement =>
     tickets.length
       ? tickets.map((edge) => {
           const grievanceDetailsPath = getGrievanceDetailsPath(

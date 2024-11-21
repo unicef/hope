@@ -5,7 +5,7 @@ import TablePagination from '@mui/material/TablePagination';
 import Typography from '@mui/material/Typography';
 import ExpandLessIcon from '@mui/icons-material/ExpandLessRounded';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMoreRounded';
-import { ReactElement, useState } from 'react';
+import { ChangeEvent, ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LogEntryNode } from '@generated/graphql';
 import { headCells } from './headCells';
@@ -52,7 +52,7 @@ interface ActivityLogTableProps {
   rowsPerPage: number;
   page: number;
   onChangePage: (event: unknown, newPage: number) => void;
-  onChangeRowsPerPage: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onChangeRowsPerPage: (event: ChangeEvent<HTMLInputElement>) => void;
 }
 export function ActivityLogTable({
   logEntries,
@@ -96,11 +96,7 @@ export function ActivityLogTable({
             <ButtonPlaceHolder />
           </Row>
           {logEntries.map((value) => (
-            <LogRow
-              data-cy="log-row"
-              key={value.id}
-              logEntry={value}
-            />
+            <LogRow data-cy="log-row" key={value.id} logEntry={value} />
           ))}
         </Table>
         <TablePagination

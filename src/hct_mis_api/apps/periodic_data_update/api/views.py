@@ -3,6 +3,7 @@ from typing import Any
 
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db.models import QuerySet
+from django.http import FileResponse
 
 from constance import config
 from django_filters.rest_framework import DjangoFilterBackend
@@ -10,6 +11,7 @@ from rest_framework import mixins, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.filters import OrderingFilter
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.serializers import BaseSerializer
@@ -104,7 +106,7 @@ class PeriodicDataUpdateTemplateViewSet(
         return Response(status=status.HTTP_200_OK, data={"message": "Exporting template"})
 
     @action(detail=True, methods=["get"])
-    def download(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def download(self, request: Request, *args: Any, **kwargs: Any) -> FileResponse:
         pdu_template = self.get_object()
 
         if pdu_template.status != PeriodicDataUpdateTemplate.Status.EXPORTED:
@@ -115,7 +117,12 @@ class PeriodicDataUpdateTemplateViewSet(
             logger.error(f"XLSX File not found. PeriodicDataUpdateTemplate ID: {pdu_template.id}")
             raise ValidationError("Template file is missing")
 
-        return Response({"url": pdu_template.file.file.url}, status=status.HTTP_200_OK)
+        return FileResponse(
+            pdu_template.file.file.open(),
+            as_attachment=True,
+            filename=pdu_template.file.file.name,
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
 
 
 class PeriodicDataUpdateUploadViewSet(
@@ -186,7 +193,7 @@ class PeriodicFieldViewSet(
     GenericViewSet,
 ):
     serializer_class = PeriodicFieldSerializer
-    permission_classes = [PDUViewListAndDetailsPermission]
+    permission_classes = [IsAuthenticated]
     filter_backends = (OrderingFilter, DjangoFilterBackend)
     filterset_class = UpdatedAtFilter
 

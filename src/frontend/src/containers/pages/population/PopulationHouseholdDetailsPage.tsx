@@ -1,6 +1,5 @@
 import { Box, Grid, Typography } from '@mui/material';
 import Paper from '@mui/material/Paper';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -34,6 +33,7 @@ import { CollectorsTable } from '@containers/tables/population/CollectorsTable';
 import { HouseholdMembersTable } from '@containers/tables/population/HouseholdMembersTable';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 import { useProgramContext } from 'src/programContext';
+import { ReactElement } from 'react';
 
 const Container = styled.div`
   padding: 20px;
@@ -59,7 +59,7 @@ const SubTitle = styled(Typography)`
   }
 `;
 
-export const PopulationHouseholdDetailsPage = (): React.ReactElement => {
+export const PopulationHouseholdDetailsPage = (): ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
   const { baseUrl, businessArea } = useBaseUrl();

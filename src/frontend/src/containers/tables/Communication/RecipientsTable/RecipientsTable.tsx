@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { TableWrapper } from '@components/core/TableWrapper';
 import {
@@ -11,6 +10,7 @@ import { headCells } from './RecipientsTableHeadCells';
 import { RecipientsTableRow } from './RecipientsTableRow';
 import { useProgramContext } from 'src/programContext';
 import { adjustHeadCells } from '@utils/utils';
+import { ReactElement } from 'react';
 
 interface RecipientsTableProps {
   id: string;
@@ -20,7 +20,7 @@ interface RecipientsTableProps {
 export function RecipientsTable({
   id,
   canViewDetails,
-}: RecipientsTableProps): React.ReactElement {
+}: RecipientsTableProps): ReactElement {
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;

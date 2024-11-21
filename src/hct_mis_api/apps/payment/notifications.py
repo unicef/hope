@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 from django.conf import settings
 from django.db.models import Q, QuerySet
@@ -37,18 +37,22 @@ class PaymentNotification:
         ACTION_SEND_FOR_APPROVAL: {
             "action_name": "sent for approval",
             "subject": "Payment pending for Approval",
+            "recipient_title": "Approver",
         },
         ACTION_APPROVE: {
             "action_name": "approved",
             "subject": "Payment pending for Authorization",
+            "recipient_title": "Authorizer",
         },
         ACTION_AUTHORIZE: {
             "action_name": "authorized",
             "subject": "Payment pending for Release",
+            "recipient_title": "Reviewer",
         },
         ACTION_REVIEW: {
             "action_name": "released",
             "subject": "Payment is Released",
+            "recipient_title": "Reviewer",
         },
     }
 
@@ -61,8 +65,9 @@ class PaymentNotification:
         self.payment_plan_creation_date = self.payment_plan.created_at
         self.email_subject = self.ACTION_PREPARE_EMAIL_BODIES_MAP[self.action]["subject"]
         self.action_name = self.ACTION_PREPARE_EMAIL_BODIES_MAP[self.action]["action_name"]
+        self.recipient_title = self.ACTION_PREPARE_EMAIL_BODIES_MAP[self.action]["recipient_title"]
         self.user_recipients = self._prepare_user_recipients()
-        self.emails = self._prepare_emails()
+        self.email = self._prepare_email()
         self.enable_email_notification = self.payment_plan.business_area.enable_email_notification
 
     def _prepare_user_recipients(self) -> QuerySet[User]:
@@ -93,19 +98,23 @@ class PaymentNotification:
             if permission in DEFAULT_PERMISSIONS_LIST_FOR_IS_UNICEF_PARTNER
             else Q()
         )
-        return User.objects.filter(
-            (Q(user_roles__in=user_roles) & program_access_q) | Q(partner_role_q & program_access_q) | unicef_q
-        ).distinct()
+        users = (
+            User.objects.filter(
+                (Q(user_roles__in=user_roles) & program_access_q) | Q(partner_role_q & program_access_q) | unicef_q
+            )
+            .exclude(id=self.action_user.id)
+            .distinct()
+        )
+        if settings.ENV == "prod":
+            users = users.exclude(is_superuser=True)
+        return users
 
-    def _prepare_emails(self) -> List[MailjetClient]:
-        return [self._prepare_email(user) for user in self.user_recipients.exclude(id=self.action_user.id)]
-
-    def _prepare_email(self, user_recipient: User) -> MailjetClient:
-        body_variables = self._prepare_body_variables(user_recipient)
+    def _prepare_email(self) -> MailjetClient:
+        body_variables = self._prepare_body_variables()
         email = MailjetClient(
             mailjet_template_id=config.MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION,
             subject=self.email_subject,
-            recipients=[user_recipient.email],
+            recipients=[user_recipient.email for user_recipient in self.user_recipients],
             ccs=[self.action_user.email],
             variables=body_variables,
         )
@@ -114,16 +123,15 @@ class PaymentNotification:
     def send_email_notification(self) -> None:
         if config.SEND_PAYMENT_PLANS_NOTIFICATION and self.enable_email_notification:
             try:
-                for email in self.emails:
-                    email.send_email()
+                self.email.send_email()
             except Exception as e:  # pragma: no cover
                 logger.exception(e)
 
-    def _prepare_body_variables(self, user_recipient: User) -> Dict[str, Any]:
+    def _prepare_body_variables(self) -> Dict[str, Any]:
         protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"
         variables = {
-            "first_name": user_recipient.first_name,
-            "last_name": user_recipient.last_name,
+            "first_name": "Payment Plan",
+            "last_name": self.recipient_title,
             "action_name": self.action_name,
             "payment_plan_url": (
                 f"{protocol}://{settings.FRONTEND_HOST}/{self.payment_plan.business_area.slug}/programs/"

@@ -6,7 +6,7 @@ from django import forms
 from django.contrib import admin, messages
 from django.contrib.admin.views.main import ChangeList
 from django.core.signing import BadSignature, Signer
-from django.db.models import QuerySet
+from django.db.models import JSONField, QuerySet
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from django.template.response import TemplateResponse
@@ -24,6 +24,7 @@ from adminfilters.depot.widget import DepotManager
 from adminfilters.json import JsonFieldFilter
 from adminfilters.numbers import NumberFilter
 from adminfilters.querystring import QueryStringFilter
+from jsoneditor.forms import JSONEditor
 from requests.auth import HTTPBasicAuth
 from smart_admin.decorators import smart_register
 
@@ -101,6 +102,9 @@ class RegistrationAdmin(ExtraButtonsMixin, admin.ModelAdmin):
     readonly_fields = ("name", "project", "slug", "extra", "metadata")
     list_filter = ("rdi_policy", "project")
     raw_id_fields = ("steficon_rule",)
+    formfield_overrides = {
+        JSONField: {"widget": JSONEditor},
+    }
 
 
 class BaseRDIForm(forms.Form):
@@ -168,23 +172,21 @@ class AmendRDIForm(BaseRDIForm):
     field_order = ["rdi", "registration", "filters"]
 
 
-class RecordMixinAdmin(ExtraButtonsMixin, admin.ModelAdmin):
+@admin.register(Record)
+class RecordDatahubAdmin(HOPEModelAdminBase):
     list_display = ("id", "registration", "timestamp", "source_id", "status", "ignored")
     readonly_fields = (
         "id",
         "registration",
         "timestamp",
         "source_id",
-        # "registration_data_import",
         "status",
         "error_message",
     )
-    # list_editable = ("ignored",)
     exclude = ("data",)
     date_hierarchy = "timestamp"
     list_filter = (
         DepotManager,
-        # ("registration_data_import", AutoCompleteFilter),
         ("status", StatusFilter),
         ("source_id", NumberFilter),
         ("id", NumberFilter),
@@ -192,7 +194,6 @@ class RecordMixinAdmin(ExtraButtonsMixin, admin.ModelAdmin):
         QueryStringFilter,
     )
     change_form_template = "registration_datahub/admin/record/change_form.html"
-    # change_list_template = "registration_datahub/admin/record/change_list.html"
 
     actions = [mass_update, "extract", "async_extract", "create_rdi", "create_sr_lanka_rdi", "count_queryset"]
 
@@ -226,7 +227,7 @@ class RecordMixinAdmin(ExtraButtonsMixin, admin.ModelAdmin):
         return render(request, "admin/aurora/record/fetch.html", ctx)
 
     def has_add_permission(self, request: HttpRequest) -> bool:
-        return False
+        return is_root(request)
 
     def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
         return is_root(request)
@@ -380,11 +381,6 @@ class RecordMixinAdmin(ExtraButtonsMixin, admin.ModelAdmin):
             for k, v in cookies.items():
                 response.set_cookie(k, v)
         return response
-
-
-@admin.register(Record)
-class RecordDatahubAdmin(RecordMixinAdmin, HOPEModelAdminBase):
-    pass
 
 
 class RemeberDataForm(forms.Form):

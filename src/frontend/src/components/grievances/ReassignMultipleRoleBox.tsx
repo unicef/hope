@@ -1,7 +1,6 @@
 import { Box, Paper, Typography } from '@mui/material';
 import WarningIcon from '@mui/icons-material/Warning';
 import capitalize from 'lodash/capitalize';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
@@ -13,6 +12,7 @@ import { ContentLink } from '@core/ContentLink';
 import { LabelizedField } from '@core/LabelizedField';
 import { LookUpReassignRole } from './LookUps/LookUpReassignRole/LookUpReassignRole';
 import { useProgramContext } from 'src/programContext';
+import { ReactElement } from 'react';
 
 const StyledBox = styled(Paper)`
   border: 1px solid ${({ theme }) => theme.hctPalette.orange};
@@ -38,19 +38,27 @@ export function ReassignMultipleRoleBox({
   ticket,
 }: {
   ticket: GrievanceTicketQuery['grievanceTicket'];
-}): React.ReactElement {
+}): ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
+  const reassignData = JSON.parse(
+    ticket.needsAdjudicationTicketDetails.roleReassignData,
+  );
+  const reassignDataDictByIndividualId = {};
+  for (const key of Object.keys(reassignData)) {
+    reassignDataDictByIndividualId[reassignData[key].individual] =
+      reassignData[key];
+  }
   const selectedIndividualsToReassign =
     ticket.needsAdjudicationTicketDetails.selectedDuplicates?.filter(
       (el) =>
         el.role === IndividualRoleInHouseholdRole.Primary || el.role === 'HEAD',
     );
 
-  const mappedReassignLookups = (): React.ReactElement => (
+  const mappedReassignLookups = (): ReactElement => (
     <>
       {selectedIndividualsToReassign.map((selectedIndividualToReassign) => {
         const { household } = selectedIndividualToReassign;
@@ -97,7 +105,12 @@ export function ReassignMultipleRoleBox({
                 }}
                 ticket={ticket}
                 household={householdAndRole.household}
-                individual={selectedIndividualToReassign}
+                individualToReassign={selectedIndividualToReassign}
+                initialSelectedIndividualId={
+                  reassignDataDictByIndividualId[
+                    selectedIndividualToReassign.id
+                  ].new_individual
+                }
               />
             </Box>
           ));
@@ -144,7 +157,12 @@ export function ReassignMultipleRoleBox({
                   individualRole={{ role: 'HEAD', id: 'HEAD' }}
                   ticket={ticket}
                   household={household}
-                  individual={selectedIndividualToReassign}
+                  individualToReassign={selectedIndividualToReassign}
+                  initialSelectedIndividualId={
+                    reassignDataDictByIndividualId[
+                      selectedIndividualToReassign.id
+                    ].new_individual
+                  }
                 />
               </Box>
             )}

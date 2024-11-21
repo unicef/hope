@@ -1,5 +1,6 @@
 from time import sleep
 
+from selenium.common import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webelement import WebElement
@@ -235,6 +236,14 @@ class ProgrammeManagement(BaseComponents):
         return self.wait_for(self.buttonApply)
 
     def getButtonEditProgram(self) -> WebElement:
+        # Workaround because elements overlapped even though Selenium saw that they were available:
+        self.driver.execute_script(
+            """
+            container = document.querySelector("div[data-cy='main-content']")
+            container.scrollBy(0,-600)
+            """
+        )
+        sleep(2)
         return self.wait_for(self.buttonEditProgram)
 
     def getSelectEditProgramDetails(self) -> WebElement:
@@ -260,3 +269,17 @@ class ProgrammeManagement(BaseComponents):
 
     def getTableRowByProgramName(self, program_name: str) -> WebElement:
         return self.wait_for(self.tableRow.format(program_name))
+
+    def clickNavProgrammeManagement(self) -> None:
+        for _ in range(150):
+            try:
+                self.wait_for(self.navProgrammeManagement).click()
+                self.wait_for(self.headerTitle)
+                self.wait_for_text("Programme Management", self.headerTitle)
+                break
+            except BaseException:
+                sleep(0.1)
+        else:
+            raise NoSuchElementException(
+                "Could not locate page with title 'Programme Management' after multiple attempts."
+            )

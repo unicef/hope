@@ -19,7 +19,7 @@ from tests.selenium.page_object.registration_data_import.registration_data_impor
     RegistrationDataImport,
 )
 
-pytestmark = pytest.mark.django_db(transaction=True)
+pytestmark = pytest.mark.django_db()
 
 
 @pytest.fixture

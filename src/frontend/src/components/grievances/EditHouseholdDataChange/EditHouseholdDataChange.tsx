@@ -2,12 +2,12 @@ import { Button, Grid, Typography } from '@mui/material';
 import { AddCircleOutline } from '@mui/icons-material';
 import { FieldArray } from 'formik';
 import { useLocation } from 'react-router-dom';
-import * as React from 'react';
-import { useEffect } from 'react';
+import { ReactElement, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   AllHouseholdsQuery,
   useAllEditHouseholdFieldsQuery,
+  useAllEditPeopleFieldsQuery,
   useHouseholdLazyQuery,
 } from '@generated/graphql';
 import { LoadingComponent } from '@core/LoadingComponent';
@@ -22,10 +22,10 @@ export interface EditHouseholdDataChangeProps {
 export function EditHouseholdDataChange({
   values,
   setFieldValue,
-}: EditHouseholdDataChangeProps): React.ReactElement {
+}: EditHouseholdDataChangeProps): ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
-  const { selectedProgram } = useProgramContext();
+  const { selectedProgram, isSocialDctType } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const isEditTicket = location.pathname.includes('edit-ticket');
@@ -52,12 +52,24 @@ export function EditHouseholdDataChange({
   }, []);
   const { data: householdFieldsData, loading: householdFieldsLoading } =
     useAllEditHouseholdFieldsQuery();
+  const { data: allEditPeopleFieldsData, loading: allEditPeopleFieldsLoading } =
+    useAllEditPeopleFieldsQuery();
+
+  const fieldsByDctType = isSocialDctType
+    ? allEditPeopleFieldsData?.allEditPeopleFieldsAttributes
+    : householdFieldsData?.allEditHouseholdFieldsAttributes;
+
   if (!household) {
     return (
       <div>{`You have to select a ${beneficiaryGroup?.groupLabel} earlier`}</div>
     );
   }
-  if (fullHouseholdLoading || householdFieldsLoading || !fullHousehold) {
+  if (
+    fullHouseholdLoading ||
+    householdFieldsLoading ||
+    allEditPeopleFieldsLoading ||
+    !fullHousehold
+  ) {
     return <LoadingComponent />;
   }
   const notAvailableItems = (values.householdDataUpdateFields || []).map(
@@ -81,9 +93,7 @@ export function EditHouseholdDataChange({
                     itemValue={item}
                     index={index}
                     household={fullHousehold.household}
-                    fields={
-                      householdFieldsData.allEditHouseholdFieldsAttributes
-                    }
+                    fields={fieldsByDctType}
                     notAvailableFields={notAvailableItems}
                     onDelete={() => arrayHelpers.remove(index)}
                     values={values}

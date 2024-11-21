@@ -11,7 +11,7 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -59,7 +59,7 @@ export function LinkedGrievancesModal({
   businessArea,
   baseUrl,
   grievancesChoices,
-}: LinkedGrievancesModalProps): React.ReactElement {
+}: LinkedGrievancesModalProps): ReactElement {
   const [dialogOpen, setDialogOpen] = useState(false);
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -80,7 +80,7 @@ export function LinkedGrievancesModal({
     [id: number]: string;
   } = choicesToDict(grievancesChoices.grievanceTicketCategoryChoices);
 
-  const renderRow = (row): React.ReactElement => {
+  const renderRow = (row): ReactElement => {
     const grievanceDetailsPath = getGrievanceDetailsPath(
       row.id,
       row.category,
@@ -108,7 +108,7 @@ export function LinkedGrievancesModal({
 
   const allGrievances = grievances ? grievances.allGrievanceTicket.edges : [];
 
-  const renderGrievances = (): Array<React.ReactElement> =>
+  const renderGrievances = (): Array<ReactElement> =>
     allGrievances.length
       ? allGrievances.map((el) => {
           const grievanceDetailsPath = getGrievanceDetailsPath(
@@ -129,7 +129,7 @@ export function LinkedGrievancesModal({
         })
       : [<span key="empty">-</span>];
 
-  const renderLink = (): React.ReactElement => {
+  const renderLink = (): ReactElement => {
     if (allGrievances.length === 0) {
       return (
         <LabelizedField label={t('Linked Grievances')} value={<span>-</span>} />
@@ -155,7 +155,7 @@ export function LinkedGrievancesModal({
     );
   };
 
-  const renderRows = (): React.ReactElement => (
+  const renderRows = (): ReactElement => (
     <>{allGrievances.map((relatedTicket) => renderRow(relatedTicket.node))}</>
   );
 

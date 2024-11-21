@@ -1,6 +1,5 @@
 import { Grid } from '@mui/material';
 import { Field } from 'formik';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { GrievancesChoiceDataQuery } from '@generated/graphql';
 import { useArrayToDict } from '@hooks/useArrayToDict';
@@ -14,9 +13,10 @@ import {
   GRIEVANCE_CATEGORIES_NAMES,
   GRIEVANCE_ISSUE_TYPES_NAMES,
 } from '@utils/constants';
+import { ChangeEvent, ReactElement } from 'react';
 
 export interface SelectionProps {
-  handleChange: (e: React.ChangeEvent) => void;
+  handleChange: (e: ChangeEvent) => void;
   choicesData: GrievancesChoiceDataQuery;
   setFieldValue: (field: string, value, shouldValidate?: boolean) => void;
   showIssueType: (values) => boolean;
@@ -31,8 +31,9 @@ export function Selection({
   showIssueType,
   values,
   redirectedFromRelatedTicket,
-}: SelectionProps): React.ReactElement {
+}: SelectionProps): ReactElement {
   const { t } = useTranslation();
+  const { isSocialDctType } = useProgramContext();
   const issueTypeDict = useArrayToDict(
     choicesData?.grievanceTicketIssueTypeChoices,
     'category',
@@ -51,6 +52,29 @@ export function Selection({
     getGrievanceCategoryDescriptions(beneficiaryGroup);
   const issueTypeDescriptions =
     getGrievanceIssueTypeDescriptions(beneficiaryGroup);
+
+  const issueTypeChoices = redirectedFromRelatedTicket
+    ? dataChangeIssueTypes
+    : issueTypeDict[values.category]?.subCategories;
+
+  const addDisabledProperty = (choices) => {
+    if (!choices) return [];
+    if (!isSocialDctType) return choices;
+
+    return choices.map((choice) => {
+      if (
+        choice.name === 'Add Individual' ||
+        choice.name === 'Household Data Update' ||
+        choice.name === 'Withdraw Household'
+      ) {
+        return { ...choice, disabled: true };
+      }
+      return choice;
+    });
+  };
+  const issueTypeChoicesBasedOnDctType = addDisabledProperty(
+    redirectedFromRelatedTicket ? dataChangeIssueTypes : issueTypeChoices,
+  );
 
   const categoryDescription =
     categoryDescriptions[GRIEVANCE_CATEGORIES_NAMES[values.category]] || '';
@@ -80,11 +104,7 @@ export function Selection({
             name="issueType"
             label="Issue Type"
             variant="outlined"
-            choices={
-              redirectedFromRelatedTicket
-                ? dataChangeIssueTypes
-                : issueTypeDict[values.category].subCategories
-            }
+            choices={issueTypeChoicesBasedOnDctType}
             component={FormikSelectField}
             required
           />

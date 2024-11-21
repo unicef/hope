@@ -1,5 +1,4 @@
 import { Box, Grid, Paper, Typography } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
@@ -20,6 +19,7 @@ import { UniversalMoment } from '@core/UniversalMoment';
 import { DocumentRegistrationPhotoModal } from '../DocumentRegistrationPhotoModal';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from 'src/programContext';
+import { ReactElement } from 'react';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}
@@ -38,7 +38,7 @@ interface RegistrationIndividualBioDataProps {
 export function RegistrationIndividualBioData({
   individual,
   choicesData,
-}: RegistrationIndividualBioDataProps): React.ReactElement {
+}: RegistrationIndividualBioDataProps): ReactElement {
   const { baseUrl } = useBaseUrl();
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();

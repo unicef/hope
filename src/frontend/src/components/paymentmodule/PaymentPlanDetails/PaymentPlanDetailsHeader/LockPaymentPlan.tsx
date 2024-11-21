@@ -6,8 +6,7 @@ import {
   DialogContent,
   DialogTitle,
 } from '@mui/material';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
@@ -25,7 +24,7 @@ export interface LockPaymentPlanProps {
 
 export function LockPaymentPlan({
   paymentPlan,
-}: LockPaymentPlanProps): React.ReactElement {
+}: LockPaymentPlanProps): ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const { selectedProgram } = useProgramContext();

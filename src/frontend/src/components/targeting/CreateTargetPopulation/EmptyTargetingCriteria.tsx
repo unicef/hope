@@ -1,15 +1,15 @@
 import { Typography } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { PaperContainer } from '../PaperContainer';
 import { useProgramContext } from 'src/programContext';
+import { ReactElement } from 'react';
 
 const Label = styled.p`
   color: #b1b1b5;
 `;
 
-export function EmptyTargetingCriteria(): React.ReactElement {
+export function EmptyTargetingCriteria(): ReactElement {
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;

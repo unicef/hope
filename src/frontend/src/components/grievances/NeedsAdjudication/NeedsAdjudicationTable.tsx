@@ -1,4 +1,4 @@
-import React from 'react';
+import { ChangeEvent } from 'react';
 import { BlackLink } from '@core/BlackLink';
 import { UniversalMoment } from '@core/UniversalMoment';
 import PeopleIcon from '@mui/icons-material/People';
@@ -43,7 +43,7 @@ export const NeedsAdjudicationTable = ({
 }: NeedsAdjudicationTableProps) => {
   const { t } = useTranslation();
   const { baseUrl, isAllPrograms } = useBaseUrl();
-  const { isActiveProgram } = useProgramContext();
+  const { isActiveProgram, isSocialDctType } = useProgramContext();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
@@ -69,7 +69,7 @@ export const NeedsAdjudicationTable = ({
     return allIds;
   };
 
-  const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSelectAll = (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
       setSelectedIndividualIds(getAllIds());
     } else {
@@ -100,7 +100,10 @@ export const NeedsAdjudicationTable = ({
     !isActiveProgram;
 
   const renderPossibleDuplicateRow = (possibleDuplicate) => (
-    <TableRow key={possibleDuplicate.id} data-cy="possible-duplicate-row">
+    <TableRow
+      key={possibleDuplicate.id}
+      data-cy={`possible-duplicate-row-${possibleDuplicate?.unicefId}`}
+    >
       <TableCell align="left" data-cy="checkbox-cell">
         <Checkbox
           color="primary"
@@ -137,20 +140,22 @@ export const NeedsAdjudicationTable = ({
           <span data-cy="individual-id">{possibleDuplicate?.unicefId}</span>
         )}
       </TableCell>
-      <TableCell align="left" data-cy="household-id-cell">
-        {!isAllPrograms ? (
-          <BlackLink
-            to={`/${baseUrl}/population/household/${possibleDuplicate?.household?.id}`}
-            data-cy="household-link"
-          >
-            {possibleDuplicate?.household?.unicefId || '-'}
-          </BlackLink>
-        ) : (
-          <span data-cy="household-id">
-            {possibleDuplicate?.household?.unicefId || '-'}
-          </span>
-        )}
-      </TableCell>
+      {!isSocialDctType && (
+        <TableCell align="left" data-cy="household-id-cell">
+          {!isAllPrograms ? (
+            <BlackLink
+              to={`/${baseUrl}/population/household/${possibleDuplicate?.household?.id}`}
+              data-cy="household-link"
+            >
+              {possibleDuplicate?.household?.unicefId || '-'}
+            </BlackLink>
+          ) : (
+            <span data-cy="household-id">
+              {possibleDuplicate?.household?.unicefId || '-'}
+            </span>
+          )}
+        </TableCell>
+      )}
       <TableCell align="left" data-cy="full-name-cell">
         {possibleDuplicate?.fullName}
       </TableCell>
@@ -202,9 +207,11 @@ export const NeedsAdjudicationTable = ({
           <TableCell data-cy="table-cell-individual-id" align="left">
             {beneficiaryGroup?.memberLabel} ID
           </TableCell>
-          <TableCell data-cy="table-cell-household-id" align="left">
-            {beneficiaryGroup?.groupLabel} ID
-          </TableCell>
+          {!isSocialDctType && (
+            <TableCell data-cy="table-cell-household-id" align="left">
+              {beneficiaryGroup?.groupLabel} ID
+            </TableCell>
+          )}
           <TableCell data-cy="table-cell-full-name" align="left">
             {t('Full Name')}
           </TableCell>
@@ -235,7 +242,9 @@ export const NeedsAdjudicationTable = ({
         </TableRow>
       </TableHead>
       <TableBody>
-        <TableRow data-cy="possible-duplicate-golden-row">
+        <TableRow
+          data-cy={`possible-duplicate-row-${details.goldenRecordsIndividual?.unicefId}`}
+        >
           <TableCell align="left">
             <Checkbox
               color="primary"
@@ -278,20 +287,22 @@ export const NeedsAdjudicationTable = ({
               </span>
             )}
           </TableCell>
-          <TableCell align="left" data-cy="household-id-cell">
-            {!isAllPrograms ? (
-              <BlackLink
-                to={`/${baseUrl}/population/household/${details.goldenRecordsIndividual?.household?.id}`}
-                data-cy="household-link"
-              >
-                {details.goldenRecordsIndividual?.household?.unicefId || '-'}
-              </BlackLink>
-            ) : (
-              <span data-cy="household-id">
-                {details.goldenRecordsIndividual?.household?.unicefId || '-'}
-              </span>
-            )}
-          </TableCell>
+          {!isSocialDctType && (
+            <TableCell align="left" data-cy="household-id-cell">
+              {!isAllPrograms ? (
+                <BlackLink
+                  to={`/${baseUrl}/population/household/${details.goldenRecordsIndividual?.household?.id}`}
+                  data-cy="household-link"
+                >
+                  {details.goldenRecordsIndividual?.household?.unicefId || '-'}
+                </BlackLink>
+              ) : (
+                <span data-cy="household-id">
+                  {details.goldenRecordsIndividual?.household?.unicefId || '-'}
+                </span>
+              )}
+            </TableCell>
+          )}
           <TableCell align="left" data-cy="full-name-cell">
             {details.goldenRecordsIndividual?.fullName}
           </TableCell>

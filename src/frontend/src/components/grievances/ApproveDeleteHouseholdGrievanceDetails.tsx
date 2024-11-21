@@ -10,8 +10,7 @@ import {
 import styled from 'styled-components';
 import Edit from '@mui/icons-material/Edit';
 import { Field, Formik } from 'formik';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import { Dialog } from '@containers/dialogs/Dialog';
@@ -41,7 +40,7 @@ export interface ApproveDeleteHouseholdGrievanceDetailsProps {
 export const ApproveDeleteHouseholdGrievanceDetails = ({
   ticket,
   type,
-}: ApproveDeleteHouseholdGrievanceDetailsProps): React.ReactElement => {
+}: ApproveDeleteHouseholdGrievanceDetailsProps): ReactElement => {
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [mutate] = useApproveDeleteHouseholdDataChangeMutation();

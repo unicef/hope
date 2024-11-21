@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { TableWrapper } from '@components/core/TableWrapper';
 import {
   AllIndividualsForPopulationTableQueryVariables,
   AllIndividualsQueryVariables,
@@ -6,13 +6,13 @@ import {
   IndividualNode,
   useAllIndividualsForPopulationTableQuery,
 } from '@generated/graphql';
-import { TableWrapper } from '@components/core/TableWrapper';
-import { adjustHeadCells, dateToIsoString } from '@utils/utils';
-import { UniversalTable } from '../../UniversalTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { adjustHeadCells, dateToIsoString } from '@utils/utils';
+import { ReactElement } from 'react';
+import { useProgramContext } from 'src/programContext';
+import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './IndividualsListTableHeadCells';
 import { IndividualsListTableRow } from './IndividualsListTableRow';
-import { useProgramContext } from 'src/programContext';
 
 interface IndividualsListTableProps {
   filter;
@@ -26,7 +26,7 @@ export function IndividualsListTable({
   filter,
   canViewDetails,
   choicesData,
-}: IndividualsListTableProps): React.ReactElement {
+}: IndividualsListTableProps): ReactElement {
   const { programId } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;

@@ -1,5 +1,6 @@
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Box, Grid } from '@mui/material';
+import { t } from 'i18next';
 import * as React from 'react';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
@@ -31,7 +32,7 @@ export const LookUpHouseholdIndividualSelectionDisplay = ({
   selectedIndividual,
   setSelectedIndividual,
 }: LookUpHouseholdIndividualSelectionDisplayProps): React.ReactElement => {
-  const { selectedProgram } = useProgramContext();
+  const { selectedProgram, isSocialDctType } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const handleRemove = (type): void => {
@@ -48,34 +49,36 @@ export const LookUpHouseholdIndividualSelectionDisplay = ({
   };
   return (
     <Grid container spacing={5}>
-      <Grid item xs={4}>
-        <StyledBox disabled={disableUnselectHousehold}>
-          <Grid container alignItems="center" justifyContent="space-between">
-            <Grid item>
-              <Box display="flex">
-                {`${beneficiaryGroup?.groupLabel} ID`}:
-                <BlueText>
-                  &ensp;
-                  {selectedHousehold?.unicefId || '-'}
-                </BlueText>
-              </Box>
-            </Grid>
-            {!disableUnselectHousehold && selectedHousehold?.unicefId && (
+      {!isSocialDctType && (
+        <Grid item xs={4}>
+          <StyledBox disabled={disableUnselectHousehold}>
+            <Grid container alignItems="center" justifyContent="space-between">
               <Grid item>
-                <DarkGrey>
-                  <Flex>
-                    <DeleteIcon
-                      color="inherit"
-                      fontSize="small"
-                      onClick={() => handleRemove(Types.household)}
-                    />
-                  </Flex>
-                </DarkGrey>
+                <Box display="flex">
+                  {t('Household ID')}:
+                  <BlueText>
+                    &ensp;
+                    {selectedHousehold?.unicefId || '-'}
+                  </BlueText>
+                </Box>
               </Grid>
-            )}
-          </Grid>
-        </StyledBox>
-      </Grid>
+              {!disableUnselectHousehold && selectedHousehold?.unicefId && (
+                <Grid item>
+                  <DarkGrey>
+                    <Flex>
+                      <DeleteIcon
+                        color="inherit"
+                        fontSize="small"
+                        onClick={() => handleRemove(Types.household)}
+                      />
+                    </Flex>
+                  </DarkGrey>
+                </Grid>
+              )}
+            </Grid>
+          </StyledBox>
+        </Grid>
+      )}
       <Grid item xs={4}>
         <StyledBox disabled={disableUnselectIndividual}>
           <Grid container alignItems="center" justifyContent="space-between">

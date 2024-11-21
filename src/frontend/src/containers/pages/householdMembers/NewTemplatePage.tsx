@@ -16,13 +16,13 @@ import { Box, Button, Step, StepLabel, Stepper } from '@mui/material';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Formik } from 'formik';
 import moment from 'moment';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { useProgramContext } from 'src/programContext';
 
-export const NewTemplatePage = (): React.ReactElement => {
+export const NewTemplatePage = (): ReactElement => {
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const { t } = useTranslation();

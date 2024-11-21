@@ -1,5 +1,5 @@
 import TableCell from '@mui/material/TableCell';
-import { ReactElement, useState } from 'react';
+import { ReactElement, ReactNode, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BlackLink } from '@components/core/BlackLink';
 import { StatusBox } from '@components/core/StatusBox';
@@ -122,7 +122,7 @@ export const HouseholdMembersTable = ({
       renderRow={(row) => {
         const isHead = row.relationship === 'HEAD';
 
-        const renderTableCellContent = (content: React.ReactNode) => {
+        const renderTableCellContent = (content: ReactNode) => {
           return isHead ? <Bold>{content}</Bold> : content;
         };
 

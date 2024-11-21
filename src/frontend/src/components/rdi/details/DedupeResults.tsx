@@ -10,8 +10,7 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { BlackLink } from '@core/BlackLink';
@@ -54,7 +53,7 @@ export function DedupeResults({
   status,
   results,
   isInBatch = false,
-}: DedupeResultsProps): React.ReactElement {
+}: DedupeResultsProps): ReactElement {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { baseUrl } = useBaseUrl();

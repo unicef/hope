@@ -364,9 +364,9 @@ class RdiMergeTask:
                         dedupe_service.create_grievance_tickets_for_duplicates(obj_hct)
                         dedupe_service.update_rdis_deduplication_statistics(obj_hct.program, exclude_rdi=obj_hct)
 
-                    obj_hct.update_needs_adjudication_tickets_statistic()
                     obj_hct.status = RegistrationDataImport.MERGED
                     obj_hct.save()
+                    obj_hct.update_duplicates_against_population_statistics()
 
                     # create household and individual collections - only for Program Population Import
                     if obj_hct.data_source == RegistrationDataImport.PROGRAM_POPULATION:

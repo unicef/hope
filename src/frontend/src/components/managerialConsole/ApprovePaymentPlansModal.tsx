@@ -1,3 +1,4 @@
+import { ReactElement } from 'react';
 import { ManagerialConsoleBaseModal } from './ManagerialConsoleBaseModal';
 import { useTranslation } from 'react-i18next';
 
@@ -11,7 +12,7 @@ export const ApprovePaymentPlansModal = ({
   selectedPlansIds,
   selectedPlansUnicefIds,
   onApprove,
-}: ApprovePaymentPlansModalProps): React.ReactElement => {
+}: ApprovePaymentPlansModalProps): ReactElement => {
   const { t } = useTranslation();
 
   return (

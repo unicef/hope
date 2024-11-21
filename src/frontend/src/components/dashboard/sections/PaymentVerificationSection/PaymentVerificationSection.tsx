@@ -1,17 +1,17 @@
 import { Box, Typography } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { AllChartsQuery } from '@generated/graphql';
 import { PaymentVerificationChart } from '../../charts/PaymentVerificationChart';
 import { DashboardPaper } from '../../DashboardPaper';
 import { useProgramContext } from 'src/programContext';
+import { ReactElement } from 'react';
 
 interface PaymentVerificationSectionProps {
   data: AllChartsQuery['chartPaymentVerification'];
 }
 export function PaymentVerificationSection({
   data,
-}: PaymentVerificationSectionProps): React.ReactElement {
+}: PaymentVerificationSectionProps): ReactElement {
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;

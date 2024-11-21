@@ -2,8 +2,7 @@ import { Box, Button, Grid, Typography } from '@mui/material';
 import { AddCircleOutline } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { FieldArray } from 'formik';
-import * as React from 'react';
-import { useEffect } from 'react';
+import { ReactElement, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
@@ -37,7 +36,7 @@ export interface EditIndividualDataChangeProps {
 export function EditIndividualDataChange({
   values,
   setFieldValue,
-}: EditIndividualDataChangeProps): React.ReactElement {
+}: EditIndividualDataChangeProps): ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
   const { selectedProgram } = useProgramContext();

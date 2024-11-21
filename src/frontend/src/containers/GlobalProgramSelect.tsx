@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { styled } from '@mui/material/styles';
 import Popper from '@mui/material/Popper';
 import ClickAwayListener from '@mui/material/ClickAwayListener';
@@ -26,7 +25,14 @@ import {
   useAllProgramsForChoicesLazyQuery,
   useProgramQuery,
 } from '@generated/graphql';
-import { KeyboardEvent, useEffect, useRef, useState } from 'react';
+import {
+  ChangeEvent,
+  KeyboardEvent,
+  MouseEvent,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import ClearIcon from '@mui/icons-material/Clear';
 
 interface PopperComponentProps {
@@ -53,6 +59,7 @@ const StyledAutocompletePopper = styled('div')`
 `;
 
 const PopperComponent = (props: PopperComponentProps) => {
+  // eslint-disable-next-line no-unused-vars
   const { disablePortal, anchorEl, open, ...other } = props;
   return <StyledAutocompletePopper {...other} />;
 };
@@ -113,7 +120,7 @@ interface ProgramRecord {
 }
 
 export const GlobalProgramSelect = () => {
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const { businessArea, programId } = useBaseUrl();
   const { selectedProgram, setSelectedProgram } = useProgramContext();
   const navigate = useNavigate();
@@ -172,6 +179,8 @@ export const GlobalProgramSelect = () => {
               dataCollectingType?.householdFiltersAvailable,
             individualFiltersAvailable:
               dataCollectingType?.individualFiltersAvailable,
+            // collectorFieldsAvailable:
+            //   dataCollectingType?.collectorFieldsAvailable,
           },
           pduFields: program.pduFields,
           beneficiaryGroup: beneficiaryGroup,
@@ -223,7 +232,7 @@ export const GlobalProgramSelect = () => {
       setPrograms(newProgramsList);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [programsList?.allPrograms]);
+  }, [programsList?.allPrograms, inputValue]);
 
   const handleClose = () => {
     setAnchorEl(null);
@@ -263,7 +272,7 @@ export const GlobalProgramSelect = () => {
     }
   };
 
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+  const handleClick = (event: MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
 
@@ -313,10 +322,7 @@ export const GlobalProgramSelect = () => {
         <ClickAwayListener onClickAway={handleClose}>
           <Autocomplete
             open
-            onClose={(
-              _event: React.ChangeEvent,
-              reason: AutocompleteCloseReason,
-            ) => {
+            onClose={(_event: ChangeEvent, reason: AutocompleteCloseReason) => {
               if (reason === 'escape') {
                 handleClose();
               }

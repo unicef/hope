@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Overview } from '@components/payments/Overview';
 import { Title } from '@core/Title';
@@ -6,8 +5,9 @@ import { Grid, Typography } from '@mui/material';
 import { LabelizedField } from '@core/LabelizedField';
 import { getPhoneNoLabel } from '@utils/utils';
 import { useProgramContext } from 'src/programContext';
+import { ReactElement } from 'react';
 
-export const HouseholdDetails = ({ household }): React.ReactElement => {
+export const HouseholdDetails = ({ household }): ReactElement => {
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;

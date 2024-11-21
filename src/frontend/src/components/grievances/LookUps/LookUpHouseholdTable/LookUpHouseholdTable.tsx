@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { useState } from 'react';
+import { MouseEvent, ReactElement, useState } from 'react';
 import styled from 'styled-components';
 import {
   AllHouseholdsForPopulationTableQuery,
@@ -48,7 +47,7 @@ export function LookUpHouseholdTable({
   householdMultiSelect,
   redirectedFromRelatedTicket,
   isFeedbackWithHouseholdOnly,
-}: LookUpHouseholdTableProps): React.ReactElement {
+}: LookUpHouseholdTableProps): ReactElement {
   const { isAllPrograms, programId } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
@@ -85,9 +84,7 @@ export function LookUpHouseholdTable({
   );
 
   const handleCheckboxClick = (
-    _event:
-      | React.MouseEvent<HTMLButtonElement, MouseEvent>
-      | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
+    _event: MouseEvent<HTMLTableRowElement> | MouseEvent<HTMLButtonElement>,
     name: string,
   ): void => {
     const selectedIndex = selected.indexOf(name);
@@ -159,7 +156,7 @@ export function LookUpHouseholdTable({
     ? headCellsWithProgramColumn
     : adjustedHeadCells;
 
-  const renderTable = (): React.ReactElement => (
+  const renderTable = (): ReactElement => (
     <UniversalTable<
       AllHouseholdsForPopulationTableQuery['allHouseholds']['edges'][number]['node'],
       AllHouseholdsForPopulationTableQueryVariables

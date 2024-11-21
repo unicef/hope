@@ -1,8 +1,8 @@
-import { Box, Grid } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
-import * as React from 'react';
-import { StyledBox, BlueText, LightGrey } from '../LookUpStyles';
+import { Box, Grid } from '@mui/material';
+import { ReactElement } from 'react';
 import { useProgramContext } from 'src/programContext';
+import { BlueText, LightGrey, StyledBox } from '../LookUpStyles';
 
 export function LookUpReassignRoleDisplay({
   selectedHousehold,
@@ -14,7 +14,7 @@ export function LookUpReassignRoleDisplay({
   selectedIndividual;
   setLookUpDialogOpen;
   disabled?: boolean;
-}): React.ReactElement {
+}): ReactElement {
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 

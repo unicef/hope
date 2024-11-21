@@ -1,5 +1,4 @@
 import { Box, Button, Grid, Typography } from '@mui/material';
-import * as React from 'react';
 import capitalize from 'lodash/capitalize';
 import { useTranslation } from 'react-i18next';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -17,6 +16,7 @@ import { LoadingComponent } from '@core/LoadingComponent';
 import { Title } from '@core/Title';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 import { useProgramContext } from 'src/programContext';
+import { ReactElement, ReactNode } from 'react';
 
 export function AddIndividualGrievanceDetails({
   ticket,
@@ -24,7 +24,7 @@ export function AddIndividualGrievanceDetails({
 }: {
   ticket: GrievanceTicketQuery['grievanceTicket'];
   canApproveDataChange: boolean;
-}): React.ReactElement {
+}): ReactElement {
   const { t } = useTranslation();
   const { data, loading } = useAllAddIndividualFieldsQuery();
   const [mutate] = useApproveAddIndividualDataChangeMutation();
@@ -78,7 +78,7 @@ export function AddIndividualGrievanceDetails({
         <Grid key={key} item xs={6}>
           <LabelizedField
             label={key === 'sex' ? t('GENDER') : key.replace(/_/g, ' ')}
-            value={<span>{textValue as React.ReactNode}</span>}
+            value={<span>{textValue as ReactNode}</span>}
           />
         </Grid>
       );

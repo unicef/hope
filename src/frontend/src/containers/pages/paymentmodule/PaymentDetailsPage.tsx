@@ -1,5 +1,4 @@
 import { Box } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router-dom';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
@@ -20,8 +19,9 @@ import { ForceFailedButton } from '@components/paymentmodule/ForceFailedButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { AdminButton } from '@core/AdminButton';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { ReactElement } from 'react';
 
-export function PaymentDetailsPage(): React.ReactElement {
+export function PaymentDetailsPage(): ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
   const { paymentId } = useParams();
@@ -58,7 +58,7 @@ export function PaymentDetailsPage(): React.ReactElement {
     },
   ];
 
-  const renderButton = (): React.ReactElement | null => {
+  const renderButton = (): ReactElement | null => {
     if (
       (hasPermissions(PERMISSIONS.PM_MARK_PAYMENT_AS_FAILED, permissions) &&
         paymentPlanStatus === PaymentPlanStatus.Accepted) ||

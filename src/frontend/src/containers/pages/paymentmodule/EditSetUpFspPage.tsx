@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
@@ -8,8 +7,9 @@ import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { usePaymentPlanQuery } from '@generated/graphql';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { ReactElement } from 'react';
 
-export function EditSetUpFspPage(): React.ReactElement {
+export function EditSetUpFspPage(): ReactElement {
   const { paymentPlanId } = useParams();
   const location = useLocation();
 

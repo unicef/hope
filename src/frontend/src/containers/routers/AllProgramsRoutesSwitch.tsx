@@ -1,18 +1,18 @@
-import * as React from 'react';
 import { useRoutes } from 'react-router-dom';
 import { ActivityLogPage } from '../pages/core/MainActivityLogPage';
-import { DashboardPage } from '../pages/dashboard/DashboardPage';
 import { ReportingDetailsPage } from '../pages/reporting/ReportingDetailsPage';
 import { ReportingPage } from '../pages/reporting/ReportingPage';
 import { GrievanceRoutes } from './GrievanceRoutes';
 import { ProgramRoutes } from './ProgramRoutes';
 import { ManagerialConsolePage } from '@containers/pages/managerialConsole/ManagerialConsolePage';
+import { ReactElement } from 'react';
+import { NewDashboardPage } from '@containers/pages/dashboard/NewDashboardPage';
 
-export const AllProgramsRoutesSwitch = (): React.ReactElement => {
+export const AllProgramsRoutesSwitch = (): ReactElement => {
   const allProgramsRoutes = [
     {
       path: 'country-dashboard',
-      element: <DashboardPage />,
+      element: <NewDashboardPage />,
     },
     {
       path: 'reporting/:id',

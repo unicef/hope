@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { useEffect } from 'react';
+import { ReactElement, useEffect } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
@@ -18,7 +17,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from 'src/programContext';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
-export const TargetPopulationDetailsPage = (): React.ReactElement => {
+export const TargetPopulationDetailsPage = (): ReactElement => {
   const { id } = useParams();
   const { isStandardDctType, isSocialDctType } = useProgramContext();
   const location = useLocation();
@@ -57,9 +56,6 @@ export const TargetPopulationDetailsPage = (): React.ReactElement => {
 
   const { targetPopulation } = data;
 
-  const category =
-    targetPopulation.targetingCriteria?.rules.length !== 0 ? 'filters' : 'ids';
-
   const canDuplicate =
     hasPermissions(PERMISSIONS.TARGETING_DUPLICATE, permissions) &&
     Boolean(targetPopulation.targetingCriteria);
@@ -88,7 +84,6 @@ export const TargetPopulationDetailsPage = (): React.ReactElement => {
         targetPopulation={targetPopulation}
         isStandardDctType={isStandardDctType}
         isSocialDctType={isSocialDctType}
-        category={category}
         permissions={permissions}
         screenBeneficiary={businessAreaData?.businessArea?.screenBeneficiary}
       />

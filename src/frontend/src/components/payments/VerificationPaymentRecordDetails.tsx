@@ -1,5 +1,4 @@
 import { Grid, Typography } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityLogTable';
 import {
@@ -20,19 +19,17 @@ import { Overview } from '@components/payments/Overview';
 import { HouseholdDetails } from '@components/payments/HouseholdDetails';
 import { useProgramContext } from '../../programContext';
 import { IndividualDetails } from '@components/payments/IndividualDetails';
+import { ReactElement } from 'react';
 
 interface VerificationPaymentRecordDetailsProps {
   paymentRecord: PaymentRecordQuery['paymentRecord'];
   canViewActivityLog: boolean;
-  choicesData;
 }
 
 export function VerificationPaymentRecordDetails({
   paymentRecord,
   canViewActivityLog,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  choicesData,
-}: VerificationPaymentRecordDetailsProps): React.ReactElement {
+}: VerificationPaymentRecordDetailsProps): ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const { isSocialDctType, selectedProgram } = useProgramContext();

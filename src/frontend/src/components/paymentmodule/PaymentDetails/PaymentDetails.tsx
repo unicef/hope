@@ -20,7 +20,7 @@ import {
   paymentStatusToColor,
   verificationRecordsStatusToColor,
 } from '@utils/utils';
-import * as React from 'react';
+import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
@@ -41,7 +41,7 @@ export function PaymentDetails({
   payment,
   canViewActivityLog,
   canViewHouseholdDetails,
-}: PaymentDetailsProps): React.ReactElement {
+}: PaymentDetailsProps): ReactElement {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
   const { selectedProgram } = useProgramContext();

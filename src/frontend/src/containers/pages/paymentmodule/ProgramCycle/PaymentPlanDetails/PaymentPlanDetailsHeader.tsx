@@ -1,10 +1,9 @@
-import styled from 'styled-components';
 import { Box } from '@mui/material';
 import { PaymentPlanQuery } from '@generated/graphql';
 import { useTranslation } from 'react-i18next';
 import { BreadCrumbsItem } from '@core/BreadCrumbs';
 import { hasPermissions, PERMISSIONS } from '../../../../../config/permissions';
-import React from 'react';
+import { ReactElement } from 'react';
 import { OpenPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/OpenPaymentPlanHeaderButtons';
 import { LockedPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/LockedPaymentPlanHeaderButtons';
 import { LockedFspPaymentPlanHeaderButtons } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/LockedFspPaymentPlanHeaderButtons';
@@ -25,10 +24,6 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useParams } from 'react-router-dom';
 import { AdminButton } from '@core/AdminButton';
 
-const StatusWrapper = styled(Box)`
-  width: 150px;
-`;
-
 interface PaymentPlanDetailsHeaderProps {
   permissions: string[];
   paymentPlan: PaymentPlanQuery['paymentPlan'];
@@ -37,7 +32,7 @@ interface PaymentPlanDetailsHeaderProps {
 export const PaymentPlanDetailsHeader = ({
   permissions,
   paymentPlan,
-}: PaymentPlanDetailsHeaderProps): React.ReactElement => {
+}: PaymentPlanDetailsHeaderProps): ReactElement => {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
   const { programCycleId } = useParams();
@@ -117,7 +112,7 @@ export const PaymentPlanDetailsHeader = ({
     hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) &&
     paymentPlan.canSendToPaymentGateway;
 
-  let buttons: React.ReactElement | null = null;
+  let buttons: ReactElement | null = null;
   switch (paymentPlan.status) {
     case 'OPEN':
       buttons = (
@@ -204,23 +199,23 @@ export const PaymentPlanDetailsHeader = ({
       title={
         <Box display="flex" alignItems="center">
           {t('Payment Plan')} ID:{' '}
-          <Box ml={1}>
+          <Box ml={1} mr={2}>
             <span data-cy="pp-unicef-id">{paymentPlan.unicefId}</span>
           </Box>
-          <StatusWrapper ml={2}>
+          <Box mr={2}>
             <StatusBox
               status={paymentPlan.status}
               statusToColor={paymentPlanStatusToColor}
             />
-          </StatusWrapper>
-          {paymentPlan.backgroundActionStatus && (
-            <StatusWrapper>
+          </Box>
+          <Box mr={2}>
+            {paymentPlan.backgroundActionStatus && (
               <StatusBox
                 status={paymentPlan.backgroundActionStatus}
                 statusToColor={paymentPlanBackgroundActionStatusToColor}
               />
-            </StatusWrapper>
-          )}
+            )}
+          </Box>
         </Box>
       }
       breadCrumbs={

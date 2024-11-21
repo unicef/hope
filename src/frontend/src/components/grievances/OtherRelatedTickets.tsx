@@ -1,6 +1,5 @@
 import { Box, Typography } from '@mui/material';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { GrievanceTicketQuery } from '@generated/graphql';
@@ -20,7 +19,7 @@ export function OtherRelatedTickets({
   ticket,
 }: {
   ticket: GrievanceTicketQuery['grievanceTicket'];
-}): React.ReactElement {
+}): ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const { id } = useParams();
@@ -30,7 +29,7 @@ export function OtherRelatedTickets({
   const [show, setShow] = useState(false);
   const { existingTickets, linkedTickets } = ticket;
 
-  const renderIds = (tickets): React.ReactElement =>
+  const renderIds = (tickets): ReactElement =>
     tickets.length
       ? tickets.map((edge) => {
           const grievanceDetailsPath = getGrievanceDetailsPath(

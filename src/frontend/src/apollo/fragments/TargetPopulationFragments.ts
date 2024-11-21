@@ -92,6 +92,8 @@ export const targetPopulationDetailed = gql`
       rules {
         __typename
         id
+        householdIds
+        individualIds
         individualsFiltersBlocks {
           __typename
           individualBlockFilters {
@@ -122,7 +124,24 @@ export const targetPopulationDetailed = gql`
             }
           }
         }
-        filters {
+        collectorsFiltersBlocks {
+          __typename
+          id
+          createdAt
+          updatedAt
+          collectorBlockFilters {
+            __typename
+            id
+            createdAt
+            updatedAt
+            fieldName
+            comparisonMethod
+            flexFieldClassification
+            arguments
+            labelEn
+          }
+        }
+        householdsFiltersBlocks {
           __typename
           id
           fieldName

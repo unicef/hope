@@ -1,5 +1,4 @@
 import { Grid, Paper, Typography } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityLogTable';
@@ -19,6 +18,7 @@ import { UniversalMoment } from '@core/UniversalMoment';
 import { BlackLink } from '@core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from 'src/programContext';
+import { ReactElement } from 'react';
 
 const Overview = styled(Paper)`
   margin: 20px;
@@ -34,7 +34,7 @@ interface PaymentRecordDetailsProps {
 export function PaymentRecordDetails({
   paymentRecord,
   canViewActivityLog,
-}: PaymentRecordDetailsProps): React.ReactElement {
+}: PaymentRecordDetailsProps): ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const { selectedProgram } = useProgramContext();

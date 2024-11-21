@@ -1,5 +1,4 @@
 import { Grid, Typography } from '@mui/material';
-import * as React from 'react';
 import { Pie } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -12,6 +11,7 @@ import { FieldBorder } from '@core/FieldBorder';
 import { LabelizedField } from '@core/LabelizedField';
 import { PaperContainer } from './PaperContainer';
 import { useProgramContext } from 'src/programContext';
+import { ReactElement } from 'react';
 
 const colors = {
   femaleChildren: '#5F02CF',
@@ -56,7 +56,7 @@ interface ResultsProps {
 
 export function ResultsForHouseholds({
   targetPopulation,
-}: ResultsProps): React.ReactElement {
+}: ResultsProps): ReactElement {
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;

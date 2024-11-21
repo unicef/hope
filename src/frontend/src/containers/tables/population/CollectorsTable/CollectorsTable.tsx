@@ -1,5 +1,5 @@
 import TableCell from '@mui/material/TableCell';
-import React, { ReactElement, useState } from 'react';
+import React, { ReactElement, ReactNode, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
@@ -116,11 +116,11 @@ export const CollectorsTable = ({
       renderRow={(row) => {
         const isHead = row.relationship === 'HEAD';
 
-        const renderTableCellContent = (content: React.ReactNode) => {
+        const renderTableCellContent = (content: ReactNode) => {
           return isHead ? <Bold>{content}</Bold> : content;
         };
 
-        const renderRelationship = (): string | React.ReactElement => {
+        const renderRelationship = (): string | ReactElement => {
           if (!row.household) {
             return 'Not a beneficiary';
           }

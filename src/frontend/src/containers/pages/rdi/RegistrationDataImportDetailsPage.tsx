@@ -1,5 +1,5 @@
 import { Typography } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { ReactElement, ReactNode, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -43,15 +43,11 @@ const TabsContainer = styled.div`
 `;
 
 interface TabPanelProps {
-  children: React.ReactNode;
+  children: ReactNode;
   index: number;
   value: number;
 }
-const TabPanel = ({
-  children,
-  index,
-  value,
-}: TabPanelProps): React.ReactElement => {
+const TabPanel = ({ children, index, value }: TabPanelProps): ReactElement => {
   return (
     <div style={{ display: index !== value ? 'none' : 'block' }}>
       {children}
@@ -59,7 +55,7 @@ const TabPanel = ({
   );
 };
 
-export const RegistrationDataImportDetailsPage = (): React.ReactElement => {
+export const RegistrationDataImportDetailsPage = (): ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
   const permissions = usePermissions();
@@ -110,7 +106,7 @@ export const RegistrationDataImportDetailsPage = (): React.ReactElement => {
     isErased,
   }: {
     isErased: boolean;
-  }): React.ReactElement {
+  }): ReactElement {
     return (
       <Container>
         <RegistrationDetails registration={data.registrationDataImport} />

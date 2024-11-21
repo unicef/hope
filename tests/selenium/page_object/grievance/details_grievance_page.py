@@ -25,6 +25,7 @@ class GrievanceDetailsPage(BaseComponents):
     ticketCategory = 'div[data-cy="label-Category"]'
     labelIssueType = 'div[data-cy="label-Issue Type"]'
     ticketHouseholdID = 'div[data-cy="label-Household ID"]'
+    ticketTargetID = 'div[data-cy="label-Target ID"]'
     ticketIndividualID = 'div[data-cy="label-Individual ID"]'
     ticketPaymentLabel = 'div[data-cy="label-Payment ID"]'
     labelPaymentPlan = 'div[data-cy="label-Payment Plan"]'
@@ -126,7 +127,6 @@ class GrievanceDetailsPage(BaseComponents):
     docNumberCell = 'td[data-cy="doc-number-cell"]'
     adminLevel2Cell = 'td[data-cy="admin-level2-cell"]'
     villageCell = 'td[data-cy="village-cell"]'
-    possibleDuplicateRow = 'tr[data-cy="possible-duplicate-row"]'
     checkboxCell = 'td[data-cy="checkbox-cell"]'
     selectCheckbox = 'span[data-cy="select-checkbox"]'
     statusCell = 'td[data-cy="status-cell"]'
@@ -152,6 +152,10 @@ class GrievanceDetailsPage(BaseComponents):
     logRow = 'div[data-cy="log-row"]'
     paymentRecord = 'span[data-cy="payment-record"]'
     labelGender = 'div[data-cy="label-GENDER"]'
+    grievanceVerify = '[data-cy="grievance-verify"]'
+    inputNewReceivedAmount = '[data-cy="input-newReceivedAmount"]'
+    buttonSubmit = 'button[data-cy="button-submit"]'
+    grievanceApprove = '[data-cy="grievance-approve"]'
 
     # Texts
     textTitle = "Ticket ID: "
@@ -168,12 +172,16 @@ class GrievanceDetailsPage(BaseComponents):
     textNotAssigment = "-"
     textAssigmentRootRootkowski = "Root Rootkowski"
     textNoCategory = "Needs Adjudication"
-    possibleDuplicateGoldenRow = 'tr[data-cy="possible-duplicate-golden-row"]'
+    possibleDuplicateRowTemplate = 'tr[data-cy="possible-duplicate-row-{}"]'
     peopleIcon = 'svg[data-cy="people-icon"]'
     personIcon = 'svg[data-cy="person-icon"]'
     buttonRotateImage = 'button[data-cy="button-rotate-image"]'
     buttonCancel = 'button[data-cy="button-cancel"]'
     linkShowPhoto = 'a[data-cy="link-show-photo"]'
+    labelStatus = 'div[data-cy="label-Status"]'
+    statusContainer = 'div[data-cy="status-container"]'
+    labelPriority = 'div[data-cy="label-Priority"]'
+    labelUrgency = 'div[data-cy="label-Urgency"]'
 
     def getLabelGender(self) -> WebElement:
         return self.wait_for(self.labelGender)
@@ -239,6 +247,9 @@ class GrievanceDetailsPage(BaseComponents):
     def disappearButtonConfirm(self) -> WebElement:
         return self.wait_for_disappear(self.buttonConfirm)
 
+    def disappearButtonCloseTicket(self) -> WebElement:
+        return self.wait_for_disappear(self.buttonCloseTicket)
+
     def getButtonEdit(self) -> WebElement:
         return self.wait_for(self.buttonEdit)
 
@@ -259,6 +270,9 @@ class GrievanceDetailsPage(BaseComponents):
 
     def getTicketHouseholdID(self) -> WebElement:
         return self.wait_for(self.ticketHouseholdID)
+
+    def getTicketTargetID(self) -> WebElement:
+        return self.wait_for(self.ticketTargetID)
 
     def getTicketIndividualID(self) -> WebElement:
         return self.wait_for(self.ticketIndividualID)
@@ -576,12 +590,8 @@ class GrievanceDetailsPage(BaseComponents):
         self.wait_for(self.villageCell)
         return self.get_elements(self.villageCell)
 
-    def getPossibleDuplicateRow(self) -> [WebElement]:
-        self.wait_for(self.possibleDuplicateRow)
-        return self.get_elements(self.possibleDuplicateRow)
-
-    def getPossibleDuplicateGoldenRow(self) -> WebElement:
-        return self.wait_for(self.possibleDuplicateGoldenRow)
+    def getPossibleDuplicateRowByUnicefId(self, unicef_id: str) -> WebElement:
+        return self.wait_for(self.possibleDuplicateRowTemplate.format(unicef_id))
 
     def getCheckboxCell(self) -> [WebElement]:
         self.wait_for(self.checkboxCell)
@@ -667,3 +677,27 @@ class GrievanceDetailsPage(BaseComponents):
 
     def getLinkShowPhoto(self) -> WebElement:
         return self.wait_for(self.linkShowPhoto)
+
+    def getGrievanceVerify(self) -> WebElement:
+        return self.wait_for(self.grievanceVerify)
+
+    def getInputNewReceivedAmount(self) -> WebElement:
+        return self.wait_for(self.inputNewReceivedAmount)
+
+    def getButtonSubmit(self) -> WebElement:
+        return self.wait_for(self.buttonSubmit)
+
+    def getGrievanceApprove(self) -> WebElement:
+        return self.wait_for(self.grievanceApprove)
+
+    def getLabelStatus(self) -> WebElement:
+        return self.wait_for(self.labelStatus)
+
+    def getStatusContainer(self) -> WebElement:
+        return self.wait_for(self.statusContainer)
+
+    def getLabelPriority(self) -> WebElement:
+        return self.wait_for(self.labelPriority)
+
+    def getLabelUrgency(self) -> WebElement:
+        return self.wait_for(self.labelUrgency)

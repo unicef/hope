@@ -33,13 +33,14 @@ import {
   formatCurrencyWithSymbol,
   isPermissionDeniedError,
 } from '@utils/utils';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { ReactElement } from 'react';
+import { IndividualDeliveryMechanisms } from '@components/population/IndividualDeliveryMechanisms';
 
 const Container = styled.div`
   padding: 20px 20px 00px 20px;
@@ -63,7 +64,7 @@ const SubTitle = styled(Typography)`
   }
 `;
 
-export const PeopleDetailsPage = (): React.ReactElement => {
+export const PeopleDetailsPage = (): ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
   const { baseUrl, businessArea, programId } = useBaseUrl();
@@ -163,6 +164,9 @@ export const PeopleDetailsPage = (): React.ReactElement => {
             individual={individual as IndividualNode}
             choicesData={choicesData}
             grievancesChoices={grievancesChoices}
+          />
+          <IndividualDeliveryMechanisms
+            individual={individual as IndividualNode}
           />
           <IndividualAdditionalRegistrationInformation
             flexFieldsData={flexFieldsData}

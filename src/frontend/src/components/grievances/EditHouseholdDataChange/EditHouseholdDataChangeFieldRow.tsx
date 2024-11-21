@@ -3,19 +3,21 @@ import { Delete } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { Field, useField } from 'formik';
 import camelCase from 'lodash/camelCase';
-import * as React from 'react';
-import { useEffect } from 'react';
+import { ReactElement, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import {
   AllEditHouseholdFieldsQuery,
+  AllEditPeopleFieldsQuery,
   HouseholdQuery,
 } from '@generated/graphql';
 import { CurrentValue } from './CurrentValue';
 import { EditHouseholdDataChangeField } from './EditHouseholdDataChangeField';
 
 export interface EditHouseholdDataChangeFieldRowProps {
-  fields: AllEditHouseholdFieldsQuery['allEditHouseholdFieldsAttributes'];
+  fields:
+    | AllEditHouseholdFieldsQuery['allEditHouseholdFieldsAttributes']
+    | AllEditPeopleFieldsQuery['allEditPeopleFieldsAttributes'];
   household: HouseholdQuery['household'];
   itemValue: { fieldName: string; fieldValue: string | number | Date };
   index: number;
@@ -31,7 +33,7 @@ export const EditHouseholdDataChangeFieldRow = ({
   notAvailableFields,
   onDelete,
   values,
-}: EditHouseholdDataChangeFieldRowProps): React.ReactElement => {
+}: EditHouseholdDataChangeFieldRowProps): ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;

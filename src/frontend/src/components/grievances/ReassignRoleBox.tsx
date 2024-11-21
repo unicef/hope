@@ -2,7 +2,6 @@ import { Box, Paper, Typography } from '@mui/material';
 import WarningIcon from '@mui/icons-material/Warning';
 import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { GrievanceTicketQuery } from '@generated/graphql';
@@ -13,6 +12,7 @@ import { LabelizedField } from '@core/LabelizedField';
 import { LookUpReassignRole } from './LookUps/LookUpReassignRole/LookUpReassignRole';
 import { ReassignRoleUnique } from './LookUps/LookUpReassignRole/ReassignRoleUnique';
 import { useProgramContext } from 'src/programContext';
+import { ReactElement } from 'react';
 
 const StyledBox = styled(Paper)`
   border: 1px solid ${({ theme }) => theme.hctPalette.orange};
@@ -42,7 +42,7 @@ export const ReassignRoleBox = ({
   ticket: GrievanceTicketQuery['grievanceTicket'];
   shouldDisplayButton?: boolean;
   shouldDisableButton?: boolean;
-}): React.ReactElement => {
+}): ReactElement => {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
@@ -90,7 +90,11 @@ export const ReassignRoleBox = ({
       shouldShowReassignHoH = false;
     }
   }
-
+  const reassignDataDictByIndividualId = {};
+  for (const key of Object.keys(reassignData)) {
+    reassignDataDictByIndividualId[reassignData[key].individual] =
+      reassignData[key];
+  }
   const mappedLookUpsForExternalHouseholds = householdsAndRoles
     .filter((el) => el.role !== 'NO_ROLE')
     .map((el) => (
@@ -113,7 +117,10 @@ export const ReassignRoleBox = ({
             individualRole={{ role: el.role, id: el.id }}
             ticket={ticket}
             household={el.household}
-            individual={individual}
+            individualToReassign={individual}
+            initialSelectedIndividualId={
+              reassignDataDictByIndividualId[individual.id]?.new_individual
+            }
           />
         ) : null}
         {shouldDisplayButton &&
@@ -130,7 +137,7 @@ export const ReassignRoleBox = ({
       </Box>
     ));
 
-  const showMessage = (): React.ReactElement => {
+  const showMessage = (): ReactElement => {
     if (
       (ticket.issueType.toString() ===
         GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL &&
@@ -187,7 +194,10 @@ export const ReassignRoleBox = ({
                 individualRole={{ role: 'HEAD', id: 'HEAD' }}
                 ticket={ticket}
                 household={household}
-                individual={individual}
+                individualToReassign={individual}
+                initialSelectedIndividualId={
+                  reassignDataDictByIndividualId[individual.id]?.new_individual
+                }
               />
             ) : null}
           </Box>

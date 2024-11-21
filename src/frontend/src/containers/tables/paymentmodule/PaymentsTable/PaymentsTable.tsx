@@ -1,6 +1,5 @@
 import { Box, Paper, Typography } from '@mui/material';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { TableWrapper } from '@components/core/TableWrapper';
@@ -35,7 +34,7 @@ export function PaymentsTable({
   paymentPlan,
   permissions,
   canViewDetails = false,
-}: PaymentsTableProps): React.ReactElement {
+}: PaymentsTableProps): ReactElement {
   const { baseUrl } = useBaseUrl();
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();

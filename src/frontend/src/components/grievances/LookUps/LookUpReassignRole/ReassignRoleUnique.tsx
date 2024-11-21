@@ -1,5 +1,4 @@
 import { Formik } from 'formik';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -10,6 +9,7 @@ import {
 } from '@generated/graphql';
 import { Button } from '@mui/material';
 import { useProgramContext } from 'src/programContext';
+import { ReactElement } from 'react';
 
 const ReassignRoleButton = styled(Button)`
   padding: 25px;
@@ -31,7 +31,7 @@ export function ReassignRoleUnique({
   ticket,
   household,
   individual,
-}): React.ReactElement {
+}): ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
   const { showMessage } = useSnackbar();

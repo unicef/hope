@@ -1,7 +1,6 @@
 import AssignmentIndRoundedIcon from '@mui/icons-material/AssignmentIndRounded';
 import GroupIcon from '@mui/icons-material/Group';
 import { Grid, MenuItem } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { HouseholdChoiceDataQuery } from '@generated/graphql';
@@ -13,6 +12,7 @@ import { NumberTextField } from '@core/NumberTextField';
 import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import { useProgramContext } from 'src/programContext';
+import { ReactElement } from 'react';
 
 interface LookUpHouseholdFiltersCommunicationProps {
   filter;
@@ -30,7 +30,7 @@ export function LookUpHouseholdFiltersCommunication({
   initialFilter,
   appliedFilter,
   setAppliedFilter,
-}: LookUpHouseholdFiltersCommunicationProps): React.ReactElement {
+}: LookUpHouseholdFiltersCommunicationProps): ReactElement {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();

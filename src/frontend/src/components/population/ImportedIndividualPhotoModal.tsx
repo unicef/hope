@@ -1,10 +1,10 @@
-import * as React from 'react';
 import {
   ImportedIndividualNode,
   useImportedIndividualPhotosQuery,
 } from '@generated/graphql';
 import { PhotoModal } from '@core/PhotoModal/PhotoModal';
 import { useProgramContext } from 'src/programContext';
+import { ReactElement } from 'react';
 
 interface ImportedIndividualPhotoModalProps {
   individual: ImportedIndividualNode;
@@ -12,7 +12,7 @@ interface ImportedIndividualPhotoModalProps {
 
 export function ImportedIndividualPhotoModal({
   individual,
-}: ImportedIndividualPhotoModalProps): React.ReactElement {
+}: ImportedIndividualPhotoModalProps): ReactElement {
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const { data } = useImportedIndividualPhotosQuery({

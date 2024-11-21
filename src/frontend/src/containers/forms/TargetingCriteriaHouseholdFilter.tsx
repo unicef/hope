@@ -1,9 +1,9 @@
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { ImportedIndividualFieldsQuery } from '@generated/graphql';
 import { FieldChooser } from '@components/targeting/FieldChooser';
 import { SubField } from '@components/targeting/SubField';
+import { ReactElement } from 'react';
 
 const Divider = styled.div`
   border-top: 1px solid #b1b1b5;
@@ -46,9 +46,9 @@ export function TargetingCriteriaHouseholdFilter({
   values;
   onClick: () => void;
   choicesDict;
-}): React.ReactElement {
+}): ReactElement {
   const { t } = useTranslation();
-  const shouldShowDivider = index + 1 < values.filters.length;
+  const shouldShowDivider = index + 1 < values.householdsFiltersBlocks.length;
   return (
     <div>
       <FieldChooser
@@ -58,14 +58,14 @@ export function TargetingCriteriaHouseholdFilter({
         onChange={onChange}
         showDelete
         onDelete={onClick}
-        baseName={`filters[${index}]`}
+        baseName={`householdsFiltersBlocks[${index}]`}
       />
       {each.fieldName && (
         <div data-cy="autocomplete-target-criteria-values">
           <SubField
             field={each}
             index={index}
-            baseName={`filters[${index}]`}
+            baseName={`householdsFiltersBlocks[${index}]`}
             choicesDict={choicesDict}
           />
         </div>

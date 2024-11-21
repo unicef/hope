@@ -1,6 +1,5 @@
 import { Grid, MenuItem } from '@mui/material';
 import { Group, Person } from '@mui/icons-material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { TargetPopulationStatus } from '@generated/graphql';
@@ -14,6 +13,7 @@ import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import { FiltersSection } from '@core/FiltersSection';
 import { useProgramContext } from 'src/programContext';
+import { ReactElement } from 'react';
 
 interface TargetPopulationTableFiltersProps {
   filter;
@@ -28,7 +28,7 @@ export const TargetPopulationTableFilters = ({
   initialFilter,
   appliedFilter,
   setAppliedFilter,
-}: TargetPopulationTableFiltersProps): React.ReactElement => {
+}: TargetPopulationTableFiltersProps): ReactElement => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();

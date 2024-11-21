@@ -19,32 +19,48 @@ import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_TICKET_STATES,
 } from '@utils/constants';
-import { choicesToDict, dateToIsoString } from '@utils/utils';
+import { adjustHeadCells, choicesToDict, dateToIsoString } from '@utils/utils';
 import get from 'lodash/get';
-import { useEffect, useState } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   PERMISSIONS,
   hasCreatorOrOwnerPermissions,
 } from '../../../config/permissions';
+import {
+  headCellsStandardProgram,
+  headCellsSocialProgram,
+} from './GrievancesTableHeadCells';
 import { GrievancesTableRow } from './GrievancesTableRow';
 import { BulkAddNoteModal } from './bulk/BulkAddNoteModal';
 import { BulkAssignModal } from './bulk/BulkAssignModal';
 import { BulkSetPriorityModal } from './bulk/BulkSetPriorityModal';
 import { BulkSetUrgencyModal } from './bulk/BulkSetUrgencyModal';
+import { useProgramContext } from 'src/programContext';
 
 interface GrievancesTableProps {
   filter;
   selectedTab;
-  adjustedHeadCells;
 }
 
 export const GrievancesTable = ({
   filter,
-  adjustedHeadCells,
-}: GrievancesTableProps): React.ReactElement => {
+}: GrievancesTableProps): ReactElement => {
   const { businessArea, programId, isAllPrograms } = useBaseUrl();
+  const { isSocialDctType, selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const { t } = useTranslation();
+
+  const replacements = {
+    household_unicef_id: (_beneficiaryGroup) =>
+      `${_beneficiaryGroup.groupLabel} ID`,
+  };
+
+  const adjustedHeadCells = adjustHeadCells(
+    headCellsStandardProgram,
+    beneficiaryGroup,
+    replacements,
+  );
 
   const initialVariables: AllGrievanceTicketQueryVariables = {
     businessArea,
@@ -196,16 +212,29 @@ export const GrievancesTable = ({
     setSelectedTickets([]);
   };
 
-  const headCellsWithProgramColumn = [
-    ...adjustedHeadCells,
-    {
-      disablePadding: false,
-      label: 'Programmes',
-      id: 'programs',
-      numeric: false,
-      dataCy: 'programs',
-    },
-  ];
+  const getHeadCells = () => {
+    const baseCells =
+      isSocialDctType || isAllPrograms
+        ? headCellsSocialProgram
+        : adjustedHeadCells;
+
+    if (isAllPrograms) {
+      return [
+        ...baseCells,
+        {
+          disablePadding: false,
+          label: 'Programmes',
+          id: 'programs',
+          numeric: false,
+          dataCy: 'programs',
+        },
+      ];
+    }
+
+    return baseCells;
+  };
+
+  const headCells = getHeadCells();
 
   return (
     <Box display="flex" flexDirection="column" px={5} pt={5}>
@@ -276,9 +305,7 @@ export const GrievancesTable = ({
             AllGrievanceTicketQueryVariables
           >
             isOnPaper={false}
-            headCells={
-              isAllPrograms ? headCellsWithProgramColumn : adjustedHeadCells
-            }
+            headCells={headCells}
             rowsPerPageOptions={[10, 15, 20, 40]}
             query={useAllGrievanceTicketQuery}
             onSelectAllClick={handleSelectAllCheckboxesClick}

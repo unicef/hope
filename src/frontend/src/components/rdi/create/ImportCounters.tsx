@@ -1,8 +1,8 @@
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramQuery } from '@generated/graphql';
 import { useProgramContext } from 'src/programContext';
+import { ReactElement } from 'react';
 
 export interface ImportCountersPropTypes {
   numberOfHouseholds: number;
@@ -12,7 +12,7 @@ export interface ImportCountersPropTypes {
 export function ImportCounters({
   numberOfHouseholds,
   numberOfIndividuals,
-}: ImportCountersPropTypes): React.ReactElement {
+}: ImportCountersPropTypes): ReactElement {
   const { t } = useTranslation();
   const { programId } = useBaseUrl();
   const { selectedProgram } = useProgramContext();

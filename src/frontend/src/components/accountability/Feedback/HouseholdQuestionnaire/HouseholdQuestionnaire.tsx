@@ -1,11 +1,11 @@
 import { Grid } from '@mui/material';
 import { Field } from 'formik';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { ContentLink } from '@core/ContentLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from 'src/programContext';
+import { ReactElement } from 'react';
 
 interface HouseholdQuestionnaireProps {
   values;
@@ -13,7 +13,7 @@ interface HouseholdQuestionnaireProps {
 
 export function HouseholdQuestionnaire({
   values,
-}: HouseholdQuestionnaireProps): React.ReactElement {
+}: HouseholdQuestionnaireProps): ReactElement {
   const { baseUrl } = useBaseUrl();
   const { t } = useTranslation();
   const selectedHouseholdData = values.selectedHousehold;

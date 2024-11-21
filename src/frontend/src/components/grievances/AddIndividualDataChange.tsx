@@ -4,7 +4,6 @@ import { useLocation } from 'react-router-dom';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { Field, FieldArray } from 'formik';
 import camelCase from 'lodash/camelCase';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
 import { FormikFileField } from '@shared/Formik/FormikFileField';
@@ -21,6 +20,7 @@ import { DocumentField } from './DocumentField';
 import { FormikBoolFieldGrievances } from './FormikBoolFieldGrievances';
 import { removeItemById } from './utils/helpers';
 import { useProgramContext } from 'src/programContext';
+import { ReactElement } from 'react';
 
 export interface AddIndividualDataChangeFieldProps {
   field: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'][number];
@@ -29,7 +29,7 @@ export interface AddIndividualDataChangeFieldProps {
 export function AddIndividualDataChangeField({
   field,
   flexField,
-}: AddIndividualDataChangeFieldProps): React.ReactElement {
+}: AddIndividualDataChangeFieldProps): ReactElement {
   let fieldProps;
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
@@ -119,7 +119,7 @@ export interface AddIndividualDataChangeProps {
 export function AddIndividualDataChange({
   values,
   setFieldValue,
-}: AddIndividualDataChangeProps): React.ReactElement {
+}: AddIndividualDataChangeProps): ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;

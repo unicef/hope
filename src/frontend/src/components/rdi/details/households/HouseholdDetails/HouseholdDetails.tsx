@@ -1,5 +1,4 @@
 import { Grid, Typography } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
@@ -13,6 +12,7 @@ import {
 import { Title } from '@core/Title';
 import { useProgramContext } from '../../../../../programContext';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { ReactElement } from 'react';
 
 const Overview = styled.div`
   display: flex;
@@ -27,7 +27,7 @@ interface HouseholdDetailsProps {
 export function HouseholdDetails({
   household,
   choicesData,
-}: HouseholdDetailsProps): React.ReactElement {
+}: HouseholdDetailsProps): ReactElement {
   const { baseUrl } = useBaseUrl();
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();

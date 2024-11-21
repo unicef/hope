@@ -8,7 +8,7 @@ import Collapse from '@mui/material/Collapse';
 import List from '@mui/material/List';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import { ElementType, useEffect, useState } from 'react';
+import { ElementType, ReactElement, useEffect, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import {
@@ -59,7 +59,7 @@ interface DrawerItemsProps {
 export const DrawerItems = ({
   currentLocation,
   open,
-}: DrawerItemsProps): React.ReactElement => {
+}: DrawerItemsProps): ReactElement => {
   const { baseUrl, businessArea, programId, isAllPrograms } = useBaseUrl();
   const { isSocialDctType, selectedProgram } = useProgramContext();
   const permissions = usePermissions();

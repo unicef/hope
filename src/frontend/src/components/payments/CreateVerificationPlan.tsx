@@ -7,7 +7,7 @@ import {
   Typography,
 } from '@mui/material';
 import { Field, Form, Formik } from 'formik';
-import { useEffect, useState } from 'react';
+import { ChangeEvent, ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
@@ -120,7 +120,7 @@ export const CreateVerificationPlan = ({
   canCreatePaymentVerificationPlan,
   version,
   isPaymentPlan,
-}: Props): React.ReactElement => {
+}: Props): ReactElement => {
   const refetchQueries = usePaymentRefetchQueries(cashOrPaymentPlanId);
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -285,7 +285,7 @@ export const CreateVerificationPlan = ({
                       data-cy="tabs"
                       value={selectedTab}
                       onChange={(
-                        event: React.ChangeEvent<unknown>,
+                        event: ChangeEvent<unknown>,
                         newValue: number,
                       ) => {
                         setValues(initialValues);
@@ -297,8 +297,8 @@ export const CreateVerificationPlan = ({
                       variant="fullWidth"
                       aria-label="full width tabs example"
                     >
-                      <Tab label={t('FULL LIST')} />
-                      <Tab label={t('RANDOM SAMPLING')} />
+                      <Tab data-cy="tab-full-list" label={t('FULL LIST')} />
+                      <Tab data-cy="tab-random-sampling" label={t('RANDOM SAMPLING')} />
                     </StyledTabs>
                   </TabsContainer>
                   <TabPanel value={selectedTab} index={0}>
@@ -340,10 +340,11 @@ export const CreateVerificationPlan = ({
                           name="verificationChannel"
                           label={t('Verification Channel')}
                           style={{ flexDirection: 'row' }}
+                          data-cy="checkbox-verification-channel"
                           choices={[
-                            { value: 'RAPIDPRO', name: 'RAPIDPRO' },
-                            { value: 'XLSX', name: 'XLSX' },
-                            { value: 'MANUAL', name: 'MANUAL' },
+                            { value: 'RAPIDPRO', name: 'RAPIDPRO', dataCy: 'radio-rapidpro' },
+                            { value: 'XLSX', name: 'XLSX', dataCy: 'radio-xlsx' },
+                            { value: 'MANUAL', name: 'MANUAL', dataCy: 'radio-manual' },
                           ]}
                           component={FormikRadioGroup}
                           alignItems="center"
@@ -480,9 +481,9 @@ export const CreateVerificationPlan = ({
                         style={{ flexDirection: 'row' }}
                         alignItems="center"
                         choices={[
-                          { value: 'RAPIDPRO', name: 'RAPIDPRO' },
-                          { value: 'XLSX', name: 'XLSX' },
-                          { value: 'MANUAL', name: 'MANUAL' },
+                            { value: 'RAPIDPRO', name: 'RAPIDPRO', dataCy: 'radio-rapidpro' },
+                            { value: 'XLSX', name: 'XLSX', dataCy: 'radio-xlsx' },
+                            { value: 'MANUAL', name: 'MANUAL', dataCy: 'radio-manual' },
                         ]}
                         component={FormikRadioGroup}
                       />
@@ -508,7 +509,7 @@ export const CreateVerificationPlan = ({
               </DialogContent>
               <DialogFooter>
                 <DialogActions>
-                  <Button onClick={() => setOpen(false)}>CANCEL</Button>
+                  <Button data-cy="button-cancel" onClick={() => setOpen(false)}>CANCEL</Button>
                   <LoadingButton
                     loading={loading}
                     type="submit"

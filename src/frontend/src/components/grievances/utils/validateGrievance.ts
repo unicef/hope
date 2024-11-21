@@ -241,6 +241,7 @@ export function validateUsingSteps(
   activeStep,
   setValidateData,
   beneficiaryGroup,
+  isSocialDctType,
 ) {
   const category = values.category?.toString();
   const issueType = values.issueType?.toString();
@@ -468,7 +469,8 @@ export function validateUsingSteps(
   if (
     activeStep === GrievanceSteps.Lookup &&
     !values.selectedHousehold &&
-    householdRequiredGrievanceTypes.includes(values.issueType)
+    householdRequiredGrievanceTypes.includes(values.issueType) &&
+    !isSocialDctType
   ) {
     errors.selectedHousehold = `${beneficiaryGroup?.groupLabel} is Required`;
   }
@@ -481,9 +483,9 @@ export function validateUsingSteps(
       GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD,
       GRIEVANCE_ISSUE_TYPES.DELETE_HOUSEHOLD,
     ];
-    const isHouseholdRequired = householdRequiredIssueTypes.includes(
-      values.issueType,
-    );
+    const isHouseholdRequired =
+      householdRequiredIssueTypes.includes(values.issueType) &&
+      !isSocialDctType;
     const isIndividualRequired = individualRequiredIssueTypes.includes(
       values.issueType,
     );

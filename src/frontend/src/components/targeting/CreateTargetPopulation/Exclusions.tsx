@@ -2,8 +2,7 @@ import { Box, Button, Collapse, Grid, Typography } from '@mui/material';
 import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUp from '@mui/icons-material/KeyboardArrowUp';
 import { Field } from 'formik';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { PaperContainer } from '../PaperContainer';
@@ -13,7 +12,7 @@ export function Exclusions({
   initialOpen = false,
 }: {
   initialOpen?: boolean;
-}): React.ReactElement {
+}): ReactElement {
   const [isExclusionsOpen, setExclusionsOpen] = useState(initialOpen);
   const { t } = useTranslation();
   const { isSocialDctType } = useProgramContext();

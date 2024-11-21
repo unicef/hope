@@ -1,4 +1,3 @@
-import * as React from 'react';
 import styled from 'styled-components';
 import {
   AllIndividualsForPopulationTableQuery,
@@ -9,9 +8,13 @@ import { UniversalTable } from '@containers/tables/UniversalTable';
 import { adjustHeadCells, decodeIdString } from '@utils/utils';
 import { TableWrapper } from '@core/TableWrapper';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { headCells } from './LookUpIndividualTableHeadCells';
+import {
+  headCellsSocialProgram,
+  headCellsStandardProgram,
+} from './LookUpIndividualTableHeadCells';
 import { LookUpIndividualTableRow } from './LookUpIndividualTableRow';
 import { useProgramContext } from 'src/programContext';
+import { ReactElement } from 'react';
 
 interface LookUpIndividualTableProps {
   filter;
@@ -45,7 +48,8 @@ export function LookUpIndividualTable({
   ticket,
   excludedId,
   noTableStyling = false,
-}: LookUpIndividualTableProps): React.ReactElement {
+}: LookUpIndividualTableProps): ReactElement {
+  const { isSocialDctType } = useProgramContext();
   const { programId, isAllPrograms } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
@@ -53,7 +57,7 @@ export function LookUpIndividualTable({
   const handleRadioChange = (individual): void => {
     setSelectedIndividual(individual);
 
-    if (individual.household) {
+    if (individual.household && !isSocialDctType) {
       setSelectedHousehold(individual.household);
       setFieldValue('selectedHousehold', individual.household);
     }
@@ -95,6 +99,10 @@ export function LookUpIndividualTable({
     household__id: (_beneficiaryGroup) => `${_beneficiaryGroup.groupLabel} ID`,
   };
 
+  const headCells = isSocialDctType
+    ? headCellsSocialProgram
+    : headCellsStandardProgram;
+
   const adjustedHeadCells = adjustHeadCells(
     headCells,
     beneficiaryGroup,
@@ -116,7 +124,7 @@ export function LookUpIndividualTable({
     ? headCellsWithProgramColumn
     : adjustedHeadCells;
 
-  const renderTable = (): React.ReactElement => (
+  const renderTable = (): ReactElement => (
     <UniversalTable<
       AllIndividualsForPopulationTableQuery['allIndividuals']['edges'][number]['node'],
       AllIndividualsForPopulationTableQueryVariables

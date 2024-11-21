@@ -1,6 +1,5 @@
 import { Box, Grid, Typography } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
@@ -17,6 +16,7 @@ import { Title } from '@core/Title';
 import { ApproveDeleteHouseholdGrievanceDetails } from './ApproveDeleteHouseholdGrievanceDetails';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 import { useProgramContext } from 'src/programContext';
+import { ReactElement } from 'react';
 
 const Info = styled(InfoIcon)`
   color: ${({ theme }) => theme.hctPalette.gray};
@@ -29,7 +29,7 @@ export function DeleteHouseholdGrievanceDetails({
 }: {
   ticket: GrievanceTicketQuery['grievanceTicket'];
   canApproveDataChange: boolean;
-}): React.ReactElement {
+}): ReactElement {
   const { t } = useTranslation();
   const { baseUrl, isAllPrograms } = useBaseUrl();
   const { selectedProgram } = useProgramContext();

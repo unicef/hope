@@ -33,7 +33,7 @@ import {
   Typography,
 } from '@mui/material';
 import { useMutation } from '@tanstack/react-query';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import styled from 'styled-components';
@@ -57,7 +57,7 @@ interface SupportingDocumentsSectionProps {
 export const SupportingDocumentsSection = ({
   initialOpen = false,
   paymentPlan,
-}: SupportingDocumentsSectionProps): React.ReactElement => {
+}: SupportingDocumentsSectionProps): ReactElement => {
   const permissions = usePermissions();
   const confirm = useConfirmation();
   const { t } = useTranslation();
@@ -198,12 +198,16 @@ export const SupportingDocumentsSection = ({
     'Are you sure you want to delete this file? This action cannot be reversed.',
   );
 
-  const handleSupportingDocumentDownloadClick = (fileId: string) => {
+  const handleSupportingDocumentDownloadClick = (
+    fileId: string,
+    fileName: string,
+  ) => {
     downloadSupportingDocument({
       businessAreaSlug: businessArea,
       programId,
       paymentPlanId: paymentPlan.id,
       fileId: fileId.toString(),
+      fileName: fileName,
     });
   };
 
@@ -273,7 +277,10 @@ export const SupportingDocumentsSection = ({
                       {canDownloadFile && (
                         <IconButton
                           onClick={() =>
-                            handleSupportingDocumentDownloadClick(doc.id)
+                            handleSupportingDocumentDownloadClick(
+                              doc.id,
+                              doc.file,
+                            )
                           }
                           data-cy="download-button"
                         >

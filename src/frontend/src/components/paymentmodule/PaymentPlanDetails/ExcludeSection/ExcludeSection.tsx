@@ -7,8 +7,7 @@ import {
   Typography,
 } from '@mui/material';
 import { Field, Form, Formik } from 'formik';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import {
@@ -36,7 +35,7 @@ interface ExcludeSectionProps {
 export function ExcludeSection({
   initialOpen = false,
   paymentPlan,
-}: ExcludeSectionProps): React.ReactElement {
+}: ExcludeSectionProps): ReactElement {
   const {
     status,
     backgroundActionStatus,
@@ -174,11 +173,7 @@ export function ExcludeSection({
 
   const numberOfExcluded = excludedIds.length - deletedIds.length;
 
-  const renderButtons = (
-    submitForm,
-    _values,
-    resetForm,
-  ): React.ReactElement => {
+  const renderButtons = (submitForm, _values, resetForm): ReactElement => {
     const noExclusions = numberOfExcluded === 0;
     const editMode = isExclusionsOpen && isEdit;
     const previewMode =
@@ -292,7 +287,7 @@ export function ExcludeSection({
     return null;
   };
 
-  const renderInputAndApply = (): React.ReactElement => {
+  const renderInputAndApply = (): ReactElement => {
     const applyDisabled =
       !hasExcludePermission ||
       !hasOpenOrLockedStatus ||

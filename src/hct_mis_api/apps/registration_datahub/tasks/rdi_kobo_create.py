@@ -35,6 +35,7 @@ from hct_mis_api.apps.household.models import (
     PendingIndividualIdentity,
     PendingIndividualRoleInHousehold,
 )
+from hct_mis_api.apps.payment.models import PendingDeliveryMechanismData
 from hct_mis_api.apps.periodic_data_update.utils import populate_pdu_with_null_values
 from hct_mis_api.apps.registration_data.models import (
     ImportData,
@@ -87,6 +88,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         super().__init__()
 
     def _handle_image_field(self, value: Any, is_flex_field: bool) -> Optional[Union[str, File]]:
+        logger.info(f"Processing image field: {value}")
         if not self.registration_data_import.pull_pictures:
             return None
         if self.attachments is None:
@@ -101,6 +103,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         file = File(image_bytes, name=value)
         if is_flex_field:
             return default_storage.save(value, file)
+        logger.info(f"Image field processed: {value}")
         return file
 
     def _handle_geopoint_field(self, value: Any, is_flex_field: bool) -> Point:
@@ -220,7 +223,14 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         collectors_to_create = defaultdict(list)
         household_hash_list = []
         household_batch_size = 50
+        logger.info(f"Processing {len(self.reduced_submissions)} households")
+        chunk_index = 0
+        delivery_mechanism_xlsx_fields = PendingDeliveryMechanismData.get_scope_delivery_mechanisms_fields(
+            by="xlsx_field"
+        )
         for reduced_submission_chunk in chunks(self.reduced_submissions, household_batch_size):
+            chunk_index += 1
+            logger.info(f"Processing chunk {chunk_index}/{len(self.reduced_submissions) // household_batch_size}")
             for household in reduced_submission_chunk:
                 # AB#199540
                 household_hash = calculate_hash_for_kobo_submission(household)
@@ -245,12 +255,14 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                     households_to_create,
                     individuals_ids_hash_dict,
                     submission_meta_data,
+                    delivery_mechanism_xlsx_fields,
                 )
             self.bulk_creates(bank_accounts_to_create, head_of_households_mapping, households_to_create)
             bank_accounts_to_create = []
             head_of_households_mapping = {}
             households_to_create = []
         self._handle_collectors(collectors_to_create, individuals_ids_hash_dict)
+        self._create_delivery_mechanisms_data()
 
         rdi_mis = RegistrationDataImport.objects.get(id=self.registration_data_import.id)
         rdi_mis.status = RegistrationDataImport.IN_REVIEW
@@ -299,6 +311,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         households_to_create: list[PendingHousehold],
         individuals_ids_hash_dict: dict,
         submission_meta_data: dict,
+        delivery_mechanism_xlsx_fields: list[str],
     ) -> None:
         individuals_to_create_list = []
         documents_and_identities_to_create = []
@@ -307,9 +320,11 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         self.attachments = household.get("_attachments", [])
         registration_date = None
         current_individuals = []
+        ind_count = 0
         for hh_field, hh_value in household.items():
             if hh_field == KOBO_FORM_INDIVIDUALS_COLUMN_NAME:
                 for individual in hh_value:
+                    ind_count += 1
                     current_individual_docs_and_identities = defaultdict(dict)
                     current_individual_bank_account = {}
                     individual_obj = PendingIndividual()
@@ -346,6 +361,8 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                                 self._cast_and_assign(i_value, i_field, household_obj)
                             except Exception as e:
                                 self._handle_exception("Household", i_field, e)
+                        elif i_field in delivery_mechanism_xlsx_fields:
+                            self._handle_delivery_mechanism_fields(i_value, i_field, ind_count, individual_obj)
                         else:
                             try:
                                 self._cast_and_assign(i_value, i_field, individual_obj)

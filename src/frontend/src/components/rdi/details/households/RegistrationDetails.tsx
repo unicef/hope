@@ -1,12 +1,12 @@
 import { Grid, Typography } from '@mui/material';
 import Paper from '@mui/material/Paper';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { LabelizedField } from '@core/LabelizedField';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { useRegistrationDataImportQuery } from '@generated/graphql';
 import { Title } from '@core/Title';
+import { ReactElement } from 'react';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}
@@ -30,11 +30,11 @@ export function RegistrationDetails({
   deviceid,
   start,
   detailId,
-}: RegistrationDetailsProps): React.ReactElement {
+}: RegistrationDetailsProps): ReactElement {
   const { t } = useTranslation();
   const { data } = useRegistrationDataImportQuery({
     variables: {
-      id: btoa(`RegistrationDataImportNode:${hctId}`),
+      id: hctId,
     },
   });
   if (!data) {

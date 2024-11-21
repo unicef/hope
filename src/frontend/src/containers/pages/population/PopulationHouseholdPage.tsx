@@ -8,14 +8,13 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { Box } from '@mui/material';
 import { getFilterFromQueryParams } from '@utils/utils';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { HouseholdTable } from '../../tables/population/HouseholdTable';
 
-export function PopulationHouseholdPage(): React.ReactElement {
+export function PopulationHouseholdPage(): ReactElement {
   const location = useLocation();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;

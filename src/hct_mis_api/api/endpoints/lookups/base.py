@@ -1,10 +1,13 @@
 from typing import TYPE_CHECKING, Any, Optional
 
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 
 from hct_mis_api.api.endpoints.base import HOPEAPIView
 from hct_mis_api.api.endpoints.serializers import CountrySerializer
+from hct_mis_api.api.filters import CountryFilter
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.household.models import (
     COLLECT_TYPES,
@@ -28,9 +31,17 @@ class DocumentType(HOPEAPIView):
 
 
 class CountryAPIView(HOPEAPIView, ListAPIView):
-    queryset = Country.objects.all()
+    queryset = Country.objects.all().order_by("name")
     serializer_class = CountrySerializer
-    pagination_class = None
+    filter_backends = (OrderingFilter, DjangoFilterBackend, SearchFilter)
+    filterset_class = CountryFilter
+    search_fields = (
+        "iso_code2",
+        "iso_code3",
+        "name",
+        "short_name",
+        "iso_num",
+    )
 
 
 class ResidenceStatus(HOPEAPIView):

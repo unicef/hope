@@ -1,11 +1,9 @@
-import * as React from 'react';
 import { useRoutes } from 'react-router-dom';
 import { ActivityLogPage } from '../pages/core/MainActivityLogPage';
 import { UsersPage } from '../pages/core/UsersPage';
 import { PaymentRecordDetailsPage } from '../pages/payments/PaymentRecordDetailsPage';
 import { ReportingDetailsPage } from '../pages/reporting/ReportingDetailsPage';
 import { ReportingPage } from '../pages/reporting/ReportingPage';
-import { DashboardPage } from '../pages/dashboard/DashboardPage';
 import { GrievanceRoutes } from './GrievanceRoutes';
 import { PaymentModuleRoutes } from './PaymentModuleRoutes';
 import { PaymentVerificationRoutes } from './PaymentVerificationRoutes';
@@ -14,12 +12,14 @@ import { ProgramRoutes } from './ProgramRoutes';
 import { RegistrationRoutes } from './RegistrationRoutes';
 import { TargetingRoutes } from './TargetingRoutes';
 import { AccountabilityRoutes } from './AccountabilityRoutes';
+import { ReactElement } from 'react';
+import { NewDashboardPage } from '@containers/pages/dashboard/NewDashboardPage';
 
-export const SelectedProgramRoutesSwitch = (): React.ReactElement => {
+export const SelectedProgramRoutesSwitch = (): ReactElement => {
   const routes = useRoutes([
     {
       path: 'country-dashboard',
-      element: <DashboardPage />,
+      element: <NewDashboardPage />,
     },
     {
       path: 'payment-records/:id',

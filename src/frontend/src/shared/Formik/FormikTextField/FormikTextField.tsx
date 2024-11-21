@@ -1,7 +1,7 @@
-import * as React from 'react';
 import { InputAdornment, TextField } from '@mui/material';
 import styled from 'styled-components';
 import get from 'lodash/get';
+import { ReactElement } from 'react';
 
 const StyledTextField = styled(TextField)`
   input[type='number']::-webkit-inner-spin-button,
@@ -26,7 +26,7 @@ export function FormikTextField({
   integer,
   maxLength,
   ...otherProps
-}): React.ReactElement {
+}): ReactElement {
   const isInvalid = Boolean(
     get(form.errors, field.name) &&
       (get(form.touched, field.name) || form.submitCount > 0 || form.errors),

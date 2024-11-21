@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -19,6 +18,7 @@ import { HouseholdImportedIndividualsTable } from '../../tables/rdi/HouseholdImp
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 import { useProgramContext } from 'src/programContext';
+import { ReactElement } from 'react';
 
 const Container = styled.div`
   padding: 20px;
@@ -29,7 +29,7 @@ const Container = styled.div`
   }
 `;
 
-export function RegistrationHouseholdDetailsPage(): React.ReactElement {
+export function RegistrationHouseholdDetailsPage(): ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
   const { baseUrl } = useBaseUrl();

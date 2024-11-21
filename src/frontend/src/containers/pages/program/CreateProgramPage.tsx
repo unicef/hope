@@ -30,6 +30,7 @@ import {
 import { programValidationSchema } from '@components/programs/CreateProgram/programValidationSchema';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 import { useProgramContext } from 'src/programContext';
+import { omit } from 'lodash';
 
 export const CreateProgramPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -74,7 +75,8 @@ export const CreateProgramPage = (): ReactElement => {
             areaAccess,
           }))
         : [];
-    const { editMode, ...requestValues } = values;
+
+    const requestValues = omit(values, ['editMode']);
 
     const initialPduFieldState = {
       label: '',

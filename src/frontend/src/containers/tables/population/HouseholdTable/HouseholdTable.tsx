@@ -13,6 +13,7 @@ import { useProgramContext } from 'src/programContext';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './HouseholdTableHeadCells';
 import { HouseholdTableRow } from './HouseholdTableRow';
+import { ReactElement } from 'react';
 
 interface HouseholdTableProps {
   businessArea: string;
@@ -26,7 +27,7 @@ export function HouseholdTable({
   filter,
   choicesData,
   canViewDetails,
-}: HouseholdTableProps): React.ReactElement {
+}: HouseholdTableProps): ReactElement {
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const { programId } = useBaseUrl();

@@ -1,7 +1,6 @@
 import { Grid } from '@mui/material';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { Field } from 'formik';
-import * as React from 'react';
 import { useLocation } from 'react-router-dom';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
 import { FormikDecimalField } from '@shared/Formik/FormikDecimalField';
@@ -10,6 +9,7 @@ import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import {
   AllEditHouseholdFieldsQuery,
+  AllEditPeopleFieldsQuery,
   useAllAdminAreasLazyQuery,
 } from '@generated/graphql';
 import { FormikBoolFieldGrievances } from '../FormikBoolFieldGrievances';
@@ -17,15 +17,18 @@ import { GrievanceFlexFieldPhotoModalEditable } from '../GrievancesPhotoModals/G
 import { FormikAutocomplete } from '@shared/Formik/FormikAutocomplete';
 import { FormikAsyncAutocomplete } from '@shared/Formik/FormikAsyncAutocomplete';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { ReactElement } from 'react';
 
 export interface EditHouseholdDataChangeFieldProps {
-  field: AllEditHouseholdFieldsQuery['allEditHouseholdFieldsAttributes'][number];
+  field:
+    | AllEditHouseholdFieldsQuery['allEditHouseholdFieldsAttributes'][number]
+    | AllEditPeopleFieldsQuery['allEditPeopleFieldsAttributes'][number];
   name: string;
 }
 export const EditHouseholdDataChangeField = ({
   name,
   field,
-}: EditHouseholdDataChangeFieldProps): React.ReactElement => {
+}: EditHouseholdDataChangeFieldProps): ReactElement => {
   const { businessArea } = useBaseUrl();
   const location = useLocation();
   const isNewTicket = location.pathname.indexOf('new-ticket') !== -1;

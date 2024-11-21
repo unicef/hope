@@ -1,5 +1,4 @@
 import { Box, Grid, Typography } from '@mui/material';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FeedbackQuery } from '@generated/graphql';
 import { BlackLink } from '@core/BlackLink';
@@ -9,6 +8,7 @@ import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
 import { getGrievanceDetailsPath } from '../../../grievances/utils/createGrievanceUtils';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { ReactElement } from 'react';
 
 interface LinkedGrievanceProps {
   feedback: FeedbackQuery['feedback'];
@@ -16,7 +16,7 @@ interface LinkedGrievanceProps {
 
 export function LinkedGrievance({
   feedback,
-}: LinkedGrievanceProps): React.ReactElement {
+}: LinkedGrievanceProps): ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const grievanceDetailsPath = getGrievanceDetailsPath(

@@ -2,7 +2,6 @@ import { Grid, MenuItem } from '@mui/material';
 import AssignmentIndRoundedIcon from '@mui/icons-material/AssignmentIndRounded';
 import FlashOnIcon from '@mui/icons-material/FlashOn';
 import GroupIcon from '@mui/icons-material/Group';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { HouseholdChoiceDataQuery, ProgramNode } from '@generated/graphql';
@@ -16,6 +15,7 @@ import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import { DocumentSearchField } from '@core/DocumentSearchField';
 import { useProgramContext } from 'src/programContext';
+import { ReactElement } from 'react';
 
 interface HouseholdFiltersProps {
   filter;
@@ -37,7 +37,7 @@ export function HouseholdFilters({
   appliedFilter,
   setAppliedFilter,
   isOnPaper = true,
-}: HouseholdFiltersProps): React.ReactElement {
+}: HouseholdFiltersProps): ReactElement {
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;

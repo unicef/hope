@@ -1,7 +1,6 @@
 import { IconButton } from '@mui/material';
 import { Info } from '@mui/icons-material';
-import * as React from 'react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { PageHeader } from '@components/core/PageHeader';
@@ -28,7 +27,7 @@ const initialFilter = {
   createdAtRangeMax: '',
 };
 
-export const TargetPopulationsPage = (): React.ReactElement => {
+export const TargetPopulationsPage = (): ReactElement => {
   const location = useLocation();
   const { t } = useTranslation();
   const permissions = usePermissions();
@@ -45,13 +44,11 @@ export const TargetPopulationsPage = (): React.ReactElement => {
   );
   const [isInfoOpen, setToggleInfo] = useState(false);
 
-  if (permissions === null) return null;
-
   const canCreate = hasPermissions(PERMISSIONS.TARGETING_CREATE, permissions);
 
+  if (!programData || !permissions) return null;
   if (!hasPermissions(PERMISSIONS.TARGETING_VIEW_LIST, permissions))
     return <PermissionDenied />;
-  if (!programData) return null;
   let Table = TargetPopulationTable;
   let Filters = TargetPopulationTableFilters;
   if (programData.program.isSocialWorkerProgram) {

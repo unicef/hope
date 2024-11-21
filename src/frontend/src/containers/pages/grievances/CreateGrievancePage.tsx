@@ -25,6 +25,7 @@ import { validationSchemaWithSteps } from '@components/grievances/utils/validati
 import {
   useAllAddIndividualFieldsQuery,
   useAllEditHouseholdFieldsQuery,
+  useAllEditPeopleFieldsQuery,
   useAllProgramsForChoicesQuery,
   useCreateGrievanceMutation,
   useGrievancesChoiceDataQuery,
@@ -50,8 +51,8 @@ import {
   hasPermissionInModule,
   hasPermissions,
 } from '../../../config/permissions';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 import { useProgramContext } from 'src/programContext';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
 const InnerBoxPadding = styled.div`
   .MuiPaper-root {
@@ -68,7 +69,7 @@ const BoxWithBorders = styled.div`
   border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
   padding: 15px 0;
 `;
-function EmptyComponent(): React.ReactElement {
+function EmptyComponent(): ReactElement {
   return null;
 }
 export const dataChangeComponentDict = {
@@ -79,11 +80,12 @@ export const dataChangeComponentDict = {
   },
 };
 
-export const CreateGrievancePage = (): React.ReactElement => {
+export const CreateGrievancePage = (): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const location = useLocation();
   const { baseUrl, businessArea, programId, isAllPrograms } = useBaseUrl();
+  const { isSocialDctType } = useProgramContext();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
   const { selectedProgram } = useProgramContext();
@@ -142,18 +144,34 @@ export const CreateGrievancePage = (): React.ReactElement => {
     data: allAddIndividualFieldsData,
     loading: allAddIndividualFieldsDataLoading,
   } = useAllAddIndividualFieldsQuery();
+
   const { data: householdFieldsData, loading: householdFieldsLoading } =
     useAllEditHouseholdFieldsQuery();
+
+  const { data: allEditPeopleFieldsData, loading: allEditPeopleFieldsLoading } =
+    useAllEditPeopleFieldsQuery();
+
   const individualFieldsDict = useArrayToDict(
     allAddIndividualFieldsData?.allAddIndividualsFieldsAttributes,
     'name',
     '*',
   );
+
   const householdFieldsDict = useArrayToDict(
     householdFieldsData?.allEditHouseholdFieldsAttributes,
     'name',
     '*',
   );
+
+  const peopleFieldsDict = useArrayToDict(
+    allEditPeopleFieldsData?.allEditPeopleFieldsAttributes,
+    'name',
+    '*',
+  );
+
+  const householdFieldsDictByDctType = isSocialDctType
+    ? peopleFieldsDict
+    : householdFieldsDict;
 
   const showIssueType = (values): boolean =>
     values.category === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
@@ -164,7 +182,8 @@ export const CreateGrievancePage = (): React.ReactElement => {
     choicesLoading ||
     allAddIndividualFieldsDataLoading ||
     householdFieldsLoading ||
-    programsDataLoading
+    programsDataLoading ||
+    allEditPeopleFieldsLoading
   )
     return <LoadingComponent />;
   if (permissions === null) return null;
@@ -178,7 +197,8 @@ export const CreateGrievancePage = (): React.ReactElement => {
     !householdFieldsData ||
     !householdFieldsDict ||
     !individualFieldsDict ||
-    !programsData
+    !programsData ||
+    !peopleFieldsDict
   )
     return null;
 
@@ -210,12 +230,20 @@ export const CreateGrievancePage = (): React.ReactElement => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
 
-  let steps = [
-    'Category Selection',
-    `${beneficiaryGroup?.groupLabel}/${beneficiaryGroup?.memberLabel} Look up`,
-    'Identity Verification',
-    'Description',
-  ];
+  let steps = isSocialDctType
+    ? [
+        'Category Selection',
+        `${beneficiaryGroup?.memberLabel} Look up`,
+        'Identity Verification',
+        'Description',
+      ]
+    : [
+        'Category Selection',
+        `${beneficiaryGroup?.groupLabel}/${beneficiaryGroup?.memberLabel} Look up`,
+        'Identity Verification',
+        'Description',
+      ];
+
   // if creating a linked G&F ticket from Feedback page skip Look Up
   if (linkedFeedbackId && selectedHousehold && selectedIndividual) {
     steps = ['Category Selection', 'Identity Verification', 'Description'];
@@ -284,10 +312,11 @@ export const CreateGrievancePage = (): React.ReactElement => {
             values,
             allAddIndividualFieldsData,
             individualFieldsDict,
-            householdFieldsDict,
+            householdFieldsDictByDctType,
             activeStep,
             setValidateData,
             beneficiaryGroup,
+            isSocialDctType,
           )
         }
         validationSchema={validationSchemaWithSteps(activeStep)}
