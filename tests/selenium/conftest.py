@@ -115,7 +115,7 @@ def pytest_addoption(parser) -> None:  # type: ignore
 
 def pytest_configure(config) -> None:  # type: ignore
     env = Env()
-    settings.OUTPUT_DATA_ROOT = env("OUTPUT_DATA_ROOT", default="/tests")
+    settings.OUTPUT_DATA_ROOT = env("OUTPUT_DATA_ROOT", default="./tests/selenium/output_data")
     config.addinivalue_line("markers", "night: This marker is intended for e2e tests conducted during the night on CI")
     # delete all old screenshots
     settings.REPORT_DIRECTORY = f"{settings.OUTPUT_DATA_ROOT}/report"
