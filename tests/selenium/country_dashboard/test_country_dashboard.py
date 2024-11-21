@@ -4,17 +4,31 @@ from typing import Callable
 
 from django.utils import timezone
 
+import factory
 import pytest
 from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.dashboard.services import DashboardDataCache
 from hct_mis_api.apps.geo.fixtures import AreaFactory
 from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.payment.fixtures import PaymentFactory
+from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from tests.selenium.page_object.country_dashboard.country_dashboard import (
     CountryDashboard,
 )
+
+
+class ModifiedPaymentFactory(PaymentFactory):
+    """
+    A specialized factory for creating Payments that match the filtering logic
+    in DashboardDataCache.refresh_data.
+    """
+
+    parent = factory.SubFactory(PaymentPlanFactory, status=factory.Iterator(["ACCEPTED", "FINISHED"]))
+    status = factory.Iterator(["Transaction Successful", "Distribution Successful", "Partially Distributed", "Pending"])
+    delivered_quantity = factory.Faker("random_int", min=100, max=500)
+    delivered_quantity_usd = factory.Faker("random_int", min=100, max=200)
+    delivery_date = factory.Faker("date_time_this_month", before_now=True)
 
 
 @pytest.fixture
@@ -28,11 +42,10 @@ def setup_household_and_payments(business_area: Callable) -> tuple:
         "size": 5,
         "children_count": 2,
         "admin1": AreaFactory(name="Kabul", area_type__name="Province", area_type__area_level=1),
-        "admin2": AreaFactory(name="Ayeara", area_type__name="District", area_type__area_level=2),
     }
 
     household, _ = create_household(household_args=household_args)
-    payments = PaymentFactory.create_batch(
+    payments = ModifiedPaymentFactory.create_batch(
         2,
         household=household,
         delivered_quantity_usd=100,
