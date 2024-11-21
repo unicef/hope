@@ -6,7 +6,6 @@ from django.db.models import Count, Q
 from dateutil.relativedelta import relativedelta
 
 from hct_mis_api.apps.household.models import (
-    COLLECT_TYPE_PARTIAL,
     DISABLED,
     FEMALE,
     MALE,
@@ -27,10 +26,7 @@ RECALCULATION_INDIVIDUAL_FIELDS = {
 }
 
 
-def aggregate_optionally(household: Household, **kwargs: Any) -> Dict:
-    if household.collect_individual_data == COLLECT_TYPE_PARTIAL:
-        return {key: None for key, _ in kwargs.items()}
-    return household.individuals.aggregate(**kwargs)
+
 
 
 @transaction.atomic
@@ -81,8 +77,7 @@ def recalculate_data(
     female_children_disabled_count = Q(birth_date__gt=date_18_years_ago) & female_disability_beneficiary
     male_children_disabled_count = Q(birth_date__gt=date_18_years_ago) & male_disability_beneficiary
 
-    age_groups = aggregate_optionally(
-        household,
+    age_groups = household.individuals.aggregate(
         female_age_group_0_5_count=Count("id", distinct=True, filter=Q(female_beneficiary & to_6_years)),
         female_age_group_6_11_count=Count("id", distinct=True, filter=Q(female_beneficiary & from_6_to_12_years)),
         female_age_group_12_17_count=Count("id", distinct=True, filter=Q(female_beneficiary & from_12_to_18_years)),

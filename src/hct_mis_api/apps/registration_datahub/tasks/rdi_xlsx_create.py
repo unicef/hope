@@ -91,25 +91,6 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             list_of_pdu_column_names.append(f"{flexible_attribute.name}_round_1_collection_date")
         return list_of_pdu_column_names
 
-    def _handle_collect_individual_data(
-        self,
-        value: Any,
-        header: str,
-        row_num: int,
-        individual: PendingIndividual,
-        *args: Any,
-        **kwargs: Any,
-    ) -> str:
-        try:
-            return {
-                "FULL": COLLECT_TYPE_FULL,
-                "PARTIAL": COLLECT_TYPE_PARTIAL,
-                "NONE": COLLECT_TYPE_NONE,
-                "UNKNOWN": COLLECT_TYPE_UNKNOWN,
-            }[value]
-        except KeyError:
-            return COLLECT_TYPE_UNKNOWN
-
     def _handle_bank_account_fields(
         self,
         value: Any,
@@ -526,7 +507,6 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 "child_hoh_h_c": self._handle_bool_field,
                 "consent_h_c": self._handle_bool_field,
                 "first_registration_date_h_c": self._handle_datetime,
-                "collect_individual_data": self._handle_collect_individual_data,
             },
         }
         complex_fields["individuals"].update(

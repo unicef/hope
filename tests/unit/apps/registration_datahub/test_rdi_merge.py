@@ -227,7 +227,6 @@ class TestRdiMergeTask(TestCase):
     @freeze_time("2022-01-01")
     def test_merge_rdi_and_recalculation(self) -> None:
         household = PendingHouseholdFactory(
-            collect_individual_data=COLLECT_TYPE_FULL,
             registration_data_import=self.rdi,
             admin_area=self.area4,
             admin4=self.area4,
@@ -258,7 +257,6 @@ class TestRdiMergeTask(TestCase):
         household = households.first()
 
         self.assertEqual(1, households.count())
-        self.assertEqual(household.collect_individual_data, COLLECT_TYPE_FULL)
         self.assertEqual(8, individuals.count())
         self.assertEqual(household.flex_fields.get("enumerator_id"), 1234567890)
         self.assertEqual(household.detail_id, "123456123")
@@ -344,7 +342,6 @@ class TestRdiMergeTask(TestCase):
     )
     def test_merge_rdi_sanction_list_check(self, sanction_execute_mock: mock.MagicMock) -> None:
         household = PendingHouseholdFactory(
-            collect_individual_data=COLLECT_TYPE_FULL,
             registration_data_import=self.rdi,
             admin_area=self.area4,
             admin4=self.area4,
@@ -376,7 +373,6 @@ class TestRdiMergeTask(TestCase):
     )
     def test_merge_rdi_sanction_list_check_business_area_false(self, sanction_execute_mock: mock.MagicMock) -> None:
         household = PendingHouseholdFactory(
-            collect_individual_data=COLLECT_TYPE_FULL,
             registration_data_import=self.rdi,
             admin_area=self.area4,
             admin4=self.area4,
@@ -409,7 +405,6 @@ class TestRdiMergeTask(TestCase):
     )
     def test_merge_rdi_sanction_list_check_rdi_false(self, sanction_execute_mock: mock.MagicMock) -> None:
         household = PendingHouseholdFactory(
-            collect_individual_data=COLLECT_TYPE_FULL,
             registration_data_import=self.rdi,
             admin_area=self.area4,
             admin4=self.area4,
@@ -450,7 +445,6 @@ class TestRdiMergeTask(TestCase):
         self.rdi.data_source = RegistrationDataImport.PROGRAM_POPULATION
         self.rdi.save()
         imported_household = HouseholdFactory(
-            collect_individual_data=COLLECT_TYPE_FULL,
             registration_data_import=self.rdi,
             unicef_id="HH-9",
             rdi_merge_status=MergeStatusModel.PENDING,
@@ -510,7 +504,6 @@ class TestRdiMergeTask(TestCase):
 
     def test_merging_external_collector(self) -> None:
         household = PendingHouseholdFactory(
-            collect_individual_data=COLLECT_TYPE_FULL,
             registration_data_import=self.rdi,
             admin_area=self.area4,
             admin4=self.area4,
