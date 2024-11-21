@@ -1,6 +1,10 @@
 from time import sleep
 
+from selenium.webdriver import Keys
+from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 
 from hct_mis_api.apps.core.utils import encode_id_base64
 from tests.selenium.helpers.helper import Common
@@ -50,6 +54,7 @@ class BaseComponents(Common):
     globalProgramFilterSearchButton = 'button[data-cy="search-icon"]'
     globalProgramFilterClearButton = 'button[data-cy="clear-icon"]'
     rows = 'tr[role="checkbox"]'
+    row_index_template = 'tr[role="checkbox"]:nth-child({})'
     alert = '[role="alert"]'
     breadcrumbsChevronIcon = 'svg[data-cy="breadcrumbs-chevron-icon"]'
     arrowBack = 'div[data-cy="arrow_back"]'
@@ -171,15 +176,21 @@ class BaseComponents(Common):
 
     def selectGlobalProgramFilter(self, name: str) -> None:
         # TODO: remove this one after fix bug with cache
-        self.getMenuUserProfile().click()
-        self.getMenuItemClearCache().click()
+        # self.getMenuUserProfile().click()
+        # self.getMenuItemClearCache().click()
 
         self.getGlobalProgramFilter().click()
+        self.getGlobalProgramFilterSearchInput().clear()
+        self.getGlobalProgramFilterSearchInput().send_keys(Keys.CONTROL + "a")  # Select all (use COMMAND on Mac)
+        self.getGlobalProgramFilterSearchInput().send_keys(Keys.DELETE)
+        for _ in range(len(self.getGlobalProgramFilterSearchInput().get_attribute("value"))):  # type: ignore
+            self.getGlobalProgramFilterSearchInput().send_keys(Keys.BACKSPACE)
+        self.getGlobalProgramFilterSearchButton().click()
         if name != "All Programmes":
             self.getGlobalProgramFilterSearchInput().send_keys(name)
             self.getGlobalProgramFilterSearchButton().click()
-
             self.wait_for_text_disappear("All Programmes", '[data-cy="select-option-name"]')
+
         self.select_listbox_element(name)
 
     def getDrawerInactiveSubheader(self, timeout: int = Common.DEFAULT_TIMEOUT) -> WebElement:
@@ -206,7 +217,19 @@ class BaseComponents(Common):
 
     def waitForRows(self) -> [WebElement]:
         self.wait_for(self.rows)
+        WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, self.rows)))
         return self.get_elements(self.rows)
+
+    def waitForRowWithText(self, index: int, text: str) -> None:
+        import time
+
+        timeout = 10
+        start_time = time.time()
+        while time.time() - start_time < timeout:
+            time.sleep(0.01)
+            if text in self.wait_for(self.row_index_template.format(index + 1)).text:
+                return
+        assert text in self.wait_for(self.row_index_template.format(index + 1)).text
 
     def getRows(self) -> [WebElement]:
         return self.get_elements(self.rows)

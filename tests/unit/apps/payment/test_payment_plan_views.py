@@ -130,8 +130,8 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
 
         with CaptureQueriesContext(connection) as ctx:
             response = _test_list()
-
             etag = response.headers["etag"]
+
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
             assert len(ctx.captured_queries) == 26
 

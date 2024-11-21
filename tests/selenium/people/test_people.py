@@ -32,7 +32,7 @@ from tests.selenium.page_object.grievance.new_ticket import NewTicket
 from tests.selenium.page_object.people.people import People
 from tests.selenium.page_object.people.people_details import PeopleDetails
 
-pytestmark = pytest.mark.django_db(transaction=True)
+pytestmark = pytest.mark.django_db()
 
 
 @pytest.fixture

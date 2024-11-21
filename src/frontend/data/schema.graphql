@@ -258,7 +258,6 @@ type BankAccountInfoNode implements Node {
   bankAccountNumber: String!
   bankBranchName: String!
   accountHolderName: String!
-  isMigrationHandled: Boolean!
   copiedFrom: BankAccountInfoNode
   copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): BankAccountInfoNodeConnection!
   type: String
@@ -823,8 +822,6 @@ type CreateSurveyMutation {
 input CreateTargetPopulationInput {
   name: String!
   targetingCriteria: TargetingCriteriaObjectType!
-  businessAreaSlug: String!
-  programId: ID!
   programCycleId: ID!
   excludedIds: String!
   exclusionReason: String
@@ -953,30 +950,12 @@ type DeliveredQuantityNode {
   currency: String
 }
 
-enum DeliveryMechanismDataDeliveryMechanismChoice {
-  CARDLESS_CASH_WITHDRAWAL
-  CASH
-  CASH_BY_FSP
-  CHEQUE
-  DEPOSIT_TO_CARD
-  MOBILE_MONEY
-  PRE_PAID_CARD
-  REFERRAL
-  TRANSFER
-  TRANSFER_TO_ACCOUNT
-  VOUCHER
-  ATM_CARD
-  CASH_OVER_THE_COUNTER
-  TRANSFER_TO_DIGITAL_WALLET
-}
-
 type DeliveryMechanismDataNode implements Node {
   id: ID!
   rdiMergeStatus: DeliveryMechanismDataRdiMergeStatus!
   createdAt: DateTime!
   updatedAt: DateTime!
   individual: IndividualNode!
-  deliveryMechanismChoice: DeliveryMechanismDataDeliveryMechanismChoice
   deliveryMechanism: DeliveryMechanismNode!
   data: JSONString!
   isValid: Boolean
@@ -1047,23 +1026,6 @@ type DeliveryMechanismNodeEdge {
   cursor: String!
 }
 
-enum DeliveryMechanismPerPaymentPlanDeliveryMechanismChoice {
-  CARDLESS_CASH_WITHDRAWAL
-  CASH
-  CASH_BY_FSP
-  CHEQUE
-  DEPOSIT_TO_CARD
-  MOBILE_MONEY
-  PRE_PAID_CARD
-  REFERRAL
-  TRANSFER
-  TRANSFER_TO_ACCOUNT
-  VOUCHER
-  ATM_CARD
-  CASH_OVER_THE_COUNTER
-  TRANSFER_TO_DIGITAL_WALLET
-}
-
 type DeliveryMechanismPerPaymentPlanNode implements Node {
   id: ID!
   createdAt: DateTime!
@@ -1074,7 +1036,6 @@ type DeliveryMechanismPerPaymentPlanNode implements Node {
   sentDate: DateTime!
   sentBy: UserNode
   status: String!
-  deliveryMechanismChoice: DeliveryMechanismPerPaymentPlanDeliveryMechanismChoice
   deliveryMechanism: DeliveryMechanismNode
   deliveryMechanismOrder: Int!
   sentToPaymentGateway: Boolean!
@@ -3942,6 +3903,7 @@ type Query {
   chartGrievances(businessAreaSlug: String!, year: Int!, administrativeArea: String): ChartGrievanceTicketsNode
   allAddIndividualsFieldsAttributes: [FieldAttributeNode]
   allEditHouseholdFieldsAttributes: [FieldAttributeNode]
+  allEditPeopleFieldsAttributes: [FieldAttributeNode]
   grievanceTicketStatusChoices: [ChoiceObject]
   grievanceTicketCategoryChoices: [ChoiceObject]
   grievanceTicketManualCategoryChoices: [ChoiceObject]
@@ -3992,6 +3954,7 @@ type Query {
   businessArea(businessAreaSlug: String!): BusinessAreaNode
   allBusinessAreas(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, slug: String): BusinessAreaNodeConnection
   allFieldsAttributes(flexField: Boolean, businessAreaSlug: String, programId: String): [FieldAttributeNode]
+  allCollectorFieldsAttributes(flexField: Boolean): [FieldAttributeNode]
   allPduFields(businessAreaSlug: String!, programId: String!): [FieldAttributeNode]
   allGroupsWithFields: [GroupAttributeNode]
   koboProject(uid: String!, businessAreaSlug: String!): KoboAssetObject
@@ -4823,14 +4786,44 @@ enum TargetPopulationStatus {
   ASSIGNED
 }
 
+enum TargetingCollectorBlockRuleFilterFlexFieldClassification {
+  NOT_FLEX_FIELD
+  FLEX_FIELD_BASIC
+  FLEX_FIELD_PDU
+}
+
+type TargetingCollectorBlockRuleFilterNode {
+  id: UUID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  collectorBlockFilters: TargetingCollectorRuleFilterBlockNode!
+  fieldName: String!
+  comparisonMethod: String
+  flexFieldClassification: TargetingCollectorBlockRuleFilterFlexFieldClassification!
+  arguments: [Arg]
+  labelEn: String
+}
+
+type TargetingCollectorRuleFilterBlockNode {
+  id: UUID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  targetingCriteriaRule: TargetingCriteriaRuleNode!
+  collectorBlockFilters: [TargetingCollectorBlockRuleFilterNode]
+}
+
+input TargetingCollectorRuleFilterBlockObjectType {
+  collectorBlockFilters: [TargetingCriteriaRuleFilterObjectType]
+}
+
 type TargetingCriteriaNode {
   id: UUID!
   createdAt: DateTime!
   updatedAt: DateTime!
   flagExcludeIfActiveAdjudicationTicket: Boolean!
   flagExcludeIfOnSanctionList: Boolean!
-  householdIds: String!
-  individualIds: String!
+  householdIds: String
+  individualIds: String
   targetPopulation: TargetPopulationNode
   rules: [TargetingCriteriaRuleNode]
 }
@@ -4839,8 +4832,6 @@ input TargetingCriteriaObjectType {
   rules: [TargetingCriteriaRuleObjectType]
   flagExcludeIfActiveAdjudicationTicket: Boolean
   flagExcludeIfOnSanctionList: Boolean
-  householdIds: String
-  individualIds: String
 }
 
 enum TargetingCriteriaRuleFilterComparisonMethod {
@@ -4887,13 +4878,19 @@ type TargetingCriteriaRuleNode {
   createdAt: DateTime!
   updatedAt: DateTime!
   targetingCriteria: TargetingCriteriaNode!
+  householdIds: String!
+  individualIds: String!
   individualsFiltersBlocks: [TargetingIndividualRuleFilterBlockNode]
-  filters: [TargetingCriteriaRuleFilterNode]
+  collectorsFiltersBlocks: [TargetingCollectorRuleFilterBlockNode!]!
+  householdsFiltersBlocks: [TargetingCriteriaRuleFilterNode]
 }
 
 input TargetingCriteriaRuleObjectType {
-  filters: [TargetingCriteriaRuleFilterObjectType]
+  householdsFiltersBlocks: [TargetingCriteriaRuleFilterObjectType]
+  householdIds: String
   individualsFiltersBlocks: [TargetingIndividualRuleFilterBlockObjectType]
+  individualIds: String
+  collectorsFiltersBlocks: [TargetingCollectorRuleFilterBlockObjectType]
 }
 
 enum TargetingIndividualBlockRuleFilterComparisonMethod {
@@ -5415,7 +5412,6 @@ input UpdateTargetPopulationInput {
   id: ID!
   name: String
   targetingCriteria: TargetingCriteriaObjectType
-  programId: ID
   programCycleId: ID
   vulnerabilityScoreMin: Decimal
   vulnerabilityScoreMax: Decimal

@@ -48,7 +48,7 @@ export function TargetingCriteriaHouseholdFilter({
   choicesDict;
 }): ReactElement {
   const { t } = useTranslation();
-  const shouldShowDivider = index + 1 < values.filters.length;
+  const shouldShowDivider = index + 1 < values.householdsFiltersBlocks.length;
   return (
     <div>
       <FieldChooser
@@ -58,14 +58,14 @@ export function TargetingCriteriaHouseholdFilter({
         onChange={onChange}
         showDelete
         onDelete={onClick}
-        baseName={`filters[${index}]`}
+        baseName={`householdsFiltersBlocks[${index}]`}
       />
       {each.fieldName && (
         <div data-cy="autocomplete-target-criteria-values">
           <SubField
             field={each}
             index={index}
-            baseName={`filters[${index}]`}
+            baseName={`householdsFiltersBlocks[${index}]`}
             choicesDict={choicesDict}
           />
         </div>

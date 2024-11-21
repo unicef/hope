@@ -8,12 +8,21 @@ from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.household.fixtures import create_household
+from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
+from hct_mis_api.apps.payment.fixtures import (
+    DeliveryMechanismDataFactory,
+    DeliveryMechanismFactory,
+)
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.models import (
+    TargetingCollectorBlockRuleFilter,
+    TargetingCollectorRuleFilterBlock,
     TargetingCriteria,
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
+    TargetingIndividualBlockRuleFilter,
+    TargetingIndividualRuleFilterBlock,
     TargetPopulation,
 )
 
@@ -29,11 +38,17 @@ class TestCopyTargetPopulationMutation(APITestCase):
                     totalIndividualsCount
                     targetingCriteria{
                       rules{
-                        filters{
+                        householdsFiltersBlocks{
                           comparisonMethod
                           fieldName
                           flexFieldClassification
                           arguments
+                        }
+                        collectorsFiltersBlocks {
+                          collectorBlockFilters {
+                            fieldName
+                            arguments
+                          }
                         }
                       }
                       householdIds
@@ -82,13 +97,40 @@ class TestCopyTargetPopulationMutation(APITestCase):
             program=cls.program,
             program_cycle=cls.cycle,
         )
-
-        tp.targeting_criteria = cls.get_targeting_criteria_for_rule(
+        targeting_criteria = cls.get_targeting_criteria_for_rule(
             {"field_name": "size", "arguments": [1], "comparison_method": "EQUALS"}
         )
+        tcr: TargetingCriteriaRule = targeting_criteria.rules.first()
+        tp.targeting_criteria = targeting_criteria
         tp.save()
         tp.households.add(cls.household)
         cls.target_population = tp
+
+        # add ind filter
+        ind_block = TargetingIndividualRuleFilterBlock.objects.create(targeting_criteria_rule=tcr)
+        TargetingIndividualBlockRuleFilter.objects.create(
+            individuals_filters_block=ind_block,
+            comparison_method="RANGE",
+            field_name="pdu_field_test",
+            arguments=["1", "2"],
+        )
+
+        # add collector filter
+        DeliveryMechanismFactory(
+            required_fields=["delivery_data_field__random_name"],
+        )
+        collector = IndividualRoleInHousehold.objects.get(household_id=cls.household.pk, role=ROLE_PRIMARY).individual
+        DeliveryMechanismDataFactory(
+            individual=collector, is_valid=True, data={"delivery_data_field__random_name": "Name"}
+        )
+        col_block = TargetingCollectorRuleFilterBlock.objects.create(targeting_criteria_rule=tcr)
+        TargetingCollectorBlockRuleFilter.objects.create(
+            collector_block_filters=col_block,
+            comparison_method="EQUALS",
+            field_name="delivery_data_field__random_name",
+            arguments=[True],
+        )
+
         cls.empty_target_population_1 = TargetPopulation(
             name="emptyTargetPopulation1",
             status="LOCKED",
@@ -190,6 +232,8 @@ class TestCopyTargetPopulationMutation(APITestCase):
             )
             rule_copy = target_population_copy.targeting_criteria.rules.first()
             rule = self.target_population.targeting_criteria.rules.first()
+            rule_copy.refresh_from_db()
+            rule.refresh_from_db()
             self.assertNotEqual(
                 rule_copy.id,
                 rule.id,
