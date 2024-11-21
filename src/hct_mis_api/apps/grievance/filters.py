@@ -175,6 +175,17 @@ class GrievanceTicketFilter(FilterSet):
             query |= Q(unicef_id__in=values)
         else:
             query |= Q(unicef_id__icontains=search)
+            if search.startswith("HH-"):
+                return qs.filter(household_unicef_id__istartswith=search)
+            if search.startswith("IND-"):
+                household_unicef_ids = (
+                    Individual.objects.filter(unicef_id__istartswith=search)
+                    .distinct("household__unicef_id")
+                    .values_list("household__unicef_id", flat=True)
+                )
+                return qs.filter(household_unicef_id__in=household_unicef_ids)
+            if search.startswith("GRV-"):
+                return qs.filter(unicef_id__istartswith=search)
 
         query |= Q(household_unicef_id__icontains=search)
         unicef_ids = (

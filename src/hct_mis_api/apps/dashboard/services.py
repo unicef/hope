@@ -81,7 +81,8 @@ class DashboardDataCache:
                     "financial_service_provider",
                     "delivery_type",
                 )
-                .filter(business_area=area, household__is_removed=False)
+                .filter(business_area=area, household__is_removed=False, parent__status__in=["ACCEPTED", "FINISHED"])
+                .exclude(status__in=["Transaction Erroneous", "Not Distributed", "Force failed", "Manually Cancelled"])
                 .annotate(
                     year=ExtractYear(Coalesce("delivery_date", "entitlement_date", "status_date")),
                     month=ExtractMonth(Coalesce("delivery_date", "entitlement_date", "status_date")),
@@ -125,6 +126,7 @@ class DashboardDataCache:
                     "business_area", "household", "program", "household__admin1", "service_provider", "delivery_type"
                 )
                 .filter(business_area=area, household__is_removed=False)
+                .exclude(status__in=["Transaction Erroneous", "Not Distributed", "Force failed", "Manually Cancelled"])
                 .annotate(
                     year=ExtractYear(Coalesce("delivery_date", "status_date")),
                     month=ExtractMonth(Coalesce("delivery_date", "status_date")),

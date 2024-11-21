@@ -64,7 +64,6 @@ export function GrievancesSidebar({
         isProperDataChange = false;
       }
     }
-
     return (
       (isHeadOfHousehold || hasRolesToReassign) &&
       isProperDataChange &&
