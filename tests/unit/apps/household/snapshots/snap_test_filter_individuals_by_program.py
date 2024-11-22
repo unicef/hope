@@ -56,3 +56,102 @@ snapshots['TestFilterIndividualsByProgram::test_individual_query_all_1_without_p
         }
     ]
 }
+
+snapshots['TestFilterIndividualsByProgram::test_individual_query_filter_by_duplicates_only 1'] = {
+    'data': {
+        'allIndividuals': {
+            'edges': [
+                {
+                    'node': {
+                        'deduplicationGoldenRecordStatus': 'UNIQUE',
+                        'program': {
+                            'name': 'Test program ONE'
+                        }
+                    }
+                },
+                {
+                    'node': {
+                        'deduplicationGoldenRecordStatus': 'UNIQUE',
+                        'program': {
+                            'name': 'Test program ONE'
+                        }
+                    }
+                },
+                {
+                    'node': {
+                        'deduplicationGoldenRecordStatus': 'UNIQUE',
+                        'program': {
+                            'name': 'Test program ONE'
+                        }
+                    }
+                },
+                {
+                    'node': {
+                        'deduplicationGoldenRecordStatus': 'UNIQUE',
+                        'program': {
+                            'name': 'Test program ONE'
+                        }
+                    }
+                },
+                {
+                    'node': {
+                        'deduplicationGoldenRecordStatus': 'UNIQUE',
+                        'program': {
+                            'name': 'Test program ONE'
+                        }
+                    }
+                },
+                {
+                    'node': {
+                        'deduplicationGoldenRecordStatus': 'UNIQUE',
+                        'program': {
+                            'name': 'Test program ONE'
+                        }
+                    }
+                },
+                {
+                    'node': {
+                        'deduplicationGoldenRecordStatus': 'UNIQUE',
+                        'program': {
+                            'name': 'Test program ONE'
+                        }
+                    }
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestFilterIndividualsByProgram::test_individual_query_filter_by_duplicates_only 2'] = {
+    'data': {
+        'allIndividuals': {
+            'edges': [
+                {
+                    'node': {
+                        'deduplicationGoldenRecordStatus': 'DUPLICATE',
+                        'program': {
+                            'name': 'Test program ONE'
+                        }
+                    }
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestFilterIndividualsByProgram::test_individual_query_rdi_id 1'] = {
+    'data': {
+        'allIndividuals': {
+            'edges': [
+                {
+                    'node': {
+                        'fullName': 'TEST User',
+                        'program': {
+                            'name': 'Test program ONE'
+                        }
+                    }
+                }
+            ]
+        }
+    }
+}
