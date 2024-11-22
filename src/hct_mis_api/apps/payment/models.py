@@ -706,19 +706,14 @@ class PaymentPlan(
             UniqueConstraint(
                 fields=["name", "program", "is_removed"], condition=Q(is_removed=False), name="name_unique_per_program"
             ),
-            models.CheckConstraint(
-                check=Q(steficon_rule_targeting__rule__type=Rule.TYPE_TARGETING)
-                | Q(steficon_rule_targeting__isnull=True),
-                name="check_steficon_rule_targeting_type_tp_level",
-            ),
-            models.CheckConstraint(
-                check=Q(steficon_rule__rule__type=Rule.TYPE_PAYMENT_PLAN) | Q(steficon_rule__isnull=True),
-                name="check_steficon_rule_targeting_type_pp_level",
-            ),
         ]
 
     def __str__(self) -> str:
         return self.unicef_id or ""
+
+    def save(self, *args: Any, **kwargs: Any) -> None:
+        self.full_clean()  # Calls `clean` and performs validation
+        super().save(*args, **kwargs)
 
     def clean(self) -> None:
         super().clean()
@@ -726,7 +721,6 @@ class PaymentPlan(
             raise ValidationError(
                 f"The selected RuleCommit must be associated with a Rule of type {Rule.TYPE_TARGETING}."
             )
-
         if self.steficon_rule and self.steficon_rule.rule.type != Rule.TYPE_PAYMENT_PLAN:
             raise ValidationError(
                 f"The selected RuleCommit must be associated with a Rule of type {Rule.TYPE_PAYMENT_PLAN}."
