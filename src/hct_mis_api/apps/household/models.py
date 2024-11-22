@@ -504,7 +504,9 @@ class Household(
     org_name_enumerator = models.CharField(max_length=250, blank=True, default=BLANK)
     village = models.CharField(max_length=250, blank=True, default=BLANK)
     registration_method = models.CharField(max_length=250, choices=REGISTRATION_METHOD_CHOICES, default=BLANK)
-    collect_individual_data = models.CharField(max_length=250, choices=COLLECT_TYPES, default=COLLECT_TYPE_UNKNOWN)
+    collect_individual_data = models.CharField(
+        max_length=250, choices=COLLECT_TYPES, default=COLLECT_TYPE_UNKNOWN
+    )  # TODO remove
     currency = models.CharField(max_length=250, choices=CURRENCY_CHOICES, default=BLANK)
     unhcr_id = models.CharField(max_length=250, blank=True, default=BLANK, db_index=True)
     user_fields = JSONField(default=dict, blank=True)
@@ -1093,6 +1095,7 @@ class Individual(
             "given_name",
             "middle_name",
             "family_name",
+            "full_name",
             "sex",
             "birth_date",
             "phone_no",
@@ -1315,11 +1318,10 @@ class BankAccountInfo(SoftDeletableRepresentationMergeStatusModelWithDate, TimeS
         on_delete=models.CASCADE,
     )
     bank_name = models.CharField(max_length=255)
-    bank_account_number = models.CharField(max_length=64)
-    debit_card_number = models.CharField(max_length=255, blank=True, default="")
+    bank_account_number = models.CharField(max_length=64, db_index=True)
+    debit_card_number = models.CharField(max_length=255, blank=True, default="", db_index=True)
     bank_branch_name = models.CharField(max_length=255, blank=True, default="")
     account_holder_name = models.CharField(max_length=255, blank=True, default="")
-    is_migration_handled = models.BooleanField(default=False)
     copied_from = models.ForeignKey(
         "self",
         null=True,

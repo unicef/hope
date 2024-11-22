@@ -1,3 +1,41 @@
+import * as Yup from 'yup';
+
+export const HhIndIdValidation = Yup.string().test(
+  'testName',
+  'ID is not in the correct format',
+  (ids) => {
+    if (!ids?.length) {
+      return true;
+    }
+    const idsArr = ids.split(',');
+    return idsArr.every((el) => /^\s*(IND|HH)-\d{2}-\d{4}\.\d{4}\s*$/.test(el));
+  },
+);
+
+export const HhIdValidation = Yup.string().test(
+  'testName',
+  'Household ID is not in the correct format',
+  (ids) => {
+    if (!ids?.length) {
+      return true;
+    }
+    const idsArr = ids.split(',');
+    return idsArr.every((el) => /^\s*(HH)-\d{2}-\d{4}\.\d{4}\s*$/.test(el));
+  },
+);
+
+export const IndIdValidation = Yup.string().test(
+  'testName',
+  'Individual ID is not in the correct format',
+  (ids) => {
+    if (!ids?.length) {
+      return true;
+    }
+    const idsArr = ids.split(',');
+    return idsArr.every((el) => /^\s*(IND)-\d{2}-\d{4}\.\d{4}\s*$/.test(el));
+  },
+);
+
 export const chooseFieldType = (fieldValue, arrayHelpers, index): void => {
   let flexFieldClassification;
   if (fieldValue.isFlexField === false) {
@@ -82,7 +120,9 @@ export function mapFiltersToInitialValues(filters): any[] {
           return mappedFilters.push({
             ...each,
             value:
-              each.fieldAttribute.type === 'BOOL' ||
+              each.fieldAttribute?.type === 'BOOL' ||
+              each?.type === 'BOOL' ||
+              each?.fieldAttribute?.pduData?.subtype === 'BOOL' ||
               each.fieldAttribute?.pduData?.subtype
                 ? each.arguments[0]
                   ? 'Yes'
@@ -130,17 +170,35 @@ function mapBlockFilters(blocks, blockKey) {
 }
 
 export function mapCriteriaToInitialValues(criteria) {
-  const filters = criteria.filters || [];
+  console.log('criteria', criteria);
+  const individualIds = criteria.individualIds || '';
+  const householdIds = criteria.householdIds || '';
+  const householdsFiltersBlocks = criteria.householdsFiltersBlocks || [];
   const individualsFiltersBlocks = criteria.individualsFiltersBlocks || [];
   const collectorsFiltersBlocks = criteria.collectorsFiltersBlocks || [];
+
+  const adjustedCollectorsFiltersBlocks = collectorsFiltersBlocks.map(
+    (block) => ({
+      ...block,
+      collectorBlockFilters: block.collectorBlockFilters.map((filter) => ({
+        ...filter,
+        arguments: filter.arguments.map((arg) =>
+          arg === true ? 'Yes' : arg === false ? 'No' : arg,
+        ),
+      })),
+    }),
+  );
+
   return {
-    filters: mapFiltersToInitialValues(filters),
+    individualIds,
+    householdIds,
+    householdsFiltersBlocks: mapFiltersToInitialValues(householdsFiltersBlocks),
     individualsFiltersBlocks: mapBlockFilters(
       individualsFiltersBlocks,
       'individual',
     ),
     collectorsFiltersBlocks: mapBlockFilters(
-      collectorsFiltersBlocks,
+      adjustedCollectorsFiltersBlocks,
       'collector',
     ),
   };
@@ -152,7 +210,8 @@ export function formatCriteriaFilters(filters) {
   return filters.map((each) => {
     let comparisonMethod;
     let values;
-    switch (each.fieldAttribute.type) {
+    console.log('each', each);
+    switch (each?.fieldAttribute?.type || each?.type) {
       case 'SELECT_ONE':
         comparisonMethod = 'EQUALS';
         values = [each.value];
@@ -163,6 +222,9 @@ export function formatCriteriaFilters(filters) {
         break;
       case 'STRING':
         comparisonMethod = 'CONTAINS';
+        if (each.associatedWith === 'DeliveryMechanismData') {
+          comparisonMethod = 'EQUALS';
+        }
         values = [each.value];
         break;
       case 'DECIMAL':
@@ -248,6 +310,12 @@ export function formatCriteriaIndividualsFiltersBlocks(
   }));
 }
 
+export function formatCriteriaCollectorsFiltersBlocks(collectorsFiltersBlocks) {
+  return collectorsFiltersBlocks.map((block) => ({
+    collectorBlockFilters: formatCriteriaFilters(block.collectorBlockFilters),
+  }));
+}
+
 interface Filter {
   isNull: boolean;
   comparisonMethod: string;
@@ -255,6 +323,7 @@ interface Filter {
   fieldName: string;
   flexFieldClassification: string;
   roundNumber?: number;
+  associatedWith: string;
 }
 
 interface Result {
@@ -266,13 +335,19 @@ interface Result {
 }
 
 function mapFilterToVariable(filter: Filter): Result {
-  const result: Result = {
-    comparisonMethod: filter.isNull ? 'IS_NULL' : filter.comparisonMethod,
-    arguments: filter.isNull
+  let preparedArguments = [];
+  if (filter?.associatedWith === 'DeliveryMechanismData') {
+    preparedArguments = filter.isNull ? [null] : filter.arguments;
+  } else {
+    preparedArguments = filter.isNull
       ? [null]
       : filter.arguments.map((arg) =>
           arg === 'Yes' ? true : arg === 'No' ? false : arg,
-        ),
+        );
+  }
+  const result: Result = {
+    comparisonMethod: filter.isNull ? 'IS_NULL' : filter.comparisonMethod,
+    arguments: preparedArguments,
     fieldName: filter.fieldName,
     flexFieldClassification: filter.flexFieldClassification,
   };
@@ -289,23 +364,26 @@ function mapFilterToVariable(filter: Filter): Result {
 export function getTargetingCriteriaVariables(values) {
   return {
     targetingCriteria: {
-      householdIds: values.householdIds,
-      individualIds: values.individualIds,
       flagExcludeIfActiveAdjudicationTicket:
         values.flagExcludeIfActiveAdjudicationTicket,
       flagExcludeIfOnSanctionList: values.flagExcludeIfOnSanctionList,
-      rules: values.criterias.map((rule) => ({
-        filters: rule.filters.map(mapFilterToVariable),
-        individualsFiltersBlocks: rule.individualsFiltersBlocks.map(
+      rules: values.criterias.map((criteria) => ({
+        individualIds: criteria.individualIds,
+        householdIds: criteria.householdIds,
+        householdsFiltersBlocks:
+          criteria.householdsFiltersBlocks.map(mapFilterToVariable),
+        individualsFiltersBlocks: criteria.individualsFiltersBlocks.map(
           (block) => ({
             individualBlockFilters:
               block.individualBlockFilters.map(mapFilterToVariable),
           }),
         ),
-        collectorsFiltersBlocks: rule.collectorsFiltersBlocks.map((block) => ({
-          collectorsFiltersBlocks:
-            block.collectorsFiltersBlocks.map(mapFilterToVariable),
-        })),
+        collectorsFiltersBlocks: criteria.collectorsFiltersBlocks.map(
+          (block) => ({
+            collectorBlockFilters:
+              block.collectorBlockFilters.map(mapFilterToVariable),
+          }),
+        ),
       })),
     },
   };

@@ -29,6 +29,7 @@ class PaymentRecord(BaseComponents):
     labelFsp = 'div[data-cy="label-FSP"]'
     buttonSubmit = 'button[data-cy="button-submit"]'
     inputReceivedamount = 'input[data-cy="input-receivedAmount"]'
+    choiceNotReceived = '[data-cy="choice-not-received"]'
 
     def getInputReceivedamount(self) -> WebElement:
         return self.wait_for(self.inputReceivedamount)
@@ -52,8 +53,15 @@ class PaymentRecord(BaseComponents):
     def getLabelStatus(self) -> [WebElement]:
         return self.get_elements(self.labelStatus)
 
+    def getStatus(self) -> [WebElement]:
+        self.wait_for(self.statusContainer)
+        return self.get_elements(self.statusContainer)
+
     def getStatusContainer(self) -> WebElement:
         return self.wait_for(self.statusContainer)
+
+    def waitForStatusContainer(self, status: str, timeout: int = 20) -> []:
+        return self.wait_for_text(status, self.statusContainer, timeout=timeout)
 
     def getLabelHousehold(self) -> WebElement:
         return self.wait_for(self.labelHousehold)
@@ -111,3 +119,6 @@ class PaymentRecord(BaseComponents):
 
     def getButtonSubmit(self) -> WebElement:
         return self.wait_for(self.buttonSubmit)
+
+    def getChoiceNotReceived(self) -> WebElement:
+        return self.wait_for(self.choiceNotReceived)

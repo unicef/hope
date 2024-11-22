@@ -25,7 +25,6 @@ from hct_mis_api.apps.core.views import (
     schema,
     trigger_error,
 )
-from hct_mis_api.apps.utils.cypress import get_cypress_xlsx_file, handle_cypress_command
 from hct_mis_api.apps.web.views import react_main
 
 # register all adminactions
@@ -102,10 +101,6 @@ api_patterns = [
 
 if settings.PROFILING:
     api_patterns.append(path("silk/", include("silk.urls", namespace="silk")))
-
-if settings.CYPRESS_TESTING:
-    api_patterns.append(path("cypress/", handle_cypress_command))
-    api_patterns.append(path("cypress/xlsx/<int:seed>/", get_cypress_xlsx_file))
 
 urlpatterns = (
     [

@@ -28,6 +28,8 @@ from hct_mis_api.apps.household.models import (
     PendingHousehold,
     PendingIndividual,
 )
+from hct_mis_api.apps.payment.fixtures import generate_delivery_mechanisms
+from hct_mis_api.apps.payment.models import PendingDeliveryMechanismData
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import ImportData, RegistrationDataImport
@@ -99,6 +101,7 @@ class TestRdiKoboCreateTask(TestCase):
             number_of_households=33,
         )
         rebuild_search_index()
+        generate_delivery_mechanisms()
 
     @mock.patch(
         "hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
@@ -160,6 +163,19 @@ class TestRdiKoboCreateTask(TestCase):
         self.assertEqual(pending_household.detail_id, "aPkhoRMrkkDwgsvWuwi39s")
         self.assertEqual(str(pending_household.kobo_submission_uuid), "c09130af-6c9c-4dba-8c7f-1b2ff1970d19")
         self.assertEqual(pending_household.kobo_submission_time.isoformat(), "2020-06-03T13:05:10+00:00")
+
+        self.assertEqual(PendingDeliveryMechanismData.objects.count(), 2)
+        dmd = PendingDeliveryMechanismData.objects.get(individual__full_name="Tesa Testowski")
+        self.assertEqual(dmd.delivery_mechanism.code, "mobile_money")
+        self.assertEqual(
+            json.loads(dmd.data),
+            {
+                "service_provider_code__mobile_money": "ABC",
+                "delivery_phone_number__mobile_money": "+48880110456",
+                "provider__mobile_money": "SIGMA",
+            },
+        )
+        self.assertEqual(dmd.individual.full_name, "Tesa Testowski")
 
     @mock.patch(
         "hct_mis_api.apps.registration_datahub.tasks.rdi_kobo_create.KoboAPI.get_attached_file",
@@ -579,6 +595,8 @@ class TestRdiKoboCreateTask(TestCase):
             households_to_create,
             individuals_ids_hash_dict,
             submission_meta_data,
+            [],
+            1,
         )
         hh = households_to_create[0]
 

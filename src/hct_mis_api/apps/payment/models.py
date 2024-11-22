@@ -468,8 +468,8 @@ class PaymentPlan(
         "program_cycle": "program_cycle",
         "targeting_criteria": "targeting_criteria",
         "sent_to_datahub": "internal_data__sent_to_datahub",
-        "steficon_rule": "steficon_rule",
-        "steficon_applied_date": "steficon_applied_date",
+        "steficon_rule": "steficon_rule_targeting",
+        "steficon_applied_date": "steficon_targeting_applied_date",
         "vulnerability_score_min": "vulnerability_score_min",
         "vulnerability_score_max": "vulnerability_score_max",
         "excluded_ids": "excluded_ids",
@@ -637,6 +637,14 @@ class PaymentPlan(
         blank=True,
     )
     steficon_applied_date = models.DateTimeField(blank=True, null=True)
+    steficon_rule_targeting = models.ForeignKey(
+        RuleCommit,
+        null=True,
+        on_delete=models.PROTECT,
+        related_name="payment_plans",
+        blank=True,
+    )
+    steficon_targeting_applied_date = models.DateTimeField(blank=True, null=True)
     payment_verification_summary = GenericRelation(
         "payment.PaymentVerificationSummary",
         content_type_field="payment_plan_content_type",
@@ -653,7 +661,7 @@ class PaymentPlan(
         "self", null=True, blank=True, on_delete=models.CASCADE, related_name="follow_ups"
     )
     is_follow_up = models.BooleanField(default=False)
-    excluded_ids = models.TextField(blank=True)
+    excluded_ids = models.TextField(blank=True, help_text="Targeting level exclusion")
     exclusion_reason = models.TextField(blank=True)
     exclude_household_error = models.TextField(blank=True)
     name = models.CharField(
@@ -726,8 +734,7 @@ class PaymentPlan(
         return beneficiaries_ids
 
     @property
-    def excluded_household_ids(self) -> List:
-        # TODO: moved from TP, maybe remove because we have excluded_beneficiaries_ids()
+    def excluded_household_ids_targeting_level(self) -> List:
         return map_unicef_ids_to_households_unicef_ids(self.excluded_ids)
 
     def get_criteria_string(self) -> str:
@@ -1351,7 +1358,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
 
             if main_key in {"admin1_id", "admin2_id", "admin3_id", "admin4_id", "admin_area_id"}:
                 area = Area.objects.filter(pk=household_data.get(main_key)).first()
-                return area.p_code if area else None
+                return f"{area.p_code} - {area.name}" if area else "" if area else None
 
             if main_key == "roles":
                 lookup_id = primary_collector.get("id") or alternate_collector.get("id")
@@ -1526,9 +1533,6 @@ class FspXlsxTemplatePerDeliveryMechanism(TimeStampedUUIDModel):
     financial_service_provider = models.ForeignKey(
         "FinancialServiceProvider", on_delete=models.CASCADE, related_name="fsp_xlsx_template_per_delivery_mechanisms"
     )
-    delivery_mechanism_choice = models.CharField(
-        max_length=255, verbose_name=_("Delivery Mechanism"), choices=DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES
-    )  # TODO MB drop later
     delivery_mechanism = models.ForeignKey("DeliveryMechanism", on_delete=models.SET_NULL, null=True)
     xlsx_template = models.ForeignKey(
         "FinancialServiceProviderXlsxTemplate",
@@ -1671,9 +1675,6 @@ class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
         null=True,
     )
     status = FSMField(default=Status.NOT_SENT, protected=False, db_index=True)
-    delivery_mechanism_choice = models.CharField(
-        max_length=255, choices=DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES, db_index=True, null=True
-    )  # TODO MB drop later
     delivery_mechanism = models.ForeignKey("DeliveryMechanism", on_delete=models.SET_NULL, null=True)
     delivery_mechanism_order = models.PositiveIntegerField()
 
@@ -2428,13 +2429,6 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
     individual = models.ForeignKey(
         "household.Individual", on_delete=models.CASCADE, related_name="delivery_mechanisms_data"
     )
-    delivery_mechanism_choice = models.CharField(
-        max_length=255,
-        verbose_name=_("Delivery Mechanism"),
-        choices=DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES,
-        null=True,
-        blank=True,
-    )  # TODO MB drop later
     delivery_mechanism = models.ForeignKey("DeliveryMechanism", on_delete=models.PROTECT)
     data = JSONField(default=dict, blank=True)
 
@@ -2523,7 +2517,6 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
 
             unique_key = sha256.hexdigest()
             possible_duplicates = self.__class__.all_objects.filter(
-                rdi_merge_status=MergeStatusModel.MERGED,
                 is_valid=True,
                 unique_key__isnull=False,
                 unique_key=unique_key,

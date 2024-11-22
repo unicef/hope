@@ -12,7 +12,6 @@ from hct_mis_api.apps.registration_datahub.apis.deduplication_engine import (
     DeduplicationEngineAPI,
     DeduplicationImage,
     DeduplicationSet,
-    DeduplicationSetConfig,
     IgnoredFilenamesPair,
 )
 
@@ -48,7 +47,6 @@ class DeduplicationEngineApiTest(TestCase):
         deduplication_set = DeduplicationSet(
             reference_pk=str(uuid.uuid4()),
             notification_url="http://test.com",
-            config=DeduplicationSetConfig(face_distance_threshold=0.5),
         )
         mock_post.return_value = {}, 200
 

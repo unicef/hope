@@ -48,13 +48,15 @@ export function PaymentGrievanceDetails({
   const { showMessage } = useSnackbar();
   const [mutate] = useApprovePaymentDetailsMutation();
   const confirm = useConfirmation();
-  const {
-    approveStatus,
-    oldReceivedAmount,
-    newReceivedAmount,
-    paymentVerification: { receivedAmount },
-  } = ticket.paymentVerificationTicketDetails;
 
+  const approveStatus = ticket.paymentVerificationTicketDetails?.approveStatus;
+  const oldReceivedAmount =
+    ticket.paymentVerificationTicketDetails?.oldReceivedAmount;
+  const newReceivedAmount =
+    ticket.paymentVerificationTicketDetails?.newReceivedAmount;
+  const receivedAmount =
+    ticket.paymentVerificationTicketDetails?.paymentVerification
+      ?.receivedAmount;
   const deliveredQuantity = ticket.paymentRecord?.deliveredQuantity;
   const entitlementQuantity = ticket.paymentRecord?.entitlementQuantity;
 
@@ -74,6 +76,7 @@ export function PaymentGrievanceDetails({
           {canApprovePaymentVerification &&
           ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL ? (
             <Button
+              data-cy="grievance-approve"
               onClick={() =>
                 confirm({
                   title: t('Approve'),

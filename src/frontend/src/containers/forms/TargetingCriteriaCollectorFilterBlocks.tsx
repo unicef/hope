@@ -5,7 +5,7 @@ import { Fragment, ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { chooseFieldType, clearField } from '@utils/targetingUtils';
-import { ImportedIndividualFieldsQuery } from '@generated/graphql';
+import { AllCollectorFieldsAttributesQuery } from '@generated/graphql';
 import { TargetingCriteriaCollectorBlockFilter } from './TargetingCriteriaCollectorBlockFilter';
 
 const Divider = styled.div`
@@ -76,7 +76,7 @@ export const TargetingCriteriaCollectorFilterBlocks = ({
   onDelete,
 }: {
   blockIndex: number;
-  data: ImportedIndividualFieldsQuery;
+  data: AllCollectorFieldsAttributesQuery;
   values;
   choicesToDict;
   onDelete: () => void;
@@ -84,14 +84,14 @@ export const TargetingCriteriaCollectorFilterBlocks = ({
   const { t } = useTranslation();
   const shouldShowAndDivider =
     blockIndex + 1 < values.collectorsFiltersBlocks.length;
+
   return (
-    <div>
-      Set Individual Criteria
+    <div data-cy="collectors-filters-block">
       <FieldArray
         name={`collectorsFiltersBlocks[${blockIndex}].collectorBlockFilters`}
         render={(arrayHelpers) => (
           <div>
-            <GrayFiltersBlock>
+            <GrayFiltersBlock data-cy="gray-filters-block">
               {values.collectorsFiltersBlocks[
                 blockIndex
               ].collectorBlockFilters.map((each, index) => {
@@ -101,14 +101,14 @@ export const TargetingCriteriaCollectorFilterBlocks = ({
                     .collectorBlockFilters.length;
                 return (
                   <Fragment key={blockIndex + index.toString()}>
-                    <FilterWrapper>
+                    <FilterWrapper data-cy="filter-wrapper">
                       <TargetingCriteriaCollectorBlockFilter
                         blockIndex={blockIndex}
                         index={index}
                         data={data}
                         each={each}
                         choicesDict={choicesToDict}
-                        onChange={(e, object) => {
+                        onChange={(_e, object) => {
                           if (object) {
                             return chooseFieldType(object, arrayHelpers, index);
                           }
@@ -124,11 +124,12 @@ export const TargetingCriteriaCollectorFilterBlocks = ({
                           }
                           arrayHelpers.remove(index);
                         }}
+                        data-cy="collector-block-filter"
                       />
                     </FilterWrapper>
                     {shouldShowDivider && (
-                      <Divider>
-                        <DividerLabel>+</DividerLabel>
+                      <Divider data-cy="divider">
+                        <DividerLabel data-cy="divider-label">+</DividerLabel>
                       </Divider>
                     )}
                   </Fragment>
@@ -149,6 +150,7 @@ export const TargetingCriteriaCollectorFilterBlocks = ({
                     top: 18,
                     backgroundColor: '#fff',
                   }}
+                  data-cy="add-next-rule-button"
                 >
                   {t('Add Next Rule')}
                 </Button>
@@ -158,8 +160,10 @@ export const TargetingCriteriaCollectorFilterBlocks = ({
         )}
       />
       {shouldShowAndDivider && (
-        <AndDivider>
-          <AndDividerLabel>{t('And')}</AndDividerLabel>
+        <AndDivider data-cy="and-divider">
+          <AndDividerLabel data-cy="and-divider-label">
+            {t('And')}
+          </AndDividerLabel>
         </AndDivider>
       )}
     </div>

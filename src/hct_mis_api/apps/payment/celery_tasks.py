@@ -687,18 +687,17 @@ def payment_plan_apply_steficon_hh_selection(self: Any, payment_plan_id: str, en
     set_sentry_business_area_tag(payment_plan.business_area.name)
     engine_rule = get_object_or_404(Rule, id=engine_rule_id)
     rule: Optional["RuleCommit"] = engine_rule.latest
-    if rule.id != payment_plan.steficon_rule_id:
-        payment_plan.steficon_rule = rule
-        payment_plan.save(update_fields=["steficon_rule"])
-
+    if rule.id != payment_plan.steficon_rule_targeting_id:
+        payment_plan.steficon_rule_targeting = rule
+        payment_plan.save(update_fields=["steficon_rule_targeting"])
     try:
         payment_plan.status = PaymentPlan.Status.TP_STEFICON_RUN
-        payment_plan.steficon_applied_date = timezone.now()
-        payment_plan.save(update_fields=["status", "steficon_applied_date"])
+        payment_plan.steficon_targeting_applied_date = timezone.now()
+        payment_plan.save(update_fields=["status", "steficon_targeting_applied_date"])
         updates = []
         with transaction.atomic():
             payment: Payment
-            for payment in payment_plan.eligible_payments:
+            for payment in payment_plan.payment_items.all():
                 result = rule.execute(
                     {
                         "household": payment.household,
@@ -709,14 +708,14 @@ def payment_plan_apply_steficon_hh_selection(self: Any, payment_plan_id: str, en
                 updates.append(payment)
             Payment.objects.bulk_update(updates, ["vulnerability_score"])
         payment_plan.status = PaymentPlan.Status.TP_STEFICON_COMPLETED
-        payment_plan.steficon_applied_date = timezone.now()
+        payment_plan.steficon_targeting_applied_date = timezone.now()
         with disable_concurrency(payment_plan):
-            payment_plan.save(update_fields=["status", "steficon_applied_date"])
+            payment_plan.save(update_fields=["status", "steficon_targeting_applied_date"])
     except Exception as e:
         logger.exception(e)
-        payment_plan.steficon_applied_date = timezone.now()
+        payment_plan.steficon_targeting_applied_date = timezone.now()
         payment_plan.status = PaymentPlan.Status.TP_STEFICON_ERROR
-        payment_plan.save(update_fields=["status", "steficon_applied_date"])
+        payment_plan.save(update_fields=["status", "steficon_targeting_applied_date"])
         raise self.retry(exc=e)
 
 

@@ -24,13 +24,22 @@ export const CreateTargetPopulationHeader = ({
 }: CreateTargetPopulationHeaderProps): ReactElement => {
   const { t } = useTranslation();
 
-  const isSubmitDisabled = () => {
-    return (
-      (!values.criterias?.length &&
-        !(values.individualIds || values.householdIds)) ||
-      !values.name ||
-      loading
-    );
+  const isSubmitDisabled = (criterias) => {
+    return criterias?.some((criteria) => {
+      const householdsFiltersBlocks = criteria.householdsFiltersBlocks || [];
+      const individualsFiltersBlocks = criteria.individualsFiltersBlocks || [];
+      const collectorsFiltersBlocks = criteria.collectorsFiltersBlocks || [];
+      const individualIds = criteria.individualIds || [];
+      const householdIds = criteria.householdIds || [];
+
+      return (
+        householdsFiltersBlocks.length === 0 &&
+        individualsFiltersBlocks.length === 0 &&
+        collectorsFiltersBlocks.length === 0 &&
+        individualIds.length === 0 &&
+        householdIds.length === 0
+      );
+    });
   };
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
@@ -51,7 +60,11 @@ export const CreateTargetPopulationHeader = ({
     >
       <>
         <Box m={2}>
-          <Button component={Link} to={`/${baseUrl}/target-population`}>
+          <Button
+            data-cy="button-cancel"
+            component={Link}
+            to={`/${baseUrl}/target-population`}
+          >
             {t('Cancel')}
           </Button>
         </Box>
@@ -60,7 +73,7 @@ export const CreateTargetPopulationHeader = ({
             variant="contained"
             color="primary"
             onClick={handleSubmit}
-            disabled={isSubmitDisabled()}
+            disabled={isSubmitDisabled(values.criterias)}
             loading={loading}
             data-cy="button-target-population-create"
           >

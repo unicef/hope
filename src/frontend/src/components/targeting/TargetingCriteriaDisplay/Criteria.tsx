@@ -1,14 +1,28 @@
-import { IconButton } from '@mui/material';
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TablePagination,
+  TableRow,
+  Typography,
+} from '@mui/material';
 import { Delete, Edit } from '@mui/icons-material';
-import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import GreaterThanEqual from '../../../assets/GreaterThanEqual.svg';
 import LessThanEqual from '../../../assets/LessThanEqual.svg';
 import { TargetingCriteriaRuleObjectType } from '@generated/graphql';
 import { Box } from '@mui/system';
 import { BlueText } from '@components/grievances/LookUps/LookUpStyles';
-import { ReactElement } from 'react';
+import { ReactElement, useState } from 'react';
 import { Fragment } from 'react/jsx-runtime';
+import { t } from 'i18next';
 
 interface CriteriaElementProps {
   alternative?: boolean;
@@ -58,7 +72,7 @@ const MathSign = styled.img`
 `;
 
 const CriteriaSetBox = styled.div`
-  border: 1px solid #607cab;
+  border: '1px solid #607cab';
   border-radius: 3px;
   padding: 0 ${({ theme }) => theme.spacing(2)};
   margin: ${({ theme }) => theme.spacing(2)} 0;
@@ -75,11 +89,11 @@ const PduDataBox = styled(Box)`
   margin: ${({ theme }) => theme.spacing(3)};
 `;
 
-const CriteriaField = ({ field, choicesDict }): ReactElement => {
+const CriteriaField = ({ field, choicesDict, dataCy }): ReactElement => {
   const extractChoiceLabel = (choiceField, argument) => {
     let choices = choicesDict?.[choiceField.fieldName];
     if (!choices) {
-      choices = choiceField.fieldAttribute.choices;
+      choices = choiceField?.fieldAttribute?.choices;
     }
     return choices?.length
       ? choices.find((each) => each.value === argument)?.labelEn
@@ -88,14 +102,13 @@ const CriteriaField = ({ field, choicesDict }): ReactElement => {
 
   const displayValueOrEmpty = (value) => (value ? value : 'Empty');
 
-  const { t } = useTranslation();
   let fieldElement;
 
   switch (field.comparisonMethod) {
     case 'NOT_EQUALS':
       fieldElement = (
         <p>
-          {field.fieldAttribute.labelEn || field.fieldName}:{' '}
+          {field.fieldAttribute?.labelEn || field.labelEn}:{' '}
           <span>{displayValueOrEmpty(field.arguments?.[0])}</span>
         </p>
       );
@@ -103,7 +116,7 @@ const CriteriaField = ({ field, choicesDict }): ReactElement => {
     case 'RANGE':
       fieldElement = (
         <p>
-          {field.fieldAttribute.labelEn || field.fieldName}:{' '}
+          {field.fieldAttribute?.labelEn || field.labelEn}:{' '}
           <span>
             {displayValueOrEmpty(field.arguments?.[0])} -{' '}
             {displayValueOrEmpty(field.arguments?.[1])}
@@ -114,7 +127,7 @@ const CriteriaField = ({ field, choicesDict }): ReactElement => {
     case 'EQUALS':
       fieldElement = (
         <p>
-          {field.fieldAttribute.labelEn || field.fieldName}:{' '}
+          {field.fieldAttribute?.labelEn || field.labelEn}:{' '}
           {field.isNull === true || field.comparisonMethod === 'IS_NULL' ? (
             <BlueText>{t('Empty')}</BlueText>
           ) : typeof field.arguments?.[0] === 'boolean' ? (
@@ -126,13 +139,7 @@ const CriteriaField = ({ field, choicesDict }): ReactElement => {
           ) : (
             <>
               {field.arguments?.[0] != null ? (
-                typeof field.arguments[0] === 'boolean' ? (
-                  field.arguments[0] === true ? (
-                    <BlueText>{t('Yes')}</BlueText>
-                  ) : (
-                    <BlueText>{t('No')}</BlueText>
-                  )
-                ) : field.arguments[0] === 'Yes' ? (
+                field.arguments[0] === 'Yes' ? (
                   <BlueText>{t('Yes')}</BlueText>
                 ) : field.arguments[0] === 'No' ? (
                   <BlueText>{t('No')}</BlueText>
@@ -149,14 +156,14 @@ const CriteriaField = ({ field, choicesDict }): ReactElement => {
       break;
     case 'LESS_THAN':
     case 'GREATER_THAN': {
-      const isLessThan = field.type === 'LESS_THAN';
+      const isLessThan = field?.type === 'LESS_THAN';
       const MathSignComponent = isLessThan ? LessThanEqual : GreaterThanEqual;
       const altText = isLessThan ? 'less_than' : 'greater_than';
       const displayValue = field.arguments?.[0];
 
       fieldElement = (
         <p>
-          {field.fieldAttribute.labelEn || field.fieldName}:{' '}
+          {field.fieldAttribute?.labelEn || field.labelEn}:{' '}
           {displayValue && <MathSign src={MathSignComponent} alt={altText} />}
           <span>{displayValueOrEmpty(displayValue)}</span>
         </p>
@@ -166,15 +173,30 @@ const CriteriaField = ({ field, choicesDict }): ReactElement => {
     case 'CONTAINS':
       fieldElement = (
         <p>
-          {field.fieldAttribute.labelEn || field.fieldName}:{' '}
-          {field.arguments?.map((argument, index) => (
-            <Fragment key={index}>
-              <span>
-                {displayValueOrEmpty(extractChoiceLabel(field, argument))}
-              </span>
-              {index !== field.arguments.length - 1 && ', '}
-            </Fragment>
-          ))}
+          {field.fieldAttribute?.labelEn || field.labelEn}:{' '}
+          {field.__typename === 'TargetingCollectorBlockRuleFilterNode'
+            ? field.arguments?.map((argument, index) => (
+                <Fragment key={index}>
+                  <span>
+                    {argument === true ? (
+                      <BlueText>{t('Yes')}</BlueText>
+                    ) : argument === false ? (
+                      <BlueText>{t('No')}</BlueText>
+                    ) : (
+                      displayValueOrEmpty(extractChoiceLabel(field, argument))
+                    )}
+                  </span>
+                  {index !== field.arguments.length - 1 && ', '}
+                </Fragment>
+              ))
+            : field.arguments?.map((argument, index) => (
+                <Fragment key={index}>
+                  <span>
+                    {displayValueOrEmpty(extractChoiceLabel(field, argument))}
+                  </span>
+                  {index !== field.arguments.length - 1 && ', '}
+                </Fragment>
+              ))}
         </p>
       );
       break;
@@ -190,8 +212,8 @@ const CriteriaField = ({ field, choicesDict }): ReactElement => {
 
   return (
     <>
-      {fieldElement}
-      {field.fieldAttribute.type === 'PDU' &&
+      <div data-cy={dataCy}>{fieldElement}</div>
+      {field.fieldAttribute?.type === 'PDU' &&
         (field.pduData || field.fieldAttribute.pduData) && (
           <PduDataBox data-cy="round-number-round-name-display">
             Round {field.roundNumber}
@@ -224,7 +246,10 @@ interface CriteriaProps {
   isEdit: boolean;
   canRemove: boolean;
   alternative?: boolean;
-  choicesDict;
+  allDataFieldsChoicesDict;
+  allCollectorFieldsChoicesDict;
+  householdIds: string;
+  individualIds: string;
 }
 
 export function Criteria({
@@ -233,38 +258,143 @@ export function Criteria({
   editFunction = () => null,
   isEdit,
   canRemove,
-  choicesDict,
+  allDataFieldsChoicesDict,
+  allCollectorFieldsChoicesDict,
   alternative = null,
   individualsFiltersBlocks,
   collectorsFiltersBlocks,
+  householdIds,
+  individualIds,
 }: CriteriaProps): ReactElement {
+  const [openHH, setOpenHH] = useState(false);
+  const [openIND, setOpenIND] = useState(false);
+  const [currentHouseholdIds, setCurrentHouseholdIds] = useState<string[]>([]);
+  const [currentIndividualIds, setCurrentIndividualIds] = useState<string[]>(
+    [],
+  );
+  const [pageHH, setPageHH] = useState(0);
+  const [rowsPerPageHH, setRowsPerPageHH] = useState(5);
+  const [pageIND, setPageIND] = useState(0);
+  const [rowsPerPageIND, setRowsPerPageIND] = useState(5);
+
+  const handleChangePageHH = (_event, newPage) => {
+    setPageHH(newPage);
+  };
+
+  const handleChangeRowsPerPageHH = (event) => {
+    setRowsPerPageHH(parseInt(event.target.value, 10));
+    setPageHH(0);
+  };
+
+  const handleChangePageIND = (_event, newPage) => {
+    setPageIND(newPage);
+  };
+
+  const handleChangeRowsPerPageIND = (event) => {
+    setRowsPerPageIND(parseInt(event.target.value, 10));
+    setPageIND(0);
+  };
+
+  const handleOpenHouseholdIds = (ids: string): void => {
+    setCurrentHouseholdIds(ids.split(','));
+    setOpenHH(true);
+  };
+
+  const handleOpenIndividualIds = (ids: string): void => {
+    setCurrentIndividualIds(ids.split(','));
+    setOpenIND(true);
+  };
+
+  const handleClose = (): void => {
+    setOpenHH(false);
+    setOpenIND(false);
+  };
+  const adjustedCollectorsFiltersBlocks = collectorsFiltersBlocks.map(
+    (block) => ({
+      ...block,
+      collectorBlockFilters: block.collectorBlockFilters.map((filter) => ({
+        ...filter,
+        arguments: filter.arguments.map((arg) =>
+          arg === true ? 'Yes' : arg === false ? 'No' : arg,
+        ),
+      })),
+    }),
+  );
+
   return (
     <CriteriaElement alternative={alternative} data-cy="criteria-container">
+      {householdIds && (
+        <div>
+          <Typography data-cy="household-ids-modal-title" variant="body1">
+            {t('Household IDs selected')}:
+          </Typography>
+          <BlueText
+            onClick={() => handleOpenHouseholdIds(householdIds)}
+            style={{ textDecoration: 'underline', cursor: 'pointer' }}
+            data-cy="button-household-ids-open"
+          >
+            {householdIds.split(',').length}
+          </BlueText>
+        </div>
+      )}
+      {individualIds && (
+        <div>
+          <Typography data-cy="individual-ids-modal-title" variant="body1">
+            {t('Individual IDs selected')}:
+          </Typography>
+          <BlueText
+            onClick={() => handleOpenIndividualIds(individualIds)}
+            style={{ textDecoration: 'underline', cursor: 'pointer' }}
+            data-cy="button-individual-ids-open"
+          >
+            {individualIds.split(',').length}
+          </BlueText>
+        </div>
+      )}
       {(rules || []).map((each, index) => (
-        <CriteriaField choicesDict={choicesDict} key={index} field={each} />
+        <CriteriaField
+          choicesDict={allDataFieldsChoicesDict}
+          key={index}
+          field={each}
+          dataCy={`criteria-field-${index}`}
+        />
       ))}
-      {individualsFiltersBlocks.map((item, index) => (
-        <CriteriaSetBox key={index}>
-          {item.individualBlockFilters.map((filter, filterIndex) => (
-            <CriteriaField
-              choicesDict={choicesDict}
-              key={filterIndex}
-              field={filter}
-            />
-          ))}
-        </CriteriaSetBox>
-      ))}
-      {collectorsFiltersBlocks.map((item, index) => (
-        <CriteriaSetBox key={index}>
-          {item.collectorBlockFilters.map((filter, filterIndex) => (
-            <CriteriaField
-              choicesDict={choicesDict}
-              key={filterIndex}
-              field={filter}
-            />
-          ))}
-        </CriteriaSetBox>
-      ))}
+      {individualsFiltersBlocks.map(
+        (item, index) =>
+          item.individualBlockFilters.length > 0 && (
+            <CriteriaSetBox
+              key={index}
+              data-cy={`individuals-criteria-set-box-${index}`}
+            >
+              {item.individualBlockFilters.map((filter, filterIndex) => (
+                <CriteriaField
+                  choicesDict={allDataFieldsChoicesDict}
+                  key={filterIndex}
+                  field={filter}
+                  dataCy={`individuals-criteria-field-${filterIndex}`}
+                />
+              ))}
+            </CriteriaSetBox>
+          ),
+      )}
+      {adjustedCollectorsFiltersBlocks.map(
+        (item, index) =>
+          item.collectorBlockFilters.length > 0 && (
+            <CriteriaSetBox
+              key={index}
+              data-cy={`collectors-criteria-set-box-${index}`}
+            >
+              {item.collectorBlockFilters.map((filter, filterIndex) => (
+                <CriteriaField
+                  choicesDict={allCollectorFieldsChoicesDict}
+                  key={filterIndex}
+                  field={filter}
+                  dataCy={`collectors-criteria-field-${filterIndex}`}
+                />
+              ))}
+            </CriteriaSetBox>
+          ),
+      )}
       {isEdit && (
         <ButtonsContainer>
           <IconButton data-cy="button-edit" onClick={editFunction}>
@@ -277,6 +407,83 @@ export function Criteria({
           )}
         </ButtonsContainer>
       )}
+      <Dialog open={openHH} onClose={handleClose} maxWidth="sm" fullWidth>
+        <DialogTitle>{t('Selected Households')}</DialogTitle>
+        <DialogContent>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>ID</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {currentHouseholdIds
+                .slice(
+                  pageHH * rowsPerPageHH,
+                  pageHH * rowsPerPageHH + rowsPerPageHH,
+                )
+                .map((id, index) => (
+                  <TableRow key={index}>
+                    <TableCell data-cy={`table-cell-hh-${id}`}>{id}</TableCell>
+                  </TableRow>
+                ))}
+            </TableBody>
+          </Table>
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25]}
+            component="div"
+            count={currentHouseholdIds.length}
+            rowsPerPage={rowsPerPageHH}
+            page={pageHH}
+            onPageChange={handleChangePageHH}
+            onRowsPerPageChange={handleChangeRowsPerPageHH}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button data-cy="button-close" color="primary" onClick={handleClose}>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={openIND} onClose={handleClose} maxWidth="sm" fullWidth>
+        <DialogTitle>{t('Selected Individuals')}</DialogTitle>
+        <DialogContent>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>ID</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {currentIndividualIds
+                .slice(
+                  pageIND * rowsPerPageIND,
+                  pageIND * rowsPerPageIND + rowsPerPageIND,
+                )
+                .map((id, index) => (
+                  <TableRow key={index}>
+                    <TableCell data-cy={`table-cell-ind-${id}`}>{id}</TableCell>
+                  </TableRow>
+                ))}
+            </TableBody>
+          </Table>
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25]}
+            component="div"
+            count={currentIndividualIds.length}
+            rowsPerPage={rowsPerPageIND}
+            page={pageIND}
+            onPageChange={handleChangePageIND}
+            onRowsPerPageChange={handleChangeRowsPerPageIND}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button data-cy="button-close" color="primary" onClick={handleClose}>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
     </CriteriaElement>
   );
 }

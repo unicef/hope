@@ -1,9 +1,9 @@
-import { SubField } from '@components/targeting/SubField';
-import { ImportedIndividualFieldsQuery } from '@generated/graphql';
+import { AllCollectorFieldsAttributesQuery } from '@generated/graphql';
 import { FieldChooser } from '@components/targeting/FieldChooser';
+import { SubField } from '@components/targeting/SubField';
 import { ReactElement } from 'react';
 
-export const TargetingCriteriaCollectorBlockFilter = ({
+export function TargetingCriteriaCollectorBlockFilter({
   blockIndex,
   index,
   data,
@@ -14,17 +14,17 @@ export const TargetingCriteriaCollectorBlockFilter = ({
 }: {
   blockIndex: number;
   index: number;
-  data: ImportedIndividualFieldsQuery;
+  data: AllCollectorFieldsAttributesQuery;
   each;
   choicesDict;
   onChange: (e, object) => void;
   onDelete: () => void;
-}): ReactElement => {
+}): ReactElement {
   return (
     <div>
       <FieldChooser
         index={index}
-        choices={data.allFieldsAttributes}
+        choices={data.allCollectorFieldsAttributes}
         fieldName={each.fieldName}
         onChange={onChange}
         onDelete={onDelete}
@@ -39,9 +39,10 @@ export const TargetingCriteriaCollectorBlockFilter = ({
             index={index}
             choicesDict={choicesDict}
             baseName={`collectorsFiltersBlocks[${blockIndex}].collectorBlockFilters[${index}]`}
+            fieldTypeProp="BOOL"
           />
         </div>
       )}
     </div>
   );
-};
+}

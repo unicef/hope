@@ -2,6 +2,7 @@ import { TargetingCriteriaForm } from '@containers/forms/TargetingCriteriaForm';
 import {
   DataCollectingTypeType,
   TargetPopulationQuery,
+  useAllCollectorFieldsAttributesQuery,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useCachedImportedIndividualFieldsQuery } from '@hooks/useCachedImportedIndividualFields';
@@ -97,10 +98,17 @@ export const AddFilterTargetingCriteriaDisplay = ({
 
   const { data: allCoreFieldsAttributesData, loading } =
     useCachedImportedIndividualFieldsQuery(businessArea, programId);
+  const { data: allCollectorFieldsAttributesData } =
+    useAllCollectorFieldsAttributesQuery({
+      fetchPolicy: 'cache-first',
+    });
+
   const [isOpen, setOpen] = useState(false);
   const [criteriaIndex, setIndex] = useState(null);
   const [criteriaObject, setCriteria] = useState({});
   const [allDataChoicesDict, setAllDataChoicesDict] = useState(null);
+  const [allCollectorDataChoicesDict, setAllCollectorDataChoicesDict] =
+    useState(null);
 
   useEffect(() => {
     if (loading) return;
@@ -112,8 +120,22 @@ export const AddFilterTargetingCriteriaDisplay = ({
     setAllDataChoicesDict(allDataChoicesDictTmp);
   }, [allCoreFieldsAttributesData, loading]);
 
+  useEffect(() => {
+    if (loading) return;
+    const allCollectorDataChoicesDictTmp =
+      allCollectorFieldsAttributesData?.allCollectorFieldsAttributes?.reduce(
+        (acc, item) => {
+          acc[item.name] = item.choices;
+          return acc;
+        },
+        {},
+      );
+    setAllCollectorDataChoicesDict(allCollectorDataChoicesDictTmp);
+  }, [allCollectorFieldsAttributesData, loading]);
+
   const regex = /(create|edit-tp)/;
   const isDetailsPage = !regex.test(location.pathname);
+
   const openModal = (criteria): void => {
     setCriteria(criteria);
     setOpen(true);
@@ -130,8 +152,11 @@ export const AddFilterTargetingCriteriaDisplay = ({
 
   const addCriteria = (values): void => {
     const criteria = {
-      filters: [...values.filters],
+      householdsFiltersBlocks: [...values.householdsFiltersBlocks],
       individualsFiltersBlocks: [...values.individualsFiltersBlocks],
+      collectorsFiltersBlocks: [...values.collectorsFiltersBlocks],
+      householdIds: values.householdIds,
+      individualIds: values.individualIds,
     };
     if (criteriaIndex !== null) {
       helpers.replace(criteriaIndex, criteria);
@@ -202,15 +227,20 @@ export const AddFilterTargetingCriteriaDisplay = ({
                     <Fragment key={criteria.id || index}>
                       <Criteria
                         isEdit={isEdit}
-                        choicesDict={allDataChoicesDict}
+                        allDataFieldsChoicesDict={allDataChoicesDict}
+                        allCollectorFieldsChoicesDict={
+                          allCollectorDataChoicesDict
+                        }
                         canRemove={rules.length > 1}
-                        rules={criteria.filters}
+                        rules={criteria.householdsFiltersBlocks || []}
                         individualsFiltersBlocks={
                           criteria.individualsFiltersBlocks || []
                         }
                         collectorsFiltersBlocks={
                           criteria.collectorsFiltersBlocks || []
                         }
+                        householdIds={criteria.householdIds}
+                        individualIds={criteria.individualIds}
                         editFunction={() => editCriteria(criteria, index)}
                         removeFunction={() => helpers.remove(index)}
                       />
