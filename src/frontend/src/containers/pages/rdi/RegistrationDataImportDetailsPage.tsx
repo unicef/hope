@@ -144,6 +144,7 @@ export const RegistrationDataImportDetailsPage = (): ReactElement => {
                   businessArea={businessArea}
                   key={`${data.registrationDataImport.status}-individual`}
                   choicesData={choicesData}
+                  rdi={data.registrationDataImport}
                 />
               </TabPanel>
             </ContainerColumnWithBorder>
