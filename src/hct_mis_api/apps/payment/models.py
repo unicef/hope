@@ -80,7 +80,7 @@ from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoice
 from hct_mis_api.apps.payment.fields import DynamicChoiceArrayField
 from hct_mis_api.apps.payment.managers import PaymentManager
 from hct_mis_api.apps.payment.validators import payment_token_and_order_number_validator
-from hct_mis_api.apps.steficon.models import RuleCommit
+from hct_mis_api.apps.steficon.models import Rule, RuleCommit
 from hct_mis_api.apps.utils.models import (
     AdminUrlMixin,
     ConcurrencyModel,
@@ -641,7 +641,7 @@ class PaymentPlan(
         RuleCommit,
         null=True,
         on_delete=models.PROTECT,
-        related_name="payment_plans",
+        related_name="payment_plans_target",
         blank=True,
     )
     steficon_targeting_applied_date = models.DateTimeField(blank=True, null=True)
@@ -705,11 +705,32 @@ class PaymentPlan(
         constraints = [
             UniqueConstraint(
                 fields=["name", "program", "is_removed"], condition=Q(is_removed=False), name="name_unique_per_program"
-            )
+            ),
+            models.CheckConstraint(
+                check=Q(steficon_rule_targeting__rule__type=Rule.TYPE_TARGETING)
+                | Q(steficon_rule_targeting__isnull=True),
+                name="check_steficon_rule_targeting_type_tp_level",
+            ),
+            models.CheckConstraint(
+                check=Q(steficon_rule__rule__type=Rule.TYPE_PAYMENT_PLAN) | Q(steficon_rule__isnull=True),
+                name="check_steficon_rule_targeting_type_pp_level",
+            ),
         ]
 
     def __str__(self) -> str:
         return self.unicef_id or ""
+
+    def clean(self) -> None:
+        super().clean()
+        if self.steficon_rule_targeting and self.steficon_rule_targeting.rule.type != Rule.TYPE_TARGETING:
+            raise ValidationError(
+                f"The selected RuleCommit must be associated with a Rule of type {Rule.TYPE_TARGETING}."
+            )
+
+        if self.steficon_rule and self.steficon_rule.rule.type != Rule.TYPE_PAYMENT_PLAN:
+            raise ValidationError(
+                f"The selected RuleCommit must be associated with a Rule of type {Rule.TYPE_PAYMENT_PLAN}."
+            )
 
     @property
     def bank_reconciliation_success(self) -> int:
