@@ -54,6 +54,7 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import ProgramCycle
 from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory
 from hct_mis_api.apps.steficon.models import Rule
+from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory
 
 pytestmark = pytest.mark.django_db
 
@@ -309,6 +310,27 @@ class TestPaymentPlanModel(TestCase):
         ):
             pp.steficon_rule_targeting = rule_for_pp
             pp.save()
+
+    def test_payment_plan_exclude_hh_property(self) -> None:
+        ind = IndividualFactory(household=None)
+        hh = HouseholdFactory(head_of_household=ind)
+        pp: PaymentPlan = PaymentPlanFactory()
+        pp.excluded_ids = f"{hh.unicef_id},{ind.unicef_id}"
+        pp.save(update_fields=["excluded_ids"])
+        pp.refresh_from_db()
+
+        self.assertEqual(pp.excluded_household_ids_targeting_level, [hh.unicef_id])
+
+    def test_payment_plan_has_empty_criteria_property(self) -> None:
+        pp: PaymentPlan = PaymentPlanFactory(targeting_criteria=None)
+
+        self.assertTrue(pp.has_empty_criteria)
+
+    def test_payment_plan_has_empty_ids_criteria_property(self) -> None:
+        targeting_criteria = TargetingCriteriaFactory()
+        pp: PaymentPlan = PaymentPlanFactory(targeting_criteria=targeting_criteria)
+
+        self.assertTrue(pp.has_empty_ids_criteria)
 
 
 class TestPaymentModel(TestCase):
