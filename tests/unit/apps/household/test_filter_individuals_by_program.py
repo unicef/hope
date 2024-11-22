@@ -31,7 +31,6 @@ class TestFilterIndividualsByProgram(APITestCase):
       }
     }
     """
-
     QUERY_WITH_RDI_FILTER = """
         query AllIndividuals($program: ID, $rdiId: String){
           allIndividuals(businessArea: "afghanistan", program: $program, rdiMergeStatus: "MERGED", rdiId: $rdiId) {
@@ -41,12 +40,19 @@ class TestFilterIndividualsByProgram(APITestCase):
                 program {
                   name
                 }
+                identities {
+                  totalCount
+                  edges {
+                    node {
+                      number
+                    }
+                  }
+                }
               }
             }
           }
         }
         """
-
     QUERY_WITH_DUPLICATE_FILTER = """
         query AllIndividuals($program: ID, $duplicatesOnly: Boolean){
           allIndividuals(businessArea: "afghanistan", program: $program, rdiMergeStatus: "MERGED", duplicatesOnly: $duplicatesOnly) {

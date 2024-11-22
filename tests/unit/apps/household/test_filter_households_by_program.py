@@ -41,6 +41,7 @@ class TestFilterHouseholdsByProgram(APITestCase):
                 program {
                   name
                 }
+                hasDuplicatesForRdi
               }
             }
           }

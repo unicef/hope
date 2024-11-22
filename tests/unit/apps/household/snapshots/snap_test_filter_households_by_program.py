@@ -13,6 +13,7 @@ snapshots['TestFilterHouseholdsByProgram::test_filter_household_query_by_rdi_id 
             'edges': [
                 {
                     'node': {
+                        'hasDuplicatesForRdi': False,
                         'headOfHousehold': {
                             'fullName': 'TEST User'
                         },

@@ -146,6 +146,11 @@ snapshots['TestFilterIndividualsByProgram::test_individual_query_rdi_id 1'] = {
                 {
                     'node': {
                         'fullName': 'TEST User',
+                        'identities': {
+                            'edges': [
+                            ],
+                            'totalCount': 0
+                        },
                         'program': {
                             'name': 'Test program ONE'
                         }
