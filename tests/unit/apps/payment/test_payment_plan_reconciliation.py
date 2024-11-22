@@ -68,6 +68,7 @@ from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service impo
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory, RuleFactory
+from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
 if TYPE_CHECKING:
@@ -500,7 +501,7 @@ class TestPaymentPlanReconciliation(APITestCase):
         assert "errors" not in lock_payment_plan_response, lock_payment_plan_response
         assert lock_payment_plan_response["data"]["actionPaymentPlanMutation"]["paymentPlan"]["status"] == "LOCKED"
 
-        rule = RuleFactory(name="Rule")
+        rule = RuleFactory(name="Rule", type=Rule.TYPE_PAYMENT_PLAN)
         RuleCommitFactory(definition="result.value=Decimal('500')", rule=rule)
 
         self.assertEqual(payment_plan.background_action_status, None)

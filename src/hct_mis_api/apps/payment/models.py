@@ -712,11 +712,6 @@ class PaymentPlan(
         return self.unicef_id or ""
 
     def save(self, *args: Any, **kwargs: Any) -> None:
-        self.full_clean()  # Calls `clean` and performs validation
-        super().save(*args, **kwargs)
-
-    def clean(self) -> None:
-        super().clean()
         if self.steficon_rule_targeting and self.steficon_rule_targeting.rule.type != Rule.TYPE_TARGETING:
             raise ValidationError(
                 f"The selected RuleCommit must be associated with a Rule of type {Rule.TYPE_TARGETING}."
@@ -725,6 +720,7 @@ class PaymentPlan(
             raise ValidationError(
                 f"The selected RuleCommit must be associated with a Rule of type {Rule.TYPE_PAYMENT_PLAN}."
             )
+        super().save(*args, **kwargs)
 
     @property
     def bank_reconciliation_success(self) -> int:

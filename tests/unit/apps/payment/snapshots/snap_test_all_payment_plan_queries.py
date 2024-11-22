@@ -324,6 +324,10 @@ snapshots['TestPaymentPlanQueries::test_fetch_payment_plan_status_choices 1'] = 
                 'value': 'ACCEPTED'
             },
             {
+                'name': 'Draft',
+                'value': 'DRAFT'
+            },
+            {
                 'name': 'Finished',
                 'value': 'FINISHED'
             },
@@ -341,6 +345,10 @@ snapshots['TestPaymentPlanQueries::test_fetch_payment_plan_status_choices 1'] = 
             },
             {
                 'name': 'Locked',
+                'value': 'TP_LOCKED'
+            },
+            {
+                'name': 'Locked',
                 'value': 'LOCKED'
             },
             {
@@ -349,11 +357,35 @@ snapshots['TestPaymentPlanQueries::test_fetch_payment_plan_status_choices 1'] = 
             },
             {
                 'name': 'Open',
+                'value': 'TP_OPEN'
+            },
+            {
+                'name': 'Open',
                 'value': 'OPEN'
             },
             {
                 'name': 'Preparing',
                 'value': 'PREPARING'
+            },
+            {
+                'name': 'Processing',
+                'value': 'PROCESSING'
+            },
+            {
+                'name': 'Steficon Completed',
+                'value': 'STEFICON_COMPLETED'
+            },
+            {
+                'name': 'Steficon Error',
+                'value': 'STEFICON_ERROR'
+            },
+            {
+                'name': 'Steficon Run',
+                'value': 'STEFICON_RUN'
+            },
+            {
+                'name': 'Steficon Wait',
+                'value': 'STEFICON_WAIT'
             }
         ]
     }
