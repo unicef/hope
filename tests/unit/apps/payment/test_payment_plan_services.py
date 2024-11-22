@@ -600,3 +600,72 @@ class TestPaymentPlanServices(APITestCase):
         PaymentPlanService.create(input_data=input_data, user=self.user)
         cycle.refresh_from_db()
         assert cycle.status == ProgramCycle.ACTIVE
+
+    @freeze_time("2022-12-12")
+    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    def test_full_rebuild(self, get_exchange_rate_mock: Any) -> None:
+        targeting = TargetPopulationFactory(
+            program=ProgramFactory(
+                status=Program.ACTIVE,
+                start_date=timezone.datetime(2000, 9, 10, tzinfo=utc).date(),
+                end_date=timezone.datetime(2099, 10, 10, tzinfo=utc).date(),
+            )
+        )
+        self.business_area.is_payment_plan_applicable = True
+        self.business_area.save()
+        targeting.status = TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
+        targeting.program_cycle = targeting.program.cycles.first()
+        hoh1 = IndividualFactory(household=None)
+        hoh2 = IndividualFactory(household=None)
+        hh1 = HouseholdFactory(head_of_household=hoh1)
+        hh2 = HouseholdFactory(head_of_household=hoh2)
+        IndividualRoleInHouseholdFactory(household=hh1, individual=hoh1, role=ROLE_PRIMARY)
+        IndividualRoleInHouseholdFactory(household=hh2, individual=hoh2, role=ROLE_PRIMARY)
+        IndividualFactory.create_batch(4, household=hh1)
+        targeting.households.set([hh1, hh2])
+        targeting.save()
+        input_data = dict(
+            business_area_slug="afghanistan",
+            targeting_id=self.id_to_base64(targeting.id, "Targeting"),
+            dispersion_start_date=parse_date("2022-12-20"),
+            dispersion_end_date=parse_date("2022-12-22"),
+            currency="USD",
+            name="paymentPlanName",
+        )
+        with mock.patch(
+            "hct_mis_api.apps.payment.services.payment_plan_services.transaction"
+        ) as mock_prepare_payment_plan_task:
+            with self.assertNumQueries(9):
+                pp = PaymentPlanService.create(input_data=input_data, user=self.user)
+            assert mock_prepare_payment_plan_task.on_commit.call_count == 1
+
+        self.assertEqual(pp.status, PaymentPlan.Status.PREPARING)
+        self.assertEqual(pp.target_population.status, TargetPopulation.STATUS_ASSIGNED)
+        self.assertEqual(pp.total_households_count, 0)
+        self.assertEqual(pp.total_individuals_count, 0)
+        self.assertEqual(pp.payment_items.count(), 0)
+        with self.assertNumQueries(68):
+            prepare_payment_plan_task.delay(pp.id)
+        pp.refresh_from_db()
+        self.assertEqual(pp.status, PaymentPlan.Status.OPEN)
+        self.assertEqual(pp.payment_items.count(), 2)
+
+        old_payment_ids = list(pp.payment_items.values_list("id", flat=True))
+        old_payment_unicef_ids = list(pp.payment_items.values_list("unicef_id", flat=True))
+
+        # check rebuild
+        pp_service = PaymentPlanService(payment_plan=pp)
+        pp_service.full_rebuild()
+
+        pp.refresh_from_db()
+        # all Payments (removed and new)
+        self.assertEqual(Payment.all_objects.filter(parent=pp).count(), 4)
+
+        new_payment_ids = list(pp.payment_items.values_list("id", flat=True))
+        new_payment_unicef_ids = list(pp.payment_items.values_list("unicef_id", flat=True))
+
+        for p_id in new_payment_ids:
+            self.assertNotIn(p_id, old_payment_ids)
+
+        for p_unicef_id in new_payment_unicef_ids:
+            self.assertNotIn(p_unicef_id, old_payment_unicef_ids)

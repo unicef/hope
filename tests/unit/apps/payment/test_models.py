@@ -4,6 +4,7 @@ from typing import Any
 from unittest.mock import MagicMock, patch
 
 from django import forms
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.utils import IntegrityError
 from django.test import TestCase
@@ -51,6 +52,8 @@ from hct_mis_api.apps.payment.services.payment_household_snapshot_service import
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import ProgramCycle
+from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory
+from hct_mis_api.apps.steficon.models import Rule
 
 pytestmark = pytest.mark.django_db
 
@@ -286,6 +289,26 @@ class TestPaymentPlanModel(TestCase):
         p2.status = Payment.STATUS_DISTRIBUTION_PARTIAL
         p2.save()
         self.assertEqual(pp.is_reconciled, True)
+
+    def test_save_pp_steficon_rule_validation(self) -> None:
+        pp = PaymentPlanFactory()
+        rule_for_tp = RuleCommitFactory(rule__type=Rule.TYPE_TARGETING, version=11)
+        rule_for_pp = RuleCommitFactory(rule__type=Rule.TYPE_PAYMENT_PLAN, version=22)
+
+        self.assertIsNone(pp.steficon_rule_targeting_id)
+        self.assertIsNone(pp.steficon_rule_id)
+
+        with self.assertRaisesMessage(
+            ValidationError, f"The selected RuleCommit must be associated with a Rule of type {Rule.TYPE_PAYMENT_PLAN}."
+        ):
+            pp.steficon_rule = rule_for_tp
+            pp.save()
+
+        with self.assertRaisesMessage(
+            ValidationError, f"The selected RuleCommit must be associated with a Rule of type {Rule.TYPE_TARGETING}."
+        ):
+            pp.steficon_rule_targeting = rule_for_pp
+            pp.save()
 
 
 class TestPaymentModel(TestCase):
