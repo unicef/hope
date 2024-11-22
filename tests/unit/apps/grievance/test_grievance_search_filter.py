@@ -58,7 +58,8 @@ class TestGrievanceQuerySearchFilter(APITestCase):
         cls.admin_area_1 = AreaFactory(name="City Test", area_type=area_type, p_code="123aa123")
         cls.admin_area_2 = AreaFactory(name="City Example", area_type=area_type, p_code="sadasdasfd222")
 
-        _, individuals = create_household({"size": 2}, {"family_name": "Kowalski"})
+        household, individuals = create_household({"size": 2}, {"family_name": "Kowalski"})
+
         cls.individual_1 = individuals[0]
         cls.individual_2 = individuals[1]
 
@@ -82,10 +83,11 @@ class TestGrievanceQuerySearchFilter(APITestCase):
                 "status": GrievanceTicket.STATUS_NEW,
                 "created_by": cls.user,
                 "assigned_to": cls.user,
-                "household_unicef_id": "HH-22-0059.7223",
+                "household_unicef_id": household.unicef_id,
             }
         )
 
+        household2, individuals2 = create_household({"size": 2}, {"family_name": "Kowalski"})
         grievance_ticket_2 = GrievanceTicket(
             **{
                 "business_area": cls.business_area,
@@ -97,7 +99,7 @@ class TestGrievanceQuerySearchFilter(APITestCase):
                 "status": GrievanceTicket.STATUS_ON_HOLD,
                 "created_by": cls.user,
                 "assigned_to": cls.user,
-                "household_unicef_id": "HH-22-0059.7224",
+                "household_unicef_id": household2.unicef_id,
             }
         )
 
@@ -112,15 +114,15 @@ class TestGrievanceQuerySearchFilter(APITestCase):
                 "status": GrievanceTicket.STATUS_IN_PROGRESS,
                 "created_by": cls.user,
                 "assigned_to": cls.user,
-                "household_unicef_id": "HH-22-0059.7225",
+                "household_unicef_id": household2.unicef_id,
             }
         )
 
         GrievanceTicket.objects.bulk_create((grievance_ticket_1, grievance_ticket_2, grievance_ticket_3))
 
-        cls.grievance_ticket_1 = GrievanceTicket.objects.get(household_unicef_id="HH-22-0059.7223")
-        cls.grievance_ticket_2 = GrievanceTicket.objects.get(household_unicef_id="HH-22-0059.7224")
-        cls.grievance_ticket_3 = GrievanceTicket.objects.get(household_unicef_id="HH-22-0059.7225")
+        cls.grievance_ticket_1 = grievance_ticket_1
+        cls.grievance_ticket_2 = grievance_ticket_2
+        cls.grievance_ticket_3 = grievance_ticket_3
 
         cls.grievance_ticket_1.programs.add(cls.program)
         cls.grievance_ticket_2.programs.add(cls.program)
@@ -165,6 +167,49 @@ class TestGrievanceQuerySearchFilter(APITestCase):
             },
             variables={
                 "search": f"{self.grievance_ticket_2.household_unicef_id}",
+            },
+        )
+
+    def test_grievance_list_filtered_by_ticket_individual_unicef_id(self) -> None:
+        self.create_user_role_with_permissions(
+            self.user,
+            [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
+            self.business_area,
+        )
+        individual_unicef_id = self.individual_1.unicef_id
+        self.snapshot_graphql_request(
+            request_string=self.FILTER_BY_SEARCH,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+            variables={
+                "search": f"{individual_unicef_id}",
+            },
+        )
+
+
+    def test_grievance_list_filtered_by_ticket_multiple_ticket_ids(self) -> None:
+        self.create_user_role_with_permissions(
+            self.user,
+            [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
+            self.business_area,
+        )
+        individual_unicef_id = self.individual_1.unicef_id
+        self.snapshot_graphql_request(
+            request_string=self.FILTER_BY_SEARCH,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+            variables={
+                "search": f"{self.grievance_ticket_1.unicef_id}, {self.grievance_ticket_2.unicef_id}",
             },
         )
 
