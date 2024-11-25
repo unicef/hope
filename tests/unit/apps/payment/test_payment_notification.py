@@ -290,7 +290,7 @@ class TestPaymentNotification(APITestCase):
         )
         self.assertEqual(payment_notification.email.subject, "Payment pending for Approval")
 
-    @mock.patch("hct_mis_api.apps.utils.mailjet.requests.post")
+    @mock.patch("hct_mis_api.apps.utils.celery_tasks.requests.post")
     @override_config(
         SEND_PAYMENT_PLANS_NOTIFICATION=True, ENABLE_MAILJET=True, MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION=1
     )
@@ -317,7 +317,7 @@ class TestPaymentNotification(APITestCase):
             1,
         )
 
-    @mock.patch("hct_mis_api.apps.utils.mailjet.requests.post")
+    @mock.patch("hct_mis_api.apps.utils.celery_tasks.requests.post")
     @override_config(
         SEND_PAYMENT_PLANS_NOTIFICATION=True, ENABLE_MAILJET=True, MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION=1
     )
@@ -347,7 +347,7 @@ class TestPaymentNotification(APITestCase):
             1,
         )
 
-    @mock.patch("hct_mis_api.apps.utils.mailjet.requests.post")
+    @mock.patch("hct_mis_api.apps.utils.celery_tasks.requests.post")
     @override_config(
         SEND_PAYMENT_PLANS_NOTIFICATION=True, ENABLE_MAILJET=True, MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION=1
     )

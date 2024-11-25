@@ -28,7 +28,7 @@ class TestSanctionList(TestCase):
             associated_email="test_email@email.com",
         )
 
-    @patch("hct_mis_api.apps.utils.mailjet.requests.post")
+    @patch("hct_mis_api.apps.utils.celery_tasks.requests.post")
     @patch("hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list.load_workbook")
     @override_settings(EMAIL_SUBJECT_PREFIX="test")
     @override_config(ENABLE_MAILJET=True)
