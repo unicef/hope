@@ -1,7 +1,10 @@
+from collections import defaultdict
+
+from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
 
-def migrate_tp_into_pp()-> None:
+def migrate_tp_into_pp() -> None:
     TP_MIGRATION_MAPPING = {
         # tp.field: payment_plan.field
         # if value has internal_data__ will story into json
@@ -38,6 +41,34 @@ def migrate_tp_into_pp()-> None:
     # per BA;
     for tp in TargetPopulation.objects.all():
         for pp in tp.payment_plans.all():
+            internal_data = defaultdict(dict)
 
             for tp_field, pp_field in TP_MIGRATION_MAPPING.items():
-                pass
+                tp_value = getattr(tp, tp_field, None)
+
+                if tp_value:
+                    pp_field_list = pp_field.split("__")
+                    if len(pp_field_list) == 1:
+                        setattr(pp, pp_field, tp_value)
+                    if len(pp_field_list) == 2 and pp_field_list[0] == internal_data:
+                        internal_data[pp_field_list[1]] = str(tp_value)
+
+                    setattr(pp, "internal_data", internal_data)
+
+            pp.save()
+
+        # if no PP create new PaymentPlan
+        payment_plan = PaymentPlan()
+        for tp_field, pp_field in TP_MIGRATION_MAPPING.items():
+            tp_value = getattr(tp, tp_field, None)
+
+            if tp_value:
+                pp_field_list = pp_field.split("__")
+                if len(pp_field_list) == 1:
+                    setattr(payment_plan, pp_field, tp_value)
+                if len(pp_field_list) == 2 and pp_field_list[0] == internal_data:
+                    internal_data[pp_field_list[1]] = str(tp_value)
+
+                setattr(payment_plan, "internal_data", internal_data)
+
+        payment_plan.save()

@@ -452,7 +452,6 @@ class PaymentPlan(
     AdminUrlMixin,
     InternalDataFieldModel,
 ):
-
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "name",
