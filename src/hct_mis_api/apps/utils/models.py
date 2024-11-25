@@ -153,6 +153,7 @@ class SoftDeletableRepresentationMergeStatusModel(MergeStatusModel):
         abstract = True
 
     # objects = SoftDeletableRepresentationMergedManager(_emit_deprecation_warnings=True)
+    # now we use 'rdi_merge_status' field for filtering
     objects = SoftDeletableRepresentationManager()
     all_merge_status_objects = SoftDeletableRepresentationManager()
     available_objects = SoftDeletableRepresentationMergedManager()
