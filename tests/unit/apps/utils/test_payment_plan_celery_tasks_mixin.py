@@ -1,3 +1,7 @@
+from unittest.mock import patch
+
+from django.contrib import messages
+from django.core.cache import cache
 from django.test import TestCase
 from django.urls import reverse
 
@@ -9,6 +13,8 @@ from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
 from hct_mis_api.apps.payment.models import PaymentPlan
+from hct_mis_api.apps.payment.utils import generate_cache_key
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 class TestPaymentPlanCeleryTasksMixin(TestCase):
@@ -16,6 +22,7 @@ class TestPaymentPlanCeleryTasksMixin(TestCase):
     def setUpTestData(cls) -> None:
         super().setUpTestData()
         cls.business_area = create_afghanistan()
+        cls.program = ProgramFactory(name="Test ABC")
 
         cls.user = UserFactory()
         cls.user.username = "admin"
@@ -26,14 +33,20 @@ class TestPaymentPlanCeleryTasksMixin(TestCase):
         cls.user.is_active = True
         cls.user.save()
 
-        cls.payment_plan = PaymentPlanFactory()
+        cls.payment_plan = PaymentPlanFactory(program=cls.program)
 
     def setUp(self) -> None:
         self.url = reverse("admin:payment_paymentplan_change", args=[self.payment_plan.id])
 
+        self.patcher = patch("django.conf.settings.ROOT_TOKEN", "test-token123")
+        self.mock_root_token = self.patcher.start()
+
+    def tearDown(self) -> None:
+        self.patcher.stop()
+        super().tearDown()
+
     @parameterized.expand(
         [
-            (PaymentPlan.Status.PREPARING, None, 'id="btn-restart_preparing_payment_plan"'),
             (
                 PaymentPlan.Status.LOCKED,
                 PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_ENTITLEMENTS,
@@ -69,3 +82,66 @@ class TestPaymentPlanCeleryTasksMixin(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn(html_element, response.rendered_content)
+
+    def test_restart_prepare_payment_plan_task_success(self) -> None:
+        self.client.login(username=self.user.username, password=self.password)
+        payment_plan = PaymentPlanFactory(
+            status=PaymentPlan.Status.PREPARING,
+            program=self.program,
+        )
+        payment_plan.refresh_from_db()
+        response = self.client.post(
+            reverse("admin:payment_paymentplan_restart_preparing_payment_plan", args=[payment_plan.id]),
+            HTTP_X_ROOT_TOKEN="test-token123",
+        )
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+
+        self.assertEqual(
+            list(messages.get_messages(response.wsgi_request))[0].message,
+            f"Task restarted for Payment Plan: {payment_plan.unicef_id}",
+        )
+
+    def test_restart_prepare_payment_plan_task_incorrect_status(self) -> None:
+        self.client.login(username=self.user.username, password=self.password)
+        payment_plan = PaymentPlanFactory(
+            status=PaymentPlan.Status.OPEN,
+            program=self.program,
+        )
+        payment_plan.refresh_from_db()
+        response = self.client.post(
+            reverse("admin:payment_paymentplan_restart_preparing_payment_plan", args=[payment_plan.id]),
+            HTTP_X_ROOT_TOKEN="test-token123",
+        )
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+
+        self.assertEqual(
+            list(messages.get_messages(response.wsgi_request))[0].message,
+            f"The Payment Plan must has the status {PaymentPlan.Status.PREPARING}",
+        )
+
+    def test_restart_prepare_payment_plan_task_already_running(self) -> None:
+        self.client.login(username=self.user.username, password=self.password)
+        payment_plan = PaymentPlanFactory(
+            status=PaymentPlan.Status.PREPARING,
+            program=self.program,
+        )
+        payment_plan.refresh_from_db()
+        # set the cache to simulate an already running task
+        cache_key = generate_cache_key(
+            {
+                "task_name": "prepare_payment_plan_task",
+                "payment_plan_id": str(payment_plan.id),
+            }
+        )
+        cache.set(cache_key, True, timeout=600)
+
+        response = self.client.post(
+            reverse("admin:payment_paymentplan_restart_preparing_payment_plan", args=[payment_plan.id]),
+            HTTP_X_ROOT_TOKEN="test-token123",
+        )
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+
+        self.assertEqual(
+            list(messages.get_messages(response.wsgi_request))[0].message,
+            f"Task is already running for Payment Plan {payment_plan.unicef_id}.",
+        )
