@@ -7,11 +7,11 @@ import pytest
 from django_webtest import DjangoTestApp
 
 from hct_mis_api.apps.account.fixtures import RoleFactory, UserFactory
-from hct_mis_api.apps.account.models import Role, User
+from hct_mis_api.apps.account.models import Partner, Role, User
 
 
 @pytest.fixture()
-def superuser(request: pytest.FixtureRequest) -> User:
+def superuser(request: pytest.FixtureRequest, partner_unicef: Partner) -> User:
     return UserFactory(is_superuser=True, is_staff=True)
 
 

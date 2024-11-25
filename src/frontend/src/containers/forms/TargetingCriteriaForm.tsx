@@ -5,10 +5,11 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Grid,
   Typography,
 } from '@mui/material';
 import { AddCircleOutline } from '@mui/icons-material';
-import { FieldArray, Formik } from 'formik';
+import { Field, FieldArray, Formik } from 'formik';
 import {
   Component,
   ReactElement,
@@ -28,6 +29,9 @@ import {
   clearField,
   formatCriteriaFilters,
   formatCriteriaIndividualsFiltersBlocks,
+  formatCriteriaCollectorsFiltersBlocks,
+  HhIdValidation,
+  IndIdValidation,
   mapCriteriaToInitialValues,
 } from '@utils/targetingUtils';
 import { DialogContainer } from '../dialogs/DialogContainer';
@@ -37,6 +41,9 @@ import { DialogTitleWrapper } from '../dialogs/DialogTitleWrapper';
 import { TargetingCriteriaIndividualFilterBlocks } from './TargetingCriteriaIndividualFilterBlocks';
 import { AndDivider, AndDividerLabel } from '@components/targeting/AndDivider';
 import { TargetingCriteriaHouseholdFilter } from './TargetingCriteriaHouseholdFilter';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { TargetingCriteriaCollectorFilterBlocks } from './TargetingCriteriaCollectorFilterBlocks';
+import { useAllCollectorFieldsAttributesQuery } from '@generated/graphql';
 
 const ButtonBox = styled.div`
   width: 300px;
@@ -52,6 +59,8 @@ const StyledBox = styled(Box)`
 `;
 
 const validationSchema = Yup.object().shape({
+  householdIds: HhIdValidation,
+  individualIds: IndIdValidation,
   filters: Yup.array().of(
     Yup.object().shape({
       fieldName: Yup.string().required('Field Type is required'),
@@ -69,18 +78,28 @@ const validationSchema = Yup.object().shape({
             .nullable()
             .when(
               ['fieldName', 'fieldAttribute'],
-              (fieldName, fieldAttribute, schema) => {
+              (_fieldName, _fieldAttribute, schema) => {
                 const parent = schema.parent;
                 if (
                   parent &&
                   parent.fieldAttribute &&
-                  parent.fieldAttribute.type === 'PDU'
+                  parent.fieldAttribute?.type === 'PDU'
                 ) {
                   return Yup.string().required('Round Number is required');
                 }
                 return Yup.string().notRequired();
               },
             ),
+        }),
+      ),
+    }),
+  ),
+  collectorsFiltersBlocks: Yup.array().of(
+    Yup.object().shape({
+      collectorBlockFilters: Yup.array().of(
+        Yup.object().shape({
+          fieldName: Yup.string().required('Field Type is required'),
+          value: Yup.string().required('Field Value is required'),
         }),
       ),
     }),
@@ -110,11 +129,12 @@ interface TargetingCriteriaFormPropTypes {
   onClose: () => void;
   individualFiltersAvailable: boolean;
   householdFiltersAvailable: boolean;
+  collectorsFiltersAvailable: boolean;
   isSocialWorkingProgram: boolean;
 }
 
 const associatedWith = (type) => (item) => item.associatedWith === type;
-const isNot = (type) => (item) => item.type !== type;
+const isNot = (type) => (item) => item?.type !== type;
 
 export const TargetingCriteriaForm = ({
   criteria,
@@ -123,6 +143,7 @@ export const TargetingCriteriaForm = ({
   onClose,
   individualFiltersAvailable,
   householdFiltersAvailable,
+  collectorsFiltersAvailable,
   isSocialWorkingProgram,
 }: TargetingCriteriaFormPropTypes): ReactElement => {
   const { t } = useTranslation();
@@ -132,15 +153,24 @@ export const TargetingCriteriaForm = ({
     businessArea,
     programId,
   );
+  const { data: allCollectorFieldsAttributesData } =
+    useAllCollectorFieldsAttributesQuery({
+      fetchPolicy: 'cache-first',
+    });
 
-  const filtersArrayWrapperRef = useRef(null);
+  const householdsFiltersBlocksWrapperRef = useRef(null);
   const individualsFiltersBlocksWrapperRef = useRef(null);
+  const collectorsFiltersBlocksWrapperRef = useRef(null);
   const initialValue = mapCriteriaToInitialValues(criteria);
   const [individualData, setIndividualData] = useState(null);
   const [householdData, setHouseholdData] = useState(null);
   const [allDataChoicesDict, setAllDataChoicesDict] = useState(null);
+  const [allCollectorFieldsChoicesDict, setAllCollectorFieldsChoicesDict] =
+    useState(null);
+
   useEffect(() => {
     if (loading) return;
+
     const filteredIndividualData = {
       allFieldsAttributes: data?.allFieldsAttributes
         ?.filter(associatedWith('Individual'))
@@ -154,6 +184,7 @@ export const TargetingCriteriaForm = ({
       ),
     };
     setHouseholdData(filteredHouseholdData);
+
     const allDataChoicesDictTmp = data?.allFieldsAttributes?.reduce(
       (acc, item) => {
         acc[item.name] = item.choices;
@@ -162,81 +193,119 @@ export const TargetingCriteriaForm = ({
       {},
     );
     setAllDataChoicesDict(allDataChoicesDictTmp);
-  }, [data, loading]);
 
-  if (!data) return null;
+    const allCollectorFieldsChoicesDictTmp =
+      allCollectorFieldsAttributesData?.allCollectorFieldsAttributes?.reduce(
+        (acc, item) => {
+          acc[item.name] = item.choices;
+          return acc;
+        },
+        {},
+      );
+    setAllCollectorFieldsChoicesDict(allCollectorFieldsChoicesDictTmp);
+  }, [data, loading, allCollectorFieldsAttributesData]);
 
-  const validate = ({
-    filters,
-    individualsFiltersBlocks,
-  }): { nonFieldErrors?: string[] } => {
-    const filterNullOrNoSelections = (filter): boolean =>
-      !filter.isNull &&
-      (filter.value === null ||
-        filter.value === '' ||
-        (filter?.fieldAttribute?.type === 'SELECT_MANY' &&
-          filter.value &&
-          filter.value.length === 0));
+  if (!data || !allCollectorFieldsAttributesData) return null;
 
-    const filterEmptyFromTo = (filter): boolean =>
-      !filter.isNull &&
-      typeof filter.value === 'object' &&
-      filter.value !== null &&
-      Object.prototype.hasOwnProperty.call(filter.value, 'from') &&
-      Object.prototype.hasOwnProperty.call(filter.value, 'to') &&
-      !filter.value.from &&
-      !filter.value.to;
+  const filterNullOrNoSelections = (filter): boolean =>
+    !filter.isNull &&
+    (filter.value === null ||
+      filter.value === '' ||
+      (filter?.fieldAttribute?.type === 'SELECT_MANY' &&
+        filter.value &&
+        filter.value.length === 0));
 
-    const hasFiltersNullValues = Boolean(
-      filters.filter(filterNullOrNoSelections).length,
-    );
+  const filterEmptyFromTo = (filter): boolean =>
+    !filter.isNull &&
+    typeof filter.value === 'object' &&
+    filter.value !== null &&
+    Object.prototype.hasOwnProperty.call(filter.value, 'from') &&
+    Object.prototype.hasOwnProperty.call(filter.value, 'to') &&
+    !filter.value.from &&
+    !filter.value.to;
 
-    const hasFiltersEmptyFromToValues = Boolean(
-      filters.filter(filterEmptyFromTo).length,
-    );
+  const validate = (values) => {
+    const hasHouseholdsFiltersBlocksErrors =
+      values.householdsFiltersBlocks.some(filterNullOrNoSelections) ||
+      values.householdsFiltersBlocks.some(filterEmptyFromTo);
 
-    const hasFiltersErrors =
-      hasFiltersNullValues || hasFiltersEmptyFromToValues;
+    const hasBlockFiltersErrors = (blocks) => {
+      if (!blocks || !Array.isArray(blocks)) {
+        return false;
+      }
 
-    const hasIndividualsFiltersBlocksErrors = individualsFiltersBlocks.some(
-      (block) => {
-        const hasNulls = block.individualBlockFilters.some(
-          filterNullOrNoSelections,
-        );
-        const hasFromToError =
-          block.individualBlockFilters.some(filterEmptyFromTo);
+      return blocks.some((block) => {
+        if (!block.blockFilters || !Array.isArray(block.blockFilters)) {
+          return false;
+        }
 
+        const hasNulls = block.blockFilters.some(filterNullOrNoSelections);
+        const hasFromToError = block.blockFilters.some(filterEmptyFromTo);
         return hasNulls || hasFromToError;
-      },
+      });
+    };
+
+    const hasIndividualsFiltersBlocksErrors = hasBlockFiltersErrors(
+      values.individualsFiltersBlocks,
+    );
+    const hasCollectorsFiltersBlocksErrors = hasBlockFiltersErrors(
+      values.collectorsFiltersBlocks,
     );
 
     const errors: { nonFieldErrors?: string[] } = {};
-    if (hasFiltersErrors || hasIndividualsFiltersBlocksErrors) {
+    if (
+      hasHouseholdsFiltersBlocksErrors ||
+      hasIndividualsFiltersBlocksErrors ||
+      hasCollectorsFiltersBlocksErrors
+    ) {
       errors.nonFieldErrors = ['You need to fill out missing values.'];
     }
-    if (filters.length + individualsFiltersBlocks.length === 0) {
+    if (
+      values.householdsFiltersBlocks.length +
+        values.individualsFiltersBlocks.length +
+        values.collectorsFiltersBlocks.length ===
+        0 &&
+      (!values.householdIds || values.householdIds.length === 0) &&
+      (!values.individualIds || values.individualIds.length === 0)
+    ) {
       errors.nonFieldErrors = [
-        'You need to add at least one household filter or an individual block filter.',
+        'You need to add at least one household filter, an individual block filter, a collector block filter, a household ID, or an individual ID.',
       ];
     } else if (
-      individualsFiltersBlocks.filter(
-        (block) => block.individualBlockFilters.length === 0,
+      values.individualsFiltersBlocks.filter(
+        (block) => block.blockFilters && block.blockFilters.length === 0,
+      ).length > 0 ||
+      values.collectorsFiltersBlocks.filter(
+        (block) => block.blockFilters && block.blockFilters.length === 0,
       ).length > 0
     ) {
       errors.nonFieldErrors = [
-        'You need to add at least one household filter or an individual block filter.',
+        'You need to add at least one household filter, an individual block filter, a collector block filter, a household IDs, or an individual IDs.',
       ];
     }
     return errors;
   };
 
   const handleSubmit = (values, bag): void => {
-    const filters = formatCriteriaFilters(values.filters);
-
+    const householdsFiltersBlocks = formatCriteriaFilters(
+      values.householdsFiltersBlocks,
+    );
+    const individualIds = values.individualIds;
+    const householdIds = values.householdIds;
     const individualsFiltersBlocks = formatCriteriaIndividualsFiltersBlocks(
       values.individualsFiltersBlocks,
     );
-    addCriteria({ filters, individualsFiltersBlocks });
+    const collectorsFiltersBlocks = formatCriteriaCollectorsFiltersBlocks(
+      values.collectorsFiltersBlocks,
+    );
+
+    addCriteria({
+      householdsFiltersBlocks,
+      individualsFiltersBlocks,
+      collectorsFiltersBlocks,
+      individualIds,
+      householdIds,
+    });
     return bag.resetForm();
   };
   if (loading || !open) return null;
@@ -289,14 +358,36 @@ export const TargetingCriteriaForm = ({
                     ? ''
                     : 'All rules defined below have to be true for the entire household.'}
                 </DialogDescription>
+                <Grid container spacing={3}>
+                  {householdFiltersAvailable && (
+                    <Grid item xs={12}>
+                      <Field
+                        data-cy="input-included-household-ids"
+                        name="householdIds"
+                        fullWidth
+                        multiline
+                        variant="outlined"
+                        label={t('Household IDs')}
+                        component={FormikTextField}
+                      />
+                    </Grid>
+                  )}
+                  {householdFiltersAvailable && individualFiltersAvailable && (
+                    <Grid item xs={12}>
+                      <AndDivider>
+                        <AndDividerLabel>AND</AndDividerLabel>
+                      </AndDivider>
+                    </Grid>
+                  )}
+                </Grid>
                 <FieldArray
-                  name="filters"
+                  name="householdsFiltersBlocks"
                   render={(arrayHelpers) => (
                     <ArrayFieldWrapper
                       arrayHelpers={arrayHelpers}
-                      ref={filtersArrayWrapperRef}
+                      ref={householdsFiltersBlocksWrapperRef}
                     >
-                      {values.filters.map((each, index) => (
+                      {values.householdsFiltersBlocks.map((each, index) => (
                         <TargetingCriteriaHouseholdFilter
                           // eslint-disable-next-line
                           key={index}
@@ -326,7 +417,7 @@ export const TargetingCriteriaForm = ({
                     <ButtonBox>
                       <Button
                         onClick={() =>
-                          filtersArrayWrapperRef.current
+                          householdsFiltersBlocksWrapperRef.current
                             .getArrayHelpers()
                             .push({ fieldName: '' })
                         }
@@ -340,13 +431,34 @@ export const TargetingCriteriaForm = ({
                     </ButtonBox>
                   </Box>
                 ) : null}
-                {individualFiltersAvailable && !isSocialWorkingProgram ? (
+                {individualFiltersAvailable ? (
                   <>
-                    {householdFiltersAvailable ? (
+                    {individualFiltersAvailable ? (
                       <AndDivider>
                         <AndDividerLabel>And</AndDividerLabel>
                       </AndDivider>
                     ) : null}
+                    <Grid container spacing={3}>
+                      <>
+                        <Grid item xs={12}>
+                          <Box pb={3}>
+                            <Field
+                              data-cy="input-included-individual-ids"
+                              name="individualIds"
+                              fullWidth
+                              variant="outlined"
+                              label={t('Individual IDs')}
+                              component={FormikTextField}
+                            />
+                          </Box>
+                        </Grid>
+                        <Grid item xs={12}>
+                          <AndDivider>
+                            <AndDividerLabel>AND</AndDividerLabel>
+                          </AndDivider>
+                        </Grid>
+                      </>
+                    </Grid>
                     <FieldArray
                       name="individualsFiltersBlocks"
                       render={(arrayHelpers) => (
@@ -385,6 +497,54 @@ export const TargetingCriteriaForm = ({
                           startIcon={<AddCircleOutline />}
                         >
                           ADD INDIVIDUAL RULE GROUP
+                        </Button>
+                      </ButtonBox>
+                    </Box>
+                  </>
+                ) : null}
+                {collectorsFiltersAvailable ? (
+                  <>
+                    <AndDivider>
+                      <AndDividerLabel>And</AndDividerLabel>
+                    </AndDivider>
+                    <FieldArray
+                      name="collectorsFiltersBlocks"
+                      render={(arrayHelpers) => (
+                        <ArrayFieldWrapper
+                          arrayHelpers={arrayHelpers}
+                          ref={collectorsFiltersBlocksWrapperRef}
+                        >
+                          {values.collectorsFiltersBlocks.map(
+                            (_each, index) => (
+                              <TargetingCriteriaCollectorFilterBlocks
+                                // eslint-disable-next-line
+                                key={index}
+                                blockIndex={index}
+                                data={allCollectorFieldsAttributesData}
+                                values={values}
+                                choicesToDict={allCollectorFieldsChoicesDict}
+                                onDelete={() => arrayHelpers.remove(index)}
+                              />
+                            ),
+                          )}
+                        </ArrayFieldWrapper>
+                      )}
+                    />
+                    <Box display="flex" flexDirection="column">
+                      <ButtonBox>
+                        <Button
+                          data-cy="button-collector-rule"
+                          onClick={() =>
+                            collectorsFiltersBlocksWrapperRef.current
+                              .getArrayHelpers()
+                              .push({
+                                collectorBlockFilters: [{ fieldName: '' }],
+                              })
+                          }
+                          color="primary"
+                          startIcon={<AddCircleOutline />}
+                        >
+                          ADD COLLECTOR RULE GROUP
                         </Button>
                       </ButtonBox>
                     </Box>

@@ -7,19 +7,22 @@ import {
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Divider, Grid, Typography } from '@mui/material';
-import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { getTargetingCriteriaVariables } from '@utils/targetingUtils';
+import {
+  getTargetingCriteriaVariables,
+  HhIdValidation,
+  HhIndIdValidation,
+  IndIdValidation,
+} from '@utils/targetingUtils';
 import { Field, FieldArray, Form, Formik } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from 'src/programContext';
 import * as Yup from 'yup';
-import { AndDivider, AndDividerLabel } from '../AndDivider';
 import { Exclusions } from '../CreateTargetPopulation/Exclusions';
 import { PaperContainer } from '../PaperContainer';
 import { EditTargetPopulationHeader } from './EditTargetPopulationHeader';
-import { TargetingCriteriaDisplay } from '../TargetingCriteriaDisplay/TargetingCriteriaDisplay';
+import { AddFilterTargetingCriteriaDisplay } from '../TargetingCriteriaDisplay/AddFilterTargetingCriteriaDisplay';
 import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
 import { ReactElement } from 'react';
 
@@ -46,8 +49,6 @@ export const EditTargetPopulation = ({
         .flagExcludeIfActiveAdjudicationTicket || false,
     flagExcludeIfOnSanctionList:
       targetPopulation.targetingCriteria.flagExcludeIfOnSanctionList || false,
-    householdIds: targetPopulation.targetingCriteria.householdIds,
-    individualIds: targetPopulation.targetingCriteria.individualIds,
     programCycleId: {
       value: targetPopulation.programCycle.id,
       name: targetPopulation.programCycle.title,
@@ -56,49 +57,26 @@ export const EditTargetPopulation = ({
   const [mutate, { loading }] = useUpdateTpMutation();
   const { showMessage } = useSnackbar();
   const { baseUrl } = useBaseUrl();
-  const { selectedProgram, isSocialDctType, isStandardDctType } =
-    useProgramContext();
-
-  const category =
-    targetPopulation.targetingCriteria?.rules.length !== 0 ? 'filters' : 'ids';
-
-  const individualFiltersAvailable =
-    selectedProgram?.dataCollectingType?.individualFiltersAvailable;
-  const householdFiltersAvailable =
-    selectedProgram?.dataCollectingType?.householdFiltersAvailable;
+  const { isSocialDctType, isStandardDctType } = useProgramContext();
 
   const handleValidate = (values): { targetingCriteria?: string } => {
-    const { targetingCriteria } = values;
+    const { targetingCriteria, householdIds, individualIds } = values;
     const errors: { targetingCriteria?: string } = {};
-    if (!targetingCriteria.length && category === 'filters') {
+    if (!targetingCriteria.length && !householdIds && !individualIds) {
       errors.targetingCriteria = t(
-        'You need to select at least one targeting criteria',
+        'You need to select at least one targeting criteria or individual ID or household ID',
       );
     }
     return errors;
   };
 
-  const idValidation = Yup.string().test(
-    'testName',
-    'ID is not in the correct format',
-    (ids) => {
-      if (!ids?.length) {
-        return true;
-      }
-      const idsArr = ids.split(',');
-      return idsArr.every((el) =>
-        /^\s*(IND|HH)-\d{2}-\d{4}\.\d{4}\s*$/.test(el),
-      );
-    },
-  );
-
   const validationSchema = Yup.object().shape({
     name: Yup.string()
       .min(3, 'Targeting name should have at least 3 characters.')
       .max(255, 'Targeting name should have at most 255 characters.'),
-    excludedIds: idValidation,
-    householdIds: idValidation,
-    individualIds: idValidation,
+    excludedIds: HhIndIdValidation,
+    householdIds: HhIdValidation,
+    individualIds: IndIdValidation,
     exclusionReason: Yup.string().max(500, t('Too long')),
     programCycleId: Yup.object().shape({
       value: Yup.string().required('Program Cycle is required'),
@@ -111,7 +89,6 @@ export const EditTargetPopulation = ({
         variables: {
           input: {
             id: values.id,
-            programId: values.program,
             excludedIds: values.excludedIds,
             exclusionReason: values.exclusionReason,
             programCycleId: values.programCycleId.value,
@@ -123,8 +100,6 @@ export const EditTargetPopulation = ({
                 values.flagExcludeIfActiveAdjudicationTicket,
               flagExcludeIfOnSanctionList: values.flagExcludeIfOnSanctionList,
               criterias: values.targetingCriteria,
-              householdIds: values.householdIds,
-              individualIds: values.individualIds,
             }),
           },
         },
@@ -144,7 +119,7 @@ export const EditTargetPopulation = ({
       onSubmit={handleSubmit}
     >
       {({ values, submitForm, errors, setFieldValue }) => (
-        <Form>
+        <Form data-cy="edit-target-population-form">
           <AutoSubmitFormOnEnter />
           <EditTargetPopulationHeader
             handleSubmit={submitForm}
@@ -152,9 +127,9 @@ export const EditTargetPopulation = ({
             loading={loading}
             baseUrl={baseUrl}
             targetPopulation={targetPopulation}
-            category={category}
+            data-cy="edit-target-population-header"
           />
-          <PaperContainer>
+          <PaperContainer data-cy="paper-container">
             <Box pt={3} pb={3}>
               <Typography variant="h6">{t('Targeting Criteria')}</Typography>
             </Box>
@@ -168,6 +143,7 @@ export const EditTargetPopulation = ({
                   required
                   // @ts-ignore
                   error={errors.programCycleId?.value}
+                  data-cy="program-cycle-autocomplete"
                 />
               </Grid>
             </Grid>
@@ -181,7 +157,6 @@ export const EditTargetPopulation = ({
                   required
                   component={FormikTextField}
                   variant="outlined"
-                  data-cy="input-name"
                   disabled={targetPopulation.status === 'LOCKED'}
                 />
               </Grid>
@@ -189,127 +164,32 @@ export const EditTargetPopulation = ({
             <Box pt={6} pb={6}>
               <Divider />
             </Box>
-            {category === 'filters' ? (
-              <FieldArray
-                name="targetingCriteria"
-                render={(arrayHelpers) => (
-                  <TargetingCriteriaDisplay
-                    helpers={arrayHelpers}
-                    rules={values.targetingCriteria}
-                    isEdit
-                    screenBeneficiary={screenBeneficiary}
-                    isStandardDctType={isStandardDctType}
-                    isSocialDctType={isSocialDctType}
-                    category={category}
-                  />
-                )}
-              />
-            ) : null}
-            {category === 'ids' ? (
-              <>
-                <Grid container spacing={3}>
-                  {householdFiltersAvailable && (
-                    <Grid item xs={12}>
-                      <Field
-                        data-cy="input-included-household-ids"
-                        name="householdIds"
-                        fullWidth
-                        variant="outlined"
-                        label={t('Household IDs')}
-                        component={FormikTextField}
-                      />
-                    </Grid>
-                  )}
-                  {householdFiltersAvailable && individualFiltersAvailable && (
-                    <Grid item xs={12}>
-                      <AndDivider>
-                        <AndDividerLabel>OR</AndDividerLabel>
-                      </AndDivider>
-                    </Grid>
-                  )}
-                  {individualFiltersAvailable && (
-                    <Grid item xs={12}>
-                      <Box pb={3}>
-                        <Field
-                          data-cy="input-included-individual-ids"
-                          name="individualIds"
-                          fullWidth
-                          variant="outlined"
-                          label={t('Individual IDs')}
-                          component={FormikTextField}
-                        />
-                      </Box>
-                    </Grid>
-                  )}
-                </Grid>
-                <Box mt={3} p={3}>
-                  <Grid container spacing={3}>
-                    {isStandardDctType && (
-                      <Grid item xs={6}>
-                        <Field
-                          name="flagExcludeIfActiveAdjudicationTicket"
-                          label={t(
-                            'Exclude Households with Active Adjudication Ticket',
-                          )}
-                          color="primary"
-                          component={FormikCheckboxField}
-                          data-cy="input-active-households-adjudication-ticket"
-                        />
-                      </Grid>
-                    )}
-                    {isSocialDctType && (
-                      <Grid item xs={6}>
-                        <Field
-                          name="flagExcludeIfActiveAdjudicationTicket"
-                          label={t(
-                            'Exclude People with Active Adjudication Ticket',
-                          )}
-                          color="primary"
-                          component={FormikCheckboxField}
-                          data-cy="input-active-people-adjudication-ticket"
-                        />
-                      </Grid>
-                    )}
-                    {screenBeneficiary && isSocialDctType && (
-                      <Grid item xs={6}>
-                        <Field
-                          name="flagExcludeIfOnSanctionList"
-                          label={t(
-                            'Exclude People with an Active Sanction Screen Flag',
-                          )}
-                          color="primary"
-                          component={FormikCheckboxField}
-                          data-cy="input-active-people-sanction-flag"
-                        />
-                      </Grid>
-                    )}
-                    {screenBeneficiary && isStandardDctType && (
-                      <Grid item xs={6}>
-                        <Field
-                          name="flagExcludeIfOnSanctionList"
-                          label={t(
-                            'Exclude Households with an Active Sanction Screen Flag',
-                          )}
-                          color="primary"
-                          component={FormikCheckboxField}
-                          data-cy="input-active-sanction-flag"
-                        />
-                      </Grid>
-                    )}
-                  </Grid>
-                </Box>
-              </>
-            ) : null}
+            <FieldArray
+              name="targetingCriteria"
+              render={(arrayHelpers) => (
+                <AddFilterTargetingCriteriaDisplay
+                  helpers={arrayHelpers}
+                  rules={values.targetingCriteria}
+                  isEdit
+                  screenBeneficiary={screenBeneficiary}
+                  isStandardDctType={isStandardDctType}
+                  isSocialDctType={isSocialDctType}
+                  data-cy="add-filter-targeting-criteria-display"
+                />
+              )}
+            />
           </PaperContainer>
-          {category === 'filters' && (
-            <Exclusions initialOpen={Boolean(values.excludedIds)} />
-          )}
+          <Exclusions
+            initialOpen={Boolean(values.excludedIds)}
+            data-cy="exclusions"
+          />
           <Box
             pt={3}
             pb={3}
             display="flex"
             flexDirection="column"
             alignItems="center"
+            data-cy="save-message-box"
           >
             <Typography style={{ color: '#b1b1b5' }} variant="h6">
               {t('Save to see the list of households')}
