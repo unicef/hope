@@ -293,7 +293,7 @@ class IndividualFilter(FilterSet):
     rdi_id = CharFilter(method="filter_rdi_id")
     duplicates_only = BooleanFilter(method="filter_duplicates_only")
     rdi_merge_status = ChoiceFilter(
-        field_name="rdi_merge_status", choices=MergeStatusModel.STATUS_CHOICE, required=True
+        field_name="rdi_merge_status", choices=MergeStatusModel.STATUS_CHOICE, required=False, default="MERGED"
     )
 
     class Meta:
