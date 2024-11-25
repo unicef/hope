@@ -94,9 +94,7 @@ class HouseholdFilter(FilterSet):
     withdrawn = BooleanFilter(field_name="withdrawn")
     country_origin = CharFilter(field_name="country_origin__iso_code3", lookup_expr="startswith")
     is_active_program = BooleanFilter(method="filter_is_active_program")
-    rdi_merge_status = ChoiceFilter(
-        field_name="rdi_merge_status", choices=MergeStatusModel.STATUS_CHOICE, required=True
-    )
+    rdi_merge_status = ChoiceFilter(method="rdi_merge_status_filter", choices=MergeStatusModel.STATUS_CHOICE)
 
     class Meta:
         model = Household
@@ -273,6 +271,12 @@ class HouseholdFilter(FilterSet):
         else:
             return qs
 
+    def rdi_merge_status_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
+        if value == MergeStatusModel.PENDING:
+            return qs.filter(rdi_merge_status=MergeStatusModel.PENDING)
+        else:
+            return qs.filter(rdi_merge_status=MergeStatusModel.MERGED)
+
 
 class IndividualFilter(FilterSet):
     business_area = BusinessAreaSlugFilter()
@@ -292,9 +296,7 @@ class IndividualFilter(FilterSet):
     is_active_program = BooleanFilter(method="filter_is_active_program")
     rdi_id = CharFilter(method="filter_rdi_id")
     duplicates_only = BooleanFilter(method="filter_duplicates_only")
-    rdi_merge_status = ChoiceFilter(
-        field_name="rdi_merge_status", choices=MergeStatusModel.STATUS_CHOICE, required=True
-    )
+    rdi_merge_status = ChoiceFilter(method="rdi_merge_status_filter", choices=MergeStatusModel.STATUS_CHOICE)
 
     class Meta:
         model = Individual
@@ -323,6 +325,12 @@ class IndividualFilter(FilterSet):
             "first_registration_date",
         )
     )
+
+    def rdi_merge_status_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
+        if value == MergeStatusModel.PENDING:
+            return qs.filter(rdi_merge_status=MergeStatusModel.PENDING)
+        else:
+            return qs.filter(rdi_merge_status=MergeStatusModel.MERGED)
 
     def flags_filter(self, qs: QuerySet, name: str, value: List[str]) -> QuerySet:
         q_obj = Q()
