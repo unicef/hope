@@ -18,7 +18,7 @@ export const AllHouseholds = gql`
     $admin2: ID
     $withdrawn: Boolean
     $program: ID
-    $rdiMergeStatus: String!
+    $rdiMergeStatus: String
     $rdiId: String
   ) {
     allHouseholds(

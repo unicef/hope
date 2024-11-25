@@ -1,13 +1,10 @@
 import { Box, Checkbox, FormControlLabel, Grid } from '@mui/material';
 import { ReactElement, useState } from 'react';
 import {
-  AllImportedIndividualsQueryVariables,
-  AllMergedIndividualsQueryVariables,
+  AllIndividualsQueryVariables,
   HouseholdChoiceDataQuery,
-  ImportedIndividualMinimalFragment,
   MergedIndividualMinimalFragment,
-  useAllImportedIndividualsQuery,
-  useAllMergedIndividualsQuery,
+  useAllIndividualsQuery,
 } from '@generated/graphql';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells as importedPeopleTableHeadCells } from './ImportedPeopleTableHeadCells';
@@ -68,13 +65,13 @@ export function ImportedPeopleTable({
       )}
       {isMerged ? (
         <UniversalTable<
-        MergedIndividualMinimalFragment,
-        AllMergedIndividualsQueryVariables
+          MergedIndividualMinimalFragment,
+          AllIndividualsQueryVariables
         >
           title={title}
           headCells={mergedPeopleTableHeadCells}
-          query={useAllMergedIndividualsQuery}
-          queriedObjectName="allMergedIndividuals"
+          query={useAllIndividualsQuery}
+          queriedObjectName="allIndividuals"
           rowsPerPageOptions={rowsPerPageOptions}
           initialVariables={initialVariables}
           isOnPaper={isOnPaper}
@@ -89,13 +86,13 @@ export function ImportedPeopleTable({
         />
       ) : (
         <UniversalTable<
-        ImportedIndividualMinimalFragment,
-        AllImportedIndividualsQueryVariables
+          MergedIndividualMinimalFragment,
+          AllIndividualsQueryVariables
         >
           title={title}
           headCells={importedPeopleTableHeadCells}
-          query={useAllImportedIndividualsQuery}
-          queriedObjectName="allImportedIndividuals"
+          query={useAllIndividualsQuery}
+          queriedObjectName="allIndividuals"
           rowsPerPageOptions={rowsPerPageOptions}
           initialVariables={initialVariables}
           isOnPaper={isOnPaper}

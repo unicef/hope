@@ -1,12 +1,12 @@
 import { PhotoModal } from '@core/PhotoModal/PhotoModal';
 import {
-  ImportedIndividualDetailedFragment,
-  useImportedIndividualPhotosQuery,
+  IndividualDetailedFragment,
+  useIndividualPhotosQuery,
 } from '@generated/graphql';
 import { ReactElement } from 'react';
 
 interface DocumentRegistrationPhotoModalProps {
-  individual: ImportedIndividualDetailedFragment;
+  individual: IndividualDetailedFragment;
   documentNumber: string;
   documentId: string;
 }
@@ -16,11 +16,11 @@ export function DocumentRegistrationPhotoModal({
   documentNumber,
   documentId,
 }: DocumentRegistrationPhotoModalProps): ReactElement {
-  const { data } = useImportedIndividualPhotosQuery({
-    variables: { id: individual?.id },
+  const { data } = useIndividualPhotosQuery({
+    variables: { id: individual?.id, rdiMergeStatus: 'PENDING' },
     fetchPolicy: 'network-only',
   });
-  const documentWithPhoto = data?.importedIndividual?.documents?.edges?.find(
+  const documentWithPhoto = data?.individual?.documents?.edges?.find(
     (el) => el.node.id === documentId,
   );
 

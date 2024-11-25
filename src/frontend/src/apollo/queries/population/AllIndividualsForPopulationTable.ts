@@ -27,7 +27,7 @@ export const AllIndividualsForPopulationTable = gql`
     $program: ID
     $isActiveProgram: Boolean
     $rdiId: String
-    $rdiMergeStatus: String!
+    $rdiMergeStatus: String
   ) {
     allIndividuals(
       before: $before

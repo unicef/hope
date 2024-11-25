@@ -3,14 +3,14 @@ import { MockedProvider } from '@apollo/react-testing';
 import { act } from 'react';
 import wait from 'waait';
 import { ImportedHouseholdTable } from '.';
-import { render, ApolloLoadingLink } from '../../../../testUtils/testUtils';
-import { fakeApolloAllImportedHouseholds } from '../../../../../fixtures/registration/fakeApolloAllImportedHouseholds';
+import { render } from '../../../../testUtils/testUtils';
 import { fakeRegistrationDetailedFragment } from '../../../../../fixtures/registration/fakeRegistrationDetailedFragment';
+import { fakeApolloAllHouseholdsForPopulationTable } from 'fixtures/population/fakeApolloAllHouseholdsForPopulationTable';
 
 describe('containers/tables/rdi/ImportedHouseholdTable', () => {
   it('should render with data', async () => {
     const { container } = render(
-      <MockedProvider mocks={fakeApolloAllImportedHouseholds}>
+      <MockedProvider mocks={fakeApolloAllHouseholdsForPopulationTable}>
         <ImportedHouseholdTable
           businessArea="afghanistan"
           rdi={fakeRegistrationDetailedFragment}
@@ -25,7 +25,7 @@ describe('containers/tables/rdi/ImportedHouseholdTable', () => {
 
   it('should render loading', () => {
     const { container } = render(
-      <MockedProvider mocks={fakeApolloAllImportedHouseholds}>
+      <MockedProvider mocks={fakeApolloAllHouseholdsForPopulationTable}>
         <ImportedHouseholdTable
           businessArea="afghanistan"
           rdi={fakeRegistrationDetailedFragment}
