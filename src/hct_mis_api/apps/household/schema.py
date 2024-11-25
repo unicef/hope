@@ -266,11 +266,11 @@ class IndividualNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTyp
 
     @staticmethod
     def resolve_documents(parent: Individual, info: Any) -> QuerySet[Document]:
-        return Document.all_merge_status_objects.filter(pk__in=parent.documents.values("id"))
+        return Document.objects.filter(pk__in=parent.documents.values("id"))
 
     @staticmethod
     def resolve_identities(parent: Individual, info: Any) -> QuerySet[IndividualIdentity]:
-        return IndividualIdentity.all_merge_status_objects.filter(pk__in=parent.identities.values("id"))
+        return IndividualIdentity.objects.filter(pk__in=parent.identities.values("id"))
 
     @staticmethod
     def resolve_import_id(parent: Individual, info: Any) -> str:
