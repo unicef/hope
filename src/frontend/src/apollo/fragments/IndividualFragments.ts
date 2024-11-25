@@ -104,7 +104,6 @@ export const individualDetailed = gql`
     lastSyncAt
     deduplicationBatchStatus
     disability
-    importedIndividualId
     commsDisability
     firstRegistrationDate
     whoAnswersAltPhone

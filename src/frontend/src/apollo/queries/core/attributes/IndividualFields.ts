@@ -1,10 +1,7 @@
 import { gql } from '@apollo/client';
 
-export const ImportedIndividualFields = gql`
-  query ImportedIndividualFields(
-    $businessAreaSlug: String
-    $programId: String
-  ) {
+export const IndividualFields = gql`
+  query IndividualFields($businessAreaSlug: String, $programId: String) {
     allFieldsAttributes(
       businessAreaSlug: $businessAreaSlug
       programId: $programId
