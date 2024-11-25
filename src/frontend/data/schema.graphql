@@ -258,7 +258,6 @@ type BankAccountInfoNode implements Node {
   bankAccountNumber: String!
   bankBranchName: String!
   accountHolderName: String!
-  isMigrationHandled: Boolean!
   copiedFrom: BankAccountInfoNode
   copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): BankAccountInfoNodeConnection!
   type: String
@@ -953,30 +952,12 @@ type DeliveredQuantityNode {
   currency: String
 }
 
-enum DeliveryMechanismDataDeliveryMechanismChoice {
-  CARDLESS_CASH_WITHDRAWAL
-  CASH
-  CASH_BY_FSP
-  CHEQUE
-  DEPOSIT_TO_CARD
-  MOBILE_MONEY
-  PRE_PAID_CARD
-  REFERRAL
-  TRANSFER
-  TRANSFER_TO_ACCOUNT
-  VOUCHER
-  ATM_CARD
-  CASH_OVER_THE_COUNTER
-  TRANSFER_TO_DIGITAL_WALLET
-}
-
 type DeliveryMechanismDataNode implements Node {
   id: ID!
   rdiMergeStatus: DeliveryMechanismDataRdiMergeStatus!
   createdAt: DateTime!
   updatedAt: DateTime!
   individual: IndividualNode!
-  deliveryMechanismChoice: DeliveryMechanismDataDeliveryMechanismChoice
   deliveryMechanism: DeliveryMechanismNode!
   data: JSONString!
   isValid: Boolean
@@ -1047,23 +1028,6 @@ type DeliveryMechanismNodeEdge {
   cursor: String!
 }
 
-enum DeliveryMechanismPerPaymentPlanDeliveryMechanismChoice {
-  CARDLESS_CASH_WITHDRAWAL
-  CASH
-  CASH_BY_FSP
-  CHEQUE
-  DEPOSIT_TO_CARD
-  MOBILE_MONEY
-  PRE_PAID_CARD
-  REFERRAL
-  TRANSFER
-  TRANSFER_TO_ACCOUNT
-  VOUCHER
-  ATM_CARD
-  CASH_OVER_THE_COUNTER
-  TRANSFER_TO_DIGITAL_WALLET
-}
-
 type DeliveryMechanismPerPaymentPlanNode implements Node {
   id: ID!
   createdAt: DateTime!
@@ -1074,7 +1038,6 @@ type DeliveryMechanismPerPaymentPlanNode implements Node {
   sentDate: DateTime!
   sentBy: UserNode
   status: String!
-  deliveryMechanismChoice: DeliveryMechanismPerPaymentPlanDeliveryMechanismChoice
   deliveryMechanism: DeliveryMechanismNode
   deliveryMechanismOrder: Int!
   sentToPaymentGateway: Boolean!
@@ -3942,6 +3905,7 @@ type Query {
   chartGrievances(businessAreaSlug: String!, year: Int!, administrativeArea: String): ChartGrievanceTicketsNode
   allAddIndividualsFieldsAttributes: [FieldAttributeNode]
   allEditHouseholdFieldsAttributes: [FieldAttributeNode]
+  allEditPeopleFieldsAttributes: [FieldAttributeNode]
   grievanceTicketStatusChoices: [ChoiceObject]
   grievanceTicketCategoryChoices: [ChoiceObject]
   grievanceTicketManualCategoryChoices: [ChoiceObject]
