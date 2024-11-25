@@ -1,9 +1,7 @@
 import {
   AllHouseholdsQueryVariables,
-  AllImportedHouseholdsQueryVariables,
   HouseholdMinimalFragment,
   HouseholdRdiMergeStatus,
-  ImportedHouseholdMinimalFragment,
   useAllHouseholdsQuery,
 } from '@generated/graphql';
 import { ReactElement } from 'react';
@@ -46,10 +44,7 @@ export function ImportedHouseholdTable({
     );
   }
   return (
-    <UniversalTable<
-      ImportedHouseholdMinimalFragment,
-      AllImportedHouseholdsQueryVariables
-    >
+    <UniversalTable<HouseholdMinimalFragment, AllHouseholdsQueryVariables>
       headCells={importedHeadCells}
       query={useAllHouseholdsQuery}
       queriedObjectName="allHouseholds"

@@ -1,12 +1,12 @@
 import { useParams } from 'react-router-dom';
 import { PhotoModal } from '@core/PhotoModal/PhotoModal';
-import { useImportedIndividualFlexFieldsQuery } from '@generated/graphql';
 import { ReactElement } from 'react';
+import { useIndividualFlexFieldsQuery } from '@generated/graphql';
 
 export function ImportedIndividualFlexFieldPhotoModal({ field }): ReactElement {
   const { id } = useParams();
-  const { data } = useImportedIndividualFlexFieldsQuery({
-    variables: { id },
+  const { data } = useIndividualFlexFieldsQuery({
+    variables: { id, rdiMergeStatus: 'PENDING' },
     fetchPolicy: 'network-only',
   });
 
@@ -14,7 +14,7 @@ export function ImportedIndividualFlexFieldPhotoModal({ field }): ReactElement {
     return null;
   }
 
-  const { flexFields } = data.importedIndividual;
+  const { flexFields } = data.individual;
   const picUrl = flexFields[field.name];
 
   return <PhotoModal src={picUrl} />;

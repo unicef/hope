@@ -23,7 +23,7 @@ export const AllIndividuals = gql`
     $withdrawn: Boolean
     $admin2: [ID]
     $flags: [String]
-    $rdiMergeStatus: String!
+    $rdiMergeStatus: String
     $rdiId: String
   ) {
     allIndividuals(

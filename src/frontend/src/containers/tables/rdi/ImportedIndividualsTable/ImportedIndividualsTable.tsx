@@ -103,6 +103,7 @@ export function ImportedIndividualsTable({
               key={row.id}
               isMerged={isMerged}
               individual={row}
+              rdi={rdi}
             />
           )}
         />
