@@ -401,8 +401,8 @@ def prepare_payment_plan_task(self: Any, payment_plan_id: str) -> bool:
         logger.info(f"Task prepare_payment_plan_task with payment_plan_id {payment_plan_id} already running.")
         return False
 
-    # 1 hour timeout
-    cache.set(cache_key, True, timeout=60 * 60)
+    # 10 hours timeout
+    cache.set(cache_key, True, timeout=60 * 60 * 10)
     try:
         with transaction.atomic():
             from hct_mis_api.apps.payment.models import PaymentPlan
