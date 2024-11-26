@@ -225,10 +225,12 @@ def enroll_households_to_program_task(households_ids: List, program_for_enroll_i
         program_for_enroll = Program.objects.get(id=program_for_enroll_id)
         enroll_households_to_program(households, program_for_enroll, user_id)
         populate_index(
-            Individual.objects.filter(program=program_for_enroll),
+            Individual.objects.filter(household__copied_from_id__in=households_ids, program=program_for_enroll),
             get_individual_doc(program_for_enroll.business_area.slug),
         )
-        populate_index(Household.objects.filter(program=program_for_enroll), HouseholdDocument)
+        populate_index(
+            Household.objects.filter(copied_from_id__in=households_ids, program=program_for_enroll), HouseholdDocument
+        )
     finally:
         cache.delete(cache_key)
 
