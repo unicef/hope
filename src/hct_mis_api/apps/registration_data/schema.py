@@ -124,7 +124,6 @@ class RegistrationDataImportNode(BaseNodePermissionMixin, AdminUrlNodeMixin, Dja
             program=parent.program,
             deduplication_engine_status__in=[
                 RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS,
-                RegistrationDataImport.DEDUP_ENGINE_PROCESSING,
             ],
         ).exists()
         if is_still_processing:

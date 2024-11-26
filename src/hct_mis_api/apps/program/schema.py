@@ -287,7 +287,6 @@ class Query(graphene.ObjectType):
             program=program,
             deduplication_engine_status__in=[
                 RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS,
-                RegistrationDataImport.DEDUP_ENGINE_PROCESSING,
             ],
         ).exists()
         # all rdis are deduplicated
