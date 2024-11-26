@@ -9,6 +9,7 @@ from django.contrib.admin.options import get_content_type_for_model
 from django.db import transaction
 from django.db.models import OuterRef, Q, Sum
 from django.db.models.functions import Coalesce
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
 from constance import config
@@ -42,7 +43,6 @@ from hct_mis_api.apps.payment.services.payment_household_snapshot_service import
     create_payment_plan_snapshot_data,
 )
 from hct_mis_api.apps.program.models import ProgramCycle
-from hct_mis_api.apps.targeting.models import TargetPopulation
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -354,7 +354,7 @@ class PaymentPlanService:
         try:
             Payment.objects.bulk_create(payments_to_create)
         except IntegrityError as e:
-            raise GraphQLError("Duplicated Households in provided Targeting") from e
+            raise GraphQLError("Duplicated Households in provided Targeting List") from e
         payment_plan.refresh_from_db()
         create_payment_plan_snapshot_data(payment_plan)
         PaymentPlanService.generate_signature(payment_plan)
@@ -373,24 +373,8 @@ class PaymentPlanService:
         if not business_area.is_payment_plan_applicable:
             raise GraphQLError("PaymentPlan can not be created in provided Business Area")
 
-        targeting_id = decode_id_string(input_data["targeting_id"])
-        try:
-            target_population = (
-                TargetPopulation.objects.select_related("program")
-                .only("program", "program__start_date", "program__end_date")
-                .get(id=targeting_id, status=TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE)
-            )
-        except TargetPopulation.DoesNotExist:
-            raise GraphQLError(
-                f"TargetPopulation id:{targeting_id} does not exist or is not in status 'Ready for Payment Module'"
-            )
-        if not target_population.program:
-            raise GraphQLError("TargetPopulation should have related Program defined")
-
-        if not target_population.program_cycle:
-            raise GraphQLError("Target Population should have assigned Programme Cycle")
-
-        program_cycle = target_population.program_cycle
+        program_cycle_id = decode_id_string(input_data["program_cycle_id"])
+        program_cycle = get_object_or_404(ProgramCycle, pk=program_cycle_id)
         if program_cycle.status not in (ProgramCycle.DRAFT, ProgramCycle.ACTIVE):
             raise GraphQLError("Impossible to create Payment Plan for Programme Cycle within Finished status")
 
@@ -402,10 +386,9 @@ class PaymentPlanService:
             payment_plan = PaymentPlan.objects.create(
                 business_area=business_area,
                 created_by=user,
-                target_population=target_population,
-                program=target_population.program,
+                program=program_cycle.program,
                 program_cycle=program_cycle,
-                name=target_population.name,
+                name=input_data["name"],
                 currency=input_data["currency"],
                 dispersion_start_date=input_data["dispersion_start_date"],
                 dispersion_end_date=dispersion_end_date,
@@ -415,10 +398,6 @@ class PaymentPlanService:
                 status=PaymentPlan.Status.PREPARING,
             )
             program_cycle.set_active()
-
-            TargetPopulation.objects.filter(id=payment_plan.target_population_id).update(
-                status=TargetPopulation.STATUS_ASSIGNED
-            )
 
             transaction.on_commit(lambda: prepare_payment_plan_task.delay(payment_plan.id))
 
@@ -436,30 +415,6 @@ class PaymentPlanService:
             # remove not editable fields
             input_data.pop("targeting_id", None)
             input_data.pop("currency", None)
-
-        targeting_id = decode_id_string(input_data.get("targeting_id"))
-        if targeting_id and targeting_id != str(self.payment_plan.target_population.id):
-            try:
-                new_target_population = TargetPopulation.objects.get(
-                    id=targeting_id, status=TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
-                )
-
-                if not new_target_population.program:
-                    raise GraphQLError("TargetPopulation should have related Program defined")
-
-                self.payment_plan.target_population.status = TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
-                self.payment_plan.target_population.save()
-
-                self.payment_plan.target_population = new_target_population
-                self.payment_plan.program = new_target_population.program
-                self.payment_plan.program_cycle = new_target_population.program_cycle
-                self.payment_plan.target_population.status = TargetPopulation.STATUS_ASSIGNED
-                self.payment_plan.target_population.save()
-                recreate_payments = True
-                recalculate_payments = True
-
-            except TargetPopulation.DoesNotExist:
-                raise GraphQLError(f"TargetPopulation id:{targeting_id} does not exist or is not in status Ready")
 
         if (
             input_data.get("dispersion_start_date")
@@ -484,12 +439,12 @@ class PaymentPlanService:
 
         start_date = input_data.get("start_date")
         start_date = start_date.date() if isinstance(start_date, (timezone.datetime, datetime.datetime)) else start_date
-        if start_date and start_date < self.payment_plan.target_population.program.start_date:
+        if start_date and start_date < self.payment_plan.program_cycle.program.start_date:
             raise GraphQLError("Start date cannot be earlier than start date in the program")
 
         end_date = input_data.get("end_date")
         end_date = end_date.date() if isinstance(end_date, (timezone.datetime, datetime.datetime)) else end_date
-        if end_date and end_date > self.payment_plan.target_population.program.end_date:
+        if end_date and end_date > self.payment_plan.program_cycle.program.end_date:
             raise GraphQLError("End date cannot be later that end date in the program")
 
         self.payment_plan.save()
@@ -508,10 +463,6 @@ class PaymentPlanService:
     def delete(self) -> PaymentPlan:
         if self.payment_plan.status != PaymentPlan.Status.OPEN:
             raise GraphQLError("Only Payment Plan in Open status can be deleted")
-
-        if not self.payment_plan.is_follow_up:
-            self.payment_plan.target_population.status = TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
-            self.payment_plan.target_population.save()
 
         if self.payment_plan.program_cycle.payment_plans.count() == 1:
             # if it's the last Payment Plan in this Cycle need to update Cycle status
@@ -664,7 +615,6 @@ class PaymentPlanService:
             source_payment_plan=source_pp,
             business_area=source_pp.business_area,
             created_by=user,
-            target_population=source_pp.target_population,
             program=source_pp.program,
             program_cycle=source_pp.program_cycle,
             currency=source_pp.currency,

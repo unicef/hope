@@ -399,7 +399,7 @@ def prepare_payment_plan_task(self: Any, payment_plan_id: str) -> bool:
                 PaymentPlanService,
             )
 
-            payment_plan = PaymentPlan.objects.select_related("target_population").get(id=payment_plan_id)
+            payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
             set_sentry_business_area_tag(payment_plan.business_area.name)
 
             PaymentPlanService.create_payments(payment_plan)
@@ -675,50 +675,47 @@ def periodic_sync_payment_gateway_delivery_mechanisms(self: Any) -> None:
         raise self.retry(exc=e)
 
 
-# commented just for now because of coverage purposes
+@app.task(bind=True, queue="priority", default_retry_delay=60, max_retries=3)
+@log_start_and_end
+@sentry_tags
+def payment_plan_apply_steficon_hh_selection(self: Any, payment_plan_id: str, engine_rule_id: str) -> None:
+    from hct_mis_api.apps.payment.models import Payment, PaymentPlan
+    from hct_mis_api.apps.steficon.models import Rule, RuleCommit
 
-# TODO: copied from TP 'target_population_apply_steficon'
-# @app.task(bind=True, queue="priority", default_retry_delay=60, max_retries=3)
-# @log_start_and_end
-# @sentry_tags
-# def payment_plan_apply_steficon_hh_selection(self: Any, payment_plan_id: str, engine_rule_id: str) -> None:
-#     from hct_mis_api.apps.payment.models import Payment, PaymentPlan
-#     from hct_mis_api.apps.steficon.models import Rule, RuleCommit
-#
-#     payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
-#     set_sentry_business_area_tag(payment_plan.business_area.name)
-#     engine_rule = get_object_or_404(Rule, id=engine_rule_id)
-#     rule: Optional["RuleCommit"] = engine_rule.latest
-#     if rule.id != payment_plan.steficon_rule_targeting_id:
-#         payment_plan.steficon_rule_targeting = rule
-#         payment_plan.save(update_fields=["steficon_rule_targeting"])
-#     try:
-#         payment_plan.status = PaymentPlan.Status.TP_STEFICON_RUN
-#         payment_plan.steficon_targeting_applied_date = timezone.now()
-#         payment_plan.save(update_fields=["status", "steficon_targeting_applied_date"])
-#         updates = []
-#         with transaction.atomic():
-#             payment: Payment
-#             for payment in payment_plan.payment_items.all():
-#                 result = rule.execute(
-#                     {
-#                         "household": payment.household,
-#                         "payment_plan": payment_plan,
-#                     }
-#                 )
-#                 payment.vulnerability_score = result.value
-#                 updates.append(payment)
-#             Payment.objects.bulk_update(updates, ["vulnerability_score"])
-#         payment_plan.status = PaymentPlan.Status.TP_STEFICON_COMPLETED
-#         payment_plan.steficon_targeting_applied_date = timezone.now()
-#         with disable_concurrency(payment_plan):
-#             payment_plan.save(update_fields=["status", "steficon_targeting_applied_date"])
-#     except Exception as e:
-#         logger.exception(e)
-#         payment_plan.steficon_targeting_applied_date = timezone.now()
-#         payment_plan.status = PaymentPlan.Status.TP_STEFICON_ERROR
-#         payment_plan.save(update_fields=["status", "steficon_targeting_applied_date"])
-#         raise self.retry(exc=e)
+    payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
+    set_sentry_business_area_tag(payment_plan.business_area.name)
+    engine_rule = get_object_or_404(Rule, id=engine_rule_id)
+    rule: Optional["RuleCommit"] = engine_rule.latest
+    if rule.id != payment_plan.steficon_rule_targeting_id:
+        payment_plan.steficon_rule_targeting = rule
+        payment_plan.save(update_fields=["steficon_rule_targeting"])
+    try:
+        payment_plan.status = PaymentPlan.Status.TP_STEFICON_RUN
+        payment_plan.steficon_targeting_applied_date = timezone.now()
+        payment_plan.save(update_fields=["status", "steficon_targeting_applied_date"])
+        updates = []
+        with transaction.atomic():
+            payment: Payment
+            for payment in payment_plan.payment_items.all():
+                result = rule.execute(
+                    {
+                        "household": payment.household,
+                        "payment_plan": payment_plan,
+                    }
+                )
+                payment.vulnerability_score = result.value
+                updates.append(payment)
+            Payment.objects.bulk_update(updates, ["vulnerability_score"])
+        payment_plan.status = PaymentPlan.Status.TP_STEFICON_COMPLETED
+        payment_plan.steficon_targeting_applied_date = timezone.now()
+        with disable_concurrency(payment_plan):
+            payment_plan.save(update_fields=["status", "steficon_targeting_applied_date"])
+    except Exception as e:
+        logger.exception(e)
+        payment_plan.steficon_targeting_applied_date = timezone.now()
+        payment_plan.status = PaymentPlan.Status.TP_STEFICON_ERROR
+        payment_plan.save(update_fields=["status", "steficon_targeting_applied_date"])
+        raise self.retry(exc=e)
 
 
 @app.task(bind=True, queue="priority", default_retry_delay=60, max_retries=3)

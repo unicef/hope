@@ -4,7 +4,11 @@ from typing import Any, Dict, Optional
 from django.db import transaction
 
 from hct_mis_api.apps.payment.models import PaymentPlan
-from hct_mis_api.apps.targeting.models import TargetPopulation, TargetingCriteria, TargetingCriteriaRule
+from hct_mis_api.apps.targeting.models import (
+    TargetingCriteria,
+    TargetingCriteriaRule,
+    TargetPopulation,
+)
 
 
 def migrate_tp_into_pp() -> None:

@@ -471,6 +471,8 @@ class PaymentPlan(
             "export_file",
             "steficon_rule",
             "steficon_applied_date",
+            "steficon_rule_targeting",
+            "steficon_targeting_applied_date",
             "exclusion_reason",
             "male_children_count",
             "female_children_count",
@@ -484,6 +486,8 @@ class PaymentPlan(
         {
             "steficon_rule": "additional_formula",
             "steficon_applied_date": "additional_formula_applied_date",
+            "steficon_rule_targeting": "additional_formula_targeting",
+            "steficon_targeting_applied_date": "additional_formula_targeting_applied_date",
             "vulnerability_score_min": "score_min",
             "vulnerability_score_max": "score_max",
         },
@@ -632,6 +636,7 @@ class PaymentPlan(
         "self", null=True, blank=True, on_delete=models.CASCADE, related_name="follow_ups"
     )
     is_follow_up = models.BooleanField(default=False)
+
     excluded_ids = models.TextField(blank=True, help_text="Targeting level exclusion")
     exclusion_reason = models.TextField(blank=True)
     exclude_household_error = models.TextField(blank=True)
@@ -1078,6 +1083,20 @@ class PaymentPlan(
         return (
             self.eligible_payments.exclude(status__in=GenericPayment.PENDING_STATUSES).count()
             == self.eligible_payments.count()
+        )
+
+    def is_population_open(self) -> bool:
+        return self.status in (self.Status.TP_OPEN,)
+
+    def is_population_finalized(self) -> bool:
+        return self.status in (self.Status.TP_PROCESSING,)
+
+    def is_population_locked(self) -> bool:
+        return self.status in (
+            self.Status.TP_LOCKED,
+            self.Status.TP_STEFICON_COMPLETED,
+            self.Status.TP_STEFICON_ERROR,
+            self.Status.TP_STEFICON_RUN,
         )
 
     def remove_export_file_entitlement(self) -> None:
