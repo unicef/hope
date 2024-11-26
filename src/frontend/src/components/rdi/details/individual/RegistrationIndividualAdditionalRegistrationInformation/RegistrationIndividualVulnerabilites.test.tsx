@@ -1,4 +1,4 @@
-import { fakeIndividual } from 'fixtures/population/fakeIndividual';
+import { fakeIndividual } from '../../../../../../fixtures/population/fakeIndividual';
 import { RegistrationIndividualAdditionalRegistrationInformation } from '.';
 import { fakeAllIndividualsFlexFieldsAttributes } from '../../../../../../fixtures/core/fakeAllIndividualsFlexFieldsAttributes';
 import { render } from '../../../../../testUtils/testUtils';

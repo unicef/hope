@@ -5,7 +5,7 @@ import wait from 'waait';
 import { ImportedPeopleTable } from '.';
 import { render } from '../../../../testUtils/testUtils';
 import { fakeHouseholdChoices } from '../../../../../fixtures/population/fakeHouseholdChoices';
-import { fakeApolloAllIndividualsForPopulationTable } from 'fixtures/population/fakeApolloAllIndividualsForPopulationTable';
+import { fakeApolloAllIndividualsForPopulationTable } from '../../../../../fixtures/population/fakeApolloAllIndividualsForPopulationTable';
 
 describe('containers/tables/rdi/ImportedIndividualsTable', () => {
   it('should render with data', async () => {

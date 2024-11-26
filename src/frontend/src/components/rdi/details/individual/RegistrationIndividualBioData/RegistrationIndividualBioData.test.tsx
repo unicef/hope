@@ -1,4 +1,4 @@
-import { fakeIndividual } from 'fixtures/population/fakeIndividual';
+import { fakeIndividual } from '../../../../../../fixtures/population/fakeIndividual';
 import { fakeHouseholdChoices } from '../../../../../../fixtures/population/fakeHouseholdChoices';
 import { render } from '../../../../../testUtils/testUtils';
 import { RegistrationIndividualBioData } from './RegistrationIndividualBioData';
