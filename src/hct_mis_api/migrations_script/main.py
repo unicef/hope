@@ -45,6 +45,6 @@ def apply_migrations():
 if __name__ == "__main__":
     export_migration_info_to_csv()
     clear_migration_table()
-    excluded_migrations = [("targeting", "0002_migration")]
+    excluded_migrations = [("targeting", "0002_migration"), ("program", "0002_migration")]
     fake_migrations(excluded_migrations)
     apply_migrations()

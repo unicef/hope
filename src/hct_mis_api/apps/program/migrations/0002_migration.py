@@ -40,7 +40,7 @@ def create_default_object(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('program', '0053_migration'),
+        ('program', '0001_migration'),
     ]
 
     operations = [
