@@ -40,7 +40,6 @@ export const PeopleRegistrationDetailsPage = (): ReactElement => {
   const { data, loading, error } = useIndividualQuery({
     variables: {
       id,
-      rdiMergeStatus: 'PENDING',
     },
     fetchPolicy: 'cache-and-network',
   });

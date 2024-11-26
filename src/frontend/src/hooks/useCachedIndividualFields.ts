@@ -1,17 +1,18 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useEffect, useState } from 'react';
-import localForage from 'localforage';
-import {
-  ImportedIndividualFieldsQuery,
-  useImportedIndividualFieldsLazyQuery,
-} from '@generated/graphql';
 import { ApolloError } from '@apollo/client';
+import {
+  IndividualFieldsQuery,
+  useIndividualFieldsLazyQuery,
+} from '@generated/graphql';
+import localForage from 'localforage';
+import { useEffect, useState } from 'react';
 
-export function useCachedImportedIndividualFieldsQuery(
-  businessArea, selectedProgramId,
+export function useCachedIndividualFieldsQuery(
+  businessArea,
+  selectedProgramId,
 ): {
   loading: boolean;
-  data: ImportedIndividualFieldsQuery;
+  data: IndividualFieldsQuery;
   error: ApolloError;
 } {
   const [loading, setLoading] = useState(true);
@@ -27,7 +28,7 @@ export function useCachedImportedIndividualFieldsQuery(
       10,
     ) || 0;
   const ttl = 2 * 60 * 60 * 1000;
-  const [getAttributes, results] = useImportedIndividualFieldsLazyQuery();
+  const [getAttributes, results] = useIndividualFieldsLazyQuery();
 
   useEffect(() => {
     if (Date.now() - lastUpdatedTimestamp < ttl) {
@@ -48,13 +49,18 @@ export function useCachedImportedIndividualFieldsQuery(
   }, [results.loading]);
 
   useEffect(() => {
-    if (businessArea === oldBusinessArea && selectedProgramId === oldSelectedProgramId) {
+    if (
+      businessArea === oldBusinessArea &&
+      selectedProgramId === oldSelectedProgramId
+    ) {
       return;
     }
     setOldBusinessArea(businessArea);
     setOldSelectedProgramId(selectedProgramId);
     localForage
-      .getItem(`cache-targeting-core-fields-attributes-${businessArea}-${selectedProgramId}`)
+      .getItem(
+        `cache-targeting-core-fields-attributes-${businessArea}-${selectedProgramId}`,
+      )
       .then((value) => {
         if (value) {
           setCache(value);

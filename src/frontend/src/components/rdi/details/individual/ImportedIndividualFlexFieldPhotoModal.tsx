@@ -6,7 +6,7 @@ import { useIndividualFlexFieldsQuery } from '@generated/graphql';
 export function ImportedIndividualFlexFieldPhotoModal({ field }): ReactElement {
   const { id } = useParams();
   const { data } = useIndividualFlexFieldsQuery({
-    variables: { id, rdiMergeStatus: 'PENDING' },
+    variables: { id },
     fetchPolicy: 'network-only',
   });
 
