@@ -3,6 +3,7 @@ import { ReactElement, useState } from 'react';
 import {
   AllIndividualsQueryVariables,
   HouseholdChoiceDataQuery,
+  IndividualMinimalFragment,
   MergedIndividualMinimalFragment,
   useAllIndividualsQuery,
 } from '@generated/graphql';
@@ -85,10 +86,7 @@ export function ImportedPeopleTable({
           )}
         />
       ) : (
-        <UniversalTable<
-          MergedIndividualMinimalFragment,
-          AllIndividualsQueryVariables
-        >
+        <UniversalTable<IndividualMinimalFragment, AllIndividualsQueryVariables>
           title={title}
           headCells={importedPeopleTableHeadCells}
           query={useAllIndividualsQuery}

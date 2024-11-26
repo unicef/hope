@@ -17,7 +17,7 @@ export function DocumentRegistrationPhotoModal({
   documentId,
 }: DocumentRegistrationPhotoModalProps): ReactElement {
   const { data } = useIndividualPhotosQuery({
-    variables: { id: individual?.id, rdiMergeStatus: 'PENDING' },
+    variables: { id: individual?.id },
     fetchPolicy: 'network-only',
   });
   const documentWithPhoto = data?.individual?.documents?.edges?.find(
