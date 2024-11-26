@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Optional
 from django.contrib.admin.options import get_content_type_for_model
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
+from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.db import transaction
@@ -720,64 +721,62 @@ def periodic_sync_payment_gateway_delivery_mechanisms(self: Any) -> None:
 #         raise self.retry(exc=e)
 
 
-# TODO: copied from TP 'target_population_rebuild_stats'
-# @app.task(bind=True, queue="priority", default_retry_delay=60, max_retries=3)
-# @log_start_and_end
-# @sentry_tags
-# def payment_plan_rebuild_stats(self: Any, payment_plan_id: str) -> None:
-#     with cache.lock(
-#         f"payment_plan_rebuild_stats_{payment_plan_id}",
-#         blocking_timeout=60 * 10,
-#         timeout=60 * 60 * 2,
-#     ):
-#         payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
-#         set_sentry_business_area_tag(payment_plan.business_area.name)
-#         payment_plan.build_status = PaymentPlan.BuildStatus.BUILD_STATUS_BUILDING
-#         payment_plan.save(update_fields=["build_status"])
-#         try:
-#             with transaction.atomic():
-#                 payment_plan.update_population_count_fields()
-#                 payment_plan.build_status = PaymentPlan.BuildStatus.BUILD_STATUS_OK
-#                 payment_plan.built_at = timezone.now()
-#                 payment_plan.save(update_fields=["build_status", "built_at"])
-#         except Exception as e:
-#             logger.exception(e)
-#             payment_plan.refresh_from_db()
-#             payment_plan.build_status = PaymentPlan.BuildStatus.BUILD_STATUS_FAILED
-#             payment_plan.save()
-#             raise self.retry(exc=e)
+@app.task(bind=True, queue="priority", default_retry_delay=60, max_retries=3)
+@log_start_and_end
+@sentry_tags
+def payment_plan_rebuild_stats(self: Any, payment_plan_id: str) -> None:
+    with cache.lock(
+        f"payment_plan_rebuild_stats_{payment_plan_id}",
+        blocking_timeout=60 * 10,
+        timeout=60 * 60 * 2,
+    ):
+        payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
+        set_sentry_business_area_tag(payment_plan.business_area.name)
+        payment_plan.build_status = PaymentPlan.BuildStatus.BUILD_STATUS_BUILDING
+        payment_plan.save(update_fields=["build_status"])
+        try:
+            with transaction.atomic():
+                payment_plan.update_population_count_fields()
+                payment_plan.build_status = PaymentPlan.BuildStatus.BUILD_STATUS_OK
+                payment_plan.built_at = timezone.now()
+                payment_plan.save(update_fields=["build_status", "built_at"])
+        except Exception as e:
+            logger.exception(e)
+            payment_plan.refresh_from_db()
+            payment_plan.build_status = PaymentPlan.BuildStatus.BUILD_STATUS_FAILED
+            payment_plan.save()
+            raise self.retry(exc=e)
 
 
-# TODO: copied from TP 'target_population_full_rebuild'
-# @app.task(bind=True, queue="priority", default_retry_delay=60, max_retries=3)
-# @log_start_and_end
-# @sentry_tags
-# def payment_plan_full_rebuild(self: Any, payment_plan_id: str) -> None:
-#     from hct_mis_api.apps.payment.services.payment_plan_services import (
-#         PaymentPlanService,
-#     )
-#
-#     with cache.lock(
-#         f"payment_plan_full_rebuild_{payment_plan_id}",
-#         blocking_timeout=60 * 10,
-#         timeout=60 * 60 * 2,
-#     ):
-#         payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
-#         set_sentry_business_area_tag(payment_plan.business_area.name)
-#         payment_plan.build_status = PaymentPlan.BuildStatus.BUILD_STATUS_BUILDING
-#         payment_plan.save(update_fields=["build_status"])
-#         try:
-#             with transaction.atomic():
-#                 if payment_plan.status not in [
-#                     PaymentPlan.Status.DRAFT,
-#                     PaymentPlan.Status.PREPARING,
-#                     PaymentPlan.Status.OPEN,
-#                 ]:
-#                     raise Exception("Payment Plan is not in correct status")
-#                 PaymentPlanService(payment_plan).full_rebuild()
-#         except Exception as e:
-#             logger.exception(e)
-#             payment_plan.refresh_from_db()
-#             payment_plan.build_status = PaymentPlan.BuildStatus.BUILD_STATUS_FAILED
-#             payment_plan.save()
-#             raise self.retry(exc=e)
+@app.task(bind=True, queue="priority", default_retry_delay=60, max_retries=3)
+@log_start_and_end
+@sentry_tags
+def payment_plan_full_rebuild(self: Any, payment_plan_id: str) -> None:
+    from hct_mis_api.apps.payment.services.payment_plan_services import (
+        PaymentPlanService,
+    )
+
+    with cache.lock(
+        f"payment_plan_full_rebuild_{payment_plan_id}",
+        blocking_timeout=60 * 10,
+        timeout=60 * 60 * 2,
+    ):
+        payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
+        set_sentry_business_area_tag(payment_plan.business_area.name)
+        payment_plan.build_status = PaymentPlan.BuildStatus.BUILD_STATUS_BUILDING
+        payment_plan.save(update_fields=["build_status"])
+        try:
+            with transaction.atomic():
+                if payment_plan.status not in [
+                    PaymentPlan.Status.DRAFT,
+                    PaymentPlan.Status.PREPARING,
+                    PaymentPlan.Status.OPEN,
+                ]:
+                    raise Exception("Payment Plan is not in correct status")
+                PaymentPlanService(payment_plan).full_rebuild()
+        except Exception as e:
+            logger.exception(e)
+            payment_plan.refresh_from_db()
+            payment_plan.build_status = PaymentPlan.BuildStatus.BUILD_STATUS_FAILED
+            payment_plan.save()
+            raise self.retry(exc=e)

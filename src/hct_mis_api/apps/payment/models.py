@@ -575,8 +575,10 @@ class PaymentPlan(
     # TODO: remove this field after migrations
     target_population = models.ForeignKey(
         "targeting.TargetPopulation",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         related_name="payment_plans",
+        null=True,
+        blank=True,
     )
     currency = models.CharField(max_length=4, choices=CURRENCY_CHOICES)
     dispersion_start_date = models.DateField()

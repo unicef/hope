@@ -24,6 +24,12 @@ from hct_mis_api.apps.core.utils import (
 )
 from hct_mis_api.apps.core.validators import raise_program_status_is
 from hct_mis_api.apps.household.models import Household, Individual
+from hct_mis_api.apps.payment.celery_tasks import (
+    payment_plan_full_rebuild,
+    payment_plan_rebuild_stats,
+)
+from hct_mis_api.apps.payment.models import PaymentPlan
+from hct_mis_api.apps.payment.schema import PaymentPlanNode
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.apps.steficon.schema import SteficonRuleNode
@@ -162,7 +168,8 @@ def from_input_to_targeting_criteria(targeting_criteria_input: Dict, program: Pr
 
 
 class CreateTargetPopulationMutation(PermissionMutation, ValidationErrorMutationMixin):
-    target_population = graphene.Field(TargetPopulationNode)
+    # TODO: rename and move it into Payment app?
+    payment_plan = graphene.Field(PaymentPlanNode)
 
     class Arguments:
         input = CreateTargetPopulationInput(required=True)
@@ -185,39 +192,41 @@ class CreateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         if program_cycle.status == ProgramCycle.FINISHED:
             raise ValidationError("Not possible to assign Finished Program Cycle to Targeting")
 
-        tp_name = input_data.get("name", "").strip()
-        if TargetPopulation.objects.filter(name=tp_name, program=program, is_removed=False).exists():
-            raise ValidationError(f"Target population with name: {tp_name} and program: {program.name} already exists.")
+        pp_name = input_data.get("name", "").strip()
+        if PaymentPlan.objects.filter(name=pp_name, program=program, is_removed=False).exists():
+            raise ValidationError(f"Payment Plan with name: {pp_name} and program: {program.name} already exists.")
         targeting_criteria_input = input_data.get("targeting_criteria")
 
         TargetingCriteriaInputValidator.validate(targeting_criteria_input, program)
         targeting_criteria = from_input_to_targeting_criteria(targeting_criteria_input, program)
-        target_population = TargetPopulation(
-            name=tp_name,
+        payment_plan = PaymentPlan(
+            status=PaymentPlan.Status.DRAFT,
+            name=pp_name,
             created_by=user,
             business_area=business_area,
             excluded_ids=input_data.get("excluded_ids", "").strip(),
             exclusion_reason=input_data.get("exclusion_reason", "").strip(),
             program_cycle=program_cycle,
         )
-        target_population.targeting_criteria = targeting_criteria
-        target_population.program = program
-        target_population.full_clean()
-        target_population.save()
-        transaction.on_commit(lambda: target_population_full_rebuild.delay(target_population.id))
+        payment_plan.targeting_criteria = targeting_criteria
+        payment_plan.program = program
+        payment_plan.full_clean()  # ???
+        payment_plan.save()
+        transaction.on_commit(lambda: payment_plan_full_rebuild.delay(payment_plan.id))
         log_create(
-            TargetPopulation.ACTIVITY_LOG_MAPPING,
+            PaymentPlan.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
             program.pk,
             None,
-            target_population,
+            payment_plan,
         )
-        return cls(target_population=target_population)
+        return cls(payment_plan=payment_plan)
 
 
 class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutationMixin):
-    target_population = graphene.Field(TargetPopulationNode)
+    # TODO: rename and move it into Payment app?
+    payment_plan = graphene.Field(PaymentPlanNode)
 
     class Arguments:
         input = UpdateTargetPopulationInput(required=True)
@@ -229,12 +238,12 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
     @transaction.atomic
     def processed_mutate(cls, root: Any, info: Any, **kwargs: Any) -> "UpdateTargetPopulationMutation":
         input_data = kwargs.get("input")
-        tp_id = input_data.get("id")
-        target_population = cls.get_object_required(tp_id)
-        check_concurrency_version_in_mutation(kwargs.get("version"), target_population)
-        old_target_population = cls.get_object(tp_id)
+        pp_id = input_data.get("id")
+        payment_plan = cls.get_object_required(pp_id)
+        check_concurrency_version_in_mutation(kwargs.get("version"), payment_plan)
+        old_payment_plan = cls.get_object(pp_id)
 
-        cls.has_permission(info, Permissions.TARGETING_UPDATE, target_population.business_area)
+        cls.has_permission(info, Permissions.TARGETING_UPDATE, payment_plan.business_area)
 
         name = input_data.get("name", "").strip()
         vulnerability_score_min = input_data.get("vulnerability_score_min")
@@ -243,115 +252,110 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         exclusion_reason = input_data.get("exclusion_reason")
         targeting_criteria_input = input_data.get("targeting_criteria")
         program_cycle_id_encoded = input_data.get("program_cycle_id")
-        program = target_population.program
+        program = payment_plan.program
 
         should_rebuild_stats = False
         should_rebuild_list = False
 
-        if target_population.is_locked() and name:
-            msg = "Name can't be changed when Target Population is in Locked status"
+        if payment_plan.is_locked() and name:
+            msg = "Name can't be changed when Payment Plan is in Locked status"
             logger.error(msg)
             raise ValidationError(msg)
         if (
-            TargetPopulation.objects.filter(name=name, program=target_population.program, is_removed=False)
-            .exclude(id=decode_id_string(tp_id))
+            PaymentPlan.objects.filter(name=name, program=payment_plan.program, is_removed=False)
+            .exclude(id=decode_id_string(pp_id))
             .exists()
         ):
             raise ValidationError(
-                f"Target population with name: {name} and program: {target_population.program.name} already exists."
+                f"Payment Plan with name: {name} and program: {payment_plan.program.name} already exists."
             )
-        if target_population.is_finalized():
-            msg = "Finalized Target Population can't be changed"
+        if payment_plan.is_finalized():
+            msg = "Finalized Payment Plan can't be changed"
             logger.error(msg)
             raise ValidationError(msg)
-        if target_population.status == TargetPopulation.STATUS_ASSIGNED:
-            logger.error("Assigned Target Population can't be changed")
-            raise ValidationError("Assigned Target Population can't be changed")
         if name:
-            target_population.name = name
+            payment_plan.name = name
         if vulnerability_score_min is not None:
             should_rebuild_stats = True
-            target_population.vulnerability_score_min = vulnerability_score_min
+            payment_plan.vulnerability_score_min = vulnerability_score_min
         if vulnerability_score_max is not None:
             should_rebuild_stats = True
-            target_population.vulnerability_score_max = vulnerability_score_max
+            payment_plan.vulnerability_score_max = vulnerability_score_max
 
         if program_cycle_id_encoded:
             program_cycle = get_object_or_404(ProgramCycle, pk=decode_id_string(program_cycle_id_encoded))
             if program_cycle.status == ProgramCycle.FINISHED:
-                raise ValidationError("Not possible to assign Finished Program Cycle to Targeting")
-            target_population.program_cycle = program_cycle
+                raise ValidationError("Not possible to assign Finished Program Cycle to Payment Plan")
+            payment_plan.program_cycle = program_cycle
 
         if targeting_criteria_input:
             should_rebuild_list = True
             TargetingCriteriaInputValidator.validate(targeting_criteria_input, program)
             targeting_criteria = from_input_to_targeting_criteria(targeting_criteria_input, program)
-            if target_population.status == TargetPopulation.STATUS_OPEN:
-                if target_population.targeting_criteria:
-                    target_population.targeting_criteria.delete()
-                target_population.targeting_criteria = targeting_criteria
+            if payment_plan.status == TargetPopulation.STATUS_OPEN:
+                if payment_plan.targeting_criteria:
+                    payment_plan.targeting_criteria.delete()
+                payment_plan.targeting_criteria = targeting_criteria
         if excluded_ids is not None:
             should_rebuild_list = True
-            target_population.excluded_ids = excluded_ids
+            payment_plan.excluded_ids = excluded_ids
         if exclusion_reason is not None:
             should_rebuild_list = True
-            target_population.exclusion_reason = exclusion_reason
-        target_population.full_clean()
-        target_population.save()
+            payment_plan.exclusion_reason = exclusion_reason
+        payment_plan.full_clean()
+        payment_plan.save()
         # prevent race between commit transaction and using in task
-        transaction.on_commit(lambda: cls.rebuild_tp(should_rebuild_list, should_rebuild_stats, target_population))
+        transaction.on_commit(lambda: cls.rebuild_tp(should_rebuild_list, should_rebuild_stats, payment_plan))
         log_create(
             TargetPopulation.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
-            getattr(target_population.program, "pk", None),
-            old_target_population,
-            target_population,
+            getattr(payment_plan.program, "pk", None),
+            old_payment_plan,
+            payment_plan,
         )
-        return cls(target_population=target_population)
+        return cls(payment_plan=payment_plan)
 
     @classmethod
-    def rebuild_tp(
-        cls, should_rebuild_list: bool, should_rebuild_stats: bool, target_population: TargetPopulation
-    ) -> None:
-        rebuild_list = target_population.is_open() and should_rebuild_list
+    def rebuild_tp(cls, should_rebuild_list: bool, should_rebuild_stats: bool, payment_plan: PaymentPlan) -> None:
+        rebuild_list = payment_plan.is_open() and should_rebuild_list
         rebuild_stats = (not rebuild_list and should_rebuild_list) or should_rebuild_stats
         if rebuild_list or rebuild_stats:
-            target_population.build_status = TargetPopulation.BUILD_STATUS_PENDING
-            target_population.save()
+            payment_plan.build_status = TargetPopulation.BUILD_STATUS_PENDING
+            payment_plan.save()
         if rebuild_list:
-            target_population_full_rebuild.delay(target_population.id)
+            payment_plan_full_rebuild.delay(payment_plan.id)
         if rebuild_stats and not rebuild_list:
-            target_population_rebuild_stats.delay(target_population.id)
+            payment_plan_rebuild_stats.delay(payment_plan.id)
 
     @classmethod
     def validate_statuses(
         cls,
         name: str,
-        target_population: TargetPopulation,
+        payment_plan: PaymentPlan,
         targeting_criteria_input: Dict,
         vulnerability_score_max: int,
         vulnerability_score_min: int,
     ) -> None:
-        if not target_population.is_locked() and (
+        if not payment_plan.is_locked() and (
             vulnerability_score_min is not None or vulnerability_score_max is not None
         ):
             raise ValidationError(
-                "You can only set vulnerability_score_min and vulnerability_score_max on Locked Target Population"
+                "You can only set vulnerability_score_min and vulnerability_score_max on Locked Payment Plan"
             )
-        if target_population.is_locked() and name:
-            raise ValidationError("Name can't be changed when Target Population is in Locked status")
-        if target_population.is_finalized():
-            raise ValidationError("Finalized Target Population can't be changed")
-        if targeting_criteria_input and not target_population.is_open():
-            raise ValidationError("Locked Target Population can't be changed")
+        if payment_plan.is_locked() and name:
+            raise ValidationError("Name can't be changed when Payment Plan is in Locked status")
+        if payment_plan.is_finalized():
+            raise ValidationError("Finalized Payment Plan can't be changed")
+        if targeting_criteria_input and not payment_plan.is_open():
+            raise ValidationError("Locked Payment Plan can't be changed")
 
     @classmethod
-    def get_object_required(cls, id: str) -> TargetPopulation:
-        return get_object_or_404(TargetPopulation, id=decode_id_string(id))
+    def get_object_required(cls, id: str) -> PaymentPlan:
+        return get_object_or_404(PaymentPlan, id=decode_id_string(id))
 
     @classmethod
-    def get_object(cls, id: Optional[str]) -> Optional[TargetPopulation]:
+    def get_object(cls, id: Optional[str]) -> Optional[PaymentPlan]:
         if id is None:
             return None
         return cls.get_object_required(id)

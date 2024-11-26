@@ -17,7 +17,11 @@ from psycopg2._psycopg import IntegrityError
 
 from hct_mis_api.apps.core.models import BusinessArea, FileTemp
 from hct_mis_api.apps.core.utils import chunks, decode_id_string
-from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
+from hct_mis_api.apps.household.models import (
+    ROLE_PRIMARY,
+    Household,
+    IndividualRoleInHousehold,
+)
 from hct_mis_api.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx,
     create_payment_plan_payment_list_xlsx_per_fsp,
@@ -312,16 +316,13 @@ class PaymentPlanService:
 
     @staticmethod
     def create_payments(payment_plan: PaymentPlan) -> None:
-        # TODO: copied from TP?
-        # households = Household.objects.filter(
-        #     business_area=payment_plan.business_area, program=payment_plan.program
-        # )
-        # households = households.filter(payment_plan.targeting_criteria.get_query())
-        # households = households.only("id")
-
         payments_to_create = []
+        households = Household.objects.filter(
+            business_area=payment_plan.business_area, program=payment_plan.program_cycle.program
+        )
+        households = households.filter(payment_plan.targeting_criteria.get_query())
         households = (
-            payment_plan.target_population.households.annotate(
+            households.annotate(
                 collector=IndividualRoleInHousehold.objects.filter(household=OuterRef("pk"), role=ROLE_PRIMARY).values(
                     "individual"
                 )[:1]
@@ -756,6 +757,7 @@ class PaymentPlanService:
     def full_rebuild(self) -> None:
         payment_plan: PaymentPlan = self.payment_plan
         # remove all payment and recreate
+        # TODO: do we need soft delete here, probably not?
         payment_plan.payment_items.all().delete()
 
         # TODO: get all new HH list?

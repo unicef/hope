@@ -54,18 +54,22 @@ def migrate_tp_into_pp() -> None:
                 if len(pp_field_list) == 1:
                     payment_plan_data[pp_field] = tp_value
                 elif len(pp_field_list) == 2 and pp_field_list[0] == "internal_data":
-                    internal_data[pp_field_list[1]] = str(tp_value)
+                    internal_data[pp_field_list[1]] = str(tp_value)  # type: ignore
         payment_plan_data["internal_data"] = internal_data
         return payment_plan_data
 
-    # TODO: migrate hh_ids, ind_ids into rule hh_ids, ind_ids???
+    def tp_migrate_hh_ind_ids(tp: TargetPopulation) -> None:
+        pass
+        # TODO: migrate hh_ids, ind_ids into rule hh_ids, ind_ids???
 
     with transaction.atomic():
         tp_qs = TargetPopulation.objects.prefetch_related("payment_plans")
         new_payment_plans = []
         updated_payment_plans = []
+        # updated_tp_rules = []
 
         for tp in tp_qs:
+            tp_migrate_hh_ind_ids(tp)
             # update existing PaymentPlans
             # TODO: double check if any TP with more that one PP ???
             existing_payment_plans = list(tp.payment_plans.all())
@@ -82,7 +86,7 @@ def migrate_tp_into_pp() -> None:
 
         if updated_payment_plans:
             PaymentPlan.objects.bulk_update(
-                updated_payment_plans, TP_MIGRATION_MAPPING.values() + ["internal_data"], 1000
+                updated_payment_plans, list(TP_MIGRATION_MAPPING.values()) + ["internal_data"], 1000
             )
         if new_payment_plans:
             PaymentPlan.objects.bulk_create(new_payment_plans, 1000)
