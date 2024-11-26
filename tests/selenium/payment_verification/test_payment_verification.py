@@ -228,6 +228,7 @@ def payment_verification_creator(channel: str = PaymentVerificationPlan.VERIFICA
     payment_verification_plan = PaymentVerificationPlanFactory(
         payment_plan=payment_plan,
         verification_channel=channel,
+        activation_date=datetime.now() - relativedelta(months=1),
     )
     pv = PaymentVerificationFactory(
         payment=payment,
