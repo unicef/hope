@@ -2,7 +2,7 @@ from hct_mis_api.apps.account.fixtures import (
     PartnerFactory,
     RoleFactory,
     UserFactory,
-    UserRoleFactory,
+    RoleAssignmentFactory,
 )
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.account.permissions import Permissions
@@ -135,7 +135,7 @@ class TestUserFilter(APITestCase):
 
         # user with role in BA
         user_with_test_role = UserFactory(username="user_with_test_role", partner=None)
-        UserRoleFactory(user=user_with_test_role, role=cls.role, business_area=business_area)
+        RoleAssignmentFactory(user=user_with_test_role, role=cls.role, business_area=business_area)
 
         # user with partner with role in BA and access to program
         role_management = RoleFactory(

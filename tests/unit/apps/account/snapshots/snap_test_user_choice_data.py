@@ -7,7 +7,7 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots['UserRolesTest::test_user_choice_data 1'] = {
+snapshots['RoleAssignmentsTest::test_user_choice_data 1'] = {
     'data': {
         'userPartnerChoices': [
             {

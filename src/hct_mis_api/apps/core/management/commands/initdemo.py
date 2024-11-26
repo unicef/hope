@@ -59,8 +59,7 @@ from django.db import OperationalError, connections
 from django.utils import timezone
 
 import elasticsearch
-
-from hct_mis_api.apps.account.models import Partner, Role, User, UserRole
+from hct_mis_api.apps.account.models import Partner, Role, User, RoleAssignment
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.payment.fixtures import (
     generate_delivery_mechanisms,
@@ -198,7 +197,7 @@ class Command(BaseCommand):
                 for email in combined_email_list:
                     try:
                         user = User.objects.create_user(email, email, "password", partner=partner)
-                        UserRole.objects.create(
+                        RoleAssignment.objects.create(
                             user=user,
                             role=role_with_all_perms,
                             business_area=afghanistan,

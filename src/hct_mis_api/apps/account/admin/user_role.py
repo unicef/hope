@@ -11,8 +11,8 @@ from adminfilters.combo import AllValuesComboFilter
 
 from hct_mis_api.apps.account import models as account_models
 from hct_mis_api.apps.account.admin.forms import (
-    UserRoleAdminForm,
-    UserRoleInlineFormSet,
+    RoleAssignmentAdminForm,
+    RoleAssignmentInlineFormSet,
 )
 from hct_mis_api.apps.account.models import Role
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
@@ -20,16 +20,16 @@ from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 logger = logging.getLogger(__name__)
 
 
-class UserRoleInline(admin.TabularInline):
-    model = account_models.UserRole
+class RoleAssignmentInline(admin.TabularInline):
+    model = account_models.RoleAssignment
     extra = 0
-    formset = UserRoleInlineFormSet
+    formset = RoleAssignmentInlineFormSet
 
 
-@admin.register(account_models.UserRole)
-class UserRoleAdmin(HOPEModelAdminBase):
+@admin.register(account_models.RoleAssignment)
+class RoleAssignmentAdmin(HOPEModelAdminBase):
     list_display = ("user", "role", "business_area")
-    form = UserRoleAdminForm
+    form = RoleAssignmentAdminForm
     autocomplete_fields = ("role",)
     raw_id_fields = ("user", "business_area", "role")
     search_fields = (
@@ -69,7 +69,7 @@ class UserRoleAdmin(HOPEModelAdminBase):
         objs = []
         for qs in [roles]:
             objs.extend(qs)
-        objs.extend(account_models.UserRole.objects.filter(pk=record.pk))
+        objs.extend(account_models.RoleAssignment.objects.filter(pk=record.pk))
         collector.collect(objs)
         serializer = self.get_serializer("json")
         return serializer.serialize(

@@ -90,6 +90,22 @@ def get_program_id_from_headers(headers: Union[Dict, "HttpHeaders"]) -> Optional
     program_id = decode_id_string(program_id) if program_id != "all" and program_id != "undefined" else None
     return program_id
 
+# TODO: change
+def get_selected_program(request) -> "Program | None":
+    if hasattr(request, "data") and isinstance(request.data, dict):  # GraphQL Request
+        program = request.data.get("variables", {}).get("program")
+    elif isinstance(request.GET, dict):  # REST API Request
+        program = request.GET.get("program")
+    return program
+
+
+def get_selected_business_area(request) -> "BusinessArea | None":
+    if hasattr(request, "data") and isinstance(request.data, dict):  # GraphQL Request
+        program = request.data.get("variables", {}).get("business_area")
+    elif isinstance(request.GET, dict):  # REST API Request
+        program = request.GET.get("business_area")
+    return program
+
 
 def unique_slugify(
     instance: "Model",
