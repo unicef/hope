@@ -10909,6 +10909,7 @@ export type AllPaymentRecordsAndPaymentsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   businessArea: Scalars['String']['input'];
+  program?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -20084,7 +20085,7 @@ export type AllPaymentRecordsLazyQueryHookResult = ReturnType<typeof useAllPayme
 export type AllPaymentRecordsSuspenseQueryHookResult = ReturnType<typeof useAllPaymentRecordsSuspenseQuery>;
 export type AllPaymentRecordsQueryResult = Apollo.QueryResult<AllPaymentRecordsQuery, AllPaymentRecordsQueryVariables>;
 export const AllPaymentRecordsAndPaymentsDocument = gql`
-    query AllPaymentRecordsAndPayments($household: ID, $after: String, $before: String, $orderBy: String, $first: Int, $last: Int, $businessArea: String!) {
+    query AllPaymentRecordsAndPayments($household: ID, $after: String, $before: String, $orderBy: String, $first: Int, $last: Int, $businessArea: String!, $program: String) {
   allPaymentRecordsAndPayments(
     household: $household
     after: $after
@@ -20093,6 +20094,7 @@ export const AllPaymentRecordsAndPaymentsDocument = gql`
     last: $last
     orderBy: $orderBy
     businessArea: $businessArea
+    program: $program
   ) {
     pageInfo {
       hasNextPage
@@ -20147,6 +20149,7 @@ export const AllPaymentRecordsAndPaymentsDocument = gql`
  *      first: // value for 'first'
  *      last: // value for 'last'
  *      businessArea: // value for 'businessArea'
+ *      program: // value for 'program'
  *   },
  * });
  */

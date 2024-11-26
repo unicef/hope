@@ -21,12 +21,13 @@ export function LookUpPaymentRecordTable({
   setFieldValue,
   initialValues,
 }: LookUpPaymentRecordTableProps): ReactElement {
-  const { businessArea } = useBaseUrl();
+  const { businessArea, programId } = useBaseUrl();
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   const initialVariables = {
     household: initialValues?.selectedHousehold?.id,
     businessArea,
+    program: programId,
   };
   const [selected, setSelected] = useState(
     initialValues.selectedPaymentRecords,
