@@ -323,13 +323,15 @@ class RoleAssignment(NaturalKeyModel, TimeStampedUUIDModel):
     business_area = models.ForeignKey("core.BusinessArea", related_name="role_assignments", on_delete=models.CASCADE)
     user = models.ForeignKey("account.User", related_name="role_assignments", on_delete=models.CASCADE, null=True, blank=True)
     partner = models.ForeignKey("account.Partner", related_name="role_assignments", on_delete=models.CASCADE, null=True, blank=True)
-    role = models.ForeignKey("account.Role", related_name="role_assignments", on_delete=models.CASCADE)
+    role = models.ForeignKey("account.Role", related_name="role_assignments", on_delete=models.CASCADE, null=True, blank=True)
     program = models.ForeignKey("program.Program", related_name="role_assignments", on_delete=models.CASCADE, null=True, blank=True)
     areas = models.ManyToManyField("geo.Area", related_name="role_assignments", blank=True)
     full_area_access = models.BooleanField(default=False)
     expiry_date = models.DateField(
         blank=True, null=True, help_text="After expiry date this Role Assignment will be inactive."
     )
+    group = models.ForeignKey(Group, related_name="role_assignments", on_delete=models.CASCADE, null=True, blank=True)
+    # TODO: only Group OR Role should be set, not both
 
     class Meta:
         constraints = [
@@ -343,6 +345,11 @@ class RoleAssignment(NaturalKeyModel, TimeStampedUUIDModel):
             models.CheckConstraint(
                 check=(Q(user__isnull=False, partner__isnull=True) | Q(user__isnull=True, partner__isnull=False)),
                 name="user_or_partner_not_both"
+            ),
+            # either group or role should be assigned; not both
+            models.CheckConstraint(
+                check=(Q(group__isnull=False, role__isnull=True) | Q(group__isnull=True, role__isnull=False)),
+                name="group_or_role_not_both"
             )
         ]
 
@@ -351,12 +358,13 @@ class RoleAssignment(NaturalKeyModel, TimeStampedUUIDModel):
         # Ensure either user or partner is set, but not both
         if bool(self.user) == bool(self.partner):
             raise ValidationError("Either user or partner must be set, but not both.")
-
+        # Ensure either group or role is set, but not both
+        if bool(self.group) == bool(self.role):
+            raise ValidationError("Either group or role must be set, but not both.")
 
     def save(self, *args: Any, **kwargs: Any) -> None:
         self.clean()
         super().save(*args, **kwargs)
-
 
     def __str__(self) -> str:
         role_holder = self.user if self.user else self.partner
@@ -403,7 +411,6 @@ class Role(NaturalKeyModel, TimeStampedUUIDModel):
         null=True,
         blank=True,
     )
-    group = models.ForeignKey(Group, related_name="roles", on_delete=models.CASCADE, null=True, blank=True)
     is_visible_on_ui = models.BooleanField(default=True)
     is_available_for_partner = models.BooleanField(default=True)
 

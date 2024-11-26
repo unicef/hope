@@ -1,12 +1,18 @@
-from typing import Any
+from typing import Any, Iterable
 
 from django.contrib.auth import get_user_model
-from django.db.models.signals import m2m_changed, post_save, pre_delete, pre_save
+from django.db.models import Q
+from django.db.models.signals import m2m_changed, post_save, pre_delete, pre_save, post_delete
 from django.dispatch import receiver
 from django.utils import timezone
 
+from hct_mis_api.api.caches import get_or_create_cache_key
+from hct_mis_api.apps.account.caches import get_user_permissions_version_key
 from hct_mis_api.apps.account.models import Partner, Role, User, RoleAssignment
 from hct_mis_api.apps.core.models import BusinessArea, BusinessAreaPartnerThrough
+
+from django.contrib.auth.models import Group
+from django.core.cache import cache
 
 
 @receiver(post_save, sender=RoleAssignment)
@@ -54,3 +60,67 @@ def allowed_business_areas_changed(sender: Any, instance: Partner, action: str, 
     elif action == "post_clear":
         removed_business_areas = getattr(instance, "_removed_business_areas", [])
         BusinessAreaPartnerThrough.objects.filter(partner=instance, business_area__in=removed_business_areas).delete()
+
+
+# Signals for permissions caches invalidation
+
+def _invalidate_user_permissions_cache(users: Iterable) -> None:
+    for user in users:
+        version_key = get_user_permissions_version_key(user)
+        get_or_create_cache_key(version_key, 0)
+        cache.incr(version_key)
+
+
+@receiver(post_save, sender=RoleAssignment)
+@receiver(pre_delete, sender=RoleAssignment)
+def invalidate_permissions_cache_on_role_assignment_change(sender, instance, **kwargs):
+    """
+    Invalidate the cache for the User/Partner's Users associated with the RoleAssignment
+    when the RoleAssignment is created, updated, or deleted.
+    """
+    if hasattr(instance, 'user'):
+        users = [instance.user]
+    else:
+        users = instance.partner.users.all()
+    _invalidate_user_permissions_cache(users)
+
+
+@receiver(post_save, sender=Role)
+@receiver(pre_delete, sender=Role)
+def invalidate_permissions_cache_on_role_change(sender, instance, **kwargs):
+    """
+    Invalidate the cache for the User/Partner's Users associated with the Role through a RoleAssignment
+    when the Role is created, updated, or deleted.
+    """
+    users = User.objects.filter(Q(role_assignments__role=instance) | Q(partner__role_assignments__role=instance)).distinct()
+    _invalidate_user_permissions_cache(users)
+
+
+@receiver(m2m_changed, sender=Group.permissions.through)
+def invalidate_permissions_cache_on_group_permissions_change(sender, instance, action, **kwargs):
+    """
+    Invalidate the cache for all Users that are assigned to that Group
+    or are assigned to this Group's RoleAssignment
+    or their Partner is assigned to this Group's RoleAssignment
+    when the Group's permissions are updated.
+    """
+    if action in ["post_add", "post_remove", "post_clear"]:
+        users = User.objects.filter(
+            Q(groups=instance) | Q(role_assignments__group=instance) | Q(partner__role_assignments__group=instance)
+        ).distinct()
+        _invalidate_user_permissions_cache(users)
+
+
+@receiver(post_save, sender=Group)
+@receiver(pre_delete, sender=Group)
+def invalidate_permissions_cache_on_group_change(sender, instance, **kwargs):
+    """
+    Invalidate the cache for all Users that are assigned to that Group
+    or are assigned to this Group's RoleAssignment
+    or their Partner is assigned to this Group's RoleAssignment
+    when the Group is created, updated, or deleted.
+    """
+    users = User.objects.filter(
+        Q(groups=instance) | Q(role_assignments__group=instance) | Q(partner__role_assignments__group=instance)
+    ).distinct()
+    _invalidate_user_permissions_cache(users)
