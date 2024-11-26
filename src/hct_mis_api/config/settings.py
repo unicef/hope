@@ -277,7 +277,7 @@ PASSWORD_RESET_TIMEOUT = 60 * 60 * 24 * 31
 ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 7
 
 AUTHENTICATION_BACKENDS = [
-    "django.contrib.auth.backends.ModelBackend",
+    "hct_mis_api.apps.core.backends.PermissionsBackend",
     "social_core.backends.azuread_tenant.AzureADTenantOAuth2",
 ]
 
