@@ -137,7 +137,7 @@ def payment_verification_multiple_verification_plans(number_verification_plans: 
         )
 
         PaymentVerificationFactory(
-            payment_obj=payment,
+            payment=payment,
             payment_verification_plan=payment_verification_plan,
             status=PV.STATUS_PENDING,
         )
@@ -221,9 +221,10 @@ def payment_verification_creator(channel: str = PaymentVerificationPlan.VERIFICA
         currency="PLN",
         status=GenericPayment.STATUS_DISTRIBUTION_SUCCESS,
     )
-    pv_summary = PaymentVerificationSummaryFactory(payment_plan=payment_plan)
-    pv_summary.activation_date = datetime.now() - relativedelta(months=1)
-    pv_summary.save()
+    PaymentVerificationSummaryFactory(
+        payment_plan=payment_plan,
+        activation_date=datetime.now() - relativedelta(months=1),
+    )
     payment_verification_plan = PaymentVerificationPlanFactory(
         payment_plan=payment_plan,
         verification_channel=channel,
