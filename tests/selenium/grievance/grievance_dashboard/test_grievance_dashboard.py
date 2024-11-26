@@ -191,6 +191,7 @@ class TestSmokeGrievanceDashboard:
         pageGrievanceDetailsPage.getButtonSetInProgress().click()
         pageGrievanceDetailsPage.getButtonCloseTicket().click()
         pageGrievanceTickets.getButtonConfirm().click()
+        pageGrievanceTickets.wait_for_text("Closed", pageGrievanceTickets.statusContainer)
         pageGrievanceTickets.getNavGrievance().click()
         pageGrievanceDashboard.getNavGrievanceDashboard().click()
         assert "3" in pageGrievanceDashboard.getTotalNumberOfTicketsTopNumber().text
