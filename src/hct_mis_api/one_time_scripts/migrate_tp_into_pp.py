@@ -1,10 +1,10 @@
 from collections import defaultdict
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from django.db import transaction
 
 from hct_mis_api.apps.payment.models import PaymentPlan
-from hct_mis_api.apps.targeting.models import TargetPopulation
+from hct_mis_api.apps.targeting.models import TargetPopulation, TargetingCriteria, TargetingCriteriaRule
 
 
 def migrate_tp_into_pp() -> None:
@@ -58,20 +58,26 @@ def migrate_tp_into_pp() -> None:
         payment_plan_data["internal_data"] = internal_data
         return payment_plan_data
 
-    def tp_migrate_hh_ind_ids(tp: TargetPopulation) -> None:
-        pass
-        # TODO: migrate hh_ids, ind_ids into rule hh_ids, ind_ids???
+    def tc_migrate_hh_ind_ids(tc: TargetingCriteria) -> Optional[TargetingCriteriaRule]:
+        if first_rule := tc.rules.first():
+            if tc.household_ids:
+                first_rule.household_ids = tc.household_ids
+            if tc.individual_ids:
+                first_rule.individual_ids = tc.individual_ids
+            return first_rule
+        return None
 
     with transaction.atomic():
         tp_qs = TargetPopulation.objects.prefetch_related("payment_plans")
         new_payment_plans = []
         updated_payment_plans = []
-        # updated_tp_rules = []
+        updated_tc_rules = []
 
         for tp in tp_qs:
-            tp_migrate_hh_ind_ids(tp)
-            # update existing PaymentPlans
-            # TODO: double check if any TP with more that one PP ???
+            tcr = tc_migrate_hh_ind_ids(tp.targeting_criteria)
+            if tcr:
+                updated_tc_rules.append(tcr)
+
             existing_payment_plans = list(tp.payment_plans.all())
             if existing_payment_plans:
                 for pp in existing_payment_plans:
@@ -90,3 +96,6 @@ def migrate_tp_into_pp() -> None:
             )
         if new_payment_plans:
             PaymentPlan.objects.bulk_create(new_payment_plans, 1000)
+
+        if updated_tc_rules:
+            TargetingCriteriaRule.objects.bulk_update(updated_tc_rules, ["household_ids", "individual_ids"], 1000)
