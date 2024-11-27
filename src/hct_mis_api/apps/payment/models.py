@@ -2055,6 +2055,7 @@ class ServiceProvider(TimeStampedUUIDModel):
     short_name = models.CharField(max_length=100, null=True)
     country = models.CharField(max_length=3)
     vision_id = models.CharField(max_length=255, null=True)
+    is_migrated_to_payment_plan = models.BooleanField(default=False)
 
     def __str__(self) -> str:
         return self.full_name or ""

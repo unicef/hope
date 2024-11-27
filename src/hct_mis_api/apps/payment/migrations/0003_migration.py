@@ -17,6 +17,11 @@ class Migration(migrations.Migration):
             field=models.BooleanField(default=False),
         ),
         migrations.AddField(
+            model_name="serviceprovider",
+            name="is_migrated_to_payment_plan",
+            field=models.BooleanField(default=False),
+        ),
+        migrations.AddField(
             model_name="paymentplan",
             name="internal_data",
             field=models.JSONField(default=dict),
