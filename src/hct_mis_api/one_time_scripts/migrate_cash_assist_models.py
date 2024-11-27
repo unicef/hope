@@ -22,6 +22,11 @@ from hct_mis_api.apps.payment.services.payment_household_snapshot_service import
     create_payment_plan_snapshot_data,
 )
 
+content_type_for_payment_plan = ContentType.objects.get_for_model(PaymentPlan)
+content_type_for_cash_plan = ContentType.objects.get_for_model(CashPlan)
+content_type_for_payment = ContentType.objects.get_for_model(Payment)
+content_type_for_payment_record = ContentType.objects.get_for_model(PaymentRecord)
+
 
 def get_status(status: str) -> str:
     mapping = {"Transaction Successful": "Distribution Successful"}
@@ -29,11 +34,6 @@ def get_status(status: str) -> str:
 
 
 def migrate_cash_plan_to_payment_plan() -> None:
-    content_type_for_payment_plan = ContentType.objects.get_for_model(PaymentPlan)
-    content_type_for_cash_plan = ContentType.objects.get_for_model(CashPlan)
-    content_type_for_payment = ContentType.objects.get_for_model(Payment)
-    content_type_for_payment_record = ContentType.objects.get_for_model(PaymentRecord)
-
     delivery_type_to_obj = {obj.name: obj for obj in DeliveryMechanism.objects.all()}
 
     for sp in ServiceProvider.objects.all():
@@ -245,7 +245,7 @@ def migrate_payment_verification_plan_generic_foreign_key_to_foreign_key() -> No
         for verification_plan in PaymentVerificationPlan.objects.exclude(
             payment_plan_content_type__isnull=True, payment_plan_object_id__isnull=True
         ):
-            if verification_plan.payment_plan_content_type.model == "paymentplan":
+            if verification_plan.payment_plan_content_type == content_type_for_payment_plan:
                 payment_plan = PaymentPlan.objects.get(id=verification_plan.payment_plan_object_id)
                 verification_plan.payment_plan = payment_plan
                 verification_plans_to_update.append(verification_plan)
@@ -259,7 +259,7 @@ def migrate_payment_verification_summary_generic_foreign_key_to_onetoone() -> No
         for verification_summary in PaymentVerificationSummary.objects.exclude(
             payment_plan_content_type__isnull=True, payment_plan_object_id__isnull=True
         ):
-            if verification_summary.payment_plan_content_type.model == "paymentplan":
+            if verification_summary.payment_plan_content_type == content_type_for_payment_plan:
                 related_instance = PaymentPlan.objects.get(id=verification_summary.payment_plan_object_id)
                 verification_summary.payment_plan = related_instance
                 verification_summaries_to_update.append(verification_summary)
@@ -273,7 +273,7 @@ def migrate_payment_verification_generic_foreign_key_to_onetoone() -> None:
         for verification in PaymentVerification.objects.exclude(
             payment_content_type__isnull=True, payment_object_id__isnull=True
         ):
-            if verification.payment_content_type.model == "payment":
+            if verification.payment_content_type == content_type_for_payment:
                 related_instance = Payment.objects.get(id=verification.payment_object_id)
                 verification.payment = related_instance
                 verifications_to_update.append(verification)
@@ -285,3 +285,30 @@ def migrate_payment_verification_models() -> None:
     migrate_payment_verification_plan_generic_foreign_key_to_foreign_key()
     migrate_payment_verification_summary_generic_foreign_key_to_onetoone()
     migrate_payment_verification_generic_foreign_key_to_onetoone()
+
+
+def migrate_payment_tickets_generic_foreign_key_to_onetoone() -> None:
+    with transaction.atomic():
+        ticket_complaint_details_to_update = []
+        ticket_sensitive_details_to_update = []
+
+        for model in [TicketComplaintDetails, TicketSensitiveDetails]:
+            for ticket_details in model.objects.exclude(
+                payment_content_type__isnull=True, payment_object_id__isnull=True
+            ):
+                if ticket_details.payment_content_type == content_type_for_payment:
+                    related_instance = Payment.objects.get(id=ticket_details.payment_object_id)
+                    ticket_details.payment = related_instance
+                    if model == TicketComplaintDetails:
+                        ticket_complaint_details_to_update.append(ticket_details)
+                    else:
+                        ticket_sensitive_details_to_update.append(ticket_details)
+
+        TicketComplaintDetails.objects.bulk_update(ticket_complaint_details_to_update, ["payment"])
+        TicketSensitiveDetails.objects.bulk_update(ticket_sensitive_details_to_update, ["payment"])
+
+
+def migrate_cash_assist_models() -> None:
+    migrate_cash_plan_to_payment_plan()
+    migrate_payment_verification_models()
+    migrate_payment_tickets_generic_foreign_key_to_onetoone()
