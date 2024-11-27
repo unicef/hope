@@ -542,6 +542,8 @@ class PaymentPlan(
     ]
 
     class Action(models.TextChoices):
+        # TODO: add more from TP
+
         LOCK = "LOCK", "Lock"
         LOCK_FSP = "LOCK_FSP", "Lock FSP"
         UNLOCK = "UNLOCK", "Unlock"
@@ -562,8 +564,7 @@ class PaymentPlan(
         on_delete=models.PROTECT,
         related_name="created_payment_plans",
     )
-    # TODO: update default maybe
-    status = FSMField(default=Status.OPEN, protected=False, db_index=True, choices=Status.choices)
+    status = FSMField(default=Status.DRAFT, protected=False, db_index=True, choices=Status.choices)
     background_action_status = FSMField(
         default=None,
         protected=False,
@@ -583,6 +584,14 @@ class PaymentPlan(
         related_name="payment_plans",
         null=True,
         blank=True,
+    )
+    # TODO: remove null=True after data migrations
+    targeting_criteria = models.OneToOneField(
+        "targeting.TargetingCriteria",
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="payment_plans",
     )
     currency = models.CharField(max_length=4, choices=CURRENCY_CHOICES)
     dispersion_start_date = models.DateField()
@@ -651,13 +660,6 @@ class PaymentPlan(
         ],
         null=True,
         blank=True,
-    )
-    targeting_criteria = models.OneToOneField(
-        "targeting.TargetingCriteria",
-        blank=True,
-        null=True,
-        on_delete=models.SET_NULL,
-        related_name="payment_plans",
     )
     vulnerability_score_min = models.DecimalField(
         null=True,

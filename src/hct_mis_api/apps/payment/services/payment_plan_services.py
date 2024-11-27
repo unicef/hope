@@ -3,7 +3,7 @@ import logging
 from decimal import Decimal
 from functools import partial
 from itertools import groupby
-from typing import IO, TYPE_CHECKING, Callable, Dict, List, Optional
+from typing import IO, TYPE_CHECKING, Callable, Dict, List, Optional, Any
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.db import transaction
@@ -30,7 +30,7 @@ from hct_mis_api.apps.payment.celery_tasks import (
     prepare_follow_up_payment_plan_task,
     prepare_payment_plan_task,
     send_payment_notification_emails,
-    send_to_payment_gateway,
+    send_to_payment_gateway, payment_plan_full_rebuild, payment_plan_rebuild_stats,
 )
 from hct_mis_api.apps.payment.models import (
     Approval,
@@ -42,7 +42,10 @@ from hct_mis_api.apps.payment.models import (
 from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
 )
-from hct_mis_api.apps.program.models import ProgramCycle
+from hct_mis_api.apps.program.models import ProgramCycle, Program
+from hct_mis_api.apps.targeting.models import TargetingCriteria
+from hct_mis_api.apps.targeting.services.utils import from_input_to_targeting_criteria
+from hct_mis_api.apps.targeting.validators import TargetingCriteriaInputValidator
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -367,27 +370,48 @@ class PaymentPlanService:
         Payment.objects.bulk_update(payments, ["signature_hash"])
 
     @staticmethod
-    def create(input_data: Dict, user: "User") -> PaymentPlan:
-        business_area_slug = input_data["business_area_slug"]
+    def create_targeting_criteria(targeting_criteria_input: Dict[str: Any], program: Program) -> TargetingCriteria:
+        TargetingCriteriaInputValidator.validate(targeting_criteria_input, program)
+
+        targeting_criteria = from_input_to_targeting_criteria(targeting_criteria_input, program)
+
+        return targeting_criteria
+
+    @staticmethod
+    def create(input_data: Dict, user: "User", business_area_slug: str) -> PaymentPlan:
         business_area = BusinessArea.objects.only("is_payment_plan_applicable").get(slug=business_area_slug)
         if not business_area.is_payment_plan_applicable:
+            # TODO: now all BA will be payment plan applicable
             raise GraphQLError("PaymentPlan can not be created in provided Business Area")
 
         program_cycle_id = decode_id_string(input_data["program_cycle_id"])
         program_cycle = get_object_or_404(ProgramCycle, pk=program_cycle_id)
-        if program_cycle.status not in (ProgramCycle.DRAFT, ProgramCycle.ACTIVE):
+        program = program_cycle.program
+        if program_cycle.status == ProgramCycle.FINISHED:
             raise GraphQLError("Impossible to create Payment Plan for Programme Cycle within Finished status")
+
+        if program.status != Program.ACTIVE:
+            raise GraphQLError("Impossible to create Payment Plan for Programme within not Active status")
 
         dispersion_end_date = input_data["dispersion_end_date"]
         if not dispersion_end_date or dispersion_end_date <= timezone.now().date():
             raise GraphQLError(f"Dispersion End Date [{dispersion_end_date}] cannot be a past date")
 
+        pp_name = input_data.get("name", "").strip()
+        if PaymentPlan.objects.filter(name=pp_name, program=program, is_removed=False).exists():
+            raise GraphQLError(
+                f"Payment Plan with name: {pp_name} and program: {program.name} already exists.")
+
         with transaction.atomic():
+
+            targeting_criteria = PaymentPlanService.create_targeting_criteria(input_data.get("targeting_criteria"), program)
+
             payment_plan = PaymentPlan.objects.create(
                 business_area=business_area,
                 created_by=user,
                 program=program_cycle.program,
                 program_cycle=program_cycle,
+                targeting_criteria=targeting_criteria,
                 name=input_data["name"],
                 currency=input_data["currency"],
                 dispersion_start_date=input_data["dispersion_start_date"],
@@ -395,7 +419,9 @@ class PaymentPlanService:
                 status_date=timezone.now(),
                 start_date=program_cycle.start_date,
                 end_date=program_cycle.end_date,
-                status=PaymentPlan.Status.PREPARING,
+                status=PaymentPlan.Status.DRAFT,
+                excluded_ids=input_data.get("excluded_ids", "").strip(),
+                exclusion_reason=input_data.get("exclusion_reason", "").strip(),
             )
             program_cycle.set_active()
 
@@ -404,17 +430,86 @@ class PaymentPlanService:
         return payment_plan
 
     def update(self, input_data: Dict) -> PaymentPlan:
-        if self.payment_plan.status != PaymentPlan.Status.OPEN:
-            raise GraphQLError("Only Payment Plan in Open status can be edited")
+        program = self.payment_plan.program_cycle.program
+        should_rebuild_stats = False
+        should_rebuild_list = False
 
-        recreate_payments = False
-        recalculate_payments = False
+        name = input_data.get("name", "").strip()
+        vulnerability_score_min = input_data.get("vulnerability_score_min")
+        vulnerability_score_max = input_data.get("vulnerability_score_max")
+        excluded_ids = input_data.get("excluded_ids")
+        exclusion_reason = input_data.get("exclusion_reason")
+        targeting_criteria_input = input_data.get("targeting_criteria")
+
+        if self.payment_plan.status in (
+                PaymentPlan.Status.DRAFT,
+                PaymentPlan.Status.OPEN,
+                PaymentPlan.Status.TP_OPEN,
+                PaymentPlan.Status.TP_LOCKED,
+                PaymentPlan.Status.TP_STEFICON_COMPLETED,
+                PaymentPlan.Status.TP_STEFICON_ERROR,
+        ):
+            raise GraphQLError(f"Not Allow edit Payment Plan within status {self.payment_plan.status}")
+
+        if self.payment_plan.is_population_finalized():
+            raise GraphQLError("Finalized Population Payment Plan can't be changed")
+
+        if not self.payment_plan.is_population_locked() and (
+                vulnerability_score_min or vulnerability_score_max
+        ):
+            raise GraphQLError(
+                "You can only set vulnerability_score_min and vulnerability_score_max on Locked Population Payment Plan"
+            )
+        if name:
+            if self.payment_plan.is_population_locked():
+                raise GraphQLError("Name can't be changed when Payment Plan is in Locked Population status")
+
+            if (
+                    PaymentPlan.objects.filter(name=name, program=program, is_removed=False)
+                            .exclude(id=self.payment_plan.pk)
+                            .exists()
+            ):
+                raise GraphQLError(
+                    f"Payment Plan with name '{name}' and program '{program.name}' already exists."
+                )
+
+        if targeting_criteria_input and not self.payment_plan.is_population_open():
+            raise GraphQLError("Locked Population Payment Plan can't be changed")
 
         if self.payment_plan.is_follow_up:
             # can change only dispersion_start_date/dispersion_end_date for Follow Up Payment Plan
             # remove not editable fields
-            input_data.pop("targeting_id", None)
             input_data.pop("currency", None)
+
+        if program_cycle_id := input_data.get("program_cycle_id"):
+            program_cycle = get_object_or_404(ProgramCycle, pk=decode_id_string(program_cycle_id))
+            if program_cycle.status == ProgramCycle.FINISHED:
+                raise GraphQLError("Not possible to assign Finished Program Cycle to Payment Plan")
+            self.payment_plan.program_cycle = program_cycle
+
+        if name:
+            self.payment_plan.name = name
+        if vulnerability_score_min is not None:
+            should_rebuild_stats = True
+            self.payment_plan.vulnerability_score_min = vulnerability_score_min
+        if vulnerability_score_max is not None:
+            should_rebuild_stats = True
+            self.payment_plan.vulnerability_score_max = vulnerability_score_max
+
+        if targeting_criteria_input:
+            should_rebuild_list = True
+            TargetingCriteriaInputValidator.validate(targeting_criteria_input, program)
+            targeting_criteria = from_input_to_targeting_criteria(targeting_criteria_input, program)
+            if self.payment_plan.status == PaymentPlan.Status.TP_OPEN:
+                if self.payment_plan.targeting_criteria:
+                    self.payment_plan.targeting_criteria.delete()
+                self.payment_plan.targeting_criteria = targeting_criteria
+        if excluded_ids is not None:
+            should_rebuild_list = True
+            self.payment_plan.excluded_ids = excluded_ids
+        if exclusion_reason is not None:
+            should_rebuild_list = True
+            self.payment_plan.exclusion_reason = exclusion_reason
 
         if (
             input_data.get("dispersion_start_date")
@@ -430,33 +525,19 @@ class PaymentPlanService:
             if input_data["dispersion_end_date"] <= timezone.now().date():
                 raise GraphQLError(f"Dispersion End Date [{input_data['dispersion_end_date']}] cannot be a past date")
             self.payment_plan.dispersion_end_date = input_data["dispersion_end_date"]
-            recalculate_payments = True
+            should_rebuild_stats = True
 
         if input_data.get("currency") and input_data["currency"] != self.payment_plan.currency:
             self.payment_plan.currency = input_data["currency"]
-            recreate_payments = True
-            recalculate_payments = True
-
-        start_date = input_data.get("start_date")
-        start_date = start_date.date() if isinstance(start_date, (timezone.datetime, datetime.datetime)) else start_date
-        if start_date and start_date < self.payment_plan.program_cycle.program.start_date:
-            raise GraphQLError("Start date cannot be earlier than start date in the program")
-
-        end_date = input_data.get("end_date")
-        end_date = end_date.date() if isinstance(end_date, (timezone.datetime, datetime.datetime)) else end_date
-        if end_date and end_date > self.payment_plan.program_cycle.program.end_date:
-            raise GraphQLError("End date cannot be later that end date in the program")
+            should_rebuild_list = True
+            should_rebuild_stats = True
 
         self.payment_plan.save()
 
-        if recreate_payments:
-            self.payment_plan.payment_items.all().delete()
-            self.create_payments(self.payment_plan)
-
-        if recalculate_payments:
-            self.payment_plan.refresh_from_db()
-            self.payment_plan.update_population_count_fields()
-            self.payment_plan.update_money_fields()
+        # prevent race between commit transaction and using in task
+        transaction.on_commit(
+            lambda: PaymentPlanService.rebuild_payment_plan_population(should_rebuild_list, should_rebuild_stats, self.payment_plan)
+        )
 
         return self.payment_plan
 
@@ -710,7 +791,19 @@ class PaymentPlanService:
         # TODO: do we need soft delete here, probably not?
         payment_plan.payment_items.all().delete()
 
-        # TODO: get all new HH list?
         self.create_payments(payment_plan)
 
         payment_plan.update_population_count_fields()
+
+    @staticmethod
+    def rebuild_payment_plan_population(should_rebuild_list: bool, should_rebuild_stats: bool, payment_plan: PaymentPlan
+    ) -> None:
+        rebuild_list = payment_plan.is_population_open() and should_rebuild_list
+        rebuild_stats = (not rebuild_list and should_rebuild_list) or should_rebuild_stats
+        if rebuild_list or rebuild_stats:
+            payment_plan.build_status = PaymentPlan.BuildStatus.BUILD_STATUS_PENDING
+            payment_plan.save()
+        if rebuild_list:
+            payment_plan_full_rebuild.delay(payment_plan.id)
+        if rebuild_stats and not rebuild_list:
+            payment_plan_rebuild_stats.delay(payment_plan.id)

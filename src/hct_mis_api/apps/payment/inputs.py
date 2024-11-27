@@ -1,6 +1,7 @@
 import graphene
 
 from hct_mis_api.apps.payment.models import PaymentPlan
+from hct_mis_api.apps.targeting.graphql_types import TargetingCriteriaObjectType
 
 
 class FullListArguments(graphene.InputObjectType):
@@ -67,6 +68,10 @@ class CreatePaymentPlanInput(graphene.InputObjectType):
     dispersion_start_date = graphene.Date(required=True)
     dispersion_end_date = graphene.Date(required=True)
     currency = graphene.String(required=True)
+    name = graphene.String(required=True)  # TODO: not sure this one have to be required
+    targeting_criteria = TargetingCriteriaObjectType(required=True)
+    excluded_ids = graphene.String(required=True)
+    exclusion_reason = graphene.String()
 
 
 class UpdatePaymentPlanInput(graphene.InputObjectType):
@@ -74,6 +79,14 @@ class UpdatePaymentPlanInput(graphene.InputObjectType):
     dispersion_start_date = graphene.Date(required=False)
     dispersion_end_date = graphene.Date(required=False)
     currency = graphene.String(required=False)
+
+    name = graphene.String()
+    targeting_criteria = TargetingCriteriaObjectType()  # TODO: is it possible to update cycle?
+    program_cycle_id = graphene.ID()
+    vulnerability_score_min = graphene.Decimal()
+    vulnerability_score_max = graphene.Decimal()
+    excluded_ids = graphene.String()
+    exclusion_reason = graphene.String()
 
 
 class ChooseDeliveryMechanismsForPaymentPlanInput(graphene.InputObjectType):

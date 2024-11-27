@@ -734,6 +734,7 @@ def payment_plan_rebuild_stats(self: Any, payment_plan_id: str) -> None:
         try:
             with transaction.atomic():
                 payment_plan.update_population_count_fields()
+                payment_plan.update_money_fields()
                 payment_plan.build_status = PaymentPlan.BuildStatus.BUILD_STATUS_OK
                 payment_plan.built_at = timezone.now()
                 payment_plan.save(update_fields=["build_status", "built_at"])

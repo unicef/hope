@@ -133,7 +133,7 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
         help_text="Threshold for Face Image Deduplication",
         validators=[MinValueValidator(0.0), MaxValueValidator(100.0)],
     )
-
+    # TODO: after remove CASH ASSIST this flag will be deprecated and maybe remove it?
     is_payment_plan_applicable = models.BooleanField(default=False)
     is_accountability_applicable = models.BooleanField(default=False)
     active = models.BooleanField(default=False)

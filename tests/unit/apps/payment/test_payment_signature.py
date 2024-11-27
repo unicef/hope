@@ -111,13 +111,10 @@ class TestPaymentSignature(APITestCase):
     @freeze_time("2020-10-10")
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_signature_after_prepare_payment_plan(self, get_exchange_rate_mock: Any) -> None:
-        targeting = TargetPopulationFactory()
-
         self.business_area.is_payment_plan_applicable = True
         self.business_area.save()
 
-        targeting.status = TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
-        targeting.program = ProgramFactory(
+        program = ProgramFactory(
             status=Program.ACTIVE,
             start_date=timezone.datetime(2000, 9, 10, tzinfo=utc).date(),
             end_date=timezone.datetime(2099, 10, 10, tzinfo=utc).date(),
@@ -133,17 +130,16 @@ class TestPaymentSignature(APITestCase):
         IndividualRoleInHouseholdFactory(household=hh2, individual=hoh2, role=ROLE_PRIMARY)
         IndividualFactory.create_batch(4, household=hh1)
 
-        targeting.program_cycle = targeting.program.cycles.first()
-        targeting.households.set([hh1, hh2])
-        targeting.save()
+        program_cycle = program.cycles.first()
+        program_cycle_id = self.id_to_base64(program_cycle.id, "ProgramCycleNode")
 
         input_data = dict(
             business_area_slug="afghanistan",
-            targeting_id=self.id_to_base64(targeting.id, "Targeting"),
             dispersion_start_date=parse_date("2020-09-10"),
             dispersion_end_date=parse_date("2020-11-10"),
             currency="USD",
             name="paymentPlanName",
+            program_cycle_id=program_cycle_id,
         )
 
         with mock.patch("hct_mis_api.apps.payment.services.payment_plan_services.prepare_payment_plan_task"):

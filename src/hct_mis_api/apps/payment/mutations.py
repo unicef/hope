@@ -769,9 +769,10 @@ class CreatePaymentPlanMutation(PermissionMutation):
     @is_authenticated
     @transaction.atomic
     def mutate(cls, root: Any, info: Any, input: Dict, **kwargs: Any) -> "CreatePaymentPlanMutation":
-        cls.has_permission(info, Permissions.PM_CREATE, input["business_area_slug"])
+        business_area_slug = info.context.headers.get("Business-Area")
+        cls.has_permission(info, Permissions.PM_CREATE, business_area_slug)
 
-        payment_plan = PaymentPlanService.create(input_data=input, user=info.context.user)
+        payment_plan = PaymentPlanService.create(input_data=input, user=info.context.user, business_area_slug=business_area_slug)
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
@@ -787,6 +788,7 @@ class UpdatePaymentPlanMutation(PermissionMutation):
 
     class Arguments:
         input = UpdatePaymentPlanInput(required=True)
+        version = BigInt(required=False)
 
     @classmethod
     @is_authenticated
@@ -794,6 +796,7 @@ class UpdatePaymentPlanMutation(PermissionMutation):
     def mutate(cls, root: Any, info: Any, input: Dict, **kwargs: Any) -> "UpdatePaymentPlanMutation":
         payment_plan_id = decode_id_string(input.get("payment_plan_id"))
         payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
+        check_concurrency_version_in_mutation(kwargs.get("version"), payment_plan)
         old_payment_plan = copy_model_object(payment_plan)
 
         cls.has_permission(info, Permissions.PM_CREATE, payment_plan.business_area)
@@ -1197,6 +1200,7 @@ class ExcludeHouseholdsMutation(PermissionMutation):
 
 
 class CreateFollowUpPaymentPlanMutation(PermissionMutation):
+    # TODO: how about TargetCriteria for FollowUpPP ??
     payment_plan = graphene.Field(PaymentPlanNode)
 
     class Arguments:
@@ -1306,13 +1310,17 @@ class Mutations(graphene.ObjectType):
     invalid_payment_verification_plan = InvalidPaymentVerificationPlan.Field()
     delete_payment_verification_plan = DeletePaymentVerificationPlan.Field()
     update_payment_verification_status_and_received_amount = UpdatePaymentVerificationStatusAndReceivedAmount.Field()
+    update_payment_verification_received_and_received_amount = (
+        UpdatePaymentVerificationReceivedAndReceivedAmount.Field()
+    )
+
+    # Payment
     mark_payment_record_as_failed = MarkPaymentRecordAsFailedMutation.Field()
     revert_mark_payment_record_as_failed = RevertMarkPaymentRecordAsFailedMutation.Field()
     mark_payment_as_failed = MarkPaymentAsFailedMutation.Field()
     revert_mark_payment_as_failed = RevertMarkPaymentAsFailedMutation.Field()
-    update_payment_verification_received_and_received_amount = (
-        UpdatePaymentVerificationReceivedAndReceivedAmount.Field()
-    )
+
+    # Payment Plan
     action_payment_plan_mutation = ActionPaymentPlanMutation.Field()
     create_payment_plan = CreatePaymentPlanMutation.Field()
     create_follow_up_payment_plan = CreateFollowUpPaymentPlanMutation.Field()
@@ -1321,13 +1329,14 @@ class Mutations(graphene.ObjectType):
     choose_delivery_mechanisms_for_payment_plan = ChooseDeliveryMechanismsForPaymentPlanMutation.Field()
     assign_fsp_to_delivery_mechanism = AssignFspToDeliveryMechanismMutation.Field()
     split_payment_plan = SplitPaymentPlanMutation.Field()
+    exclude_households = ExcludeHouseholdsMutation.Field()
+    set_steficon_rule_on_payment_plan_payment_list = SetSteficonRuleOnPaymentPlanPaymentListMutation.Field()
 
+    # Payment Plan XLSX
     export_xlsx_payment_plan_payment_list = ExportXLSXPaymentPlanPaymentListMutation.Field()
     export_xlsx_payment_plan_payment_list_per_fsp = ExportXLSXPaymentPlanPaymentListPerFSPMutation.Field()
     import_xlsx_payment_plan_payment_list = ImportXLSXPaymentPlanPaymentListMutation.Field()
     import_xlsx_payment_plan_payment_list_per_fsp = ImportXLSXPaymentPlanPaymentListPerFSPMutation.Field()
-    set_steficon_rule_on_payment_plan_payment_list = SetSteficonRuleOnPaymentPlanPaymentListMutation.Field()
-    exclude_households = ExcludeHouseholdsMutation.Field()
 
-    # pdf
+    # Payment Plan PDF
     export_pdf_payment_plan_summary = ExportPDFPaymentPlanSummaryMutation.Field()
