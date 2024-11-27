@@ -221,20 +221,20 @@ def payment_verification_creator(channel: str = PaymentVerificationPlan.VERIFICA
         currency="PLN",
         status=GenericPayment.STATUS_DISTRIBUTION_SUCCESS,
     )
-    PaymentVerificationSummaryFactory(
+    pvs = PaymentVerificationSummaryFactory(
         payment_plan=payment_plan,
-        activation_date=datetime.now() - relativedelta(months=1),
     )
     payment_verification_plan = PaymentVerificationPlanFactory(
         payment_plan=payment_plan,
         verification_channel=channel,
-        activation_date=datetime.now() - relativedelta(months=1),
     )
     pv = PaymentVerificationFactory(
         payment=payment,
         payment_verification_plan=payment_verification_plan,
         status=PV.STATUS_PENDING,
     )
+    # overwrite update_verification_status_in_cash_plan signal
+    pvs.activation_date = datetime.now() - relativedelta(months=1)
     return pv
 
 
