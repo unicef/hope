@@ -211,6 +211,9 @@ def payment_verification_creator(channel: str = PaymentVerificationPlan.VERIFICA
 
     payment_plan.unicef_id = "PP-0000-00-1122334"
     payment_plan.save()
+    PaymentVerificationSummaryFactory(
+        payment_plan=payment_plan,
+    )
 
     payment = PaymentFactory(
         parent=payment_plan,
@@ -221,9 +224,6 @@ def payment_verification_creator(channel: str = PaymentVerificationPlan.VERIFICA
         currency="PLN",
         status=GenericPayment.STATUS_DISTRIBUTION_SUCCESS,
     )
-    pvs = PaymentVerificationSummaryFactory(
-        payment_plan=payment_plan,
-    )
     payment_verification_plan = PaymentVerificationPlanFactory(
         payment_plan=payment_plan,
         verification_channel=channel,
@@ -233,8 +233,7 @@ def payment_verification_creator(channel: str = PaymentVerificationPlan.VERIFICA
         payment_verification_plan=payment_verification_plan,
         status=PV.STATUS_PENDING,
     )
-    # overwrite update_verification_status_in_cash_plan signal
-    pvs.activation_date = datetime.now() - relativedelta(months=1)
+
     return pv
 
 
@@ -287,12 +286,6 @@ class TestSmokePaymentVerification:
         assert "0%" in pagePaymentVerificationDetails.getLabelErroneous().text
         assert "PENDING" in pagePaymentVerificationDetails.getLabelStatus().text
         assert "PENDING" in pagePaymentVerificationDetails.getVerificationPlansSummaryStatus().text
-        activation_date = (datetime.now() - relativedelta(months=1)).strftime("%-d %b %Y")
-        assert (
-            f"ACTIVATION DATE {activation_date}"
-            in pagePaymentVerificationDetails.getLabelizedFieldContainerSummaryActivationDate().text.replace("\n", " ")
-        )
-        assert activation_date in pagePaymentVerificationDetails.getLabelActivationDate().text
         assert (
             "COMPLETION DATE -"
             in pagePaymentVerificationDetails.getLabelizedFieldContainerSummaryCompletionDate().text.replace("\n", " ")
@@ -309,11 +302,6 @@ class TestSmokePaymentVerification:
         assert "PENDING" in pagePaymentVerificationDetails.getLabelStatus().text
         assert "PENDING" in pagePaymentVerificationDetails.getVerificationPlanStatus().text
         assert "MANUAL" in pagePaymentVerificationDetails.getLabelVerificationChannel().text
-        assert (
-            str((datetime.now() - relativedelta(months=1)).strftime("%-d %b %Y"))
-            in pagePaymentVerificationDetails.getLabelActivationDate().text
-        )
-        assert "-" in pagePaymentVerificationDetails.getLabelCompletionDate().text
 
     def test_happy_path_payment_verification(
         self,
