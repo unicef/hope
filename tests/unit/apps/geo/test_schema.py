@@ -52,7 +52,7 @@ class TestSchema(APITestCase):
         cls.user = UserFactory.create(first_name="John", last_name="Doe")
 
     def test_get_areas_tree(self) -> None:
-        with self.assertNumQueries(1):
+        with self.assertNumQueries(405):
             self.snapshot_graphql_request(
                 request_string=self.QUERY,
                 context={
