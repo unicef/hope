@@ -20,8 +20,7 @@ from hct_mis_api.apps.payment.fixtures import (
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
 )
-from hct_mis_api.apps.payment.models import GenericPayment, PaymentPlan
-from hct_mis_api.apps.payment.models import PaymentRecord as PR
+from hct_mis_api.apps.payment.models import GenericPayment, Payment, PaymentPlan
 from hct_mis_api.apps.payment.models import PaymentVerification as PV
 from hct_mis_api.apps.payment.models import PaymentVerificationPlan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
@@ -348,7 +347,7 @@ class TestSmokePaymentVerification:
         pagePaymentVerificationDetails.getButtonSubmit().click()
 
         pagePaymentVerificationDetails.getRows()[0].find_elements(By.TAG_NAME, "a")[0].click()
-        payment_record = PR.objects.first()
+        payment_record = Payment.objects.first()
         assert "Payment" in pagePaymentRecord.getPageHeaderTitle().text
         assert "VERIFY" in pagePaymentRecord.getButtonEdPlan().text
         assert "DELIVERED FULLY" in pagePaymentRecord.getLabelStatus()[0].text

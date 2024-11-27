@@ -1,3 +1,5 @@
+import logging
+
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
 
@@ -22,6 +24,9 @@ from hct_mis_api.apps.payment.services.payment_household_snapshot_service import
     create_payment_plan_snapshot_data,
 )
 
+logger = logging.getLogger(__name__)
+
+
 content_type_for_payment_plan = ContentType.objects.get_for_model(PaymentPlan)
 content_type_for_cash_plan = ContentType.objects.get_for_model(CashPlan)
 content_type_for_payment = ContentType.objects.get_for_model(Payment)
@@ -34,6 +39,7 @@ def get_status(status: str) -> str:
 
 
 def migrate_cash_plan_to_payment_plan() -> None:
+    logger.info("**Migrating Cash Plan to Payment Plan**")
     delivery_type_to_obj = {obj.name: obj for obj in DeliveryMechanism.objects.all()}
 
     for sp in ServiceProvider.objects.all():
@@ -240,6 +246,7 @@ def migrate_cash_plan_to_payment_plan() -> None:
 
 
 def migrate_payment_verification_plan_generic_foreign_key_to_foreign_key() -> None:
+    logger.info("*Migrating Payment Verification Plan*")
     with transaction.atomic():
         verification_plans_to_update = []
         for verification_plan in PaymentVerificationPlan.objects.exclude(
@@ -254,6 +261,7 @@ def migrate_payment_verification_plan_generic_foreign_key_to_foreign_key() -> No
 
 
 def migrate_payment_verification_summary_generic_foreign_key_to_onetoone() -> None:
+    logger.info("*Migrating Payment Verification Summary*")
     with transaction.atomic():
         verification_summaries_to_update = []
         for verification_summary in PaymentVerificationSummary.objects.exclude(
@@ -268,6 +276,7 @@ def migrate_payment_verification_summary_generic_foreign_key_to_onetoone() -> No
 
 
 def migrate_payment_verification_generic_foreign_key_to_onetoone() -> None:
+    logger.info("*Migrating Payment Verification*")
     with transaction.atomic():
         verifications_to_update = []
         for verification in PaymentVerification.objects.exclude(
@@ -282,20 +291,21 @@ def migrate_payment_verification_generic_foreign_key_to_onetoone() -> None:
 
 
 def migrate_payment_verification_models() -> None:
+    logger.info("**Migrating Payment Verification models**")
     migrate_payment_verification_plan_generic_foreign_key_to_foreign_key()
     migrate_payment_verification_summary_generic_foreign_key_to_onetoone()
     migrate_payment_verification_generic_foreign_key_to_onetoone()
 
 
 def migrate_payment_tickets_generic_foreign_key_to_onetoone() -> None:
+    logger.info("*Migrating Payment Tickets*")
     with transaction.atomic():
         ticket_complaint_details_to_update = []
         ticket_sensitive_details_to_update = []
-
         for model in [TicketComplaintDetails, TicketSensitiveDetails]:
-            for ticket_details in model.objects.exclude(
-                payment_content_type__isnull=True, payment_object_id__isnull=True
-            ):
+            tickets = model.objects.exclude(payment_content_type__isnull=True, payment_object_id__isnull=True)
+            logger.info(f"Processing {model.__name__} with {tickets.count()} records")
+            for ticket_details in tickets:
                 if ticket_details.payment_content_type == content_type_for_payment:
                     related_instance = Payment.objects.get(id=ticket_details.payment_object_id)
                     ticket_details.payment = related_instance
@@ -309,6 +319,7 @@ def migrate_payment_tickets_generic_foreign_key_to_onetoone() -> None:
 
 
 def migrate_cash_assist_models() -> None:
+    logger.info("***Migrating Cash Assist models to Payment models***")
     migrate_cash_plan_to_payment_plan()
     migrate_payment_verification_models()
     migrate_payment_tickets_generic_foreign_key_to_onetoone()

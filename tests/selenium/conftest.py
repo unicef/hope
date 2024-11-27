@@ -560,13 +560,16 @@ def create_super_user(business_area: BusinessArea) -> User:
     call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data_small.json", verbosity=0)
     country = Country.objects.get(name="Afghanistan")
     business_area.countries.add(country)
-    user = UserFactory.create(
-        is_superuser=True,
-        is_staff=True,
-        username="superuser",
-        password="testtest2",
-        email="test@example.com",
-        partner=partner,
+    user = UserFactory.get_or_create(
+        pk="4196c2c5-c2dd-48d2-887f-3a9d39e78916",
+        defaults=dict(
+            is_superuser=True,
+            is_staff=True,
+            username="superuser",
+            password="testtest2",
+            email="test@example.com",
+            partner=partner,
+        ),
     )
     UserRole.objects.create(
         user=user,
