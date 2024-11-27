@@ -405,7 +405,7 @@ def prepare_payment_plan_task(self: Any, payment_plan_id: str) -> bool:
             PaymentPlanService.create_payments(payment_plan)
             payment_plan.update_population_count_fields()
             payment_plan.update_money_fields()
-            payment_plan.status_open()
+            # payment_plan.status_open()  # TODO upd background_action_status
             payment_plan.save(update_fields=("status",))
     except Exception as e:
         logger.exception("Prepare Payment Plan Error")

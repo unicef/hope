@@ -321,6 +321,9 @@ class PaymentPlanService:
 
     @staticmethod
     def create_payments(payment_plan: PaymentPlan) -> None:
+
+
+
         payments_to_create = []
         households = Household.objects.filter(
             business_area=payment_plan.business_area, program=payment_plan.program_cycle.program
@@ -419,7 +422,8 @@ class PaymentPlanService:
                 status_date=timezone.now(),
                 start_date=program_cycle.start_date,
                 end_date=program_cycle.end_date,
-                status=PaymentPlan.Status.DRAFT,
+                status=PaymentPlan.Status.TP_OPEN,
+                build_status=PaymentPlan.BuildStatus.BUILD_STATUS_PENDING,
                 excluded_ids=input_data.get("excluded_ids", "").strip(),
                 exclusion_reason=input_data.get("exclusion_reason", "").strip(),
             )

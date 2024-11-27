@@ -494,17 +494,18 @@ class PaymentPlan(
     )
 
     class Status(models.TextChoices):
+        # TODO: migrate data with PREPARING status
         # new from TP
         TP_OPEN = "TP_OPEN", "Open"
         TP_LOCKED = "TP_LOCKED", "Locked"
-        TP_PROCESSING = "PROCESSING", "Processing"
+        TP_PROCESSING = "PROCESSING", "Processing"  # TODO: do we need this one?
         TP_STEFICON_WAIT = "STEFICON_WAIT", "Steficon Wait"
         TP_STEFICON_RUN = "STEFICON_RUN", "Steficon Run"
         TP_STEFICON_COMPLETED = "STEFICON_COMPLETED", "Steficon Completed"
         TP_STEFICON_ERROR = "STEFICON_ERROR", "Steficon Error"
 
-        DRAFT = "DRAFT", "Draft"
-        PREPARING = "PREPARING", "Preparing"
+        DRAFT = "DRAFT", "Draft" # like ready for PP create
+
         OPEN = "OPEN", "Open"
         LOCKED = "LOCKED", "Locked"
         LOCKED_FSP = "LOCKED_FSP", "Locked FSP"
@@ -564,7 +565,7 @@ class PaymentPlan(
         on_delete=models.PROTECT,
         related_name="created_payment_plans",
     )
-    status = FSMField(default=Status.DRAFT, protected=False, db_index=True, choices=Status.choices)
+    status = FSMField(default=Status.TP_OPEN, protected=False, db_index=True, choices=Status.choices)
     background_action_status = FSMField(
         default=None,
         protected=False,
@@ -591,7 +592,7 @@ class PaymentPlan(
         blank=True,
         null=True,
         on_delete=models.SET_NULL,
-        related_name="payment_plans",
+        related_name="payment_plan",
     )
     currency = models.CharField(max_length=4, choices=CURRENCY_CHOICES)
     dispersion_start_date = models.DateField()
@@ -952,7 +953,7 @@ class PaymentPlan(
 
     @transition(
         field=status,
-        source=Status.PREPARING,
+        source=Status.TP_OPEN,
         target=Status.OPEN,
     )
     def status_open(self) -> None:
