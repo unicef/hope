@@ -2,7 +2,7 @@ from django.conf import settings
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.fixtures import create_ukraine
 from hct_mis_api.apps.geo.models import Area, AreaType, Country
 
 
@@ -12,12 +12,29 @@ class TestSchema(APITestCase):
 
     QUERY = """
     query AllAreasTree {
-      allAreasTree(businessArea: "afghanistan") {
+      allAreasTree(businessArea: "ukraine") {
         name
         pCode
+        level
         areas {
           name
           pCode
+          level
+          areas {
+            name
+            pCode
+            level
+            areas {
+              name
+              pCode
+              level
+              areas {
+                name
+                pCode
+                level
+              }
+            }
+          }
         }
       }
     }
@@ -26,8 +43,8 @@ class TestSchema(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        cls.business_area = create_afghanistan()
-        country = Country.objects.get(name="Afghanistan")
+        cls.business_area = create_ukraine()
+        country = Country.objects.get(name="Ukraine")
         cls.business_area.countries.add(country)
         Area.objects.rebuild()
         AreaType.objects.rebuild()
