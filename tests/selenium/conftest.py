@@ -561,13 +561,13 @@ def create_super_user(business_area: BusinessArea) -> User:
     user, _ = User.objects.get_or_create(
         pk="4196c2c5-c2dd-48d2-887f-3a9d39e78916",
         defaults={
-            "is_superuser":True,
+            "is_superuser": True,
             "is_staff": True,
             "username": "superuser",
             "password": "testtest2",
             "email": "test@example.com",
-            "partner": partner
-        }
+            "partner": partner,
+        },
     )
     UserRole.objects.create(
         user=user,
