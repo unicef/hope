@@ -609,7 +609,7 @@ class TargetingCollectorBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteriaF
             pk__in=list(collector_primary_qs),
         )
         # If argument is Yes
-        if argument:
+        if argument.lower() == "yes":
             individuals_with_field_query = collectors_ind_query.filter(
                 delivery_mechanisms_data__data__has_key=self.field_name,
                 delivery_mechanisms_data__is_valid=True,
