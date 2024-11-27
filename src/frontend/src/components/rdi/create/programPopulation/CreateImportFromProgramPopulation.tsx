@@ -39,6 +39,7 @@ export const CreateImportFromProgramPopulationForm = ({
         first: 100,
         businessArea,
         compatibleDct: true,
+        beneficiaryGroupMatch: true,
       },
       fetchPolicy: 'network-only',
     });
