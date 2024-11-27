@@ -772,7 +772,9 @@ class CreatePaymentPlanMutation(PermissionMutation):
         business_area_slug = info.context.headers.get("Business-Area")
         cls.has_permission(info, Permissions.PM_CREATE, business_area_slug)
 
-        payment_plan = PaymentPlanService.create(input_data=input, user=info.context.user, business_area_slug=business_area_slug)
+        payment_plan = PaymentPlanService.create(
+            input_data=input, user=info.context.user, business_area_slug=business_area_slug
+        )
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",

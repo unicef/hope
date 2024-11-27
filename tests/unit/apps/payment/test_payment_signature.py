@@ -28,8 +28,6 @@ from hct_mis_api.apps.payment.services.payment_household_snapshot_service import
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
-from hct_mis_api.apps.targeting.models import TargetPopulation
 
 
 class TestPaymentSignature(APITestCase):
@@ -143,7 +141,9 @@ class TestPaymentSignature(APITestCase):
         )
 
         with mock.patch("hct_mis_api.apps.payment.services.payment_plan_services.prepare_payment_plan_task"):
-            pp = PaymentPlanService.create(input_data=input_data, user=self.user)
+            pp = PaymentPlanService.create(
+                input_data=input_data, user=self.user, business_area_slug=self.business_area.slug
+            )
 
         prepare_payment_plan_task(pp.id)
         pp.refresh_from_db()

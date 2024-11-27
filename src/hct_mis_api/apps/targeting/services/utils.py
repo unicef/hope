@@ -1,10 +1,16 @@
 import logging
-from typing import Dict, TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict
 
 from hct_mis_api.apps.household.models import Household, Individual
-from hct_mis_api.apps.targeting.models import TargetingCriteria, TargetingCriteriaRule, TargetingCriteriaRuleFilter, \
-    TargetingIndividualRuleFilterBlock, TargetingIndividualBlockRuleFilter, TargetingCollectorRuleFilterBlock, \
-    TargetingCollectorBlockRuleFilter
+from hct_mis_api.apps.targeting.models import (
+    TargetingCollectorBlockRuleFilter,
+    TargetingCollectorRuleFilterBlock,
+    TargetingCriteria,
+    TargetingCriteriaRule,
+    TargetingCriteriaRuleFilter,
+    TargetingIndividualBlockRuleFilter,
+    TargetingIndividualRuleFilterBlock,
+)
 
 if TYPE_CHECKING:  # pragma: no cover
     from hct_mis_api.apps.program.models import Program

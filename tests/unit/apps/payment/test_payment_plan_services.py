@@ -128,7 +128,7 @@ class TestPaymentPlanServices(APITestCase):
         )
 
         with self.assertRaisesMessage(GraphQLError, "PaymentPlan can not be created in provided Business Area"):
-            PaymentPlanService.create(input_data=input_data, user=self.user)
+            PaymentPlanService.create(input_data=input_data, user=self.user, business_area_slug=self.business_area.slug)
         self.business_area.is_payment_plan_applicable = True
         self.business_area.save()
 
@@ -136,14 +136,14 @@ class TestPaymentPlanServices(APITestCase):
             GraphQLError,
             f"TargetPopulation id:{targeting.id} does not exist or is not in status 'Ready for Payment Module'",
         ):
-            PaymentPlanService.create(input_data=input_data, user=self.user)
+            PaymentPlanService.create(input_data=input_data, user=self.user, business_area_slug=self.business_area.slug)
         targeting.status = TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
         targeting.save()
 
         with self.assertRaisesMessage(
             GraphQLError, f"Dispersion End Date [{input_data['dispersion_end_date']}] cannot be a past date"
         ):
-            PaymentPlanService.create(input_data=input_data, user=self.user)
+            PaymentPlanService.create(input_data=input_data, user=self.user, business_area_slug=self.business_area.slug)
         input_data["dispersion_end_date"] = parse_date("2020-11-11")
 
     @freeze_time("2020-10-10")
@@ -187,7 +187,9 @@ class TestPaymentPlanServices(APITestCase):
             "hct_mis_api.apps.payment.services.payment_plan_services.transaction"
         ) as mock_prepare_payment_plan_task:
             with self.assertNumQueries(9):
-                pp = PaymentPlanService.create(input_data=input_data, user=self.user)
+                pp = PaymentPlanService.create(
+                    input_data=input_data, user=self.user, business_area_slug=self.business_area.slug
+                )
             assert mock_prepare_payment_plan_task.on_commit.call_count == 1
 
         self.assertEqual(pp.status, PaymentPlan.Status.PREPARING)
@@ -592,12 +594,12 @@ class TestPaymentPlanServices(APITestCase):
         ):
             cycle.status = ProgramCycle.FINISHED
             cycle.save()
-            PaymentPlanService.create(input_data=input_data, user=self.user)
+            PaymentPlanService.create(input_data=input_data, user=self.user, business_area_slug=self.business_area.slug)
 
         cycle.status = ProgramCycle.DRAFT
         cycle.end_date = None
         cycle.save()
-        PaymentPlanService.create(input_data=input_data, user=self.user)
+        PaymentPlanService.create(input_data=input_data, user=self.user, business_area_slug=self.business_area.slug)
         cycle.refresh_from_db()
         assert cycle.status == ProgramCycle.ACTIVE
 
@@ -636,7 +638,9 @@ class TestPaymentPlanServices(APITestCase):
             "hct_mis_api.apps.payment.services.payment_plan_services.transaction"
         ) as mock_prepare_payment_plan_task:
             with self.assertNumQueries(9):
-                pp = PaymentPlanService.create(input_data=input_data, user=self.user)
+                pp = PaymentPlanService.create(
+                    input_data=input_data, user=self.user, business_area_slug=self.business_area.slug
+                )
             assert mock_prepare_payment_plan_task.on_commit.call_count == 1
 
         self.assertEqual(pp.status, PaymentPlan.Status.PREPARING)

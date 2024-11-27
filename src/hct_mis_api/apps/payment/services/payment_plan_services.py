@@ -3,7 +3,7 @@ import logging
 from decimal import Decimal
 from functools import partial
 from itertools import groupby
-from typing import IO, TYPE_CHECKING, Callable, Dict, List, Optional, Any
+from typing import IO, TYPE_CHECKING, Callable, Dict, List, Optional
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.db import transaction
@@ -27,10 +27,12 @@ from hct_mis_api.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx,
     create_payment_plan_payment_list_xlsx_per_fsp,
     import_payment_plan_payment_list_per_fsp_from_xlsx,
+    payment_plan_full_rebuild,
+    payment_plan_rebuild_stats,
     prepare_follow_up_payment_plan_task,
     prepare_payment_plan_task,
     send_payment_notification_emails,
-    send_to_payment_gateway, payment_plan_full_rebuild, payment_plan_rebuild_stats,
+    send_to_payment_gateway,
 )
 from hct_mis_api.apps.payment.models import (
     Approval,
@@ -42,7 +44,7 @@ from hct_mis_api.apps.payment.models import (
 from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
 )
-from hct_mis_api.apps.program.models import ProgramCycle, Program
+from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.targeting.models import TargetingCriteria
 from hct_mis_api.apps.targeting.services.utils import from_input_to_targeting_criteria
 from hct_mis_api.apps.targeting.validators import TargetingCriteriaInputValidator
@@ -370,7 +372,7 @@ class PaymentPlanService:
         Payment.objects.bulk_update(payments, ["signature_hash"])
 
     @staticmethod
-    def create_targeting_criteria(targeting_criteria_input: Dict[str: Any], program: Program) -> TargetingCriteria:
+    def create_targeting_criteria(targeting_criteria_input: Dict, program: Program) -> TargetingCriteria:
         TargetingCriteriaInputValidator.validate(targeting_criteria_input, program)
 
         targeting_criteria = from_input_to_targeting_criteria(targeting_criteria_input, program)
@@ -399,12 +401,10 @@ class PaymentPlanService:
 
         pp_name = input_data.get("name", "").strip()
         if PaymentPlan.objects.filter(name=pp_name, program=program, is_removed=False).exists():
-            raise GraphQLError(
-                f"Payment Plan with name: {pp_name} and program: {program.name} already exists.")
+            raise GraphQLError(f"Payment Plan with name: {pp_name} and program: {program.name} already exists.")
 
         with transaction.atomic():
-
-            targeting_criteria = PaymentPlanService.create_targeting_criteria(input_data.get("targeting_criteria"), program)
+            targeting_criteria = PaymentPlanService.create_targeting_criteria(input_data["targeting_criteria"], program)
 
             payment_plan = PaymentPlan.objects.create(
                 business_area=business_area,
@@ -442,21 +442,19 @@ class PaymentPlanService:
         targeting_criteria_input = input_data.get("targeting_criteria")
 
         if self.payment_plan.status in (
-                PaymentPlan.Status.DRAFT,
-                PaymentPlan.Status.OPEN,
-                PaymentPlan.Status.TP_OPEN,
-                PaymentPlan.Status.TP_LOCKED,
-                PaymentPlan.Status.TP_STEFICON_COMPLETED,
-                PaymentPlan.Status.TP_STEFICON_ERROR,
+            PaymentPlan.Status.DRAFT,
+            PaymentPlan.Status.OPEN,
+            PaymentPlan.Status.TP_OPEN,
+            PaymentPlan.Status.TP_LOCKED,
+            PaymentPlan.Status.TP_STEFICON_COMPLETED,
+            PaymentPlan.Status.TP_STEFICON_ERROR,
         ):
             raise GraphQLError(f"Not Allow edit Payment Plan within status {self.payment_plan.status}")
 
         if self.payment_plan.is_population_finalized():
             raise GraphQLError("Finalized Population Payment Plan can't be changed")
 
-        if not self.payment_plan.is_population_locked() and (
-                vulnerability_score_min or vulnerability_score_max
-        ):
+        if not self.payment_plan.is_population_locked() and (vulnerability_score_min or vulnerability_score_max):
             raise GraphQLError(
                 "You can only set vulnerability_score_min and vulnerability_score_max on Locked Population Payment Plan"
             )
@@ -465,13 +463,11 @@ class PaymentPlanService:
                 raise GraphQLError("Name can't be changed when Payment Plan is in Locked Population status")
 
             if (
-                    PaymentPlan.objects.filter(name=name, program=program, is_removed=False)
-                            .exclude(id=self.payment_plan.pk)
-                            .exists()
+                PaymentPlan.objects.filter(name=name, program=program, is_removed=False)
+                .exclude(id=self.payment_plan.pk)
+                .exists()
             ):
-                raise GraphQLError(
-                    f"Payment Plan with name '{name}' and program '{program.name}' already exists."
-                )
+                raise GraphQLError(f"Payment Plan with name '{name}' and program '{program.name}' already exists.")
 
         if targeting_criteria_input and not self.payment_plan.is_population_open():
             raise GraphQLError("Locked Population Payment Plan can't be changed")
@@ -516,7 +512,7 @@ class PaymentPlanService:
             and input_data["dispersion_start_date"] != self.payment_plan.dispersion_start_date
         ):
             self.payment_plan.dispersion_start_date = input_data["dispersion_start_date"]
-            recalculate_payments = True
+            should_rebuild_list = True
 
         if (
             input_data.get("dispersion_end_date")
@@ -536,7 +532,9 @@ class PaymentPlanService:
 
         # prevent race between commit transaction and using in task
         transaction.on_commit(
-            lambda: PaymentPlanService.rebuild_payment_plan_population(should_rebuild_list, should_rebuild_stats, self.payment_plan)
+            lambda: PaymentPlanService.rebuild_payment_plan_population(
+                should_rebuild_list, should_rebuild_stats, self.payment_plan
+            )
         )
 
         return self.payment_plan
@@ -796,7 +794,8 @@ class PaymentPlanService:
         payment_plan.update_population_count_fields()
 
     @staticmethod
-    def rebuild_payment_plan_population(should_rebuild_list: bool, should_rebuild_stats: bool, payment_plan: PaymentPlan
+    def rebuild_payment_plan_population(
+        should_rebuild_list: bool, should_rebuild_stats: bool, payment_plan: PaymentPlan
     ) -> None:
         rebuild_list = payment_plan.is_population_open() and should_rebuild_list
         rebuild_stats = (not rebuild_list and should_rebuild_list) or should_rebuild_stats

@@ -30,9 +30,7 @@ from hct_mis_api.apps.payment.schema import PaymentPlanNode
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.apps.steficon.schema import SteficonRuleNode
-from hct_mis_api.apps.targeting.inputs import (
-    CopyTargetPopulationInput,
-)
+from hct_mis_api.apps.targeting.inputs import CopyTargetPopulationInput
 from hct_mis_api.apps.targeting.models import (
     TargetingCollectorRuleFilterBlock,
     TargetingCriteria,
@@ -351,4 +349,3 @@ class Mutations(graphene.ObjectType):
     target_population_rebuild = RebuildTargetPopulationMutation.Field()
 
     set_steficon_rule_on_target_population = SetSteficonRuleOnTargetPopulationMutation.Field()
-
