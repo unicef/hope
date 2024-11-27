@@ -3,30 +3,6 @@
 from django.db import migrations, models
 
 
-def migrate_payment_tickets_generic_foreign_key_to_onetoone(apps, schema_editor):
-    TicketComplaintDetails = apps.get_model("grievance", "TicketComplaintDetails")
-    TicketSensitiveDetails = apps.get_model("grievance", "TicketSensitiveDetails")
-
-    Payment = apps.get_model("payment", "Payment")
-    ContentType = apps.get_model("contenttypes", "ContentType")
-
-    ticket_complaint_details_to_update = []
-    ticket_sensitive_details_to_update = []
-
-    for model in [TicketComplaintDetails, TicketSensitiveDetails]:
-        for ticket_details in model.objects.exclude(payment_content_type__isnull=True, payment_object_id__isnull=True):
-            if ticket_details.payment_content_type.model == "payment":
-                related_instance = Payment.objects.get(id=ticket_details.payment_object_id)
-                ticket_details.payment = related_instance
-                if model == TicketComplaintDetails:
-                    ticket_complaint_details_to_update.append(ticket_details)
-                else:
-                    ticket_sensitive_details_to_update.append(ticket_details)
-
-    TicketComplaintDetails.objects.bulk_update(ticket_complaint_details_to_update, ["payment"])
-    TicketSensitiveDetails.objects.bulk_update(ticket_sensitive_details_to_update, ["payment"])
-
-
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -54,9 +30,5 @@ class Migration(migrations.Migration):
                 on_delete=models.CASCADE,
                 related_name="ticket_sensitive_details",
             ),
-        ),
-        migrations.RunPython(
-            migrate_payment_tickets_generic_foreign_key_to_onetoone,
-            migrations.RunPython.noop,
         ),
     ]

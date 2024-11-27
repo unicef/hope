@@ -83,7 +83,7 @@ def household_social_worker() -> Household:
 @pytest.fixture
 def hh_with_payment_record(household_without_disabilities: Household) -> Payment:
     payment_plan = PaymentPlanFactory(
-        program=household_without_disabilities.program,
+        program_cycle=household_without_disabilities.program.cycles.first(),
         business_area=household_without_disabilities.business_area,
     )
     payment = PaymentFactory(

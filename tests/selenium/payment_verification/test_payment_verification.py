@@ -349,7 +349,7 @@ class TestSmokePaymentVerification:
 
         pagePaymentVerificationDetails.getRows()[0].find_elements(By.TAG_NAME, "a")[0].click()
         payment_record = PR.objects.first()
-        assert "Payment Record" in pagePaymentRecord.getPageHeaderTitle().text
+        assert "Payment" in pagePaymentRecord.getPageHeaderTitle().text
         assert "VERIFY" in pagePaymentRecord.getButtonEdPlan().text
         assert "DELIVERED FULLY" in pagePaymentRecord.getLabelStatus()[0].text
         assert "DELIVERED FULLY" in pagePaymentRecord.getStatusContainer().text
