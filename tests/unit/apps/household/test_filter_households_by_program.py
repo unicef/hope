@@ -8,8 +8,10 @@ from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.utils import encode_id_base64_required
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 
 
 class TestFilterHouseholdsByProgram(APITestCase):
@@ -17,12 +19,29 @@ class TestFilterHouseholdsByProgram(APITestCase):
 
     QUERY = """
         query AllHouseholds($program: ID){
-          allHouseholds(program: $program, orderBy: "size", businessArea: "afghanistan") {
+          allHouseholds(program: $program, orderBy: "size", businessArea: "afghanistan", rdiMergeStatus: "MERGED") {
             edges {
               node {
                 program {
                   name
                 }
+              }
+            }
+          }
+        }
+        """
+    QUERY_WITH_RDI_FILTER = """
+        query AllHouseholds($program: ID, $rdiId: String){
+          allHouseholds(program: $program, orderBy: "size", businessArea: "afghanistan", rdiMergeStatus: "MERGED", rdiId: $rdiId) {
+            edges {
+              node {
+                headOfHousehold {
+                  fullName
+                }
+                program {
+                  name
+                }
+                hasDuplicatesForRdi
               }
             }
           }
@@ -61,5 +80,37 @@ class TestFilterHouseholdsByProgram(APITestCase):
             context={"user": self.user, "headers": headers},
             variables={
                 "program": self.id_to_base64(self.program1.id, "ProgramNode"),
+            },
+        )
+
+    def test_filter_household_query_by_rdi_id(self) -> None:
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], self.business_area, self.program1
+        )
+        rdi = RegistrationDataImportFactory(imported_by=self.user, business_area=self.business_area)
+        # create new HH and IND with new RDI
+        household, individuals = create_household(
+            {
+                "registration_data_import": rdi,
+                "program": self.program1,
+                "size": 1,
+            },
+            {"full_name": "TEST User", "given_name": "TEST", "family_name": "User", "registration_data_import": rdi},
+        )
+        individual = individuals[0]
+        self.assertEqual(individual.full_name, "TEST User")
+        self.assertEqual(household.head_of_household.full_name, "TEST User")
+
+        rdi_id_str = encode_id_base64_required(rdi.id, "RegistrationDataImport")
+        headers = {
+            "Business-Area": self.business_area.slug,
+            "Program": self.id_to_base64(self.program1.id, "ProgramNode"),
+        }
+        self.snapshot_graphql_request(
+            request_string=self.QUERY_WITH_RDI_FILTER,
+            context={"user": self.user, "headers": headers},
+            variables={
+                "program": self.id_to_base64(self.program1.id, "ProgramNode"),
+                "rdiId": rdi_id_str,
             },
         )

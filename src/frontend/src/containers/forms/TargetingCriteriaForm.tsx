@@ -23,7 +23,7 @@ import styled from 'styled-components';
 import * as Yup from 'yup';
 import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useCachedImportedIndividualFieldsQuery } from '@hooks/useCachedImportedIndividualFields';
+import { useCachedIndividualFieldsQuery } from '@hooks/useCachedIndividualFields';
 import {
   chooseFieldType,
   clearField,
@@ -149,7 +149,7 @@ export const TargetingCriteriaForm = ({
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
 
-  const { data, loading } = useCachedImportedIndividualFieldsQuery(
+  const { data, loading } = useCachedIndividualFieldsQuery(
     businessArea,
     programId,
   );

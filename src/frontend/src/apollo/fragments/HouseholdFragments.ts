@@ -6,6 +6,7 @@ export const householdMinimal = gql`
     status
     adminUrl
     createdAt
+    rdiMergeStatus
     residenceStatus
     maleChildrenCount
     femaleChildrenCount

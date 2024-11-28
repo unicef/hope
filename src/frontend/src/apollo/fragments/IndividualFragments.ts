@@ -5,6 +5,7 @@ export const individualMinimal = gql`
     id
     age
     lastRegistrationDate
+    rdiMergeStatus
     adminUrl
     createdAt
     updatedAt
@@ -52,6 +53,7 @@ export const individualMinimal = gql`
       id
       unicefId
       status
+      importId
       admin1 {
         id
         name
@@ -104,7 +106,6 @@ export const individualDetailed = gql`
     lastSyncAt
     deduplicationBatchStatus
     disability
-    importedIndividualId
     commsDisability
     firstRegistrationDate
     whoAnswersAltPhone
@@ -211,6 +212,11 @@ export const individualDetailed = gql`
     walletName
     walletAddress
     blockchainName
+    registrationDataImport {
+      id
+      name
+    }
+    importId
   }
 `;
 
@@ -244,7 +250,8 @@ export const mergedIndividualMinimal = gql`
     }
     registrationDataImport {
       id
-      datahubId
+      name
     }
+    importId
   }
 `;

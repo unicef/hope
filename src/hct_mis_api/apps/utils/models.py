@@ -152,7 +152,9 @@ class SoftDeletableRepresentationMergeStatusModel(MergeStatusModel):
     class Meta:
         abstract = True
 
-    objects = SoftDeletableRepresentationMergedManager(_emit_deprecation_warnings=True)
+    # objects = SoftDeletableRepresentationMergedManager(_emit_deprecation_warnings=True)
+    # now we use 'rdi_merge_status' field for filtering
+    objects = SoftDeletableRepresentationManager()
     all_merge_status_objects = SoftDeletableRepresentationManager()
     available_objects = SoftDeletableRepresentationMergedManager()
     all_objects = models.Manager()
