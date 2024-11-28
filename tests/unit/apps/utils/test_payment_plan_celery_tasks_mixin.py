@@ -31,7 +31,7 @@ class TestPaymentPlanCeleryTasksMixin(TestCase):
         cls.user.is_active = True
         cls.user.save()
 
-        cls.payment_plan = PaymentPlanFactory(program=cls.program)
+        cls.payment_plan = PaymentPlanFactory(program_cycle=cls.program.cycles.first())
 
     def setUp(self) -> None:
         self.url = reverse("admin:payment_paymentplan_change", args=[self.payment_plan.id])
