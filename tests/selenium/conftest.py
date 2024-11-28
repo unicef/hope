@@ -549,10 +549,8 @@ def change_super_user(business_area: BusinessArea) -> None:
 @pytest.fixture(autouse=True)
 def create_super_user(business_area: BusinessArea) -> User:
     Partner.objects.get_or_create(name="TEST")
-    Partner.objects.get_or_create(name="UNICEF")
+    partner, _ = Partner.objects.get_or_create(name="UNICEF")
     Partner.objects.get_or_create(name="UNHCR")
-
-    partner = Partner.objects.get(name="UNICEF")
 
     permission_list = [role.value for role in Permissions]
 
@@ -561,9 +559,8 @@ def create_super_user(business_area: BusinessArea) -> User:
     country = Country.objects.get(name="Afghanistan")
     business_area.countries.add(country)
 
-    user = User.objects.filter(pk="4196c2c5-c2dd-48d2-887f-3a9d39e78916").first()
-    if not user:
-        user = UserFactory.create(
+    if not (user := User.objects.filter(pk="4196c2c5-c2dd-48d2-887f-3a9d39e78916").first()):
+        user = UserFactory(
             pk="4196c2c5-c2dd-48d2-887f-3a9d39e78916",
             is_superuser=True,
             is_staff=True,

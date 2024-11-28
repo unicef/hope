@@ -57,7 +57,7 @@ snapshots['TestCopyTargetPopulationMutation::test_copy_target_0_with_permission 
                                     'collectorBlockFilters': [
                                         {
                                             'arguments': [
-                                                True
+                                                'Yes'
                                             ],
                                             'fieldName': 'delivery_data_field__random_name'
                                         }

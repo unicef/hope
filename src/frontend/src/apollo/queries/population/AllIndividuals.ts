@@ -23,6 +23,8 @@ export const AllIndividuals = gql`
     $withdrawn: Boolean
     $admin2: [ID]
     $flags: [String]
+    $rdiMergeStatus: String
+    $rdiId: String
   ) {
     allIndividuals(
       before: $before
@@ -46,6 +48,8 @@ export const AllIndividuals = gql`
       withdrawn: $withdrawn
       admin2: $admin2
       flags: $flags
+      rdiMergeStatus: $rdiMergeStatus
+      rdiId: $rdiId
     ) {
       totalCount
       pageInfo {
