@@ -172,7 +172,7 @@ class TestFilterIndividualsByProgram(APITestCase):
             variables={"program": self.id_to_base64(self.program1.id, "ProgramNode")},
         )
 
-    def test_individual_query_rdi_id(self) -> None:
+    def test_individual_query_rdi_id(self, _mock: Any) -> None:
         self.create_user_role_with_permissions(
             self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST], self.business_area, self.program1
         )
@@ -203,7 +203,7 @@ class TestFilterIndividualsByProgram(APITestCase):
             },
         )
 
-    def test_individual_query_filter_by_duplicates_only(self) -> None:
+    def test_individual_query_filter_by_duplicates_only(self, _mock: Any) -> None:
         self.create_user_role_with_permissions(
             self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST], self.business_area, self.program1
         )
