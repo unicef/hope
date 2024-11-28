@@ -353,7 +353,7 @@ class TestSmokePaymentVerification:
         assert "DELIVERED FULLY" in pagePaymentRecord.getLabelStatus()[0].text
         assert "DELIVERED FULLY" in pagePaymentRecord.getStatusContainer().text
         assert payment_record.household.unicef_id in pagePaymentRecord.getLabelHousehold().text
-        assert payment_record.target_population.name in pagePaymentRecord.getLabelTargetPopulation().text
+        assert payment_record.parent.target_population.name in pagePaymentRecord.getLabelTargetPopulation().text
         assert payment_record.distribution_modality in pagePaymentRecord.getLabelDistributionModality().text
         assert payment_record.verification.status in pagePaymentRecord.getLabelStatus()[1].text
         assert "PLN 0.00" in pagePaymentRecord.getLabelAmountReceived().text
