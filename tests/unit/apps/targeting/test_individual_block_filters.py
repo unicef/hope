@@ -401,7 +401,7 @@ class TestIndividualBlockFilter(TestCase):
             collector_block_filters=col_block,
             comparison_method="EQUALS",
             field_name="delivery_data_field__random_name",
-            arguments=[True],
+            arguments=["Yes"],
         )
         collectors_filters_block = TargetingCollectorRuleFilterBlockBase(collector_block_filters=[collector_filter])
         tcr = TargetingCriteriaRuleQueryingBase(
