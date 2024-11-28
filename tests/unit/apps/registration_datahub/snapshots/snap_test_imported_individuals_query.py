@@ -9,7 +9,7 @@ snapshots = Snapshot()
 
 snapshots['TestImportedIndividualQuery::test_imported_individual_query_0_all_with_permission 1'] = {
     'data': {
-        'allImportedIndividuals': {
+        'allIndividuals': {
             'edges': [
                 {
                     'node': {
@@ -63,7 +63,7 @@ snapshots['TestImportedIndividualQuery::test_imported_individual_query_0_all_wit
 
 snapshots['TestImportedIndividualQuery::test_imported_individual_query_1_all_without_permission 1'] = {
     'data': {
-        'allImportedIndividuals': None
+        'allIndividuals': None
     },
     'errors': [
         {
@@ -75,7 +75,7 @@ snapshots['TestImportedIndividualQuery::test_imported_individual_query_1_all_wit
             ],
             'message': 'Permission Denied',
             'path': [
-                'allImportedIndividuals'
+                'allIndividuals'
             ]
         }
     ]
@@ -83,7 +83,7 @@ snapshots['TestImportedIndividualQuery::test_imported_individual_query_1_all_wit
 
 snapshots['TestImportedIndividualQuery::test_imported_individual_query_2_order_by_dob_all_with_permission 1'] = {
     'data': {
-        'allImportedIndividuals': {
+        'allIndividuals': {
             'edges': [
                 {
                     'node': {
@@ -137,7 +137,7 @@ snapshots['TestImportedIndividualQuery::test_imported_individual_query_2_order_b
 
 snapshots['TestImportedIndividualQuery::test_imported_individual_query_3_order_by_dob_d_all_with_permission 1'] = {
     'data': {
-        'allImportedIndividuals': {
+        'allIndividuals': {
             'edges': [
                 {
                     'node': {
@@ -196,7 +196,7 @@ snapshots['TestImportedIndividualQuery::test_imported_individual_query_3_order_b
 
 snapshots['TestImportedIndividualQuery::test_imported_individual_query_single_0_with_permission 1'] = {
     'data': {
-        'importedIndividual': {
+        'individual': {
             'birthDate': '1943-07-30',
             'email': 'myemail111@mail.com',
             'familyName': 'Butler',
@@ -209,7 +209,7 @@ snapshots['TestImportedIndividualQuery::test_imported_individual_query_single_0_
 
 snapshots['TestImportedIndividualQuery::test_imported_individual_query_single_1_without_permission 1'] = {
     'data': {
-        'importedIndividual': None
+        'individual': None
     },
     'errors': [
         {
@@ -221,7 +221,7 @@ snapshots['TestImportedIndividualQuery::test_imported_individual_query_single_1_
             ],
             'message': 'Permission Denied',
             'path': [
-                'importedIndividual'
+                'individual'
             ]
         }
     ]

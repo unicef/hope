@@ -1605,180 +1605,6 @@ enum HouseholdCollectType {
   SINGLE
 }
 
-enum HouseholdConsentSharing {
-  A_
-  GOVERNMENT_PARTNER
-  HUMANITARIAN_PARTNER
-  PRIVATE_PARTNER
-  UNICEF
-}
-
-enum HouseholdCurrency {
-  A_
-  AED
-  AFN
-  ALL
-  AMD
-  ANG
-  AOA
-  ARS
-  AUD
-  AWG
-  AZN
-  BAM
-  BBD
-  BDT
-  BGN
-  BHD
-  BIF
-  BMD
-  BND
-  BOB
-  BOV
-  BRL
-  BSD
-  BTN
-  BWP
-  BYN
-  BZD
-  CAD
-  CDF
-  CHF
-  CLP
-  CNY
-  COP
-  CRC
-  CUC
-  CUP
-  CVE
-  CZK
-  DJF
-  DKK
-  DOP
-  DZD
-  EGP
-  ERN
-  ETB
-  EUR
-  FJD
-  FKP
-  GBP
-  GEL
-  GHS
-  GIP
-  GMD
-  GNF
-  GTQ
-  GYD
-  HKD
-  HNL
-  HRK
-  HTG
-  HUF
-  IDR
-  ILS
-  INR
-  IQD
-  IRR
-  ISK
-  JMD
-  JOD
-  JPY
-  KES
-  KGS
-  KHR
-  KMF
-  KPW
-  KRW
-  KWD
-  KYD
-  KZT
-  LAK
-  LBP
-  LKR
-  LRD
-  LSL
-  LYD
-  MAD
-  MDL
-  MGA
-  MKD
-  MMK
-  MNT
-  MOP
-  MRU
-  MUR
-  MVR
-  MWK
-  MXN
-  MYR
-  MZN
-  NAD
-  NGN
-  NIO
-  NOK
-  NPR
-  NZD
-  OMR
-  PAB
-  PEN
-  PGK
-  PHP
-  PKR
-  PLN
-  PYG
-  QAR
-  RON
-  RSD
-  RUB
-  RWF
-  SAR
-  SBD
-  SCR
-  SDG
-  SEK
-  SGD
-  SHP
-  SLL
-  SOS
-  SRD
-  SSP
-  STN
-  SVC
-  SYP
-  SZL
-  THB
-  TJS
-  TMT
-  TND
-  TOP
-  TRY
-  TTD
-  TWD
-  TZS
-  UAH
-  UGX
-  USD
-  UYU
-  UYW
-  UZS
-  VES
-  VND
-  VUV
-  WST
-  XAF
-  XAG
-  XAU
-  XCD
-  XOF
-  XPF
-  YER
-  ZAR
-  ZMW
-  ZWL
-  USDC
-}
-
 type HouseholdDataChangeApproveMutation {
   grievanceTicket: GrievanceTicketNode
 }
@@ -1889,7 +1715,7 @@ type HouseholdNode implements Node {
   flexRegistrationsRecordId: Int
   copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individualsAndRoles: [IndividualRoleInHouseholdNode!]!
-  individuals(offset: Int, before: String, after: String, first: Int, last: Int, household_Id: UUID, businessArea: String, fullName: String, fullName_Startswith: String, fullName_Endswith: String, sex: [String], household_AdminArea: ID, withdrawn: Boolean, program: ID, age: String, programs: [ID], search: String, documentType: String, documentNumber: String, lastRegistrationDate: String, admin1: [ID], admin2: [ID], status: [String], excludedId: String, flags: [String], isActiveProgram: Boolean, orderBy: String): IndividualNodeConnection
+  individuals(offset: Int, before: String, after: String, first: Int, last: Int, household_Id: UUID, businessArea: String, fullName: String, fullName_Startswith: String, fullName_Endswith: String, sex: [String], household_AdminArea: ID, withdrawn: Boolean, program: ID, age: String, programs: [ID], search: String, documentType: String, documentNumber: String, lastRegistrationDate: String, admin1: [ID], admin2: [ID], status: [String], excludedId: String, flags: [String], isActiveProgram: Boolean, rdiId: String, duplicatesOnly: Boolean, rdiMergeStatus: String, orderBy: String): IndividualNodeConnection
   paymentrecordSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   complaintTicketDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
@@ -1910,6 +1736,7 @@ type HouseholdNode implements Node {
   sanctionListPossibleMatch: Boolean
   sanctionListConfirmedMatch: Boolean
   hasDuplicates: Boolean
+  hasDuplicatesForRdi: Boolean
   adminAreaTitle: String
   status: String
   deliveredQuantities: [DeliveredQuantityNode]
@@ -1945,16 +1772,6 @@ enum HouseholdRegistrationMethod {
   A_
   COMMUNITY
   HH_REGISTRATION
-}
-
-enum HouseholdResidenceStatus {
-  A_
-  IDP
-  REFUGEE
-  OTHERS_OF_CONCERN
-  HOST
-  NON_HOST
-  RETURNEE
 }
 
 type HouseholdSelectionNode {
@@ -2065,42 +1882,6 @@ type ImportXlsxPaymentVerificationPlanFile {
   errors: [XlsxErrorNode]
 }
 
-type ImportedDocumentNode implements Node {
-  id: ID!
-  rdiMergeStatus: DocumentRdiMergeStatus!
-  isRemoved: Boolean!
-  isOriginal: Boolean!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  lastSyncAt: DateTime
-  documentNumber: String!
-  photo: String
-  individual: IndividualNode!
-  type: ImportedDocumentTypeNode!
-  country: String
-  status: DocumentStatus!
-  cleared: Boolean!
-  clearedDate: DateTime!
-  clearedBy: UserNode
-  issuanceDate: DateTime
-  expiryDate: DateTime
-  program: ProgramNode
-  isMigrationHandled: Boolean!
-  copiedFrom: DocumentNode
-}
-
-type ImportedDocumentNodeConnection {
-  pageInfo: PageInfo!
-  edges: [ImportedDocumentNodeEdge]!
-  totalCount: Int
-  edgeCount: Int
-}
-
-type ImportedDocumentNodeEdge {
-  node: ImportedDocumentNode
-  cursor: String!
-}
-
 type ImportedDocumentTypeNode {
   id: UUID!
   createdAt: DateTime!
@@ -2111,240 +1892,6 @@ type ImportedDocumentTypeNode {
   uniqueForIndividual: Boolean!
   validForDeduplication: Boolean!
   documents(offset: Int, before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
-}
-
-type ImportedHouseholdNode implements Node {
-  id: ID!
-  size: Int
-  headOfHousehold: IndividualNode
-  rdiMergeStatus: HouseholdRdiMergeStatus!
-  isOriginal: Boolean!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  isRemoved: Boolean!
-  removedDate: DateTime
-  lastSyncAt: DateTime
-  version: BigInt!
-  unicefId: String
-  withdrawn: Boolean!
-  withdrawnDate: DateTime
-  consentSign: String!
-  consent: Boolean
-  consentSharing: HouseholdConsentSharing!
-  residenceStatus: HouseholdResidenceStatus
-  countryOrigin: String
-  country: String
-  address: String!
-  zipCode: String
-  adminArea: AreaNode
-  admin1: AreaNode
-  admin2: AreaNode
-  admin3: AreaNode
-  admin4: AreaNode
-  geopoint: GeoJSON
-  femaleAgeGroup05Count: Int
-  femaleAgeGroup611Count: Int
-  femaleAgeGroup1217Count: Int
-  femaleAgeGroup1859Count: Int
-  femaleAgeGroup60Count: Int
-  pregnantCount: Int
-  maleAgeGroup05Count: Int
-  maleAgeGroup611Count: Int
-  maleAgeGroup1217Count: Int
-  maleAgeGroup1859Count: Int
-  maleAgeGroup60Count: Int
-  femaleAgeGroup05DisabledCount: Int
-  femaleAgeGroup611DisabledCount: Int
-  femaleAgeGroup1217DisabledCount: Int
-  femaleAgeGroup1859DisabledCount: Int
-  femaleAgeGroup60DisabledCount: Int
-  maleAgeGroup05DisabledCount: Int
-  maleAgeGroup611DisabledCount: Int
-  maleAgeGroup1217DisabledCount: Int
-  maleAgeGroup1859DisabledCount: Int
-  maleAgeGroup60DisabledCount: Int
-  childrenCount: Int
-  maleChildrenCount: Int
-  femaleChildrenCount: Int
-  childrenDisabledCount: Int
-  maleChildrenDisabledCount: Int
-  femaleChildrenDisabledCount: Int
-  registrationDataImport: RegistrationDataImportNode
-  returnee: Boolean
-  flexFields: Arg
-  firstRegistrationDate: DateTime!
-  lastRegistrationDate: DateTime!
-  fchildHoh: Boolean
-  childHoh: Boolean
-  businessArea: UserBusinessAreaNode!
-  start: DateTime
-  deviceid: String!
-  nameEnumerator: String!
-  orgEnumerator: HouseholdOrgEnumerator!
-  orgNameEnumerator: String!
-  village: String!
-  registrationMethod: HouseholdRegistrationMethod!
-  collectIndividualData: HouseholdCollectIndividualData!
-  currency: HouseholdCurrency!
-  unhcrId: String!
-  userFields: JSONString!
-  detailId: String
-  registrationId: String
-  programRegistrationId: String
-  totalCashReceivedUsd: Float
-  totalCashReceived: Float
-  familyId: String
-  program: ProgramNode
-  copiedFrom: HouseholdNode
-  originUnicefId: String
-  isMigrationHandled: Boolean!
-  migratedAt: DateTime
-  isRecalculatedGroupAges: Boolean!
-  collectType: HouseholdCollectType!
-  koboSubmissionUuid: UUID
-  koboSubmissionTime: DateTime
-  enumeratorRecId: Int
-  misUnicefId: String
-  flexRegistrationsRecordId: Int
-  individuals(offset: Int, before: String, after: String, first: Int, last: Int): ImportedIndividualNodeConnection
-  hasDuplicates: Boolean
-  importId: String
-}
-
-type ImportedHouseholdNodeConnection {
-  pageInfo: PageInfo!
-  edges: [ImportedHouseholdNodeEdge]!
-  totalCount: Int
-  edgeCount: Int
-}
-
-type ImportedHouseholdNodeEdge {
-  node: ImportedHouseholdNode
-  cursor: String!
-}
-
-type ImportedIndividualIdentityNode implements Node {
-  id: ID!
-  created: DateTime!
-  modified: DateTime!
-  rdiMergeStatus: IndividualIdentityRdiMergeStatus!
-  isRemoved: Boolean!
-  isOriginal: Boolean!
-  individual: IndividualNode!
-  number: String!
-  partner: String
-  country: String
-  isMigrationHandled: Boolean!
-  copiedFrom: IndividualIdentityNode
-}
-
-type ImportedIndividualIdentityNodeConnection {
-  pageInfo: PageInfo!
-  edges: [ImportedIndividualIdentityNodeEdge]!
-  totalCount: Int
-  edgeCount: Int
-}
-
-type ImportedIndividualIdentityNodeEdge {
-  node: ImportedIndividualIdentityNode
-  cursor: String!
-}
-
-type ImportedIndividualNode implements Node {
-  id: ID!
-  rdiMergeStatus: IndividualRdiMergeStatus!
-  isOriginal: Boolean!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  isRemoved: Boolean!
-  removedDate: DateTime
-  lastSyncAt: DateTime
-  version: BigInt!
-  unicefId: String
-  duplicate: Boolean!
-  duplicateDate: DateTime
-  withdrawn: Boolean!
-  withdrawnDate: DateTime
-  individualId: String!
-  photo: String!
-  fullName: String!
-  givenName: String!
-  middleName: String!
-  familyName: String!
-  sex: IndividualSex!
-  birthDate: Date!
-  estimatedBirthDate: Boolean
-  maritalStatus: IndividualMaritalStatus!
-  phoneNo: String!
-  phoneNoValid: Boolean
-  phoneNoAlternative: String!
-  phoneNoAlternativeValid: Boolean
-  email: String
-  paymentDeliveryPhoneNo: String
-  relationship: String
-  household: HouseholdNode
-  registrationDataImport: RegistrationDataImportNode!
-  workStatus: String!
-  firstRegistrationDate: Date!
-  lastRegistrationDate: Date!
-  flexFields: FlexFieldsScalar
-  userFields: JSONString!
-  enrolledInNutritionProgramme: Boolean
-  administrationOfRutf: Boolean
-  deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus!
-  deduplicationBatchStatus: IndividualDeduplicationBatchStatus!
-  deduplicationGoldenRecordResults: [DeduplicationResultNode]
-  deduplicationBatchResults: [DeduplicationResultNode]
-  importedIndividualId: UUID
-  sanctionListPossibleMatch: Boolean!
-  sanctionListConfirmedMatch: Boolean!
-  pregnant: Boolean
-  disability: IndividualDisability!
-  observedDisability: [String]
-  disabilityCertificatePicture: String
-  seeingDisability: String!
-  hearingDisability: String!
-  physicalDisability: String!
-  memoryDisability: String!
-  selfcareDisability: String!
-  commsDisability: String!
-  whoAnswersPhone: String!
-  whoAnswersAltPhone: String!
-  businessArea: UserBusinessAreaNode!
-  fchildHoh: Boolean!
-  childHoh: Boolean!
-  detailId: String
-  registrationId: String
-  programRegistrationId: String
-  preferredLanguage: String
-  relationshipConfirmed: Boolean!
-  ageAtRegistration: Int
-  walletName: String!
-  blockchainName: String!
-  walletAddress: String!
-  program: ProgramNode
-  copiedFrom: IndividualNode
-  originUnicefId: String
-  isMigrationHandled: Boolean!
-  migratedAt: DateTime
-  misUnicefId: String
-  role: String
-  age: Int
-  importId: String
-  documents(offset: Int, before: String, after: String, first: Int, last: Int): ImportedDocumentNodeConnection
-  identities(offset: Int, before: String, after: String, first: Int, last: Int): ImportedIndividualIdentityNodeConnection
-}
-
-type ImportedIndividualNodeConnection {
-  pageInfo: PageInfo!
-  edges: [ImportedIndividualNodeEdge]!
-  totalCount: Int
-  edgeCount: Int
-}
-
-type ImportedIndividualNodeEdge {
-  node: ImportedIndividualNode
-  cursor: String!
 }
 
 type IndividualDataChangeApproveMutation {
@@ -2466,7 +2013,7 @@ type IndividualNode implements Node {
   phoneNoValid: Boolean
   phoneNoAlternative: String!
   phoneNoAlternativeValid: Boolean
-  email: String!
+  email: String
   paymentDeliveryPhoneNo: String
   relationship: IndividualRelationship
   household: HouseholdNode
@@ -2517,8 +2064,8 @@ type IndividualNode implements Node {
   misUnicefId: String
   representedHouseholds(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   headingHousehold: HouseholdNode
-  documents(offset: Int, before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
-  identities(offset: Int, before: String, after: String, first: Int, last: Int): IndividualIdentityNodeConnection!
+  documents(offset: Int, before: String, after: String, first: Int, last: Int): DocumentNodeConnection
+  identities(offset: Int, before: String, after: String, first: Int, last: Int): IndividualIdentityNodeConnection
   householdsAndRoles: [IndividualRoleInHouseholdNode!]!
   copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   bankAccountInfo: BankAccountInfoNode
@@ -2545,6 +2092,7 @@ type IndividualNode implements Node {
   age: Int
   sanctionListLastCheck: DateTime
   paymentChannels: [BankAccountInfoNode]
+  importId: String
 }
 
 type IndividualNodeConnection {
@@ -3987,9 +3535,9 @@ type Query {
   targetPopulationStatusChoices: [ChoiceObject]
   allActiveTargetPopulations(offset: Int, before: String, after: String, first: Int, last: Int, program: [ID], createdAt: DateTime, createdAt_Lte: DateTime, createdAt_Gte: DateTime, updatedAt: DateTime, updatedAt_Lte: DateTime, updatedAt_Gte: DateTime, status: String, households: [ID], name: String, createdByName: String, totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, createdAtRange: String, paymentPlanApplicable: Boolean, statusNot: String, totalHouseholdsCountWithValidPhoneNoMax: Int, totalHouseholdsCountWithValidPhoneNoMin: Int, programCycle: String, orderBy: String): TargetPopulationNodeConnection
   household(id: ID!): HouseholdNode
-  allHouseholds(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String, address: String, address_Startswith: String, headOfHousehold_FullName: String, headOfHousehold_FullName_Startswith: String, size_Range: [Int], size_Lte: Int, size_Gte: Int, adminArea: ID, admin1: ID, admin2: ID, targetPopulations: [ID], residenceStatus: String, withdrawn: Boolean, program: ID, size: String, search: String, documentType: String, documentNumber: String, headOfHousehold_PhoneNoValid: Boolean, lastRegistrationDate: String, countryOrigin: String, isActiveProgram: Boolean, orderBy: String): HouseholdNodeConnection
+  allHouseholds(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String, address: String, address_Startswith: String, headOfHousehold_FullName: String, headOfHousehold_FullName_Startswith: String, size_Range: [Int], size_Lte: Int, size_Gte: Int, adminArea: ID, admin1: ID, admin2: ID, targetPopulations: [ID], residenceStatus: String, withdrawn: Boolean, program: ID, firstRegistrationDate: DateTime, rdiId: String, size: String, search: String, documentType: String, documentNumber: String, headOfHousehold_PhoneNoValid: Boolean, lastRegistrationDate: String, countryOrigin: String, isActiveProgram: Boolean, rdiMergeStatus: String, orderBy: String): HouseholdNodeConnection
   individual(id: ID!): IndividualNode
-  allIndividuals(offset: Int, before: String, after: String, first: Int, last: Int, household_Id: UUID, businessArea: String, fullName: String, fullName_Startswith: String, fullName_Endswith: String, sex: [String], household_AdminArea: ID, withdrawn: Boolean, program: ID, age: String, programs: [ID], search: String, documentType: String, documentNumber: String, lastRegistrationDate: String, admin1: [ID], admin2: [ID], status: [String], excludedId: String, flags: [String], isActiveProgram: Boolean, orderBy: String): IndividualNodeConnection
+  allIndividuals(offset: Int, before: String, after: String, first: Int, last: Int, household_Id: UUID, businessArea: String, fullName: String, fullName_Startswith: String, fullName_Endswith: String, sex: [String], household_AdminArea: ID, withdrawn: Boolean, program: ID, age: String, programs: [ID], search: String, documentType: String, documentNumber: String, lastRegistrationDate: String, admin1: [ID], admin2: [ID], status: [String], excludedId: String, flags: [String], isActiveProgram: Boolean, rdiId: String, duplicatesOnly: Boolean, rdiMergeStatus: String, orderBy: String): IndividualNodeConnection
   allMergedHouseholds(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String, rdiId: String, orderBy: String): HouseholdNodeConnection
   allMergedIndividuals(offset: Int, before: String, after: String, first: Int, last: Int, household: ID, rdiId: String, duplicatesOnly: Boolean, businessArea: String, orderBy: String): IndividualNodeConnection
   sectionHouseholdsReached(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): SectionTotalNode
@@ -4021,11 +3569,7 @@ type Query {
   userPartnerChoices: [ChoiceObject]
   partnerForGrievanceChoices(householdId: ID, individualId: ID): [ChoiceObject]
   hasAvailableUsersToExport(businessAreaSlug: String!): Boolean
-  importedHousehold(id: ID!): ImportedHouseholdNode
-  allImportedHouseholds(offset: Int, before: String, after: String, first: Int, last: Int, rdiId: String, businessArea: String, orderBy: String): ImportedHouseholdNodeConnection
   registrationDataImportDatahub(id: ID!): RegistrationDataImportDatahubNode
-  importedIndividual(id: ID!): ImportedIndividualNode
-  allImportedIndividuals(offset: Int, before: String, after: String, first: Int, last: Int, household: ID, rdiId: String, duplicatesOnly: Boolean, businessArea: String, orderBy: String): ImportedIndividualNodeConnection
   importData(id: ID!): ImportDataNode
   koboImportData(id: ID!): KoboImportDataNode
   deduplicationBatchStatusChoices: [ChoiceObject]

@@ -1,7 +1,7 @@
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
-import { MergedIndividualMinimalFragment } from '@generated/graphql';
+import { IndividualMinimalFragment } from '@generated/graphql';
 
-export const headCells: HeadCell<MergedIndividualMinimalFragment>[] = [
+export const headCells: HeadCell<IndividualMinimalFragment>[] = [
   {
     disablePadding: false,
     label: 'Individual ID',

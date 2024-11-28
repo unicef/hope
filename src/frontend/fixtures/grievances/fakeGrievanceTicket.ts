@@ -119,7 +119,6 @@ export const fakeGrievanceTicket = {
     lastSyncAt: null,
     deduplicationBatchStatus: 'UNIQUE_IN_BATCH',
     disability: 'NOT_DISABLED',
-    importedIndividualId: 'f3e480bd-9062-4d29-89cc-d1c70dad4f29',
     commsDisability: '',
     firstRegistrationDate: '1988-06-15',
     whoAnswersAltPhone: '',

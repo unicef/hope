@@ -90,7 +90,6 @@ export const fakeIndividual = {
   lastSyncAt: null,
   deduplicationBatchStatus: 'DUPLICATE_IN_BATCH',
   disability: 'NOT_DISABLED',
-  importedIndividualId: 'a3d931d0-e8b1-4283-bc88-8499516287fe',
   commsDisability: '',
   firstRegistrationDate: '1988-06-15',
   whoAnswersAltPhone: '',
