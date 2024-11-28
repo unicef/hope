@@ -1,9 +1,11 @@
 import datetime
+import hashlib
+import json
 import typing
 from base64 import b64decode
 from decimal import Decimal
 from math import ceil
-from typing import TYPE_CHECKING, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
@@ -197,3 +199,8 @@ def get_payment_delivered_quantity_status_and_value(
 
     else:
         raise Exception(f"Invalid delivered quantity {delivered_quantity}")
+
+
+def generate_cache_key(data: Dict[str, Any]) -> str:
+    task_params_str = json.dumps(data)
+    return hashlib.sha256(task_params_str.encode()).hexdigest()
