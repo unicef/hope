@@ -1,15 +1,13 @@
-import { ReactElement } from 'react';
 import {
-  AllImportedHouseholdsQueryVariables,
-  AllMergedHouseholdsQueryVariables,
-  ImportedHouseholdMinimalFragment,
-  MergedHouseholdMinimalFragment,
-  useAllImportedHouseholdsQuery,
-  useAllMergedHouseholdsQuery,
+  AllHouseholdsQueryVariables,
+  HouseholdMinimalFragment,
+  HouseholdRdiMergeStatus,
+  useAllHouseholdsQuery,
 } from '@generated/graphql';
+import { ReactElement } from 'react';
 import { UniversalTable } from '../../UniversalTable';
-import { ImportedHouseholdTableRow } from './ImportedHouseholdTableRow';
 import { headCells as importedHeadCells } from './ImportedHouseholdTableHeadCells';
+import { ImportedHouseholdTableRow } from './ImportedHouseholdTableRow';
 import { headCells as mergedHeadCells } from './MergedHouseholdTableHeadCells';
 import { useProgramContext } from 'src/programContext';
 import { adjustHeadCells } from '@utils/utils';
@@ -22,6 +20,9 @@ export function ImportedHouseholdTable({
   const initialVariables = {
     rdiId: rdi.id,
     businessArea,
+    rdiMergeStatus: isMerged
+      ? HouseholdRdiMergeStatus.Merged
+      : HouseholdRdiMergeStatus.Pending,
   };
 
   const { selectedProgram } = useProgramContext();
@@ -54,13 +55,10 @@ export function ImportedHouseholdTable({
   );
   if (isMerged) {
     return (
-      <UniversalTable<
-        MergedHouseholdMinimalFragment,
-        AllMergedHouseholdsQueryVariables
-      >
+      <UniversalTable<HouseholdMinimalFragment, AllHouseholdsQueryVariables>
         headCells={adjustedMergedHeadCells}
-        query={useAllMergedHouseholdsQuery}
-        queriedObjectName="allMergedHouseholds"
+        query={useAllHouseholdsQuery}
+        queriedObjectName="allHouseholds"
         rowsPerPageOptions={[10, 15, 20]}
         initialVariables={initialVariables}
         isOnPaper={false}
@@ -76,13 +74,10 @@ export function ImportedHouseholdTable({
     );
   }
   return (
-    <UniversalTable<
-      ImportedHouseholdMinimalFragment,
-      AllImportedHouseholdsQueryVariables
-    >
+    <UniversalTable<HouseholdMinimalFragment, AllHouseholdsQueryVariables>
       headCells={adjustedImportedHeadCells}
-      query={useAllImportedHouseholdsQuery}
-      queriedObjectName="allImportedHouseholds"
+      query={useAllHouseholdsQuery}
+      queriedObjectName="allHouseholds"
       rowsPerPageOptions={[10, 15, 20]}
       initialVariables={initialVariables}
       isOnPaper={false}

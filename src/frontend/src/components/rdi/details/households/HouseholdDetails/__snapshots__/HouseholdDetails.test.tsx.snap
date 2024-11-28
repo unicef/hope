@@ -55,12 +55,7 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
             <div
               data-cy="label-Country"
             >
-              <span
-                class="sc-fAUdSK fuvdWP"
-                color="textSecondary"
-              >
-                Isle of Man
-              </span>
+              -
             </div>
           </div>
         </div>
@@ -81,7 +76,7 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
                 class="sc-fAUdSK fuvdWP"
                 color="textSecondary"
               >
-                Displaced  |  Refugee / Asylum Seeker
+                None
               </span>
             </div>
           </div>
@@ -99,12 +94,7 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
             <div
               data-cy="label-Country of Origin"
             >
-              <span
-                class="sc-fAUdSK fuvdWP"
-                color="textSecondary"
-              >
-                San Marino
-              </span>
+              -
             </div>
           </div>
         </div>
@@ -127,9 +117,9 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
               >
                 <a
                   class="sc-gtLWhw flPTLU"
-                  href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTpmM2U0ODBiZC05MDYyLTRkMjktODljYy1kMWM3MGRhZDRmMjk="
+                  href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/registration-data-import/individual/SW5kaXZpZHVhbE5vZGU6Y2MwMDAwMDAtMDAwMC0wMDAwLTAwMDAtMDAwMDAwMDAwMDAx"
                 >
-                  Agata Kowalska
+                  Jan Kowalski
                 </a>
               </span>
             </div>
@@ -192,12 +182,7 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
             <div
               data-cy="label-ADMINISTRATIVE LEVEL 1"
             >
-              <span
-                class="sc-fAUdSK fuvdWP"
-                color="textSecondary"
-              >
-                Nangarhar
-              </span>
+              -
             </div>
           </div>
         </div>
@@ -214,12 +199,7 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
             <div
               data-cy="label-ADMINISTRATIVE LEVEL 2"
             >
-              <span
-                class="sc-fAUdSK fuvdWP"
-                color="textSecondary"
-              >
-                Achin
-              </span>
+              -
             </div>
           </div>
         </div>

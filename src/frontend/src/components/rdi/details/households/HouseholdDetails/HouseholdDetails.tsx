@@ -7,7 +7,7 @@ import { LabelizedField } from '@core/LabelizedField';
 import { choicesToDict } from '@utils/utils';
 import {
   HouseholdChoiceDataQuery,
-  ImportedHouseholdDetailedFragment,
+  HouseholdDetailedFragment,
 } from '@generated/graphql';
 import { Title } from '@core/Title';
 import { useProgramContext } from '../../../../../programContext';
@@ -21,7 +21,7 @@ const Overview = styled.div`
 `;
 
 interface HouseholdDetailsProps {
-  household: ImportedHouseholdDetailedFragment;
+  household: HouseholdDetailedFragment;
   choicesData: HouseholdChoiceDataQuery;
 }
 export function HouseholdDetails({

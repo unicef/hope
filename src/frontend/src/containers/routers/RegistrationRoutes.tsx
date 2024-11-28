@@ -1,8 +1,6 @@
 import { useRoutes } from 'react-router-dom';
 import { RegistrationDataImportDetailsPage } from '../pages/rdi/RegistrationDataImportDetailsPage';
 import { RegistrationDataImportPage } from '../pages/rdi/RegistrationDataImportPage';
-import { RegistrationHouseholdDetailsPage } from '../pages/rdi/RegistrationHouseholdDetailsPage';
-import { RegistrationIndividualDetailsPage } from '../pages/rdi/RegistrationIndividualDetailsPage';
 import { useProgramContext } from '../../programContext';
 import { PeopleRegistrationDataImportPage } from '@containers/pages/rdi/people/PeopleRegistrationDataImportPage';
 import { PeopleRegistrationDetailsPage } from '@containers/pages/rdi/people/PeopleRegistrationDetailsPage';
@@ -34,14 +32,6 @@ export const RegistrationRoutes = (): ReactElement => {
       {
         path: '',
         element: <RegistrationDataImportPage />,
-      },
-      {
-        path: 'household/:id',
-        element: <RegistrationHouseholdDetailsPage />,
-      },
-      {
-        path: 'individual/:id',
-        element: <RegistrationIndividualDetailsPage />,
       },
       {
         path: ':id',

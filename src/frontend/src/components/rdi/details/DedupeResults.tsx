@@ -18,7 +18,7 @@ import { MiśTheme } from '../../../theme';
 import { decodeIdString } from '@utils/utils';
 import {
   DeduplicationResultNode,
-  ImportedIndividualMinimalFragment,
+  IndividualDetailedFragment,
 } from '@generated/graphql';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
@@ -42,7 +42,7 @@ const StyledTable = styled(Table)`
 `;
 
 interface DedupeResultsProps {
-  individual: ImportedIndividualMinimalFragment;
+  individual: IndividualDetailedFragment;
   status: string;
   results: Array<DeduplicationResultNode>;
   isInBatch?: boolean;

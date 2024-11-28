@@ -22,6 +22,8 @@ export const AllHouseholdsForPopulationTable = gql`
     $headOfHouseholdPhoneNoValid: Boolean
     $program: ID
     $isActiveProgram: Boolean
+    $rdiId: String
+    $rdiMergeStatus: String
   ) {
     allHouseholds(
       after: $after
@@ -44,6 +46,8 @@ export const AllHouseholdsForPopulationTable = gql`
       headOfHousehold_PhoneNoValid: $headOfHouseholdPhoneNoValid
       program: $program
       isActiveProgram: $isActiveProgram
+      rdiId: $rdiId
+      rdiMergeStatus: $rdiMergeStatus
     ) {
       pageInfo {
         hasNextPage
