@@ -5,6 +5,7 @@ from uuid import UUID
 from django.conf import settings
 from django.contrib import admin, messages
 from django.contrib.admin import ModelAdmin, SimpleListFilter
+from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Field, JSONField, Model, OneToOneRel, QuerySet
 from django.http import HttpRequest, HttpResponse
@@ -24,6 +25,7 @@ from hct_mis_api.apps.administration.widgets import JsonWidget
 from hct_mis_api.apps.core.celery import app as celery_app
 from hct_mis_api.apps.core.models import BusinessArea, FileTemp
 from hct_mis_api.apps.payment.models import PaymentPlan
+from hct_mis_api.apps.payment.utils import generate_cache_key
 from hct_mis_api.apps.utils.celery_utils import get_task_in_queue_or_running
 from hct_mis_api.apps.utils.security import is_root
 
@@ -204,24 +206,39 @@ class PaymentPlanCeleryTasksMixin:
 
     url = "admin:payment_paymentplan_change"
 
-    @button(visible=lambda btn: is_preparing_payment_plan(btn), enabled=lambda btn: is_enabled(btn))
+    @button(
+        visible=lambda btn: is_preparing_payment_plan(btn),
+        enabled=lambda btn: is_enabled(btn),
+        permission=is_root,
+    )
     def restart_preparing_payment_plan(self, request: HttpRequest, pk: str) -> Optional[HttpResponse]:
         """Preparing Payment Plan"""
-
         from hct_mis_api.apps.payment.celery_tasks import prepare_payment_plan_task
 
-        if request.method == "POST":
-            task_name = self.prepare_payment_plan_task
-            args = [uuid.UUID(pk)]
-            task_data = get_task_in_queue_or_running(name=self.prepare_payment_plan_task, args=args)
-            if task_data:
-                task_id = task_data["id"]
-                revoke_with_termination(task_id)
-                prepare_payment_plan_task.apply_async(args=args)
+        payment_plan = PaymentPlan.objects.get(pk=pk)
+        if payment_plan.status != PaymentPlan.Status.PREPARING:
+            messages.add_message(
+                request, messages.ERROR, f"The Payment Plan must has the status {PaymentPlan.Status.PREPARING}"
+            )
+            return redirect(reverse(self.url, args=[pk]))
+        # check if no task in a queue
+        cache_key = generate_cache_key(
+            {
+                "task_name": "prepare_payment_plan_task",
+                "payment_plan_id": pk,
+            }
+        )
+        if cache.get(cache_key):
+            messages.add_message(
+                request, messages.ERROR, f"Task is already running for Payment Plan {payment_plan.unicef_id}."
+            )
+            return redirect(reverse(self.url, args=[pk]))
 
-                messages.add_message(request, messages.INFO, "Successfully executed.")
-            else:
-                messages.add_message(request, messages.ERROR, f"There is no current {task_name} for this payment plan")
+        if request.method == "POST":
+            prepare_payment_plan_task.delay(payment_plan.id)
+            messages.add_message(
+                request, messages.SUCCESS, f"Task restarted for Payment Plan: {payment_plan.unicef_id}"
+            )
 
             return redirect(reverse(self.url, args=[pk]))
         else:
@@ -229,7 +246,7 @@ class PaymentPlanCeleryTasksMixin:
                 modeladmin=self,
                 request=request,
                 action=self.restart_preparing_payment_plan,
-                message="Do you confirm to restart payment plan task?",
+                message="Do you confirm to restart preparing Payment Plan task?",
             )
 
     @button(
