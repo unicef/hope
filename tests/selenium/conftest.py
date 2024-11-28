@@ -28,6 +28,7 @@ from hct_mis_api.apps.core.models import (
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.household.fixtures import DocumentTypeFactory
 from hct_mis_api.apps.household.models import DocumentType
+from hct_mis_api.apps.program.fixtures import BeneficiaryGroupFactory
 from tests.selenium.page_object.accountability.communication import (
     AccountabilityCommunication,
 )
@@ -241,10 +242,6 @@ def driver(download_path: str) -> Chrome:
     chrome_options.add_experimental_option("prefs", prefs)
     driver = webdriver.Chrome(options=chrome_options)
     yield driver
-    # try:
-    #     shutil.rmtree(download_path)
-    # except FileNotFoundError:
-    #     pass
 
 
 @pytest.fixture(scope="session")
@@ -548,6 +545,15 @@ def change_super_user(business_area: BusinessArea) -> None:
 
 @pytest.fixture(autouse=True)
 def create_super_user(business_area: BusinessArea) -> User:
+    BeneficiaryGroupFactory(
+        name="Main Menu",
+        group_label="Items Group",
+        group_label_plural="Items Groups",
+        member_label="Item",
+        member_label_plural="Items",
+        master_detail=True,
+    )
+
     Partner.objects.get_or_create(name="TEST")
     Partner.objects.get_or_create(name="UNICEF")
     Partner.objects.get_or_create(name="UNHCR")

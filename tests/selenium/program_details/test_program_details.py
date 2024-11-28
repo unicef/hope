@@ -261,7 +261,7 @@ class TestSmokeProgrammeDetails:
             "%-d %b %Y"
         ) in pageProgrammeDetails.getLabelEndDate().text
         assert program.programme_code in pageProgrammeDetails.getLabelProgrammeCode().text
-        assert program.sector.replace("_", " ").title() in pageProgrammeDetails.getLabelSelector().text
+        assert program.sector.replace("_", " ").title() in pageProgrammeDetails.getLabelSelector().text.title()
         assert program.data_collecting_type.label in pageProgrammeDetails.getLabelDataCollectingType().text
         assert (
             program.frequency_of_payments.replace("_", "-").capitalize()

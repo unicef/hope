@@ -36,7 +36,7 @@ from hct_mis_api.apps.periodic_data_update.utils import (
     populate_pdu_with_null_values,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory
 from hct_mis_api.apps.targeting.models import TargetPopulation
@@ -65,6 +65,7 @@ def non_sw_program() -> Program:
 @pytest.fixture
 def program() -> Program:
     business_area = create_afghanistan()
+    beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     return ProgramFactory(
         name="Test Program",
         status=Program.ACTIVE,
@@ -72,6 +73,7 @@ def program() -> Program:
         cycle__title="Cycle In Programme",
         cycle__start_date=datetime.now() - relativedelta(days=5),
         cycle__end_date=datetime.now() + relativedelta(months=5),
+        beneficiary_group=beneficiary_group,
     )
 
 
@@ -205,6 +207,7 @@ def get_program_with_dct_type_and_name(
 ) -> Program:
     BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
     dct = DataCollectingTypeFactory(type=dct_type)
+    beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     program = ProgramFactory(
         name=name,
         start_date=datetime.now() - relativedelta(months=1),
@@ -214,6 +217,7 @@ def get_program_with_dct_type_and_name(
         cycle__title="First Cycle In Programme",
         cycle__start_date=datetime.now() - relativedelta(days=5),
         cycle__end_date=datetime.now() + relativedelta(months=5),
+        beneficiary_group=beneficiary_group,
     )
     return program
 
