@@ -689,7 +689,7 @@ class PaymentPlanService:
             raise GraphQLError("Cannot create a follow-up for a payment plan with no unsuccessful payments")
 
         follow_up_pp = PaymentPlan.objects.create(
-            status=PaymentPlan.Status.PREPARING,
+            status=PaymentPlan.Status.TP_OPEN,
             status_date=timezone.now(),
             is_follow_up=True,
             source_payment_plan=source_pp,

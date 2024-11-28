@@ -575,7 +575,7 @@ class PaymentPlan(
         choices=BackgroundActionStatus.choices,
     )
     build_status = models.CharField(
-        max_length=256, choices=BuildStatus.choices, default=BuildStatus.BUILD_STATUS_PENDING, db_index=True
+        max_length=256, choices=BuildStatus.choices, default=None, db_index=True, null=True, blank=True
     )
     built_at = models.DateTimeField(null=True, blank=True)
     # TODO: remove this field after migrations
@@ -829,6 +829,33 @@ class PaymentPlan(
         self.background_action_status = None  # little hack
 
     @transition(
+        field=build_status,
+        source=[BuildStatus.BUILD_STATUS_PENDING, BuildStatus.BUILD_STATUS_FAILED, BuildStatus.BUILD_STATUS_OK],
+        target=BuildStatus.BUILD_STATUS_BUILDING,
+        conditions=[lambda obj: obj.status in [PaymentPlan.Status.TP_OPEN]],
+    )
+    def build_status_building(self) -> None:
+        self.built_at = timezone.now()
+
+    @transition(
+        field=build_status,
+        source=BuildStatus.BUILD_STATUS_BUILDING,
+        target=BuildStatus.BUILD_STATUS_FAILED,
+        conditions=[lambda obj: obj.status in [PaymentPlan.Status.TP_OPEN]],
+    )
+    def build_status_failed(self) -> None:
+        self.built_at = timezone.now()
+
+    @transition(
+        field=build_status,
+        source=BuildStatus.BUILD_STATUS_BUILDING,
+        target=BuildStatus.BUILD_STATUS_OK,
+        conditions=[lambda obj: obj.status in [PaymentPlan.Status.TP_OPEN]],
+    )
+    def build_status_ok(self) -> None:
+        self.built_at = timezone.now()
+
+    @transition(
         field=background_action_status,
         source=[None, BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR],
         target=BackgroundActionStatus.EXCLUDE_BENEFICIARIES,
@@ -953,7 +980,15 @@ class PaymentPlan(
 
     @transition(
         field=status,
-        source=Status.TP_OPEN,
+        source=[Status.TP_LOCKED, Status.TP_STEFICON_COMPLETED, Status.TP_STEFICON_ERROR],
+        target=Status.DRAFT,
+    )
+    def status_draft(self) -> None:
+        self.status_date = timezone.now()
+
+    @transition(
+        field=status,
+        source=Status.DRAFT,
         target=Status.OPEN,
     )
     def status_open(self) -> None:
