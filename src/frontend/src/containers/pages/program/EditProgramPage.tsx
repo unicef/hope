@@ -104,6 +104,7 @@ export const EditProgramPage = (): ReactElement => {
     endDate,
     sector,
     dataCollectingType,
+    beneficiaryGroup,
     description,
     budget = '',
     administrativeAreasOfImplementation,
@@ -166,6 +167,7 @@ export const EditProgramPage = (): ReactElement => {
         'partners',
         'partnerAccess',
         'pduFields',
+        'beneficiaryGroup',
       ]);
       const response = await updateProgramDetails({
         variables: {
@@ -232,6 +234,7 @@ export const EditProgramPage = (): ReactElement => {
     endDate,
     sector,
     dataCollectingTypeCode: dataCollectingType?.code,
+    beneficiaryGroup: decodeIdString(beneficiaryGroup?.id),
     description,
     budget,
     administrativeAreasOfImplementation,
@@ -268,6 +271,7 @@ export const EditProgramPage = (): ReactElement => {
       'endDate',
       'sector',
       'dataCollectingTypeCode',
+      'beneficiaryGroup',
       'description',
       'budget',
       'administrativeAreasOfImplementation',
@@ -374,6 +378,7 @@ export const EditProgramPage = (): ReactElement => {
                             handleNext={handleNextStep}
                             programId={id}
                             errors={errors}
+                            programHasRdi={programHasRdi}
                           />
                         )}
                       </div>

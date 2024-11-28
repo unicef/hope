@@ -12,23 +12,42 @@ import { FormikDateField } from '@shared/Formik/FormikDateField';
 import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { fetchBeneficiaryGroups } from '@api/programsApi';
+import { useQuery } from '@tanstack/react-query';
 
 interface ProgramFormPropTypes {
   values;
+  programHasRdi?: boolean;
 }
 
-export const ProgramForm = ({ values }: ProgramFormPropTypes): ReactElement => {
+export const ProgramForm = ({
+  values,
+  programHasRdi,
+}: ProgramFormPropTypes): ReactElement => {
   const { t } = useTranslation();
   const { data } = useProgrammeChoiceDataQuery();
   const { data: dataCollectionTypeChoicesData } =
     useDataCollectionTypeChoiceDataQuery();
 
-  if (!data || !dataCollectionTypeChoicesData) return null;
+  const { data: beneficiaryGroupsData } = useQuery({
+    queryKey: ['beneficiaryGroups'],
+    queryFn: async () => fetchBeneficiaryGroups(),
+  });
+
+  if (!data || !dataCollectionTypeChoicesData || !beneficiaryGroupsData)
+    return null;
 
   const filteredDataCollectionTypeChoicesData =
     dataCollectionTypeChoicesData?.dataCollectionTypeChoices.filter(
       (el) => el.name !== '',
     );
+
+  const mappedBeneficiaryGroupsData = beneficiaryGroupsData?.results?.map(
+    (el) => ({
+      name: el.name,
+      value: el.id,
+    }),
+  );
 
   return (
     <Form>
@@ -105,7 +124,19 @@ export const ProgramForm = ({ values }: ProgramFormPropTypes): ReactElement => {
             data-cy="input-data-collecting-type"
           />
         </Grid>
-        <Grid item xs={6} />
+        <Grid item xs={6}>
+          <Field
+            name="beneficiaryGroup"
+            label={t('Beneficiary Group')}
+            fullWidth
+            variant="outlined"
+            required
+            choices={mappedBeneficiaryGroupsData}
+            component={FormikSelectField}
+            data-cy="input-beneficiary-group"
+            disabled={programHasRdi || values.editMode}
+          />
+        </Grid>
         <Grid item xs={12}>
           <Field
             name="description"
