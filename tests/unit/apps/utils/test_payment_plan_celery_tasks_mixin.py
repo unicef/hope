@@ -79,7 +79,7 @@ class TestPaymentPlanCeleryTasksMixin(TestCase):
         self.client.login(username=self.user.username, password=self.password)
         payment_plan = PaymentPlanFactory(
             status=PaymentPlan.Status.PREPARING,
-            program=self.program,
+            program_cycle=self.program.cycles.first(),
         )
         payment_plan.refresh_from_db()
         response = self.client.post(
@@ -98,7 +98,7 @@ class TestPaymentPlanCeleryTasksMixin(TestCase):
         self.client.login(username=self.user.username, password=self.password)
         payment_plan = PaymentPlanFactory(
             status=PaymentPlan.Status.OPEN,
-            program=self.program,
+            program_cycle=self.program.cycles.first(),
         )
         payment_plan.refresh_from_db()
         response = self.client.post(
@@ -117,7 +117,7 @@ class TestPaymentPlanCeleryTasksMixin(TestCase):
         self.client.login(username=self.user.username, password=self.password)
         payment_plan = PaymentPlanFactory(
             status=PaymentPlan.Status.PREPARING,
-            program=self.program,
+            program_cycle=self.program.cycles.first(),
         )
         payment_plan.refresh_from_db()
         # set the cache to simulate an already running task
