@@ -3,7 +3,6 @@ import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { DetailsStep } from '@components/programs/CreateProgram/DetailsStep';
 import { PartnersStep } from '@components/programs/CreateProgram/PartnersStep';
-import { programValidationSchema } from '@components/programs/CreateProgram/programValidationSchema';
 import {
   AllProgramsForChoicesDocument,
   ProgramPartnerAccess,
@@ -31,6 +30,7 @@ import {
 } from '@components/programs/CreateProgram/ProgramStepper';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 import { omit } from 'lodash';
+import { editProgramDetailsValidationSchema } from '@components/programs/CreateProgram/editProgramValidationSchema';
 
 export const DuplicateProgramPage = (): ReactElement => {
   const navigate = useNavigate();
@@ -70,7 +70,7 @@ export const DuplicateProgramPage = (): ReactElement => {
           }))
         : [];
 
-    const requestValues = omit(values, ['editMode']);
+    const requestValues = omit(values, ['editMode', 'beneficiaryGroup']);
     const initialPduFieldState = {
       label: '',
       pduData: {
@@ -189,7 +189,7 @@ export const DuplicateProgramPage = (): ReactElement => {
   } = data.program;
 
   const initialValues = {
-    editMode: false,
+    editMode: true,
     name: `Copy of Programme: (${name})`,
     programmeCode: '',
     startDate,
@@ -286,7 +286,8 @@ export const DuplicateProgramPage = (): ReactElement => {
         onSubmit={(values) => {
           handleSubmit(values);
         }}
-        validationSchema={programValidationSchema(t)}
+        validationSchema={editProgramDetailsValidationSchema(t, initialValues)}
+        validateOnChange={true}
       >
         {({
           submitForm,

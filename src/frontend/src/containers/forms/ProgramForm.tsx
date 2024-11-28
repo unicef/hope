@@ -49,6 +49,9 @@ export const ProgramForm = ({
     }),
   );
 
+  const isCopyProgramPage = location.pathname.includes('duplicate');
+
+
   return (
     <Form>
       <Grid container spacing={3}>
@@ -95,6 +98,7 @@ export const ProgramForm = ({
             disabled={!values.startDate}
             initialFocusedDate={values.startDate}
             fullWidth
+            required={values.editMode}
             decoratorEnd={<CalendarTodayRoundedIcon color="disabled" />}
             minDate={values.startDate}
             data-cy="input-end-date"
@@ -134,7 +138,7 @@ export const ProgramForm = ({
             choices={mappedBeneficiaryGroupsData}
             component={FormikSelectField}
             data-cy="input-beneficiary-group"
-            disabled={programHasRdi || values.editMode}
+            disabled={programHasRdi || isCopyProgramPage}
           />
         </Grid>
         <Grid item xs={12}>

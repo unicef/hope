@@ -22,7 +22,7 @@ export const editProgramDetailsValidationSchema = (
     .min(today, t('End Date cannot be in the past'))
     .nullable();
 
-  if (initialValues.endDate) {
+  if (initialValues.editMode) {
     endDate = endDate.required(t('End Date is required'));
   }
 
