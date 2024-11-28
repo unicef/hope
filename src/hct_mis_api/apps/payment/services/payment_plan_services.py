@@ -335,7 +335,6 @@ class PaymentPlanService:
             .all()
             .values("pk", "collector", "unicef_id", "head_of_household")
         )
-
         for household in households:
             collector_id = household["collector"]
             if not collector_id:

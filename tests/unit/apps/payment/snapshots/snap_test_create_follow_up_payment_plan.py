@@ -7,12 +7,12 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots['TestExportPDFPaymentPlanSummary::test_export_pdf_payment_plan_summary_mutation 1'] = {
+snapshots['TestCreateFollowUpPaymentPlan::test_create_follow_up_pp_mutation 1'] = {
     'data': {
         'createFollowUpPaymentPlan': {
             'paymentPlan': {
                 'isFollowUp': True,
-                'status': 'PREPARING'
+                'status': 'TP_OPEN'
             }
         }
     }

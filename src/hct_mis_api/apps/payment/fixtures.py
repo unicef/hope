@@ -515,6 +515,7 @@ class PaymentPlanFactory(DjangoModelFactory):
         after_now=False,
         tzinfo=utc,
     )
+    status = PaymentPlan.Status.OPEN
     exchange_rate = factory.fuzzy.FuzzyDecimal(0.1, 9.9)
 
     total_entitled_quantity = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)

@@ -52,6 +52,7 @@ from hct_mis_api.apps.payment.services.payment_household_snapshot_service import
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import ProgramCycle
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory
 from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory
@@ -115,7 +116,7 @@ class TestBasePaymentPlanModel:
         [
             PaymentPlan.Status.FINISHED,
             PaymentPlan.Status.ACCEPTED,
-            PaymentPlan.Status.PREPARING,
+            PaymentPlan.Status.DRAFT,
             PaymentPlan.Status.OPEN,
             PaymentPlan.Status.LOCKED,
             PaymentPlan.Status.LOCKED_FSP,
@@ -474,22 +475,36 @@ class TestPaymentModel(TestCase):
         )
 
     def test_manager_annotations_pp_no_conflicts_for_follow_up(self) -> None:
-        program_cycle = RealProgramFactory().cycles.first()
-        pp1 = PaymentPlanFactory(program_cycle=program_cycle)
+        rdi = RegistrationDataImportFactory(business_area=self.business_area)
+        program = RealProgramFactory(business_area=self.business_area)
+        program_cycle = program.cycles.first()
+        pp1 = PaymentPlanFactory(
+            program_cycle=program_cycle,
+            business_area=self.business_area,
+            status=PaymentPlan.Status.OPEN,
+        )
         # create follow up pp
         pp2 = PaymentPlanFactory(
+            business_area=self.business_area,
             status=PaymentPlan.Status.LOCKED,
             is_follow_up=True,
             source_payment_plan=pp1,
             program_cycle=program_cycle,
         )
         pp3 = PaymentPlanFactory(
+            business_area=self.business_area,
             status=PaymentPlan.Status.OPEN,
             is_follow_up=True,
             source_payment_plan=pp1,
             program_cycle=program_cycle,
         )
-        p1 = PaymentFactory(parent=pp1, conflicted=False, currency="PLN")
+        p1 = PaymentFactory(
+            parent=pp1,
+            conflicted=False,
+            currency="PLN",
+            household__registration_data_import=rdi,
+            household__program=program,
+        )
         p2 = PaymentFactory(
             parent=pp2,
             household=p1.household,

@@ -153,6 +153,7 @@ class TestPaymentSignature(APITestCase):
             name="paymentPlanName",
             program_cycle_id=program_cycle_id,
             targeting_criteria=targeting_criteria,
+            excluded_ids="TEST_INVALID_ID_01, TEST_INVALID_ID_02",
         )
 
         with mock.patch("hct_mis_api.apps.payment.services.payment_plan_services.prepare_payment_plan_task"):
@@ -160,8 +161,14 @@ class TestPaymentSignature(APITestCase):
                 input_data=input_data, user=self.user, business_area_slug=self.business_area.slug
             )
 
-        prepare_payment_plan_task(pp.id)
         pp.refresh_from_db()
+        self.assertEqual(pp.build_status, PaymentPlan.BuildStatus.BUILD_STATUS_PENDING)
+
+        prepare_payment_plan_task(str(pp.id))
+        pp.refresh_from_db()
+
+        self.assertEqual(pp.build_status, PaymentPlan.BuildStatus.BUILD_STATUS_OK)
+
         payment1 = pp.payment_items.all()[0]
         payment2 = pp.payment_items.all()[1]
         self.assertEqual(payment1.signature_hash, self.calculate_hash_manually(payment1))

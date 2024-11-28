@@ -495,6 +495,8 @@ class PaymentPlan(
 
     class Status(models.TextChoices):
         # TODO: migrate data with PREPARING status
+        # move all Preparing into TP_OPEN and run rebuild
+
         # new from TP
         TP_OPEN = "TP_OPEN", "Open"
         TP_LOCKED = "TP_LOCKED", "Locked"
@@ -514,6 +516,17 @@ class PaymentPlan(
         IN_REVIEW = "IN_REVIEW", "In Review"
         ACCEPTED = "ACCEPTED", "Accepted"
         FINISHED = "FINISHED", "Finished"
+
+    PRE_PAYMENT_PLAN_STATUSES = (
+        Status.TP_OPEN,
+        Status.TP_LOCKED,
+        Status.TP_PROCESSING,
+        Status.TP_STEFICON_WAIT,
+        Status.TP_STEFICON_RUN,
+        Status.TP_STEFICON_COMPLETED,
+        Status.TP_STEFICON_ERROR,
+        Status.DRAFT,
+    )
 
     class BuildStatus(models.TextChoices):
         BUILD_STATUS_PENDING = "PENDING", "Pending"
@@ -574,8 +587,8 @@ class PaymentPlan(
         null=True,
         choices=BackgroundActionStatus.choices,
     )
-    build_status = models.CharField(
-        max_length=256, choices=BuildStatus.choices, default=None, db_index=True, null=True, blank=True
+    build_status = FSMField(
+        choices=BuildStatus.choices, default=None, protected=False, db_index=True, null=True, blank=True
     )
     built_at = models.DateTimeField(null=True, blank=True)
     # TODO: remove this field after migrations

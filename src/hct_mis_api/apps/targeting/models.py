@@ -391,9 +391,7 @@ class TargetingCriteria(TimeStampedUUIDModel, TargetingCriteriaQueryingBase):
 
     def get_excluded_household_ids(self) -> List[str]:
         hh_ids_list = []
-        for rule in self.rules.all():
-            if rule.household_ids:
-                hh_ids_list.extend(hh_id.strip() for hh_id in rule.household_ids.split(",") if hh_id.strip())
+        hh_ids_list.extend(hh_id.strip() for hh_id in self.payment_plan.excluded_ids.split(",") if hh_id.strip())
         return hh_ids_list
 
     def get_query(self) -> Q:

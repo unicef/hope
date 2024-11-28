@@ -24,7 +24,7 @@ mutation createFollowUpPaymentPlan($paymentPlanId: ID!, $dispersionStartDate: Da
 """
 
 
-class TestExportPDFPaymentPlanSummary(APITestCase):
+class TestCreateFollowUpPaymentPlan(APITestCase):
     databases = ("default",)
 
     @classmethod
@@ -39,7 +39,7 @@ class TestExportPDFPaymentPlanSummary(APITestCase):
             5, parent=cls.payment_plan, excluded=False, currency="PLN", status=Payment.STATUS_ERROR
         )
 
-    def test_export_pdf_payment_plan_summary_mutation(self) -> None:
+    def test_create_follow_up_pp_mutation(self) -> None:
         self.snapshot_graphql_request(
             request_string=CREATE_FOLLOW_UP_MUTATION,
             context={"user": self.user},

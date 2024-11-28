@@ -50,7 +50,7 @@ class TargetingCriteriaQueryingBase:
     def get_rules(self) -> Any:
         return self.rules
 
-    def get_excluded_household_ids(self) -> Any:
+    def get_excluded_household_ids(self) -> List[Optional[str]]:
         return self._excluded_household_ids
 
     def get_criteria_string(self) -> str:
