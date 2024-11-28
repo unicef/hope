@@ -1,8 +1,6 @@
-from unittest.mock import patch
-
 from django.contrib import messages
 from django.core.cache import cache
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from parameterized import parameterized
@@ -37,13 +35,6 @@ class TestPaymentPlanCeleryTasksMixin(TestCase):
 
     def setUp(self) -> None:
         self.url = reverse("admin:payment_paymentplan_change", args=[self.payment_plan.id])
-
-        self.patcher = patch("django.conf.settings.ROOT_TOKEN", "test-token123")
-        self.mock_root_token = self.patcher.start()
-
-    def tearDown(self) -> None:
-        self.patcher.stop()
-        super().tearDown()
 
     @parameterized.expand(
         [
@@ -83,6 +74,7 @@ class TestPaymentPlanCeleryTasksMixin(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn(html_element, response.rendered_content)
 
+    @override_settings(ROOT_TOKEN="test-token123")
     def test_restart_prepare_payment_plan_task_success(self) -> None:
         self.client.login(username=self.user.username, password=self.password)
         payment_plan = PaymentPlanFactory(
@@ -101,6 +93,7 @@ class TestPaymentPlanCeleryTasksMixin(TestCase):
             f"Task restarted for Payment Plan: {payment_plan.unicef_id}",
         )
 
+    @override_settings(ROOT_TOKEN="test-token123")
     def test_restart_prepare_payment_plan_task_incorrect_status(self) -> None:
         self.client.login(username=self.user.username, password=self.password)
         payment_plan = PaymentPlanFactory(
@@ -119,6 +112,7 @@ class TestPaymentPlanCeleryTasksMixin(TestCase):
             f"The Payment Plan must has the status {PaymentPlan.Status.PREPARING}",
         )
 
+    @override_settings(ROOT_TOKEN="test-token123")
     def test_restart_prepare_payment_plan_task_already_running(self) -> None:
         self.client.login(username=self.user.username, password=self.password)
         payment_plan = PaymentPlanFactory(
