@@ -7,6 +7,26 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
+snapshots['TestFilterHouseholdsByProgram::test_filter_household_query_by_rdi_id 1'] = {
+    'data': {
+        'allHouseholds': {
+            'edges': [
+                {
+                    'node': {
+                        'hasDuplicatesForRdi': False,
+                        'headOfHousehold': {
+                            'fullName': 'TEST User'
+                        },
+                        'program': {
+                            'name': 'Test program ONE'
+                        }
+                    }
+                }
+            ]
+        }
+    }
+}
+
 snapshots['TestFilterHouseholdsByProgram::test_filter_households_0_with_permission 1'] = {
     'data': {
         'allHouseholds': {
