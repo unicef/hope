@@ -242,7 +242,7 @@ class PaymentRecordFactory(DjangoModelFactory):
         variable_nb_words=True,
         ext_word_list=None,
     )
-    target_population = factory.SubFactory(TargetPopulationFactory)
+    # target_population = factory.SubFactory(TargetPopulationFactory)
     entitlement_card_number = factory.Faker("ssn")
     entitlement_card_status = factory.fuzzy.FuzzyChoice(
         PaymentRecord.ENTITLEMENT_CARD_STATUS_CHOICE,
@@ -479,7 +479,7 @@ class RealPaymentRecordFactory(DjangoModelFactory):
         variable_nb_words=True,
         ext_word_list=None,
     )
-    target_population = factory.SubFactory(TargetPopulationFactory)
+    # targeting_criteria = targeting_criteria
     entitlement_card_number = factory.Faker("ssn")
     entitlement_card_status = factory.fuzzy.FuzzyChoice(
         PaymentRecord.ENTITLEMENT_CARD_STATUS_CHOICE,
@@ -666,7 +666,6 @@ def create_payment_verification_plan_with_status(
     user: "User",
     business_area: BusinessArea,
     program: Program,
-    target_population: "TargetPopulation",
     status: str,
     verification_channel: Optional[str] = None,
     create_failed_payments: bool = False,
@@ -701,7 +700,7 @@ def create_payment_verification_plan_with_status(
 
         if isinstance(cash_plan, CashPlan):
             payment_record = PaymentRecordFactory(
-                parent=cash_plan, household=household, target_population=target_population, currency=currency
+                parent=cash_plan, household=household, currency=currency
             )
         else:
             additional_args = {}
@@ -749,17 +748,8 @@ def generate_real_cash_plans() -> None:
         TargetingCriteriaRuleFilter.objects.create(
             targeting_criteria_rule=rule, comparison_method="EQUALS", field_name="residence_status", arguments=[REFUGEE]
         )
-        target_population = TargetPopulationFactory(
-            program=program,
-            status=TargetPopulation.STATUS_OPEN,
-            targeting_criteria=targeting_criteria,
-        )
-        full_rebuild(target_population)
-        target_population.status = TargetPopulation.STATUS_READY_FOR_CASH_ASSIST
-        target_population.save()
         RealPaymentRecordFactory.create_batch(
             5,
-            target_population=target_population,
             parent=cash_plan,
         )
 
@@ -769,8 +759,7 @@ def generate_real_cash_plans() -> None:
                 cash_plan,
                 root,
                 cash_plan.business_area,
-                target_population.program,
-                target_population,
+                program,
                 PaymentVerificationPlan.STATUS_ACTIVE,
             )
 
@@ -785,20 +774,21 @@ def generate_reconciled_payment_plan() -> None:
     afghanistan = BusinessArea.objects.get(slug="afghanistan")
     root = User.objects.get(username="root")
     now = timezone.now()
-    tp: TargetPopulation = TargetPopulation.objects.all()[0]
+    targeting_criteria: TargetingCriteria = TargetingCriteriaFactory()
+    program = Program.objects.filter(business_area=afghanistan, name="Test Program").first()
 
     payment_plan = PaymentPlan.objects.update_or_create(
         unicef_id="PP-0060-22-11223344",
         business_area=afghanistan,
-        target_population=tp,
+        targeting_criteria=targeting_criteria,
         currency="USD",
         dispersion_start_date=now,
         dispersion_end_date=now + timedelta(days=14),
         status_date=now,
         status=PaymentPlan.Status.ACCEPTED,
         created_by=root,
-        program=tp.program,
-        program_cycle=tp.program.cycles.first(),
+        program=program,
+        program_cycle=program.cycles.first(),
         total_delivered_quantity=999,
         total_entitled_quantity=2999,
         is_follow_up=False,
@@ -822,8 +812,7 @@ def generate_reconciled_payment_plan() -> None:
         payment_plan,
         root,
         afghanistan,
-        tp.program,
-        tp,
+        program,
         PaymentVerificationPlan.STATUS_ACTIVE,
         PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL,
         True,  # create failed payments
@@ -950,25 +939,11 @@ def generate_payment_plan() -> None:
         arguments=[address],
     )
 
-    target_population_pk = UUID("00000000-0000-0000-0000-faceb00c0123")
-    target_population = TargetPopulation.objects.update_or_create(
-        pk=target_population_pk,
-        name="Test Target Population",
-        targeting_criteria=targeting_criteria,
-        status=TargetPopulation.STATUS_ASSIGNED,
-        business_area=afghanistan,
-        program=program,
-        created_by=root,
-        program_cycle=program_cycle,
-    )[0]
-    full_rebuild(target_population)
-    target_population.save()
-
     payment_plan_pk = UUID("00000000-feed-beef-0000-00000badf00d")
     payment_plan = PaymentPlan.objects.update_or_create(
         pk=payment_plan_pk,
         business_area=afghanistan,
-        target_population=target_population,
+        targeting_criteria=targeting_criteria,
         currency="USD",
         dispersion_start_date=now,
         dispersion_end_date=now + timedelta(days=14),

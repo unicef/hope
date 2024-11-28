@@ -1830,8 +1830,10 @@ class PaymentRecord(ConcurrencyModel, AdminUrlMixin, GenericPayment):
     )
     target_population = models.ForeignKey(
         "targeting.TargetPopulation",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         related_name="payment_records",
+        null=True,
+        blank=True,
     )
     target_population_cash_assist_id = models.CharField(max_length=255)
     entitlement_card_number = models.CharField(max_length=255, null=True)
