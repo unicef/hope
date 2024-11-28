@@ -354,15 +354,15 @@ class TestSmokePaymentVerification:
         assert "DELIVERED FULLY" in pagePaymentRecord.getStatusContainer().text
         assert payment_record.household.unicef_id in pagePaymentRecord.getLabelHousehold().text
         assert payment_record.parent.target_population.name in pagePaymentRecord.getLabelTargetPopulation().text
-        assert payment_record.distribution_modality in pagePaymentRecord.getLabelDistributionModality().text
-        assert payment_record.verification.status in pagePaymentRecord.getLabelStatus()[1].text
+        assert payment_record.parent.unicef_id in pagePaymentRecord.getLabelDistributionModality().text
+        assert payment_record.payment_verification.status in pagePaymentRecord.getLabelStatus()[1].text
         assert "PLN 0.00" in pagePaymentRecord.getLabelAmountReceived().text
         assert payment_record.household.unicef_id in pagePaymentRecord.getLabelHouseholdId().text
         assert "21.36" in pagePaymentRecord.getLabelEntitlementQuantity().text
         assert "21.36" in pagePaymentRecord.getLabelDeliveredQuantity().text
         assert "PLN" in pagePaymentRecord.getLabelCurrency().text
-        assert "-" in pagePaymentRecord.getLabelDeliveryType().text
-        assert payment_record.service_provider.full_name in pagePaymentRecord.getLabelFsp().text
+        assert payment_record.delivery_type.name in pagePaymentRecord.getLabelDeliveryType().text
+        assert payment_record.financial_service_provider.name in pagePaymentRecord.getLabelFsp().text
 
         pagePaymentRecord.getButtonEdPlan().click()
 
