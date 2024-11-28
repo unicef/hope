@@ -5,7 +5,6 @@ import {
   useAllCollectorFieldsAttributesQuery,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useCachedImportedIndividualFieldsQuery } from '@hooks/useCachedImportedIndividualFields';
 import { AddCircleOutline } from '@mui/icons-material';
 import { Box, Button } from '@mui/material';
 import { Fragment, ReactElement, useEffect, useState } from 'react';
@@ -20,6 +19,7 @@ import {
   TargetingCriteriaDisplayDisabled,
 } from './TargetingCriteriaDisplayDisabled';
 import { VulnerabilityScoreComponent } from './VulnerabilityScoreComponent';
+import { useCachedIndividualFieldsQuery } from '@hooks/useCachedIndividualFields';
 
 const Title = styled.div`
   padding: ${({ theme }) => theme.spacing(3)} ${({ theme }) => theme.spacing(4)};
@@ -97,7 +97,7 @@ export const AddFilterTargetingCriteriaDisplay = ({
   const { businessArea, programId } = useBaseUrl();
 
   const { data: allCoreFieldsAttributesData, loading } =
-    useCachedImportedIndividualFieldsQuery(businessArea, programId);
+    useCachedIndividualFieldsQuery(businessArea, programId);
   const { data: allCollectorFieldsAttributesData } =
     useAllCollectorFieldsAttributesQuery({
       fetchPolicy: 'cache-first',

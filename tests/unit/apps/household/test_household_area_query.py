@@ -20,6 +20,7 @@ ALL_HOUSEHOLD_QUERY = """
         orderBy: "size",
         program: $program,
         businessArea: "afghanistan"
+        rdiMergeStatus: "MERGED"
     ) {
       edges {
         node {
