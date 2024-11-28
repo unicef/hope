@@ -13,1802 +13,2830 @@ snapshots['TestSchema::test_get_areas_tree 1'] = {
             {
                 'areas': [
                     {
-                        'name': 'Arghanjkhwa',
-                        'pCode': 'AF1504'
+                        'areas': [
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Aromatnenska',
+                                'pCode': 'UA0102003'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Bakhchysaraiska',
+                                'pCode': 'UA0102005'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Dolynnenska',
+                                'pCode': 'UA0102015'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Holubynska',
+                                'pCode': 'UA0102013'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Kashtanivska',
+                                'pCode': 'UA0102025'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Krasnomatska',
+                                'pCode': 'UA0102027'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Kuibyshevska',
+                                'pCode': 'UA0102029'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Pishchanivska',
+                                'pCode': 'UA0102033'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Plodivska',
+                                'pCode': 'UA0102035'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Poshtivska',
+                                'pCode': 'UA0102037'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Sevastopilska',
+                                'pCode': 'UA0102000'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Skalystivska',
+                                'pCode': 'UA0102039'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Tabachnenska',
+                                'pCode': 'UA0102041'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Tinystivska',
+                                'pCode': 'UA0102045'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Uhlivska',
+                                'pCode': 'UA0102047'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Verkhorichenska',
+                                'pCode': 'UA0102009'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Vilinska',
+                                'pCode': 'UA0102011'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Zaliznychnenska',
+                                'pCode': 'UA0102017'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Zelenivska',
+                                'pCode': 'UA0102019'
+                            }
+                        ],
+                        'level': 2,
+                        'name': 'Bakhchysaraiskyi',
+                        'pCode': 'UA0102'
                     },
                     {
-                        'name': 'Argo',
-                        'pCode': 'AF1503'
+                        'areas': [
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Aromatnivska',
+                                'pCode': 'UA0104001'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Bahativska',
+                                'pCode': 'UA0104003'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Bilohirska',
+                                'pCode': 'UA0104005'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Chkalovska',
+                                'pCode': 'UA0104071'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Chornopilska',
+                                'pCode': 'UA0104073'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Drofynska',
+                                'pCode': 'UA0104011'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Ivanivska',
+                                'pCode': 'UA0104027'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Izobilnenska',
+                                'pCode': 'UA0104029'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Kistochkivska',
+                                'pCode': 'UA0104031'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Krymskorozivska',
+                                'pCode': 'UA0104033'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Krynychnenska',
+                                'pCode': 'UA0104035'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Kurska',
+                                'pCode': 'UA0104037'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Lystvynska',
+                                'pCode': 'UA0104039'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Melnychna',
+                                'pCode': 'UA0104041'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Michurinska',
+                                'pCode': 'UA0104047'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Muromska',
+                                'pCode': 'UA0104049'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Mykhailivska',
+                                'pCode': 'UA0104045'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Mytrofanivska',
+                                'pCode': 'UA0104043'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Novohryhorivska',
+                                'pCode': 'UA0104053'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Novozhylivska',
+                                'pCode': 'UA0104055'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Nyzhnohirska',
+                                'pCode': 'UA0104051'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Okhotska',
+                                'pCode': 'UA0104059'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Omelianivska',
+                                'pCode': 'UA0104057'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Pshenychnenska',
+                                'pCode': 'UA0104061'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Rusakivska',
+                                'pCode': 'UA0104063'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Sadova',
+                                'pCode': 'UA0104065'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Tsvitochnenska',
+                                'pCode': 'UA0104069'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Uvarivska',
+                                'pCode': 'UA0104067'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Vasylivska',
+                                'pCode': 'UA0104007'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Vyshenska',
+                                'pCode': 'UA0104009'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Yakymivska',
+                                'pCode': 'UA0104075'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Zelenohirska',
+                                'pCode': 'UA0104017'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Zemlianychnenska',
+                                'pCode': 'UA0104019'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Zheliabovska',
+                                'pCode': 'UA0104013'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Zhemchuzhynska',
+                                'pCode': 'UA0104015'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Zorkinska',
+                                'pCode': 'UA0104023'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Zuiska',
+                                'pCode': 'UA0104025'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Zybynska',
+                                'pCode': 'UA0104021'
+                            }
+                        ],
+                        'level': 2,
+                        'name': 'Bilohirskyi',
+                        'pCode': 'UA0104'
                     },
                     {
-                        'name': 'Baharak',
-                        'pCode': 'AF1512'
+                        'areas': [
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Azovska',
+                                'pCode': 'UA0106001'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Chaikynska',
+                                'pCode': 'UA0106051'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Dzhankoiska',
+                                'pCode': 'UA0106005'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Izumrudnivska',
+                                'pCode': 'UA0106013'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Kindrativska',
+                                'pCode': 'UA0106015'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Krymkivska',
+                                'pCode': 'UA0106017'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Lobanivska',
+                                'pCode': 'UA0106019'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Luhanska',
+                                'pCode': 'UA0106021'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Maiska',
+                                'pCode': 'UA0106023'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Maslivska',
+                                'pCode': 'UA0106025'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Medvedivska',
+                                'pCode': 'UA0106027'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Myrnivska',
+                                'pCode': 'UA0106029'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Novokrymska',
+                                'pCode': 'UA0106031'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Pakharivska',
+                                'pCode': 'UA0106033'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Pobiednenska',
+                                'pCode': 'UA0106035'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Prostornenska',
+                                'pCode': 'UA0106037'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Roshchynska',
+                                'pCode': 'UA0106041'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Rozkishnenska',
+                                'pCode': 'UA0106039'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Stalnenska',
+                                'pCode': 'UA0106045'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Svitlivska',
+                                'pCode': 'UA0106043'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Tabachnenska',
+                                'pCode': 'UA0106047'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Tsilynna',
+                                'pCode': 'UA0106049'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Vilnenska',
+                                'pCode': 'UA0106003'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Yarkivska',
+                                'pCode': 'UA0106053'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Yarkopolenska',
+                                'pCode': 'UA0106055'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Yasnopolianska',
+                                'pCode': 'UA0106057'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Yermakivska',
+                                'pCode': 'UA0106007'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Zarichnenska',
+                                'pCode': 'UA0106011'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Zavito-Leninska',
+                                'pCode': 'UA0106009'
+                            }
+                        ],
+                        'level': 2,
+                        'name': 'Dzhankoiskyi',
+                        'pCode': 'UA0106'
                     },
                     {
-                        'name': 'Darayem',
-                        'pCode': 'AF1510'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Feodosiiskyi',
+                        'pCode': 'UA0118'
                     },
                     {
-                        'name': 'Darwaz',
-                        'pCode': 'AF1524'
+                        'areas': [
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Baherivska',
+                                'pCode': 'UA0110001'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Batalnenska',
+                                'pCode': 'UA0110003'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Bielinska',
+                                'pCode': 'UA0110005'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Cheliadinivska',
+                                'pCode': 'UA0110051'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Chystopilska',
+                                'pCode': 'UA0110053'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Hlazivska',
+                                'pCode': 'UA0110011'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Hornostaivska',
+                                'pCode': 'UA0110013'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Illichivska',
+                                'pCode': 'UA0110017'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Kalynivska',
+                                'pCode': 'UA0110019'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Kerchenska',
+                                'pCode': 'UA0110021'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Kirovska',
+                                'pCode': 'UA0110023'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Krasnohirska',
+                                'pCode': 'UA0110025'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Leninska',
+                                'pCode': 'UA0110027'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Leninska',
+                                'pCode': 'UA0110029'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Luhivska',
+                                'pCode': 'UA0110031'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Marfivska',
+                                'pCode': 'UA0110035'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Marivska',
+                                'pCode': 'UA0110033'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Mysivska',
+                                'pCode': 'UA0110037'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Novomykolaivska',
+                                'pCode': 'UA0110039'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Oktiabrska',
+                                'pCode': 'UA0110041'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Ostaninska',
+                                'pCode': 'UA0110043'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Pryozernivska',
+                                'pCode': 'UA0110045'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Semysotska',
+                                'pCode': 'UA0110047'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Shcholkinska',
+                                'pCode': 'UA0110055'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Uvarivska',
+                                'pCode': 'UA0110049'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Voikovska',
+                                'pCode': 'UA0110009'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Vynohradnenska',
+                                'pCode': 'UA0110007'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Zavitnenska',
+                                'pCode': 'UA0110015'
+                            }
+                        ],
+                        'level': 2,
+                        'name': 'Kerchynskyi',
+                        'pCode': 'UA0110'
                     },
                     {
-                        'name': 'Darwaz-e-Balla',
-                        'pCode': 'AF1515'
+                        'areas': [
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Abrykosivska',
+                                'pCode': 'UA0112001'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Amurska',
+                                'pCode': 'UA0112003'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Chernovska',
+                                'pCode': 'UA0112071'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Hryshynska',
+                                'pCode': 'UA0112011'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Hvardiiska',
+                                'pCode': 'UA0112009'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Kalininska',
+                                'pCode': 'UA0112015'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Kalininska',
+                                'pCode': 'UA0112017'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Klepyninska',
+                                'pCode': 'UA0112019'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Kolodiazianska',
+                                'pCode': 'UA0112021'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Kormivska',
+                                'pCode': 'UA0112023'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Kotelnykivska',
+                                'pCode': 'UA0112025'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Krasnohvardiiska',
+                                'pCode': 'UA0112027'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Krasnoznamianska',
+                                'pCode': 'UA0112029'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Krestianivska',
+                                'pCode': 'UA0112031'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Leninska',
+                                'pCode': 'UA0112033'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Marianivska',
+                                'pCode': 'UA0112035'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Naidonivska',
+                                'pCode': 'UA0112037'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Novopokrovska',
+                                'pCode': 'UA0112039'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Oktiabrska',
+                                'pCode': 'UA0112041'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Oktiabrska',
+                                'pCode': 'UA0112043'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Oleksandrivska',
+                                'pCode': 'UA0112045'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Oleksiivska',
+                                'pCode': 'UA0112047'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Ostrovska',
+                                'pCode': 'UA0112049'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Pervomaiska',
+                                'pCode': 'UA0112053'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Petrivska',
+                                'pCode': 'UA0112055'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Piatykhatska',
+                                'pCode': 'UA0112051'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Poltavska',
+                                'pCode': 'UA0112057'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Pravdivska',
+                                'pCode': 'UA0112059'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Rivnivska',
+                                'pCode': 'UA0112061'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Sarybashivska',
+                                'pCode': 'UA0112063'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Stakhanovska',
+                                'pCode': 'UA0112065'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Stepnivska',
+                                'pCode': 'UA0112067'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Susaninska',
+                                'pCode': 'UA0112069'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Voikovska',
+                                'pCode': 'UA0112005'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Voskhodnenska',
+                                'pCode': 'UA0112007'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Yantarnenska',
+                                'pCode': 'UA0112073'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Zernivska',
+                                'pCode': 'UA0112013'
+                            }
+                        ],
+                        'level': 2,
+                        'name': 'Kurmanskyi',
+                        'pCode': 'UA0112'
                     },
                     {
-                        'name': 'Eshkashem',
-                        'pCode': 'AF1523'
+                        'areas': [
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Armianska',
+                                'pCode': 'UA0114001'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Berezivska',
+                                'pCode': 'UA0114003'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Botanichna',
+                                'pCode': 'UA0114005'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Bratska',
+                                'pCode': 'UA0114007'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Chernyshivska',
+                                'pCode': 'UA0114053'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Filativska',
+                                'pCode': 'UA0114051'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Illinska',
+                                'pCode': 'UA0114015'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Ishunska',
+                                'pCode': 'UA0114017'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Kovylnivska',
+                                'pCode': 'UA0114019'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Krasnoarmiiska',
+                                'pCode': 'UA0114021'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Krasnoperekopska',
+                                'pCode': 'UA0114023'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Kukushkinska',
+                                'pCode': 'UA0114025'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Mahazynska',
+                                'pCode': 'UA0114027'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Novopavlivska',
+                                'pCode': 'UA0114029'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Novoselivska',
+                                'pCode': 'UA0114031'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Orlivska',
+                                'pCode': 'UA0114033'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Pochetnenska',
+                                'pCode': 'UA0114035'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Rozdolnenska',
+                                'pCode': 'UA0114037'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Ruchivska',
+                                'pCode': 'UA0114039'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Serebrianska',
+                                'pCode': 'UA0114041'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Slavnivska',
+                                'pCode': 'UA0114043'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Slovianska',
+                                'pCode': 'UA0114045'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Sovkhoznenska',
+                                'pCode': 'UA0114047'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Suvorovska',
+                                'pCode': 'UA0114049'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Voinska',
+                                'pCode': 'UA0114011'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Vyshnivska',
+                                'pCode': 'UA0114009'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Zymynska',
+                                'pCode': 'UA0114013'
+                            }
+                        ],
+                        'level': 2,
+                        'name': 'Perekopskyi',
+                        'pCode': 'UA0114'
                     },
                     {
-                        'name': 'Fayzabad',
-                        'pCode': 'AF1501'
+                        'areas': [
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Dobrivska',
+                                'pCode': 'UA0116005'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Donska',
+                                'pCode': 'UA0116007'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Hresivska',
+                                'pCode': 'UA0116003'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Hvardiiska',
+                                'pCode': 'UA0116001'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Kolchuhynska',
+                                'pCode': 'UA0116011'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Mazanska',
+                                'pCode': 'UA0116013'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Molodizhnenska',
+                                'pCode': 'UA0116019'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Mykolaivska',
+                                'pCode': 'UA0116015'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Myrnivska',
+                                'pCode': 'UA0116017'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Novoandriivska',
+                                'pCode': 'UA0116021'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Novoselivska',
+                                'pCode': 'UA0116023'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Perovska',
+                                'pCode': 'UA0116027'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Pervomaiska',
+                                'pCode': 'UA0116025'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Pozharska',
+                                'pCode': 'UA0116029'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Rodnykivska',
+                                'pCode': 'UA0116031'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Skvortsivska',
+                                'pCode': 'UA0116035'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Trudivska',
+                                'pCode': 'UA0116037'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Ukromnivska',
+                                'pCode': 'UA0116039'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Urozhainivska',
+                                'pCode': 'UA0116041'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Zhuravlivska',
+                                'pCode': 'UA0116009'
+                            }
+                        ],
+                        'level': 2,
+                        'name': 'Simferopolskyi',
+                        'pCode': 'UA0116'
                     },
                     {
-                        'name': 'Jorm',
-                        'pCode': 'AF1521'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Yaltynskyi',
+                        'pCode': 'UA0120'
                     },
                     {
-                        'name': 'Keshem',
-                        'pCode': 'AF1518'
-                    },
-                    {
-                        'name': 'Khash',
-                        'pCode': 'AF1511'
-                    },
-                    {
-                        'name': 'Khwahan',
-                        'pCode': 'AF1517'
-                    },
-                    {
-                        'name': 'Kofab',
-                        'pCode': 'AF1516'
-                    },
-                    {
-                        'name': 'Kohestan',
-                        'pCode': 'AF1505'
-                    },
-                    {
-                        'name': 'Koran Wa Monjan',
-                        'pCode': 'AF1526'
-                    },
-                    {
-                        'name': 'Raghestan',
-                        'pCode': 'AF1506'
-                    },
-                    {
-                        'name': 'Shahr-e-Buzorg',
-                        'pCode': 'AF1508'
-                    },
-                    {
-                        'name': 'Shaki',
-                        'pCode': 'AF1525'
-                    },
-                    {
-                        'name': 'Shighnan',
-                        'pCode': 'AF1514'
-                    },
-                    {
-                        'name': 'Shuhada',
-                        'pCode': 'AF1513'
-                    },
-                    {
-                        'name': 'Tagab',
-                        'pCode': 'AF1519'
-                    },
-                    {
-                        'name': 'Teshkan',
-                        'pCode': 'AF1509'
-                    },
-                    {
-                        'name': 'Wakhan',
-                        'pCode': 'AF1528'
-                    },
-                    {
-                        'name': 'Warduj',
-                        'pCode': 'AF1522'
-                    },
-                    {
-                        'name': 'Yaftal-e-Sufla',
-                        'pCode': 'AF1502'
-                    },
-                    {
-                        'name': 'Yamgan',
-                        'pCode': 'AF1520'
-                    },
-                    {
-                        'name': 'Yawan',
-                        'pCode': 'AF1507'
-                    },
-                    {
-                        'name': 'Zebak',
-                        'pCode': 'AF1527'
+                        'areas': [
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Chornomorska',
+                                'pCode': 'UA0108077'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Dalekivska',
+                                'pCode': 'UA0108011'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Dobrushynska',
+                                'pCode': 'UA0108013'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Frunzenska',
+                                'pCode': 'UA0108075'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Heroiska',
+                                'pCode': 'UA0108009'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Ivanivska',
+                                'pCode': 'UA0108021'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Kirovska',
+                                'pCode': 'UA0108023'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Koltsovska',
+                                'pCode': 'UA0108025'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Krainenska',
+                                'pCode': 'UA0108027'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Krasnoiarska',
+                                'pCode': 'UA0108031'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Krasnopolianska',
+                                'pCode': 'UA0108029'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Krymska',
+                                'pCode': 'UA0108033'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Lisnivska',
+                                'pCode': 'UA0108035'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Medvedivska',
+                                'pCode': 'UA0108037'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Mizhvodnenska',
+                                'pCode': 'UA0108043'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Molochnenska',
+                                'pCode': 'UA0108045'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Myrnivska',
+                                'pCode': 'UA0108039'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Mytiaivska',
+                                'pCode': 'UA0108041'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Novofedorivska',
+                                'pCode': 'UA0108053'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Novoivanivska',
+                                'pCode': 'UA0108047'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Novoozernivska',
+                                'pCode': 'UA0108049'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Novosilska',
+                                'pCode': 'UA0108051'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Okhotnykivska',
+                                'pCode': 'UA0108061'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Okunivska',
+                                'pCode': 'UA0108055'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Olenivska',
+                                'pCode': 'UA0108057'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Orikhivska',
+                                'pCode': 'UA0108059'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Romashkinska',
+                                'pCode': 'UA0108063'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Sakska',
+                                'pCode': 'UA0108065'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Shtormivska',
+                                'pCode': 'UA0108079'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Stovpivska',
+                                'pCode': 'UA0108069'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Suvorovska',
+                                'pCode': 'UA0108071'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Syzivska',
+                                'pCode': 'UA0108067'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Uiutnenska',
+                                'pCode': 'UA0108073'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Veresaievska',
+                                'pCode': 'UA0108001'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Veselivska',
+                                'pCode': 'UA0108003'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Vorobiovska',
+                                'pCode': 'UA0108007'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Vynohradivska',
+                                'pCode': 'UA0108005'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Yevpatoriiska',
+                                'pCode': 'UA0108015'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Zaozernenska',
+                                'pCode': 'UA0108017'
+                            },
+                            {
+                                'areas': [
+                                ],
+                                'level': 3,
+                                'name': 'Zernivska',
+                                'pCode': 'UA0108019'
+                            }
+                        ],
+                        'level': 2,
+                        'name': 'Yevpatoriiskyi',
+                        'pCode': 'UA0108'
                     }
                 ],
-                'name': 'Badakhshan',
-                'pCode': 'AF15'
+                'level': 1,
+                'name': 'Avtonomna Respublika Krym',
+                'pCode': 'UA01'
             },
             {
                 'areas': [
                     {
-                        'name': 'Abkamari',
-                        'pCode': 'AF2903'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Cherkaskyi',
+                        'pCode': 'UA7108'
                     },
                     {
-                        'name': 'Balamurghab',
-                        'pCode': 'AF2906'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Umanskyi',
+                        'pCode': 'UA7106'
                     },
                     {
-                        'name': 'Ghormach',
-                        'pCode': 'AF2907'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Zolotoniskyi',
+                        'pCode': 'UA7104'
                     },
                     {
-                        'name': 'Jawand',
-                        'pCode': 'AF2905'
-                    },
-                    {
-                        'name': 'Muqur',
-                        'pCode': 'AF2902'
-                    },
-                    {
-                        'name': 'Qadis',
-                        'pCode': 'AF2904'
-                    },
-                    {
-                        'name': 'Qala-e-Naw',
-                        'pCode': 'AF2901'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Zvenyhorodskyi',
+                        'pCode': 'UA7102'
                     }
                 ],
-                'name': 'Badghis',
-                'pCode': 'AF29'
+                'level': 1,
+                'name': 'Cherkaska',
+                'pCode': 'UA71'
             },
             {
                 'areas': [
                     {
-                        'name': 'Andarab',
-                        'pCode': 'AF0908'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Chernihivskyi',
+                        'pCode': 'UA7410'
                     },
                     {
-                        'name': 'Baghlan-e-Jadid',
-                        'pCode': 'AF0902'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Koriukivskyi',
+                        'pCode': 'UA7402'
                     },
                     {
-                        'name': 'Burka',
-                        'pCode': 'AF0910'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Nizhynskyi',
+                        'pCode': 'UA7404'
                     },
                     {
-                        'name': 'Dahana-e-Ghori',
-                        'pCode': 'AF0903'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Novhorod-Siverskyi',
+                        'pCode': 'UA7406'
                     },
                     {
-                        'name': 'Dehsalah',
-                        'pCode': 'AF0912'
-                    },
-                    {
-                        'name': 'Doshi',
-                        'pCode': 'AF0904'
-                    },
-                    {
-                        'name': 'Fereng Wa Gharu',
-                        'pCode': 'AF0915'
-                    },
-                    {
-                        'name': 'Guzargah-e-Nur',
-                        'pCode': 'AF0914'
-                    },
-                    {
-                        'name': 'Khenjan',
-                        'pCode': 'AF0907'
-                    },
-                    {
-                        'name': 'Khost Wa Fereng',
-                        'pCode': 'AF0913'
-                    },
-                    {
-                        'name': 'Khwajahejran',
-                        'pCode': 'AF0909'
-                    },
-                    {
-                        'name': 'Nahrin',
-                        'pCode': 'AF0905'
-                    },
-                    {
-                        'name': 'Pul-e-Hesar',
-                        'pCode': 'AF0911'
-                    },
-                    {
-                        'name': 'Pul-e-Khumri',
-                        'pCode': 'AF0901'
-                    },
-                    {
-                        'name': 'Tala Wa barfak',
-                        'pCode': 'AF0906'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Prylutskyi',
+                        'pCode': 'UA7408'
                     }
                 ],
-                'name': 'Baghlan',
-                'pCode': 'AF09'
+                'level': 1,
+                'name': 'Chernihivska',
+                'pCode': 'UA74'
             },
             {
                 'areas': [
                     {
-                        'name': 'Balkh',
-                        'pCode': 'AF1805'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Cnernivetskyi',
+                        'pCode': 'UA7306'
                     },
                     {
-                        'name': 'Charbulak',
-                        'pCode': 'AF1812'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Dnistrovskyi',
+                        'pCode': 'UA7304'
                     },
                     {
-                        'name': 'Charkent',
-                        'pCode': 'AF1807'
-                    },
-                    {
-                        'name': 'Chemtal',
-                        'pCode': 'AF1813'
-                    },
-                    {
-                        'name': 'Dawlatabad',
-                        'pCode': 'AF1804'
-                    },
-                    {
-                        'name': 'Dehdadi',
-                        'pCode': 'AF1806'
-                    },
-                    {
-                        'name': 'Kaldar',
-                        'pCode': 'AF1810'
-                    },
-                    {
-                        'name': 'Keshendeh',
-                        'pCode': 'AF1815'
-                    },
-                    {
-                        'name': 'Khulm',
-                        'pCode': 'AF1809'
-                    },
-                    {
-                        'name': 'Marmul',
-                        'pCode': 'AF1808'
-                    },
-                    {
-                        'name': 'Mazar-e-Sharif',
-                        'pCode': 'AF1801'
-                    },
-                    {
-                        'name': 'Nahr-e-Shahi',
-                        'pCode': 'AF1802'
-                    },
-                    {
-                        'name': 'Sharak-e-Hayratan',
-                        'pCode': 'AF1811'
-                    },
-                    {
-                        'name': 'Sholgareh',
-                        'pCode': 'AF1814'
-                    },
-                    {
-                        'name': 'Shortepa',
-                        'pCode': 'AF1803'
-                    },
-                    {
-                        'name': 'Zari',
-                        'pCode': 'AF1816'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Vyzhnytskyi',
+                        'pCode': 'UA7302'
                     }
                 ],
-                'name': 'Balkh',
-                'pCode': 'AF18'
+                'level': 1,
+                'name': 'Chernivetska',
+                'pCode': 'UA73'
             },
             {
                 'areas': [
                     {
-                        'name': 'Bamyan',
-                        'pCode': 'AF1001'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Dniprovskyi',
+                        'pCode': 'UA1202'
                     },
                     {
-                        'name': 'Kahmard',
-                        'pCode': 'AF1006'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Kamianskyi',
+                        'pCode': 'UA1204'
                     },
                     {
-                        'name': 'Panjab',
-                        'pCode': 'AF1004'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Kryvorizkyi',
+                        'pCode': 'UA1206'
                     },
                     {
-                        'name': 'Sayghan',
-                        'pCode': 'AF1002'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Nikopolskyi',
+                        'pCode': 'UA1208'
                     },
                     {
-                        'name': 'Shibar',
-                        'pCode': 'AF1005'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Novomoskovskyi',
+                        'pCode': 'UA1210'
                     },
                     {
-                        'name': 'Waras',
-                        'pCode': 'AF1007'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Pavlohradskyi',
+                        'pCode': 'UA1212'
                     },
                     {
-                        'name': 'Yakawlang',
-                        'pCode': 'AF1003'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Synelnykivskyi',
+                        'pCode': 'UA1214'
                     }
                 ],
-                'name': 'Bamyan',
-                'pCode': 'AF10'
+                'level': 1,
+                'name': 'Dnipropetrovska',
+                'pCode': 'UA12'
             },
             {
                 'areas': [
                     {
-                        'name': 'Ashtarlay',
-                        'pCode': 'AF2202'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Bakhmutskyi',
+                        'pCode': 'UA1402'
                     },
                     {
-                        'name': 'Gizab / Patoo',
-                        'pCode': 'AF2205'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Donetskyi',
+                        'pCode': 'UA1408'
                     },
                     {
-                        'name': 'Kajran',
-                        'pCode': 'AF2208'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Horlivskyi',
+                        'pCode': 'UA1406'
                     },
                     {
-                        'name': 'Khadir',
-                        'pCode': 'AF2203'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Kalmiuskyi',
+                        'pCode': 'UA1410'
                     },
                     {
-                        'name': 'Kiti',
-                        'pCode': 'AF2204'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Kramatorskyi',
+                        'pCode': 'UA1412'
                     },
                     {
-                        'name': 'Miramor',
-                        'pCode': 'AF2209'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Mariupolskyi',
+                        'pCode': 'UA1414'
                     },
                     {
-                        'name': 'Nili',
-                        'pCode': 'AF2201'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Pokrovskyi',
+                        'pCode': 'UA1416'
                     },
                     {
-                        'name': 'Sang-e-Takht',
-                        'pCode': 'AF2207'
-                    },
-                    {
-                        'name': 'Shahrestan',
-                        'pCode': 'AF2206'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Volnovaskyi',
+                        'pCode': 'UA1404'
                     }
                 ],
-                'name': 'Daykundi',
-                'pCode': 'AF22'
+                'level': 1,
+                'name': 'Donetska',
+                'pCode': 'UA14'
             },
             {
                 'areas': [
                     {
-                        'name': 'Anardara',
-                        'pCode': 'AF3111'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Ivano-Frankivskyi',
+                        'pCode': 'UA2604'
                     },
                     {
-                        'name': 'Bakwa',
-                        'pCode': 'AF3102'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Kaluskyi',
+                        'pCode': 'UA2606'
                     },
                     {
-                        'name': 'Balabuluk',
-                        'pCode': 'AF3103'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Kolomyiskyi',
+                        'pCode': 'UA2608'
                     },
                     {
-                        'name': 'Farah',
-                        'pCode': 'AF3101'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Kosivskyi',
+                        'pCode': 'UA2610'
                     },
                     {
-                        'name': 'Gulestan',
-                        'pCode': 'AF3109'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Nadvirnianskyi',
+                        'pCode': 'UA2612'
                     },
                     {
-                        'name': 'Khak-e-Safed',
-                        'pCode': 'AF3104'
-                    },
-                    {
-                        'name': 'Lash-e-Juwayn',
-                        'pCode': 'AF3108'
-                    },
-                    {
-                        'name': 'Purchaman',
-                        'pCode': 'AF3110'
-                    },
-                    {
-                        'name': 'Pushtrod',
-                        'pCode': 'AF3105'
-                    },
-                    {
-                        'name': 'Qala-e-Kah',
-                        'pCode': 'AF3106'
-                    },
-                    {
-                        'name': 'Shibkoh',
-                        'pCode': 'AF3107'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Verkhovynskyi',
+                        'pCode': 'UA2602'
                     }
                 ],
-                'name': 'Farah',
-                'pCode': 'AF31'
+                'level': 1,
+                'name': 'Ivano-Frankivska',
+                'pCode': 'UA26'
             },
             {
                 'areas': [
                     {
-                        'name': 'Almar',
-                        'pCode': 'AF2805'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Bohodukhivskyi',
+                        'pCode': 'UA6302'
                     },
                     {
-                        'name': 'Andkhoy',
-                        'pCode': 'AF2811'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Chuhuivskyi',
+                        'pCode': 'UA6314'
                     },
                     {
-                        'name': 'Bilcheragh',
-                        'pCode': 'AF2809'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Iziumskyi',
+                        'pCode': 'UA6304'
                     },
                     {
-                        'name': 'Dawlatabad',
-                        'pCode': 'AF2810'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Kharkivskyi',
+                        'pCode': 'UA6312'
                     },
                     {
-                        'name': 'Garziwan',
-                        'pCode': 'AF2808'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Krasnohradskyi',
+                        'pCode': 'UA6306'
                     },
                     {
-                        'name': 'Khan-e-Char Bagh',
-                        'pCode': 'AF2813'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Kupianskyi',
+                        'pCode': 'UA6308'
                     },
                     {
-                        'name': 'Khwajasabzposh',
-                        'pCode': 'AF2802'
-                    },
-                    {
-                        'name': 'Kohestan',
-                        'pCode': 'AF2807'
-                    },
-                    {
-                        'name': 'Maymana',
-                        'pCode': 'AF2801'
-                    },
-                    {
-                        'name': 'Pashtunkot',
-                        'pCode': 'AF2803'
-                    },
-                    {
-                        'name': 'Qaramqol',
-                        'pCode': 'AF2812'
-                    },
-                    {
-                        'name': 'Qaysar',
-                        'pCode': 'AF2806'
-                    },
-                    {
-                        'name': 'Qorghan',
-                        'pCode': 'AF2814'
-                    },
-                    {
-                        'name': 'Shirintagab',
-                        'pCode': 'AF2804'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Lozivskyi',
+                        'pCode': 'UA6310'
                     }
                 ],
-                'name': 'Faryab',
-                'pCode': 'AF28'
+                'level': 1,
+                'name': 'Kharkivska',
+                'pCode': 'UA63'
             },
             {
                 'areas': [
                     {
-                        'name': 'Abband',
-                        'pCode': 'AF1115'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Beryslavskyi',
+                        'pCode': 'UA6502'
                     },
                     {
-                        'name': 'Ajrestan',
-                        'pCode': 'AF1116'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Henicheskyi',
+                        'pCode': 'UA6504'
                     },
                     {
-                        'name': 'Andar',
-                        'pCode': 'AF1105'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Kakhovskyi',
+                        'pCode': 'UA6506'
                     },
                     {
-                        'name': 'Dehyak',
-                        'pCode': 'AF1106'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Khersonskyi',
+                        'pCode': 'UA6510'
                     },
                     {
-                        'name': 'Gelan',
-                        'pCode': 'AF1118'
-                    },
-                    {
-                        'name': 'Ghazni',
-                        'pCode': 'AF1101'
-                    },
-                    {
-                        'name': 'Giro',
-                        'pCode': 'AF1111'
-                    },
-                    {
-                        'name': 'Jaghatu',
-                        'pCode': 'AF1109'
-                    },
-                    {
-                        'name': 'Jaghuri',
-                        'pCode': 'AF1113'
-                    },
-                    {
-                        'name': 'Khwajaumari',
-                        'pCode': 'AF1102'
-                    },
-                    {
-                        'name': 'Malestan',
-                        'pCode': 'AF1117'
-                    },
-                    {
-                        'name': 'Muqur',
-                        'pCode': 'AF1114'
-                    },
-                    {
-                        'name': 'Nawa',
-                        'pCode': 'AF1119'
-                    },
-                    {
-                        'name': 'Nawur',
-                        'pCode': 'AF1112'
-                    },
-                    {
-                        'name': 'Qarabagh',
-                        'pCode': 'AF1110'
-                    },
-                    {
-                        'name': 'Rashidan',
-                        'pCode': 'AF1108'
-                    },
-                    {
-                        'name': 'Waghaz',
-                        'pCode': 'AF1104'
-                    },
-                    {
-                        'name': 'Walimuhammad-e-Shahid',
-                        'pCode': 'AF1103'
-                    },
-                    {
-                        'name': 'Zanakhan',
-                        'pCode': 'AF1107'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Skadovskyi',
+                        'pCode': 'UA6508'
                     }
                 ],
-                'name': 'Ghazni',
-                'pCode': 'AF11'
+                'level': 1,
+                'name': 'Khersonska',
+                'pCode': 'UA65'
             },
             {
                 'areas': [
                     {
-                        'name': 'Chaghcharan',
-                        'pCode': 'AF2101'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Kamianets-Podilskyi',
+                        'pCode': 'UA6802'
                     },
                     {
-                        'name': 'Charsadra',
-                        'pCode': 'AF2102'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Khmelnytskyi',
+                        'pCode': 'UA6804'
                     },
                     {
-                        'name': 'Dawlatyar',
-                        'pCode': 'AF2104'
-                    },
-                    {
-                        'name': 'DoLayna',
-                        'pCode': 'AF2103'
-                    },
-                    {
-                        'name': 'Lal Wa Sarjangal',
-                        'pCode': 'AF2108'
-                    },
-                    {
-                        'name': 'Pasaband',
-                        'pCode': 'AF2107'
-                    },
-                    {
-                        'name': 'Saghar',
-                        'pCode': 'AF2110'
-                    },
-                    {
-                        'name': 'Shahrak',
-                        'pCode': 'AF2105'
-                    },
-                    {
-                        'name': 'Taywarah',
-                        'pCode': 'AF2106'
-                    },
-                    {
-                        'name': 'Tolak',
-                        'pCode': 'AF2109'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Shepetivskyi',
+                        'pCode': 'UA6806'
                     }
                 ],
-                'name': 'Ghor',
-                'pCode': 'AF21'
+                'level': 1,
+                'name': 'Khmelnytska',
+                'pCode': 'UA68'
             },
             {
                 'areas': [
                     {
-                        'name': 'Baghran',
-                        'pCode': 'AF3211'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Holovanivskyi',
+                        'pCode': 'UA3502'
                     },
                     {
-                        'name': 'Deh-e-Shu',
-                        'pCode': 'AF3213'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Kropyvnytskyi',
+                        'pCode': 'UA3504'
                     },
                     {
-                        'name': 'Garmser',
-                        'pCode': 'AF3209'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Novoukrainskyi',
+                        'pCode': 'UA3506'
                     },
                     {
-                        'name': 'Kajaki',
-                        'pCode': 'AF3210'
-                    },
-                    {
-                        'name': 'Lashkargah',
-                        'pCode': 'AF3201'
-                    },
-                    {
-                        'name': 'Musaqalah',
-                        'pCode': 'AF3206'
-                    },
-                    {
-                        'name': 'Nad-e-Ali / Marja',
-                        'pCode': 'AF3203'
-                    },
-                    {
-                        'name': 'Nahr-e-Saraj',
-                        'pCode': 'AF3202'
-                    },
-                    {
-                        'name': 'Nawa-e-Barakzaiy',
-                        'pCode': 'AF3204'
-                    },
-                    {
-                        'name': 'Nawzad',
-                        'pCode': 'AF3207'
-                    },
-                    {
-                        'name': 'Reg',
-                        'pCode': 'AF3212'
-                    },
-                    {
-                        'name': 'Sangin',
-                        'pCode': 'AF3205'
-                    },
-                    {
-                        'name': 'Washer',
-                        'pCode': 'AF3208'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Oleksandriiskyi',
+                        'pCode': 'UA3508'
                     }
                 ],
-                'name': 'Hilmand',
-                'pCode': 'AF32'
+                'level': 1,
+                'name': 'Kirovohradska',
+                'pCode': 'UA35'
             },
             {
                 'areas': [
                     {
-                        'name': 'Adraskan',
-                        'pCode': 'AF3010'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Bilotserkivskyi',
+                        'pCode': 'UA3202'
                     },
                     {
-                        'name': 'Chisht-e-Sharif',
-                        'pCode': 'AF3016'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Boryspilskyi',
+                        'pCode': 'UA3204'
                     },
                     {
-                        'name': 'Farsi',
-                        'pCode': 'AF3011'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Brovarskyi',
+                        'pCode': 'UA3206'
                     },
                     {
-                        'name': 'Ghoryan',
-                        'pCode': 'AF3009'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Buchanskyi',
+                        'pCode': 'UA3208'
                     },
                     {
-                        'name': 'Gulran',
-                        'pCode': 'AF3008'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Chornobylska zona vidchuzhennia',
+                        'pCode': 'UA3200'
                     },
                     {
-                        'name': 'Guzara',
-                        'pCode': 'AF3005'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Fastivskyi',
+                        'pCode': 'UA3214'
                     },
                     {
-                        'name': 'Hirat',
-                        'pCode': 'AF3001'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Obukhivskyi',
+                        'pCode': 'UA3212'
                     },
                     {
-                        'name': 'Injil',
-                        'pCode': 'AF3002'
-                    },
-                    {
-                        'name': 'Karukh',
-                        'pCode': 'AF3007'
-                    },
-                    {
-                        'name': 'Kohsan',
-                        'pCode': 'AF3014'
-                    },
-                    {
-                        'name': 'Kushk',
-                        'pCode': 'AF3003'
-                    },
-                    {
-                        'name': 'Kushk-e-Kohna',
-                        'pCode': 'AF3013'
-                    },
-                    {
-                        'name': 'Obe',
-                        'pCode': 'AF3012'
-                    },
-                    {
-                        'name': 'Pashtunzarghun',
-                        'pCode': 'AF3006'
-                    },
-                    {
-                        'name': 'Shindand',
-                        'pCode': 'AF3015'
-                    },
-                    {
-                        'name': 'Zindajan',
-                        'pCode': 'AF3004'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Vyshhorodskyi',
+                        'pCode': 'UA3210'
                     }
                 ],
-                'name': 'Hirat',
-                'pCode': 'AF30'
+                'level': 1,
+                'name': 'Kyivska',
+                'pCode': 'UA32'
             },
             {
                 'areas': [
                     {
-                        'name': 'Aqcha',
-                        'pCode': 'AF2707'
-                    },
-                    {
-                        'name': 'Darzab',
-                        'pCode': 'AF2711'
-                    },
-                    {
-                        'name': 'Fayzabad',
-                        'pCode': 'AF2705'
-                    },
-                    {
-                        'name': 'Khamyab',
-                        'pCode': 'AF2710'
-                    },
-                    {
-                        'name': 'Khanaqa',
-                        'pCode': 'AF2706'
-                    },
-                    {
-                        'name': 'Khwajadukoh',
-                        'pCode': 'AF2703'
-                    },
-                    {
-                        'name': 'Mardyan',
-                        'pCode': 'AF2708'
-                    },
-                    {
-                        'name': 'Mingajik',
-                        'pCode': 'AF2702'
-                    },
-                    {
-                        'name': 'Qarqin',
-                        'pCode': 'AF2709'
-                    },
-                    {
-                        'name': 'Qushtepa',
-                        'pCode': 'AF2704'
-                    },
-                    {
-                        'name': 'Shiberghan',
-                        'pCode': 'AF2701'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Kyivska',
+                        'pCode': 'UA8000'
                     }
                 ],
-                'name': 'Jawzjan',
-                'pCode': 'AF27'
+                'level': 1,
+                'name': 'Kyivska',
+                'pCode': 'UA80'
             },
             {
                 'areas': [
                     {
-                        'name': 'Bagrami',
-                        'pCode': 'AF0107'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Alchevskyi',
+                        'pCode': 'UA4402'
                     },
                     {
-                        'name': 'Chaharasyab',
-                        'pCode': 'AF0105'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Dovzhanskyi',
+                        'pCode': 'UA4404'
                     },
                     {
-                        'name': 'Dehsabz',
-                        'pCode': 'AF0102'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Luhanskyi',
+                        'pCode': 'UA4406'
                     },
                     {
-                        'name': 'Estalef',
-                        'pCode': 'AF0114'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Rovenkivskyi',
+                        'pCode': 'UA4408'
                     },
                     {
-                        'name': 'Farza',
-                        'pCode': 'AF0115'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Shchastynskyi',
+                        'pCode': 'UA4416'
                     },
                     {
-                        'name': 'Guldara',
-                        'pCode': 'AF0111'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Sievierodonetskyi',
+                        'pCode': 'UA4412'
                     },
                     {
-                        'name': 'Kabul',
-                        'pCode': 'AF0101'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Starobilskyi',
+                        'pCode': 'UA4414'
                     },
                     {
-                        'name': 'Kalakan',
-                        'pCode': 'AF0109'
-                    },
-                    {
-                        'name': 'Khak-e-Jabbar',
-                        'pCode': 'AF0112'
-                    },
-                    {
-                        'name': 'Mirbachakot',
-                        'pCode': 'AF0110'
-                    },
-                    {
-                        'name': 'Musayi',
-                        'pCode': 'AF0106'
-                    },
-                    {
-                        'name': 'Paghman',
-                        'pCode': 'AF0104'
-                    },
-                    {
-                        'name': 'Qarabagh',
-                        'pCode': 'AF0108'
-                    },
-                    {
-                        'name': 'Shakardara',
-                        'pCode': 'AF0103'
-                    },
-                    {
-                        'name': 'Surobi',
-                        'pCode': 'AF0113'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Svativskyi',
+                        'pCode': 'UA4410'
                     }
                 ],
-                'name': 'Kabul',
-                'pCode': 'AF01'
+                'level': 1,
+                'name': 'Luhanska',
+                'pCode': 'UA44'
             },
             {
                 'areas': [
                     {
-                        'name': 'Arghandab',
-                        'pCode': 'AF3302'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Chervonohradskyi',
+                        'pCode': 'UA4612'
                     },
                     {
-                        'name': 'Arghestan',
-                        'pCode': 'AF3312'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Drohobytskyi',
+                        'pCode': 'UA4602'
                     },
                     {
-                        'name': 'Daman',
-                        'pCode': 'AF3305'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Lvivskyi',
+                        'pCode': 'UA4606'
                     },
                     {
-                        'name': 'Ghorak',
-                        'pCode': 'AF3315'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Sambirskyi',
+                        'pCode': 'UA4608'
                     },
                     {
-                        'name': 'Kandahar / Dand',
-                        'pCode': 'AF3301'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Stryiskyi',
+                        'pCode': 'UA4610'
                     },
                     {
-                        'name': 'Khakrez',
-                        'pCode': 'AF3307'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Yavorivskyi',
+                        'pCode': 'UA4614'
                     },
                     {
-                        'name': 'Maruf',
-                        'pCode': 'AF3316'
-                    },
-                    {
-                        'name': 'Maywand',
-                        'pCode': 'AF3308'
-                    },
-                    {
-                        'name': 'Miyanshin',
-                        'pCode': 'AF3313'
-                    },
-                    {
-                        'name': 'Nesh',
-                        'pCode': 'AF3314'
-                    },
-                    {
-                        'name': 'Panjwayi',
-                        'pCode': 'AF3304'
-                    },
-                    {
-                        'name': 'Reg',
-                        'pCode': 'AF3309'
-                    },
-                    {
-                        'name': 'Shahwalikot',
-                        'pCode': 'AF3306'
-                    },
-                    {
-                        'name': 'Shorabak',
-                        'pCode': 'AF3310'
-                    },
-                    {
-                        'name': 'Spinboldak',
-                        'pCode': 'AF3311'
-                    },
-                    {
-                        'name': 'Zheray',
-                        'pCode': 'AF3303'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Zolochivskyi',
+                        'pCode': 'UA4604'
                     }
                 ],
-                'name': 'Kandahar',
-                'pCode': 'AF33'
+                'level': 1,
+                'name': 'Lvivska',
+                'pCode': 'UA46'
             },
             {
                 'areas': [
                     {
-                        'name': 'Alasay',
-                        'pCode': 'AF0206'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Bashtanskyi',
+                        'pCode': 'UA4802'
                     },
                     {
-                        'name': 'Hisa-e-Awal-e-Kohestan',
-                        'pCode': 'AF0207'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Mykolaivskyi',
+                        'pCode': 'UA4806'
                     },
                     {
-                        'name': 'Hisa-e-Duwum-e-Kohestan',
-                        'pCode': 'AF0204'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Pervomaiskyi',
+                        'pCode': 'UA4808'
                     },
                     {
-                        'name': 'Kohband',
-                        'pCode': 'AF0203'
-                    },
-                    {
-                        'name': 'Mahmud-e-Raqi',
-                        'pCode': 'AF0201'
-                    },
-                    {
-                        'name': 'Nejrab',
-                        'pCode': 'AF0202'
-                    },
-                    {
-                        'name': 'Tagab',
-                        'pCode': 'AF0205'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Voznesenskyi',
+                        'pCode': 'UA4804'
                     }
                 ],
-                'name': 'Kapisa',
-                'pCode': 'AF02'
+                'level': 1,
+                'name': 'Mykolaivska',
+                'pCode': 'UA48'
             },
             {
                 'areas': [
                     {
-                        'name': 'Bak',
-                        'pCode': 'AF2612'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Berezivskyi',
+                        'pCode': 'UA5102'
                     },
                     {
-                        'name': 'Gurbuz',
-                        'pCode': 'AF2607'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Bilhorod-Dnistrovskyi',
+                        'pCode': 'UA5104'
                     },
                     {
-                        'name': 'Jajimaydan',
-                        'pCode': 'AF2613'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Bolhradskyi',
+                        'pCode': 'UA5106'
                     },
                     {
-                        'name': 'Khost (Matun)',
-                        'pCode': 'AF2601'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Izmailskyi',
+                        'pCode': 'UA5108'
                     },
                     {
-                        'name': 'Mandozayi',
-                        'pCode': 'AF2605'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Odeskyi',
+                        'pCode': 'UA5110'
                     },
                     {
-                        'name': 'Musakhel',
-                        'pCode': 'AF2603'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Podilskyi',
+                        'pCode': 'UA5112'
                     },
                     {
-                        'name': 'Nadirshahkot',
-                        'pCode': 'AF2604'
-                    },
-                    {
-                        'name': 'Qalandar',
-                        'pCode': 'AF2609'
-                    },
-                    {
-                        'name': 'Sabari',
-                        'pCode': 'AF2602'
-                    },
-                    {
-                        'name': 'Shamal',
-                        'pCode': 'AF2610'
-                    },
-                    {
-                        'name': 'Spera',
-                        'pCode': 'AF2611'
-                    },
-                    {
-                        'name': 'Tani',
-                        'pCode': 'AF2606'
-                    },
-                    {
-                        'name': 'Terezayi',
-                        'pCode': 'AF2608'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Rozdilnianskyi',
+                        'pCode': 'UA5114'
                     }
                 ],
-                'name': 'Khost',
-                'pCode': 'AF26'
+                'level': 1,
+                'name': 'Odeska',
+                'pCode': 'UA51'
             },
             {
                 'areas': [
                     {
-                        'name': 'Asadabad',
-                        'pCode': 'AF1301'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Kremenchutskyi',
+                        'pCode': 'UA5302'
                     },
                     {
-                        'name': 'Barkunar',
-                        'pCode': 'AF1311'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Lubenskyi',
+                        'pCode': 'UA5304'
                     },
                     {
-                        'name': 'Chapadara',
-                        'pCode': 'AF1313'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Myrhorodskyi',
+                        'pCode': 'UA5306'
                     },
                     {
-                        'name': 'Chawkay',
-                        'pCode': 'AF1308'
-                    },
-                    {
-                        'name': 'Dangam',
-                        'pCode': 'AF1310'
-                    },
-                    {
-                        'name': 'Dara-e-Pech',
-                        'pCode': 'AF1307'
-                    },
-                    {
-                        'name': 'Ghaziabad',
-                        'pCode': 'AF1312'
-                    },
-                    {
-                        'name': 'Khaskunar',
-                        'pCode': 'AF1309'
-                    },
-                    {
-                        'name': 'Marawara',
-                        'pCode': 'AF1305'
-                    },
-                    {
-                        'name': 'Narang',
-                        'pCode': 'AF1303'
-                    },
-                    {
-                        'name': 'Nari',
-                        'pCode': 'AF1315'
-                    },
-                    {
-                        'name': 'Nurgal',
-                        'pCode': 'AF1314'
-                    },
-                    {
-                        'name': 'Sarkani',
-                        'pCode': 'AF1304'
-                    },
-                    {
-                        'name': 'Shigal Wa Sheltan',
-                        'pCode': 'AF1306'
-                    },
-                    {
-                        'name': 'Watapur',
-                        'pCode': 'AF1302'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Poltavskyi',
+                        'pCode': 'UA5308'
                     }
                 ],
-                'name': 'Kunar',
-                'pCode': 'AF13'
+                'level': 1,
+                'name': 'Poltavska',
+                'pCode': 'UA53'
             },
             {
                 'areas': [
                     {
-                        'name': 'Aliabad',
-                        'pCode': 'AF1705'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Dubenskyi',
+                        'pCode': 'UA5604'
                     },
                     {
-                        'name': 'Chardarah',
-                        'pCode': 'AF1704'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Rivnenskyi',
+                        'pCode': 'UA5606'
                     },
                     {
-                        'name': 'Dasht-e-Archi',
-                        'pCode': 'AF1707'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Sarnenskyi',
+                        'pCode': 'UA5608'
                     },
                     {
-                        'name': 'Emamsaheb',
-                        'pCode': 'AF1702'
-                    },
-                    {
-                        'name': 'Khanabad',
-                        'pCode': 'AF1706'
-                    },
-                    {
-                        'name': 'Kunduz',
-                        'pCode': 'AF1701'
-                    },
-                    {
-                        'name': 'Qala-e-Zal',
-                        'pCode': 'AF1703'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Varaskyi',
+                        'pCode': 'UA5602'
                     }
                 ],
-                'name': 'Kunduz',
-                'pCode': 'AF17'
+                'level': 1,
+                'name': 'Rivnenska',
+                'pCode': 'UA56'
             },
             {
                 'areas': [
                     {
-                        'name': 'Alingar',
-                        'pCode': 'AF0704'
-                    },
-                    {
-                        'name': 'Alishang',
-                        'pCode': 'AF0702'
-                    },
-                    {
-                        'name': 'Dawlatshah',
-                        'pCode': 'AF0705'
-                    },
-                    {
-                        'name': 'Mehtarlam / Bad Pash',
-                        'pCode': 'AF0701'
-                    },
-                    {
-                        'name': 'Qarghayi',
-                        'pCode': 'AF0703'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Sevastopilska',
+                        'pCode': 'UA8500'
                     }
                 ],
-                'name': 'Laghman',
-                'pCode': 'AF07'
+                'level': 1,
+                'name': 'Sevastopilska',
+                'pCode': 'UA85'
             },
             {
                 'areas': [
                     {
-                        'name': 'Azra',
-                        'pCode': 'AF0507'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Konotopskyi',
+                        'pCode': 'UA5902'
                     },
                     {
-                        'name': 'Barakibarak',
-                        'pCode': 'AF0504'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Okhtyrskyi',
+                        'pCode': 'UA5904'
                     },
                     {
-                        'name': 'Charkh',
-                        'pCode': 'AF0505'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Romenskyi',
+                        'pCode': 'UA5906'
                     },
                     {
-                        'name': 'Kharwar',
-                        'pCode': 'AF0506'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Shostkynskyi',
+                        'pCode': 'UA5910'
                     },
                     {
-                        'name': 'Khoshi',
-                        'pCode': 'AF0502'
-                    },
-                    {
-                        'name': 'Mohammadagha',
-                        'pCode': 'AF0503'
-                    },
-                    {
-                        'name': 'Pul-e-Alam',
-                        'pCode': 'AF0501'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Sumskyi',
+                        'pCode': 'UA5908'
                     }
                 ],
-                'name': 'Logar',
-                'pCode': 'AF05'
+                'level': 1,
+                'name': 'Sumska',
+                'pCode': 'UA59'
             },
             {
                 'areas': [
                     {
-                        'name': 'Achin',
-                        'pCode': 'AF0617'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Chortkivskyi',
+                        'pCode': 'UA6106'
                     },
                     {
-                        'name': 'Batikot',
-                        'pCode': 'AF0615'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Kremenetskyi',
+                        'pCode': 'UA6102'
                     },
                     {
-                        'name': 'Behsud',
-                        'pCode': 'AF0602'
-                    },
-                    {
-                        'name': 'Chaparhar',
-                        'pCode': 'AF0605'
-                    },
-                    {
-                        'name': 'Dara-e-Nur',
-                        'pCode': 'AF0609'
-                    },
-                    {
-                        'name': 'Dehbala',
-                        'pCode': 'AF0613'
-                    },
-                    {
-                        'name': 'Durbaba',
-                        'pCode': 'AF0622'
-                    },
-                    {
-                        'name': 'Goshta',
-                        'pCode': 'AF0616'
-                    },
-                    {
-                        'name': 'Hesarak',
-                        'pCode': 'AF0610'
-                    },
-                    {
-                        'name': 'Jalalabad',
-                        'pCode': 'AF0601'
-                    },
-                    {
-                        'name': 'Kama',
-                        'pCode': 'AF0607'
-                    },
-                    {
-                        'name': 'Khogyani',
-                        'pCode': 'AF0604'
-                    },
-                    {
-                        'name': 'Kot',
-                        'pCode': 'AF0614'
-                    },
-                    {
-                        'name': 'Kuzkunar',
-                        'pCode': 'AF0608'
-                    },
-                    {
-                        'name': 'Lalpur',
-                        'pCode': 'AF0620'
-                    },
-                    {
-                        'name': 'Muhmand Dara',
-                        'pCode': 'AF0619'
-                    },
-                    {
-                        'name': 'Nazyan',
-                        'pCode': 'AF0621'
-                    },
-                    {
-                        'name': 'Pachieragam',
-                        'pCode': 'AF0612'
-                    },
-                    {
-                        'name': 'Rodat',
-                        'pCode': 'AF0606'
-                    },
-                    {
-                        'name': 'Sherzad',
-                        'pCode': 'AF0611'
-                    },
-                    {
-                        'name': 'Shinwar',
-                        'pCode': 'AF0618'
-                    },
-                    {
-                        'name': 'Surkhrod',
-                        'pCode': 'AF0603'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Ternopilskyi',
+                        'pCode': 'UA6104'
                     }
                 ],
-                'name': 'Nangarhar',
-                'pCode': 'AF06'
+                'level': 1,
+                'name': 'Ternopilska',
+                'pCode': 'UA61'
             },
             {
                 'areas': [
                     {
-                        'name': 'Chakhansur',
-                        'pCode': 'AF3404'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Haisynskyi',
+                        'pCode': 'UA0504'
                     },
                     {
-                        'name': 'Charburjak',
-                        'pCode': 'AF3403'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Khmilnytskyi',
+                        'pCode': 'UA0512'
                     },
                     {
-                        'name': 'Kang',
-                        'pCode': 'AF3402'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Mohyliv-Podilskyi',
+                        'pCode': 'UA0508'
                     },
                     {
-                        'name': 'Khashrod / Dularam',
-                        'pCode': 'AF3405'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Tulchynskyi',
+                        'pCode': 'UA0510'
                     },
                     {
-                        'name': 'Zaranj',
-                        'pCode': 'AF3401'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Vinnytskyi',
+                        'pCode': 'UA0502'
+                    },
+                    {
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Zhmerynskyi',
+                        'pCode': 'UA0506'
                     }
                 ],
-                'name': 'Nimroz',
-                'pCode': 'AF34'
+                'level': 1,
+                'name': 'Vinnytska',
+                'pCode': 'UA05'
             },
             {
                 'areas': [
                     {
-                        'name': 'Barg-e-Matal',
-                        'pCode': 'AF1408'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Kamin-Kashyrskyi',
+                        'pCode': 'UA0704'
                     },
                     {
-                        'name': 'Duab',
-                        'pCode': 'AF1403'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Kovelskyi',
+                        'pCode': 'UA0706'
                     },
                     {
-                        'name': 'Kamdesh',
-                        'pCode': 'AF1407'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Lutskyi',
+                        'pCode': 'UA0708'
                     },
                     {
-                        'name': 'Mandol',
-                        'pCode': 'AF1402'
-                    },
-                    {
-                        'name': 'Nurgeram',
-                        'pCode': 'AF1404'
-                    },
-                    {
-                        'name': 'Poruns',
-                        'pCode': 'AF1401'
-                    },
-                    {
-                        'name': 'Wama',
-                        'pCode': 'AF1405'
-                    },
-                    {
-                        'name': 'Waygal',
-                        'pCode': 'AF1406'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Volodymyr-Volynskyi',
+                        'pCode': 'UA0702'
                     }
                 ],
-                'name': 'Nuristan',
-                'pCode': 'AF14'
+                'level': 1,
+                'name': 'Volynska',
+                'pCode': 'UA07'
             },
             {
                 'areas': [
                     {
-                        'name': 'Bermel',
-                        'pCode': 'AF2515'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Berehivskyi',
+                        'pCode': 'UA2102'
                     },
                     {
-                        'name': 'Dila',
-                        'pCode': 'AF2518'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Khustskyi',
+                        'pCode': 'UA2112'
                     },
                     {
-                        'name': 'Gomal',
-                        'pCode': 'AF2508'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Mukachivskyi',
+                        'pCode': 'UA2104'
                     },
                     {
-                        'name': 'Gyan',
-                        'pCode': 'AF2516'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Rakhivskyi',
+                        'pCode': 'UA2106'
                     },
                     {
-                        'name': 'Janikhel',
-                        'pCode': 'AF2512'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Tiachivskyi',
+                        'pCode': 'UA2108'
                     },
                     {
-                        'name': 'Matakhan',
-                        'pCode': 'AF2502'
-                    },
-                    {
-                        'name': 'Naka',
-                        'pCode': 'AF2511'
-                    },
-                    {
-                        'name': 'Omna',
-                        'pCode': 'AF2507'
-                    },
-                    {
-                        'name': 'Sarobi',
-                        'pCode': 'AF2509'
-                    },
-                    {
-                        'name': 'Sarrawzah',
-                        'pCode': 'AF2504'
-                    },
-                    {
-                        'name': 'Sharan',
-                        'pCode': 'AF2501'
-                    },
-                    {
-                        'name': 'Turwo',
-                        'pCode': 'AF2519'
-                    },
-                    {
-                        'name': 'Urgun',
-                        'pCode': 'AF2510'
-                    },
-                    {
-                        'name': 'Wazakhah',
-                        'pCode': 'AF2513'
-                    },
-                    {
-                        'name': 'Wormamay',
-                        'pCode': 'AF2514'
-                    },
-                    {
-                        'name': 'Yahyakhel',
-                        'pCode': 'AF2506'
-                    },
-                    {
-                        'name': 'Yosufkhel',
-                        'pCode': 'AF2503'
-                    },
-                    {
-                        'name': 'Zarghunshahr',
-                        'pCode': 'AF2505'
-                    },
-                    {
-                        'name': 'Ziruk',
-                        'pCode': 'AF2517'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Uzhhorodskyi',
+                        'pCode': 'UA2110'
                     }
                 ],
-                'name': 'Paktika',
-                'pCode': 'AF25'
+                'level': 1,
+                'name': 'Zakarpatska',
+                'pCode': 'UA21'
             },
             {
                 'areas': [
                     {
-                        'name': 'Ahmadaba',
-                        'pCode': 'AF1203'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Berdianskyi',
+                        'pCode': 'UA2302'
                     },
                     {
-                        'name': 'Alikhel (Jaji)',
-                        'pCode': 'AF1208'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Melitopolskyi',
+                        'pCode': 'UA2308'
                     },
                     {
-                        'name': 'Chamkani',
-                        'pCode': 'AF1210'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Polohivskyi',
+                        'pCode': 'UA2310'
                     },
                     {
-                        'name': 'Dand Wa Patan',
-                        'pCode': 'AF1211'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Vasylivskyi',
+                        'pCode': 'UA2304'
                     },
                     {
-                        'name': 'Gardez',
-                        'pCode': 'AF1201'
-                    },
-                    {
-                        'name': 'Janikhel',
-                        'pCode': 'AF1209'
-                    },
-                    {
-                        'name': 'Lija Ahmad Khel / Laja Mangel',
-                        'pCode': 'AF1207'
-                    },
-                    {
-                        'name': 'Sayedkaram / Mirzaka',
-                        'pCode': 'AF1202'
-                    },
-                    {
-                        'name': 'Shawak',
-                        'pCode': 'AF1205'
-                    },
-                    {
-                        'name': 'Zadran',
-                        'pCode': 'AF1206'
-                    },
-                    {
-                        'name': 'Zurmat',
-                        'pCode': 'AF1204'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Zaporizkyi',
+                        'pCode': 'UA2306'
                     }
                 ],
-                'name': 'Paktya',
-                'pCode': 'AF12'
+                'level': 1,
+                'name': 'Zaporizka',
+                'pCode': 'UA23'
             },
             {
                 'areas': [
                     {
-                        'name': 'Bazarak',
-                        'pCode': 'AF0801'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Berdychivskyi',
+                        'pCode': 'UA1802'
                     },
                     {
-                        'name': 'Dara / Ab Shar',
-                        'pCode': 'AF0804'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Korostenskyi',
+                        'pCode': 'UA1806'
                     },
                     {
-                        'name': 'Khenj (Hes-e-Awal)',
-                        'pCode': 'AF0805'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Novohrad-Volynskyi',
+                        'pCode': 'UA1808'
                     },
                     {
-                        'name': 'Onaba (Anawa)',
-                        'pCode': 'AF0806'
-                    },
-                    {
-                        'name': 'Paryan',
-                        'pCode': 'AF0807'
-                    },
-                    {
-                        'name': 'Rukha',
-                        'pCode': 'AF0803'
-                    },
-                    {
-                        'name': 'Shutul',
-                        'pCode': 'AF0802'
+                        'areas': [
+                        ],
+                        'level': 2,
+                        'name': 'Zhytomyrskyi',
+                        'pCode': 'UA1804'
                     }
                 ],
-                'name': 'Panjsher',
-                'pCode': 'AF08'
-            },
-            {
-                'areas': [
-                    {
-                        'name': 'Bagram',
-                        'pCode': 'AF0304'
-                    },
-                    {
-                        'name': 'Charikar',
-                        'pCode': 'AF0301'
-                    },
-                    {
-                        'name': 'Ghorband',
-                        'pCode': 'AF0307'
-                    },
-                    {
-                        'name': 'Jabalussaraj',
-                        'pCode': 'AF0302'
-                    },
-                    {
-                        'name': 'Koh-e-Safi',
-                        'pCode': 'AF0308'
-                    },
-                    {
-                        'name': 'Salang',
-                        'pCode': 'AF0306'
-                    },
-                    {
-                        'name': 'Saydkhel',
-                        'pCode': 'AF0305'
-                    },
-                    {
-                        'name': 'Shekhali',
-                        'pCode': 'AF0309'
-                    },
-                    {
-                        'name': 'Shinwari',
-                        'pCode': 'AF0303'
-                    },
-                    {
-                        'name': 'Surkh-e-Parsa',
-                        'pCode': 'AF0310'
-                    }
-                ],
-                'name': 'Parwan',
-                'pCode': 'AF03'
-            },
-            {
-                'areas': [
-                    {
-                        'name': 'Aybak',
-                        'pCode': 'AF1901'
-                    },
-                    {
-                        'name': 'Dara-e Suf-e-Bala',
-                        'pCode': 'AF1905'
-                    },
-                    {
-                        'name': 'Dara-e-Suf-e-Payin',
-                        'pCode': 'AF1904'
-                    },
-                    {
-                        'name': 'Feroznakhchir',
-                        'pCode': 'AF1903'
-                    },
-                    {
-                        'name': 'Hazrat-e-Sultan',
-                        'pCode': 'AF1902'
-                    },
-                    {
-                        'name': 'Khuram Wa Sarbagh',
-                        'pCode': 'AF1906'
-                    },
-                    {
-                        'name': 'Ruy-e-Duab',
-                        'pCode': 'AF1907'
-                    }
-                ],
-                'name': 'Samangan',
-                'pCode': 'AF19'
-            },
-            {
-                'areas': [
-                    {
-                        'name': 'Balkhab',
-                        'pCode': 'AF2006'
-                    },
-                    {
-                        'name': 'Gosfandi',
-                        'pCode': 'AF2005'
-                    },
-                    {
-                        'name': 'Kohestanat',
-                        'pCode': 'AF2003'
-                    },
-                    {
-                        'name': 'Sancharak',
-                        'pCode': 'AF2007'
-                    },
-                    {
-                        'name': 'Sar-e-Pul',
-                        'pCode': 'AF2001'
-                    },
-                    {
-                        'name': 'Sayad',
-                        'pCode': 'AF2002'
-                    },
-                    {
-                        'name': 'Sozmaqala',
-                        'pCode': 'AF2004'
-                    }
-                ],
-                'name': 'Sar-e-Pul',
-                'pCode': 'AF20'
-            },
-            {
-                'areas': [
-                    {
-                        'name': 'Baharak',
-                        'pCode': 'AF1603'
-                    },
-                    {
-                        'name': 'Bangi',
-                        'pCode': 'AF1604'
-                    },
-                    {
-                        'name': 'Chahab',
-                        'pCode': 'AF1610'
-                    },
-                    {
-                        'name': 'Chal',
-                        'pCode': 'AF1605'
-                    },
-                    {
-                        'name': 'Darqad',
-                        'pCode': 'AF1617'
-                    },
-                    {
-                        'name': 'Dasht-e-Qala',
-                        'pCode': 'AF1613'
-                    },
-                    {
-                        'name': 'Eshkmesh',
-                        'pCode': 'AF1615'
-                    },
-                    {
-                        'name': 'Farkhar',
-                        'pCode': 'AF1607'
-                    },
-                    {
-                        'name': 'Hazarsumuch',
-                        'pCode': 'AF1602'
-                    },
-                    {
-                        'name': 'Kalafgan',
-                        'pCode': 'AF1608'
-                    },
-                    {
-                        'name': 'Khwajabahawuddin',
-                        'pCode': 'AF1612'
-                    },
-                    {
-                        'name': 'Khwajaghar',
-                        'pCode': 'AF1614'
-                    },
-                    {
-                        'name': 'Namakab',
-                        'pCode': 'AF1606'
-                    },
-                    {
-                        'name': 'Rostaq',
-                        'pCode': 'AF1609'
-                    },
-                    {
-                        'name': 'Taloqan',
-                        'pCode': 'AF1601'
-                    },
-                    {
-                        'name': 'Warsaj',
-                        'pCode': 'AF1616'
-                    },
-                    {
-                        'name': 'Yang-e-Qala',
-                        'pCode': 'AF1611'
-                    }
-                ],
-                'name': 'Takhar',
-                'pCode': 'AF16'
-            },
-            {
-                'areas': [
-                    {
-                        'name': 'Chora / Chinarto',
-                        'pCode': 'AF2302'
-                    },
-                    {
-                        'name': 'Dehrawud',
-                        'pCode': 'AF2304'
-                    },
-                    {
-                        'name': 'Khasuruzgan',
-                        'pCode': 'AF2305'
-                    },
-                    {
-                        'name': 'Shahid-e-Hassas',
-                        'pCode': 'AF2303'
-                    },
-                    {
-                        'name': 'Tirinkot',
-                        'pCode': 'AF2301'
-                    }
-                ],
-                'name': 'Uruzgan',
-                'pCode': 'AF23'
-            },
-            {
-                'areas': [
-                    {
-                        'name': 'Chak',
-                        'pCode': 'AF0406'
-                    },
-                    {
-                        'name': 'Daymirdad',
-                        'pCode': 'AF0405'
-                    },
-                    {
-                        'name': 'Hesa-e-Awal-e-Behsud',
-                        'pCode': 'AF0404'
-                    },
-                    {
-                        'name': 'Jaghatu',
-                        'pCode': 'AF0409'
-                    },
-                    {
-                        'name': 'Jalrez',
-                        'pCode': 'AF0402'
-                    },
-                    {
-                        'name': 'Markaz-e-Behsud',
-                        'pCode': 'AF0408'
-                    },
-                    {
-                        'name': 'Maydanshahr',
-                        'pCode': 'AF0401'
-                    },
-                    {
-                        'name': 'Nerkh',
-                        'pCode': 'AF0403'
-                    },
-                    {
-                        'name': 'Saydabad',
-                        'pCode': 'AF0407'
-                    }
-                ],
-                'name': 'Wardak',
-                'pCode': 'AF04'
-            },
-            {
-                'areas': [
-                    {
-                        'name': 'Arghandab',
-                        'pCode': 'AF2402'
-                    },
-                    {
-                        'name': 'Atghar',
-                        'pCode': 'AF2409'
-                    },
-                    {
-                        'name': 'Daychopan',
-                        'pCode': 'AF2408'
-                    },
-                    {
-                        'name': 'Kakar',
-                        'pCode': 'AF2407'
-                    },
-                    {
-                        'name': 'Mizan',
-                        'pCode': 'AF2403'
-                    },
-                    {
-                        'name': 'Nawbahar',
-                        'pCode': 'AF2411'
-                    },
-                    {
-                        'name': 'Qalat',
-                        'pCode': 'AF2401'
-                    },
-                    {
-                        'name': 'Shahjoy',
-                        'pCode': 'AF2406'
-                    },
-                    {
-                        'name': 'Shinkay',
-                        'pCode': 'AF2405'
-                    },
-                    {
-                        'name': 'Shomulzay',
-                        'pCode': 'AF2410'
-                    },
-                    {
-                        'name': 'Tarnak Wa Jaldak',
-                        'pCode': 'AF2404'
-                    }
-                ],
-                'name': 'Zabul',
-                'pCode': 'AF24'
+                'level': 1,
+                'name': 'Zhytomyrska',
+                'pCode': 'UA18'
             }
         ]
     }

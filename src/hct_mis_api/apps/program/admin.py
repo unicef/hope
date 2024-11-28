@@ -59,7 +59,9 @@ class ProgramCycleAdminInline(admin.TabularInline):
 
 class PartnerAreaForm(forms.Form):
     partner = forms.ModelChoiceField(queryset=Partner.objects.all(), required=True)
-    areas = TreeNodeMultipleChoiceField(queryset=Area.objects.all(), widget=CheckboxSelectMultiple(), required=False)
+    areas = TreeNodeMultipleChoiceField(
+        queryset=Area.objects.filter(area_type__area_level__lte=3), widget=CheckboxSelectMultiple(), required=False
+    )
 
 
 @admin.register(Program)
