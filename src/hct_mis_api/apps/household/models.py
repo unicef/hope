@@ -651,7 +651,7 @@ class Household(
 
     @cached_property
     def primary_collector(self) -> Optional["Individual"]:
-        return self.representatives.get(households_and_roles__role=ROLE_PRIMARY)
+        return self.representatives.filter(households_and_roles__role=ROLE_PRIMARY).first()
 
     @cached_property
     def alternate_collector(self) -> Optional["Individual"]:

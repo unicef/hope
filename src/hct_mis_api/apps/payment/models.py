@@ -2207,6 +2207,9 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
 
 
 def build_summary(payment_plan: Optional[Any]) -> None:
+    if not payment_plan:
+        return
+
     statuses_count = payment_plan.payment_verification_plans.aggregate(
         active=Count("pk", filter=Q(status=PaymentVerificationSummary.STATUS_ACTIVE)),
         pending=Count("pk", filter=Q(status=PaymentVerificationSummary.STATUS_PENDING)),
