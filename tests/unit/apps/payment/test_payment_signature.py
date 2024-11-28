@@ -142,7 +142,7 @@ class TestPaymentSignature(APITestCase):
                     "individual_ids": "",
                     "individuals_filters_blocks": [],
                 }
-            ]
+            ],
         }
 
         input_data = dict(

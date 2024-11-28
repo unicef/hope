@@ -50,8 +50,6 @@ from hct_mis_api.apps.utils.validators import (
 )
 
 if TYPE_CHECKING:
-    from uuid import UUID
-
     from django.db.models.query import QuerySet
 
 logger = logging.getLogger(__name__)

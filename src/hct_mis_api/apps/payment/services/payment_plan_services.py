@@ -321,9 +321,6 @@ class PaymentPlanService:
 
     @staticmethod
     def create_payments(payment_plan: PaymentPlan) -> None:
-
-
-
         payments_to_create = []
         households = Household.objects.filter(
             business_area=payment_plan.business_area, program=payment_plan.program_cycle.program

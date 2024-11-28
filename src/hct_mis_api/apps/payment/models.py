@@ -504,7 +504,7 @@ class PaymentPlan(
         TP_STEFICON_COMPLETED = "STEFICON_COMPLETED", "Steficon Completed"
         TP_STEFICON_ERROR = "STEFICON_ERROR", "Steficon Error"
 
-        DRAFT = "DRAFT", "Draft" # like ready for PP create
+        DRAFT = "DRAFT", "Draft"  # like ready for PP create
 
         OPEN = "OPEN", "Open"
         LOCKED = "LOCKED", "Locked"

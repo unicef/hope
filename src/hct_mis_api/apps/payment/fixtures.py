@@ -68,9 +68,7 @@ from hct_mis_api.apps.targeting.models import (
     TargetingCriteria,
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
-    TargetPopulation,
 )
-from hct_mis_api.apps.targeting.services.targeting_stats_refresher import full_rebuild
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
 
@@ -699,9 +697,7 @@ def create_payment_verification_plan_with_status(
             currency = "PLN"
 
         if isinstance(cash_plan, CashPlan):
-            payment_record = PaymentRecordFactory(
-                parent=cash_plan, household=household, currency=currency
-            )
+            payment_record = PaymentRecordFactory(parent=cash_plan, household=household, currency=currency)
         else:
             additional_args = {}
             if create_failed_payments:  # create only two failed Payments
