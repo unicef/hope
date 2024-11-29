@@ -22,7 +22,6 @@ class FollowUpPaymentPlanSerializer(serializers.ModelSerializer):
 class PaymentPlanSerializer(serializers.ModelSerializer):
     id = Base64ModelField(model_name="PaymentPlan")
     status = serializers.CharField(source="get_status_display")
-    target_population = serializers.CharField(source="target_population.name")
     currency = serializers.CharField(source="get_currency_display")
     follow_ups = FollowUpPaymentPlanSerializer(many=True, read_only=True)
     program = serializers.CharField(source="program.name")

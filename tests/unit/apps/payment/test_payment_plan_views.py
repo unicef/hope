@@ -133,7 +133,7 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
             etag = response.headers["etag"]
 
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 26
+            assert len(ctx.captured_queries) == 24
 
         # Test that reoccurring request use cached data
         with CaptureQueriesContext(connection) as ctx:

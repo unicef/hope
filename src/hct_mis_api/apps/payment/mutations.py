@@ -32,6 +32,7 @@ from hct_mis_api.apps.payment.celery_tasks import (
     payment_plan_apply_engine_rule,
     payment_plan_apply_steficon_hh_selection,
     payment_plan_exclude_beneficiaries,
+    payment_plan_full_rebuild,
 )
 from hct_mis_api.apps.payment.inputs import (
     ActionPaymentPlanInput,
@@ -87,8 +88,14 @@ from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service impo
 from hct_mis_api.apps.payment.xlsx.xlsx_verification_import_service import (
     XlsxVerificationImportService,
 )
-from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.steficon.models import Rule
+from hct_mis_api.apps.targeting.models import (
+    TargetingCollectorRuleFilterBlock,
+    TargetingCriteria,
+    TargetingCriteriaRule,
+    TargetingIndividualRuleFilterBlock,
+)
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 
@@ -1347,6 +1354,110 @@ class SplitPaymentPlanMutation(PermissionMutation):
         return cls(payment_plan=payment_plan)
 
 
+class CopyTargetingCriteriaMutation(PermissionMutation):
+    payment_plan = graphene.Field(PaymentPlanNode)
+
+    class Arguments:
+        payment_plan_id = graphene.ID(required=True)
+        name = graphene.String(required=True)
+        program_cycle_id = graphene.ID(required=True)
+
+    @classmethod
+    @is_authenticated
+    @raise_program_status_is(Program.FINISHED)
+    @transaction.atomic
+    def mutate(
+        cls, root: Any, info: Any, payment_plan_id: str, name: str, program_cycle_id: str, **kwargs: Any
+    ) -> "CopyTargetingCriteriaMutation":
+        user = info.context.user
+        name = name.strip()
+        payment_plan_id = decode_id_string_required(payment_plan_id)
+        payment_plan = get_object_or_404(PaymentPlan, pk=payment_plan_id)
+        program_cycle = get_object_or_404(ProgramCycle, pk=decode_id_string(program_cycle_id))
+        program = program_cycle.program
+
+        if program_cycle.status == ProgramCycle.FINISHED:
+            raise GraphQLError("Not possible to assign Finished Program Cycle to Targeting")
+
+        cls.has_permission(info, Permissions.TARGETING_DUPLICATE, payment_plan.business_area)
+
+        if PaymentPlan.objects.filter(name=name, program_cycle=program_cycle, is_removed=False).exists():
+            raise GraphQLError(
+                f"Payment Plan with name: {name} and program cycle: {program_cycle.title} already exists."
+            )
+
+        payment_plan_copy = PaymentPlan(
+            name=name,
+            created_by=user,
+            business_area=payment_plan.business_area,
+            status=PaymentPlan.Status.TP_OPEN,
+            male_children_count=payment_plan.male_children_count,
+            female_children_count=payment_plan.female_children_count,
+            male_adults_count=payment_plan.male_adults_count,
+            female_adults_count=payment_plan.female_adults_count,
+            total_households_count=payment_plan.total_households_count,
+            total_individuals_count=payment_plan.total_individuals_count,
+            steficon_rule_targeting=payment_plan.steficon_rule_targeting,
+            steficon_targeting_applied_date=payment_plan.steficon_targeting_applied_date,
+            program=program,
+            program_cycle=program_cycle,
+        )
+        payment_plan_copy.save()
+        if payment_plan.targeting_criteria:
+            payment_plan_copy.targeting_criteria = cls.copy_target_criteria(payment_plan.targeting_criteria)
+        payment_plan_copy.save()
+        payment_plan_copy.refresh_from_db()
+        transaction.on_commit(lambda: payment_plan_full_rebuild.delay(payment_plan_copy.id))
+        log_create(
+            PaymentPlan.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            user,
+            getattr(program, "pk", None),
+            None,
+            payment_plan_copy,
+        )
+        return cls(payment_plan=payment_plan_copy)
+
+    @classmethod
+    def copy_target_criteria(cls, targeting_criteria: TargetingCriteria) -> TargetingCriteria:
+        targeting_criteria_copy = TargetingCriteria()
+        targeting_criteria_copy.save()
+        for rule in targeting_criteria.rules.all():
+            rule_copy = TargetingCriteriaRule(
+                targeting_criteria=targeting_criteria_copy,
+                household_ids=rule.household_ids,
+                individual_ids=rule.individual_ids,
+            )
+            rule_copy.save()
+            for hh_filter in rule.filters.all():
+                hh_filter.pk = None
+                hh_filter.targeting_criteria_rule = rule_copy
+                hh_filter.save()
+            for ind_filter_block in rule.individuals_filters_blocks.all():
+                ind_filter_block_copy = TargetingIndividualRuleFilterBlock(
+                    targeting_criteria_rule=rule_copy, target_only_hoh=ind_filter_block.target_only_hoh
+                )
+                ind_filter_block_copy.save()
+                for ind_filter in ind_filter_block.individual_block_filters.all():
+                    ind_filter.pk = None
+                    ind_filter.individuals_filters_block = ind_filter_block_copy
+                    ind_filter.save()
+
+            for col_filter_block in rule.collectors_filters_blocks.all():
+                col_filter_block_copy = TargetingCollectorRuleFilterBlock(targeting_criteria_rule=rule_copy)
+                col_filter_block_copy.save()
+                for col_filter in col_filter_block.collector_block_filters.all():
+                    col_filter.pk = None
+                    col_filter.collector_block_filters = col_filter_block_copy
+                    col_filter.save()
+        # TODO: will remove after refactoring
+        targeting_criteria_copy.household_ids = targeting_criteria.household_ids
+        targeting_criteria_copy.individual_ids = targeting_criteria.individual_ids
+        targeting_criteria_copy.save()
+
+        return targeting_criteria_copy
+
+
 class Mutations(graphene.ObjectType):
     create_payment_verification_plan = CreateVerificationPlanMutation.Field()
     edit_payment_verification_plan = EditPaymentVerificationMutation.Field()
@@ -1381,6 +1492,7 @@ class Mutations(graphene.ObjectType):
     exclude_households = ExcludeHouseholdsMutation.Field()
     set_steficon_rule_on_payment_plan_payment_list = SetSteficonRuleOnPaymentPlanPaymentListMutation.Field()
     set_steficon_rule_on_target_population = SetSteficonRuleOnTargetPopulationMutation.Field()
+    copy_targeting_criteria = CopyTargetingCriteriaMutation.Field()
 
     # Payment Plan XLSX
     export_xlsx_payment_plan_payment_list = ExportXLSXPaymentPlanPaymentListMutation.Field()

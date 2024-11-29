@@ -81,6 +81,5 @@ class TestBuildSummary(TestCase):
             self.user,
             self.business_area,
             self.program,
-            self.target_population,
             status,
         )

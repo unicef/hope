@@ -40,19 +40,23 @@ class TestPaymentCeleryTask(TestCase):
     @patch("hct_mis_api.apps.payment.celery_tasks.logger")
     def test_prepare_payment_plan_task_wrong_pp_status(self, mock_logger: Mock) -> None:
         payment_plan = PaymentPlanFactory(
-            status=PaymentPlan.Status.OPEN,
+            status=PaymentPlan.Status.TP_LOCKED,
             program=self.program,
+            build_status=PaymentPlan.BuildStatus.BUILD_STATUS_PENDING,
         )
         payment_plan.refresh_from_db()
-        pp_id_str = str(payment_plan.pk)
-        result = prepare_payment_plan_task(pp_id_str)
+        result = prepare_payment_plan_task(str(payment_plan.pk))
 
         self.assertFalse(result)
-        mock_logger.info.assert_called_with("The Payment Plan must have the status PREPARING.")
+        mock_logger.info.assert_called_with("The Payment Plan must have the status TP_OPEN.")
 
     @patch("hct_mis_api.apps.payment.celery_tasks.logger")
     def test_prepare_payment_plan_task_already_running(self, mock_logger: Mock) -> None:
-        payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.PREPARING, program=self.program)
+        payment_plan = PaymentPlanFactory(
+            status=PaymentPlan.Status.TP_OPEN,
+            program=self.program,
+            build_status=PaymentPlan.BuildStatus.BUILD_STATUS_PENDING,
+        )
         payment_plan.refresh_from_db()
         pp_id_str = str(payment_plan.pk)
         cache_key = generate_cache_key(

@@ -107,7 +107,6 @@ class TestDeleteVerificationMutation(APITestCase):
             self.user,
             self.business_area,
             self.program,
-            self.target_population,
             PaymentVerificationPlan.STATUS_PENDING,
         )
 
@@ -117,6 +116,5 @@ class TestDeleteVerificationMutation(APITestCase):
             self.user,
             self.business_area,
             self.program,
-            self.target_population,
             PaymentVerificationPlan.STATUS_ACTIVE,
         )

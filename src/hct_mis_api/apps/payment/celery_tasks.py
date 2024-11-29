@@ -392,6 +392,11 @@ def remove_old_payment_plan_payment_list_xlsx(self: Any, past_days: int = 30) ->
 @log_start_and_end
 @sentry_tags
 def prepare_payment_plan_task(self: Any, payment_plan_id: str) -> bool:
+    from hct_mis_api.apps.payment.models import PaymentPlan
+    from hct_mis_api.apps.payment.services.payment_plan_services import (
+        PaymentPlanService,
+    )
+
     cache_key = generate_cache_key(
         {
             "task_name": "prepare_payment_plan_task",
@@ -402,24 +407,18 @@ def prepare_payment_plan_task(self: Any, payment_plan_id: str) -> bool:
         logger.info(f"Task prepare_payment_plan_task with payment_plan_id {payment_plan_id} already running.")
         return False
 
-    # 2 hours timeout
-    cache.set(cache_key, True, timeout=60 * 60 * 2)
+    # 10 hours timeout
+    cache.set(cache_key, True, timeout=60 * 60 * 10)
     try:
+        payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
+        # double check Payment Plan status
+        if payment_plan.status != PaymentPlan.Status.TP_OPEN:
+            logger.info(f"The Payment Plan must have the status {PaymentPlan.Status.TP_OPEN}.")
+            return False
         with transaction.atomic():
-            from hct_mis_api.apps.payment.models import PaymentPlan
-            from hct_mis_api.apps.payment.services.payment_plan_services import (
-                PaymentPlanService,
-            )
-
-            payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
             payment_plan.build_status_building()
             payment_plan.save(update_fields=("build_status", "built_at"))
             set_sentry_business_area_tag(payment_plan.business_area.name)
-
-            # double check Payment Plan status
-            if payment_plan.status != PaymentPlan.Status.PREPARING:
-                logger.info(f"The Payment Plan must have the status {PaymentPlan.Status.PREPARING}.")
-                return False
 
             PaymentPlanService.create_payments(payment_plan)
             payment_plan.update_population_count_fields()

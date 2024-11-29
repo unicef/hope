@@ -61,12 +61,9 @@ class TestPaymentPlanServices(APITestCase):
 
     def test_delete_open(self) -> None:
         pp: PaymentPlan = PaymentPlanFactory(status=PaymentPlan.Status.OPEN, program__status=Program.ACTIVE)
-        self.assertEqual(pp.target_population.status, TargetPopulation.STATUS_OPEN)
 
         pp = PaymentPlanService(payment_plan=pp).delete()
         self.assertEqual(pp.is_removed, True)
-        pp.target_population.refresh_from_db()
-        self.assertEqual(pp.target_population.status, TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE)
 
     def test_delete_locked(self) -> None:
         pp = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED)
@@ -115,11 +112,10 @@ class TestPaymentPlanServices(APITestCase):
             cycle__start_date=timezone.datetime(2021, 10, 10, tzinfo=utc).date(),
             cycle__end_date=timezone.datetime(2021, 12, 10, tzinfo=utc).date(),
         )
-        targeting = TargetPopulationFactory(program=program, program_cycle=program.cycles.first())
+        program_cycle = program.cycles.first()
 
         input_data = dict(
-            business_area_slug="afghanistan",
-            targeting_id=self.id_to_base64(targeting.id, "Targeting"),
+            program_cycle_id=self.id_to_base64(str(program_cycle.id), "ProgramCycle"),
             dispersion_start_date=parse_date("2020-09-10"),
             dispersion_end_date=parse_date("2020-09-11"),
             currency="USD",
@@ -129,14 +125,6 @@ class TestPaymentPlanServices(APITestCase):
             PaymentPlanService.create(input_data=input_data, user=self.user, business_area_slug=self.business_area.slug)
         self.business_area.is_payment_plan_applicable = True
         self.business_area.save()
-
-        with self.assertRaisesMessage(
-            GraphQLError,
-            f"TargetPopulation id:{targeting.id} does not exist or is not in status 'Ready for Payment Module'",
-        ):
-            PaymentPlanService.create(input_data=input_data, user=self.user, business_area_slug=self.business_area.slug)
-        targeting.status = TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
-        targeting.save()
 
         with self.assertRaisesMessage(
             GraphQLError, f"Dispersion End Date [{input_data['dispersion_end_date']}] cannot be a past date"
@@ -247,50 +235,6 @@ class TestPaymentPlanServices(APITestCase):
             GraphQLError, f"Dispersion End Date [{input_data['dispersion_end_date']}] cannot be a past date"
         ):
             PaymentPlanService(payment_plan=pp).update(input_data=input_data)
-
-    @freeze_time("2020-10-10")
-    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
-    def test_update(self, get_exchange_rate_mock: Any) -> None:
-        pp = PaymentPlanFactory(total_households_count=1, name="PaymentPlanName1")
-        hoh1 = IndividualFactory(household=None)
-        hh1 = HouseholdFactory(head_of_household=hoh1)
-        PaymentFactory(parent=pp, household=hh1, currency="PLN")
-        self.assertEqual(pp.payment_items.count(), 1)
-
-        new_targeting = TargetPopulationFactory(
-            status=TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE,
-            program=ProgramFactory(
-                start_date=timezone.datetime(2021, 11, 10, tzinfo=utc).date(),
-            ),
-        )
-        hoh1 = IndividualFactory(household=None)
-        hoh2 = IndividualFactory(household=None)
-        hh1 = HouseholdFactory(head_of_household=hoh1)
-        hh2 = HouseholdFactory(head_of_household=hoh2)
-        IndividualRoleInHouseholdFactory(household=hh1, individual=hoh1, role=ROLE_PRIMARY)
-        IndividualRoleInHouseholdFactory(household=hh2, individual=hoh2, role=ROLE_PRIMARY)
-        IndividualFactory.create_batch(4, household=hh1)
-        new_targeting.households.set([hh1, hh2])
-        new_targeting.save()
-
-        with freeze_time("2020-11-10"):
-            # test targeting update, payments recreation triggered
-            old_pp_targeting = pp.target_population
-            old_pp_exchange_rate = pp.exchange_rate
-            old_pp_updated_at = pp.updated_at
-
-            updated_pp_1 = PaymentPlanService(payment_plan=pp).update(
-                input_data=dict(targeting_id=self.id_to_base64(new_targeting.id, "Targeting"))
-            )
-            updated_pp_1.refresh_from_db()
-            self.assertNotEqual(old_pp_updated_at, updated_pp_1.updated_at)
-            self.assertNotEqual(old_pp_exchange_rate, updated_pp_1.exchange_rate)
-            self.assertEqual(updated_pp_1.total_households_count, 2)
-            self.assertEqual(updated_pp_1.payment_items.count(), 2)
-            self.assertEqual(updated_pp_1.target_population, new_targeting)
-            self.assertEqual(updated_pp_1.target_population.status, TargetPopulation.STATUS_ASSIGNED)
-            self.assertEqual(updated_pp_1.program, updated_pp_1.target_population.program)
-            self.assertEqual(old_pp_targeting.status, TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE)
 
     @freeze_time("2023-10-10")
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
@@ -665,7 +609,7 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(pp.total_individuals_count, 0)
         self.assertEqual(pp.payment_items.count(), 0)
         with self.assertNumQueries(77):
-            prepare_payment_plan_task.delay(pp.id)
+            prepare_payment_plan_task.delay(str(pp.id))
         pp.refresh_from_db()
         self.assertEqual(pp.status, PaymentPlan.Status.TP_OPEN)
         self.assertEqual(pp.payment_items.count(), 2)

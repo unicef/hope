@@ -848,7 +848,7 @@ class PaymentPlan(
         field=build_status,
         source="*",
         target=BuildStatus.BUILD_STATUS_PENDING,
-        # conditions=[lambda obj: obj.status in [PaymentPlan.Status.TP_OPEN, PaymentPlan.Status.TP_LOCKED]],
+        conditions=[lambda obj: obj.status in [PaymentPlan.Status.TP_OPEN, PaymentPlan.Status.TP_LOCKED]],
     )
     def build_status_pending(self) -> None:
         self.built_at = timezone.now()
