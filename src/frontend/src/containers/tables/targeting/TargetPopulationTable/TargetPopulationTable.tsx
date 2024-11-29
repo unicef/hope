@@ -62,7 +62,7 @@ export function TargetPopulationTable({
 
   const replacements = {
     total_households_count: (_beneficiaryGroup) =>
-      `Total ${_beneficiaryGroup.groupLabelPlural} Count`,
+      `Num. of ${_beneficiaryGroup.groupLabelPlural}`,
   };
 
   const adjustedHeadCells = adjustHeadCells(
