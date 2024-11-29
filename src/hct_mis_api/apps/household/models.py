@@ -605,16 +605,6 @@ class Household(
         self.withdrawn_date = None
         self.save()
 
-    def set_sys_field(self, key: str, value: Any) -> None:
-        if "sys" not in self.internal_data:
-            self.internal_data["sys"] = {}
-        self.internal_data["sys"][key] = value
-
-    def get_sys_field(self, key: str) -> Any:
-        if "sys" in self.internal_data:
-            return self.internal_data["sys"][key]
-        return None
-
     def set_admin_areas(self, new_admin_area: Optional[Area] = None, save: bool = True) -> None:
         """Propagates admin1,2,3,4 based on admin_area parents"""
         admins = ["admin1", "admin2", "admin3", "admin4"]

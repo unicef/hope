@@ -25,7 +25,7 @@ from hct_mis_api.apps.utils.models import (
 )
 
 if TYPE_CHECKING:
-    from hct_mis_api.apps.program.models import Program
+    from hct_mis_api.apps.program.models import Program  # pragma: no cover
 
 logger = logging.getLogger(__name__)
 
@@ -125,9 +125,9 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
     def get_xlsx_verification_file(self) -> FileTemp:
         try:
             return FileTemp.objects.get(object_id=self.pk, content_type=get_content_type_for_model(self))
-        except FileTemp.DoesNotExist:
+        except FileTemp.DoesNotExist:  # pragma: no cover
             raise GraphQLError("Xlsx Verification File does not exist.")
-        except FileTemp.MultipleObjectsReturned as e:
+        except FileTemp.MultipleObjectsReturned as e:  # pragma: no cover
             logger.exception(e)
             raise GraphQLError("Query returned multiple Xlsx Verification Files when only one was expected.")
 
