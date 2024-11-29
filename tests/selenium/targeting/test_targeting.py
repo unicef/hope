@@ -271,7 +271,14 @@ class TestSmokeTargeting:
         pageTargeting.getNavTargeting().click()
         assert "Targeting" in pageTargeting.getTitlePage().text
         assert "CREATE NEW" in pageTargeting.getButtonCreateNew().text
-        expected_column_names = ["Name", "Status", "Num. of Households", "Date Created", "Last Edited", "Created by"]
+        expected_column_names = [
+            "Name",
+            "Status",
+            "Total Households Count",
+            "Date Created",
+            "Last Edited",
+            "Created by",
+        ]
         assert expected_column_names == [name.text for name in pageTargeting.getTabColumnLabel()]
         assert 2 == len(pageTargeting.getTargetPopulationsRows())
         pageTargeting.getButtonCreateNew().click()
@@ -339,11 +346,11 @@ class TestSmokeTargeting:
         assert "1" in pageTargetingDetails.getLabelMaleAdults().text
         assert "3" in pageTargetingDetails.getLabelTotalNumberOfHouseholds().text
         assert "7" in pageTargetingDetails.getLabelTargetedIndividuals().text
-        assert "Items Group" in pageTargetingDetails.getTableTitle().text
+        assert "Households" in pageTargetingDetails.getTableTitle().text
         expected_menu_items = [
             "ID",
-            "Head of Items Group",
-            "Items Group Size",
+            "Head of Household",
+            "Household Size",
             "Administrative Level 2",
             "Score",
         ]

@@ -286,7 +286,7 @@ class TestSmokeFilters:
                 filters.filterImportDateRangeMin,
                 filters.filterImportDateRangeMax,
             ],
-            "Programme Population": [
+            "Main Menu": [
                 filters.selectFilter,
                 filters.filtersDocumentType,
                 filters.filtersDocumentNumber,
@@ -402,7 +402,7 @@ class TestSmokeFilters:
             if nav_menu == "Feedback":
                 filters.wait_for('[data-cy="nav-Grievance"]').click()
             if nav_menu == "Individuals":
-                filters.wait_for('[data-cy="nav-Programme Population"]').click()
+                filters.wait_for('[data-cy="nav-Main Menu"]').click()
             if nav_menu == "Surveys":
                 filters.wait_for('[data-cy="nav-Accountability"]').click()
             if nav_menu == "Payment Plans":
@@ -502,7 +502,7 @@ class TestSmokeFilters:
                 [["Payment Module", "Payment Plans"], "filter-search", "PP-0060-22-11223344"], id="Payment Module"
             ),
             # ToDo: uncomment after fix bug: 206395
-            # pytest.param(["Programme Population", "hh-filters-search", "HH-00-0000.1380"], id="Programme Population"),
+            # pytest.param(['Main Menu', "hh-filters-search", "HH-00-0000.1380"], id="Programme Population"),
         ],
     )
     def test_filters_happy_path_search_filter(

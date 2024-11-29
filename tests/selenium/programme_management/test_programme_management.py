@@ -147,6 +147,7 @@ class TestProgrammeManagement:
     ) -> None:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
+        sleep(1000)
         # Create Programme
         pageProgrammeManagement.getButtonNewProgram().click()
         # 1st step (Details)

@@ -20,5 +20,5 @@ export interface PaginatedListResponse<T> {
 export const fetchBeneficiaryGroups = async (): Promise<
   PaginatedListResponse<BeneficiaryGroup>
 > => {
-  return api.get('/beneficiary-groups/');
+  return api.get('beneficiary-groups/');
 };

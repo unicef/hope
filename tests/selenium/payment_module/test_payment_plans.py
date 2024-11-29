@@ -414,9 +414,6 @@ class TestSmokePaymentModule:
         assert "0" in pagePaymentModuleDetails.getLabelMaleChildren().text
         assert "0" in pagePaymentModuleDetails.getLabelMaleAdults().text
         assert "" in pagePaymentModuleDetails.getChartContainer().text
-        from tests.selenium.tools.tag_name_finder import printing
-
-        printing("Assert", pagePaymentModuleDetails.driver)
         assert "0" in pagePaymentModuleDetails.getLabelTotalNumberOfHouseholds().text
         assert "0" in pagePaymentModuleDetails.getLabelTargetedIndividuals().text
         assert "Payee List" in pagePaymentModuleDetails.getTableTitle().text

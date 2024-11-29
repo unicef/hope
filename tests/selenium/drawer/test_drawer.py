@@ -97,7 +97,7 @@ class TestDrawer:
         expected_menu_items = [
             "Country Dashboard",
             "Registration Data Import",
-            "Programme Population",
+            "Main Menu",
             "Programme Details",
             "Targeting",
             "Payment Module",

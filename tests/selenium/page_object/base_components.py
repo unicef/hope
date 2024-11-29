@@ -19,7 +19,7 @@ class BaseComponents(Common):
     sideNav = 'div[data-cy="side-nav"]'
     navCountryDashboard = 'a[data-cy="nav-Country Dashboard"]'
     navRegistrationDataImport = 'a[data-cy="nav-Registration Data Import"]'
-    navProgrammePopulation = 'a[data-cy="nav-Programme Population"]'
+    navProgrammePopulation = 'a[data-cy="nav-{}"]'
     navHouseholdMembers = 'a[data-cy="nav-{}"]'
     navHouseholds = 'a[data-cy="nav-{}"]'
     navIndividuals = 'a[data-cy="nav-{}"]'
@@ -94,8 +94,8 @@ class BaseComponents(Common):
     def getNavRegistrationDataImport(self) -> WebElement:
         return self.wait_for(self.navRegistrationDataImport)
 
-    def getNavProgrammePopulation(self) -> WebElement:
-        return self.wait_for(self.navProgrammePopulation)
+    def getNavProgrammePopulation(self, name: str = "Main Menu") -> WebElement:
+        return self.wait_for(self.navProgrammePopulation.format(name))
 
     def getNavHouseholdMembers(self, name: str = "Items") -> WebElement:
         return self.wait_for(self.navHouseholdMembers.format(name))
