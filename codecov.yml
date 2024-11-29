@@ -25,6 +25,7 @@ coverage:
     - "hct_mis_api/conftest.py"
     - "hct_mis_api/config/settings.py"
     - "hct_mis_api/apps/core/management/commands/*"
+    - "hct_mis_api/apps/payment/models/cash_assist.py"
     - "pragma: no cover"
     - "pragma: no-cover"
     - "def __repr__"
