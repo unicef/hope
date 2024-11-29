@@ -53782,7 +53782,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'English(EN)'
                     }
                 ],
-                'name': 'collect_individual_data',
                 'required': False,
                 'type': 'SELECT_ONE'
             },

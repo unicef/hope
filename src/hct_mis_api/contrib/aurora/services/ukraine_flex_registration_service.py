@@ -28,7 +28,6 @@ from hct_mis_api.apps.household.models import (
     NOT_DISABLED,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
-    YES,
     DocumentType,
     PendingBankAccountInfo,
     PendingDocument,
