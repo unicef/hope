@@ -151,13 +151,12 @@ def migrate_cash_plan_to_payment_plan() -> None:
 
                 financial_service_provider = fsp_vision_vendor_number_to_obj.get(cp.service_provider.vision_id)
                 if not financial_service_provider:
-                    logger.error(
+                    raise ValueError(
                         f"FinancialServiceProvider not found for vision_id: {first_record.service_provider.vision_id}"
                         f"Cash Plan: {cp}"
                         f"Record: {first_record}"
                         f"Service Provider: {first_record.service_provider}"
                     )
-                    continue
 
                 dmppp = DeliveryMechanismPerPaymentPlan.objects.create(
                     payment_plan_id=pp.id,
