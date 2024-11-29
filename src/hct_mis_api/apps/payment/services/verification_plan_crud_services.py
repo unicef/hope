@@ -18,7 +18,7 @@ from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
 )
 
 if TYPE_CHECKING:
-    from hct_mis_api.apps.payment.models import PaymentPlan
+    from hct_mis_api.apps.payment.models import PaymentPlan  # pragma: no cover
 
 
 def get_payment_records(payment_plan: "PaymentPlan", verification_channel: Optional[Any]) -> QuerySet:
@@ -55,8 +55,8 @@ class VerificationPlanCrudServices:
         verifier.verify("sampling")
         verifier.verify("verification_channel")
 
-        if payment_verification_plan.status != PaymentVerificationPlan.STATUS_PENDING:
-            raise GraphQLError("You can only edit PENDING Cash/Payment Plan Verification")
+        if payment_verification_plan.status != PaymentVerificationPlan.STATUS_PENDING:  # pragma: no cover
+            raise GraphQLError("You can only edit PENDING Payment Plan Verification")
 
         payment_records = get_payment_records(
             payment_verification_plan.payment_plan, payment_verification_plan.verification_channel

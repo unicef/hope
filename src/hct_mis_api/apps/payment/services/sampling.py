@@ -11,7 +11,7 @@ from hct_mis_api.apps.payment.models import PaymentVerificationPlan
 from hct_mis_api.apps.payment.utils import get_number_of_samples
 
 if TYPE_CHECKING:
-    from hct_mis_api.apps.payment.models import Payment, PaymentPlan
+    from hct_mis_api.apps.payment.models import Payment, PaymentPlan  # pragma: no cover
 
 
 class Sampling:
@@ -81,7 +81,7 @@ class BaseSampling(abc.ABC):
             return get_number_of_samples(sample_count, self.confidence_interval, self.margin_of_error)
 
     @abc.abstractmethod
-    def sampling(self, payment_records: QuerySet["Payment"]) -> None:
+    def sampling(self, payment_records: QuerySet["Payment"]) -> None:  # pragma: no cover
         pass
 
 
