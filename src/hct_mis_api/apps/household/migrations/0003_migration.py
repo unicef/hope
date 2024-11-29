@@ -20,4 +20,14 @@ class Migration(migrations.Migration):
             old_name="user_fields",
             new_name="internal_data",
         ),
+        migrations.AlterField(
+            model_name='household',
+            name='internal_data',
+            field=models.JSONField(default=dict),
+        ),
+        migrations.AlterField(
+            model_name='individual',
+            name='internal_data',
+            field=models.JSONField(default=dict),
+        ),
     ]
