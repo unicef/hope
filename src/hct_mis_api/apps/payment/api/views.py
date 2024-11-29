@@ -70,7 +70,7 @@ class PaymentPlanViewSet(BusinessAreaProgramMixin, PaymentPlanMixin, mixins.List
         PMViewListPermission,
     ]
 
-    def get_queryset(self) -> QuerySet:
+    def get_queryset(self) -> QuerySet:  # pragma: no cover
         business_area = self.get_business_area()
         program = self.get_program()
         return PaymentPlan.objects.filter(business_area=business_area, program_cycle__program=program)

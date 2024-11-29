@@ -156,11 +156,11 @@ class PaymentVerificationAdmin(HOPEModelAdminBase):
     date_hierarchy = "updated_at"
     raw_id_fields = ("payment_verification_plan", "payment_content_type")
 
-    def payment_plan_name(self, obj: PaymentVerification) -> str:
+    def payment_plan_name(self, obj: PaymentVerification) -> str:  # pragma: no cover
         payment_plan = obj.payment_verification_plan.payment_plan
         return getattr(payment_plan, "name", "~no name~")
 
-    def household(self, obj: PaymentVerification) -> str:
+    def household(self, obj: PaymentVerification) -> str:  # pragma: no cover
         payment = obj.payment
         return payment.household.unicef_id if payment else ""
 

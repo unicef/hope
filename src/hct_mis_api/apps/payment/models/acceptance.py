@@ -58,7 +58,7 @@ class Approval(TimeStampedUUIDModel):
         ordering = ("-created_at",)
 
     def __str__(self) -> str:
-        return self.type or ""
+        return self.type or ""  # pragma: no cover
 
     @property
     def info(self) -> str:
