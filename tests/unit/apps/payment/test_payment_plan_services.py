@@ -15,7 +15,6 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.household.fixtures import (
     HouseholdFactory,
@@ -55,8 +54,7 @@ class TestPaymentPlanServices(APITestCase):
     def setUpTestData(cls) -> None:
         super().setUpTestData()
         generate_delivery_mechanisms()
-        create_afghanistan()
-        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.business_area = create_afghanistan()
         cls.user = UserFactory.create()
         cls.create_user_role_with_permissions(cls.user, [Permissions.PM_CREATE], cls.business_area)
         cls.dm_transfer_to_account = DeliveryMechanism.objects.get(code="transfer_to_account")
@@ -149,62 +147,66 @@ class TestPaymentPlanServices(APITestCase):
     @freeze_time("2020-10-10")
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_create(self, get_exchange_rate_mock: Any) -> None:
-        targeting = TargetPopulationFactory(
-            program=ProgramFactory(
-                status=Program.ACTIVE,
-                start_date=timezone.datetime(2000, 9, 10, tzinfo=utc).date(),
-                end_date=timezone.datetime(2099, 10, 10, tzinfo=utc).date(),
-            )
+        program = ProgramFactory(
+            status=Program.ACTIVE,
+            start_date=timezone.datetime(2000, 9, 10, tzinfo=utc).date(),
+            end_date=timezone.datetime(2099, 10, 10, tzinfo=utc).date(),
         )
+        program_cycle = program.cycles.first()
 
         self.business_area.is_payment_plan_applicable = True
         self.business_area.save()
 
-        targeting.status = TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
-        targeting.program_cycle = targeting.program.cycles.first()
-
         hoh1 = IndividualFactory(household=None)
         hoh2 = IndividualFactory(household=None)
-        hh1 = HouseholdFactory(head_of_household=hoh1)
-        hh2 = HouseholdFactory(head_of_household=hoh2)
+        hh1 = HouseholdFactory(head_of_household=hoh1, program=program, business_area=self.business_area)
+        hh2 = HouseholdFactory(head_of_household=hoh2, program=program, business_area=self.business_area)
         IndividualRoleInHouseholdFactory(household=hh1, individual=hoh1, role=ROLE_PRIMARY)
         IndividualRoleInHouseholdFactory(household=hh2, individual=hoh2, role=ROLE_PRIMARY)
         IndividualFactory.create_batch(4, household=hh1)
 
-        targeting.households.set([hh1, hh2])
-        targeting.save()
-
         input_data = dict(
             business_area_slug="afghanistan",
-            targeting_id=self.id_to_base64(targeting.id, "Targeting"),
             dispersion_start_date=parse_date("2020-09-10"),
             dispersion_end_date=parse_date("2020-11-10"),
             currency="USD",
             name="paymentPlanName",
+            program_cycle_id=self.id_to_base64(program_cycle.id, "ProgramCycleNode"),
+            targeting_criteria={
+                "flag_exclude_if_active_adjudication_ticket": False,
+                "flag_exclude_if_on_sanction_list": False,
+                "rules": [
+                    {
+                        "collectors_filters_blocks": [],
+                        "household_filters_blocks": [],
+                        "household_ids": f"{hh1.unicef_id}, {hh2.unicef_id}",
+                        "individual_ids": "",
+                        "individuals_filters_blocks": [],
+                    }
+                ],
+            },
         )
 
         with mock.patch(
             "hct_mis_api.apps.payment.services.payment_plan_services.transaction"
         ) as mock_prepare_payment_plan_task:
-            with self.assertNumQueries(9):
+            with self.assertNumQueries(11):
                 pp = PaymentPlanService.create(
                     input_data=input_data, user=self.user, business_area_slug=self.business_area.slug
                 )
             assert mock_prepare_payment_plan_task.on_commit.call_count == 1
 
-        self.assertEqual(pp.status, PaymentPlan.Status.PREPARING)
-        self.assertEqual(pp.target_population.status, TargetPopulation.STATUS_ASSIGNED)
+        self.assertEqual(pp.status, PaymentPlan.Status.TP_OPEN)
         self.assertEqual(pp.total_households_count, 0)
         self.assertEqual(pp.total_individuals_count, 0)
         self.assertEqual(pp.payment_items.count(), 0)
-        with self.assertNumQueries(68):
-            prepare_payment_plan_task.delay(pp.id)
+        with self.assertNumQueries(77):
+            prepare_payment_plan_task.delay(str(pp.id))
         pp.refresh_from_db()
-        self.assertEqual(pp.status, PaymentPlan.Status.OPEN)
+        self.assertEqual(pp.status, PaymentPlan.Status.TP_OPEN)
         self.assertEqual(pp.total_households_count, 2)
         self.assertEqual(pp.total_individuals_count, 4)
         self.assertEqual(pp.payment_items.count(), 2)
-        self.assertEqual(pp.name, targeting.name)
 
     @freeze_time("2020-10-10")
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
@@ -298,28 +300,17 @@ class TestPaymentPlanServices(APITestCase):
             program__cycle__start_date=timezone.datetime(2021, 6, 10, tzinfo=utc).date(),
             program__cycle__end_date=timezone.datetime(2021, 7, 10, tzinfo=utc).date(),
         )
-        new_targeting = TargetPopulationFactory(
-            status=TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE,
-            program=ProgramFactory(
-                start_date=timezone.datetime(2021, 5, 10, tzinfo=utc).date(),
-                end_date=timezone.datetime(2021, 8, 10, tzinfo=utc).date(),
-            ),
-        )
+        program = pp.program_cycle.program
         payments = []
         for _ in range(4):
             hoh = IndividualFactory(household=None)
-            hh = HouseholdFactory(head_of_household=hoh)
+            hh = HouseholdFactory(head_of_household=hoh, program=program, business_area=self.business_area)
             IndividualRoleInHouseholdFactory(household=hh, individual=hoh, role=ROLE_PRIMARY)
             IndividualFactory.create_batch(2, household=hh)
             payment = PaymentFactory(
                 parent=pp, household=hh, status=Payment.STATUS_DISTRIBUTION_SUCCESS, currency="PLN"
             )
             payments.append(payment)
-
-        new_targeting.households.set([p.household for p in payments])
-        new_targeting.save()
-        pp.target_population = new_targeting
-        pp.save()
 
         dispersion_start_date = (pp.dispersion_start_date + timedelta(days=1)).date()
         dispersion_end_date = (pp.dispersion_end_date + timedelta(days=1)).date()
@@ -350,7 +341,7 @@ class TestPaymentPlanServices(APITestCase):
             )
 
         follow_up_pp.refresh_from_db()
-        self.assertEqual(follow_up_pp.status, PaymentPlan.Status.PREPARING)
+        self.assertEqual(follow_up_pp.status, PaymentPlan.Status.TP_OPEN)
         self.assertEqual(follow_up_pp.target_population, pp.target_population)
         self.assertEqual(follow_up_pp.program, pp.program)
         self.assertEqual(follow_up_pp.program_cycle, pp.program_cycle)
@@ -567,25 +558,41 @@ class TestPaymentPlanServices(APITestCase):
     def test_create_with_program_cycle_validation_error(self) -> None:
         self.business_area.is_payment_plan_applicable = True
         self.business_area.save()
-        targeting = TargetPopulationFactory(
-            status=TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE,
-            program=ProgramFactory(
-                status=Program.ACTIVE,
-                start_date=timezone.datetime(2000, 9, 10, tzinfo=utc).date(),
-                end_date=timezone.datetime(2099, 10, 10, tzinfo=utc).date(),
-                cycle__start_date=timezone.datetime(2021, 10, 10, tzinfo=utc).date(),
-                cycle__end_date=timezone.datetime(2021, 12, 10, tzinfo=utc).date(),
-            ),
+        program = ProgramFactory(
+            status=Program.ACTIVE,
+            start_date=timezone.datetime(2000, 9, 10, tzinfo=utc).date(),
+            end_date=timezone.datetime(2099, 10, 10, tzinfo=utc).date(),
+            cycle__start_date=timezone.datetime(2021, 10, 10, tzinfo=utc).date(),
+            cycle__end_date=timezone.datetime(2021, 12, 10, tzinfo=utc).date(),
         )
-        cycle = targeting.program.cycles.first()
-        targeting.program_cycle = targeting.program.cycles.first()
-        targeting.save()
+        cycle = program.cycles.first()
         input_data = dict(
             business_area_slug="afghanistan",
-            targeting_id=self.id_to_base64(targeting.id, "TargetingNode"),
             dispersion_start_date=parse_date("2020-11-11"),
             dispersion_end_date=parse_date("2020-11-20"),
             currency="USD",
+            name="TestName123",
+            program_cycle_id=self.id_to_base64(cycle.id, "ProgramCycleNode"),
+            targeting_criteria={
+                "flag_exclude_if_active_adjudication_ticket": False,
+                "flag_exclude_if_on_sanction_list": False,
+                "rules": [
+                    {
+                        "collectors_filters_blocks": [
+                            {
+                                "comparison_method": "EQUALS",
+                                "arguments": ["No"],
+                                "field_name": "mobile_phone_number__cash_over_the_counter",
+                                "flex_field_classification": "NOT_FLEX_FIELD",
+                            },
+                        ],
+                        "household_filters_blocks": [],
+                        "household_ids": "",
+                        "individual_ids": "",
+                        "individuals_filters_blocks": [],
+                    }
+                ],
+            },
         )
 
         with self.assertRaisesMessage(
@@ -606,52 +613,61 @@ class TestPaymentPlanServices(APITestCase):
     @freeze_time("2022-12-12")
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_full_rebuild(self, get_exchange_rate_mock: Any) -> None:
-        targeting = TargetPopulationFactory(
-            program=ProgramFactory(
-                status=Program.ACTIVE,
-                start_date=timezone.datetime(2000, 9, 10, tzinfo=utc).date(),
-                end_date=timezone.datetime(2099, 10, 10, tzinfo=utc).date(),
-            )
+        program = ProgramFactory(
+            status=Program.ACTIVE,
+            start_date=timezone.datetime(2000, 9, 10, tzinfo=utc).date(),
+            end_date=timezone.datetime(2099, 10, 10, tzinfo=utc).date(),
         )
+        program_cycle = program.cycles.first()
         self.business_area.is_payment_plan_applicable = True
         self.business_area.save()
-        targeting.status = TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
-        targeting.program_cycle = targeting.program.cycles.first()
+
         hoh1 = IndividualFactory(household=None)
         hoh2 = IndividualFactory(household=None)
-        hh1 = HouseholdFactory(head_of_household=hoh1)
-        hh2 = HouseholdFactory(head_of_household=hoh2)
+        hh1 = HouseholdFactory(head_of_household=hoh1, program=program, business_area=self.business_area)
+        hh2 = HouseholdFactory(head_of_household=hoh2, program=program, business_area=self.business_area)
         IndividualRoleInHouseholdFactory(household=hh1, individual=hoh1, role=ROLE_PRIMARY)
         IndividualRoleInHouseholdFactory(household=hh2, individual=hoh2, role=ROLE_PRIMARY)
         IndividualFactory.create_batch(4, household=hh1)
-        targeting.households.set([hh1, hh2])
-        targeting.save()
+
         input_data = dict(
             business_area_slug="afghanistan",
-            targeting_id=self.id_to_base64(targeting.id, "Targeting"),
             dispersion_start_date=parse_date("2022-12-20"),
             dispersion_end_date=parse_date("2022-12-22"),
             currency="USD",
             name="paymentPlanName",
+            program_cycle_id=self.id_to_base64(program_cycle.id, "ProgramCycleNode"),
+            targeting_criteria={
+                "flag_exclude_if_active_adjudication_ticket": False,
+                "flag_exclude_if_on_sanction_list": False,
+                "rules": [
+                    {
+                        "collectors_filters_blocks": [],
+                        "household_filters_blocks": [],
+                        "household_ids": f"{hh1.unicef_id}, {hh2.unicef_id}",
+                        "individual_ids": "",
+                        "individuals_filters_blocks": [],
+                    }
+                ],
+            },
         )
         with mock.patch(
             "hct_mis_api.apps.payment.services.payment_plan_services.transaction"
         ) as mock_prepare_payment_plan_task:
-            with self.assertNumQueries(9):
+            with self.assertNumQueries(11):
                 pp = PaymentPlanService.create(
                     input_data=input_data, user=self.user, business_area_slug=self.business_area.slug
                 )
             assert mock_prepare_payment_plan_task.on_commit.call_count == 1
 
-        self.assertEqual(pp.status, PaymentPlan.Status.PREPARING)
-        self.assertEqual(pp.target_population.status, TargetPopulation.STATUS_ASSIGNED)
+        self.assertEqual(pp.status, PaymentPlan.Status.TP_OPEN)
         self.assertEqual(pp.total_households_count, 0)
         self.assertEqual(pp.total_individuals_count, 0)
         self.assertEqual(pp.payment_items.count(), 0)
-        with self.assertNumQueries(68):
+        with self.assertNumQueries(77):
             prepare_payment_plan_task.delay(pp.id)
         pp.refresh_from_db()
-        self.assertEqual(pp.status, PaymentPlan.Status.OPEN)
+        self.assertEqual(pp.status, PaymentPlan.Status.TP_OPEN)
         self.assertEqual(pp.payment_items.count(), 2)
 
         old_payment_ids = list(pp.payment_items.values_list("id", flat=True))

@@ -61,6 +61,7 @@ class ActionPaymentPlanInput(graphene.InputObjectType):
     payment_plan_id = graphene.ID(required=True)
     action = graphene.Enum.from_enum(PaymentPlan.Action)(required=True)
     comment = graphene.String()
+    # add steficon id here?
 
 
 class CreatePaymentPlanInput(graphene.InputObjectType):

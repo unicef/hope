@@ -30,6 +30,7 @@ from hct_mis_api.apps.payment.celery_tasks import (
     export_pdf_payment_plan_summary,
     import_payment_plan_payment_list_from_xlsx,
     payment_plan_apply_engine_rule,
+    payment_plan_apply_steficon_hh_selection,
     payment_plan_exclude_beneficiaries,
 )
 from hct_mis_api.apps.payment.inputs import (
@@ -702,13 +703,16 @@ class ActionPaymentPlanMutation(PermissionMutation):
 
     class Arguments:
         input = ActionPaymentPlanInput(required=True)
+        version = BigInt(required=False)
 
     @classmethod
     @is_authenticated
+    @raise_program_status_is(Program.FINISHED)
     @transaction.atomic
     def mutate(cls, root: Any, info: Any, input: Dict, **kwargs: Any) -> "ActionPaymentPlanMutation":
         payment_plan_id = decode_id_string(input.get("payment_plan_id"))
         payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
+        check_concurrency_version_in_mutation(kwargs.get("version"), payment_plan)
 
         old_payment_plan = copy_model_object(payment_plan)
         if old_payment_plan.imported_file:
@@ -1128,7 +1132,6 @@ class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
         cls, root: Any, info: Any, payment_plan_id: str, steficon_rule_id: str
     ) -> "SetSteficonRuleOnPaymentPlanPaymentListMutation":
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
-
         cls.has_permission(info, Permissions.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS, payment_plan.business_area)
 
         if payment_plan.status != PaymentPlan.Status.LOCKED:
@@ -1160,6 +1163,50 @@ class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
             programs=payment_plan.get_program.pk,
             old_object=old_payment_plan,
             new_object=payment_plan,
+        )
+        return cls(payment_plan=payment_plan)
+
+
+class SetSteficonRuleOnTargetPopulationMutation(PermissionMutation):
+    payment_plan = graphene.Field(PaymentPlanNode)
+
+    class Input:
+        payment_plan_id = graphene.ID(required=True)
+        steficon_rule_id = graphene.ID(required=True)
+        version = BigInt(required=False)
+
+    @classmethod
+    @is_authenticated
+    def mutate(cls, _root: Any, _info: Any, **kwargs: Any) -> "SetSteficonRuleOnTargetPopulationMutation":
+        payment_plan_id = decode_id_string(kwargs["payment_plan_id"])
+        payment_plan = get_object_or_404(PaymentPlan, pk=payment_plan_id)
+        check_concurrency_version_in_mutation(kwargs.get("version"), payment_plan)
+        old_payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
+        cls.has_permission(_info, Permissions.TARGETING_UPDATE, payment_plan.business_area)
+
+        encoded_steficon_rule_id = kwargs.get("steficon_rule_id")
+        if encoded_steficon_rule_id is not None:
+            steficon_rule_id = decode_id_string(encoded_steficon_rule_id)
+            steficon_rule = get_object_or_404(Rule, id=steficon_rule_id)
+            steficon_rule_commit = steficon_rule.latest
+            if not steficon_rule.enabled or steficon_rule.deprecated:
+                raise GraphQLError("This steficon rule is not enabled or is deprecated.")
+            payment_plan.steficon_rule_targeting = steficon_rule_commit
+            payment_plan.status = PaymentPlan.Status.TP_STEFICON_WAIT
+            payment_plan.save()
+            payment_plan_apply_steficon_hh_selection.delay(str(payment_plan.pk))
+        else:
+            payment_plan.steficon_rule_targeting = None
+            payment_plan.vulnerability_score_min = None
+            payment_plan.vulnerability_score_max = None
+            payment_plan.save()
+        log_create(
+            PaymentPlan.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            _info.context.user,
+            getattr(payment_plan.program_cycle.program, "pk", None),
+            old_payment_plan,
+            payment_plan,
         )
         return cls(payment_plan=payment_plan)
 
@@ -1333,6 +1380,7 @@ class Mutations(graphene.ObjectType):
     split_payment_plan = SplitPaymentPlanMutation.Field()
     exclude_households = ExcludeHouseholdsMutation.Field()
     set_steficon_rule_on_payment_plan_payment_list = SetSteficonRuleOnPaymentPlanPaymentListMutation.Field()
+    set_steficon_rule_on_target_population = SetSteficonRuleOnTargetPopulationMutation.Field()
 
     # Payment Plan XLSX
     export_xlsx_payment_plan_payment_list = ExportXLSXPaymentPlanPaymentListMutation.Field()

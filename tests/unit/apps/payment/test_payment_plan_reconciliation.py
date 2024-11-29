@@ -102,19 +102,6 @@ mutation UpdateProgram($programData: UpdateProgramInput!) {
 }
 """
 
-
-CREATE_TARGET_POPULATION_MUTATION = """
-mutation CreateTP($input: CreateTargetPopulationInput!) {
-  createTargetPopulation(input: $input) {
-    targetPopulation {
-      id
-      status
-    }
-  }
-}
-"""
-
-
 CREATE_PAYMENT_PLAN_MUTATION = """
 mutation CreatePaymentPlan($input: CreatePaymentPlanInput!) {
     createPaymentPlan(input: $input) {
@@ -360,67 +347,30 @@ class TestPaymentPlanReconciliation(APITestCase):
         cycle = program.cycles.first()
         cycle.end_date = timezone.datetime(2022, 8, 24, tzinfo=utc).date()
         cycle.save()
-        program_cycle_id = create_programme_response["data"]["createProgram"]["program"]["cycles"]["edges"][0]["node"][
-            "id"
-        ]
+        # program_cycle_id = create_programme_response["data"]["createProgram"]["program"]["cycles"]["edges"][0]["node"][
+        #     "id"
+        # ]
         self.update_partner_access_to_program(self.user.partner, program)
 
-        create_target_population_response = self.graphql_request(
-            request_string=CREATE_TARGET_POPULATION_MUTATION,
-            context={
-                "user": self.user,
-                "headers": {
-                    "Business-Area": self.business_area.slug,
-                    "program": program_id,
-                },
-            },
-            variables={
-                "input": {
-                    "programCycleId": program_cycle_id,
-                    "name": "TargP",
-                    "excludedIds": "",
-                    "exclusionReason": "",
-                    "targetingCriteria": {
-                        "rules": [
-                            {
-                                "householdsFiltersBlocks": [
-                                    {
-                                        "comparisonMethod": "EQUALS",
-                                        "arguments": ["True"],
-                                        "fieldName": "consent",
-                                        "flexFieldClassification": "NOT_FLEX_FIELD",
-                                    }
-                                ],
-                                "individualsFiltersBlocks": [],
-                            }
-                        ]
-                    },
-                }
-            },
-        )
-        target_population_id = create_target_population_response["data"]["createTargetPopulation"]["targetPopulation"][
-            "id"
-        ]
-
-        locked_tp_response = self.graphql_request(
-            request_string=LOCK_TARGET_POPULATION_MUTATION,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(program.id, "ProgramNode")}},
-            variables={
-                "id": target_population_id,
-            },
-        )
-        status = locked_tp_response["data"]["lockTargetPopulation"]["targetPopulation"]["status"]
-        self.assertEqual(status, "LOCKED")
-
-        finalize_tp_response = self.graphql_request(
-            request_string=FINALIZE_TARGET_POPULATION_MUTATION,
-            context={"user": self.user},
-            variables={
-                "id": target_population_id,
-            },
-        )
-        status = finalize_tp_response["data"]["finalizeTargetPopulation"]["targetPopulation"]["status"]
-        self.assertEqual(status, "READY_FOR_PAYMENT_MODULE")
+        # locked_tp_response = self.graphql_request(
+        #     request_string=LOCK_TARGET_POPULATION_MUTATION,
+        #     context={"user": self.user, "headers": {"Program": self.id_to_base64(program.id, "ProgramNode")}},
+        #     variables={
+        #         "id": target_population_id,
+        #     },
+        # )
+        # status = locked_tp_response["data"]["lockTargetPopulation"]["targetPopulation"]["status"]
+        # self.assertEqual(status, "LOCKED")
+        #
+        # finalize_tp_response = self.graphql_request(
+        #     request_string=FINALIZE_TARGET_POPULATION_MUTATION,
+        #     context={"user": self.user},
+        #     variables={
+        #         "id": target_population_id,
+        #     },
+        # )
+        # status = finalize_tp_response["data"]["finalizeTargetPopulation"]["targetPopulation"]["status"]
+        # self.assertEqual(status, "READY_FOR_PAYMENT_MODULE")
 
         # all cycles should have end_date before creation new one
         ProgramCycle.objects.filter(program_id=decode_id_string(program_id)).update(
@@ -440,10 +390,24 @@ class TestPaymentPlanReconciliation(APITestCase):
                 variables={
                     "input": {
                         "businessAreaSlug": self.business_area.slug,
-                        "targetingId": target_population_id,
                         "dispersionStartDate": (timezone.now() - timedelta(days=1)).strftime("%Y-%m-%d"),
                         "dispersionEndDate": (timezone.now() + timedelta(days=1)).strftime("%Y-%m-%d"),
                         "currency": "USD",
+                        "targetingCriteria": {
+                            "rules": [
+                                {
+                                    "householdsFiltersBlocks": [
+                                        {
+                                            "comparisonMethod": "EQUALS",
+                                            "arguments": ["True"],
+                                            "fieldName": "consent",
+                                            "flexFieldClassification": "NOT_FLEX_FIELD",
+                                        }
+                                    ],
+                                    "individualsFiltersBlocks": [],
+                                }
+                            ]
+                        },
                     }
                 },
             )

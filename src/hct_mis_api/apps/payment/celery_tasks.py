@@ -738,20 +738,19 @@ def payment_plan_rebuild_stats(self: Any, payment_plan_id: str) -> None:
     ):
         payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
         set_sentry_business_area_tag(payment_plan.business_area.name)
-        payment_plan.build_status = PaymentPlan.BuildStatus.BUILD_STATUS_BUILDING
-        payment_plan.save(update_fields=["build_status"])
+        payment_plan.build_status_building()
+        payment_plan.save(update_fields=("build_status", "built_at"))
         try:
             with transaction.atomic():
                 payment_plan.update_population_count_fields()
                 payment_plan.update_money_fields()
-                payment_plan.build_status = PaymentPlan.BuildStatus.BUILD_STATUS_OK
-                payment_plan.built_at = timezone.now()
-                payment_plan.save(update_fields=["build_status", "built_at"])
+                payment_plan.build_status_ok()
+                payment_plan.save(update_fields=("build_status", "built_at"))
         except Exception as e:
             logger.exception(e)
             payment_plan.refresh_from_db()
-            payment_plan.build_status = PaymentPlan.BuildStatus.BUILD_STATUS_FAILED
-            payment_plan.save()
+            payment_plan.build_status_failed()
+            payment_plan.save(update_fields=("build_status", "built_at"))
             raise self.retry(exc=e)
 
 
@@ -770,20 +769,22 @@ def payment_plan_full_rebuild(self: Any, payment_plan_id: str) -> None:
     ):
         payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
         set_sentry_business_area_tag(payment_plan.business_area.name)
-        payment_plan.build_status = PaymentPlan.BuildStatus.BUILD_STATUS_BUILDING
-        payment_plan.save(update_fields=["build_status"])
+        payment_plan.build_status_building()
+        payment_plan.save(update_fields=("build_status", "built_at"))
         try:
             with transaction.atomic():
                 if payment_plan.status not in [
-                    PaymentPlan.Status.DRAFT,
-                    PaymentPlan.Status.PREPARING,
-                    PaymentPlan.Status.OPEN,
+                    PaymentPlan.Status.TP_OPEN,
+                    PaymentPlan.Status.TP_LOCKED,
+                    # PaymentPlan.Status.TP_PROCESSING,
                 ]:
                     raise Exception("Payment Plan is not in correct status")
                 PaymentPlanService(payment_plan).full_rebuild()
+                payment_plan.build_status_ok()
+                payment_plan.save(update_fields=("build_status", "built_at"))
         except Exception as e:
             logger.exception(e)
             payment_plan.refresh_from_db()
-            payment_plan.build_status = PaymentPlan.BuildStatus.BUILD_STATUS_FAILED
-            payment_plan.save()
+            payment_plan.build_status_failed()
+            payment_plan.save(update_fields=("build_status", "built_at"))
             raise self.retry(exc=e)

@@ -66,6 +66,11 @@ class PaymentPlanService:
     @property
     def actions_map(self) -> Dict:
         return {
+            PaymentPlan.Action.TP_LOCK.value: self.tp_lock,
+            PaymentPlan.Action.TP_UNLOCK.value: self.tp_unlock,
+            PaymentPlan.Action.TP_REBUILD.value: self.tp_rebuild,
+            PaymentPlan.Action.DRAFT.value: self.draft,
+            PaymentPlan.Action.OPEN.value: self.open,
             PaymentPlan.Action.LOCK.value: self.lock,
             PaymentPlan.Action.LOCK_FSP.value: self.lock_fsp,
             PaymentPlan.Action.UNLOCK.value: self.unlock,
@@ -151,6 +156,53 @@ class PaymentPlanService:
         else:
             raise GraphQLError("Already sent to Payment Gateway")
 
+        return self.payment_plan
+
+    def tp_lock(self) -> PaymentPlan:
+        if self.payment_plan.status != PaymentPlan.Status.TP_OPEN:
+            raise GraphQLError("Can only Lock Population for Open Population Payment Plan")
+
+        self.payment_plan.status = PaymentPlan.Status.TP_LOCKED
+        self.payment_plan.build_status_pending()
+        self.payment_plan.save(update_fields=("build_status", "built_at", "status"))
+        transaction.on_commit(lambda: payment_plan_rebuild_stats.delay(str(self.payment_plan.id)))
+
+        return self.payment_plan
+
+    def tp_unlock(self) -> PaymentPlan:
+        if self.payment_plan.status != PaymentPlan.Status.TP_LOCKED:
+            raise GraphQLError("Can only Unlock Population for Locked Population Payment Plan")
+
+        self.payment_plan.status = PaymentPlan.Status.TP_OPEN
+        self.payment_plan.build_status_pending()
+        self.payment_plan.save(update_fields=("build_status", "built_at", "status"))
+        transaction.on_commit(lambda: payment_plan_rebuild_stats.delay(str(self.payment_plan.id)))
+
+        return self.payment_plan
+
+    def tp_rebuild(self) -> PaymentPlan:
+        if self.payment_plan.status != PaymentPlan.Status.TP_LOCKED:
+            pass
+
+        self.payment_plan.build_status_pending()
+        self.payment_plan.save(update_fields=("build_status", "built_at"))
+        transaction.on_commit(lambda: payment_plan_full_rebuild.delay(str(self.payment_plan.id)))
+        return self.payment_plan
+
+    def draft(self) -> PaymentPlan:
+        if self.payment_plan.is_population_locked():
+            raise GraphQLError("Can only Locked Population Payment Plan can be moved to Draft")
+
+        self.payment_plan.status_draft()
+        self.payment_plan.save(update_fields=("status_date", "status"))
+        return self.payment_plan
+
+    def open(self) -> PaymentPlan:
+        if self.payment_plan.status != PaymentPlan.Status.DRAFT:
+            raise GraphQLError("Can only move from Draft status to Open")
+
+        self.payment_plan.status_open()
+        self.payment_plan.save(update_fields=("status_date", "status"))
         return self.payment_plan
 
     def lock(self) -> PaymentPlan:

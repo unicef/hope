@@ -14,22 +14,15 @@ from hct_mis_api.apps.account.permissions import (
 )
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.permissions import is_authenticated
-from hct_mis_api.apps.core.scalars import BigInt
 from hct_mis_api.apps.core.utils import (
     check_concurrency_version_in_mutation,
     decode_id_string,
 )
 from hct_mis_api.apps.core.validators import raise_program_status_is
-from hct_mis_api.apps.payment.celery_tasks import (
-    payment_plan_apply_steficon_hh_selection,
-    payment_plan_full_rebuild,
-    payment_plan_rebuild_stats,
-)
+from hct_mis_api.apps.payment.celery_tasks import payment_plan_full_rebuild
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.payment.schema import PaymentPlanNode
 from hct_mis_api.apps.program.models import Program, ProgramCycle
-from hct_mis_api.apps.steficon.models import Rule
-from hct_mis_api.apps.steficon.schema import SteficonRuleNode
 from hct_mis_api.apps.targeting.inputs import CopyTargetPopulationInput
 from hct_mis_api.apps.targeting.models import (
     TargetingCollectorRuleFilterBlock,
@@ -37,13 +30,7 @@ from hct_mis_api.apps.targeting.models import (
     TargetingCriteriaRule,
     TargetingIndividualRuleFilterBlock,
 )
-from hct_mis_api.apps.targeting.schema import TargetPopulationNode
-from hct_mis_api.apps.targeting.validators import (
-    LockTargetPopulationValidator,
-    RebuildTargetPopulationValidator,
-    TargetValidator,
-    UnlockTargetPopulationValidator,
-)
+from hct_mis_api.apps.targeting.validators import TargetValidator
 from hct_mis_api.apps.utils.schema import Arg
 
 logger = logging.getLogger(__name__)
@@ -77,71 +64,6 @@ class ValidatedMutation(PermissionMutation):
         for validator in cls.object_validators:
             validator.validate(object)
         return object
-
-
-class LockTargetPopulationMutation(ValidatedMutation):
-    # TODO: rename and move it into Payment app?
-    payment_plan = graphene.Field(PaymentPlanNode)
-    object_validators = [LockTargetPopulationValidator]
-    model_class = PaymentPlan
-    permissions = [Permissions.TARGETING_LOCK]
-
-    class Arguments:
-        id = graphene.ID(required=True)
-        version = BigInt(required=False)
-
-    @classmethod
-    @raise_program_status_is(Program.FINISHED)
-    @transaction.atomic
-    def validated_mutate(cls, root: Any, info: Any, **kwargs: Any) -> "LockTargetPopulationMutation":
-        payment_plan = kwargs.get("model_object")
-        if payment_plan.status != PaymentPlan.Status.TP_OPEN:
-            raise ValidationError("You can only lock population for open population Payment Plan")
-        old_target_population = kwargs.get("old_model_object")
-        payment_plan.status = PaymentPlan.Status.TP_LOCKED
-        payment_plan.build_status = PaymentPlan.BuildStatus.BUILD_STATUS_PENDING
-        payment_plan.save()
-        transaction.on_commit(lambda: payment_plan_rebuild_stats.delay(payment_plan.id))
-        log_create(
-            PaymentPlan.ACTIVITY_LOG_MAPPING,
-            "business_area",
-            info.context.user,
-            getattr(payment_plan.program_cycle.program, "pk", None),
-            old_target_population,
-            payment_plan,
-        )
-        return cls(payment_plan=payment_plan)
-
-
-class UnlockTargetPopulationMutation(ValidatedMutation):
-    # TODO: rename and move it into Payment app?
-    payment_plan = graphene.Field(PaymentPlanNode)
-    object_validators = [UnlockTargetPopulationValidator]
-    model_class = PaymentPlan
-    permissions = [Permissions.TARGETING_UNLOCK]
-
-    class Arguments:
-        id = graphene.ID(required=True)
-        version = BigInt(required=False)
-
-    @classmethod
-    @raise_program_status_is(Program.FINISHED)
-    def validated_mutate(cls, root: Any, info: Any, **kwargs: Any) -> "UnlockTargetPopulationMutation":
-        payment_plan = kwargs.get("model_object")
-        old_target_population = kwargs.get("old_model_object")
-        payment_plan.status = PaymentPlan.Status.TP_OPEN
-        payment_plan.build_status = PaymentPlan.BuildStatus.BUILD_STATUS_PENDING
-        payment_plan.save()
-        transaction.on_commit(lambda: payment_plan_rebuild_stats.delay(payment_plan.id))
-        log_create(
-            PaymentPlan.ACTIVITY_LOG_MAPPING,
-            "business_area",
-            info.context.user,
-            getattr(payment_plan.program_cycle.program, "pk", None),
-            old_target_population,
-            payment_plan,
-        )
-        return cls(payment_plan=payment_plan)
 
 
 class CopyTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
@@ -256,96 +178,6 @@ class CopyTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
         return targeting_criteria_copy
 
 
-class SetSteficonRuleOnTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
-    # TODO: rename and move it into Payment app?
-    payment_plan = graphene.Field(PaymentPlanNode)
-
-    class Input:
-        payment_plan_id = graphene.GlobalID(
-            required=True,
-            node=PaymentPlanNode,
-        )
-        steficon_rule_id = graphene.GlobalID(
-            required=False,
-            node=SteficonRuleNode,
-        )
-        version = BigInt(required=False)
-
-    @classmethod
-    @is_authenticated
-    def mutate_and_get_payload(
-        cls, _root: Any, _info: Any, **kwargs: Any
-    ) -> "SetSteficonRuleOnTargetPopulationMutation":
-        payment_plan_id = decode_id_string(kwargs["payment_plan_id"])
-        payment_plan = get_object_or_404(PaymentPlan, pk=payment_plan_id)
-        check_concurrency_version_in_mutation(kwargs.get("version"), payment_plan)
-        old_payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
-        cls.has_permission(_info, Permissions.TARGETING_UPDATE, payment_plan.business_area)
-
-        encoded_steficon_rule_id = kwargs.get("steficon_rule_id")
-        if encoded_steficon_rule_id is not None:
-            steficon_rule_id = decode_id_string(encoded_steficon_rule_id)
-            steficon_rule = get_object_or_404(Rule, id=steficon_rule_id)
-            steficon_rule_commit = steficon_rule.latest
-            if not steficon_rule.enabled or steficon_rule.deprecated:
-                raise ValidationError("This steficon rule is not enabled or is deprecated.")
-            payment_plan.steficon_rule_targeting = steficon_rule_commit
-            payment_plan.status = PaymentPlan.Status.TP_STEFICON_WAIT
-            payment_plan.save()
-            payment_plan_apply_steficon_hh_selection.delay(payment_plan.pk)
-        else:
-            payment_plan.steficon_rule_targeting = None
-            payment_plan.vulnerability_score_min = None
-            payment_plan.vulnerability_score_max = None
-            payment_plan.save()
-            # TODO: remove this one ??
-            # for selection in HouseholdSelection.objects.filter(target_population=payment_plan):
-            #     selection.vulnerability_score = None
-            #     selection.save(update_fields=["vulnerability_score"])
-        log_create(
-            PaymentPlan.ACTIVITY_LOG_MAPPING,
-            "business_area",
-            _info.context.user,
-            getattr(payment_plan.program_cycle.program, "pk", None),
-            old_payment_plan,
-            payment_plan,
-        )
-        return SetSteficonRuleOnTargetPopulationMutation(payment_plan=payment_plan)
-
-
-class RebuildTargetPopulationMutation(ValidatedMutation):
-    # TODO: rename and move it into Payment app?
-    payment_plan = graphene.Field(TargetPopulationNode)
-    object_validators = [RebuildTargetPopulationValidator]
-    model_class = PaymentPlan
-    permissions = [Permissions.TARGETING_UPDATE]
-
-    class Arguments:
-        id = graphene.ID(required=True)
-
-    @classmethod
-    def validated_mutate(cls, root: Any, info: Any, **kwargs: Any) -> "RebuildTargetPopulationMutation":
-        payment_plan = kwargs.get("model_object")
-        old_payment_plan = kwargs.get("old_model_object")
-        payment_plan.build_status = PaymentPlan.BuildStatus.BUILD_STATUS_PENDING
-        payment_plan.save()
-        transaction.on_commit(lambda: payment_plan_full_rebuild.delay(payment_plan.id))
-        log_create(
-            PaymentPlan.ACTIVITY_LOG_MAPPING,
-            "business_area",
-            info.context.user,
-            getattr(payment_plan.program_cycle.program, "pk", None),
-            old_payment_plan,
-            payment_plan,
-        )
-        return cls(payment_plan=payment_plan)
-
-
 class Mutations(graphene.ObjectType):
     # move all to PP.Actions
     copy_target_population = CopyTargetPopulationMutation.Field()
-    lock_target_population = LockTargetPopulationMutation.Field()
-    unlock_target_population = UnlockTargetPopulationMutation.Field()
-    target_population_rebuild = RebuildTargetPopulationMutation.Field()
-
-    set_steficon_rule_on_target_population = SetSteficonRuleOnTargetPopulationMutation.Field()

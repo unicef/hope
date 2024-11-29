@@ -60,10 +60,7 @@ from hct_mis_api.apps.payment.utils import to_decimal
 from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.targeting.fixtures import (
-    TargetingCriteriaFactory,
-    TargetPopulationFactory,
-)
+from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory
 from hct_mis_api.apps.targeting.models import (
     TargetingCriteria,
     TargetingCriteriaRule,
@@ -530,7 +527,7 @@ class PaymentPlanFactory(DjangoModelFactory):
 
     created_by = factory.SubFactory(UserFactory)
     unicef_id = factory.Faker("uuid4")
-    target_population = factory.SubFactory(TargetPopulationFactory)
+    targeting_criteria = factory.SubFactory(TargetingCriteriaFactory)
     program = factory.SubFactory(RealProgramFactory)
     program_cycle = factory.LazyAttribute(lambda o: o.program.cycles.first())
     currency = factory.fuzzy.FuzzyChoice(CURRENCY_CHOICES, getter=lambda c: c[0])

@@ -364,10 +364,6 @@ snapshots['TestPaymentPlanQueries::test_fetch_payment_plan_status_choices 1'] = 
                 'value': 'OPEN'
             },
             {
-                'name': 'Preparing',
-                'value': 'PREPARING'
-            },
-            {
                 'name': 'Processing',
                 'value': 'PROCESSING'
             },

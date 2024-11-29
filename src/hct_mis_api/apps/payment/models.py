@@ -556,8 +556,11 @@ class PaymentPlan(
     ]
 
     class Action(models.TextChoices):
-        # TODO: add more from TP
-
+        TP_LOCK = "TP_LOCK", "Population Lock"
+        TP_UNLOCK = "TP_UNLOCK", "Population Unlock"
+        TP_REBUILD = "TP_REBUILD", "Population Rebuild"
+        DRAFT = "DRAFT", "Draft"
+        OPEN = "OPEN", "Open"
         LOCK = "LOCK", "Lock"
         LOCK_FSP = "LOCK_FSP", "Lock FSP"
         UNLOCK = "UNLOCK", "Unlock"
@@ -843,9 +846,18 @@ class PaymentPlan(
 
     @transition(
         field=build_status,
+        source="*",
+        target=BuildStatus.BUILD_STATUS_PENDING,
+        # conditions=[lambda obj: obj.status in [PaymentPlan.Status.TP_OPEN, PaymentPlan.Status.TP_LOCKED]],
+    )
+    def build_status_pending(self) -> None:
+        self.built_at = timezone.now()
+
+    @transition(
+        field=build_status,
         source=[BuildStatus.BUILD_STATUS_PENDING, BuildStatus.BUILD_STATUS_FAILED, BuildStatus.BUILD_STATUS_OK],
         target=BuildStatus.BUILD_STATUS_BUILDING,
-        conditions=[lambda obj: obj.status in [PaymentPlan.Status.TP_OPEN]],
+        conditions=[lambda obj: obj.status in [PaymentPlan.Status.TP_OPEN, PaymentPlan.Status.TP_LOCKED]],
     )
     def build_status_building(self) -> None:
         self.built_at = timezone.now()
