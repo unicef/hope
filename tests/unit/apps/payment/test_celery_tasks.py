@@ -41,7 +41,7 @@ class TestPaymentCeleryTask(TestCase):
     def test_prepare_payment_plan_task_wrong_pp_status(self, mock_logger: Mock) -> None:
         payment_plan = PaymentPlanFactory(
             status=PaymentPlan.Status.OPEN,
-            program=self.program,
+            program_cycle=self.program.cycles.first(),
         )
         payment_plan.refresh_from_db()
         pp_id_str = str(payment_plan.pk)
