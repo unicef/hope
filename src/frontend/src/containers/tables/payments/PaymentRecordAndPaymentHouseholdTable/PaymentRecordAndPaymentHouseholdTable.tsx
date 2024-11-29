@@ -34,10 +34,10 @@ export function PaymentRecordHouseholdTable({
 
   const replacements = {
     headOfHousehold: (_beneficiaryGroup) =>
-      `Head of ${_beneficiaryGroup.groupLabel}`,
-    fullName: (_beneficiaryGroup) => `${_beneficiaryGroup.memberLabel}`,
+      `Head of ${_beneficiaryGroup?.groupLabel}`,
+    fullName: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel}`,
     relationship: (_beneficiaryGroup) =>
-      `Relationship to Head of ${_beneficiaryGroup.groupLabel}`,
+      `Relationship to Head of ${_beneficiaryGroup?.groupLabel}`,
   };
 
   const adjustedHeadCells = adjustHeadCells(

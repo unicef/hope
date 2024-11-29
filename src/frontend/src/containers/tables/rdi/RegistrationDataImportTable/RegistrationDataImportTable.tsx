@@ -70,11 +70,11 @@ export function RegistrationDataImportTable({
 
   const replacements = {
     numberOfIndividuals: (_beneficiaryGroup) =>
-      `Num. of ${_beneficiaryGroup.memberLabelPlural}`,
+      `Num. of ${_beneficiaryGroup?.memberLabelPlural}`,
     numberOfHouseholds: (_beneficiaryGroup) =>
-      `Num. of ${_beneficiaryGroup.groupLabelPlural}`,
+      `Num. of ${_beneficiaryGroup?.groupLabelPlural}`,
     household__unicef_id: (_beneficiaryGroup) =>
-      `${_beneficiaryGroup.groupLabel} ID`,
+      `${_beneficiaryGroup?.groupLabel} ID`,
   };
 
   const adjustedHeadCells = adjustHeadCells(

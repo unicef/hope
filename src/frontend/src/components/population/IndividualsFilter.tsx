@@ -106,7 +106,7 @@ export function IndividualsFilter({
               icon={<FlashOnIcon />}
               data-cy="filters-program"
             >
-              {programs.map((program) => (
+              {programs?.map((program) => (
                 <MenuItem key={program.id} value={program.id}>
                   {program.name}
                 </MenuItem>

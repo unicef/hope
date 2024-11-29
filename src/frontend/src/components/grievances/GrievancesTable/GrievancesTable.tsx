@@ -53,7 +53,7 @@ export const GrievancesTable = ({
 
   const replacements = {
     household_unicef_id: (_beneficiaryGroup) =>
-      `${_beneficiaryGroup.groupLabel} ID`,
+      `${_beneficiaryGroup?.groupLabel} ID`,
   };
 
   const adjustedHeadCells = adjustHeadCells(

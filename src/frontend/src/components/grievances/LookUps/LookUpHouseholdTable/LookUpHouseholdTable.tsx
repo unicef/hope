@@ -129,10 +129,10 @@ export function LookUpHouseholdTable({
   };
 
   const replacements = {
-    unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup.groupLabel} ID`,
+    unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} ID`,
     head_of_household__full_name: (_beneficiaryGroup) =>
-      `Head of ${_beneficiaryGroup.groupLabel}`,
-    size: (_beneficiaryGroup) => `${_beneficiaryGroup.groupLabel} Size`,
+      `Head of ${_beneficiaryGroup?.groupLabel}`,
+    size: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} Size`,
   };
 
   const adjustedHeadCells = adjustHeadCells(

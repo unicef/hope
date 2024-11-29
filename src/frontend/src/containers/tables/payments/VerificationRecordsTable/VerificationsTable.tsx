@@ -37,9 +37,9 @@ export function VerificationsTable({
 
   const replacements = {
     payment_record__head_of_household__family_name: (_beneficiaryGroup) =>
-      `Head of ${_beneficiaryGroup.groupLabel}`,
+      `Head of ${_beneficiaryGroup?.groupLabel}`,
     payment_record__household__unicef_id: (_beneficiaryGroup) =>
-      `${_beneficiaryGroup.groupLabel} ID`,
+      `${_beneficiaryGroup?.groupLabel} ID`,
   };
 
   const adjustedHeadCells = adjustHeadCells(

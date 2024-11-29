@@ -58,9 +58,9 @@ export const CollectorsTable = ({
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const replacements = {
-    fullName: (_beneficiaryGroup) => `${_beneficiaryGroup.memberLabel}`,
+    fullName: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel}`,
     relationship: (_beneficiaryGroup) =>
-      `Relationship to ${_beneficiaryGroup.groupLabel}`,
+      `Relationship to ${_beneficiaryGroup?.groupLabel}`,
   };
 
   const adjustedHeadCells = adjustHeadCells(

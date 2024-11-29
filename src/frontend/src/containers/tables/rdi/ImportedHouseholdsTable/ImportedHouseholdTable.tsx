@@ -29,10 +29,10 @@ export function ImportedHouseholdTable({
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const mergedReplacements = {
-    id: (_beneficiaryGroup) => `${_beneficiaryGroup.memberLabel} ID`,
+    id: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel} ID`,
     head_of_household__full_name: (_beneficiaryGroup) =>
-      `Head of ${_beneficiaryGroup.groupLabel}`,
-    size: (_beneficiaryGroup) => `${_beneficiaryGroup.groupLabel} Size`,
+      `Head of ${_beneficiaryGroup?.groupLabel}`,
+    size: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} Size`,
   };
 
   const adjustedMergedHeadCells = adjustHeadCells(
@@ -42,10 +42,10 @@ export function ImportedHouseholdTable({
   );
 
   const importedReplacements = {
-    id: (_beneficiaryGroup) => `${_beneficiaryGroup.groupLabel} ID`,
+    id: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} ID`,
     head_of_household__full_name: (_beneficiaryGroup) =>
-      `Head of ${_beneficiaryGroup.groupLabel}`,
-    size: (_beneficiaryGroup) => `${_beneficiaryGroup.groupLabel} Size`,
+      `Head of ${_beneficiaryGroup?.groupLabel}`,
+    size: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} Size`,
   };
 
   const adjustedImportedHeadCells = adjustHeadCells(

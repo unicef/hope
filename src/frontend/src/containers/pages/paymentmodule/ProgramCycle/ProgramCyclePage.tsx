@@ -38,7 +38,7 @@ export const ProgramCyclePage = (): ReactElement => {
 
   const replacements = {
     totalHouseholdsCount: (_beneficiaryGroup) =>
-      `Total ${_beneficiaryGroup.groupLabelPlural} Count`,
+      `Total ${_beneficiaryGroup?.groupLabelPlural} Count`,
   };
 
   const adjustedHeadCells = adjustHeadCells(

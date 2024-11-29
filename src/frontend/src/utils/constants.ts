@@ -295,27 +295,38 @@ interface BeneficiaryGroup {
 }
 
 export const generateTableOrderOptionsGroup = (
-  beneficiaryGroup: BeneficiaryGroup,
-) => [
-  { name: `${beneficiaryGroup.groupLabel}: ascending`, value: 'unicef_id' },
-  { name: `${beneficiaryGroup.groupLabel}: descending`, value: '-unicef_id' },
-  { name: 'Status: ascending', value: 'status_label' },
-  { name: 'Status: descending', value: '-status_label' },
-  { name: `${beneficiaryGroup.groupLabel} Size: ascending`, value: 'size' },
-  { name: `${beneficiaryGroup.groupLabel} Size: descending`, value: '-size' },
-  { name: 'Registration Date: ascending', value: 'last_registration_date' },
-  { name: 'Registration Date: descending', value: '-last_registration_date' },
-];
+  beneficiaryGroup: BeneficiaryGroup | null,
+) => {
+  if (!beneficiaryGroup) return null;
+
+  return [
+    { name: `${beneficiaryGroup.groupLabel}: ascending`, value: 'unicef_id' },
+    { name: `${beneficiaryGroup.groupLabel}: descending`, value: '-unicef_id' },
+    { name: 'Status: ascending', value: 'status_label' },
+    { name: 'Status: descending', value: '-status_label' },
+    { name: `${beneficiaryGroup.groupLabel} Size: ascending`, value: 'size' },
+    { name: `${beneficiaryGroup.groupLabel} Size: descending`, value: '-size' },
+    { name: 'Registration Date: ascending', value: 'last_registration_date' },
+    { name: 'Registration Date: descending', value: '-last_registration_date' },
+  ];
+};
 
 export const generateTableOrderOptionsMember = (
-  beneficiaryGroup: BeneficiaryGroup,
-) => [
-  { name: `${beneficiaryGroup.memberLabel}: ascending`, value: 'unicef_id' },
-  { name: `${beneficiaryGroup.memberLabel}: descending`, value: '-unicef_id' },
-  { name: 'Status: ascending', value: 'status_label' },
-  { name: 'Status: descending', value: '-status_label' },
-  { name: `${beneficiaryGroup.groupLabel} Size: ascending`, value: 'size' },
-  { name: `${beneficiaryGroup.groupLabel} Size: descending`, value: '-size' },
-  { name: 'Registration Date: ascending', value: 'last_registration_date' },
-  { name: 'Registration Date: descending', value: '-last_registration_date' },
-];
+  beneficiaryGroup: BeneficiaryGroup | null,
+) => {
+  if (!beneficiaryGroup) return null;
+
+  return [
+    { name: `${beneficiaryGroup.memberLabel}: ascending`, value: 'unicef_id' },
+    {
+      name: `${beneficiaryGroup.memberLabel}: descending`,
+      value: '-unicef_id',
+    },
+    { name: 'Status: ascending', value: 'status_label' },
+    { name: 'Status: descending', value: '-status_label' },
+    { name: `${beneficiaryGroup.groupLabel} Size: ascending`, value: 'size' },
+    { name: `${beneficiaryGroup.groupLabel} Size: descending`, value: '-size' },
+    { name: 'Registration Date: ascending', value: 'last_registration_date' },
+    { name: 'Registration Date: descending', value: '-last_registration_date' },
+  ];
+};

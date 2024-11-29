@@ -99,10 +99,10 @@ export const HouseholdMembersTable = ({
   const totalCount = allIndividuals.length;
 
   const replacements = {
-    unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup.memberLabel} ID`,
-    fullName: (_beneficiaryGroup) => `${_beneficiaryGroup.memberLabel}`,
+    unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel} ID`,
+    fullName: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel}`,
     relationship: (_beneficiaryGroup) =>
-      `Relationship to Head of ${_beneficiaryGroup.groupLabel}`,
+      `Relationship to Head of ${_beneficiaryGroup?.groupLabel}`,
   };
 
   const adjustedHeadCells = adjustHeadCells(

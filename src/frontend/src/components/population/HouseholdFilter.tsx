@@ -96,7 +96,7 @@ export function HouseholdFilters({
               icon={<FlashOnIcon />}
               data-cy="hh-filters-program"
             >
-              {programs.map((program) => (
+              {programs?.map((program) => (
                 <MenuItem key={program.id} value={program.id}>
                   {program.name}
                 </MenuItem>
@@ -155,7 +155,7 @@ export function HouseholdFilters({
             data-cy="hh-filters-order-by"
             disableClearable
           >
-            {householdTableOrderOptions.map((order) => (
+            {householdTableOrderOptions?.map((order) => (
               <MenuItem key={order.value} value={order.value}>
                 {order.name}
               </MenuItem>

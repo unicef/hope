@@ -136,9 +136,9 @@ export const DrawerItems = ({
         if (item.secondaryActions) {
           item.secondaryActions = item.secondaryActions.map((action) => {
             if (action.name === 'Households') {
-              action.name = _beneficiaryGroup.groupLabelPlural;
+              action.name = _beneficiaryGroup?.groupLabelPlural;
             } else if (action.name === 'Household Members') {
-              action.name = _beneficiaryGroup.memberLabelPlural;
+              action.name = _beneficiaryGroup?.memberLabelPlural;
             }
             return action;
           });

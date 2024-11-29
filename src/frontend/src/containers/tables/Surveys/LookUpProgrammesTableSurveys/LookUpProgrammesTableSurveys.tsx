@@ -61,7 +61,7 @@ export function LookUpProgrammesTableSurveys({
 
   const replacements = {
     totalHhCount: (_beneficiaryGroup) =>
-      `Num. of ${_beneficiaryGroup.groupLabelPlural}`,
+      `Num. of ${_beneficiaryGroup?.groupLabelPlural}`,
   };
 
   const adjustedHeadCells = adjustHeadCells(

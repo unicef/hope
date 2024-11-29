@@ -78,12 +78,12 @@ export function HouseholdImportedIndividualsTable({
   }
 
   const replacements = {
-    unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup.memberLabel} ID`,
-    fullName: (_beneficiaryGroup) => _beneficiaryGroup.memberLabel,
+    unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel} ID`,
+    fullName: (_beneficiaryGroup) => _beneficiaryGroup?.memberLabel,
     household__unicef_id: (_beneficiaryGroup) =>
-      `${_beneficiaryGroup.groupLabel} ID`,
+      `${_beneficiaryGroup?.groupLabel} ID`,
     relationship: (_beneficiaryGroup) =>
-      `Relationship to Head of ${_beneficiaryGroup.groupLabel}`,
+      `Relationship to Head of ${_beneficiaryGroup?.groupLabel}`,
   };
 
   const adjustedHeadCells = adjustHeadCells(
