@@ -1125,7 +1125,6 @@ class TestTargeting:
         pageTargeting.countTargetPopulations(2)
         filters.getButtonFiltersClear().click()
 
-    # @flaky(max_runs=5, min_passes=1)
     def test_targeting_and_labels(
         self,
         create_programs: None,
@@ -1164,7 +1163,7 @@ class TestTargeting:
         assert "Copy TP" in pageTargeting.chooseTargetPopulations(0).text
         pageTargeting.getColumnCreatedBy().click()
         pageTargeting.disappearLoadingRows()
-        assert "est NEW TP" in pageTargeting.chooseTargetPopulations(0).text
+        pageTargeting.wait_for_text("Test NEW TP", pageTargeting.rows)
 
     def test_targeting_parametrized_rules_filters(
         self,
