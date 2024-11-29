@@ -1,4 +1,3 @@
-# pragma: no cover
 import logging
 from datetime import datetime
 from decimal import Decimal
