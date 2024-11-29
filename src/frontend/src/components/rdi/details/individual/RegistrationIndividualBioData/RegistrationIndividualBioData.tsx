@@ -10,7 +10,7 @@ import {
 } from '@utils/utils';
 import {
   HouseholdChoiceDataQuery,
-  ImportedIndividualDetailedFragment,
+  IndividualDetailedFragment,
 } from '@generated/graphql';
 import { ContentLink } from '@core/ContentLink';
 import { LabelizedField } from '@core/LabelizedField';
@@ -31,7 +31,7 @@ const BorderBox = styled.div`
 `;
 
 interface RegistrationIndividualBioDataProps {
-  individual: ImportedIndividualDetailedFragment;
+  individual: IndividualDetailedFragment;
   choicesData: HouseholdChoiceDataQuery;
 }
 

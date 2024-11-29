@@ -167,7 +167,6 @@ export const EditProgramPage = (): ReactElement => {
         'partners',
         'partnerAccess',
         'pduFields',
-        'beneficiaryGroup',
       ]);
       const response = await updateProgramDetails({
         variables: {
@@ -335,6 +334,7 @@ export const EditProgramPage = (): ReactElement => {
             t,
             initialValuesProgramDetails,
           )}
+          validateOnChange={true}
         >
           {({
             submitForm,
@@ -345,6 +345,7 @@ export const EditProgramPage = (): ReactElement => {
             errors,
             setErrors,
           }) => {
+
             const handleNextStep = async () => {
               await handleNext({
                 validateForm,

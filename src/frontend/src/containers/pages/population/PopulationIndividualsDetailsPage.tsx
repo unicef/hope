@@ -1,5 +1,4 @@
 import { Box } from '@mui/material';
-import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import {
@@ -30,6 +29,7 @@ import { IndividualDeliveryMechanisms } from '@components/population/IndividualD
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
 
 const Container = styled.div`
   padding: 20px;
@@ -41,11 +41,11 @@ const Container = styled.div`
 `;
 
 export const PopulationIndividualsDetailsPage = (): ReactElement => {
-  const { t } = useTranslation();
   const { id } = useParams();
   const location = useLocation();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const { t } = useTranslation();
 
   const { baseUrl, businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
@@ -94,12 +94,24 @@ export const PopulationIndividualsDetailsPage = (): ReactElement => {
   )
     return null;
 
-  const breadCrumbsItems: BreadCrumbsItem[] = [
+  let breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: `${beneficiaryGroup?.groupLabelPlural}`,
       to: `/${baseUrl}/population/individuals`,
     },
   ];
+
+  const breadcrumbTitle = location?.state?.breadcrumbTitle;
+  const breadcrumbUrl = location?.state?.breadcrumbUrl;
+
+  if (breadcrumbTitle && breadcrumbUrl) {
+    breadCrumbsItems = [
+      {
+        title: breadcrumbTitle,
+        to: breadcrumbUrl,
+      },
+    ];
+  }
 
   const { individual } = data;
 

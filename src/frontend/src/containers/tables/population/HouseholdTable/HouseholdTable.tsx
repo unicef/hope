@@ -4,16 +4,16 @@ import {
   AllHouseholdsQueryVariables,
   HouseholdChoiceDataQuery,
   HouseholdNode,
+  HouseholdRdiMergeStatus,
   useAllHouseholdsForPopulationTableQuery,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { adjustHeadCells } from '@utils/utils';
-import * as React from 'react';
+import { ReactElement } from 'react';
 import { useProgramContext } from 'src/programContext';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './HouseholdTableHeadCells';
 import { HouseholdTableRow } from './HouseholdTableRow';
-import { ReactElement } from 'react';
 
 interface HouseholdTableProps {
   businessArea: string;
@@ -56,6 +56,7 @@ export function HouseholdTable({
     withdrawn: matchWithdrawnValue(),
     orderBy: filter.orderBy,
     program: programId,
+    rdiMergeStatus: HouseholdRdiMergeStatus.Merged,
   };
   const replacements = {
     unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup.groupLabel} ID`,

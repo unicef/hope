@@ -1,5 +1,5 @@
 import { SubField } from '@components/targeting/SubField';
-import { ImportedIndividualFieldsQuery } from '@generated/graphql';
+import { IndividualFieldsQuery } from '@generated/graphql';
 import { FieldChooser } from '@components/targeting/FieldChooser';
 import { ReactElement } from 'react';
 
@@ -14,7 +14,7 @@ export function TargetingCriteriaIndividualBlockFilter({
 }: {
   blockIndex: number;
   index: number;
-  data: ImportedIndividualFieldsQuery;
+  data: IndividualFieldsQuery;
   each;
   choicesDict;
   onChange: (e, object) => void;
