@@ -14,7 +14,7 @@ from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.payment.fixtures import ApprovalProcessFactory, PaymentPlanFactory
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
 from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
     TargetPopulationFactory,
@@ -45,12 +45,14 @@ def create_program(
 ) -> Program:
     BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
     dct = DataCollectingTypeFactory(type=dct_type)
+    beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     program = ProgramFactory(
         name=name,
         start_date=datetime.now() - relativedelta(months=1),
         end_date=datetime.now() + relativedelta(months=1),
         data_collecting_type=dct,
         status=status,
+        beneficiary_group=beneficiary_group,
     )
     if partner:
         program.partners.add(partner.id)

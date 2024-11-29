@@ -27,7 +27,7 @@ from hct_mis_api.apps.payment.models import PaymentRecord as PR
 from hct_mis_api.apps.payment.models import PaymentVerification as PV
 from hct_mis_api.apps.payment.models import PaymentVerificationPlan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import Program, ProgramCycle
+from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
@@ -59,6 +59,7 @@ def get_program_with_dct_type_and_name(
 ) -> Program:
     BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
     dct = DataCollectingTypeFactory(type=dct_type)
+    beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     program = ProgramFactory(
         name=name,
         programme_code=programme_code,
@@ -66,6 +67,7 @@ def get_program_with_dct_type_and_name(
         end_date=datetime.now() + relativedelta(months=1),
         data_collecting_type=dct,
         status=status,
+        beneficiary_group=beneficiary_group,
     )
     return program
 
@@ -73,6 +75,7 @@ def get_program_with_dct_type_and_name(
 def create_program(name: str = "Test Program", dct_type: str = DataCollectingType.Type.STANDARD) -> Program:
     BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
     dct = DataCollectingTypeFactory(type=dct_type)
+    beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     yield ProgramFactory(
         name=name,
         programme_code="1234",
@@ -84,6 +87,7 @@ def create_program(name: str = "Test Program", dct_type: str = DataCollectingTyp
         cycle__status=ProgramCycle.DRAFT,
         cycle__start_date=datetime.now() - relativedelta(days=5),
         cycle__end_date=datetime.now() + relativedelta(days=5),
+        beneficiary_group=beneficiary_group,
     )
 
 

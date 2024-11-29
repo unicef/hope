@@ -34,10 +34,10 @@ class TestSmokeIndividuals:
         pageIndividuals.selectGlobalProgramFilter("Test Programm")
         pageIndividuals.getNavProgrammePopulation().click()
         pageIndividuals.getNavIndividuals().click()
-        assert "Individuals" in pageIndividuals.getTableTitle().text
-        assert "Individual ID" in pageIndividuals.getIndividualId().text
-        assert "Individual" in pageIndividuals.getIndividualName().text
-        assert "Household ID" in pageIndividuals.getHouseholdId().text
+        assert "Items" in pageIndividuals.getTableTitle().text
+        assert "Item ID" in pageIndividuals.getIndividualId().text
+        assert "Item" in pageIndividuals.getIndividualName().text
+        assert "Items Group ID" in pageIndividuals.getHouseholdId().text
         assert "Relationship to HoH" in pageIndividuals.getRelationship().text
         assert "Age" in pageIndividuals.getIndividualAge().text
         assert "Gender" in pageIndividuals.getIndividualSex().text

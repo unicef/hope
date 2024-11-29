@@ -17,7 +17,7 @@ from hct_mis_api.apps.core.models import (
     DataCollectingType,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from tests.selenium.helpers.date_time_format import FormatTime
 from tests.selenium.page_object.programme_details.programme_details import (
@@ -41,6 +41,7 @@ def create_program(
 ) -> Program:
     BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
     dct = DataCollectingTypeFactory(type=dct_type)
+    beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     program = ProgramFactory(
         name=name,
         start_date=datetime.now() - relativedelta(months=1),
@@ -48,6 +49,7 @@ def create_program(
         data_collecting_type=dct,
         status=status,
         budget=100,
+        beneficiary_group=beneficiary_group,
     )
     program.refresh_from_db()
     return program

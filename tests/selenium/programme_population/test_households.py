@@ -34,11 +34,11 @@ class TestSmokeHouseholds:
         pageHouseholds.getNavProgrammePopulation().click()
         pageHouseholds.getNavHouseholds().click()
         assert 2 == len(pageHouseholds.getHouseholdsRows())
-        assert "Households" in pageHouseholds.getTableTitle().text
-        assert "Household ID" in pageHouseholds.getHouseholdId().text
+        assert "Items Groups" in pageHouseholds.getTableTitle().text
+        assert "Items Group ID" in pageHouseholds.getHouseholdId().text
         assert "Status" in pageHouseholds.getStatus().text
-        assert "Head of Household" in pageHouseholds.getHouseholdHeadName().text
-        assert "Household Size" in pageHouseholds.getHouseholdSize().text
+        assert "Head of Items Group" in pageHouseholds.getHouseholdHeadName().text
+        assert "Items Group Size" in pageHouseholds.getHouseholdSize().text
         assert "Administrative Level 2" in pageHouseholds.getHouseholdLocation().text
         assert "Residence Status" in pageHouseholds.getHouseholdResidenceStatus().text
         assert "Total Cash Received" in pageHouseholds.getHouseholdTotalCashReceived().text
@@ -78,8 +78,8 @@ class TestSmokeHouseholds:
         assert "Full_TEST" in pageHouseholdsDetails.getLabelDataCollectingType().text
         assert "USD 0.00" in pageHouseholdsDetails.getLabelCashReceived().text
         assert "USD 0.00" in pageHouseholdsDetails.getLabelTotalCashReceived().text
-        assert "Household Members" in pageHouseholdsDetails.getTableTitle().text
-        assert "Individual ID" in pageHouseholdsDetails.getTableLabel().text
+        assert "Items Group Members" in pageHouseholdsDetails.getTableTitle().text
+        assert "Item ID" in pageHouseholdsDetails.getTableLabel().text
         assert "ACTIVE" in pageHouseholdsDetails.getStatusContainer().text
         assert "No results" in pageHouseholdsDetails.getTableRow().text
         assert "XLS" in pageHouseholdsDetails.getLabelSource().text

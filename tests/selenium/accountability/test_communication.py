@@ -106,10 +106,10 @@ class TestSmokeAccountabilityCommunication:
             in pageAccountabilityCommunicationDetails.getLabelTargetPopulation().text
         )
         assert "Recipients" in pageAccountabilityCommunicationDetails.getTableTitle().text
-        assert "Household Id" in pageAccountabilityCommunicationDetails.getHouseholdId().text
+        assert "Items Group ID" in pageAccountabilityCommunicationDetails.getHouseholdId().text
         assert "Status" in pageAccountabilityCommunicationDetails.getStatus().text
-        assert "Head of Household" in pageAccountabilityCommunicationDetails.getHouseholdHeadName().text
-        assert "Household Size" in pageAccountabilityCommunicationDetails.getHouseholdSize().text
+        assert "Head of 'Items Group" in pageAccountabilityCommunicationDetails.getHouseholdHeadName().text
+        assert "Items Group Size" in pageAccountabilityCommunicationDetails.getHouseholdSize().text
         assert "Administrative Level 2" in pageAccountabilityCommunicationDetails.getHouseholdLocation().text
         assert "Residence Status" in pageAccountabilityCommunicationDetails.getHouseholdResidenceStatus().text
         assert "Registration Date" in pageAccountabilityCommunicationDetails.getHouseholdRegistrationDate().text

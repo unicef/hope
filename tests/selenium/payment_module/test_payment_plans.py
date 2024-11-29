@@ -27,7 +27,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentPlan,
 )
 from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
-from hct_mis_api.apps.program.models import Program, ProgramCycle
+from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
 from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory, RuleFactory
 from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.apps.targeting.fixtures import (
@@ -74,6 +74,7 @@ def social_worker_program() -> Program:
 def create_program(name: str = "Test Program", dct_type: str = DataCollectingType.Type.STANDARD) -> Program:
     BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
     dct = DataCollectingTypeFactory(type=dct_type)
+    beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     return ProgramFactory(
         name=name,
         programme_code="1234",
@@ -85,6 +86,7 @@ def create_program(name: str = "Test Program", dct_type: str = DataCollectingTyp
         cycle__status=ProgramCycle.DRAFT,
         cycle__start_date=datetime.now() - relativedelta(days=5),
         cycle__end_date=datetime.now() + relativedelta(days=5),
+        beneficiary_group=beneficiary_group,
     )
 
 
@@ -412,13 +414,16 @@ class TestSmokePaymentModule:
         assert "0" in pagePaymentModuleDetails.getLabelMaleChildren().text
         assert "0" in pagePaymentModuleDetails.getLabelMaleAdults().text
         assert "" in pagePaymentModuleDetails.getChartContainer().text
+        from tests.selenium.tools.tag_name_finder import printing
+
+        printing("Assert", pagePaymentModuleDetails.driver)
         assert "0" in pagePaymentModuleDetails.getLabelTotalNumberOfHouseholds().text
         assert "0" in pagePaymentModuleDetails.getLabelTargetedIndividuals().text
         assert "Payee List" in pagePaymentModuleDetails.getTableTitle().text
         assert "UPLOAD RECONCILIATION INFO" in pagePaymentModuleDetails.getButtonImport().text
         assert "Payment ID" in pagePaymentModuleDetails.getTableLabel()[1].text
-        assert "Household ID" in pagePaymentModuleDetails.getTableLabel()[2].text
-        assert "Household Size" in pagePaymentModuleDetails.getTableLabel()[3].text
+        assert "Items Group ID" in pagePaymentModuleDetails.getTableLabel()[2].text
+        assert "Items Group Size" in pagePaymentModuleDetails.getTableLabel()[3].text
         assert "Administrative Level 2" in pagePaymentModuleDetails.getTableLabel()[4].text
         assert "Collector" in pagePaymentModuleDetails.getTableLabel()[5].text
         assert "FSP" in pagePaymentModuleDetails.getTableLabel()[6].text

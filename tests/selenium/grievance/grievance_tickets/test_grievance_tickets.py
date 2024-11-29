@@ -1123,7 +1123,7 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getIssueType().click()
         pageGrievanceNewTicket.select_listbox_element("Household Data Update")
         assert "Data Change" in pageGrievanceNewTicket.getSelectCategory().text
-        assert "Household Data Update" in pageGrievanceNewTicket.getIssueType().text
+        assert "Items Group Data Update" in pageGrievanceNewTicket.getIssueType().text
         pageGrievanceNewTicket.getButtonNext().click()
         pageGrievanceNewTicket.getHouseholdTab()
         pageGrievanceNewTicket.getHouseholdTableRows(0).click()

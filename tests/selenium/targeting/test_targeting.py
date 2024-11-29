@@ -339,11 +339,11 @@ class TestSmokeTargeting:
         assert "1" in pageTargetingDetails.getLabelMaleAdults().text
         assert "3" in pageTargetingDetails.getLabelTotalNumberOfHouseholds().text
         assert "7" in pageTargetingDetails.getLabelTargetedIndividuals().text
-        assert "Households" in pageTargetingDetails.getTableTitle().text
+        assert "Items Group" in pageTargetingDetails.getTableTitle().text
         expected_menu_items = [
             "ID",
-            "Head of Household",
-            "Household Size",
+            "Head of Items Group",
+            "Items Group Size",
             "Administrative Level 2",
             "Score",
         ]

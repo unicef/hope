@@ -18,7 +18,7 @@ from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
-from hct_mis_api.apps.program.models import Program, ProgramCycle
+from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
@@ -88,6 +88,7 @@ def get_program_with_dct_type_and_name(
         cycle_end_date = datetime.now() + relativedelta(days=10)
     BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
     dct = DataCollectingTypeFactory(type=dct_type)
+    beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     program = ProgramFactory(
         name=name,
         programme_code=programme_code,
@@ -99,6 +100,7 @@ def get_program_with_dct_type_and_name(
         cycle__status=program_cycle_status,
         cycle__start_date=cycle_start_date,
         cycle__end_date=cycle_end_date,
+        beneficiary_group=beneficiary_group,
     )
     return program
 
@@ -155,6 +157,7 @@ def get_program_without_cycle_end_date(
         cycle_start_date = datetime.now() - relativedelta(days=25)
     BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
     dct = DataCollectingTypeFactory(type=dct_type)
+    beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     program = ProgramFactory(
         name=name,
         programme_code=programme_code,
@@ -166,6 +169,7 @@ def get_program_without_cycle_end_date(
         cycle__status=program_cycle_status,
         cycle__start_date=cycle_start_date,
         cycle__end_date=None,
+        beneficiary_group=beneficiary_group,
     )
     program_cycle = ProgramCycle.objects.get(program=program)
     PaymentPlanFactory(
