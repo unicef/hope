@@ -28,7 +28,7 @@ from hct_mis_api.apps.payment.pdf.payment_plan_export_pdf_service import (
 from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
 )
-from hct_mis_api.apps.payment.utils import get_quantity_in_usd
+from hct_mis_api.apps.payment.utils import generate_cache_key, get_quantity_in_usd
 from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
     XlsxPaymentPlanImportPerFspService,
 )
@@ -392,6 +392,18 @@ def remove_old_payment_plan_payment_list_xlsx(self: Any, past_days: int = 30) ->
 @log_start_and_end
 @sentry_tags
 def prepare_payment_plan_task(self: Any, payment_plan_id: str) -> bool:
+    cache_key = generate_cache_key(
+        {
+            "task_name": "prepare_payment_plan_task",
+            "payment_plan_id": payment_plan_id,
+        }
+    )
+    if cache.get(cache_key):
+        logger.info(f"Task prepare_payment_plan_task with payment_plan_id {payment_plan_id} already running.")
+        return False
+
+    # 2 hours timeout
+    cache.set(cache_key, True, timeout=60 * 60 * 2)
     try:
         with transaction.atomic():
             from hct_mis_api.apps.payment.models import PaymentPlan
@@ -404,6 +416,11 @@ def prepare_payment_plan_task(self: Any, payment_plan_id: str) -> bool:
             payment_plan.save(update_fields=("build_status", "built_at"))
             set_sentry_business_area_tag(payment_plan.business_area.name)
 
+            # double check Payment Plan status
+            if payment_plan.status != PaymentPlan.Status.PREPARING:
+                logger.info(f"The Payment Plan must have the status {PaymentPlan.Status.PREPARING}.")
+                return False
+
             PaymentPlanService.create_payments(payment_plan)
             payment_plan.update_population_count_fields()
             payment_plan.update_money_fields()
@@ -414,6 +431,9 @@ def prepare_payment_plan_task(self: Any, payment_plan_id: str) -> bool:
         payment_plan.save(update_fields=("build_status", "built_at"))
         logger.exception("Prepare Payment Plan Error")
         raise self.retry(exc=e) from e
+
+    finally:
+        cache.delete(cache_key)
 
     return True
 

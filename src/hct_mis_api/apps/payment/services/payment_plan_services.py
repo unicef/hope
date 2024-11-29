@@ -477,7 +477,7 @@ class PaymentPlanService:
             )
             program_cycle.set_active()
 
-            transaction.on_commit(lambda: prepare_payment_plan_task.delay(payment_plan.id))
+            transaction.on_commit(lambda: prepare_payment_plan_task.delay(str(payment_plan.id)))
 
         return payment_plan
 
