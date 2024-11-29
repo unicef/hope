@@ -15,10 +15,8 @@ from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.payment.fixtures import (
-    CashPlanFactory,
     PaymentFactory,
     PaymentPlanFactory,
-    PaymentRecordFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
 )
@@ -85,81 +83,83 @@ class TestGenerateReportService(TestCase):
             else:
                 household.programs.add(self.program_2)
 
-        self.cash_plan_1 = CashPlanFactory(
-            business_area=self.business_area,
-            program=self.program_1,
-            # end_date=datetime.datetime.fromisoformat("2020-01-01 00:01:11+00:00"),
-        )
-        self.cash_plan_2 = CashPlanFactory(
-            business_area=self.business_area,
-            # end_date=datetime.datetime.fromisoformat("2020-01-01 00:01:11+00:00")
-        )
         self.payment_plan_1 = PaymentPlanFactory(
             business_area=self.business_area,
-            program=self.program_1,
+            program_cycle=self.program_1.cycles.first(),
             # end_date=datetime.datetime.fromisoformat("2020-01-01 00:01:11+00:00"),
         )
         self.payment_plan_2 = PaymentPlanFactory(
             business_area=self.business_area,
             # end_date=datetime.datetime.fromisoformat("2020-01-01 00:01:11+00:00")
         )
-        PaymentVerificationSummary.objects.create(payment_plan_obj=self.payment_plan_1)
-        PaymentVerificationSummary.objects.create(payment_plan_obj=self.payment_plan_2)
-        self.cash_plan_verification_1 = PaymentVerificationPlanFactory(
-            payment_plan_obj=self.cash_plan_1, completion_date="2020-01-01T14:30+00:00"
+        self.payment_plan_3 = PaymentPlanFactory(
+            business_area=self.business_area,
+            program_cycle=self.program_1.cycles.first(),
+            # end_date=datetime.datetime.fromisoformat("2020-01-01 00:01:11+00:00"),
         )
-        self.cash_plan_verification_2 = PaymentVerificationPlanFactory(
-            payment_plan_obj=self.cash_plan_2, completion_date="2020-01-01T14:30+00:00"
+        self.payment_plan_4 = PaymentPlanFactory(
+            business_area=self.business_area,
+            # end_date=datetime.datetime.fromisoformat("2020-01-01 00:01:11+00:00")
         )
+        PaymentVerificationSummary.objects.create(payment_plan=self.payment_plan_1)
+        PaymentVerificationSummary.objects.create(payment_plan=self.payment_plan_2)
+        PaymentVerificationSummary.objects.create(payment_plan=self.payment_plan_3)
+        PaymentVerificationSummary.objects.create(payment_plan=self.payment_plan_4)
         self.payment_plan_verification_1 = PaymentVerificationPlanFactory(
-            payment_plan_obj=self.payment_plan_1, completion_date="2020-01-01T14:30+00:00"
+            payment_plan=self.payment_plan_1, completion_date="2020-01-01T14:30+00:00"
         )
         self.payment_plan_verification_2 = PaymentVerificationPlanFactory(
-            payment_plan_obj=self.payment_plan_2, completion_date="2020-01-01T14:30+00:00"
+            payment_plan=self.payment_plan_2, completion_date="2020-01-01T14:30+00:00"
         )
-        record_1 = PaymentRecordFactory(
-            household=self.households[0],
-            business_area=self.business_area,
-            delivery_date="2020-01-01T00:00+00:00",
-            parent=self.cash_plan_1,
-            currency="PLN",
+        self.payment_plan_verification_3 = PaymentVerificationPlanFactory(
+            payment_plan=self.payment_plan_3, completion_date="2020-01-01T14:30+00:00"
         )
-        record_2 = PaymentRecordFactory(
-            household=self.households[1],
-            business_area=self.business_area,
-            delivery_date="2020-01-01T00:00+00:00",
-            parent=self.cash_plan_2,
-            currency="PLN",
+        self.payment_plan_verification_4 = PaymentVerificationPlanFactory(
+            payment_plan=self.payment_plan_4, completion_date="2020-01-01T14:30+00:00"
         )
         payment_1 = PaymentFactory(
             household=self.households[0],
             business_area=self.business_area,
-            delivery_date="2020-01-01T14:30+00:00",
+            delivery_date="2020-01-01T00:00+00:00",
             parent=self.payment_plan_1,
             currency="PLN",
         )
         payment_2 = PaymentFactory(
             household=self.households[1],
             business_area=self.business_area,
-            delivery_date="2020-01-01T14:30+00:00",
+            delivery_date="2020-01-01T00:00+00:00",
             parent=self.payment_plan_2,
             currency="PLN",
         )
-        PaymentVerificationFactory(
-            payment_verification_plan=self.cash_plan_verification_1,
-            payment_obj=record_1,
+        payment_3 = PaymentFactory(
+            household=self.households[0],
+            business_area=self.business_area,
+            delivery_date="2020-01-01T14:30+00:00",
+            parent=self.payment_plan_3,
+            currency="PLN",
         )
-        PaymentVerificationFactory(
-            payment_verification_plan=self.cash_plan_verification_2,
-            payment_obj=record_2,
+        payment_4 = PaymentFactory(
+            household=self.households[1],
+            business_area=self.business_area,
+            delivery_date="2020-01-01T14:30+00:00",
+            parent=self.payment_plan_4,
+            currency="PLN",
         )
         PaymentVerificationFactory(
             payment_verification_plan=self.payment_plan_verification_1,
-            payment_obj=payment_1,
+            payment=payment_1,
         )
         PaymentVerificationFactory(
             payment_verification_plan=self.payment_plan_verification_2,
-            payment_obj=payment_2,
+            payment=payment_2,
+        )
+        PaymentVerificationFactory(
+            payment_verification_plan=self.payment_plan_verification_1,
+            payment=payment_3,
+        )
+        PaymentVerificationFactory(
+            payment_verification_plan=self.payment_plan_verification_2,
+            payment=payment_4,
         )
 
     @parameterized.expand(
