@@ -74,11 +74,16 @@ RESIDENCE_STATUS_CHOICE = (
 # INDIVIDUALS
 MALE = "MALE"
 FEMALE = "FEMALE"
-UNKNOWN = "UNKNOWN"
+OTHER = "OTHER"
+NOT_COLLECTED = "NOT_COLLECTED"
+NOT_ANSWERED = "NOT_ANSWERED"
 
 SEX_CHOICE = (
     (MALE, _("Male")),
     (FEMALE, _("Female")),
+    (OTHER, _("Other")),
+    (NOT_COLLECTED, _("Not collected")),
+    (NOT_ANSWERED, _("Not answered")),
 )
 
 SINGLE = "SINGLE"

@@ -2618,6 +2618,9 @@ enum IndividualRoleInHouseholdRole {
 enum IndividualSex {
   MALE
   FEMALE
+  OTHER
+  NOT_COLLECTED
+  NOT_ANSWERED
 }
 
 input IndividualUpdateDataObjectType {

@@ -35,6 +35,7 @@ from hct_mis_api.apps.household.models import (
     HEAD,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_NATIONAL_ID,
+    NOT_ANSWERED,
     ROLE_PRIMARY,
     SINGLE,
     BankAccountInfo,
@@ -264,7 +265,7 @@ class TestCloseDataChangeTickets(APITestCase):
                 "full_name": {"value": "Test Example", "approve_status": True},
                 "family_name": {"value": "Example", "approve_status": True},
                 "phone_no_alternative": {"value": "+48602203689", "approve_status": True},
-                "sex": {"value": "MALE", "approve_status": False},
+                "sex": {"value": "NOT_ANSWERED", "approve_status": True},
                 "birth_date": {"value": date(year=1980, month=2, day=1).isoformat(), "approve_status": False},
                 "marital_status": {"value": SINGLE, "approve_status": True},
                 "role": {"value": ROLE_PRIMARY, "approve_status": True},
@@ -405,6 +406,7 @@ class TestCloseDataChangeTickets(APITestCase):
             self.assertEqual(individual.phone_no_alternative, "+48602203689")
             self.assertEqual(individual.phone_no_alternative_valid, True)
             self.assertEqual(individual.marital_status, SINGLE)
+            self.assertEqual(individual.sex, NOT_ANSWERED)
             self.assertNotEqual(individual.birth_date, date(year=1980, month=2, day=1))
 
             role = individual.households_and_roles.get(role=ROLE_PRIMARY, individual=individual)

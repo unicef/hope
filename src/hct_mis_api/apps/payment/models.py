@@ -848,6 +848,7 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
             female_children_count=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=FEMALE)),
             male_adults_count=Count("id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=MALE)),
             female_adults_count=Count("id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=FEMALE)),
+            total_individuals_count=Count("id", distinct=True),
         )
 
         self.female_children_count = targeted_individuals.get("female_children_count", 0)
@@ -855,9 +856,7 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
         self.female_adults_count = targeted_individuals.get("female_adults_count", 0)
         self.male_adults_count = targeted_individuals.get("male_adults_count", 0)
         self.total_households_count = households_ids.count()
-        self.total_individuals_count = (
-            self.female_children_count + self.male_children_count + self.female_adults_count + self.male_adults_count
-        )
+        self.total_individuals_count = targeted_individuals.get("total_individuals_count", 0)
 
         self.save(
             update_fields=[
@@ -1942,7 +1941,7 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
     rapid_pro_flow_start_uuids = ArrayField(models.CharField(max_length=255, blank=True), default=list)
     age_filter = JSONField(null=True, blank=True)
     excluded_admin_areas_filter = JSONField(null=True, blank=True)
-    sex_filter = models.CharField(null=True, max_length=10, blank=True)
+    sex_filter = models.CharField(null=True, max_length=255, blank=True)
     activation_date = models.DateTimeField(null=True)
     completion_date = models.DateTimeField(null=True)
     xlsx_file_exporting = models.BooleanField(default=False)
