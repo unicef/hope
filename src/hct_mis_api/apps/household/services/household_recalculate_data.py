@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Tuple
+from typing import List, Tuple
 
 from django.db import transaction
 from django.db.models import Count, Q
@@ -24,9 +24,6 @@ RECALCULATION_INDIVIDUAL_FIELDS = {
     "birth_date",
     "pregnant",
 }
-
-
-
 
 
 @transaction.atomic

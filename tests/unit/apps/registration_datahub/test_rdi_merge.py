@@ -28,7 +28,6 @@ from hct_mis_api.apps.household.fixtures import (
 )
 from hct_mis_api.apps.household.models import (
     BROTHER_SISTER,
-    COLLECT_TYPE_FULL,
     COUSIN,
     HEAD,
     NON_BENEFICIARY,

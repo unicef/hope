@@ -29,10 +29,6 @@ from hct_mis_api.apps.core.models import (
 from hct_mis_api.apps.core.utils import SheetImageLoader, timezone_datetime
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.models import (
-    COLLECT_TYPE_FULL,
-    COLLECT_TYPE_NONE,
-    COLLECT_TYPE_PARTIAL,
-    COLLECT_TYPE_UNKNOWN,
     HEAD,
     NON_BENEFICIARY,
     ROLE_ALTERNATE,

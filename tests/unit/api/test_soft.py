@@ -10,7 +10,6 @@ from rest_framework import status
 from hct_mis_api.api.models import Grant
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.models import (
-    COLLECT_TYPE_FULL,
     HEAD,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     NON_BENEFICIARY,
@@ -69,7 +68,6 @@ class PushLaxToRDITests(HOPEApiTestCase):
                 "residence_status": "",
                 "village": "village1",
                 "country": "AF",
-                "collect_individual_data": COLLECT_TYPE_FULL,
                 "members": [
                     {
                         "relationship": HEAD,
@@ -100,7 +98,6 @@ class PushLaxToRDITests(HOPEApiTestCase):
                 "residence_status": "",
                 "village": "village2",
                 "country": "AF",
-                "collect_individual_data": COLLECT_TYPE_FULL,
                 "members": [
                     {
                         "relationship": HEAD,
@@ -123,7 +120,6 @@ class PushLaxToRDITests(HOPEApiTestCase):
                 "residence_status": "IDP",
                 "village": "village3",
                 "country": "AF",
-                "collect_individual_data": COLLECT_TYPE_FULL,
                 "size": 1,
                 "members": [
                     {
@@ -166,7 +162,6 @@ class PushLaxToRDITests(HOPEApiTestCase):
                 "residence_status": "",
                 "village": "village4",
                 "country": "AF",
-                "collect_individual_data": COLLECT_TYPE_FULL,
                 "size": 1,
                 "members": [
                     {
@@ -197,7 +192,6 @@ class PushLaxToRDITests(HOPEApiTestCase):
                 "residence_status": "",
                 "village": "village5",
                 "country": "AF",
-                "collect_individual_data": COLLECT_TYPE_FULL,
                 "size": 1,
                 "members": [
                     {
@@ -228,7 +222,6 @@ class PushLaxToRDITests(HOPEApiTestCase):
                 "residence_status": "",
                 "village": "village6",
                 "country": "AF",
-                "collect_individual_data": COLLECT_TYPE_FULL,
                 "size": 1,
                 "members": [
                     {

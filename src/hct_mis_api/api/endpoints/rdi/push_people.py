@@ -49,8 +49,6 @@ class PushPeopleSerializer(serializers.ModelSerializer):
 
     country_origin = serializers.ChoiceField(choices=Countries(), required=False)
     country = serializers.ChoiceField(choices=Countries())
-    # TODO - 221086 what should I do here?
-    # collect_individual_data = serializers.ChoiceField(choices=COLLECT_TYPES)
     residence_status = serializers.ChoiceField(choices=RESIDENCE_STATUS_CHOICE)
     village = serializers.CharField(allow_blank=True, allow_null=True, required=False)
 
