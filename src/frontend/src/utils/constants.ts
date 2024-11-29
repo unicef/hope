@@ -284,22 +284,38 @@ export const SurveyTabsValues = {
   A_2: 'Partial',
 };
 
-export const householdTableOrderOptions = [
-  { name: 'Household Id: ascending', value: 'unicef_id' },
-  { name: 'Household Id: descending', value: '-unicef_id' },
+interface BeneficiaryGroup {
+  id: string;
+  name: string;
+  groupLabel: string;
+  groupLabelPlural: string;
+  memberLabel: string;
+  memberLabelPlural: string;
+  masterDetail: boolean;
+}
+
+export const generateTableOrderOptionsGroup = (
+  beneficiaryGroup: BeneficiaryGroup,
+) => [
+  { name: `${beneficiaryGroup.groupLabel}: ascending`, value: 'unicef_id' },
+  { name: `${beneficiaryGroup.groupLabel}: descending`, value: '-unicef_id' },
   { name: 'Status: ascending', value: 'status_label' },
   { name: 'Status: descending', value: '-status_label' },
-  { name: 'Household Size: ascending', value: 'size' },
-  { name: 'Household Size: descending', value: '-size' },
+  { name: `${beneficiaryGroup.groupLabel} Size: ascending`, value: 'size' },
+  { name: `${beneficiaryGroup.groupLabel} Size: descending`, value: '-size' },
   { name: 'Registration Date: ascending', value: 'last_registration_date' },
   { name: 'Registration Date: descending', value: '-last_registration_date' },
 ];
 
-export const individualTableOrderOptions = [
-  { name: 'Individual Id: ascending', value: 'unicef_id' },
-  { name: 'Individual Id: descending', value: '-unicef_id' },
-  { name: 'Individual: ascending', value: 'full_name' },
-  { name: 'Individual: descending', value: '-full_name' },
-  { name: 'Gender: ascending', value: 'sex' },
-  { name: 'Gender: descending', value: '-sex' },
+export const generateTableOrderOptionsMember = (
+  beneficiaryGroup: BeneficiaryGroup,
+) => [
+  { name: `${beneficiaryGroup.memberLabel}: ascending`, value: 'unicef_id' },
+  { name: `${beneficiaryGroup.memberLabel}: descending`, value: '-unicef_id' },
+  { name: 'Status: ascending', value: 'status_label' },
+  { name: 'Status: descending', value: '-status_label' },
+  { name: `${beneficiaryGroup.groupLabel} Size: ascending`, value: 'size' },
+  { name: `${beneficiaryGroup.groupLabel} Size: descending`, value: '-size' },
+  { name: 'Registration Date: ascending', value: 'last_registration_date' },
+  { name: 'Registration Date: descending', value: '-last_registration_date' },
 ];

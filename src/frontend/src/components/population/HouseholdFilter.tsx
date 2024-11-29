@@ -7,7 +7,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { HouseholdChoiceDataQuery, ProgramNode } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomplete';
-import { householdTableOrderOptions } from '@utils/constants';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { FiltersSection } from '@core/FiltersSection';
 import { NumberTextField } from '@core/NumberTextField';
@@ -16,6 +15,7 @@ import { SelectFilter } from '@core/SelectFilter';
 import { DocumentSearchField } from '@core/DocumentSearchField';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
+import { generateTableOrderOptionsGroup } from '@utils/constants';
 
 interface HouseholdFiltersProps {
   filter;
@@ -61,6 +61,9 @@ export function HouseholdFilters({
   const handleClearFilter = (): void => {
     clearFilter();
   };
+
+  const householdTableOrderOptions =
+    generateTableOrderOptionsGroup(beneficiaryGroup);
 
   return (
     <FiltersSection

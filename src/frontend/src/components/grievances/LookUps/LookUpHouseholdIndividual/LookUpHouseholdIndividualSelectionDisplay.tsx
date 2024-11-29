@@ -1,6 +1,5 @@
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Box, Grid } from '@mui/material';
-import { t } from 'i18next';
 import * as React from 'react';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
@@ -55,7 +54,7 @@ export const LookUpHouseholdIndividualSelectionDisplay = ({
             <Grid container alignItems="center" justifyContent="space-between">
               <Grid item>
                 <Box display="flex">
-                  {t('Household ID')}:
+                  {`${beneficiaryGroup?.groupLabel} ID`}:
                   <BlueText>
                     &ensp;
                     {selectedHousehold?.unicefId || '-'}

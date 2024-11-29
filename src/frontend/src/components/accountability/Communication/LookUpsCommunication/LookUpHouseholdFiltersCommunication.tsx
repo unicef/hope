@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { HouseholdChoiceDataQuery } from '@generated/graphql';
 import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomplete';
-import { householdTableOrderOptions } from '@utils/constants';
+import { generateTableOrderOptionsGroup } from '@utils/constants';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { FiltersSection } from '@core/FiltersSection';
 import { NumberTextField } from '@core/NumberTextField';
@@ -55,6 +55,9 @@ export function LookUpHouseholdFiltersCommunication({
   const handleClearFilter = (): void => {
     clearFilter();
   };
+
+  const householdTableOrderOptions =
+    generateTableOrderOptionsGroup(beneficiaryGroup);
 
   return (
     <FiltersSection
