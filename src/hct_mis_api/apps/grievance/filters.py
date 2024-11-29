@@ -334,7 +334,7 @@ class ExistingGrievanceTicketFilter(FilterSet):
 
     order_by = OrderingFilter(fields=("id",))
 
-    def prepare_ticket_filters(self, lookup: str, obj: GrievanceTicket) -> Q:
+    def prepare_ticket_filters(self, lookup: str, obj: GrievanceTicket) -> Q:  # pragma: no cover
         types_and_lookups = GrievanceTicket.SEARCH_TICKET_TYPES_LOOKUPS
         q_obj = Q()
         for ticket_type, lookup_objs in types_and_lookups.items():

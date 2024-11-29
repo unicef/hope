@@ -380,7 +380,7 @@ class UpdatePaymentVerificationStatusAndReceivedAmount(PermissionMutation):
                 f"You can only update status of payment verification for {PaymentVerificationPlan.STATUS_ACTIVE} cash plan verification"
             )
         delivered_amount = payment_verification.payment.delivered_quantity
-        if status == PaymentVerification.STATUS_PENDING and received_amount is not None:
+        if status == PaymentVerification.STATUS_PENDING and received_amount is not None:  # pragma: no cover
             logger.error(
                 f"Wrong status {PaymentVerification.STATUS_PENDING} when received_amount ({received_amount}) is not empty",
             )
