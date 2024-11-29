@@ -1,7 +1,6 @@
 import { useRoutes } from 'react-router-dom';
 import { ActivityLogPage } from '../pages/core/MainActivityLogPage';
 import { UsersPage } from '../pages/core/UsersPage';
-import { PaymentRecordDetailsPage } from '../pages/payments/PaymentRecordDetailsPage';
 import { ReportingDetailsPage } from '../pages/reporting/ReportingDetailsPage';
 import { ReportingPage } from '../pages/reporting/ReportingPage';
 import { GrievanceRoutes } from './GrievanceRoutes';
@@ -20,10 +19,6 @@ export const SelectedProgramRoutesSwitch = (): ReactElement => {
     {
       path: 'country-dashboard',
       element: <NewDashboardPage />,
-    },
-    {
-      path: 'payment-records/:id',
-      element: <PaymentRecordDetailsPage />,
     },
     {
       path: 'reporting/:id',

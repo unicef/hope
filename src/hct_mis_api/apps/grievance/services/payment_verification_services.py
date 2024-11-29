@@ -23,8 +23,8 @@ def update_payment_verification_service(
     if payment_verification_details.new_status == PaymentVerification.STATUS_NOT_RECEIVED:
         status = payment_verification_details.new_status
     elif (
-        payment_verification.payment_obj
-        and payment_verification_details.new_received_amount == payment_verification.payment_obj.delivered_quantity
+        payment_verification.payment
+        and payment_verification_details.new_received_amount == payment_verification.payment.delivered_quantity
     ):
         status = PaymentVerification.STATUS_RECEIVED
     else:

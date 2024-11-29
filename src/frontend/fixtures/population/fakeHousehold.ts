@@ -165,57 +165,6 @@ export const fakeHousehold = {
     },
     __typename: 'RegistrationDataImportNode',
   },
-  paymentrecordSet: {
-    edges: [
-      {
-        node: {
-          id:
-            'UGF5bWVudFJlY29yZE5vZGU6YThhNzdkZTEtNWYxZi00MzBjLWJlOGMtODVhNzkzNjJiMzZm',
-          fullName: 'Arthur Fletcher',
-          parent: {
-            id:
-              'Q2FzaFBsYW5Ob2RlOmQzMDI1MDRhLWQzZjMtNGE2MC05Nzg5LTBhNGVjMGI0N2M4Mw==',
-            totalPersonsCovered: 3,
-            program: {
-              id:
-                'UHJvZ3JhbU5vZGU6MDAwMDAwMDAtMDAwMC0wMDAwLTAwMDAtZmFjZWIwMGMwMDAw',
-              name: 'Test Program',
-              __typename: 'ProgramNode',
-            },
-            totalDeliveredQuantity: 49412110.25,
-            assistanceMeasurement: 'Falkland Islands pound',
-            __typename: 'CashPlanNode',
-          },
-          __typename: 'PaymentRecordNode',
-        },
-        __typename: 'PaymentRecordNodeEdge',
-      },
-      {
-        node: {
-          id:
-            'UGF5bWVudFJlY29yZE5vZGU6Y2JkMjU1MjctNTIwNS00Mjk5LWFiYmYtYTZjYTgzNzEyYjk1',
-          fullName: 'Ashley Reid',
-          parent: {
-            id:
-              'Q2FzaFBsYW5Ob2RlOjMwMTY0M2ZjLTQwMGItNGY5MS1iZDg1LTFiNTAyZTMxZmMzMg==',
-            totalPersonsCovered: 2,
-            program: {
-              id:
-                'UHJvZ3JhbU5vZGU6MDAwMDAwMDAtMDAwMC0wMDAwLTAwMDAtZmFjZWIwMGMwMDAw',
-              name: 'Test Program',
-              __typename: 'ProgramNode',
-            },
-            totalDeliveredQuantity: 75446491.46,
-            assistanceMeasurement: 'Norwegian krone',
-            __typename: 'CashPlanNode',
-          },
-          __typename: 'PaymentRecordNode',
-        },
-        __typename: 'PaymentRecordNodeEdge',
-      },
-    ],
-    __typename: 'PaymentRecordNodeConnection',
-  },
   deliveredQuantities: [
     {
       totalDeliveredQuantity: '5755.00',

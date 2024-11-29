@@ -121,7 +121,7 @@ class HouseholdWithdrawFromListMixin:
         households.update(
             withdrawn=True,
             withdrawn_date=timezone.now(),
-            user_fields=JSONBSet(F("user_fields"), Value("{withdrawn_tag}"), Value(f'"{tag}"')),
+            internal_data=JSONBSet(F("internal_data"), Value("{withdrawn_tag}"), Value(f'"{tag}"')),
         )
 
     @staticmethod
