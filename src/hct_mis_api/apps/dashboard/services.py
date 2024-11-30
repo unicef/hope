@@ -90,7 +90,7 @@ class DashboardDataCache:
                     sectors=Coalesce(F("household__program__sector"), Value("Unknown sector")),
                     admin1=Coalesce(F("household__admin1__name"), Value("Unknown admin1")),
                     fsp=Coalesce(F("financial_service_provider__name"), Value("Unknown fsp")),
-                    delivery_types=Coalesce(F("delivery_type__name"), F("delivery_type_choice")),
+                    delivery_types=F("delivery_type__name"),
                 )
                 .distinct()
                 .values(
@@ -134,7 +134,7 @@ class DashboardDataCache:
                     sectors=Coalesce(F("household__program__sector"), Value("Unknown sector")),
                     admin1=Coalesce(F("household__admin1__name"), Value("Unknown admin1")),
                     fsp=Coalesce(F("service_provider__short_name"), Value("Unknown fsp")),
-                    delivery_types=Coalesce(F("delivery_type__name"), F("delivery_type_choice")),
+                    delivery_types=F("delivery_type__name"),
                 )
                 .distinct()
                 .values(

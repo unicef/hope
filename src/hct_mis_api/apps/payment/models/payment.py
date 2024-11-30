@@ -11,13 +11,9 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Un
 
 from django import forms
 from django.conf import settings
-from django.contrib.admin.options import get_content_type_for_model
 from django.contrib.admin.widgets import FilteredSelectMultiple
-from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
-from django.contrib.contenttypes.models import ContentType
-from django.contrib.postgres.fields import ArrayField, IntegerRangeField
-from django.contrib.postgres.validators import RangeMinValueValidator
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.contrib.postgres.fields import ArrayField
+from django.core.exceptions import ValidationError
 from django.core.validators import (
     MaxLengthValidator,
     MaxValueValidator,
@@ -26,31 +22,19 @@ from django.core.validators import (
     ProhibitNullCharactersValidator,
 )
 from django.db import models
-from django.db.models import (
-    Count,
-    JSONField,
-    Q,
-    QuerySet,
-    Sum,
-    UniqueConstraint,
-    UUIDField,
-)
+from django.db.models import Count, JSONField, Q, QuerySet, Sum, UniqueConstraint
 from django.db.models.functions import Coalesce
-from django.db.models.signals import post_delete, post_save
-from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.text import Truncator
 from django.utils.translation import gettext_lazy as _
 
 from dateutil.relativedelta import relativedelta
 from django_fsm import FSMField, transition
-from graphql import GraphQLError
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel
 from multiselectfield import MultiSelectField
 from psycopg2._range import NumericRange
 
-from hct_mis_api.apps.account.models import HorizontalChoiceArrayField
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES, USDC
 from hct_mis_api.apps.core.exchange_rates import ExchangeRates
@@ -67,16 +51,10 @@ from hct_mis_api.apps.core.field_attributes.fields_types import (
     Scope,
 )
 from hct_mis_api.apps.core.mixins import LimitBusinessAreaModelMixin
-from hct_mis_api.apps.core.models import (
-    BusinessArea,
-    FileTemp,
-    FlexibleAttribute,
-    StorageFile,
-)
+from hct_mis_api.apps.core.models import FileTemp, FlexibleAttribute, StorageFile
 from hct_mis_api.apps.core.utils import map_unicef_ids_to_households_unicef_ids
 from hct_mis_api.apps.geo.models import Area, Country
 from hct_mis_api.apps.household.models import FEMALE, MALE, Individual
-from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.fields import DynamicChoiceArrayField
 from hct_mis_api.apps.payment.managers import PaymentManager
 from hct_mis_api.apps.payment.validators import payment_token_and_order_number_validator
@@ -98,10 +76,16 @@ from hct_mis_api.apps.utils.validators import (
 )
 
 if TYPE_CHECKING:
-    from hct_mis_api.apps.account.models import User
-    from hct_mis_api.apps.core.exchange_rates.api import ExchangeRateClient
-    from hct_mis_api.apps.grievance.models import GrievanceTicket
-    from hct_mis_api.apps.program.models import Program
+    from hct_mis_api.apps.account.models import User  # pragma: no cover
+    from hct_mis_api.apps.core.exchange_rates.api import (
+        ExchangeRateClient,  # pragma: no cover
+    )
+    from hct_mis_api.apps.grievance.models import GrievanceTicket  # pragma: no cover
+    from hct_mis_api.apps.payment.models import (  # pragma: no cover
+        AcceptanceProcessThreshold,
+        PaymentVerificationPlan,
+    )
+    from hct_mis_api.apps.program.models import Program  # pragma: no cover
 
 logger = logging.getLogger(__name__)
 
@@ -110,291 +94,6 @@ logger = logging.getLogger(__name__)
 class ModifiedData:
     modified_date: datetime
     modified_by: Optional["User"] = None
-
-
-class ChoiceArrayFieldDM(ArrayField):
-    def formfield(self, form_class: Optional[Any] = ..., choices_form_class: Optional[Any] = ..., **kwargs: Any) -> Any:
-        defaults = {
-            "form_class": forms.TypedMultipleChoiceField,
-            "choices": self.base_field.choices,
-            "coerce": self.base_field.to_python,
-            "widget": forms.SelectMultiple,
-        }
-        defaults.update(kwargs)
-
-        return super().formfield(**defaults)
-
-
-class GenericPaymentPlan(TimeStampedUUIDModel):
-    usd_fields = [
-        "total_entitled_quantity_usd",
-        "total_entitled_quantity_revised_usd",
-        "total_delivered_quantity_usd",
-        "total_undelivered_quantity_usd",
-    ]
-
-    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
-    status_date = models.DateTimeField()
-    start_date = models.DateTimeField(
-        db_index=True,
-        blank=True,
-        null=True,
-    )
-    end_date = models.DateTimeField(
-        db_index=True,
-        blank=True,
-        null=True,
-    )
-    program = models.ForeignKey("program.Program", on_delete=models.CASCADE)
-    exchange_rate = models.DecimalField(decimal_places=8, blank=True, null=True, max_digits=14)
-
-    total_entitled_quantity = models.DecimalField(
-        decimal_places=2,
-        max_digits=12,
-        validators=[MinValueValidator(Decimal("0"))],
-        db_index=True,
-        null=True,
-    )
-    total_entitled_quantity_usd = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0"))], null=True, blank=True
-    )
-    total_entitled_quantity_revised = models.DecimalField(
-        decimal_places=2,
-        max_digits=12,
-        validators=[MinValueValidator(Decimal("0"))],
-        db_index=True,
-        null=True,
-        blank=True,
-    )
-    total_entitled_quantity_revised_usd = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0"))], null=True, blank=True
-    )
-    total_delivered_quantity = models.DecimalField(
-        decimal_places=2,
-        max_digits=12,
-        validators=[MinValueValidator(Decimal("0"))],
-        db_index=True,
-        null=True,
-        blank=True,
-    )
-    total_delivered_quantity_usd = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0"))], null=True, blank=True
-    )
-    total_undelivered_quantity = models.DecimalField(
-        decimal_places=2,
-        max_digits=12,
-        validators=[MinValueValidator(Decimal("0"))],
-        db_index=True,
-        null=True,
-        blank=True,
-    )
-    total_undelivered_quantity_usd = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0"))], null=True, blank=True
-    )
-
-    class Meta:
-        abstract = True
-
-    @property
-    def get_unicef_id(self) -> str:
-        # TODO: maybe 'ca_id' rename to 'unicef_id'?
-        return self.ca_id if isinstance(self, CashPlan) else self.unicef_id
-
-    def get_exchange_rate(self, exchange_rates_client: Optional["ExchangeRateClient"] = None) -> float:
-        if self.currency == USDC:
-            # TODO: is it good place for that?
-            # exchange rate for Digital currency
-            return 1.0
-
-        if exchange_rates_client is None:
-            exchange_rates_client = ExchangeRates()
-
-        return exchange_rates_client.get_exchange_rate_for_currency_code(self.currency, self.currency_exchange_date)
-
-    @property
-    def get_payment_verification_summary(self) -> Optional["PaymentVerificationSummary"]:
-        """PaymentPlan has only one payment_verification_summary"""
-        c_type = ContentType.objects.get_for_model(self.__class__)
-        try:
-            verification_summary = PaymentVerificationSummary.objects.get(
-                payment_plan_content_type_id=c_type.pk, payment_plan_object_id=self.pk
-            )
-        except PaymentVerificationSummary.DoesNotExist:
-            return None
-        return verification_summary
-
-    @property
-    def get_payment_verification_plans(self) -> QuerySet["PaymentVerificationPlan"]:
-        c_type = ContentType.objects.get_for_model(self.__class__)
-        payment_verification_plans = PaymentVerificationPlan.objects.filter(
-            payment_plan_content_type_id=c_type.pk, payment_plan_object_id=self.pk
-        )
-        return payment_verification_plans
-
-    def available_payment_records(
-        self,
-        payment_verification_plan: Optional["PaymentVerificationPlan"] = None,
-        extra_validation: Optional[Callable] = None,
-    ) -> QuerySet:
-        params = Q(status__in=GenericPayment.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0)
-
-        if payment_verification_plan:
-            params &= Q(
-                Q(payment_verification__isnull=True)
-                | Q(payment_verification__payment_verification_plan=payment_verification_plan)
-            )
-        else:
-            params &= Q(payment_verification__isnull=True)
-
-        payment_records = self.payment_items.select_related("head_of_household").filter(params).distinct()
-
-        if extra_validation:
-            payment_records = list(map(lambda pr: pr.pk, filter(extra_validation, payment_records)))
-
-        qs = (PaymentRecord if self.__class__.__name__ == "CashPlan" else Payment).objects.filter(
-            pk__in=payment_records
-        )
-
-        return qs
-
-    @property
-    def can_create_payment_verification_plan(self) -> int:
-        return self.available_payment_records().count() > 0
-
-
-class GenericPayment(TimeStampedUUIDModel):
-    usd_fields = ["delivered_quantity_usd", "entitlement_quantity_usd"]
-
-    STATUS_SUCCESS = "Transaction Successful"
-    STATUS_ERROR = "Transaction Erroneous"
-    STATUS_DISTRIBUTION_SUCCESS = "Distribution Successful"
-    STATUS_NOT_DISTRIBUTED = "Not Distributed"
-    STATUS_FORCE_FAILED = "Force failed"
-    STATUS_DISTRIBUTION_PARTIAL = "Partially Distributed"
-    STATUS_PENDING = "Pending"
-    # Payment Gateway statuses
-    STATUS_SENT_TO_PG = "Sent to Payment Gateway"
-    STATUS_SENT_TO_FSP = "Sent to FSP"
-    STATUS_MANUALLY_CANCELLED = "Manually Cancelled"
-
-    STATUS_CHOICE = (
-        (STATUS_DISTRIBUTION_SUCCESS, _("Distribution Successful")),  # Delivered Fully
-        (STATUS_NOT_DISTRIBUTED, _("Not Distributed")),  # Not Delivered
-        (STATUS_SUCCESS, _("Transaction Successful")),  # Delivered Fully
-        (STATUS_ERROR, _("Transaction Erroneous")),  # Unsuccessful
-        (STATUS_FORCE_FAILED, _("Force failed")),  # Force Failed
-        (STATUS_DISTRIBUTION_PARTIAL, _("Partially Distributed")),  # Delivered Partially
-        (STATUS_PENDING, _("Pending")),  # Pending
-        (STATUS_SENT_TO_PG, _("Sent to Payment Gateway")),
-        (STATUS_SENT_TO_FSP, _("Sent to FSP")),
-        (STATUS_MANUALLY_CANCELLED, _("Manually Cancelled")),
-    )
-
-    ALLOW_CREATE_VERIFICATION = (STATUS_SUCCESS, STATUS_DISTRIBUTION_SUCCESS, STATUS_DISTRIBUTION_PARTIAL)
-    PENDING_STATUSES = (STATUS_PENDING, STATUS_SENT_TO_PG, STATUS_SENT_TO_FSP)
-
-    ENTITLEMENT_CARD_STATUS_ACTIVE = "ACTIVE"
-    ENTITLEMENT_CARD_STATUS_INACTIVE = "INACTIVE"
-    ENTITLEMENT_CARD_STATUS_CHOICE = Choices(
-        (ENTITLEMENT_CARD_STATUS_ACTIVE, _("Active")),
-        (ENTITLEMENT_CARD_STATUS_INACTIVE, _("Inactive")),
-    )
-
-    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
-    status = models.CharField(
-        max_length=255,
-        choices=STATUS_CHOICE,
-        default=STATUS_PENDING,
-    )
-    status_date = models.DateTimeField(null=True, blank=True)
-    household = models.ForeignKey("household.Household", on_delete=models.CASCADE)
-    head_of_household = models.ForeignKey("household.Individual", on_delete=models.CASCADE, null=True)
-    delivery_type_choice = models.CharField(
-        choices=DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES, max_length=32, null=True
-    )  # TODO MB drop later
-    delivery_type = models.ForeignKey("payment.DeliveryMechanism", on_delete=models.SET_NULL, null=True)
-    currency = models.CharField(
-        max_length=4,
-        null=True,
-        blank=True,
-    )
-    entitlement_quantity = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
-    )
-    entitlement_quantity_usd = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
-    )
-    delivered_quantity = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
-    )
-    delivered_quantity_usd = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
-    )
-    delivery_date = models.DateTimeField(null=True, blank=True)
-    transaction_reference_id = models.CharField(max_length=255, null=True, blank=True)  # transaction_id
-    transaction_status_blockchain_link = models.CharField(max_length=255, null=True, blank=True)
-
-    class Meta:
-        abstract = True
-
-    @property
-    def verification(self) -> Optional["PaymentVerification"]:
-        c_type = ContentType.objects.get_for_model(self.__class__)
-        try:
-            verification = PaymentVerification.objects.get(payment_content_type_id=c_type.pk, payment_object_id=self.pk)
-        except PaymentVerification.DoesNotExist:
-            return None
-        return verification
-
-    def get_revert_mark_as_failed_status(self, delivered_quantity: Decimal) -> str:
-        raise NotImplementedError()
-
-    def mark_as_failed(self) -> None:
-        if self.status is self.STATUS_FORCE_FAILED:
-            raise ValidationError("Status shouldn't be failed")
-        self.status = self.STATUS_FORCE_FAILED
-        self.status_date = timezone.now()
-        self.delivered_quantity = 0
-        self.delivered_quantity_usd = 0
-        self.delivery_date = None
-
-    def revert_mark_as_failed(self, delivered_quantity: Decimal, delivery_date: datetime) -> None:
-        if self.status != self.STATUS_FORCE_FAILED:
-            raise ValidationError("Only payment marked as force failed can be reverted")
-        if self.entitlement_quantity is None:
-            raise ValidationError("Entitlement quantity need to be set in order to revert")
-
-        self.status = self.get_revert_mark_as_failed_status(delivered_quantity)
-        self.status_date = timezone.now()
-        self.delivered_quantity = delivered_quantity
-        self.delivery_date = delivery_date
-
-    @property
-    def get_unicef_id(self) -> str:
-        return self.ca_id if isinstance(self, PaymentRecord) else self.unicef_id
-
-    @property
-    def payment_status(self) -> str:
-        status = "-"
-        if self.status == GenericPayment.STATUS_PENDING:
-            status = "Pending"
-
-        elif self.status in (GenericPayment.STATUS_DISTRIBUTION_SUCCESS, GenericPayment.STATUS_SUCCESS):
-            status = "Delivered Fully"
-
-        elif self.status == GenericPayment.STATUS_DISTRIBUTION_PARTIAL:
-            status = "Delivered Partially"
-
-        elif self.status == GenericPayment.STATUS_NOT_DISTRIBUTED:
-            status = "Not Delivered"
-
-        elif self.status == GenericPayment.STATUS_ERROR:
-            status = "Unsuccessful"
-
-        elif self.status == GenericPayment.STATUS_FORCE_FAILED:
-            status = "Force Failed"
-
-        return status
 
 
 class PaymentPlanSplitPayments(TimeStampedUUIDModel):
@@ -447,12 +146,12 @@ class PaymentPlanSplit(TimeStampedUUIDModel):
 
 
 class PaymentPlan(
+    TimeStampedUUIDModel,
+    InternalDataFieldModel,
     ConcurrencyModel,
     SoftDeletableModel,
-    GenericPaymentPlan,
     UnicefIdentifiedModel,
     AdminUrlMixin,
-    InternalDataFieldModel,
 ):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
@@ -572,9 +271,72 @@ class PaymentPlan(
         FINISH = "FINISH", "Finish"
         SEND_TO_PAYMENT_GATEWAY = "SEND_TO_PAYMENT_GATEWAY", "Send to Payment Gateway"
 
-    program_cycle = models.ForeignKey(
-        "program.ProgramCycle", related_name="payment_plans", null=True, blank=True, on_delete=models.CASCADE
+    usd_fields = [
+        "total_entitled_quantity_usd",
+        "total_entitled_quantity_revised_usd",
+        "total_delivered_quantity_usd",
+        "total_undelivered_quantity_usd",
+    ]
+
+    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
+    status_date = models.DateTimeField()
+    start_date = models.DateTimeField(
+        db_index=True,
+        blank=True,
+        null=True,
     )
+    end_date = models.DateTimeField(
+        db_index=True,
+        blank=True,
+        null=True,
+    )
+    exchange_rate = models.DecimalField(decimal_places=8, blank=True, null=True, max_digits=14)
+
+    total_entitled_quantity = models.DecimalField(
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0"))],
+        db_index=True,
+        null=True,
+    )
+    total_entitled_quantity_usd = models.DecimalField(
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0"))], null=True, blank=True
+    )
+    total_entitled_quantity_revised = models.DecimalField(
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0"))],
+        db_index=True,
+        null=True,
+        blank=True,
+    )
+    total_entitled_quantity_revised_usd = models.DecimalField(
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0"))], null=True, blank=True
+    )
+    total_delivered_quantity = models.DecimalField(
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0"))],
+        db_index=True,
+        null=True,
+        blank=True,
+    )
+    total_delivered_quantity_usd = models.DecimalField(
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0"))], null=True, blank=True
+    )
+    total_undelivered_quantity = models.DecimalField(
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0"))],
+        db_index=True,
+        null=True,
+        blank=True,
+    )
+    total_undelivered_quantity_usd = models.DecimalField(
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0"))], null=True, blank=True
+    )
+
+    program_cycle = models.ForeignKey("program.ProgramCycle", related_name="payment_plans", on_delete=models.CASCADE)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
@@ -645,18 +407,7 @@ class PaymentPlan(
         blank=True,
     )
     steficon_targeting_applied_date = models.DateTimeField(blank=True, null=True)
-    payment_verification_summary = GenericRelation(
-        "payment.PaymentVerificationSummary",
-        content_type_field="payment_plan_content_type",
-        object_id_field="payment_plan_object_id",
-        related_query_name="payment_plan",
-    )
-    payment_verification_plan = GenericRelation(
-        "payment.PaymentVerificationPlan",
-        content_type_field="payment_plan_content_type",
-        object_id_field="payment_plan_object_id",
-        related_query_name="payment_plan",
-    )
+
     source_payment_plan = models.ForeignKey(
         "self", null=True, blank=True, on_delete=models.CASCADE, related_name="follow_ups"
     )
@@ -692,6 +443,7 @@ class PaymentPlan(
         blank=True,
     )
     storage_file = models.OneToOneField(StorageFile, blank=True, null=True, on_delete=models.SET_NULL)
+    is_cash_assist = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = "Payment Plan"
@@ -995,12 +747,12 @@ class PaymentPlan(
         target=Status.FINISHED,
     )
     def status_finished(self) -> None:
+        from hct_mis_api.apps.payment.models import PaymentVerificationSummary
+
         self.status_date = timezone.now()
 
-        if not self.payment_verification_summary.exists():
-            PaymentVerificationSummary.objects.create(
-                payment_plan_obj=self,
-            )
+        if not hasattr(self, "payment_verification_summary"):
+            PaymentVerificationSummary.objects.create(payment_plan=self)
 
     @transition(
         field=status,
@@ -1138,12 +890,11 @@ class PaymentPlan(
 
     @property
     def is_reconciled(self) -> bool:
-        # TODO what in case of active grievance tickets?
         if not self.eligible_payments.exists():
             return False
 
         return (
-            self.eligible_payments.exclude(status__in=GenericPayment.PENDING_STATUSES).count()
+            self.eligible_payments.exclude(status__in=Payment.PENDING_STATUSES).count()
             == self.eligible_payments.count()
         )
 
@@ -1221,7 +972,7 @@ class PaymentPlan(
             status__in=[
                 Payment.STATUS_ERROR,  # delivered_quantity < 0 (-1)
                 Payment.STATUS_NOT_DISTRIBUTED,  # delivered_quantity == 0
-                Payment.STATUS_FORCE_FAILED,  # TODO remove force failed?
+                Payment.STATUS_FORCE_FAILED,
             ]
         )
 
@@ -1252,11 +1003,12 @@ class PaymentPlan(
         return Payment.objects.filter(parent__source_payment_plan_id=self.id, excluded=False)
 
     @property
-    def get_program(self) -> "Program":
-        # TODO will update after add feature with 'program_cycle' and migrate all data
-        return self.program_cycle.program if self.program_cycle else self.program
+    def program(self) -> "Program":
+        return self.program_cycle.program
 
     def _get_last_approval_process_data(self) -> ModifiedData:
+        from hct_mis_api.apps.payment.models import Approval
+
         approval_process = hasattr(self, "approval_process") and self.approval_process.first()
         if approval_process:
             if self.status == PaymentPlan.Status.IN_APPROVAL:
@@ -1309,6 +1061,45 @@ class PaymentPlan(
                     financial_service_provider__payment_gateway_id__isnull=False,
                 ).exists()
             )
+
+    # from generic pp
+    def get_exchange_rate(self, exchange_rates_client: Optional["ExchangeRateClient"] = None) -> float:
+        if self.currency == USDC:
+            # exchange rate for Digital currency USDC to USD
+            return 1.0
+
+        if exchange_rates_client is None:
+            exchange_rates_client = ExchangeRates()
+
+        return exchange_rates_client.get_exchange_rate_for_currency_code(self.currency, self.currency_exchange_date)
+
+    def available_payment_records(
+        self,
+        payment_verification_plan: Optional["PaymentVerificationPlan"] = None,
+        extra_validation: Optional[Callable] = None,
+    ) -> QuerySet:
+        params = Q(status__in=Payment.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0)
+
+        if payment_verification_plan:
+            params &= Q(
+                Q(payment_verification__isnull=True)
+                | Q(payment_verification__payment_verification_plan=payment_verification_plan)
+            )
+        else:
+            params &= Q(payment_verification__isnull=True)
+
+        payment_records = self.payment_items.select_related("head_of_household").filter(params).distinct()
+
+        if extra_validation:
+            payment_records = list(map(lambda pr: pr.pk, filter(extra_validation, payment_records)))
+
+        qs = Payment.objects.filter(pk__in=payment_records)
+
+        return qs
+
+    @property
+    def can_create_payment_verification_plan(self) -> int:
+        return self.available_payment_records().count() > 0
 
 
 class FlexFieldArrayField(ArrayField):
@@ -1593,11 +1384,13 @@ class FspXlsxTemplatePerDeliveryMechanism(TimeStampedUUIDModel):
         verbose_name=_("Created by"),
     )
     financial_service_provider = models.ForeignKey(
-        "FinancialServiceProvider", on_delete=models.CASCADE, related_name="fsp_xlsx_template_per_delivery_mechanisms"
+        "payment.FinancialServiceProvider",
+        on_delete=models.CASCADE,
+        related_name="fsp_xlsx_template_per_delivery_mechanisms",
     )
     delivery_mechanism = models.ForeignKey("DeliveryMechanism", on_delete=models.SET_NULL, null=True)
     xlsx_template = models.ForeignKey(
-        "FinancialServiceProviderXlsxTemplate",
+        "payment.FinancialServiceProviderXlsxTemplate",
         on_delete=models.CASCADE,
         related_name="fsp_xlsx_template_per_delivery_mechanisms",
     )
@@ -1609,7 +1402,7 @@ class FspXlsxTemplatePerDeliveryMechanism(TimeStampedUUIDModel):
         return f"{self.financial_service_provider.name} - {self.xlsx_template} - {self.delivery_mechanism}"  # pragma: no cover
 
 
-class FinancialServiceProvider(LimitBusinessAreaModelMixin, TimeStampedUUIDModel):
+class FinancialServiceProvider(InternalDataFieldModel, LimitBusinessAreaModelMixin, TimeStampedUUIDModel):
     COMMUNICATION_CHANNEL_API = "API"
     COMMUNICATION_CHANNEL_SFTP = "SFTP"
     COMMUNICATION_CHANNEL_XLSX = "XLSX"
@@ -1629,9 +1422,6 @@ class FinancialServiceProvider(LimitBusinessAreaModelMixin, TimeStampedUUIDModel
     )
     name = models.CharField(max_length=100, unique=True)
     vision_vendor_number = models.CharField(max_length=100, unique=True)
-    delivery_mechanisms_choices = HorizontalChoiceArrayField(
-        models.CharField(choices=DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES, max_length=32), null=True
-    )  # TODO MB drop later
     delivery_mechanisms = models.ManyToManyField("payment.DeliveryMechanism")
     distribution_limit = models.DecimalField(
         decimal_places=2,
@@ -1761,110 +1551,44 @@ class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
         self.sent_by = sent_by
 
 
-class CashPlan(ConcurrencyModel, AdminUrlMixin, GenericPaymentPlan):
-    DISTRIBUTION_COMPLETED = "Distribution Completed"
-    DISTRIBUTION_COMPLETED_WITH_ERRORS = "Distribution Completed with Errors"
-    TRANSACTION_COMPLETED = "Transaction Completed"
-    TRANSACTION_COMPLETED_WITH_ERRORS = "Transaction Completed with Errors"
+class Payment(
+    TimeStampedUUIDModel,
+    InternalDataFieldModel,
+    SoftDeletableModel,
+    UnicefIdentifiedModel,
+    AdminUrlMixin,
+    SignatureMixin,
+):
+    usd_fields = ["delivered_quantity_usd", "entitlement_quantity_usd"]
+
+    STATUS_SUCCESS = "Transaction Successful"
+    STATUS_ERROR = "Transaction Erroneous"
+    STATUS_DISTRIBUTION_SUCCESS = "Distribution Successful"
+    STATUS_NOT_DISTRIBUTED = "Not Distributed"
+    STATUS_FORCE_FAILED = "Force failed"
+    STATUS_DISTRIBUTION_PARTIAL = "Partially Distributed"
+    STATUS_PENDING = "Pending"
+    # Payment Gateway statuses
+    STATUS_SENT_TO_PG = "Sent to Payment Gateway"
+    STATUS_SENT_TO_FSP = "Sent to FSP"
+    STATUS_MANUALLY_CANCELLED = "Manually Cancelled"
 
     STATUS_CHOICE = (
-        (DISTRIBUTION_COMPLETED, _("Distribution Completed")),
-        (
-            DISTRIBUTION_COMPLETED_WITH_ERRORS,
-            _("Distribution Completed with Errors"),
-        ),
-        (TRANSACTION_COMPLETED, _("Transaction Completed")),
-        (
-            TRANSACTION_COMPLETED_WITH_ERRORS,
-            _("Transaction Completed with Errors"),
-        ),
-    )
-    name = models.CharField(max_length=255, db_index=True)
-    ca_id = models.CharField(max_length=255, null=True, db_index=True)
-    ca_hash_id = models.UUIDField(unique=True, null=True)
-    status = models.CharField(max_length=255, choices=STATUS_CHOICE, db_index=True)
-    distribution_level = models.CharField(max_length=255)
-    dispersion_date = models.DateTimeField()
-    coverage_duration = models.PositiveIntegerField()
-    coverage_unit = models.CharField(max_length=255)
-    comments = models.CharField(max_length=255, null=True)
-    delivery_type = models.CharField(
-        choices=DeliveryMechanismChoices.DELIVERY_TYPE_CHOICES,
-        max_length=32,
-        null=True,
-        db_index=True,
-    )
-    assistance_measurement = models.CharField(max_length=255, db_index=True)
-    assistance_through = models.CharField(max_length=255, db_index=True)
-    service_provider = models.ForeignKey(
-        "payment.ServiceProvider",
-        null=True,
-        related_name="cash_plans",
-        on_delete=models.CASCADE,
-    )
-    vision_id = models.CharField(max_length=255, null=True)
-    funds_commitment = models.CharField(max_length=255, null=True)
-    down_payment = models.CharField(max_length=255, null=True)
-    validation_alerts_count = models.IntegerField()
-    total_persons_covered = models.IntegerField(db_index=True)
-    total_persons_covered_revised = models.IntegerField(db_index=True)
-    payment_verification_summary = GenericRelation(
-        "payment.PaymentVerificationSummary",
-        content_type_field="payment_plan_content_type",
-        object_id_field="payment_plan_object_id",
-        related_query_name="cash_plan",
-    )
-    payment_verification_plan = GenericRelation(
-        "payment.PaymentVerificationPlan",
-        content_type_field="payment_plan_content_type",
-        object_id_field="payment_plan_object_id",
-        related_query_name="cash_plan",
+        (STATUS_DISTRIBUTION_SUCCESS, _("Distribution Successful")),  # Delivered Fully
+        (STATUS_NOT_DISTRIBUTED, _("Not Distributed")),  # Not Delivered
+        (STATUS_SUCCESS, _("Transaction Successful")),  # Delivered Fully
+        (STATUS_ERROR, _("Transaction Erroneous")),  # Unsuccessful
+        (STATUS_FORCE_FAILED, _("Force failed")),  # Force Failed
+        (STATUS_DISTRIBUTION_PARTIAL, _("Partially Distributed")),  # Delivered Partially
+        (STATUS_PENDING, _("Pending")),  # Pending
+        (STATUS_SENT_TO_PG, _("Sent to Payment Gateway")),
+        (STATUS_SENT_TO_FSP, _("Sent to FSP")),
+        (STATUS_MANUALLY_CANCELLED, _("Manually Cancelled")),
     )
 
-    def __str__(self) -> str:
-        return self.name or ""
+    ALLOW_CREATE_VERIFICATION = (STATUS_SUCCESS, STATUS_DISTRIBUTION_SUCCESS, STATUS_DISTRIBUTION_PARTIAL)
+    PENDING_STATUSES = (STATUS_PENDING, STATUS_SENT_TO_PG, STATUS_SENT_TO_FSP)
 
-    @property
-    def payment_records_count(self) -> int:
-        return self.payment_items.count()
-
-    @property
-    def bank_reconciliation_success(self) -> int:
-        return self.payment_items.filter(status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION).count()
-
-    @property
-    def bank_reconciliation_error(self) -> int:
-        return self.payment_items.filter(status=PaymentRecord.STATUS_ERROR).count()
-
-    @cached_property
-    def total_number_of_households(self) -> int:
-        # https://unicef.visualstudio.com/ICTD-HCT-MIS/_workitems/edit/84040
-        return self.payment_items.count()
-
-    @property
-    def currency(self) -> Optional[str]:
-        payment_record = self.payment_items.first()
-        return payment_record.currency if payment_record else None
-
-    @property
-    def currency_exchange_date(self) -> datetime:
-        return self.dispersion_date
-
-    def unicef_id(self) -> str:
-        # TODO: maybe 'ca_id' rename to 'unicef_id'?
-        return self.ca_id
-
-    @property
-    def verification_status(self) -> Optional[str]:
-        summary = self.payment_verification_summary.first()
-        return getattr(summary, "status", None)
-
-    class Meta:
-        verbose_name = "Cash Plan"
-        ordering = ["created_at"]
-
-
-class PaymentRecord(ConcurrencyModel, AdminUrlMixin, GenericPayment):
     ENTITLEMENT_CARD_STATUS_ACTIVE = "ACTIVE"
     ENTITLEMENT_CARD_STATUS_INACTIVE = "INACTIVE"
     ENTITLEMENT_CARD_STATUS_CHOICE = Choices(
@@ -1872,68 +1596,80 @@ class PaymentRecord(ConcurrencyModel, AdminUrlMixin, GenericPayment):
         (ENTITLEMENT_CARD_STATUS_INACTIVE, _("Inactive")),
     )
 
-    ca_id = models.CharField(max_length=255, null=True, db_index=True)
-    ca_hash_id = models.UUIDField(unique=True, null=True)
-    parent = models.ForeignKey(
-        "payment.CashPlan",
-        on_delete=models.CASCADE,
-        related_name="payment_items",
-        null=True,
-    )
-
-    full_name = models.CharField(max_length=255)
-    total_persons_covered = models.IntegerField()
-    distribution_modality = models.CharField(
+    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
+    status = models.CharField(
         max_length=255,
+        choices=STATUS_CHOICE,
+        default=STATUS_PENDING,
     )
-    target_population = models.ForeignKey(
-        "targeting.TargetPopulation",
-        on_delete=models.SET_NULL,
-        related_name="payment_records",
+    status_date = models.DateTimeField()
+    household = models.ForeignKey("household.Household", on_delete=models.CASCADE)
+    head_of_household = models.ForeignKey("household.Individual", on_delete=models.CASCADE, null=True)
+    delivery_type = models.ForeignKey("payment.DeliveryMechanism", on_delete=models.SET_NULL, null=True)
+    currency = models.CharField(
+        max_length=4,
         null=True,
         blank=True,
     )
-    target_population_cash_assist_id = models.CharField(max_length=255)
-    entitlement_card_number = models.CharField(max_length=255, null=True)
-    entitlement_card_status = models.CharField(
-        choices=ENTITLEMENT_CARD_STATUS_CHOICE, default="ACTIVE", max_length=20, null=True
+    entitlement_quantity = models.DecimalField(
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
     )
-    entitlement_card_issue_date = models.DateField(null=True)
-    vision_id = models.CharField(max_length=255, null=True)
-    registration_ca_id = models.CharField(max_length=255, null=True)
-    service_provider = models.ForeignKey(
-        "payment.ServiceProvider",
-        on_delete=models.CASCADE,
+    entitlement_quantity_usd = models.DecimalField(
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
     )
-    payment_verification = GenericRelation(
-        "payment.PaymentVerification",
-        content_type_field="payment_content_type",
-        object_id_field="payment_object_id",
-        related_query_name="payment_record",
+    delivered_quantity = models.DecimalField(
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
     )
-    ticket_complaint_details = GenericRelation(
-        "grievance.TicketComplaintDetails",
-        content_type_field="payment_content_type",
-        object_id_field="payment_object_id",
-        related_query_name="payment_record",
+    delivered_quantity_usd = models.DecimalField(
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
     )
+    delivery_date = models.DateTimeField(null=True, blank=True)
+    transaction_reference_id = models.CharField(max_length=255, null=True, blank=True)  # transaction_id
+    transaction_status_blockchain_link = models.CharField(max_length=255, null=True, blank=True)
 
-    ticket_sensitive_details = GenericRelation(
-        "grievance.TicketSensitiveDetails",
-        content_type_field="payment_content_type",
-        object_id_field="payment_object_id",
-        related_query_name="payment_record",
-    )
+    def mark_as_failed(self) -> None:  # pragma: no cover
+        if self.status is self.STATUS_FORCE_FAILED:
+            raise ValidationError("Status shouldn't be failed")
+        self.status = self.STATUS_FORCE_FAILED
+        self.status_date = timezone.now()
+        self.delivered_quantity = 0
+        self.delivered_quantity_usd = 0
+        self.delivery_date = None
+
+    def revert_mark_as_failed(self, delivered_quantity: Decimal, delivery_date: datetime) -> None:  # pragma: no cover
+        if self.status != self.STATUS_FORCE_FAILED:
+            raise ValidationError("Only payment marked as force failed can be reverted")
+        if self.entitlement_quantity is None:
+            raise ValidationError("Entitlement quantity need to be set in order to revert")
+
+        self.status = self.get_revert_mark_as_failed_status(delivered_quantity)
+        self.status_date = timezone.now()
+        self.delivered_quantity = delivered_quantity
+        self.delivery_date = delivery_date
 
     @property
-    def unicef_id(self) -> str:
-        return self.ca_id
+    def payment_status(self) -> str:  # pragma: no cover
+        status = "-"
+        if self.status == Payment.STATUS_PENDING:
+            status = "Pending"
 
-    def get_revert_mark_as_failed_status(self, delivered_quantity: Decimal) -> str:
-        return self.STATUS_SUCCESS
+        elif self.status in (Payment.STATUS_DISTRIBUTION_SUCCESS, Payment.STATUS_SUCCESS):
+            status = "Delivered Fully"
 
+        elif self.status == Payment.STATUS_DISTRIBUTION_PARTIAL:
+            status = "Delivered Partially"
 
-class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel, AdminUrlMixin, SignatureMixin):
+        elif self.status == Payment.STATUS_NOT_DISTRIBUTED:
+            status = "Not Delivered"
+
+        elif self.status == Payment.STATUS_ERROR:
+            status = "Unsuccessful"
+
+        elif self.status == Payment.STATUS_FORCE_FAILED:
+            status = "Force Failed"
+
+        return status
+
     parent = models.ForeignKey(
         "payment.PaymentPlan",
         on_delete=models.CASCADE,
@@ -1946,13 +1682,6 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel, AdminUr
         "payment.FinancialServiceProvider", on_delete=models.PROTECT, null=True
     )
     collector = models.ForeignKey("household.Individual", on_delete=models.CASCADE, related_name="collector_payments")
-    payment_verification = GenericRelation(
-        "payment.PaymentVerification",
-        content_type_field="payment_content_type",
-        object_id_field="payment_object_id",
-        related_query_name="payment",
-    )
-
     source_payment = models.ForeignKey(
         "self", null=True, blank=True, on_delete=models.CASCADE, related_name="follow_ups"
     )
@@ -1974,19 +1703,7 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel, AdminUr
         null=True,
         validators=[MinValueValidator(1000000), MaxValueValidator(9999999), payment_token_and_order_number_validator],
     )  # 7 digits
-    ticket_complaint_details = GenericRelation(
-        "grievance.TicketComplaintDetails",
-        content_type_field="payment_content_type",
-        object_id_field="payment_object_id",
-        related_query_name="payment",
-    )
 
-    ticket_sensitive_details = GenericRelation(
-        "grievance.TicketSensitiveDetails",
-        content_type_field="payment_content_type",
-        object_id_field="payment_object_id",
-        related_query_name="payment",
-    )
     additional_collector_name = models.CharField(
         max_length=64,
         blank=True,
@@ -2000,6 +1717,7 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel, AdminUr
         max_length=128, blank=True, null=True, help_text="Use this field for reconciliation data"
     )
     fsp_auth_code = models.CharField(max_length=128, blank=True, null=True, help_text="FSP Auth Code")
+    is_cash_assist = models.BooleanField(default=False)
     vulnerability_score = models.DecimalField(
         blank=True, null=True, decimal_places=3, max_digits=6, help_text="Written by Steficon", db_index=True
     )
@@ -2008,7 +1726,7 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel, AdminUr
     def full_name(self) -> str:
         return self.collector.full_name
 
-    def get_revert_mark_as_failed_status(self, delivered_quantity: Decimal) -> str:
+    def get_revert_mark_as_failed_status(self, delivered_quantity: Decimal) -> str:  # pragma: no cover
         if delivered_quantity == 0:
             return Payment.STATUS_NOT_DISTRIBUTED
 
@@ -2029,7 +1747,7 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel, AdminUr
         constraints = [
             UniqueConstraint(
                 fields=["parent", "household"],
-                condition=Q(is_removed=False),
+                condition=Q(is_removed=False) & Q(is_cash_assist=False),
                 name="payment_plan_and_household",
             ),
             UniqueConstraint(
@@ -2074,412 +1792,6 @@ class Payment(SoftDeletableModel, GenericPayment, UnicefIdentifiedModel, AdminUr
     )
 
 
-class ServiceProvider(TimeStampedUUIDModel):
-    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
-    ca_id = models.CharField(max_length=255, unique=True)
-    full_name = models.CharField(max_length=255, null=True)
-    short_name = models.CharField(max_length=100, null=True)
-    country = models.CharField(max_length=3)
-    vision_id = models.CharField(max_length=255, null=True)
-
-    def __str__(self) -> str:
-        return self.full_name or ""
-
-
-class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedModel, AdminUrlMixin):
-    ACTIVITY_LOG_MAPPING = create_mapping_dict(
-        [
-            "status",
-            "payment_plan",
-            "sampling",
-            "verification_channel",
-            "sample_size",
-            "responded_count",
-            "received_count",
-            "not_received_count",
-            "received_with_problems_count",
-            "confidence_interval",
-            "margin_of_error",
-            "rapid_pro_flow_id",
-            "rapid_pro_flow_start_uuids",
-            "age_filter",
-            "excluded_admin_areas_filter",
-            "sex_filter",
-            "activation_date",
-            "completion_date",
-        ]
-    )
-    STATUS_PENDING = "PENDING"
-    STATUS_ACTIVE = "ACTIVE"
-    STATUS_FINISHED = "FINISHED"
-    STATUS_INVALID = "INVALID"
-    STATUS_RAPID_PRO_ERROR = "RAPID_PRO_ERROR"
-    SAMPLING_FULL_LIST = "FULL_LIST"
-    SAMPLING_RANDOM = "RANDOM"
-    VERIFICATION_CHANNEL_RAPIDPRO = "RAPIDPRO"
-    VERIFICATION_CHANNEL_XLSX = "XLSX"
-    VERIFICATION_CHANNEL_MANUAL = "MANUAL"
-    STATUS_CHOICES = (
-        (STATUS_ACTIVE, "Active"),
-        (STATUS_FINISHED, "Finished"),
-        (STATUS_PENDING, "Pending"),
-        (STATUS_INVALID, "Invalid"),
-        (STATUS_RAPID_PRO_ERROR, "RapidPro Error"),
-    )
-    SAMPLING_CHOICES = (
-        (SAMPLING_FULL_LIST, "Full list"),
-        (SAMPLING_RANDOM, "Random sampling"),
-    )
-    VERIFICATION_CHANNEL_CHOICES = (
-        (VERIFICATION_CHANNEL_MANUAL, "MANUAL"),
-        (VERIFICATION_CHANNEL_RAPIDPRO, "RAPIDPRO"),
-        (VERIFICATION_CHANNEL_XLSX, "XLSX"),
-    )
-    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING, db_index=True)
-    payment_plan_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    payment_plan_object_id = UUIDField()
-    payment_plan_obj: "Union[PaymentPlan, CashPlan]" = GenericForeignKey(
-        "payment_plan_content_type", "payment_plan_object_id"
-    )  # type: ignore
-    sampling = models.CharField(max_length=50, choices=SAMPLING_CHOICES)
-    verification_channel = models.CharField(max_length=50, choices=VERIFICATION_CHANNEL_CHOICES)
-    sample_size = models.PositiveIntegerField(null=True, blank=True)
-    responded_count = models.PositiveIntegerField(null=True, blank=True)
-    received_count = models.PositiveIntegerField(null=True, blank=True)
-    not_received_count = models.PositiveIntegerField(null=True, blank=True)
-    received_with_problems_count = models.PositiveIntegerField(null=True, blank=True)
-    confidence_interval = models.FloatField(null=True, blank=True)
-    margin_of_error = models.FloatField(null=True, blank=True)
-    rapid_pro_flow_id = models.CharField(max_length=255, blank=True)
-    rapid_pro_flow_start_uuids = ArrayField(models.CharField(max_length=255, blank=True), default=list)
-    age_filter = JSONField(null=True, blank=True)
-    excluded_admin_areas_filter = JSONField(null=True, blank=True)
-    sex_filter = models.CharField(null=True, max_length=10, blank=True)
-    activation_date = models.DateTimeField(null=True)
-    completion_date = models.DateTimeField(null=True)
-    xlsx_file_exporting = models.BooleanField(default=False)
-    xlsx_file_imported = models.BooleanField(default=False)
-    error = models.CharField(max_length=500, null=True, blank=True)
-
-    class Meta:
-        ordering = ("created_at",)
-        indexes = [
-            models.Index(fields=["payment_plan_content_type", "payment_plan_object_id"]),
-        ]
-
-    @property
-    def business_area(self) -> BusinessArea:
-        return self.payment_plan_obj.business_area
-
-    @property
-    def get_xlsx_verification_file(self) -> FileTemp:
-        try:
-            return FileTemp.objects.get(object_id=self.pk, content_type=get_content_type_for_model(self))
-        except FileTemp.DoesNotExist:
-            raise GraphQLError("Xlsx Verification File does not exist.")
-        except FileTemp.MultipleObjectsReturned as e:
-            logger.exception(e)
-            raise GraphQLError("Query returned multiple Xlsx Verification Files when only one was expected.")
-
-    @property
-    def has_xlsx_payment_verification_plan_file(self) -> bool:
-        return all(
-            [
-                self.verification_channel == self.VERIFICATION_CHANNEL_XLSX,
-                FileTemp.objects.filter(object_id=self.pk, content_type=get_content_type_for_model(self)).count() == 1,
-            ]
-        )
-
-    @property
-    def xlsx_payment_verification_plan_file_link(self) -> Optional[str]:
-        return self.get_xlsx_verification_file.file.url if self.has_xlsx_payment_verification_plan_file else None
-
-    @property
-    def xlsx_payment_verification_plan_file_was_downloaded(self) -> bool:
-        return self.get_xlsx_verification_file.was_downloaded if self.has_xlsx_payment_verification_plan_file else False
-
-    def set_active(self) -> None:
-        self.status = PaymentVerificationPlan.STATUS_ACTIVE
-        self.activation_date = timezone.now()
-        self.error = None
-
-    def set_pending(self) -> None:
-        self.status = PaymentVerificationPlan.STATUS_PENDING
-        self.responded_count = None
-        self.received_count = None
-        self.not_received_count = None
-        self.received_with_problems_count = None
-        self.activation_date = None
-        self.rapid_pro_flow_start_uuids = []
-
-    def can_activate(self) -> bool:
-        return self.status not in (
-            PaymentVerificationPlan.STATUS_PENDING,
-            PaymentVerificationPlan.STATUS_RAPID_PRO_ERROR,
-        )
-
-    @property
-    def get_payment_plan(self) -> Union["PaymentPlan", "CashPlan", None]:
-        try:
-            # use GFK instead of self.payment_plan_content_type.model_class().objects.get(pk=self.payment_plan_object_id)
-            return self.payment_plan_obj
-        except ObjectDoesNotExist:
-            return None
-
-    @property
-    def get_program(self) -> Optional["Program"]:
-        if payment_plan := self.get_payment_plan:
-            program = (
-                payment_plan.program_cycle.program
-                if isinstance(payment_plan, PaymentPlan) and payment_plan.program_cycle
-                else payment_plan.program
-            )
-            return program
-        return None
-
-
-def build_summary(payment_plan: Optional[Any]) -> None:
-    statuses_count = payment_plan.get_payment_verification_plans.aggregate(
-        active=Count("pk", filter=Q(status=PaymentVerificationSummary.STATUS_ACTIVE)),
-        pending=Count("pk", filter=Q(status=PaymentVerificationSummary.STATUS_PENDING)),
-        finished=Count("pk", filter=Q(status=PaymentVerificationSummary.STATUS_FINISHED)),
-    )
-    summary = payment_plan.get_payment_verification_summary
-    if statuses_count["active"] >= 1:
-        summary.mark_as_active()
-    elif statuses_count["finished"] >= 1 and statuses_count["active"] == 0 and statuses_count["pending"] == 0:
-        summary.mark_as_finished()
-    else:
-        summary.status = PaymentVerificationSummary.STATUS_PENDING
-        summary.completion_date = None
-        summary.activation_date = None
-        summary.mark_as_pending()
-    summary.save()
-
-
-@receiver(
-    post_save,
-    sender=PaymentVerificationPlan,
-    dispatch_uid="update_verification_status_in_cash_plan",
-)
-def update_verification_status_in_cash_plan(sender: Any, instance: PaymentVerificationPlan, **kwargs: Any) -> None:
-    build_summary(instance.payment_plan_obj)
-
-
-@receiver(
-    post_delete,
-    sender=PaymentVerificationPlan,
-    dispatch_uid="update_verification_status_in_cash_plan_on_delete",
-)
-def update_verification_status_in_cash_plan_on_delete(
-    sender: Any, instance: PaymentVerificationPlan, **kwargs: Any
-) -> None:
-    build_summary(instance.payment_plan_obj)
-
-
-class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMixin):
-    ACTIVITY_LOG_MAPPING = create_mapping_dict(
-        [
-            "payment_verification_plan",
-            "status",
-            "status_date",
-            "received_amount",
-        ]
-    )
-    STATUS_PENDING = "PENDING"
-    STATUS_RECEIVED = "RECEIVED"
-    STATUS_NOT_RECEIVED = "NOT_RECEIVED"
-    STATUS_RECEIVED_WITH_ISSUES = "RECEIVED_WITH_ISSUES"
-    STATUS_CHOICES = (
-        (STATUS_NOT_RECEIVED, "NOT RECEIVED"),
-        (STATUS_PENDING, "PENDING"),
-        (STATUS_RECEIVED, "RECEIVED"),
-        (STATUS_RECEIVED_WITH_ISSUES, "RECEIVED WITH ISSUES"),
-    )
-    payment_verification_plan = models.ForeignKey(
-        "payment.PaymentVerificationPlan",
-        on_delete=models.CASCADE,
-        related_name="payment_record_verifications",
-    )
-    payment_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    payment_object_id = UUIDField()
-    payment_obj = GenericForeignKey("payment_content_type", "payment_object_id")
-    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING)
-    status_date = models.DateTimeField(null=True)
-    received_amount = models.DecimalField(
-        decimal_places=2,
-        max_digits=12,
-        validators=[MinValueValidator(Decimal("0.01"))],
-        null=True,
-    )
-    sent_to_rapid_pro = models.BooleanField(default=False)
-
-    class Meta:
-        indexes = [
-            models.Index(fields=["payment_content_type", "payment_object_id"]),
-        ]
-        constraints = [
-            UniqueConstraint(
-                fields=["payment_content_type", "payment_object_id"],
-                name="payment_content_type_and_payment_id",
-            )
-        ]
-
-    @property
-    def get_payment(self) -> Union[Payment, PaymentRecord, None]:
-        try:
-            return self.payment_content_type.model_class().objects.get(pk=self.payment_object_id)
-        except ObjectDoesNotExist:
-            return None
-
-    @property
-    def is_manually_editable(self) -> bool:
-        if self.payment_verification_plan.verification_channel != PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL:
-            return False
-        minutes_elapsed = (timezone.now() - self.status_date).total_seconds() / 60
-        return not (self.status != PaymentVerification.STATUS_PENDING and minutes_elapsed > 10)
-
-    @property
-    def business_area(self) -> BusinessArea:
-        return self.payment_verification_plan.payment_plan_obj.business_area
-
-    def set_pending(self) -> None:
-        self.status_date = timezone.now()
-        self.status = PaymentVerification.STATUS_PENDING
-        self.received_amount = None
-
-
-class PaymentVerificationSummary(TimeStampedUUIDModel):
-    STATUS_PENDING = "PENDING"
-    STATUS_ACTIVE = "ACTIVE"
-    STATUS_FINISHED = "FINISHED"
-    STATUS_CHOICES = (
-        (STATUS_ACTIVE, "Active"),
-        (STATUS_FINISHED, "Finished"),
-        (STATUS_PENDING, "Pending"),
-    )
-    status = models.CharField(
-        max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING, verbose_name="Verification status", db_index=True
-    )
-    activation_date = models.DateTimeField(null=True)
-    completion_date = models.DateTimeField(null=True)
-    payment_plan_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    payment_plan_object_id = UUIDField()
-    payment_plan_obj = GenericForeignKey("payment_plan_content_type", "payment_plan_object_id")
-
-    class Meta:
-        indexes = [
-            models.Index(fields=["payment_plan_content_type", "payment_plan_object_id"]),
-        ]
-        constraints = [
-            UniqueConstraint(
-                fields=["payment_plan_content_type", "payment_plan_object_id"],
-                name="payment_plan_content_type_and_payment_plan_id",
-            )
-        ]
-
-    def mark_as_active(self) -> None:
-        self.status = self.STATUS_ACTIVE
-        self.completion_date = None
-        if self.activation_date is None:
-            self.activation_date = timezone.now()
-
-    def mark_as_finished(self) -> None:
-        self.status = self.STATUS_FINISHED
-        if self.completion_date is None:
-            self.completion_date = timezone.now()
-
-    def mark_as_pending(self) -> None:
-        self.status = self.STATUS_PENDING
-        self.completion_date = None
-        self.activation_date = None
-
-
-class ApprovalProcess(TimeStampedUUIDModel):
-    sent_for_approval_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name="+", null=True
-    )
-    sent_for_approval_date = models.DateTimeField(null=True)
-    sent_for_authorization_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name="+", null=True
-    )
-    sent_for_authorization_date = models.DateTimeField(null=True)
-    sent_for_finance_release_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name="+", null=True
-    )
-    sent_for_finance_release_date = models.DateTimeField(null=True)
-    payment_plan = models.ForeignKey(PaymentPlan, on_delete=models.CASCADE, related_name="approval_process")
-
-    approval_number_required = models.PositiveIntegerField(default=1)
-    authorization_number_required = models.PositiveIntegerField(default=1)
-    finance_release_number_required = models.PositiveIntegerField(default=1)
-
-    class Meta:
-        ordering = ("-created_at",)
-        verbose_name_plural = "Approval Processes"
-
-
-class Approval(TimeStampedUUIDModel):
-    APPROVAL = "APPROVAL"
-    AUTHORIZATION = "AUTHORIZATION"
-    FINANCE_RELEASE = "FINANCE_RELEASE"
-    REJECT = "REJECT"
-    TYPE_CHOICES = (
-        (APPROVAL, "Approval"),
-        (AUTHORIZATION, "Authorization"),
-        (FINANCE_RELEASE, "Finance Release"),
-        (REJECT, "Reject"),
-    )
-
-    type = models.CharField(max_length=50, choices=TYPE_CHOICES, default=APPROVAL, verbose_name=_("Approval type"))
-    comment = models.CharField(max_length=500, null=True, blank=True)
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
-    approval_process = models.ForeignKey(ApprovalProcess, on_delete=models.CASCADE, related_name="approvals")
-
-    class Meta:
-        ordering = ("-created_at",)
-
-    def __str__(self) -> str:
-        return self.type or ""
-
-    @property
-    def info(self) -> str:
-        types_map = {
-            self.APPROVAL: "Approved",
-            self.AUTHORIZATION: "Authorized",
-            self.FINANCE_RELEASE: "Released",
-            self.REJECT: "Rejected",
-        }
-
-        return f"{types_map.get(self.type)} by {self.created_by}" if self.created_by else types_map.get(self.type, "")
-
-
-class AcceptanceProcessThreshold(TimeStampedUUIDModel):
-    business_area = models.ForeignKey(
-        "core.BusinessArea", on_delete=models.PROTECT, related_name="acceptance_process_thresholds"
-    )
-    payments_range_usd = IntegerRangeField(
-        default=NumericRange(0, None),
-        validators=[
-            RangeMinValueValidator(0),
-        ],
-    )
-    approval_number_required = models.PositiveIntegerField(default=1)
-    authorization_number_required = models.PositiveIntegerField(default=1)
-    finance_release_number_required = models.PositiveIntegerField(default=1)
-
-    class Meta:
-        ordering = ("payments_range_usd",)
-
-    def __str__(self) -> str:
-        return (
-            f"{self.payments_range_usd} USD, "
-            f"Approvals: {self.approval_number_required} "
-            f"Authorization: {self.authorization_number_required} "
-            f"Finance Releases: {self.finance_release_number_required}"
-        )
-
-
 class PaymentHouseholdSnapshot(TimeStampedUUIDModel):
     snapshot_data = JSONField(default=dict)
     household_id = models.UUIDField()
@@ -2493,7 +1805,7 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
     individual = models.ForeignKey(
         "household.Individual", on_delete=models.CASCADE, related_name="delivery_mechanisms_data"
     )
-    delivery_mechanism = models.ForeignKey("DeliveryMechanism", on_delete=models.PROTECT)
+    delivery_mechanism = models.ForeignKey("payment.DeliveryMechanism", on_delete=models.PROTECT)
     data = JSONField(default=dict, blank=True)
 
     is_valid: bool = models.BooleanField(default=False)  # type: ignore

@@ -9,6 +9,7 @@ from django.utils import timezone
 from freezegun import freeze_time
 from pytz import utc
 
+from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.fixtures import (
     FlexibleAttributeForPDUFactory,
     PeriodicFieldDataFactory,
@@ -51,6 +52,7 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         super().setUpTestData()
         households = []
         business_area = create_afghanistan()
+        cls.user = UserFactory()
         (household, individuals) = create_household_and_individuals(
             {
                 "size": 1,
@@ -326,7 +328,7 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         )
         tc = TargetingCriteria()
         tc.save()
-        PaymentPlanFactory(targeting_criteria=tc, program=hh.program)
+        PaymentPlanFactory(targeting_criteria=tc, program_cycle=hh.program.cycles.first(), created_by=self.user)
         tcr = TargetingCriteriaRule()
         tcr.targeting_criteria = tc
         tcr.save()
@@ -353,7 +355,7 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         # Target population
         tc = TargetingCriteria()
         tc.save()
-        PaymentPlanFactory(targeting_criteria=tc, program=hh.program)
+        PaymentPlanFactory(targeting_criteria=tc, program_cycle=hh.program.cycles.first(), created_by=self.user)
         tcr = TargetingCriteriaRule()
         tcr.targeting_criteria = tc
         tcr.save()
@@ -373,7 +375,9 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         # all HH list, no collector' filter
         tc = TargetingCriteria()
         tc.save()
-        PaymentPlanFactory(targeting_criteria=tc, program=self.households[0].program)
+        PaymentPlanFactory(
+            targeting_criteria=tc, program_cycle=self.households[0].program.cycles.first(), created_by=self.user
+        )
         tcr = TargetingCriteriaRule()
         tcr.targeting_criteria = tc
         tcr.save()
@@ -515,7 +519,9 @@ class TargetingCriteriaPDUFlexRuleFilterTestCase(TestCase):
         super().setUpTestData()
         call_command("loadflexfieldsattributes")
         business_area = create_afghanistan()
+        cls.user = UserFactory()
         cls.program = ProgramFactory(name="Test Program for PDU Flex Rule Filter", business_area=business_area)
+        cls.program_cycle = cls.program.cycles.first()
 
         pdu_data_string = PeriodicFieldDataFactory(
             subtype=PeriodicFieldData.STRING,
@@ -646,7 +652,7 @@ class TargetingCriteriaPDUFlexRuleFilterTestCase(TestCase):
 
     def test_rule_filter_pdu_string_contains(self) -> None:
         tc = TargetingCriteriaFactory()
-        PaymentPlanFactory(targeting_criteria=tc, program=self.program)
+        PaymentPlanFactory(targeting_criteria=tc, program_cycle=self.program_cycle, created_by=self.user)
         tcr = TargetingCriteriaRule()
         tcr.targeting_criteria = tc
         tcr.save()
@@ -670,7 +676,7 @@ class TargetingCriteriaPDUFlexRuleFilterTestCase(TestCase):
 
     def test_rule_filter_pdu_string_is_null(self) -> None:
         tc = TargetingCriteriaFactory()
-        PaymentPlanFactory(targeting_criteria=tc, program=self.program)
+        PaymentPlanFactory(targeting_criteria=tc, program_cycle=self.program_cycle, created_by=self.user)
         tcr = TargetingCriteriaRule()
         tcr.targeting_criteria = tc
         tcr.save()
@@ -694,7 +700,7 @@ class TargetingCriteriaPDUFlexRuleFilterTestCase(TestCase):
 
     def test_rule_filter_pdu_decimal_range(self) -> None:
         tc = TargetingCriteriaFactory()
-        PaymentPlanFactory(targeting_criteria=tc, program=self.program)
+        PaymentPlanFactory(targeting_criteria=tc, program_cycle=self.program_cycle, created_by=self.user)
         tcr = TargetingCriteriaRule()
         tcr.targeting_criteria = tc
         tcr.save()
@@ -719,7 +725,7 @@ class TargetingCriteriaPDUFlexRuleFilterTestCase(TestCase):
 
     def test_rule_filter_pdu_decimal_greater_than(self) -> None:
         tc = TargetingCriteriaFactory()
-        PaymentPlanFactory(targeting_criteria=tc, program=self.program)
+        PaymentPlanFactory(targeting_criteria=tc, program_cycle=self.program_cycle, created_by=self.user)
         tcr = TargetingCriteriaRule()
         tcr.targeting_criteria = tc
         tcr.save()
@@ -745,7 +751,7 @@ class TargetingCriteriaPDUFlexRuleFilterTestCase(TestCase):
 
     def test_rule_filter_pdu_decimal_less_than(self) -> None:
         tc = TargetingCriteriaFactory()
-        PaymentPlanFactory(targeting_criteria=tc, program=self.program)
+        PaymentPlanFactory(targeting_criteria=tc, program_cycle=self.program_cycle, created_by=self.user)
         tcr = TargetingCriteriaRule()
         tcr.targeting_criteria = tc
         tcr.save()
@@ -769,7 +775,7 @@ class TargetingCriteriaPDUFlexRuleFilterTestCase(TestCase):
 
     def test_rule_filter_pdu_decimal_is_null(self) -> None:
         tc = TargetingCriteriaFactory()
-        PaymentPlanFactory(targeting_criteria=tc, program=self.program)
+        PaymentPlanFactory(targeting_criteria=tc, program_cycle=self.program_cycle, created_by=self.user)
         tcr = TargetingCriteriaRule()
         tcr.targeting_criteria = tc
         tcr.save()
@@ -793,7 +799,7 @@ class TargetingCriteriaPDUFlexRuleFilterTestCase(TestCase):
 
     def test_rule_filter_pdu_date_range(self) -> None:
         tc = TargetingCriteriaFactory()
-        PaymentPlanFactory(targeting_criteria=tc, program=self.program)
+        PaymentPlanFactory(targeting_criteria=tc, program_cycle=self.program_cycle, created_by=self.user)
         tcr = TargetingCriteriaRule()
         tcr.targeting_criteria = tc
         tcr.save()
@@ -818,7 +824,7 @@ class TargetingCriteriaPDUFlexRuleFilterTestCase(TestCase):
 
     def test_rule_filter_pdu_date_greater_than(self) -> None:
         tc = TargetingCriteriaFactory()
-        PaymentPlanFactory(targeting_criteria=tc, program=self.program)
+        PaymentPlanFactory(targeting_criteria=tc, program_cycle=self.program_cycle, created_by=self.user)
         tcr = TargetingCriteriaRule()
         tcr.targeting_criteria = tc
         tcr.save()
@@ -842,7 +848,7 @@ class TargetingCriteriaPDUFlexRuleFilterTestCase(TestCase):
 
     def test_rule_filter_pdu_date_less_than(self) -> None:
         tc = TargetingCriteriaFactory()
-        PaymentPlanFactory(targeting_criteria=tc, program=self.program)
+        PaymentPlanFactory(targeting_criteria=tc, program_cycle=self.program_cycle, created_by=self.user)
         tcr = TargetingCriteriaRule()
         tcr.targeting_criteria = tc
         tcr.save()
@@ -867,7 +873,7 @@ class TargetingCriteriaPDUFlexRuleFilterTestCase(TestCase):
 
     def test_rule_filter_pdu_date_is_null(self) -> None:
         tc = TargetingCriteriaFactory()
-        PaymentPlanFactory(targeting_criteria=tc, program=self.program)
+        PaymentPlanFactory(targeting_criteria=tc, program_cycle=self.program_cycle, created_by=self.user)
         tcr = TargetingCriteriaRule()
         tcr.targeting_criteria = tc
         tcr.save()
@@ -891,7 +897,7 @@ class TargetingCriteriaPDUFlexRuleFilterTestCase(TestCase):
 
     def test_rule_filter_pdu_boolean_true(self) -> None:
         tc = TargetingCriteriaFactory()
-        PaymentPlanFactory(targeting_criteria=tc, program=self.program)
+        PaymentPlanFactory(targeting_criteria=tc, program_cycle=self.program_cycle, created_by=self.user)
         tcr = TargetingCriteriaRule()
         tcr.targeting_criteria = tc
         tcr.save()
@@ -916,7 +922,7 @@ class TargetingCriteriaPDUFlexRuleFilterTestCase(TestCase):
 
     def test_rule_filter_pdu_boolean_false(self) -> None:
         tc = TargetingCriteriaFactory()
-        PaymentPlanFactory(targeting_criteria=tc, program=self.program)
+        PaymentPlanFactory(targeting_criteria=tc, program_cycle=self.program_cycle, created_by=self.user)
         tcr = TargetingCriteriaRule()
         tcr.targeting_criteria = tc
         tcr.save()
@@ -940,7 +946,7 @@ class TargetingCriteriaPDUFlexRuleFilterTestCase(TestCase):
 
     def test_rule_filter_pdu_boolean_is_null(self) -> None:
         tc = TargetingCriteriaFactory()
-        PaymentPlanFactory(targeting_criteria=tc, program=self.program)
+        PaymentPlanFactory(targeting_criteria=tc, program_cycle=self.program_cycle, created_by=self.user)
         tcr = TargetingCriteriaRule()
         tcr.targeting_criteria = tc
         tcr.save()

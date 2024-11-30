@@ -1,6 +1,7 @@
 from django.core.management import call_command
 from django.test import TestCase
 
+from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.fixtures import (
     FlexibleAttributeForPDUFactory,
     PeriodicFieldDataFactory,
@@ -44,7 +45,9 @@ class TestIndividualBlockFilter(TestCase):
         super().setUpTestData()
         call_command("loadflexfieldsattributes")
         cls.business_area = create_afghanistan()
+        cls.user = UserFactory()
         cls.program = ProgramFactory(business_area=cls.business_area, name="Test Program")
+        cls.program_cycle = cls.program.cycles.first()
         (household, individuals) = create_household_and_individuals(
             {
                 "business_area": cls.business_area,
@@ -67,7 +70,7 @@ class TestIndividualBlockFilter(TestCase):
     def test_all_individuals_are_female(self) -> None:
         queryset = Household.objects.all()
         tc = TargetingCriteriaFactory()
-        PaymentPlanFactory(targeting_criteria=tc, program=self.program)
+        PaymentPlanFactory(targeting_criteria=tc, program_cycle=self.program_cycle, created_by=self.user)
         tcr = TargetingCriteriaRule()
         tcr.targeting_criteria = tc
         tcr.save()
@@ -156,7 +159,7 @@ class TestIndividualBlockFilter(TestCase):
 
     def test_filter_on_flex_field_not_exist(self) -> None:
         tc = TargetingCriteriaFactory()
-        PaymentPlanFactory(targeting_criteria=tc, program=self.program)
+        PaymentPlanFactory(targeting_criteria=tc, program_cycle=self.program_cycle, created_by=self.user)
         tcr = TargetingCriteriaRule()
         tcr.targeting_criteria = tc
         tcr.save()
@@ -183,7 +186,7 @@ class TestIndividualBlockFilter(TestCase):
 
     def test_filter_on_flex_field(self) -> None:
         tc = TargetingCriteriaFactory()
-        PaymentPlanFactory(targeting_criteria=tc, program=self.program)
+        PaymentPlanFactory(targeting_criteria=tc, program_cycle=self.program_cycle, created_by=self.user)
         tcr = TargetingCriteriaRule()
         tcr.targeting_criteria = tc
         tcr.save()
@@ -219,7 +222,7 @@ class TestIndividualBlockFilter(TestCase):
 
     def test_filter_on_pdu_flex_field_not_exist(self) -> None:
         tc = TargetingCriteriaFactory()
-        PaymentPlanFactory(targeting_criteria=tc, program=self.program)
+        PaymentPlanFactory(targeting_criteria=tc, program_cycle=self.program_cycle, created_by=self.user)
         tcr = TargetingCriteriaRule()
         tcr.targeting_criteria = tc
         tcr.save()
@@ -247,7 +250,7 @@ class TestIndividualBlockFilter(TestCase):
 
     def test_filter_on_pdu_flex_field_no_round_number(self) -> None:
         tc = TargetingCriteriaFactory()
-        PaymentPlanFactory(targeting_criteria=tc, program=self.program)
+        PaymentPlanFactory(targeting_criteria=tc, program_cycle=self.program_cycle, created_by=self.user)
         tcr = TargetingCriteriaRule()
         tcr.targeting_criteria = tc
         tcr.save()
@@ -284,7 +287,7 @@ class TestIndividualBlockFilter(TestCase):
 
     def test_filter_on_pdu_flex_field_incorrect_round_number(self) -> None:
         tc = TargetingCriteriaFactory()
-        PaymentPlanFactory(targeting_criteria=tc, program=self.program)
+        PaymentPlanFactory(targeting_criteria=tc, program_cycle=self.program_cycle, created_by=self.user)
         tcr = TargetingCriteriaRule()
         tcr.targeting_criteria = tc
         tcr.save()
@@ -322,7 +325,7 @@ class TestIndividualBlockFilter(TestCase):
 
     def test_filter_on_pdu_flex_field(self) -> None:
         tc = TargetingCriteriaFactory()
-        PaymentPlanFactory(targeting_criteria=tc, program=self.program)
+        PaymentPlanFactory(targeting_criteria=tc, program_cycle=self.program_cycle, created_by=self.user)
         tcr = TargetingCriteriaRule()
         tcr.targeting_criteria = tc
         tcr.save()
@@ -380,7 +383,7 @@ class TestIndividualBlockFilter(TestCase):
         )
         # Target population
         tc = TargetingCriteriaFactory()
-        PaymentPlanFactory(targeting_criteria=tc, program=self.program)
+        PaymentPlanFactory(targeting_criteria=tc, program_cycle=self.program_cycle, created_by=self.user)
         tcr = TargetingCriteriaRule()
         tcr.targeting_criteria = tc
         tcr.save()

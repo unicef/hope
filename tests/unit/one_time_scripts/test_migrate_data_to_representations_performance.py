@@ -29,13 +29,11 @@ from hct_mis_api.apps.household.models import (
     Individual,
 )
 from hct_mis_api.apps.payment.fixtures import (
-    CashPlanFactory,
+    FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
-    PaymentRecordFactory,
-    ServiceProviderFactory,
 )
-from hct_mis_api.apps.payment.models import ServiceProvider
+from hct_mis_api.apps.payment.models import FinancialServiceProvider
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
@@ -204,7 +202,7 @@ class TestMigrateDataToRepresentationsPerformance(TestCase):
         # Payments 1
         payment_plan1 = PaymentPlanFactory(
             target_population=self.target_population1,
-            program=self.program_active,
+            program_cycle=self.program_active.cycles.first(),
         )
 
         self.payment1 = PaymentFactory(
@@ -216,16 +214,16 @@ class TestMigrateDataToRepresentationsPerformance(TestCase):
             entitlement_quantity=103,
             currency="PLN",
         )
-        cash_plan = CashPlanFactory(
+        payment_plan2 = PaymentPlanFactory(
             program=self.program_active,
         )
 
-        self.payment_record1 = PaymentRecordFactory(
+        self.payment2 = PaymentFactory(
             target_population=self.target_population1,
             household=self.household1,
             head_of_household=self.individual1_1,
-            service_provider=ServiceProvider.objects.first() or ServiceProviderFactory(),
-            parent=cash_plan,
+            service_provider=FinancialServiceProvider.objects.first() or FinancialServiceProviderFactory(),
+            parent=payment_plan2,
             currency="PLN",
         )
 
@@ -265,12 +263,12 @@ class TestMigrateDataToRepresentationsPerformance(TestCase):
         )
 
         # Payments 2
-        payment_plan2 = PaymentPlanFactory(
+        payment_plan3 = PaymentPlanFactory(
             target_population=self.target_population_paid,
             program=self.program_active,
         )
-        self.payment2 = PaymentFactory(
-            parent=payment_plan2,
+        self.payment3 = PaymentFactory(
+            parent=payment_plan3,
             collector=self.collector2_1,
             household=self.household2,
             head_of_household=self.individual2_1,
@@ -278,12 +276,12 @@ class TestMigrateDataToRepresentationsPerformance(TestCase):
             currency="PLN",
         )
 
-        self.payment_record2 = PaymentRecordFactory(
+        self.payment4 = PaymentFactory(
             target_population=self.target_population_paid,
             household=self.household2,
             head_of_household=self.collector2_1,
-            service_provider=ServiceProvider.objects.first() or ServiceProviderFactory(),
-            parent=cash_plan,
+            service_provider=FinancialServiceProvider.objects.first() or FinancialServiceProviderFactory(),
+            parent=payment_plan2,
             currency="PLN",
         )
 
@@ -423,7 +421,7 @@ class TestMigrateDataToRepresentationsPerformance(TestCase):
         # Payments 5
         payment_plan5 = PaymentPlanFactory(
             target_population=self.target_population_paid,
-            program=self.program_finished1,
+            program_cycle=self.program_finished1.cycles.first(),
         )
         self.payment5 = PaymentFactory(
             parent=payment_plan5,
@@ -434,17 +432,17 @@ class TestMigrateDataToRepresentationsPerformance(TestCase):
             currency="PLN",
         )
 
-        self.payment_record5 = PaymentRecordFactory(
+        self.payment6 = PaymentFactory(
             target_population=self.target_population_paid,
             household=self.household5,
             head_of_household=self.individual5_1,
-            service_provider=ServiceProvider.objects.first() or ServiceProviderFactory(),
-            parent=cash_plan,
+            service_provider=FinancialServiceProvider.objects.first() or FinancialServiceProviderFactory(),
+            parent=payment_plan2,
         )
         # Payments 7
         payment_plan7 = PaymentPlanFactory(
             target_population=self.target_population3,
-            program=self.program_finished2,
+            program_cycle=self.program_finished2.cycles.first(),
         )
         self.payment7 = PaymentFactory(
             parent=payment_plan7,
@@ -455,12 +453,12 @@ class TestMigrateDataToRepresentationsPerformance(TestCase):
             currency="PLN",
         )
 
-        self.payment_record7 = PaymentRecordFactory(
+        self.payment8 = PaymentFactory(
             target_population=self.target_population3,
             household=self.household7,
             head_of_household=self.individual7_1,
-            service_provider=ServiceProvider.objects.first() or ServiceProviderFactory(),
-            parent=cash_plan,
+            service_provider=FinancialServiceProvider.objects.first() or FinancialServiceProviderFactory(),
+            parent=payment_plan2,
         )
 
         # Households from mixed rdi

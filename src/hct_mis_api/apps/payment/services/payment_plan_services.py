@@ -413,7 +413,7 @@ class PaymentPlanService:
             payments_to_create.append(
                 Payment(
                     parent=payment_plan,
-                    program_id=payment_plan.program_id,
+                    program_id=payment_plan.program_cycle.program_id,
                     business_area_id=payment_plan.business_area_id,
                     status=Payment.STATUS_PENDING,
                     status_date=timezone.now(),
@@ -462,7 +462,7 @@ class PaymentPlanService:
             raise GraphQLError("Impossible to create Payment Plan for Programme within not Active status")
 
         pp_name = input_data.get("name", "").strip()
-        if PaymentPlan.objects.filter(name=pp_name, program=program, is_removed=False).exists():
+        if PaymentPlan.objects.filter(name=pp_name, program_cycle__program=program, is_removed=False).exists():
             raise GraphQLError(f"Payment Plan with name: {pp_name} and program: {program.name} already exists.")
 
         with transaction.atomic():
@@ -471,7 +471,6 @@ class PaymentPlanService:
             payment_plan = PaymentPlan.objects.create(
                 business_area=business_area,
                 created_by=user,
-                program=program_cycle.program,
                 program_cycle=program_cycle,
                 targeting_criteria=targeting_criteria,
                 name=input_data["name"],
@@ -525,7 +524,7 @@ class PaymentPlanService:
                 raise GraphQLError("Name can be changed only within Open status")
 
             if (
-                PaymentPlan.objects.filter(name=name, program=program, is_removed=False)
+                PaymentPlan.objects.filter(name=name, program_cycle__program=program, is_removed=False)
                 .exclude(id=self.payment_plan.pk)
                 .exists()
             ):
@@ -708,7 +707,7 @@ class PaymentPlanService:
             Payment(
                 parent=self.payment_plan,
                 source_payment=payment,
-                program_id=self.payment_plan.program_id,
+                program_id=self.payment_plan.program_cycle.program_id,
                 is_follow_up=True,
                 business_area_id=payment.business_area_id,
                 status=Payment.STATUS_PENDING,
@@ -739,16 +738,16 @@ class PaymentPlanService:
             raise GraphQLError("Cannot create a follow-up for a payment plan with no unsuccessful payments")
 
         follow_up_pp = PaymentPlan.objects.create(
+            name=source_pp.name + " Follow Up",
             status=PaymentPlan.Status.OPEN,
             build_status=PaymentPlan.BuildStatus.BUILD_STATUS_OK,
             built_at=timezone.now(),
             status_date=timezone.now(),
-            # targeting_criteria=source_pp.targeting_criteria,  # copy criteria from source
+            # targeting_criteria=source_pp.targeting_criteria,  # TODO: copy criteria from source_pp?
             is_follow_up=True,
             source_payment_plan=source_pp,
             business_area=source_pp.business_area,
             created_by=user,
-            program=source_pp.program,
             program_cycle=source_pp.program_cycle,
             currency=source_pp.currency,
             dispersion_start_date=dispersion_start_date,

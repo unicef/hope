@@ -60,7 +60,7 @@ class TestMassWithdrawSudanHhs(TestCase):
             True,
         )
         self.assertEqual(
-            self.household.user_fields["withdrawn_tag"],
+            self.household.internal_data["withdrawn_tag"],
             "Received Full entitlements",
         )
         self.assertEqual(

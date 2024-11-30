@@ -59,19 +59,25 @@ class TestPaymentPlanServices(APITestCase):
         cls.dm_transfer_to_account = DeliveryMechanism.objects.get(code="transfer_to_account")
 
     def test_delete_open(self) -> None:
-        pp: PaymentPlan = PaymentPlanFactory(status=PaymentPlan.Status.OPEN, program__status=Program.ACTIVE)
+        program = ProgramFactory(status=Program.ACTIVE)
+        pp: PaymentPlan = PaymentPlanFactory(
+            status=PaymentPlan.Status.OPEN, program_cycle=program.cycles.first(), created_by=self.user
+        )
 
         pp = PaymentPlanService(payment_plan=pp).delete()
         self.assertEqual(pp.is_removed, True)
 
     def test_delete_locked(self) -> None:
-        pp = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED)
+        pp = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED, created_by=self.user)
 
         with self.assertRaises(GraphQLError):
             PaymentPlanService(payment_plan=pp).delete()
 
     def test_delete_when_its_one_pp_in_cycle(self) -> None:
-        pp = PaymentPlanFactory(status=PaymentPlan.Status.OPEN, program__status=Program.ACTIVE)
+        program = ProgramFactory(status=Program.ACTIVE)
+        pp: PaymentPlan = PaymentPlanFactory(
+            status=PaymentPlan.Status.OPEN, program_cycle=program.cycles.first(), created_by=self.user
+        )
         program_cycle = ProgramCycleFactory(status=ProgramCycle.ACTIVE, program=pp.program)
         pp.program_cycle = program_cycle
         pp.save()
@@ -85,14 +91,12 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(program_cycle.status, ProgramCycle.DRAFT)
 
     def test_delete_when_its_two_pp_in_cycle(self) -> None:
-        pp_1 = PaymentPlanFactory(status=PaymentPlan.Status.OPEN, program__status=Program.ACTIVE)
-        pp_2 = PaymentPlanFactory(status=PaymentPlan.Status.OPEN, program=pp_1.program)
-        program_cycle = ProgramCycleFactory(status=ProgramCycle.ACTIVE, program=pp_1.program)
-        pp_1.program_cycle = program_cycle
-        pp_1.save()
-        pp_1.refresh_from_db()
-        pp_2.program_cycle = program_cycle
-        pp_2.save()
+        program = ProgramFactory(status=Program.ACTIVE)
+        program_cycle = ProgramCycleFactory(status=ProgramCycle.ACTIVE, program=program)
+        pp_1: PaymentPlan = PaymentPlanFactory(
+            status=PaymentPlan.Status.OPEN, program_cycle=program_cycle, created_by=self.user
+        )
+        PaymentPlanFactory(status=PaymentPlan.Status.OPEN, program_cycle=program_cycle, created_by=self.user)
 
         self.assertEqual(pp_1.program_cycle.status, ProgramCycle.ACTIVE)
 
@@ -146,7 +150,7 @@ class TestPaymentPlanServices(APITestCase):
         with self.assertRaisesMessage(
             GraphQLError, f"Payment Plan with name: TEST_123 and program: {program.name} already exists."
         ):
-            PaymentPlanFactory(program=program, name="TEST_123")
+            PaymentPlanFactory(program_cycle=program_cycle, name="TEST_123", created_by=self.user)
             PaymentPlanService.create(
                 input_data=create_input_data, user=self.user, business_area_slug=self.business_area.slug
             )
@@ -263,7 +267,7 @@ class TestPaymentPlanServices(APITestCase):
     @freeze_time("2020-10-10")
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_update_validation_errors(self, get_exchange_rate_mock: Any) -> None:
-        pp = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED)
+        pp = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED, created_by=self.user)
 
         hoh1 = IndividualFactory(household=None)
         hoh2 = IndividualFactory(household=None)
@@ -294,8 +298,7 @@ class TestPaymentPlanServices(APITestCase):
     def test_create_follow_up_pp(self, get_exchange_rate_mock: Any) -> None:
         pp = PaymentPlanFactory(
             total_households_count=1,
-            program__cycle__start_date=timezone.datetime(2021, 6, 10, tzinfo=utc).date(),
-            program__cycle__end_date=timezone.datetime(2021, 7, 10, tzinfo=utc).date(),
+            created_by=self.user,
         )
         program = pp.program_cycle.program
         payments = []
@@ -389,7 +392,7 @@ class TestPaymentPlanServices(APITestCase):
 
         self.assertEqual(pp.follow_ups.count(), 2)
 
-        with self.assertNumQueries(46):
+        with self.assertNumQueries(47):
             prepare_follow_up_payment_plan_task(follow_up_pp_2.id)
 
         self.assertEqual(follow_up_pp_2.payment_items.count(), 1)
@@ -405,10 +408,7 @@ class TestPaymentPlanServices(APITestCase):
     def test_split(self, min_no_of_payments_in_chunk_mock: Any, get_exchange_rate_mock: Any) -> None:
         min_no_of_payments_in_chunk_mock.__get__ = mock.Mock(return_value=2)
 
-        pp = PaymentPlanFactory(
-            program__cycle__start_date=timezone.datetime(2021, 6, 10, tzinfo=utc).date(),
-            program__cycle__end_date=timezone.datetime(2021, 7, 10, tzinfo=utc).date(),
-        )
+        pp = PaymentPlanFactory(created_by=self.user)
 
         with self.assertRaisesMessage(GraphQLError, "No payments to split"):
             PaymentPlanService(pp).split(PaymentPlanSplit.SplitType.BY_COLLECTOR)
@@ -514,9 +514,8 @@ class TestPaymentPlanServices(APITestCase):
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_send_to_payment_gateway(self, get_exchange_rate_mock: Any) -> None:
         pp = PaymentPlanFactory(
-            program__cycle__start_date=timezone.datetime(2021, 6, 10, tzinfo=utc).date(),
-            program__cycle__end_date=timezone.datetime(2021, 7, 10, tzinfo=utc).date(),
             status=PaymentPlan.Status.ACCEPTED,
+            created_by=self.user,
         )
         pp.background_action_status_send_to_payment_gateway()
         pp.save()

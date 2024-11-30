@@ -3,10 +3,7 @@ from decimal import Decimal
 from typing import Any
 from unittest import mock
 
-from django.utils import timezone
-
 import pytest
-from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -72,11 +69,7 @@ class TestPaymentGatewayService(APITestCase):
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.user = UserFactory.create()
 
-        cls.pp = PaymentPlanFactory(
-            program__cycle__start_date=timezone.datetime(2021, 6, 10, tzinfo=utc).date(),
-            program__cycle__end_date=timezone.datetime(2021, 7, 10, tzinfo=utc).date(),
-            status=PaymentPlan.Status.ACCEPTED,
-        )
+        cls.pp = PaymentPlanFactory(status=PaymentPlan.Status.ACCEPTED, created_by=cls.user)
         cls.pg_fsp = FinancialServiceProviderFactory(
             name="Western Union",
             communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,

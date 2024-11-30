@@ -9,12 +9,7 @@ from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.payment.fixtures import (
-    CashPlanFactory,
-    PaymentFactory,
-    PaymentPlanFactory,
-    PaymentRecordFactory,
-)
+from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
@@ -167,47 +162,47 @@ class TestDashboardQueries(APITestCase):
                 "male_age_group_60_count": 0,
             },
         )
-        cash_plan1 = CashPlanFactory(program=cls.program_one)
+        payment_plan1 = PaymentPlanFactory(program_cycle=cls.program_one.cycles.first())
         delivery_date = timezone.datetime(2021, 10, 10, tzinfo=utc)
-        PaymentRecordFactory(
-            parent=cash_plan1,
+        PaymentFactory(
+            parent=payment_plan1,
             delivery_date=delivery_date,
             household=household1,
             delivered_quantity_usd=100,
             currency="PLN",
         )
-        PaymentRecordFactory(
-            parent=cash_plan1,
+        PaymentFactory(
+            parent=payment_plan1,
             delivery_date=delivery_date,
             household=household2,
             delivered_quantity_usd=100,
             currency="PLN",
         )
-        PaymentRecordFactory(
-            parent=cash_plan1,
+        PaymentFactory(
+            parent=payment_plan1,
             delivery_date=delivery_date,
             household=household3,
             delivered_quantity_usd=100,
             currency="PLN",
         )
 
-        payment_plan1 = PaymentPlanFactory(program=cls.program_two)
+        payment_plan2 = PaymentPlanFactory(program_cycle=cls.program_two.cycles.first())
         PaymentFactory(
-            parent=payment_plan1,
+            parent=payment_plan2,
             delivery_date=delivery_date,
             delivered_quantity_usd=100,
             household=household1,
             currency="PLN",
         )
         PaymentFactory(
-            parent=payment_plan1,
+            parent=payment_plan2,
             delivery_date=delivery_date,
             delivered_quantity_usd=100,
             household=household2,
             currency="PLN",
         )
         PaymentFactory(
-            parent=payment_plan1,
+            parent=payment_plan2,
             delivery_date=delivery_date,
             delivered_quantity_usd=100,
             household=household4,

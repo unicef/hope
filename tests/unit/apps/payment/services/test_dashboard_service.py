@@ -10,11 +10,9 @@ from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.fixtures import (
-    CashPlanFactory,
     FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
-    PaymentRecordFactory,
     generate_delivery_mechanisms,
 )
 from hct_mis_api.apps.payment.models import DeliveryMechanism, GenericPayment
@@ -81,9 +79,9 @@ class TestPaymentVerificationChartQuery:
             household_args={"size": 2, "business_area": business_area, "admin_area": admin_area3, "program": program},
         )
 
-        cash_plan = CashPlanFactory(program=program, business_area=business_area)
-        PaymentRecordFactory(
-            parent=cash_plan,
+        payment_plan1 = PaymentPlanFactory(program_cycle=program.cycles.first(), business_area=business_area)
+        PaymentFactory(
+            parent=payment_plan1,
             delivery_date=timezone.datetime(2021, 10, 10, tzinfo=utc),
             household=household1,
             delivery_type=self.dm_cash,
@@ -93,8 +91,8 @@ class TestPaymentVerificationChartQuery:
             business_area=business_area,
             currency="PLN",
         )
-        PaymentRecordFactory(
-            parent=cash_plan,
+        PaymentFactory(
+            parent=payment_plan1,
             delivery_date=timezone.datetime(2021, 10, 10, tzinfo=utc),
             household=household2,
             delivery_type=self.dm_voucher,
@@ -104,8 +102,8 @@ class TestPaymentVerificationChartQuery:
             business_area=business_area,
             currency="PLN",
         )
-        PaymentRecordFactory(
-            parent=cash_plan,
+        PaymentFactory(
+            parent=payment_plan1,
             delivery_date=timezone.datetime(2021, 11, 10, tzinfo=utc),
             household=household3,
             delivery_type=self.dm_cash,
@@ -116,9 +114,9 @@ class TestPaymentVerificationChartQuery:
             currency="PLN",
         )
 
-        payment_plan = PaymentPlanFactory(program=program, business_area=business_area)
+        payment_plan2 = PaymentPlanFactory(program_cycle=program.cycles.first(), business_area=business_area)
         PaymentFactory(
-            parent=payment_plan,
+            parent=payment_plan2,
             delivery_date=timezone.datetime(2021, 10, 10, tzinfo=utc),
             delivery_type=self.dm_cash,
             delivered_quantity=10 + num,
@@ -130,7 +128,7 @@ class TestPaymentVerificationChartQuery:
             financial_service_provider=fsp,
         )
         PaymentFactory(
-            parent=payment_plan,
+            parent=payment_plan2,
             delivery_date=timezone.datetime(2021, 10, 10, tzinfo=utc),
             delivery_type=self.dm_voucher,
             delivered_quantity=20 + num,
@@ -142,7 +140,7 @@ class TestPaymentVerificationChartQuery:
             financial_service_provider=fsp,
         )
         PaymentFactory(
-            parent=payment_plan,
+            parent=payment_plan2,
             delivery_date=timezone.datetime(2021, 11, 10, tzinfo=utc),
             delivery_type=self.dm_cash,
             delivered_quantity=30 + num,

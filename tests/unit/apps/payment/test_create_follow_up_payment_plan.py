@@ -34,7 +34,9 @@ class TestCreateFollowUpPaymentPlan(APITestCase):
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.user = UserFactory.create()
         cls.create_user_role_with_permissions(cls.user, [Permissions.PM_CREATE], cls.business_area)
-        cls.payment_plan = PaymentPlanFactory(business_area=cls.business_area, status=PaymentPlan.Status.ACCEPTED)
+        cls.payment_plan = PaymentPlanFactory(
+            business_area=cls.business_area, status=PaymentPlan.Status.ACCEPTED, created_by=cls.user
+        )
         PaymentFactory.create_batch(
             5, parent=cls.payment_plan, excluded=False, currency="PLN", status=Payment.STATUS_ERROR
         )

@@ -2,7 +2,7 @@ import io
 import logging
 from datetime import date, datetime
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 from zipfile import BadZipFile
 
 from django.db import transaction
@@ -45,14 +45,12 @@ from hct_mis_api.apps.payment.inputs import (
     UpdatePaymentPlanInput,
 )
 from hct_mis_api.apps.payment.models import (
-    CashPlan,
     DeliveryMechanism,
     DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
     Payment,
     PaymentPlan,
     PaymentPlanSplit,
-    PaymentRecord,
     PaymentVerification,
     PaymentVerificationPlan,
 )
@@ -60,7 +58,6 @@ from hct_mis_api.apps.payment.schema import (
     GenericPaymentPlanNode,
     PaymentNode,
     PaymentPlanNode,
-    PaymentRecordNode,
     PaymentVerificationNode,
 )
 from hct_mis_api.apps.payment.services.mark_as_failed import (
@@ -120,9 +117,7 @@ class CreateVerificationPlanMutation(PermissionMutation):
     @transaction.atomic
     @raise_program_status_is(Program.FINISHED)
     def mutate(cls, root: Any, info: Any, input: Dict, **kwargs: Any) -> "CreateVerificationPlanMutation":
-        payment_plan_object: Union["CashPlan", "PaymentPlan"] = get_payment_plan_object(
-            input["cash_or_payment_plan_id"]
-        )
+        payment_plan_object: "PaymentPlan" = get_payment_plan_object(input["cash_or_payment_plan_id"])
 
         check_concurrency_version_in_mutation(kwargs.get("version"), payment_plan_object)
 
@@ -167,7 +162,7 @@ class EditPaymentVerificationMutation(PermissionMutation):
 
         payment_verification_plan = VerificationPlanCrudServices.update(payment_verification_plan, input)
 
-        payment_verification_plan.payment_plan_obj.refresh_from_db()
+        payment_verification_plan.payment_plan.refresh_from_db()
         log_create(
             PaymentVerificationPlan.ACTIVITY_LOG_MAPPING,
             "business_area",
@@ -176,7 +171,7 @@ class EditPaymentVerificationMutation(PermissionMutation):
             old_payment_verification_plan,
             payment_verification_plan,
         )
-        return cls(payment_plan=payment_verification_plan.payment_plan_obj)
+        return cls(payment_plan=payment_verification_plan.payment_plan)
 
 
 class ActivatePaymentVerificationPlan(PermissionMutation, ValidationErrorMutationMixin):
@@ -209,7 +204,7 @@ class ActivatePaymentVerificationPlan(PermissionMutation, ValidationErrorMutatio
             old_payment_verification_plan,
             payment_verification_plan,
         )
-        return ActivatePaymentVerificationPlan(payment_plan=payment_verification_plan.payment_plan_obj)
+        return ActivatePaymentVerificationPlan(payment_plan=payment_verification_plan.payment_plan)
 
 
 class FinishPaymentVerificationPlan(PermissionMutation):
@@ -243,7 +238,7 @@ class FinishPaymentVerificationPlan(PermissionMutation):
             old_payment_verification_plan,
             payment_verification_plan,
         )
-        return FinishPaymentVerificationPlan(payment_plan=payment_verification_plan.payment_plan_obj)
+        return FinishPaymentVerificationPlan(payment_plan=payment_verification_plan.payment_plan)
 
 
 class DiscardPaymentVerificationPlan(PermissionMutation):
@@ -278,7 +273,7 @@ class DiscardPaymentVerificationPlan(PermissionMutation):
             old_payment_verification_plan,
             payment_verification_plan,
         )
-        return cls(payment_plan=payment_verification_plan.payment_plan_obj)
+        return cls(payment_plan=payment_verification_plan.payment_plan)
 
 
 class InvalidPaymentVerificationPlan(PermissionMutation):
@@ -312,7 +307,7 @@ class InvalidPaymentVerificationPlan(PermissionMutation):
             old_payment_verification_plan,
             payment_verification_plan,
         )
-        return cls(payment_plan=payment_verification_plan.payment_plan_obj)
+        return cls(payment_plan=payment_verification_plan.payment_plan)
 
 
 class DeletePaymentVerificationPlan(PermissionMutation):
@@ -330,7 +325,7 @@ class DeletePaymentVerificationPlan(PermissionMutation):
     ) -> "DeletePaymentVerificationPlan":
         payment_verification_plan_id = decode_id_string(payment_verification_plan_id)
         payment_verification_plan = get_object_or_404(PaymentVerificationPlan, id=payment_verification_plan_id)
-        payment_plan = payment_verification_plan.payment_plan_obj
+        payment_plan = payment_verification_plan.payment_plan
         program_id = getattr(payment_verification_plan.get_program, "pk", None)
 
         check_concurrency_version_in_mutation(kwargs.get("version"), payment_verification_plan)
@@ -393,8 +388,8 @@ class UpdatePaymentVerificationStatusAndReceivedAmount(PermissionMutation):
             raise GraphQLError(
                 f"You can only update status of payment verification for {PaymentVerificationPlan.STATUS_ACTIVE} cash plan verification"
             )
-        delivered_amount = payment_verification.payment_obj.delivered_quantity
-        if status == PaymentVerification.STATUS_PENDING and received_amount is not None:
+        delivered_amount = payment_verification.payment.delivered_quantity
+        if status == PaymentVerification.STATUS_PENDING and received_amount is not None:  # pragma: no cover
             logger.error(
                 f"Wrong status {PaymentVerification.STATUS_PENDING} when received_amount ({received_amount}) is not empty",
             )
@@ -495,7 +490,7 @@ class UpdatePaymentVerificationReceivedAndReceivedAmount(PermissionMutation):
             )
         if not payment_verification.is_manually_editable:
             log_and_raise("You can only edit payment verification in first 10 minutes")
-        delivered_amount = payment_verification.payment_obj.delivered_quantity
+        delivered_amount = payment_verification.payment.delivered_quantity
 
         if received is None and received_amount is not None and received_amount == 0:
             log_and_raise("You can't set received_amount {received_amount} and not set received to NO")
@@ -569,7 +564,7 @@ class ExportXlsxPaymentVerificationPlanFile(PermissionMutation):
         payment_verification_plan.xlsx_file_exporting = True
         payment_verification_plan.save()
         create_payment_verification_plan_xlsx.delay(payment_verification_plan_id, info.context.user.pk)
-        return cls(payment_plan=payment_verification_plan.payment_plan_obj)
+        return cls(payment_plan=payment_verification_plan.payment_plan)
 
 
 class ImportXlsxPaymentVerificationPlanFile(PermissionMutation):
@@ -605,29 +600,7 @@ class ImportXlsxPaymentVerificationPlanFile(PermissionMutation):
         calculate_counts(payment_verification_plan)
         payment_verification_plan.xlsx_file_imported = True
         payment_verification_plan.save()
-        return ImportXlsxPaymentVerificationPlanFile(payment_verification_plan.payment_plan_obj, import_service.errors)
-
-
-class MarkPaymentRecordAsFailedMutation(PermissionMutation):
-    payment_record = graphene.Field(PaymentRecordNode)
-
-    class Arguments:
-        payment_record_id = graphene.ID(required=True)
-
-    @classmethod
-    @is_authenticated
-    @transaction.atomic
-    def mutate(
-        cls,
-        root: Any,
-        info: Any,
-        payment_record_id: str,
-        **kwargs: Any,
-    ) -> "MarkPaymentRecordAsFailedMutation":
-        payment_record = get_object_or_404(PaymentRecord, id=decode_id_string(payment_record_id))
-        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_MARK_AS_FAILED, payment_record.business_area)
-        mark_as_failed(payment_record)
-        return cls(payment_record)
+        return ImportXlsxPaymentVerificationPlanFile(payment_verification_plan.payment_plan, import_service.errors)
 
 
 class MarkPaymentAsFailedMutation(PermissionMutation):
@@ -650,33 +623,6 @@ class MarkPaymentAsFailedMutation(PermissionMutation):
         cls.has_permission(info, Permissions.PM_MARK_PAYMENT_AS_FAILED, payment.business_area)
         mark_as_failed(payment)
         return cls(payment)
-
-
-class RevertMarkPaymentRecordAsFailedMutation(PermissionMutation):
-    payment_record = graphene.Field(PaymentRecordNode)
-
-    class Arguments:
-        payment_record_id = graphene.ID(required=True)
-        delivered_quantity = graphene.Decimal(required=True)
-        delivery_date = graphene.Date(required=True)
-
-    @classmethod
-    @is_authenticated
-    @transaction.atomic
-    def mutate(
-        cls,
-        root: Any,
-        info: Any,
-        payment_record_id: str,
-        delivered_quantity: Decimal,
-        delivery_date: date,
-        **kwargs: Any,
-    ) -> "RevertMarkPaymentRecordAsFailedMutation":
-        payment_record = get_object_or_404(PaymentRecord, id=decode_id_string(payment_record_id))
-        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_MARK_AS_FAILED, payment_record.business_area)
-        delivery_date = datetime.combine(delivery_date, datetime.min.time())
-        revert_mark_as_failed(payment_record, delivered_quantity, delivery_date)
-        return cls(payment_record)
 
 
 class RevertMarkPaymentAsFailedMutation(PermissionMutation):
@@ -739,7 +685,7 @@ class ActionPaymentPlanMutation(PermissionMutation):
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
             user=info.context.user,
-            programs=payment_plan.get_program.pk,
+            programs=payment_plan.program.pk,
             old_object=old_payment_plan,
             new_object=payment_plan,
         )
@@ -795,7 +741,7 @@ class CreatePaymentPlanMutation(PermissionMutation):
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
             user=info.context.user,
-            programs=payment_plan.get_program.pk,
+            programs=payment_plan.program.pk,
             new_object=payment_plan,
         )
         return cls(payment_plan=payment_plan)
@@ -855,7 +801,7 @@ class UpdatePaymentPlanMutation(PermissionMutation):
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
             user=info.context.user,
-            programs=payment_plan.get_program.pk,
+            programs=payment_plan.program.pk,
             old_object=old_payment_plan,
             new_object=payment_plan,
         )
@@ -884,7 +830,7 @@ class DeletePaymentPlanMutation(PermissionMutation):
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
             user=info.context.user,
-            programs=payment_plan.get_program.pk,
+            programs=payment_plan.program.pk,
             old_object=old_payment_plan,
             new_object=payment_plan,
         )
@@ -923,7 +869,7 @@ class ExportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
             user=info.context.user,
-            programs=payment_plan.get_program.pk,
+            programs=payment_plan.program.pk,
             old_object=old_payment_plan,
             new_object=payment_plan,
         )
@@ -1101,7 +1047,7 @@ class ImportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
                 mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
                 business_area_field="business_area",
                 user=info.context.user,
-                programs=payment_plan.get_program.pk,
+                programs=payment_plan.program.pk,
                 old_object=old_payment_plan,
                 new_object=payment_plan,
             )
@@ -1154,7 +1100,7 @@ class ImportXLSXPaymentPlanPaymentListPerFSPMutation(PermissionMutation):
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
             user=info.context.user,
-            programs=payment_plan.get_program.pk,
+            programs=payment_plan.program.pk,
             old_object=old_payment_plan,
             new_object=payment_plan,
         )
@@ -1203,7 +1149,7 @@ class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",
             user=info.context.user,
-            programs=payment_plan.get_program.pk,
+            programs=payment_plan.program.pk,
             old_object=old_payment_plan,
             new_object=payment_plan,
         )
@@ -1292,7 +1238,6 @@ class ExcludeHouseholdsMutation(PermissionMutation):
 
 
 class CreateFollowUpPaymentPlanMutation(PermissionMutation):
-    # TODO: how about TargetCriteria for FollowUpPP ??
     payment_plan = graphene.Field(PaymentPlanNode)
 
     class Arguments:
@@ -1505,13 +1450,6 @@ class Mutations(graphene.ObjectType):
     invalid_payment_verification_plan = InvalidPaymentVerificationPlan.Field()
     delete_payment_verification_plan = DeletePaymentVerificationPlan.Field()
     update_payment_verification_status_and_received_amount = UpdatePaymentVerificationStatusAndReceivedAmount.Field()
-    update_payment_verification_received_and_received_amount = (
-        UpdatePaymentVerificationReceivedAndReceivedAmount.Field()
-    )
-
-    # Payment
-    mark_payment_record_as_failed = MarkPaymentRecordAsFailedMutation.Field()
-    revert_mark_payment_record_as_failed = RevertMarkPaymentRecordAsFailedMutation.Field()
     mark_payment_as_failed = MarkPaymentAsFailedMutation.Field()
     revert_mark_payment_as_failed = RevertMarkPaymentAsFailedMutation.Field()
 

@@ -871,7 +871,7 @@ class TestPaymentPlanReconciliation(APITestCase):
         expected_delivered_quantity: Decimal,
         expected_status: str,
     ) -> None:
-        service = XlsxPaymentPlanImportPerFspService(PaymentPlanFactory(), None)  # type: ignore
+        service = XlsxPaymentPlanImportPerFspService(PaymentPlanFactory(created_by=self.user), None)  # type: ignore
 
         if not expected_status:
             with self.assertRaisesMessage(
@@ -888,11 +888,16 @@ class TestPaymentPlanReconciliation(APITestCase):
             self.assertEqual(value, expected_delivered_quantity)
 
     def test_xlsx_payment_plan_import_per_fsp_service_import_row(self) -> None:
-        pp = PaymentPlanFactory(status=PaymentPlan.Status.FINISHED)
+        pp = PaymentPlanFactory(
+            status=PaymentPlan.Status.FINISHED,
+            created_by=self.user,
+        )
         pp.refresh_from_db()
-        PaymentVerificationSummaryFactory(payment_plan_obj=pp)
+        pvs = PaymentVerificationSummaryFactory()
+        pvs.payment_plan = pp
+        pvs.save()
         pvp = PaymentVerificationPlanFactory(
-            payment_plan_obj=pp,
+            payment_plan=pp,
             verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL,
             status=PaymentVerificationPlan.STATUS_ACTIVE,
         )
@@ -938,19 +943,19 @@ class TestPaymentPlanReconciliation(APITestCase):
         )
         verification_1 = PaymentVerificationFactory(
             payment_verification_plan=pvp,
-            payment_obj=payment_1,
+            payment=payment_1,
             status=PaymentVerification.STATUS_RECEIVED_WITH_ISSUES,
             received_amount=999,
         )
         verification_2 = PaymentVerificationFactory(
             payment_verification_plan=pvp,
-            payment_obj=payment_2,
+            payment=payment_2,
             status=PaymentVerification.STATUS_RECEIVED,
             received_amount=500,
         )
         verification_3 = PaymentVerificationFactory(
             payment_verification_plan=pvp,
-            payment_obj=payment_3,
+            payment=payment_3,
             status=PaymentVerification.STATUS_PENDING,
             received_amount=None,
         )
@@ -1003,7 +1008,10 @@ class TestPaymentPlanReconciliation(APITestCase):
         self.assertEqual(verification_3.status, PaymentVerification.STATUS_PENDING)
 
     def test_payment_plan_is_fully_delivered(self) -> None:
-        payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.ACCEPTED)
+        payment_plan = PaymentPlanFactory(
+            status=PaymentPlan.Status.ACCEPTED,
+            created_by=self.user,
+        )
         for hh, ind in [
             (self.household_1, self.individual_1),
             (self.household_2, self.individual_2),
@@ -1036,7 +1044,11 @@ class TestPaymentPlanReconciliation(APITestCase):
 
     @freeze_time("2023-12-12")
     def test_follow_up_pp_entitlements_can_be_changed_with_steficon_rule(self) -> None:
-        pp = PaymentPlanFactory(is_follow_up=True, status=PaymentPlan.Status.LOCKED)
+        pp = PaymentPlanFactory(
+            is_follow_up=True,
+            status=PaymentPlan.Status.LOCKED,
+            created_by=self.user,
+        )
         pp.unicef_id = "PP-0060-23-00000002"
         pp.save()
 
@@ -1052,7 +1064,10 @@ class TestPaymentPlanReconciliation(APITestCase):
         )
 
     def test_apply_steficon_rule_with_wrong_payment_plan_status(self) -> None:
-        payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.OPEN)
+        payment_plan = PaymentPlanFactory(
+            status=PaymentPlan.Status.OPEN,
+            created_by=self.user,
+        )
         rule = RuleFactory(name="SomeRule")
 
         self.snapshot_graphql_request(
@@ -1081,7 +1096,10 @@ class TestPaymentPlanReconciliation(APITestCase):
         )
 
     def test_error_message_when_engine_rule_not_enabled_or_deprecated(self) -> None:
-        payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED)
+        payment_plan = PaymentPlanFactory(
+            status=PaymentPlan.Status.LOCKED,
+            created_by=self.user,
+        )
         rule_not_enabled = RuleFactory(enabled=False)
         rule_deprecated = RuleFactory(deprecated=True)
 
@@ -1097,7 +1115,11 @@ class TestPaymentPlanReconciliation(APITestCase):
 
     def test_follow_up_pp_entitlements_updated_with_file(self) -> None:
         content = Path(f"{settings.TESTS_ROOT}/apps/payment/test_file/pp_payment_list_valid.xlsx").read_bytes()
-        pp = PaymentPlanFactory(is_follow_up=True, status=PaymentPlan.Status.LOCKED)
+        pp = PaymentPlanFactory(
+            is_follow_up=True,
+            status=PaymentPlan.Status.LOCKED,
+            created_by=self.user,
+        )
 
         self.snapshot_graphql_request(
             request_string=IMPORT_XLSX_PP_MUTATION,
@@ -1110,7 +1132,10 @@ class TestPaymentPlanReconciliation(APITestCase):
 
     def test_correct_message_displayed_when_file_is_protected(self) -> None:
         content = Path(f"{settings.TESTS_ROOT}/apps/payment/test_file/import_file_protected.xlsx").read_bytes()
-        pp = PaymentPlanFactory(status=PaymentPlan.Status.ACCEPTED)
+        pp = PaymentPlanFactory(
+            status=PaymentPlan.Status.ACCEPTED,
+            created_by=self.user,
+        )
 
         self.snapshot_graphql_request(
             request_string=IMPORT_XLSX_PER_FSP_MUTATION,
@@ -1122,7 +1147,10 @@ class TestPaymentPlanReconciliation(APITestCase):
         )
 
     def test_import_with_wrong_payment_plan_status(self) -> None:
-        payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.OPEN)
+        payment_plan = PaymentPlanFactory(
+            status=PaymentPlan.Status.OPEN,
+            created_by=self.user,
+        )
 
         self.assertEqual(payment_plan.status, PaymentPlan.Status.OPEN)
         self.snapshot_graphql_request(
@@ -1135,7 +1163,10 @@ class TestPaymentPlanReconciliation(APITestCase):
         )
 
     def test_assign_fsp_mutation_payment_plan_wrong_status(self) -> None:
-        payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.OPEN)
+        payment_plan = PaymentPlanFactory(
+            status=PaymentPlan.Status.OPEN,
+            created_by=self.user,
+        )
         fsp = FinancialServiceProviderFactory()
         encoded_santander_fsp_id = encode_id_base64(fsp.id, "FinancialServiceProvider")
 

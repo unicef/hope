@@ -71,7 +71,7 @@ class TestPaymentSignature(APITestCase):
         return sha1.hexdigest()
 
     def test_payment_single_signature(self) -> None:
-        pp: PaymentPlan = PaymentPlanFactory(status=PaymentPlan.Status.OPEN)
+        pp: PaymentPlan = PaymentPlanFactory(status=PaymentPlan.Status.OPEN, created_by=self.user)
         (payment,) = PaymentFactory.create_batch(1, parent=pp)
         create_payment_plan_snapshot_data(pp)
         payment.refresh_from_db()
@@ -79,7 +79,7 @@ class TestPaymentSignature(APITestCase):
         self.assertEqual(payment.signature_hash, self.calculate_hash_manually(payment))
 
     def test_bulk_update(self) -> None:
-        pp: PaymentPlan = PaymentPlanFactory(status=PaymentPlan.Status.OPEN)
+        pp: PaymentPlan = PaymentPlanFactory(status=PaymentPlan.Status.OPEN, created_by=self.user)
         (payment,) = PaymentFactory.create_batch(1, parent=pp)
         create_payment_plan_snapshot_data(pp)
         payment.refresh_from_db()
@@ -93,7 +93,7 @@ class TestPaymentSignature(APITestCase):
         self.assertEqual(payment.signature_hash, self.calculate_hash_manually(payment))
 
     def test_bulk_create(self) -> None:
-        pp: PaymentPlan = PaymentPlanFactory(status=PaymentPlan.Status.OPEN)
+        pp: PaymentPlan = PaymentPlanFactory(status=PaymentPlan.Status.OPEN, created_by=self.user)
 
         (payment,) = PaymentFactory.create_batch(1, parent=pp)
         creation_dict = payment.__dict__.copy()

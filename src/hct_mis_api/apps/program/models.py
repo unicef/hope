@@ -2,7 +2,7 @@ import random
 import string
 from datetime import date
 from decimal import Decimal
-from typing import Any, Collection, Optional, Union
+from typing import Any, Collection, Optional
 
 from django.conf import settings
 from django.contrib.postgres.fields import CICharField
@@ -24,9 +24,8 @@ from rest_framework.exceptions import ValidationError as DRFValidationError
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.models import DataCollectingType
-from hct_mis_api.apps.core.querysets import ExtendedQuerySetSequence
 from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.payment.models import Payment
+from hct_mis_api.apps.payment.models import Payment, PaymentPlan
 from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
     AdminUrlMixin,
@@ -223,7 +222,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         return programme_code
 
     @staticmethod
-    def get_total_number_of_households_from_payments(qs: Union[models.QuerySet, ExtendedQuerySetSequence]) -> int:
+    def get_total_number_of_households_from_payments(qs: models.QuerySet[PaymentPlan]) -> int:
         return (
             qs.filter(**{"payment_items__delivered_quantity__gt": 0})
             .distinct("payment_items__household__unicef_id")

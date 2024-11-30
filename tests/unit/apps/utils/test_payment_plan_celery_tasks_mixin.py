@@ -31,7 +31,10 @@ class TestPaymentPlanCeleryTasksMixin(TestCase):
         cls.user.is_active = True
         cls.user.save()
 
-        cls.payment_plan = PaymentPlanFactory(program=cls.program)
+        cls.payment_plan = PaymentPlanFactory(
+            program_cycle=cls.program.cycles.first(),
+            created_by=cls.user,
+        )
 
     def setUp(self) -> None:
         self.url = reverse("admin:payment_paymentplan_change", args=[self.payment_plan.id])
@@ -79,7 +82,8 @@ class TestPaymentPlanCeleryTasksMixin(TestCase):
         self.client.login(username=self.user.username, password=self.password)
         payment_plan = PaymentPlanFactory(
             status=PaymentPlan.Status.OPEN,
-            program=self.program,
+            program_cycle=self.program.cycles.first(),
+            created_by=self.user,
         )
         payment_plan.refresh_from_db()
         response = self.client.post(
@@ -98,7 +102,8 @@ class TestPaymentPlanCeleryTasksMixin(TestCase):
         self.client.login(username=self.user.username, password=self.password)
         payment_plan = PaymentPlanFactory(
             status=PaymentPlan.Status.LOCKED,
-            program=self.program,
+            program_cycle=self.program.cycles.first(),
+            created_by=self.user,
         )
         payment_plan.refresh_from_db()
         response = self.client.post(
@@ -117,7 +122,8 @@ class TestPaymentPlanCeleryTasksMixin(TestCase):
         self.client.login(username=self.user.username, password=self.password)
         payment_plan = PaymentPlanFactory(
             status=PaymentPlan.Status.OPEN,
-            program=self.program,
+            program_cycle=self.program.cycles.first(),
+            created_by=self.user,
         )
         payment_plan.refresh_from_db()
         # set the cache to simulate an already running task

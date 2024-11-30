@@ -9,7 +9,8 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.payment.fixtures import (
-    CashPlanFactory,
+    PaymentPlanFactory,
+    PaymentVerificationSummaryFactory,
     create_payment_verification_plan_with_status,
 )
 from hct_mis_api.apps.payment.models import PaymentVerificationPlan
@@ -52,12 +53,14 @@ class TestDeleteVerificationMutation(APITestCase):
             targeting_criteria=(TargetingCriteriaFactory()),
             business_area=cls.business_area,
         )
-        cls.cash_plan = CashPlanFactory(
+        cls.payment_plan = PaymentPlanFactory(
             name="TEST",
-            program=cls.program,
+            program_cycle=cls.program.cycles.first(),
             business_area=cls.business_area,
+            created_by=cls.user,
         )
-        cls.verification = cls.cash_plan.payment_verification_plan.first()
+        PaymentVerificationSummaryFactory(payment_plan=cls.payment_plan)
+        cls.verification = cls.payment_plan.payment_verification_plans.first()
 
     @parameterized.expand(
         [
@@ -103,7 +106,7 @@ class TestDeleteVerificationMutation(APITestCase):
 
     def create_pending_payment_verification_plan(self) -> PaymentVerificationPlan:
         return create_payment_verification_plan_with_status(
-            self.cash_plan,
+            self.payment_plan,
             self.user,
             self.business_area,
             self.program,
@@ -112,7 +115,7 @@ class TestDeleteVerificationMutation(APITestCase):
 
     def create_active_payment_verification_plan(self) -> PaymentVerificationPlan:
         return create_payment_verification_plan_with_status(
-            self.cash_plan,
+            self.payment_plan,
             self.user,
             self.business_area,
             self.program,
