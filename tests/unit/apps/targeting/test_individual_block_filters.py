@@ -15,20 +15,22 @@ from hct_mis_api.apps.household.models import (
     Household,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.fixtures import DeliveryMechanismDataFactory
+from hct_mis_api.apps.payment.fixtures import (
+    DeliveryMechanismDataFactory,
+    PaymentPlanFactory,
+)
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.targeting.choices import FlexFieldClassification
+from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory
 from hct_mis_api.apps.targeting.models import (
     TargetingCollectorBlockRuleFilter,
     TargetingCollectorRuleFilterBlock,
-    TargetingCriteria,
     TargetingCriteriaQueryingBase,
     TargetingCriteriaRule,
     TargetingCriteriaRuleQueryingBase,
     TargetingIndividualBlockRuleFilter,
     TargetingIndividualRuleFilterBlock,
     TargetingIndividualRuleFilterBlockBase,
-    TargetPopulation,
 )
 from hct_mis_api.apps.targeting.services.targeting_service import (
     TargetingCollectorRuleFilterBlockBase,
@@ -46,6 +48,7 @@ class TestIndividualBlockFilter(TestCase):
         (household, individuals) = create_household_and_individuals(
             {
                 "business_area": cls.business_area,
+                "program": cls.program,
             },
             [{"sex": "MALE", "marital_status": "MARRIED"}],
         )
@@ -54,6 +57,7 @@ class TestIndividualBlockFilter(TestCase):
         (household, individuals) = create_household_and_individuals(
             {
                 "business_area": cls.business_area,
+                "program": cls.program,
             },
             [{"sex": "MALE", "marital_status": "SINGLE"}, {"sex": "FEMALE", "marital_status": "MARRIED"}],
         )
@@ -62,10 +66,8 @@ class TestIndividualBlockFilter(TestCase):
 
     def test_all_individuals_are_female(self) -> None:
         queryset = Household.objects.all()
-        tp = TargetPopulation()
-        tc = TargetingCriteria()
-        tc.target_population = tp
-        tc.save()
+        tc = TargetingCriteriaFactory()
+        PaymentPlanFactory(targeting_criteria=tc, program=self.program)
         tcr = TargetingCriteriaRule()
         tcr.targeting_criteria = tc
         tcr.save()
@@ -153,10 +155,8 @@ class TestIndividualBlockFilter(TestCase):
         self.assertEqual(query.first().id, self.household_2_indiv.id)
 
     def test_filter_on_flex_field_not_exist(self) -> None:
-        tp = TargetPopulation(program=self.program)
-        tc = TargetingCriteria()
-        tc.target_population = tp
-        tc.save()
+        tc = TargetingCriteriaFactory()
+        PaymentPlanFactory(targeting_criteria=tc, program=self.program)
         tcr = TargetingCriteriaRule()
         tcr.targeting_criteria = tc
         tcr.save()
@@ -182,10 +182,8 @@ class TestIndividualBlockFilter(TestCase):
         )
 
     def test_filter_on_flex_field(self) -> None:
-        tp = TargetPopulation(program=self.program)
-        tc = TargetingCriteria()
-        tc.target_population = tp
-        tc.save()
+        tc = TargetingCriteriaFactory()
+        PaymentPlanFactory(targeting_criteria=tc, program=self.program)
         tcr = TargetingCriteriaRule()
         tcr.targeting_criteria = tc
         tcr.save()
@@ -220,10 +218,8 @@ class TestIndividualBlockFilter(TestCase):
         self.assertEqual(query.first().id, self.household_1_indiv.id)
 
     def test_filter_on_pdu_flex_field_not_exist(self) -> None:
-        tp = TargetPopulation(program=self.program)
-        tc = TargetingCriteria()
-        tc.target_population = tp
-        tc.save()
+        tc = TargetingCriteriaFactory()
+        PaymentPlanFactory(targeting_criteria=tc, program=self.program)
         tcr = TargetingCriteriaRule()
         tcr.targeting_criteria = tc
         tcr.save()
@@ -250,10 +246,8 @@ class TestIndividualBlockFilter(TestCase):
         )
 
     def test_filter_on_pdu_flex_field_no_round_number(self) -> None:
-        tp = TargetPopulation(program=self.program)
-        tc = TargetingCriteria()
-        tc.target_population = tp
-        tc.save()
+        tc = TargetingCriteriaFactory()
+        PaymentPlanFactory(targeting_criteria=tc, program=self.program)
         tcr = TargetingCriteriaRule()
         tcr.targeting_criteria = tc
         tcr.save()
@@ -289,10 +283,8 @@ class TestIndividualBlockFilter(TestCase):
         )
 
     def test_filter_on_pdu_flex_field_incorrect_round_number(self) -> None:
-        tp = TargetPopulation(program=self.program)
-        tc = TargetingCriteria()
-        tc.target_population = tp
-        tc.save()
+        tc = TargetingCriteriaFactory()
+        PaymentPlanFactory(targeting_criteria=tc, program=self.program)
         tcr = TargetingCriteriaRule()
         tcr.targeting_criteria = tc
         tcr.save()
@@ -329,10 +321,8 @@ class TestIndividualBlockFilter(TestCase):
         )
 
     def test_filter_on_pdu_flex_field(self) -> None:
-        tp = TargetPopulation(program=self.program)
-        tc = TargetingCriteria()
-        tc.target_population = tp
-        tc.save()
+        tc = TargetingCriteriaFactory()
+        PaymentPlanFactory(targeting_criteria=tc, program=self.program)
         tcr = TargetingCriteriaRule()
         tcr.targeting_criteria = tc
         tcr.save()
@@ -389,10 +379,8 @@ class TestIndividualBlockFilter(TestCase):
             individual=collector, is_valid=True, data={"delivery_data_field__random_name": "test123"}
         )
         # Target population
-        tp = TargetPopulation(program=hh.program)
-        tc = TargetingCriteria()
-        tc.target_population = tp
-        tc.save()
+        tc = TargetingCriteriaFactory()
+        PaymentPlanFactory(targeting_criteria=tc, program=self.program)
         tcr = TargetingCriteriaRule()
         tcr.targeting_criteria = tc
         tcr.save()

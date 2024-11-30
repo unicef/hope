@@ -5,7 +5,6 @@ from unittest import mock
 from django.conf import settings
 from django.utils import timezone
 
-from aniso8601 import parse_date
 from freezegun import freeze_time
 from pytz import utc
 
@@ -147,9 +146,6 @@ class TestPaymentSignature(APITestCase):
 
         input_data = dict(
             business_area_slug="afghanistan",
-            dispersion_start_date=parse_date("2020-09-10"),
-            dispersion_end_date=parse_date("2020-11-10"),
-            currency="USD",
             name="paymentPlanName",
             program_cycle_id=program_cycle_id,
             targeting_criteria=targeting_criteria,

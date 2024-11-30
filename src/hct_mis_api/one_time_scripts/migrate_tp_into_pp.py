@@ -4,6 +4,7 @@ from typing import Any, Dict, Optional
 from django.db import transaction
 
 from hct_mis_api.apps.payment.models import PaymentPlan
+from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.targeting.models import (
     TargetingCriteria,
     TargetingCriteriaRule,
@@ -75,6 +76,7 @@ def migrate_tp_into_pp() -> None:
         tp_qs = TargetPopulation.objects.prefetch_related("payment_plans")
         new_payment_plans = []
         updated_payment_plans = []
+        full_reduild_payment_plans = []
         updated_tc_rules = []
 
         for tp in tp_qs:
@@ -89,8 +91,10 @@ def migrate_tp_into_pp() -> None:
                     for field, value in payment_plan_data.items():
                         setattr(pp, field, value)
                     updated_payment_plans.append(pp)
+                    if pp.status == PaymentPlan.Status.PREPARING:
+                        full_reduild_payment_plans.append(str(pp.pk))
             else:
-                # create new PaymentPlan if none exist
+                # create new PaymentPlan
                 payment_plan_data = map_tp_to_pp(tp)
                 new_payment_plans.append(PaymentPlan(**payment_plan_data))
 
@@ -103,3 +107,8 @@ def migrate_tp_into_pp() -> None:
 
         if updated_tc_rules:
             TargetingCriteriaRule.objects.bulk_update(updated_tc_rules, ["household_ids", "individual_ids"], 1000)
+
+        # rebuild Preparing Payment Plans
+        for payment_plan_id in full_reduild_payment_plans:
+            if pp := PaymentPlan.objects.filter(pk=payment_plan_id).first():
+                PaymentPlanService(payment_plan=pp).full_rebuild()

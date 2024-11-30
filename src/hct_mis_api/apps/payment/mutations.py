@@ -41,6 +41,7 @@ from hct_mis_api.apps.payment.inputs import (
     CreatePaymentPlanInput,
     CreatePaymentVerificationInput,
     EditPaymentVerificationInput,
+    OpenPaymentPlanInput,
     UpdatePaymentPlanInput,
 )
 from hct_mis_api.apps.payment.models import (
@@ -755,6 +756,10 @@ class ActionPaymentPlanMutation(PermissionMutation):
             return status_to_perm_map.get(status, list(status_to_perm_map.values()))
 
         action_to_permissions_map = {
+            PaymentPlan.Action.TP_LOCK.name: Permissions.TARGETING_LOCK,
+            PaymentPlan.Action.TP_UNLOCK.name: Permissions.TARGETING_UNLOCK,
+            PaymentPlan.Action.TP_REBUILD.name: Permissions.TARGETING_LOCK,
+            PaymentPlan.Action.DRAFT.name: Permissions.PM_CREATE,
             PaymentPlan.Action.LOCK.name: Permissions.PM_LOCK_AND_UNLOCK,
             PaymentPlan.Action.UNLOCK.name: Permissions.PM_LOCK_AND_UNLOCK,
             PaymentPlan.Action.LOCK_FSP.name: Permissions.PM_LOCK_AND_UNLOCK_FSP,
@@ -796,6 +801,37 @@ class CreatePaymentPlanMutation(PermissionMutation):
         return cls(payment_plan=payment_plan)
 
 
+class OpenPaymentPlanMutation(PermissionMutation):
+    payment_plan = graphene.Field(PaymentPlanNode)
+
+    class Arguments:
+        input = OpenPaymentPlanInput(required=True)
+        version = BigInt(required=False)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(cls, root: Any, info: Any, input: Dict, **kwargs: Any) -> "OpenPaymentPlanMutation":
+        business_area_slug = info.context.headers.get("Business-Area")
+        cls.has_permission(info, Permissions.PM_CREATE, business_area_slug)
+        payment_plan_id = decode_id_string(input.get("payment_plan_id"))
+        payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
+        check_concurrency_version_in_mutation(kwargs.get("version"), payment_plan)
+        old_payment_plan = copy_model_object(payment_plan)
+
+        payment_plan = PaymentPlanService(payment_plan=payment_plan).open(input_data=input)
+        log_create(
+            mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
+            business_area_field="business_area",
+            user=info.context.user,
+            programs=payment_plan.program_cycle.program,
+            old_object=old_payment_plan,
+            new_object=payment_plan,
+        )
+
+        return cls(payment_plan=payment_plan)
+
+
 class UpdatePaymentPlanMutation(PermissionMutation):
     payment_plan = graphene.Field(PaymentPlanNode)
 
@@ -812,7 +848,7 @@ class UpdatePaymentPlanMutation(PermissionMutation):
         check_concurrency_version_in_mutation(kwargs.get("version"), payment_plan)
         old_payment_plan = copy_model_object(payment_plan)
 
-        cls.has_permission(info, Permissions.PM_CREATE, payment_plan.business_area)
+        cls.has_permission(info, [Permissions.PM_CREATE, Permissions.TARGETING_UPDATE], payment_plan.business_area)
 
         payment_plan = PaymentPlanService(payment_plan=payment_plan).update(input_data=input)
         log_create(
@@ -1304,7 +1340,6 @@ class ExportPDFPaymentPlanSummaryMutation(PermissionMutation):
     ) -> "ExportPDFPaymentPlanSummaryMutation":
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
         cls.has_permission(info, Permissions.PM_EXPORT_PDF_SUMMARY, payment_plan.business_area)
-        # TODO: upd background_action_status??
         export_pdf_payment_plan_summary.delay(payment_plan.pk, info.context.user.pk)
 
         return cls(payment_plan=payment_plan)
@@ -1483,6 +1518,7 @@ class Mutations(graphene.ObjectType):
     # Payment Plan
     action_payment_plan_mutation = ActionPaymentPlanMutation.Field()
     create_payment_plan = CreatePaymentPlanMutation.Field()
+    open_payment_plan = OpenPaymentPlanMutation.Field()
     create_follow_up_payment_plan = CreateFollowUpPaymentPlanMutation.Field()
     update_payment_plan = UpdatePaymentPlanMutation.Field()
     delete_payment_plan = DeletePaymentPlanMutation.Field()

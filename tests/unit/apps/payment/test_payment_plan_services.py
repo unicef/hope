@@ -20,6 +20,7 @@ from hct_mis_api.apps.household.fixtures import (
     HouseholdFactory,
     IndividualFactory,
     IndividualRoleInHouseholdFactory,
+    create_household_and_individuals,
 )
 from hct_mis_api.apps.household.models import ROLE_PRIMARY
 from hct_mis_api.apps.payment.celery_tasks import (
@@ -43,8 +44,6 @@ from hct_mis_api.apps.payment.models import (
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program, ProgramCycle
-from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
-from hct_mis_api.apps.targeting.models import TargetPopulation
 
 
 class TestPaymentPlanServices(APITestCase):
@@ -102,7 +101,6 @@ class TestPaymentPlanServices(APITestCase):
         program_cycle.refresh_from_db()
         self.assertEqual(program_cycle.status, ProgramCycle.ACTIVE)
 
-    @flaky(max_runs=5, min_passes=1)
     @freeze_time("2020-10-10")
     def test_create_validation_errors(self) -> None:
         program = ProgramFactory(
@@ -113,24 +111,93 @@ class TestPaymentPlanServices(APITestCase):
             cycle__end_date=timezone.datetime(2021, 12, 10, tzinfo=utc).date(),
         )
         program_cycle = program.cycles.first()
-
-        input_data = dict(
+        household, individuals = create_household_and_individuals(
+            household_data={
+                "business_area": self.business_area,
+                "program": program,
+            },
+            individuals_data=[{}],
+        )
+        create_input_data = dict(
             program_cycle_id=self.id_to_base64(str(program_cycle.id), "ProgramCycle"),
-            dispersion_start_date=parse_date("2020-09-10"),
-            dispersion_end_date=parse_date("2020-09-11"),
-            currency="USD",
+            name="TEST_123",
+            targeting_criteria={
+                "flag_exclude_if_active_adjudication_ticket": False,
+                "flag_exclude_if_on_sanction_list": False,
+                "rules": [
+                    {
+                        "collectors_filters_blocks": [],
+                        "household_filters_blocks": [],
+                        "household_ids": f"{household.unicef_id}",
+                        "individual_ids": "",
+                        "individuals_filters_blocks": [],
+                    }
+                ],
+            },
         )
 
         with self.assertRaisesMessage(GraphQLError, "PaymentPlan can not be created in provided Business Area"):
-            PaymentPlanService.create(input_data=input_data, user=self.user, business_area_slug=self.business_area.slug)
+            PaymentPlanService.create(
+                input_data=create_input_data, user=self.user, business_area_slug=self.business_area.slug
+            )
         self.business_area.is_payment_plan_applicable = True
         self.business_area.save()
 
         with self.assertRaisesMessage(
-            GraphQLError, f"Dispersion End Date [{input_data['dispersion_end_date']}] cannot be a past date"
+            GraphQLError, f"Payment Plan with name: TEST_123 and program: {program.name} already exists."
         ):
-            PaymentPlanService.create(input_data=input_data, user=self.user, business_area_slug=self.business_area.slug)
-        input_data["dispersion_end_date"] = parse_date("2020-11-11")
+            PaymentPlanFactory(program=program, name="TEST_123")
+            PaymentPlanService.create(
+                input_data=create_input_data, user=self.user, business_area_slug=self.business_area.slug
+            )
+        with self.assertRaisesMessage(
+            GraphQLError, "Impossible to create Payment Plan for Programme within not Active status"
+        ):
+            program.status = Program.FINISHED
+            program.save()
+            program.refresh_from_db()
+            PaymentPlanService.create(
+                input_data=create_input_data, user=self.user, business_area_slug=self.business_area.slug
+            )
+        with self.assertRaisesMessage(
+            GraphQLError, "Impossible to create Payment Plan for Programme Cycle within Finished status"
+        ):
+            program_cycle.status = ProgramCycle.FINISHED
+            program_cycle.save()
+            PaymentPlanService.create(
+                input_data=create_input_data, user=self.user, business_area_slug=self.business_area.slug
+            )
+        program_cycle.status = ProgramCycle.ACTIVE
+        program_cycle.save()
+        program.status = Program.ACTIVE
+        program.save()
+        # create PP
+        create_input_data["name"] = "TEST"
+        pp = PaymentPlanService.create(
+            input_data=create_input_data, user=self.user, business_area_slug=self.business_area.slug
+        )
+        pp.status = PaymentPlan.Status.TP_OPEN
+        pp.save()
+
+        # check validation for Open PP
+        open_input_data = dict(
+            dispersion_start_date=parse_date("2020-09-10"),
+            dispersion_end_date=parse_date("2020-09-11"),
+            currency="USD",
+        )
+        with self.assertRaisesMessage(GraphQLError, "Can only move from Draft status to Open"):
+            PaymentPlanService(payment_plan=pp).open(input_data=open_input_data)
+
+        pp.status = PaymentPlan.Status.DRAFT
+        pp.save()
+        with self.assertRaisesMessage(
+            GraphQLError, f"Dispersion End Date [{open_input_data['dispersion_end_date']}] cannot be a past date"
+        ):
+            PaymentPlanService(payment_plan=pp).open(input_data=open_input_data)
+        open_input_data["dispersion_end_date"] = parse_date("2020-11-11")
+        pp = PaymentPlanService(payment_plan=pp).open(input_data=open_input_data)
+        pp.refresh_from_db()
+        self.assertEqual(pp.status, PaymentPlan.Status.OPEN)
 
     @freeze_time("2020-10-10")
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
@@ -155,9 +222,6 @@ class TestPaymentPlanServices(APITestCase):
 
         input_data = dict(
             business_area_slug="afghanistan",
-            dispersion_start_date=parse_date("2020-09-10"),
-            dispersion_end_date=parse_date("2020-11-10"),
-            currency="USD",
             name="paymentPlanName",
             program_cycle_id=self.id_to_base64(program_cycle.id, "ProgramCycleNode"),
             targeting_criteria={
@@ -200,7 +264,6 @@ class TestPaymentPlanServices(APITestCase):
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_update_validation_errors(self, get_exchange_rate_mock: Any) -> None:
         pp = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED)
-        new_targeting = TargetPopulationFactory(program=ProgramFactory())
 
         hoh1 = IndividualFactory(household=None)
         hoh2 = IndividualFactory(household=None)
@@ -209,27 +272,17 @@ class TestPaymentPlanServices(APITestCase):
         IndividualRoleInHouseholdFactory(household=hh1, individual=hoh1, role=ROLE_PRIMARY)
         IndividualRoleInHouseholdFactory(household=hh2, individual=hoh2, role=ROLE_PRIMARY)
         IndividualFactory.create_batch(4, household=hh1)
-        new_targeting.households.set([hh1, hh2])
-        new_targeting.save()
 
         input_data = dict(
-            targeting_id=self.id_to_base64(new_targeting.id, "Targeting"),
             dispersion_start_date=parse_date("2020-09-10"),
             dispersion_end_date=parse_date("2020-09-11"),
             currency="USD",
         )
 
-        with self.assertRaisesMessage(GraphQLError, "Only Payment Plan in Open status can be edited"):
+        with self.assertRaisesMessage(GraphQLError, "Not Allow edit Payment Plan within status LOCKED"):
             pp = PaymentPlanService(payment_plan=pp).update(input_data=input_data)
         pp.status = PaymentPlan.Status.OPEN
         pp.save()
-
-        with self.assertRaisesMessage(
-            GraphQLError, f"TargetPopulation id:{new_targeting.id} does not exist or is not in status Ready"
-        ):
-            pp = PaymentPlanService(payment_plan=pp).update(input_data=input_data)
-        new_targeting.status = TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
-        new_targeting.save()
 
         with self.assertRaisesMessage(
             GraphQLError, f"Dispersion End Date [{input_data['dispersion_end_date']}] cannot be a past date"
@@ -285,7 +338,7 @@ class TestPaymentPlanServices(APITestCase):
             )
 
         follow_up_pp.refresh_from_db()
-        self.assertEqual(follow_up_pp.status, PaymentPlan.Status.TP_OPEN)
+        self.assertEqual(follow_up_pp.status, PaymentPlan.Status.OPEN)
         self.assertEqual(follow_up_pp.target_population, pp.target_population)
         self.assertEqual(follow_up_pp.program, pp.program)
         self.assertEqual(follow_up_pp.program_cycle, pp.program_cycle)
@@ -306,6 +359,7 @@ class TestPaymentPlanServices(APITestCase):
         follow_up_pp.refresh_from_db()
 
         self.assertEqual(follow_up_pp.status, PaymentPlan.Status.OPEN)
+        self.assertEqual(follow_up_pp.build_status, PaymentPlan.BuildStatus.BUILD_STATUS_OK)
 
         self.assertEqual(follow_up_pp.payment_items.count(), 3)
         self.assertEqual(
@@ -335,7 +389,7 @@ class TestPaymentPlanServices(APITestCase):
 
         self.assertEqual(pp.follow_ups.count(), 2)
 
-        with self.assertNumQueries(48):
+        with self.assertNumQueries(46):
             prepare_follow_up_payment_plan_task(follow_up_pp_2.id)
 
         self.assertEqual(follow_up_pp_2.payment_items.count(), 1)
@@ -552,7 +606,8 @@ class TestPaymentPlanServices(APITestCase):
         cycle.save()
         PaymentPlanService.create(input_data=input_data, user=self.user, business_area_slug=self.business_area.slug)
         cycle.refresh_from_db()
-        assert cycle.status == ProgramCycle.ACTIVE
+        # open PP will update cycle' status into Active
+        assert cycle.status == ProgramCycle.DRAFT
 
     @freeze_time("2022-12-12")
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
@@ -576,9 +631,6 @@ class TestPaymentPlanServices(APITestCase):
 
         input_data = dict(
             business_area_slug="afghanistan",
-            dispersion_start_date=parse_date("2022-12-20"),
-            dispersion_end_date=parse_date("2022-12-22"),
-            currency="USD",
             name="paymentPlanName",
             program_cycle_id=self.id_to_base64(program_cycle.id, "ProgramCycleNode"),
             targeting_criteria={

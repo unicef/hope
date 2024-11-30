@@ -66,11 +66,12 @@ class PaymentPlanService:
     @property
     def actions_map(self) -> Dict:
         return {
+            # old TP
             PaymentPlan.Action.TP_LOCK.value: self.tp_lock,
             PaymentPlan.Action.TP_UNLOCK.value: self.tp_unlock,
             PaymentPlan.Action.TP_REBUILD.value: self.tp_rebuild,
             PaymentPlan.Action.DRAFT.value: self.draft,
-            PaymentPlan.Action.OPEN.value: self.open,
+            # PP
             PaymentPlan.Action.LOCK.value: self.lock,
             PaymentPlan.Action.LOCK_FSP.value: self.lock_fsp,
             PaymentPlan.Action.UNLOCK.value: self.unlock,
@@ -190,19 +191,34 @@ class PaymentPlanService:
         return self.payment_plan
 
     def draft(self) -> PaymentPlan:
-        if self.payment_plan.is_population_locked():
-            raise GraphQLError("Can only Locked Population Payment Plan can be moved to Draft")
-
+        if not self.payment_plan.is_population_locked():
+            raise GraphQLError("Only Locked Population status can be moved to next step")
         self.payment_plan.status_draft()
         self.payment_plan.save(update_fields=("status_date", "status"))
         return self.payment_plan
 
-    def open(self) -> PaymentPlan:
+    def open(self, input_data: Dict) -> PaymentPlan:
         if self.payment_plan.status != PaymentPlan.Status.DRAFT:
             raise GraphQLError("Can only move from Draft status to Open")
 
+        dispersion_end_date = input_data["dispersion_end_date"]
+        if not dispersion_end_date or dispersion_end_date <= timezone.now().date():
+            raise GraphQLError(f"Dispersion End Date [{dispersion_end_date}] cannot be a past date")
+
+        self.payment_plan.currency = input_data["currency"]
+        self.payment_plan.dispersion_start_date = input_data["dispersion_start_date"]
+        self.payment_plan.dispersion_end_date = dispersion_end_date
+
         self.payment_plan.status_open()
-        self.payment_plan.save(update_fields=("status_date", "status"))
+        self.payment_plan.save(
+            update_fields=("status_date", "status", "currency", "dispersion_start_date", "dispersion_end_date")
+        )
+        self.payment_plan.program_cycle.set_active()
+
+        # add currency
+        Payment.objects.filter(parent=self.payment_plan).update(currency=self.payment_plan.currency)
+        self.payment_plan.update_money_fields()
+
         return self.payment_plan
 
     def lock(self) -> PaymentPlan:
@@ -404,7 +420,6 @@ class PaymentPlanService:
                     household_id=household["pk"],
                     head_of_household_id=household["head_of_household"],
                     collector_id=collector_id,
-                    currency=payment_plan.currency,
                 )
             )
         try:
@@ -446,10 +461,6 @@ class PaymentPlanService:
         if program.status != Program.ACTIVE:
             raise GraphQLError("Impossible to create Payment Plan for Programme within not Active status")
 
-        dispersion_end_date = input_data["dispersion_end_date"]
-        if not dispersion_end_date or dispersion_end_date <= timezone.now().date():
-            raise GraphQLError(f"Dispersion End Date [{dispersion_end_date}] cannot be a past date")
-
         pp_name = input_data.get("name", "").strip()
         if PaymentPlan.objects.filter(name=pp_name, program=program, is_removed=False).exists():
             raise GraphQLError(f"Payment Plan with name: {pp_name} and program: {program.name} already exists.")
@@ -464,18 +475,15 @@ class PaymentPlanService:
                 program_cycle=program_cycle,
                 targeting_criteria=targeting_criteria,
                 name=input_data["name"],
-                currency=input_data["currency"],
-                dispersion_start_date=input_data["dispersion_start_date"],
-                dispersion_end_date=dispersion_end_date,
                 status_date=timezone.now(),
                 start_date=program_cycle.start_date,
                 end_date=program_cycle.end_date,
                 status=PaymentPlan.Status.TP_OPEN,
                 build_status=PaymentPlan.BuildStatus.BUILD_STATUS_PENDING,
+                built_at=timezone.now(),
                 excluded_ids=input_data.get("excluded_ids", "").strip(),
                 exclusion_reason=input_data.get("exclusion_reason", "").strip(),
             )
-            program_cycle.set_active()
 
             transaction.on_commit(lambda: prepare_payment_plan_task.delay(str(payment_plan.id)))
 
@@ -492,37 +500,36 @@ class PaymentPlanService:
         excluded_ids = input_data.get("excluded_ids")
         exclusion_reason = input_data.get("exclusion_reason")
         targeting_criteria_input = input_data.get("targeting_criteria")
+        dispersion_start_date = input_data.get("dispersion_start_date")
+        dispersion_end_date = input_data.get("dispersion_end_date")
 
-        if self.payment_plan.status in (
-            PaymentPlan.Status.DRAFT,
-            PaymentPlan.Status.OPEN,
-            PaymentPlan.Status.TP_OPEN,
-            PaymentPlan.Status.TP_LOCKED,
-            PaymentPlan.Status.TP_STEFICON_COMPLETED,
-            PaymentPlan.Status.TP_STEFICON_ERROR,
+        if (
+            any([excluded_ids, exclusion_reason, targeting_criteria_input])
+            and not self.payment_plan.is_population_open()
         ):
-            raise GraphQLError(f"Not Allow edit Payment Plan within status {self.payment_plan.status}")
-
-        if self.payment_plan.is_population_finalized():
-            raise GraphQLError("Finalized Population Payment Plan can't be changed")
+            raise GraphQLError(f"Not Allow edit targeting criteria within status {self.payment_plan.status}")
 
         if not self.payment_plan.is_population_locked() and (vulnerability_score_min or vulnerability_score_max):
             raise GraphQLError(
-                "You can only set vulnerability_score_min and vulnerability_score_max on Locked Population Payment Plan"
+                "You can only set vulnerability_score_min and vulnerability_score_max on Locked Population status"
             )
+
+        if (
+            any([dispersion_start_date, dispersion_end_date, input_data.get("currency")])
+            and self.payment_plan.status != PaymentPlan.Status.OPEN
+        ):
+            raise GraphQLError(f"Not Allow edit Payment Plan within status {self.payment_plan.status}")
+
         if name:
-            if self.payment_plan.is_population_locked():
-                raise GraphQLError("Name can't be changed when Payment Plan is in Locked Population status")
+            if self.payment_plan.status != PaymentPlan.Status.TP_OPEN:
+                raise GraphQLError("Name can be changed only within Open status")
 
             if (
                 PaymentPlan.objects.filter(name=name, program=program, is_removed=False)
                 .exclude(id=self.payment_plan.pk)
                 .exists()
             ):
-                raise GraphQLError(f"Payment Plan with name '{name}' and program '{program.name}' already exists.")
-
-        if targeting_criteria_input and not self.payment_plan.is_population_open():
-            raise GraphQLError("Locked Population Payment Plan can't be changed")
+                raise GraphQLError(f"Name '{name}' and program '{program.name}' already exists.")
 
         if self.payment_plan.is_follow_up:
             # can change only dispersion_start_date/dispersion_end_date for Follow Up Payment Plan
@@ -532,16 +539,16 @@ class PaymentPlanService:
         if program_cycle_id := input_data.get("program_cycle_id"):
             program_cycle = get_object_or_404(ProgramCycle, pk=decode_id_string(program_cycle_id))
             if program_cycle.status == ProgramCycle.FINISHED:
-                raise GraphQLError("Not possible to assign Finished Program Cycle to Payment Plan")
+                raise GraphQLError("Not possible to assign Finished Program Cycle")
             self.payment_plan.program_cycle = program_cycle
 
         if name:
             self.payment_plan.name = name
         if vulnerability_score_min is not None:
-            should_rebuild_stats = True
+            should_rebuild_list = True
             self.payment_plan.vulnerability_score_min = vulnerability_score_min
         if vulnerability_score_max is not None:
-            should_rebuild_stats = True
+            should_rebuild_list = True
             self.payment_plan.vulnerability_score_max = vulnerability_score_max
 
         if targeting_criteria_input:
@@ -559,21 +566,13 @@ class PaymentPlanService:
             should_rebuild_list = True
             self.payment_plan.exclusion_reason = exclusion_reason
 
-        if (
-            input_data.get("dispersion_start_date")
-            and input_data["dispersion_start_date"] != self.payment_plan.dispersion_start_date
-        ):
-            self.payment_plan.dispersion_start_date = input_data["dispersion_start_date"]
-            should_rebuild_list = True
+        if dispersion_start_date and dispersion_start_date != self.payment_plan.dispersion_start_date:
+            self.payment_plan.dispersion_start_date = dispersion_start_date
 
-        if (
-            input_data.get("dispersion_end_date")
-            and input_data["dispersion_end_date"] != self.payment_plan.dispersion_end_date
-        ):
-            if input_data["dispersion_end_date"] <= timezone.now().date():
-                raise GraphQLError(f"Dispersion End Date [{input_data['dispersion_end_date']}] cannot be a past date")
-            self.payment_plan.dispersion_end_date = input_data["dispersion_end_date"]
-            should_rebuild_stats = True
+        if dispersion_end_date and dispersion_end_date != self.payment_plan.dispersion_end_date:
+            if dispersion_end_date <= timezone.now().date():
+                raise GraphQLError(f"Dispersion End Date [{dispersion_end_date}] cannot be a past date")
+            self.payment_plan.dispersion_end_date = dispersion_end_date
 
         if input_data.get("currency") and input_data["currency"] != self.payment_plan.currency:
             self.payment_plan.currency = input_data["currency"]
@@ -740,8 +739,11 @@ class PaymentPlanService:
             raise GraphQLError("Cannot create a follow-up for a payment plan with no unsuccessful payments")
 
         follow_up_pp = PaymentPlan.objects.create(
-            status=PaymentPlan.Status.TP_OPEN,
+            status=PaymentPlan.Status.OPEN,
+            build_status=PaymentPlan.BuildStatus.BUILD_STATUS_OK,
+            built_at=timezone.now(),
             status_date=timezone.now(),
+            # targeting_criteria=source_pp.targeting_criteria,  # copy criteria from source
             is_follow_up=True,
             source_payment_plan=source_pp,
             business_area=source_pp.business_area,
@@ -851,10 +853,9 @@ class PaymentPlanService:
     ) -> None:
         rebuild_list = payment_plan.is_population_open() and should_rebuild_list
         rebuild_stats = (not rebuild_list and should_rebuild_list) or should_rebuild_stats
-        if rebuild_list or rebuild_stats:
+        if rebuild_list:
             payment_plan.build_status = PaymentPlan.BuildStatus.BUILD_STATUS_PENDING
             payment_plan.save()
-        if rebuild_list:
             payment_plan_full_rebuild.delay(payment_plan.id)
         if rebuild_stats and not rebuild_list:
             payment_plan_rebuild_stats.delay(payment_plan.id)

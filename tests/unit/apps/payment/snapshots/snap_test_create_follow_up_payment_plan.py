@@ -12,7 +12,7 @@ snapshots['TestCreateFollowUpPaymentPlan::test_create_follow_up_pp_mutation 1'] 
         'createFollowUpPaymentPlan': {
             'paymentPlan': {
                 'isFollowUp': True,
-                'status': 'TP_OPEN'
+                'status': 'OPEN'
             }
         }
     }

@@ -34,6 +34,7 @@ from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
     DjangoPermissionFilterConnectionField,
     Permissions,
+    hopeOneOfPermissionClass,
     hopePermissionClass,
 )
 from hct_mis_api.apps.activity_log.models import LogEntry
@@ -1102,7 +1103,7 @@ class Query(graphene.ObjectType):
     all_payment_plans = DjangoPermissionFilterConnectionField(
         PaymentPlanNode,
         filterset_class=PaymentPlanFilter,
-        permission_classes=(hopePermissionClass(Permissions.PM_VIEW_LIST),),
+        permission_classes=(hopeOneOfPermissionClass(Permissions.PM_VIEW_LIST, Permissions.TARGETING_VIEW_LIST),),
     )
     payment_plan_status_choices = graphene.List(ChoiceObject)
     currency_choices = graphene.List(ChoiceObject)

@@ -315,6 +315,8 @@ class GenericPayment(TimeStampedUUIDModel):
     delivery_type = models.ForeignKey("payment.DeliveryMechanism", on_delete=models.SET_NULL, null=True)
     currency = models.CharField(
         max_length=4,
+        null=True,
+        blank=True,
     )
     entitlement_quantity = models.DecimalField(
         decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
@@ -494,9 +496,6 @@ class PaymentPlan(
     )
 
     class Status(models.TextChoices):
-        # TODO: migrate data with PREPARING status
-        # move all Preparing into TP_OPEN and run rebuild
-
         # new from TP
         TP_OPEN = "TP_OPEN", "Open"
         TP_LOCKED = "TP_LOCKED", "Locked"
@@ -507,6 +506,7 @@ class PaymentPlan(
         TP_STEFICON_ERROR = "STEFICON_ERROR", "Steficon Error"
 
         DRAFT = "DRAFT", "Draft"  # like ready for PP create
+        PREPARING = "PREPARING", "Preparing"  # deprecated will remove it after data migrations
 
         OPEN = "OPEN", "Open"
         LOCKED = "LOCKED", "Locked"
@@ -560,7 +560,6 @@ class PaymentPlan(
         TP_UNLOCK = "TP_UNLOCK", "Population Unlock"
         TP_REBUILD = "TP_REBUILD", "Population Rebuild"
         DRAFT = "DRAFT", "Draft"
-        OPEN = "OPEN", "Open"
         LOCK = "LOCK", "Lock"
         LOCK_FSP = "LOCK_FSP", "Lock FSP"
         UNLOCK = "UNLOCK", "Unlock"
@@ -610,9 +609,9 @@ class PaymentPlan(
         on_delete=models.SET_NULL,
         related_name="payment_plan",
     )
-    currency = models.CharField(max_length=4, choices=CURRENCY_CHOICES)
-    dispersion_start_date = models.DateField()
-    dispersion_end_date = models.DateField()
+    currency = models.CharField(max_length=4, choices=CURRENCY_CHOICES, blank=True, null=True)
+    dispersion_start_date = models.DateField(blank=True, null=True)
+    dispersion_end_date = models.DateField(blank=True, null=True)
     female_children_count = models.PositiveIntegerField(default=0)
     male_children_count = models.PositiveIntegerField(default=0)
     female_adults_count = models.PositiveIntegerField(default=0)
@@ -1159,7 +1158,6 @@ class PaymentPlan(
             self.Status.TP_LOCKED,
             self.Status.TP_STEFICON_COMPLETED,
             self.Status.TP_STEFICON_ERROR,
-            self.Status.TP_STEFICON_RUN,
         )
 
     def remove_export_file_entitlement(self) -> None:

@@ -448,8 +448,6 @@ def prepare_follow_up_payment_plan_task(self: Any, payment_plan_id: str) -> bool
         )
 
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
-        payment_plan.build_status_building()
-        payment_plan.save(update_fields=("build_status", "built_at"))
         set_sentry_business_area_tag(payment_plan.business_area.name)
 
         PaymentPlanService(payment_plan=payment_plan).create_follow_up_payments()
@@ -457,11 +455,7 @@ def prepare_follow_up_payment_plan_task(self: Any, payment_plan_id: str) -> bool
         create_payment_plan_snapshot_data(payment_plan)
         payment_plan.update_population_count_fields()
         payment_plan.update_money_fields()
-        payment_plan.build_status_ok()
-        payment_plan.save(update_fields=("build_status", "built_at"))
     except Exception as e:
-        payment_plan.build_status_failed()
-        payment_plan.save(update_fields=("build_status", "built_at"))
         logger.exception("Prepare Follow Up Payment Plan Error")
         raise self.retry(exc=e) from e
 
@@ -757,19 +751,13 @@ def payment_plan_rebuild_stats(self: Any, payment_plan_id: str) -> None:
     ):
         payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
         set_sentry_business_area_tag(payment_plan.business_area.name)
-        payment_plan.build_status_building()
-        payment_plan.save(update_fields=("build_status", "built_at"))
         try:
             with transaction.atomic():
                 payment_plan.update_population_count_fields()
                 payment_plan.update_money_fields()
-                payment_plan.build_status_ok()
-                payment_plan.save(update_fields=("build_status", "built_at"))
         except Exception as e:
             logger.exception(e)
             payment_plan.refresh_from_db()
-            payment_plan.build_status_failed()
-            payment_plan.save(update_fields=("build_status", "built_at"))
             raise self.retry(exc=e)
 
 

@@ -501,7 +501,9 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterB
     @property
     def is_social_worker_program(self) -> bool:
         try:
-            return self.targeting_criteria_rule.targeting_criteria.target_population.program.is_social_worker_program
+            return (
+                self.targeting_criteria_rule.targeting_criteria.payment_plan.program_cycle.program.is_social_worker_program
+            )
         except (
             AttributeError,
             TargetingCriteriaRuleFilter.targeting_criteria_rule.RelatedObjectDoesNotExist,
@@ -593,7 +595,9 @@ class TargetingCollectorBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteriaF
     )
 
     def get_query(self) -> Q:
-        program = self.collector_block_filters.targeting_criteria_rule.targeting_criteria.target_population.program
+        program = (
+            self.collector_block_filters.targeting_criteria_rule.targeting_criteria.payment_plan.program_cycle.program
+        )
         argument = self.arguments[0] if len(self.arguments) else None
         if argument is None:
             return Q()

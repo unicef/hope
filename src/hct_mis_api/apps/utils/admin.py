@@ -169,7 +169,7 @@ def is_background_action_in_status(btn: Button, background_status: str) -> bool:
 
 
 def is_preparing_payment_plan(btn: Button) -> bool:
-    return is_payment_plan_in_status(btn, PaymentPlan.Status.PREPARING)
+    return is_payment_plan_in_status(btn, PaymentPlan.Status.OPEN)
 
 
 def is_locked_payment_plan(btn: Button) -> bool:
@@ -216,9 +216,9 @@ class PaymentPlanCeleryTasksMixin:
         from hct_mis_api.apps.payment.celery_tasks import prepare_payment_plan_task
 
         payment_plan = PaymentPlan.objects.get(pk=pk)
-        if payment_plan.status != PaymentPlan.Status.PREPARING:
+        if payment_plan.status != PaymentPlan.Status.OPEN:
             messages.add_message(
-                request, messages.ERROR, f"The Payment Plan must has the status {PaymentPlan.Status.PREPARING}"
+                request, messages.ERROR, f"The Payment Plan must has the status {PaymentPlan.Status.OPEN}"
             )
             return redirect(reverse(self.url, args=[pk]))
         # check if no task in a queue

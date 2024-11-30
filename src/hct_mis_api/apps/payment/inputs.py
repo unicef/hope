@@ -61,18 +61,21 @@ class ActionPaymentPlanInput(graphene.InputObjectType):
     payment_plan_id = graphene.ID(required=True)
     action = graphene.Enum.from_enum(PaymentPlan.Action)(required=True)
     comment = graphene.String()
-    # add steficon id here?
 
 
 class CreatePaymentPlanInput(graphene.InputObjectType):
     program_cycle_id = graphene.ID(required=True)
-    dispersion_start_date = graphene.Date(required=True)
-    dispersion_end_date = graphene.Date(required=True)
-    currency = graphene.String(required=True)
-    name = graphene.String(required=True)  # TODO: not sure this one have to be required
+    name = graphene.String(required=True)
     targeting_criteria = TargetingCriteriaObjectType(required=True)
     excluded_ids = graphene.String(required=True)
     exclusion_reason = graphene.String()
+
+
+class OpenPaymentPlanInput(graphene.InputObjectType):
+    payment_plan_id = graphene.ID(required=True)
+    dispersion_start_date = graphene.Date(required=True)
+    dispersion_end_date = graphene.Date(required=True)
+    currency = graphene.String(required=True)
 
 
 class UpdatePaymentPlanInput(graphene.InputObjectType):
@@ -82,7 +85,7 @@ class UpdatePaymentPlanInput(graphene.InputObjectType):
     currency = graphene.String(required=False)
 
     name = graphene.String()
-    targeting_criteria = TargetingCriteriaObjectType()  # TODO: is it possible to update cycle?
+    targeting_criteria = TargetingCriteriaObjectType()
     program_cycle_id = graphene.ID()
     vulnerability_score_min = graphene.Decimal()
     vulnerability_score_max = graphene.Decimal()
