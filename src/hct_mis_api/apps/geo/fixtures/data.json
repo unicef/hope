@@ -6041,6 +6041,26 @@
   },
   {
     "model": "geo.areatype",
+    "pk": "333cd746-3294-4c28-a2f0-1233dceae0fd",
+    "fields": {
+      "created_at": "2021-10-28 09:39:17.754-00:00",
+      "updated_at": "2022-06-24 09:19:57.336-00:00",
+      "original_id": "18a18069-ed1a-4f34-b123-eea14c00f40c",
+      "name": "Just level 4",
+      "country": "fea412b2-a617-4c23-b773-d0001f36a932",
+      "area_level": 4,
+      "parent": "199cd746-3294-4c28-a2f0-5244dceae0fd",
+      "valid_from": "2021-10-28 09:39:17.754-00:00",
+      "valid_until": null,
+      "extras": {},
+      "lft": 3,
+      "rght": 4,
+      "tree_id": 21,
+      "level": 3
+    }
+  },
+  {
+    "model": "geo.areatype",
     "pk": "1a3428cd-b378-4056-9805-60340623326c",
     "fields": {
       "created_at": "2021-10-28 09:39:14.744-00:00",
@@ -6055,7 +6075,7 @@
       "extras": {},
       "lft": 1,
       "rght": 6,
-      "tree_id": 21,
+      "tree_id": 22,
       "level": 0
     }
   },
@@ -32081,6 +32101,28 @@
       "rght": 374,
       "tree_id": 150,
       "level": 2
+    }
+  },
+  {
+    "model": "geo.area",
+    "pk": "ffe1ea30-9fb1-4237-83ad-a2d41d9b2f58",
+    "fields": {
+      "created_at": "2022-05-05 12:57:19.625-00:00",
+      "updated_at": "2022-06-24 10:03:09.978-00:00",
+      "original_id": "248a9ec5-02c4-4690-a0c0-267ede5b937f",
+      "name": "TESTlevel4",
+      "parent": "ffe1ea30-9fb1-4237-83ad-a2d41d9b2f58",
+      "p_code": "UA011603311",
+      "area_type": "333cd746-3294-4c28-a2f0-1233dceae0fd",
+      "geom": null,
+      "point": null,
+      "valid_from": "2022-05-05 12:57:19.625-00:00",
+      "valid_until": null,
+      "extras": {},
+      "lft": 373,
+      "rght": 374,
+      "tree_id": 150,
+      "level": 3
     }
   },
   {
