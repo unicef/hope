@@ -1,7 +1,6 @@
 import { DocumentNode } from 'graphql';
 import {
   AllPaymentVerificationsDocument,
-  CashPlanDocument,
   PaymentPlanDocument,
 } from '@generated/graphql';
 import { useBaseUrl } from './useBaseUrl';
@@ -16,7 +15,6 @@ export const usePaymentRefetchQueries = (
     { query: DocumentNode; variables: { id: string } },
   ]) => {
   const { businessArea } = useBaseUrl();
-  const planType = atob(paymentPlanId).split(':')[0];
 
   return () => [
     {
@@ -33,8 +31,7 @@ export const usePaymentRefetchQueries = (
       },
     },
     {
-      query:
-        planType === 'PaymentPlanNode' ? PaymentPlanDocument : CashPlanDocument,
+      query: PaymentPlanDocument,
       variables: { id: paymentPlanId },
     },
   ];

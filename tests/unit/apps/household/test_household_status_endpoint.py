@@ -21,7 +21,7 @@ from hct_mis_api.apps.household.models import (
     ROLE_NO_ROLE,
     PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
+from hct_mis_api.apps.payment.fixtures import PaymentFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
@@ -185,7 +185,9 @@ class TestDetails(TestCase):
         document_type = DocumentTypeFactory(key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID])
         document = PendingDocumentFactory(individual=individual, type=document_type)
         tax_id = document.document_number
-        payment_record = PaymentRecordFactory(household=household, currency="PLN")
+        payment = PaymentFactory(
+            household=household, currency="PLN", delivery_date=datetime.date.today(), delivered_quantity=1
+        )
 
         response = self.api_client.get(f"/api/hh-status?tax_id={tax_id}")
         self.assertEqual(response.status_code, 200)
@@ -193,7 +195,7 @@ class TestDetails(TestCase):
         self.assertIsNotNone(data["info"])
         info = data["info"]
         self.assertEqual(info["status"], "paid")
-        self.assertEqual(info["date"], _time(payment_record.updated_at))
+        self.assertEqual(datetime.datetime.fromisoformat(info["date"].replace("Z", "")).date(), payment.delivery_date)
 
     def test_getting_non_existent_household(self) -> None:
         response = self.api_client.get("/api/hh-status?registration_id=non-existent")

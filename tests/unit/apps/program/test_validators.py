@@ -38,7 +38,7 @@ class TestProgramValidators(TestCase):
         data = {"program": self.program, "program_data": {"status": Program.FINISHED}}
         self.program.status = Program.ACTIVE
         self.program.save()
-        PaymentPlanFactory(program=self.program, program_cycle=self.program_cycle, status=PaymentPlan.Status.IN_REVIEW)
+        PaymentPlanFactory(program_cycle=self.program_cycle, status=PaymentPlan.Status.IN_REVIEW)
 
         with self.assertRaisesMessage(
             ValidationError, "All Payment Plans and Follow-Up Payment Plans have to be Reconciled."

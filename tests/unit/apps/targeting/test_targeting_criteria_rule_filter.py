@@ -333,7 +333,7 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
             collector_block_filters=col_block,
             comparison_method="EQUALS",
             field_name="delivery_data_field__random_name",
-            arguments=[True],
+            arguments=["Yes"],
         )
         query = rule_filter.get_query()
         queryset = self.get_households_queryset().filter(query).distinct()
@@ -361,7 +361,7 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
             collector_block_filters=col_block,
             comparison_method="EQUALS",
             field_name="delivery_data_field__random_name",
-            arguments=[False],
+            arguments=["No"],
         )
         query = rule_filter.get_query()
         queryset = self.get_households_queryset().filter(query).distinct()

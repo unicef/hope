@@ -26,7 +26,7 @@ def create_payment_snapshot() -> None:
         if program_qs:
             print(f"Processing {program_qs.count()} programs for {ba.name}.")
             for program in program_qs:
-                for payment_plan in PaymentPlan.all_objects.filter(program=program):
+                for payment_plan in PaymentPlan.all_objects.filter(program_cycle__program=program):
                     payments_ids = list(
                         payment_plan.eligible_payments.filter(household_snapshot__isnull=True)
                         .values_list("id", flat=True)
