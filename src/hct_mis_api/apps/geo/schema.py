@@ -61,7 +61,12 @@ class Query(graphene.ObjectType):
         return Area.objects.all().order_by("area_type__area_level", "name")
 
     def resolve_all_areas_tree(self, info: Any, business_area: str, **kwargs: Any) -> List[Area]:
-        queryset = Area.objects.filter(area_type__country__business_areas__slug=business_area)
+        # get Area max level 3
+        queryset = (
+            Area.objects.filter(area_type__country__business_areas__slug=business_area, area_type__area_level__lte=3)
+            .select_related("area_type__country")
+            .prefetch_related("area_type__country__business_areas")
+        )
         if does_path_exist_in_query("edges.node.level", info):
             queryset = queryset.select_related("area_type")
         return queryset.get_cached_trees()
