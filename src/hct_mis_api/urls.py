@@ -20,7 +20,6 @@ from hct_mis_api.apps.core.rest_api import all_fields_attributes
 from hct_mis_api.apps.core.views import (
     UploadFile,
     homepage,
-    hope_redirect,
     logout_view,
     schema,
     trigger_error,
@@ -36,7 +35,6 @@ api_patterns = [
     path("fields_attributes/", all_fields_attributes, name="fields_attributes"),
     path("_health", homepage),
     path("explorer/", include("explorer.urls")),
-    path("hope-redirect", hope_redirect),
     path("graphql", csrf_exempt(FileUploadGraphQLView.as_view(graphiql=True))),
     path("graphql/schema.graphql", schema),
     path("logout", logout_view, name="logout"),

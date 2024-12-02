@@ -25,8 +25,8 @@ class PaymentPlanSerializer(serializers.ModelSerializer):
     target_population = serializers.CharField(source="target_population.name")
     currency = serializers.CharField(source="get_currency_display")
     follow_ups = FollowUpPaymentPlanSerializer(many=True, read_only=True)
-    program = serializers.CharField(source="program.name")
-    program_id = Base64ModelField(model_name="Program")
+    program = serializers.CharField(source="program_cycle.program.name")
+    program_id = Base64ModelField(model_name="Program", source="program_cycle.program.id")
     last_approval_process_by = serializers.SerializerMethodField()
 
     class Meta:

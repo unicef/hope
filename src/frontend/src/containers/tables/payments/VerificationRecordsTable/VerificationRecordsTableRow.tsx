@@ -29,7 +29,7 @@ export function VerificationRecordsTableRow({
 
   const nodeType = atob(paymentVerification.payment.id).split(':')[0];
   const linkPath = `/${baseUrl}/verification/payment${
-    nodeType === 'PaymentRecordNode' ? '-record' : ''
+    nodeType === 'PaymentRecordAndPaymentNode' ? '-record' : ''
   }/${paymentVerification.payment.id}`;
 
   return (

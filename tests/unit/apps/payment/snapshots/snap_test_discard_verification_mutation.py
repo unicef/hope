@@ -11,7 +11,7 @@ snapshots['TestDiscardVerificationMutation::test_discard_active_0_with_permissio
     'data': {
         'discardPaymentVerificationPlan': {
             'paymentPlan': {
-                'objType': 'CashPlan',
+                'objType': 'PaymentPlan',
                 'verificationPlans': {
                     'edges': [
                         {

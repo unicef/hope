@@ -4,6 +4,7 @@ import {
   AllIndividualsQueryVariables,
   HouseholdChoiceDataQuery,
   IndividualNode,
+  IndividualRdiMergeStatus,
   useAllIndividualsForPopulationTableQuery,
 } from '@generated/graphql';
 import { TableWrapper } from '@components/core/TableWrapper';
@@ -44,6 +45,7 @@ export function IndividualsListTable({
       max: dateToIsoString(filter.lastRegistrationDateMax, 'endOfDay'),
     }),
     program: programId,
+    rdiMergeStatus: IndividualRdiMergeStatus.Merged,
   };
 
   return (

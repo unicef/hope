@@ -15,18 +15,15 @@ from hct_mis_api.apps.grievance.fixtures import TicketPaymentVerificationDetails
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.payment.fixtures import (
-    CashPlanFactory,
-    PaymentRecordFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
+    PaymentVerificationSummaryFactory,
 )
 from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.targeting.fixtures import (
-    TargetingCriteriaFactory,
-    TargetPopulationFactory,
-)
 
 
 class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):
@@ -74,11 +71,11 @@ class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):
 
         cls.program = ProgramFactory(id="e6537f1e-27b5-4179-a443-d42498fb0478", status=Program.ACTIVE)
         cls.update_partner_access_to_program(partner, cls.program)
-        CashPlanFactory(
+        PaymentPlanFactory(
             id="0272dd2d-c41e-435d-9587-6ba280678c54",
-            ca_id="B4M-21-CSH-00004",
+            unicef_id="B4M-21-CSH-00004",
             business_area=cls.business_area,
-            program=cls.program,
+            program_cycle=cls.program.cycles.first(),
         )
 
         household, _ = create_household_and_individuals(
@@ -100,32 +97,25 @@ class TestGrievanceUpdatePaymentVerificationTicketQuery(APITestCase):
             ],
         )
 
-        cash_plan = CashPlanFactory(
+        payment_plan = PaymentPlanFactory(
             name="TEST",
-            program=cls.program,
+            program_cycle=cls.program.cycles.first(),
             business_area=cls.business_area,
         )
+        PaymentVerificationSummaryFactory(payment_plan=payment_plan)
         payment_verification_plan = PaymentVerificationPlanFactory(
-            payment_plan_obj=cash_plan, status=PaymentVerificationPlan.STATUS_ACTIVE
+            payment_plan=payment_plan, status=PaymentVerificationPlan.STATUS_ACTIVE
         )
-
-        target_population = TargetPopulationFactory(
-            id="6FFB6BB7-3D43-4ECE-BB0E-21FDE209AFAF",
-            created_by=cls.user,
-            targeting_criteria=(TargetingCriteriaFactory()),
-            business_area=cls.business_area,
-        )
-        payment_record = PaymentRecordFactory(
-            parent=cash_plan,
+        payment = PaymentFactory(
+            parent=payment_plan,
             household=household,
-            target_population=target_population,
-            ca_id="P8F-21-CSH-00031-123123",
+            unicef_id="P8F-21-CSH-00031-123123",
             currency="PLN",
         )
         payment_verification = PaymentVerificationFactory(
             id="a76bfe6f-c767-4b7f-9671-6df10b8095cc",
             payment_verification_plan=payment_verification_plan,
-            payment_obj=payment_record,
+            payment=payment,
             status=PaymentVerification.STATUS_RECEIVED_WITH_ISSUES,
         )
         cls.ticket = TicketPaymentVerificationDetailsFactory(payment_verification=payment_verification)

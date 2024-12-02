@@ -3,7 +3,7 @@ import { Doughnut } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { countPercentage } from '@utils/utils';
-import { CashPlanQuery, PaymentPlanQuery } from '@generated/graphql';
+import { PaymentPlanQuery } from '@generated/graphql';
 import { BlackLink } from '@core/BlackLink';
 import { LabelizedField } from '@core/LabelizedField';
 import { Title } from '@core/Title';
@@ -23,7 +23,7 @@ const BorderLeftBox = styled.div`
 `;
 
 interface CashPlanDetailsSectionProps {
-  planNode: CashPlanQuery['cashPlan'] | PaymentPlanQuery['paymentPlan'];
+  planNode: PaymentPlanQuery['paymentPlan'];
 }
 
 export function CashPlanDetailsSection({

@@ -10,13 +10,8 @@ from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.payment.fixtures import (
-    CashPlanFactory,
-    PaymentFactory,
-    PaymentPlanFactory,
-    PaymentRecordFactory,
-)
-from hct_mis_api.apps.payment.models import PaymentRecord
+from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
+from hct_mis_api.apps.payment.models import Payment
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
@@ -54,17 +49,17 @@ class TestHouseholdDeliveredQuantitiesQuery(APITestCase):
         household.program = program
         household.save()
 
-        PaymentRecordFactory(
-            parent=CashPlanFactory(program=program),
+        PaymentFactory(
+            parent=PaymentPlanFactory(program_cycle=program.cycles.first()),
             currency="AFG",
             delivered_quantity_usd=50,
             delivered_quantity=100,
             household=household,
-            status=PaymentRecord.STATUS_SUCCESS,
+            status=Payment.STATUS_SUCCESS,
         )
 
         PaymentFactory(
-            parent=PaymentPlanFactory(program=program),
+            parent=PaymentPlanFactory(program_cycle=program.cycles.first()),
             currency="AFG",
             delivered_quantity_usd=33,
             delivered_quantity=133,

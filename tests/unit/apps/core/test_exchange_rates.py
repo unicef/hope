@@ -1,10 +1,8 @@
 import os
 from datetime import datetime, timedelta
-from decimal import Decimal
 from typing import Any
 from unittest import mock
 
-from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
 
@@ -13,18 +11,6 @@ from parameterized import parameterized
 
 from hct_mis_api.apps.core.exchange_rates import ExchangeRateClientAPI, ExchangeRates
 from hct_mis_api.apps.core.exchange_rates.api import ExchangeRateClientDummy
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.payment.fixtures import (
-    RealCashPlanFactory,
-    RealPaymentRecordFactory,
-    RealProgramFactory,
-    ServiceProviderFactory,
-)
-from hct_mis_api.apps.payment.models import PaymentRecord
-from tests.unit.apps.core.test_files.exchange_rates_api_response import (
-    EXCHANGE_RATES_API_RESPONSE,
-)
 
 EXCHANGE_RATES_WITH_HISTORICAL_DATA = {
     "ROWSET": {
@@ -224,63 +210,3 @@ class TestExchangeRates(TestCase):
             exchange_rates_client = ExchangeRates()
             exchange_rate = exchange_rates_client.get_exchange_rate_for_currency_code(currency_code, dispersion_date)
             self.assertEqual(expected_result, exchange_rate)
-
-
-@mock.patch.dict(os.environ, {"EXCHANGE_RATES_API_KEY": "TEST_API_KEY"})
-class TestFixExchangeRatesCommand(TestCase):
-    @classmethod
-    def setUpTestData(cls) -> None:
-        super().setUpTestData()
-        business_area = BusinessArea.objects.create(
-            code="0060",
-            name="Afghanistan",
-            long_name="THE ISLAMIC REPUBLIC OF AFGHANISTAN",
-            region_code="64",
-            region_name="SAR",
-            has_data_sharing_agreement=True,
-        )
-        create_household(
-            household_args={"size": 2, "business_area": business_area},
-        )
-        ServiceProviderFactory.create_batch(3)
-        program = RealProgramFactory()
-        cash_plans_with_currency = (
-            (
-                "PLN",
-                RealCashPlanFactory(program=program, dispersion_date=timezone.make_aware(datetime(2021, 4, 4))),
-            ),  # x_rate == 3.973
-            (
-                "AFN",
-                RealCashPlanFactory(program=program, dispersion_date=timezone.make_aware(datetime(2020, 3, 3))),
-            ),  # x_rate == 76.55
-            (
-                "USD",
-                RealCashPlanFactory(program=program, dispersion_date=timezone.make_aware(datetime(2020, 3, 3))),
-            ),  # x_rate ==  1
-        )
-        for currency, cash_plan in cash_plans_with_currency:
-            RealPaymentRecordFactory(
-                parent=cash_plan,
-                currency=currency,
-                delivered_quantity=200,
-            )
-
-    @requests_mock.Mocker()
-    def test_modify_delivered_quantity_in_usd(self, mocker: Any) -> None:
-        mocker.register_uri(
-            "GET",
-            "https://uniapis.unicef.org/biapi/v1/exchangerates?history=yes",
-            json=EXCHANGE_RATES_API_RESPONSE,
-        )
-
-        call_command("fixexchangerates", "--silent")
-
-        all_payment_records = PaymentRecord.objects.all()
-
-        expected_results = {
-            "PLN": Decimal("50.34"),
-            "AFN": Decimal("2.61"),
-            "USD": Decimal("200"),
-        }
-        for payment_record in all_payment_records:
-            self.assertEqual(expected_results[payment_record.currency], payment_record.delivered_quantity_usd)
