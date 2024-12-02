@@ -358,7 +358,27 @@ class IndividualDataUpdateService(DataChangeService):
             only_approved_data["phone_no_alternative_valid"] = is_valid_phone_number(
                 only_approved_data["phone_no_alternative"]
             )
-
+        # people update
+        hh_fields = [
+            "consent",
+            "residence_status",
+            "country_origin",
+            "country",
+            "address",
+            "village",
+            "currency",
+            "unhcr_id",
+            "name_enumerator",
+            "org_enumerator",
+            "org_name_enumerator",
+            "registration_method",
+        ]
+        # move HH fields from only_approved_data into hh_approved_data
+        hh_approved_data = {hh_f: only_approved_data.pop(hh_f) for hh_f in hh_fields if hh_f in only_approved_data}
+        # TODO: check with country_origin?
+        print("==>>> ", f"HH data: hh_id {household.id} >", hh_approved_data, "\nInd data: ", only_approved_data)
+        # people update HH
+        Household.objects.filter(id=household.id).update(**hh_approved_data, updated_at=timezone.now())
         Individual.objects.filter(id=new_individual.id).update(
             flex_fields=merged_flex_fields, **only_approved_data, updated_at=timezone.now()
         )
