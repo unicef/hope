@@ -27,7 +27,7 @@ export function LookUpPaymentRecordTable({
   const initialVariables = {
     household: initialValues?.selectedHousehold?.id,
     businessArea,
-    program: programId,
+    program: programId === 'all' ? null : programId,
   };
   const [selected, setSelected] = useState(
     initialValues.selectedPaymentRecords,
