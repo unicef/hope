@@ -426,11 +426,13 @@ class DeduplicationEngineSimilarityPair(models.Model):
     def serialize_for_ticket(self) -> Dict[str, Any]:
         return {
             "individual1": {
+                "id": str(self.individual1.id),
                 "unicef_id": str(self.individual1.unicef_id),
                 "full_name": self.individual1.full_name,
                 "photo_name": str(self.individual1.photo.name) if self.individual1.photo else None,
             },
             "individual2": {
+                "id": str(self.individual2.id),
                 "unicef_id": str(self.individual2.unicef_id),
                 "full_name": self.individual2.full_name,
                 "photo_name": str(self.individual2.photo.name) if self.individual2.photo else None,
