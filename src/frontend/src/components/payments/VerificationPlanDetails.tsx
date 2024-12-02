@@ -2,7 +2,6 @@ import { Box, Grid, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
-  CashPlanQuery,
   CashPlanVerificationSamplingChoicesQuery,
   PaymentPlanQuery,
 } from '@generated/graphql';
@@ -32,7 +31,7 @@ const Container = styled.div`
 interface VerificationPlanDetailsProps {
   verificationPlan: PaymentPlanQuery['paymentPlan']['verificationPlans']['edges'][0]['node'];
   samplingChoicesData: CashPlanVerificationSamplingChoicesQuery;
-  planNode: CashPlanQuery['cashPlan'] | PaymentPlanQuery['paymentPlan'];
+  planNode: PaymentPlanQuery['paymentPlan'];
 }
 
 export function VerificationPlanDetails({

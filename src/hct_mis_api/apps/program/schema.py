@@ -1,13 +1,11 @@
-from typing import Any, Dict, List, Tuple, Type
+from typing import Any, Dict, List
 
 from django.db.models import (
     Case,
     Count,
     DecimalField,
-    Exists,
     F,
     IntegerField,
-    OuterRef,
     Q,
     QuerySet,
     Sum,
@@ -16,7 +14,7 @@ from django.db.models import (
 )
 
 import graphene
-from graphene import Int, relay
+from graphene import relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
@@ -25,7 +23,6 @@ from hct_mis_api.apps.account.permissions import (
     ALL_GRIEVANCES_CREATE_MODIFY,
     AdminUrlNodeMixin,
     BaseNodePermissionMixin,
-    BasePermission,
     DjangoPermissionFilterConnectionField,
     Permissions,
     hopeOneOfPermissionClass,
@@ -46,21 +43,7 @@ from hct_mis_api.apps.core.utils import (
     get_program_id_from_headers,
     to_choice_object,
 )
-from hct_mis_api.apps.payment.filters import (
-    CashPlanFilter,
-    PaymentVerificationPlanFilter,
-)
-from hct_mis_api.apps.payment.models import (
-    CashPlan,
-    DeliveryMechanism,
-    GenericPayment,
-    PaymentVerificationPlan,
-    PaymentVerificationSummary,
-)
-from hct_mis_api.apps.payment.schema import (
-    PaymentVerificationPlanNode,
-    PaymentVerificationSummaryNode,
-)
+from hct_mis_api.apps.payment.models import DeliveryMechanism
 from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
 from hct_mis_api.apps.program.filters import ProgramCycleFilter, ProgramFilter
 from hct_mis_api.apps.program.models import Program, ProgramCycle
@@ -164,46 +147,6 @@ class ProgramNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
         return program.can_finish
 
 
-class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
-    permission_classes: Tuple[Type[BasePermission], ...] = (
-        hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS),
-        hopePermissionClass(Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS),
-    )
-
-    bank_reconciliation_success = graphene.Int()
-    bank_reconciliation_error = graphene.Int()
-    delivery_type = graphene.String()
-    total_number_of_households = graphene.Int()
-    currency = graphene.String(source="currency")
-    total_delivered_quantity = graphene.Float()
-    total_entitled_quantity = graphene.Float()
-    total_undelivered_quantity = graphene.Float()
-    can_create_payment_verification_plan = graphene.Boolean()
-    available_payment_records_count = graphene.Int()
-    verification_plans = DjangoPermissionFilterConnectionField(
-        PaymentVerificationPlanNode,
-        filterset_class=PaymentVerificationPlanFilter,
-    )
-    payment_verification_summary = graphene.Field(
-        PaymentVerificationSummaryNode,
-        source="get_payment_verification_summary",
-    )
-    unicef_id = graphene.String(source="ca_id")
-
-    class Meta:
-        model = CashPlan
-        interfaces = (relay.Node,)
-        connection_class = ExtendedConnection
-
-    def resolve_available_payment_records_count(self, info: Any, **kwargs: Any) -> Int:
-        return self.payment_items.filter(
-            status__in=GenericPayment.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0
-        ).count()
-
-    def resolve_verification_plans(self, info: Any, **kwargs: Any) -> QuerySet:
-        return self.get_payment_verification_plans
-
-
 class Query(graphene.ObjectType):
     program = relay.Node.Field(ProgramNode)
     all_programs = DjangoPermissionFilterConnectionField(
@@ -226,18 +169,6 @@ class Query(graphene.ObjectType):
         year=graphene.Int(required=True),
         program=graphene.String(required=False),
         administrative_area=graphene.String(required=False),
-    )
-
-    cash_plan = relay.Node.Field(CashPlanNode)
-    all_cash_plans = DjangoPermissionFilterConnectionField(
-        CashPlanNode,
-        filterset_class=CashPlanFilter,
-        permission_classes=(
-            hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_LIST),
-            hopePermissionClass(
-                Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
-            ),
-        ),
     )
     program_status_choices = graphene.List(ChoiceObject)
     program_cycle_status_choices = graphene.List(ChoiceObject)
@@ -360,30 +291,6 @@ class Query(graphene.ObjectType):
             .order_by("name")
         )
 
-    def resolve_all_cash_plans(self, info: Any, **kwargs: Any) -> QuerySet[CashPlan]:
-        payment_verification_summary_qs = PaymentVerificationSummary.objects.filter(
-            payment_plan_object_id=OuterRef("id")
-        )
-
-        return CashPlan.objects.annotate(
-            custom_order=Case(
-                When(
-                    Exists(payment_verification_summary_qs.filter(status=PaymentVerificationPlan.STATUS_ACTIVE)),
-                    then=Value(1),
-                ),
-                When(
-                    Exists(payment_verification_summary_qs.filter(status=PaymentVerificationPlan.STATUS_PENDING)),
-                    then=Value(2),
-                ),
-                When(
-                    Exists(payment_verification_summary_qs.filter(status=PaymentVerificationPlan.STATUS_FINISHED)),
-                    then=Value(3),
-                ),
-                output_field=IntegerField(),
-                default=Value(0),
-            ),
-        ).order_by("-updated_at", "custom_order")
-
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     @cached_in_django_cache(24)
     def resolve_chart_programmes_by_sector(self, info: Any, business_area_slug: str, year: int, **kwargs: Any) -> Dict:
@@ -391,7 +298,7 @@ class Query(graphene.ObjectType):
         sector_choice_mapping = dict(Program.SECTOR_CHOICE)
         payment_items_qs: QuerySet = get_payment_items_for_dashboard(year, business_area_slug, filters, True)
 
-        programs_ids = payment_items_qs.values_list("parent__program__id", flat=True)
+        programs_ids = payment_items_qs.values_list("parent__program_cycle__program__id", flat=True)
         programs = Program.objects.filter(id__in=programs_ids).distinct()
 
         programmes_by_sector = (

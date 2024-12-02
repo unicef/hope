@@ -56,7 +56,7 @@ def test_refresh_data(afghanistan: BusinessAreaFactory, populate_dashboard_cache
     data: ReturnDict = DashboardDataCache.refresh_data(afghanistan.slug)
     assert len(data) > 0
     assert all(re.match(r"^[A-Z]{3}$", item["currency"]) for item in data)
-    assert sum(item["payments"] for item in data) == 8
+    assert sum(item["payments"] for item in data) == 5
     all_fields = DashboardHouseholdSerializer().get_fields().keys()
     assert data[0].keys() >= all_fields
     cache_key = DashboardDataCache.get_cache_key(afghanistan.slug)

@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from django.test import TestCase
 
 from freezegun import freeze_time
@@ -31,10 +29,7 @@ class TestMigratePaymentSnapShot(TestCase):
             program = RealProgramFactory()
             program_cycle = program.cycles.first()
             cls.pp = PaymentPlanFactory(
-                program=program,
                 program_cycle=program_cycle,
-                dispersion_start_date=datetime(2020, 8, 10),
-                dispersion_end_date=datetime(2020, 12, 10),
                 is_follow_up=False,
             )
             cls.hoh1 = IndividualFactory(household=None)

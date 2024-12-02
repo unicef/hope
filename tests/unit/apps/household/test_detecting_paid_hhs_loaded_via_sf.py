@@ -10,7 +10,7 @@ from hct_mis_api.apps.household.fixtures import (
 from hct_mis_api.apps.household.management.commands.detect_paid_households import (
     find_paid_households,
 )
-from hct_mis_api.apps.payment.fixtures import CashPlanFactory, PaymentRecordFactory
+from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
 
 
 class TestDetectingAlreadyPaidHouseholds(TestCase):
@@ -31,7 +31,7 @@ class TestDetectingAlreadyPaidHouseholds(TestCase):
             has_data_sharing_agreement=True,
         )
 
-        cls.cash_plan = CashPlanFactory(business_area=cls.business_area)
+        cls.payment_plan = PaymentPlanFactory(business_area=cls.business_area)
         cls.document_type = DocumentTypeFactory(key="tax_id")
 
         ##
@@ -50,11 +50,11 @@ class TestDetectingAlreadyPaidHouseholds(TestCase):
         )
         cls.household_2.storage_obj = None
         cls.household_2.save()
-        PaymentRecordFactory(
+        PaymentFactory(
             household=cls.household_2,
-            full_name=cls.individuals_2[0].full_name,
+            collector=cls.individuals_2[0],
             business_area=cls.business_area,
-            parent=cls.cash_plan,
+            parent=cls.payment_plan,
             currency="PLN",
         )
         cls.individuals_2[0].documents.add(
