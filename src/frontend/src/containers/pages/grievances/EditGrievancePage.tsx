@@ -7,6 +7,7 @@ import {
   GrievanceTicketDocument,
   useAllAddIndividualFieldsQuery,
   useAllEditHouseholdFieldsQuery,
+  useAllEditPeopleFieldsQuery,
   useAllProgramsForChoicesQuery,
   useGrievanceTicketQuery,
   useGrievanceTicketStatusChangeMutation,
@@ -119,6 +120,9 @@ export const EditGrievancePage = (): ReactElement => {
   } = useAllAddIndividualFieldsQuery();
   const { data: householdFieldsData, loading: householdFieldsLoading } =
     useAllEditHouseholdFieldsQuery();
+  const { data: allEditPeopleFieldsData, loading: allEditPeopleFieldsLoading } =
+    useAllEditPeopleFieldsQuery();
+
   const { data: programsData, loading: programsDataLoading } =
     useAllProgramsForChoicesQuery({
       variables: {
@@ -137,10 +141,17 @@ export const EditGrievancePage = (): ReactElement => {
     '*',
   );
 
+  const peopleFieldsDict = useArrayToDict(
+    allEditPeopleFieldsData?.allEditPeopleFieldsAttributes,
+    'name',
+    '*',
+  );
+
   if (
     choicesLoading ||
     ticketLoading ||
     allAddIndividualFieldsDataLoading ||
+    allEditPeopleFieldsLoading ||
     householdFieldsLoading ||
     currentUserDataLoading ||
     programsDataLoading
@@ -155,6 +166,7 @@ export const EditGrievancePage = (): ReactElement => {
     !householdFieldsData ||
     !householdFieldsDict ||
     !individualFieldsDict ||
+    !peopleFieldsDict ||
     !programsData
   )
     return null;
@@ -216,6 +228,7 @@ export const EditGrievancePage = (): ReactElement => {
       'individualDataUpdateIdentitiesToEdit',
       'individualDataUpdateFieldsPaymentChannels',
       'individualDataUpdatePaymentChannelsToEdit',
+      'peopleDataUpdateFields',
     ].map(
       (fieldname) =>
         isInvalid(fieldname, errors, touched) && (
@@ -298,6 +311,7 @@ export const EditGrievancePage = (): ReactElement => {
             allAddIndividualFieldsData,
             individualFieldsDict,
             householdFieldsDict,
+            peopleFieldsDict,
           )
         }
         validationSchema={validationSchema}

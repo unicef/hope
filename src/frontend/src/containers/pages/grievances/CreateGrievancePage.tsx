@@ -53,6 +53,7 @@ import {
 } from '../../../config/permissions';
 import { useProgramContext } from 'src/programContext';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { EditPeopleDataChange } from '@components/grievances/EditPeopleDataChange/EditPeopleDataChange';
 
 const InnerBoxPadding = styled.div`
   .MuiPaper-root {
@@ -77,6 +78,7 @@ export const dataChangeComponentDict = {
     [GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL]: AddIndividualDataChange,
     [GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL]: EditIndividualDataChange,
     [GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD]: EditHouseholdDataChange,
+    [GRIEVANCE_ISSUE_TYPES.EDIT_PEOPLE]: EditPeopleDataChange,
   },
 };
 
@@ -167,9 +169,7 @@ export const CreateGrievancePage = (): ReactElement => {
     '*',
   );
 
-  const householdFieldsDictByDctType = isSocialDctType
-    ? peopleFieldsDict
-    : householdFieldsDict;
+  const individualFieldsDictByDctType = individualFieldsDict;
 
   const showIssueType = (values): boolean =>
     values.category === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
@@ -309,11 +309,10 @@ export const CreateGrievancePage = (): ReactElement => {
           validateUsingSteps(
             values,
             allAddIndividualFieldsData,
-            individualFieldsDict,
-            householdFieldsDictByDctType,
+            individualFieldsDictByDctType,
+            householdFieldsDict,
             activeStep,
             setValidateData,
-            isSocialDctType,
           )
         }
         validationSchema={validationSchemaWithSteps(activeStep)}

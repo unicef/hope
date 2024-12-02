@@ -6,21 +6,21 @@ import { ReactElement, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   AllHouseholdsQuery,
-  useAllEditHouseholdFieldsQuery,
+  useAllEditPeopleFieldsQuery,
   useHouseholdLazyQuery,
 } from '@generated/graphql';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { Title } from '@core/Title';
-import { EditHouseholdDataChangeFieldRow } from './EditHouseholdDataChangeFieldRow';
+import { EditPeopleDataChangeFieldRow } from './EditPeopleDataChangeFieldRow';
 
-export interface EditHouseholdDataChangeProps {
+export interface EditPeopleDataChangeProps {
   values;
   setFieldValue;
 }
-export function EditHouseholdDataChange({
+export function EditPeopleDataChange({
   values,
   setFieldValue,
-}: EditHouseholdDataChangeProps): ReactElement {
+}: EditPeopleDataChangeProps): ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
   const isEditTicket = location.pathname.includes('edit-ticket');
@@ -45,16 +45,17 @@ export function EditHouseholdDataChange({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  const { data: householdFieldsData, loading: householdFieldsLoading } =
-    useAllEditHouseholdFieldsQuery();
 
-  const householdFieldsDict =
-    householdFieldsData?.allEditHouseholdFieldsAttributes;
+  const { data: allEditPeopleFieldsData, loading: allEditPeopleFieldsLoading } =
+    useAllEditPeopleFieldsQuery();
+
+  const fieldsByDctType =
+    allEditPeopleFieldsData?.allEditPeopleFieldsAttributes;
 
   if (!household) {
     return <div>{t('You have to select a household earlier')}</div>;
   }
-  if (fullHouseholdLoading || householdFieldsLoading || !fullHousehold) {
+  if (fullHouseholdLoading || allEditPeopleFieldsLoading || !fullHousehold) {
     return <LoadingComponent />;
   }
   const notAvailableItems = (values.householdDataUpdateFields || []).map(
@@ -72,13 +73,13 @@ export function EditHouseholdDataChange({
             render={(arrayHelpers) => (
               <>
                 {(values.householdDataUpdateFields || []).map((item, index) => (
-                  <EditHouseholdDataChangeFieldRow
+                  <EditPeopleDataChangeFieldRow
                     /* eslint-disable-next-line react/no-array-index-key */
                     key={`${index}-${item.fieldName}`}
                     itemValue={item}
                     index={index}
                     household={fullHousehold.household}
-                    fields={householdFieldsDict}
+                    fields={fieldsByDctType}
                     notAvailableFields={notAvailableItems}
                     onDelete={() => arrayHelpers.remove(index)}
                     values={values}
