@@ -149,7 +149,7 @@ class TestPaymentSignature(APITestCase):
         with mock.patch("hct_mis_api.apps.payment.services.payment_plan_services.prepare_payment_plan_task"):
             pp = PaymentPlanService.create(input_data=input_data, user=self.user)
 
-        prepare_payment_plan_task(pp.id)
+        prepare_payment_plan_task(str(pp.id))
         pp.refresh_from_db()
         payment1 = pp.payment_items.all()[0]
         payment2 = pp.payment_items.all()[1]

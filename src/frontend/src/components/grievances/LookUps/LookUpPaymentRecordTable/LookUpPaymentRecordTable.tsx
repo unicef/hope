@@ -1,10 +1,9 @@
 import { MouseEvent, ReactElement, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import {
-  LookUpPaymentRecordsQueryVariables,
+  AllPaymentRecordsAndPaymentsQueryVariables,
   PaymentRecordAndPaymentNode,
   useAllPaymentRecordsAndPaymentsQuery,
-  useLookUpPaymentRecordsQuery,
 } from '@generated/graphql';
 import { UniversalTable } from '@containers/tables/UniversalTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -64,11 +63,11 @@ export function LookUpPaymentRecordTable({
     return (
       <UniversalTable<
         PaymentRecordAndPaymentNode,
-        LookUpPaymentRecordsQueryVariables
+        AllPaymentRecordsAndPaymentsQueryVariables
       >
         headCells={headCells}
-        query={useLookUpPaymentRecordsQuery}
-        queriedObjectName="allPaymentRecords"
+        query={useAllPaymentRecordsAndPaymentsQuery}
+        queriedObjectName="allPaymentRecordsAndPayments"
         initialVariables={initialVariables}
         renderRow={(row) => (
           <LookUpPaymentRecordTableRow
@@ -85,7 +84,7 @@ export function LookUpPaymentRecordTable({
   return (
     <UniversalTable<
       PaymentRecordAndPaymentNode,
-      LookUpPaymentRecordsQueryVariables
+      AllPaymentRecordsAndPaymentsQueryVariables
     >
       headCells={headCells}
       query={useAllPaymentRecordsAndPaymentsQuery}

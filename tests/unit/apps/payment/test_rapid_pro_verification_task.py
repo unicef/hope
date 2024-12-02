@@ -12,10 +12,11 @@ from hct_mis_api.apps.core.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.fixtures import EntitlementCardFactory, create_household
 from hct_mis_api.apps.payment.fixtures import (
-    CashPlanFactory,
-    PaymentRecordFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
+    PaymentVerificationSummaryFactory,
 )
 from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan
 from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
@@ -23,10 +24,6 @@ from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.targeting.fixtures import (
-    TargetingCriteriaFactory,
-    TargetPopulationFactory,
-)
 from hct_mis_api.apps.utils.phone import is_valid_phone_number
 
 
@@ -86,22 +83,16 @@ class TestRapidProVerificationTask(TestCase):
 
         program = ProgramFactory(business_area=BusinessArea.objects.first())
         program.admin_areas.set(Area.objects.order_by("?")[:3])
-        targeting_criteria = TargetingCriteriaFactory()
 
-        target_population = TargetPopulationFactory(
-            created_by=user,
-            targeting_criteria=targeting_criteria,
+        payment_plan = PaymentPlanFactory(
+            program_cycle=program.cycles.first(),
             business_area=BusinessArea.objects.first(),
         )
-        cash_plan = CashPlanFactory(
-            program=program,
-            business_area=BusinessArea.objects.first(),
-        )
-        cash_plan.save()
+        PaymentVerificationSummaryFactory(payment_plan=payment_plan)
         payment_verification_plan = PaymentVerificationPlanFactory(
             status=PaymentVerificationPlan.STATUS_ACTIVE,
             verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_RAPIDPRO,
-            payment_plan_obj=cash_plan,
+            payment_plan=payment_plan,
         )
         cls.individuals = []
         for _ in range(payment_record_amount):
@@ -119,23 +110,22 @@ class TestRapidProVerificationTask(TestCase):
 
             household.programs.add(program)
 
-            payment_record = PaymentRecordFactory(
-                parent=cash_plan,
+            payment = PaymentFactory(
+                parent=payment_plan,
                 household=household,
                 head_of_household=household.head_of_household,
-                target_population=target_population,
                 delivered_quantity_usd=200,
                 currency="PLN",
             )
 
             PaymentVerificationFactory(
                 payment_verification_plan=payment_verification_plan,
-                payment_obj=payment_record,
+                payment=payment,
                 status=PaymentVerification.STATUS_PENDING,
             )
             EntitlementCardFactory(household=household)
-        cls.cash_plan = cash_plan
-        cls.verification = cash_plan.get_payment_verification_plans.first()
+        cls.payment_plan = payment_plan
+        cls.verification = payment_plan.payment_verification_plans.first()
 
     @patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__")
     def test_filtering_by_start_id(self, mock_parent_init: Any) -> None:
@@ -143,7 +133,7 @@ class TestRapidProVerificationTask(TestCase):
         payment_record_verification_obj = TestRapidProVerificationTask.verification.payment_record_verifications.first()
         TestRapidProVerificationTask.ORIGINAL_RAPIDPRO_RUNS_RESPONSE[0]["contact"][
             "urn"
-        ] = f"tel:{payment_record_verification_obj.payment_obj.head_of_household.phone_no}"
+        ] = f"tel:{payment_record_verification_obj.payment.head_of_household.phone_no}"
         mock = MagicMock(return_value=TestRapidProVerificationTask.ORIGINAL_RAPIDPRO_RUNS_RESPONSE)
         with patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.get_flow_runs", mock):
             api = RapidProAPI("afghanistan", RapidProAPI.MODE_VERIFICATION)
@@ -159,7 +149,7 @@ class TestRapidProVerificationTask(TestCase):
         payment_record_verification_obj = TestRapidProVerificationTask.verification.payment_record_verifications.first()
         TestRapidProVerificationTask.ORIGINAL_RAPIDPRO_RUNS_RESPONSE[0]["contact"][
             "urn"
-        ] = f"tel:{payment_record_verification_obj.payment_obj.head_of_household.phone_no}"
+        ] = f"tel:{payment_record_verification_obj.payment.head_of_household.phone_no}"
         mock = MagicMock(return_value=TestRapidProVerificationTask.ORIGINAL_RAPIDPRO_RUNS_RESPONSE)
         with patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.get_flow_runs", mock):
             api = RapidProAPI("afghanistan", RapidProAPI.MODE_VERIFICATION)
@@ -168,7 +158,7 @@ class TestRapidProVerificationTask(TestCase):
                 mapped_dict,
                 [
                     {
-                        "phone_number": str(payment_record_verification_obj.payment_obj.head_of_household.phone_no),
+                        "phone_number": str(payment_record_verification_obj.payment.head_of_household.phone_no),
                         "received": True,
                         "received_amount": Decimal("200"),
                     }
@@ -188,13 +178,13 @@ class TestRapidProVerificationTask(TestCase):
 
         fake_data_to_return_from_rapid_pro_api = [
             {
-                "phone_number": str(payment_record_verification.payment_obj.head_of_household.phone_no),
+                "phone_number": str(payment_record_verification.payment.head_of_household.phone_no),
                 "received": False,
             }
         ]
         assert is_valid_phone_number(
-            payment_record_verification.payment_obj.head_of_household.phone_no
-        ), payment_record_verification.payment_obj.head_of_household.phone_no
+            payment_record_verification.payment.head_of_household.phone_no
+        ), payment_record_verification.payment.head_of_household.phone_no
         mock = MagicMock(return_value=fake_data_to_return_from_rapid_pro_api)
         with patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.get_mapped_flow_runs", mock):
             task = CheckRapidProVerificationTask()
@@ -217,13 +207,13 @@ class TestRapidProVerificationTask(TestCase):
             PaymentVerification.STATUS_PENDING,
         )
         assert is_valid_phone_number(
-            payment_record_verification.payment_obj.head_of_household.phone_no
-        ), payment_record_verification.payment_obj.head_of_household.phone_no
+            payment_record_verification.payment.head_of_household.phone_no
+        ), payment_record_verification.payment.head_of_household.phone_no
         fake_data_to_return_from_rapid_pro_api = [
             {
-                "phone_number": str(payment_record_verification.payment_obj.head_of_household.phone_no),
+                "phone_number": str(payment_record_verification.payment.head_of_household.phone_no),
                 "received": True,
-                "received_amount": payment_record_verification.payment_obj.delivered_quantity - 1,
+                "received_amount": payment_record_verification.payment.delivered_quantity - 1,
             }
         ]
         mock = MagicMock(return_value=fake_data_to_return_from_rapid_pro_api)
@@ -238,7 +228,7 @@ class TestRapidProVerificationTask(TestCase):
             )
             self.assertEqual(
                 payment_record_verification.received_amount,
-                payment_record_verification.payment_obj.delivered_quantity - 1,
+                payment_record_verification.payment.delivered_quantity - 1,
             )
 
     @patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__")
@@ -253,14 +243,14 @@ class TestRapidProVerificationTask(TestCase):
         )
         fake_data_to_return_from_rapid_pro_api = [
             {
-                "phone_number": str(payment_record_verification.payment_obj.head_of_household.phone_no),
+                "phone_number": str(payment_record_verification.payment.head_of_household.phone_no),
                 "received": True,
-                "received_amount": payment_record_verification.payment_obj.delivered_quantity,
+                "received_amount": payment_record_verification.payment.delivered_quantity,
             }
         ]
         assert is_valid_phone_number(
-            payment_record_verification.payment_obj.head_of_household.phone_no
-        ), payment_record_verification.payment_obj.head_of_household.phone_no
+            payment_record_verification.payment.head_of_household.phone_no
+        ), payment_record_verification.payment.head_of_household.phone_no
         mock = MagicMock(return_value=fake_data_to_return_from_rapid_pro_api)
         with patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.get_mapped_flow_runs", mock):
             task = CheckRapidProVerificationTask()
@@ -273,7 +263,7 @@ class TestRapidProVerificationTask(TestCase):
             )
             self.assertEqual(
                 payment_record_verification.received_amount,
-                payment_record_verification.payment_obj.delivered_quantity,
+                payment_record_verification.payment.delivered_quantity,
             )
 
     @patch("hct_mis_api.apps.core.services.rapid_pro.api.RapidProAPI.__init__")
@@ -290,7 +280,7 @@ class TestRapidProVerificationTask(TestCase):
             {
                 "phone_number": "123-not-really-a-phone-number",
                 "received": True,
-                "received_amount": payment_record_verification.payment_obj.delivered_quantity,
+                "received_amount": payment_record_verification.payment.delivered_quantity,
             }
         ]
         mock = MagicMock(return_value=fake_data_to_return_from_rapid_pro_api)

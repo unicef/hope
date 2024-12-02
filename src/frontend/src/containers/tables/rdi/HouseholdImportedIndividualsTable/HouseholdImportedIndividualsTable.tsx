@@ -1,10 +1,10 @@
 import { ReactElement, useState } from 'react';
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
 import { Order, TableComponent } from '@components/core/Table/TableComponent';
-import { ImportedIndividualMinimalFragment } from '@generated/graphql';
+import { IndividualMinimalFragment } from '@generated/graphql';
 import { ImportedIndividualsTableRow } from '../ImportedIndividualsTable/ImportedIndividualsTableRow';
 
-const headCells: HeadCell<ImportedIndividualMinimalFragment>[] = [
+const headCells: HeadCell<IndividualMinimalFragment>[] = [
   {
     disablePadding: false,
     label: 'Individual ID',
@@ -74,7 +74,7 @@ export function HouseholdImportedIndividualsTable({
 
   const totalCount = allIndividuals.length;
   return (
-    <TableComponent<ImportedIndividualMinimalFragment>
+    <TableComponent<IndividualMinimalFragment>
       title="Individuals in Household"
       data={allIndividuals.slice(
         page * rowsPerPage,
@@ -86,6 +86,8 @@ export function HouseholdImportedIndividualsTable({
           key={row.id}
           choices={choicesData}
           individual={row}
+          rdi={household.rdi}
+          isMerged={household.rdiMergeStatus}
         />
       )}
       headCells={headCells}

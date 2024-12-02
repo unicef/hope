@@ -10,8 +10,8 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentRecordFactory
-from hct_mis_api.apps.payment.models import Payment, PaymentRecord
+from hct_mis_api.apps.payment.fixtures import PaymentFactory
+from hct_mis_api.apps.payment.models import Payment
 
 
 class TestProgramChoices(APITestCase):
@@ -59,10 +59,8 @@ class TestProgramChoices(APITestCase):
     @freeze_time("2023-10-10")
     def test_dashboard_years_choices_no_objects(self) -> None:
         cache.clear()
-        PaymentRecord.objects.all().delete()
         Payment.objects.all().delete()
         GrievanceTicket.objects.all().delete()
-        self.assertEqual(PaymentRecord.objects.count(), 0)
         self.assertEqual(Payment.objects.count(), 0)
         self.assertEqual(GrievanceTicket.objects.count(), 0)
 
@@ -81,7 +79,7 @@ class TestProgramChoices(APITestCase):
         household, individuals = create_household(
             household_args={"size": 2, "business_area": business_area},
         )
-        PaymentRecordFactory(
+        PaymentFactory(
             delivery_date=timezone.datetime(2021, 10, 10, tzinfo=utc),
             business_area=business_area,
             household=household,
@@ -93,8 +91,7 @@ class TestProgramChoices(APITestCase):
             household=household,
             currency="PLN",
         )
-        self.assertEqual(PaymentRecord.objects.count(), 1)
-        self.assertEqual(Payment.objects.count(), 1)
+        self.assertEqual(Payment.objects.count(), 2)
 
         self.snapshot_graphql_request(
             request_string=self.QUERY_DASHBOARD_YEARS_CHOICES,

@@ -147,6 +147,7 @@ def create_payment_plan(create_targeting: None) -> PaymentPlan:
         end_date=datetime.now() + relativedelta(days=15),
     )
     payment_plan = PaymentPlan.objects.update_or_create(
+        name="Test Payment Plan",
         business_area=BusinessArea.objects.only("is_payment_plan_applicable").get(slug="afghanistan"),
         target_population=tp,
         program_cycle=cycle,
@@ -156,11 +157,9 @@ def create_payment_plan(create_targeting: None) -> PaymentPlan:
         status_date=datetime.now(),
         status=PaymentPlan.Status.ACCEPTED,
         created_by=User.objects.first(),
-        program=tp.program,
         total_delivered_quantity=999,
         total_entitled_quantity=2999,
         is_follow_up=False,
-        program_id=tp.program.id,
     )
     yield payment_plan[0]
 
@@ -188,7 +187,6 @@ def create_payment_plan_open(social_worker_program: Program) -> PaymentPlan:
     payment_plan = PaymentPlanFactory(
         status=PaymentPlan.Status.PREPARING,
         is_follow_up=False,
-        program=social_worker_program,
         program_cycle=program_cycle,
         business_area=social_worker_program.business_area,
         dispersion_start_date=datetime.now().date(),
@@ -213,7 +211,6 @@ def create_payment_plan_open(social_worker_program: Program) -> PaymentPlan:
 
     PaymentPlanFactory(
         status=PaymentPlan.Status.LOCKED,
-        program=social_worker_program,
         program_cycle=program_cycle,
         business_area=social_worker_program.business_area,
         dispersion_start_date=datetime.now().date(),
@@ -234,7 +231,6 @@ def payment_plan_create(program: Program, status: str = PaymentPlan.Status.LOCKE
     )
 
     payment_plan = PaymentPlanFactory(
-        program=program,
         is_follow_up=False,
         status=status,
         program_cycle=program_cycle,

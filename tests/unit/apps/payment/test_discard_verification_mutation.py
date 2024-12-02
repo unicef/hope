@@ -10,18 +10,15 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.fixtures import EntitlementCardFactory, create_household
 from hct_mis_api.apps.payment.fixtures import (
-    CashPlanFactory,
-    PaymentRecordFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
+    PaymentVerificationSummaryFactory,
 )
 from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.targeting.fixtures import (
-    TargetingCriteriaFactory,
-    TargetPopulationFactory,
-)
 
 
 class TestDiscardVerificationMutation(APITestCase):
@@ -59,20 +56,15 @@ class TestDiscardVerificationMutation(APITestCase):
 
         program = ProgramFactory(business_area=cls.business_area)
         program.admin_areas.set(Area.objects.order_by("?")[:3])
-        targeting_criteria = TargetingCriteriaFactory()
 
-        target_population = TargetPopulationFactory(
-            created_by=cls.user,
-            targeting_criteria=targeting_criteria,
-            business_area=cls.business_area,
-        )
-        cash_plan = CashPlanFactory(
+        payment_plan = PaymentPlanFactory(
             name="TEST",
-            program=program,
+            program_cycle=program.cycles.first(),
             business_area=cls.business_area,
         )
+        PaymentVerificationSummaryFactory(payment_plan=payment_plan)
         payment_verification_plan = PaymentVerificationPlanFactory(
-            payment_plan_obj=cash_plan, verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL
+            payment_plan=payment_plan, verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL
         )
         payment_verification_plan.status = PaymentVerificationPlan.STATUS_ACTIVE
         payment_verification_plan.save()
@@ -90,20 +82,19 @@ class TestDiscardVerificationMutation(APITestCase):
 
             household.programs.add(program)
 
-            payment_record = PaymentRecordFactory(
-                parent=cash_plan,
+            payment = PaymentFactory(
+                parent=payment_plan,
                 household=household,
-                target_population=target_population,
                 currency="PLN",
             )
             PaymentVerificationFactory(
                 payment_verification_plan=payment_verification_plan,
-                payment_obj=payment_record,
+                payment=payment,
                 status=PaymentVerification.STATUS_PENDING,
             )
             EntitlementCardFactory(household=household)
-        cls.cash_plan = cash_plan
-        cls.verification = cash_plan.payment_verification_plan.first()
+        cls.payment_plan = payment_plan
+        cls.verification = payment_plan.payment_verification_plans.first()
 
     @parameterized.expand(
         [

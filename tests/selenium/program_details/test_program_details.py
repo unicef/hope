@@ -169,7 +169,6 @@ def get_program_without_cycle_end_date(
     )
     program_cycle = ProgramCycle.objects.get(program=program)
     PaymentPlanFactory(
-        program=program,
         program_cycle=program_cycle,
         total_entitled_quantity_usd=Decimal(1234.99),
         total_delivered_quantity_usd=Decimal(50.01),
@@ -212,6 +211,7 @@ def create_payment_plan(standard_program: Program) -> PaymentPlan:
         program_cycle=cycle,
     )
     payment_plan = PaymentPlan.objects.update_or_create(
+        name="Test Payment Plan",
         business_area=BusinessArea.objects.only("is_payment_plan_applicable").get(slug="afghanistan"),
         target_population=tp,
         start_date=datetime.now(),
@@ -222,11 +222,9 @@ def create_payment_plan(standard_program: Program) -> PaymentPlan:
         status_date=datetime.now(),
         status=PaymentPlan.Status.ACCEPTED,
         created_by=User.objects.first(),
-        program=tp.program,
         total_delivered_quantity=999,
         total_entitled_quantity=2999,
         is_follow_up=False,
-        program_id=tp.program.id,
         program_cycle=cycle,
     )
     yield payment_plan[0]

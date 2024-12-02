@@ -1,5 +1,5 @@
 from base64 import b64decode
-from typing import Dict, List, Optional, Type, Union
+from typing import Dict, List, Optional, Type
 
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
@@ -10,7 +10,7 @@ from hct_mis_api.apps.core.utils import (
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.models import Household, Individual
-from hct_mis_api.apps.payment.models import Payment, PaymentRecord
+from hct_mis_api.apps.payment.models import Payment
 
 
 def create_tickets_based_on_payment_records_service(
@@ -42,9 +42,7 @@ def create_tickets_based_on_payment_records_service(
     for payment_record_encoded_id in payment_record_encoded_ids_list:
         node_name, obj_id = b64decode(payment_record_encoded_id).decode().split(":")
 
-        payment_record: Union["Payment", "PaymentRecord"] = get_object_or_404(  # type: ignore
-            Payment if node_name == "PaymentNode" else PaymentRecord, id=obj_id
-        )
+        payment: Payment = get_object_or_404(Payment, id=obj_id)
         # copy GrievanceTicket object and assign linked tickets
         if not ticket:
             ticket = grievance_ticket
@@ -58,7 +56,7 @@ def create_tickets_based_on_payment_records_service(
         model.objects.create(
             individual=individual,
             household=household,
-            payment_obj=payment_record,
+            payment=payment,
             ticket=ticket,
         )
         ticket.refresh_from_db()
@@ -88,9 +86,7 @@ def update_ticket_based_on_payment_record_service(
     if payment_record_id := input_data.get("payment_record"):
         node_name, obj_id = b64decode(payment_record_id).decode().split(":")
 
-        payment_record: Union["Payment", "PaymentRecord"] = get_object_or_404(  # type: ignore
-            Payment if node_name == "PaymentNode" else PaymentRecord, id=obj_id
-        )
-        ticket_details.payment_obj = payment_record
+        payment_record: "Payment" = get_object_or_404(Payment, id=obj_id)
+        ticket_details.payment = payment_record
     ticket_details.save()
     return grievance_ticket

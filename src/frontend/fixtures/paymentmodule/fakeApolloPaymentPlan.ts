@@ -1,7 +1,6 @@
 import {
   FinancialServiceProviderCommunicationChannel,
   PaymentPlanBackgroundActionStatus,
-  PaymentPlanCurrency,
   PaymentPlanQuery,
   PaymentPlanStatus,
   PaymentStatus,
@@ -44,7 +43,7 @@ export const fakeApolloPaymentPlan: PaymentPlanQuery['paymentPlan'] = {
     name: 'Report should property early adult.',
     __typename: 'TargetPopulationNode',
   },
-  currency: PaymentPlanCurrency.Pln,
+  currency: "PLN",
   currencyName: 'Polish złoty',
   startDate: '2020-10-27',
   endDate: '2021-09-08',

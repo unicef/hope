@@ -9,11 +9,7 @@ from hct_mis_api.apps.account.fixtures import BusinessAreaFactory
 from hct_mis_api.apps.geo.fixtures import AreaFactory
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.payment.fixtures import (
-    PaymentFactory,
-    PaymentPlanFactory,
-    PaymentRecordFactory,
-)
+from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
 
 
 class ModifiedPaymentFactory(PaymentFactory):
@@ -24,15 +20,6 @@ class ModifiedPaymentFactory(PaymentFactory):
 
     parent = factory.SubFactory(PaymentPlanFactory, status=factory.Iterator(["ACCEPTED", "FINISHED"]))
     status = factory.Iterator(["Transaction Successful", "Distribution Successful", "Partially Distributed", "Pending"])
-
-
-class ModifiedPaymentRecordFactory(PaymentRecordFactory):
-    """
-    A specialized factory for creating Payments that match the filtering logic
-    in DashboardDataCache.refresh_data.
-    """
-
-    status = factory.Iterator(["Transaction Successful", "Distribution Successful", "Partially Distributed"])
 
 
 @pytest.fixture()
@@ -66,7 +53,6 @@ def populate_dashboard_cache() -> Callable[[BusinessAreaFactory], Household]:
                 }
             )
             ModifiedPaymentFactory.create_batch(5, household=household)
-            ModifiedPaymentRecordFactory.create_batch(3, household=household)
 
         return household
 
