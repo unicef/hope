@@ -33,7 +33,9 @@ class TestPaymentNotification(APITestCase):
         cls.program = ProgramFactory.create(business_area=cls.business_area)
         cls.program2 = ProgramFactory.create(business_area=cls.business_area)
         cls.payment_plan = PaymentPlanFactory.create(
-            business_area=cls.business_area, created_by=cls.user_payment_plan_creator, program=cls.program
+            business_area=cls.business_area,
+            created_by=cls.user_payment_plan_creator,
+            program_cycle=cls.program.cycles.first(),
         )
 
         cls.approval_process = ApprovalProcessFactory.create(

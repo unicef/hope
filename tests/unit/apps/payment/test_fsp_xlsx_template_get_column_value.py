@@ -34,7 +34,9 @@ class FinancialServiceProviderXlsxTemplateTest(APITestCase):
         household, individuals = create_household(household_args={"size": 1, "business_area": self.business_area})
         individual = individuals[0]
         payment_plan = PaymentPlanFactory(
-            program=self.program, status=PaymentPlan.Status.ACCEPTED, business_area=self.business_area
+            program_cycle=self.program.cycles.first(),
+            status=PaymentPlan.Status.ACCEPTED,
+            business_area=self.business_area,
         )
         payment = PaymentFactory(parent=payment_plan, household=household, collector=individual, currency="PLN")
         create_payment_plan_snapshot_data(payment_plan)
@@ -62,7 +64,9 @@ class FinancialServiceProviderXlsxTemplateTest(APITestCase):
         individual = individuals[0]
 
         payment_plan = PaymentPlanFactory(
-            program=self.program, status=PaymentPlan.Status.ACCEPTED, business_area=self.business_area
+            program_cycle=self.program.cycles.first(),
+            status=PaymentPlan.Status.ACCEPTED,
+            business_area=self.business_area,
         )
         payment = PaymentFactory(parent=payment_plan, household=household, collector=individual, currency="PLN")
         primary = IndividualRoleInHousehold.objects.filter(role=ROLE_PRIMARY).first().individual

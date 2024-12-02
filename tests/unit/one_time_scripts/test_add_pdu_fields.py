@@ -43,9 +43,9 @@ class TestAddPDUFields(TestCase):
         cls.individual_with_flex_field = individuals2[0]
         flex_field_existing = FlexibleAttribute.objects.create(
             name="flex_field_1",
-            label={"English(EN)": "flex field 1"},
             type=FlexibleAttribute.STRING,
             associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+            label={"English(EN)": "flex_field_1"},
         )
         cls.individual_with_flex_field.flex_fields = {
             flex_field_existing.name: "value1",

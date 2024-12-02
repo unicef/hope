@@ -45,7 +45,6 @@ from hct_mis_api.apps.payment.fixtures import (
     PaymentFactory,
     PaymentPlanFactory,
     RealProgramFactory,
-    ServiceProviderFactory,
     generate_delivery_mechanisms,
 )
 from hct_mis_api.apps.payment.models import (
@@ -56,7 +55,6 @@ from hct_mis_api.apps.payment.models import (
     PaymentHouseholdSnapshot,
     PaymentPlan,
     PaymentPlanSplit,
-    ServiceProvider,
 )
 from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
@@ -101,13 +99,13 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
                     {"size": n, "address": "Lorem Ipsum", "country_origin": country_origin, "village": "TEST_VILLAGE"},
                 )
 
-        if ServiceProvider.objects.count() < 3:
-            ServiceProviderFactory.create_batch(3)
+        if FinancialServiceProvider.objects.count() < 3:
+            FinancialServiceProviderFactory.create_batch(3)
         program = RealProgramFactory()
         cls.dm_cash = DeliveryMechanism.objects.get(code="cash")
         cls.dm_transfer = DeliveryMechanism.objects.get(code="transfer")
         cls.dm_atm_card = DeliveryMechanism.objects.get(code="atm_card")
-        cls.payment_plan = PaymentPlanFactory(program=program, business_area=cls.business_area)
+        cls.payment_plan = PaymentPlanFactory(program_cycle=program.cycles.first(), business_area=cls.business_area)
         cls.fsp_1 = FinancialServiceProviderFactory(
             name="Test FSP 1",
             communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
@@ -501,7 +499,7 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
 
         # create Program for People export
         program_sw = ProgramFactory(data_collecting_type__type=DataCollectingType.Type.SOCIAL)
-        self.payment_plan.program = program_sw
+        self.payment_plan.program_cycle = program_sw.cycles.first()
         self.payment_plan.save()
 
         export_service = XlsxPaymentPlanExportPerFspService(self.payment_plan)

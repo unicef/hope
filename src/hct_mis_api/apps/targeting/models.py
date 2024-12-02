@@ -223,6 +223,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         help_text="Written by a tool such as Corticon.",
         blank=True,
     )
+
     excluded_ids = models.TextField(blank=True)
     exclusion_reason = models.TextField(blank=True)
 
@@ -251,7 +252,6 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         null=True,
     )
 
-    # TODO: move to StorageFile
     storage_file = models.OneToOneField(StorageFile, blank=True, null=True, on_delete=models.SET_NULL)
 
     @property
@@ -607,16 +607,17 @@ class TargetingCollectorBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteriaF
 
         collectors_ind_query = Individual.objects.filter(
             pk__in=list(collector_primary_qs),
-            delivery_mechanisms_data__is_valid=True,
         )
         # If argument is Yes
-        if argument:
+        if argument.lower() == "yes":
             individuals_with_field_query = collectors_ind_query.filter(
-                delivery_mechanisms_data__data__has_key=self.field_name
+                delivery_mechanisms_data__data__has_key=self.field_name,
+                delivery_mechanisms_data__is_valid=True,
             )
         # If argument is No
         else:
             individuals_with_field_query = collectors_ind_query.exclude(
-                delivery_mechanisms_data__data__has_key=self.field_name
+                delivery_mechanisms_data__data__has_key=self.field_name,
+                delivery_mechanisms_data__is_valid=True,
             )
         return Q(pk__in=list(individuals_with_field_query.values_list("household_id", flat=True)))

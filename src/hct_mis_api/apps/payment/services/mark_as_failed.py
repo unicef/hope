@@ -4,7 +4,6 @@ from typing import TYPE_CHECKING, Union
 
 from django.db.models import Sum
 
-from hct_mis_api.apps.core.querysets import ExtendedQuerySetSequence
 from hct_mis_api.apps.payment.models import Payment, PaymentRecord
 from hct_mis_api.apps.payment.utils import get_quantity_in_usd
 
@@ -35,8 +34,7 @@ def revert_mark_as_failed(
 
 
 def recalculate_cash_received(household: "Household") -> None:
-    payment_items = ExtendedQuerySetSequence(household.paymentrecord_set.all(), household.payment_set.eligible())
-    aggregated_delivered_quantity = payment_items.aggregate(
+    aggregated_delivered_quantity = household.payment_set.eligible().aggregate(
         total_cash_received=Sum("delivered_quantity"),
         total_cash_received_usd=Sum("delivered_quantity_usd"),
     )

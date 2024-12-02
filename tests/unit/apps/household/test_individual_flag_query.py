@@ -22,7 +22,7 @@ class TestIndividualFlagQuery(APITestCase):
 
     QUERY = """
     query AllIndividuals($flags: [String]) {
-      allIndividuals(flags: $flags, businessArea: "afghanistan", orderBy: "id") {
+      allIndividuals(flags: $flags, businessArea: "afghanistan", orderBy: "id", rdiMergeStatus: "MERGED") {
         edges {
           node {
             givenName
