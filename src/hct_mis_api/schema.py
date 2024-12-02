@@ -26,7 +26,6 @@ import hct_mis_api.apps.reporting.schema
 import hct_mis_api.apps.sanction_list.mutations
 import hct_mis_api.apps.sanction_list.schema
 import hct_mis_api.apps.steficon.schema
-import hct_mis_api.apps.targeting.schema
 
 
 class Query(
@@ -34,7 +33,6 @@ class Query(
     hct_mis_api.apps.registration_datahub.schema.Query,
     hct_mis_api.apps.account.schema.Query,
     hct_mis_api.apps.household.schema.Query,
-    hct_mis_api.apps.targeting.schema.Query,
     hct_mis_api.apps.program.schema.Query,
     hct_mis_api.apps.core.schema.Query,
     hct_mis_api.apps.payment.schema.Query,
