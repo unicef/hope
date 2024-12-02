@@ -18,7 +18,6 @@ export function validate(
   allAddIndividualFieldsData: AllAddIndividualFieldsQuery,
   individualFieldsDict,
   householdFieldsDict,
-  peopleFieldsDict,
 ) {
   const category = values.category?.toString();
   const issueType = values.issueType?.toString();
