@@ -130,18 +130,20 @@ export const DrawerItems = ({
       return array;
     }
 
-    return array.map((item) => {
-      if (item.name === 'Programme Population') {
+    return array.map((item, index) => {
+      if (index === 2) {
         item.name = _beneficiaryGroup.name;
         if (item.secondaryActions) {
-          item.secondaryActions = item.secondaryActions.map((action) => {
-            if (action.name === 'Households') {
-              action.name = _beneficiaryGroup?.groupLabelPlural;
-            } else if (action.name === 'Household Members') {
-              action.name = _beneficiaryGroup?.memberLabelPlural;
-            }
-            return action;
-          });
+          item.secondaryActions = item.secondaryActions.map(
+            (action, actionIndex) => {
+              if (actionIndex === 0) {
+                action.name = _beneficiaryGroup.groupLabelPlural;
+              } else if (actionIndex === 1) {
+                action.name = _beneficiaryGroup.memberLabelPlural;
+              }
+              return action;
+            },
+          );
         }
       }
       return item;
