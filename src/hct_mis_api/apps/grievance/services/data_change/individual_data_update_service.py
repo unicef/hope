@@ -383,8 +383,8 @@ class IndividualDataUpdateService(DataChangeService):
                 hh_approved_data["country_origin"] = Country.objects.filter(iso_code3=hh_country_origin).first()
             if hh_country is not None:
                 hh_approved_data["country"] = Country.objects.filter(iso_code3=hh_country).first()
-        # people update HH
-        Household.objects.filter(id=household.id).update(**hh_approved_data, updated_at=timezone.now())
+            # people update HH
+            Household.objects.filter(id=household.id).update(**hh_approved_data, updated_at=timezone.now())
         # upd Individual
         Individual.objects.filter(id=new_individual.id).update(
             flex_fields=merged_flex_fields, **only_approved_data, updated_at=timezone.now()
