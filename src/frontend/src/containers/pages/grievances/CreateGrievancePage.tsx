@@ -73,14 +73,6 @@ const BoxWithBorders = styled.div`
 function EmptyComponent(): ReactElement {
   return null;
 }
-export const dataChangeComponentDict = {
-  [GRIEVANCE_CATEGORIES.DATA_CHANGE]: {
-    [GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL]: AddIndividualDataChange,
-    [GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL]: EditIndividualDataChange,
-    [GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD]: EditHouseholdDataChange,
-    [GRIEVANCE_ISSUE_TYPES.EDIT_PEOPLE]: EditPeopleDataChange,
-  },
-};
 
 export const CreateGrievancePage = (): ReactElement => {
   const navigate = useNavigate();
@@ -93,6 +85,16 @@ export const CreateGrievancePage = (): ReactElement => {
 
   const [activeStep, setActiveStep] = useState(GrievanceSteps.Selection);
   const [validateData, setValidateData] = useState(false);
+
+  const dataChangeComponentDict = {
+    [GRIEVANCE_CATEGORIES.DATA_CHANGE]: {
+      [GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL]: AddIndividualDataChange,
+      [GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL]: isSocialDctType
+        ? EditPeopleDataChange
+        : EditIndividualDataChange,
+      [GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD]: EditHouseholdDataChange,
+    },
+  };
 
   const linkedTicketId = location.state?.linkedTicketId;
   const selectedHousehold = location.state?.selectedHousehold;

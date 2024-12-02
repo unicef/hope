@@ -1,12 +1,14 @@
 import { Grid } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { AllEditPeopleFieldsQuery } from '@generated/graphql';
+import { useLocation } from 'react-router-dom';
+import { AllAddIndividualFieldsQuery } from '@generated/graphql';
 import { LabelizedField } from '@core/LabelizedField';
-import { GrievanceFlexFieldPhotoModalNewHousehold } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModalNewHousehold';
+import { GrievanceFlexFieldPhotoModal } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModal';
+import { GrievanceFlexFieldPhotoModalNewIndividual } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModalNewIndividual';
 import { ReactElement } from 'react';
 
 export interface CurrentValueProps {
-  field: AllEditPeopleFieldsQuery['allEditPeopleFieldsAttributes'][number];
+  field: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'][number];
   value;
   values;
 }
@@ -16,53 +18,52 @@ export function CurrentValue({
   value,
   values,
 }: CurrentValueProps): ReactElement {
+  const location = useLocation();
+  const isNewTicket = location.pathname.indexOf('new-ticket') !== -1;
+
   const { t } = useTranslation();
-  let displayValue;
-  if (
-    field?.name === 'country' ||
-    field?.name === 'country_origin' ||
-    field?.name === 'admin_area_title'
-  ) {
-    displayValue = value || '-';
-  } else {
-    switch (field?.type) {
-      case 'SELECT_ONE':
-        displayValue =
-          field.choices.find((item) => item.value === value)?.labelEn || '-';
-        break;
-      case 'SELECT_MANY':
-        displayValue =
-          field.choices.find((item) => item.value === value)?.labelEn || '-';
-        if (value instanceof Array) {
-          displayValue = value
-            .map(
-              (choice) =>
-                field.choices.find((item) => item.value === choice)?.labelEn ||
-                '-',
-            )
-            .join(', ');
-        }
-        break;
-      case 'BOOL':
-        /* eslint-disable-next-line no-nested-ternary */
-        displayValue = value === null ? '-' : value ? 'Yes' : 'No';
-        break;
-      case 'IMAGE':
-        return (
-          <Grid item xs={3}>
-            <GrievanceFlexFieldPhotoModalNewHousehold
-              flexField={field}
-              householdId={values?.selectedHousehold?.id || null}
-            />
-          </Grid>
-        );
-      default:
-        displayValue = value;
-    }
+  let displayValue = value;
+  switch (field?.type) {
+    case 'SELECT_ONE':
+      displayValue =
+        field.choices.find((item) => item.value === value)?.labelEn || '-';
+      break;
+    case 'SELECT_MANY':
+      displayValue =
+        field.choices.find((item) => item.value === value)?.labelEn || '-';
+      if (value instanceof Array) {
+        displayValue = value
+          .map(
+            (choice) =>
+              field.choices.find((item) => item.value === choice)?.labelEn ||
+              '-',
+          )
+          .join(', ');
+      }
+      break;
+    case 'BOOL':
+      /* eslint-disable-next-line no-nested-ternary */
+      displayValue = value === null ? '-' : value ? t('Yes') : t('No');
+      break;
+    case 'IMAGE':
+      return isNewTicket ? (
+        <Grid item xs={3}>
+          <GrievanceFlexFieldPhotoModalNewIndividual
+            flexField={field}
+            individualId={values?.selectedIndividual?.id || null}
+          />
+        </Grid>
+      ) : (
+        <Grid item xs={3}>
+          <GrievanceFlexFieldPhotoModal isCurrent isIndividual field={field} />
+        </Grid>
+      );
+    default:
+      displayValue = value;
   }
   return (
     <Grid item xs={3}>
-      <LabelizedField label={t('Current Value')} value={displayValue} />
+      <LabelizedField label="Current Value" value={displayValue} />
     </Grid>
   );
 }

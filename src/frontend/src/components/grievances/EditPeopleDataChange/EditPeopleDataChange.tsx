@@ -1,107 +1,127 @@
 import { Button, Grid, Typography } from '@mui/material';
 import { AddCircleOutline } from '@mui/icons-material';
-import { FieldArray } from 'formik';
 import { useLocation } from 'react-router-dom';
+import { FieldArray } from 'formik';
 import { ReactElement, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 import {
-  AllHouseholdsQuery,
+  AllIndividualsQuery,
   useAllEditPeopleFieldsQuery,
-  useHouseholdLazyQuery,
+  useIndividualLazyQuery,
 } from '@generated/graphql';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { Title } from '@core/Title';
 import { EditPeopleDataChangeFieldRow } from './EditPeopleDataChangeFieldRow';
 
+const BoxWithBorders = styled.div`
+  border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
+  padding: 15px 0;
+`;
+
 export interface EditPeopleDataChangeProps {
   values;
   setFieldValue;
+  form;
+  field;
 }
+
 export function EditPeopleDataChange({
   values,
   setFieldValue,
 }: EditPeopleDataChangeProps): ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
-  const isEditTicket = location.pathname.includes('edit-ticket');
-  const household: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'] =
-    values.selectedHousehold;
-  const [getHousehold, { data: fullHousehold, loading: fullHouseholdLoading }] =
-    useHouseholdLazyQuery({ variables: { id: household?.id } });
+  const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
+  const individual: AllIndividualsQuery['allIndividuals']['edges'][number]['node'] =
+    values.selectedIndividual;
+  const { data: editPeopleFieldsData, loading: editPeopleFieldsLoading } =
+    useAllEditPeopleFieldsQuery();
+
+  const [
+    getIndividual,
+    { data: fullIndividual, loading: fullIndividualLoading },
+  ] = useIndividualLazyQuery({ variables: { id: individual?.id } });
+
   useEffect(() => {
-    if (values.selectedHousehold) {
-      getHousehold();
+    if (individual) {
+      getIndividual();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [values.selectedHousehold]);
+  }, [values.selectedIndividual]);
+
   useEffect(() => {
     if (
-      !values.householdDataUpdateFields ||
-      values.householdDataUpdateFields.length === 0
+      !values.individualDataUpdateFields ||
+      values.individualDataUpdateFields.length === 0
     ) {
-      setFieldValue('householdDataUpdateFields', [
-        { fieldName: null, fieldValue: '' },
+      setFieldValue('individualDataUpdateFields', [
+        { fieldName: null, fieldValue: null },
       ]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const { data: allEditPeopleFieldsData, loading: allEditPeopleFieldsLoading } =
-    useAllEditPeopleFieldsQuery();
-
-  const fieldsByDctType =
-    allEditPeopleFieldsData?.allEditPeopleFieldsAttributes;
-
-  if (!household) {
-    return <div>{t('You have to select a household earlier')}</div>;
+  if (!individual) {
+    return <div>{t('You have to select an individual earlier')}</div>;
   }
-  if (fullHouseholdLoading || allEditPeopleFieldsLoading || !fullHousehold) {
+  if (
+    editPeopleFieldsLoading ||
+    fullIndividualLoading ||
+    editPeopleFieldsLoading ||
+    !fullIndividual
+  ) {
     return <LoadingComponent />;
   }
-  const notAvailableItems = (values.householdDataUpdateFields || []).map(
+  const notAvailableItems = (values.individualDataUpdateFields || []).map(
     (fieldItem) => fieldItem.fieldName,
   );
+
   return (
-    !isEditTicket && (
-      <>
-        <Title>
-          <Typography variant="h6">{t('Household Data')}</Typography>
-        </Title>
-        <Grid container spacing={3}>
-          <FieldArray
-            name="householdDataUpdateFields"
-            render={(arrayHelpers) => (
-              <>
-                {(values.householdDataUpdateFields || []).map((item, index) => (
-                  <EditPeopleDataChangeFieldRow
-                    /* eslint-disable-next-line react/no-array-index-key */
-                    key={`${index}-${item.fieldName}`}
-                    itemValue={item}
-                    index={index}
-                    household={fullHousehold.household}
-                    fields={fieldsByDctType}
-                    notAvailableFields={notAvailableItems}
-                    onDelete={() => arrayHelpers.remove(index)}
-                    values={values}
-                  />
-                ))}
-                <Grid item xs={4}>
-                  <Button
-                    color="primary"
-                    startIcon={<AddCircleOutline />}
-                    onClick={() => {
-                      arrayHelpers.push({ fieldName: null, fieldValue: null });
-                    }}
-                    data-cy="button-add-new-field"
-                  >
-                    {t('Add new field')}
-                  </Button>
-                </Grid>
-              </>
-            )}
-          />
-        </Grid>
-      </>
-    )
+    <>
+      {!isEditTicket && (
+        <BoxWithBorders>
+          <Title>
+            <Typography variant="h6">{t('Bio Data')}</Typography>
+          </Title>
+          <Grid container spacing={3}>
+            <FieldArray
+              name="individualDataUpdateFields"
+              render={(arrayHelpers) => (
+                <>
+                  {values.individualDataUpdateFields.map((item, index) => (
+                    <EditPeopleDataChangeFieldRow
+                      // eslint-disable-next-line react/no-array-index-key
+                      key={`${index}-${item?.fieldName}`}
+                      itemValue={item}
+                      index={index}
+                      individual={fullIndividual.individual}
+                      fields={
+                        editPeopleFieldsData.allEditPeopleFieldsAttributes
+                      }
+                      notAvailableFields={notAvailableItems}
+                      onDelete={() => arrayHelpers.remove(index)}
+                      values={values}
+                    />
+                  ))}
+                  <Grid item xs={4}>
+                    <Button
+                      color="primary"
+                      onClick={() => {
+                        arrayHelpers.push({ fieldName: null, fieldValue: '' });
+                      }}
+                      startIcon={<AddCircleOutline />}
+                      data-cy="button-add-new-field"
+                      disabled={isEditTicket}
+                    >
+                      {t('Add new field')}
+                    </Button>
+                  </Grid>
+                </>
+              )}
+            />
+          </Grid>
+        </BoxWithBorders>
+      )}
+    </>
   );
 }
