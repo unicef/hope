@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`containers/tables/payments/PaymentRecordHouseholdTable should render loading 2`] = `
+exports[`containers/tables/payments/PaymentRecordHouseholdTable should render loading 1`] = `
 <div>
   <div
     class="sc-kLhKbu blzheD"
