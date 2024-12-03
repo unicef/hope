@@ -26,9 +26,6 @@ from hct_mis_api.apps.household.models import DocumentType
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
-from hct_mis_api.one_time_scripts.migrate_data_to_representations import (
-    migrate_data_to_representations_per_business_area,
-)
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
@@ -251,7 +248,6 @@ class TestHouseholdQuery(APITestCase):
         BusinessAreaFactory(name="Trinidad & Tobago")
         BusinessAreaFactory(name="Slovakia")
         BusinessAreaFactory(name="Sri Lanka")
-        migrate_data_to_representations_per_business_area(business_area=cls.business_area)
         rebuild_search_index()
 
     @parameterized.expand(
