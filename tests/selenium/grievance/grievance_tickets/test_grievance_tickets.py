@@ -1015,10 +1015,6 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getIndividualTableRows(0).click()
         pageGrievanceNewTicket.getButtonNext().click()
         pageGrievanceNewTicket.getInputQuestionnaire_size().click()
-        sleep(2)
-        from tests.selenium.tools.tag_name_finder import printing
-
-        printing("Mapping", pageGrievanceNewTicket.driver)
         assert "3" in pageGrievanceNewTicket.getLabelHouseholdSize().text
         pageGrievanceNewTicket.getInputQuestionnaire_malechildrencount().click()
         assert "-" in pageGrievanceNewTicket.getLabelNumberOfMaleChildren().text

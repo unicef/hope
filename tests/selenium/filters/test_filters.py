@@ -504,8 +504,6 @@ class TestSmokeFilters:
         }
 
         for nav_menu in all_programs:
-            if nav_menu == "Feedback":
-                filters.wait_for('[data-cy="nav-Grievance"]').click()
             filters.wait_for(f'[data-cy="nav-{nav_menu}"]').click()
             for locator in all_programs[nav_menu]:
                 try:

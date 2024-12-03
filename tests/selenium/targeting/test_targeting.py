@@ -2,9 +2,6 @@ from datetime import datetime
 from typing import Callable
 from uuid import UUID
 
-from django.conf import settings
-from django.core.management import call_command
-
 import pytest
 from dateutil.relativedelta import relativedelta
 from selenium.common import NoSuchElementException
@@ -263,17 +260,11 @@ def create_programs() -> None:
     )
 
 
-@pytest.fixture
-def add_targeting() -> None:
-    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/registration_data/fixtures/data-cypress.json", verbosity=0)
-    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/household/fixtures/data-cypress.json", verbosity=0)
-    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/targeting/fixtures/data-cypress.json", verbosity=0)
-    yield
-
-
 @pytest.mark.usefixtures("login")
 class TestSmokeTargeting:
-    def test_smoke_targeting_page(self, create_programs: None, add_targeting: None, pageTargeting: Targeting) -> None:
+    def test_smoke_targeting_page(
+        self, create_programs: None, create_targeting: TargetPopulation, pageTargeting: Targeting
+    ) -> None:
         pageTargeting.selectGlobalProgramFilter("Test Programm")
         pageTargeting.getNavTargeting().click()
         assert "Targeting" in pageTargeting.getTitlePage().text
@@ -291,7 +282,11 @@ class TestSmokeTargeting:
         pageTargeting.getButtonCreateNew().click()
 
     def test_smoke_targeting_create_use_filters(
-        self, create_programs: None, add_targeting: None, pageTargeting: Targeting, pageTargetingCreate: TargetingCreate
+        self,
+        create_programs: None,
+        create_targeting: TargetPopulation,
+        pageTargeting: Targeting,
+        pageTargetingCreate: TargetingCreate,
     ) -> None:
         pageTargeting.selectGlobalProgramFilter("Test Programm")
         pageTargeting.getNavTargeting().click()
@@ -305,7 +300,11 @@ class TestSmokeTargeting:
         pageTargetingCreate.getAutocompleteTargetCriteriaOption().click()
 
     def test_smoke_targeting_create_use_ids(
-        self, create_programs: None, add_targeting: None, pageTargeting: Targeting, pageTargetingCreate: TargetingCreate
+        self,
+        create_programs: None,
+        create_targeting: TargetPopulation,
+        pageTargeting: Targeting,
+        pageTargetingCreate: TargetingCreate,
     ) -> None:
         pageTargeting.selectGlobalProgramFilter("Test Programm")
         pageTargeting.getNavTargeting().click()
@@ -322,7 +321,7 @@ class TestSmokeTargeting:
     def test_smoke_targeting_details_page(
         self,
         create_programs: None,
-        add_targeting: None,
+        create_targeting: TargetPopulation,
         pageTargeting: Targeting,
         pageTargetingDetails: TargetingDetails,
     ) -> None:
@@ -780,7 +779,7 @@ class TestTargeting:
         self,
         create_programs: None,
         household_with_disability: Household,
-        add_targeting: None,
+        create_targeting: TargetPopulation,
         pageTargeting: Targeting,
         pageTargetingDetails: TargetingDetails,
         pageTargetingCreate: TargetingCreate,
@@ -815,7 +814,7 @@ class TestTargeting:
         self,
         create_programs: None,
         household_with_disability: Household,
-        add_targeting: None,
+        create_targeting: TargetPopulation,
         pageTargeting: Targeting,
         pageTargetingDetails: TargetingDetails,
         pageTargetingCreate: TargetingCreate,
@@ -863,7 +862,7 @@ class TestTargeting:
         self,
         create_programs: None,
         household_with_disability: Household,
-        add_targeting: None,
+        create_targeting: TargetPopulation,
         pageTargeting: Targeting,
         filters: Filters,
         pageTargetingDetails: TargetingDetails,
@@ -885,7 +884,7 @@ class TestTargeting:
     def test_copy_targeting(
         self,
         create_programs: None,
-        add_targeting: None,
+        create_targeting: TargetPopulation,
         pageTargeting: Targeting,
         pageTargetingDetails: TargetingDetails,
         pageTargetingCreate: TargetingCreate,
@@ -911,7 +910,7 @@ class TestTargeting:
         self,
         create_programs: None,
         household_with_disability: Household,
-        add_targeting: None,
+        create_targeting: TargetPopulation,
         pageTargeting: Targeting,
         pageTargetingDetails: TargetingDetails,
         pageTargetingCreate: TargetingCreate,
@@ -937,7 +936,7 @@ class TestTargeting:
         self,
         create_programs: None,
         household_with_disability: Household,
-        add_targeting: None,
+        create_targeting: TargetPopulation,
         pageTargeting: Targeting,
         pageTargetingDetails: TargetingDetails,
     ) -> None:
@@ -999,7 +998,7 @@ class TestTargeting:
         test_data: dict,
         create_programs: None,
         household_with_disability: Household,
-        add_targeting: None,
+        create_targeting: TargetPopulation,
         pageTargeting: Targeting,
         pageTargetingDetails: TargetingDetails,
         pageTargetingCreate: TargetingCreate,
@@ -1070,7 +1069,7 @@ class TestTargeting:
         test_data: dict,
         create_programs: None,
         household_with_disability: Household,
-        add_targeting: None,
+        create_targeting: TargetPopulation,
         pageTargeting: Targeting,
         pageTargetingDetails: TargetingDetails,
         pageTargetingCreate: TargetingCreate,
@@ -1116,7 +1115,7 @@ class TestTargeting:
         self,
         create_programs: None,
         household_with_disability: Household,
-        add_targeting: None,
+        create_targeting: TargetPopulation,
         pageTargeting: Targeting,
         filters: Filters,
     ) -> None:
@@ -1148,7 +1147,7 @@ class TestTargeting:
         self,
         create_programs: None,
         household_with_disability: Household,
-        add_targeting: None,
+        create_targeting: TargetPopulation,
         pageTargeting: Targeting,
     ) -> None:
         pageTargeting.selectGlobalProgramFilter("Test Programm")
@@ -1188,7 +1187,7 @@ class TestTargeting:
         self,
         create_programs: None,
         household_with_disability: Household,
-        add_targeting: None,
+        create_targeting: TargetPopulation,
         pageTargeting: Targeting,
         pageTargetingDetails: TargetingDetails,
         pageTargetingCreate: TargetingCreate,
@@ -1217,7 +1216,7 @@ class TestTargeting:
         self,
         create_programs: None,
         household_with_disability: Household,
-        add_targeting: None,
+        create_targeting: TargetPopulation,
         pageTargeting: Targeting,
         pageTargetingDetails: TargetingDetails,
         pageTargetingCreate: TargetingCreate,
