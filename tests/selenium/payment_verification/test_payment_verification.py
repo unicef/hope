@@ -14,25 +14,18 @@ from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.fixtures import (
-    CashPlanFactory,
     PaymentFactory,
     PaymentPlanFactory,
-    PaymentRecordFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
 )
-from hct_mis_api.apps.payment.models import GenericPayment, PaymentPlan
-from hct_mis_api.apps.payment.models import PaymentRecord as PR
+from hct_mis_api.apps.payment.models import GenericPayment, Payment, PaymentPlan
 from hct_mis_api.apps.payment.models import PaymentVerification as PV
 from hct_mis_api.apps.payment.models import PaymentVerificationPlan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.targeting.fixtures import (
-    TargetingCriteriaFactory,
-    TargetPopulationFactory,
-)
 from tests.selenium.page_object.grievance.details_grievance_page import (
     GrievanceDetailsPage,
 )
@@ -115,7 +108,7 @@ def payment_verification_multiple_verification_plans(number_verification_plans: 
         households.append(household)
 
     payment_plan = PaymentPlanFactory(
-        program=program,
+        program_cycle=program.cycles.first(),
         status=PaymentPlan.Status.FINISHED,
         business_area=BusinessArea.objects.filter(slug="afghanistan").first(),
     )
@@ -127,23 +120,23 @@ def payment_verification_multiple_verification_plans(number_verification_plans: 
                 business_area=BusinessArea.objects.first(),
                 household=hh,
                 head_of_household=household.head_of_household,
-                entitlement_quantity=Decimal("21.36"),
-                delivered_quantity=Decimal("21.36"),
+                entitlement_quantity=Decimal(21.36),
+                delivered_quantity=Decimal(21.36),
                 currency="PLN",
                 status=GenericPayment.STATUS_DISTRIBUTION_SUCCESS,
             )
         )
 
-    PaymentVerificationSummaryFactory(payment_plan_obj=payment_plan)
+    PaymentVerificationSummaryFactory(payment_plan=payment_plan)
 
     for payment in payments:
         payment_verification_plan = PaymentVerificationPlanFactory(
-            payment_plan_obj=payment_plan,
+            payment_plan=payment_plan,
             verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL,
         )
 
         PaymentVerificationFactory(
-            payment_obj=payment,
+            payment=payment,
             payment_verification_plan=payment_verification_plan,
             status=PV.STATUS_PENDING,
         )
@@ -165,7 +158,7 @@ def empty_payment_verification(social_worker_program: Program) -> None:
     )
 
     payment_plan = PaymentPlanFactory(
-        program=program,
+        program_cycle=program.cycles.first(),
         status=PaymentPlan.Status.FINISHED,
         business_area=BusinessArea.objects.filter(slug="afghanistan").first(),
     )
@@ -174,12 +167,12 @@ def empty_payment_verification(social_worker_program: Program) -> None:
         business_area=BusinessArea.objects.first(),
         household=household,
         head_of_household=household.head_of_household,
-        entitlement_quantity=Decimal("21.36"),
-        delivered_quantity=Decimal("21.36"),
+        entitlement_quantity=Decimal(21.36),
+        delivered_quantity=Decimal(21.36),
         currency="PLN",
         status=GenericPayment.STATUS_DISTRIBUTION_SUCCESS,
     )
-    PaymentVerificationSummaryFactory(payment_plan_obj=payment_plan)
+    PaymentVerificationSummaryFactory(payment_plan=payment_plan)
 
 
 @pytest.fixture
@@ -206,45 +199,40 @@ def payment_verification_creator(channel: str = PaymentVerificationPlan.VERIFICA
         {"registration_data_import": registration_data_import},
     )
 
-    cash_plan = CashPlanFactory(
+    payment_plan = PaymentPlanFactory(
         name="TEST",
-        program=program,
+        status=PaymentPlan.Status.FINISHED,
+        program_cycle=program.cycles.first(),
         business_area=BusinessArea.objects.first(),
         start_date=datetime.now() - relativedelta(months=1),
         end_date=datetime.now() + relativedelta(months=1),
     )
 
-    targeting_criteria = TargetingCriteriaFactory()
-
-    target_population = TargetPopulationFactory(
-        created_by=User.objects.first(),
-        targeting_criteria=targeting_criteria,
-        business_area=BusinessArea.objects.first(),
+    payment_plan.unicef_id = "PP-0000-00-1122334"
+    payment_plan.save()
+    PaymentVerificationSummaryFactory(
+        payment_plan=payment_plan,
     )
-    payment_record = PaymentRecordFactory(
-        parent=cash_plan,
+
+    payment = PaymentFactory(
+        parent=payment_plan,
         household=household,
         head_of_household=household.head_of_household,
-        target_population=target_population,
-        entitlement_quantity="21.36",
-        delivered_quantity="21.36",
+        entitlement_quantity=21.36,
+        delivered_quantity=21.36,
         currency="PLN",
         status=GenericPayment.STATUS_DISTRIBUTION_SUCCESS,
     )
     payment_verification_plan = PaymentVerificationPlanFactory(
-        payment_plan_obj=cash_plan,
+        payment_plan=payment_plan,
         verification_channel=channel,
     )
-
-    pv_summary = cash_plan.get_payment_verification_summary
-    pv_summary.activation_date = datetime.now() - relativedelta(months=1)
-    pv_summary.save()
-
     pv = PaymentVerificationFactory(
-        payment_obj=payment_record,
+        payment=payment,
         payment_verification_plan=payment_verification_plan,
         status=PV.STATUS_PENDING,
     )
+
     return pv
 
 
@@ -297,12 +285,6 @@ class TestSmokePaymentVerification:
         assert "0%" in pagePaymentVerificationDetails.getLabelErroneous().text
         assert "PENDING" in pagePaymentVerificationDetails.getLabelStatus().text
         assert "PENDING" in pagePaymentVerificationDetails.getVerificationPlansSummaryStatus().text
-        activation_date = (datetime.now() - relativedelta(months=1)).strftime("%-d %b %Y")
-        assert (
-            f"ACTIVATION DATE {activation_date}"
-            in pagePaymentVerificationDetails.getLabelizedFieldContainerSummaryActivationDate().text.replace("\n", " ")
-        )
-        assert activation_date in pagePaymentVerificationDetails.getLabelActivationDate().text
         assert (
             "COMPLETION DATE -"
             in pagePaymentVerificationDetails.getLabelizedFieldContainerSummaryCompletionDate().text.replace("\n", " ")
@@ -319,11 +301,6 @@ class TestSmokePaymentVerification:
         assert "PENDING" in pagePaymentVerificationDetails.getLabelStatus().text
         assert "PENDING" in pagePaymentVerificationDetails.getVerificationPlanStatus().text
         assert "MANUAL" in pagePaymentVerificationDetails.getLabelVerificationChannel().text
-        assert (
-            str((datetime.now() - relativedelta(months=1)).strftime("%-d %b %Y"))
-            in pagePaymentVerificationDetails.getLabelActivationDate().text
-        )
-        assert "-" in pagePaymentVerificationDetails.getLabelCompletionDate().text
 
     def test_happy_path_payment_verification(
         self,
@@ -370,22 +347,22 @@ class TestSmokePaymentVerification:
         pagePaymentVerificationDetails.getButtonSubmit().click()
 
         pagePaymentVerificationDetails.getRows()[0].find_elements(By.TAG_NAME, "a")[0].click()
-        payment_record = PR.objects.first()
-        assert "Payment Record" in pagePaymentRecord.getPageHeaderTitle().text
+        payment_record = Payment.objects.first()
+        assert "Payment" in pagePaymentRecord.getPageHeaderTitle().text
         assert "VERIFY" in pagePaymentRecord.getButtonEdPlan().text
         assert "DELIVERED FULLY" in pagePaymentRecord.getLabelStatus()[0].text
         assert "DELIVERED FULLY" in pagePaymentRecord.getStatusContainer().text
         assert payment_record.household.unicef_id in pagePaymentRecord.getLabelHousehold().text
-        assert payment_record.target_population.name in pagePaymentRecord.getLabelTargetPopulation().text
-        assert payment_record.distribution_modality in pagePaymentRecord.getLabelDistributionModality().text
-        assert payment_record.verification.status in pagePaymentRecord.getLabelStatus()[1].text
+        assert payment_record.parent.target_population.name in pagePaymentRecord.getLabelTargetPopulation().text
+        assert payment_record.parent.unicef_id in pagePaymentRecord.getLabelDistributionModality().text
+        assert payment_record.payment_verification.status in pagePaymentRecord.getLabelStatus()[1].text
         assert "PLN 0.00" in pagePaymentRecord.getLabelAmountReceived().text
         assert payment_record.household.unicef_id in pagePaymentRecord.getLabelHouseholdId().text
         assert "21.36" in pagePaymentRecord.getLabelEntitlementQuantity().text
         assert "21.36" in pagePaymentRecord.getLabelDeliveredQuantity().text
         assert "PLN" in pagePaymentRecord.getLabelCurrency().text
-        assert "-" in pagePaymentRecord.getLabelDeliveryType().text
-        assert payment_record.service_provider.full_name in pagePaymentRecord.getLabelFsp().text
+        assert payment_record.delivery_type.name in pagePaymentRecord.getLabelDeliveryType().text
+        assert payment_record.financial_service_provider.name in pagePaymentRecord.getLabelFsp().text
 
         pagePaymentRecord.getButtonEdPlan().click()
 

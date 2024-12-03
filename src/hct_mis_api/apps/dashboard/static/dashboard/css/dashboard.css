@@ -28,3 +28,23 @@
     justify-content: center;
     align-items: center;
 }
+
+.flex-grow {
+    flex-grow: 1;
+}
+
+.flex-col {
+    flex-direction: column;
+}
+
+.col-span-1 {
+    grid-column: span 1 / span 1;
+}
+
+.col-span-2 {
+    grid-column: span 2 / span 2;
+}
+
+h3 {
+    margin-bottom: 5px;
+}

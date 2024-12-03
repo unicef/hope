@@ -472,7 +472,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
                                     "collectorBlockFilters": [
                                         {
                                             "comparisonMethod": "EQUALS",
-                                            "arguments": [False],
+                                            "arguments": ["No"],
                                             "fieldName": "mobile_phone_number__cash_over_the_counter",
                                             "flexFieldClassification": "NOT_FLEX_FIELD",
                                         },
@@ -511,7 +511,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
                                     "collectorBlockFilters": [
                                         {
                                             "comparisonMethod": "EQUALS",
-                                            "arguments": [False],
+                                            "arguments": ["No"],
                                             "fieldName": "mobile_phone_number__cash_over_the_counter",
                                             "flexFieldClassification": "NOT_FLEX_FIELD",
                                         },

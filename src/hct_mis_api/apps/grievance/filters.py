@@ -25,7 +25,7 @@ from hct_mis_api.apps.core.utils import decode_id_string, get_program_id_from_he
 from hct_mis_api.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
 from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNote
 from hct_mis_api.apps.household.models import HEAD, Household, Individual
-from hct_mis_api.apps.payment.models import PaymentRecord
+from hct_mis_api.apps.payment.models import Payment
 from hct_mis_api.apps.program.models import Program
 
 logger = logging.getLogger(__name__)
@@ -103,7 +103,7 @@ class GrievanceTicketFilter(FilterSet):
     fsp = CharFilter(method="fsp_filter")
     cash_plan = CharFilter(
         field_name="payment_verification_ticket_details",
-        lookup_expr="payment_verification__payment_verification_plan__payment_plan_object_id",
+        lookup_expr="payment_verification__payment_verification_plan__payment_plan_id",
     )
     created_at_range = DateTimeRangeFilter(field_name="created_at")
     permissions = MultipleChoiceFilter(choices=Permissions.choices(), method="permissions_filter")
@@ -175,6 +175,17 @@ class GrievanceTicketFilter(FilterSet):
             query |= Q(unicef_id__in=values)
         else:
             query |= Q(unicef_id__icontains=search)
+            if search.startswith("HH-"):
+                return qs.filter(household_unicef_id__istartswith=search)
+            if search.startswith("IND-"):
+                household_unicef_ids = (
+                    Individual.objects.filter(unicef_id__istartswith=search)
+                    .distinct("household__unicef_id")
+                    .values_list("household__unicef_id", flat=True)
+                )
+                return qs.filter(household_unicef_id__in=household_unicef_ids)
+            if search.startswith("GRV-"):
+                return qs.filter(unicef_id__istartswith=search)
 
         query |= Q(household_unicef_id__icontains=search)
         unicef_ids = (
@@ -314,7 +325,7 @@ class ExistingGrievanceTicketFilter(FilterSet):
     issue_type = ChoiceFilter(field_name="issue_type", choices=GrievanceTicket.ALL_ISSUE_TYPES)
     household = ModelChoiceFilter(queryset=Household.objects.all())
     individual = ModelChoiceFilter(queryset=Individual.objects.all())
-    payment_record = ModelMultipleChoiceFilter(queryset=PaymentRecord.objects.all())
+    payment_record = ModelMultipleChoiceFilter(queryset=Payment.objects.all())
     permissions = MultipleChoiceFilter(choices=Permissions.choices(), method="permissions_filter")
 
     class Meta:
@@ -323,7 +334,7 @@ class ExistingGrievanceTicketFilter(FilterSet):
 
     order_by = OrderingFilter(fields=("id",))
 
-    def prepare_ticket_filters(self, lookup: str, obj: GrievanceTicket) -> Q:
+    def prepare_ticket_filters(self, lookup: str, obj: GrievanceTicket) -> Q:  # pragma: no cover
         types_and_lookups = GrievanceTicket.SEARCH_TICKET_TYPES_LOOKUPS
         q_obj = Q()
         for ticket_type, lookup_objs in types_and_lookups.items():
@@ -332,7 +343,7 @@ class ExistingGrievanceTicketFilter(FilterSet):
                 ticket_type in ("complaint_ticket_details", "sensitive_ticket_details")
                 and real_lookup == "payment_record"
             ):
-                q_obj |= Q(**{f"{ticket_type}__payment_object_id": str(obj.id)})
+                q_obj |= Q(**{f"{ticket_type}__payment_id": str(obj.id)})
             elif real_lookup:
                 q_obj |= Q(**{f"{ticket_type}__{real_lookup}": obj})
         return q_obj

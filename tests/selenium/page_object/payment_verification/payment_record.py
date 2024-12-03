@@ -9,7 +9,7 @@ class PaymentRecord(BaseComponents):
     buttonEdPlan = 'button[data-cy="button-ed-plan"]'
     labelStatus = 'div[data-cy="label-STATUS"]'
     statusContainer = 'div[data-cy="status-container"]'
-    labelHousehold = 'div[data-cy="label-Household"]'
+    labelHousehold = 'div[data-cy="label-HOUSEHOLD ID"]'
     labelTargetPopulation = 'div[data-cy="label-TARGET POPULATION"]'
     labelDistributionModality = 'div[data-cy="label-DISTRIBUTION MODALITY"]'
     labelAmountReceived = 'div[data-cy="label-AMOUNT RECEIVED"]'

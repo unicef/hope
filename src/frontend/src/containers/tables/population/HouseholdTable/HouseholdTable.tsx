@@ -1,17 +1,18 @@
-import { useTranslation } from 'react-i18next';
+import { TableWrapper } from '@components/core/TableWrapper';
 import {
   AllHouseholdsForPopulationTableQueryVariables,
   AllHouseholdsQueryVariables,
   HouseholdChoiceDataQuery,
   HouseholdNode,
+  HouseholdRdiMergeStatus,
   useAllHouseholdsForPopulationTableQuery,
 } from '@generated/graphql';
-import { TableWrapper } from '@components/core/TableWrapper';
-import { UniversalTable } from '../../UniversalTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './HouseholdTableHeadCells';
 import { HouseholdTableRow } from './HouseholdTableRow';
-import { ReactElement } from 'react';
 
 interface HouseholdTableProps {
   businessArea: string;
@@ -53,6 +54,7 @@ export function HouseholdTable({
     withdrawn: matchWithdrawnValue(),
     orderBy: filter.orderBy,
     program: programId,
+    rdiMergeStatus: HouseholdRdiMergeStatus.Merged,
   };
   return (
     <TableWrapper>

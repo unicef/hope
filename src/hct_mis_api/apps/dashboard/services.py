@@ -81,7 +81,8 @@ class DashboardDataCache:
                     "financial_service_provider",
                     "delivery_type",
                 )
-                .filter(business_area=area, household__is_removed=False)
+                .filter(business_area=area, household__is_removed=False, parent__status__in=["ACCEPTED", "FINISHED"])
+                .exclude(status__in=["Transaction Erroneous", "Not Distributed", "Force failed", "Manually Cancelled"])
                 .annotate(
                     year=ExtractYear(Coalesce("delivery_date", "entitlement_date", "status_date")),
                     month=ExtractMonth(Coalesce("delivery_date", "entitlement_date", "status_date")),
@@ -89,7 +90,7 @@ class DashboardDataCache:
                     sectors=Coalesce(F("household__program__sector"), Value("Unknown sector")),
                     admin1=Coalesce(F("household__admin1__name"), Value("Unknown admin1")),
                     fsp=Coalesce(F("financial_service_provider__name"), Value("Unknown fsp")),
-                    delivery_types=Coalesce(F("delivery_type__name"), F("delivery_type_choice")),
+                    delivery_types=F("delivery_type__name"),
                 )
                 .distinct()
                 .values(
@@ -125,6 +126,7 @@ class DashboardDataCache:
                     "business_area", "household", "program", "household__admin1", "service_provider", "delivery_type"
                 )
                 .filter(business_area=area, household__is_removed=False)
+                .exclude(status__in=["Transaction Erroneous", "Not Distributed", "Force failed", "Manually Cancelled"])
                 .annotate(
                     year=ExtractYear(Coalesce("delivery_date", "status_date")),
                     month=ExtractMonth(Coalesce("delivery_date", "status_date")),
@@ -132,7 +134,7 @@ class DashboardDataCache:
                     sectors=Coalesce(F("household__program__sector"), Value("Unknown sector")),
                     admin1=Coalesce(F("household__admin1__name"), Value("Unknown admin1")),
                     fsp=Coalesce(F("service_provider__short_name"), Value("Unknown fsp")),
-                    delivery_types=Coalesce(F("delivery_type__name"), F("delivery_type_choice")),
+                    delivery_types=F("delivery_type__name"),
                 )
                 .distinct()
                 .values(

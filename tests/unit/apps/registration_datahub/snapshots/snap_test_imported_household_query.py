@@ -9,7 +9,7 @@ snapshots = Snapshot()
 
 snapshots['TestImportedHouseholdQuery::test_imported_household_query_0_detail_id 1'] = {
     'data': {
-        'importedHousehold': {
+        'household': {
             'country': 'Afghanistan',
             'importId': 'HH-123 (Detail id test123)',
             'individuals': {
@@ -42,7 +42,7 @@ snapshots['TestImportedHouseholdQuery::test_imported_household_query_0_detail_id
 
 snapshots['TestImportedHouseholdQuery::test_imported_household_query_1_enumerator_rec_id 1'] = {
     'data': {
-        'importedHousehold': {
+        'household': {
             'country': 'Afghanistan',
             'importId': 'HH-123 (Enumerator ID 123)',
             'individuals': {
@@ -75,7 +75,7 @@ snapshots['TestImportedHouseholdQuery::test_imported_household_query_1_enumerato
 
 snapshots['TestImportedHouseholdQuery::test_imported_household_query_all_0_with_permission 1'] = {
     'data': {
-        'allImportedHouseholds': {
+        'allHouseholds': {
             'edges': [
                 {
                     'node': {
@@ -133,7 +133,7 @@ snapshots['TestImportedHouseholdQuery::test_imported_household_query_all_0_with_
 
 snapshots['TestImportedHouseholdQuery::test_imported_household_query_all_1_without_permission 1'] = {
     'data': {
-        'allImportedHouseholds': None
+        'allHouseholds': None
     },
     'errors': [
         {
@@ -145,7 +145,7 @@ snapshots['TestImportedHouseholdQuery::test_imported_household_query_all_1_witho
             ],
             'message': 'Permission Denied',
             'path': [
-                'allImportedHouseholds'
+                'allHouseholds'
             ]
         }
     ]
@@ -153,7 +153,7 @@ snapshots['TestImportedHouseholdQuery::test_imported_household_query_all_1_witho
 
 snapshots['TestImportedHouseholdQuery::test_imported_household_query_single_0_with_permission 1'] = {
     'data': {
-        'importedHousehold': {
+        'household': {
             'address': 'Lorem Ipsum',
             'countryOrigin': 'Poland',
             'size': 2
@@ -163,7 +163,7 @@ snapshots['TestImportedHouseholdQuery::test_imported_household_query_single_0_wi
 
 snapshots['TestImportedHouseholdQuery::test_imported_household_query_single_1_without_permission 1'] = {
     'data': {
-        'importedHousehold': None
+        'household': None
     },
     'errors': [
         {
@@ -175,7 +175,7 @@ snapshots['TestImportedHouseholdQuery::test_imported_household_query_single_1_wi
             ],
             'message': 'Permission Denied',
             'path': [
-                'importedHousehold'
+                'household'
             ]
         }
     ]

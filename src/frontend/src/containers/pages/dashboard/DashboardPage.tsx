@@ -8,7 +8,6 @@ import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { DashboardFilters } from '@components/dashboard/DashboardFilters';
 import { DashboardPaper } from '@components/dashboard/DashboardPaper';
-import { ExportModal } from '@components/dashboard/ExportModal';
 import { Tabs, Tab } from '@core/Tabs';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -45,10 +44,6 @@ export function DashboardPage(): ReactElement {
     PERMISSIONS.DASHBOARD_VIEW_COUNTRY,
     permissions,
   );
-  const hasPermissionToExport = hasPermissions(
-    PERMISSIONS.DASHBOARD_EXPORT,
-    permissions,
-  );
 
   const years = data.dashboardYearsChoices;
 
@@ -79,9 +74,6 @@ export function DashboardPage(): ReactElement {
       componentName="DashboardPage"
     >
       <PageHeader tabs={tabs} title={t('Dashboard')}>
-        {hasPermissionToExport && (
-          <ExportModal filter={appliedFilter} year={years[selectedTab]} />
-        )}
       </PageHeader>
       {hasPermissionToView ? (
         <>

@@ -1,20 +1,19 @@
+import {
+  AllIndividualsQueryVariables,
+  HouseholdChoiceDataQuery,
+  IndividualMinimalFragment,
+  IndividualRdiMergeStatus,
+  useAllIndividualsQuery,
+} from '@generated/graphql';
 import { Box, Checkbox, FormControlLabel, Grid } from '@mui/material';
 import { ReactElement, useState } from 'react';
-import {
-  AllImportedIndividualsQueryVariables,
-  AllMergedIndividualsQueryVariables,
-  HouseholdChoiceDataQuery,
-  ImportedIndividualMinimalFragment,
-  MergedIndividualMinimalFragment,
-  useAllImportedIndividualsQuery,
-  useAllMergedIndividualsQuery,
-} from '@generated/graphql';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells as importedIndividualHeadCells } from './ImportedIndividualsTableHeadCells';
-import { headCells as mergedIndividualHeadCells } from './MergedIndividualsTableHeadCells';
 import { ImportedIndividualsTableRow } from './ImportedIndividualsTableRow';
+import { headCells as mergedIndividualHeadCells } from './MergedIndividualsTableHeadCells';
 
 interface ImportedIndividualsTableProps {
+  rdi;
   rdiId: string;
   household?: string;
   title?: string;
@@ -27,6 +26,7 @@ interface ImportedIndividualsTableProps {
 }
 
 export function ImportedIndividualsTable({
+  rdi,
   rdiId,
   isOnPaper = false,
   title,
@@ -44,6 +44,9 @@ export function ImportedIndividualsTable({
     household,
     duplicatesOnly: showDuplicates,
     businessArea,
+    rdiMergeStatus: isMerged
+      ? IndividualRdiMergeStatus.Merged
+      : IndividualRdiMergeStatus.Pending,
   };
 
   return (
@@ -67,14 +70,11 @@ export function ImportedIndividualsTable({
         </Grid>
       )}
       {isMerged ? (
-        <UniversalTable<
-        MergedIndividualMinimalFragment,
-        AllMergedIndividualsQueryVariables
-        >
+        <UniversalTable<IndividualMinimalFragment, AllIndividualsQueryVariables>
           title={title}
           headCells={mergedIndividualHeadCells}
-          query={useAllMergedIndividualsQuery}
-          queriedObjectName="allMergedIndividuals"
+          query={useAllIndividualsQuery}
+          queriedObjectName="allIndividuals"
           rowsPerPageOptions={rowsPerPageOptions}
           initialVariables={initialVariables}
           isOnPaper={isOnPaper}
@@ -84,18 +84,16 @@ export function ImportedIndividualsTable({
               key={row.id}
               isMerged={isMerged}
               individual={row}
+              rdi={rdi}
             />
           )}
         />
       ) : (
-        <UniversalTable<
-        ImportedIndividualMinimalFragment,
-        AllImportedIndividualsQueryVariables
-        >
+        <UniversalTable<IndividualMinimalFragment, AllIndividualsQueryVariables>
           title={title}
           headCells={importedIndividualHeadCells}
-          query={useAllImportedIndividualsQuery}
-          queriedObjectName="allImportedIndividuals"
+          query={useAllIndividualsQuery}
+          queriedObjectName="allIndividuals"
           rowsPerPageOptions={rowsPerPageOptions}
           initialVariables={initialVariables}
           isOnPaper={isOnPaper}
@@ -105,6 +103,7 @@ export function ImportedIndividualsTable({
               key={row.id}
               isMerged={isMerged}
               individual={row}
+              rdi={rdi}
             />
           )}
         />

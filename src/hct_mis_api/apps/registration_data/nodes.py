@@ -48,7 +48,7 @@ class DeduplicationEngineSimilarityPairIndividualNode(graphene.ObjectType):
     def resolve_photo(parent: Any, info: Any) -> Optional[graphene.String]:
         from hct_mis_api.apps.household.models import Individual
 
-        individual = Individual.objects.get(unicef_id=parent.get("unicef_id"))
+        individual = Individual.objects.get(id=parent.get("id"))
         return individual.photo.url if individual.photo else None
 
 

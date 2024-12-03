@@ -9,10 +9,8 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.fixtures import (
-    CashPlanFactory,
     PaymentFactory,
     PaymentPlanFactory,
-    PaymentRecordFactory,
     generate_delivery_mechanisms,
 )
 from hct_mis_api.apps.payment.models import DeliveryMechanism
@@ -84,16 +82,16 @@ class TestDashboardQueries(APITestCase):
         program3 = ProgramFactory.create(cash_plus=False, sector=Program.NUTRITION)
         program4 = ProgramFactory.create(cash_plus=True, sector=Program.WASH)
 
-        cash_plan1 = CashPlanFactory(program=program1)
-        cash_plan2 = CashPlanFactory(program=program2)
+        payment_plan1 = PaymentPlanFactory(program_cycle=program1.cycles.first())
+        payment_plan2 = PaymentPlanFactory(program_cycle=program2.cycles.first())
         delivery_date = timezone.datetime(2021, 10, 10, tzinfo=utc)
-        PaymentRecordFactory(parent=cash_plan1, delivery_date=delivery_date, household=household, currency="PLN")
-        PaymentRecordFactory(parent=cash_plan2, delivery_date=delivery_date, household=household, currency="PLN")
-
-        payment_plan1 = PaymentPlanFactory(program=program3)
-        payment_plan2 = PaymentPlanFactory(program=program4)
         PaymentFactory(parent=payment_plan1, delivery_date=delivery_date, household=household, currency="PLN")
         PaymentFactory(parent=payment_plan2, delivery_date=delivery_date, household=household, currency="PLN")
+
+        payment_plan3 = PaymentPlanFactory(program_cycle=program3.cycles.first())
+        payment_plan4 = PaymentPlanFactory(program_cycle=program4.cycles.first())
+        PaymentFactory(parent=payment_plan3, delivery_date=delivery_date, household=household, currency="PLN")
+        PaymentFactory(parent=payment_plan4, delivery_date=delivery_date, household=household, currency="PLN")
 
         self.snapshot_graphql_request(
             request_string=QUERY_CHART_PROGRAMMES_BY_SECTOR,
@@ -104,70 +102,63 @@ class TestDashboardQueries(APITestCase):
     def test_chart_total_transferred_by_month(self) -> None:
         dm_cash = DeliveryMechanism.objects.get(code="cash")
         dm_voucher = DeliveryMechanism.objects.get(code="voucher")
-        household, individuals = create_household(
-            household_args={"size": 2, "business_area": self.business_area},
-        )
         program1 = ProgramFactory.create(cash_plus=True, sector=Program.EDUCATION)
-        cash_plan1 = CashPlanFactory(program=program1)
+        payment_plan1 = PaymentPlanFactory(program_cycle=program1.cycles.first())
         delivery_date1 = timezone.datetime(2021, 10, 10, tzinfo=utc)
         delivery_date2 = timezone.datetime(2021, 11, 10, tzinfo=utc)
-        PaymentRecordFactory(
-            parent=cash_plan1,
+        PaymentFactory(
+            parent=payment_plan1,
             delivery_date=delivery_date1,
-            household=household,
             delivery_type=dm_cash,
             delivered_quantity_usd=133,
             currency="PLN",
         )
-        PaymentRecordFactory(
-            parent=cash_plan1,
+        PaymentFactory(
+            parent=payment_plan1,
             delivery_date=delivery_date1,
-            household=household,
             delivery_type=dm_voucher,
             delivered_quantity_usd=25,
             currency="PLN",
         )
-        PaymentRecordFactory(
-            parent=cash_plan1,
+        PaymentFactory(
+            parent=payment_plan1,
             delivery_date=delivery_date2,
-            household=household,
             delivery_type=dm_cash,
             delivered_quantity_usd=133,
             currency="PLN",
         )
-        PaymentRecordFactory(
-            parent=cash_plan1,
+        PaymentFactory(
+            parent=payment_plan1,
             delivery_date=delivery_date2,
-            household=household,
             delivery_type=dm_voucher,
             delivered_quantity_usd=25,
             currency="PLN",
         )
 
-        payment_plan1 = PaymentPlanFactory(program=program1)
+        payment_plan2 = PaymentPlanFactory(program_cycle=program1.cycles.first())
         PaymentFactory(
-            parent=payment_plan1,
+            parent=payment_plan2,
             delivery_date=delivery_date1,
             delivery_type=dm_cash,
             delivered_quantity_usd=133,
             currency="PLN",
         )
         PaymentFactory(
-            parent=payment_plan1,
+            parent=payment_plan2,
             delivery_date=delivery_date1,
             delivery_type=dm_voucher,
             delivered_quantity_usd=25,
             currency="PLN",
         )
         PaymentFactory(
-            parent=payment_plan1,
+            parent=payment_plan2,
             delivery_date=delivery_date2,
             delivery_type=dm_cash,
             delivered_quantity_usd=133,
             currency="PLN",
         )
         PaymentFactory(
-            parent=payment_plan1,
+            parent=payment_plan2,
             delivery_date=delivery_date2,
             delivery_type=dm_voucher,
             delivered_quantity_usd=25,
