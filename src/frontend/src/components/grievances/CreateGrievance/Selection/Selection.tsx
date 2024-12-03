@@ -48,6 +48,23 @@ export function Selection({
     { name: `${beneficiaryGroup?.memberLabel} Data Update`, value: '14' },
   ];
 
+  function replaceLabels(choices, beneficiaryGroup) {
+    return choices.map((choice) => {
+      let newName = choice.name;
+      if (beneficiaryGroup?.memberLabel) {
+        newName = newName.replace(/Individual/g, beneficiaryGroup.memberLabel);
+      }
+      if (beneficiaryGroup?.groupLabel) {
+        newName = newName.replace(/Household/g, beneficiaryGroup.groupLabel);
+      }
+      return { ...choice, name: newName };
+    });
+  }
+  const updatedChoices = replaceLabels(
+    issueTypeDict[values.category]?.subCategories,
+    beneficiaryGroup,
+  );
+
   const categoryDescriptions =
     getGrievanceCategoryDescriptions(beneficiaryGroup);
   const issueTypeDescriptions =
@@ -55,7 +72,7 @@ export function Selection({
 
   const issueTypeChoices = redirectedFromRelatedTicket
     ? dataChangeIssueTypes
-    : issueTypeDict[values.category]?.subCategories;
+    : updatedChoices;
 
   const addDisabledProperty = (choices) => {
     if (!choices) return [];
