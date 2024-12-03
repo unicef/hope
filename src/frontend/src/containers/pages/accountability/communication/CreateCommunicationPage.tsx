@@ -549,6 +549,9 @@ export const CreateCommunicationPage = (): ReactElement => {
                                     choices={[
                                       { value: 'FEMALE', name: t('Female') },
                                       { value: 'MALE', name: t('Male') },
+                                      { value: 'OTHER', name: t('Other') },
+                                      { value: 'NOT_COLLECTED', name: t('Not Collected') },
+                                      { value: 'NOT_ANSWERED', name: t('Not Answered') },
                                     ]}
                                     component={FormikSelectField}
                                   />
