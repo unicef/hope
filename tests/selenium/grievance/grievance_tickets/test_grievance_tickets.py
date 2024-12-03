@@ -27,10 +27,6 @@ from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
 from hct_mis_api.apps.payment.models import Payment
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
-from hct_mis_api.apps.targeting.fixtures import (
-    TargetingCriteriaFactory,
-    TargetPopulationFactory,
-)
 from tests.selenium.drawer.test_drawer import get_program_with_dct_type_and_name
 from tests.selenium.helpers.date_time_format import FormatTime
 from tests.selenium.page_object.admin_panel.admin_panel import AdminPanel

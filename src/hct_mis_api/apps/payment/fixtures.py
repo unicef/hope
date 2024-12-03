@@ -50,7 +50,6 @@ from hct_mis_api.apps.payment.utils import to_decimal
 from hct_mis_api.apps.program.fixtures import (
     BeneficiaryGroupFactory,
     ProgramCycleFactory,
-    ProgramFactory,
 )
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
