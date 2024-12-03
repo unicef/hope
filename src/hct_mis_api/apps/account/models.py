@@ -249,19 +249,19 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
     def can_download_storage_files(self) -> bool:
         return any(
             self.has_permission(Permissions.DOWNLOAD_STORAGE_FILE.name, role.business_area)
-            for role in self.cached_user_roles()
+            for role in self.cached_role_assignments()
         )
 
     def can_change_fsp(self) -> bool:
         return any(
             self.has_permission(Permissions.PM_ADMIN_FINANCIAL_SERVICE_PROVIDER_UPDATE.name, role.business_area)
-            for role in self.cached_user_roles()
+            for role in self.cached_role_assignments()
         )
 
     def can_add_business_area_to_partner(self) -> bool:
         return any(
             self.has_permission(Permissions.CAN_ADD_BUSINESS_AREA_TO_PARTNER.name, role.business_area)
-            for role in self.cached_user_roles()
+            for role in self.cached_role_assignments()
         )
 
     def email_user(  # type: ignore
@@ -368,7 +368,7 @@ class RoleAssignment(NaturalKeyModel, TimeStampedUUIDModel):
         ).exclude(id=self.id).exists():
             raise ValidationError("This role is already assigned to the user in the business area.")
         # Ensure partner can only be assigned roles that have flag is_available_for_partner as True
-        if self.partner and not self.role.is_available_for_partner:
+        if self.partner and self.role and not self.role.is_available_for_partner:
             raise ValidationError("Partner can only be assigned roles that are available for partners.")
 
     def save(self, *args: Any, **kwargs: Any) -> None:

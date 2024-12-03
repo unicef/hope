@@ -84,7 +84,7 @@
   }
 },
 {
-  "model": "account.userrole",
+  "model": "account.roleassignment",
   "pk": "bc46afbd-a0b7-48f3-abf9-8a4c4b033092",
   "fields": {
     "created_at": "2022-03-30 09:05:24.581-00:00",
@@ -95,7 +95,7 @@
   }
 },
 {
-  "model": "account.userrole",
+  "model": "account.roleassignment",
   "pk": "ef880fed-cf92-4f97-b346-cc25fee1b4cd",
   "fields": {
     "created_at": "2022-03-30 09:08:03.635-00:00",

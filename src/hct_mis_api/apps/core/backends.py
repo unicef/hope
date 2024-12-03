@@ -8,7 +8,7 @@ from django.utils import timezone
 
 from hct_mis_api.api.caches import get_or_create_cache_key
 from hct_mis_api.apps.account.caches import get_user_permissions_version_key, get_user_permissions_cache_key
-from hct_mis_api.apps.account.models import RoleAssignment, User
+from hct_mis_api.apps.account.models import RoleAssignment, User, Role
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.program.models import Program
 
@@ -53,12 +53,12 @@ class PermissionsBackend(BaseBackend):
         if cached_permissions:
             return cached_permissions
 
-        # If user does not have access to program, return empty set
+        # If permission is checked for a Program and User does not have access to it, return empty set
         if program and not RoleAssignment.objects.filter(
-                partner=user.partner,
-                program=program,
-                expiry_date__gt=timezone.now()
-        ).exists():
+            Q(partner=user.partner)
+            & Q(business_area=business_area)
+            & (Q(program=None) | Q(program=program))
+        ).exclude(expiry_date__lt=timezone.now()).exists():
             return set()
 
         """
@@ -67,30 +67,35 @@ class PermissionsBackend(BaseBackend):
         * RoleAssignment - where they can be stored either on the Group or on the Role
           and assigned either to the User or to their Partner
         """
-        permissions_set = set()
-
-        # permissions from the User's Group
-        user_group_permissions = Permission.objects.filter(
-            group__users=user
-        ).values_list("content_type__app_label", "codename")
-        permissions_set.update(f"{app}.{codename}" for app, codename in user_group_permissions)
 
         # role assignments from the User or their Partner
         role_assignments = RoleAssignment.objects.filter(
             (Q(user=user) | Q(partner__user=user))
             & (Q(business_area=filters.get('business_area'), program=None) | Q(**filters))
-        ).exclude(expiry_date__gt=timezone.now())
+        ).exclude(expiry_date__lt=timezone.now())
+
+        if business_area and not role_assignments.exists():
+            return set()
+
+        permissions_set = set()
 
         # permissions from the RoleAssignments' Groups
-        role_group_permissions = Permission.objects.filter(
+        role_assignment_group_permissions = Permission.objects.filter(
             group__role_assignments__in=role_assignments
         ).values_list("content_type__app_label", "codename")
-        permissions_set.update(f"{app}.{codename}" for app, codename in role_group_permissions)
+        permissions_set.update(f"{app}.{codename}" for app, codename in role_assignment_group_permissions)
 
         # permissions from RoleAssignment's Roles
-        for role_assignment in role_assignments:
-            role_permissions = role_assignment.role.permissions
-            permissions_set.update(role_permissions)
+        role_assignment_role_permissions = Role.objects.filter(
+            role_assignments__in=role_assignments
+        ).values_list("permissions", flat=True)
+        permissions_set.update(permission for permission_list in role_assignment_role_permissions for permission in permission_list)
+
+        # permissions from the User's Group
+        user_group_permissions = Permission.objects.filter(
+            group__user=user
+        ).values_list("content_type__app_label", "codename")
+        permissions_set.update(f"{app}.{codename}" for app, codename in user_group_permissions)
 
         cache.set(cache_key, permissions_set, timeout=None)
 
