@@ -19,10 +19,19 @@ from hct_mis_api.apps.payment.fixtures import (
 )
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory
 from hct_mis_api.apps.steficon.models import Rule
+from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory
+from hct_mis_api.apps.targeting.models import (
+    TargetingCollectorBlockRuleFilter,
+    TargetingCollectorRuleFilterBlock,
+    TargetingCriteriaRule,
+    TargetingCriteriaRuleFilter,
+    TargetingIndividualBlockRuleFilter,
+    TargetingIndividualRuleFilterBlock,
+)
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.household.models import Household, Individual
@@ -61,17 +70,6 @@ mutation DeletePaymentPlan($paymentPlanId: ID!) {
 }
 """
 
-FINALIZE_TARGET_POPULATION_MUTATION = """
-mutation FinalizeTP($id: ID!) {
-    finalizeTargetPopulation(id: $id) {
-        targetPopulation {
-            name
-            status
-        }
-    }
-}
-"""
-
 SET_STEFICON_RULE_ON_TP_MUTATION = """
 mutation setSteficonRuleOnTargetPopulation($paymentPlanId: ID!, $steficonRuleId: ID) {
     setSteficonRuleOnTargetPopulation(paymentPlanId: $paymentPlanId, steficonRuleId: $steficonRuleId) {
@@ -80,6 +78,17 @@ mutation setSteficonRuleOnTargetPopulation($paymentPlanId: ID!, $steficonRuleId:
             status
         }
     }
+}
+"""
+
+COPY_TARGETING_CRITERIA = """
+mutation CopyTargetingCriteriaMutation($paymentPlanId: ID!, $programCycleId: ID!, $name: String!) {
+  copyTargetingCriteria(name: $name, paymentPlanId: $paymentPlanId, programCycleId: $programCycleId){
+    paymentPlan{
+      name
+      status
+    }
+  }
 }
 """
 
@@ -107,7 +116,7 @@ class TestPaymentPlanMutation(APITestCase):
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         partner = PartnerFactory(name="Partner")
         cls.user = UserFactory.create(partner=partner)
-        cls.program = ProgramFactory(status=Program.ACTIVE)
+        cls.program = ProgramFactory(status=Program.ACTIVE, cycle__title="Cycle1")
         cls.cycle = cls.program.cycles.first()
         cls.registration_data_import = RegistrationDataImportFactory(
             business_area=cls.business_area, program=cls.program
@@ -171,7 +180,9 @@ class TestPaymentPlanMutation(APITestCase):
         self, name: Any, permissions: List[Permissions], mock_get_exchange_rate: Any
     ) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-        payment_plan = PaymentPlanFactory(name="OldName", status=PaymentPlan.Status.TP_OPEN, program_cycle=self.cycle)
+        payment_plan = PaymentPlanFactory(
+            name="OldName", status=PaymentPlan.Status.TP_OPEN, program_cycle=self.cycle, created_by=self.user
+        )
         self.snapshot_graphql_request(
             request_string=UPDATE_PAYMENT_PLAN_MUTATION,
             context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
@@ -205,7 +216,10 @@ class TestPaymentPlanMutation(APITestCase):
     def test_delete_payment_plan_mutation(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         payment_plan = PaymentPlanFactory(
-            name="DeletePaymentPlan", status=PaymentPlan.Status.OPEN, program_cycle=self.cycle
+            name="DeletePaymentPlan",
+            status=PaymentPlan.Status.OPEN,
+            program_cycle=self.cycle,
+            created_by=self.user,
         )
         self.snapshot_graphql_request(
             request_string=DELETE_PAYMENT_PLAN_MUTATION,
@@ -225,7 +239,10 @@ class TestPaymentPlanMutation(APITestCase):
     def test_set_steficon_target_population_mutation(self, name: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         payment_plan = PaymentPlanFactory(
-            name="TestSetSteficonTP", status=PaymentPlan.Status.OPEN, program_cycle=self.cycle
+            name="TestSetSteficonTP",
+            status=PaymentPlan.Status.OPEN,
+            program_cycle=self.cycle,
+            created_by=self.user,
         )
 
         rule_for_tp = RuleCommitFactory(rule__type=Rule.TYPE_TARGETING, version=11)
@@ -243,3 +260,96 @@ class TestPaymentPlanMutation(APITestCase):
                 "steficonRuleId": rule_commit_id,
             },
         )
+
+    @parameterized.expand(
+        [
+            ("without_permission", []),
+            ("with_permission", [Permissions.TARGETING_DUPLICATE]),
+        ]
+    )
+    def test_copy_target_criteria_mutation(self, name: Any, permissions: List[Permissions]) -> None:
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        # create criteria
+        tc = TargetingCriteriaFactory()
+        tcr = TargetingCriteriaRule(household_ids="HH-001", individual_ids="IND-001")
+        tcr.targeting_criteria = tc
+        tcr.save()
+        TargetingCriteriaRuleFilter.objects.create(
+            targeting_criteria_rule=tcr,
+            comparison_method="LESS_THAN",
+            field_name="size",
+            arguments=[1],
+        )
+        individuals_filters_block = TargetingIndividualRuleFilterBlock(
+            targeting_criteria_rule=tcr, target_only_hoh=False
+        )
+        individuals_filters_block.save()
+        TargetingIndividualBlockRuleFilter.objects.create(
+            individuals_filters_block=individuals_filters_block,
+            comparison_method="LESS_THAN",
+            field_name="age",
+            arguments=[40],
+        )
+        col_block = TargetingCollectorRuleFilterBlock(targeting_criteria_rule=tcr)
+        col_block.save()
+        TargetingCollectorBlockRuleFilter.objects.create(
+            collector_block_filters=col_block,
+            comparison_method="EQUALS",
+            field_name="delivery_data_field__random_name",
+            arguments=["Yes"],
+        )
+
+        payment_plan = PaymentPlanFactory(
+            name="New PaymentPlan",
+            status=PaymentPlan.Status.OPEN,
+            program_cycle=self.cycle,
+            created_by=self.user,
+            targeting_criteria=tc,
+        )
+
+        self.cycle.status = ProgramCycle.FINISHED
+        self.cycle.save()
+        # invalid cycle status
+        self.snapshot_graphql_request(
+            request_string=COPY_TARGETING_CRITERIA,
+            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            variables={
+                "paymentPlanId": self.id_to_base64(payment_plan.id, "PaymentPlanNode"),
+                "programCycleId": self.id_to_base64(self.cycle.id, "CycleNode"),
+                "name": "New PaymentPlan",
+            },
+        )
+
+        if name == "with_permission":
+            self.cycle.status = ProgramCycle.ACTIVE
+            self.cycle.save()
+            # name duplicated
+            self.snapshot_graphql_request(
+                request_string=COPY_TARGETING_CRITERIA,
+                context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+                variables={
+                    "paymentPlanId": self.id_to_base64(payment_plan.id, "PaymentPlanNode"),
+                    "programCycleId": self.id_to_base64(self.cycle.id, "CycleNode"),
+                    "name": "New PaymentPlan",
+                },
+            )
+
+            self.assertEqual(TargetingCollectorRuleFilterBlock.objects.all().count(), 1)
+            self.assertEqual(TargetingCollectorBlockRuleFilter.objects.all().count(), 1)
+            self.assertEqual(TargetingCriteriaRule.objects.all().count(), 1)
+            self.assertEqual(PaymentPlan.objects.all().count(), 1)
+
+            self.snapshot_graphql_request(
+                request_string=COPY_TARGETING_CRITERIA,
+                context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+                variables={
+                    "paymentPlanId": self.id_to_base64(payment_plan.id, "PaymentPlanNode"),
+                    "programCycleId": self.id_to_base64(self.cycle.id, "CycleNode"),
+                    "name": "Let's have One new Payment Plan XD",
+                },
+            )
+
+            self.assertEqual(TargetingCollectorRuleFilterBlock.objects.all().count(), 2)
+            self.assertEqual(TargetingCollectorBlockRuleFilter.objects.all().count(), 2)
+            self.assertEqual(TargetingCriteriaRule.objects.all().count(), 2)
+            self.assertEqual(PaymentPlan.objects.all().count(), 2)

@@ -723,7 +723,6 @@ def payment_plan_full_rebuild(self: Any, payment_plan_id: str) -> None:
                 if payment_plan.status not in [
                     PaymentPlan.Status.TP_OPEN,
                     PaymentPlan.Status.TP_LOCKED,
-                    # PaymentPlan.Status.TP_PROCESSING,
                 ]:
                     raise Exception("Payment Plan is not in correct status")
                 PaymentPlanService(payment_plan).full_rebuild()

@@ -567,6 +567,9 @@ class TargetingCollectorRuleFilterBlock(
         related_name="collectors_filters_blocks",
     )
 
+    def get_collector_block_filters(self) -> "QuerySet":
+        return self.collector_block_filters.all()
+
 
 class TargetingCollectorBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterBase):
     """

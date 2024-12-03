@@ -1356,10 +1356,10 @@ class CopyTargetingCriteriaMutation(PermissionMutation):
         program_cycle = get_object_or_404(ProgramCycle, pk=decode_id_string(program_cycle_id))
         program = program_cycle.program
 
+        cls.has_permission(info, Permissions.TARGETING_DUPLICATE, payment_plan.business_area)
+
         if program_cycle.status == ProgramCycle.FINISHED:
             raise GraphQLError("Not possible to assign Finished Program Cycle to Targeting")
-
-        cls.has_permission(info, Permissions.TARGETING_DUPLICATE, payment_plan.business_area)
 
         if PaymentPlan.objects.filter(name=name, program_cycle=program_cycle, is_removed=False).exists():
             raise GraphQLError(
@@ -1371,6 +1371,11 @@ class CopyTargetingCriteriaMutation(PermissionMutation):
             created_by=user,
             business_area=payment_plan.business_area,
             status=PaymentPlan.Status.TP_OPEN,
+            status_date=timezone.now(),
+            start_date=program_cycle.start_date,
+            end_date=program_cycle.end_date,
+            build_status=PaymentPlan.BuildStatus.BUILD_STATUS_PENDING,
+            built_at=timezone.now(),
             male_children_count=payment_plan.male_children_count,
             female_children_count=payment_plan.female_children_count,
             male_adults_count=payment_plan.male_adults_count,
@@ -1379,14 +1384,14 @@ class CopyTargetingCriteriaMutation(PermissionMutation):
             total_individuals_count=payment_plan.total_individuals_count,
             steficon_rule_targeting=payment_plan.steficon_rule_targeting,
             steficon_targeting_applied_date=payment_plan.steficon_targeting_applied_date,
-            program=program,
             program_cycle=program_cycle,
         )
-        payment_plan_copy.save()
         if payment_plan.targeting_criteria:
             payment_plan_copy.targeting_criteria = cls.copy_target_criteria(payment_plan.targeting_criteria)
+
         payment_plan_copy.save()
         payment_plan_copy.refresh_from_db()
+
         transaction.on_commit(lambda: payment_plan_full_rebuild.delay(payment_plan_copy.id))
         log_create(
             PaymentPlan.ACTIVITY_LOG_MAPPING,
