@@ -345,19 +345,22 @@ export const GlobalProgramSelect = () => {
             onChange={onChange}
             PopperComponent={PopperComponent}
             noOptionsText="No results"
-            renderOption={(props, option) => (
-              <li {...props}>
-                <NameBox data-cy="select-option-name" title={option.name}>
-                  {option.name}
-                </NameBox>
-                {option.status && (
-                  <StatusBox
-                    status={option.status}
-                    statusToColor={programStatusToColor}
-                  />
-                )}
-              </li>
-            )}
+            renderOption={(props, option) => {
+              const { key, ...restProps } = props;
+              return (
+                <li key={key} {...restProps}>
+                  <NameBox data-cy="select-option-name" title={option.name}>
+                    {option.name}
+                  </NameBox>
+                  {option.status && (
+                    <StatusBox
+                      status={option.status}
+                      statusToColor={programStatusToColor}
+                    />
+                  )}
+                </li>
+              );
+            }}
             filterOptions={(x) => x}
             options={programs}
             getOptionLabel={(option) => option.name}
