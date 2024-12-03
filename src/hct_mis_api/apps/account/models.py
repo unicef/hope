@@ -331,26 +331,32 @@ class RoleAssignment(NaturalKeyModel, TimeStampedUUIDModel):
         blank=True, null=True, help_text="After expiry date this Role Assignment will be inactive."
     )
     group = models.ForeignKey(Group, related_name="role_assignments", on_delete=models.CASCADE, null=True, blank=True)
-    # TODO: only Group OR Role should be set, not both
 
     class Meta:
         constraints = [
-            # user can have only one role in BA
-            models.UniqueConstraint(
-                fields=["business_area", "role", "user"],
-                condition=Q(user__isnull=False),
-                name="unique_user_role_assignment"
-            ),
             # either user or partner should be assigned; not both
             models.CheckConstraint(
                 check=(Q(user__isnull=False, partner__isnull=True) | Q(user__isnull=True, partner__isnull=False)),
                 name="user_or_partner_not_both"
             ),
-            # either group or role should be assigned; not both
+            # program and areas can only be assigned for partner roles; not for user roles
             models.CheckConstraint(
-                check=(Q(group__isnull=False, role__isnull=True) | Q(group__isnull=True, role__isnull=False)),
-                name="group_or_role_not_both"
-            )
+                check=Q(user__isnull=True) | (Q(user__isnull=False) & Q(program__isnull=True) & Q(areas__isnull=True)),
+                name="program_and_areas_null_for_user"
+            ),
+            # unique combination of user, role, and business_area; applies only when a user is assigned, not a partner.
+            # (For partner assignments, the role can be reused within the same business_area
+            # if linked to different programs, as the assignment is considered per program, not per business_area.)
+            models.UniqueConstraint(
+                fields=["business_area", "role", "user"],
+                condition=Q(user__isnull=False),
+                name="unique_user_role_assignment"
+            ),
+            # Partner can only be assigned roles that have flag is_available_for_partner as True
+            models.CheckConstraint(
+                check=Q(partner__isnull=True) | Q(role__is_available_for_partner=True),
+                name="partner_only_available_roles"
+            ),
         ]
 
     def clean(self) -> None:
@@ -358,9 +364,14 @@ class RoleAssignment(NaturalKeyModel, TimeStampedUUIDModel):
         # Ensure either user or partner is set, but not both
         if bool(self.user) == bool(self.partner):
             raise ValidationError("Either user or partner must be set, but not both.")
-        # Ensure either group or role is set, but not both
-        if bool(self.group) == bool(self.role):
-            raise ValidationError("Either group or role must be set, but not both.")
+        # Ensure program and areas can only be assigned for partner roles; not for user roles
+        if self.user and (self.program or self.areas.exists()):
+            raise ValidationError("Program and areas can only be assigned for partner roles; not for user roles.")
+        # Ensure user role assignment is unique within the business area
+        if self.user and RoleAssignment.objects.filter(
+            business_area=self.business_area, role=self.role, user=self.user
+        ).exclude(id=self.id).exists():
+            raise ValidationError("This role is already assigned to the user in the business area.")
 
     def save(self, *args: Any, **kwargs: Any) -> None:
         self.clean()
