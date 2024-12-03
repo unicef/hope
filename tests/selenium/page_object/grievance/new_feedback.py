@@ -69,8 +69,8 @@ class NewFeedback(BaseComponents):
     # Texts
     textTitle = "New Feedback"
     textCategory = "Feedback"
-    textLookUpHousehold = "LOOK UP HOUSEHOLD"
-    textLookUpIndividual = "LOOK UP INDIVIDUAL"
+    textLookUpHousehold = "LOOK UP {}"
+    textLookUpIndividual = "LOOK UP {}"
 
     # Elements
 
@@ -95,22 +95,22 @@ class NewFeedback(BaseComponents):
     def getOptions(self) -> list[WebElement]:
         return self.get_elements(self.option)
 
-    def getHouseholdTab(self) -> None:
+    def getHouseholdTab(self, tab_name: str = "Items Group") -> None:
         try:
             household_tab = self.get_elements(self.lookUpTabsHouseHold)[0]
         except IndexError:
             sleep(1)
             household_tab = self.get_elements(self.lookUpTabsHouseHold)[0]
-        assert self.textLookUpHousehold in household_tab.text
+        assert self.textLookUpHousehold.format(tab_name) in household_tab.text
         return household_tab
 
-    def getIndividualTab(self) -> WebElement:
+    def getIndividualTab(self, tab_name: str = "Item") -> WebElement:
         try:
             individual_tab = self.get_elements(self.lookUpTabsIndividual, attempts=5)[1]
         except IndexError:
             sleep(1)
             individual_tab = self.get_elements(self.lookUpTabsIndividual, attempts=5)[1]
-        assert self.textLookUpIndividual in individual_tab.text
+        assert self.textLookUpIndividual.format(tab_name) in individual_tab.text
         return individual_tab
 
     def getHouseholdTableRows(self, number: int) -> WebElement:
