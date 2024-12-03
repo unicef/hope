@@ -65,7 +65,7 @@ export function ImportedPeopleTableRow({
       </TableCell>
       <TableCell align="left">{sexToCapitalize(individual.sex)}</TableCell>
       <TableCell align="left">
-        {individual.deduplicationBatchResults.length ? (
+        {individual.deduplicationBatchResults?.length ? (
           <DedupeResults
             isInBatch
             status={deduplicationBatchDict[individual.deduplicationBatchStatus]}
@@ -77,7 +77,7 @@ export function ImportedPeopleTableRow({
         )}
       </TableCell>
       <TableCell align="left">
-        {individual.deduplicationGoldenRecordResults.length ? (
+        {individual.deduplicationGoldenRecordResults?.length ? (
           <DedupeResults
             status={
               deduplicationGoldenRecordDict[
