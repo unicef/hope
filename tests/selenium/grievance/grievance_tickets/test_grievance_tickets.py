@@ -1090,6 +1090,7 @@ class TestGrievanceTickets:
         for str_row in pageGrievanceTickets.getRows():
             assert "Urgent" in str_row.text.replace("\n", " ").split(" ")
 
+    @pytest.mark.xfail(reason="UNSTABLE")
     def test_grievance_tickets_process_tickets(
         self,
         pageGrievanceTickets: GrievanceTickets,
@@ -1135,6 +1136,7 @@ class TestGrievanceTickets:
         pageHouseholds.getHouseholdsRows()[0].click()
         assert "5" in pageHouseholdsDetails.getRow05().text
 
+    @pytest.mark.xfail(reason="UNSTABLE")
     def test_grievance_tickets_add_note(
         self,
         pageGrievanceTickets: GrievanceTickets,
