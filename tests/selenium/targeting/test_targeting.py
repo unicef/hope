@@ -251,9 +251,16 @@ def create_targeting(household_without_disabilities: Household) -> TargetPopulat
 
 @pytest.fixture
 def create_programs() -> None:
-    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/core/fixtures/data-selenium.json", verbosity=0)
-    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/program/fixtures/data-cypress.json", verbosity=0)
-    yield
+    business_area = create_afghanistan()
+    dct = DataCollectingTypeFactory(type=DataCollectingType.Type.STANDARD)
+    beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
+    ProgramFactory(
+        name="Test Programm",
+        status=Program.ACTIVE,
+        business_area=business_area,
+        data_collecting_type=dct,
+        beneficiary_group=beneficiary_group,
+    )
 
 
 @pytest.fixture
@@ -274,7 +281,7 @@ class TestSmokeTargeting:
         expected_column_names = [
             "Name",
             "Status",
-            "Total Households Count",
+            "Num. of Households",
             "Date Created",
             "Last Edited",
             "Created by",

@@ -6,8 +6,11 @@ from elasticsearch_dsl import connections
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory
 from hct_mis_api.apps.account.models import Partner
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
+from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.geo.models import Area, AreaType, Country
+from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 from tests.selenium.page_object.programme_population.households_details import (
     HouseholdsDetails,
@@ -32,9 +35,16 @@ def registration_datahub(db) -> None:  # type: ignore
 
 @pytest.fixture
 def create_programs() -> None:
-    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/core/fixtures/data-selenium.json")
-    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/program/fixtures/data-cypress.json")
-    yield
+    business_area = create_afghanistan()
+    dct = DataCollectingTypeFactory(type=DataCollectingType.Type.STANDARD)
+    beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
+    ProgramFactory(
+        name="Test Programm",
+        status=Program.ACTIVE,
+        business_area=business_area,
+        data_collecting_type=dct,
+        beneficiary_group=beneficiary_group,
+    )
 
 
 @pytest.fixture

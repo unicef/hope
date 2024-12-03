@@ -2,15 +2,12 @@ from datetime import datetime
 from decimal import Decimal
 from time import sleep
 
-from django.conf import settings
-from django.core.management import call_command
-
 import pytest
 from dateutil.relativedelta import relativedelta
 from selenium.webdriver import Keys
 
 from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
+from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.fixtures import create_household
@@ -238,9 +235,16 @@ def create_payment_plan(standard_program: Program) -> PaymentPlan:
 
 @pytest.fixture
 def create_programs() -> None:
-    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/core/fixtures/data-selenium.json")
-    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/program/fixtures/data-cypress.json")
-    yield
+    business_area = create_afghanistan()
+    dct = DataCollectingTypeFactory(type=DataCollectingType.Type.STANDARD)
+    beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
+    ProgramFactory(
+        name="Test Programm",
+        status=Program.ACTIVE,
+        business_area=business_area,
+        data_collecting_type=dct,
+        beneficiary_group=beneficiary_group,
+    )
 
 
 @pytest.mark.usefixtures("login")
@@ -352,6 +356,8 @@ class TestProgrammeDetails:
         pageProgrammeManagement.getInputEndDate().send_keys(FormatTime(1, 2, 2032).numerically_formatted_date)
         pageProgrammeManagement.chooseOptionSelector("Health")
         pageProgrammeManagement.chooseOptionDataCollectingType("Partial")
+        pageProgrammeManagement.getInputBeneficiaryGroup().click()
+        pageProgrammeManagement.select_listbox_element("Main Menu")
         pageProgrammeManagement.getButtonNext().click()
         # 2nd step (Time Series Fields)
         pageProgrammeManagement.getButtonAddTimeSeriesField()

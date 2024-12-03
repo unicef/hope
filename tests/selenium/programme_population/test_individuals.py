@@ -4,6 +4,10 @@ from django.core.management import call_command
 import pytest
 from freezegun import freeze_time
 
+from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
+from hct_mis_api.apps.core.models import DataCollectingType
+from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
 from tests.selenium.page_object.programme_population.individuals import Individuals
 from tests.selenium.page_object.programme_population.individuals_details import (
     IndividualsDetails,
@@ -14,9 +18,16 @@ pytestmark = pytest.mark.django_db()
 
 @pytest.fixture
 def create_programs() -> None:
-    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/core/fixtures/data-selenium.json")
-    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/program/fixtures/data-cypress.json")
-    yield
+    business_area = create_afghanistan()
+    dct = DataCollectingTypeFactory(type=DataCollectingType.Type.STANDARD)
+    beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
+    ProgramFactory(
+        name="Test Programm",
+        status=Program.ACTIVE,
+        business_area=business_area,
+        data_collecting_type=dct,
+        beneficiary_group=beneficiary_group,
+    )
 
 
 @pytest.fixture

@@ -1,13 +1,11 @@
 from datetime import datetime
 
-from django.conf import settings
-from django.core.management import call_command
-
 import pytest
 from dateutil.relativedelta import relativedelta
 
 from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
+from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.fixtures import GrievanceTicketFactory
 from hct_mis_api.apps.grievance.models import GrievanceTicket
@@ -18,7 +16,8 @@ from hct_mis_api.apps.payment.fixtures import (
     PaymentVerificationPlanFactory,
 )
 from hct_mis_api.apps.payment.models import PaymentPlan, PaymentVerificationPlan
-from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import ImportData, RegistrationDataImport
 from hct_mis_api.apps.targeting.fixtures import (
@@ -265,9 +264,16 @@ def create_rdi() -> None:
 
 @pytest.fixture
 def create_programs() -> None:
-    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/core/fixtures/data-selenium.json")
-    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/program/fixtures/data-cypress.json")
-    yield
+    business_area = create_afghanistan()
+    dct = DataCollectingTypeFactory(type=DataCollectingType.Type.STANDARD)
+    beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
+    ProgramFactory(
+        name="Test Programm",
+        status=Program.ACTIVE,
+        business_area=business_area,
+        data_collecting_type=dct,
+        beneficiary_group=beneficiary_group,
+    )
 
 
 @pytest.mark.usefixtures("login")

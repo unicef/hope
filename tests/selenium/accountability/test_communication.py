@@ -108,7 +108,7 @@ class TestSmokeAccountabilityCommunication:
         assert "Recipients" in pageAccountabilityCommunicationDetails.getTableTitle().text
         assert "Items Group ID" in pageAccountabilityCommunicationDetails.getHouseholdId().text
         assert "Status" in pageAccountabilityCommunicationDetails.getStatus().text
-        assert "Head of 'Items Group" in pageAccountabilityCommunicationDetails.getHouseholdHeadName().text
+        assert "Head of Items Group" in pageAccountabilityCommunicationDetails.getHouseholdHeadName().text
         assert "Items Group Size" in pageAccountabilityCommunicationDetails.getHouseholdSize().text
         assert "Administrative Level 2" in pageAccountabilityCommunicationDetails.getHouseholdLocation().text
         assert "Residence Status" in pageAccountabilityCommunicationDetails.getHouseholdResidenceStatus().text

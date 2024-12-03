@@ -350,7 +350,7 @@ class TestSmokePaymentModule:
         assert "Payment Plan ID" in pagePaymentModule.getTableLabel()[0].text
         assert "Status" in pagePaymentModule.getTableLabel()[1].text
         assert "Target Population" in pagePaymentModule.getTableLabel()[2].text
-        assert "Num. of Households" in pagePaymentModule.getTableLabel()[3].text
+        assert "Num. of Items Groups" in pagePaymentModule.getTableLabel()[3].text
         assert "Currency" in pagePaymentModule.getTableLabel()[4].text
         assert "Total Entitled Quantity" in pagePaymentModule.getTableLabel()[5].text
         assert "Total Delivered Quantity" in pagePaymentModule.getTableLabel()[6].text

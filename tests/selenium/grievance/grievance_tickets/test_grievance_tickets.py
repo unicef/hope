@@ -12,7 +12,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 
 from hct_mis_api.apps.account.models import User
-from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
+from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
@@ -67,9 +67,16 @@ def add_households() -> None:
 
 @pytest.fixture
 def create_programs() -> None:
-    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/core/fixtures/data-selenium.json")
-    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/program/fixtures/data-cypress.json")
-    yield
+    business_area = create_afghanistan()
+    dct = DataCollectingTypeFactory(type=DataCollectingType.Type.STANDARD)
+    beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
+    ProgramFactory(
+        name="Test Programm",
+        status=Program.ACTIVE,
+        business_area=business_area,
+        data_collecting_type=dct,
+        beneficiary_group=beneficiary_group,
+    )
 
 
 @pytest.fixture
@@ -1022,6 +1029,10 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getIndividualTableRows(0).click()
         pageGrievanceNewTicket.getButtonNext().click()
         pageGrievanceNewTicket.getInputQuestionnaire_size().click()
+        sleep(2)
+        from tests.selenium.tools.tag_name_finder import printing
+
+        printing("Mapping", pageGrievanceNewTicket.driver)
         assert "3" in pageGrievanceNewTicket.getLabelHouseholdSize().text
         pageGrievanceNewTicket.getInputQuestionnaire_malechildrencount().click()
         assert "-" in pageGrievanceNewTicket.getLabelNumberOfMaleChildren().text
