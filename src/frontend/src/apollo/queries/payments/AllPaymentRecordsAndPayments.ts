@@ -9,6 +9,7 @@ export const AllPaymentRecordsAndPayments = gql`
     $first: Int
     $last: Int
     $businessArea: String!
+    $program: String
   ) {
     allPaymentRecordsAndPayments(
       household: $household
@@ -18,6 +19,7 @@ export const AllPaymentRecordsAndPayments = gql`
       last: $last
       orderBy: $orderBy
       businessArea: $businessArea
+      program: $program
     ) {
       pageInfo {
         hasNextPage
