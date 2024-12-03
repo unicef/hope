@@ -349,8 +349,9 @@ def prepare_payment_plan_task(self: Any, payment_plan_id: str) -> bool:
 
     # 10 hours timeout
     cache.set(cache_key, True, timeout=60 * 60 * 10)
+    payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
+
     try:
-        payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
         # double check Payment Plan status
         if payment_plan.status != PaymentPlan.Status.TP_OPEN:
             logger.info(f"The Payment Plan must have the status {PaymentPlan.Status.TP_OPEN}.")
@@ -648,7 +649,7 @@ def payment_plan_apply_steficon_hh_selection(self: Any, payment_plan_id: str, en
     set_sentry_business_area_tag(payment_plan.business_area.name)
     engine_rule = get_object_or_404(Rule, id=engine_rule_id)
     rule: Optional["RuleCommit"] = engine_rule.latest
-    if rule.id != payment_plan.steficon_rule_targeting_id:
+    if rule and rule.id != payment_plan.steficon_rule_targeting_id:
         payment_plan.steficon_rule_targeting = rule
         payment_plan.save(update_fields=["steficon_rule_targeting"])
     try:
@@ -697,7 +698,6 @@ def payment_plan_rebuild_stats(self: Any, payment_plan_id: str) -> None:
                 payment_plan.update_money_fields()
         except Exception as e:
             logger.exception(e)
-            payment_plan.refresh_from_db()
             raise self.retry(exc=e)
 
 
@@ -720,17 +720,11 @@ def payment_plan_full_rebuild(self: Any, payment_plan_id: str) -> None:
         payment_plan.save(update_fields=("build_status", "built_at"))
         try:
             with transaction.atomic():
-                if payment_plan.status not in [
-                    PaymentPlan.Status.TP_OPEN,
-                    PaymentPlan.Status.TP_LOCKED,
-                ]:
-                    raise Exception("Payment Plan is not in correct status")
                 PaymentPlanService(payment_plan).full_rebuild()
                 payment_plan.build_status_ok()
                 payment_plan.save(update_fields=("build_status", "built_at"))
         except Exception as e:
             logger.exception(e)
-            payment_plan.refresh_from_db()
             payment_plan.build_status_failed()
             payment_plan.save(update_fields=("build_status", "built_at"))
             raise self.retry(exc=e)

@@ -617,7 +617,7 @@ class PaymentPlan(
         field=build_status,
         source=BuildStatus.BUILD_STATUS_BUILDING,
         target=BuildStatus.BUILD_STATUS_FAILED,
-        conditions=[lambda obj: obj.status in [PaymentPlan.Status.TP_OPEN]],
+        conditions=[lambda obj: obj.status in [PaymentPlan.Status.TP_OPEN, PaymentPlan.Status.TP_LOCKED]],
     )
     def build_status_failed(self) -> None:
         self.built_at = timezone.now()
@@ -626,7 +626,7 @@ class PaymentPlan(
         field=build_status,
         source=BuildStatus.BUILD_STATUS_BUILDING,
         target=BuildStatus.BUILD_STATUS_OK,
-        conditions=[lambda obj: obj.status in [PaymentPlan.Status.TP_OPEN]],
+        conditions=[lambda obj: obj.status in [PaymentPlan.Status.TP_OPEN, PaymentPlan.Status.TP_LOCKED]],
     )
     def build_status_ok(self) -> None:
         self.built_at = timezone.now()
