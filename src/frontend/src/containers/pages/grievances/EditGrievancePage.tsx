@@ -73,6 +73,7 @@ import {
 import { grievancePermissions } from './GrievancesDetailsPage/grievancePermissions';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 import { ReactElement } from 'react';
+import { useProgramContext } from 'src/programContext';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -91,6 +92,7 @@ export const EditGrievancePage = (): ReactElement => {
   const location = useLocation();
   const { t } = useTranslation();
   const { baseUrl, businessArea, isAllPrograms } = useBaseUrl();
+  const { isSocialDctType } = useProgramContext();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
   const { id } = useParams();
@@ -266,6 +268,10 @@ export const EditGrievancePage = (): ReactElement => {
     ticket?.individualDataUpdateTicketDetails?.individualData
       ?.delivery_mechanism_data_to_edit;
 
+  const individualFieldsDictForValidation = isSocialDctType
+    ? peopleFieldsDict
+    : individualFieldsDict;
+
   return (
     <UniversalErrorBoundary
       location={location}
@@ -309,9 +315,8 @@ export const EditGrievancePage = (): ReactElement => {
           validate(
             values,
             allAddIndividualFieldsData,
-            individualFieldsDict,
+            individualFieldsDictForValidation,
             householdFieldsDict,
-            peopleFieldsDict,
           )
         }
         validationSchema={validationSchema}

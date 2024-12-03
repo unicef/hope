@@ -171,7 +171,9 @@ export const CreateGrievancePage = (): ReactElement => {
     '*',
   );
 
-  const individualFieldsDictByDctType = individualFieldsDict;
+  const individualFieldsDictForValidation = isSocialDctType
+    ? peopleFieldsDict
+    : individualFieldsDict;
 
   const showIssueType = (values): boolean =>
     values.category === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
@@ -311,7 +313,7 @@ export const CreateGrievancePage = (): ReactElement => {
           validateUsingSteps(
             values,
             allAddIndividualFieldsData,
-            individualFieldsDictByDctType,
+            individualFieldsDictForValidation,
             householdFieldsDict,
             activeStep,
             setValidateData,
