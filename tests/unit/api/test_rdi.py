@@ -10,7 +10,6 @@ from rest_framework.reverse import reverse
 from hct_mis_api.api.models import Grant
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.models import (
-    COLLECT_TYPE_FULL,
     HEAD,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     NON_BENEFICIARY,
@@ -108,7 +107,6 @@ class PushToRDITests(HOPEApiTestCase):
                         "sex": "FEMALE",
                     },
                 ],
-                "collect_individual_data": COLLECT_TYPE_FULL,
                 "size": 1,
             }
         ]
@@ -124,7 +122,6 @@ class PushToRDITests(HOPEApiTestCase):
         self.assertIsNotNone(hh.head_of_household)
         self.assertIsNotNone(hh.primary_collector)
         self.assertIsNone(hh.alternate_collector)
-        self.assertEqual(hh.collect_individual_data, COLLECT_TYPE_FULL)
         self.assertEqual(hh.program_id, self.program.id)
 
         self.assertEqual(hh.primary_collector.full_name, "Mary Primary #1")

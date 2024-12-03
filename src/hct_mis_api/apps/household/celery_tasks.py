@@ -14,12 +14,7 @@ from constance import config
 
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
-from hct_mis_api.apps.household.models import (
-    COLLECT_TYPE_FULL,
-    COLLECT_TYPE_PARTIAL,
-    Household,
-    Individual,
-)
+from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.household.services.household_recalculate_data import (
     recalculate_data,
 )
@@ -54,7 +49,7 @@ def recalculate_population_fields_chunk_task(households_ids: List[UUID], program
                 fields_to_update = []
                 for hh in (
                     Household.objects.filter(pk__in=households_ids_page)
-                    .only("id", "collect_individual_data")
+                    .only("id")
                     .prefetch_related("individuals")
                     .select_for_update(of=("self",), skip_locked=True)
                     .order_by("pk")
@@ -85,9 +80,7 @@ def recalculate_population_fields_task(
         program = Program.objects.get(id=program_id)
         recalculate_composition = program.data_collecting_type.recalculate_composition
     queryset = Household.objects.filter(**params).only("pk").order_by("pk")
-    if recalculate_composition is None:
-        queryset = queryset.filter(collect_individual_data__in=(COLLECT_TYPE_FULL, COLLECT_TYPE_PARTIAL))
-    elif not recalculate_composition:
+    if not recalculate_composition:
         queryset = queryset.none()
 
     if queryset.exists():
@@ -116,46 +109,6 @@ def interval_recalculate_population_fields_task() -> None:
     )
 
     recalculate_population_fields_task.delay(household_ids=list(households))
-
-
-@app.task()
-@log_start_and_end
-@sentry_tags
-def calculate_children_fields_for_not_collected_individual_data() -> int:
-    from django.db.models.functions import Coalesce
-
-    from hct_mis_api.apps.household.models import (
-        COLLECT_TYPE_FULL,
-        COLLECT_TYPE_PARTIAL,
-        Household,
-    )
-
-    return Household.objects.exclude(collect_individual_data__in=[COLLECT_TYPE_FULL, COLLECT_TYPE_PARTIAL]).update(
-        children_count=Coalesce("female_age_group_0_5_count", 0)
-        + Coalesce("female_age_group_6_11_count", 0)
-        + Coalesce("female_age_group_12_17_count", 0)
-        + Coalesce("male_age_group_0_5_count", 0)
-        + Coalesce("male_age_group_6_11_count", 0)
-        + Coalesce("male_age_group_12_17_count", 0),
-        female_children_count=Coalesce("female_age_group_0_5_count", 0)
-        + Coalesce("female_age_group_6_11_count", 0)
-        + Coalesce("female_age_group_12_17_count", 0),
-        male_children_count=Coalesce("male_age_group_0_5_count", 0)
-        + Coalesce("male_age_group_6_11_count", 0)
-        + Coalesce("male_age_group_12_17_count", 0),
-        children_disabled_count=Coalesce("female_age_group_0_5_disabled_count", 0)
-        + Coalesce("female_age_group_6_11_disabled_count", 0)
-        + Coalesce("female_age_group_12_17_disabled_count", 0)
-        + Coalesce("male_age_group_0_5_disabled_count", 0)
-        + Coalesce("male_age_group_6_11_disabled_count", 0)
-        + Coalesce("male_age_group_12_17_disabled_count", 0),
-        female_children_disabled_count=Coalesce("female_age_group_0_5_disabled_count", 0)
-        + Coalesce("female_age_group_6_11_disabled_count", 0)
-        + Coalesce("female_age_group_12_17_disabled_count", 0),
-        male_children_disabled_count=Coalesce("male_age_group_0_5_disabled_count", 0)
-        + Coalesce("male_age_group_6_11_disabled_count", 0)
-        + Coalesce("male_age_group_12_17_disabled_count", 0),
-    )
 
 
 @app.task()
