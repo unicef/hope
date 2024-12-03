@@ -65,7 +65,8 @@ class TestPaymentPlanServices(APITestCase):
         )
 
         pp = PaymentPlanService(payment_plan=pp).delete()
-        self.assertEqual(pp.is_removed, True)
+        self.assertEqual(pp.is_removed, False)
+        self.assertEqual(pp.status, PaymentPlan.Status.DRAFT)
 
     def test_delete_locked(self) -> None:
         pp = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED, created_by=self.user)
@@ -86,7 +87,8 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(pp.program_cycle.status, ProgramCycle.ACTIVE)
 
         pp = PaymentPlanService(payment_plan=pp).delete()
-        self.assertEqual(pp.is_removed, True)
+        self.assertEqual(pp.is_removed, False)
+        self.assertEqual(pp.status, PaymentPlan.Status.DRAFT)
         program_cycle.refresh_from_db()
         self.assertEqual(program_cycle.status, ProgramCycle.DRAFT)
 
@@ -101,7 +103,8 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(pp_1.program_cycle.status, ProgramCycle.ACTIVE)
 
         pp_1 = PaymentPlanService(payment_plan=pp_1).delete()
-        self.assertEqual(pp_1.is_removed, True)
+        self.assertEqual(pp_1.is_removed, False)
+        self.assertEqual(pp_1.status, PaymentPlan.Status.DRAFT)
         program_cycle.refresh_from_db()
         self.assertEqual(program_cycle.status, ProgramCycle.ACTIVE)
 

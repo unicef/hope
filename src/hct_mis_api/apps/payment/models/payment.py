@@ -756,7 +756,7 @@ class PaymentPlan(
 
     @transition(
         field=status,
-        source=[Status.TP_LOCKED, Status.TP_STEFICON_COMPLETED, Status.TP_STEFICON_ERROR],
+        source=[Status.TP_LOCKED, Status.TP_STEFICON_COMPLETED, Status.TP_STEFICON_ERROR, Status.OPEN],
         target=Status.DRAFT,
     )
     def status_draft(self) -> None:

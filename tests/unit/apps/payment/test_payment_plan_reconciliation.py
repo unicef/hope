@@ -25,7 +25,7 @@ from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
+from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.core.utils import (
     decode_id_string,
     decode_id_string_required,
@@ -263,10 +263,9 @@ class TestPaymentPlanReconciliation(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        create_afghanistan(
+        cls.business_area = create_afghanistan(
             is_payment_plan_applicable=True,
         )
-        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         partner = PartnerFactory(name="Partner")
         cls.user = UserFactory.create(partner=partner)
         cls.all_necessary_permissions = [

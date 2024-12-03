@@ -1161,7 +1161,7 @@ class SetSteficonRuleOnTargetPopulationMutation(PermissionMutation):
 
     class Input:
         payment_plan_id = graphene.ID(required=True)
-        steficon_rule_id = graphene.ID(required=True)
+        steficon_rule_id = graphene.ID()
         version = BigInt(required=False)
 
     @classmethod

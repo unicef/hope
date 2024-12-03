@@ -598,8 +598,12 @@ class PaymentPlanService:
             # move from Active to Draft Cycle need to delete all Payment Plans
             self.payment_plan.program_cycle.set_draft()
 
-        self.payment_plan.payment_items.all().delete()
-        self.payment_plan.delete()
+        # self.payment_plan.payment_items.all().delete()
+        # self.payment_plan.delete()
+        # with new proces just update status and not remove Payments and PaymentPlan
+        self.payment_plan.status_draft()
+        self.payment_plan.save()
+
         return self.payment_plan
 
     def export_xlsx(self, user_id: "UUID") -> PaymentPlan:
