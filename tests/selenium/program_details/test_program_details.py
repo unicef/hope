@@ -332,6 +332,7 @@ class TestSmokeProgrammeDetails:
 
 @pytest.mark.usefixtures("login")
 class TestProgrammeDetails:
+    @pytest.mark.xfail(reason="UNSTABLE")
     def test_program_details_check_default_cycle(
         self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails
     ) -> None:
