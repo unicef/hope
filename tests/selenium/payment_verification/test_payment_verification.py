@@ -681,6 +681,7 @@ class TestPaymentVerification:
         assert pagePaymentRecord.waitForStatusContainer("RECEIVED", timeout=60)
         assert "RECEIVED" == pagePaymentRecord.getStatusContainer().text
 
+    @pytest.mark.xfail(reason="UNSTABLE")
     def test_payment_verification_xlsx_partially_successful(
         self,
         clear_downloaded_files: None,

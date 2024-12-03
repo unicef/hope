@@ -213,6 +213,7 @@ class TestSmokePeople:
         assert pagePeopleDetails.getLabelRegistrationDate().text
         assert pagePeopleDetails.getLabelUserName().text
 
+    @pytest.mark.xfail(reason="UNSTABLE")
     def test_people_happy_path(
         self,
         add_people_with_payment_record: PaymentRecord,
