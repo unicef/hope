@@ -78,10 +78,10 @@ def invalidate_permissions_cache_on_role_assignment_change(sender, instance, **k
     Invalidate the cache for the User/Partner's Users associated with the RoleAssignment
     when the RoleAssignment is created, updated, or deleted.
     """
-    if hasattr(instance, 'user'):
+    if instance.user:
         users = [instance.user]
     else:
-        users = instance.partner.users.all()
+        users = instance.partner.user_set.all()
     _invalidate_user_permissions_cache(users)
 
 
