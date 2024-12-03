@@ -1,7 +1,7 @@
 import { Grid } from '@mui/material';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { Field, Form } from 'formik';
-import { ReactElement } from 'react';
+import { ReactElement, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   useDataCollectionTypeChoiceDataQuery,
@@ -34,23 +34,30 @@ export const ProgramForm = ({
     queryFn: async () => fetchBeneficiaryGroups(),
   });
 
-  if (!data || !dataCollectionTypeChoicesData || !beneficiaryGroupsData)
-    return null;
-
   const filteredDataCollectionTypeChoicesData =
     dataCollectionTypeChoicesData?.dataCollectionTypeChoices.filter(
       (el) => el.name !== '',
     );
 
-  const mappedBeneficiaryGroupsData = beneficiaryGroupsData?.results?.map(
-    (el) => ({
+  const mappedBeneficiaryGroupsData = useMemo(() => {
+    if (!beneficiaryGroupsData?.results) return [];
+
+    const filteredData =
+      values.dataCollectingTypeCode === 'partial'
+        ? beneficiaryGroupsData.results.filter(
+            (el) => el.masterDetail === false,
+          )
+        : beneficiaryGroupsData.results;
+
+    return filteredData.map((el) => ({
       name: el.name,
       value: el.id,
-    }),
-  );
+    }));
+  }, [values.dataCollectingTypeCode, beneficiaryGroupsData]);
 
   const isCopyProgramPage = location.pathname.includes('duplicate');
-
+  if (!data || !dataCollectionTypeChoicesData || !beneficiaryGroupsData)
+    return null;
 
   return (
     <Form>
@@ -134,7 +141,6 @@ export const ProgramForm = ({
             label={t('Beneficiary Group')}
             fullWidth
             variant="outlined"
-            required
             choices={mappedBeneficiaryGroupsData}
             component={FormikSelectField}
             data-cy="input-beneficiary-group"

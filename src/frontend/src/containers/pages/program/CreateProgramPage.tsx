@@ -197,7 +197,6 @@ export const CreateProgramPage = (): ReactElement => {
       'endDate',
       'sector',
       'dataCollectingTypeCode',
-      'beneficiaryGroup',
       'description',
       'budget',
       'administrativeAreasOfImplementation',
