@@ -1,6 +1,6 @@
 import datetime
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, List, Optional
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.contrib.auth import get_user_model
@@ -255,66 +255,6 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx(self: Any, payment_plan_i
     return True
 
 
-@app.task
-@log_start_and_end
-@sentry_tags
-def create_cash_plan_reconciliation_xlsx(
-    reconciliation_xlsx_file_id: str,
-    column_mapping: Dict,
-    cash_plan_form_data: Dict,
-    currency: str,
-    delivery_type: str,
-    delivery_date: str,
-    program_id: str,
-    service_provider_id: str,
-) -> None:
-    try:
-        from hct_mis_api.apps.core.models import StorageFile
-        from hct_mis_api.apps.payment.models import ServiceProvider
-        from hct_mis_api.apps.payment.services.create_cash_plan_from_reconciliation import (
-            CreateCashPlanReconciliationService,
-        )
-        from hct_mis_api.apps.program.models import Program
-
-        reconciliation_xlsx_obj = StorageFile.objects.get(id=reconciliation_xlsx_file_id)
-        business_area = reconciliation_xlsx_obj.business_area
-        set_sentry_business_area_tag(business_area.name)
-
-        cash_plan_form_data["program"] = Program.objects.get(id=program_id)
-        cash_plan_form_data["service_provider"] = ServiceProvider.objects.get(id=service_provider_id)
-
-        service = CreateCashPlanReconciliationService(
-            business_area,
-            reconciliation_xlsx_obj.file,
-            column_mapping,
-            cash_plan_form_data,
-            currency,
-            delivery_type,
-            delivery_date,
-        )
-
-        try:
-            service.parse_xlsx()
-            error_msg = None
-        except Exception as e:
-            error_msg = f"Error parse xlsx: {e} \nFile name: {reconciliation_xlsx_obj.file_name}"
-            user = reconciliation_xlsx_obj.created_by
-            if reconciliation_xlsx_obj.business_area.enable_email_notification:
-                send_email_notification(
-                    service,
-                    user,
-                    {"user": user, "file_name": reconciliation_xlsx_obj.file_name, "error_msg": error_msg},
-                )
-
-        # remove file every time
-        reconciliation_xlsx_obj.file.delete()
-        reconciliation_xlsx_obj.delete()
-
-    except Exception as e:
-        logger.exception(e)
-        raise
-
-
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
@@ -470,9 +410,9 @@ def payment_plan_exclude_beneficiaries(
 
         from hct_mis_api.apps.payment.models import Payment, PaymentPlan
 
-        payment_plan = PaymentPlan.objects.select_related("program").get(id=payment_plan_id)
+        payment_plan = PaymentPlan.objects.select_related("program_cycle__program").get(id=payment_plan_id)
         # for social worker program exclude Individual unicef_id
-        is_social_worker_program = payment_plan.program.is_social_worker_program
+        is_social_worker_program = payment_plan.program_cycle.program.is_social_worker_program
         set_sentry_business_area_tag(payment_plan.business_area.name)
         pp_payment_items = payment_plan.payment_items.select_related("household")
         payment_plan_title = "Follow-up Payment Plan" if payment_plan.is_follow_up else "Payment Plan"

@@ -575,7 +575,7 @@ def create_super_user(business_area: BusinessArea) -> User:
             email="test@example.com",
             partner=partner,
         )
-    UserRole.objects.create(
+    UserRole.objects.get_or_create(
         user=user,
         role=Role.objects.get(name="Role"),
         business_area=business_area,

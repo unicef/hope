@@ -1,4 +1,5 @@
 from typing import Any, List
+from unittest import mock
 
 from parameterized import parameterized
 
@@ -17,6 +18,9 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 
 
+@mock.patch(
+    "hct_mis_api.apps.registration_data.signals.increment_registration_data_import_version_cache", return_value=None
+)
 class TestFilterIndividualsByProgram(APITestCase):
     QUERY = """
     query AllIndividuals($program: ID){
@@ -155,7 +159,7 @@ class TestFilterIndividualsByProgram(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_individual_query_all(self, _: Any, permissions: List[Permissions]) -> None:
+    def test_individual_query_all(self, _mock: Any, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program1)
 
         headers = {
@@ -168,7 +172,7 @@ class TestFilterIndividualsByProgram(APITestCase):
             variables={"program": self.id_to_base64(self.program1.id, "ProgramNode")},
         )
 
-    def test_individual_query_rdi_id(self) -> None:
+    def test_individual_query_rdi_id(self, _mock: Any) -> None:
         self.create_user_role_with_permissions(
             self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST], self.business_area, self.program1
         )
@@ -199,7 +203,7 @@ class TestFilterIndividualsByProgram(APITestCase):
             },
         )
 
-    def test_individual_query_filter_by_duplicates_only(self) -> None:
+    def test_individual_query_filter_by_duplicates_only(self, _mock: Any) -> None:
         self.create_user_role_with_permissions(
             self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST], self.business_area, self.program1
         )

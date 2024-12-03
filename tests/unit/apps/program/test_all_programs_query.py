@@ -276,7 +276,7 @@ class TestAllProgramsQuery(APITestCase):
         program = Program.objects.get(name="Program with all partners access")
 
         cycle = ProgramCycleFactory(program=program, title="Second CYCLE with total_delivered_quantity_usd")
-        PaymentPlanFactory(program=program, program_cycle=cycle, total_delivered_quantity_usd=999)
+        PaymentPlanFactory(program_cycle=cycle, total_delivered_quantity_usd=999)
 
         self.snapshot_graphql_request(
             request_string=self.ALL_PROGRAMS_QUERY_WITH_PROGRAM_CYCLE_FILTERS,

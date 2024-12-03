@@ -42,7 +42,7 @@ class ProgramCycleFactory(DjangoModelFactory):
         variable_nb_words=True,
         ext_word_list=None,
     )
-    program = factory.SubFactory("program.fixtures.ProgramFactory")
+    program = factory.SubFactory("hct_mis_api.apps.program.fixtures.ProgramFactory")
 
 
 class BeneficiaryGroupFactory(DjangoModelFactory):

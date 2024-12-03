@@ -633,3 +633,10 @@ class CeleryEnabledModel(models.Model):  # pragma: no cover
     @classmethod
     def purge(cls) -> None:
         app.control.purge()
+
+
+class InternalDataFieldModel(models.Model):
+    internal_data = models.JSONField(default=dict)
+
+    class Meta:
+        abstract = True

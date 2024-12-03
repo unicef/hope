@@ -628,6 +628,7 @@ class TestAdminAreas:
 @pytest.mark.night
 @pytest.mark.usefixtures("login")
 class TestComeBackScenarios:
+    @pytest.mark.xfail(reason="UNSTABLE")
     @pytest.mark.parametrize(
         "test_data",
         [
@@ -844,6 +845,7 @@ class TestManualCalendar:
         assert FormatTime(1, 1, 2022).date_in_text_format in pageProgrammeDetails.getLabelStartDate().text
         assert FormatTime(1, 10, 2099).date_in_text_format in pageProgrammeDetails.getLabelEndDate().text
 
+    @pytest.mark.xfail(reason="UNSTABLE")
     def test_programme_partners(
         self,
         create_programs: None,

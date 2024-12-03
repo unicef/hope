@@ -14,7 +14,7 @@ from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.payment.fixtures import CashPlanFactory, PaymentRecordFactory
+from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
@@ -66,22 +66,26 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
             {"size": 1, "business_area": cls.business_area},
             {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe"},
         )
+        cls.household2, cls.individuals2 = create_household(
+            {"size": 1, "business_area": cls.business_area},
+            {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe second Individual"},
+        )
         cls.program = ProgramFactory(status=Program.ACTIVE, business_area=cls.business_area)
         cls.update_partner_access_to_program(partner, cls.program)
 
-        cash_plan = CashPlanFactory(program=cls.program, business_area=cls.business_area)
-        cls.payment_record = PaymentRecordFactory(
+        payment_plan = PaymentPlanFactory(program_cycle=cls.program.cycles.first(), business_area=cls.business_area)
+        cls.payment = PaymentFactory(
             household=cls.household,
-            full_name=cls.individuals[0].full_name,
+            collector=cls.individuals[0],
             business_area=cls.business_area,
-            parent=cash_plan,
+            parent=payment_plan,
             currency="PLN",
         )
-        cls.second_payment_record = PaymentRecordFactory(
-            household=cls.household,
-            full_name=f"{cls.individuals[0].full_name} second Individual",
+        cls.second_payment = PaymentFactory(
+            household=cls.household2,
+            collector=cls.individuals2[0],
             business_area=cls.business_area,
-            parent=cash_plan,
+            parent=payment_plan,
             currency="PLN",
         )
         super().setUpTestData()
@@ -101,7 +105,7 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
         input_data = self._create_variables(
             household=self.id_to_base64(self.household.id, "HouseholdNode"),
             individual=self.id_to_base64(self.individuals[0].id, "IndividualNode"),
-            payment_records=[self.id_to_base64(self.payment_record.id, "PaymentRecordNode")],
+            payment_records=[self.id_to_base64(self.payment.id, "PaymentNode")],
         )
 
         self.snapshot_graphql_request(
@@ -110,15 +114,15 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
             variables=input_data,
         )
 
-    def test_create_a_ticket_per_payment_record(self) -> None:
+    def test_create_a_ticket_per_payment(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.business_area)
 
         input_data = self._create_variables(
             household=self.id_to_base64(self.household.id, "HouseholdNode"),
             individual=self.id_to_base64(self.individuals[0].id, "IndividualNode"),
             payment_records=[
-                self.id_to_base64(self.payment_record.id, "PaymentRecordNode"),
-                self.id_to_base64(self.second_payment_record.id, "PaymentRecordNode"),
+                self.id_to_base64(self.payment.id, "PaymentNode"),
+                self.id_to_base64(self.second_payment.id, "PaymentNode"),
             ],
         )
 
@@ -169,8 +173,8 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
             household=self.id_to_base64(self.household.id, "HouseholdNode"),
             individual=self.id_to_base64(self.individuals[0].id, "IndividualNode"),
             payment_records=[
-                self.id_to_base64(self.payment_record.id, "PaymentRecordNode"),
-                self.id_to_base64(self.second_payment_record.id, "PaymentRecordNode"),
+                self.id_to_base64(self.payment.id, "PaymentNode"),
+                self.id_to_base64(self.second_payment.id, "PaymentNode"),
             ],
         )
 
@@ -194,7 +198,7 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
 
         input_data = self._create_variables(
             individual=self.id_to_base64(self.individuals[0].id, "IndividualNode"),
-            payment_records=[self.id_to_base64(self.payment_record.id, "PaymentRecordNode")],
+            payment_records=[self.id_to_base64(self.payment.id, "PaymentNode")],
         )
 
         self.snapshot_graphql_request(
@@ -217,7 +221,7 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
 
         input_data = self._create_variables(
             household=self.id_to_base64(self.household.id, "HouseholdNode"),
-            payment_records=[self.id_to_base64(self.payment_record.id, "PaymentRecordNode")],
+            payment_records=[self.id_to_base64(self.payment.id, "PaymentNode")],
         )
 
         self.snapshot_graphql_request(

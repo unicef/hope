@@ -72,7 +72,7 @@ snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket
                             'fullName': 'John Doe'
                         },
                         'paymentRecord': {
-                            'fullName': 'John Doe second Individual'
+                            'fullName': 'John Doe Second Individual'
                         }
                     }
                 },
@@ -91,7 +91,7 @@ snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket
                             'fullName': 'John Doe'
                         },
                         'paymentRecord': {
-                            'fullName': 'John Doe second Individual'
+                            'fullName': 'John Doe Second Individual'
                         }
                     }
                 }
