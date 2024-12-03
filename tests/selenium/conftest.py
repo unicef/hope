@@ -123,8 +123,6 @@ def pytest_configure(config) -> None:  # type: ignore
     settings.SCREENSHOT_DIRECTORY = f"{settings.REPORT_DIRECTORY}/screenshot"
     if not os.path.exists(settings.SCREENSHOT_DIRECTORY):
         os.makedirs(settings.SCREENSHOT_DIRECTORY)
-    print("settings.SCREENSHOT_DIRECTORY", settings.SCREENSHOT_DIRECTORY)
-    print("*" * 70)
 
     for file in os.listdir(settings.SCREENSHOT_DIRECTORY):
         os.remove(os.path.join(settings.SCREENSHOT_DIRECTORY, file))
@@ -138,7 +136,7 @@ def pytest_configure(config) -> None:  # type: ignore
 
     settings.EXCHANGE_RATE_CACHE_EXPIRY = 0
     settings.USE_DUMMY_EXCHANGE_RATES = True
-
+    settings.DATABASES["read_only"]["TEST"] = {"MIRROR": "default"}
     settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
     settings.CSRF_COOKIE_SECURE = False
     settings.CSRF_COOKIE_HTTPONLY = False
@@ -211,8 +209,18 @@ def create_session(host: str, username: str, password: str, csrf: str = "") -> o
     return pytest.session
 
 
-@pytest.fixture
-def driver() -> Chrome:
+@pytest.fixture(scope="session")
+def download_path(worker_id: str) -> str:
+    try:
+        worker_id = worker_id
+        assert worker_id is not None
+        yield f"{settings.DOWNLOAD_DIRECTORY}/{worker_id}"
+    except BaseException:
+        yield settings.DOWNLOAD_DIRECTORY
+
+
+@pytest.fixture(scope="session")
+def driver(download_path: str) -> Chrome:
     chrome_options = Options()
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
@@ -222,26 +230,51 @@ def driver() -> Chrome:
     chrome_options.add_argument("--disable-notifications")
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--window-size=1920,1080")
-    if not os.path.exists(settings.DOWNLOAD_DIRECTORY):
-        os.makedirs(settings.DOWNLOAD_DIRECTORY)
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    try:
+        os.makedirs(download_path)
+    except FileExistsError:
+        pass
     prefs = {
-        "download.default_directory": settings.DOWNLOAD_DIRECTORY,
+        "download.default_directory": download_path,
     }
     chrome_options.add_experimental_option("prefs", prefs)
     driver = webdriver.Chrome(options=chrome_options)
     yield driver
+    # try:
+    #     shutil.rmtree(download_path)
+    # except FileNotFoundError:
+    #     pass
 
 
-@pytest.fixture(autouse=True)
-def browser(driver: Chrome) -> Chrome:
-    driver.live_server = LiveServer("localhost")
-    yield driver
-    driver.quit()
+@pytest.fixture(scope="session")
+def live_server() -> LiveServer:
+    yield LiveServer("localhost")
+
+
+@pytest.fixture(autouse=True, scope="session")
+def browser(driver: Chrome, live_server: LiveServer) -> Chrome:
+    try:
+        driver.live_server = live_server
+        yield driver
+    finally:
+        driver.quit()
 
 
 @pytest.fixture
 def login(browser: Chrome) -> Chrome:
     browser.get(f"{browser.live_server.url}/api/unicorn/")
+
+    browser.execute_script(  # type: ignore
+        """
+    window.indexedDB.databases().then(dbs => dbs.forEach(db => {
+        console.log('Deleting database:', db.name);
+        indexedDB.deleteDatabase(db.name);
+    }));
+    window.localStorage.clear();
+    window.sessionStorage.clear();
+    """
+    )
     login = "id_username"
     password = "id_password"
     loginButton = '//*[@id="login-form"]/div[3]/input'
@@ -255,6 +288,9 @@ def login(browser: Chrome) -> Chrome:
     browser.find_element(By.ID, password).send_keys("testtest2")
     browser.find_element(By.XPATH, loginButton).click()
     browser.get(f"{browser.live_server.url}/")
+    from django.core.cache import cache
+
+    cache.clear()
     yield browser
 
 
@@ -493,38 +529,47 @@ def business_area() -> BusinessArea:
 
 
 @pytest.fixture
+def clear_downloaded_files(download_path: str) -> None:
+    for file in os.listdir(download_path):
+        os.remove(os.path.join(download_path, file))
+    yield
+    for file in os.listdir(download_path):
+        os.remove(os.path.join(download_path, file))
+
+
+@pytest.fixture
 def change_super_user(business_area: BusinessArea) -> None:
     user = User.objects.filter(email="test@example.com").first()
     user.partner = Partner.objects.get(name="UNHCR")
     user.partner.allowed_business_areas.add(business_area)
     user.save()
+    yield user
 
 
 @pytest.fixture(autouse=True)
 def create_super_user(business_area: BusinessArea) -> User:
     Partner.objects.get_or_create(name="TEST")
-    Partner.objects.get_or_create(name="UNICEF")
+    partner, _ = Partner.objects.get_or_create(name="UNICEF")
     Partner.objects.get_or_create(name="UNHCR")
-
-    partner = Partner.objects.get(name="UNICEF")
 
     permission_list = [role.value for role in Permissions]
 
     role, _ = Role.objects.update_or_create(name="Role", defaults={"permissions": permission_list})
-
-    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json", verbosity=0)
+    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data_small.json", verbosity=0)
     country = Country.objects.get(name="Afghanistan")
     business_area.countries.add(country)
-    user = UserFactory.create(
-        pk="4196c2c5-c2dd-48d2-887f-3a9d39e78916",
-        is_superuser=True,
-        is_staff=True,
-        username="superuser",
-        password="testtest2",
-        email="test@example.com",
-        partner=partner,
-    )
-    RoleAssignment.objects.create(
+
+    if not (user := User.objects.filter(pk="4196c2c5-c2dd-48d2-887f-3a9d39e78916").first()):
+        user = UserFactory(
+            pk="4196c2c5-c2dd-48d2-887f-3a9d39e78916",
+            is_superuser=True,
+            is_staff=True,
+            username="superuser",
+            password="testtest2",
+            email="test@example.com",
+            partner=partner,
+        )
+    RoleAssignment.objects.get_or_create(
         user=user,
         role=Role.objects.get(name="Role"),
         business_area=business_area,
@@ -637,7 +682,9 @@ def test_failed_check(request: FixtureRequest, browser: Chrome) -> None:
 def screenshot(driver: Chrome, node_id: str) -> None:
     if not os.path.exists(settings.SCREENSHOT_DIRECTORY):
         os.makedirs(settings.SCREENSHOT_DIRECTORY)
-    file_name = f'{node_id}_{datetime.today().strftime("%Y-%m-%d_%H.%M")}.png'.replace("/", "_").replace("::", "__")
+    file_name = f'{node_id.split("::")[-1]}_{datetime.today().strftime("%Y-%m-%d_%H.%M")}.png'.replace(
+        "/", "_"
+    ).replace("::", "__")
     file_path = os.path.join(settings.SCREENSHOT_DIRECTORY, file_name)
     driver.get_screenshot_as_file(file_path)
     attach(data=driver.get_screenshot_as_png())

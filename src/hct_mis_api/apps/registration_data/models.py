@@ -15,6 +15,8 @@ from django.utils.translation import gettext_lazy as _
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import (
+    DUPLICATE,
+    NEEDS_ADJUDICATION,
     Household,
     Individual,
     PendingHousehold,
@@ -241,19 +243,16 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
     def biometric_deduplication_enabled(self) -> bool:
         return self.program.biometric_deduplication_enabled
 
-    def update_needs_adjudication_tickets_statistic(self) -> None:
-        from hct_mis_api.apps.grievance.models import GrievanceTicket
-
-        # AB#201950
-        self.golden_record_possible_duplicates = (
-            self.grievanceticket_set.filter(
-                category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
-                registration_data_import=self,
-            )
-            .exclude(status=GrievanceTicket.STATUS_CLOSED)
-            .count()
-        )
-        self.save(update_fields=["golden_record_possible_duplicates"])
+    def update_duplicates_against_population_statistics(self) -> None:
+        self.golden_record_duplicates = Individual.objects.filter(
+            registration_data_import_id=self.id,
+            deduplication_golden_record_status=DUPLICATE,
+        ).count()
+        self.golden_record_possible_duplicates = Individual.objects.filter(
+            registration_data_import_id=self.id,
+            deduplication_golden_record_status=NEEDS_ADJUDICATION,
+        ).count()
+        self.save(update_fields=["golden_record_duplicates", "golden_record_possible_duplicates"])
 
     def bulk_update_household_size(self) -> None:
         # AB#208387
@@ -427,11 +426,13 @@ class DeduplicationEngineSimilarityPair(models.Model):
     def serialize_for_ticket(self) -> Dict[str, Any]:
         return {
             "individual1": {
+                "id": str(self.individual1.id),
                 "unicef_id": str(self.individual1.unicef_id),
                 "full_name": self.individual1.full_name,
                 "photo_name": str(self.individual1.photo.name) if self.individual1.photo else None,
             },
             "individual2": {
+                "id": str(self.individual2.id),
                 "unicef_id": str(self.individual2.unicef_id),
                 "full_name": self.individual2.full_name,
                 "photo_name": str(self.individual2.photo.name) if self.individual2.photo else None,

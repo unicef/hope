@@ -2,7 +2,6 @@ from base64 import b64decode
 from typing import Any, List
 from uuid import UUID
 
-from django.contrib.contenttypes.models import ContentType
 from django.db.models import Case, Count, IntegerField, Q, QuerySet, Value, When
 from django.db.models.functions import Lower
 from django.shortcuts import get_object_or_404
@@ -21,14 +20,11 @@ from django_filters import (
 )
 
 from hct_mis_api.apps.activity_log.schema import LogEntryFilter
-from hct_mis_api.apps.core.querysets import ExtendedQuerySetSequence
 from hct_mis_api.apps.core.utils import (
     CustomOrderingFilter,
     decode_id_string,
     decode_id_string_required,
-    is_valid_uuid,
 )
-from hct_mis_api.apps.household.models import ROLE_NO_ROLE
 from hct_mis_api.apps.payment.models import (
     CashPlan,
     DeliveryMechanism,
@@ -36,7 +32,6 @@ from hct_mis_api.apps.payment.models import (
     FinancialServiceProviderXlsxTemplate,
     Payment,
     PaymentPlan,
-    PaymentRecord,
     PaymentVerification,
     PaymentVerificationPlan,
     PaymentVerificationSummary,
@@ -54,46 +49,6 @@ class PaymentOrderingFilter(OrderingFilter):
         return super().filter(qs, value)
 
 
-class PaymentRecordFilter(FilterSet):
-    individual = CharFilter(method="individual_filter")
-    business_area = CharFilter(field_name="business_area__slug")
-    program_id = CharFilter(method="filter_by_program_id")
-
-    class Meta:
-        fields = (
-            "parent",
-            "household",
-        )
-        model = PaymentRecord
-
-    order_by = CustomOrderingFilter(
-        fields=(
-            "ca_id",
-            "status",
-            Lower("name"),
-            "status_date",
-            Lower("head_of_household__full_name"),
-            "total_person_covered",
-            "distribution_modality",
-            "household__unicef_id",
-            "household__size",
-            "household__admin2__name",
-            "entitlement_quantity",
-            "delivered_quantity",
-            "delivered_quantity_usd",
-            "delivery_date",
-        )
-    )
-
-    def individual_filter(self, qs: "QuerySet", name: str, value: UUID) -> "QuerySet[PaymentRecord]":
-        if is_valid_uuid(str(value)):
-            return qs.exclude(household__individuals_and_roles__role=ROLE_NO_ROLE)
-        return qs
-
-    def filter_by_program_id(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[PaymentRecord]":
-        return qs.filter(parent__program_id=decode_id_string_required(value))
-
-
 class PaymentVerificationFilter(FilterSet):
     payment_plan_id = CharFilter(method="payment_plan_filter")
     search = CharFilter(method="search_filter")
@@ -107,7 +62,6 @@ class PaymentVerificationFilter(FilterSet):
     order_by = OrderingFilter(
         fields=(
             "payment__unicef_id",
-            "payment_record__ca_id",
             "payment_verification_plan__verification_channel",
             "payment_verification_plan__unicef_id",
             "status",
@@ -126,7 +80,6 @@ class PaymentVerificationFilter(FilterSet):
         q_obj = Q()
         for value in values:
             q_obj |= Q(payment__unicef_id__istartswith=value)
-            q_obj |= Q(payment_record__ca_id__istartswith=value)
             q_obj |= Q(payment_verification_plan__unicef_id__istartswith=value)
             q_obj |= Q(received_amount__istartswith=value)
             q_obj |= Q(payment__household__unicef_id__istartswith=value)
@@ -136,23 +89,13 @@ class PaymentVerificationFilter(FilterSet):
             q_obj |= Q(payment__head_of_household__family_name__istartswith=value)
             q_obj |= Q(payment__head_of_household__phone_no__istartswith=value)
             q_obj |= Q(payment__head_of_household__phone_no_alternative__istartswith=value)
-            q_obj |= Q(payment_record__household__unicef_id__istartswith=value)
-            q_obj |= Q(payment_record__head_of_household__full_name__istartswith=value)
-            q_obj |= Q(payment_record__head_of_household__given_name__istartswith=value)
-            q_obj |= Q(payment_record__head_of_household__middle_name__istartswith=value)
-            q_obj |= Q(payment_record__head_of_household__family_name__istartswith=value)
-            q_obj |= Q(payment_record__head_of_household__phone_no__istartswith=value)
-            q_obj |= Q(payment_record__head_of_household__phone_no_alternative__istartswith=value)
 
         return qs.filter(q_obj)
 
     def payment_plan_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         node_name, obj_id = b64decode(value).decode().split(":")
-        # content type for PaymentPlan or CashPlan
-        ct_id = ContentType.objects.filter(app_label="payment", model=node_name[:-4].lower()).first().pk
         return qs.filter(
-            payment_verification_plan__payment_plan_object_id=obj_id,
-            payment_verification_plan__payment_plan_content_type_id=ct_id,
+            payment_verification_plan__payment_plan_id=obj_id,
         )
 
     def business_area_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
@@ -195,7 +138,7 @@ class PaymentVerificationLogEntryFilter(LogEntryFilter):
         object_type = cleaned_data.get("object_type")
         object_id = cleaned_data.get("object_id")
         plan_object = (PaymentPlan if object_type == self.PLAN_TYPE_PAYMENT else CashPlan).objects.get(pk=object_id)
-        verifications_ids = plan_object.payment_verification_plan.all().values_list("pk", flat=True)
+        verifications_ids = plan_object.payment_verification_plans.all().values_list("pk", flat=True)
         return queryset.filter(object_id__in=verifications_ids)
 
     def object_id_filter(self, qs: QuerySet, name: str, value: UUID) -> QuerySet:
@@ -249,62 +192,6 @@ class FinancialServiceProviderFilter(FilterSet):
     )
 
 
-class CashPlanFilter(FilterSet):
-    search = CharFilter(method="search_filter")
-    delivery_type = MultipleChoiceFilter(field_name="delivery_type", choices=DeliveryMechanism.get_choices())
-    verification_status = MultipleChoiceFilter(
-        field_name="payment_verification_summary__status", choices=PaymentVerificationPlan.STATUS_CHOICES
-    )
-    business_area = CharFilter(
-        field_name="business_area__slug",
-    )
-
-    class Meta:
-        fields = {
-            "program": ["exact"],
-            "assistance_through": ["exact", "startswith"],
-            "service_provider__full_name": ["exact", "startswith"],
-            "start_date": ["exact", "lte", "gte"],
-            "end_date": ["exact", "lte", "gte"],
-            "business_area": ["exact"],
-        }
-        model = CashPlan
-
-    order_by = OrderingFilter(
-        fields=(
-            "ca_id",
-            "status",
-            "total_number_of_hh",
-            "total_entitled_quantity",
-            ("payment_verification_summary__status", "verification_status"),
-            "total_persons_covered",
-            "total_delivered_quantity",
-            "total_undelivered_quantity",
-            "dispersion_date",
-            "assistance_measurement",
-            "assistance_through",
-            "delivery_type",
-            "start_date",
-            "end_date",
-            "program__name",
-            "id",
-            "updated_at",
-            "service_provider__full_name",
-        )
-    )
-
-    def filter_queryset(self, queryset: QuerySet) -> QuerySet:
-        queryset = queryset.annotate(total_number_of_hh=Count("payment_items"))
-        return super().filter_queryset(queryset)
-
-    def search_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
-        values = value.split(" ")
-        q_obj = Q()
-        for value in values:
-            q_obj |= Q(ca_id__istartswith=value)
-        return qs.filter(q_obj)
-
-
 class PaymentPlanFilter(FilterSet):
     business_area = CharFilter(field_name="business_area__slug", required=True)
     search = CharFilter(method="search_filter")
@@ -351,7 +238,7 @@ class PaymentPlanFilter(FilterSet):
         return PaymentPlan.objects.filter(source_payment_plan_id=decode_id_string(value))
 
     def filter_by_program(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[PaymentPlan]":
-        return qs.filter(program_id=decode_id_string_required(value))
+        return qs.filter(program_cycle__program_id=decode_id_string_required(value))
 
     def filter_by_program_cycle(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[PaymentPlan]":
         return qs.filter(program_cycle_id=decode_id_string_required(value))
@@ -417,7 +304,7 @@ class PaymentFilter(FilterSet):
         return qs.filter(parent__program_cycle__program_id=decode_id_string_required(value))
 
 
-def cash_plan_and_payment_plan_filter(queryset: ExtendedQuerySetSequence, **kwargs: Any) -> ExtendedQuerySetSequence:
+def payment_plan_filter(queryset: QuerySet[PaymentPlan], **kwargs: Any) -> QuerySet[PaymentPlan]:
     business_area = kwargs.get("business_area")
     program = kwargs.get("program")
     service_provider = kwargs.get("service_provider")
@@ -430,7 +317,7 @@ def cash_plan_and_payment_plan_filter(queryset: ExtendedQuerySetSequence, **kwar
         queryset = queryset.filter(business_area__slug=business_area)
 
     if program:
-        queryset = queryset.filter(program=decode_id_string(program))
+        queryset = queryset.filter(program_cycle__program=decode_id_string(program))
 
     if start_date_gte:
         queryset = queryset.filter(start_date__gte=start_date_gte)
@@ -459,14 +346,14 @@ def cash_plan_and_payment_plan_filter(queryset: ExtendedQuerySetSequence, **kwar
     return queryset
 
 
-def cash_plan_and_payment_plan_ordering(queryset: ExtendedQuerySetSequence, order_by: str) -> List[Any]:
+def payment_plan_ordering(queryset: QuerySet[PaymentPlan], order_by: str) -> QuerySet[PaymentPlan]:
     reverse = "-" if order_by.startswith("-") else ""
     order_by = order_by[1:] if reverse else order_by
 
     if order_by == "verification_status":
         qs = queryset.order_by(reverse + "custom_order")
     elif order_by == "unicef_id":
-        qs = sorted(queryset, key=lambda o: o.get_unicef_id, reverse=bool(reverse))
+        qs = queryset.order_by(reverse + "unicef_id")
     elif order_by == "dispersion_date":
         # TODO this field is empty at the moment
         qs = queryset
@@ -475,10 +362,10 @@ def cash_plan_and_payment_plan_ordering(queryset: ExtendedQuerySetSequence, orde
     else:
         qs = queryset.order_by(reverse + order_by)
 
-    return list(qs)
+    return qs
 
 
-def payment_record_and_payment_filter(queryset: ExtendedQuerySetSequence, **kwargs: Any) -> ExtendedQuerySetSequence:
+def payment_filter(queryset: QuerySet[Payment], **kwargs: Any) -> QuerySet[Payment]:
     business_area = kwargs.get("business_area")
     household = kwargs.get("household")
     program = kwargs.get("program")
@@ -490,25 +377,27 @@ def payment_record_and_payment_filter(queryset: ExtendedQuerySetSequence, **kwar
         queryset = queryset.filter(household__id=decode_id_string(household))
 
     if program:
-        queryset = queryset.filter(parent__program=decode_id_string(program))
+        queryset = queryset.filter(parent__program_cycle__program=decode_id_string(program))
 
     return queryset
 
 
-def payment_record_and_payment_ordering(queryset: ExtendedQuerySetSequence, order_by: str) -> List[Any]:
+def payment_ordering(queryset: QuerySet[Payment], order_by: str) -> QuerySet[Payment]:
     reverse = "-" if order_by.startswith("-") else ""
     order_by = order_by[1:] if reverse else order_by
 
     if order_by == "ca_id":
-        qs = sorted(queryset, key=lambda o: o.get_unicef_id, reverse=bool(reverse))
+        qs = queryset.order_by(reverse + "unicef_id")
     elif order_by in ("head_of_household", "entitlement_quantity", "delivered_quantity", "delivery_date"):
         order_by_dict = {f"{order_by}__isnull": True}
-        qs_null = list(queryset.filter(**order_by_dict))
+        qs_null = queryset.filter(**order_by_dict)
+        qs_non_null = queryset.exclude(**order_by_dict)
+
         if reverse:
-            qs = list(queryset.exclude(**order_by_dict).order_by(f"-{order_by}")) + qs_null
+            qs = qs_non_null.order_by(f"-{order_by}").union(qs_null)
         else:
-            qs = qs_null + list(queryset.exclude(**order_by_dict).order_by(order_by))
+            qs = qs_null.union(qs_non_null.order_by(order_by))
     else:
         qs = queryset.order_by(reverse + order_by)
 
-    return list(qs)
+    return qs

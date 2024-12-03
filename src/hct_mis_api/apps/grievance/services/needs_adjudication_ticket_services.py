@@ -12,7 +12,7 @@ from hct_mis_api.apps.grievance.models import (
 )
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 from hct_mis_api.apps.grievance.services.reassign_roles_services import (
-    reassign_roles_on_disable_individual_service,
+    reassign_roles_on_marking_as_duplicate_individual_service,
 )
 from hct_mis_api.apps.grievance.signals import (
     individual_marked_as_distinct,
@@ -43,7 +43,6 @@ from hct_mis_api.apps.utils.elasticsearch_utils import (
 if TYPE_CHECKING:
     from hct_mis_api.apps.program.models import Program
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -65,39 +64,22 @@ def _clear_deduplication_individuals_fields(individuals: Sequence[Individual]) -
     )
 
 
-def close_needs_adjudication_old_ticket(ticket_details: TicketNeedsAdjudicationDetails, user: AbstractUser) -> None:
-    both_individuals = (ticket_details.golden_records_individual, ticket_details.possible_duplicate)
-    need_reassign_roles = not ticket_details.ticket.has_social_worker_program
-
-    if ticket_details.selected_individual is None:
-        _clear_deduplication_individuals_fields(both_individuals)
-    else:
-        individual_to_remove = ticket_details.selected_individual
-        unique_individuals = [individual for individual in both_individuals if individual.id != individual_to_remove.id]
-        mark_as_duplicate_individual_and_reassign_roles(
-            ticket_details, individual_to_remove, user, need_reassign_roles, unique_individuals[0]
-        )
-        _clear_deduplication_individuals_fields(unique_individuals)
-
-
 def close_needs_adjudication_new_ticket(ticket_details: TicketNeedsAdjudicationDetails, user: AbstractUser) -> None:
     validate_all_individuals_before_close_needs_adjudication(ticket_details)
 
     distinct_individuals = ticket_details.selected_distinct.all()
     duplicate_individuals = ticket_details.selected_individuals.all()
-
     if duplicate_individuals:
-        # need this boolean just to run reassign roles once
-        # for multiple Individuals it will call each time and got 404 for IndividualRoleInHousehold
-        # and only for non-social worker program
-        need_reassign_roles = not ticket_details.ticket.has_social_worker_program
         for individual_to_remove in duplicate_individuals:
-            mark_as_duplicate_individual_and_reassign_roles(
-                ticket_details, individual_to_remove, user, need_reassign_roles
+            unique_individual = None
+            household = individual_to_remove.household
+            mark_as_duplicate_individual(
+                individual_to_remove, unique_individual, household, user, ticket_details.ticket.programs.all()
             )
-            need_reassign_roles = False
         _clear_deduplication_individuals_fields(duplicate_individuals)
-
+        reassign_roles_on_marking_as_duplicate_individual_service(
+            ticket_details.role_reassign_data, user, duplicate_individuals
+        )
     if distinct_individuals:
         for individual_to_distinct in distinct_individuals:
             mark_as_distinct_individual(individual_to_distinct, user, ticket_details.ticket.programs.all())
@@ -127,12 +109,9 @@ def close_needs_adjudication_ticket_service(grievance_ticket: GrievanceTicket, u
     if not ticket_details:
         return
 
-    if ticket_details.is_multiple_duplicates_version:
-        selected_duplicates = ticket_details.selected_individuals.all()
-        traverse_sibling_tickets(grievance_ticket, selected_duplicates)
-        close_needs_adjudication_new_ticket(ticket_details, user)
-    else:
-        close_needs_adjudication_old_ticket(ticket_details, user)
+    selected_duplicates = ticket_details.selected_individuals.all()
+    traverse_sibling_tickets(grievance_ticket, selected_duplicates)
+    close_needs_adjudication_new_ticket(ticket_details, user)
 
 
 def _get_min_max_score(golden_records: List[Dict]) -> Tuple[float, float]:
@@ -301,31 +280,6 @@ def create_needs_adjudication_tickets_for_biometrics(
 
     for ticket in new_tickets:
         ticket.linked_tickets.set([t for t in new_tickets if t != ticket])
-
-
-def mark_as_duplicate_individual_and_reassign_roles(
-    ticket_details: TicketNeedsAdjudicationDetails,
-    individual_to_remove: Individual,
-    user: AbstractUser,
-    need_reassign_roles: bool = True,
-    unique_individual: Optional[Individual] = None,
-) -> None:
-    household = individual_to_remove.household
-    if ticket_details.is_multiple_duplicates_version and need_reassign_roles:
-        reassign_roles_on_disable_individual_service(
-            individual_to_remove,
-            ticket_details.role_reassign_data,
-            user,
-            ticket_details.ticket.programs.all(),
-            "new_individual",
-        )
-    elif need_reassign_roles:
-        reassign_roles_on_disable_individual_service(
-            individual_to_remove, ticket_details.role_reassign_data, user, ticket_details.ticket.programs.all()
-        )
-    mark_as_duplicate_individual(
-        individual_to_remove, unique_individual, household, user, ticket_details.ticket.programs.all()
-    )
 
 
 def mark_as_duplicate_individual(

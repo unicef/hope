@@ -14,6 +14,7 @@ from django.db.models.constraints import UniqueConstraint
 from django.utils.text import Truncator
 from django.utils.translation import gettext_lazy as _
 
+from model_utils import Choices
 from model_utils.models import SoftDeletableModel
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
@@ -21,10 +22,16 @@ from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldF
 from hct_mis_api.apps.core.field_attributes.fields_types import Scope
 from hct_mis_api.apps.core.models import StorageFile
 from hct_mis_api.apps.core.utils import map_unicef_ids_to_households_unicef_ids
-from hct_mis_api.apps.household.models import Household
+from hct_mis_api.apps.household.models import (
+    ROLE_PRIMARY,
+    Household,
+    Individual,
+    IndividualRoleInHousehold,
+)
 from hct_mis_api.apps.steficon.models import Rule, RuleCommit
 from hct_mis_api.apps.targeting.choices import FlexFieldClassification
 from hct_mis_api.apps.targeting.services.targeting_service import (
+    TargetingCollectorRuleFilterBlockBase,
     TargetingCriteriaFilterBase,
     TargetingCriteriaQueryingBase,
     TargetingCriteriaRuleQueryingBase,
@@ -216,6 +223,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         help_text="Written by a tool such as Corticon.",
         blank=True,
     )
+
     excluded_ids = models.TextField(blank=True)
     exclusion_reason = models.TextField(blank=True)
 
@@ -244,7 +252,6 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         null=True,
     )
 
-    # TODO: move to StorageFile
     storage_file = models.OneToOneField(StorageFile, blank=True, null=True, on_delete=models.SET_NULL)
 
     @property
@@ -280,6 +287,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
 
     @property
     def has_empty_ids_criteria(self) -> bool:
+        # TODO: update
         return not bool(self.targeting_criteria.household_ids) and not bool(self.targeting_criteria.individual_ids)
 
     @property
@@ -374,7 +382,9 @@ class TargetingCriteria(TimeStampedUUIDModel, TargetingCriteriaQueryingBase):
         default=False,
         help_text=_("Exclude households with individuals (members or collectors) on sanction list."),
     )
+    # TODO: deprecated and move 'TargetingCriteriaRule'
     household_ids = models.TextField(blank=True)
+    # TODO: deprecated and move 'TargetingCriteriaRule'
     individual_ids = models.TextField(blank=True)
 
     def get_rules(self) -> "QuerySet":
@@ -416,12 +426,34 @@ class TargetingCriteriaRule(TimeStampedUUIDModel, TargetingCriteriaRuleQueryingB
         related_name="rules",
         on_delete=models.CASCADE,
     )
+    household_ids = models.TextField(blank=True)
+    individual_ids = models.TextField(blank=True)
 
     def get_filters(self) -> "QuerySet":
         return self.filters.all()
 
     def get_individuals_filters_blocks(self) -> "QuerySet":
         return self.individuals_filters_blocks.all()
+
+    def get_collectors_filters_blocks(self) -> "QuerySet":
+        return self.collectors_filters_blocks.all()
+
+    def get_query(self) -> Q:
+        query = super().get_query()
+
+        q_hh_ids = Q(unicef_id__in=self.household_ids.split(", "))
+        q_ind_ids = Q(individuals__unicef_id__in=self.individual_ids.split(", "))
+
+        if self.household_ids and self.individual_ids:
+            query &= Q(q_hh_ids | q_ind_ids)
+            return query
+
+        if self.household_ids:
+            query &= q_hh_ids
+        if self.individual_ids:
+            query &= q_ind_ids
+
+        return query
 
 
 class TargetingIndividualRuleFilterBlock(
@@ -524,3 +556,68 @@ class TargetingIndividualBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteria
 
     def get_lookup_prefix(self, associated_with: Any) -> str:
         return ""
+
+
+class TargetingCollectorRuleFilterBlock(
+    TimeStampedUUIDModel,
+    TargetingCollectorRuleFilterBlockBase,
+):
+    targeting_criteria_rule = models.ForeignKey(
+        "TargetingCriteriaRule",
+        on_delete=models.CASCADE,
+        related_name="collectors_filters_blocks",
+    )
+
+
+class TargetingCollectorBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterBase):
+    """
+    This is one field like 'bank_account_number__transfer_to_account' - YES, NO
+    """
+
+    collector_block_filters = models.ForeignKey(
+        "TargetingCollectorRuleFilterBlock",
+        related_name="collector_block_filters",
+        on_delete=models.CASCADE,
+    )
+    field_name = models.CharField(max_length=120)
+    comparison_method = models.CharField(
+        max_length=20,
+        choices=Choices(("EQUALS", _("Equals"))),
+    )
+    flex_field_classification = models.CharField(
+        max_length=20,
+        choices=FlexFieldClassification.choices,
+        default=FlexFieldClassification.NOT_FLEX_FIELD,
+    )
+    arguments = JSONField(
+        help_text="""
+                Array of arguments
+                """
+    )
+
+    def get_query(self) -> Q:
+        program = self.collector_block_filters.targeting_criteria_rule.targeting_criteria.target_population.program
+        argument = self.arguments[0] if len(self.arguments) else None
+        if argument is None:
+            return Q()
+
+        collector_primary_qs = IndividualRoleInHousehold.objects.filter(
+            household__program=program, role=ROLE_PRIMARY
+        ).values_list("individual", flat=True)
+
+        collectors_ind_query = Individual.objects.filter(
+            pk__in=list(collector_primary_qs),
+        )
+        # If argument is Yes
+        if argument.lower() == "yes":
+            individuals_with_field_query = collectors_ind_query.filter(
+                delivery_mechanisms_data__data__has_key=self.field_name,
+                delivery_mechanisms_data__is_valid=True,
+            )
+        # If argument is No
+        else:
+            individuals_with_field_query = collectors_ind_query.exclude(
+                delivery_mechanisms_data__data__has_key=self.field_name,
+                delivery_mechanisms_data__is_valid=True,
+            )
+        return Q(pk__in=list(individuals_with_field_query.values_list("household_id", flat=True)))

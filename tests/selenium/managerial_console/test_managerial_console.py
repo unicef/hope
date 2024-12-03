@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 from django.utils import timezone
 
@@ -7,12 +8,12 @@ from dateutil.relativedelta import relativedelta
 from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.account.models import User
+from hct_mis_api.apps.account.models import Partner, User
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.payment.fixtures import ApprovalProcessFactory, PaymentPlanFactory
 from hct_mis_api.apps.payment.models import PaymentPlan
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
@@ -23,12 +24,12 @@ from tests.selenium.page_object.managerial_console.managerial_console import (
     ManagerialConsole,
 )
 
-pytestmark = pytest.mark.django_db(transaction=True)
+pytestmark = pytest.mark.django_db()
 
 
 @pytest.fixture
 def create_active_test_program() -> Program:
-    yield create_program("Test Programm")
+    yield create_program("Test Programm", partner=Partner.objects.filter(name="UNHCR").first())
 
 
 @pytest.fixture
@@ -37,7 +38,10 @@ def second_test_program() -> Program:
 
 
 def create_program(
-    name: str, dct_type: str = DataCollectingType.Type.STANDARD, status: str = Program.ACTIVE
+    name: str,
+    dct_type: str = DataCollectingType.Type.STANDARD,
+    status: str = Program.ACTIVE,
+    partner: Optional[Partner] = None,
 ) -> Program:
     BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
     dct = DataCollectingTypeFactory(type=dct_type)
@@ -48,14 +52,17 @@ def create_program(
         data_collecting_type=dct,
         status=status,
     )
+    if partner:
+        program.partners.add(partner.id)
     return program
 
 
 @pytest.fixture
 def create_payment_plan(create_active_test_program: Program, second_test_program: Program) -> PaymentPlan:
+    program_cycle_second = ProgramCycleFactory(program=second_test_program)
     PaymentPlanFactory(
         target_population=TargetPopulationFactory(program=second_test_program),
-        program=second_test_program,
+        program_cycle=program_cycle_second,
         status=PaymentPlan.Status.IN_APPROVAL,
         business_area=BusinessArea.objects.filter(slug="afghanistan").first(),
     )
@@ -67,6 +74,7 @@ def create_payment_plan(create_active_test_program: Program, second_test_program
     )
     tp = TargetPopulation.objects.get(program__name="Test Programm")
     payment_plan = PaymentPlan.objects.update_or_create(
+        name="Test Payment Plan",
         business_area=BusinessArea.objects.only("is_payment_plan_applicable").get(slug="afghanistan"),
         target_population=tp,
         currency="USD",
@@ -75,12 +83,10 @@ def create_payment_plan(create_active_test_program: Program, second_test_program
         status_date=datetime.now(),
         status=PaymentPlan.Status.IN_APPROVAL,
         created_by=User.objects.first(),
-        program=tp.program,
         program_cycle=tp.program.cycles.first(),
         total_delivered_quantity=999,
         total_entitled_quantity=2999,
         is_follow_up=False,
-        program_id=tp.program.id,
     )[0]
     approval_user = UserFactory()
     approval_date = timezone.datetime(2000, 10, 10, tzinfo=timezone.utc)
@@ -111,30 +117,35 @@ class TestSmokeManagerialConsole:
             pageManagerialConsole.getReleaseButton().click()
 
         program = Program.objects.filter(name="Test Programm").first()
+        program_cycle = ProgramCycleFactory(program=program)
         PaymentPlanFactory(
-            program=program,
+            program_cycle=program_cycle,
             status=PaymentPlan.Status.IN_APPROVAL,
             business_area=BusinessArea.objects.filter(slug="afghanistan").first(),
         )
         PaymentPlanFactory(
-            program=program,
+            program_cycle=program_cycle,
             status=PaymentPlan.Status.IN_AUTHORIZATION,
             business_area=BusinessArea.objects.filter(slug="afghanistan").first(),
         )
         PaymentPlanFactory(
-            program=program,
+            program_cycle=program_cycle,
             status=PaymentPlan.Status.IN_REVIEW,
             business_area=BusinessArea.objects.filter(slug="afghanistan").first(),
         )
         PaymentPlanFactory(
-            program=program,
+            program_cycle=program_cycle,
             status=PaymentPlan.Status.ACCEPTED,
             business_area=BusinessArea.objects.filter(slug="afghanistan").first(),
         )
-        pageManagerialConsole.driver.refresh()
+        program.save()
+        program.refresh_from_db()
+        pageManagerialConsole.getMenuUserProfile().click()
+        pageManagerialConsole.getMenuItemClearCache().click()
 
         pageManagerialConsole.getSelectAllApproval()
         pageManagerialConsole.getProgramSelectApproval()
+
         with pytest.raises(Exception):
             pageManagerialConsole.getApproveButton().click()
 

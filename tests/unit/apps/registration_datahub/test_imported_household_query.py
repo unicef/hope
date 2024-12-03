@@ -17,6 +17,8 @@ from hct_mis_api.apps.household.fixtures import (
     PendingHouseholdFactory,
     PendingIndividualFactory,
 )
+from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.models import ProgramPartnerThrough
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
 
@@ -25,8 +27,8 @@ class TestImportedHouseholdQuery(APITestCase):
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     ALL_IMPORTED_HOUSEHOLD_QUERY = """
-    query AllImportedHouseholds{
-      allImportedHouseholds(businessArea: "afghanistan", orderBy: "size") {
+    query allHouseholds{
+      allHouseholds(businessArea: "afghanistan", orderBy: "size", rdiMergeStatus: "PENDING") {
         edges {
           node {
             size
@@ -38,8 +40,8 @@ class TestImportedHouseholdQuery(APITestCase):
     }
     """
     IMPORTED_HOUSEHOLD_QUERY = """
-    query ImportedHousehold($id: ID!) {
-      importedHousehold(id: $id) {
+    query Household($id: ID!) {
+      household(id: $id) {
         size
         countryOrigin
         address
@@ -52,8 +54,14 @@ class TestImportedHouseholdQuery(APITestCase):
         super().setUpTestData()
         call_command("loadbusinessareas")
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
-        cls.partner = PartnerFactory(name="Test1")
+        cls.partner = PartnerFactory(name="TEST1")
         cls.user = UserFactory.create(partner=cls.partner)
+        cls.program = ProgramFactory(name="Program_1", status="ACTIVE")
+        ProgramPartnerThrough.objects.create(
+            program=cls.program,
+            partner=cls.partner,
+            full_area_access=True,
+        )
         sizes_list = (2, 4, 5, 1, 3, 11, 14)
         cls.households = [
             HouseholdFactory(
@@ -61,6 +69,7 @@ class TestImportedHouseholdQuery(APITestCase):
                 address="Lorem Ipsum",
                 country_origin=Country.objects.get(iso_code2="PL"),
                 rdi_merge_status=MergeStatusModel.PENDING,
+                program=cls.program,
             )
             for size in sizes_list
         ]
@@ -85,7 +94,13 @@ class TestImportedHouseholdQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.ALL_IMPORTED_HOUSEHOLD_QUERY,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                },
+            },
         )
 
     @parameterized.expand(
@@ -105,8 +120,14 @@ class TestImportedHouseholdQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.IMPORTED_HOUSEHOLD_QUERY,
-            context={"user": self.user},
-            variables={"id": self.id_to_base64(self.households[0].id, "ImportedHouseholdNode")},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                },
+            },
+            variables={"id": self.id_to_base64(self.households[0].id, "HouseholdNode")},
         )
 
     @parameterized.expand(
@@ -124,7 +145,7 @@ class TestImportedHouseholdQuery(APITestCase):
     def test_imported_household_query(self, field_name: str, value: Any) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.RDI_VIEW_DETAILS], self.business_area)
         country = CountryFactory()
-        hh = PendingHouseholdFactory(country=country, unicef_id="HH-123")
+        hh = PendingHouseholdFactory(country=country, unicef_id="HH-123", program=self.program)
         setattr(hh, field_name, value)
         hh.save()
         ind = PendingIndividualFactory(
@@ -136,19 +157,16 @@ class TestImportedHouseholdQuery(APITestCase):
             phone_no_alternative_valid=True,
             detail_id="test123",
             preferred_language="en",
+            program=self.program,
         )
-        PendingDocumentFactory(
-            individual=ind,
-            country=country,
-            photo="",
-        )
+        PendingDocumentFactory(individual=ind, country=country, photo="", program=self.program)
 
         query = """
-        query ImportedHousehold($id: ID!) {
-          importedHousehold(id: $id) {
+        query household($id: ID!) {
+          household(id: $id) {
             importId
             country
-            individuals {
+            individuals(rdiMergeStatus: "PENDING") {
               edges {
                 node {
                   phoneNo
@@ -174,6 +192,12 @@ class TestImportedHouseholdQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=query,
-            context={"user": self.user},
-            variables={"id": self.id_to_base64(hh.id, "ImportedHouseholdNode")},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                },
+            },
+            variables={"id": self.id_to_base64(hh.id, "HouseholdNode")},
         )

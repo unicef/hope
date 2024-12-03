@@ -18,7 +18,7 @@ export const StyledLink = styled.div`
 `;
 
 interface ImportedHouseholdTableRowProps {
-  isMerged?: boolean;
+  isMerged: boolean;
   household;
   rdi;
 }
@@ -31,12 +31,10 @@ export function ImportedHouseholdTableRow({
   const { baseUrl, businessArea } = useBaseUrl();
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const importedHouseholdPath = `/${baseUrl}/registration-data-import/household/${household.id}`;
-  const mergedHouseholdPath = `/${baseUrl}/population/household/${household.id}`;
-  const url = isMerged ? mergedHouseholdPath : importedHouseholdPath;
+  const householdDetailsPath = `/${baseUrl}/population/household/${household.id}`;
 
   const handleClick = (): void => {
-    navigate(url, {
+    navigate(householdDetailsPath, {
       state: {
         breadcrumbTitle: `Registration Data Import: ${rdi.name}`,
         breadcrumbUrl: `/${businessArea}/registration-data-import/${rdi.id}`,

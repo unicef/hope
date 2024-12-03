@@ -22,7 +22,6 @@ from hct_mis_api.apps.payment.fixtures import (
     FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
-    RealProgramFactory,
     generate_delivery_mechanisms,
 )
 from hct_mis_api.apps.payment.models import (
@@ -30,6 +29,7 @@ from hct_mis_api.apps.payment.models import (
     DeliveryMechanism,
     PaymentPlan,
 )
+from hct_mis_api.apps.program.fixtures import ProgramCycleFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 
 
@@ -96,7 +96,9 @@ class TestActionPaymentPlanMutation(APITestCase):
         )
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
-        cls.payment_plan = PaymentPlanFactory.create(business_area=cls.business_area, program=RealProgramFactory())
+        cls.payment_plan = PaymentPlanFactory.create(
+            business_area=cls.business_area, program_cycle=ProgramCycleFactory()
+        )
         cls.registration_data_import = RegistrationDataImportFactory(business_area=cls.business_area)
         household, individuals = create_household_and_individuals(
             household_data={

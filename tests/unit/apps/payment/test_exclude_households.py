@@ -199,7 +199,6 @@ class TestExcludeHouseholds(APITestCase):
     def test_exclude_payment_error_when_payment_has_hard_conflicts(self) -> None:
         finished_payment_plan = PaymentPlanFactory(
             status=PaymentPlan.Status.FINISHED,
-            program=self.program,
             is_follow_up=False,
             program_cycle=self.program_cycle,
         )
@@ -259,8 +258,8 @@ class TestExcludeHouseholds(APITestCase):
         self.program.data_collecting_type = people_dct
         self.program.save(update_fields=["data_collecting_type"])
         self.payment_plan.background_action_status = PaymentPlan.BackgroundActionStatus.EXCLUDE_BENEFICIARIES
-        self.payment_plan.program = self.program
-        self.payment_plan.save(update_fields=["background_action_status", "program"])
+        self.payment_plan.program_cycle = self.program.cycles.first()
+        self.payment_plan.save(update_fields=["background_action_status", "program_cycle"])
 
         ind_unicef_id_1 = Individual.objects.get(id=self.individual_1.id).unicef_id
         ind_unicef_id_2 = Individual.objects.get(id=self.individual_2.id).unicef_id

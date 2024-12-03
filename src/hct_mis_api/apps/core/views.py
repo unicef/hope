@@ -16,7 +16,6 @@ from graphql.utils import schema_printer
 
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.forms import StorageFileForm
-from hct_mis_api.apps.core.hope_redirect import get_hope_redirect
 from hct_mis_api.apps.core.models import StorageFile
 from hct_mis_api.apps.core.permissions_views_mixins import UploadFilePermissionMixin
 from hct_mis_api.apps.reporting.models import DashboardReport
@@ -60,16 +59,6 @@ def download_dashboard_report(request: HttpRequest, report_id: "UUID") -> Any:
         logger.error("Permission Denied: You need dashboard export permission to access this file")
         raise PermissionDenied("Permission Denied: You need dashboard export permission to access this file")
     return redirect(report.file.url)
-
-
-@login_required
-def hope_redirect(request: HttpRequest) -> HttpResponse:
-    ent = request.GET.get("ent")
-    caid = request.GET.get("caid")
-    sourceid = request.GET.get("sourceid")
-    programid = request.GET.get("programid")
-    hope_redirect = get_hope_redirect(request.user, ent, caid, sourceid, programid)
-    return redirect(hope_redirect.url())
 
 
 class UploadFile(UploadFilePermissionMixin, View):

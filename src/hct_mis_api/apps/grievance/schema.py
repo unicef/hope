@@ -181,8 +181,8 @@ class GrievanceTicketNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObje
     @staticmethod
     def resolve_payment_record(grievance_ticket: GrievanceTicket, info: Any) -> Optional[Any]:
         payment_verification = getattr(grievance_ticket.ticket_details, "payment_verification", None)
-        payment_obj = getattr(grievance_ticket.ticket_details, "payment_obj", None)
-        return getattr(payment_verification, "payment_obj", None) if payment_verification else payment_obj
+        payment_obj = getattr(grievance_ticket.ticket_details, "payment", None)
+        return getattr(payment_verification, "payment", None) if payment_verification else payment_obj
 
     @staticmethod
     def resolve_admin(grievance_ticket: GrievanceTicket, info: Any) -> Optional[str]:
@@ -247,7 +247,7 @@ class TicketComplaintDetailsNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
     def resolve_payment_record(self, info: Any) -> Optional[Any]:
-        return getattr(self, "payment_obj", None)
+        return getattr(self, "payment", None)
 
 
 class TicketSensitiveDetailsNode(DjangoObjectType):
@@ -260,7 +260,7 @@ class TicketSensitiveDetailsNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
     def resolve_payment_record(self, info: Any) -> Optional[Any]:
-        return getattr(self, "payment_obj", None)
+        return getattr(self, "payment", None)
 
 
 class TicketIndividualDataUpdateDetailsNode(DjangoObjectType):
@@ -548,6 +548,9 @@ class Query(graphene.ObjectType):
     )
     all_add_individuals_fields_attributes = graphene.List(FieldAttributeNode, description="All field datatype meta.")
     all_edit_household_fields_attributes = graphene.List(FieldAttributeNode, description="All field datatype meta.")
+    all_edit_people_fields_attributes = graphene.List(
+        FieldAttributeNode, description="All field datatype meta for People."
+    )
     grievance_ticket_status_choices = graphene.List(ChoiceObject)
     grievance_ticket_category_choices = graphene.List(ChoiceObject)
     grievance_ticket_manual_category_choices = graphene.List(ChoiceObject)
@@ -668,6 +671,21 @@ class Query(graphene.ObjectType):
                 associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD
             ).prefetch_related("choices")
         )
+
+        return sort_by_attr(all_options, "label.English(EN)")
+
+    def resolve_all_edit_people_fields_attributes(self, info: Any, **kwargs: Any) -> List:
+        business_area_slug = info.context.headers.get("Business-Area")
+        fields = FieldFactory.from_scope(Scope.PEOPLE_UPDATE).apply_business_area(business_area_slug)
+        all_options = list(fields) + list(
+            FlexibleAttribute.objects.filter(
+                associated_with__in=[
+                    FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD,
+                    FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
+                ]
+            ).prefetch_related("choices")
+        )
+
         return sort_by_attr(all_options, "label.English(EN)")
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])

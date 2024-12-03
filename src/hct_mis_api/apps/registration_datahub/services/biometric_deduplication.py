@@ -16,7 +16,6 @@ from hct_mis_api.apps.registration_datahub.apis.deduplication_engine import (
     DeduplicationEngineAPI,
     DeduplicationImage,
     DeduplicationSet,
-    DeduplicationSetConfig,
     DeduplicationSetData,
     IgnoredFilenamesPair,
     SimilarityPair,
@@ -38,9 +37,6 @@ class BiometricDeduplicationService:
             reference_pk=str(program.id),
             notification_url=f"https://{settings.DOMAIN_NAME}/api/rest/{program.business_area.slug}/programs/{str(program.id)}/registration-data/webhookdeduplication/",
             # notification_url=reverse("registration-data:webhook_deduplication", kwargs={"program_id": str(program.id), "business_area": program.business_area.slug}), # TODO MB why reverse is not working
-            config=DeduplicationSetConfig(
-                face_distance_threshold=1 - (program.business_area.biometric_deduplication_threshold / 100)
-            ),
         )
         response_data = self.api.create_deduplication_set(deduplication_set)
         deduplication_set_id = uuid.UUID(response_data["id"])
@@ -168,29 +164,15 @@ class BiometricDeduplicationService:
     def mark_rdis_as_deduplicated(deduplication_set_id: str) -> None:
         program = Program.objects.get(deduplication_set_id=deduplication_set_id)
         RegistrationDataImport.objects.filter(
-            program=program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_PROCESSING
-        ).update(deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED)
-
-    @staticmethod
-    def mark_rdis_as_deduplication_error(deduplication_set_id: str) -> None:
-        program = Program.objects.get(deduplication_set_id=deduplication_set_id)
-        RegistrationDataImport.objects.filter(
-            program=program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_PROCESSING
-        ).update(deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_ERROR)
-
-    @staticmethod
-    def mark_rdis_as_processing(deduplication_set_id: str) -> None:
-        program = Program.objects.get(deduplication_set_id=deduplication_set_id)
-        RegistrationDataImport.objects.filter(
             program=program, deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS
-        ).update(deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_PROCESSING)
+        ).update(deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED)
 
     def store_rdis_deduplication_statistics(self, deduplication_set_id: str) -> None:
         program = Program.objects.get(deduplication_set_id=deduplication_set_id)
         rdis = RegistrationDataImport.objects.filter(
             status=RegistrationDataImport.IN_REVIEW,
             program=program,
-            deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_PROCESSING,
+            deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS,
         )
         for rdi in rdis:
             rdi.dedup_engine_batch_duplicates = self.get_duplicate_individuals_for_rdi_against_batch_count(rdi)
@@ -299,16 +281,6 @@ class BiometricDeduplicationService:
                 self.store_similarity_pairs(deduplication_set_id, similarity_pairs)
                 self.store_rdis_deduplication_statistics(deduplication_set_id)
                 self.mark_rdis_as_deduplicated(deduplication_set_id)
-
-        elif deduplication_set_data.state == "Processing":
-            self.mark_rdis_as_processing(deduplication_set_id)
-
-        elif deduplication_set_data.state == "Error":
-            self.mark_rdis_as_deduplication_error(deduplication_set_id)
-            logger.error(
-                f"Failed to process deduplication set {deduplication_set_id},"
-                f" dedupe engine state: {deduplication_set_data.state}"
-            )
 
     def report_false_positive_duplicate(
         self, individual1_photo: str, individual2_photo: str, deduplication_set_id: str

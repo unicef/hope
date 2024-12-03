@@ -35,24 +35,20 @@ from hct_mis_api.apps.program.fixtures import ProgramCycleFactory
 def create_child_payment_plans(pp: PaymentPlan) -> None:
     fpp1 = PaymentPlanFactory(
         id="56aca38c-dc16-48a9-ace4-70d88b41d462",
-        dispersion_start_date=datetime(2020, 8, 10),
-        dispersion_end_date=datetime(2020, 12, 10),
         is_follow_up=True,
         source_payment_plan=pp,
-        program__cycle__start_date=timezone.datetime(2020, 9, 10, tzinfo=utc).date(),
-        program__cycle__end_date=timezone.datetime(2020, 11, 10, tzinfo=utc).date(),
+        dispersion_start_date=datetime(2020, 8, 10),
+        dispersion_end_date=datetime(2020, 12, 10),
     )
     fpp1.unicef_id = "PP-0060-20-00000003"
     fpp1.save()
 
     fpp2 = PaymentPlanFactory(
         id="5b04f7c3-579a-48dd-a232-424daaefffe7",
-        dispersion_start_date=datetime(2020, 8, 10),
-        dispersion_end_date=datetime(2020, 12, 10),
         is_follow_up=True,
         source_payment_plan=pp,
-        program__cycle__start_date=timezone.datetime(2020, 9, 10, tzinfo=utc).date(),
-        program__cycle__end_date=timezone.datetime(2020, 11, 10, tzinfo=utc).date(),
+        dispersion_start_date=datetime(2020, 8, 10),
+        dispersion_end_date=datetime(2020, 12, 10),
     )
     fpp2.unicef_id = "PP-0060-20-00000004"
     fpp2.save()
@@ -236,7 +232,6 @@ class TestPaymentPlanQueries(APITestCase):
             )
             program_cycle = program.cycles.first()
             cls.pp = PaymentPlanFactory(
-                program=program,
                 program_cycle=program_cycle,
                 dispersion_start_date=datetime(2020, 8, 10),
                 dispersion_end_date=datetime(2020, 12, 10),
@@ -276,7 +271,6 @@ class TestPaymentPlanQueries(APITestCase):
 
             # create hard conflicted payment
             cls.pp_conflicted = PaymentPlanFactory(
-                program=program,
                 program_cycle=program_cycle,
                 status=PaymentPlan.Status.LOCKED,
                 dispersion_start_date=cls.pp.dispersion_start_date + relativedelta(months=2),
@@ -468,7 +462,6 @@ class TestPaymentPlanQueries(APITestCase):
             cycle__end_date=timezone.datetime(2023, 11, 10, tzinfo=utc).date(),
         )
         new_pp = PaymentPlanFactory(
-            program=program,
             program_cycle=program.cycles.first(),
             dispersion_start_date=datetime(2023, 8, 10),
             dispersion_end_date=datetime(2023, 12, 10),

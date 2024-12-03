@@ -5,17 +5,17 @@ import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
-import { ImportedIndividualPhotoModal } from '@components/population/ImportedIndividualPhotoModal';
+import { IndividualPhotoModal } from '@components/population/IndividualPhotoModal';
 import { RegistrationIndividualBioData } from '@components/rdi/details/individual/RegistrationIndividualBioData/RegistrationIndividualBioData';
 import { RegistrationIndividualAdditionalRegistrationInformation } from '@components/rdi/details/individual/RegistrationIndividualAdditionalRegistrationInformation/RegistrationIndividualAdditionalRegistrationInformation';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError } from '@utils/utils';
 import {
-  ImportedIndividualNode,
+  IndividualNode,
   useAllIndividualsFlexFieldsAttributesQuery,
   useHouseholdChoiceDataQuery,
-  useImportedIndividualQuery,
+  useIndividualQuery,
 } from '@generated/graphql';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 import { ReactElement } from 'react';
@@ -37,7 +37,7 @@ export const PeopleRegistrationDetailsPage = (): ReactElement => {
 
   const { data: flexFieldsData, loading: flexFieldsDataLoading } =
     useAllIndividualsFlexFieldsAttributesQuery();
-  const { data, loading, error } = useImportedIndividualQuery({
+  const { data, loading, error } = useIndividualQuery({
     variables: {
       id,
     },
@@ -52,7 +52,7 @@ export const PeopleRegistrationDetailsPage = (): ReactElement => {
   if (!data || !choicesData || !flexFieldsData || permissions === null)
     return null;
 
-  const { importedIndividual } = data;
+  const { individual } = data;
   const breadCrumbsItems: BreadCrumbsItem[] = [
     ...(hasPermissions(PERMISSIONS.RDI_VIEW_LIST, permissions)
       ? [
@@ -63,7 +63,7 @@ export const PeopleRegistrationDetailsPage = (): ReactElement => {
         ]
       : []),
     {
-      title: importedIndividual.registrationDataImport.name,
+      title: individual.registrationDataImport.name,
       to: '..',
     },
   ];
@@ -78,22 +78,20 @@ export const PeopleRegistrationDetailsPage = (): ReactElement => {
       componentName="PeopleRegistrationDetailsPage"
     >
       <PageHeader
-        title={`${t('Individual ID')}: ${importedIndividual.importId}`}
+        title={`${t('Individual ID')}: ${individual.importId}`}
         breadCrumbs={breadCrumbsItems}
       >
-        {importedIndividual.photo ? (
-          <ImportedIndividualPhotoModal
-            individual={importedIndividual as ImportedIndividualNode}
-          />
+        {individual.photo ? (
+          <IndividualPhotoModal individual={individual as IndividualNode} />
         ) : null}
       </PageHeader>
       <Container>
         <RegistrationIndividualBioData
-          individual={importedIndividual}
+          individual={individual}
           choicesData={choicesData}
         />
         <RegistrationIndividualAdditionalRegistrationInformation
-          individual={importedIndividual}
+          individual={individual}
           flexFieldsData={flexFieldsData}
         />
       </Container>

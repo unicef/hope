@@ -127,7 +127,7 @@ class TestIndividualXlsxUpdate(TestCase):
         for individual in cls.individuals:
             individual.save()
 
-    @mock.patch("hct_mis_api.apps.utils.mailjet.requests.post")
+    @mock.patch("hct_mis_api.apps.utils.celery_tasks.requests.post")
     @override_settings(EMAIL_SUBJECT_PREFIX="test")
     @override_config(ENABLE_MAILJET=True)
     def test_update_individuals_iban_from_xlsx_task_invalid_file_error(self, mocked_requests_post: Any) -> None:
@@ -152,7 +152,7 @@ class TestIndividualXlsxUpdate(TestCase):
             data=expected_data,
         )
 
-    @mock.patch("hct_mis_api.apps.utils.mailjet.requests.post")
+    @mock.patch("hct_mis_api.apps.utils.celery_tasks.requests.post")
     @override_settings(EMAIL_SUBJECT_PREFIX="test")
     @override_config(ENABLE_MAILJET=True)
     def test_update_individuals_iban_from_xlsx_task_invalid_file_bad_columns_fail(
@@ -177,7 +177,7 @@ class TestIndividualXlsxUpdate(TestCase):
             data=expected_data,
         )
 
-    @mock.patch("hct_mis_api.apps.utils.mailjet.requests.post")
+    @mock.patch("hct_mis_api.apps.utils.celery_tasks.requests.post")
     @override_settings(EMAIL_SUBJECT_PREFIX="test")
     @override_config(ENABLE_MAILJET=True)
     def test_update_individuals_iban_from_xlsx_task_invalid_no_match_fail(self, mocked_requests_post: Any) -> None:
@@ -199,7 +199,7 @@ class TestIndividualXlsxUpdate(TestCase):
             data=expected_data,
         )
 
-    @mock.patch("hct_mis_api.apps.utils.mailjet.requests.post")
+    @mock.patch("hct_mis_api.apps.utils.celery_tasks.requests.post")
     @override_settings(EMAIL_SUBJECT_PREFIX="test")
     @override_config(ENABLE_MAILJET=True)
     def test_update_individuals_iban_from_xlsx_task_valid_match(self, mocked_requests_post: Any) -> None:
@@ -233,7 +233,7 @@ class TestIndividualXlsxUpdate(TestCase):
         self.assertEqual(bank_account_info_1.bank_account_number, "2222222222")
         self.assertEqual(bank_account_info_1.bank_name, "Bank")
 
-    @mock.patch("hct_mis_api.apps.utils.mailjet.requests.post")
+    @mock.patch("hct_mis_api.apps.utils.celery_tasks.requests.post")
     @override_settings(EMAIL_SUBJECT_PREFIX="test")
     @override_config(ENABLE_MAILJET=True)
     def test_update_individuals_iban_from_xlsx_task_invalid_empty_cell(self, mocked_requests_post: Any) -> None:

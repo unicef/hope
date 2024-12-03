@@ -64,7 +64,6 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.payment.fixtures import (
     generate_delivery_mechanisms,
     generate_payment_plan,
-    generate_real_cash_plans,
     generate_reconciled_payment_plan,
     update_fsps,
 )
@@ -148,7 +147,6 @@ class Command(BaseCommand):
         self.stdout.write("Generating payment plan...")
         generate_payment_plan()
         self.stdout.write("Generating real cash plans...")
-        generate_real_cash_plans()
         self.stdout.write("Generating reconciled payment plan...")
         generate_reconciled_payment_plan()
         self.stdout.write("Updating FSPs...")

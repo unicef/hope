@@ -10,6 +10,7 @@ from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
 from single_source import get_version
+from smart_env.exceptions import SmartEnvMissing
 
 from hct_mis_api.config.env import env
 
@@ -24,7 +25,7 @@ PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
 DOMAIN_NAME = env("DOMAIN")
 WWW_ROOT = "http://{}/".format(DOMAIN_NAME)
 ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS")
-FRONTEND_HOST = env("HCT_MIS_FRONTEND_HOST")
+FRONTEND_HOST = env("DOMAIN")
 ADMIN_PANEL_URL = env("ADMIN_PANEL_URL")
 
 ####
@@ -109,7 +110,15 @@ if ENV != "prod":
 else:
     EMAIL_SUBJECT_PREFIX = ""
 
-RO_CONN = dict(**env.db("DATABASE_URL")).copy()
+try:
+    REPLICA_DB = env("REP_DATABASE_URL", default=None)
+except SmartEnvMissing:
+    REPLICA_DB = None
+
+if REPLICA_DB:
+    RO_CONN = dict(**env.db("REP_DATABASE_URL")).copy()
+else:
+    RO_CONN = dict(**env.db("DATABASE_URL")).copy()
 RO_CONN.update(
     {
         "OPTIONS": {"options": "-c default_transaction_read_only=on"},
@@ -146,7 +155,9 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "hijack.middleware.HijackUserMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
-    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    # "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    # Replace the default XFrameOptionsMiddleware with the custom one to enable Dashboard iframe
+    "hct_mis_api.middlewares.xframe.AllowSpecificIframeDomainsMiddleware",
     "hct_mis_api.middlewares.sentry.SentryScopeMiddleware",
     "hct_mis_api.middlewares.version.VersionMiddleware",
 ]
@@ -200,6 +211,7 @@ PROJECT_APPS = [
     "hct_mis_api.apps.steficon.apps.SteficonConfig",
     "hct_mis_api.apps.reporting.apps.ReportingConfig",
     "hct_mis_api.apps.activity_log.apps.ActivityLogConfig",
+    "hct_mis_api.apps.dashboard.apps.DashboardConfig",
     "hct_mis_api.apps.accountability.apps.AccountabilityConfig",
     "hct_mis_api.apps.web.apps.WebConfig",
     "hct_mis_api.apps.periodic_data_update.apps.PeriodicDataUpdateConfig",
@@ -476,6 +488,8 @@ FLOWER_ADDRESS = env("FLOWER_ADDRESS")
 
 ADMIN_SYNC_CONFIG = "admin_sync.conf.DjangoConstance"
 DEFAULT_EMPTY_PARTNER = "Default Empty Partner"
+X_FRAME_OPTIONS = "SAMEORIGIN"
+
 
 from hct_mis_api.config.fragments.celery import *  # noqa: F403, F401, E402
 from hct_mis_api.config.fragments.constance import *  # noqa: F403, F401, E402
