@@ -39,6 +39,7 @@ from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
     AdminUrlMixin,
     ConcurrencyModel,
+    InternalDataFieldModel,
     MergeStatusModel,
     RepresentationManager,
     SoftDeletableRepresentationMergeStatusModel,
@@ -322,6 +323,7 @@ class HouseholdCollection(UnicefIdentifiedModel):
 
 
 class Household(
+    InternalDataFieldModel,
     SoftDeletableRepresentationMergeStatusModelWithDate,
     TimeStampedUUIDModel,
     AbstractSyncable,
@@ -491,7 +493,6 @@ class Household(
     registration_method = models.CharField(max_length=250, choices=REGISTRATION_METHOD_CHOICES, default=BLANK)
     currency = models.CharField(max_length=250, choices=CURRENCY_CHOICES, default=BLANK)
     unhcr_id = models.CharField(max_length=250, blank=True, default=BLANK, db_index=True)
-    user_fields = JSONField(default=dict, blank=True)
     detail_id = models.CharField(
         max_length=150, blank=True, null=True, help_text="Kobo asset ID, Xlsx row ID, Aurora source ID"
     )
@@ -577,9 +578,7 @@ class Household(
     def withdraw(self, tag: Optional[Any] = None) -> None:
         self.withdrawn = True
         self.withdrawn_date = timezone.now()
-        user_fields = self.user_fields or {}
-        user_fields["withdrawn_tag"] = tag
-        self.user_fields = user_fields
+        self.internal_data["withdrawn_tag"] = tag
         self.save()
         household_withdrawn.send(sender=self.__class__, instance=self)
 
@@ -587,16 +586,6 @@ class Household(
         self.withdrawn = False
         self.withdrawn_date = None
         self.save()
-
-    def set_sys_field(self, key: str, value: Any) -> None:
-        if "sys" not in self.user_fields:
-            self.user_fields["sys"] = {}
-        self.user_fields["sys"][key] = value
-
-    def get_sys_field(self, key: str) -> Any:
-        if "sys" in self.user_fields:
-            return self.user_fields["sys"][key]
-        return None
 
     def set_admin_areas(self, new_admin_area: Optional[Area] = None, save: bool = True) -> None:
         """Propagates admin1,2,3,4 based on admin_area parents"""
@@ -634,7 +623,7 @@ class Household(
 
     @cached_property
     def primary_collector(self) -> Optional["Individual"]:
-        return self.representatives.get(households_and_roles__role=ROLE_PRIMARY)
+        return self.representatives.filter(households_and_roles__role=ROLE_PRIMARY).first()
 
     @cached_property
     def alternate_collector(self) -> Optional["Individual"]:
@@ -852,6 +841,7 @@ class IndividualCollection(UnicefIdentifiedModel):
 
 
 class Individual(
+    InternalDataFieldModel,
     SoftDeletableRepresentationMergeStatusModelWithDate,
     TimeStampedUUIDModel,
     AbstractSyncable,
@@ -971,7 +961,6 @@ class Individual(
     first_registration_date = models.DateField()
     last_registration_date = models.DateField()
     flex_fields = JSONField(default=dict, blank=True, encoder=FlexFieldsEncoder)
-    user_fields = JSONField(default=dict, blank=True)
     enrolled_in_nutrition_programme = models.BooleanField(null=True)
     administration_of_rutf = models.BooleanField(null=True)
     deduplication_golden_record_status = models.CharField(
@@ -1165,16 +1154,6 @@ class Individual(
     class Meta:
         verbose_name = "Individual"
         indexes = (GinIndex(fields=["vector_column"]),)
-
-    def set_sys_field(self, key: str, value: Any) -> None:
-        if "sys" not in self.user_fields:
-            self.user_fields["sys"] = {}
-        self.user_fields["sys"][key] = value
-
-    def get_sys_field(self, key: str) -> Any:
-        if "sys" in self.user_fields:
-            return self.user_fields["sys"][key]
-        return None
 
     def recalculate_data(self, save: bool = True) -> Tuple[Any, List[str]]:
         update_fields = ["disability"]

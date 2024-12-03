@@ -21,18 +21,23 @@ from hct_mis_api.apps.core.fixtures import (
 from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
-from hct_mis_api.apps.household.fixtures import DocumentFactory, create_household
+from hct_mis_api.apps.household.fixtures import (
+    DocumentFactory,
+    HouseholdFactory,
+    create_household,
+)
 from hct_mis_api.apps.household.models import DocumentType
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
+from hct_mis_api.apps.utils.models import MergeStatusModel
 
 pytestmark = pytest.mark.usefixtures("django_elasticsearch_setup")
 
 
 ALL_HOUSEHOLD_QUERY = """
       query AllHouseholds($search: String, $documentType: String, $documentNumber: String, $program: ID) {
-        allHouseholds(search: $search, documentType: $documentType, documentNumber: $documentNumber, orderBy: "size", program: $program, businessArea: "afghanistan") {
+        allHouseholds(search: $search, documentType: $documentType, documentNumber: $documentNumber, orderBy: "size", program: $program, businessArea: "afghanistan", rdiMergeStatus: "MERGED") {
           edges {
             node {
               size
@@ -50,7 +55,8 @@ ALL_HOUSEHOLD_QUERY_RANGE = """
         orderBy: "size",
         size: "{\\"min\\": 3, \\"max\\": 9}",
         businessArea: "afghanistan",
-        program: $program
+        program: $program,
+        rdiMergeStatus: "MERGED"
       ) {
         edges {
           node {
@@ -65,7 +71,7 @@ ALL_HOUSEHOLD_QUERY_RANGE = """
 
 ALL_HOUSEHOLD_QUERY_MIN = """
     query AllHouseholds($program: ID){
-      allHouseholds(orderBy: "size", size: "{\\"min\\": 3}", businessArea: "afghanistan", program: $program) {
+      allHouseholds(orderBy: "size", size: "{\\"min\\": 3}", businessArea: "afghanistan", program: $program, rdiMergeStatus: "MERGED") {
         edges {
           node {
             size
@@ -78,7 +84,7 @@ ALL_HOUSEHOLD_QUERY_MIN = """
     """
 ALL_HOUSEHOLD_QUERY_MAX = """
     query AllHouseholds($program: ID){
-      allHouseholds(orderBy: "size", size: "{\\"max\\": 9}", businessArea: "afghanistan", program: $program) {
+      allHouseholds(orderBy: "size", size: "{\\"max\\": 9}", businessArea: "afghanistan", program: $program, rdiMergeStatus: "MERGED") {
         edges {
           node {
             size
@@ -241,6 +247,14 @@ class TestHouseholdQuery(APITestCase):
         )
         for program in [cls.program_one, cls.program_two, cls.program_draft]:
             cls.update_partner_access_to_program(cls.partner, program, [cls.households[0].admin_area])
+
+        # just add one PENDING HH to be sure filters works correctly
+        HouseholdFactory(
+            size=2,
+            address="Lorem Ipsum",
+            rdi_merge_status=MergeStatusModel.PENDING,
+            program=cls.program_one,
+        )
 
         # remove after data migration
         BusinessAreaFactory(name="Democratic Republic of Congo")

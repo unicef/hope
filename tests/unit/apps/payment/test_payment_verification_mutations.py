@@ -18,10 +18,8 @@ from hct_mis_api.apps.core.utils import encode_id_base64, encode_id_base64_requi
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.fixtures import EntitlementCardFactory, create_household
 from hct_mis_api.apps.payment.fixtures import (
-    CashPlanFactory,
     PaymentFactory,
     PaymentPlanFactory,
-    PaymentRecordFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
@@ -37,10 +35,6 @@ from hct_mis_api.apps.payment.services.verification_plan_status_change_services 
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.targeting.fixtures import (
-    TargetingCriteriaFactory,
-    TargetPopulationFactory,
-)
 
 EDIT_PAYMENT_VERIFICATION_MUTATION = """
 mutation EditPaymentVerificationPlan($input: EditPaymentVerificationInput!) {
@@ -67,15 +61,11 @@ class TestPaymentVerificationMutations(APITestCase):
         )
         program = ProgramFactory(business_area=cls.business_area)
         program.admin_areas.set(Area.objects.order_by("?")[:3])
-        targeting_criteria = TargetingCriteriaFactory()
 
-        target_population = TargetPopulationFactory(
-            created_by=cls.user, targeting_criteria=targeting_criteria, business_area=cls.business_area
-        )
-        cash_plan = CashPlanFactory(program=program, business_area=cls.business_area)
-        cash_plan.save()
+        payment_plan = PaymentPlanFactory(program_cycle=program.cycles.first(), business_area=cls.business_area)
+        PaymentVerificationSummaryFactory(payment_plan=payment_plan)
         payment_verification_plan = PaymentVerificationPlanFactory(
-            payment_plan_obj=cash_plan, verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL
+            payment_plan=payment_plan, verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL
         )
         registration_data_import = RegistrationDataImportFactory(
             imported_by=cls.user, business_area=BusinessArea.objects.first()
@@ -90,24 +80,23 @@ class TestPaymentVerificationMutations(APITestCase):
 
         household.programs.add(program)
 
-        payment_record = PaymentRecordFactory(
-            parent=cash_plan,
+        payment = PaymentFactory(
+            parent=payment_plan,
             household=household,
             head_of_household=household.head_of_household,
-            target_population=target_population,
-            entitlement_quantity="21.36",
-            delivered_quantity="21.36",
+            entitlement_quantity=21.36,
+            delivered_quantity=21.36,
             currency="PLN",
         )
 
         PaymentVerificationFactory(
-            payment_obj=payment_record,
+            payment=payment,
             payment_verification_plan=payment_verification_plan,
             status=PaymentVerification.STATUS_PENDING,
         )
         EntitlementCardFactory(household=household)
-        cls.cash_plan = cash_plan
-        cls.verification = cash_plan.payment_verification_plan.first()
+        cls.payment_plan = payment_plan
+        cls.verification = payment_plan.payment_verification_plans.first()
         VerificationPlanStatusChangeServices(payment_verification_plan).activate()
         info = ResolveInfo(None, None, None, None, None, None, None, None, None, None)
         request = RequestFactory().get("/api/graphql")
@@ -230,10 +219,10 @@ class TestPaymentVerificationMutations(APITestCase):
 
     def test_edit_payment_verification_plan_mutation(self) -> None:
         payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.FINISHED, business_area=self.business_area)
-        PaymentVerificationSummaryFactory(payment_plan_obj=payment_plan)
+        PaymentVerificationSummaryFactory(payment_plan=payment_plan)
         PaymentFactory(parent=payment_plan, currency="PLN", status=GenericPayment.STATUS_SUCCESS)
         payment_verification_plan = PaymentVerificationPlanFactory(
-            payment_plan_obj=payment_plan,
+            payment_plan=payment_plan,
             status=PaymentVerificationPlan.STATUS_PENDING,
         )
         input_dict = {

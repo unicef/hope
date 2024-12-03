@@ -35,13 +35,13 @@ class CheckRapidProVerificationTask:
 
     def _verify_cashplan_payment_verification(self, payment_verification_plan: PaymentVerificationPlan) -> None:
         payment_record_verifications = payment_verification_plan.payment_record_verifications.prefetch_related(
-            "payment_obj__head_of_household"
+            "payment__head_of_household"
         )
-        business_area = payment_verification_plan.payment_plan_obj.business_area
+        business_area = payment_verification_plan.payment_plan.business_area
         payment_record_verifications_phone_number_dict = {
-            str(payment_verification.payment_obj.head_of_household.phone_no): payment_verification
+            str(payment_verification.payment.head_of_household.phone_no): payment_verification
             for payment_verification in payment_record_verifications
-            if payment_verification.payment_obj.head_of_household is not None
+            if payment_verification.payment.head_of_household is not None
         }
         api = RapidProAPI(business_area.slug, RapidProAPI.MODE_VERIFICATION)
         rapid_pro_results = api.get_mapped_flow_runs(payment_verification_plan.rapid_pro_flow_start_uuids)
@@ -73,7 +73,7 @@ class CheckRapidProVerificationTask:
         payment_record_verification = payment_record_verifications_phone_number_dict.get(phone_number)
         if not payment_record_verification:
             return None
-        delivered_amount = payment_record_verification.payment_obj.delivered_quantity
+        delivered_amount = payment_record_verification.payment.delivered_quantity
         payment_record_verification.status = from_received_to_status(received, received_amount, delivered_amount)
         payment_record_verification.received_amount = received_amount
         return payment_record_verification

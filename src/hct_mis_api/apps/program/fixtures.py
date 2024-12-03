@@ -4,8 +4,6 @@ from datetime import datetime, timedelta
 from random import randint
 from typing import Any
 
-from django.utils.timezone import utc
-
 import factory
 from dateutil.relativedelta import relativedelta
 from factory import fuzzy
@@ -29,7 +27,11 @@ class ProgramCycleFactory(DjangoModelFactory):
         lambda o: (
             o.program.cycles.latest("start_date").end_date + timedelta(days=1)
             if o.program.cycles.exists()
-            else fake.date_time_this_decade(before_now=True, after_now=True, tzinfo=utc).date()
+            else (
+                datetime.fromisoformat(o.program.start_date)
+                if type(o.program.start_date) is str
+                else o.program.start_date
+            )
         )
     )
 
@@ -40,7 +42,7 @@ class ProgramCycleFactory(DjangoModelFactory):
         variable_nb_words=True,
         ext_word_list=None,
     )
-    program = factory.SubFactory("program.fixtures.ProgramFactory")
+    program = factory.SubFactory("hct_mis_api.apps.program.fixtures.ProgramFactory")
 
 
 class ProgramFactory(DjangoModelFactory):

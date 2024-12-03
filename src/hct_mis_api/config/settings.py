@@ -25,7 +25,7 @@ PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
 DOMAIN_NAME = env("DOMAIN")
 WWW_ROOT = "http://{}/".format(DOMAIN_NAME)
 ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS")
-FRONTEND_HOST = env("HCT_MIS_FRONTEND_HOST")
+FRONTEND_HOST = env("DOMAIN")
 ADMIN_PANEL_URL = env("ADMIN_PANEL_URL")
 
 ####

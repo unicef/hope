@@ -38,17 +38,17 @@ class PaymentPlanTestMixin:
         self.program1 = ProgramFactory(business_area=self.afghanistan)
         self.program2 = ProgramFactory(business_area=self.afghanistan)
         self.payment_plan1 = PaymentPlanFactory(
-            program=self.program1,
+            program_cycle=self.program1.cycles.first(),
             business_area=self.afghanistan,
             status=PaymentPlan.Status.IN_APPROVAL,
         )
         self.payment_plan2 = PaymentPlanFactory(
-            program=self.program2,
+            program_cycle=self.program2.cycles.first(),
             business_area=self.afghanistan,
             status=PaymentPlan.Status.IN_APPROVAL,
         )
         self.payment_plan3 = PaymentPlanFactory(
-            program=self.program2,
+            program_cycle=self.program2.cycles.first(),
             business_area=self.afghanistan,
             status=PaymentPlan.Status.OPEN,
         )
@@ -133,7 +133,7 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
             etag = response.headers["etag"]
 
             assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
-            assert len(ctx.captured_queries) == 26
+            assert len(ctx.captured_queries) == 28
 
         # Test that reoccurring request use cached data
         with CaptureQueriesContext(connection) as ctx:

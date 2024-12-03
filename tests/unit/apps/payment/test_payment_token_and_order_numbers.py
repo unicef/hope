@@ -30,7 +30,7 @@ class TestPaymentTokenAndOrderNumbers(TestCase):
         program = ProgramFactory(business_area=business_area)
 
         cls.payment_plan = PaymentPlanFactory(
-            program=program, status=PaymentPlan.Status.ACCEPTED, business_area=business_area
+            program_cycle=program.cycles.first(), status=PaymentPlan.Status.ACCEPTED, business_area=business_area
         )
         program.households.set(Household.objects.all().values_list("id", flat=True))
         for household in program.households.all():

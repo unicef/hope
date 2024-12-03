@@ -17,19 +17,12 @@ from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.fixtures import (
-    CashPlanFactory,
     FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
-    PaymentRecordFactory,
     generate_delivery_mechanisms,
 )
-from hct_mis_api.apps.payment.models import (
-    DeliveryMechanism,
-    GenericPayment,
-    Payment,
-    PaymentRecord,
-)
+from hct_mis_api.apps.payment.models import DeliveryMechanism, GenericPayment, Payment
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
@@ -243,9 +236,9 @@ class TestDashboardQueries(APITestCase):
                     "program": program1,
                 },
             )
-            cash_plan1 = CashPlanFactory(program=program1, business_area=business_area)
-            PaymentRecordFactory(
-                parent=cash_plan1,
+            payment_plan1 = PaymentPlanFactory(program_cycle=program1.cycles.first(), business_area=business_area)
+            PaymentFactory(
+                parent=payment_plan1,
                 delivery_date=timezone.datetime(2021, 10, 10, tzinfo=utc),
                 household=household1_admin1,
                 delivery_type=cls.dm_cash,
@@ -255,8 +248,8 @@ class TestDashboardQueries(APITestCase):
                 business_area=business_area,
                 currency="PLN",
             )
-            PaymentRecordFactory(
-                parent=cash_plan1,
+            PaymentFactory(
+                parent=payment_plan1,
                 delivery_date=timezone.datetime(2021, 10, 10, tzinfo=utc),
                 household=household1_admin2,
                 delivery_type=cls.dm_voucher,
@@ -266,8 +259,8 @@ class TestDashboardQueries(APITestCase):
                 business_area=business_area,
                 currency="PLN",
             )
-            PaymentRecordFactory(
-                parent=cash_plan1,
+            PaymentFactory(
+                parent=payment_plan1,
                 delivery_date=timezone.datetime(2021, 10, 10, tzinfo=utc),
                 household=household3_admin2,
                 delivery_type=cls.dm_voucher,
@@ -277,8 +270,8 @@ class TestDashboardQueries(APITestCase):
                 business_area=business_area,
                 currency="PLN",
             )
-            PaymentRecordFactory(
-                parent=cash_plan1,
+            PaymentFactory(
+                parent=payment_plan1,
                 delivery_date=timezone.datetime(2021, 11, 10, tzinfo=utc),
                 household=household1_admin3,
                 delivery_type=cls.dm_cash,
@@ -288,8 +281,8 @@ class TestDashboardQueries(APITestCase):
                 business_area=business_area,
                 currency="PLN",
             )
-            PaymentRecordFactory(
-                parent=cash_plan1,
+            PaymentFactory(
+                parent=payment_plan1,
                 delivery_date=timezone.datetime(2021, 10, 10, tzinfo=utc),
                 household=household3_admin3,
                 delivery_type=cls.dm_voucher,
@@ -299,8 +292,8 @@ class TestDashboardQueries(APITestCase):
                 business_area=business_area,
                 currency="PLN",
             )
-            PaymentRecordFactory(
-                parent=cash_plan1,
+            PaymentFactory(
+                parent=payment_plan1,
                 delivery_date=timezone.datetime(2021, 10, 10, tzinfo=utc),
                 household=household4_admin3,
                 delivery_type=cls.dm_voucher,
@@ -311,9 +304,9 @@ class TestDashboardQueries(APITestCase):
                 currency="PLN",
             )
 
-            payment_plan1 = PaymentPlanFactory(program=program1, business_area=business_area)
+            payment_plan2 = PaymentPlanFactory(program_cycle=program1.cycles.first(), business_area=business_area)
             PaymentFactory(
-                parent=payment_plan1,
+                parent=payment_plan2,
                 delivery_date=timezone.datetime(2021, 10, 10, tzinfo=utc),
                 delivery_type=cls.dm_cash,
                 delivered_quantity=10 + num,
@@ -325,7 +318,7 @@ class TestDashboardQueries(APITestCase):
                 financial_service_provider=fsp,
             )
             PaymentFactory(
-                parent=payment_plan1,
+                parent=payment_plan2,
                 delivery_date=timezone.datetime(2021, 10, 10, tzinfo=utc),
                 delivery_type=cls.dm_voucher,
                 delivered_quantity=20 + num,
@@ -337,7 +330,7 @@ class TestDashboardQueries(APITestCase):
                 financial_service_provider=fsp,
             )
             PaymentFactory(
-                parent=payment_plan1,
+                parent=payment_plan2,
                 delivery_date=timezone.datetime(2021, 11, 10, tzinfo=utc),
                 delivery_type=cls.dm_cash,
                 delivered_quantity=30 + num,
@@ -377,7 +370,7 @@ class TestDashboardQueries(APITestCase):
 
         for index, ba_name in enumerate(resp_data["labels"]):
             ba = BusinessArea.objects.get(slug=ba_name.lower())
-            qs_success_payment_record = PaymentRecord.objects.filter(business_area=ba)
+            qs_success_payment_record = Payment.objects.filter(business_area=ba)
             qs_success_payment = Payment.objects.filter(business_area=ba)
             payment_records_cash = qs_success_payment_record.filter(delivery_type=self.dm_cash)
             payment_records_voucher = qs_success_payment_record.filter(delivery_type=self.dm_voucher)
