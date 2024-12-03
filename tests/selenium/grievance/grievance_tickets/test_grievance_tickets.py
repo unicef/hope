@@ -3,9 +3,6 @@ from datetime import datetime
 from time import sleep
 from typing import Optional
 
-from django.conf import settings
-from django.core.management import call_command
-
 import pytest
 from dateutil.relativedelta import relativedelta
 from selenium.webdriver.common.by import By
@@ -14,12 +11,14 @@ from selenium.webdriver.remote.webelement import WebElement
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
+from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketNeedsAdjudicationDetails,
 )
 from hct_mis_api.apps.household.fixtures import (
     IndividualRoleInHouseholdFactory,
+    create_household,
     create_household_and_individuals,
 )
 from hct_mis_api.apps.household.models import HOST, Household, Individual
@@ -27,7 +26,9 @@ from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
 from hct_mis_api.apps.payment.models import Payment
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from tests.selenium.drawer.test_drawer import get_program_with_dct_type_and_name
+from tests.selenium.filters.test_filters import create_grievance
 from tests.selenium.helpers.date_time_format import FormatTime
 from tests.selenium.page_object.admin_panel.admin_panel import AdminPanel
 from tests.selenium.page_object.grievance.details_grievance_page import (
@@ -50,15 +51,26 @@ def id_to_base64(object_id: str, name: str) -> str:
 
 @pytest.fixture
 def add_grievance() -> None:
-    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/grievance/fixtures/data-cypress.json")
-    yield
+    create_grievance("GRV-0000123")
+    create_grievance("GRV-0000666")
 
 
 @pytest.fixture
 def add_households() -> None:
-    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/registration_data/fixtures/data-cypress.json")
-    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/household/fixtures/data-cypress.json")
-    yield
+    registration_data_import = RegistrationDataImportFactory(
+        imported_by=User.objects.first(), business_area=BusinessArea.objects.first()
+    )
+    household, _ = create_household(
+        {
+            "registration_data_import": registration_data_import,
+            "admin_area": Area.objects.order_by("?").first(),
+            "program": Program.objects.filter(name="Test Programm").first(),
+        },
+        {"registration_data_import": registration_data_import},
+    )
+
+    household.unicef_id = "HH-00-0000.1380"
+    household.save()
 
 
 @pytest.fixture

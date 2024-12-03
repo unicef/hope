@@ -4,13 +4,18 @@ from django.core.management import call_command
 import pytest
 from selenium.webdriver import Keys
 
+from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
-from hct_mis_api.apps.core.models import DataCollectingType
+from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.geo.models import Area, Country
-from hct_mis_api.apps.household.fixtures import create_household_and_individuals
+from hct_mis_api.apps.household.fixtures import (
+    create_household,
+    create_household_and_individuals,
+)
 from hct_mis_api.apps.household.models import HOST, Household
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from tests.selenium.helpers.fixtures import get_program_with_dct_type_and_name
 from tests.selenium.page_object.grievance.details_feedback_page import (
     FeedbackDetailsPage,
@@ -36,9 +41,20 @@ def add_feedbacks() -> None:
 
 @pytest.fixture
 def add_households() -> None:
-    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/registration_data/fixtures/data-cypress.json")
-    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/household/fixtures/data-cypress.json")
-    yield
+    registration_data_import = RegistrationDataImportFactory(
+        imported_by=User.objects.first(), business_area=BusinessArea.objects.first()
+    )
+    household, _ = create_household(
+        {
+            "registration_data_import": registration_data_import,
+            "admin_area": Area.objects.order_by("?").first(),
+            "program": Program.objects.filter(name="Test Programm").first(),
+        },
+        {"registration_data_import": registration_data_import},
+    )
+
+    household.unicef_id = "HH-00-0000.1380"
+    household.save()
 
 
 @pytest.fixture
