@@ -91,6 +91,7 @@ export function RequestedIndividualDataChangeTable({
           values={values}
           isEdit={isEdit}
           fieldsDict={fieldsDict}
+          countriesDict={countriesDict}
           ticket={ticket}
           entries={entries}
           entriesFlexFields={entriesFlexFields}
