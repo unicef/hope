@@ -653,9 +653,14 @@ class DeduplicateTask:
 class HardDocumentDeduplication:
     @transaction.atomic
     def deduplicate(
-        self, new_documents: QuerySet[Document], registration_data_import: Optional[RegistrationDataImport] = None
+        self,
+        new_documents: QuerySet[Document],
+        registration_data_import: Optional[RegistrationDataImport] = None,
+        program: Optional[Program] = None,
     ) -> None:
-        if registration_data_import and registration_data_import.program_id:
+        if program:
+            program_ids = [str(program.id)]
+        elif registration_data_import and registration_data_import.program_id:
             program_ids = [str(registration_data_import.program_id)]
         else:
             # can remove filter after refactoring Individual.program null=False

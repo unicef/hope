@@ -9,7 +9,7 @@ class PaymentRecord(BaseComponents):
     buttonEdPlan = 'button[data-cy="button-ed-plan"]'
     labelStatus = 'div[data-cy="label-STATUS"]'
     statusContainer = 'div[data-cy="status-container"]'
-    labelHousehold = 'div[data-cy="label-Household"]'
+    labelHousehold = 'div[data-cy="label-HOUSEHOLD ID"]'
     labelTargetPopulation = 'div[data-cy="label-TARGET POPULATION"]'
     labelDistributionModality = 'div[data-cy="label-DISTRIBUTION MODALITY"]'
     labelAmountReceived = 'div[data-cy="label-AMOUNT RECEIVED"]'
@@ -60,8 +60,8 @@ class PaymentRecord(BaseComponents):
     def getStatusContainer(self) -> WebElement:
         return self.wait_for(self.statusContainer)
 
-    def waitForStatusContainer(self, status: str) -> []:
-        return self.wait_for_text(status, self.statusContainer)
+    def waitForStatusContainer(self, status: str, timeout: int = 20) -> []:
+        return self.wait_for_text(status, self.statusContainer, timeout=timeout)
 
     def getLabelHousehold(self) -> WebElement:
         return self.wait_for(self.labelHousehold)

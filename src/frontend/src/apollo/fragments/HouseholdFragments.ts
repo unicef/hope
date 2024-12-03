@@ -6,6 +6,7 @@ export const householdMinimal = gql`
     status
     adminUrl
     createdAt
+    rdiMergeStatus
     residenceStatus
     maleChildrenCount
     femaleChildrenCount
@@ -138,24 +139,6 @@ export const householdDetailed = gql`
         lastName
         email
         username
-      }
-    }
-    paymentrecordSet {
-      edges {
-        node {
-          id
-          fullName
-          parent {
-            id
-            totalPersonsCovered
-            program {
-              id
-              name
-            }
-            totalDeliveredQuantity
-            assistanceMeasurement
-          }
-        }
       }
     }
     flexFields

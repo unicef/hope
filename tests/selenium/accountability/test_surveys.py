@@ -19,7 +19,7 @@ from tests.selenium.page_object.accountability.surveys_details import (
     AccountabilitySurveysDetails,
 )
 
-pytestmark = pytest.mark.django_db(transaction=True)
+pytestmark = pytest.mark.django_db()
 
 
 @pytest.fixture

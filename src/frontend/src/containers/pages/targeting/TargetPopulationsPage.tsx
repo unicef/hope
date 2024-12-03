@@ -43,13 +43,11 @@ export const TargetPopulationsPage = (): ReactElement => {
   );
   const [isInfoOpen, setToggleInfo] = useState(false);
 
-  if (permissions === null) return null;
-
   const canCreate = hasPermissions(PERMISSIONS.TARGETING_CREATE, permissions);
 
+  if (!programData || !permissions) return null;
   if (!hasPermissions(PERMISSIONS.TARGETING_VIEW_LIST, permissions))
     return <PermissionDenied />;
-  if (!programData) return null;
   let Table = TargetPopulationTable;
   let Filters = TargetPopulationTableFilters;
   if (programData.program.isSocialWorkerProgram) {

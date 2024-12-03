@@ -9,7 +9,7 @@ from tests.selenium.page_object.programme_population.individuals_details import 
     IndividualsDetails,
 )
 
-pytestmark = pytest.mark.django_db(transaction=True)
+pytestmark = pytest.mark.django_db()
 
 
 @pytest.fixture
@@ -82,7 +82,7 @@ class TestSmokeIndividuals:
         assert "None" in pageIndividualsDetails.getLabelRememberingOrConcentratingDisabilitySeverity().text
         assert "None" in pageIndividualsDetails.getLabelCommunicatingDisabilitySeverity().text
         assert "Not Disabled" in pageIndividualsDetails.getLabelDisability().text
-        assert "Poland" in pageIndividualsDetails.getLabelIssued().text
+        assert "Afghanistan" in pageIndividualsDetails.getLabelIssued().text
         assert "fake111test@email.com" in pageIndividualsDetails.getLabelEmail().text
         assert "0048503123555" in pageIndividualsDetails.getLabelPhoneNumber().text
         assert "-" in pageIndividualsDetails.getLabelAlternativePhoneNumber().text

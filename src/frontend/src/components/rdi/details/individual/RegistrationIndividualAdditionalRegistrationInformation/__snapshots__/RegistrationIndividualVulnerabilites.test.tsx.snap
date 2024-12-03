@@ -34,7 +34,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualAdditionalRegis
               class="sc-gtLWhw dynQwi"
               color="textSecondary"
             >
-              12
+              334
             </span>
           </div>
         </div>
@@ -56,7 +56,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualAdditionalRegis
               class="sc-gtLWhw dynQwi"
               color="textSecondary"
             >
-              No
+              Yes
             </span>
           </div>
         </div>
@@ -78,7 +78,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualAdditionalRegis
               class="sc-gtLWhw dynQwi"
               color="textSecondary"
             >
-              Yes
+              No
             </span>
           </div>
         </div>

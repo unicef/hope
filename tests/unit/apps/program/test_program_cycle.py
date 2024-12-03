@@ -111,19 +111,17 @@ class TestProgramCycleMethods(TestCase):
 
     def test_total_entitled_quantity_usd(self) -> None:
         self.assertEqual(self.cycle.total_entitled_quantity_usd, Decimal("0.0"))
-        PaymentPlanFactory(program=self.program, program_cycle=self.cycle, total_entitled_quantity_usd=Decimal(123.99))
+        PaymentPlanFactory(program_cycle=self.cycle, total_entitled_quantity_usd=Decimal(123.99))
         self.assertEqual(self.cycle.total_entitled_quantity_usd, Decimal("123.99"))
 
     def test_total_undelivered_quantity_usd(self) -> None:
         self.assertEqual(self.cycle.total_undelivered_quantity_usd, Decimal("0.0"))
-        PaymentPlanFactory(
-            program=self.program, program_cycle=self.cycle, total_undelivered_quantity_usd=Decimal(222.33)
-        )
+        PaymentPlanFactory(program_cycle=self.cycle, total_undelivered_quantity_usd=Decimal(222.33))
         self.assertEqual(self.cycle.total_undelivered_quantity_usd, Decimal("222.33"))
 
     def test_total_delivered_quantity_usd(self) -> None:
         self.assertEqual(self.cycle.total_delivered_quantity_usd, Decimal("0.0"))
-        PaymentPlanFactory(program=self.program, program_cycle=self.cycle, total_delivered_quantity_usd=Decimal(333.11))
+        PaymentPlanFactory(program_cycle=self.cycle, total_delivered_quantity_usd=Decimal(333.11))
         self.assertEqual(self.cycle.total_delivered_quantity_usd, Decimal("333.11"))
 
     def test_cycle_validation_start_date(self) -> None:

@@ -31,13 +31,7 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.fixtures import (
-    PaymentFactory,
-    PaymentPlanFactory,
-    PaymentRecordFactory,
-    ServiceProviderFactory,
-)
-from hct_mis_api.apps.payment.models import ServiceProvider
+from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
@@ -48,7 +42,6 @@ from hct_mis_api.apps.targeting.fixtures import (
 )
 from hct_mis_api.apps.targeting.models import HouseholdSelection
 from hct_mis_api.one_time_scripts.migrate_data_to_representations import (
-    adjust_payment_records,
     adjust_payments,
     copy_bank_account_info_per_individual,
     copy_document_per_individual,
@@ -506,57 +499,6 @@ class TestAdjustPayments(TestCase):
         self.assertEqual(self.payment1.collector, individual_representation_this_program)
         self.assertEqual(self.payment1.head_of_household, individual_representation_this_program)
         self.assertEqual(self.payment1.household, household_this_program)
-
-
-class TestAdjustPaymentRecords(TestCase):
-    def setUp(self) -> None:
-        self.business_area = BusinessAreaFactory()
-        self.other_program = ProgramFactory(status=Program.ACTIVE, business_area=self.business_area)
-        self.target_population1 = TargetPopulationFactory(program=self.other_program, business_area=self.business_area)
-        (
-            self.household_original,
-            self.individual_original,
-        ) = create_origin_household_with_individual(
-            business_area=self.business_area,
-        )
-        self.payment_record1 = PaymentRecordFactory(
-            target_population=self.target_population1,
-            household=self.household_original,
-            head_of_household=self.individual_original,
-            service_provider=ServiceProvider.objects.first() or ServiceProviderFactory(),
-            business_area=self.business_area,
-        )
-
-    def test_adjust_payment_records(self) -> None:
-        this_program = ProgramFactory(status=Program.ACTIVE, business_area=self.business_area)
-
-        individual_representation_this_program = IndividualFactory(
-            program_id=this_program.id,
-            business_area=self.business_area,
-            copied_from=self.individual_original,
-            origin_unicef_id=self.individual_original.unicef_id,
-            household=None,
-            is_original=False,
-        )
-
-        household_this_program = HouseholdFactory(
-            program_id=this_program.id,
-            business_area=self.business_area,
-            copied_from=self.household_original,
-            origin_unicef_id=self.household_original.unicef_id,
-            head_of_household=individual_representation_this_program,
-            is_original=False,
-        )
-
-        self.target_population1.program = this_program
-        self.target_population1.save()
-
-        adjust_payment_records(self.business_area)
-
-        self.payment_record1.refresh_from_db()
-
-        self.assertEqual(self.payment_record1.head_of_household, individual_representation_this_program)
-        self.assertEqual(self.payment_record1.household, household_this_program)
 
 
 @skip(reason="Skip this test for GPF")

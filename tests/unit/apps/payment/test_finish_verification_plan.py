@@ -13,10 +13,11 @@ from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import EntitlementCardFactory, create_household
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.fixtures import (
-    CashPlanFactory,
-    PaymentRecordFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
+    PaymentVerificationSummaryFactory,
 )
 from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan
 from hct_mis_api.apps.payment.services.verification_plan_status_change_services import (
@@ -24,10 +25,6 @@ from hct_mis_api.apps.payment.services.verification_plan_status_change_services 
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.targeting.fixtures import (
-    TargetingCriteriaFactory,
-    TargetPopulationFactory,
-)
 
 
 class TestFinishVerificationPlan(TestCase):
@@ -46,23 +43,16 @@ class TestFinishVerificationPlan(TestCase):
 
         cls.program = ProgramFactory(business_area=business_area)
         cls.program.admin_areas.set(afghanistan_areas_qs.order_by("?")[:3])
-        targeting_criteria = TargetingCriteriaFactory()
 
-        target_population = TargetPopulationFactory(
-            created_by=user,
-            targeting_criteria=targeting_criteria,
-            business_area=business_area,
-            program=cls.program,
-        )
-        cash_plan = CashPlanFactory(
-            program=cls.program,
+        payment_plan = PaymentPlanFactory(
+            program_cycle=cls.program.cycles.first(),
             business_area=business_area,
         )
-        cash_plan.save()
-        cash_plan_payment_verification = PaymentVerificationPlanFactory(
+        PaymentVerificationSummaryFactory(payment_plan=payment_plan)
+        payment_plan_payment_verification = PaymentVerificationPlanFactory(
             status=PaymentVerificationPlan.STATUS_PENDING,
             verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_RAPIDPRO,
-            payment_plan_obj=cash_plan,
+            payment_plan=payment_plan,
         )
         for i in range(payment_record_amount):
             registration_data_import = RegistrationDataImportFactory(
@@ -83,24 +73,23 @@ class TestFinishVerificationPlan(TestCase):
             household.program = cls.program
             household.refresh_from_db()
 
-            payment_record = PaymentRecordFactory(
-                parent=cash_plan,
+            payment = PaymentFactory(
+                parent=payment_plan,
                 household=household,
                 head_of_household=household.head_of_household,
-                target_population=target_population,
                 delivered_quantity_usd=200,
                 currency="PLN",
             )
 
             PaymentVerificationFactory(
-                payment_verification_plan=cash_plan_payment_verification,
-                payment_obj=payment_record,
+                payment_verification_plan=payment_plan_payment_verification,
+                payment=payment,
                 status=PaymentVerification.STATUS_RECEIVED_WITH_ISSUES,
             )
             EntitlementCardFactory(household=household)
-        cls.verification = cash_plan.get_payment_verification_plans.first()
+        cls.verification = payment_plan.payment_verification_plans.first()
 
-    @mock.patch("hct_mis_api.apps.utils.mailjet.requests.post")
+    @mock.patch("hct_mis_api.apps.utils.celery_tasks.requests.post")
     @override_settings(EMAIL_SUBJECT_PREFIX="test")
     @override_config(SEND_GRIEVANCES_NOTIFICATION=True, ENABLE_MAILJET=True)
     def test_create_tickets_with_admin2_same_as_in_household(self, mocked_requests_post: Any) -> None:

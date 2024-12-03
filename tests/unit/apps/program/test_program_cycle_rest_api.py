@@ -177,7 +177,7 @@ class ProgramCycleAPITestCase(HOPEApiTestCase):
         )
         # create TP and PP
         tp = TargetPopulationFactory(program_cycle=cycle3, program=self.program)
-        pp = PaymentPlanFactory(program_cycle=cycle3, target_population=tp, program=self.program)
+        pp = PaymentPlanFactory(program_cycle=cycle3, target_population=tp)
         self.assertEqual(TargetPopulation.objects.count(), 1)
         self.assertEqual(ProgramCycle.objects.count(), 4)
         self.client.force_authenticate(user=self.user)

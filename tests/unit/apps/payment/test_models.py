@@ -228,13 +228,12 @@ class TestPaymentPlanModel(TestCase):
         program = RealProgramFactory()
         program_cycle = program.cycles.first()
 
-        pp1 = PaymentPlanFactory(program=program, program_cycle=program_cycle)
+        pp1 = PaymentPlanFactory(program_cycle=program_cycle)
         self.assertEqual(pp1.can_be_locked, False)
 
         # create hard conflicted payment
         pp1_conflicted = PaymentPlanFactory(
             status=PaymentPlan.Status.LOCKED,
-            program=program,
             program_cycle=program_cycle,
         )
         p1 = PaymentFactory(parent=pp1, conflicted=False, currency="PLN")
@@ -311,23 +310,20 @@ class TestPaymentModel(TestCase):
         program = RealProgramFactory()
         program_cycle = program.cycles.first()
 
-        pp1 = PaymentPlanFactory(program=program, program_cycle=program_cycle)
+        pp1 = PaymentPlanFactory(program_cycle=program_cycle)
 
         # create hard conflicted payment
         pp2 = PaymentPlanFactory(
             status=PaymentPlan.Status.LOCKED,
-            program=program,
             program_cycle=program_cycle,
         )
         # create soft conflicted payments
         pp3 = PaymentPlanFactory(
             status=PaymentPlan.Status.OPEN,
-            program=program,
             program_cycle=program_cycle,
         )
         pp4 = PaymentPlanFactory(
             status=PaymentPlan.Status.OPEN,
-            program=program,
             program_cycle=program_cycle,
         )
         p1 = PaymentFactory(parent=pp1, conflicted=False, currency="PLN")
@@ -614,11 +610,11 @@ class TestFinancialServiceProviderModel(TestCase):
         size = fsp_xlsx_template.get_column_from_core_field(payment, "size")
         self.assertEqual(size, 1)
         admin1 = fsp_xlsx_template.get_column_from_core_field(payment, "admin1")
-        self.assertEqual(admin1, f"{area1.p_code}")
+        self.assertEqual(admin1, f"{area1.p_code} - {area1.name}")
         admin2 = fsp_xlsx_template.get_column_from_core_field(payment, "admin2")
-        self.assertEqual(admin2, f"{area2.p_code}")
+        self.assertEqual(admin2, f"{area2.p_code} - {area2.name}")
         admin3 = fsp_xlsx_template.get_column_from_core_field(payment, "admin3")
-        self.assertEqual(admin3, f"{area3.p_code}")
+        self.assertEqual(admin3, f"{area3.p_code} - {area3.name}")
         given_name = fsp_xlsx_template.get_column_from_core_field(payment, "given_name")
         self.assertEqual(given_name, primary.given_name)
         ind_unicef_id = fsp_xlsx_template.get_column_from_core_field(payment, "individual_unicef_id")

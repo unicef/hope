@@ -33,7 +33,9 @@ class TestPaymentNotification(APITestCase):
         cls.program = ProgramFactory.create(business_area=cls.business_area)
         cls.program2 = ProgramFactory.create(business_area=cls.business_area)
         cls.payment_plan = PaymentPlanFactory.create(
-            business_area=cls.business_area, created_by=cls.user_payment_plan_creator, program=cls.program
+            business_area=cls.business_area,
+            created_by=cls.user_payment_plan_creator,
+            program_cycle=cls.program.cycles.first(),
         )
 
         cls.approval_process = ApprovalProcessFactory.create(
@@ -263,7 +265,7 @@ class TestPaymentNotification(APITestCase):
         payment_notification.send_email_notification()
         self.assertEqual(
             mock_send.call_count,
-            3,
+            1,
         )
 
     @mock.patch("hct_mis_api.apps.payment.notifications.MailjetClient.send_email")
@@ -276,8 +278,7 @@ class TestPaymentNotification(APITestCase):
             self.user_action_user,
             f"{timezone.now():%-d %B %Y}",
         )
-        for mailjet_client in payment_notification.emails:
-            self.assertEqual(mailjet_client.subject, "[test] Payment pending for Approval")
+        self.assertEqual(payment_notification.email.subject, "[test] Payment pending for Approval")
 
     @mock.patch("hct_mis_api.apps.payment.notifications.MailjetClient.send_email")
     @override_config(SEND_PAYMENT_PLANS_NOTIFICATION=True)
@@ -289,10 +290,9 @@ class TestPaymentNotification(APITestCase):
             self.user_action_user,
             f"{timezone.now():%-d %B %Y}",
         )
-        for mailjet_client in payment_notification.emails:
-            self.assertEqual(mailjet_client.subject, "Payment pending for Approval")
+        self.assertEqual(payment_notification.email.subject, "Payment pending for Approval")
 
-    @mock.patch("hct_mis_api.apps.utils.mailjet.requests.post")
+    @mock.patch("hct_mis_api.apps.utils.celery_tasks.requests.post")
     @override_config(
         SEND_PAYMENT_PLANS_NOTIFICATION=True, ENABLE_MAILJET=True, MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION=1
     )
@@ -305,17 +305,21 @@ class TestPaymentNotification(APITestCase):
             f"{timezone.now():%-d %B %Y}",
         )
         payment_notification.send_email_notification()
-        for mailjet_client in payment_notification.emails:
-            self.assertEqual(
-                mailjet_client.recipients,
-                ["catchallemail@email.com", "catchallemail2@email.com"],
-            )
+        self.assertEqual(len(payment_notification.email.recipients), 2)
+        self.assertIn(
+            "catchallemail@email.com",
+            payment_notification.email.recipients,
+        )
+        self.assertIn(
+            "catchallemail2@email.com",
+            payment_notification.email.recipients,
+        )
         self.assertEqual(
             mock_post.call_count,
-            3,
+            1,
         )
 
-    @mock.patch("hct_mis_api.apps.utils.mailjet.requests.post")
+    @mock.patch("hct_mis_api.apps.utils.celery_tasks.requests.post")
     @override_config(
         SEND_PAYMENT_PLANS_NOTIFICATION=True, ENABLE_MAILJET=True, MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION=1
     )
@@ -327,21 +331,25 @@ class TestPaymentNotification(APITestCase):
             f"{timezone.now():%-d %B %Y}",
         )
         payment_notification.send_email_notification()
-        for mailjet_client in payment_notification.emails:
-            self.assertIn(
-                mailjet_client.recipients[0],
-                [
-                    self.user_with_approval_permission_partner_unicef.email,
-                    self.user_with_approval_permission_partner_with_program_access.email,
-                    self.user_with_partner_action_permissions_and_program_access.email,
-                ],
-            )
+        self.assertEqual(len(payment_notification.email.recipients), 3)
+        self.assertIn(
+            self.user_with_approval_permission_partner_unicef.email,
+            payment_notification.email.recipients,
+        )
+        self.assertIn(
+            self.user_with_approval_permission_partner_with_program_access.email,
+            payment_notification.email.recipients,
+        )
+        self.assertIn(
+            self.user_with_partner_action_permissions_and_program_access.email,
+            payment_notification.email.recipients,
+        )
         self.assertEqual(
             mock_post.call_count,
-            3,
+            1,
         )
 
-    @mock.patch("hct_mis_api.apps.utils.mailjet.requests.post")
+    @mock.patch("hct_mis_api.apps.utils.celery_tasks.requests.post")
     @override_config(
         SEND_PAYMENT_PLANS_NOTIFICATION=True, ENABLE_MAILJET=True, MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION=1
     )
@@ -356,16 +364,16 @@ class TestPaymentNotification(APITestCase):
             f"{timezone.now():%-d %B %Y}",
         )
         payment_notification.send_email_notification()
-        for mailjet_client in payment_notification.emails:
-            self.assertIn(
-                mailjet_client.recipients[0],
-                [
-                    self.user_with_approval_permission_partner_with_program_access.email,
-                    self.user_with_partner_action_permissions_and_program_access.email,
-                ],
-            )
-        self.assertNotIn(self.user_with_approval_permission_partner_unicef.email, payment_notification.emails)
+        self.assertEqual(len(payment_notification.email.recipients), 2)
+        self.assertIn(
+            self.user_with_approval_permission_partner_with_program_access.email,
+            payment_notification.email.recipients,
+        )
+        self.assertIn(
+            self.user_with_partner_action_permissions_and_program_access.email,
+            payment_notification.email.recipients,
+        )
         self.assertEqual(
             mock_post.call_count,
-            2,
+            1,
         )

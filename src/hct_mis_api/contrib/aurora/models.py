@@ -7,10 +7,11 @@ import swapper
 from strategy_field.fields import StrategyField
 
 from hct_mis_api.apps.registration_datahub.utils import combine_collections
+from hct_mis_api.apps.utils.models import TimeStampedModel
 from hct_mis_api.contrib.aurora.rdi import registry
 
 
-class AuroraModel(models.Model):
+class AuroraModel(TimeStampedModel):
     source_id = models.BigIntegerField()
 
     class Meta:

@@ -91,7 +91,7 @@ class VerificationPlanStatusChangeServices:
         api = RapidProAPI(business_area_slug, RapidProAPI.MODE_VERIFICATION)
 
         hoh_ids = [
-            pv.payment_obj.household.head_of_household.pk
+            pv.payment.household.head_of_household.pk
             for pv in self.payment_verification_plan.payment_record_verifications.filter(sent_to_rapid_pro=False)
         ]
         individuals = Individual.objects.filter(pk__in=hoh_ids)
@@ -107,7 +107,7 @@ class VerificationPlanStatusChangeServices:
 
         payment_verifications_to_upd = []
         for pv in self.payment_verification_plan.payment_record_verifications.all():
-            if pv.payment_obj.head_of_household in processed_individuals:
+            if pv.payment.head_of_household in processed_individuals:
                 pv.sent_to_rapid_pro = True
                 payment_verifications_to_upd.append(pv)
         PaymentVerification.objects.bulk_update(payment_verifications_to_upd, ("sent_to_rapid_pro",), 1000)
@@ -137,7 +137,7 @@ class VerificationPlanStatusChangeServices:
         if verifications.count() == 0:
             return
 
-        business_area = payment_verification_plan.payment_plan_obj.business_area
+        business_area = payment_verification_plan.payment_plan.business_area
         grievance_ticket_list = []
         tickets_programs = []
         GrievanceTicketProgramThrough = GrievanceTicket.programs.through
@@ -145,12 +145,12 @@ class VerificationPlanStatusChangeServices:
             grievance_ticket = GrievanceTicket(
                 category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION,
                 business_area=business_area,
-                household_unicef_id=verification.payment_obj.household.unicef_id,
-                admin2_id=verification.payment_obj.household.admin2_id,
+                household_unicef_id=verification.payment.household.unicef_id,
+                admin2_id=verification.payment.household.admin2_id,
             )
             grievance_ticket_list.append(grievance_ticket)
             # get program from parent GenericPaymentPlan.program
-            program = verification.payment_obj.parent.program
+            program = verification.payment.parent.program
 
             tickets_programs.append(
                 GrievanceTicketProgramThrough(grievanceticket=grievance_ticket, program_id=program.id)

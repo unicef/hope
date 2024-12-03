@@ -474,11 +474,11 @@ def is_valid_uuid(uuid_str: str) -> bool:
 
 
 def decode_and_get_payment_object(encoded_id: str, required: bool) -> Optional[Any]:
-    from hct_mis_api.apps.payment.utils import get_payment_items_sequence_qs
+    from hct_mis_api.apps.payment.models import Payment
 
     if required or encoded_id is not None:
         decoded_id = decode_id_string(encoded_id)
-        qs = get_payment_items_sequence_qs()
+        qs = Payment.objects.filter(excluded=False, conflicted=False)
         try:
             return qs.get(id=decoded_id)
         except Exception:

@@ -221,7 +221,7 @@ snapshots['TestTargetPopulationQuery::test_simple_target_query_0_with_permission
             'targetingCriteria': {
                 'rules': [
                     {
-                        'filters': [
+                        'householdsFiltersBlocks': [
                             {
                                 'arguments': [
                                     1
@@ -276,7 +276,7 @@ snapshots['TestTargetPopulationQuery::test_simple_target_query_individual_filter
             'targetingCriteria': {
                 'rules': [
                     {
-                        'filters': [
+                        'householdsFiltersBlocks': [
                         ],
                         'individualsFiltersBlocks': [
                             {
@@ -336,7 +336,7 @@ snapshots['TestTargetPopulationQuery::test_simple_target_query_next_0_with_permi
             'targetingCriteria': {
                 'rules': [
                     {
-                        'filters': [
+                        'householdsFiltersBlocks': [
                             {
                                 'arguments': [
                                     'REFUGEE'
@@ -391,7 +391,7 @@ snapshots['TestTargetPopulationQuery::test_simple_target_query_pdu_0_with_permis
             'targetingCriteria': {
                 'rules': [
                     {
-                        'filters': [
+                        'householdsFiltersBlocks': [
                         ],
                         'individualsFiltersBlocks': [
                             {
@@ -451,7 +451,7 @@ snapshots['TestTargetPopulationQuery::test_simple_target_query_pdu_for_sw_progra
             'targetingCriteria': {
                 'rules': [
                     {
-                        'filters': [
+                        'householdsFiltersBlocks': [
                             {
                                 'arguments': [
                                     'Test'
