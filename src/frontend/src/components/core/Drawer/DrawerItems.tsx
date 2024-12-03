@@ -131,7 +131,7 @@ export const DrawerItems = ({
     }
 
     return array.map((item, index) => {
-      if (index === 2) {
+      if (index === 2 && !isAllPrograms) {
         item.name = _beneficiaryGroup.name;
         if (item.secondaryActions) {
           item.secondaryActions = item.secondaryActions.map(
