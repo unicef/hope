@@ -10,9 +10,9 @@ from hct_mis_api.apps.grievance.services.reassign_roles_services import (
 )
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.household.models import (
+    RELATIONSHIP_UNKNOWN,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
-    UNKNOWN,
     Individual,
     IndividualRoleInHousehold,
 )
@@ -97,7 +97,7 @@ class TestReassignRolesOnUpdate(APITestCase):
         self.household.refresh_from_db()
         self.assertEqual(self.household.head_of_household, self.no_role_individual)
         for individual in self.household.individuals.exclude(id=self.no_role_individual.id):
-            self.assertEqual(individual.relationship, UNKNOWN)
+            self.assertEqual(individual.relationship, RELATIONSHIP_UNKNOWN)
 
     def test_reassign_roles_on_marking_as_duplicate_individual_service_wrong_program(self) -> None:
         program_two = ProgramFactory(name="Test program TWO", business_area=self.business_area)
