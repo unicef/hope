@@ -356,20 +356,23 @@ class RoleAssignment(NaturalKeyModel, TimeStampedUUIDModel):
 
     def clean(self) -> None:
         super().clean()
+        errors = []
         # Ensure either user or partner is set, but not both
         if bool(self.user) == bool(self.partner):
-            raise ValidationError("Either user or partner must be set, but not both.")
+            errors.append("Either user or partner must be set, but not both.")
         # Ensure program and areas can only be assigned for partner roles; not for user roles
         if self.user and (self.program or self.areas.exists()):
-            raise ValidationError("Program and areas can only be assigned for partner roles; not for user roles.")
+            errors.append("Program and areas can only be assigned for partner roles; not for user roles.")
         # Ensure user role assignment is unique within the business area
         if self.user and RoleAssignment.objects.filter(
             business_area=self.business_area, role=self.role, user=self.user
         ).exclude(id=self.id).exists():
-            raise ValidationError("This role is already assigned to the user in the business area.")
+            errors.append("This role is already assigned to the user in the business area.")
         # Ensure partner can only be assigned roles that have flag is_available_for_partner as True
         if self.partner and self.role and not self.role.is_available_for_partner:
-            raise ValidationError("Partner can only be assigned roles that are available for partners.")
+            errors.append("Partner can only be assigned roles that are available for partners.")
+        if errors:
+            raise ValidationError(errors)
 
     def save(self, *args: Any, **kwargs: Any) -> None:
         self.clean()
