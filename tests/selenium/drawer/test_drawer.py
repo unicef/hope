@@ -19,7 +19,7 @@ pytestmark = pytest.mark.django_db()
 
 @pytest.fixture
 def social_worker_program() -> Program:
-    yield get_program_with_dct_type_and_name("Worker Program", "WORK", DataCollectingType.Type.SOCIAL)
+    yield get_social_program_with_dct_type_and_name("Worker Program", "WORK", DataCollectingType.Type.SOCIAL)
 
 
 @pytest.fixture
@@ -56,6 +56,22 @@ def get_program_with_dct_type_and_name(
         data_collecting_type=dct,
         status=status,
         beneficiary_group=beneficiary_group,
+    )
+    return program
+
+
+def get_social_program_with_dct_type_and_name(
+    name: str, programme_code: str, dct_type: str = DataCollectingType.Type.SOCIAL, status: str = Program.ACTIVE
+) -> Program:
+    BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
+    dct = DataCollectingTypeFactory(type=dct_type)
+    program = ProgramFactory(
+        name=name,
+        programme_code=programme_code,
+        start_date=datetime.now() - relativedelta(months=1),
+        end_date=datetime.now() + relativedelta(months=1),
+        data_collecting_type=dct,
+        status=status,
     )
     return program
 

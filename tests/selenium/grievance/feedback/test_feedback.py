@@ -53,6 +53,13 @@ def create_programs() -> None:
         data_collecting_type=dct,
         beneficiary_group=beneficiary_group,
     )
+    ProgramFactory(
+        name="Draft Program",
+        status=Program.DRAFT,
+        business_area=business_area,
+        data_collecting_type=dct,
+        beneficiary_group=beneficiary_group,
+    )
 
 
 @pytest.fixture
