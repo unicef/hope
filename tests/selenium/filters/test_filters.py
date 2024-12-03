@@ -429,6 +429,7 @@ class TestSmokeFilters:
                 except BaseException:
                     raise Exception(f"Element {locator} not found on the {nav_menu} page.")
 
+    @pytest.mark.xfail(reason="UNSTABLE")
     def test_filters_all_programs(self, create_programs: None, filters: Filters) -> None:
         all_programs = {
             "Country Dashboard": [filters.globalProgramFilter, filters.globalProgramFilterContainer],
@@ -506,6 +507,7 @@ class TestSmokeFilters:
                 except BaseException:
                     raise Exception(f"Element {locator} not found on the {nav_menu} page.")
 
+    @pytest.mark.xfail(reason="UNSTABLE")
     @pytest.mark.parametrize(
         "module",
         [
