@@ -9,6 +9,7 @@ import {
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './PaymentRecordAndPaymentPeopleTableHeadCells';
 import { PaymentRecordAndPaymentPeopleTableRow } from './PaymentRecordAndPaymentPeopleTableRow';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface PaymentRecordHouseholdTableProps {
   household?: HouseholdNode;
@@ -23,14 +24,18 @@ export function PaymentRecordAndPaymentPeopleTable({
   canViewPaymentRecordDetails,
 }: PaymentRecordHouseholdTableProps): ReactElement {
   const { t } = useTranslation();
+  const { programId } = useBaseUrl();
+
   const initialVariables = {
     household: household?.id,
     businessArea,
+    program: programId,
   };
+
   return (
     <UniversalTable<
-    PaymentRecordAndPaymentNode,
-    AllPaymentRecordsAndPaymentsQueryVariables
+      PaymentRecordAndPaymentNode,
+      AllPaymentRecordsAndPaymentsQueryVariables
     >
       title={t('Payment Records')}
       headCells={headCells}

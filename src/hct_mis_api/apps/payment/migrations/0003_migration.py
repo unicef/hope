@@ -41,18 +41,6 @@ class Migration(migrations.Migration):
             name="internal_data",
             field=models.JSONField(default=dict),
         ),
-        migrations.RemoveConstraint(
-            model_name="payment",
-            name="payment_plan_and_household",
-        ),
-        migrations.AddConstraint(
-            model_name="payment",
-            constraint=models.UniqueConstraint(
-                condition=models.Q(("is_cash_assist", False)),
-                fields=("parent", "household"),
-                name="payment_plan_and_household",
-            ),
-        ),
         migrations.AddField(
             model_name="financialserviceprovider",
             name="internal_data",
@@ -120,14 +108,5 @@ class Migration(migrations.Migration):
             model_name='paymentverificationsummary',
             name='payment_plan_object_id',
             field=models.UUIDField(null=True),
-        ),
-        migrations.RemoveConstraint(
-            model_name='payment',
-            name='payment_plan_and_household',
-        ),
-        migrations.AddConstraint(
-            model_name='payment',
-            constraint=models.UniqueConstraint(condition=models.Q(('is_removed', False), ('is_cash_assist', False)),
-                                               fields=('parent', 'household'), name='payment_plan_and_household'),
         ),
     ]
