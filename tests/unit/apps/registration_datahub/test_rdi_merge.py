@@ -524,7 +524,7 @@ class TestRdiMergeTask(TestCase):
                 "family_name": "Collector",
                 "relationship": NON_BENEFICIARY,
                 "birth_date": "1962-02-02",  # age 39
-                "sex": "MALE",
+                "sex": "OTHER",
                 "registration_data_import": self.rdi,
                 "email": "xd@com",
             }

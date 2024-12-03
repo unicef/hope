@@ -14,6 +14,7 @@ from hct_mis_api.apps.household.models import (
     FEMALE,
     HEAD,
     MALE,
+    OTHER,
     SON_DAUGHTER,
     WIFE_HUSBAND,
     XlsxUpdateFile,
@@ -119,7 +120,7 @@ class TestIndividualXlsxUpdate(APITestCase):
                 "phone_no": "934-25-25-121",
                 "phone_no_alternative": "",
                 "relationship": SON_DAUGHTER,
-                "sex": FEMALE,
+                "sex": OTHER,
                 "birth_date": "1985-08-12",
             },
             {
