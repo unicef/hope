@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
 
 class PermissionsBackend(BaseBackend):
-    def get_all_user_permissions(self, user: "User", obj: "Model|None" = None) -> set[str]:
+    def get_all_permissions(self, user: "User", obj: "Model|None" = None) -> set[str]:
         if not obj:
             program = None
             business_area = None
@@ -53,6 +53,14 @@ class PermissionsBackend(BaseBackend):
         if cached_permissions:
             return cached_permissions
 
+        # If user does not have access to program, return empty set
+        if program and not RoleAssignment.objects.filter(
+                partner=user.partner,
+                program=program,
+                expiry_date__gt=timezone.now()
+        ).exists():
+            return set()
+
         """
         The permissions are fetched from:
         * the user's Group
@@ -71,7 +79,7 @@ class PermissionsBackend(BaseBackend):
         role_assignments = RoleAssignment.objects.filter(
             (Q(user=user) | Q(partner__user=user))
             & (Q(business_area=filters.get('business_area'), program=None) | Q(**filters))
-        ).exclude(expiry_date__lt=timezone.now())
+        ).exclude(expiry_date__gt=timezone.now())
 
         # permissions from the RoleAssignments' Groups
         role_group_permissions = Permission.objects.filter(
@@ -94,6 +102,3 @@ class PermissionsBackend(BaseBackend):
         if isinstance(user_obj, AnonymousUser):
             return False
         return super().has_perm(user_obj, perm, obj)
-
-    def get_all_permissions(self, user_obj: "User", obj: "Model|None" = None) -> set[str]:
-        return self.get_all_user_permissions(user_obj, obj)

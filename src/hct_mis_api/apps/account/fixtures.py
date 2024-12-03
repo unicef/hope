@@ -66,9 +66,10 @@ class RoleFactory(DjangoModelFactory):
 
 class RoleAssignmentFactory(DjangoModelFactory):
     user = factory.SubFactory(UserFactory)
+    partner = factory.SubFactory(PartnerFactory, user=None)
     role = factory.SubFactory(RoleFactory)
     business_area = factory.SubFactory(BusinessAreaFactory)
 
     class Meta:
         model = RoleAssignment
-        django_get_or_create = ("user", "role")
+        django_get_or_create = ("user", "partner", "role")

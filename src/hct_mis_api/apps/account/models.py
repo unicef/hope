@@ -336,12 +336,12 @@ class RoleAssignment(NaturalKeyModel, TimeStampedUUIDModel):
         constraints = [
             # either user or partner should be assigned; not both
             models.CheckConstraint(
-                check=(Q(user__isnull=False, partner__isnull=True) | Q(user__isnull=True, partner__isnull=False)),
+                check=Q(user__isnull=False, partner__isnull=True) | Q(user__isnull=True, partner__isnull=False),
                 name="user_or_partner_not_both"
             ),
-            # program and areas can only be assigned for partner roles; not for user roles
+            # program can only be assigned for partner roles; not for user roles
             models.CheckConstraint(
-                check=Q(user__isnull=True) | (Q(user__isnull=False) & Q(program__isnull=True) & Q(areas__isnull=True)),
+                check=Q(user__isnull=True) | (Q(user__isnull=False) & Q(program__isnull=True)),
                 name="program_and_areas_null_for_user"
             ),
             # unique combination of user, role, and business_area; applies only when a user is assigned, not a partner.
@@ -351,11 +351,6 @@ class RoleAssignment(NaturalKeyModel, TimeStampedUUIDModel):
                 fields=["business_area", "role", "user"],
                 condition=Q(user__isnull=False),
                 name="unique_user_role_assignment"
-            ),
-            # Partner can only be assigned roles that have flag is_available_for_partner as True
-            models.CheckConstraint(
-                check=Q(partner__isnull=True) | Q(role__is_available_for_partner=True),
-                name="partner_only_available_roles"
             ),
         ]
 
@@ -372,6 +367,9 @@ class RoleAssignment(NaturalKeyModel, TimeStampedUUIDModel):
             business_area=self.business_area, role=self.role, user=self.user
         ).exclude(id=self.id).exists():
             raise ValidationError("This role is already assigned to the user in the business area.")
+        # Ensure partner can only be assigned roles that have flag is_available_for_partner as True
+        if self.partner and not self.role.is_available_for_partner:
+            raise ValidationError("Partner can only be assigned roles that are available for partners.")
 
     def save(self, *args: Any, **kwargs: Any) -> None:
         self.clean()
