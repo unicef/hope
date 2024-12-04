@@ -140,9 +140,8 @@ class TestPaymentPlanModel(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        create_afghanistan()
+        cls.business_area = create_afghanistan()
         cls.user = UserFactory()
-        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
     def test_create(self) -> None:
         pp = PaymentPlanFactory(created_by=self.user)

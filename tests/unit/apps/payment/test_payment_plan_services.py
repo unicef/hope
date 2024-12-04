@@ -1,4 +1,5 @@
 from datetime import timedelta
+from decimal import Decimal
 from typing import Any
 from unittest import mock
 from unittest.mock import patch
@@ -15,6 +16,7 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.household.fixtures import (
     HouseholdFactory,
@@ -408,6 +410,22 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(
             {follow_up_payment.source_payment.id},
             set(follow_up_pp_2.payment_items.values_list("source_payment_id", flat=True)),
+        )
+
+    def test_create_follow_up_pp_from_follow_up_validation(self) -> None:
+        payment_plan = PaymentPlanFactory(
+            program_cycle=self.cycle,
+            created_by=self.user,
+            status=PaymentPlan.Status.FINISHED,
+            is_follow_up=True,
+        )
+        dispersion_start_date = (payment_plan.dispersion_start_date + timedelta(days=1)).date()
+        dispersion_end_date = (payment_plan.dispersion_end_date + timedelta(days=1)).date()
+        with self.assertRaises(GraphQLError) as e:
+            PaymentPlanService(payment_plan).create_follow_up(self.user, dispersion_start_date, dispersion_end_date)
+        self.assertEqual(
+            e.exception.message,
+            "Cannot create a follow-up of a follow-up Payment Plan",
         )
 
     @flaky(max_runs=5, min_passes=1)
@@ -847,13 +865,77 @@ class TestPaymentPlanServices(APITestCase):
         )
 
     def test_rebuild_payment_plan_population(self) -> None:
-        PaymentPlanService.rebuild_payment_plan_population(
-            rebuild_list=False, rebuild_stats=True, payment_plan=self.payment_plan
+        pp = PaymentPlanFactory(
+            name="test_data",
+            program_cycle=self.cycle,
+            created_by=self.user,
+            status=PaymentPlan.Status.TP_OPEN,
         )
 
-        PaymentPlanService.rebuild_payment_plan_population(
-            rebuild_list=True, rebuild_stats=False, payment_plan=self.payment_plan
+        PaymentPlanService.rebuild_payment_plan_population(rebuild_list=False, rebuild_stats=True, payment_plan=pp)
+        PaymentPlanService.rebuild_payment_plan_population(rebuild_list=True, rebuild_stats=False, payment_plan=pp)
+
+        self.payment_plan.refresh_from_db(fields=("build_status",))
+        self.assertEqual(pp.build_status, PaymentPlan.BuildStatus.BUILD_STATUS_PENDING)
+
+    def test_unlock_fsp(self) -> None:
+        payment_plan = PaymentPlanFactory(
+            program_cycle=self.cycle,
+            created_by=self.user,
+            status=PaymentPlan.Status.LOCKED_FSP,
         )
+
+        PaymentPlanService(payment_plan).unlock_fsp()
+
+        payment_plan.refresh_from_db(fields=("status",))
+        self.assertEqual(payment_plan.status, PaymentPlan.Status.LOCKED)
+
+    def test_update_pp_program_cycle(self) -> None:
+        new_cycle = ProgramCycleFactory(program=self.program, title="New Cycle ABC")
+        program_cycle_id = self.id_to_base64(new_cycle.id, "ProgramCycleNode")
+
+        PaymentPlanService(self.payment_plan).update({"program_cycle_id": program_cycle_id})
 
         self.payment_plan.refresh_from_db()
-        self.assertEqual(self.payment_plan.build_status, PaymentPlan.BuildStatus.BUILD_STATUS_PENDING)
+        self.assertEqual(self.payment_plan.program_cycle.title, "New Cycle ABC")
+
+    def test_update_pp_vulnerability_score(self) -> None:
+        PaymentPlanService(self.payment_plan).update(
+            {"vulnerability_score_min": "11.229222", "vulnerability_score_max": "77.889777"}
+        )
+        self.payment_plan.refresh_from_db(fields=("vulnerability_score_min", "vulnerability_score_max"))
+        self.assertEqual(self.payment_plan.vulnerability_score_min, Decimal("11.229"))
+        self.assertEqual(self.payment_plan.vulnerability_score_max, Decimal("77.890"))
+
+    def test_update_pp_exclude_ids(self) -> None:
+        payment_plan = PaymentPlanFactory(
+            program_cycle=self.cycle,
+            created_by=self.user,
+            status=PaymentPlan.Status.TP_OPEN,
+        )
+        PaymentPlanService(payment_plan).update({"excluded_ids": "IND-123", "exclusion_reason": "Test text"})
+        payment_plan.refresh_from_db(fields=("excluded_ids", "exclusion_reason"))
+        self.assertEqual(payment_plan.excluded_ids, "IND-123")
+        self.assertEqual(payment_plan.exclusion_reason, "Test text")
+
+    def test_update_pp_currency(self) -> None:
+        payment_plan = PaymentPlanFactory(
+            program_cycle=self.cycle,
+            created_by=self.user,
+            status=PaymentPlan.Status.OPEN,
+            currency="AMD",
+        )
+        PaymentPlanService(payment_plan).update({"currency": "PLN"})
+        payment_plan.refresh_from_db()
+        self.assertEqual(payment_plan.currency, "PLN")
+
+    def test_export_xlsx(self) -> None:
+        payment_plan = PaymentPlanFactory(
+            program_cycle=self.cycle, created_by=self.user, status=PaymentPlan.Status.LOCKED
+        )
+        self.assertEqual(FileTemp.objects.all().count(), 0)
+
+        PaymentPlanService(payment_plan).export_xlsx(self.user.pk)
+
+        self.assertEqual(FileTemp.objects.all().count(), 1)
+        self.assertEqual(FileTemp.objects.first().object_id, str(payment_plan.pk))

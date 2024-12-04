@@ -49,7 +49,7 @@ from hct_mis_api.apps.targeting.models import TargetingCriteria
 from hct_mis_api.apps.targeting.services.utils import from_input_to_targeting_criteria
 from hct_mis_api.apps.targeting.validators import TargetingCriteriaInputValidator
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from uuid import UUID
 
     from hct_mis_api.apps.account.models import User
@@ -404,7 +404,7 @@ class PaymentPlanService:
             .values("pk", "collector", "unicef_id", "head_of_household")
         )
         for household in households:
-            collector_id = household["collector"]
+            collector_id = household.get("collector")
             if not collector_id:
                 msg = f"Couldn't find a primary collector in {household['unicef_id']}"
                 logging.exception(msg)
@@ -573,8 +573,9 @@ class PaymentPlanService:
                 raise GraphQLError(f"Dispersion End Date [{dispersion_end_date}] cannot be a past date")
             self.payment_plan.dispersion_end_date = dispersion_end_date
 
-        if input_data.get("currency") and input_data["currency"] != self.payment_plan.currency:
-            self.payment_plan.currency = input_data["currency"]
+        new_currency = input_data.get("currency")
+        if new_currency and new_currency != self.payment_plan.currency:
+            self.payment_plan.currency = new_currency
             should_rebuild_list = True
             should_rebuild_stats = True
 
@@ -610,7 +611,7 @@ class PaymentPlanService:
         self.payment_plan.background_action_status_xlsx_exporting()
         self.payment_plan.save()
 
-        create_payment_plan_payment_list_xlsx.delay(payment_plan_id=self.payment_plan.pk, user_id=user_id)
+        create_payment_plan_payment_list_xlsx.delay(payment_plan_id=str(self.payment_plan.pk), user_id=str(user_id))
         self.payment_plan.refresh_from_db(fields=["background_action_status"])
         return self.payment_plan
 
