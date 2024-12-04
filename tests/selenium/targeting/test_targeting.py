@@ -998,7 +998,7 @@ class TestTargeting:
             pytest.param(
                 {
                     "type": "STANDARD",
-                    "text": "Exclude Households with Active Adjudication Ticket",
+                    "text": "Exclude Items Groups with Active Adjudication Ticket",
                 },
                 id="Programme population",
             ),
