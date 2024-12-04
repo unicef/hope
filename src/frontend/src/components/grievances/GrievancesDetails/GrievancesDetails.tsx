@@ -23,6 +23,7 @@ import {
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
+import { replaceLabels } from '../utils/createGrievanceUtils';
 
 interface GrievancesDetailsProps {
   ticket: GrievanceTicketQuery['grievanceTicket'];
@@ -249,7 +250,9 @@ export function GrievancesDetails({
               },
               showIssueType && {
                 label: t('Issue Type'),
-                value: <span>{issueType}</span>,
+                value: (
+                  <span>{replaceLabels(issueType, beneficiaryGroup)}</span>
+                ),
                 size: 3,
               },
               !isAllPrograms && {

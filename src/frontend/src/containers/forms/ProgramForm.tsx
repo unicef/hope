@@ -41,15 +41,14 @@ export const ProgramForm = ({
 
   const mappedBeneficiaryGroupsData = useMemo(() => {
     if (!beneficiaryGroupsData?.results) return [];
-
-    const filteredData =
+    const filteredBeneficiaryGroups =
       values.dataCollectingTypeCode === 'partial'
         ? beneficiaryGroupsData.results.filter(
-            (el) => el.masterDetail === false,
+            (el) => el.master_detail === false,
           )
         : beneficiaryGroupsData.results;
 
-    return filteredData.map((el) => ({
+    return filteredBeneficiaryGroups.map((el) => ({
       name: el.name,
       value: el.id,
     }));

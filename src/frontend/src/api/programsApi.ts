@@ -3,11 +3,11 @@ import { api } from './api';
 interface BeneficiaryGroup {
   id: string;
   name: string;
-  groupLabel: string;
-  groupLabelPlural: string;
-  memberLabel: string;
-  memberLabelPlural: string;
-  masterDetail: boolean;
+  group_label: string;
+  group_label_plural: string;
+  member_label: string;
+  member_label_plural: string;
+  master_detail: boolean;
 }
 
 export interface PaginatedListResponse<T> {
