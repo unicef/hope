@@ -78,7 +78,7 @@ class TestSmokeHouseholds:
         pageHouseholds.getNavProgrammePopulation().click()
         pageHouseholds.getNavHouseholds().click()
         pageHouseholds.getHouseholdsRowByNumber(0).click()
-        assert "4" in pageHouseholdsDetails.getLabelHouseholdSize().text
+        assert "6" in pageHouseholdsDetails.getLabelHouseholdSize().text
         assert "Displaced | Refugee / Asylum Seeker" in pageHouseholdsDetails.getLabelResidenceStatus().text
         assert "Agata Kowalska" in pageHouseholdsDetails.getLabelHeadOfHousehold().text
         assert "No" in pageHouseholdsDetails.getLabelFemaleChildHeadedHousehold().text

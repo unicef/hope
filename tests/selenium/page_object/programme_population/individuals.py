@@ -32,7 +32,7 @@ class Individuals(BaseComponents):
     individualLocation = 'th[data-cy="individual-location"]'
     tableRow = 'tr[data-cy="table-row"]'
     tablePagination = 'div[data-cy="table-pagination"]'
-    individualTableRow = 'tr[data-cy="individual-table-row"'
+    individualTableRow = 'tr[data-cy="item-table-row"'
 
     # PDU
     tabPeriodicDataUpdates = 'button[data-cy="tab-periodic-data-updates"]'

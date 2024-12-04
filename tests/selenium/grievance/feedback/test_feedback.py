@@ -379,7 +379,7 @@ class TestFeedback:
         pageNewFeedback.chooseOptionByName("Negative feedback")
         pageNewFeedback.getButtonNext().click()
         pageNewFeedback.getHouseholdTab()
-        pageNewFeedback.getHouseholdTableRows(1).click()
+        pageNewFeedback.getHouseholdTableRows(0).click()
         pageNewFeedback.getIndividualTab().click()
         pageNewFeedback.getIndividualTableRow(2).click()
         pageNewFeedback.getButtonNext().click()
