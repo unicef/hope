@@ -121,7 +121,7 @@ class PaymentPlanService:
         return payment_plan
 
     def validate_action(self) -> None:
-        actions = self.actions_map.keys()
+        actions = list(self.actions_map.keys())
         if self.action not in actions:
             raise GraphQLError(f"Not Implemented Action: {self.action}. List of possible actions: {actions}")
 
@@ -161,7 +161,7 @@ class PaymentPlanService:
 
     def tp_lock(self) -> PaymentPlan:
         if self.payment_plan.status != PaymentPlan.Status.TP_OPEN:
-            raise GraphQLError("Can only Lock Population for Open Population Payment Plan")
+            raise GraphQLError("Can only Lock Population for Open Population status")
 
         self.payment_plan.status = PaymentPlan.Status.TP_LOCKED
         self.payment_plan.build_status_pending()
@@ -172,7 +172,7 @@ class PaymentPlanService:
 
     def tp_unlock(self) -> PaymentPlan:
         if self.payment_plan.status != PaymentPlan.Status.TP_LOCKED:
-            raise GraphQLError("Can only Unlock Population for Locked Population Payment Plan")
+            raise GraphQLError("Can only Unlock Population for Locked Population status")
 
         self.payment_plan.status = PaymentPlan.Status.TP_OPEN
         self.payment_plan.build_status_pending()
@@ -182,8 +182,8 @@ class PaymentPlanService:
         return self.payment_plan
 
     def tp_rebuild(self) -> PaymentPlan:
-        if self.payment_plan.status != PaymentPlan.Status.TP_LOCKED:
-            pass
+        if self.payment_plan.status not in [PaymentPlan.Status.TP_OPEN, PaymentPlan.Status.TP_LOCKED]:
+            raise GraphQLError("Can only Rebuild Population for Locked or Open Population status")
 
         self.payment_plan.build_status_pending()
         self.payment_plan.save(update_fields=("build_status", "built_at"))
@@ -851,11 +851,8 @@ class PaymentPlanService:
         payment_plan.update_population_count_fields()
 
     @staticmethod
-    def rebuild_payment_plan_population(
-        should_rebuild_list: bool, should_rebuild_stats: bool, payment_plan: PaymentPlan
-    ) -> None:
-        rebuild_list = payment_plan.is_population_open() and should_rebuild_list
-        rebuild_stats = (not rebuild_list and should_rebuild_list) or should_rebuild_stats
+    def rebuild_payment_plan_population(rebuild_list: bool, rebuild_stats: bool, payment_plan: PaymentPlan) -> None:
+        rebuild_list = payment_plan.is_population_open() and rebuild_list
         if rebuild_list:
             payment_plan.build_status = PaymentPlan.BuildStatus.BUILD_STATUS_PENDING
             payment_plan.save()

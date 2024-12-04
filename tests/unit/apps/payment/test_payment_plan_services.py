@@ -57,6 +57,12 @@ class TestPaymentPlanServices(APITestCase):
         cls.user = UserFactory.create()
         cls.create_user_role_with_permissions(cls.user, [Permissions.PM_CREATE], cls.business_area)
         cls.dm_transfer_to_account = DeliveryMechanism.objects.get(code="transfer_to_account")
+        cls.program = ProgramFactory(status=Program.ACTIVE)
+        cls.cycle = cls.program.cycles.first()
+
+        cls.payment_plan = PaymentPlanFactory(
+            program_cycle=cls.cycle, created_by=cls.user, status=PaymentPlan.Status.TP_LOCKED
+        )
 
     def test_delete_open(self) -> None:
         program = ProgramFactory(status=Program.ACTIVE)
@@ -687,3 +693,167 @@ class TestPaymentPlanServices(APITestCase):
 
         for p_unicef_id in new_payment_unicef_ids:
             self.assertNotIn(p_unicef_id, old_payment_unicef_ids)
+
+    def test_get_approval_type_by_action_value_error(self) -> None:
+        with self.assertRaises(ValueError) as error:
+            PaymentPlanService(payment_plan=self.payment_plan).get_approval_type_by_action()
+        self.assertEqual(str(error.exception), "Action cannot be None")
+
+    def test_validate_action_not_implemented(self) -> None:
+        with self.assertRaises(GraphQLError) as e:
+            PaymentPlanService(self.payment_plan).execute_update_status_action(
+                input_data={"action": "INVALID_ACTION"}, user=self.user
+            )
+        self.assertEqual(
+            e.exception.message,
+            "Not Implemented Action: INVALID_ACTION. List of possible actions: "
+            "['TP_LOCK', 'TP_UNLOCK', 'TP_REBUILD', 'DRAFT', 'LOCK', 'LOCK_FSP', 'UNLOCK', 'UNLOCK_FSP', "
+            "'SEND_FOR_APPROVAL', 'APPROVE', 'AUTHORIZE', 'REVIEW', 'REJECT', 'SEND_TO_PAYMENT_GATEWAY']",
+        )
+
+    def test_tp_lock_invalid_pp_status(self) -> None:
+        payment_plan = PaymentPlanFactory(
+            program_cycle=self.cycle, created_by=self.user, status=PaymentPlan.Status.DRAFT
+        )
+        with self.assertRaises(GraphQLError) as e:
+            PaymentPlanService(payment_plan).tp_lock()
+        self.assertEqual(
+            e.exception.message,
+            "Can only Lock Population for Open Population status",
+        )
+
+    def test_tp_unlock(self) -> None:
+        payment_plan = PaymentPlanFactory(
+            program_cycle=self.cycle, created_by=self.user, status=PaymentPlan.Status.DRAFT
+        )
+        with self.assertRaises(GraphQLError) as e:
+            PaymentPlanService(payment_plan).tp_unlock()
+        self.assertEqual(
+            e.exception.message,
+            "Can only Unlock Population for Locked Population status",
+        )
+        payment_plan.status = PaymentPlan.Status.TP_LOCKED
+        payment_plan.save()
+        PaymentPlanService(payment_plan).tp_unlock()
+
+        payment_plan.refresh_from_db()
+        self.assertEqual(payment_plan.status, PaymentPlan.Status.TP_OPEN)
+        self.assertEqual(payment_plan.build_status, PaymentPlan.BuildStatus.BUILD_STATUS_PENDING)
+
+    def test_tp_rebuild(self) -> None:
+        payment_plan = PaymentPlanFactory(
+            program_cycle=self.cycle,
+            created_by=self.user,
+            status=PaymentPlan.Status.DRAFT,
+            build_status=PaymentPlan.BuildStatus.BUILD_STATUS_FAILED,
+        )
+        with self.assertRaises(GraphQLError) as e:
+            PaymentPlanService(payment_plan).tp_rebuild()
+        self.assertEqual(
+            e.exception.message,
+            "Can only Rebuild Population for Locked or Open Population status",
+        )
+        payment_plan.status = PaymentPlan.Status.TP_LOCKED
+        payment_plan.save()
+        PaymentPlanService(payment_plan).tp_rebuild()
+
+        payment_plan.refresh_from_db()
+        self.assertEqual(payment_plan.status, PaymentPlan.Status.TP_LOCKED)
+        self.assertEqual(payment_plan.build_status, PaymentPlan.BuildStatus.BUILD_STATUS_PENDING)
+
+    def test_draft_with_invalid_pp_status(self) -> None:
+        payment_plan = PaymentPlanFactory(
+            program_cycle=self.cycle,
+            created_by=self.user,
+            status=PaymentPlan.Status.DRAFT,
+        )
+        with self.assertRaises(GraphQLError) as e:
+            PaymentPlanService(payment_plan).draft()
+        self.assertEqual(
+            e.exception.message,
+            "Only Locked Population status can be moved to next step",
+        )
+
+    def test_lock_if_no_valid_payments(self) -> None:
+        payment_plan = PaymentPlanFactory(
+            program_cycle=self.cycle,
+            created_by=self.user,
+            status=PaymentPlan.Status.OPEN,
+        )
+        with self.assertRaises(GraphQLError) as e:
+            PaymentPlanService(payment_plan).lock()
+        self.assertEqual(
+            e.exception.message,
+            "At least one valid Payment should exist in order to Lock the Payment Plan",
+        )
+
+    def test_update_pp_validation_errors(self) -> None:
+        payment_plan = PaymentPlanFactory(
+            program_cycle=self.cycle,
+            created_by=self.user,
+            status=PaymentPlan.Status.DRAFT,
+        )
+        with self.assertRaises(GraphQLError) as e:
+            PaymentPlanService(payment_plan).update({"exclusion_reason": "test_data"})
+        self.assertEqual(
+            e.exception.message,
+            f"Not Allow edit targeting criteria within status {payment_plan.status}",
+        )
+
+        with self.assertRaises(GraphQLError) as e:
+            PaymentPlanService(payment_plan).update({"vulnerability_score_min": "test_data"})
+        self.assertEqual(
+            e.exception.message,
+            "You can only set vulnerability_score_min and vulnerability_score_max on Locked Population status",
+        )
+
+        with self.assertRaises(GraphQLError) as e:
+            PaymentPlanService(payment_plan).update({"currency": "test_data"})
+        self.assertEqual(
+            e.exception.message,
+            f"Not Allow edit Payment Plan within status {payment_plan.status}",
+        )
+
+        with self.assertRaises(GraphQLError) as e:
+            PaymentPlanService(payment_plan).update({"name": "test_data"})
+        self.assertEqual(
+            e.exception.message,
+            "Name can be changed only within Open status",
+        )
+
+        payment_plan.status = PaymentPlan.Status.TP_OPEN
+        payment_plan.save()
+        PaymentPlanFactory(
+            name="test_data",
+            program_cycle=self.cycle,
+            created_by=self.user,
+            status=PaymentPlan.Status.DRAFT,
+        )
+        with self.assertRaises(GraphQLError) as e:
+            PaymentPlanService(payment_plan).update({"name": "test_data"})
+        self.assertEqual(
+            e.exception.message,
+            f"Name 'test_data' and program '{self.cycle.program.name}' already exists.",
+        )
+
+        self.cycle.status = ProgramCycle.FINISHED
+        self.cycle.save()
+        program_cycle_id = self.id_to_base64(self.cycle.id, "ProgramCycleNode")
+        with self.assertRaises(GraphQLError) as e:
+            PaymentPlanService(payment_plan).update({"program_cycle_id": program_cycle_id})
+        self.assertEqual(
+            e.exception.message,
+            "Not possible to assign Finished Program Cycle",
+        )
+
+    def test_rebuild_payment_plan_population(self) -> None:
+        PaymentPlanService.rebuild_payment_plan_population(
+            rebuild_list=False, rebuild_stats=True, payment_plan=self.payment_plan
+        )
+
+        PaymentPlanService.rebuild_payment_plan_population(
+            rebuild_list=True, rebuild_stats=False, payment_plan=self.payment_plan
+        )
+
+        self.payment_plan.refresh_from_db()
+        self.assertEqual(self.payment_plan.build_status, PaymentPlan.BuildStatus.BUILD_STATUS_PENDING)
