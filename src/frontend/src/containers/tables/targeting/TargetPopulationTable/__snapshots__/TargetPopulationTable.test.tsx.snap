@@ -101,7 +101,7 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
                     role="button"
                     tabindex="0"
                   >
-                    Total Households Count
+                    Num. of Households
                     <svg
                       aria-hidden="true"
                       class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
@@ -544,7 +544,7 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
                     role="button"
                     tabindex="0"
                   >
-                    Total Households Count
+                    Num. of Households
                     <svg
                       aria-hidden="true"
                       class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
