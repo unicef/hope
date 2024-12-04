@@ -589,7 +589,7 @@ def create_super_user(business_area: BusinessArea) -> User:
     for partner in Partner.objects.exclude(name="UNICEF"):
         partner.allowed_business_areas.add(business_area)
         role = RoleFactory(name=f"Role for {partner.name}")
-        partner_through = BusinessAreaPartnerThrough.objects.create(
+        partner_through, _ = BusinessAreaPartnerThrough.objects.get_or_create(
             business_area=business_area,
             partner=partner,
         )
@@ -637,7 +637,7 @@ def create_super_user(business_area: BusinessArea) -> User:
     ]
 
     for dct in dct_list:
-        data_collecting_type = DataCollectingType.objects.create(
+        data_collecting_type, _ = DataCollectingType.objects.get_or_create(
             label=dct["label"],
             code=dct["code"],
             description=dct["description"],

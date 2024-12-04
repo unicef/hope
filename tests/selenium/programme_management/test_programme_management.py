@@ -98,7 +98,6 @@ class TestProgrammeManagement:
         pageProgrammeManagement.chooseOptionSelector(test_data["selector"])
         pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
         pageProgrammeManagement.getInputBeneficiaryGroup().click()
-        pageProgrammeManagement.screenshot("0", file_path="./")
         pageProgrammeManagement.select_listbox_element("Main Menu")
         pageProgrammeManagement.getButtonNext().click()
         # 2nd step (Time Series Fields)
@@ -220,6 +219,8 @@ class TestProgrammeManagement:
         pageProgrammeManagement.chooseOptionSelector(test_data["selector"])
         pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
         pageProgrammeManagement.getInputFreqOfPaymentOneOff().click()
+        pageProgrammeManagement.getInputBeneficiaryGroup().click()
+        pageProgrammeManagement.select_listbox_element("People Menu")
         pageProgrammeManagement.getButtonNext().click()
         # 2nd step (Time Series Fields)
         pageProgrammeManagement.getButtonAddTimeSeriesField()
@@ -228,7 +229,7 @@ class TestProgrammeManagement:
         pageProgrammeManagement.getButtonSave().click()
         # Check Details page
         pageProgrammeDetails.wait_for_text("New Programme", pageProgrammeDetails.headerTitle)
-        assert "DRAFT" in pageProgrammeDetails.getProgramStatus().text
+        pageProgrammeDetails.wait_for_text("DRAFT", pageProgrammeDetails.programStatus)
         assert test_data["startDate"].date_in_text_format in pageProgrammeDetails.getLabelStartDate().text
         assert test_data["endDate"].date_in_text_format in pageProgrammeDetails.getLabelEndDate().text
         assert test_data["selector"] in pageProgrammeDetails.getLabelSelector().text
@@ -841,7 +842,7 @@ class TestManualCalendar:
         partner1 = Partner.objects.create(name="Test Partner 1")
         partner2 = Partner.objects.create(name="Test Partner 2")
         role = RoleFactory(name="Role in BA")
-        ba_partner_through = BusinessAreaPartnerThrough.objects.create(
+        ba_partner_through, _ = BusinessAreaPartnerThrough.objects.get_or_create(
             business_area=BusinessArea.objects.get(slug="afghanistan"),
             partner=partner1,
         )

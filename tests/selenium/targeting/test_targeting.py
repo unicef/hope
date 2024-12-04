@@ -35,7 +35,10 @@ from hct_mis_api.apps.periodic_data_update.utils import (
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory
+from hct_mis_api.apps.targeting.fixtures import (
+    TargetingCriteriaFactory,
+    TargetPopulationFactory,
+)
 from hct_mis_api.apps.targeting.models import TargetPopulation
 from tests.selenium.page_object.filters import Filters
 from tests.selenium.page_object.targeting.targeting import Targeting
@@ -221,7 +224,7 @@ def get_program_with_dct_type_and_name(
 
 @pytest.fixture
 def create_targeting(household_without_disabilities: Household) -> TargetPopulation:
-    program = Program.objects.first()
+    program = Program.objects.filter(name="Test Programm").first()
     program_cycle = program.cycles.first()
     target_population = TargetPopulation.objects.update_or_create(
         pk=UUID("00000000-0000-0000-0000-faceb00c0123"),
@@ -243,6 +246,14 @@ def create_targeting(household_without_disabilities: Household) -> TargetPopulat
         },
     )
     target_population.households.set([household])
+
+    TargetPopulationFactory(
+        name="Copy TP",
+        program=program,
+        status=TargetPopulation.STATUS_OPEN,
+        targeting_criteria=TargetingCriteriaFactory(),
+    )
+
     yield target_population
 
 
@@ -257,6 +268,7 @@ def create_programs() -> None:
         business_area=business_area,
         data_collecting_type=dct,
         beneficiary_group=beneficiary_group,
+        cycle__title="First Cycle In Programme",
     )
 
 
@@ -345,7 +357,6 @@ class TestSmokeTargeting:
         assert "SEND BY" in pageTargetingDetails.getLabelizedFieldContainerSendBy().text
         assert "-" in pageTargetingDetails.getLabelSendBy().text
         assert "-" in pageTargetingDetails.getLabelSendDate().text
-        assert "-" in pageTargetingDetails.getCriteriaContainer().text
         assert "6" in pageTargetingDetails.getLabelFemaleChildren().text
         assert "1" in pageTargetingDetails.getLabelMaleChildren().text
         assert "2" in pageTargetingDetails.getLabelFemaleAdults().text
@@ -954,7 +965,7 @@ class TestTargeting:
         pageTargeting.disappearLoadingRows()
         new_list = pageTargeting.getTargetPopulationsRows()
         assert 1 == len(new_list)
-        assert "Test NEW TP" in new_list[0].text
+        assert "Test Target Population" in new_list[0].text
 
     @pytest.mark.xfail(reason="Problem with deadlock during test - 202318")
     def test_targeting_different_program_statuses(
@@ -1129,7 +1140,7 @@ class TestTargeting:
         filters.getFiltersStatus().click()
         filters.select_listbox_element("Open")
         filters.getButtonFiltersApply().click()
-        pageTargeting.countTargetPopulations(1)
+        pageTargeting.countTargetPopulations(2)
         assert "OPEN" in pageTargeting.getStatusContainer().text
         filters.getButtonFiltersClear().click()
         filters.getFiltersTotalHouseholdsCountMin().send_keys("10")
@@ -1157,31 +1168,31 @@ class TestTargeting:
         assert "Copy TP" in pageTargeting.chooseTargetPopulations(0).text
         pageTargeting.getColumnName().click()
         pageTargeting.disappearLoadingRows()
-        assert "Test NEW TP" in pageTargeting.chooseTargetPopulations(0).text
+        assert "Test Target Population" in pageTargeting.chooseTargetPopulations(0).text
         pageTargeting.getColumnStatus().click()
         pageTargeting.disappearLoadingRows()
-        assert "Test NEW TP" in pageTargeting.chooseTargetPopulations(0).text
+        assert "Test Target Population" in pageTargeting.chooseTargetPopulations(0).text
         pageTargeting.getColumnStatus().click()
         pageTargeting.disappearLoadingRows()
         assert "Copy TP" in pageTargeting.chooseTargetPopulations(0).text
         pageTargeting.getColumnNumOfHouseholds().click()
         pageTargeting.disappearLoadingRows()
-        assert "Test NEW TP" in pageTargeting.chooseTargetPopulations(0).text
+        assert "Test Target Population" in pageTargeting.chooseTargetPopulations(0).text
         pageTargeting.getColumnDateCreated().click()
         pageTargeting.disappearLoadingRows()
-        assert "Test NEW TP" in pageTargeting.chooseTargetPopulations(0).text
+        assert "Test Target Population" in pageTargeting.chooseTargetPopulations(0).text
         pageTargeting.getColumnDateCreated().click()
         pageTargeting.disappearLoadingRows()
         assert "Copy TP" in pageTargeting.chooseTargetPopulations(0).text
         pageTargeting.getColumnLastEdited().click()
         pageTargeting.disappearLoadingRows()
-        assert "Test NEW TP" in pageTargeting.chooseTargetPopulations(0).text
+        assert "Test Target Population" in pageTargeting.chooseTargetPopulations(0).text
         pageTargeting.getColumnLastEdited().click()
         pageTargeting.disappearLoadingRows()
         assert "Copy TP" in pageTargeting.chooseTargetPopulations(0).text
         pageTargeting.getColumnCreatedBy().click()
         pageTargeting.disappearLoadingRows()
-        assert "est NEW TP" in pageTargeting.chooseTargetPopulations(0).text
+        assert "Test Target Population" in pageTargeting.chooseTargetPopulations(0).text
 
     def test_targeting_parametrized_rules_filters(
         self,

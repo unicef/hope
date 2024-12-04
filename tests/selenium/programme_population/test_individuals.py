@@ -69,7 +69,7 @@ class TestSmokeIndividuals:
         assert "Item ID" in pageIndividuals.getIndividualId().text
         assert "Item" in pageIndividuals.getIndividualName().text
         assert "Items Group ID" in pageIndividuals.getHouseholdId().text
-        assert "Relationship to HoH" in pageIndividuals.getRelationship().text
+        assert "Relationship to Head of Items Group" in pageIndividuals.getRelationship().text
         assert "Age" in pageIndividuals.getIndividualAge().text
         assert "Gender" in pageIndividuals.getIndividualSex().text
         assert "Administrative Level 2" in pageIndividuals.getIndividualLocation().text
