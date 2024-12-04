@@ -23,6 +23,7 @@ import { NewDocumentationFieldArray } from '../../Documentation/NewDocumentation
 import { LookUpLinkedTickets } from '../../LookUps/LookUpLinkedTickets/LookUpLinkedTickets';
 import { LookUpPaymentRecord } from '../../LookUps/LookUpPaymentRecord/LookUpPaymentRecord';
 import { useProgramContext } from 'src/programContext';
+import { replaceLabels } from '@components/grievances/utils/createGrievanceUtils';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -123,7 +124,11 @@ export function Description({
               },
               showIssueType(values) && {
                 label: t('Issue Type'),
-                value: <span>{selectedIssueType(values)}</span>,
+                value: (
+                  <span>
+                    {replaceLabels(selectedIssueType(values), beneficiaryGroup)}
+                  </span>
+                ),
                 size: 9,
               },
               {
