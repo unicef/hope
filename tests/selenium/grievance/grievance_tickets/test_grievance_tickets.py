@@ -666,14 +666,14 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getIssueType().click()
         pageGrievanceNewTicket.select_listbox_element("Add Member")
         assert "Data Change" in pageGrievanceNewTicket.getSelectCategory().text
-        assert "Add Individual" in pageGrievanceNewTicket.getIssueType().text
+        assert "Add Member" in pageGrievanceNewTicket.getIssueType().text
         pageGrievanceNewTicket.getButtonNext().click()
         pageGrievanceNewTicket.getHouseholdTab()
         pageGrievanceNewTicket.getHouseholdTableRows(0).click()
         pageGrievanceNewTicket.getButtonNext().click()
         pageGrievanceNewTicket.getReceivedConsent().click()
         pageGrievanceNewTicket.getButtonNext().click()
-        pageGrievanceNewTicket.getDescription().send_keys("Add Individual - TEST")
+        pageGrievanceNewTicket.getDescription().send_keys("Add Member - TEST")
         pageGrievanceNewTicket.getPhoneNoAlternative().send_keys("999 999 999")
         pageGrievanceNewTicket.getDatePickerFilter().click()
         pageGrievanceNewTicket.getDatePickerFilter().send_keys(FormatTime(1, 5, 1986).numerically_formatted_date)
@@ -717,9 +717,9 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getInputIndividualdataWhoanswersphone().send_keys("111 11 11")
 
         pageGrievanceNewTicket.getButtonNext().click()
-        assert "Add Individual - TEST" in pageGrievanceDetailsPage.getTicketDescription().text
+        assert "Add Member - TEST" in pageGrievanceDetailsPage.getTicketDescription().text
         assert "Data Change" in pageGrievanceDetailsPage.getTicketCategory().text
-        assert "Add Individual" in pageGrievanceDetailsPage.getLabelIssueType().text
+        assert "Add Member" in pageGrievanceDetailsPage.getLabelIssueType().text
         assert "New" in pageGrievanceDetailsPage.getTicketStatus().text
         assert "Not set" in pageGrievanceDetailsPage.getTicketPriority().text
         assert "Not set" in pageGrievanceDetailsPage.getTicketUrgency().text

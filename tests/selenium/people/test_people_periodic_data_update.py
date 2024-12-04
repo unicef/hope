@@ -29,7 +29,7 @@ from hct_mis_api.apps.periodic_data_update.utils import (
     populate_pdu_with_null_values,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from tests.selenium.page_object.people.people import People
 from tests.selenium.page_object.people.people_details import PeopleDetails
@@ -60,11 +60,13 @@ def clear_downloaded_files(download_path: str) -> None:
 def program() -> Program:
     business_area = create_afghanistan()
     dct = DataCollectingTypeFactory(type=DataCollectingType.Type.SOCIAL)
+    beneficiary_group = BeneficiaryGroup.objects.filter(name="People Menu").first()
     return ProgramFactory(
         name="Test Program",
         status=Program.ACTIVE,
         business_area=business_area,
         data_collecting_type=dct,
+        beneficiary_group=beneficiary_group,
     )
 
 
