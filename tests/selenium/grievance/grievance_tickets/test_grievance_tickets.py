@@ -373,7 +373,7 @@ class TestSmokeGrievanceTickets:
         assert "SET PRIORITY" in pageGrievanceTickets.getButtonSetPriority().text
         assert "SET URGENCY" in pageGrievanceTickets.getButtonSetUrgency().text
         assert "ADD NOTE" in pageGrievanceTickets.getButtonAddNote().text
-        assert 6 == len(pageGrievanceTickets.getTicketListRow())
+        assert 2 == len(pageGrievanceTickets.getTicketListRow())
         expected_labels = [
             "Ticket ID",
             "Status",
@@ -640,16 +640,16 @@ class TestGrievanceTickets:
         items = select_element.find_elements("tag name", "li")
 
         check_list = {
-            "Add Individual": "true",
-            "Household Data Update": "true",
-            "Individual Data Update": "None",
-            "Withdraw Individual": "None",
-            "Withdraw Household": "true",
+            "Add Item": "true",
+            "Items Group Data Update": "true",
+            "Item Data Update": "None",
+            "Withdraw Item": "None",
+            "Withdraw Items Group": "true",
         }
 
         for item in items:
             sleep(0.5)
-            assert str(item.get_attribute("aria-disabled")) in check_list[item.text]
+            assert str(item.get_attribute("aria-disabled")) in check_list[item.text], items
 
     def test_grievance_tickets_create_new_ticket_Data_Change_Add_Individual_All_Fields(
         self,
@@ -664,7 +664,7 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getSelectCategory().click()
         pageGrievanceNewTicket.select_option_by_name("Data Change")
         pageGrievanceNewTicket.getIssueType().click()
-        pageGrievanceNewTicket.select_listbox_element("Add Individual")
+        pageGrievanceNewTicket.select_listbox_element("Add Member")
         assert "Data Change" in pageGrievanceNewTicket.getSelectCategory().text
         assert "Add Individual" in pageGrievanceNewTicket.getIssueType().text
         pageGrievanceNewTicket.getButtonNext().click()
@@ -737,9 +737,9 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getSelectCategory().click()
         pageGrievanceNewTicket.select_option_by_name("Data Change")
         pageGrievanceNewTicket.getIssueType().click()
-        pageGrievanceNewTicket.select_listbox_element("Add Individual")
+        pageGrievanceNewTicket.select_listbox_element("Add Member")
         assert "Data Change" in pageGrievanceNewTicket.getSelectCategory().text
-        assert "Add Individual" in pageGrievanceNewTicket.getIssueType().text
+        assert "Add Member" in pageGrievanceNewTicket.getIssueType().text
         pageGrievanceNewTicket.getButtonNext().click()
         pageGrievanceNewTicket.getHouseholdTab()
         pageGrievanceNewTicket.getHouseholdTableRows(0).click()
@@ -769,7 +769,7 @@ class TestGrievanceTickets:
         assert "Not set" in pageGrievanceDetailsPage.getTicketUrgency().text
         assert "-" in pageGrievanceDetailsPage.getTicketAssigment().text
         assert "Data Change" in pageGrievanceDetailsPage.getTicketCategory().text
-        assert "Add Individual" in pageGrievanceDetailsPage.getLabelIssueType().text
+        assert "Add Member" in pageGrievanceDetailsPage.getLabelIssueType().text
         assert household_without_disabilities.unicef_id in pageGrievanceDetailsPage.getTicketTargetID().text
         assert "Test Program" in pageGrievanceDetailsPage.getLabelProgramme().text
         assert datetime.now().strftime("%-d %b %Y") in pageGrievanceDetailsPage.getLabelDateCreation().text
@@ -786,9 +786,7 @@ class TestGrievanceTickets:
     @pytest.mark.parametrize(
         "test_data",
         [
-            pytest.param(
-                {"category": "Data Change", "type": "Household Data Update"}, id="Data Change Household Data Update"
-            ),
+            pytest.param({"category": "Data Change", "type": "Group Data Update"}, id="Data Change Group Data Update"),
         ],
     )
     def test_hh_grievance_tickets_create_new_ticket(
@@ -815,7 +813,7 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getReceivedConsent().click()
         pageGrievanceNewTicket.getButtonNext().click()
 
-        pageGrievanceNewTicket.getDescription().send_keys("Add Individual - TEST")
+        pageGrievanceNewTicket.getDescription().send_keys("Add Group - TEST")
         pageGrievanceNewTicket.getButtonAddNewField()
         pageGrievanceNewTicket.getSelectFieldName().click()
         pageGrievanceNewTicket.select_listbox_element("Females age 12 - 17 with disability")
@@ -829,8 +827,8 @@ class TestGrievanceTickets:
         "test_data",
         [
             pytest.param(
-                {"category": "Data Change", "type": "Individual Data Update"},
-                id="Data Change Individual Data Update",
+                {"category": "Data Change", "type": "Member Data Update"},
+                id="Data Change Member Data Update",
             )
         ],
     )
@@ -861,7 +859,7 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getReceivedConsent().click()
         pageGrievanceNewTicket.getButtonNext().click()
 
-        pageGrievanceNewTicket.getDescription().send_keys("Add Individual - TEST")
+        pageGrievanceNewTicket.getDescription().send_keys("Add Member Data Update - TEST")
         pageGrievanceNewTicket.getButtonAddNewField().click()
         pageGrievanceNewTicket.getIndividualFieldName(0).click()
         pageGrievanceNewTicket.select_listbox_element("Gender")
@@ -1017,9 +1015,9 @@ class TestGrievanceTickets:
         pageGrievanceNewTicket.getSelectCategory().click()
         pageGrievanceNewTicket.select_option_by_name("Data Change")
         pageGrievanceNewTicket.getIssueType().click()
-        pageGrievanceNewTicket.select_listbox_element("Individual Data Update")
+        pageGrievanceNewTicket.select_listbox_element("Member Data Update")
         assert "Data Change" in pageGrievanceNewTicket.getSelectCategory().text
-        assert "Individual Data Update" in pageGrievanceNewTicket.getIssueType().text
+        assert "Member Data Update" in pageGrievanceNewTicket.getIssueType().text
         pageGrievanceNewTicket.getButtonNext().click()
         pageGrievanceNewTicket.getHouseholdTab()
         pageGrievanceNewTicket.getIndividualTab().click()

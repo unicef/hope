@@ -321,7 +321,7 @@ class TestSmokeFilters:
                 filters.selectFilter,
                 filters.hhFiltersStatus,
             ],
-            "Household Members": [
+            "Items": [
                 filters.indFiltersSearch,
                 filters.selectFilter,
                 filters.filtersDocumentType,
@@ -422,7 +422,7 @@ class TestSmokeFilters:
         for nav_menu in programs:
             if nav_menu == "Feedback":
                 filters.wait_for('[data-cy="nav-Grievance"]').click()
-            if nav_menu == "Individuals":
+            if nav_menu == "Items":
                 filters.wait_for('[data-cy="nav-Main Menu"]').click()
             if nav_menu == "Surveys":
                 filters.wait_for('[data-cy="nav-Accountability"]').click()

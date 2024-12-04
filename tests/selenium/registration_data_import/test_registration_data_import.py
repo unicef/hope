@@ -1,4 +1,5 @@
 from datetime import datetime
+from time import sleep
 
 from django.conf import settings
 
@@ -235,13 +236,18 @@ class TestRegistrationDataImport:
         assert "208" in pageRegistrationDataImport.getNumberOfIndividuals().text
         pageRegistrationDataImport.getButtonImportFile().click()
         pageRegistrationDataImport.disappearButtonImportFile()
+
         pageDetailsRegistrationDataImport.waitForStatus("IN REVIEW")
         assert "50" in pageDetailsRegistrationDataImport.getLabelTotalNumberOfHouseholds().text
         assert "208" in pageDetailsRegistrationDataImport.getLabelTotalNumberOfIndividuals().text
+        pageDetailsRegistrationDataImport.element_clickable(pageDetailsRegistrationDataImport.buttonMergeRdi)
+        sleep(2)
         pageDetailsRegistrationDataImport.getButtonMergeRdi().click()
+        pageDetailsRegistrationDataImport.element_clickable(pageDetailsRegistrationDataImport.buttonMerge)
+        sleep(2)
         pageDetailsRegistrationDataImport.getButtonMerge().click()
         pageDetailsRegistrationDataImport.waitForStatus("MERGED")
-        assert "MERGED" == pageDetailsRegistrationDataImport.getStatusContainer().text
+        pageDetailsRegistrationDataImport.wait_for_text("MERGED", pageDetailsRegistrationDataImport.statusContainer)
         assert "VIEW TICKETS" in pageDetailsRegistrationDataImport.getButtonViewTickets().text
         pageDetailsRegistrationDataImport.getButtonIndividuals().click()
         pageDetailsRegistrationDataImport.getButtonHouseholds().click()

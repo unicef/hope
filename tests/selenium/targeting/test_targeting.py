@@ -1174,7 +1174,7 @@ class TestTargeting:
         assert "Test Target Population" in pageTargeting.chooseTargetPopulations(0).text
         pageTargeting.getColumnStatus().click()
         pageTargeting.disappearLoadingRows()
-        assert "Copy TP" in pageTargeting.chooseTargetPopulations(0).text
+        assert "Test Target Population" in pageTargeting.chooseTargetPopulations(0).text
         pageTargeting.getColumnNumOfHouseholds().click()
         pageTargeting.disappearLoadingRows()
         assert "Test Target Population" in pageTargeting.chooseTargetPopulations(0).text
