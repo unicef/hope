@@ -6,6 +6,7 @@ import pytest
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.geo.fixtures import CountryFactory
+from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.grievance.fixtures import TicketIndividualDataUpdateDetailsFactory
 from hct_mis_api.apps.grievance.services.data_change.individual_data_update_service import (
     IndividualDataUpdateService,
@@ -30,10 +31,13 @@ class TestUpdateIndividualDataService(TestCase):
         cls.business_area = BusinessAreaFactory()
         cls.program = ProgramFactory()
         cls.country_afg = CountryFactory(iso_code3="AFG")
+        cls.user = UserFactory()
 
-        household, _ = create_household({"program": cls.program})
+        cls.household, _ = create_household({"program": cls.program})
 
-        cls.individual = IndividualFactory(household=household, business_area=cls.business_area, program=cls.program)
+        cls.individual = IndividualFactory(
+            household=cls.household, business_area=cls.business_area, program=cls.program
+        )
 
         cls.document_type_unique_for_individual = DocumentTypeFactory(
             unique_for_individual=True, key="unique", label="Unique"
@@ -79,7 +83,7 @@ class TestUpdateIndividualDataService(TestCase):
         service = IndividualDataUpdateService(self.ticket, self.ticket.individual_data_update_ticket_details)
 
         try:
-            service.close(UserFactory())
+            service.close(self.user)
         except ValidationError:
             self.fail("ValidationError should not be raised")
 
@@ -109,7 +113,7 @@ class TestUpdateIndividualDataService(TestCase):
 
         service = IndividualDataUpdateService(self.ticket, self.ticket.individual_data_update_ticket_details)
         try:
-            service.close(UserFactory())
+            service.close(self.user)
         except ValidationError:
             self.fail("ValidationError should not be raised")
 
@@ -139,7 +143,7 @@ class TestUpdateIndividualDataService(TestCase):
 
         service = IndividualDataUpdateService(self.ticket, self.ticket.individual_data_update_ticket_details)
         with self.assertRaises(ValidationError) as e:
-            service.close(UserFactory())
+            service.close(self.user)
         self.assertEqual(
             f"Document of type {self.document_type_unique_for_individual} already exists for this individual",
             e.exception.message,
@@ -171,7 +175,7 @@ class TestUpdateIndividualDataService(TestCase):
 
         service = IndividualDataUpdateService(self.ticket, self.ticket.individual_data_update_ticket_details)
         try:
-            service.close(UserFactory())
+            service.close(self.user)
         except ValidationError:
             self.fail("ValidationError should not be raised")
 
@@ -217,7 +221,7 @@ class TestUpdateIndividualDataService(TestCase):
         service = IndividualDataUpdateService(self.ticket, self.ticket.individual_data_update_ticket_details)
 
         with self.assertRaises(ValidationError) as e:
-            service.close(UserFactory())
+            service.close(self.user)
         self.assertEqual(
             f"Document of type {self.document_type_unique_for_individual} already exists for this individual",
             e.exception.message,
@@ -258,7 +262,7 @@ class TestUpdateIndividualDataService(TestCase):
 
         service = IndividualDataUpdateService(self.ticket, self.ticket.individual_data_update_ticket_details)
         try:
-            service.close(UserFactory())
+            service.close(self.user)
         except ValidationError:
             self.fail("ValidationError should not be raised")
 
@@ -307,7 +311,7 @@ class TestUpdateIndividualDataService(TestCase):
         self.ticket.individual_data_update_ticket_details.save()
         service = IndividualDataUpdateService(self.ticket, self.ticket.individual_data_update_ticket_details)
         with self.assertRaises(ValidationError) as e:
-            service.close(UserFactory())
+            service.close(self.user)
         self.assertEqual(
             f"Document with number {existing_document.document_number} of type {self.document_type_unique_for_individual} already exists",
             e.exception.message,
@@ -316,3 +320,57 @@ class TestUpdateIndividualDataService(TestCase):
         document_to_edit.refresh_from_db()
         # document was not updated
         self.assertEqual(document_to_edit.document_number, "111111")
+
+    def test_update_people_individual_hh_fields(self) -> None:
+        CountryFactory(name="Poland", iso_code3="POL", iso_code2="PL", iso_num="620")
+        CountryFactory(name="Other Country", short_name="Oth", iso_code2="O", iso_code3="OTH", iso_num="111")
+        hh_fields = [
+            "consent",
+            "residence_status",
+            "country_origin",
+            "country",
+            "address",
+            "village",
+            "currency",
+            "unhcr_id",
+            "name_enumerator",
+            "org_enumerator",
+            "org_name_enumerator",
+            "registration_method",
+        ]
+        hh = self.household
+        ind_data = {}
+        new_data = {
+            "address": "Test Address ABC",
+            "country_origin": "POL",
+            "country": "OTH",
+            "residence_status": "HOST",
+            "village": "El Paso",
+            "consent": None,
+            "currency": "PLN",
+            "unhcr_id": "random_unhcr_id_123",
+            "name_enumerator": "test_name",
+            "org_enumerator": "test_org",
+            "org_name_enumerator": "test_org_name",
+            "registration_method": "COMMUNITY",
+        }
+        for hh_field in hh_fields:
+            ind_data[hh_field] = {
+                "value": new_data.get(hh_field),
+                "approve_status": True,
+                "previous_value": getattr(hh, hh_field).iso_code3
+                if isinstance(getattr(hh, hh_field), Country)
+                else getattr(hh, hh_field),
+            }
+        self.ticket.individual_data_update_ticket_details.individual_data = ind_data
+        self.ticket.individual_data_update_ticket_details.save()
+
+        service = IndividualDataUpdateService(self.ticket, self.ticket.individual_data_update_ticket_details)
+        service.close(self.user)
+
+        hh.refresh_from_db()
+        for hh_field in hh_fields:
+            hh_value = (
+                getattr(hh, hh_field).iso_code3 if isinstance(getattr(hh, hh_field), Country) else getattr(hh, hh_field)
+            )
+            self.assertEqual(hh_value, new_data.get(hh_field))
