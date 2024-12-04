@@ -1,5 +1,4 @@
 import datetime
-import json
 from datetime import date
 from io import BytesIO
 from pathlib import Path
@@ -583,7 +582,7 @@ class TestRdiXlsxCreateTask(TestCase):
         self.assertEqual(dmd2.rdi_merge_status, MergeStatusModel.PENDING)
         self.assertEqual(dmd3.rdi_merge_status, MergeStatusModel.PENDING)
         self.assertEqual(
-            json.loads(dmd1.data),
+            dmd1.data,
             {"card_number__atm_card": "164260858", "card_expiry_date__atm_card": "1995-06-03T00:00:00"},
         )
         self.assertEqual(
