@@ -156,6 +156,27 @@ export const GlobalProgramSelect = () => {
   }, []);
 
   useEffect(() => {
+    // Initial setup for selectedProgram
+    setSelectedProgram({
+      beneficiaryGroup: {
+        id: 'default-id',
+        name: 'Beneficiaries',
+        groupLabel: 'Group',
+        groupLabelPlural: 'Groups',
+        memberLabel: 'Member',
+        memberLabelPlural: 'Members',
+        masterDetail: false,
+      },
+      id: 'all',
+      name: 'All Programmes',
+      status: ProgramStatus.Active,
+      dataCollectingType: null,
+      pduFields: null,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
     if (programId !== 'all') {
       const program = programData?.program;
       if (
@@ -186,23 +207,6 @@ export const GlobalProgramSelect = () => {
           beneficiaryGroup: beneficiaryGroup,
         });
       }
-    } else {
-      setSelectedProgram({
-        beneficiaryGroup: {
-          id: 'default-id',
-          name: 'Beneficiaries',
-          groupLabel: 'Group',
-          groupLabelPlural: 'Groups',
-          memberLabel: 'Member',
-          memberLabelPlural: 'Members',
-          masterDetail: false,
-        },
-        id: 'all',
-        name: 'All Programmes',
-        status: ProgramStatus.Active,
-        dataCollectingType: null,
-        pduFields: null,
-      });
     }
   }, [programId, selectedProgram, setSelectedProgram, programData]);
 

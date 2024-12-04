@@ -359,7 +359,7 @@ export const TargetingCriteriaForm = ({
                 <DialogDescription>
                   {isSocialWorkingProgram
                     ? ''
-                    : 'All rules defined below have to be true for the entire household.'}
+                    : `All rules defined below have to be true for the entire ${beneficiaryGroup?.groupLabelPlural}.`}{' '}
                 </DialogDescription>
                 <Grid container spacing={3}>
                   {householdFiltersAvailable && (
@@ -370,7 +370,7 @@ export const TargetingCriteriaForm = ({
                         fullWidth
                         multiline
                         variant="outlined"
-                        label={t('Household IDs')}
+                        label={t(`${beneficiaryGroup?.groupLabelPlural} IDs`)}
                         component={FormikTextField}
                       />
                     </Grid>
@@ -453,7 +453,9 @@ export const TargetingCriteriaForm = ({
                               name="individualIds"
                               fullWidth
                               variant="outlined"
-                              label={t('Individual IDs')}
+                              label={t(
+                                `${beneficiaryGroup?.memberLabelPlural} IDs`,
+                              )}
                               component={FormikTextField}
                             />
                           </Box>
@@ -502,7 +504,8 @@ export const TargetingCriteriaForm = ({
                           color="primary"
                           startIcon={<AddCircleOutline />}
                         >
-                          ADD INDIVIDUAL RULE GROUP
+                          {`ADD ${beneficiaryGroup?.memberLabel.toUpperCase()}
+                          RULE GROUP`}
                         </Button>
                       </ButtonBox>
                     </Box>

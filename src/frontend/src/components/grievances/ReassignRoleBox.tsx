@@ -103,7 +103,7 @@ export const ReassignRoleBox = ({
           <LabelizedField label={t('ROLE')}>
             <>{capitalize(el.role)} Collector</>
           </LabelizedField>
-          <LabelizedField label={t('HOUSEHOLD ID')}>
+          <LabelizedField label={t(`${beneficiaryGroup?.groupLabel} ID`)}>
             <ContentLink
               href={`/${baseUrl}/population/household/${el.household.id}`}
             >
@@ -180,7 +180,7 @@ export const ReassignRoleBox = ({
               <LabelizedField label={t('ROLE')}>
                 <>{t('Head of Household')}</>
               </LabelizedField>
-              <LabelizedField label={t('HOUSEHOLD ID')}>
+              <LabelizedField label={t(`${beneficiaryGroup?.groupLabel} ID`)}>
                 <ContentLink
                   href={`/${baseUrl}/population/household/${ticket?.household.id}`}
                 >
