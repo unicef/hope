@@ -794,6 +794,7 @@ class PaymentPlan(
             female_children_count=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=FEMALE)),
             male_adults_count=Count("id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=MALE)),
             female_adults_count=Count("id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=FEMALE)),
+            total_individuals_count=Count("id", distinct=True),
         )
 
         self.female_children_count = targeted_individuals.get("female_children_count", 0)
@@ -801,9 +802,7 @@ class PaymentPlan(
         self.female_adults_count = targeted_individuals.get("female_adults_count", 0)
         self.male_adults_count = targeted_individuals.get("male_adults_count", 0)
         self.total_households_count = households_ids.count()
-        self.total_individuals_count = (
-            self.female_children_count + self.male_children_count + self.female_adults_count + self.male_adults_count
-        )
+        self.total_individuals_count = targeted_individuals.get("total_individuals_count", 0)
 
         self.save(
             update_fields=[

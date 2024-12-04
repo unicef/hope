@@ -22,6 +22,7 @@ export const individualDataRow = (
   index,
   ticket,
   fieldsDict,
+  countriesDict,
   isEdit,
   handleSelectBioData,
 ): ReactElement => {
@@ -34,15 +35,37 @@ export const individualDataRow = (
     approveStatus: boolean;
   };
   const field = fieldsDict[row[0]];
+
+  const isCountryFieldName =
+    fieldName === 'country' ||
+    fieldName === 'country_origin' ||
+    fieldName === 'countryOrigin';
+
+  const previousValue = isCountryFieldName
+    ? countriesDict[valueDetails.previousValue]
+    : valueDetails.previousValue;
+
   const individualValue = field?.isFlexField
     ? ticket.individualDataUpdateTicketDetails?.individual?.flexFields[row[0]]
-    : ticket.individualDataUpdateTicketDetails?.individual[
-        camelCase(fieldName)
-      ];
+    : isCountryFieldName
+      ? countriesDict[
+          ticket.individualDataUpdateTicketDetails?.individual[
+            camelCase(fieldName)
+          ]
+        ]
+      : ticket.individualDataUpdateTicketDetails?.individual[
+          camelCase(fieldName)
+        ];
+
   const currentValue =
     ticket.status === GRIEVANCE_TICKET_STATES.CLOSED
-      ? valueDetails.previousValue
+      ? previousValue
       : individualValue;
+
+  const newValue = isCountryFieldName
+    ? countriesDict[valueDetails.value]
+    : valueDetails.value;
+
   return (
     <TableRow role="checkbox" aria-checked={isItemSelected} key={fieldName}>
       <TableCell>
@@ -76,7 +99,7 @@ export const individualDataRow = (
         <CurrentValue field={field} value={currentValue} />
       </TableCell>
       <TableCell align="left" data-cy="new-value">
-        <NewValue field={field} value={valueDetails.value} />
+        <NewValue field={field} value={newValue} />
       </TableCell>
     </TableRow>
   );

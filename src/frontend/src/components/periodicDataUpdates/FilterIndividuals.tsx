@@ -60,6 +60,15 @@ export const FilterIndividuals: FC<FilterIndividualsProps> = ({
             <MenuItem key="female" value="FEMALE">
               {t('Female')}
             </MenuItem>
+            <MenuItem key="other" value="OTHER">
+              {t('Other')}
+            </MenuItem>
+            <MenuItem key="not_collected" value="NOT_COLLECTED">
+              {t('Not Collected')}
+            </MenuItem>
+            <MenuItem key="not_answered" value="NOT_ANSWERED">
+              {t('Not Answered')}
+            </MenuItem>
           </SelectFilter>
         </Grid>
         <Grid item xs={3}>

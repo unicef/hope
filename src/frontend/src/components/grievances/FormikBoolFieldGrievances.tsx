@@ -64,6 +64,7 @@ export function FormikBoolFieldGrievances({
       required={required}
       variant="outlined"
       fullWidth
+      size="small"
       {...otherProps}
     >
       <Box mb={1}>

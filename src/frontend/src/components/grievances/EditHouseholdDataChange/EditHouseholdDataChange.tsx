@@ -7,13 +7,11 @@ import { useTranslation } from 'react-i18next';
 import {
   AllHouseholdsQuery,
   useAllEditHouseholdFieldsQuery,
-  useAllEditPeopleFieldsQuery,
   useHouseholdLazyQuery,
 } from '@generated/graphql';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { Title } from '@core/Title';
 import { EditHouseholdDataChangeFieldRow } from './EditHouseholdDataChangeFieldRow';
-import { useProgramContext } from 'src/programContext';
 
 export interface EditHouseholdDataChangeProps {
   values;
@@ -25,7 +23,6 @@ export function EditHouseholdDataChange({
 }: EditHouseholdDataChangeProps): ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
-  const { isSocialDctType } = useProgramContext();
   const isEditTicket = location.pathname.includes('edit-ticket');
   const household: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'] =
     values.selectedHousehold;
@@ -50,22 +47,14 @@ export function EditHouseholdDataChange({
   }, []);
   const { data: householdFieldsData, loading: householdFieldsLoading } =
     useAllEditHouseholdFieldsQuery();
-  const { data: allEditPeopleFieldsData, loading: allEditPeopleFieldsLoading } =
-    useAllEditPeopleFieldsQuery();
 
-  const fieldsByDctType = isSocialDctType
-    ? allEditPeopleFieldsData?.allEditPeopleFieldsAttributes
-    : householdFieldsData?.allEditHouseholdFieldsAttributes;
+  const householdFieldsDict =
+    householdFieldsData?.allEditHouseholdFieldsAttributes;
 
   if (!household) {
     return <div>{t('You have to select a household earlier')}</div>;
   }
-  if (
-    fullHouseholdLoading ||
-    householdFieldsLoading ||
-    allEditPeopleFieldsLoading ||
-    !fullHousehold
-  ) {
+  if (fullHouseholdLoading || householdFieldsLoading || !fullHousehold) {
     return <LoadingComponent />;
   }
   const notAvailableItems = (values.householdDataUpdateFields || []).map(
@@ -89,7 +78,7 @@ export function EditHouseholdDataChange({
                     itemValue={item}
                     index={index}
                     household={fullHousehold.household}
-                    fields={fieldsByDctType}
+                    fields={householdFieldsDict}
                     notAvailableFields={notAvailableItems}
                     onDelete={() => arrayHelpers.remove(index)}
                     values={values}
