@@ -178,7 +178,7 @@ export const ReassignRoleBox = ({
           <Box mb={2} mt={2}>
             <Box mb={2}>
               <LabelizedField label={t('ROLE')}>
-                <>{t('Head of Household')}</>
+                <>{t(`Head of ${beneficiaryGroup?.groupLabel}`)}</>
               </LabelizedField>
               <LabelizedField label={t(`${beneficiaryGroup?.groupLabel} ID`)}>
                 <ContentLink
