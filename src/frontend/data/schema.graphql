@@ -2524,8 +2524,8 @@ type PaymentNode implements Node {
   fspAuthCode: String
   isCashAssist: Boolean!
   followUps(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
-  paymentVerification: PaymentVerificationNode
   householdSnapshot: PaymentHouseholdSnapshotNode
+  paymentVerification: PaymentVerificationNode
   ticketComplaintDetails: TicketComplaintDetailsNode
   ticketSensitiveDetails: TicketSensitiveDetailsNode
   adminUrl: String
@@ -2618,13 +2618,13 @@ type PaymentPlanNode implements Node {
   excludeHouseholdError: String!
   name: String
   isCashAssist: Boolean!
+  approvalProcess(offset: Int, before: String, after: String, first: Int, last: Int): ApprovalProcessNodeConnection!
   followUps(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanNodeConnection!
   deliveryMechanisms: [DeliveryMechanismPerPaymentPlanNode]
   paymentItems(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
+  documents(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanSupportingDocumentNodeConnection!
   paymentVerificationPlans(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationPlanNodeConnection!
   paymentVerificationSummary: PaymentVerificationSummaryNode
-  approvalProcess(offset: Int, before: String, after: String, first: Int, last: Int): ApprovalProcessNodeConnection!
-  documents(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanSupportingDocumentNodeConnection!
   adminUrl: String
   currencyName: String
   hasPaymentListExportFile: Boolean
@@ -4694,13 +4694,13 @@ type UserNode implements Node {
   doapHash: String!
   userRoles: [UserRoleNode!]!
   documentSet(offset: Int, before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
+  approvalSet: [ApprovalNode!]!
   registrationDataImports(offset: Int, before: String, after: String, first: Int, last: Int): RegistrationDataImportNodeConnection!
   createdPaymentPlans(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanNodeConnection!
   createdFinancialServiceProviderXlsxTemplates(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderXlsxTemplateNodeConnection!
   createdFinancialServiceProviders(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderNodeConnection!
   createdDeliveryMechanisms(offset: Int, before: String, after: String, first: Int, last: Int): DeliveryMechanismPerPaymentPlanNodeConnection!
   sentDeliveryMechanisms(offset: Int, before: String, after: String, first: Int, last: Int): DeliveryMechanismPerPaymentPlanNodeConnection!
-  approvalSet: [ApprovalNode!]!
   createdTickets(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   assignedTickets(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   ticketNotes(offset: Int, before: String, after: String, first: Int, last: Int): TicketNoteNodeConnection!
