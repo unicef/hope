@@ -98,6 +98,7 @@ class TestProgrammeManagement:
         pageProgrammeManagement.chooseOptionSelector(test_data["selector"])
         pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
         pageProgrammeManagement.getInputBeneficiaryGroup().click()
+        pageProgrammeManagement.screenshot("0", file_path="./")
         pageProgrammeManagement.select_listbox_element("Main Menu")
         pageProgrammeManagement.getButtonNext().click()
         # 2nd step (Time Series Fields)
@@ -110,11 +111,9 @@ class TestProgrammeManagement:
         pageProgrammeManagement.getInputPduFieldsRoundsNames(0, 0).send_keys("Round 1")
         pageProgrammeManagement.getButtonNext().click()
         # 3rd step (Partners)
-        programme_creation_url = pageProgrammeManagement.driver.current_url
         pageProgrammeManagement.getButtonSave().click()
         # Check Details page
-        assert "details" in pageProgrammeDetails.wait_for_new_url(programme_creation_url).split("/")
-        assert "New Programme" in pageProgrammeDetails.getHeaderTitle().text
+        pageProgrammeDetails.wait_for_text("New Programme", pageProgrammeDetails.headerTitle)
         assert "DRAFT" in pageProgrammeDetails.getProgramStatus().text
         assert test_data["startDate"].date_in_text_format in pageProgrammeDetails.getLabelStartDate().text
         assert test_data["endDate"].date_in_text_format in pageProgrammeDetails.getLabelEndDate().text
@@ -170,17 +169,15 @@ class TestProgrammeManagement:
         pageProgrammeManagement.getInputPopulation().clear()
         pageProgrammeManagement.getInputPopulation().send_keys(test_data["populationGoals"])
         pageProgrammeManagement.getInputBeneficiaryGroup().click()
-        pageProgrammeManagement.select_listbox_element("Main Menu")
+        pageProgrammeManagement.select_listbox_element("People Menu")
         pageProgrammeManagement.getButtonNext().click()
         # 2nd step (Time Series Fields)
         pageProgrammeManagement.getButtonAddTimeSeriesField()
         pageProgrammeManagement.getButtonNext().click()
         # 3rd step (Partners)
-        programme_creation_url = pageProgrammeManagement.driver.current_url
         pageProgrammeManagement.getButtonSave().click()
         # Check Details page
-        assert "details" in pageProgrammeDetails.wait_for_new_url(programme_creation_url).split("/")
-        assert "New Programme" in pageProgrammeDetails.getHeaderTitle().text
+        pageProgrammeDetails.wait_for_text("New Programme", pageProgrammeDetails.headerTitle)
         assert "DRAFT" in pageProgrammeDetails.getProgramStatus().text
         assert test_data["startDate"].date_in_text_format in pageProgrammeDetails.getLabelStartDate().text
         assert test_data["endDate"].date_in_text_format in pageProgrammeDetails.getLabelEndDate().text
@@ -228,11 +225,9 @@ class TestProgrammeManagement:
         pageProgrammeManagement.getButtonAddTimeSeriesField()
         pageProgrammeManagement.getButtonNext().click()
         # 3rd step (Partners)
-        programme_creation_url = pageProgrammeManagement.driver.current_url
         pageProgrammeManagement.getButtonSave().click()
         # Check Details page
-        assert "details" in pageProgrammeDetails.wait_for_new_url(programme_creation_url).split("/")
-        assert "New Programme" in pageProgrammeDetails.getHeaderTitle().text
+        pageProgrammeDetails.wait_for_text("New Programme", pageProgrammeDetails.headerTitle)
         assert "DRAFT" in pageProgrammeDetails.getProgramStatus().text
         assert test_data["startDate"].date_in_text_format in pageProgrammeDetails.getLabelStartDate().text
         assert test_data["endDate"].date_in_text_format in pageProgrammeDetails.getLabelEndDate().text
@@ -276,17 +271,15 @@ class TestProgrammeManagement:
         pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
         pageProgrammeManagement.getInputCashPlus().click()
         pageProgrammeManagement.getInputBeneficiaryGroup().click()
-        pageProgrammeManagement.select_listbox_element("Main Menu")
+        pageProgrammeManagement.select_listbox_element("People Menu")
         pageProgrammeManagement.getButtonNext().click()
         # 2nd step (Time Series Fields)
         pageProgrammeManagement.getButtonAddTimeSeriesField()
         pageProgrammeManagement.getButtonNext().click()
         # 3rd step (Partners)
-        programme_creation_url = pageProgrammeManagement.driver.current_url
         pageProgrammeManagement.getButtonSave().click()
         # Check Details page
-        assert "details" in pageProgrammeDetails.wait_for_new_url(programme_creation_url).split("/")
-        assert "New Programme" in pageProgrammeDetails.getHeaderTitle().text
+        pageProgrammeDetails.wait_for_text("New Programme", pageProgrammeDetails.headerTitle)
         assert "DRAFT" in pageProgrammeDetails.getProgramStatus().text
         assert test_data["startDate"].date_in_text_format in pageProgrammeDetails.getLabelStartDate().text
         assert test_data["endDate"].date_in_text_format in pageProgrammeDetails.getLabelEndDate().text
@@ -330,17 +323,15 @@ class TestProgrammeManagement:
         pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
         pageProgrammeManagement.getInputCashPlus().click()
         pageProgrammeManagement.getInputBeneficiaryGroup().click()
-        pageProgrammeManagement.select_listbox_element("Main Menu")
+        pageProgrammeManagement.select_listbox_element("People Menu")
         pageProgrammeManagement.getButtonNext().click()
         # 2nd step (Time Series Fields)
         pageProgrammeManagement.getButtonAddTimeSeriesField()
         pageProgrammeManagement.getButtonNext().click()
         # 3rd step (Partners)
-        programme_creation_url = pageProgrammeManagement.driver.current_url
         pageProgrammeManagement.getButtonSave().click()
         # Check Details page
-        assert "details" in pageProgrammeDetails.wait_for_new_url(programme_creation_url).split("/")
-        assert "DRAFT" in pageProgrammeDetails.getProgramStatus().text
+        pageProgrammeDetails.wait_for_text("DRAFT", pageProgrammeDetails.programStatus)
         assert test_data["startDate"].date_in_text_format in pageProgrammeDetails.getLabelStartDate().text
         assert test_data["endDate"].date_in_text_format in pageProgrammeDetails.getLabelEndDate().text
         assert test_data["selector"] in pageProgrammeDetails.getLabelSelector().text
@@ -400,7 +391,7 @@ class TestProgrammeManagement:
         pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
         pageProgrammeManagement.getInputCashPlus().click()
         pageProgrammeManagement.getInputBeneficiaryGroup().click()
-        pageProgrammeManagement.select_listbox_element("Main Menu")
+        pageProgrammeManagement.select_listbox_element("People Menu")
         pageProgrammeManagement.getButtonNext().click()
         # 2nd step (Time Series Fields)
         pageProgrammeManagement.getButtonAddTimeSeriesField()
@@ -468,7 +459,7 @@ class TestBusinessAreas:
         pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
         pageProgrammeManagement.getInputCashPlus().click()
         pageProgrammeManagement.getInputBeneficiaryGroup().click()
-        pageProgrammeManagement.select_listbox_element("Main Menu")
+        pageProgrammeManagement.select_listbox_element("People Menu")
         pageProgrammeManagement.getButtonNext().click()
         # 2nd step (Time Series Fields)
         pageProgrammeManagement.getButtonAddTimeSeriesField()
@@ -522,7 +513,7 @@ class TestBusinessAreas:
         pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
         pageProgrammeManagement.getInputCashPlus().click()
         pageProgrammeManagement.getInputBeneficiaryGroup().click()
-        pageProgrammeManagement.select_listbox_element("Main Menu")
+        pageProgrammeManagement.select_listbox_element("People Menu")
         pageProgrammeManagement.getButtonNext().click()
         # 2nd step (Time Series Fields)
         pageProgrammeManagement.getButtonAddTimeSeriesField().click()
@@ -600,7 +591,7 @@ class TestAdminAreas:
         pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
         pageProgrammeManagement.getInputCashPlus().click()
         pageProgrammeManagement.getInputBeneficiaryGroup().click()
-        pageProgrammeManagement.select_listbox_element("Main Menu")
+        pageProgrammeManagement.select_listbox_element("People Menu")
         pageProgrammeManagement.getButtonNext().click()
         # 2nd step (Time Series Fields)
         pageProgrammeManagement.getButtonAddTimeSeriesField()
@@ -616,11 +607,9 @@ class TestAdminAreas:
         from time import sleep
 
         sleep(1)
-        programme_creation_url = pageProgrammeManagement.driver.current_url
         pageProgrammeManagement.getButtonSave().click()
         # Check Details page
-        assert "details" in pageProgrammeDetails.wait_for_new_url(programme_creation_url).split("/")
-        assert "UNHCR" in pageProgrammeDetails.getLabelPartnerName().text
+        pageProgrammeDetails.wait_for_text("UNHCR", pageProgrammeDetails.labelPartnerName)
         assert "1" in pageProgrammeDetails.getLabelAdminArea1().text
         assert "15" in pageProgrammeDetails.getLabelAdminArea2().text
 
@@ -665,7 +654,7 @@ class TestComeBackScenarios:
         pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
         pageProgrammeManagement.getInputCashPlus().click()
         pageProgrammeManagement.getInputBeneficiaryGroup().click()
-        pageProgrammeManagement.select_listbox_element("Main Menu")
+        pageProgrammeManagement.select_listbox_element("People Menu")
         pageProgrammeManagement.getButtonNext().click()
         # 2nd step (Time Series Fields)
         pageProgrammeManagement.getButtonAddTimeSeriesField()
@@ -690,11 +679,9 @@ class TestComeBackScenarios:
         # 3rd step (Partners)
         pageProgrammeManagement.getAccessToProgram().click()
         webdriver.ActionChains(pageProgrammeManagement.driver).send_keys(Keys.ESCAPE).perform()  # type: ignore
-        programme_creation_url = pageProgrammeManagement.driver.current_url
         pageProgrammeManagement.getButtonSave().click()
         # Check Details page
-        assert "details" in pageProgrammeDetails.wait_for_new_url(programme_creation_url).split("/")
-        assert "New Programme" in pageProgrammeDetails.getHeaderTitle().text
+        pageProgrammeDetails.wait_for_text("New Programme", pageProgrammeDetails.headerTitle)
         assert "DRAFT" in pageProgrammeDetails.getProgramStatus().text
         assert test_data["startDate"].date_in_text_format in pageProgrammeDetails.getLabelStartDate().text
         assert test_data["endDate"].date_in_text_format in pageProgrammeDetails.getLabelEndDate().text
@@ -737,16 +724,15 @@ class TestManualCalendar:
         pageProgrammeManagement.chooseOptionSelector(test_data["selector"])
         pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
         pageProgrammeManagement.getInputBeneficiaryGroup().click()
-        pageProgrammeManagement.select_listbox_element("Main Menu")
+        pageProgrammeManagement.select_listbox_element("People Menu")
         pageProgrammeManagement.getButtonNext().click()
         # 2nd step (Time Series Fields)
         pageProgrammeManagement.getButtonAddTimeSeriesField()
         pageProgrammeManagement.getButtonNext().click()
         # 3rd step (Partners)
-        programme_creation_url = pageProgrammeManagement.driver.current_url
         pageProgrammeManagement.getButtonSave().click()
         # Check Details page
-        assert "details" in pageProgrammeDetails.wait_for_new_url(programme_creation_url).split("/")
+        pageProgrammeDetails.wait_for_text("New Programme", pageProgrammeDetails.headerTitle)
         assert str(datetime.now().strftime("15 %b %Y")) in pageProgrammeDetails.getLabelStartDate().text
         end_date = datetime.now() + relativedelta(months=1)
         assert str(end_date.strftime("25 %b %Y")) in pageProgrammeDetails.getLabelEndDate().text
@@ -795,7 +781,7 @@ class TestManualCalendar:
         pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
         pageProgrammeManagement.getInputCashPlus().click()
         pageProgrammeManagement.getInputBeneficiaryGroup().click()
-        pageProgrammeManagement.select_listbox_element("Main Menu")
+        pageProgrammeManagement.select_listbox_element("People Menu")
         pageProgrammeManagement.getButtonNext().click()
         # 2nd step (Time Series Fields)
         pageProgrammeManagement.getButtonAddTimeSeriesField()
@@ -874,7 +860,7 @@ class TestManualCalendar:
         pageProgrammeManagement.chooseOptionDataCollectingType("Partial")
         pageProgrammeManagement.getInputCashPlus().click()
         pageProgrammeManagement.getInputBeneficiaryGroup().click()
-        pageProgrammeManagement.select_listbox_element("Main Menu")
+        pageProgrammeManagement.select_listbox_element("People Menu")
         pageProgrammeManagement.getButtonNext().click()
         # 2nd step (Time Series Fields)
         pageProgrammeManagement.getButtonAddTimeSeriesField()
@@ -902,12 +888,10 @@ class TestManualCalendar:
 
         pageProgrammeManagement.choosePartnerOption("UNHCR")
 
-        programme_creation_url = pageProgrammeManagement.driver.current_url
         pageProgrammeManagement.getButtonSave().click()
 
         # Check Details page
-        assert "details" in pageProgrammeDetails.wait_for_new_url(programme_creation_url).split("/")
-        assert "Test Program Partners" in pageProgrammeDetails.getHeaderTitle().text
+        pageProgrammeDetails.wait_for_text("Test Program Partners", pageProgrammeDetails.headerTitle)
         assert partner_access_selected in pageProgrammeDetails.getLabelPartnerAccess().text
 
         partner_name_elements = pageProgrammeManagement.driver.find_elements(

@@ -272,7 +272,7 @@ class TestSmokeTargeting:
         expected_column_names = [
             "Name",
             "Status",
-            "Num. of Households",
+            "Num. of Items Groups",
             "Date Created",
             "Last Edited",
             "Created by",

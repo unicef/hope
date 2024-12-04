@@ -554,6 +554,11 @@ def create_super_user(business_area: BusinessArea) -> User:
         master_detail=True,
     )
 
+    BeneficiaryGroupFactory(
+        name="People Menu",
+        master_detail=False,
+    )
+
     Partner.objects.get_or_create(name="TEST")
     partner, _ = Partner.objects.get_or_create(name="UNICEF")
     Partner.objects.get_or_create(name="UNHCR")

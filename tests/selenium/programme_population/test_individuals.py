@@ -42,7 +42,15 @@ def add_household() -> None:
             "admin_area": Area.objects.order_by("?").first(),
             "program": Program.objects.filter(name="Test Programm").first(),
         },
-        {"registration_data_import": registration_data_import},
+        {
+            "registration_data_import": registration_data_import,
+            "full_name": "Alicja Kowalska",
+            "middle_name": "",
+            "given_name": "Mary",
+            "family_name": "Kowalska",
+            "sex": "Female",
+            "birth_date": "1941-08-26",
+        },
     )
 
     household.unicef_id = "HH-00-0000.1380"
