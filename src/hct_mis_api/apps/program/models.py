@@ -239,9 +239,13 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
     def households_with_payments_in_program(self) -> QuerySet:
         # TODO: filter by status ?
         household_ids = (
-            Payment.objects.filter(program=self).exclude(Q(conflicted=True) | Q(excluded=True)).values("household_id")
+            Payment.objects.filter(program=self)
+            .exclude(conflicted=True, excluded=True)
+            .values_list("household_id", flat=True)
+            .distinct()
         )
-        return Household.objects.filter(id__in=household_ids).distinct()
+
+        return Household.objects.filter(id__in=household_ids)
 
     @property
     def admin_areas_log(self) -> str:
@@ -249,8 +253,6 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
 
     @property
     def is_social_worker_program(self) -> bool:
-        if self.data_collecting_type is None:
-            return False
         return self.data_collecting_type.type == DataCollectingType.Type.SOCIAL
 
     class Meta:
