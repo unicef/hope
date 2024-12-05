@@ -36,7 +36,9 @@ export const householdDataRow = (
   };
 
   const previousValue =
-    fieldName === 'country' || fieldName === 'country_origin'
+    fieldName === 'country' ||
+    fieldName === 'country_origin' ||
+    fieldName === 'countryOrigin'
       ? countriesDict[valueDetails.previousValue]
       : valueDetails.previousValue;
 

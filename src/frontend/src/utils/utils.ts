@@ -26,6 +26,9 @@ import {
 const Gender = new Map([
   ['MALE', 'Male'],
   ['FEMALE', 'Female'],
+  ['OTHER', 'Other'],
+  ['NOT_COLLECTED', 'Not Collected'],
+  ['NOT_ANSWERED', 'Not Answered'],
 ]);
 
 const IdentificationType = new Map([

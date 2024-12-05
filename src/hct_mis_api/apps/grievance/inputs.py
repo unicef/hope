@@ -211,6 +211,19 @@ class IndividualUpdateDataObjectType(graphene.InputObjectType):
     delivery_mechanism_data = graphene.List(DeliveryMechanismDataObjectType)
     delivery_mechanism_data_to_edit = graphene.List(EditDeliveryMechanismDataObjectType)
     delivery_mechanism_data_to_remove = graphene.List(graphene.ID)
+    # people fields
+    consent = graphene.Boolean(description="People update")
+    residence_status = graphene.String(description="People update")
+    country_origin = graphene.String(description="People update")
+    country = graphene.String(description="People update")
+    address = graphene.String(description="People update")
+    village = graphene.String(description="People update")
+    currency = graphene.String(description="People update")
+    unhcr_id = graphene.String(description="People update")
+    name_enumerator = graphene.String(description="People update")
+    org_enumerator = graphene.String(description="People update")
+    org_name_enumerator = graphene.String(description="People update")
+    registration_method = graphene.String(description="People update")
 
 
 class AddIndividualDataObjectType(graphene.InputObjectType):

@@ -22,6 +22,7 @@ export interface EntriesTableProps {
   values;
   isEdit;
   fieldsDict;
+  countriesDict;
   ticket: GrievanceTicketQuery['grievanceTicket'];
   entries;
   entriesFlexFields;
@@ -32,6 +33,7 @@ export function EntriesTable({
   values,
   isEdit,
   fieldsDict,
+  countriesDict,
   ticket,
   entries,
   entriesFlexFields,
@@ -83,6 +85,7 @@ export function EntriesTable({
             index,
             ticket,
             fieldsDict,
+            countriesDict,
             isEdit,
             handleSelectBioData,
           ),
@@ -94,6 +97,7 @@ export function EntriesTable({
             index,
             ticket,
             fieldsDict,
+            countriesDict,
             isEdit,
             handleFlexFields,
           ),

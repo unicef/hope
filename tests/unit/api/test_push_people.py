@@ -15,6 +15,7 @@ from hct_mis_api.apps.household.models import (
     HEAD,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     MALE,
+    NOT_COLLECTED,
     DocumentType,
     PendingDocument,
     PendingHousehold,
@@ -73,7 +74,7 @@ class TestPushPeople(HOPEApiTestCase):
                 "collect_individual_data": COLLECT_TYPE_FULL,
                 "full_name": "John Doe",
                 "birth_date": "2000-01-01",
-                "sex": "MALE",
+                "sex": "NOT_COLLECTED",
                 "type": "",
             }
         ]
@@ -95,7 +96,7 @@ class TestPushPeople(HOPEApiTestCase):
         self.assertEqual(hh.village, "village1")
 
         self.assertEqual(ind.full_name, "John Doe")
-        self.assertEqual(ind.sex, MALE)
+        self.assertEqual(ind.sex, NOT_COLLECTED)
         self.assertEqual(ind.relationship, HEAD)
 
         self.assertEqual(response_json["id"], str(self.rdi.id))
