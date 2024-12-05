@@ -73,9 +73,11 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
     long_name = models.CharField(max_length=255)
     region_code = models.CharField(max_length=8)
     region_name = models.CharField(max_length=8)
+    # TODO: deprecated to remove in the next release
     kobo_username = models.CharField(max_length=255, null=True, blank=True)
     kobo_token = models.CharField(max_length=255, null=True, blank=True)
     kobo_url = models.URLField(max_length=255, null=True, blank=True)
+
     rapid_pro_host = models.URLField(null=True, blank=True)
     rapid_pro_payment_verification_token = models.CharField(max_length=40, null=True, blank=True)
     rapid_pro_messages_token = models.CharField(max_length=40, null=True, blank=True)
