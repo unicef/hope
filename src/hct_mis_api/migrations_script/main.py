@@ -17,6 +17,7 @@ def export_migration_info_to_csv(filename="migrations_info.csv"):
         cursor.execute("SELECT * FROM django_migrations")
         rows = cursor.fetchall()
         column_names = [desc[0] for desc in cursor.description]
+    print(rows)
 
     with open(filename, mode="w", newline="") as file:
         writer = csv.writer(file)
@@ -51,7 +52,9 @@ if __name__ == "__main__":
         ("grievance", "0004_migration"),
         ("payment", "0002_migration"),
         ("payment", "0003_migration"),
-        ("aurora", "0003_migration"),
+        ("payment", "0004_migration"),
+        ("payment", "0005_migration"),
+        # ("aurora", "0003_migration"),
     ]
     fake_migrations(excluded_migrations)
     apply_migrations()
