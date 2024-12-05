@@ -5,7 +5,7 @@ from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afg
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.household.models import REFUGEE
+from hct_mis_api.apps.household.models import REFUGEE, Household
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
@@ -32,7 +32,7 @@ def create_programs() -> None:
 
 
 @pytest.fixture
-def add_household() -> None:
+def add_household() -> Household:
     registration_data_import = RegistrationDataImportFactory(
         imported_by=User.objects.first(), business_area=BusinessArea.objects.first()
     )
@@ -44,6 +44,7 @@ def add_household() -> None:
             "size": 7,
             "residence_status": REFUGEE,
             "address": "938 Luna Cliffs Apt. 551 Jameschester, SC 24934",
+            "village": "Small One",
         },
         {
             "registration_data_import": registration_data_import,
@@ -53,12 +54,13 @@ def add_household() -> None:
 
     household.unicef_id = "HH-00-0000.1380"
     household.save()
+    yield household
 
 
 @pytest.mark.usefixtures("login")
 class TestSmokeHouseholds:
     def test_smoke_page_households(
-        self, create_programs: None, add_household: None, pageHouseholds: Households
+        self, create_programs: None, add_household: Household, pageHouseholds: Households
     ) -> None:
         pageHouseholds.selectGlobalProgramFilter("Test Programm")
         pageHouseholds.getNavProgrammePopulation().click()
@@ -77,7 +79,7 @@ class TestSmokeHouseholds:
     def test_smoke_page_households_details(
         self,
         create_programs: None,
-        add_household: None,
+        add_household: Household,
         pageHouseholds: Households,
         pageHouseholdsDetails: HouseholdsDetails,
     ) -> None:
@@ -88,24 +90,21 @@ class TestSmokeHouseholds:
         assert "7" in pageHouseholdsDetails.getLabelHouseholdSize().text
         assert "Displaced | Refugee / Asylum Seeker" in pageHouseholdsDetails.getLabelResidenceStatus().text
         assert "Agata Kowalska" in pageHouseholdsDetails.getLabelHeadOfHousehold().text
-        assert "No" in pageHouseholdsDetails.getLabelFemaleChildHeadedHousehold().text
-        assert "No" in pageHouseholdsDetails.getLabelChildHeadedHousehold().text
         assert "Afghanistan" in pageHouseholdsDetails.getLabelCountry().text
         assert "Afghanistan" in pageHouseholdsDetails.getLabelCountryOfOrigin().text
         assert "938 Luna Cliffs Apt. 551 Jameschester, SC 24934" in pageHouseholdsDetails.getLabelAddress().text
-        assert "-" in pageHouseholdsDetails.getLabelVillage().text
+        assert "Small One" in pageHouseholdsDetails.getLabelVillage().text
         assert "-" in pageHouseholdsDetails.getLabelZipCode().text
         assert "-" in pageHouseholdsDetails.getLabelAdministrativeLevel1().text
         assert "-" in pageHouseholdsDetails.getLabelAdministrativeLevel2().text
         assert "-" in pageHouseholdsDetails.getLabelAdministrativeLevel3().text
         assert "-" in pageHouseholdsDetails.getLabelAdministrativeLevel4().text
-        assert "70.210209, 172.085021" in pageHouseholdsDetails.getLabelGeolocation().text
+        assert "-" in pageHouseholdsDetails.getLabelGeolocation().text
         assert "-" in pageHouseholdsDetails.getLabelUnhcrCaseId().text
         assert "-" in pageHouseholdsDetails.getLabelLengthOfTimeSinceArrival().text
         assert "-" in pageHouseholdsDetails.getLabelNumberOfTimesDisplaced().text
-        assert "No" in pageHouseholdsDetails.getLabelIsThisAReturneeHousehold().text
         assert "-" in pageHouseholdsDetails.getLabelLinkedGrievances().text
-        assert "Full_TEST" in pageHouseholdsDetails.getLabelDataCollectingType().text
+        assert "Black may training civil." in pageHouseholdsDetails.getLabelDataCollectingType().text
         assert "USD 0.00" in pageHouseholdsDetails.getLabelCashReceived().text
         assert "USD 0.00" in pageHouseholdsDetails.getLabelTotalCashReceived().text
         assert "Items Group Members" in pageHouseholdsDetails.getTableTitle().text

@@ -21,6 +21,7 @@ class TargetingDetails(BaseComponents):
     inputName = 'input[data-cy="input-name"]'
     buttonDelete = 'button[data-cy="button-delete"]'
     buttonEdit = 'a[data-cy="button-edit"]'
+    buttonSave = 'button[data-cy="button-save"]'
     buttonIconEdit = 'button[data-cy="button-edit"]'
     buttonRebuild = 'button[data-cy="button-rebuild"]'
     buttonTargetPopulationLock = 'button[data-cy="button-target-population-lock"]'
@@ -60,6 +61,7 @@ class TargetingDetails(BaseComponents):
     householdSizeFrom = 'input[data-cy="input-householdsFiltersBlocks[0].value.from"]'
     householdSizeTo = 'input[data-cy="input-householdsFiltersBlocks[0].value.to"]'
     dialogBox = 'div[role="dialog"]'
+    buttonTargetPopulationAddCriteria = 'div[data-cy="button-target-population-add-criteria"]'
 
     # Texts
     # Elements
@@ -84,6 +86,9 @@ class TargetingDetails(BaseComponents):
 
     def getButtonEdit(self) -> WebElement:
         return self.wait_for(self.buttonEdit)
+
+    def getButtonSave(self) -> WebElement:
+        return self.wait_for(self.buttonSave)
 
     def getButtonIconEdit(self) -> WebElement:
         return self.wait_for(self.buttonIconEdit)
@@ -227,3 +232,6 @@ class TargetingDetails(BaseComponents):
 
     def getDialogBox(self) -> WebElement:
         return self.wait_for(self.dialogBox)
+
+    def getButtonTargetPopulationAddCriteria(self) -> WebElement:
+        return self.wait_for(self.buttonTargetPopulationAddCriteria)

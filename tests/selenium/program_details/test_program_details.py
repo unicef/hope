@@ -237,6 +237,7 @@ def create_programs() -> None:
     dct = DataCollectingTypeFactory(type=DataCollectingType.Type.STANDARD)
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     ProgramFactory(
+        budget=10000,
         name="Test Programm",
         status=Program.ACTIVE,
         business_area=business_area,

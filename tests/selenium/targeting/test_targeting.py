@@ -246,7 +246,15 @@ def create_targeting() -> TargetPopulation:
     )
     households = [
         create_household(
-            household_args={"size": 2, "business_area": tp.business_area, "program": tp.program},
+            household_args={
+                "size": 2,
+                "business_area": tp.business_area,
+                "program": tp.program,
+                "female_age_group_6_11_count": 6,
+                "male_age_group_0_5_count": 1,
+                "female_age_group_18_59_count": 2,
+                "male_age_group_60_count": 1,
+            },
         )[0]
         for _ in range(14)
     ]
@@ -954,12 +962,13 @@ class TestTargeting:
         pageTargetingDetails.getButtonEdit().click()
         pageTargetingDetails.getInputName().send_keys(Keys.CONTROL + "a")
         pageTargetingDetails.getInputName().send_keys("New Test Data")
-        pageTargetingDetails.getButtonIconEdit().click()
-        pageTargetingDetails.getHouseholdSizeFrom().send_keys(Keys.CONTROL + "a")
+        pageTargetingDetails.getButtonTargetPopulationAddCriteria().click()
+        pageTargetingCreate.getButtonHouseholdRule().click()
+        pageTargetingCreate.getAutocompleteTargetCriteriaOption().click()
+        pageTargetingCreate.select_listbox_element("What is the Household size?")
         pageTargetingDetails.getHouseholdSizeFrom().send_keys("0")
-        pageTargetingDetails.getHouseholdSizeTo().send_keys(Keys.CONTROL + "a")
         pageTargetingDetails.getHouseholdSizeTo().send_keys("9")
-        pageTargetingCreate.get_elements(pageTargetingCreate.targetingCriteriaAddDialogSaveButton)[1].click()
+        pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
         pageTargetingCreate.getButtonSave().click()
         pageTargetingDetails.getButtonEdit()
         assert pageTargetingDetails.waitForTextTitlePage("New Test Data")
