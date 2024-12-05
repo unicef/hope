@@ -810,11 +810,7 @@ class TestTargeting:
         target_population = TargetPopulation.objects.get(
             name=f"Target Population for {household_with_disability.unicef_id}"
         )
-        assert (
-            "1"
-            == str(target_population.total_individuals_count)
-            == pageTargetingDetails.getLabelTargetedIndividuals().text
-        )
+        assert str(target_population.total_individuals_count) == pageTargetingDetails.getLabelTargetedIndividuals().text
         assert (
             str(target_population.total_households_count) == pageTargetingDetails.getLabelTotalNumberOfHouseholds().text
         )

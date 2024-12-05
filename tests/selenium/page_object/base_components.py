@@ -23,7 +23,7 @@ class BaseComponents(Common):
     navHouseholdMembers = 'a[data-cy="nav-{}"]'
     navHouseholds = 'a[data-cy="nav-{}"]'
     navIndividuals = 'a[data-cy="nav-{}"]'
-    navPeople = 'a[data-cy="nav-People"]'
+    navPeople = 'a[data-cy="nav-People Menu"]'
     navProgrammeManagement = 'a[data-cy="nav-Programmes"]'
     navManagerialConsole = 'a[data-cy="nav-Managerial Console"]'
     navProgrammeDetails = 'a[data-cy="nav-Programme Details"]'

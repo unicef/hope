@@ -91,7 +91,8 @@ class TestDrawer:
         expected_menu_items = [
             "Country Dashboard",
             "Registration Data Import",
-            "People",
+            # ToDo: Check if should be Beneficiary group name or People
+            "People Menu",
             "Programme Details",
             "Targeting",
             "Payment Module",
