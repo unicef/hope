@@ -230,7 +230,7 @@ def get_program_with_dct_type_and_name(
 
 
 @pytest.fixture
-def create_targeting() -> None:
+def create_targeting() -> TargetPopulation:
     create_test_program = Program.objects.filter(name="Test Programm").first()
     generate_delivery_mechanisms()
     dm_cash = DeliveryMechanism.objects.get(code="cash")
@@ -238,8 +238,9 @@ def create_targeting() -> None:
     targeting_criteria = TargetingCriteriaFactory()
 
     tp = TargetPopulationFactory(
+        name="Test Target Population",
         program=create_test_program,
-        status=TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE,
+        status=TargetPopulation.STATUS_OPEN,
         targeting_criteria=targeting_criteria,
         program_cycle=create_test_program.cycles.first(),
     )
@@ -299,6 +300,7 @@ class TestSmokeTargeting:
     def test_smoke_targeting_page(
         self, create_programs: None, create_targeting: TargetPopulation, pageTargeting: Targeting
     ) -> None:
+        TargetPopulationFactory(program=Program.objects.get(name="Test Programm"), name="Copy TP")
         pageTargeting.selectGlobalProgramFilter("Test Programm")
         pageTargeting.getNavTargeting().click()
         assert "Targeting" in pageTargeting.getTitlePage().text
@@ -971,6 +973,7 @@ class TestTargeting:
         pageTargeting: Targeting,
         pageTargetingDetails: TargetingDetails,
     ) -> None:
+        TargetPopulationFactory(program=Program.objects.get(name="Test Programm"), name="Copy TP")
         pageTargeting.selectGlobalProgramFilter("Test Programm")
         pageTargeting.getNavTargeting().click()
         pageTargeting.disappearLoadingRows()
@@ -985,7 +988,7 @@ class TestTargeting:
         pageTargeting.disappearLoadingRows()
         new_list = pageTargeting.getTargetPopulationsRows()
         assert 1 == len(new_list)
-        assert "Test Target Population" in new_list[0].text
+        assert create_targeting.name in new_list[0].text
 
     @pytest.mark.xfail(reason="Problem with deadlock during test - 202318")
     def test_targeting_different_program_statuses(
@@ -1150,17 +1153,22 @@ class TestTargeting:
         pageTargeting: Targeting,
         filters: Filters,
     ) -> None:
+        TargetPopulationFactory(
+            program=Program.objects.get(name="Test Programm"),
+            name="Copy TP",
+            status=TargetPopulation.STATUS_PROCESSING,
+        )
         pageTargeting.selectGlobalProgramFilter("Test Programm")
         pageTargeting.getNavTargeting().click()
         filters.getFiltersSearch().send_keys("Copy")
         filters.getButtonFiltersApply().click()
         pageTargeting.countTargetPopulations(1)
-        assert "OPEN" in pageTargeting.getStatusContainer().text
+        assert "PROCESSING" in pageTargeting.getStatusContainer().text
         filters.getButtonFiltersClear().click()
         filters.getFiltersStatus().click()
         filters.select_listbox_element("Open")
         filters.getButtonFiltersApply().click()
-        pageTargeting.countTargetPopulations(2)
+        pageTargeting.countTargetPopulations(1)
         assert "OPEN" in pageTargeting.getStatusContainer().text
         filters.getButtonFiltersClear().click()
         filters.getFiltersTotalHouseholdsCountMin().send_keys("10")
@@ -1173,7 +1181,6 @@ class TestTargeting:
         pageTargeting.countTargetPopulations(2)
         filters.getButtonFiltersClear().click()
 
-    # @flaky(max_runs=5, min_passes=1)
     def test_targeting_and_labels(
         self,
         create_programs: None,
@@ -1181,6 +1188,12 @@ class TestTargeting:
         create_targeting: TargetPopulation,
         pageTargeting: Targeting,
     ) -> None:
+        TargetPopulationFactory(
+            program=Program.objects.get(name="Test Programm"),
+            name="Copy TP",
+            status=TargetPopulation.STATUS_PROCESSING,
+        )
+
         pageTargeting.selectGlobalProgramFilter("Test Programm")
         pageTargeting.getNavTargeting().click()
         pageTargeting.getColumnName().click()
@@ -1194,7 +1207,7 @@ class TestTargeting:
         assert "Test Target Population" in pageTargeting.chooseTargetPopulations(0).text
         pageTargeting.getColumnStatus().click()
         pageTargeting.disappearLoadingRows()
-        assert "Test Target Population" in pageTargeting.chooseTargetPopulations(0).text
+        assert "Copy TP" in pageTargeting.chooseTargetPopulations(0).text
         pageTargeting.getColumnNumOfHouseholds().click()
         pageTargeting.disappearLoadingRows()
         assert "Test Target Population" in pageTargeting.chooseTargetPopulations(0).text

@@ -61,7 +61,7 @@ class BeneficiaryGroupFactory(DjangoModelFactory):
 class ProgramFactory(DjangoModelFactory):
     class Meta:
         model = Program
-        django_get_or_create = ("programme_code", "business_area")
+        django_get_or_create = ("name", "business_area")
 
     business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first())
     name = factory.Faker(

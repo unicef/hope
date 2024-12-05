@@ -5,6 +5,7 @@ from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afg
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.fixtures import create_household
+from hct_mis_api.apps.household.models import REFUGEE
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
@@ -35,14 +36,19 @@ def add_household() -> None:
     registration_data_import = RegistrationDataImportFactory(
         imported_by=User.objects.first(), business_area=BusinessArea.objects.first()
     )
-    household, _ = create_household(
+    household, individuals = create_household(
         {
             "registration_data_import": registration_data_import,
             "admin_area": Area.objects.order_by("?").first(),
             "program": Program.objects.filter(name="Test Programm").first(),
             "size": 7,
+            "residence_status": REFUGEE,
+            "address": "938 Luna Cliffs Apt. 551 Jameschester, SC 24934",
         },
-        {"registration_data_import": registration_data_import},
+        {
+            "registration_data_import": registration_data_import,
+            "full_name": "Agata Kowalska",
+        },
     )
 
     household.unicef_id = "HH-00-0000.1380"

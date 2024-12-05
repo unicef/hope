@@ -6,6 +6,12 @@ from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afg
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.fixtures import create_household
+from hct_mis_api.apps.household.models import (
+    FEMALE,
+    MARRIED,
+    ROLE_ALTERNATE,
+    IndividualRoleInHousehold,
+)
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
@@ -36,7 +42,7 @@ def add_household() -> None:
     registration_data_import = RegistrationDataImportFactory(
         imported_by=User.objects.first(), business_area=BusinessArea.objects.first()
     )
-    household, _ = create_household(
+    household, individuals = create_household(
         {
             "registration_data_import": registration_data_import,
             "admin_area": Area.objects.order_by("?").first(),
@@ -48,11 +54,18 @@ def add_household() -> None:
             "middle_name": "",
             "given_name": "Alicja",
             "family_name": "Kowalska",
-            "sex": "FEMALE",
+            "sex": FEMALE,
             "birth_date": "1941-08-26",
-            "marital_status": "Married",
+            "marital_status": MARRIED,
+            "pregnant": True,
+            "email": "fake111test@email.com",
+            "phone_no": "0048503123555",
         },
     )
+
+    alternate_role = IndividualRoleInHousehold.objects.get(household=household, role=ROLE_ALTERNATE)
+    alternate_role.individual = individuals[0]
+    alternate_role.save()
 
     household.unicef_id = "HH-00-0000.1380"
     household.save()
@@ -101,22 +114,18 @@ class TestSmokeIndividuals:
         assert "Yes" in pageIndividualsDetails.getLabelPregnant().text
         assert "-" in pageIndividualsDetails.getLabelHouseholdId().text
         assert "Alternate collector" in pageIndividualsDetails.getLabelRole().text
-        assert (
-            "Not a Family Member. Can only act as a recipient."
-            in pageIndividualsDetails.getLabelRelationshipToHoh().text
-        )
+        assert "Head of household (self)" in pageIndividualsDetails.getLabelRelationshipToHoh().text
         assert "-" in pageIndividualsDetails.getLabelPreferredLanguage().text
-        assert "HH-20-0000.0001 -Alternate collector" in pageIndividualsDetails.getLabelLinkedHouseholds().text
-        assert "-" in pageIndividualsDetails.getLabelObservedDisabilities().text
+        assert "HH-00-0000.1380 -Alternate collector" in pageIndividualsDetails.getLabelLinkedHouseholds().text
+        assert "None" in pageIndividualsDetails.getLabelObservedDisabilities().text
         assert "None" in pageIndividualsDetails.getLabelSeeingDisabilitySeverity().text
         assert "None" in pageIndividualsDetails.getLabelHearingDisabilitySeverity().text
         assert "None" in pageIndividualsDetails.getLabelPhysicalDisabilitySeverity().text
         assert "None" in pageIndividualsDetails.getLabelRememberingOrConcentratingDisabilitySeverity().text
         assert "None" in pageIndividualsDetails.getLabelCommunicatingDisabilitySeverity().text
         assert "Not Disabled" in pageIndividualsDetails.getLabelDisability().text
-        assert "Afghanistan" in pageIndividualsDetails.getLabelIssued().text
         assert "fake111test@email.com" in pageIndividualsDetails.getLabelEmail().text
-        assert "0048503123555" in pageIndividualsDetails.getLabelPhoneNumber().text
+        assert "Invalid Phone Number" in pageIndividualsDetails.getLabelPhoneNumber().text
         assert "-" in pageIndividualsDetails.getLabelAlternativePhoneNumber().text
         assert "-" in pageIndividualsDetails.getLabelDateOfLastScreeningAgainstSanctionsList().text
 

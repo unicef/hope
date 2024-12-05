@@ -148,7 +148,7 @@ class TestSmokePeople:
         assert individual.given_name in pagePeopleDetails.getLabelGivenName().text
         assert individual.middle_name if individual.middle_name else "-" in pagePeopleDetails.getLabelMiddleName().text
         assert individual.family_name in pagePeopleDetails.getLabelFamilyName().text
-        assert individual.sex.lower() in pagePeopleDetails.getLabelGender().text.lower()
+        assert individual.sex.lower().replace("_", " ") in pagePeopleDetails.getLabelGender().text.lower()
         assert pagePeopleDetails.getLabelAge().text
         assert individual.birth_date.strftime("%-d %b %Y") in pagePeopleDetails.getLabelDateOfBirth().text
         assert pagePeopleDetails.getLabelEstimatedDateOfBirth().text
