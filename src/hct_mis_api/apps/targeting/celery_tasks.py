@@ -130,7 +130,7 @@ def create_tp_from_list(form_data: Dict[str, str], user_id: str, program_pk: str
     program = Program.objects.get(pk=program_pk)
     form = CreateTargetPopulationTextForm(form_data, program=program)
     if form.is_valid():
-        # population = form.cleaned_data["criteria"]
+        # unicef_ids = form.cleaned_data["criteria"]  # filter by unicef_id ?
         set_sentry_business_area_tag(program.business_area.name)
         program_cycle = form.cleaned_data["program_cycle"]
         try:
@@ -139,7 +139,7 @@ def create_tp_from_list(form_data: Dict[str, str], user_id: str, program_pk: str
                     targeting_criteria=form.cleaned_data["targeting_criteria"],
                     created_by_id=user_id,
                     name=form.cleaned_data["name"],
-                    business_area=program.business_area,
+                    business_area=program_cycle.program.business_area,
                     program_cycle=program_cycle,
                     status_date=timezone.now(),
                     start_date=program_cycle.start_date,
@@ -153,7 +153,6 @@ def create_tp_from_list(form_data: Dict[str, str], user_id: str, program_pk: str
                 payment_plan.save(update_fields=("build_status", "built_at"))
                 PaymentPlanService.create_payments(payment_plan)
                 payment_plan.update_population_count_fields()
-                payment_plan.update_money_fields()
                 payment_plan.build_status_ok()
                 payment_plan.save(update_fields=("build_status", "built_at"))
         except Exception as e:
