@@ -1,0 +1,143 @@
+from django.test import TestCase
+
+from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
+from hct_mis_api.apps.payment.models import Payment, PaymentPlan
+from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.targeting.fixtures import (
+    TargetingCriteriaFactory,
+    TargetingCriteriaRuleFactory,
+    TargetPopulationFactory,
+)
+from hct_mis_api.apps.targeting.models import (
+    TargetingCriteria,
+    TargetingCriteriaRule,
+    TargetPopulation,
+)
+from hct_mis_api.one_time_scripts.migrate_tp_into_pp import migrate_tp_into_pp
+
+
+class MigrationTPIntoPPTest(TestCase):
+    def setUp(cls) -> None:
+        cls.business_area = create_afghanistan()
+        cls.user = UserFactory()
+        cls.program = ProgramFactory()
+        cls.program_cycle = cls.program.cycles.first()
+
+        # preparing PaymentPlan
+        cls.targeting_criteria_for_preparing_pp = TargetingCriteriaFactory()
+        cls.tp_for_preparing = TargetPopulationFactory(
+            name="TP for Preparing PP",
+            targeting_criteria=cls.targeting_criteria_for_preparing_pp,
+            business_area=cls.business_area,
+            created_by=cls.user,
+            status=TargetPopulation.STATUS_ASSIGNED,
+        )
+        cls.preparing_payment_plan = PaymentPlanFactory(
+            program_cycle=cls.program_cycle,
+            created_by=cls.user,
+            targeting_criteria=None,
+            target_population=cls.tp_for_preparing,
+        )
+        # tp_1
+        cls.targeting_criteria_1_without_rule = TargetingCriteriaFactory(household_ids="HH-11", individual_ids="IND-11")
+        cls.tp_1 = TargetPopulationFactory(
+            name="TP without rule",
+            targeting_criteria=cls.targeting_criteria_1_without_rule,
+            business_area=cls.business_area,
+            created_by=cls.user,
+            status=TargetPopulation.STATUS_OPEN,
+        )
+        # tp_2
+        cls.targeting_criteria_2_with_rule = TargetingCriteriaFactory(household_ids="HH-22", individual_ids="IND-22")
+        TargetingCriteriaRuleFactory(
+            targeting_criteria=cls.targeting_criteria_2_with_rule, household_ids="", individual_ids=""
+        )
+        cls.tp_2 = TargetPopulationFactory(
+            name="TP with rule",
+            targeting_criteria=cls.targeting_criteria_2_with_rule,
+            business_area=cls.business_area,
+            created_by=cls.user,
+            status=TargetPopulation.STATUS_LOCKED,
+        )
+
+        # tp_3 with PaymentPlan
+        cls.targeting_criteria_3 = TargetingCriteriaFactory()
+        cls.tp_3 = TargetPopulationFactory(
+            name="TP with Open PP",
+            targeting_criteria=cls.targeting_criteria_3,
+            business_area=cls.business_area,
+            created_by=cls.user,
+            status=TargetPopulation.STATUS_ASSIGNED,
+        )
+        cls.payment_plan_2 = PaymentPlanFactory(
+            program_cycle=cls.program_cycle,
+            created_by=cls.user,
+            targeting_criteria=None,
+            status=PaymentPlan.Status.OPEN,
+            target_population=cls.tp_3,
+        )
+        # tp_4 with PaymentPlan
+        cls.targeting_criteria_4 = TargetingCriteriaFactory()
+        cls.tp_4 = TargetPopulationFactory(
+            name="TP with Finished PP",
+            targeting_criteria=cls.targeting_criteria_4,
+            business_area=cls.business_area,
+            created_by=cls.user,
+            status=TargetPopulation.STATUS_ASSIGNED,
+        )
+        cls.payment_plan_3 = PaymentPlanFactory(
+            program_cycle=cls.program_cycle,
+            created_by=cls.user,
+            targeting_criteria=None,
+            status=PaymentPlan.Status.FINISHED,
+            target_population=cls.tp_4,
+        )
+        # create Tps for all other statuses
+        for tp_status in [
+            TargetPopulation.STATUS_STEFICON_WAIT,
+            TargetPopulation.STATUS_STEFICON_RUN,
+            TargetPopulation.STATUS_STEFICON_COMPLETED,
+            TargetPopulation.STATUS_STEFICON_ERROR,
+            TargetPopulation.STATUS_PROCESSING,
+            TargetPopulation.STATUS_SENDING_TO_CASH_ASSIST,
+            TargetPopulation.STATUS_READY_FOR_CASH_ASSIST,
+            TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE,
+        ]:
+            TargetPopulationFactory(
+                name=f"TP for status {tp_status}",
+                targeting_criteria=TargetingCriteriaFactory(),
+                business_area=cls.business_area,
+                created_by=cls.user,
+                status=tp_status,
+            )
+        # removed TP
+        TargetPopulationFactory(
+            name="Removed TP",
+            targeting_criteria=TargetingCriteriaFactory(),
+            business_area=cls.business_area,
+            created_by=cls.user,
+            status=TargetPopulation.STATUS_ASSIGNED,
+            is_removed=True,
+        )
+
+    def test_migrate_tp_into_pp(self) -> None:
+        self.assertEqual(TargetPopulation.all_objects.all().count(), 14)
+        self.assertEqual(TargetingCriteriaRule.objects.all().count(), 1)
+        self.assertEqual(TargetingCriteria.objects.all().count(), 14)
+
+        self.assertEqual(PaymentPlan.all_objects.count(), 3)
+        self.assertEqual(Payment.objects.filter(parent=self.preparing_payment_plan).count(), 0)
+
+        migrate_tp_into_pp()
+
+        self.assertEqual(TargetPopulation.all_objects.all().count(), 14)
+        self.assertEqual(TargetingCriteriaRule.objects.all().count(), 2)  # new Rule created and migrated hh ind ids
+        self.assertEqual(TargetingCriteria.objects.all().count(), 14)
+
+        self.assertEqual(PaymentPlan.all_objects.count(), 13)
+        # not copy TP is_removed=True
+        self.assertFalse(PaymentPlan.objects.filter(name="Removed TP").exists())
+
+        self.assertEqual(Payment.objects.filter(parent=self.preparing_payment_plan).count(), 0)

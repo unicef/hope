@@ -363,7 +363,6 @@ def prepare_payment_plan_task(self: Any, payment_plan_id: str) -> bool:
 
             PaymentPlanService.create_payments(payment_plan)
             payment_plan.update_population_count_fields()
-            payment_plan.update_money_fields()
             payment_plan.build_status_ok()
             payment_plan.save(update_fields=("build_status", "built_at"))
     except Exception as e:

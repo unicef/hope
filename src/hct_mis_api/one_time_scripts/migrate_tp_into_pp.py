@@ -15,9 +15,9 @@ from hct_mis_api.apps.targeting.models import (
     TargetPopulation,
 )
 
+# tp.field: payment_plan.field
+# if value has internal_data__ will story into json
 TP_MIGRATION_MAPPING = {
-    # tp.field: payment_plan.field
-    # if value has internal_data__ will story into json
     "name": "name",
     "created_by": "created_by",
     "change_date": "status_date",
@@ -47,19 +47,43 @@ INTERNAL_DATA_FIELDS = {
     "sent_to_datahub": "internal_data__sent_to_datahub",
 }
 
-ALL_TP_MIGRATION_MAPPING = TP_MIGRATION_MAPPING.update(INTERNAL_DATA_FIELDS)
+ALL_TP_MIGRATION_MAPPING = TP_MIGRATION_MAPPING | INTERNAL_DATA_FIELDS
+
+tp_status_to_pp_mapping = {
+    TargetPopulation.STATUS_OPEN: PaymentPlan.Status.TP_OPEN,
+    TargetPopulation.STATUS_LOCKED: PaymentPlan.Status.TP_LOCKED,
+    TargetPopulation.STATUS_PROCESSING: PaymentPlan.Status.TP_PROCESSING,
+    TargetPopulation.STATUS_STEFICON_WAIT: PaymentPlan.Status.TP_STEFICON_WAIT,
+    TargetPopulation.STATUS_STEFICON_RUN: PaymentPlan.Status.TP_STEFICON_RUN,
+    TargetPopulation.STATUS_STEFICON_COMPLETED: PaymentPlan.Status.TP_STEFICON_COMPLETED,
+    TargetPopulation.STATUS_STEFICON_ERROR: PaymentPlan.Status.TP_STEFICON_ERROR,
+    TargetPopulation.STATUS_SENDING_TO_CASH_ASSIST: PaymentPlan.Status.DRAFT,
+    TargetPopulation.STATUS_READY_FOR_CASH_ASSIST: PaymentPlan.Status.DRAFT,
+    TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE: PaymentPlan.Status.DRAFT,
+    TargetPopulation.STATUS_ASSIGNED: None,  # not copy status from TP
+}
 
 
 def map_tp_to_pp(tp: TargetPopulation) -> Dict[str, Any]:
     """helper function to map TargetPopulation to PaymentPlan fields"""
     payment_plan_data = defaultdict(dict)
     internal_data = defaultdict(dict)
+
     for tp_field, pp_field in ALL_TP_MIGRATION_MAPPING.items():
         tp_value = getattr(tp, tp_field, None)
         if tp_value:
             pp_field_list = pp_field.split("__")
             if len(pp_field_list) == 1:
+                # map TP and PP status
+                if pp_field_list[0] == "status":
+                    if tp_value == TargetPopulation.STATUS_ASSIGNED:
+                        # for assigned TP just skip updating PP.status
+                        continue
+                    else:
+                        tp_value = tp_status_to_pp_mapping.get(tp_value)
+
                 payment_plan_data[pp_field] = tp_value
+            # internal_data json
             elif len(pp_field_list) == 2 and pp_field_list[0] == "internal_data":
                 internal_data[pp_field_list[1]] = str(tp_value)  # type: ignore
     payment_plan_data["internal_data"] = internal_data
@@ -123,11 +147,11 @@ def migrate_tp_qs(tp_qs: QuerySet["TargetPopulation"]) -> None:
             # create new PaymentPlan
             payment_plan_data = map_tp_to_pp(tp)
             payment_plan_data["start_date"] = tp.program_cycle.start_date
-            payment_plan_data["end_date"] = (tp.program_cycle.end_date,)
-            payment_plan_data["status"] = (PaymentPlan.Status.TP_OPEN,)
-            payment_plan_data["build_status"] = (PaymentPlan.BuildStatus.BUILD_STATUS_PENDING,)
-            payment_plan_data["built_at"] = (timezone.now(),)
-
+            payment_plan_data["end_date"] = tp.program_cycle.end_date
+            payment_plan_data["status"] = PaymentPlan.Status.TP_OPEN
+            payment_plan_data["status_date"] = timezone.now()
+            payment_plan_data["build_status"] = PaymentPlan.BuildStatus.BUILD_STATUS_PENDING
+            payment_plan_data["built_at"] = timezone.now()
             new_payment_plans.append(PaymentPlan(**payment_plan_data))
 
     if update_payment_plans:
@@ -174,7 +198,7 @@ def migrate_tp_into_pp(batch_size: int = 500) -> None:
     get_statistics()
 
     for business_area in BusinessArea.objects.all().only("id", "name"):
-        queryset = TargetPopulation.all_objects.filter(business_area_id=business_area.id).only(
+        queryset = TargetPopulation.objects.filter(business_area_id=business_area.id).only(
             "id",
         )
         if queryset:
@@ -193,14 +217,14 @@ def migrate_tp_into_pp(batch_size: int = 500) -> None:
 
                     page_count += 1
                 if i % (batch_size * 10) == 0:
-                    print(f"progress: migrated {page_count * batch_size}/{total_count} TPs.")
+                    print(f"progress: {page_count}/{total_count // batch_size} page(s) migrated.")  # # # #
 
-            pending_payment_plans_qs = PaymentPlan.objects.filter(
+            build_payment_plans_qs = PaymentPlan.objects.filter(
                 build_status=PaymentPlan.BuildStatus.BUILD_STATUS_PENDING, business_area_id=business_area.id
             )
-            if pending_payment_plans_qs.exists():
+            if build_payment_plans_qs.exists():
                 print("Create payments for New Created Payment Plans")
-                for payment_plan in pending_payment_plans_qs.only("id"):
+                for payment_plan in build_payment_plans_qs.only("id"):
                     prepare_payment_plan_task(str(payment_plan.id))
 
     print(f"Completed in {timezone.now() - start_time}\n", "*" * 55)
