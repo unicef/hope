@@ -7,7 +7,6 @@ import { useTranslation } from 'react-i18next';
 import {
   AllHouseholdsQuery,
   useAllEditHouseholdFieldsQuery,
-  useAllEditPeopleFieldsQuery,
   useHouseholdLazyQuery,
 } from '@generated/graphql';
 import { LoadingComponent } from '@core/LoadingComponent';
@@ -25,7 +24,7 @@ export function EditHouseholdDataChange({
 }: EditHouseholdDataChangeProps): ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
-  const { selectedProgram, isSocialDctType } = useProgramContext();
+  const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const isEditTicket = location.pathname.includes('edit-ticket');
@@ -52,24 +51,16 @@ export function EditHouseholdDataChange({
   }, []);
   const { data: householdFieldsData, loading: householdFieldsLoading } =
     useAllEditHouseholdFieldsQuery();
-  const { data: allEditPeopleFieldsData, loading: allEditPeopleFieldsLoading } =
-    useAllEditPeopleFieldsQuery();
 
-  const fieldsByDctType = isSocialDctType
-    ? allEditPeopleFieldsData?.allEditPeopleFieldsAttributes
-    : householdFieldsData?.allEditHouseholdFieldsAttributes;
+  const householdFieldsDict =
+    householdFieldsData?.allEditHouseholdFieldsAttributes;
 
   if (!household) {
     return (
       <div>{`You have to select a ${beneficiaryGroup?.groupLabel} earlier`}</div>
     );
   }
-  if (
-    fullHouseholdLoading ||
-    householdFieldsLoading ||
-    allEditPeopleFieldsLoading ||
-    !fullHousehold
-  ) {
+  if (fullHouseholdLoading || householdFieldsLoading || !fullHousehold) {
     return <LoadingComponent />;
   }
   const notAvailableItems = (values.householdDataUpdateFields || []).map(
@@ -93,7 +84,7 @@ export function EditHouseholdDataChange({
                     itemValue={item}
                     index={index}
                     household={fullHousehold.household}
-                    fields={fieldsByDctType}
+                    fields={householdFieldsDict}
                     notAvailableFields={notAvailableItems}
                     onDelete={() => arrayHelpers.remove(index)}
                     values={values}

@@ -336,14 +336,16 @@ class TestMigrateCashPlanToPaymentPlan(TestCase):
         assert pp1.dispersion_end_date == datetime.date(2021, 1, 2)
         assert pp1.status_date == datetime.datetime(2021, 1, 3, tzinfo=utc)
         assert pp1.exchange_rate == self.cash_plan.exchange_rate
-        assert pp1.total_entitled_quantity == self.cash_plan.total_entitled_quantity
-        assert pp1.total_entitled_quantity_usd == self.cash_plan.total_entitled_quantity_usd
+
+        assert pp1.total_entitled_quantity == self.pr1.entitlement_quantity
+        assert pp1.total_entitled_quantity_usd == self.pr1.entitlement_quantity_usd
         assert pp1.total_entitled_quantity_revised == self.cash_plan.total_entitled_quantity_revised
         assert pp1.total_entitled_quantity_revised_usd == self.cash_plan.total_entitled_quantity_revised_usd
-        assert pp1.total_delivered_quantity == self.cash_plan.total_delivered_quantity
-        assert pp1.total_delivered_quantity_usd == self.cash_plan.total_delivered_quantity_usd
-        assert pp1.total_undelivered_quantity == self.cash_plan.total_undelivered_quantity
-        assert pp1.total_undelivered_quantity_usd == self.cash_plan.total_undelivered_quantity_usd
+        assert pp1.total_delivered_quantity == self.pr1.delivered_quantity
+        assert pp1.total_delivered_quantity_usd == self.pr1.delivered_quantity_usd
+        assert pp1.total_undelivered_quantity == pp1.total_entitled_quantity - self.pr1.delivered_quantity
+        assert pp1.total_undelivered_quantity_usd == pp1.total_entitled_quantity_usd - self.pr1.delivered_quantity_usd
+
         assert pp1.internal_data == {
             "name": self.cash_plan.name,
             "ca_hash_id": str(self.cash_plan.ca_hash_id),

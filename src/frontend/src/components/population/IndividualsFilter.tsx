@@ -139,6 +139,9 @@ export function IndividualsFilter({
           >
             <MenuItem value="FEMALE">{t('Female')}</MenuItem>
             <MenuItem value="MALE">{t('Male')}</MenuItem>
+            <MenuItem value="OTHER">{t('Other')}</MenuItem>
+            <MenuItem value="NOT_COLLECTED">{t('Not Collected')}</MenuItem>
+            <MenuItem value="NOT_ANSWERED">{t('Not Answered')}</MenuItem>
           </SelectFilter>
         </Grid>
         <Grid item xs={2}>

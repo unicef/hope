@@ -1,7 +1,9 @@
-import logging
+from decimal import Decimal
 
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
+from django.db.models import Sum
+from django.db.models.functions import Coalesce
 
 from hct_mis_api.apps.grievance.models import (
     TicketComplaintDetails,
@@ -25,8 +27,6 @@ from hct_mis_api.apps.payment.services.payment_household_snapshot_service import
 )
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
-logger = logging.getLogger(__name__)
-
 
 def get_status(status: str) -> str:
     mapping = {"Transaction Successful": "Distribution Successful"}
@@ -38,18 +38,18 @@ def migrate_cash_plan_to_payment_plan() -> None:
     content_type_for_cash_plan = ContentType.objects.get_for_model(CashPlan)
     content_type_for_payment_record = ContentType.objects.get_for_model(PaymentRecord)
 
-    logger.info("**Migrating Cash Plan to Payment Plan**")
+    print("**Migrating Cash Plan to Payment Plan**")
     delivery_type_to_obj = {obj.name: obj for obj in DeliveryMechanism.objects.all()}
 
-    logger.info("Creating FinancialServiceProviders")
+    print("Creating FinancialServiceProviders")
     for sp in ServiceProvider.objects.filter(is_migrated_to_payment_plan=False):
-        logger.info(f"\nProcessing Service Provider {sp}")
+        print(f"\nProcessing Service Provider {sp}")
         if not sp.cash_plans.exists():
-            logger.info(f"Service provider {sp} has no cash plans")
+            print(f"Service provider {sp} has no cash plans")
             continue
 
         if FinancialServiceProvider.objects.filter(vision_vendor_number=sp.vision_id).exists():
-            logger.info(f"FinancialServiceProvider with vision_id {sp.vision_id} already exists")
+            print(f"FinancialServiceProvider with vision_id {sp.vision_id} already exists")
             continue
 
         if not sp.vision_id:
@@ -78,12 +78,12 @@ def migrate_cash_plan_to_payment_plan() -> None:
     dm_cash = delivery_type_to_obj["Cash"]
 
     cash_plans = CashPlan.objects.filter(is_migrated_to_payment_plan=False)
-    logger.info(f"Total Cash Plans to migrate: {cash_plans.count()}")
+    print(f"Total Cash Plans to migrate: {cash_plans.count()}")
     cp_count = cash_plans.count()
     cp_i = 0
     for cp in cash_plans.iterator(chunk_size=50):
         if cp_i % 50 == 0:
-            logger.info(f"Processing cash plan {cp_i}/{cp_count}")
+            print(f"Processing cash plan {cp_i}/{cp_count}")
         cp_i += 1
         with transaction.atomic():
             if not cp.payment_items.exists():
@@ -269,6 +269,35 @@ def migrate_cash_plan_to_payment_plan() -> None:
                             ticket_sensitive_details.save()
 
                 create_payment_plan_snapshot_data(pp)
+
+                pp.update_population_count_fields()
+
+                payments = pp.eligible_payments.aggregate(
+                    total_entitled_quantity=Coalesce(Sum("entitlement_quantity"), Decimal(0.0)),
+                    total_entitled_quantity_usd=Coalesce(Sum("entitlement_quantity_usd"), Decimal(0.0)),
+                    total_delivered_quantity=Coalesce(Sum("delivered_quantity"), Decimal(0.0)),
+                    total_delivered_quantity_usd=Coalesce(Sum("delivered_quantity_usd"), Decimal(0.0)),
+                )
+
+                pp.total_entitled_quantity = payments.get("total_entitled_quantity", 0.00)
+                pp.total_entitled_quantity_usd = payments.get("total_entitled_quantity_usd", 0.00)
+                pp.total_delivered_quantity = payments.get("total_delivered_quantity", 0.00)
+                pp.total_delivered_quantity_usd = payments.get("total_delivered_quantity_usd", 0.00)
+
+                pp.total_undelivered_quantity = pp.total_entitled_quantity - pp.total_delivered_quantity
+                pp.total_undelivered_quantity_usd = pp.total_entitled_quantity_usd - pp.total_delivered_quantity_usd
+
+                pp.save(
+                    update_fields=[
+                        "total_entitled_quantity",
+                        "total_entitled_quantity_usd",
+                        "total_delivered_quantity",
+                        "total_delivered_quantity_usd",
+                        "total_undelivered_quantity",
+                        "total_undelivered_quantity_usd",
+                    ]
+                )
+
                 tp_counter += 1
 
             cp.is_migrated_to_payment_plan = True
@@ -276,5 +305,5 @@ def migrate_cash_plan_to_payment_plan() -> None:
 
 
 def migrate_cash_assist_models() -> None:
-    logger.info("***Migrating Cash Assist models to Payment models***")
+    print("***Migrating Cash Assist models to Payment models***")
     migrate_cash_plan_to_payment_plan()

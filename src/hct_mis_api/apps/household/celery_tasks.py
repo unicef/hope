@@ -131,6 +131,7 @@ def calculate_children_fields_for_not_collected_individual_data() -> int:
     )
 
     return Household.objects.exclude(collect_individual_data__in=[COLLECT_TYPE_FULL, COLLECT_TYPE_PARTIAL]).update(
+        # TODO: count differently or add all the fields for the new gender options
         children_count=Coalesce("female_age_group_0_5_count", 0)
         + Coalesce("female_age_group_6_11_count", 0)
         + Coalesce("female_age_group_12_17_count", 0)
