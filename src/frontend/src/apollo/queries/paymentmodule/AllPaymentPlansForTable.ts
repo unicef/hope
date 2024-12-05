@@ -71,10 +71,6 @@ export const AllPaymentPlansForTable = gql`
             id
             name
           }
-          targetPopulation {
-            id
-            name
-          }
           currency
           currencyName
           startDate

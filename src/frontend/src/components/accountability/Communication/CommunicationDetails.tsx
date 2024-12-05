@@ -38,13 +38,13 @@ export function CommunicationDetails({
               <UniversalMoment>{message.createdAt}</UniversalMoment>
             </LabelizedField>
           </Grid>
-          {message.targetPopulation && (
+          {message.paymentPlan && (
             <Grid item xs={4}>
               <LabelizedField label={t('Target Population')}>
                 <BlackLink
-                  to={`/${baseUrl}/target-population/${message.targetPopulation.id}`}
+                  to={`/${baseUrl}/payment-module/payment-plans/${message.paymentPlan.id}`}
                 >
-                  {message.targetPopulation.name}
+                  {message.paymentPlan.unicefId}
                 </BlackLink>
               </LabelizedField>
             </Grid>

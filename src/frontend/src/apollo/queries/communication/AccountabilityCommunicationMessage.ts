@@ -12,11 +12,11 @@ export const AccountabilityCommunicationMessage = gql`
         lastName
         email
       }
-      createdAt
-      targetPopulation {
+      paymentPlan {
         id
         name
       }
+      createdAt
       registrationDataImport {
         id
         name
