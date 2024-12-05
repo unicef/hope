@@ -60,7 +60,7 @@ def clear_downloaded_files(download_path: str) -> None:
 def program() -> Program:
     business_area = create_afghanistan()
     dct = DataCollectingTypeFactory(type=DataCollectingType.Type.SOCIAL)
-    beneficiary_group = BeneficiaryGroup.objects.filter(name="People Menu").first()
+    beneficiary_group = BeneficiaryGroup.objects.filter(name="People").first()
     return ProgramFactory(
         name="Test Program",
         status=Program.ACTIVE,

@@ -65,7 +65,7 @@ def get_social_program_with_dct_type_and_name(
 ) -> Program:
     BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
     dct = DataCollectingTypeFactory(type=dct_type)
-    beneficiary_group = BeneficiaryGroup.objects.filter(name="People Menu").first()
+    beneficiary_group = BeneficiaryGroup.objects.filter(name="People").first()
     program = ProgramFactory(
         name=name,
         programme_code=programme_code,
@@ -91,8 +91,7 @@ class TestDrawer:
         expected_menu_items = [
             "Country Dashboard",
             "Registration Data Import",
-            # ToDo: Check if should be Beneficiary group name or People
-            "People Menu",
+            "People",
             "Programme Details",
             "Targeting",
             "Payment Module",

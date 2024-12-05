@@ -555,7 +555,9 @@ def create_super_user(business_area: BusinessArea) -> User:
     )
 
     BeneficiaryGroupFactory(
-        name="People Menu",
+        name="People",
+        member_label="Individual",
+        member_label_plural="Individuals",
         master_detail=False,
     )
 
