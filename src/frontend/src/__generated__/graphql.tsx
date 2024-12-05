@@ -3146,7 +3146,10 @@ export enum IndividualRoleInHouseholdRole {
 
 export enum IndividualSex {
   Female = 'FEMALE',
-  Male = 'MALE'
+  Male = 'MALE',
+  NotAnswered = 'NOT_ANSWERED',
+  NotCollected = 'NOT_COLLECTED',
+  Other = 'OTHER'
 }
 
 export type IndividualUpdateDataObjectType = {

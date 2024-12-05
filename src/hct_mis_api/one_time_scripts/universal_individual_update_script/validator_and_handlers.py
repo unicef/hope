@@ -4,7 +4,7 @@ from typing import Any, Optional
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import timezone_datetime
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.household.models import FEMALE, MALE
+from hct_mis_api.apps.household.models import SEX_CHOICE
 from hct_mis_api.apps.program.models import Program
 
 
@@ -62,7 +62,7 @@ def validate_sex(
 ) -> Optional[str]:
     if value is None or value == "":
         return None
-    sex_choices = [MALE, FEMALE]
+    sex_choices = [value for value, _ in SEX_CHOICE]
     if value not in sex_choices:
         return f"Invalid value {value} for column {name}"
     return None
