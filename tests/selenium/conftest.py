@@ -556,6 +556,8 @@ def create_super_user(business_area: BusinessArea) -> User:
 
     BeneficiaryGroupFactory(
         name="People",
+        group_label="Household",
+        group_label_plural="Households",
         member_label="Individual",
         member_label_plural="Individuals",
         master_detail=False,

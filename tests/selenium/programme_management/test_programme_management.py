@@ -177,6 +177,7 @@ class TestProgrammeManagement:
         pageProgrammeManagement.getButtonSave().click()
         # Check Details page
         pageProgrammeDetails.wait_for_text("New Programme", pageProgrammeDetails.headerTitle)
+        pageProgrammeDetails.screenshot("0", file_path="./")
         assert "DRAFT" in pageProgrammeDetails.getProgramStatus().text
         assert test_data["startDate"].date_in_text_format in pageProgrammeDetails.getLabelStartDate().text
         assert test_data["endDate"].date_in_text_format in pageProgrammeDetails.getLabelEndDate().text

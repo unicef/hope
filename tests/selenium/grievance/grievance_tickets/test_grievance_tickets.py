@@ -95,7 +95,10 @@ def household_without_disabilities() -> Household:
 @pytest.fixture
 def household_social_worker() -> Household:
     yield create_custom_household(
-        observed_disability=[], program_name="Social Program", dct_type=DataCollectingType.Type.SOCIAL
+        observed_disability=[],
+        program_name="Social Program",
+        dct_type=DataCollectingType.Type.SOCIAL,
+        beneficiary_group_name="People",
     )
 
 
@@ -145,8 +148,11 @@ def create_custom_household(
     residence_status: str = HOST,
     program_name: str = "Test Program",
     dct_type: str = DataCollectingType.Type.STANDARD,
+    beneficiary_group_name: str = "Main Menu",
 ) -> Household:
-    program = get_program_with_dct_type_and_name(program_name, "1234", dct_type=dct_type)
+    program = get_program_with_dct_type_and_name(
+        program_name, "1234", dct_type=dct_type, beneficiary_group_name=beneficiary_group_name
+    )
     household, _ = create_household_and_individuals(
         household_data={
             "unicef_id": "HH-20-0000.0001",
@@ -640,16 +646,16 @@ class TestGrievanceTickets:
         items = select_element.find_elements("tag name", "li")
 
         check_list = {
-            "Add Item": "true",
-            "Items Group Data Update": "true",
-            "Item Data Update": "None",
-            "Withdraw Item": "None",
-            "Withdraw Items Group": "true",
+            "Add Individual": "true",
+            "Household Data Update": "true",
+            "Individual Data Update": "None",
+            "Withdraw Individual": "None",
+            "Withdraw Household": "true",
         }
 
         for item in items:
             sleep(0.5)
-            assert str(item.get_attribute("aria-disabled")) in check_list[item.text], items
+            assert str(item.get_attribute("aria-disabled")) in check_list[item.text], f"{item.text} - not disabled"
 
     def test_grievance_tickets_create_new_ticket_Data_Change_Add_Individual_All_Fields(
         self,

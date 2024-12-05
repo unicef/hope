@@ -46,10 +46,11 @@ def add_household() -> None:
             "registration_data_import": registration_data_import,
             "full_name": "Alicja Kowalska",
             "middle_name": "",
-            "given_name": "Mary",
+            "given_name": "Alicja",
             "family_name": "Kowalska",
-            "sex": "Female",
+            "sex": "FEMALE",
             "birth_date": "1941-08-26",
+            "marital_status": "Married",
         },
     )
 

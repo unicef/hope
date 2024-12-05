@@ -1,6 +1,5 @@
 from datetime import datetime
 from typing import Callable
-from uuid import UUID
 
 import pytest
 from dateutil.relativedelta import relativedelta
@@ -8,7 +7,6 @@ from selenium.common import NoSuchElementException
 from selenium.webdriver import ActionChains, Keys
 from selenium.webdriver.common.by import By
 
-from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
 from hct_mis_api.apps.core.models import (
     BusinessArea,
@@ -28,6 +26,13 @@ from hct_mis_api.apps.household.models import (
     Household,
     Individual,
 )
+from hct_mis_api.apps.payment.fixtures import (
+    FinancialServiceProviderFactory,
+    FinancialServiceProviderXlsxTemplateFactory,
+    FspXlsxTemplatePerDeliveryMechanismFactory,
+    generate_delivery_mechanisms,
+)
+from hct_mis_api.apps.payment.models import DeliveryMechanism, FinancialServiceProvider
 from hct_mis_api.apps.periodic_data_update.utils import (
     field_label_to_field_name,
     populate_pdu_with_null_values,
@@ -35,6 +40,8 @@ from hct_mis_api.apps.periodic_data_update.utils import (
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory, RuleFactory
+from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
     TargetPopulationFactory,
@@ -223,38 +230,53 @@ def get_program_with_dct_type_and_name(
 
 
 @pytest.fixture
-def create_targeting(household_without_disabilities: Household) -> TargetPopulation:
-    program = Program.objects.filter(name="Test Programm").first()
-    program_cycle = program.cycles.first()
-    target_population = TargetPopulation.objects.update_or_create(
-        pk=UUID("00000000-0000-0000-0000-faceb00c0123"),
-        name="Test Target Population",
-        targeting_criteria=TargetingCriteriaFactory(),
-        status=TargetPopulation.STATUS_OPEN,
-        business_area=BusinessArea.objects.get(slug="afghanistan"),
-        program=Program.objects.get(name="Test Programm"),
-        created_by=User.objects.first(),
-        program_cycle=program_cycle,
-    )[0]
-    target_population.save()
-    household, _ = create_household(
-        household_args={
-            "unicef_id": "HH-00-0000.0442",
-            "business_area": program.business_area,
-            "program": program,
-            "residence_status": HOST,
-        },
-    )
-    target_population.households.set([household])
+def create_targeting() -> None:
+    create_test_program = Program.objects.filter(name="Test Programm").first()
+    generate_delivery_mechanisms()
+    dm_cash = DeliveryMechanism.objects.get(code="cash")
 
-    TargetPopulationFactory(
-        name="Copy TP",
-        program=program,
-        status=TargetPopulation.STATUS_OPEN,
-        targeting_criteria=TargetingCriteriaFactory(),
-    )
+    targeting_criteria = TargetingCriteriaFactory()
 
-    yield target_population
+    tp = TargetPopulationFactory(
+        program=create_test_program,
+        status=TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE,
+        targeting_criteria=targeting_criteria,
+        program_cycle=create_test_program.cycles.first(),
+    )
+    households = [
+        create_household(
+            household_args={"size": 2, "business_area": tp.business_area, "program": tp.program},
+        )[0]
+        for _ in range(14)
+    ]
+
+    tp.households.set(households)
+    business_area = BusinessArea.objects.get(slug="afghanistan")
+    rule = RuleFactory(
+        name="Test Rule",
+        type=Rule.TYPE_PAYMENT_PLAN,
+        deprecated=False,
+        enabled=True,
+    )
+    rule.allowed_business_areas.add(business_area)
+    RuleCommitFactory(rule=rule, version=2)
+
+    fsp_xlsx_template = FinancialServiceProviderXlsxTemplateFactory(name="TestName123")
+
+    fsp_1 = FinancialServiceProviderFactory(
+        name="FSP_1",
+        vision_vendor_number="149-69-3686",
+        distribution_limit=10_000,
+        communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
+    )
+    fsp_1.delivery_mechanisms.set([dm_cash])
+    fsp_1.allowed_business_areas.add(business_area)
+    FspXlsxTemplatePerDeliveryMechanismFactory(
+        financial_service_provider=fsp_1,
+        xlsx_template=fsp_xlsx_template,
+        delivery_mechanism=dm_cash,
+    )
+    yield tp
 
 
 @pytest.fixture
@@ -340,7 +362,7 @@ class TestSmokeTargeting:
         pageTargeting.selectGlobalProgramFilter("Test Programm")
         pageTargeting.getNavTargeting().click()
         pageTargeting.chooseTargetPopulations(0).click()
-        assert "Copy TP" in pageTargetingDetails.getPageHeaderTitle().text
+        assert create_targeting.name in pageTargetingDetails.getPageHeaderTitle().text
         pageTargetingDetails.getButtonTargetPopulationDuplicate()
         pageTargetingDetails.getButtonDelete()
         assert "EDIT" in pageTargetingDetails.getButtonEdit().text
@@ -357,6 +379,8 @@ class TestSmokeTargeting:
         assert "SEND BY" in pageTargetingDetails.getLabelizedFieldContainerSendBy().text
         assert "-" in pageTargetingDetails.getLabelSendBy().text
         assert "-" in pageTargetingDetails.getLabelSendDate().text
+        pageTargetingDetails.scroll()
+        pageTargetingDetails.scroll()
         assert "6" in pageTargetingDetails.getLabelFemaleChildren().text
         assert "1" in pageTargetingDetails.getLabelMaleChildren().text
         assert "2" in pageTargetingDetails.getLabelFemaleAdults().text

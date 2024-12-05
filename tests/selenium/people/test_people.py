@@ -104,6 +104,7 @@ def get_social_program_with_dct_type_and_name(
 ) -> Program:
     BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
     dct = DataCollectingTypeFactory(type=dct_type)
+    beneficiary_group = BeneficiaryGroup.objects.filter(name="People").first()
     program = ProgramFactory(
         name=name,
         programme_code=programme_code,
@@ -111,6 +112,7 @@ def get_social_program_with_dct_type_and_name(
         end_date=datetime.now() + relativedelta(months=1),
         data_collecting_type=dct,
         status=status,
+        beneficiary_group=beneficiary_group,
     )
     return program
 
@@ -257,7 +259,7 @@ class TestPeople:
         "test_data",
         [
             pytest.param(
-                {"category": "Data Change", "type": "Individual Data Update"},
+                {"category": "Data Change", "type": "Member Data Update"},
                 id="Data Change People Data Update",
             )
         ],
@@ -291,7 +293,7 @@ class TestPeople:
         pageGrievanceNewTicket.getReceivedConsent().click()
         pageGrievanceNewTicket.getButtonNext().click()
 
-        pageGrievanceNewTicket.getDescription().send_keys("Add Individual - TEST")
+        pageGrievanceNewTicket.getDescription().send_keys("Add Member - TEST")
         pageGrievanceNewTicket.getButtonAddNewField().click()
         pageGrievanceNewTicket.getIndividualFieldName(0).click()
         pageGrievanceNewTicket.select_listbox_element("Gender")
