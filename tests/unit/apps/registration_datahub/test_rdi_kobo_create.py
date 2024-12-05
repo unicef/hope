@@ -168,7 +168,7 @@ class TestRdiKoboCreateTask(TestCase):
         dmd = PendingDeliveryMechanismData.objects.get(individual__full_name="Tesa Testowski")
         self.assertEqual(dmd.delivery_mechanism.code, "mobile_money")
         self.assertEqual(
-            json.loads(dmd.data),
+            dmd.data,
             {
                 "service_provider_code__mobile_money": "ABC",
                 "delivery_phone_number__mobile_money": "+48880110456",
