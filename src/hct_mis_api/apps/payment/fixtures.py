@@ -510,7 +510,7 @@ def generate_payment_plan() -> None:
 
     program_pk = UUID("00000000-0000-0000-0000-faceb00c0000")
     data_collecting_type = DataCollectingType.objects.get(code="full")
-    beneficiary_master_detail = True if data_collecting_type.type == DataCollectingType.Type.SOCIAL else False
+    beneficiary_master_detail = False if data_collecting_type.type == DataCollectingType.Type.SOCIAL else True
     program = Program.objects.update_or_create(
         pk=program_pk,
         business_area=afghanistan,
