@@ -51,7 +51,7 @@ class BeneficiaryGroupFactory(DjangoModelFactory):
     group_label_plural = factory.Faker("word")
     member_label = factory.Faker("word")
     member_label_plural = factory.Faker("word")
-    master_detail = factory.Faker("boolean")
+    master_detail = True
 
     class Meta:
         model = BeneficiaryGroup

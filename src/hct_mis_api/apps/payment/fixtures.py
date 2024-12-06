@@ -210,7 +210,14 @@ class RealProgramFactory(DjangoModelFactory):
         lambda o: "".join(random.choice(string.ascii_uppercase + string.digits) for _ in range(4))
     )
     data_collecting_type = factory.SubFactory(DataCollectingTypeFactory)
-    beneficiary_group = factory.SubFactory(BeneficiaryGroupFactory)
+    beneficiary_group = factory.LazyAttribute(
+        lambda o: BeneficiaryGroupFactory(
+            master_detail=False if o.data_collecting_type.type == DataCollectingType.Type.SOCIAL else True,
+            name=factory.Faker("word")
+            if o.data_collecting_type.type == DataCollectingType.Type.SOCIAL
+            else "Household",
+        )
+    )
 
     @factory.post_generation
     def cycle(self, create: bool, extracted: bool, **kwargs: Any) -> None:
@@ -502,6 +509,8 @@ def generate_payment_plan() -> None:
     address = "Ohio"
 
     program_pk = UUID("00000000-0000-0000-0000-faceb00c0000")
+    data_collecting_type = DataCollectingType.objects.get(code="full")
+    beneficiary_master_detail = True if data_collecting_type.type == DataCollectingType.Type.SOCIAL else False
     program = Program.objects.update_or_create(
         pk=program_pk,
         business_area=afghanistan,
@@ -515,9 +524,9 @@ def generate_payment_plan() -> None:
         frequency_of_payments=Program.ONE_OFF,
         sector=Program.MULTI_PURPOSE,
         scope=Program.SCOPE_UNICEF,
-        data_collecting_type=DataCollectingType.objects.get(code="full"),
+        data_collecting_type=data_collecting_type,
         programme_code="T3ST",
-        beneficiary_group=BeneficiaryGroup.objects.first(),
+        beneficiary_group=BeneficiaryGroup.objects.filter(master_detail=beneficiary_master_detail).first(),
     )[0]
     program_cycle = ProgramCycleFactory(
         program=program,

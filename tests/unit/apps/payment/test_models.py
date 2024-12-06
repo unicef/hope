@@ -49,7 +49,7 @@ from hct_mis_api.apps.payment.models import (
 from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
 )
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.fixtures import BeneficiaryGroupFactory, ProgramFactory
 from hct_mis_api.apps.program.models import ProgramCycle
 
 pytestmark = pytest.mark.django_db
@@ -553,7 +553,12 @@ class TestFinancialServiceProviderModel(TestCase):
         household.country_origin = country
         household.save()
 
-        payment = PaymentFactory(program=ProgramFactory(), household=household, collector=individuals[0])
+        beneficiary_group = BeneficiaryGroupFactory(master_detail=False)
+        payment = PaymentFactory(
+            program=ProgramFactory(beneficiary_group=beneficiary_group),
+            household=household,
+            collector=individuals[0],
+        )
         data_collecting_type = DataCollectingTypeFactory(type=DataCollectingType.Type.SOCIAL)
         fsp_xlsx_template = FinancialServiceProviderXlsxTemplate
         payment.parent.program.data_collecting_type = data_collecting_type
