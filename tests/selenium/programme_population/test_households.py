@@ -104,14 +104,19 @@ class TestSmokeHouseholds:
         assert "-" in pageHouseholdsDetails.getLabelLengthOfTimeSinceArrival().text
         assert "-" in pageHouseholdsDetails.getLabelNumberOfTimesDisplaced().text
         assert "-" in pageHouseholdsDetails.getLabelLinkedGrievances().text
-        assert "Black may training civil." in pageHouseholdsDetails.getLabelDataCollectingType().text
+        assert add_household.collect_individual_data in pageHouseholdsDetails.getLabelDataCollectingType().text
         assert "USD 0.00" in pageHouseholdsDetails.getLabelCashReceived().text
         assert "USD 0.00" in pageHouseholdsDetails.getLabelTotalCashReceived().text
         assert "Items Group Members" in pageHouseholdsDetails.getTableTitle().text
         assert "Item ID" in pageHouseholdsDetails.getTableLabel().text
         assert "ACTIVE" in pageHouseholdsDetails.getStatusContainer().text
         assert "No results" in pageHouseholdsDetails.getTableRow().text
-        assert "XLS" in pageHouseholdsDetails.getLabelSource().text
-        assert "Test" in pageHouseholdsDetails.getLabelImportName().text
-        assert "22 Aug 2020" in pageHouseholdsDetails.getLabelRegistrationDate().text
-        assert "test@example.com" in pageHouseholdsDetails.getLabelUserName().text
+        assert add_household.registration_data_import.data_source in pageHouseholdsDetails.getLabelSource().text
+        assert add_household.name_enumerator in pageHouseholdsDetails.getLabelImportName().text
+        assert (
+            add_household.registration_data_import.import_date.strftime("%-d %b %Y")
+            in pageHouseholdsDetails.getLabelRegistrationDate().text
+        )
+        assert (
+            add_household.registration_data_import.imported_by.username in pageHouseholdsDetails.getLabelUserName().text
+        )
