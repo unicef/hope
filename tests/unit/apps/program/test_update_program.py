@@ -58,6 +58,7 @@ class TestUpdateProgram(APITestCase):
             }
           }
         }
+        validationErrors
       }
     }
     """
@@ -85,6 +86,8 @@ class TestUpdateProgram(APITestCase):
         create_afghanistan()
         generate_data_collecting_types()
         data_collecting_type = DataCollectingType.objects.get(code="full_collection")
+        data_collecting_type.type = DataCollectingType.Type.STANDARD
+        data_collecting_type.save()
 
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.business_area.data_collecting_types.set(DataCollectingType.objects.all().values_list("id", flat=True))
@@ -313,7 +316,7 @@ class TestUpdateProgram(APITestCase):
         )
 
     def test_update_program_beneficiary_group(self) -> None:
-        beneficiary_group2 = BeneficiaryGroupFactory(name="Other Group")
+        beneficiary_group2 = BeneficiaryGroupFactory(name="Other Group", master_detail=True)
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
 
         self.snapshot_graphql_request(
@@ -329,7 +332,7 @@ class TestUpdateProgram(APITestCase):
         )
 
     def test_update_program_beneficiary_group_when_imported_population(self) -> None:
-        beneficiary_group2 = BeneficiaryGroupFactory(name="Other Group")
+        beneficiary_group2 = BeneficiaryGroupFactory(name="Other Group", master_detail=True)
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
         RegistrationDataImportFactory(program=self.program)
 
@@ -340,6 +343,23 @@ class TestUpdateProgram(APITestCase):
                 "programData": {
                     "id": self.id_to_base64(self.program.id, "ProgramNode"),
                     "beneficiaryGroup": str(beneficiary_group2.id),
+                },
+                "version": self.program.version,
+            },
+        )
+
+    def test_update_program_incompatible_beneficiary_group(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
+
+        beneficiary_group = BeneficiaryGroupFactory(name="Social", master_detail=False)
+
+        self.snapshot_graphql_request(
+            request_string=self.UPDATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables={
+                "programData": {
+                    "id": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "beneficiaryGroup": str(beneficiary_group.id),
                 },
                 "version": self.program.version,
             },

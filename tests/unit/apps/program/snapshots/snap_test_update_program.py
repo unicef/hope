@@ -98,7 +98,8 @@ snapshots['TestUpdateProgram::test_finish_active_program_with_not_finished_progr
                     }
                 ],
                 'status': 'FINISHED'
-            }
+            },
+            'validationErrors': None
         }
     }
 }
@@ -194,7 +195,8 @@ snapshots['TestUpdateProgram::test_update_program_authenticated_0_with_permissio
                     }
                 ],
                 'status': 'ACTIVE'
-            }
+            },
+            'validationErrors': None
         }
     }
 }
@@ -290,7 +292,8 @@ snapshots['TestUpdateProgram::test_update_program_beneficiary_group 1'] = {
                     }
                 ],
                 'status': 'DRAFT'
-            }
+            },
+            'validationErrors': None
         }
     }
 }
@@ -373,6 +376,19 @@ snapshots['TestUpdateProgram::test_update_program_end_date_validation 3'] = {
             ]
         }
     ]
+}
+
+snapshots['TestUpdateProgram::test_update_program_incompatible_beneficiary_group 1'] = {
+    'data': {
+        'updateProgram': {
+            'program': None,
+            'validationErrors': {
+                '__all__': [
+                    'Selected combination of data collecting type and beneficiary group is invalid.'
+                ]
+            }
+        }
+    }
 }
 
 snapshots['TestUpdateProgram::test_update_program_not_authenticated 1'] = {
@@ -594,7 +610,8 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields 2'] = {
                     }
                 ],
                 'status': 'DRAFT'
-            }
+            },
+            'validationErrors': None
         }
     }
 }
@@ -720,7 +737,8 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_existing_field
                     }
                 ],
                 'status': 'DRAFT'
-            }
+            },
+            'validationErrors': None
         }
     }
 }
@@ -778,7 +796,8 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_existing_field
                     }
                 ],
                 'status': 'DRAFT'
-            }
+            },
+            'validationErrors': None
         }
     }
 }
@@ -856,7 +875,8 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_program_has_RD
                     }
                 ],
                 'status': 'DRAFT'
-            }
+            },
+            'validationErrors': None
         }
     }
 }
@@ -952,7 +972,8 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_program_has_RD
                     }
                 ],
                 'status': 'DRAFT'
-            }
+            },
+            'validationErrors': None
         }
     }
 }
@@ -1008,7 +1029,8 @@ snapshots['TestUpdateProgram::test_update_program_with_pdu_fields_program_has_RD
                     }
                 ],
                 'status': 'DRAFT'
-            }
+            },
+            'validationErrors': None
         }
     }
 }

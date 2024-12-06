@@ -13,7 +13,7 @@ snapshots['TestCreateProgram::test_create_program_authenticated_0_with_permissio
             'program': {
                 'administrativeAreasOfImplementation': 'Lorem Ipsum',
                 'beneficiaryGroup': {
-                    'name': 'Household'
+                    'name': 'School'
                 },
                 'budget': '20000000',
                 'cashPlus': True,
@@ -136,6 +136,32 @@ snapshots['TestCreateProgram::test_create_program_with_dct_from_other_ba 1'] = {
     ]
 }
 
+snapshots['TestCreateProgram::test_create_program_with_dct_social_not_compatible_with_beneficiary_group 1'] = {
+    'data': {
+        'createProgram': {
+            'program': None,
+            'validationErrors': {
+                '__all__': [
+                    'Selected combination of data collecting type and beneficiary group is invalid.'
+                ]
+            }
+        }
+    }
+}
+
+snapshots['TestCreateProgram::test_create_program_with_dct_standard_not_compatible_with_beneficiary_group 1'] = {
+    'data': {
+        'createProgram': {
+            'program': None,
+            'validationErrors': {
+                '__all__': [
+                    'Selected combination of data collecting type and beneficiary group is invalid.'
+                ]
+            }
+        }
+    }
+}
+
 snapshots['TestCreateProgram::test_create_program_with_deprecated_dct 1'] = {
     'data': {
         'createProgram': None
@@ -182,7 +208,7 @@ snapshots['TestCreateProgram::test_create_program_with_partners_0_valid 1'] = {
             'program': {
                 'administrativeAreasOfImplementation': 'Lorem Ipsum',
                 'beneficiaryGroup': {
-                    'name': 'Household'
+                    'name': 'School'
                 },
                 'budget': '20000000',
                 'cashPlus': True,
@@ -295,7 +321,7 @@ snapshots['TestCreateProgram::test_create_program_with_partners_all_partners_acc
             'program': {
                 'administrativeAreasOfImplementation': 'Lorem Ipsum',
                 'beneficiaryGroup': {
-                    'name': 'Household'
+                    'name': 'School'
                 },
                 'budget': '20000000',
                 'cashPlus': True,
@@ -356,7 +382,7 @@ snapshots['TestCreateProgram::test_create_program_with_partners_none_partners_ac
             'program': {
                 'administrativeAreasOfImplementation': 'Lorem Ipsum',
                 'beneficiaryGroup': {
-                    'name': 'Household'
+                    'name': 'School'
                 },
                 'budget': '20000000',
                 'cashPlus': True,
@@ -405,7 +431,7 @@ snapshots['TestCreateProgram::test_create_program_with_pdu_fields 1'] = {
             'program': {
                 'administrativeAreasOfImplementation': 'Lorem Ipsum',
                 'beneficiaryGroup': {
-                    'name': 'Household'
+                    'name': 'School'
                 },
                 'budget': '20000000',
                 'cashPlus': True,
@@ -524,7 +550,7 @@ snapshots['TestCreateProgram::test_create_program_with_pdu_fields_existing_field
             'program': {
                 'administrativeAreasOfImplementation': 'Lorem Ipsum',
                 'beneficiaryGroup': {
-                    'name': 'Household'
+                    'name': 'School'
                 },
                 'budget': '20000000',
                 'cashPlus': True,

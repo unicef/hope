@@ -230,7 +230,20 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
 
     objects = SoftDeletableIsVisibleManager()
 
+    def clean(self) -> None:
+        super().clean()
+        if self.data_collecting_type and self.beneficiary_group:
+            if (
+                self.data_collecting_type.type == DataCollectingType.Type.SOCIAL
+                and self.beneficiary_group.master_detail
+            ) or (
+                self.data_collecting_type.type != DataCollectingType.Type.SOCIAL
+                and not self.beneficiary_group.master_detail
+            ):
+                raise ValidationError("Selected combination of data collecting type and beneficiary group is invalid.")
+
     def save(self, *args: Any, **kwargs: Any) -> None:
+        self.full_clean()
         if not self.programme_code:
             self.programme_code = self._generate_programme_code()
         if self.data_collecting_type_id is None and self.data_collecting_type:
