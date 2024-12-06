@@ -51,7 +51,7 @@ from hct_mis_api.apps.core.field_attributes.fields_types import (
 from hct_mis_api.apps.core.mixins import LimitBusinessAreaModelMixin
 from hct_mis_api.apps.core.models import FileTemp, FlexibleAttribute
 from hct_mis_api.apps.geo.models import Area, Country
-from hct_mis_api.apps.household.models import FEMALE, MALE, Individual
+from hct_mis_api.apps.household.models import FEMALE, MALE, DocumentType, Individual
 from hct_mis_api.apps.payment.fields import DynamicChoiceArrayField
 from hct_mis_api.apps.payment.managers import PaymentManager
 from hct_mis_api.apps.payment.validators import payment_token_and_order_number_validator
@@ -988,6 +988,13 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         blank=True,
     )
 
+    documents = DynamicChoiceArrayField(
+        models.CharField(max_length=255, blank=True),
+        choices_callable=DocumentType.get_all_doc_types_choices(),
+        default=list,
+        blank=True,
+    )
+
     @staticmethod
     def get_data_from_payment_snapshot(
         household_data: Dict[str, Any],
@@ -1124,11 +1131,12 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             ),
         }
         additional_columns = {
-            "registration_token": cls.get_registration_token_doc_number,
-            "national_id": cls.get_national_id_doc_number,
             "admin_level_2": cls.get_admin_level_2,
             "alternate_collector_document_numbers": cls.get_alternate_collector_doc_numbers,
         }
+        if column_name in DocumentType.get_all_doc_types():
+            return cls.get_document_number_by_doc_type_key(snapshot_data, column_name)
+
         if column_name in additional_columns:
             method = additional_columns[column_name]
             return method(snapshot_data)
@@ -1148,22 +1156,13 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         return getattr(obj, nested_field, None) or ""
 
     @staticmethod
-    def get_registration_token_doc_number(snapshot_data: Dict[str, Any]) -> str:
+    def get_document_number_by_doc_type_key(snapshot_data: Dict[str, Any], document_type_key: str) -> str:
         collector_data = (
             snapshot_data.get("primary_collector", {}) or snapshot_data.get("alternate_collector", {}) or dict()
         )
         documents_list = collector_data.get("documents", [])
         documents_dict = {doc.get("type"): doc for doc in documents_list}
-        return documents_dict.get("registration_token", {}).get("document_number", "")
-
-    @staticmethod
-    def get_national_id_doc_number(snapshot_data: Dict[str, Any]) -> str:
-        collector_data = (
-            snapshot_data.get("primary_collector", {}) or snapshot_data.get("alternate_collector", {}) or dict()
-        )
-        documents_list = collector_data.get("documents", [])
-        documents_dict = {doc.get("type"): doc for doc in documents_list}
-        return documents_dict.get("national_id", {}).get("document_number", "")
+        return documents_dict.get(document_type_key, {}).get("document_number", "")
 
     @staticmethod
     def get_alternate_collector_doc_numbers(snapshot_data: Dict[str, Any]) -> str:
