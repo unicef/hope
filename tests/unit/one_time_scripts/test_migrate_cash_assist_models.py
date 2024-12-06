@@ -194,9 +194,10 @@ class TestMigrateCashPlanToPaymentPlan(TestCase):
 
         cls.tp1 = TargetPopulationFactory()
         cls.tp2 = TargetPopulationFactory()
+        cls.tp3 = TargetPopulationFactory()
 
         cls.cash_plan = CashPlanFactory(
-            delivery_type=cls.cash_delivery_mechanism.name,
+            delivery_type=None,
             service_provider=cls.service_provider1,
             is_migrated_to_payment_plan=False,
             start_date=datetime.date(2021, 1, 1),
@@ -216,6 +217,12 @@ class TestMigrateCashPlanToPaymentPlan(TestCase):
             is_migrated_to_payment_plan=False,
         )  # CP without payments, not migrating, same service provider as CP1 so fsp delivery mechanisms should be updated
 
+        cls.cash_plan4 = CashPlanFactory(
+            delivery_type=cls.digital_delivery_mechanism.name,
+            service_provider=cls.service_provider1,
+            is_migrated_to_payment_plan=False,
+        )  # CP without payments, not migrating, same service provider as CP1 so fsp delivery mechanisms should be updated
+
         hh1, _ = create_household(household_args={"size": 2})
         cls.pr1 = PaymentRecordFactory(
             parent=cls.cash_plan,
@@ -225,11 +232,19 @@ class TestMigrateCashPlanToPaymentPlan(TestCase):
             service_provider=cls.service_provider1,
         )
         hh2, _ = create_household(household_args={"size": 2})
+        hh3, _ = create_household(household_args={"size": 2})
         cls.pr2 = PaymentRecordFactory(
             parent=cls.cash_plan,
             delivery_type=cls.digital_delivery_mechanism,
             target_population=cls.tp2,
             head_of_household=hh2.head_of_household,
+            service_provider=cls.service_provider1,
+        )
+        cls.pr3 = PaymentRecordFactory(
+            parent=cls.cash_plan4,
+            delivery_type=None,
+            target_population=cls.tp3,
+            head_of_household=hh3.head_of_household,
             service_provider=cls.service_provider1,
         )
         cls.pvs = PaymentVerificationSummaryFactory(
