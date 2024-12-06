@@ -629,7 +629,7 @@ def create_super_user(business_area: BusinessArea) -> User:
             "code": "partial",
             "description": "Partial individuals collected",
             "active": True,
-            "type": DataCollectingType.Type.STANDARD,
+            "type": DataCollectingType.Type.SOCIAL,
         },
         {
             "label": "size/age/gender disaggregated",
