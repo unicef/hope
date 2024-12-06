@@ -1,7 +1,7 @@
 import { Grid } from '@mui/material';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
-import { Field, Form } from 'formik';
-import { ReactElement, useMemo } from 'react';
+import { Field, Form, useFormikContext } from 'formik';
+import { ReactElement, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   useDataCollectionTypeChoiceDataQuery,
@@ -10,10 +10,10 @@ import {
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
 import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
+import { useQuery } from '@tanstack/react-query';
+import { fetchBeneficiaryGroups } from '@api/programsApi';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { fetchBeneficiaryGroups } from '@api/programsApi';
-import { useQuery } from '@tanstack/react-query';
 
 interface ProgramFormPropTypes {
   values;
@@ -34,6 +34,12 @@ export const ProgramForm = ({
     queryFn: async () => fetchBeneficiaryGroups(),
   });
 
+  const { setFieldValue } = useFormikContext();
+
+  useEffect(() => {
+    setFieldValue('beneficiaryGroup', '');
+  }, [values.dataCollectingTypeCode, setFieldValue]);
+
   const filteredDataCollectionTypeChoicesData =
     dataCollectionTypeChoicesData?.dataCollectionTypeChoices.filter(
       (el) => el.name !== '',
@@ -46,7 +52,9 @@ export const ProgramForm = ({
         ? beneficiaryGroupsData.results.filter(
             (el) => el.master_detail === false,
           )
-        : beneficiaryGroupsData.results;
+        : beneficiaryGroupsData.results.filter(
+            (el) => el.master_detail === true,
+          );
 
     return filteredBeneficiaryGroups.map((el) => ({
       name: el.name,

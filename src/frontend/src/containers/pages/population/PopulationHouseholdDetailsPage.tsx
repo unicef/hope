@@ -129,7 +129,7 @@ export const PopulationHouseholdDetailsPage = (): ReactElement => {
       componentName="PopulationHouseholdDetailsPage"
     >
       <PageHeader
-        title={`${beneficiaryGroup?.groupLabelPlural}: ${renderSomethingOrDash(
+        title={`${beneficiaryGroup?.memberLabel}: ${renderSomethingOrDash(
           household?.unicefId,
         )}`}
         breadCrumbs={
