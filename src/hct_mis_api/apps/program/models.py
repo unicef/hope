@@ -237,7 +237,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
                 self.data_collecting_type.type == DataCollectingType.Type.SOCIAL
                 and self.beneficiary_group.master_detail
             ) or (
-                self.data_collecting_type.type != DataCollectingType.Type.SOCIAL
+                self.data_collecting_type.type == DataCollectingType.Type.STANDARD
                 and not self.beneficiary_group.master_detail
             ):
                 raise ValidationError("Selected combination of data collecting type and beneficiary group is invalid.")
