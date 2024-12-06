@@ -123,7 +123,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
             column_list.append(core_field)
         for flex_field in fsp_xlsx_template.flex_fields:
             column_list.append(flex_field)
-        for document_field in fsp_xlsx_template.documents:
+        for document_field in fsp_xlsx_template.document_types:
             column_list.append(document_field)
 
         column_list = self._remove_column_for_people(column_list)
@@ -146,7 +146,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
     def get_payment_row(self, payment: Payment, fsp_xlsx_template: "FinancialServiceProviderXlsxTemplate") -> List[str]:
         fsp_template_columns = self._remove_column_for_people(fsp_xlsx_template.columns)
         fsp_template_core_fields = self._remove_core_fields_for_people(fsp_xlsx_template.core_fields)
-        fsp_template_document_fields = fsp_xlsx_template.documents
+        fsp_template_document_fields = fsp_xlsx_template.document_types
 
         if self.payment_generate_token_and_order_numbers:
             payment = generate_token_and_order_numbers(payment)

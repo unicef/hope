@@ -988,7 +988,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         blank=True,
     )
 
-    documents = DynamicChoiceArrayField(
+    document_types = DynamicChoiceArrayField(
         models.CharField(max_length=255, blank=True),
         choices_callable=DocumentType.get_all_doc_types_choices(),
         default=list,
