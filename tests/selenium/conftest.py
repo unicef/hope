@@ -546,6 +546,7 @@ def change_super_user(business_area: BusinessArea) -> None:
 @pytest.fixture(autouse=True)
 def create_super_user(business_area: BusinessArea) -> User:
     BeneficiaryGroupFactory(
+        id="913700c0-3b8b-429a-b68f-0cd3d2bcd09a",
         name="Main Menu",
         group_label="Items Group",
         group_label_plural="Items Groups",
@@ -555,6 +556,7 @@ def create_super_user(business_area: BusinessArea) -> User:
     )
 
     BeneficiaryGroupFactory(
+        id="9cf21adb-74a9-4c3c-9057-6fb27feb4220",
         name="People",
         group_label="Household",
         group_label_plural="Households",

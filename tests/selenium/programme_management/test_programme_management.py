@@ -283,7 +283,6 @@ class TestProgrammeManagement:
         pageProgrammeManagement.getButtonSave().click()
         # Check Details page
         pageProgrammeDetails.wait_for_text("New Programme", pageProgrammeDetails.headerTitle)
-        pageProgrammeDetails.screenshot("test_create_programme_Cash_Plus", file_path="./")
         assert "DRAFT" in pageProgrammeDetails.getProgramStatus().text
         assert test_data["startDate"].date_in_text_format in pageProgrammeDetails.getLabelStartDate().text
         assert test_data["endDate"].date_in_text_format in pageProgrammeDetails.getLabelEndDate().text
@@ -436,7 +435,7 @@ class TestBusinessAreas:
                     "selector": "Health",
                     "startDate": FormatTime(1, 1, 2022),
                     "endDate": FormatTime(1, 2, 2032),
-                    "dataCollectingType": "Partial",
+                    "dataCollecting312Type": "Partial",
                 },
                 id="programme_management_page",
             ),
