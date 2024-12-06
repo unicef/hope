@@ -1,7 +1,7 @@
 import { Grid } from '@mui/material';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { Field, Form, useFormikContext } from 'formik';
-import { ReactElement, useMemo, useEffect } from 'react';
+import { ReactElement, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   useDataCollectionTypeChoiceDataQuery,
