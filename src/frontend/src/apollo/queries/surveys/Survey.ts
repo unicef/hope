@@ -16,10 +16,6 @@ export const Survey = gql`
         email
       }
       createdAt
-      targetPopulation {
-        id
-        name
-      }
       program {
         id
         name
