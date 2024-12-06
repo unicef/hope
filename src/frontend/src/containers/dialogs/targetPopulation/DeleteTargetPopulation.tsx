@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 import { LoadingButton } from '@components/core/LoadingButton';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { useDeleteTargetPopulationMutation } from '@generated/graphql';
+import { useDeletePaymentPlanMutation } from '@generated/graphql';
 import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';

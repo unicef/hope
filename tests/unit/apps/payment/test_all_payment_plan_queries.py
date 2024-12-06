@@ -10,6 +10,7 @@ from freezegun import freeze_time
 from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -32,13 +33,14 @@ from hct_mis_api.apps.payment.models import (
 from hct_mis_api.apps.program.fixtures import ProgramCycleFactory
 
 
-def create_child_payment_plans(pp: PaymentPlan) -> None:
+def create_child_payment_plans(pp: PaymentPlan, created_by: User) -> None:
     fpp1 = PaymentPlanFactory(
         id="56aca38c-dc16-48a9-ace4-70d88b41d462",
         is_follow_up=True,
         source_payment_plan=pp,
         dispersion_start_date=datetime(2020, 8, 10),
         dispersion_end_date=datetime(2020, 12, 10),
+        created_by=created_by,
     )
     fpp1.unicef_id = "PP-0060-20-00000003"
     fpp1.save()
@@ -49,6 +51,7 @@ def create_child_payment_plans(pp: PaymentPlan) -> None:
         source_payment_plan=pp,
         dispersion_start_date=datetime(2020, 8, 10),
         dispersion_end_date=datetime(2020, 12, 10),
+        created_by=created_by,
     )
     fpp2.unicef_id = "PP-0060-20-00000004"
     fpp2.save()
@@ -236,6 +239,7 @@ class TestPaymentPlanQueries(APITestCase):
                 dispersion_start_date=datetime(2020, 8, 10),
                 dispersion_end_date=datetime(2020, 12, 10),
                 is_follow_up=False,
+                created_by=cls.user,
             )
             cls.pp.unicef_id = "PP-01"
             cls.pp.save()
@@ -275,6 +279,7 @@ class TestPaymentPlanQueries(APITestCase):
                 status=PaymentPlan.Status.LOCKED,
                 dispersion_start_date=cls.pp.dispersion_start_date + relativedelta(months=2),
                 dispersion_end_date=cls.pp.dispersion_end_date - relativedelta(months=2),
+                created_by=cls.user,
             )
             cls.pp_conflicted.unicef_id = "PP-02"
             cls.pp_conflicted.save()
@@ -393,7 +398,7 @@ class TestPaymentPlanQueries(APITestCase):
 
     @freeze_time("2020-10-10")
     def test_filter_payment_plans_with_source_id(self) -> None:
-        create_child_payment_plans(self.pp)
+        create_child_payment_plans(self.pp, self.user)
 
         self.snapshot_graphql_request(
             request_string=self.ALL_PAYMENT_PLANS_FILTER_QUERY_2,
@@ -418,7 +423,7 @@ class TestPaymentPlanQueries(APITestCase):
 
     @freeze_time("2020-10-10")
     def test_filter_payment_plans_with_follow_up_flag(self) -> None:
-        create_child_payment_plans(self.pp)
+        create_child_payment_plans(self.pp, self.user)
 
         resp_data = self.graphql_request(
             request_string=self.ALL_PAYMENT_PLANS_FILTER_QUERY_2,
@@ -466,6 +471,7 @@ class TestPaymentPlanQueries(APITestCase):
             dispersion_start_date=datetime(2023, 8, 10),
             dispersion_end_date=datetime(2023, 12, 10),
             is_follow_up=False,
+            created_by=self.user,
         )
         hoh_1 = IndividualFactory(household=None)
         hoh_2 = IndividualFactory(household=None)

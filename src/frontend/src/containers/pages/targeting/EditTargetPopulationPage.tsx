@@ -1,7 +1,6 @@
 import { ReactElement, useEffect } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import {
-  TargetPopulationBuildStatus,
   useBusinessAreaDataQuery,
   useTargetPopulationQuery,
 } from '@generated/graphql';

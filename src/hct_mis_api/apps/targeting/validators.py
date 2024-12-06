@@ -173,7 +173,6 @@ class TargetingCriteriaInputValidator:
                 logger.error("Target criteria can only have individual ids")
                 raise ValidationError("Target criteria can only have individual ids")
             if individual_ids and not program_dct.individual_filters_available:
-                logger.error("Target criteria can only have household ids")
                 raise ValidationError("Target criteria can only have household ids")
 
             if household_ids:
@@ -181,7 +180,6 @@ class TargetingCriteriaInputValidator:
                 ids_list = [i.strip() for i in ids_list]
                 ids_list = [i for i in ids_list if i.startswith("HH")]
                 if not Household.objects.filter(unicef_id__in=ids_list, program=program).exists():
-                    logger.error("The given households do not exist in the current program")
                     raise ValidationError("The given households do not exist in the current program")
 
             if individual_ids:
@@ -189,7 +187,6 @@ class TargetingCriteriaInputValidator:
                 ids_list = [i.strip() for i in ids_list]
                 ids_list = [i for i in ids_list if i.startswith("IND")]
                 if not Individual.objects.filter(unicef_id__in=ids_list, program=program).exists():
-                    logger.error("The given individuals do not exist in the current program")
                     raise ValidationError("The given individuals do not exist in the current program")
 
             is_empty_rules = all(
@@ -198,7 +195,6 @@ class TargetingCriteriaInputValidator:
             )
 
             if is_empty_rules and not household_ids and not individual_ids:
-                logger.error("There should be at least 1 rule in target criteria")
                 raise ValidationError("There should be at least 1 rule in target criteria")
 
             TargetingCriteriaRuleInputValidator.validate(rule=rule, program=program)

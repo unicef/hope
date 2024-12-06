@@ -53,6 +53,7 @@ class Message(TimeStampedUUIDModel, AdminUrlMixin, UnicefIdentifiedModel):
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     # Recipients Lookup criteria
     households = models.ManyToManyField("household.Household", related_name="messages", blank=True)
+    # TODO: fix this one to use PaymentPlan
     target_population = models.ForeignKey(
         "targeting.TargetPopulation", related_name="messages", blank=True, null=True, on_delete=models.SET_NULL
     )

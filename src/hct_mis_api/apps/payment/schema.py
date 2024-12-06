@@ -32,6 +32,7 @@ from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
     DjangoPermissionFilterConnectionField,
     Permissions,
+    hopeOneOfPermissionClass,
     hopePermissionClass,
 )
 from hct_mis_api.apps.activity_log.models import LogEntry
@@ -107,7 +108,6 @@ from hct_mis_api.apps.payment.utils import (
     get_payment_plan_object,
 )
 from hct_mis_api.apps.program.schema import ProgramNode
-from hct_mis_api.apps.targeting.graphql_types import TargetPopulationNode
 from hct_mis_api.apps.targeting.models import TargetPopulation
 from hct_mis_api.apps.utils.schema import (
     ChartDatasetNode,
@@ -323,7 +323,6 @@ class PaymentNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     payment_plan_soft_conflicted = graphene.Boolean()
     payment_plan_soft_conflicted_data = graphene.List(PaymentConflictDataNode)
     full_name = graphene.String()
-    target_population = graphene.Field(TargetPopulationNode)
     verification = graphene.Field("hct_mis_api.apps.payment.schema.PaymentVerificationNode")
     distribution_modality = graphene.String()
     service_provider = graphene.Field(FinancialServiceProviderNode)
@@ -1070,7 +1069,7 @@ class Query(graphene.ObjectType):
     all_payment_plans = DjangoPermissionFilterConnectionField(
         PaymentPlanNode,
         filterset_class=PaymentPlanFilter,
-        permission_classes=(hopePermissionClass(Permissions.PM_VIEW_LIST),),
+        permission_classes=(hopeOneOfPermissionClass(Permissions.PM_VIEW_LIST, Permissions.TARGETING_VIEW_LIST),),
     )
     payment_plan_status_choices = graphene.List(ChoiceObject)
     currency_choices = graphene.List(ChoiceObject)

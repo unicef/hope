@@ -25,10 +25,6 @@ export const PAYMENT_PLAN_QUERY = gql`
         name
         caId
       }
-      targetPopulation {
-        id
-        name
-      }
       adminUrl
       currency
       currencyName

@@ -1,19 +1,17 @@
-import { AllTargetPopulationsQuery } from '../../src/__generated__/graphql';
+import { AllPaymentPlansQuery } from '../../src/__generated__/graphql';
 
 export const fakeAllTargetPopulation = {
-  allTargetPopulation: {
+  allPaymentPlans: {
     edges: [
       {
         node: {
-          id:
-            'VGFyZ2V0UG9wdWxhdGlvbk5vZGU6ZTkzMTU2YWUtOWQ2Ni00MTVkLTk2OWUtMzYzZGJkMjlkNzVl',
+          id: 'VGFyZ2V0UG9wdWxhdGlvbk5vZGU6ZTkzMTU2YWUtOWQ2Ni00MTVkLTk2OWUtMzYzZGJkMjlkNzVl',
           name: 'Example Target Population',
           status: 'OPEN',
           createdAt: '2022-04-13T08:56:10.671921',
           updatedAt: '2022-04-13T08:56:10.671951',
           program: {
-            id:
-              'UHJvZ3JhbU5vZGU6OGMyZWVhMDQtNzljMC00NGNjLWI0NDctNTdkYzA3ZjNmMTVh',
+            id: 'UHJvZ3JhbU5vZGU6OGMyZWVhMDQtNzljMC00NGNjLWI0NDctNTdkYzA3ZjNmMTVh',
             name: 'Add write view around happen make never.',
             __typename: 'ProgramNode',
           },
@@ -33,4 +31,4 @@ export const fakeAllTargetPopulation = {
     edgeCount: 1,
     __typename: 'TargetPopulationNodeConnection',
   },
-} as AllTargetPopulationsQuery;
+} as AllPaymentPlansQuery;

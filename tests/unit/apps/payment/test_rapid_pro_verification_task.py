@@ -87,6 +87,7 @@ class TestRapidProVerificationTask(TestCase):
         payment_plan = PaymentPlanFactory(
             program_cycle=program.cycles.first(),
             business_area=BusinessArea.objects.first(),
+            created_by=user,
         )
         PaymentVerificationSummaryFactory(payment_plan=payment_plan)
         payment_verification_plan = PaymentVerificationPlanFactory(

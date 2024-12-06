@@ -42,8 +42,8 @@ class MessageCrudServices:
         message.number_of_recipients = result.number_of_recipients
         message.households.set(result.households)
 
-        if target_population_id := input_data.get("target_population"):
-            message.target_population = get_object_or_404(TargetPopulation, id=decode_id_string(target_population_id))
+        if payment_plan_id := input_data.get("target_population"):  # FIXME: payment_plan instead of TP
+            message.target_population = get_object_or_404(TargetPopulation, id=decode_id_string(payment_plan_id))
 
         if registration_data_import_id := input_data.get("registration_data_import"):
             message.registration_data_import = get_object_or_404(
