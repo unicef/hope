@@ -66,6 +66,16 @@ class TestPaymentPlanServices(APITestCase):
             program_cycle=cls.cycle, created_by=cls.user, status=PaymentPlan.Status.TP_LOCKED
         )
 
+    def test_delete_tp_open(self) -> None:
+        program = ProgramFactory(status=Program.ACTIVE)
+        pp: PaymentPlan = PaymentPlanFactory(
+            status=PaymentPlan.Status.TP_OPEN, program_cycle=program.cycles.first(), created_by=self.user
+        )
+
+        pp = PaymentPlanService(payment_plan=pp).delete()
+        self.assertEqual(pp.is_removed, True)
+        self.assertEqual(pp.status, PaymentPlan.Status.TP_OPEN)
+
     def test_delete_open(self) -> None:
         program = ProgramFactory(status=Program.ACTIVE)
         pp: PaymentPlan = PaymentPlanFactory(
@@ -79,8 +89,12 @@ class TestPaymentPlanServices(APITestCase):
     def test_delete_locked(self) -> None:
         pp = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED, created_by=self.user)
 
-        with self.assertRaises(GraphQLError):
+        with self.assertRaises(GraphQLError) as e:
             PaymentPlanService(payment_plan=pp).delete()
+        self.assertEqual(
+            e.exception.message,
+            "Deletion is only allowed when the status is 'Open'",
+        )
 
     def test_delete_when_its_one_pp_in_cycle(self) -> None:
         program = ProgramFactory(status=Program.ACTIVE)
@@ -267,7 +281,7 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(pp.total_households_count, 0)
         self.assertEqual(pp.total_individuals_count, 0)
         self.assertEqual(pp.payment_items.count(), 0)
-        with self.assertNumQueries(77):
+        with self.assertNumQueries(74):
             prepare_payment_plan_task.delay(str(pp.id))
         pp.refresh_from_db()
         self.assertEqual(pp.status, PaymentPlan.Status.TP_OPEN)
@@ -686,7 +700,7 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(pp.total_households_count, 0)
         self.assertEqual(pp.total_individuals_count, 0)
         self.assertEqual(pp.payment_items.count(), 0)
-        with self.assertNumQueries(77):
+        with self.assertNumQueries(74):
             prepare_payment_plan_task.delay(str(pp.id))
         pp.refresh_from_db()
         self.assertEqual(pp.status, PaymentPlan.Status.TP_OPEN)
@@ -928,6 +942,17 @@ class TestPaymentPlanServices(APITestCase):
         PaymentPlanService(payment_plan).update({"currency": "PLN"})
         payment_plan.refresh_from_db()
         self.assertEqual(payment_plan.currency, "PLN")
+
+    def test_update_dispersion_end_date(self) -> None:
+        payment_plan = PaymentPlanFactory(
+            program_cycle=self.cycle,
+            created_by=self.user,
+            status=PaymentPlan.Status.OPEN,
+            currency="AMD",
+        )
+        PaymentPlanService(payment_plan).update({"dispersion_end_date": timezone.now().date() + timedelta(days=3)})
+        payment_plan.refresh_from_db()
+        self.assertEqual(payment_plan.dispersion_end_date, timezone.now().date() + timedelta(days=3))
 
     def test_export_xlsx(self) -> None:
         payment_plan = PaymentPlanFactory(

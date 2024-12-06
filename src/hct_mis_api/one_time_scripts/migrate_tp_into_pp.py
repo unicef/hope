@@ -45,6 +45,7 @@ INTERNAL_DATA_FIELDS = {
     "ca_id": "internal_data__ca_id",
     "ca_hash_id": "internal_data__ca_hash_id",
     "sent_to_datahub": "internal_data__sent_to_datahub",
+    "id": "internal_data__target_population_id",  # we need to store ID in case to migrate maybe data in future
 }
 
 ALL_TP_MIGRATION_MAPPING = TP_MIGRATION_MAPPING | INTERNAL_DATA_FIELDS

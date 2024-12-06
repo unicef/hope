@@ -591,18 +591,22 @@ class PaymentPlanService:
         return self.payment_plan
 
     def delete(self) -> PaymentPlan:
-        if self.payment_plan.status != PaymentPlan.Status.OPEN:
-            raise GraphQLError("Only Payment Plan in Open status can be deleted")
+        if self.payment_plan.status not in [PaymentPlan.Status.OPEN, PaymentPlan.Status.TP_OPEN]:
+            raise GraphQLError("Deletion is only allowed when the status is 'Open'")
 
-        if self.payment_plan.program_cycle.payment_plans.count() == 1:
-            # if it's the last Payment Plan in this Cycle need to update Cycle status
-            # move from Active to Draft Cycle need to delete all Payment Plans
-            self.payment_plan.program_cycle.set_draft()
+        if self.payment_plan.status == PaymentPlan.Status.OPEN:
+            if self.payment_plan.program_cycle.payment_plans.count() == 1:
+                # if it's the last Payment Plan in this Cycle need to update Cycle status
+                # move from Active to Draft Cycle need to delete all Payment Plans
+                self.payment_plan.program_cycle.set_draft()
 
-        # self.payment_plan.payment_items.all().delete()
-        # self.payment_plan.delete()
-        # with new proces just update status and not remove Payments and PaymentPlan
-        self.payment_plan.status_draft()
+            # with new proces just update status and not remove Payments and PaymentPlan
+            self.payment_plan.status_draft()
+
+        if self.payment_plan.status == PaymentPlan.Status.TP_OPEN:
+            self.payment_plan.payment_items.all().delete()
+            self.payment_plan.delete()
+
         self.payment_plan.save()
 
         return self.payment_plan

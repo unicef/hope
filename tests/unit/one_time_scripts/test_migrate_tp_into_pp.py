@@ -33,6 +33,9 @@ class MigrationTPIntoPPTest(TestCase):
             business_area=cls.business_area,
             created_by=cls.user,
             status=TargetPopulation.STATUS_ASSIGNED,
+            ca_id="ca_id test",
+            ca_hash_id="ca_hash_id test",
+            sent_to_datahub=True,
         )
         cls.preparing_payment_plan = PaymentPlanFactory(
             program_cycle=cls.program_cycle,
@@ -141,3 +144,31 @@ class MigrationTPIntoPPTest(TestCase):
         self.assertFalse(PaymentPlan.objects.filter(name="Removed TP").exists())
 
         self.assertEqual(Payment.objects.filter(parent=self.preparing_payment_plan).count(), 0)
+
+        self.preparing_payment_plan.refresh_from_db()
+        self.assertEqual(self.preparing_payment_plan.status, PaymentPlan.Status.OPEN)
+        self.assertEqual(self.preparing_payment_plan.name, "TP for Preparing PP")
+        self.assertEqual(
+            str(self.preparing_payment_plan.targeting_criteria_id), str(self.targeting_criteria_for_preparing_pp.pk)
+        )
+        # check internal data json
+        self.assertEqual(
+            self.preparing_payment_plan.internal_data.get("target_population_id"), str(self.tp_for_preparing.pk)
+        )
+        self.assertEqual(self.preparing_payment_plan.internal_data.get("ca_id"), self.tp_for_preparing.ca_id)
+        self.assertEqual(self.preparing_payment_plan.internal_data.get("ca_hash_id"), self.tp_for_preparing.ca_hash_id)
+        self.assertEqual(
+            self.preparing_payment_plan.internal_data.get("sent_to_datahub"), str(self.tp_for_preparing.sent_to_datahub)
+        )
+
+        first_rule_for_targeting_criteria_1_without_rule = self.targeting_criteria_1_without_rule.get_rules().first()
+        self.assertEqual(first_rule_for_targeting_criteria_1_without_rule.household_ids, "HH-11")
+        self.assertEqual(first_rule_for_targeting_criteria_1_without_rule.individual_ids, "IND-11")
+
+        first_rule_for_targeting_criteria_2_with_rule = self.targeting_criteria_2_with_rule.get_rules().first()
+        self.assertEqual(first_rule_for_targeting_criteria_2_with_rule.household_ids, "HH-22")
+        self.assertEqual(first_rule_for_targeting_criteria_2_with_rule.individual_ids, "IND-22")
+
+        # check all migrated fields
+
+        # check all TP>PP statuses
