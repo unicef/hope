@@ -15,6 +15,7 @@ import { LoadingComponent } from '@core/LoadingComponent';
 import { Title } from '@core/Title';
 import { ApproveDeleteHouseholdGrievanceDetails } from './ApproveDeleteHouseholdGrievanceDetails';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
+import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
 
 const Info = styled(InfoIcon)`
@@ -31,6 +32,8 @@ export function DeleteHouseholdGrievanceDetails({
 }): ReactElement {
   const { t } = useTranslation();
   const { baseUrl, isAllPrograms } = useBaseUrl();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const { data: choicesData, loading: choicesLoading } =
     useHouseholdChoiceDataQuery();
@@ -48,13 +51,16 @@ export function DeleteHouseholdGrievanceDetails({
     <ApproveBox>
       <Title>
         <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Typography variant="h6">{t('Household to be withdrawn')}</Typography>
+          <Typography variant="h6">{`${beneficiaryGroup?.groupLabel} to be withdrawn`}</Typography>
           {approveStatus &&
             ticket.deleteHouseholdTicketDetails.reasonHousehold && (
               <Box display="flex" alignItems="center">
                 <Info />
                 <Box mr={2}>
-                  <p>This household is a duplicate of a household ID:</p>
+                  <p>
+                    This {beneficiaryGroup?.groupLabel} is a duplicate of a{' '}
+                    {beneficiaryGroup?.groupLabel} ID:
+                  </p>
                 </Box>
                 {!isAllPrograms ? (
                   <BlackLink
@@ -91,7 +97,7 @@ export function DeleteHouseholdGrievanceDetails({
       </Title>
       <Grid container spacing={6}>
         <Grid item xs={3}>
-          <LabelizedField label={t('Household Size')}>
+          <LabelizedField label={`${beneficiaryGroup?.groupLabel} Size`}>
             {ticket.household.size}
           </LabelizedField>
         </Grid>
@@ -101,7 +107,7 @@ export function DeleteHouseholdGrievanceDetails({
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label={t('Head of Household')}>
+          <LabelizedField label={`Head of ${beneficiaryGroup?.groupLabel}`}>
             <ContentLink
               href={`/${baseUrl}/population/individuals/${ticket.household.headOfHousehold.id}`}
             >

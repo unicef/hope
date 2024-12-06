@@ -1,6 +1,6 @@
 import { ProgramQuery, ProgramStatus } from '@generated/graphql';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
-import React, { ReactElement, useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { ClickableTableRow } from '@core/Table/ClickableTableRow';
 import TableCell from '@mui/material/TableCell';
 import { UniversalMoment } from '@core/UniversalMoment';

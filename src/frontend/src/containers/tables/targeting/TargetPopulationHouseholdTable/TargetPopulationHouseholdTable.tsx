@@ -4,6 +4,7 @@ import { TableWrapper } from '@components/core/TableWrapper';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './TargetPopulationHouseholdHeadCells';
 import { TargetPopulationHouseholdTableRow } from './TargetPopulationHouseholdRow';
+import { useProgramContext } from 'src/programContext';
 
 interface TargetPopulationHouseholdProps {
   id?: string;
@@ -25,10 +26,13 @@ export function TargetPopulationHouseholdTable({
     ...(id && { targetPopulation: id }),
     ...variables,
   };
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   return (
     <TableWrapper>
       <UniversalTable
-        title={t('Households')}
+        title={t(`${beneficiaryGroup?.groupLabelPlural}`)}
         headCells={headCells}
         rowsPerPageOptions={[10, 15, 20]}
         query={query}

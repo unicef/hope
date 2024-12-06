@@ -207,6 +207,11 @@ Clear Cache,clear-cache/
         "Time To Live for REST API cache",
         "positive_integers",
     ),
+    "DEFAULT_BENEFICIARY_GROUP_NAME": (
+        "Household",
+        "Default Beneficiary Group name",
+        str,
+    ),
 }
 
 CONSTANCE_DBS = ("default",)

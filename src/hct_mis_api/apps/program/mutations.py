@@ -34,7 +34,7 @@ from hct_mis_api.apps.program.inputs import (
     UpdateProgramInput,
     UpdateProgramPartnersInput,
 )
-from hct_mis_api.apps.program.models import Program, ProgramCycle
+from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
 from hct_mis_api.apps.program.schema import ProgramNode
 from hct_mis_api.apps.program.utils import (
     copy_program_object,
@@ -77,6 +77,9 @@ class CreateProgram(
         if not (data_collecting_type_code := program_data.pop("data_collecting_type_code", None)):
             raise ValidationError("DataCollectingType is required for creating new Program")
         data_collecting_type = DataCollectingType.objects.get(code=data_collecting_type_code)
+        if not (beneficiary_group_id := program_data.pop("beneficiary_group", None)):
+            raise ValidationError("Beneficiary Group is required for creating new Program")
+        beneficiary_group = BeneficiaryGroup.objects.get(id=beneficiary_group_id)
         partner_access = program_data.get("partner_access", [])
         partners_data = program_data.pop("partners", [])
         pdu_fields = program_data.pop("pdu_fields", None)
@@ -103,7 +106,11 @@ class CreateProgram(
         )
 
         program = Program(
-            **program_data, status=Program.DRAFT, business_area=business_area, data_collecting_type=data_collecting_type
+            **program_data,
+            status=Program.DRAFT,
+            business_area=business_area,
+            data_collecting_type=data_collecting_type,
+            beneficiary_group=beneficiary_group,
         )
         program.full_clean()
         program.save()
@@ -150,7 +157,6 @@ class UpdateProgram(
         business_area = program.business_area
         pdu_fields = program_data.pop("pdu_fields", None)
         programme_code = program_data.get("programme_code", "")
-
         if programme_code:
             programme_code = programme_code.upper()
             program_data["programme_code"] = programme_code
@@ -185,6 +191,11 @@ class UpdateProgram(
             # Only reactivation is possible
             if status_to_set != Program.ACTIVE or len(program_data) > 1:
                 raise ValidationError("You cannot change finished program")
+        if beneficiary_group_id := program_data.pop("beneficiary_group", None):
+            beneficiary_group = BeneficiaryGroup.objects.get(id=beneficiary_group_id)
+            if old_program.registration_imports.exists() and old_program.beneficiary_group != beneficiary_group:
+                raise ValidationError("You cannot update a program's Beneficiary Group if it has imported population.")
+            program_data["beneficiary_group"] = beneficiary_group
 
         if data_collecting_type_code:
             program.data_collecting_type = data_collecting_type

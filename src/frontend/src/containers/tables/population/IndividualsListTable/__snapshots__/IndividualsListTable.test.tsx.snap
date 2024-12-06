@@ -95,7 +95,7 @@ exports[`containers/tables/population/IndividualsListTable should render loading
                     class="sc-kLhKbu dUAYNZ"
                     data-cy="table-label"
                   >
-                    Relationship to HoH
+                    Relationship to Head of Household
                   </span>
                 </th>
                 <th

@@ -12,6 +12,7 @@ import { NumberTextField } from '@core/NumberTextField';
 import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import { FiltersSection } from '@core/FiltersSection';
+import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
 
 interface TargetPopulationTableFiltersProps {
@@ -32,6 +33,8 @@ export const TargetPopulationTableFilters = ({
   const navigate = useNavigate();
   const location = useLocation();
   const isAccountability = location.pathname.includes('accountability');
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const { handleFilterChange, applyFilterChanges, clearFilter } =
     createHandleApplyFilterChange(
@@ -88,7 +91,7 @@ export const TargetPopulationTableFilters = ({
         </Grid>
         <Grid item xs={3}>
           <NumberTextField
-            topLabel={t('Number of Households')}
+            topLabel={t(`Number of ${beneficiaryGroup?.groupLabelPlural}`)}
             value={filter.totalHouseholdsCountMin}
             placeholder={t('From')}
             onChange={(e) =>

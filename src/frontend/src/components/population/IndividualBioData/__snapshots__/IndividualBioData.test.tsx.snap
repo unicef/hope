@@ -315,10 +315,10 @@ exports[`components/population/IndividualBioData should render 1`] = `
             class="sc-gtLWhw bkWrmx"
             color="textSecondary"
           >
-            Relationship to HOH
+            Relationship to Head Of Household
           </span>
           <div
-            data-cy="label-Relationship to HOH"
+            data-cy="label-Relationship to Head Of Household"
           >
             <span
               class="sc-egkSDF XYdBd"

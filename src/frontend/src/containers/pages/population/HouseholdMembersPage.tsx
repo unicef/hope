@@ -23,7 +23,9 @@ import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary'
 export const HouseholdMembersPage = (): ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
-  const { programHasPdu } = useProgramContext();
+  const { programHasPdu, selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const { businessArea } = useBaseUrl();
   const isNewTemplateJustCreated =
     location.state?.isNewTemplateJustCreated || false;
@@ -90,7 +92,7 @@ export const HouseholdMembersPage = (): ReactElement => {
     >
       <>
         <PageHeader
-          title={t('Household Members')}
+          title={beneficiaryGroup?.memberLabelPlural}
           tabs={
             <Tabs
               value={currentTab}
@@ -98,7 +100,10 @@ export const HouseholdMembersPage = (): ReactElement => {
                 setCurrentTab(newValue);
               }}
             >
-              <Tab data-cy="tab-individuals" label="Individuals" />
+              <Tab
+                data-cy="tab-individuals"
+                label={beneficiaryGroup?.memberLabelPlural}
+              />
               {programHasPdu ? (
                 canViewPDUListAndDetails ? (
                   <Tab

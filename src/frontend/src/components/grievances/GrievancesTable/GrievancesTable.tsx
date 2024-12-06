@@ -19,7 +19,7 @@ import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_TICKET_STATES,
 } from '@utils/constants';
-import { choicesToDict, dateToIsoString } from '@utils/utils';
+import { adjustHeadCells, choicesToDict, dateToIsoString } from '@utils/utils';
 import get from 'lodash/get';
 import { ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -47,8 +47,20 @@ export const GrievancesTable = ({
   filter,
 }: GrievancesTableProps): ReactElement => {
   const { businessArea, programId, isAllPrograms } = useBaseUrl();
-  const { isSocialDctType } = useProgramContext();
+  const { isSocialDctType, selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const { t } = useTranslation();
+
+  const replacements = {
+    household_unicef_id: (_beneficiaryGroup) =>
+      `${_beneficiaryGroup?.groupLabel} ID`,
+  };
+
+  const adjustedHeadCells = adjustHeadCells(
+    headCellsStandardProgram,
+    beneficiaryGroup,
+    replacements,
+  );
 
   const initialVariables: AllGrievanceTicketQueryVariables = {
     businessArea,
@@ -204,7 +216,7 @@ export const GrievancesTable = ({
     const baseCells =
       isSocialDctType || isAllPrograms
         ? headCellsSocialProgram
-        : headCellsStandardProgram;
+        : adjustedHeadCells;
 
     if (isAllPrograms) {
       return [

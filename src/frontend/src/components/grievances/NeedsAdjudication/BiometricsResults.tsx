@@ -16,6 +16,7 @@ import {
 import { FC, ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
+import { useProgramContext } from 'src/programContext';
 
 export interface Individual {
   __typename?: 'DeduplicationEngineSimilarityPairIndividualNode';
@@ -58,6 +59,8 @@ export const BiometricsResults = ({
     PERMISSIONS.GRIEVANCES_VIEW_BIOMETRIC_RESULTS,
     permissions,
   );
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const [loadData] = useGrievanceTicketLazyQuery({
     variables: {
@@ -113,7 +116,8 @@ export const BiometricsResults = ({
                   <Placeholder />
                 )}
                 <Typography variant="subtitle2">
-                  Individual {individual1?.unicefId}: {individual1?.fullName}
+                  {beneficiaryGroup?.memberLabel} {individual1?.unicefId}:{' '}
+                  {individual1?.fullName}
                 </Typography>
               </Box>
               <Box display="flex" flexDirection="column">
@@ -132,7 +136,8 @@ export const BiometricsResults = ({
                   <Placeholder />
                 )}
                 <Typography variant="subtitle2">
-                  Individual {individual2?.unicefId}: {individual2?.fullName}
+                  {beneficiaryGroup?.memberLabel} {individual2?.unicefId}:{' '}
+                  {individual2?.fullName}
                 </Typography>
               </Box>
             </Box>

@@ -1,22 +1,23 @@
-import { Box } from '@mui/material';
-import { ReactElement, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
-import { useHouseholdChoiceDataQuery } from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
+import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 import { HouseholdFilters } from '@components/population/HouseholdFilter';
-import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
+import { useHouseholdChoiceDataQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
+import { Box } from '@mui/material';
 import { getFilterFromQueryParams } from '@utils/utils';
+import { ReactElement, useState } from 'react';
+import { useLocation } from 'react-router-dom';
+import { useProgramContext } from 'src/programContext';
+import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { HouseholdTable } from '../../tables/population/HouseholdTable';
-import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 
 export function PopulationHouseholdPage(): ReactElement {
-  const { t } = useTranslation();
   const location = useLocation();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const { data: choicesData, loading: choicesLoading } =
     useHouseholdChoiceDataQuery({
       fetchPolicy: 'cache-first',
@@ -62,7 +63,7 @@ export function PopulationHouseholdPage(): ReactElement {
       componentName="PopulationHouseholdPage"
     >
       <>
-        <PageHeader title={t('Households')} />
+        <PageHeader title={beneficiaryGroup?.groupLabelPlural} />
         <HouseholdFilters
           filter={filter}
           choicesData={choicesData}

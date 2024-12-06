@@ -46,7 +46,7 @@ export function ProgrammesTable({
         title={t('Programmes')}
         headCells={headCells}
         query={useAllProgramsForTableQuery}
-        queriedObjectName="allPrograms"
+        queriedObjectName="allProgrsams"
         initialVariables={initialVariables}
         renderRow={(row) => (
           <ProgrammesTableRow

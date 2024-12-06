@@ -27,7 +27,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentPlan,
 )
 from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
-from hct_mis_api.apps.program.models import Program, ProgramCycle
+from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
 from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory, RuleFactory
 from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.apps.targeting.fixtures import (
@@ -68,12 +68,17 @@ def create_test_program() -> Program:
 
 @pytest.fixture
 def social_worker_program() -> Program:
-    yield create_program(dct_type=DataCollectingType.Type.SOCIAL)
+    yield create_program(dct_type=DataCollectingType.Type.SOCIAL, beneficiary_group_name="People")
 
 
-def create_program(name: str = "Test Program", dct_type: str = DataCollectingType.Type.STANDARD) -> Program:
+def create_program(
+    name: str = "Test Program",
+    dct_type: str = DataCollectingType.Type.STANDARD,
+    beneficiary_group_name: str = "Main Menu",
+) -> Program:
     BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
     dct = DataCollectingTypeFactory(type=dct_type)
+    beneficiary_group = BeneficiaryGroup.objects.filter(name=beneficiary_group_name).first()
     return ProgramFactory(
         name=name,
         programme_code="1234",
@@ -85,6 +90,7 @@ def create_program(name: str = "Test Program", dct_type: str = DataCollectingTyp
         cycle__status=ProgramCycle.DRAFT,
         cycle__start_date=datetime.now() - relativedelta(days=5),
         cycle__end_date=datetime.now() + relativedelta(days=5),
+        beneficiary_group=beneficiary_group,
     )
 
 
@@ -344,7 +350,7 @@ class TestSmokePaymentModule:
         assert "Payment Plan ID" in pagePaymentModule.getTableLabel()[0].text
         assert "Status" in pagePaymentModule.getTableLabel()[1].text
         assert "Target Population" in pagePaymentModule.getTableLabel()[2].text
-        assert "Num. of Households" in pagePaymentModule.getTableLabel()[3].text
+        assert "Num. of Items Groups" in pagePaymentModule.getTableLabel()[3].text
         assert "Currency" in pagePaymentModule.getTableLabel()[4].text
         assert "Total Entitled Quantity" in pagePaymentModule.getTableLabel()[5].text
         assert "Total Delivered Quantity" in pagePaymentModule.getTableLabel()[6].text
@@ -413,8 +419,8 @@ class TestSmokePaymentModule:
         assert "Payee List" in pagePaymentModuleDetails.getTableTitle().text
         assert "UPLOAD RECONCILIATION INFO" in pagePaymentModuleDetails.getButtonImport().text
         assert "Payment ID" in pagePaymentModuleDetails.getTableLabel()[1].text
-        assert "Household ID" in pagePaymentModuleDetails.getTableLabel()[2].text
-        assert "Household Size" in pagePaymentModuleDetails.getTableLabel()[3].text
+        assert "Items Group ID" in pagePaymentModuleDetails.getTableLabel()[2].text
+        assert "Items Group Size" in pagePaymentModuleDetails.getTableLabel()[3].text
         assert "Administrative Level 2" in pagePaymentModuleDetails.getTableLabel()[4].text
         assert "Collector" in pagePaymentModuleDetails.getTableLabel()[5].text
         assert "FSP" in pagePaymentModuleDetails.getTableLabel()[6].text

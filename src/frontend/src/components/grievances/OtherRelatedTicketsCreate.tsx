@@ -14,10 +14,13 @@ import {
   BlueBold,
 } from './GrievancesApproveSection/ApproveSectionStyles';
 import { getGrievanceDetailsPath } from './utils/createGrievanceUtils';
+import { useProgramContext } from 'src/programContext';
 
 export function OtherRelatedTicketsCreate({ values }): ReactElement {
   const { t } = useTranslation();
   const { baseUrl, businessArea } = useBaseUrl();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const [show, setShow] = useState(false);
 
   const { data, loading } = useExistingGrievanceTicketsQuery({
@@ -70,9 +73,7 @@ export function OtherRelatedTicketsCreate({ values }): ReactElement {
       </Title>
       <Box display="flex" flexDirection="column">
         <LabelizedField
-          label={`${t('For Household')} ${
-            values?.selectedHousehold?.unicefId || '-'
-          } `}
+          label={`For ${beneficiaryGroup?.groupLabel} ${values?.selectedHousehold?.unicefId || '-'}`}
         >
           <>{renderIds(openExistingTickets)}</>
         </LabelizedField>
@@ -87,9 +88,7 @@ export function OtherRelatedTicketsCreate({ values }): ReactElement {
           <Box mb={3} mt={3}>
             <Typography>{t('Closed Tickets')}</Typography>
             <LabelizedField
-              label={`${t('For Household')} ${
-                values?.selectedHousehold?.unicefId || '-'
-              } `}
+              label={`For ${beneficiaryGroup?.groupLabel} ${values?.selectedHousehold?.unicefId || '-'}`}
             >
               <>{renderIds(closedExistingTickets)}</>
             </LabelizedField>

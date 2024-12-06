@@ -27,6 +27,7 @@ import { fetchPeriodicFields } from '@api/periodicDataUpdateApi';
 import { useQuery } from '@tanstack/react-query';
 import { IndividualDeliveryMechanisms } from '@components/population/IndividualDeliveryMechanisms';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -42,6 +43,8 @@ const Container = styled.div`
 export const PopulationIndividualsDetailsPage = (): ReactElement => {
   const { id } = useParams();
   const location = useLocation();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const { t } = useTranslation();
 
   const { baseUrl, businessArea, programId } = useBaseUrl();
@@ -93,7 +96,7 @@ export const PopulationIndividualsDetailsPage = (): ReactElement => {
 
   let breadCrumbsItems: BreadCrumbsItem[] = [
     {
-      title: 'Individuals',
+      title: `${beneficiaryGroup?.groupLabelPlural}`,
       to: `/${baseUrl}/population/individuals`,
     },
   ];
@@ -122,7 +125,7 @@ export const PopulationIndividualsDetailsPage = (): ReactElement => {
       componentName="PopulationIndividualsDetailsPage"
     >
       <PageHeader
-        title={`${t('Individual ID')}: ${individual?.unicefId}`}
+        title={`${t(`${beneficiaryGroup?.memberLabel} ID`)}: ${individual?.unicefId}`}
         breadCrumbs={
           hasPermissions(
             PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_LIST,

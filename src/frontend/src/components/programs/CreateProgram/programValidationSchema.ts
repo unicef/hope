@@ -45,6 +45,7 @@ export const programValidationSchema = (
     dataCollectingTypeCode: Yup.string().required(
       t('Data Collecting Type is required'),
     ),
+    beneficiaryGroup: Yup.string().required(t('Beneficiary Group is required')),
     description: Yup.string()
       .min(3, t('Too short'))
       .max(255, t('Too long'))

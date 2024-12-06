@@ -16,14 +16,15 @@ export const IndividualQuestionnaire = ({
 }: IndividualQuestionnaireProps): ReactElement => {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
-  const { isSocialDctType } = useProgramContext();
+  const { isSocialDctType, selectedProgram } = useProgramContext();
   const selectedIndividualData =
     values.selectedIndividual || values.selectedHousehold.headOfHousehold;
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const questionFields = isSocialDctType
     ? [
         {
           name: 'questionnaire_fullName',
-          label: t('Individual Full Name'),
+          label: t(`${beneficiaryGroup?.memberLabel} Full Name`),
           value: (
             <ContentLink
               href={`/${baseUrl}/population/individuals/${selectedIndividualData.id}`}
@@ -97,7 +98,7 @@ export const IndividualQuestionnaire = ({
     : [
         {
           name: 'questionnaire_fullName',
-          label: t('Individual Full Name'),
+          label: `${beneficiaryGroup?.memberLabel} full name`,
           value: (
             <ContentLink
               href={`/${baseUrl}/population/individuals/${selectedIndividualData.id}`}
@@ -127,7 +128,7 @@ export const IndividualQuestionnaire = ({
         },
         {
           name: 'questionnaire_relationship',
-          label: t('Relationship to HOH'),
+          label: `Relationship to Head of ${beneficiaryGroup?.groupLabel}`,
           value: selectedIndividualData.relationship,
           size: 3,
         },

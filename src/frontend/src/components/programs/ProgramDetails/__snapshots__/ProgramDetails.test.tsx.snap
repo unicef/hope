@@ -167,6 +167,23 @@ exports[`components/ProgramDetails should render 1`] = `
               class="sc-fAUdSK goVbUg"
               color="textSecondary"
             >
+              Beneficiary Group
+            </span>
+            <div
+              data-cy="label-Beneficiary Group"
+            >
+              -
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
+        >
+          <div>
+            <span
+              class="sc-fAUdSK goVbUg"
+              color="textSecondary"
+            >
               Frequency of Payment
             </span>
             <div

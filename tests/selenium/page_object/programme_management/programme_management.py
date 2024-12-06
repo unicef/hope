@@ -26,6 +26,7 @@ class ProgrammeManagement(BaseComponents):
     inputBudget = 'input[data-cy="input-budget"]'
     inputAdministrativeAreasOfImplementation = 'input[data-cy="input-administrativeAreasOfImplementation"]'
     inputPopulation = 'input[data-cy="input-populationGoal"]'
+    inputBeneficiaryGroup = 'div[data-cy="input-beneficiary-group"]'
     inputFreqOfPaymentOneOff = '//*[@data-cy="input-frequency-of-payment"]/div[1]/div/span'
     inputFreqOfPaymentRegular = '//*[@data-cy="input-frequency-of-payment"]/div[2]/div/span'
     buttonNext = 'button[data-cy="button-next"]'
@@ -266,6 +267,9 @@ class ProgrammeManagement(BaseComponents):
 
     def getInputPopulation(self) -> WebElement:
         return self.wait_for(self.inputPopulation)
+
+    def getInputBeneficiaryGroup(self) -> WebElement:
+        return self.wait_for(self.inputBeneficiaryGroup)
 
     def getTableRowByProgramName(self, program_name: str) -> WebElement:
         return self.wait_for(self.tableRow.format(program_name))

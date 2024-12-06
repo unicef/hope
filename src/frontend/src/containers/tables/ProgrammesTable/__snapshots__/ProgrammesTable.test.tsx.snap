@@ -533,118 +533,41 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
               <tr
                 class="MuiTableRow-root sc-keTIit gpxSVY css-n2dwpd-MuiTableRow-root"
                 data-cy="table-row"
+                style="height: 350px;"
               >
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-dpBQxM cSmxFQ css-1ex1afd-MuiTableCell-root"
                   colspan="6"
-                >
-                  <span
-                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
-                    style="width: 100%; height: 70px;"
-                  />
-                </td>
-              </tr>
-              <tr
-                class="MuiTableRow-root sc-keTIit gpxSVY css-n2dwpd-MuiTableRow-root"
-                data-cy="table-row"
-              >
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-dpBQxM cSmxFQ css-1ex1afd-MuiTableCell-root"
-                  colspan="6"
-                >
-                  <span
-                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
-                    style="width: 100%; height: 70px;"
-                  />
-                </td>
-              </tr>
-              <tr
-                class="MuiTableRow-root sc-keTIit gpxSVY css-n2dwpd-MuiTableRow-root"
-                data-cy="table-row"
-              >
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-dpBQxM cSmxFQ css-1ex1afd-MuiTableCell-root"
-                  colspan="6"
-                >
-                  <span
-                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
-                    style="width: 100%; height: 70px;"
-                  />
-                </td>
-              </tr>
-              <tr
-                class="MuiTableRow-root sc-keTIit gpxSVY css-n2dwpd-MuiTableRow-root"
-                data-cy="table-row"
-              >
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-dpBQxM cSmxFQ css-1ex1afd-MuiTableCell-root"
-                  colspan="6"
-                >
-                  <span
-                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
-                    style="width: 100%; height: 70px;"
-                  />
-                </td>
-              </tr>
-              <tr
-                class="MuiTableRow-root MuiTableRow-hover sc-eUlrpB cISNIh css-n2dwpd-MuiTableRow-root"
-                data-cy="table-row-Notice hair fall college enough perhaps."
-                role="checkbox"
-              >
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
-                >
-                  <a
-                    class="sc-fFoeYl JfWVp"
-                    href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/details/UHJvZ3JhbU5vZGU6ZDM4YWI4MTQtOTQyNy00ZmJkLTg4ODctOGUyYzlkMzcxYjg2"
-                  >
-                    Notice hair fall college enough perhaps.
-                  </a>
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
                 >
                   <div
-                    class="sc-iuUfFv iMkwVk"
+                    class="sc-cEzcPc dtBRLW"
                   >
                     <div
-                      class="sc-dprtRQ csHGSY status-box-container"
-                      data-cy="status-container"
+                      class="sc-eOzmre jTEKWa MuiBox-root css-0"
                     >
-                      ACTIVE
+                      <svg
+                        aria-hidden="true"
+                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeInherit sc-eauhAA gdjGnH css-1vooibu-MuiSvgIcon-root"
+                        data-testid="FindInPageIcon"
+                        focusable="false"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          d="M20 19.59V8l-6-6H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c.45 0 .85-.15 1.19-.4l-4.43-4.43c-.8.52-1.74.83-2.76.83-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5c0 1.02-.31 1.96-.83 2.75zM9 13c0 1.66 1.34 3 3 3s3-1.34 3-3-1.34-3-3-3-3 1.34-3 3"
+                        />
+                      </svg>
+                    </div>
+                    <div
+                      class="MuiBox-root css-164r41r"
+                    >
+                      No results
+                    </div>
+                    <div
+                      class="sc-ovuCP eDYBaQ MuiBox-root css-164r41r"
+                    >
+                      Try adjusting your search or your filters to find what you are looking for.
                     </div>
                   </div>
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
-                >
-                  <time
-                    datetime="1579478400000"
-                  >
-                    20 Jan 2020
-                  </time>
-                   -
-                   
-                  <time
-                    datetime="1597795200000"
-                  >
-                    19 Aug 2020
-                  </time>
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
-                >
-                  Education
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-177gid-MuiTableCell-root"
-                >
-                  12
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-177gid-MuiTableCell-root"
-                >
-                  691946197.49 USD
                 </td>
               </tr>
             </tbody>
@@ -703,7 +626,7 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
             <p
               class="MuiTablePagination-displayedRows css-levciy-MuiTablePagination-displayedRows"
             >
-              1–5 of 9
+              0–0 of 0
             </p>
             <div
               class="MuiBox-root css-nkn1dz"
@@ -729,8 +652,9 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
               </button>
               <button
                 aria-label="next page"
-                class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium css-78trlr-MuiButtonBase-root-MuiIconButton-root"
-                tabindex="0"
+                class="MuiButtonBase-root Mui-disabled MuiIconButton-root Mui-disabled MuiIconButton-sizeMedium css-78trlr-MuiButtonBase-root-MuiIconButton-root"
+                disabled=""
+                tabindex="-1"
                 type="button"
               >
                 <svg
@@ -744,9 +668,6 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
                     d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z"
                   />
                 </svg>
-                <span
-                  class="MuiTouchRipple-root css-8je8zh-MuiTouchRipple-root"
-                />
               </button>
             </div>
           </div>

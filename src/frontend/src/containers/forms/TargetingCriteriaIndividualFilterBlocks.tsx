@@ -7,6 +7,7 @@ import styled from 'styled-components';
 import { chooseFieldType, clearField } from '@utils/targetingUtils';
 import { IndividualFieldsQuery } from '@generated/graphql';
 import { TargetingCriteriaIndividualBlockFilter } from './TargetingCriteriaIndividualBlockFilter';
+import { useProgramContext } from 'src/programContext';
 
 const Divider = styled.div`
   border-top: 1px solid #e2e2e2;
@@ -84,9 +85,12 @@ export function TargetingCriteriaIndividualFilterBlocks({
   const { t } = useTranslation();
   const shouldShowAndDivider =
     blockIndex + 1 < values.individualsFiltersBlocks.length;
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   return (
     <div>
-      Set Individual Criteria
+      {`Set ${beneficiaryGroup?.memberLabel} Criteria`}
       <FieldArray
         name={`individualsFiltersBlocks[${blockIndex}].individualBlockFilters`}
         render={(arrayHelpers) => (

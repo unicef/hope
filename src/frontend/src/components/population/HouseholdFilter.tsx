@@ -7,14 +7,15 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { HouseholdChoiceDataQuery, ProgramNode } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomplete';
-import { householdTableOrderOptions } from '@utils/constants';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { FiltersSection } from '@core/FiltersSection';
 import { NumberTextField } from '@core/NumberTextField';
 import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import { DocumentSearchField } from '@core/DocumentSearchField';
+import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
+import { generateTableOrderOptionsGroup } from '@utils/constants';
 
 interface HouseholdFiltersProps {
   filter;
@@ -38,6 +39,8 @@ export function HouseholdFilters({
   isOnPaper = true,
 }: HouseholdFiltersProps): ReactElement {
   const { t } = useTranslation();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const navigate = useNavigate();
   const location = useLocation();
   const { isAllPrograms } = useBaseUrl();
@@ -58,6 +61,9 @@ export function HouseholdFilters({
   const handleClearFilter = (): void => {
     clearFilter();
   };
+
+  const householdTableOrderOptions =
+    generateTableOrderOptionsGroup(beneficiaryGroup);
 
   return (
     <FiltersSection
@@ -90,7 +96,7 @@ export function HouseholdFilters({
               icon={<FlashOnIcon />}
               data-cy="hh-filters-program"
             >
-              {programs.map((program) => (
+              {programs?.map((program) => (
                 <MenuItem key={program.id} value={program.id}>
                   {program.name}
                 </MenuItem>
@@ -118,7 +124,7 @@ export function HouseholdFilters({
         </Grid>
         <Grid item xs={3}>
           <NumberTextField
-            topLabel={t('Household Size')}
+            topLabel={`${beneficiaryGroup?.groupLabel} ${t('Size')}`}
             value={filter.householdSizeMin}
             placeholder={t('From')}
             icon={<GroupIcon />}
@@ -149,7 +155,7 @@ export function HouseholdFilters({
             data-cy="hh-filters-order-by"
             disableClearable
           >
-            {householdTableOrderOptions.map((order) => (
+            {householdTableOrderOptions?.map((order) => (
               <MenuItem key={order.value} value={order.value}>
                 {order.name}
               </MenuItem>

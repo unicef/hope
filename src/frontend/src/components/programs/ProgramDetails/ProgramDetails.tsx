@@ -130,6 +130,12 @@ export const ProgramDetails = ({
           </Grid>
           <Grid item xs={4}>
             <LabelizedField
+              label={t('Beneficiary Group')}
+              value={program?.beneficiaryGroup?.name}
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <LabelizedField
               label={t('Frequency of Payment')}
               value={
                 programFrequencyOfPaymentsChoicesDict[
