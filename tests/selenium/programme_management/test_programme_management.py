@@ -435,7 +435,7 @@ class TestBusinessAreas:
                     "selector": "Health",
                     "startDate": FormatTime(1, 1, 2022),
                     "endDate": FormatTime(1, 2, 2032),
-                    "dataCollecting312Type": "Partial",
+                    "dataCollectingType": "Partial",
                 },
                 id="programme_management_page",
             ),
