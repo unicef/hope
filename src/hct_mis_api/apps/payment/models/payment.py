@@ -974,23 +974,20 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         verbose_name=_("Columns"),
         help_text=_("Select the columns to include in the report"),
     )
-
     core_fields = DynamicChoiceArrayField(
         models.CharField(max_length=255, blank=True),
         choices_callable=FieldFactory.get_all_core_fields_choices,
         default=list,
         blank=True,
     )
-
     flex_fields = FlexFieldArrayField(
         models.CharField(max_length=255, blank=True),
         default=list,
         blank=True,
     )
-
     document_types = DynamicChoiceArrayField(
         models.CharField(max_length=255, blank=True),
-        choices_callable=DocumentType.get_all_doc_types_choices(),
+        choices_callable=DocumentType.get_all_doc_types_choices,
         default=list,
         blank=True,
     )
