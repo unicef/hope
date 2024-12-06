@@ -112,6 +112,7 @@ class TestProgrammeManagement:
         # 3rd step (Partners)
         pageProgrammeManagement.getButtonSave().click()
         # Check Details page
+        pageProgrammeManagement.screenshot("test_create_programme", file_path="./")
         pageProgrammeDetails.wait_for_text("New Programme", pageProgrammeDetails.headerTitle)
         assert "DRAFT" in pageProgrammeDetails.getProgramStatus().text
         assert test_data["startDate"].date_in_text_format in pageProgrammeDetails.getLabelStartDate().text
@@ -282,6 +283,7 @@ class TestProgrammeManagement:
         pageProgrammeManagement.getButtonSave().click()
         # Check Details page
         pageProgrammeDetails.wait_for_text("New Programme", pageProgrammeDetails.headerTitle)
+        pageProgrammeDetails.screenshot("test_create_programme_Cash_Plus", file_path="./")
         assert "DRAFT" in pageProgrammeDetails.getProgramStatus().text
         assert test_data["startDate"].date_in_text_format in pageProgrammeDetails.getLabelStartDate().text
         assert test_data["endDate"].date_in_text_format in pageProgrammeDetails.getLabelEndDate().text
@@ -470,13 +472,9 @@ class TestBusinessAreas:
         pageProgrammeManagement.getAccessToProgram().click()
         pageProgrammeManagement.selectWhoAccessToProgram("Only Selected Partners within the business area")
         pageProgrammeManagement.choosePartnerOption("UNHCR")
-        programme_creation_url = pageProgrammeManagement.driver.current_url
         pageProgrammeManagement.getButtonSave().click()
         # Check Details page
-        assert "details" in pageProgrammeDetails.wait_for_new_url(programme_creation_url).split(
-            "/"
-        )  # Check Details page
-        assert "UNHCR" in pageProgrammeDetails.getLabelPartnerName().text
+        pageProgrammeDetails.wait_for_text("UNHCR", pageProgrammeDetails.labelPartnerName)
         assert "Business Area" in pageProgrammeDetails.getLabelAreaAccess().text
 
     @pytest.mark.parametrize(

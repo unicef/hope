@@ -100,7 +100,7 @@ def get_program_with_dct_type_and_name(
 
 
 def get_social_program_with_dct_type_and_name(
-    name: str, programme_code: str, dct_type: str = DataCollectingType.Type.STANDARD, status: str = Program.DRAFT
+    name: str, programme_code: str, dct_type: str = DataCollectingType.Type.SOCIAL, status: str = Program.DRAFT
 ) -> Program:
     BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
     dct = DataCollectingTypeFactory(type=dct_type)

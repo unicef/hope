@@ -123,15 +123,18 @@ def find_text_of_label(element: WebElement) -> str:
 
 @pytest.fixture
 def social_worker_program() -> Program:
-    yield create_program("Social Program", dct_type=DataCollectingType.Type.SOCIAL)
+    yield create_program("Social Program", dct_type=DataCollectingType.Type.SOCIAL, beneficiary_group="People")
 
 
 def create_program(
-    name: str, dct_type: str = DataCollectingType.Type.STANDARD, status: str = Program.ACTIVE
+    name: str,
+    dct_type: str = DataCollectingType.Type.STANDARD,
+    status: str = Program.ACTIVE,
+    beneficiary_group: str = "Main Menu",
 ) -> Program:
     BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
     dct = DataCollectingTypeFactory(type=dct_type)
-    beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
+    beneficiary_group = BeneficiaryGroup.objects.filter(name=beneficiary_group).first()
     program = ProgramFactory(
         name=name,
         start_date=datetime.now() - relativedelta(months=1),

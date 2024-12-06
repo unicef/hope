@@ -10,6 +10,7 @@ from hct_mis_api.apps.household.models import (
     FEMALE,
     MARRIED,
     ROLE_ALTERNATE,
+    Household,
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
@@ -38,7 +39,7 @@ def create_programs() -> None:
 
 
 @pytest.fixture
-def add_household() -> None:
+def add_household() -> Household:
     registration_data_import = RegistrationDataImportFactory(
         imported_by=User.objects.first(), business_area=BusinessArea.objects.first()
     )
@@ -69,12 +70,13 @@ def add_household() -> None:
 
     household.unicef_id = "HH-00-0000.1380"
     household.save()
+    yield household
 
 
 @pytest.mark.usefixtures("login")
 class TestSmokeIndividuals:
     def test_smoke_page_individuals(
-        self, create_programs: None, add_household: None, pageIndividuals: Individuals
+        self, create_programs: None, add_household: Household, pageIndividuals: Individuals
     ) -> None:
         pageIndividuals.selectGlobalProgramFilter("Test Programm")
         pageIndividuals.getNavProgrammePopulation().click()
@@ -87,13 +89,13 @@ class TestSmokeIndividuals:
         assert "Age" in pageIndividuals.getIndividualAge().text
         assert "Gender" in pageIndividuals.getIndividualSex().text
         assert "Administrative Level 2" in pageIndividuals.getIndividualLocation().text
-        assert 6 == len(pageIndividuals.getIndividualTableRow())
+        assert len(add_household.active_individuals) + 2 == len(pageIndividuals.getIndividualTableRow())
 
     @freeze_time("2024-08-26")
     def test_smoke_page_individuals_details(
         self,
         create_programs: None,
-        add_household: None,
+        add_household: Household,
         pageIndividuals: Individuals,
         pageIndividualsDetails: IndividualsDetails,
     ) -> None:
