@@ -1,9 +1,5 @@
 import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
-import {
-  TargetPopulationQuery,
-  TargetPopulationStatus,
-  useUpdateTpMutation,
-} from '@generated/graphql';
+import { useUpdateTpMutation } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Divider, Grid, Typography } from '@mui/material';
