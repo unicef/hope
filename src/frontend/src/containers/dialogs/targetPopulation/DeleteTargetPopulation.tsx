@@ -5,18 +5,17 @@ import {
   DialogContent,
   DialogTitle,
 } from '@mui/material';
-import { Formik } from 'formik';
 import { useTranslation } from 'react-i18next';
-import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 import { LoadingButton } from '@components/core/LoadingButton';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { useDeletePaymentPlanMutation } from '@generated/graphql';
+import { Action } from '@generated/graphql';
 import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useNavigate } from 'react-router-dom';
 import { ReactElement } from 'react';
+import { usePaymentPlanAction } from '@hooks/usePaymentPlanAction';
 
 export interface DeleteTargetPopulationProps {
   open: boolean;
@@ -31,12 +30,15 @@ export const DeleteTargetPopulation = ({
 }: DeleteTargetPopulationProps): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const [mutate, { loading }] = useDeleteTargetPopulationMutation();
-  const { showMessage } = useSnackbar();
   const { baseUrl } = useBaseUrl();
-  const initialValues = {
-    id: targetPopulationId,
-  };
+  const { showMessage } = useSnackbar();
+
+  const { mutatePaymentPlanAction: deleteAction, loading: loadingDelete } =
+    usePaymentPlanAction(Action.TpDelete, targetPopulationId, () => {
+      showMessage(t('Target Population Deleted'));
+      navigate(`/${baseUrl}/target-population/`);
+    });
+
   return (
     <Dialog
       open={open}
@@ -44,47 +46,34 @@ export const DeleteTargetPopulation = ({
       scroll="paper"
       aria-labelledby="form-dialog-title"
     >
-      <Formik
-        validationSchema={null}
-        initialValues={initialValues}
-        onSubmit={async () => {
-          await mutate({
-            variables: { input: { targetId: targetPopulationId } },
-          });
-          setOpen(false);
-          showMessage('Target Population Deleted');
-          navigate(`/${baseUrl}/target-population/`);
-        }}
-      >
-        {({ submitForm }) => (
-          <>
-            {open && <AutoSubmitFormOnEnter />}
-            <DialogTitleWrapper>
-              <DialogTitle>{t('Delete Target Population')}</DialogTitle>
-            </DialogTitleWrapper>
-            <DialogContent>
-              <DialogDescription>
-                {t('Are you sure you want to remove this Target Population?')}
-              </DialogDescription>
-            </DialogContent>
-            <DialogFooter>
-              <DialogActions>
-                <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
-                <LoadingButton
-                  loading={loading}
-                  type="submit"
-                  color="primary"
-                  variant="contained"
-                  onClick={submitForm}
-                  data-cy="button-delete"
-                >
-                  {t('Delete')}
-                </LoadingButton>
-              </DialogActions>
-            </DialogFooter>
-          </>
-        )}
-      </Formik>
+      <>
+        <DialogTitleWrapper>
+          <DialogTitle>{t('Delete Target Population')}</DialogTitle>
+        </DialogTitleWrapper>
+        <DialogContent>
+          <DialogDescription>
+            {t('Are you sure you want to remove this Target Population?')}
+          </DialogDescription>
+        </DialogContent>
+        <DialogFooter>
+          <DialogActions>
+            <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
+            <LoadingButton
+              color="primary"
+              variant="contained"
+              loading={loadingDelete}
+              onClick={() => {
+                deleteAction().then(() => {
+                  setOpen(false);
+                });
+              }}
+              data-cy="button-delete"
+            >
+              {t('Delete')}
+            </LoadingButton>
+          </DialogActions>
+        </DialogFooter>
+      </>
     </Dialog>
   );
 };
