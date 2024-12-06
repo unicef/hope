@@ -51,7 +51,7 @@ from hct_mis_api.apps.program.fixtures import (
     BeneficiaryGroupFactory,
     ProgramCycleFactory,
 )
-from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 from hct_mis_api.apps.targeting.models import (
@@ -510,7 +510,10 @@ def generate_payment_plan() -> None:
 
     program_pk = UUID("00000000-0000-0000-0000-faceb00c0000")
     data_collecting_type = DataCollectingType.objects.get(code="full")
-    beneficiary_master_detail = False if data_collecting_type.type == DataCollectingType.Type.SOCIAL else True
+    if data_collecting_type.type == DataCollectingType.Type.SOCIAL:
+        beneficiary_group = BeneficiaryGroupFactory(name="Social", master_detail=False)
+    else:
+        beneficiary_group = BeneficiaryGroupFactory(name="Household", master_detail=True)
     program = Program.objects.update_or_create(
         pk=program_pk,
         business_area=afghanistan,
@@ -526,7 +529,7 @@ def generate_payment_plan() -> None:
         scope=Program.SCOPE_UNICEF,
         data_collecting_type=data_collecting_type,
         programme_code="T3ST",
-        beneficiary_group=BeneficiaryGroup.objects.filter(master_detail=beneficiary_master_detail).first(),
+        beneficiary_group=beneficiary_group,
     )[0]
     program_cycle = ProgramCycleFactory(
         program=program,
