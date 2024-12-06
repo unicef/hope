@@ -243,7 +243,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
                 raise ValidationError("Selected combination of data collecting type and beneficiary group is invalid.")
 
     def save(self, *args: Any, **kwargs: Any) -> None:
-        self.full_clean()
+        self.clean()
         if not self.programme_code:
             self.programme_code = self._generate_programme_code()
         if self.data_collecting_type_id is None and self.data_collecting_type:
