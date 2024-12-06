@@ -212,7 +212,7 @@ class TestMigrateCashPlanToPaymentPlan(TestCase):
         )  # CP without payments, not migrating
 
         cls.cash_plan3 = CashPlanFactory(
-            delivery_type=cls.digital_delivery_mechanism.name,
+            delivery_type=cls.cash_delivery_mechanism.name,
             service_provider=cls.service_provider1,
             is_migrated_to_payment_plan=False,
         )  # CP without payments, not migrating, same service provider as CP1 so fsp delivery mechanisms should be updated
@@ -381,7 +381,7 @@ class TestMigrateCashPlanToPaymentPlan(TestCase):
         pp2 = pps.get(target_population=self.pr2.target_population)
 
         # Assert DeliveryMechanismPerPaymentPlans created
-        assert DeliveryMechanismPerPaymentPlan.objects.count() == 2
+        assert DeliveryMechanismPerPaymentPlan.objects.count() == 3
         dmp1 = DeliveryMechanismPerPaymentPlan.objects.get(payment_plan=pp1)
         assert dmp1.delivery_mechanism == self.cash_delivery_mechanism
         assert dmp1.sent_date == self.cash_plan.status_date
@@ -394,7 +394,7 @@ class TestMigrateCashPlanToPaymentPlan(TestCase):
         assert dmp2.delivery_mechanism == self.digital_delivery_mechanism
 
         # Assert PaymentRecords created
-        assert Payment.objects.count() == 2
+        assert Payment.objects.count() == 3
 
         ps = Payment.objects.filter(parent_id=pp1.id)
         assert ps.count() == 1

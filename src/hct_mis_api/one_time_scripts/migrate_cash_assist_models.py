@@ -69,7 +69,7 @@ def migrate_cash_plan_to_payment_plan() -> None:
                 "short_name": sp.short_name,
             },
         )
-        fsp.delivery_mechanisms.set([delivery_type_to_obj[dt] for dt in delivery_mechanisms])
+        fsp.delivery_mechanisms.set([delivery_type_to_obj[dt] for dt in delivery_mechanisms if dt])
         sp.is_migrated_to_payment_plan = True
         sp.save(update_fields=["is_migrated_to_payment_plan"])
 
