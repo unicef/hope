@@ -82,13 +82,12 @@ def migrate_cash_plan_to_payment_plan() -> None:
     cp_count = cash_plans.count()
     cp_i = 0
     for cp in cash_plans.iterator(chunk_size=50):
-        if cp_i % 50 == 0:
-            print(f"Processing cash plan {cp_i}/{cp_count}")
+        print(f"Processing cash plan {cp_i}/{cp_count}, {cp.name} {cp.id}")
         cp_i += 1
+        if not cp.payment_items.exists():
+            print(f"Cash Plan {cp} has no payment items")
+            continue
         with transaction.atomic():
-            if not cp.payment_items.exists():
-                continue
-
             # get target populations from payment records
             target_populations = cp.payment_items.values_list("target_population", flat=True).distinct()
             tp_counter = 0
@@ -97,7 +96,10 @@ def migrate_cash_plan_to_payment_plan() -> None:
                 tp = TargetPopulation.objects.get(id=tp_id)
                 payment_records = cp.payment_items.filter(target_population=tp)
                 first_record = payment_records.first()
-                if first_record.delivery_type:
+
+                if cp.delivery_type:
+                    delivery_mechanism = delivery_type_to_obj[cp.delivery_type]
+                elif first_record.delivery_type:
                     delivery_mechanism = delivery_type_to_obj[first_record.delivery_type.name]
                 else:
                     delivery_mechanism = dm_cash
@@ -149,7 +151,15 @@ def migrate_cash_plan_to_payment_plan() -> None:
                 pp.save(update_fields=["unicef_id", "created_at"])
                 pp.update_population_count_fields()
 
-                financial_service_provider = fsp_vision_vendor_number_to_obj.get(cp.service_provider.vision_id)
+                if not cp.service_provider:
+                    # get from records
+                    vision_id = (
+                        cp.payment_items.values_list("service_provider__vision_id", flat=True).distinct().first()
+                    )
+                    financial_service_provider = fsp_vision_vendor_number_to_obj.get(vision_id)
+                else:
+                    financial_service_provider = fsp_vision_vendor_number_to_obj.get(cp.service_provider.vision_id)
+
                 if not financial_service_provider:
                     raise ValueError(
                         f"FinancialServiceProvider not found for vision_id: {first_record.service_provider.vision_id}"
