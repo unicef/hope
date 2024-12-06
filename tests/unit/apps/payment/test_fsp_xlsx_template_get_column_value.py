@@ -5,7 +5,6 @@ from parameterized import parameterized
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import (
     DocumentFactory,
     DocumentTypeFactory,
@@ -27,9 +26,8 @@ class FinancialServiceProviderXlsxTemplateTest(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        create_afghanistan()
+        cls.business_area = create_afghanistan()
         cls.user = UserFactory()
-        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.program = ProgramFactory(business_area=cls.business_area)
 
     def test_get_column_value_registration_token_empty(self) -> None:

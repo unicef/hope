@@ -1,10 +1,12 @@
 from django.test import TestCase
+from django.utils import timezone
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
 from hct_mis_api.apps.payment.models import Payment, PaymentPlan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory
 from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
     TargetingCriteriaRuleFactory,
@@ -45,12 +47,30 @@ class MigrationTPIntoPPTest(TestCase):
         )
         # tp_1
         cls.targeting_criteria_1_without_rule = TargetingCriteriaFactory(household_ids="HH-11", individual_ids="IND-11")
+        cls.rule_commit = RuleCommitFactory()
+        cls.time_now = timezone.now()
         cls.tp_1 = TargetPopulationFactory(
-            name="TP without rule",
+            name="TP without rule check all fields",
             targeting_criteria=cls.targeting_criteria_1_without_rule,
             business_area=cls.business_area,
             created_by=cls.user,
-            status=TargetPopulation.STATUS_OPEN,
+            status=TargetPopulation.STATUS_STEFICON_COMPLETED,
+            change_date=cls.time_now,
+            build_status=TargetPopulation.BUILD_STATUS_FAILED,
+            built_at=cls.time_now,
+            program_cycle=cls.program_cycle,
+            steficon_rule=cls.rule_commit,
+            steficon_applied_date=cls.time_now,
+            vulnerability_score_min=123,
+            vulnerability_score_max=999,
+            excluded_ids="Test IND-123",
+            exclusion_reason="Exclusion_reason",
+            total_households_count=1,
+            total_individuals_count=2,
+            child_male_count=3,
+            child_female_count=4,
+            adult_male_count=5,
+            adult_female_count=6,
         )
         # tp_2
         cls.targeting_criteria_2_with_rule = TargetingCriteriaFactory(household_ids="HH-22", individual_ids="IND-22")
@@ -170,5 +190,21 @@ class MigrationTPIntoPPTest(TestCase):
         self.assertEqual(first_rule_for_targeting_criteria_2_with_rule.individual_ids, "IND-22")
 
         # check all migrated fields
-
-        # check all TP>PP statuses
+        new_pp = PaymentPlan.objects.get(name="TP without rule check all fields")
+        self.assertEqual(new_pp.status, PaymentPlan.Status.TP_OPEN)
+        self.assertEqual(new_pp.created_by, self.user)
+        self.assertEqual(new_pp.build_status, PaymentPlan.BuildStatus.BUILD_STATUS_OK)
+        self.assertEqual(new_pp.program_cycle, self.program_cycle)
+        self.assertEqual(new_pp.business_area, self.business_area)
+        self.assertEqual(new_pp.steficon_rule_targeting, self.rule_commit)
+        self.assertEqual(new_pp.steficon_targeting_applied_date, self.time_now)
+        self.assertEqual(new_pp.vulnerability_score_min, 123)
+        self.assertEqual(new_pp.vulnerability_score_max, 999)
+        self.assertEqual(new_pp.excluded_ids, "Test IND-123")
+        self.assertEqual(new_pp.exclusion_reason, "Exclusion_reason")
+        self.assertEqual(new_pp.total_households_count, 0)
+        self.assertEqual(new_pp.total_individuals_count, 0)
+        self.assertEqual(new_pp.male_children_count, 0)
+        self.assertEqual(new_pp.female_children_count, 0)
+        self.assertEqual(new_pp.male_adults_count, 0)
+        self.assertEqual(new_pp.female_adults_count, 0)
