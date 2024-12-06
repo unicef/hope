@@ -58,7 +58,7 @@ pytestmark = pytest.mark.django_db()
 @pytest.fixture
 def sw_program() -> Program:
     yield get_program_with_dct_type_and_name(
-        "Test Programm", dct_type=DataCollectingType.Type.SOCIAL, status=Program.ACTIVE
+        "Test Programm", dct_type=DataCollectingType.Type.SOCIAL, status=Program.ACTIVE, beneficiary_group_name="People"
     )
 
 
@@ -210,11 +210,14 @@ def household_refugee() -> Household:
 
 
 def get_program_with_dct_type_and_name(
-    name: str, dct_type: str = DataCollectingType.Type.STANDARD, status: str = Program.ACTIVE
+    name: str,
+    dct_type: str = DataCollectingType.Type.STANDARD,
+    status: str = Program.ACTIVE,
+    beneficiary_group_name: str = "Main Menu",
 ) -> Program:
     BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
     dct = DataCollectingTypeFactory(type=dct_type)
-    beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
+    beneficiary_group = BeneficiaryGroup.objects.filter(name=beneficiary_group_name).first()
     program = ProgramFactory(
         name=name,
         start_date=datetime.now() - relativedelta(months=1),
