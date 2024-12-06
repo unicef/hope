@@ -1,5 +1,4 @@
 import hashlib
-import json
 import logging
 import uuid
 from collections import defaultdict
@@ -14,6 +13,7 @@ from django.conf import settings
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
+from django.core.serializers.json import DjangoJSONEncoder
 from django.core.validators import (
     MaxLengthValidator,
     MaxValueValidator,
@@ -1608,7 +1608,7 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
         "household.Individual", on_delete=models.CASCADE, related_name="delivery_mechanisms_data"
     )
     delivery_mechanism = models.ForeignKey("payment.DeliveryMechanism", on_delete=models.PROTECT)
-    data = JSONField(default=dict, blank=True)
+    data = JSONField(default=dict, blank=True, encoder=DjangoJSONEncoder)
 
     is_valid: bool = models.BooleanField(default=False)  # type: ignore
     validation_errors: dict = JSONField(default=dict)  # type: ignore
@@ -1650,13 +1650,9 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
         associated_objects = {
             _INDIVIDUAL: self.individual,
             _HOUSEHOLD: self.individual.household,
-            _DELIVERY_MECHANISM_DATA: self._data,
+            _DELIVERY_MECHANISM_DATA: self.data,
         }
         return associated_objects.get(associated_with)
-
-    @property
-    def _data(self) -> Dict:
-        return json.loads(self.data) if not isinstance(self.data, dict) else self.data
 
     @cached_property
     def delivery_data(self) -> Dict:
