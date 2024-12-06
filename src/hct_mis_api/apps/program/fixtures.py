@@ -111,7 +111,14 @@ class ProgramFactory(DjangoModelFactory):
     programme_code = factory.LazyAttribute(
         lambda o: "".join(random.choice(string.ascii_uppercase + string.digits) for _ in range(4))
     )
-    beneficiary_group = factory.SubFactory(BeneficiaryGroupFactory)
+    beneficiary_group = factory.LazyAttribute(
+        lambda o: BeneficiaryGroupFactory(
+            master_detail=False if o.data_collecting_type.type == DataCollectingType.Type.SOCIAL else True,
+            name=factory.Faker("word")
+            if o.data_collecting_type.type == DataCollectingType.Type.SOCIAL
+            else "Household",
+        )
+    )
 
     @factory.post_generation
     def cycle(self, create: bool, extracted: bool, **kwargs: Any) -> None:
