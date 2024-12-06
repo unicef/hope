@@ -36,10 +36,6 @@ export const ProgramForm = ({
 
   const { setFieldValue } = useFormikContext();
 
-  useEffect(() => {
-    setFieldValue('beneficiaryGroup', '');
-  }, [values.dataCollectingTypeCode, setFieldValue]);
-
   const filteredDataCollectionTypeChoicesData =
     dataCollectionTypeChoicesData?.dataCollectionTypeChoices.filter(
       (el) => el.name !== '',
@@ -137,6 +133,10 @@ export const ProgramForm = ({
             fullWidth
             variant="outlined"
             required
+            onChange={(e) => {
+              setFieldValue('beneficiaryGroup', '');
+              setFieldValue('dataCollectingTypeCode', e.target.value);
+            }}
             choices={filteredDataCollectionTypeChoicesData || []}
             component={FormikSelectField}
             data-cy="input-data-collecting-type"
