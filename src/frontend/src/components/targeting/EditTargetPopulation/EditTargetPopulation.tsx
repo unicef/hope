@@ -1,5 +1,5 @@
 import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
-import { useUpdateTpMutation } from '@generated/graphql';
+import { PaymentPlanQuery, useUpdateTpMutation } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Divider, Grid, Typography } from '@mui/material';
@@ -23,31 +23,31 @@ import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/Program
 import { ReactElement } from 'react';
 
 interface EditTargetPopulationProps {
-  targetPopulation: TargetPopulationQuery['targetPopulation'];
+  paymentPlan: PaymentPlanQuery['paymentPlan'];
   screenBeneficiary: boolean;
 }
 
 export const EditTargetPopulation = ({
-  targetPopulation,
+  paymentPlan,
   screenBeneficiary,
 }: EditTargetPopulationProps): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const initialValues = {
-    id: targetPopulation.id,
-    name: targetPopulation.name || '',
-    program: targetPopulation.program?.id || '',
-    targetingCriteria: targetPopulation.targetingCriteria.rules || [],
-    excludedIds: targetPopulation.excludedIds || '',
-    exclusionReason: targetPopulation.exclusionReason || '',
+    id: paymentPlan.id,
+    name: paymentPlan.name || '',
+    program: paymentPlan.program?.id || '',
+    targetingCriteria: paymentPlan.targetingCriteria.rules || [],
+    excludedIds: paymentPlan.excludedIds || '',
+    exclusionReason: paymentPlan.exclusionReason || '',
     flagExcludeIfActiveAdjudicationTicket:
-      targetPopulation.targetingCriteria
-        .flagExcludeIfActiveAdjudicationTicket || false,
+      paymentPlan.targetingCriteria.flagExcludeIfActiveAdjudicationTicket ||
+      false,
     flagExcludeIfOnSanctionList:
-      targetPopulation.targetingCriteria.flagExcludeIfOnSanctionList || false,
+      paymentPlan.targetingCriteria.flagExcludeIfOnSanctionList || false,
     programCycleId: {
-      value: targetPopulation.programCycle.id,
-      name: targetPopulation.programCycle.title,
+      value: paymentPlan.programCycle.id,
+      name: paymentPlan.programCycle.title,
     },
   };
   const [mutate, { loading }] = useUpdateTpMutation();
@@ -88,7 +88,7 @@ export const EditTargetPopulation = ({
             excludedIds: values.excludedIds,
             exclusionReason: values.exclusionReason,
             programCycleId: values.programCycleId.value,
-            ...(targetPopulation.status === TargetPopulationStatus.Open && {
+            ...(paymentPlan.status === TargetPopulationStatus.Open && {
               name: values.name,
             }),
             ...getTargetingCriteriaVariables({
@@ -153,7 +153,7 @@ export const EditTargetPopulation = ({
                   required
                   component={FormikTextField}
                   variant="outlined"
-                  disabled={targetPopulation.status === 'LOCKED'}
+                  disabled={paymentPlan.status === 'LOCKED'}
                 />
               </Grid>
             </Grid>
