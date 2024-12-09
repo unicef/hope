@@ -57,6 +57,7 @@ if __name__ == "__main__":
         ("payment", "0006_migration"),
         ("payment", "0007_migration"),
         ("aurora", "0003_migration"),
+        ("registration_data", "0002_migration"),
     ]
     fake_migrations(excluded_migrations)
     apply_migrations()
