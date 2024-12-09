@@ -96,6 +96,7 @@ class HouseholdCollectionFactory(DjangoModelFactory):
 class HouseholdFactory(DjangoModelFactory):
     class Meta:
         model = Household
+        django_get_or_create = ("id", "unicef_id")
 
     unicef_id = factory.Sequence(lambda n: f"HH-{n}")
     consent_sign = factory.django.ImageField(color="blue")
@@ -371,6 +372,69 @@ def create_household(
         rdi_merge_status=MergeStatusModel.MERGED,
     )
     alternate_collector_irh.save()
+
+    return household, individuals
+
+
+def create_household_with_individual_with_collectors(
+    household_args: Optional[Dict] = None, individual_args: Optional[Dict] = None
+) -> Tuple[Household, List[Individual]]:
+    """HH.size default is 2, first Ind is Primary Collector and second id so will be Alternate Collector"""
+    if household_args is None:
+        household_args = {}
+    if individual_args is None:
+        individual_args = {}
+
+    if household_args.get("size") is None:
+        household_args["size"] = 2
+
+    partner = PartnerFactory(name="UNICEF")
+    household_args["registration_data_import__imported_by__partner"] = partner
+
+    household = HouseholdFactory.build(**household_args)
+    individuals = IndividualFactory.create_batch(
+        household.size, household=None, program=household.program, **individual_args
+    )
+
+    household.head_of_household = individuals[0]
+    household.household_collection.save()
+    household.program.save()
+    # household.registration_data_import.imported_by.partner.save()
+    household.registration_data_import.imported_by.save()
+    household.registration_data_import.program.save()
+    household.registration_data_import.save()
+    household.program.save()
+    household.save()
+
+    individuals_to_update = []
+    for index, individual in enumerate(individuals):
+        if index == 0:
+            individual.relationship = "HEAD"
+        individual.household = household
+        individuals_to_update.append(individual)
+
+    Individual.objects.bulk_update(individuals_to_update, ("relationship", "household"))
+
+    primary_collector = individuals[0]
+    if len(individuals) > 1:
+        alternate_collector = individuals[1]
+        alternate_collector.relationship = "NON_BENEFICIARY"
+        alternate_collector.save()
+    else:
+        alternate_collector = None
+
+    primary_collector_irh = IndividualRoleInHousehold(
+        individual=primary_collector, household=household, role=ROLE_PRIMARY, rdi_merge_status=MergeStatusModel.MERGED
+    )
+    primary_collector_irh.save()
+    if alternate_collector:
+        alternate_collector_irh = IndividualRoleInHousehold(
+            individual=alternate_collector,
+            household=household,
+            role=ROLE_ALTERNATE,
+            rdi_merge_status=MergeStatusModel.MERGED,
+        )
+        alternate_collector_irh.save()
 
     return household, individuals
 

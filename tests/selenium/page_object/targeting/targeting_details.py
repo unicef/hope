@@ -191,7 +191,7 @@ class TargetingDetails(BaseComponents):
     def getTableTitle(self) -> WebElement:
         return self.wait_for(self.tableTitle)
 
-    def getTableLabel(self) -> WebElement:
+    def getTableLabel(self) -> [WebElement]:
         return self.get_elements(self.tableLabel)
 
     def getTablePagination(self) -> WebElement:

@@ -1,8 +1,10 @@
 from datetime import datetime
 from typing import Callable
 
+import factory
 import pytest
 from dateutil.relativedelta import relativedelta
+from pytz import utc
 from selenium.common import NoSuchElementException
 from selenium.webdriver import ActionChains, Keys
 from selenium.webdriver.common.by import By
@@ -15,7 +17,8 @@ from hct_mis_api.apps.core.models import (
     PeriodicFieldData,
 )
 from hct_mis_api.apps.household.fixtures import (
-    create_household,
+    HouseholdFactory,
+    IndividualFactory,
     create_household_and_individuals,
 )
 from hct_mis_api.apps.household.models import (
@@ -247,23 +250,99 @@ def create_targeting() -> TargetPopulation:
         status=TargetPopulation.STATUS_OPEN,
         targeting_criteria=targeting_criteria,
         program_cycle=create_test_program.cycles.first(),
+        build_status=TargetPopulation.BUILD_STATUS_OK,
     )
-    households = [
-        create_household(
-            household_args={
-                "size": 2,
-                "business_area": tp.business_area,
-                "program": tp.program,
-                "female_age_group_6_11_count": 6,
-                "male_age_group_0_5_count": 1,
-                "female_age_group_18_59_count": 2,
-                "male_age_group_60_count": 1,
-            },
-        )[0]
-        for _ in range(14)
-    ]
+    program = tp.program
 
-    tp.households.set(households)
+    hoh1 = IndividualFactory(household=None)
+    hoh2 = IndividualFactory(household=None)
+    household_1 = HouseholdFactory(
+        program=program,
+        id="3d7087be-e8f8-478d-9ca2-4ca6d5e96f51",
+        unicef_id="HH-17-0000.3340",
+        head_of_household=hoh1,
+        size=5,
+    )
+    household_2 = HouseholdFactory(
+        program=program,
+        id="3d7087be-e8f8-478d-9ca2-4ca6d5e96f52",
+        unicef_id="HH-17-0000.3341",
+        head_of_household=hoh2,
+        size=6,
+    )
+
+    # HH1 - Female Children: 1; Female Adults: 1; Male Children: 2; Male Adults: 1;
+    IndividualFactory(
+        household=household_1,
+        program=program,
+        sex="MALE",
+        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=11, maximum_age=16),
+    )
+    IndividualFactory(
+        household=household_1,
+        program=program,
+        sex="MALE",
+        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=11, maximum_age=16),
+    )
+    IndividualFactory(
+        household=household_1,
+        program=program,
+        sex="FEMALE",
+        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=1, maximum_age=10),
+    )
+    IndividualFactory(
+        household=household_1,
+        program=program,
+        sex="FEMALE",
+        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=20, maximum_age=40),
+    )
+    IndividualFactory(
+        household=household_1,
+        program=program,
+        sex="MALE",
+        unicef_id="IND-06-0001.1828",
+        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=20, maximum_age=40),
+    )
+
+    # HH2 - Female Children: 4; Female Adults: 1; Male Children: 1; Male Adults: 0;
+    IndividualFactory(
+        household=household_2,
+        program=program,
+        sex="MALE",
+        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=1, maximum_age=3),
+    )
+    IndividualFactory(
+        household=household_2,
+        program=program,
+        sex="FEMALE",
+        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=1, maximum_age=10),
+    )
+    IndividualFactory(
+        household=household_2,
+        program=program,
+        sex="FEMALE",
+        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=1, maximum_age=10),
+    )
+    IndividualFactory(
+        household=household_2,
+        program=program,
+        sex="FEMALE",
+        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=1, maximum_age=10),
+    )
+    IndividualFactory(
+        household=household_2,
+        program=program,
+        sex="FEMALE",
+        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=1, maximum_age=10),
+    )
+    IndividualFactory(
+        household=household_2,
+        program=program,
+        sex="FEMALE",
+        birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=30, maximum_age=45),
+    )
+
+    tp.households.set([household_1, household_2])
     business_area = BusinessArea.objects.get(slug="afghanistan")
     rule = RuleFactory(
         name="Test Rule",
@@ -289,7 +368,9 @@ def create_targeting() -> TargetPopulation:
         xlsx_template=fsp_xlsx_template,
         delivery_mechanism=dm_cash,
     )
-    refresh_stats(tp)
+    tp.refresh_from_db()
+    tp = refresh_stats(tp)
+    tp.save()
     yield tp
 
 
@@ -394,19 +475,17 @@ class TestSmokeTargeting:
         assert "SEND BY" in pageTargetingDetails.getLabelizedFieldContainerSendBy().text
         assert "-" in pageTargetingDetails.getLabelSendBy().text
         assert "-" in pageTargetingDetails.getLabelSendDate().text
-        pageTargetingDetails.scroll()
-        pageTargetingDetails.scroll()
-        assert "6" in pageTargetingDetails.getLabelFemaleChildren().text
-        assert "1" in pageTargetingDetails.getLabelMaleChildren().text
+        assert "5" in pageTargetingDetails.getLabelFemaleChildren().text
+        assert "3" in pageTargetingDetails.getLabelMaleChildren().text
         assert "2" in pageTargetingDetails.getLabelFemaleAdults().text
         assert "1" in pageTargetingDetails.getLabelMaleAdults().text
-        assert "3" in pageTargetingDetails.getLabelTotalNumberOfHouseholds().text
-        assert "7" in pageTargetingDetails.getLabelTargetedIndividuals().text
-        assert "Households" in pageTargetingDetails.getTableTitle().text
+        assert "2" in pageTargetingDetails.getLabelTotalNumberOfHouseholds().text
+        assert "11" in pageTargetingDetails.getLabelTargetedIndividuals().text
+        assert "Items Groups" in pageTargetingDetails.getTableTitle().text
         expected_menu_items = [
             "ID",
-            "Head of Household",
-            "Household Size",
+            "Head of Items Group",
+            "Items Group Size",
             "Administrative Level 2",
             "Score",
         ]
