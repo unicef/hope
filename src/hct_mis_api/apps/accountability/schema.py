@@ -48,8 +48,8 @@ from hct_mis_api.apps.core.utils import (
 )
 from hct_mis_api.apps.grievance.utils import filter_feedback_based_on_partner_areas_2
 from hct_mis_api.apps.household.models import Household
+from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.targeting.models import TargetPopulation
 
 
 class Query(graphene.ObjectType):
@@ -146,12 +146,12 @@ class Query(graphene.ObjectType):
         }
 
     def resolve_accountability_sample_size(self, info: Any, input: Dict, **kwargs: Any) -> Dict:
-        if target_population := input.get("target_population"):
-            obj = get_object_or_404(TargetPopulation, id=decode_id_string(target_population))
-            households = Household.objects.filter(target_populations=obj)
+        if payment_plan := input.get("payment_plan"):
+            obj = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan))
+            households = Household.objects.filter(payment__parent=obj)
         elif program := input.get("program"):
             obj = get_object_or_404(Program, id=decode_id_string(program))
-            households = obj.households_with_tp_in_program
+            households = obj.households_with_payments_in_program
         else:
             raise ValidationError("Target population or program should be provided.")
 

@@ -1,12 +1,19 @@
 import { gql } from '@apollo/client';
 
-export const CREATE_PROGRAM_MUTATION = gql`
+export const SET_STEFICON_RULE_ON_TARGET_POPULATION = gql`
   mutation setSteficonRuleOnTargetPopulation(
-    $input: SetSteficonRuleOnTargetPopulationMutationInput!
+    $paymentPlanId: ID!
+    $steficonRuleId: ID
+    $version: BigInt
   ) {
-    setSteficonRuleOnTargetPopulation(input: $input) {
-      targetPopulation {
-        ...targetPopulationDetailed
+    setSteficonRuleOnTargetPopulation(
+      paymentPlanId: $paymentPlanId
+      steficonRuleId: $steficonRuleId
+      version: $version
+    ) {
+      paymentPlan {
+        id
+        name
       }
     }
   }

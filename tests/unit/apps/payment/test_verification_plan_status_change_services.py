@@ -42,6 +42,7 @@ class TestPhoneNumberVerification(TestCase):
         payment_plan = PaymentPlanFactory(
             program_cycle=program.cycles.first(),
             business_area=BusinessArea.objects.first(),
+            created_by=user,
         )
         PaymentVerificationSummaryFactory(payment_plan=payment_plan)
         cash_plan_payment_verification = PaymentVerificationPlanFactory(
@@ -94,6 +95,7 @@ class TestPhoneNumberVerification(TestCase):
         other_payment_plan = PaymentPlanFactory(
             program_cycle=other_program.cycles.first(),
             business_area=BusinessArea.objects.first(),
+            created_by=user,
         )
         PaymentVerificationSummaryFactory(payment_plan=other_payment_plan)
         other_payment_plan_payment_verification = PaymentVerificationPlanFactory(

@@ -58,6 +58,7 @@ class TestDeliveryDate(APITestCase):
         cls.payment_plan = PaymentPlanFactory(
             dispersion_start_date=datetime(2020, 8, 10).date(),
             dispersion_end_date=datetime(2020, 12, 10).date(),
+            created_by=cls.user,
         )
 
         hoh1 = IndividualFactory(household=None)

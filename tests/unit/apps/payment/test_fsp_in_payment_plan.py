@@ -32,17 +32,13 @@ from hct_mis_api.apps.payment.models import (
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.targeting.fixtures import (
-    TargetingCriteriaFactory,
-    TargetPopulationFactory,
-)
-from hct_mis_api.apps.targeting.models import TargetPopulation
-from hct_mis_api.apps.targeting.services.targeting_stats_refresher import full_rebuild
+from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory
 
 
 def base_setup(cls: Any) -> None:
     create_afghanistan()
     cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+    cls.program = ProgramFactory(business_area=cls.business_area)
     cls.user = UserFactory.create()
     cls.create_user_role_with_permissions(
         cls.user,
@@ -56,6 +52,7 @@ def base_setup(cls: Any) -> None:
         household_data={
             "registration_data_import": cls.registration_data_import,
             "business_area": cls.business_area,
+            "program": cls.program,
         },
         individuals_data=[{}],
     )
@@ -69,6 +66,7 @@ def base_setup(cls: Any) -> None:
         household_data={
             "registration_data_import": cls.registration_data_import,
             "business_area": cls.business_area,
+            "program": cls.program,
         },
         individuals_data=[{}],
     )
@@ -82,6 +80,7 @@ def base_setup(cls: Any) -> None:
         household_data={
             "registration_data_import": cls.registration_data_import,
             "business_area": cls.business_area,
+            "program": cls.program,
         },
         individuals_data=[{}],
     )
@@ -90,7 +89,6 @@ def base_setup(cls: Any) -> None:
         household=cls.household_3,
         role=ROLE_PRIMARY,
     )
-    cls.program = ProgramFactory()
     cls.context = {
         "user": cls.user,
         "headers": {
@@ -107,19 +105,13 @@ def base_setup(cls: Any) -> None:
 
 
 def payment_plan_setup(cls: Any) -> None:
-    target_population = TargetPopulationFactory(
-        created_by=cls.user,
-        targeting_criteria=(TargetingCriteriaFactory()),
-        business_area=cls.business_area,
-        status=TargetPopulation.STATUS_LOCKED,
-    )
-    full_rebuild(target_population)
-    target_population.save()
+    targeting_criteria = TargetingCriteriaFactory()
     cls.payment_plan = PaymentPlanFactory(
         total_households_count=4,
-        target_population=target_population,
+        targeting_criteria=targeting_criteria,
         status=PaymentPlan.Status.LOCKED,
         program_cycle=cls.program.cycles.first(),
+        created_by=cls.user,
     )
     cls.encoded_payment_plan_id = encode_id_base64(cls.payment_plan.id, "PaymentPlan")
 
@@ -251,7 +243,10 @@ class TestFSPSetup(APITestCase):
 
     def test_choosing_delivery_mechanism_order(self) -> None:
         payment_plan = PaymentPlanFactory(
-            total_households_count=1, status=PaymentPlan.Status.LOCKED, program_cycle=self.program.cycles.first()
+            total_households_count=1,
+            status=PaymentPlan.Status.LOCKED,
+            program_cycle=self.program.cycles.first(),
+            created_by=self.user,
         )
         encoded_payment_plan_id = encode_id_base64(payment_plan.id, "PaymentPlan")
         choose_dms_mutation_variables_mutation_variables_without_delivery_mechanisms = dict(
@@ -322,6 +317,7 @@ class TestFSPSetup(APITestCase):
             status=PaymentPlan.Status.LOCKED,
             program_cycle=self.program.cycles.first(),
             currency=USDC,
+            created_by=self.user,
         )
         assert payment_plan.currency == USDC
         encoded_payment_plan_id = encode_id_base64(payment_plan.id, "PaymentPlan")
@@ -365,7 +361,10 @@ class TestFSPSetup(APITestCase):
 
     def test_providing_non_unique_delivery_mechanisms(self) -> None:
         payment_plan = PaymentPlanFactory(
-            total_households_count=1, status=PaymentPlan.Status.LOCKED, program_cycle=self.program.cycles.first()
+            total_households_count=1,
+            status=PaymentPlan.Status.LOCKED,
+            program_cycle=self.program.cycles.first(),
+            created_by=self.user,
         )
         encoded_payment_plan_id = encode_id_base64(payment_plan.id, "PaymentPlan")
         choose_dms_mutation_variables_mutation_variables = dict(
@@ -1117,7 +1116,9 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
         self.bank_of_america_fsp.distribution_limit = 1000
         self.bank_of_america_fsp.save()
         new_payment_plan = PaymentPlanFactory(
-            status=PaymentPlan.Status.LOCKED_FSP, program_cycle=self.program.cycles.first()
+            status=PaymentPlan.Status.LOCKED_FSP,
+            program_cycle=self.program.cycles.first(),
+            created_by=self.user,
         )
         DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=new_payment_plan,
