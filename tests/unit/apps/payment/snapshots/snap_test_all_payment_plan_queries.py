@@ -476,3 +476,51 @@ snapshots['TestPaymentPlanQueries::test_payment_node_with_legacy_data 3'] = {
         }
     }
 }
+
+snapshots['TestPaymentPlanQueries::test_payment_plan_filter_is_payment_plan 1'] = {
+    'data': {
+        'allPaymentPlans': {
+            'edges': [
+                {
+                    'node': {
+                        'name': 'Payment Plan within FINISHED status',
+                        'status': 'FINISHED'
+                    }
+                },
+                {
+                    'node': {
+                        'name': 'PaymentPlan with conflicts',
+                        'status': 'LOCKED'
+                    }
+                },
+                {
+                    'node': {
+                        'name': 'Main Payment Plan',
+                        'status': 'OPEN'
+                    }
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestPaymentPlanQueries::test_payment_plan_filter_is_target_population 1'] = {
+    'data': {
+        'allPaymentPlans': {
+            'edges': [
+                {
+                    'node': {
+                        'name': 'Payment Plan within DRAFT status',
+                        'status': 'DRAFT'
+                    }
+                },
+                {
+                    'node': {
+                        'name': 'Payment Plan within TP_LOCK status',
+                        'status': 'TP_LOCKED'
+                    }
+                }
+            ]
+        }
+    }
+}

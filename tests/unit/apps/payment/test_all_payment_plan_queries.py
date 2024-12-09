@@ -14,7 +14,6 @@ from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.payment.fixtures import (
@@ -35,6 +34,7 @@ from hct_mis_api.apps.program.fixtures import ProgramCycleFactory
 
 def create_child_payment_plans(pp: PaymentPlan, created_by: User) -> None:
     fpp1 = PaymentPlanFactory(
+        name="PaymentPlan FollowUp 01",
         id="56aca38c-dc16-48a9-ace4-70d88b41d462",
         is_follow_up=True,
         source_payment_plan=pp,
@@ -46,6 +46,7 @@ def create_child_payment_plans(pp: PaymentPlan, created_by: User) -> None:
     fpp1.save()
 
     fpp2 = PaymentPlanFactory(
+        name="PaymentPlan FollowUp 02",
         id="5b04f7c3-579a-48dd-a232-424daaefffe7",
         is_follow_up=True,
         source_payment_plan=pp,
@@ -217,15 +218,28 @@ class TestPaymentPlanQueries(APITestCase):
         }
         """
 
+    PAYMENT_PLANS_FILTER_QUERY = """
+        query AllPaymentPlans($businessArea: String!, $search: String, $status: [String], $totalEntitledQuantityFrom: Float, $totalEntitledQuantityTo: Float, $dispersionStartDate: Date, $dispersionEndDate: Date, $program: String, $programCycle: String, $isPaymentPlan: Boolean, $isTargetPopulation: Boolean) {
+            allPaymentPlans(businessArea: $businessArea, search: $search, status: $status, totalEntitledQuantityFrom: $totalEntitledQuantityFrom, totalEntitledQuantityTo: $totalEntitledQuantityTo, dispersionStartDate: $dispersionStartDate, dispersionEndDate: $dispersionEndDate, program: $program, orderBy: "status", programCycle: $programCycle, isPaymentPlan: $isPaymentPlan, isTargetPopulation: $isTargetPopulation) {
+            edges {
+              node {
+                name
+                status
+              }
+            }
+          }
+        }
+        """
+
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        create_afghanistan()
+        cls.business_area = create_afghanistan()
         cls.user = UserFactory.create(username="qazxsw321")
         cls.create_user_role_with_permissions(
             cls.user,
             [Permissions.PM_VIEW_LIST, Permissions.PM_VIEW_DETAILS],
-            BusinessArea.objects.get(slug="afghanistan"),
+            cls.business_area,
         )
 
         with freeze_time("2020-10-10"):
@@ -233,9 +247,10 @@ class TestPaymentPlanQueries(APITestCase):
                 cycle__start_date=timezone.datetime(2020, 9, 10, tzinfo=utc).date(),
                 cycle__end_date=timezone.datetime(2020, 11, 10, tzinfo=utc).date(),
             )
-            program_cycle = program.cycles.first()
+            cls.program_cycle = program.cycles.first()
             cls.pp = PaymentPlanFactory(
-                program_cycle=program_cycle,
+                name="Main Payment Plan",
+                program_cycle=cls.program_cycle,
                 dispersion_start_date=datetime(2020, 8, 10),
                 dispersion_end_date=datetime(2020, 12, 10),
                 is_follow_up=False,
@@ -275,7 +290,8 @@ class TestPaymentPlanQueries(APITestCase):
 
             # create hard conflicted payment
             cls.pp_conflicted = PaymentPlanFactory(
-                program_cycle=program_cycle,
+                name="PaymentPlan with conflicts",
+                program_cycle=cls.program_cycle,
                 status=PaymentPlan.Status.LOCKED,
                 dispersion_start_date=cls.pp.dispersion_start_date + relativedelta(months=2),
                 dispersion_end_date=cls.pp.dispersion_end_date - relativedelta(months=2),
@@ -314,7 +330,7 @@ class TestPaymentPlanQueries(APITestCase):
             IndividualFactory(household=hh2, sex="MALE", birth_date=datetime.now().date() - relativedelta(years=20))
 
             AcceptanceProcessThreshold.objects.create(
-                business_area=BusinessArea.objects.first(),
+                business_area=cls.business_area,
                 approval_number_required=2,
                 authorization_number_required=2,
                 finance_release_number_required=3,
@@ -467,6 +483,7 @@ class TestPaymentPlanQueries(APITestCase):
             cycle__end_date=timezone.datetime(2023, 11, 10, tzinfo=utc).date(),
         )
         new_pp = PaymentPlanFactory(
+            name="PaymentPlan with legacy data",
             program_cycle=program.cycles.first(),
             dispersion_start_date=datetime(2023, 8, 10),
             dispersion_end_date=datetime(2023, 12, 10),
@@ -544,3 +561,58 @@ class TestPaymentPlanQueries(APITestCase):
                 context={"user": self.user},
                 variables={"id": encode_id_base64(payment_id, "Payment")},
             )
+
+    def test_payment_plan_filter_is_payment_plan(self) -> None:
+        PaymentPlanFactory(
+            name="Payment Plan within FINISHED status",
+            status=PaymentPlan.Status.FINISHED,
+            program_cycle=self.program_cycle,
+            business_area=self.business_area,
+            dispersion_start_date=datetime(2020, 8, 10),
+            dispersion_end_date=datetime(2020, 12, 10),
+            is_follow_up=False,
+            created_by=self.user,
+        )
+        PaymentPlanFactory(
+            name="Payment Plan within TP_LOCK status",
+            status=PaymentPlan.Status.TP_LOCKED,
+            program_cycle=self.program_cycle,
+            business_area=self.business_area,
+            dispersion_start_date=datetime(2020, 8, 10),
+            dispersion_end_date=datetime(2020, 12, 10),
+            is_follow_up=False,
+            created_by=self.user,
+        )
+
+        self.snapshot_graphql_request(
+            request_string=self.PAYMENT_PLANS_FILTER_QUERY,
+            context={"user": self.user},
+            variables={"businessArea": "afghanistan", "isPaymentPlan": True},
+        )
+
+    def test_payment_plan_filter_is_target_population(self) -> None:
+        PaymentPlanFactory(
+            name="Payment Plan within TP_LOCK status",
+            status=PaymentPlan.Status.TP_LOCKED,
+            program_cycle=self.program_cycle,
+            business_area=self.business_area,
+            dispersion_start_date=datetime(2020, 8, 10),
+            dispersion_end_date=datetime(2020, 12, 10),
+            is_follow_up=False,
+            created_by=self.user,
+        )
+        PaymentPlanFactory(
+            name="Payment Plan within DRAFT status",
+            status=PaymentPlan.Status.DRAFT,
+            program_cycle=self.program_cycle,
+            business_area=self.business_area,
+            dispersion_start_date=datetime(2020, 8, 10),
+            dispersion_end_date=datetime(2020, 12, 10),
+            is_follow_up=False,
+            created_by=self.user,
+        )
+        self.snapshot_graphql_request(
+            request_string=self.PAYMENT_PLANS_FILTER_QUERY,
+            context={"user": self.user},
+            variables={"businessArea": "afghanistan", "isTargetPopulation": True},
+        )

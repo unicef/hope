@@ -61,7 +61,7 @@ tp_status_to_pp_mapping = {
     TargetPopulation.STATUS_SENDING_TO_CASH_ASSIST: PaymentPlan.Status.DRAFT,
     TargetPopulation.STATUS_READY_FOR_CASH_ASSIST: PaymentPlan.Status.DRAFT,
     TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE: PaymentPlan.Status.DRAFT,
-    TargetPopulation.STATUS_ASSIGNED: None,  # not copy status from TP
+    # TargetPopulation.STATUS_ASSIGNED: None,  # TP has created Payment Plan
 }
 
 
@@ -99,7 +99,7 @@ def tc_migrate_hh_ind_ids(tc: TargetingCriteria) -> Tuple[Optional[TargetingCrit
     if rules.count() == 0:
         # create new one if HH or Ind ids and return new TargetingCriteriaRule, True
         if tc.individual_ids or tc.household_ids:
-            print("* Not Found TargetingCriteriaRule for TargetingCriteria. Going to create a new one.")
+            print("not found TargetingCriteriaRule for TargetingCriteria. Going to create a new one.")
             new_tcr = TargetingCriteriaRule(
                 targeting_criteria=tc, household_ids=tc.household_ids, individual_ids=tc.individual_ids
             )
@@ -217,8 +217,7 @@ def migrate_tp_into_pp(batch_size: int = 500) -> None:
                     migrate_tp_qs(processing_qs)
 
                     page_count += 1
-                if i % (batch_size * 10) == 0:
-                    print(f"progress: {page_count}/{total_count // batch_size} page(s) migrated.")  # # # #
+                print(f"Progress: {page_count}/{-(-total_count // batch_size)} page(s) migrated.")
 
             build_payment_plans_qs = PaymentPlan.objects.filter(
                 build_status=PaymentPlan.BuildStatus.BUILD_STATUS_PENDING, business_area_id=business_area.id
