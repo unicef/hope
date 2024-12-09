@@ -485,7 +485,7 @@ class TestFeedback:
         pageFeedback.getNavFeedback().click()
         assert grievance_ticket in pageFeedback.waitForRows()[0].text
         pageFeedback.waitForRows()[0].click()
-        assert grievance_ticket in pageGrievanceDetailsPage.getTitle().text.split(" ")[-1]
+        assert grievance_ticket in pageGrievanceDetailsPage.getGrievanceLinedTicket().text
         pageFeedback.getNavFeedback().click()
         pageFeedback.waitForRows()[0].find_elements("tag name", "a")[0].click()
 

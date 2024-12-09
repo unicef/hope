@@ -47,6 +47,7 @@ from hct_mis_api.apps.targeting.fixtures import (
     TargetPopulationFactory,
 )
 from hct_mis_api.apps.targeting.models import TargetPopulation
+from hct_mis_api.apps.targeting.services.targeting_stats_refresher import refresh_stats
 from tests.selenium.page_object.filters import Filters
 from tests.selenium.page_object.targeting.targeting import Targeting
 from tests.selenium.page_object.targeting.targeting_create import TargetingCreate
@@ -288,6 +289,7 @@ def create_targeting() -> TargetPopulation:
         xlsx_template=fsp_xlsx_template,
         delivery_mechanism=dm_cash,
     )
+    refresh_stats(tp)
     yield tp
 
 
