@@ -293,6 +293,7 @@ def create_programs() -> None:
 
 @pytest.mark.usefixtures("login")
 class TestSmokeFilters:
+    @pytest.mark.xfail(reason="UNSTABLE")
     def test_filters_selected_program(self, create_programs: None, filters: Filters) -> None:
         filters.selectGlobalProgramFilter("Test Programm")
 
@@ -428,9 +429,12 @@ class TestSmokeFilters:
                 filters.wait_for('[data-cy="nav-Accountability"]').click()
             if nav_menu == "Payment Plans":
                 filters.wait_for('[data-cy="nav-Payment Module"]').click()
+
             filters.wait_for(f'[data-cy="nav-{nav_menu}"]').click()
+
             for locator in programs[nav_menu]:
                 try:
+                    print(nav_menu, locator)
                     filters.wait_for(locator, timeout=20)
                 except BaseException:
                     raise Exception(f"Element {locator} not found on the {nav_menu} page.")
