@@ -27,8 +27,8 @@ class FinancialServiceProviderXlsxTemplateTest(APITestCase):
     def setUpTestData(cls) -> None:
         super().setUpTestData()
         cls.business_area = create_afghanistan()
-        cls.user = UserFactory()
         cls.program = ProgramFactory(business_area=cls.business_area)
+        cls.user = UserFactory()
 
     def test_get_column_value_registration_token_empty(self) -> None:
         household, individuals = create_household(household_args={"size": 1, "business_area": self.business_area})
@@ -39,6 +39,7 @@ class FinancialServiceProviderXlsxTemplateTest(APITestCase):
             business_area=self.business_area,
             created_by=self.user,
         )
+        DocumentTypeFactory(key="registration_token")
         payment = PaymentFactory(parent=payment_plan, household=household, collector=individual, currency="PLN")
         create_payment_plan_snapshot_data(payment_plan)
 

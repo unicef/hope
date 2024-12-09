@@ -56,6 +56,7 @@ if __name__ == "__main__":
         ("payment", "0005_migration"),
         ("payment", "0006_migration"),
         ("payment", "0007_migration"),
+        ("payment", "0008_migration"),
         ("aurora", "0003_migration"),
         ("accountability", "0004_migration"),
     ]
