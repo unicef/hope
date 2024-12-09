@@ -16,14 +16,14 @@ from django.core.cache import cache
 
 
 @receiver(post_save, sender=RoleAssignment)
-def post_save_pre_delete_roleassignment(sender: Any, instance: User, *args: Any, **kwargs: Any) -> None:
+def post_save_pre_delete_role_assignment(sender: Any, instance: User, *args: Any, **kwargs: Any) -> None:
     if instance.user:
         instance.user.last_modify_date = timezone.now()
         instance.user.save()
 
 
 @receiver(pre_delete, sender=RoleAssignment)
-def pre_delete_roleassignment(sender: Any, instance: User, *args: Any, **kwargs: Any) -> None:
+def pre_delete_role_assignment(sender: Any, instance: User, *args: Any, **kwargs: Any) -> None:
     if instance.user:
         instance.user.last_modify_date = timezone.now()
         instance.user.save()
