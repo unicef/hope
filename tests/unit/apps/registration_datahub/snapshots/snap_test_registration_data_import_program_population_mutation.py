@@ -110,3 +110,27 @@ snapshots['TestRegistrationDataProgramPopulationImportMutations::test_registrati
         }
     ]
 }
+
+snapshots['TestRegistrationDataProgramPopulationImportMutations::test_registration_data_import_create_program_with_ids_filter 1'] = {
+    'data': {
+        'registrationProgramPopulationImport': {
+            'registrationDataImport': {
+                'dataSource': 'PROGRAM_POPULATION',
+                'name': 'New Import of Data HH Ids',
+                'screenBeneficiary': False
+            }
+        }
+    }
+}
+
+snapshots['TestRegistrationDataProgramPopulationImportMutations::test_registration_data_import_create_program_with_ids_filter 2'] = {
+    'data': {
+        'registrationProgramPopulationImport': {
+            'registrationDataImport': {
+                'dataSource': 'PROGRAM_POPULATION',
+                'name': 'New Import of Data Ind ids',
+                'screenBeneficiary': False
+            }
+        }
+    }
+}

@@ -2,9 +2,14 @@ import hashlib
 import json
 import re
 import sys
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
+
+from django.db.models import Q, QuerySet
+from django.shortcuts import get_object_or_404
 
 from hct_mis_api.apps.core.kobo.common import get_field_name
+from hct_mis_api.apps.household.models import Household, Individual
+from hct_mis_api.apps.program.models import Program
 
 
 def post_process_dedupe_results(record: Any) -> None:
@@ -73,3 +78,48 @@ def calculate_hash_for_kobo_submission(submission: Dict) -> str:
     hash_object = hashlib.sha256(d_bytes)
     hex_dig = hash_object.hexdigest()
     return hex_dig
+
+
+def get_rdi_program_population(
+    import_from_program_id: str, import_to_program_id: str, import_from_ids: Optional[str]
+) -> Tuple[QuerySet[Household], QuerySet[Individual]]:
+    program = get_object_or_404(Program, pk=import_to_program_id)
+
+    # filter by rdi.import_from_ids HH or Ins ids based on Program.DCT
+    list_of_ids = [item.strip() for item in import_from_ids.split(",")] if import_from_ids else []
+    if list_of_ids:
+        individual_ids_q = (
+            Q(unicef_id__in=list_of_ids)
+            if program.is_social_worker_program
+            else Q(household__unicef_id__in=list_of_ids)
+        )
+        household_ids_q = (
+            Q(unicef_id__in=list_of_ids)
+            if not program.is_social_worker_program
+            else Q(individuals__unicef_id__in=list_of_ids)
+        )
+    else:
+        individual_ids_q = Q()
+        household_ids_q = Q()
+
+    households = (
+        Household.objects.filter(
+            household_ids_q,
+            program_id=import_from_program_id,
+            withdrawn=False,
+        )
+        .exclude(household_collection__households__program=import_to_program_id)
+        .distinct()
+    )
+    individuals = (
+        Individual.objects.filter(
+            individual_ids_q,
+            program_id=import_from_program_id,
+            withdrawn=False,
+            duplicate=False,
+        )
+        .exclude(individual_collection__individuals__program=import_to_program_id)
+        .distinct()
+        .order_by("first_registration_date")
+    )
+    return households, individuals
