@@ -261,6 +261,22 @@ export const GlobalProgramSelect = () => {
     if (selectedValue) {
       handleClose();
       if (selectedValue.id === 'all') {
+        setSelectedProgram({
+          beneficiaryGroup: {
+            id: 'default-id',
+            name: 'Beneficiaries',
+            groupLabel: 'Group',
+            groupLabelPlural: 'Groups',
+            memberLabel: 'Member',
+            memberLabelPlural: 'Members',
+            masterDetail: false,
+          },
+          id: 'all',
+          name: 'All Programmes',
+          status: ProgramStatus.Active,
+          dataCollectingType: null,
+          pduFields: null,
+        });
         navigate(`/${businessArea}/programs/all/list`);
       } else {
         navigate(
