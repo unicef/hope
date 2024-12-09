@@ -1,4 +1,3 @@
-from unittest import skip
 from unittest.mock import patch
 from uuid import uuid4
 
@@ -8,9 +7,9 @@ from hct_mis_api.apps.accountability.fixtures import SurveyFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import create_household
+from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory, PaymentFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 
 
 class TestSurveyQueries(APITestCase):
@@ -19,7 +18,7 @@ mutation ExportSurveySample($surveyId: ID!) {
   exportSurveySample (surveyId: $surveyId) {
     survey {
       title
-      targetPopulation {
+      paymentPlan {
         name
       }
     }
@@ -33,17 +32,20 @@ mutation ExportSurveySample($surveyId: ID!) {
         cls.business_area = create_afghanistan()
         partner = PartnerFactory(name="Partner")
         cls.user = UserFactory(first_name="John", last_name="Wick", partner=partner)
-        cls.target_population = TargetPopulationFactory(business_area=cls.business_area, name="Test Target Population")
         cls.program = ProgramFactory(status=Program.ACTIVE, business_area=cls.business_area)
+        cls.payment_plan = PaymentPlanFactory(business_area=cls.business_area, name="Test Target Population", created_by=cls.user, program_cycle=cls.program.cycles.first())
         cls.update_partner_access_to_program(partner, cls.program)
 
         households = [create_household()[0] for _ in range(14)]
-        cls.target_population.households.set(households)
+        for hh in households:
+            PaymentFactory(
+                parent=cls.payment_plan,
+                household=hh,
+            )
 
-        cls.survey = SurveyFactory(title="Test survey", target_population=cls.target_population, created_by=cls.user)
+        cls.survey = SurveyFactory(title="Test survey", payment_plan=cls.payment_plan, created_by=cls.user)
 
-    # TODO: fix in next PR when remove TP model
-    @skip("Skip for now and fix in next PR")
+
     def test_create_export_survey_sample_without_permissions(self) -> None:
         self.create_user_role_with_permissions(self.user, [], self.business_area)
 
@@ -61,7 +63,7 @@ mutation ExportSurveySample($surveyId: ID!) {
             },
         )
 
-    @skip("Skip for now and fix in next PR")
+
     @patch(
         "hct_mis_api.apps.accountability.celery_tasks.export_survey_sample_task.delay",
         new=lambda *args, **kwargs: None,
@@ -85,7 +87,6 @@ mutation ExportSurveySample($surveyId: ID!) {
             },
         )
 
-    @skip("Skip for now and fix in next PR")
     @patch(
         "hct_mis_api.apps.accountability.celery_tasks.export_survey_sample_task.delay",
         new=lambda *args, **kwargs: None,
