@@ -17,10 +17,10 @@ from hct_mis_api.apps.utils.sentry import sentry_tags
 logger = logging.getLogger(__name__)
 
 
-# @app.task(bind=True, default_retry_delay=60, max_retries=3)
-# @log_start_and_end
-# @sentry_tags
-def invalidate_permissions_cache_for_user_if_expired_role() -> bool:
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@log_start_and_end
+@sentry_tags
+def invalidate_permissions_cache_for_user_if_expired_role(self) -> bool:
     # Invalidate permissions cache for users with roles that expired a day before
     day_ago = timezone.now() - datetime.timedelta(days=1)
     users = User.objects.filter(
