@@ -699,6 +699,16 @@ class DocumentType(TimeStampedUUIDModel):
     def __str__(self) -> str:
         return f"{self.label}"
 
+    @classmethod
+    def get_all_doc_types_choices(cls) -> List[Tuple[str, str]]:
+        """return list of Document Types choices"""
+        return [(obj.key, obj.label) for obj in cls.objects.all()]
+
+    @classmethod
+    def get_all_doc_types(cls) -> List[str]:
+        """return list of Document Types keys"""
+        return list(cls.objects.all().only("key").values_list("key", flat=True))
+
 
 class Document(AbstractSyncable, SoftDeletableRepresentationMergeStatusModel, TimeStampedUUIDModel):
     STATUS_PENDING = "PENDING"
