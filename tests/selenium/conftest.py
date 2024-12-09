@@ -1,11 +1,14 @@
 import logging
 import os
+import re
 from datetime import datetime
+from typing import Any
 
 from django.conf import settings
 from django.core.management import call_command
 
 import pytest
+import redis
 from _pytest.fixtures import FixtureRequest
 from _pytest.nodes import Item
 from _pytest.runner import CallInfo
@@ -28,6 +31,7 @@ from hct_mis_api.apps.core.models import (
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.household.fixtures import DocumentTypeFactory
 from hct_mis_api.apps.household.models import DocumentType
+from hct_mis_api.config.env import env
 from tests.selenium.page_object.accountability.communication import (
     AccountabilityCommunication,
 )
@@ -113,11 +117,42 @@ def pytest_addoption(parser) -> None:  # type: ignore
     parser.addoption("--mapping", action="store_true", default=False, help="Enable mapping mode")
 
 
+def get_redis_host() -> str:
+    regex = "\\/\\/(.*):"
+    redis_host = re.search(regex, env("CACHE_LOCATION")).group(1)
+    return redis_host
+
+
+@pytest.fixture(autouse=True)
+def configure_cache_for_tests(worker_id: str, settings: Any) -> None:
+    """
+    Dynamically configure Django's cache backend for each pytest-xdist worker.
+    """
+    redis_db = 0 if worker_id == "master" else int(worker_id.replace("gw", ""))
+    settings.CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": f"redis://{get_redis_host()}:6379/{redis_db}",
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            },
+        }
+    }
+
+
+@pytest.fixture(autouse=True)
+def flush_redis(worker_id: str) -> None:
+    redis_db = 0 if worker_id == "master" else int(worker_id.replace("gw", ""))
+    redis_client = redis.StrictRedis(host=get_redis_host(), port=6379, db=redis_db)
+    redis_client.flushdb()
+
+
 def pytest_configure(config) -> None:  # type: ignore
-    env = Env()
-    settings.OUTPUT_DATA_ROOT = env("OUTPUT_DATA_ROOT", default="/tests/selenium/output_data")
     config.addinivalue_line("markers", "night: This marker is intended for e2e tests conducted during the night on CI")
     # delete all old screenshots
+
+    env = Env()
+    settings.OUTPUT_DATA_ROOT = env("OUTPUT_DATA_ROOT", default="/tests/selenium/output_data")
     settings.REPORT_DIRECTORY = f"{settings.OUTPUT_DATA_ROOT}/report"
     settings.DOWNLOAD_DIRECTORY = f"{settings.OUTPUT_DATA_ROOT}/report/downloads"
     settings.SCREENSHOT_DIRECTORY = f"{settings.REPORT_DIRECTORY}/screenshot"
@@ -146,12 +181,6 @@ def pytest_configure(config) -> None:  # type: ignore
     settings.SECURE_CONTENT_TYPE_NOSNIFF = True
     settings.SECURE_REFERRER_POLICY = "same-origin"
     settings.CACHE_ENABLED = False
-    settings.CACHES = {
-        "default": {
-            "BACKEND": "hct_mis_api.apps.core.memcache.LocMemCache",
-            "TIMEOUT": 1800,
-        }
-    }
 
     settings.LOGGING["loggers"].update(
         {
