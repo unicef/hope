@@ -6,7 +6,7 @@ import styled from 'styled-components';
 import { useArrayToDict } from '@hooks/useArrayToDict';
 import {
   AllIndividualsFlexFieldsAttributesQuery,
-  ImportedIndividualDetailedFragment,
+  IndividualDetailedFragment,
 } from '@generated/graphql';
 import { LabelizedField } from '@core/LabelizedField';
 import { Title } from '@core/Title';
@@ -21,7 +21,7 @@ const Overview = styled(Paper)`
 `;
 
 interface RegistrationIndividualAdditionalRegistrationInformationProps {
-  individual: ImportedIndividualDetailedFragment;
+  individual: IndividualDetailedFragment;
   flexFieldsData: AllIndividualsFlexFieldsAttributesQuery;
 }
 

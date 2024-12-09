@@ -81,7 +81,7 @@ class XlsxVerificationExportService(XlsxExportBaseService):
 
     def __init__(self, payment_verification_plan: PaymentVerificationPlan) -> None:
         self.payment_verification_plan = payment_verification_plan
-        self.is_social_worker_program = payment_verification_plan.payment_plan_obj.program.is_social_worker_program
+        self.is_social_worker_program = payment_verification_plan.payment_plan.program.is_social_worker_program
         self.payment_record_verifications = payment_verification_plan.payment_record_verifications.all()
         self.HEADERS = self._get_headers()
 
@@ -115,11 +115,11 @@ class XlsxVerificationExportService(XlsxExportBaseService):
             self._add_payment_record_verification_row_for_household(payment_record_verification)
 
     def _add_payment_record_verification_row_for_people(self, payment_record_verification: PaymentVerification) -> None:
-        household = payment_record_verification.payment_obj.household
-        head_of_household = payment_record_verification.payment_obj.head_of_household
+        household = payment_record_verification.payment.household
+        head_of_household = payment_record_verification.payment.head_of_household
         payment_record_verification_row = (
-            str(payment_record_verification.payment_object_id),
-            str(payment_record_verification.payment_obj.unicef_id) if payment_record_verification.payment_obj else "",
+            str(payment_record_verification.payment_id),
+            str(payment_record_verification.payment.unicef_id) if payment_record_verification.payment else "",
             self._to_received_column(payment_record_verification),
             str(head_of_household.full_name) if head_of_household else "",
             str(head_of_household.phone_no) if head_of_household else "",
@@ -130,7 +130,7 @@ class XlsxVerificationExportService(XlsxExportBaseService):
             str(household.admin4.name) if household.admin4 else "",
             str(household.village),
             str(household.address),
-            payment_record_verification.payment_obj.delivered_quantity,
+            payment_record_verification.payment.delivered_quantity,
             payment_record_verification.received_amount,
         )
         self.ws_export_list.append(payment_record_verification_row)
@@ -138,11 +138,11 @@ class XlsxVerificationExportService(XlsxExportBaseService):
     def _add_payment_record_verification_row_for_household(
         self, payment_record_verification: PaymentVerification
     ) -> None:
-        household = payment_record_verification.payment_obj.household
-        head_of_household = payment_record_verification.payment_obj.head_of_household
+        household = payment_record_verification.payment.household
+        head_of_household = payment_record_verification.payment.head_of_household
         payment_record_verification_row = (
-            str(payment_record_verification.payment_object_id),
-            str(payment_record_verification.payment_obj.unicef_id) if payment_record_verification.payment_obj else "",
+            str(payment_record_verification.payment.id),
+            str(payment_record_verification.payment.unicef_id) if payment_record_verification.payment else "",
             self._to_received_column(payment_record_verification),
             str(head_of_household.full_name) if head_of_household else "",
             str(head_of_household.phone_no) if head_of_household else "",
@@ -153,9 +153,9 @@ class XlsxVerificationExportService(XlsxExportBaseService):
             str(household.admin4.name) if household.admin4 else "",
             str(household.village),
             str(household.address),
-            str(payment_record_verification.payment_obj.household_id),
+            str(payment_record_verification.payment.household_id),
             str(household.unicef_id),
-            payment_record_verification.payment_obj.delivered_quantity,
+            payment_record_verification.payment.delivered_quantity,
             payment_record_verification.received_amount,
         )
         self.ws_export_list.append(payment_record_verification_row)

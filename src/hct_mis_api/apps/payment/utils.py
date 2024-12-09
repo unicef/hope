@@ -1,21 +1,20 @@
 import datetime
+import hashlib
+import json
 import typing
 from base64 import b64decode
 from decimal import Decimal
 from math import ceil
-from typing import TYPE_CHECKING, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 
 from hct_mis_api.apps.core.exchange_rates import ExchangeRates
-from hct_mis_api.apps.core.querysets import ExtendedQuerySetSequence
 from hct_mis_api.apps.core.utils import chart_create_filter_query, chart_get_filtered_qs
 from hct_mis_api.apps.payment.models import (
-    CashPlan,
     Payment,
     PaymentPlan,
-    PaymentRecord,
     PaymentVerification,
     PaymentVerificationPlan,
 )
@@ -103,14 +102,14 @@ def get_payment_items_for_dashboard(
     if only_with_delivered_quantity:
         additional_filters["delivered_quantity_usd__gt"] = 0
     return chart_get_filtered_qs(
-        get_payment_items_sequence_qs(),
+        Payment.objects.filter(excluded=False, conflicted=False),
         year,
         business_area_slug_filter={"business_area__slug": business_area_slug},
         additional_filters={
             **additional_filters,
             **chart_create_filter_query(
                 filters,
-                program_id_path="parent__program__id",
+                program_id_path="parent__program_cycle__program__id",
                 administrative_area_path="household__admin_area",
             ),
         },
@@ -143,30 +142,9 @@ def get_quantity_in_usd(
     return Decimal(amount / Decimal(exchange_rate)).quantize(Decimal(".01"))
 
 
-def get_payment_items_sequence_qs() -> ExtendedQuerySetSequence:
-    return ExtendedQuerySetSequence(
-        Payment.objects.filter(excluded=False, conflicted=False), PaymentRecord.objects.all()
-    )
-
-
-def get_payment_cash_plan_items_sequence_qs() -> ExtendedQuerySetSequence:
-    return ExtendedQuerySetSequence(PaymentPlan.objects.all(), CashPlan.objects.all())
-
-
-def get_payment_plan_object(cash_or_payment_plan_id: str) -> Union["PaymentPlan", "CashPlan"]:
-    """
-    get cash_or_payment_plan_id: "UGF5bWVudFBsYW5Ob2RlOmEz4YjA2NGJkMmJmMw=="
-    return CashPlan/PaymentPlan object or raise 404
-    """
-    node_name, obj_id = b64decode(cash_or_payment_plan_id).decode().split(":")
-
-    payment_plan_object: Union["CashPlan", "PaymentPlan"]
-    if node_name == "CashPlanNode":
-        payment_plan_object = get_object_or_404(CashPlan, pk=obj_id)
-    else:
-        payment_plan_object = get_object_or_404(PaymentPlan, pk=obj_id)
-
-    return payment_plan_object
+def get_payment_plan_object(payment_plan_id: str) -> "PaymentPlan":
+    node_name, obj_id = b64decode(payment_plan_id).decode().split(":")
+    return get_object_or_404(PaymentPlan, pk=obj_id)
 
 
 def get_payment_delivered_quantity_status_and_value(
@@ -197,3 +175,8 @@ def get_payment_delivered_quantity_status_and_value(
 
     else:
         raise Exception(f"Invalid delivered quantity {delivered_quantity}")
+
+
+def generate_cache_key(data: Dict[str, Any]) -> str:
+    task_params_str = json.dumps(data)
+    return hashlib.sha256(task_params_str.encode()).hexdigest()

@@ -23,10 +23,11 @@ from hct_mis_api.apps.household.fixtures import (
     create_household,
 )
 from hct_mis_api.apps.payment.fixtures import (
-    CashPlanFactory,
-    PaymentRecordFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
     PaymentVerificationFactory,
     PaymentVerificationPlanFactory,
+    PaymentVerificationSummaryFactory,
 )
 from hct_mis_api.apps.payment.models import PaymentVerification
 from hct_mis_api.apps.payment.xlsx.xlsx_verification_export_service import (
@@ -37,32 +38,24 @@ from hct_mis_api.apps.payment.xlsx.xlsx_verification_import_service import (
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.targeting.fixtures import (
-    TargetingCriteriaFactory,
-    TargetPopulationFactory,
-)
 
 
 class TestXlsxVerificationImport(APITestCase):
     def setUp(self) -> None:
         super().setUp()
         create_afghanistan()
-        payment_record_amount = 10
+        payments_amount = 10
         self.business_area = BusinessArea.objects.get(slug="afghanistan")
 
         self.user = UserFactory()
 
         program = ProgramFactory(business_area=self.business_area)
         program.admin_areas.set(Area.objects.order_by("?")[:3])
-        targeting_criteria = TargetingCriteriaFactory()
 
-        target_population = TargetPopulationFactory(
-            created_by=self.user, targeting_criteria=targeting_criteria, business_area=self.business_area
-        )
-        cash_plan = CashPlanFactory(program=program, business_area=self.business_area)
-        cash_plan.save()
-        payment_verification_plan = PaymentVerificationPlanFactory(payment_plan_obj=cash_plan)
-        for _ in range(payment_record_amount):
+        payment_plan = PaymentPlanFactory(program_cycle=program.cycles.first(), business_area=self.business_area)
+        PaymentVerificationSummaryFactory(payment_plan=payment_plan)
+        payment_verification_plan = PaymentVerificationPlanFactory(payment_plan=payment_plan)
+        for _ in range(payments_amount):
             registration_data_import = RegistrationDataImportFactory(
                 imported_by=self.user, business_area=BusinessArea.objects.first()
             )
@@ -76,22 +69,21 @@ class TestXlsxVerificationImport(APITestCase):
 
             household.programs.add(program)
 
-            payment_record = PaymentRecordFactory(
-                parent=cash_plan,
+            payment = PaymentFactory(
+                parent=payment_plan,
                 household=household,
                 head_of_household=household.head_of_household,
-                target_population=target_population,
                 currency="PLN",
             )
 
             PaymentVerificationFactory(
-                payment_obj=payment_record,
+                payment=payment,
                 payment_verification_plan=payment_verification_plan,
                 status=PaymentVerification.STATUS_PENDING,
             )
             EntitlementCardFactory(household=household)
-        self.cash_plan = cash_plan
-        self.verification = cash_plan.payment_verification_plan.first()
+        self.payment_plan = payment_plan
+        self.verification = payment_plan.payment_verification_plans.first()
 
     @parameterized.expand(
         [
@@ -123,7 +115,7 @@ class TestXlsxVerificationImport(APITestCase):
         self.assertEqual(import_service.errors, [])
 
     def test_validation_valid_status_changed_for_people(self) -> None:
-        dct = self.verification.payment_plan_obj.program.data_collecting_type
+        dct = self.verification.payment_plan.program_cycle.program.data_collecting_type
         dct.type = DataCollectingType.Type.SOCIAL
         dct.save()
         export_service = XlsxVerificationExportService(self.verification)
@@ -277,7 +269,7 @@ class TestXlsxVerificationImport(APITestCase):
         export_service = XlsxVerificationExportService(self.verification)
         wb = export_service.generate_workbook()
         payment_record_id = wb.active["A2"].value
-        payment_verification = PaymentVerification.objects.get(payment_object_id=payment_record_id)
+        payment_verification = PaymentVerification.objects.get(payment_id=payment_record_id)
         self.assertEqual(payment_verification.status, PaymentVerification.STATUS_PENDING)
         wb.active[f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2"] = "NO"
         with NamedTemporaryFile() as tmp:
@@ -289,18 +281,18 @@ class TestXlsxVerificationImport(APITestCase):
         import_service.import_verifications()
         self.assertEqual(import_service.errors, [])
 
-        payment_verification = PaymentVerification.objects.get(payment_object_id=payment_record_id)
+        payment_verification = PaymentVerification.objects.get(payment_id=payment_record_id)
         self.assertEqual(payment_verification.status, PaymentVerification.STATUS_NOT_RECEIVED)
 
     def test_import_valid_status_changed_received_yes_not_full(self) -> None:
         export_service = XlsxVerificationExportService(self.verification)
         wb = export_service.generate_workbook()
         payment_record_id = wb.active["A2"].value
-        payment_verification = PaymentVerification.objects.get(payment_object_id=payment_record_id)
+        payment_verification = PaymentVerification.objects.get(payment_id=payment_record_id)
         self.assertEqual(payment_verification.status, PaymentVerification.STATUS_PENDING)
         wb.active[f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2"] = "YES"
         wb.active[f"{XlsxVerificationExportService.RECEIVED_AMOUNT_COLUMN_LETTER}2"] = (
-            payment_verification.payment_obj.delivered_quantity - 1
+            payment_verification.payment.delivered_quantity - 1
         )
         with NamedTemporaryFile() as tmp:
             wb.save(tmp.name)
@@ -311,26 +303,26 @@ class TestXlsxVerificationImport(APITestCase):
         import_service.import_verifications()
         self.assertEqual(import_service.errors, [])
 
-        payment_verification = PaymentVerification.objects.get(payment_object_id=payment_record_id)
+        payment_verification = PaymentVerification.objects.get(payment_id=payment_record_id)
         self.assertEqual(
             payment_verification.status,
             PaymentVerification.STATUS_RECEIVED_WITH_ISSUES,
         )
         self.assertEqual(
             payment_verification.received_amount,
-            payment_verification.payment_obj.delivered_quantity - 1,
+            payment_verification.payment.delivered_quantity - 1,
         )
 
     def test_import_valid_status_changed_received_yes_full(self) -> None:
         export_service = XlsxVerificationExportService(self.verification)
         wb = export_service.generate_workbook()
         payment_record_id = wb.active["A2"].value
-        payment_verification = PaymentVerification.objects.get(payment_object_id=payment_record_id)
+        payment_verification = PaymentVerification.objects.get(payment_id=payment_record_id)
         self.assertEqual(payment_verification.status, PaymentVerification.STATUS_PENDING)
         wb.active[f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2"] = "YES"
         wb.active[
             f"{XlsxVerificationExportService.RECEIVED_AMOUNT_COLUMN_LETTER}2"
-        ] = payment_verification.payment_obj.delivered_quantity
+        ] = payment_verification.payment.delivered_quantity
         with NamedTemporaryFile() as tmp:
             wb.save(tmp.name)
             file = io.BytesIO(tmp.read())
@@ -340,14 +332,14 @@ class TestXlsxVerificationImport(APITestCase):
         import_service.import_verifications()
         self.assertEqual(import_service.errors, [])
 
-        payment_verification = PaymentVerification.objects.get(payment_object_id=payment_record_id)
+        payment_verification = PaymentVerification.objects.get(payment_id=payment_record_id)
         self.assertEqual(
             payment_verification.status,
             PaymentVerification.STATUS_RECEIVED,
         )
         self.assertEqual(
             payment_verification.received_amount,
-            payment_verification.payment_obj.delivered_quantity,
+            payment_verification.payment.delivered_quantity,
         )
 
     @parameterized.expand(
@@ -368,13 +360,13 @@ class TestXlsxVerificationImport(APITestCase):
         3rd scenario - like above + one null header
         """
 
-        cash_plan = CashPlanFactory()
+        payment_plan = PaymentPlanFactory()
 
         hoh1 = IndividualFactory(household=None)
         household_1 = HouseholdFactory(head_of_household=hoh1)
-        payment_1 = PaymentRecordFactory(
+        payment_1 = PaymentFactory(
             id="0329a41f-affd-4669-9e38-38ec2d6699b3",
-            parent=cash_plan,
+            parent=payment_plan,
             household=household_1,
             entitlement_quantity=120,
             delivered_quantity=150,
@@ -383,24 +375,24 @@ class TestXlsxVerificationImport(APITestCase):
 
         hoh2 = IndividualFactory(household=None)
         household_2 = HouseholdFactory(head_of_household=hoh2)
-        payment_2 = PaymentRecordFactory(
+        payment_2 = PaymentFactory(
             id="299811ef-b123-427d-b77d-9fd5d1bc8946",
-            parent=cash_plan,
+            parent=payment_plan,
             household=household_2,
             entitlement_quantity=120,
             delivered_quantity=150,
             currency="PLN",
         )
-
-        payment_verification_plan = PaymentVerificationPlanFactory(payment_plan_obj=cash_plan)
+        PaymentVerificationSummaryFactory(payment_plan=payment_plan)
+        payment_verification_plan = PaymentVerificationPlanFactory(payment_plan=payment_plan)
 
         PaymentVerificationFactory(
-            payment_obj=payment_1,
+            payment=payment_1,
             payment_verification_plan=payment_verification_plan,
             status=PaymentVerification.STATUS_PENDING,
         )
         PaymentVerificationFactory(
-            payment_obj=payment_2,
+            payment=payment_2,
             payment_verification_plan=payment_verification_plan,
             status=PaymentVerification.STATUS_PENDING,
         )

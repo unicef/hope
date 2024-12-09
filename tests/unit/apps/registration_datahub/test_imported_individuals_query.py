@@ -10,11 +10,13 @@ from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import IndividualFactory
+from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.models import ProgramPartnerThrough
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
 ALL_IMPORTED_INDIVIDUALS_QUERY = """
-query AllImportedIndividuals {
-  allImportedIndividuals(orderBy: "full_name", businessArea: "afghanistan") {
+query AllIndividuals {
+  allIndividuals(orderBy: "full_name", businessArea: "afghanistan", rdiMergeStatus: "PENDING") {
     edges {
       node {
         birthDate
@@ -28,8 +30,8 @@ query AllImportedIndividuals {
 }
 """
 ALL_IMPORTED_INDIVIDUALS_ORDER_BY_BIRTH_DATE_A_QUERY = """
-query AllImportedIndividuals {
-  allImportedIndividuals(orderBy: "birth_date", businessArea: "afghanistan") {
+query AllIndividuals {
+  allIndividuals(orderBy: "birth_date", businessArea: "afghanistan", rdiMergeStatus: "PENDING") {
     edges {
       node {
         birthDate
@@ -43,8 +45,8 @@ query AllImportedIndividuals {
 }
 """
 ALL_IMPORTED_INDIVIDUALS_ORDER_BY_BIRTH_DATE_D_QUERY = """
-query AllImportedIndividuals {
-  allImportedIndividuals(orderBy: "-birth_date", businessArea: "afghanistan") {
+query AllIndividuals {
+  allIndividuals(orderBy: "-birth_date", businessArea: "afghanistan", rdiMergeStatus: "PENDING") {
     edges {
       node {
         birthDate
@@ -59,8 +61,8 @@ query AllImportedIndividuals {
 }
 """
 IMPORTED_INDIVIDUAL_QUERY = """
-query ImportedIndividual($id: ID!) {
-  importedIndividual(id: $id) {
+query individual($id: ID!) {
+  individual(id: $id) {
     birthDate
         familyName
         fullName
@@ -84,10 +86,16 @@ class TestImportedIndividualQuery(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        create_afghanistan()
         cls.partner = PartnerFactory(name="Test1")
         cls.user = UserFactory.create(partner=cls.partner)
-        create_afghanistan()
+        cls.program = ProgramFactory(name="Program_1", status="ACTIVE")
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        ProgramPartnerThrough.objects.create(
+            program=cls.program,
+            partner=cls.partner,
+            full_area_access=True,
+        )
         cls.individuals_to_create = [
             {
                 "full_name": "Benjamin Butler",
@@ -98,6 +106,7 @@ class TestImportedIndividualQuery(APITestCase):
                 "birth_date": "1943-07-30",
                 "sex": "MALE",
                 "id": "47dd625a-e64e-48a9-bfcd-e970ca356bf7",
+                "program": cls.program,
             },
             {
                 "full_name": "Robin Ford",
@@ -108,6 +117,7 @@ class TestImportedIndividualQuery(APITestCase):
                 "birth_date": "1946-02-15",
                 "sex": "MALE",
                 "id": "f91eb18b-175a-495c-a49d-92af4ad554ba",
+                "program": cls.program,
             },
             {
                 "full_name": "Timothy Perry",
@@ -118,6 +128,7 @@ class TestImportedIndividualQuery(APITestCase):
                 "birth_date": "1983-12-21",
                 "sex": "MALE",
                 "id": "4174aa63-4d3d-416a-bf39-09bc0e14e7c6",
+                "program": cls.program,
             },
             {
                 "full_name": "Eric Torres",
@@ -128,6 +139,7 @@ class TestImportedIndividualQuery(APITestCase):
                 "birth_date": "1973-03-23",
                 "sex": "MALE",
                 "id": "6aada701-4639-4142-92ca-7cbf82411534",
+                "program": cls.program,
             },
             {
                 "full_name": "Jenna Franklin",
@@ -138,6 +150,7 @@ class TestImportedIndividualQuery(APITestCase):
                 "birth_date": "1969-11-29",
                 "sex": "FEMALE",
                 "id": "c38fa2a5-e518-495c-988f-c308c94dcc53",
+                "program": cls.program,
             },
         ]
 
@@ -170,7 +183,13 @@ class TestImportedIndividualQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=query,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                },
+            },
         )
 
     @parameterized.expand(
@@ -184,11 +203,17 @@ class TestImportedIndividualQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=IMPORTED_INDIVIDUAL_QUERY,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                },
+            },
             variables={
                 "id": self.id_to_base64(
                     self.individuals[0].id,
-                    "ImportedIndividualNode",
+                    "IndividualNode",
                 )
             },
         )

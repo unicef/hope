@@ -15,8 +15,9 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea, FileTemp
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.payment.fixtures import (
-    CashPlanFactory,
+    PaymentPlanFactory,
     PaymentVerificationPlanFactory,
+    PaymentVerificationSummaryFactory,
 )
 from hct_mis_api.apps.payment.models import PaymentVerificationPlan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
@@ -53,10 +54,10 @@ class TestXlsxVerificationMarkAsInvalid(APITestCase):
         program = ProgramFactory(business_area=cls.business_area)
         program.admin_areas.set(Area.objects.order_by("?")[:3])
 
-        cash_plan = CashPlanFactory(program=program, business_area=cls.business_area)
-        cash_plan.save()
+        payment_plan = PaymentPlanFactory(program_cycle=program.cycles.first(), business_area=cls.business_area)
+        PaymentVerificationSummaryFactory(payment_plan=payment_plan)
         cls.payment_verification_plan = PaymentVerificationPlanFactory(
-            payment_plan_obj=cash_plan,
+            payment_plan=payment_plan,
             verification_channel=PaymentVerificationPlan.VERIFICATION_CHANNEL_XLSX,
             status=PaymentVerificationPlan.STATUS_ACTIVE,
         )

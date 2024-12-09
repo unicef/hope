@@ -5,7 +5,7 @@ import { Fragment, ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { chooseFieldType, clearField } from '@utils/targetingUtils';
-import { ImportedIndividualFieldsQuery } from '@generated/graphql';
+import { IndividualFieldsQuery } from '@generated/graphql';
 import { TargetingCriteriaIndividualBlockFilter } from './TargetingCriteriaIndividualBlockFilter';
 
 const Divider = styled.div`
@@ -76,7 +76,7 @@ export function TargetingCriteriaIndividualFilterBlocks({
   onDelete,
 }: {
   blockIndex: number;
-  data: ImportedIndividualFieldsQuery;
+  data: IndividualFieldsQuery;
   values;
   choicesToDict;
   onDelete: () => void;
