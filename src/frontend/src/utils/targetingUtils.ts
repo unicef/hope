@@ -170,7 +170,6 @@ function mapBlockFilters(blocks, blockKey) {
 }
 
 export function mapCriteriaToInitialValues(criteria) {
-  console.log('criteria', criteria);
   const individualIds = criteria.individualIds || '';
   const householdIds = criteria.householdIds || '';
   const householdsFiltersBlocks = criteria.householdsFiltersBlocks || [];

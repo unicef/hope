@@ -46,7 +46,7 @@ from hct_mis_api.apps.core.utils import (
 from hct_mis_api.apps.payment.models import DeliveryMechanism
 from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
 from hct_mis_api.apps.program.filters import ProgramCycleFilter, ProgramFilter
-from hct_mis_api.apps.program.models import Program, ProgramCycle
+from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.utils.schema import ChartDetailedDatasetsNode
 
@@ -82,6 +82,13 @@ class ProgramCycleNode(BaseNodePermissionMixin, DjangoObjectType):
         connection_class = ExtendedConnection
 
 
+class BeneficiaryGroupNode(DjangoObjectType):
+    class Meta:
+        model = BeneficiaryGroup
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+
 class ProgramNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     permission_classes = (
         hopePermissionClass(
@@ -96,6 +103,7 @@ class ProgramNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     total_number_of_households = graphene.Int()
     total_number_of_households_with_tp_in_program = graphene.Int()
     data_collecting_type = graphene.Field(DataCollectingTypeNode, source="data_collecting_type")
+    beneficiary_group = graphene.Field(BeneficiaryGroupNode, source="beneficiary_group")
     partners = graphene.List(PartnerNode)
     is_social_worker_program = graphene.Boolean()
     pdu_fields = graphene.List(PeriodicFieldNode)

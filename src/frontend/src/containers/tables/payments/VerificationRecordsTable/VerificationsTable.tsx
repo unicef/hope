@@ -8,6 +8,8 @@ import {
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './VerificationsHeadCells';
 import { VerificationRecordsTableRow } from './VerificationRecordsTableRow';
+import { adjustHeadCells } from '@utils/utils';
+import { useProgramContext } from 'src/programContext';
 
 interface VerificationsTableProps {
   paymentPlanId?: string;
@@ -30,13 +32,29 @@ export function VerificationsTable({
     paymentPlanId,
   };
 
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
+  const replacements = {
+    payment_record__head_of_household__family_name: (_beneficiaryGroup) =>
+      `Head of ${_beneficiaryGroup?.groupLabel}`,
+    payment_record__household__unicef_id: (_beneficiaryGroup) =>
+      `${_beneficiaryGroup?.groupLabel} ID`,
+  };
+
+  const adjustedHeadCells = adjustHeadCells(
+    headCells,
+    beneficiaryGroup,
+    replacements,
+  );
+
   return (
     <UniversalTable<
       PaymentVerificationNode,
       AllPaymentVerificationsQueryVariables
     >
       title={t('Verification Records')}
-      headCells={headCells}
+      headCells={adjustedHeadCells}
       query={useAllPaymentVerificationsQuery}
       queriedObjectName="allPaymentVerifications"
       initialVariables={initialVariables}

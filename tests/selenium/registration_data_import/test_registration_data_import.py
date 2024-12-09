@@ -1,13 +1,20 @@
+from datetime import datetime
+from time import sleep
+
 from django.conf import settings
-from django.core.management import call_command
 
 import pytest
 from elasticsearch_dsl import connections
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory
-from hct_mis_api.apps.account.models import Partner
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.account.models import Partner, User
+from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
+from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.geo.models import Area, AreaType, Country
+from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
+from hct_mis_api.apps.registration_data.models import ImportData
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport as RDI
 from hct_mis_api.apps.utils.elasticsearch_utils import rebuild_search_index
 from tests.selenium.page_object.programme_population.households_details import (
     HouseholdsDetails,
@@ -32,15 +39,57 @@ def registration_datahub(db) -> None:  # type: ignore
 
 @pytest.fixture
 def create_programs() -> None:
-    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/core/fixtures/data-selenium.json")
-    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/program/fixtures/data-cypress.json")
-    yield
+    business_area = create_afghanistan()
+    dct = DataCollectingTypeFactory(type=DataCollectingType.Type.STANDARD)
+    beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
+    ProgramFactory(
+        name="Test Programm",
+        status=Program.ACTIVE,
+        business_area=business_area,
+        data_collecting_type=dct,
+        beneficiary_group=beneficiary_group,
+    )
 
 
 @pytest.fixture
 def add_rdi() -> None:
-    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/registration_data/fixtures/data-cypress.json")
-    yield
+    business_area = BusinessArea.objects.get(slug="afghanistan")
+    programme = Program.objects.filter(name="Test Programm").first()
+    imported_by = User.objects.first()
+    number_of_individuals = 9
+    number_of_households = 3
+    status = RDI.IN_REVIEW
+
+    import_data = ImportData.objects.create(
+        status=ImportData.STATUS_PENDING,
+        business_area_slug=business_area.slug,
+        data_type=ImportData.FLEX_REGISTRATION,
+        number_of_individuals=number_of_individuals,
+        number_of_households=number_of_households,
+        created_by_id=imported_by.id if imported_by else None,
+    )
+    RDI.objects.create(
+        name="Test",
+        data_source=RDI.FLEX_REGISTRATION,
+        imported_by=imported_by,
+        number_of_individuals=number_of_individuals,
+        number_of_households=number_of_households,
+        business_area=business_area,
+        status=status,
+        program=programme,
+        import_data=import_data,
+    )
+
+    RDI.objects.create(
+        name="Test Other Status",
+        data_source=RDI.KOBO,
+        imported_by=imported_by,
+        number_of_individuals=number_of_individuals,
+        number_of_households=number_of_households,
+        business_area=business_area,
+        status=status,
+        program=programme,
+    )
 
 
 @pytest.fixture
@@ -100,8 +149,8 @@ class TestSmokeRegistrationDataImport:
         assert "Title" in pageRegistrationDataImport.getTableLabel()[0].text
         assert "Status" in pageRegistrationDataImport.getTableLabel()[1].text
         assert "Import Date" in pageRegistrationDataImport.getTableLabel()[2].text
-        assert "Num. of Individuals" in pageRegistrationDataImport.getTableLabel()[3].text
-        assert "Num. of Households" in pageRegistrationDataImport.getTableLabel()[4].text
+        assert "Num. of Items" in pageRegistrationDataImport.getTableLabel()[3].text
+        assert "Num. of Items Groups" in pageRegistrationDataImport.getTableLabel()[4].text
         assert "Imported by" in pageRegistrationDataImport.getTableLabel()[5].text
         assert "Data Source" in pageRegistrationDataImport.getTableLabel()[6].text
 
@@ -141,17 +190,14 @@ class TestSmokeRegistrationDataImport:
         assert "Test Other Status" in pageDetailsRegistrationDataImport.getPageHeaderTitle().text
         assert "IN REVIEW" in pageDetailsRegistrationDataImport.getLabelStatus().text
         assert "KOBO" in pageDetailsRegistrationDataImport.getLabelSourceOfData().text
-        assert "21 Mar 2023 9:22 AM" in pageDetailsRegistrationDataImport.getLabelImportDate().text
+        assert datetime.now().strftime("%-d %b %Y") in pageDetailsRegistrationDataImport.getLabelImportDate().text
         pageDetailsRegistrationDataImport.getLabelImportedBy()
         assert (
-            "TOTAL NUMBER OF HOUSEHOLDS"
+            "TOTAL NUMBER OF ITEMS GROUPS"
             in pageDetailsRegistrationDataImport.getLabelizedFieldContainerHouseholds().text
         )
         assert "3" in pageDetailsRegistrationDataImport.getLabelTotalNumberOfHouseholds().text
-        assert (
-            "TOTAL NUMBER OF REGISTERED INDIVIDUALS"
-            in pageDetailsRegistrationDataImport.getLabelizedFieldContainerIndividuals().text
-        )
+        assert "TOTAL NUMBER OF ITEMS" in pageDetailsRegistrationDataImport.getLabelizedFieldContainerIndividuals().text
         assert "9" in pageDetailsRegistrationDataImport.getLabelTotalNumberOfIndividuals().text
         assert (
             pageDetailsRegistrationDataImport.buttonMergeRdiText
@@ -190,13 +236,18 @@ class TestRegistrationDataImport:
         assert "208" in pageRegistrationDataImport.getNumberOfIndividuals().text
         pageRegistrationDataImport.getButtonImportFile().click()
         pageRegistrationDataImport.disappearButtonImportFile()
+
         pageDetailsRegistrationDataImport.waitForStatus("IN REVIEW")
         assert "50" in pageDetailsRegistrationDataImport.getLabelTotalNumberOfHouseholds().text
         assert "208" in pageDetailsRegistrationDataImport.getLabelTotalNumberOfIndividuals().text
+        pageDetailsRegistrationDataImport.element_clickable(pageDetailsRegistrationDataImport.buttonMergeRdi)
+        sleep(2)
         pageDetailsRegistrationDataImport.getButtonMergeRdi().click()
+        pageDetailsRegistrationDataImport.element_clickable(pageDetailsRegistrationDataImport.buttonMerge)
+        sleep(2)
         pageDetailsRegistrationDataImport.getButtonMerge().click()
         pageDetailsRegistrationDataImport.waitForStatus("MERGED")
-        assert "MERGED" == pageDetailsRegistrationDataImport.getStatusContainer().text
+        pageDetailsRegistrationDataImport.wait_for_text("MERGED", pageDetailsRegistrationDataImport.statusContainer)
         assert "VIEW TICKETS" in pageDetailsRegistrationDataImport.getButtonViewTickets().text
         pageDetailsRegistrationDataImport.getButtonIndividuals().click()
         pageDetailsRegistrationDataImport.getButtonHouseholds().click()

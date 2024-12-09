@@ -2,7 +2,7 @@ import React, { ReactElement, useState } from 'react';
 import { PageHeader } from '@core/PageHeader';
 import { useTranslation } from 'react-i18next';
 import { ProgramCyclesFilters } from '@containers/tables/ProgramCyclesTablePaymentModule/ProgramCyclesFilters';
-import { getFilterFromQueryParams } from '@utils/utils';
+import { adjustHeadCells, getFilterFromQueryParams } from '@utils/utils';
 import { useLocation } from 'react-router-dom';
 import { usePermissions } from '@hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
@@ -11,6 +11,7 @@ import { useProgramContext } from '../../../../programContext';
 import { TableWrapper } from '@core/TableWrapper';
 import { ProgramCyclesTablePaymentModule } from '@containers/tables/ProgramCyclesTablePaymentModule/ProgramCyclesTablePaymentModule';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { headCells } from '@containers/tables/ProgramCyclesTablePaymentModule/HeadCells';
 
 const initialFilter = {
   search: '',
@@ -26,12 +27,24 @@ export const ProgramCyclePage = (): ReactElement => {
   const permissions = usePermissions();
   const location = useLocation();
   const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
   const [appliedFilter, setAppliedFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
+  );
+
+  const replacements = {
+    totalHouseholdsCount: (_beneficiaryGroup) =>
+      `Total ${_beneficiaryGroup?.groupLabelPlural} Count`,
+  };
+
+  const adjustedHeadCells = adjustHeadCells(
+    headCells,
+    beneficiaryGroup,
+    replacements,
   );
 
   if (permissions === null) return null;
@@ -61,6 +74,7 @@ export const ProgramCyclePage = (): ReactElement => {
           <ProgramCyclesTablePaymentModule
             program={selectedProgram}
             filters={appliedFilter}
+            adjustedHeadCells={adjustedHeadCells}
           />
         </TableWrapper>
       </>

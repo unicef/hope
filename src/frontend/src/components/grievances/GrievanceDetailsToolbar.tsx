@@ -74,7 +74,8 @@ export const GrievanceDetailsToolbar = ({
   const { baseUrl } = useBaseUrl();
   const confirm = useConfirmation();
   const navigate = useNavigate();
-  const { isActiveProgram } = useProgramContext();
+  const { isActiveProgram, selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -193,7 +194,7 @@ export const GrievanceDetailsToolbar = ({
       confirmationMessage = '';
     } else if (isDeduplicationCategory) {
       confirmationMessage = t(
-        'By continuing you acknowledge that individuals in this ticket were reviewed and all were deemed either distinct or duplicates in the system.',
+        `By continuing you acknowledge that ${beneficiaryGroup?.memberLabelPlural} in this ticket were reviewed and all were deemed either distinct or duplicates in the system.`,
       );
     }
     return confirmationMessage;
@@ -248,7 +249,7 @@ export const GrievanceDetailsToolbar = ({
 
     if (notApprovedSystemFlaggingChanges) {
       additionalContent = t(
-        ' By continuing you acknowledge that individuals in this ticket was compared with sanction list. No matches were found',
+        `By continuing you acknowledge that ${beneficiaryGroup?.memberLabelPlural} in this ticket were compared with the sanction list. No matches were found`,
       );
     }
 
@@ -259,7 +260,7 @@ export const GrievanceDetailsToolbar = ({
       householdHasOneIndividual
     ) {
       additionalContent += t(
-        ' When you close this ticket, the household that this Individual is a member of will be deactivated.',
+        `When you close this ticket, the ${beneficiaryGroup?.groupLabel} that this ${beneficiaryGroup?.memberLabel} is a member of will be deactivated.`,
       );
     }
 
@@ -292,7 +293,7 @@ export const GrievanceDetailsToolbar = ({
       title={t('Duplicate Document Conflict')}
       buttonText={t('Close Ticket')}
       message={t(
-        'The individuals have matching document numbers. HOPE requires that document numbers are unique. Please resolve before closing the ticket.',
+        `The ${beneficiaryGroup?.memberLabelPlural} have matching document numbers. HOPE requires that document numbers are unique. Please resolve before closing the ticket.`,
       )}
     />
   ) : (

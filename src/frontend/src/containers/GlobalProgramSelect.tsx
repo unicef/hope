@@ -156,6 +156,27 @@ export const GlobalProgramSelect = () => {
   }, []);
 
   useEffect(() => {
+    // Initial setup for selectedProgram
+    setSelectedProgram({
+      beneficiaryGroup: {
+        id: 'default-id',
+        name: 'Beneficiaries',
+        groupLabel: 'Group',
+        groupLabelPlural: 'Groups',
+        memberLabel: 'Member',
+        memberLabelPlural: 'Members',
+        masterDetail: false,
+      },
+      id: 'all',
+      name: 'All Programmes',
+      status: ProgramStatus.Active,
+      dataCollectingType: null,
+      pduFields: null,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
     if (programId !== 'all') {
       const program = programData?.program;
       if (
@@ -163,7 +184,8 @@ export const GlobalProgramSelect = () => {
         isMounted.current &&
         (!selectedProgram || selectedProgram?.id !== programId)
       ) {
-        const { id, name, status, dataCollectingType } = program;
+        const { id, name, status, dataCollectingType, beneficiaryGroup } =
+          program;
 
         setSelectedProgram({
           id,
@@ -182,10 +204,9 @@ export const GlobalProgramSelect = () => {
             //   dataCollectingType?.collectorFieldsAvailable,
           },
           pduFields: program.pduFields,
+          beneficiaryGroup: beneficiaryGroup,
         });
       }
-    } else {
-      setSelectedProgram(null);
     }
   }, [programId, selectedProgram, setSelectedProgram, programData]);
 
@@ -240,6 +261,22 @@ export const GlobalProgramSelect = () => {
     if (selectedValue) {
       handleClose();
       if (selectedValue.id === 'all') {
+        setSelectedProgram({
+          beneficiaryGroup: {
+            id: 'default-id',
+            name: 'Beneficiaries',
+            groupLabel: 'Group',
+            groupLabelPlural: 'Groups',
+            memberLabel: 'Member',
+            memberLabelPlural: 'Members',
+            masterDetail: false,
+          },
+          id: 'all',
+          name: 'All Programmes',
+          status: ProgramStatus.Active,
+          dataCollectingType: null,
+          pduFields: null,
+        });
         navigate(`/${businessArea}/programs/all/list`);
       } else {
         navigate(
@@ -328,19 +365,22 @@ export const GlobalProgramSelect = () => {
             onChange={onChange}
             PopperComponent={PopperComponent}
             noOptionsText="No results"
-            renderOption={(props, option) => (
-              <li {...props}>
-                <NameBox data-cy="select-option-name" title={option.name}>
-                  {option.name}
-                </NameBox>
-                {option.status && (
-                  <StatusBox
-                    status={option.status}
-                    statusToColor={programStatusToColor}
-                  />
-                )}
-              </li>
-            )}
+            renderOption={(props, option) => {
+              const { key, ...restProps } = props;
+              return (
+                <li key={key} {...restProps}>
+                  <NameBox data-cy="select-option-name" title={option.name}>
+                    {option.name}
+                  </NameBox>
+                  {option.status && (
+                    <StatusBox
+                      status={option.status}
+                      statusToColor={programStatusToColor}
+                    />
+                  )}
+                </li>
+              );
+            }}
             filterOptions={(x) => x}
             options={programs}
             getOptionLabel={(option) => option.name}

@@ -10,6 +10,7 @@ interface DetailsStepProps {
   handleNext?: () => Promise<void>;
   errors: any;
   programId?: string;
+  programHasRdi?: boolean;
 }
 
 export const DetailsStep: FC<DetailsStepProps> = ({
@@ -17,6 +18,7 @@ export const DetailsStep: FC<DetailsStepProps> = ({
   handleNext,
   errors,
   programId: formProgramId,
+  programHasRdi,
 }) => {
   const { t } = useTranslation();
   const { businessArea, programId, baseUrl } = useBaseUrl();
@@ -29,7 +31,7 @@ export const DetailsStep: FC<DetailsStepProps> = ({
 
   return (
     <>
-      <ProgramForm values={values} />
+      <ProgramForm values={values} programHasRdi={programHasRdi} />
       <Box display="flex" justifyContent="space-between">
         <Button
           data-cy="button-cancel"

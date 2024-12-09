@@ -12,6 +12,9 @@ snapshots['TestCreateProgram::test_create_program_authenticated_0_with_permissio
         'createProgram': {
             'program': {
                 'administrativeAreasOfImplementation': 'Lorem Ipsum',
+                'beneficiaryGroup': {
+                    'name': 'School'
+                },
                 'budget': '20000000',
                 'cashPlus': True,
                 'dataCollectingType': {
@@ -133,6 +136,32 @@ snapshots['TestCreateProgram::test_create_program_with_dct_from_other_ba 1'] = {
     ]
 }
 
+snapshots['TestCreateProgram::test_create_program_with_dct_social_not_compatible_with_beneficiary_group 1'] = {
+    'data': {
+        'createProgram': {
+            'program': None,
+            'validationErrors': {
+                '__all__': [
+                    'Selected combination of data collecting type and beneficiary group is invalid.'
+                ]
+            }
+        }
+    }
+}
+
+snapshots['TestCreateProgram::test_create_program_with_dct_standard_not_compatible_with_beneficiary_group 1'] = {
+    'data': {
+        'createProgram': {
+            'program': None,
+            'validationErrors': {
+                '__all__': [
+                    'Selected combination of data collecting type and beneficiary group is invalid.'
+                ]
+            }
+        }
+    }
+}
+
 snapshots['TestCreateProgram::test_create_program_with_deprecated_dct 1'] = {
     'data': {
         'createProgram': None
@@ -178,6 +207,9 @@ snapshots['TestCreateProgram::test_create_program_with_partners_0_valid 1'] = {
         'createProgram': {
             'program': {
                 'administrativeAreasOfImplementation': 'Lorem Ipsum',
+                'beneficiaryGroup': {
+                    'name': 'School'
+                },
                 'budget': '20000000',
                 'cashPlus': True,
                 'dataCollectingType': {
@@ -288,6 +320,9 @@ snapshots['TestCreateProgram::test_create_program_with_partners_all_partners_acc
         'createProgram': {
             'program': {
                 'administrativeAreasOfImplementation': 'Lorem Ipsum',
+                'beneficiaryGroup': {
+                    'name': 'School'
+                },
                 'budget': '20000000',
                 'cashPlus': True,
                 'dataCollectingType': {
@@ -346,6 +381,9 @@ snapshots['TestCreateProgram::test_create_program_with_partners_none_partners_ac
         'createProgram': {
             'program': {
                 'administrativeAreasOfImplementation': 'Lorem Ipsum',
+                'beneficiaryGroup': {
+                    'name': 'School'
+                },
                 'budget': '20000000',
                 'cashPlus': True,
                 'dataCollectingType': {
@@ -392,6 +430,9 @@ snapshots['TestCreateProgram::test_create_program_with_pdu_fields 1'] = {
         'createProgram': {
             'program': {
                 'administrativeAreasOfImplementation': 'Lorem Ipsum',
+                'beneficiaryGroup': {
+                    'name': 'School'
+                },
                 'budget': '20000000',
                 'cashPlus': True,
                 'dataCollectingType': {
@@ -508,6 +549,9 @@ snapshots['TestCreateProgram::test_create_program_with_pdu_fields_existing_field
         'createProgram': {
             'program': {
                 'administrativeAreasOfImplementation': 'Lorem Ipsum',
+                'beneficiaryGroup': {
+                    'name': 'School'
+                },
                 'budget': '20000000',
                 'cashPlus': True,
                 'dataCollectingType': {
@@ -635,6 +679,26 @@ snapshots['TestCreateProgram::test_create_program_with_programme_code_not_within
                 }
             ],
             'message': 'Programme code should be exactly 4 characters long and may only contain letters, digits and characters: - . /',
+            'path': [
+                'createProgram'
+            ]
+        }
+    ]
+}
+
+snapshots['TestCreateProgram::test_create_program_without_beneficiary_group 1'] = {
+    'data': {
+        'createProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': "['Beneficiary Group is required for creating new Program']",
             'path': [
                 'createProgram'
             ]

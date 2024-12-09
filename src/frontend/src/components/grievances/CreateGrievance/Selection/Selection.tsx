@@ -4,15 +4,15 @@ import { useTranslation } from 'react-i18next';
 import { GrievancesChoiceDataQuery } from '@generated/graphql';
 import { useArrayToDict } from '@hooks/useArrayToDict';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
-import {
-  GRIEVANCE_CATEGORIES_NAMES,
-  GRIEVANCE_CATEGORY_DESCRIPTIONS,
-  GRIEVANCE_ISSUE_TYPES_NAMES,
-  GRIEVANCE_ISSUE_TYPE_DESCRIPTIONS,
-} from '@utils/constants';
 import { DividerLine } from '@core/DividerLine';
 import { LabelizedField } from '@core/LabelizedField';
 import { useProgramContext } from 'src/programContext';
+import {
+  getGrievanceCategoryDescriptions,
+  getGrievanceIssueTypeDescriptions,
+  GRIEVANCE_CATEGORIES_NAMES,
+  GRIEVANCE_ISSUE_TYPES_NAMES,
+} from '@utils/constants';
 import { ChangeEvent, ReactElement } from 'react';
 
 export interface SelectionProps {
@@ -40,14 +40,40 @@ export function Selection({
     '*',
   );
 
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const dataChangeIssueTypes = [
-    { name: 'Household Data Update', value: '13' },
-    { name: 'Individual Data Update', value: '14' },
+    { name: `${beneficiaryGroup?.groupLabel} Data Update`, value: '13' },
+    { name: `${beneficiaryGroup?.memberLabel} Data Update`, value: '14' },
   ];
+
+  function replaceLabels(choices, _beneficiaryGroup) {
+    if (!choices) return [];
+    return choices.map((choice) => {
+      let newName = choice.name;
+      if (_beneficiaryGroup?.memberLabel) {
+        newName = newName.replace(/Individual/g, _beneficiaryGroup.memberLabel);
+      }
+      if (_beneficiaryGroup?.groupLabel) {
+        newName = newName.replace(/Household/g, _beneficiaryGroup.groupLabel);
+      }
+      return { ...choice, name: newName };
+    });
+  }
+  const updatedChoices = replaceLabels(
+    issueTypeDict[values.category]?.subCategories,
+    beneficiaryGroup,
+  );
+
+  const categoryDescriptions =
+    getGrievanceCategoryDescriptions(beneficiaryGroup);
+  const issueTypeDescriptions =
+    getGrievanceIssueTypeDescriptions(beneficiaryGroup);
 
   const issueTypeChoices = redirectedFromRelatedTicket
     ? dataChangeIssueTypes
-    : issueTypeDict[values.category]?.subCategories;
+    : updatedChoices;
 
   const addDisabledProperty = (choices) => {
     if (!choices) return [];
@@ -69,13 +95,9 @@ export function Selection({
   );
 
   const categoryDescription =
-    GRIEVANCE_CATEGORY_DESCRIPTIONS[
-      GRIEVANCE_CATEGORIES_NAMES[values.category]
-    ] || '';
+    categoryDescriptions[GRIEVANCE_CATEGORIES_NAMES[values.category]] || '';
   const issueTypeDescription =
-    GRIEVANCE_ISSUE_TYPE_DESCRIPTIONS[
-      GRIEVANCE_ISSUE_TYPES_NAMES[values.issueType]
-    ] || '';
+    issueTypeDescriptions[GRIEVANCE_ISSUE_TYPES_NAMES[values.issueType]] || '';
 
   return (
     <Grid container spacing={3}>

@@ -47,9 +47,6 @@ class PaymentModule(BaseComponents):
     def getNavProgramPopulation(self) -> WebElement:
         return self.wait_for(self.navProgramPopulation)
 
-    def getNavHouseholds(self) -> WebElement:
-        return self.wait_for(self.navHouseholds)
-
     def getNavIndividuals(self) -> WebElement:
         return self.wait_for(self.navIndividuals)
 

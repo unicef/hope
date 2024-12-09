@@ -82,6 +82,7 @@ class TargetingCriteriaFactory(DjangoModelFactory):
 class TargetPopulationFactory(DjangoModelFactory):
     class Meta:
         model = TargetPopulation
+        django_get_or_create = ("name", "business_area", "program")
 
     name = factory.Faker(
         "sentence",

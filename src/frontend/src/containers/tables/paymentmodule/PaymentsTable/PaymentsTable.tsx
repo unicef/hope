@@ -16,6 +16,8 @@ import { headCells } from './PaymentsTableHeadCells';
 import { PaymentsTableRow } from './PaymentsTableRow';
 import { WarningTooltipTable } from './WarningTooltipTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useProgramContext } from 'src/programContext';
+import { adjustHeadCells } from '@utils/utils';
 
 const StyledBox = styled(Box)`
   background-color: #fff;
@@ -35,6 +37,9 @@ export function PaymentsTable({
 }: PaymentsTableProps): ReactElement {
   const { baseUrl } = useBaseUrl();
   const { t } = useTranslation();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const [dialogPayment, setDialogPayment] = useState<
     AllPaymentsForTableQuery['allPayments']['edges'][number]['node'] | null
   >();
@@ -42,6 +47,19 @@ export function PaymentsTable({
     businessArea,
     paymentPlanId: paymentPlan.id,
   };
+
+  const replacements = {
+    household__unicef_id: (_beneficiaryGroup) =>
+      `${_beneficiaryGroup?.groupLabel} ${t('ID')}`,
+    household__size: (_beneficiaryGroup) =>
+      `${_beneficiaryGroup?.groupLabel} ${t('Size')}`,
+  };
+
+  const adjustedHeadCells = adjustHeadCells(
+    headCells,
+    beneficiaryGroup,
+    replacements,
+  );
 
   return (
     <>
@@ -64,7 +82,7 @@ export function PaymentsTable({
             AllPaymentsForTableQueryVariables
           >
             isOnPaper={false}
-            headCells={headCells}
+            headCells={adjustedHeadCells}
             query={useAllPaymentsForTableQuery}
             rowsPerPageOptions={[10, 25, 50]}
             queriedObjectName="allPayments"

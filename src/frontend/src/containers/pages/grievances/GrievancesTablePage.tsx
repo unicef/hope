@@ -24,7 +24,6 @@ import { ButtonTooltip } from '@components/core/ButtonTooltip';
 import { t } from 'i18next';
 import { useProgramContext } from 'src/programContext';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
-
 export const GrievancesTablePage = (): ReactElement => {
   const { baseUrl } = useBaseUrl();
   const { isActiveProgram } = useProgramContext();

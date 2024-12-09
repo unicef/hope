@@ -20,6 +20,15 @@ export interface ProgramInterface {
     type: string;
   };
   pduFields: { id: string }[];
+  beneficiaryGroup: {
+    id: string;
+    name: string;
+    groupLabel: string;
+    groupLabelPlural: string;
+    memberLabel: string;
+    memberLabelPlural: string;
+    masterDetail: boolean;
+  };
 }
 
 export type ProgramContextType = ProgramInterface | null;
