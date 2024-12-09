@@ -1,4 +1,7 @@
+from datetime import datetime
+
 import pytest
+from pytz import utc
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
@@ -34,7 +37,9 @@ def create_programs() -> None:
 @pytest.fixture
 def add_household() -> Household:
     registration_data_import = RegistrationDataImportFactory(
-        imported_by=User.objects.first(), business_area=BusinessArea.objects.first()
+        imported_by=User.objects.first(),
+        business_area=BusinessArea.objects.first(),
+        import_date=datetime(2022, 1, 29, tzinfo=utc),
     )
     household, individuals = create_household(
         {
@@ -112,11 +117,10 @@ class TestSmokeHouseholds:
         assert "ACTIVE" in pageHouseholdsDetails.getStatusContainer().text
         assert "No results" in pageHouseholdsDetails.getTableRow().text
         assert add_household.registration_data_import.data_source in pageHouseholdsDetails.getLabelSource().text
-        assert add_household.name_enumerator in pageHouseholdsDetails.getLabelImportName().text
+        assert add_household.registration_data_import.name in pageHouseholdsDetails.getLabelImportName().text
+
         assert (
-            add_household.registration_data_import.import_date.strftime("%-d %b %Y")
+            add_household.last_registration_date.strftime("%-d %b %Y")
             in pageHouseholdsDetails.getLabelRegistrationDate().text
         )
-        assert (
-            add_household.registration_data_import.imported_by.username in pageHouseholdsDetails.getLabelUserName().text
-        )
+        assert add_household.registration_data_import.imported_by.email in pageHouseholdsDetails.getLabelUserName().text
