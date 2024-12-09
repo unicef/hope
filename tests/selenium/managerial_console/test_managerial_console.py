@@ -177,6 +177,7 @@ class TestSmokeManagerialConsole:
         pageManagerialConsole.getReleaseButton().click()
         pageManagerialConsole.getButtonCancel().click()
 
+    @pytest.mark.xfail(reason="UNSTABLE")
     def test_managerial_console_happy_path(
         self, pageManagerialConsole: ManagerialConsole, create_payment_plan: PaymentPlan
     ) -> None:

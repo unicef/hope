@@ -5,14 +5,10 @@ from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.household.models import (
-    FEMALE,
-    MARRIED,
-    ROLE_ALTERNATE,
-    Household,
-    IndividualRoleInHousehold,
+from hct_mis_api.apps.household.fixtures import (
+    create_household_with_individual_with_collectors,
 )
+from hct_mis_api.apps.household.models import FEMALE, MARRIED, Household
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
@@ -43,7 +39,7 @@ def add_household() -> Household:
     registration_data_import = RegistrationDataImportFactory(
         imported_by=User.objects.first(), business_area=BusinessArea.objects.first()
     )
-    household, individuals = create_household(
+    household, individuals = create_household_with_individual_with_collectors(
         {
             "registration_data_import": registration_data_import,
             "admin_area": Area.objects.order_by("?").first(),
@@ -63,10 +59,6 @@ def add_household() -> Household:
             "phone_no": "0048503123555",
         },
     )
-
-    alternate_role = IndividualRoleInHousehold.objects.get(household=household, role=ROLE_ALTERNATE)
-    alternate_role.individual = individuals[0]
-    alternate_role.save()
 
     household.unicef_id = "HH-00-0000.1380"
     household.save()
@@ -89,7 +81,7 @@ class TestSmokeIndividuals:
         assert "Age" in pageIndividuals.getIndividualAge().text
         assert "Gender" in pageIndividuals.getIndividualSex().text
         assert "Administrative Level 2" in pageIndividuals.getIndividualLocation().text
-        assert len(add_household.active_individuals) + 2 == len(pageIndividuals.getIndividualTableRow())
+        assert len(add_household.active_individuals) == len(pageIndividuals.getIndividualTableRow())
 
     @freeze_time("2024-08-26")
     def test_smoke_page_individuals_details(
@@ -115,10 +107,10 @@ class TestSmokeIndividuals:
         assert "Not provided" in pageIndividualsDetails.getLabelWorkStatus().text
         assert "Yes" in pageIndividualsDetails.getLabelPregnant().text
         assert "-" in pageIndividualsDetails.getLabelHouseholdId().text
-        assert "Alternate collector" in pageIndividualsDetails.getLabelRole().text
+        assert "Primary collector" in pageIndividualsDetails.getLabelRole().text
         assert "Head of household (self)" in pageIndividualsDetails.getLabelRelationshipToHoh().text
         assert "-" in pageIndividualsDetails.getLabelPreferredLanguage().text
-        assert "HH-00-0000.1380 -Alternate collector" in pageIndividualsDetails.getLabelLinkedHouseholds().text
+        assert "HH-00-0000.1380 -Primary collector" in pageIndividualsDetails.getLabelLinkedHouseholds().text
         assert "None" in pageIndividualsDetails.getLabelObservedDisabilities().text
         assert "None" in pageIndividualsDetails.getLabelSeeingDisabilitySeverity().text
         assert "None" in pageIndividualsDetails.getLabelHearingDisabilitySeverity().text

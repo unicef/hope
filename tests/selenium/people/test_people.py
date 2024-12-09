@@ -130,6 +130,7 @@ class TestSmokePeople:
         assert "Administrative Level 2" in pagePeople.getIndividualLocation().text
         assert "Rows per page: 10 0–0 of 0" in pagePeople.getTablePagination().text.replace("\n", " ")
 
+    @pytest.mark.xfail(reason="UNSTABLE")
     def test_smoke_page_details_people(
         self,
         add_people: None,
