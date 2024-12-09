@@ -14,19 +14,11 @@ import { TargetingHouseholds } from './TargetingHouseholds';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { TargetPopulationPeopleTable } from '@containers/tables/targeting/TargetPopulationPeopleTable';
 import { ResultsForPeople } from '@components/targeting/ResultsForPeople';
-import { TargetingCriteriaDisplay } from './TargetingCriteriaDisplay/TargetingCriteriaDisplay';
 import { ReactElement } from 'react';
+import { AddFilterTargetingCriteriaDisplay } from './TargetingCriteriaDisplay/AddFilterTargetingCriteriaDisplay';
 
 const Label = styled.p`
   color: #b1b1b5;
-`;
-
-const IdContainer = styled.div`
-  background-color: #e6ecf4;
-  border: 1px solid #2f95fb;
-  border-radius: 5px;
-  padding: 10px;
-  white-space: pre-wrap;
 `;
 
 interface TargetPopulationCoreProps {
@@ -36,7 +28,6 @@ interface TargetPopulationCoreProps {
   screenBeneficiary: boolean;
   isStandardDctType: boolean;
   isSocialDctType: boolean;
-  category: string;
 }
 
 export const TargetPopulationCore = ({
@@ -46,13 +37,11 @@ export const TargetPopulationCore = ({
   screenBeneficiary,
   isStandardDctType,
   isSocialDctType,
-  category,
 }: TargetPopulationCoreProps): ReactElement => {
   const { t } = useTranslation();
   const { businessArea } = useBaseUrl();
   if (!targetPopulation) return null;
-  const householdIds = targetPopulation.targetingCriteria?.householdIds;
-  const individualIds = targetPopulation.targetingCriteria?.individualIds;
+
   const ResultComponent = targetPopulation.program.isSocialWorkerProgram
     ? ResultsForPeople
     : ResultsForHouseholds;
@@ -99,25 +88,12 @@ export const TargetPopulationCore = ({
           <Box pt={3} pb={3}>
             <Typography variant="h6">{t('Targeting Criteria')}</Typography>
           </Box>
-          <Box mb={2}>
-            {householdIds.length > 0 && (
-              <IdContainer data-cy="household-ids-container">
-                {householdIds}
-              </IdContainer>
-            )}
-          </Box>
-          {individualIds.length > 0 && (
-            <IdContainer data-cy="household-ids-container">
-              {individualIds}
-            </IdContainer>
-          )}
-          <TargetingCriteriaDisplay
+          <AddFilterTargetingCriteriaDisplay
             rules={targetPopulation.targetingCriteria?.rules || []}
             targetPopulation={targetPopulation}
             screenBeneficiary={screenBeneficiary}
             isStandardDctType={isStandardDctType}
             isSocialDctType={isSocialDctType}
-            category={category}
           />
         </PaperContainer>
       ) : null}

@@ -62,7 +62,8 @@ class TestPaymentPlanServices(APITestCase):
         cls.dm_transfer_to_account = DeliveryMechanism.objects.get(code="transfer_to_account")
 
     def test_delete_open(self) -> None:
-        pp: PaymentPlan = PaymentPlanFactory(status=PaymentPlan.Status.OPEN, program__status=Program.ACTIVE)
+        program = ProgramFactory(status=Program.ACTIVE)
+        pp: PaymentPlan = PaymentPlanFactory(status=PaymentPlan.Status.OPEN, program_cycle=program.cycles.first())
         self.assertEqual(pp.target_population.status, TargetPopulation.STATUS_OPEN)
 
         pp = PaymentPlanService(payment_plan=pp).delete()
@@ -77,7 +78,8 @@ class TestPaymentPlanServices(APITestCase):
             PaymentPlanService(payment_plan=pp).delete()
 
     def test_delete_when_its_one_pp_in_cycle(self) -> None:
-        pp = PaymentPlanFactory(status=PaymentPlan.Status.OPEN, program__status=Program.ACTIVE)
+        program = ProgramFactory(status=Program.ACTIVE)
+        pp: PaymentPlan = PaymentPlanFactory(status=PaymentPlan.Status.OPEN, program_cycle=program.cycles.first())
         program_cycle = ProgramCycleFactory(status=ProgramCycle.ACTIVE, program=pp.program)
         pp.program_cycle = program_cycle
         pp.save()
@@ -91,14 +93,10 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(program_cycle.status, ProgramCycle.DRAFT)
 
     def test_delete_when_its_two_pp_in_cycle(self) -> None:
-        pp_1 = PaymentPlanFactory(status=PaymentPlan.Status.OPEN, program__status=Program.ACTIVE)
-        pp_2 = PaymentPlanFactory(status=PaymentPlan.Status.OPEN, program=pp_1.program)
-        program_cycle = ProgramCycleFactory(status=ProgramCycle.ACTIVE, program=pp_1.program)
-        pp_1.program_cycle = program_cycle
-        pp_1.save()
-        pp_1.refresh_from_db()
-        pp_2.program_cycle = program_cycle
-        pp_2.save()
+        program = ProgramFactory(status=Program.ACTIVE)
+        program_cycle = ProgramCycleFactory(status=ProgramCycle.ACTIVE, program=program)
+        pp_1: PaymentPlan = PaymentPlanFactory(status=PaymentPlan.Status.OPEN, program_cycle=program_cycle)
+        PaymentPlanFactory(status=PaymentPlan.Status.OPEN, program_cycle=program_cycle)
 
         self.assertEqual(pp_1.program_cycle.status, ProgramCycle.ACTIVE)
 
@@ -195,8 +193,8 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(pp.total_households_count, 0)
         self.assertEqual(pp.total_individuals_count, 0)
         self.assertEqual(pp.payment_items.count(), 0)
-        with self.assertNumQueries(68):
-            prepare_payment_plan_task.delay(pp.id)
+        with self.assertNumQueries(69):
+            prepare_payment_plan_task.delay(str(pp.id))
         pp.refresh_from_db()
         self.assertEqual(pp.status, PaymentPlan.Status.OPEN)
         self.assertEqual(pp.total_households_count, 2)
@@ -293,8 +291,6 @@ class TestPaymentPlanServices(APITestCase):
     def test_create_follow_up_pp(self, get_exchange_rate_mock: Any) -> None:
         pp = PaymentPlanFactory(
             total_households_count=1,
-            program__cycle__start_date=timezone.datetime(2021, 6, 10, tzinfo=utc).date(),
-            program__cycle__end_date=timezone.datetime(2021, 7, 10, tzinfo=utc).date(),
         )
         new_targeting = TargetPopulationFactory(
             status=TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE,
@@ -398,7 +394,7 @@ class TestPaymentPlanServices(APITestCase):
 
         self.assertEqual(pp.follow_ups.count(), 2)
 
-        with self.assertNumQueries(48):
+        with self.assertNumQueries(49):
             prepare_follow_up_payment_plan_task(follow_up_pp_2.id)
 
         self.assertEqual(follow_up_pp_2.payment_items.count(), 1)
@@ -414,10 +410,7 @@ class TestPaymentPlanServices(APITestCase):
     def test_split(self, min_no_of_payments_in_chunk_mock: Any, get_exchange_rate_mock: Any) -> None:
         min_no_of_payments_in_chunk_mock.__get__ = mock.Mock(return_value=2)
 
-        pp = PaymentPlanFactory(
-            program__cycle__start_date=timezone.datetime(2021, 6, 10, tzinfo=utc).date(),
-            program__cycle__end_date=timezone.datetime(2021, 7, 10, tzinfo=utc).date(),
-        )
+        pp = PaymentPlanFactory()
 
         with self.assertRaisesMessage(GraphQLError, "No payments to split"):
             PaymentPlanService(pp).split(PaymentPlanSplit.SplitType.BY_COLLECTOR)
@@ -523,8 +516,6 @@ class TestPaymentPlanServices(APITestCase):
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_send_to_payment_gateway(self, get_exchange_rate_mock: Any) -> None:
         pp = PaymentPlanFactory(
-            program__cycle__start_date=timezone.datetime(2021, 6, 10, tzinfo=utc).date(),
-            program__cycle__end_date=timezone.datetime(2021, 7, 10, tzinfo=utc).date(),
             status=PaymentPlan.Status.ACCEPTED,
         )
         pp.background_action_status_send_to_payment_gateway()

@@ -14,17 +14,26 @@ class FundsCommitmentAdmin(HOPEModelAdminBase):
         "funds_commitment_item",
         "funds_commitment_number",
         "posting_date",
+        "grant_number",
+        "wbs_element",
     )
     list_filter = (
         "business_area",
         "posting_date",
         ("business_area", ValueFilter),
     )
-    search_fields = ("rec_serial_number", "vendor_id", "wbs_element", "funds_commitment_number")
+    search_fields = (
+        "rec_serial_number",
+        "vendor_id",
+        "wbs_element",
+        "funds_commitment_number",
+        "grant_number",
+        "wbs_element",
+    )
 
 
 @admin.register(DownPayment)
 class DownPaymentAdmin(HOPEModelAdminBase):
-    list_display = ("rec_serial_number", "down_payment_reference", "business_area", "consumed_fc_number")
+    list_display = ("rec_serial_number", "down_payment_reference", "business_area", "consumed_fc_number", "doc_number")
 
-    list_filter = (("business_area", ValueFilter),)
+    list_filter = (("business_area", ValueFilter), "doc_number")

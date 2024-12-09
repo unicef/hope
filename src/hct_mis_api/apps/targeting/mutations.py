@@ -15,12 +15,12 @@ from hct_mis_api.apps.account.permissions import (
 )
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core import utils
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.permissions import is_authenticated
 from hct_mis_api.apps.core.scalars import BigInt
 from hct_mis_api.apps.core.utils import (
     check_concurrency_version_in_mutation,
     decode_id_string,
+    get_program_id_from_headers,
 )
 from hct_mis_api.apps.core.validators import raise_program_status_is
 from hct_mis_api.apps.household.models import Household, Individual
@@ -39,6 +39,8 @@ from hct_mis_api.apps.targeting.inputs import (
 )
 from hct_mis_api.apps.targeting.models import (
     HouseholdSelection,
+    TargetingCollectorBlockRuleFilter,
+    TargetingCollectorRuleFilterBlock,
     TargetingCriteria,
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
@@ -115,29 +117,47 @@ def get_unicef_ids(ids_string: str, type_id: str, program: Program) -> str:
 
 def from_input_to_targeting_criteria(targeting_criteria_input: Dict, program: Program) -> TargetingCriteria:
     rules = targeting_criteria_input.pop("rules", [])
-    household_ids = targeting_criteria_input.get("household_ids")
-    individual_ids = targeting_criteria_input.get("individual_ids")
-    if household_ids:
-        targeting_criteria_input["household_ids"] = get_unicef_ids(household_ids, "household", program)
-    if individual_ids:
-        targeting_criteria_input["individual_ids"] = get_unicef_ids(individual_ids, "individual", program)
 
     targeting_criteria = TargetingCriteria(**targeting_criteria_input)
     targeting_criteria.save()
-    for rule_input in rules:
-        rule = TargetingCriteriaRule(targeting_criteria=targeting_criteria)
-        rule.save()
-        for filter_input in rule_input.get("filters", []):
-            rule_filter = TargetingCriteriaRuleFilter(targeting_criteria_rule=rule, **filter_input)
-            rule_filter.save()
-        for block_input in rule_input.get("individuals_filters_blocks", []):
-            block = TargetingIndividualRuleFilterBlock(targeting_criteria_rule=rule)
-            block.save()
-            for individual_block_filters_input in block_input.get("individual_block_filters"):
-                individual_block_filters = TargetingIndividualBlockRuleFilter(
-                    individuals_filters_block=block, **individual_block_filters_input
+
+    for rule in rules:
+        household_ids = rule.get("household_ids", "")
+        individual_ids = rule.get("individual_ids", "")
+        households_filters_blocks = rule.get("households_filters_blocks", [])
+        individuals_filters_blocks = rule.get("individuals_filters_blocks", [])
+        collectors_filters_blocks = rule.get("collectors_filters_blocks", [])
+        if household_ids:
+            household_ids = get_unicef_ids(household_ids, "household", program)
+        if individual_ids:
+            individual_ids = get_unicef_ids(individual_ids, "individual", program)
+
+        tc_rule = TargetingCriteriaRule(
+            targeting_criteria=targeting_criteria, household_ids=household_ids, individual_ids=individual_ids
+        )
+        tc_rule.save()
+        for hh_filter in households_filters_blocks:
+            tc_rule_filter = TargetingCriteriaRuleFilter(targeting_criteria_rule=tc_rule, **hh_filter)
+            tc_rule_filter.save()
+
+        for ind_filter_block in individuals_filters_blocks:
+            ind_block = TargetingIndividualRuleFilterBlock(targeting_criteria_rule=tc_rule)
+            ind_block.save()
+            for ind_filter in ind_filter_block.get("individual_block_filters", []):
+                individual_filter = TargetingIndividualBlockRuleFilter(
+                    individuals_filters_block=ind_block, **ind_filter
                 )
-                individual_block_filters.save()
+                individual_filter.save()
+
+        for collector_filter_block in collectors_filters_blocks:
+            collector_block = TargetingCollectorRuleFilterBlock(targeting_criteria_rule=tc_rule)
+            collector_block.save()
+            for collectors_filter in collector_filter_block.get("collector_block_filters", []):
+                collector_block_filters = TargetingCollectorBlockRuleFilter(
+                    collector_block_filters=collector_block, **collectors_filter
+                )
+                collector_block_filters.save()
+
     return targeting_criteria
 
 
@@ -153,10 +173,12 @@ class CreateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
     def processed_mutate(cls, root: Any, info: Any, **kwargs: Any) -> "CreateTargetPopulationMutation":
         user = info.context.user
         input_data = kwargs.pop("input")
-        program = get_object_or_404(Program, pk=decode_id_string(input_data.get("program_id")))
+        program_id = get_program_id_from_headers(info.context.headers)
+        program = get_object_or_404(Program, pk=program_id)
         program_cycle = get_object_or_404(ProgramCycle, pk=decode_id_string(input_data.get("program_cycle_id")))
+        business_area = program.business_area
 
-        cls.has_permission(info, Permissions.TARGETING_CREATE, program.business_area)
+        cls.has_permission(info, Permissions.TARGETING_CREATE, business_area)
 
         if program.status != Program.ACTIVE:
             raise ValidationError("Only Active program can be assigned to Targeting")
@@ -168,7 +190,6 @@ class CreateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
             raise ValidationError(f"Target population with name: {tp_name} and program: {program.name} already exists.")
         targeting_criteria_input = input_data.get("targeting_criteria")
 
-        business_area = BusinessArea.objects.get(slug=input_data.pop("business_area_slug"))
         TargetingCriteriaInputValidator.validate(targeting_criteria_input, program)
         targeting_criteria = from_input_to_targeting_criteria(targeting_criteria_input, program)
         target_population = TargetPopulation(
@@ -216,13 +237,13 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         cls.has_permission(info, Permissions.TARGETING_UPDATE, target_population.business_area)
 
         name = input_data.get("name", "").strip()
-        program_id_encoded = input_data.get("program_id")
         vulnerability_score_min = input_data.get("vulnerability_score_min")
         vulnerability_score_max = input_data.get("vulnerability_score_max")
         excluded_ids = input_data.get("excluded_ids")
         exclusion_reason = input_data.get("exclusion_reason")
         targeting_criteria_input = input_data.get("targeting_criteria")
         program_cycle_id_encoded = input_data.get("program_cycle_id")
+        program = target_population.program
 
         should_rebuild_stats = False
         should_rebuild_list = False
@@ -254,12 +275,6 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         if vulnerability_score_max is not None:
             should_rebuild_stats = True
             target_population.vulnerability_score_max = vulnerability_score_max
-        if program_id_encoded:
-            should_rebuild_list = True
-            program = get_object_or_404(Program, pk=decode_id_string(program_id_encoded))
-            target_population.program = program
-        else:
-            program = target_population.program
 
         if program_cycle_id_encoded:
             program_cycle = get_object_or_404(ProgramCycle, pk=decode_id_string(program_cycle_id_encoded))
@@ -531,7 +546,11 @@ class CopyTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
         targeting_criteria_copy = TargetingCriteria()
         targeting_criteria_copy.save()
         for rule in targeting_criteria.rules.all():
-            rule_copy = TargetingCriteriaRule(targeting_criteria=targeting_criteria_copy)
+            rule_copy = TargetingCriteriaRule(
+                targeting_criteria=targeting_criteria_copy,
+                household_ids=rule.household_ids,
+                individual_ids=rule.individual_ids,
+            )
             rule_copy.save()
             for hh_filter in rule.filters.all():
                 hh_filter.pk = None
@@ -546,6 +565,15 @@ class CopyTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
                     ind_filter.pk = None
                     ind_filter.individuals_filters_block = ind_filter_block_copy
                     ind_filter.save()
+
+            for col_filter_block in rule.collectors_filters_blocks.all():
+                col_filter_block_copy = TargetingCollectorRuleFilterBlock(targeting_criteria_rule=rule_copy)
+                col_filter_block_copy.save()
+                for col_filter in col_filter_block.collector_block_filters.all():
+                    col_filter.pk = None
+                    col_filter.collector_block_filters = col_filter_block_copy
+                    col_filter.save()
+        # TODO: will remove after refactoring
         targeting_criteria_copy.household_ids = targeting_criteria.household_ids
         targeting_criteria_copy.individual_ids = targeting_criteria.individual_ids
         targeting_criteria_copy.save()

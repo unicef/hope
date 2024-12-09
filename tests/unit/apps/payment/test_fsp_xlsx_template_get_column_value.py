@@ -2,9 +2,9 @@ from typing import Any
 
 from parameterized import parameterized
 
+from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import (
     DocumentFactory,
     DocumentTypeFactory,
@@ -26,16 +26,20 @@ class FinancialServiceProviderXlsxTemplateTest(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        create_afghanistan()
-        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.business_area = create_afghanistan()
         cls.program = ProgramFactory(business_area=cls.business_area)
+        cls.user = UserFactory()
 
     def test_get_column_value_registration_token_empty(self) -> None:
         household, individuals = create_household(household_args={"size": 1, "business_area": self.business_area})
         individual = individuals[0]
         payment_plan = PaymentPlanFactory(
-            program=self.program, status=PaymentPlan.Status.ACCEPTED, business_area=self.business_area
+            program_cycle=self.program.cycles.first(),
+            status=PaymentPlan.Status.ACCEPTED,
+            business_area=self.business_area,
+            created_by=self.user,
         )
+        DocumentTypeFactory(key="registration_token")
         payment = PaymentFactory(parent=payment_plan, household=household, collector=individual, currency="PLN")
         create_payment_plan_snapshot_data(payment_plan)
 
@@ -62,7 +66,9 @@ class FinancialServiceProviderXlsxTemplateTest(APITestCase):
         individual = individuals[0]
 
         payment_plan = PaymentPlanFactory(
-            program=self.program, status=PaymentPlan.Status.ACCEPTED, business_area=self.business_area
+            program_cycle=self.program.cycles.first(),
+            status=PaymentPlan.Status.ACCEPTED,
+            business_area=self.business_area,
         )
         payment = PaymentFactory(parent=payment_plan, household=household, collector=individual, currency="PLN")
         primary = IndividualRoleInHousehold.objects.filter(role=ROLE_PRIMARY).first().individual

@@ -25,8 +25,9 @@ class TestPaymentPlanPDFExportService(TestCase):
         generate_delivery_mechanisms()
         create_afghanistan()
         self.dm_cash = DeliveryMechanism.objects.get(code="cash")
+        program = ProgramFactory(data_collecting_type__type=DataCollectingType.Type.STANDARD)
         self.payment_plan = PaymentPlanFactory(
-            program=ProgramFactory(data_collecting_type__type=DataCollectingType.Type.STANDARD)
+            program_cycle=program.cycles.first(),
         )
         self.payment_plan.unicef_id = "PP-0060-24-00000007"
         self.payment_plan.save()

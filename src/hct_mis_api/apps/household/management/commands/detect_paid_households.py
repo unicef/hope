@@ -10,7 +10,7 @@ from django.db.models import Q, QuerySet
 
 from hct_mis_api.apps.core.models import StorageFile
 from hct_mis_api.apps.household.models import Document, Household
-from hct_mis_api.apps.payment.models import PaymentRecord
+from hct_mis_api.apps.payment.models import Payment
 
 
 def find_paid_households(sf_pk: UUID, business_area_slug: str = "ukraine") -> Dict[str, List[str]]:
@@ -27,8 +27,8 @@ def find_paid_households(sf_pk: UUID, business_area_slug: str = "ukraine") -> Di
         )
         & ~Q(storage_obj=storage_file)
     ).values_list("id", flat=True)
-    payment_records = PaymentRecord.objects.filter(household__id__in=hh_ids_not_loaded_via_sf).distinct("household")
-    already_paid_households = payment_records.values_list("household", flat=True)
+    payments = Payment.objects.filter(household__id__in=hh_ids_not_loaded_via_sf).distinct("household")
+    already_paid_households = payments.values_list("household", flat=True)
 
     def match(household_to_match: Household) -> QuerySet[Household]:
         tax_ids_in_household_to_match = Document.objects.filter(

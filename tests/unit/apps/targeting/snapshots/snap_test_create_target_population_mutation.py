@@ -23,7 +23,10 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_0_with_permi
                     'individualIds': '',
                     'rules': [
                         {
-                            'filters': [
+                            'collectorsFiltersBlocks': [
+                            ],
+                            'householdIds': '',
+                            'householdsFiltersBlocks': [
                                 {
                                     'arguments': [
                                         3
@@ -33,6 +36,7 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_0_with_permi
                                     'flexFieldClassification': 'NOT_FLEX_FIELD'
                                 }
                             ],
+                            'individualIds': '',
                             'individualsFiltersBlocks': [
                             ]
                         }
@@ -69,8 +73,8 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_target_by_id
     'data': {
         'createTargetPopulation': {
             'targetPopulation': {
-                'hasEmptyCriteria': True,
-                'hasEmptyIdsCriteria': False,
+                'hasEmptyCriteria': False,
+                'hasEmptyIdsCriteria': True,
                 'name': 'Test name 1',
                 'programCycle': {
                     'status': 'ACTIVE'
@@ -80,6 +84,16 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_target_by_id
                     'householdIds': 'HH-1',
                     'individualIds': '',
                     'rules': [
+                        {
+                            'collectorsFiltersBlocks': [
+                            ],
+                            'householdIds': 'HH-1',
+                            'householdsFiltersBlocks': [
+                            ],
+                            'individualIds': '',
+                            'individualsFiltersBlocks': [
+                            ]
+                        }
                     ]
                 },
                 'totalHouseholdsCount': None,
@@ -93,8 +107,8 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_target_by_id
     'data': {
         'createTargetPopulation': {
             'targetPopulation': {
-                'hasEmptyCriteria': True,
-                'hasEmptyIdsCriteria': False,
+                'hasEmptyCriteria': False,
+                'hasEmptyIdsCriteria': True,
                 'name': 'Test name 2',
                 'programCycle': {
                     'status': 'ACTIVE'
@@ -104,6 +118,16 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_target_by_id
                     'householdIds': 'HH-1, HH-2, HH-3',
                     'individualIds': 'IND-33',
                     'rules': [
+                        {
+                            'collectorsFiltersBlocks': [
+                            ],
+                            'householdIds': 'HH-1, HH-2, HH-3',
+                            'householdsFiltersBlocks': [
+                            ],
+                            'individualIds': 'IND-33',
+                            'individualsFiltersBlocks': [
+                            ]
+                        }
                     ]
                 },
                 'totalHouseholdsCount': None,
@@ -117,8 +141,8 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_target_by_id
     'data': {
         'createTargetPopulation': {
             'targetPopulation': {
-                'hasEmptyCriteria': True,
-                'hasEmptyIdsCriteria': False,
+                'hasEmptyCriteria': False,
+                'hasEmptyIdsCriteria': True,
                 'name': 'Test name 3',
                 'programCycle': {
                     'status': 'ACTIVE'
@@ -128,6 +152,16 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_target_by_id
                     'householdIds': 'HH-1',
                     'individualIds': 'IND-33',
                     'rules': [
+                        {
+                            'collectorsFiltersBlocks': [
+                            ],
+                            'householdIds': 'HH-1',
+                            'householdsFiltersBlocks': [
+                            ],
+                            'individualIds': 'IND-33',
+                            'individualsFiltersBlocks': [
+                            ]
+                        }
                     ]
                 },
                 'totalHouseholdsCount': None,
@@ -141,8 +175,8 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_target_by_id
     'data': {
         'createTargetPopulation': {
             'targetPopulation': {
-                'hasEmptyCriteria': True,
-                'hasEmptyIdsCriteria': False,
+                'hasEmptyCriteria': False,
+                'hasEmptyIdsCriteria': True,
                 'name': 'Test name 4',
                 'programCycle': {
                     'status': 'ACTIVE'
@@ -152,6 +186,16 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_target_by_id
                     'householdIds': '',
                     'individualIds': 'IND-33',
                     'rules': [
+                        {
+                            'collectorsFiltersBlocks': [
+                            ],
+                            'householdIds': '',
+                            'householdsFiltersBlocks': [
+                            ],
+                            'individualIds': 'IND-33',
+                            'individualsFiltersBlocks': [
+                            ]
+                        }
                     ]
                 },
                 'totalHouseholdsCount': None,
@@ -165,8 +209,8 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_target_by_id
     'data': {
         'createTargetPopulation': {
             'targetPopulation': {
-                'hasEmptyCriteria': True,
-                'hasEmptyIdsCriteria': False,
+                'hasEmptyCriteria': False,
+                'hasEmptyIdsCriteria': True,
                 'name': 'Test name 5',
                 'programCycle': {
                     'status': 'ACTIVE'
@@ -176,6 +220,16 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_target_by_id
                     'householdIds': '',
                     'individualIds': 'IND-33',
                     'rules': [
+                        {
+                            'collectorsFiltersBlocks': [
+                            ],
+                            'householdIds': '',
+                            'householdsFiltersBlocks': [
+                            ],
+                            'individualIds': 'IND-33',
+                            'individualsFiltersBlocks': [
+                            ]
+                        }
                     ]
                 },
                 'totalHouseholdsCount': None,
@@ -209,8 +263,8 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_target_by_id
     'data': {
         'createTargetPopulation': {
             'targetPopulation': {
-                'hasEmptyCriteria': True,
-                'hasEmptyIdsCriteria': False,
+                'hasEmptyCriteria': False,
+                'hasEmptyIdsCriteria': True,
                 'name': 'Test name 7',
                 'programCycle': {
                     'status': 'ACTIVE'
@@ -220,6 +274,16 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_target_by_id
                     'householdIds': 'HH-1',
                     'individualIds': '',
                     'rules': [
+                        {
+                            'collectorsFiltersBlocks': [
+                            ],
+                            'householdIds': 'HH-1',
+                            'householdsFiltersBlocks': [
+                            ],
+                            'individualIds': '',
+                            'individualsFiltersBlocks': [
+                            ]
+                        }
                     ]
                 },
                 'totalHouseholdsCount': None,
@@ -269,7 +333,52 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_target_by_id
     ]
 }
 
-snapshots['TestCreateTargetPopulationMutation::test_create_mutation_with_comparison_method_contains_0_with_permission 1'] = {
+snapshots['TestCreateTargetPopulationMutation::test_create_mutation_with_collectors_field 1'] = {
+    'data': {
+        'createTargetPopulation': {
+            'targetPopulation': {
+                'hasEmptyCriteria': False,
+                'hasEmptyIdsCriteria': True,
+                'name': 'Example name 5',
+                'programCycle': {
+                    'status': 'ACTIVE'
+                },
+                'status': 'OPEN',
+                'targetingCriteria': {
+                    'householdIds': '',
+                    'individualIds': '',
+                    'rules': [
+                        {
+                            'collectorsFiltersBlocks': [
+                                {
+                                    'collectorBlockFilters': [
+                                        {
+                                            'arguments': [
+                                                'No'
+                                            ],
+                                            'fieldName': 'mobile_phone_number__cash_over_the_counter',
+                                            'labelEn': 'Mobile Phone Number Cash Over The Counter (UT Name Delivery Mechanism)'
+                                        }
+                                    ]
+                                }
+                            ],
+                            'householdIds': '',
+                            'householdsFiltersBlocks': [
+                            ],
+                            'individualIds': '',
+                            'individualsFiltersBlocks': [
+                            ]
+                        }
+                    ]
+                },
+                'totalHouseholdsCount': None,
+                'totalIndividualsCount': None
+            }
+        }
+    }
+}
+
+snapshots['TestCreateTargetPopulationMutation::test_create_mutation_with_collectors_field_validation_error 1'] = {
     'data': {
         'createTargetPopulation': None
     },
@@ -281,12 +390,54 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_with_compari
                     'line': 3
                 }
             ],
-            'message': "['SELECT_MANY expects at least 1 argument']",
+            'message': '["Can\'t field field \'mobile_phone_number__cash_over_the_counter\' in Delivery Mechanism data"]',
             'path': [
                 'createTargetPopulation'
             ]
         }
     ]
+}
+
+snapshots['TestCreateTargetPopulationMutation::test_create_mutation_with_comparison_method_contains_0_with_permission 1'] = {
+    'data': {
+        'createTargetPopulation': {
+            'targetPopulation': {
+                'hasEmptyCriteria': False,
+                'hasEmptyIdsCriteria': True,
+                'name': 'Example name 5',
+                'programCycle': {
+                    'status': 'ACTIVE'
+                },
+                'status': 'OPEN',
+                'targetingCriteria': {
+                    'householdIds': '',
+                    'individualIds': '',
+                    'rules': [
+                        {
+                            'collectorsFiltersBlocks': [
+                            ],
+                            'householdIds': '',
+                            'householdsFiltersBlocks': [
+                                {
+                                    'arguments': [
+                                        'Average'
+                                    ],
+                                    'comparisonMethod': 'CONTAINS',
+                                    'fieldName': 'registration_data_import',
+                                    'flexFieldClassification': 'NOT_FLEX_FIELD'
+                                }
+                            ],
+                            'individualIds': '',
+                            'individualsFiltersBlocks': [
+                            ]
+                        }
+                    ]
+                },
+                'totalHouseholdsCount': None,
+                'totalIndividualsCount': None
+            }
+        }
+    }
 }
 
 snapshots['TestCreateTargetPopulationMutation::test_create_mutation_with_comparison_method_contains_1_without_permission 1'] = {
@@ -325,8 +476,12 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_with_flex_fi
                     'individualIds': '',
                     'rules': [
                         {
-                            'filters': [
+                            'collectorsFiltersBlocks': [
                             ],
+                            'householdIds': '',
+                            'householdsFiltersBlocks': [
+                            ],
+                            'individualIds': '',
                             'individualsFiltersBlocks': [
                                 {
                                     'individualBlockFilters': [
@@ -368,8 +523,12 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_with_pdu_fle
                     'individualIds': '',
                     'rules': [
                         {
-                            'filters': [
+                            'collectorsFiltersBlocks': [
                             ],
+                            'householdIds': '',
+                            'householdsFiltersBlocks': [
+                            ],
+                            'individualIds': '',
                             'individualsFiltersBlocks': [
                                 {
                                     'individualBlockFilters': [
@@ -412,7 +571,10 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_with_pdu_fle
                     'individualIds': '',
                     'rules': [
                         {
-                            'filters': [
+                            'collectorsFiltersBlocks': [
+                            ],
+                            'householdIds': '',
+                            'householdsFiltersBlocks': [
                                 {
                                     'arguments': [
                                         '2',
@@ -423,6 +585,7 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation_with_pdu_fle
                                     'flexFieldClassification': 'FLEX_FIELD_PDU'
                                 }
                             ],
+                            'individualIds': '',
                             'individualsFiltersBlocks': [
                             ]
                         }
