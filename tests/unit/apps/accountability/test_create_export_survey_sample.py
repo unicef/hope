@@ -7,7 +7,7 @@ from hct_mis_api.apps.accountability.fixtures import SurveyFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory, PaymentFactory
+from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
@@ -33,7 +33,12 @@ mutation ExportSurveySample($surveyId: ID!) {
         partner = PartnerFactory(name="Partner")
         cls.user = UserFactory(first_name="John", last_name="Wick", partner=partner)
         cls.program = ProgramFactory(status=Program.ACTIVE, business_area=cls.business_area)
-        cls.payment_plan = PaymentPlanFactory(business_area=cls.business_area, name="Test Target Population", created_by=cls.user, program_cycle=cls.program.cycles.first())
+        cls.payment_plan = PaymentPlanFactory(
+            business_area=cls.business_area,
+            name="Test Target Population",
+            created_by=cls.user,
+            program_cycle=cls.program.cycles.first(),
+        )
         cls.update_partner_access_to_program(partner, cls.program)
 
         households = [create_household()[0] for _ in range(14)]
@@ -44,7 +49,6 @@ mutation ExportSurveySample($surveyId: ID!) {
             )
 
         cls.survey = SurveyFactory(title="Test survey", payment_plan=cls.payment_plan, created_by=cls.user)
-
 
     def test_create_export_survey_sample_without_permissions(self) -> None:
         self.create_user_role_with_permissions(self.user, [], self.business_area)
@@ -62,7 +66,6 @@ mutation ExportSurveySample($surveyId: ID!) {
                 "surveyId": self.id_to_base64(self.survey.id, "SurveyNode"),
             },
         )
-
 
     @patch(
         "hct_mis_api.apps.accountability.celery_tasks.export_survey_sample_task.delay",

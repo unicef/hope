@@ -8,7 +8,7 @@ from hct_mis_api.apps.accountability.models import Message
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory, PaymentFactory
+from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
@@ -29,7 +29,9 @@ class TestSampleSizeQuery(APITestCase):
         cls.user = UserFactory(first_name="John", last_name="Wick")
         cls.business_area = create_afghanistan()
 
-        cls.pp = PaymentPlanFactory(business_area=cls.business_area, status=PaymentPlan.Status.TP_PROCESSING, created_by=cls.user)
+        cls.pp = PaymentPlanFactory(
+            business_area=cls.business_area, status=PaymentPlan.Status.TP_PROCESSING, created_by=cls.user
+        )
         cls.households = [create_household()[0] for _ in range(4)]
         for household in cls.households:
             PaymentFactory(household=household, parent=cls.pp)

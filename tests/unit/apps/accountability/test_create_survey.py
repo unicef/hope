@@ -11,7 +11,7 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.services.rapid_pro.api import RapidProFlowResponse
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory, PaymentFactory
+from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
@@ -49,7 +49,9 @@ class TestCreateSurvey(APITestCase):
         partner = PartnerFactory(name="Partner")
         cls.user = UserFactory(first_name="John", last_name="Doe", partner=partner)
         cls.program = ProgramFactory(status=Program.ACTIVE, business_area=cls.business_area)
-        cls.pp = PaymentPlanFactory(business_area=cls.business_area, created_by=cls.user, program_cycle=cls.program.cycles.first())
+        cls.pp = PaymentPlanFactory(
+            business_area=cls.business_area, created_by=cls.user, program_cycle=cls.program.cycles.first()
+        )
         cls.update_partner_access_to_program(partner, cls.program)
 
     def test_create_survey_without_permission(self) -> None:

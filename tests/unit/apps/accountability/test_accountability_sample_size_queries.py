@@ -29,7 +29,9 @@ class TestAccountabilitySampleSizeQueries(APITestCase):
         cls.business_area = create_afghanistan()
         cls.user = UserFactory(first_name="John", last_name="Wick")
         cls.program = ProgramFactory(status=Program.ACTIVE)
-        cls.payment_plan = PaymentPlanFactory(business_area=cls.business_area, created_by=cls.user, program_cycle=cls.program.cycles.first())
+        cls.payment_plan = PaymentPlanFactory(
+            business_area=cls.business_area, created_by=cls.user, program_cycle=cls.program.cycles.first()
+        )
 
         households = [create_household()[0] for _ in range(14)]
         for household in households:
@@ -38,7 +40,11 @@ class TestAccountabilitySampleSizeQueries(APITestCase):
         SurveyFactory.create_batch(3, payment_plan=cls.payment_plan, created_by=cls.user)
         SurveyFactory(title="Test survey", payment_plan=cls.payment_plan, created_by=cls.user)
         SurveyFactory.create_batch(
-            3, payment_plan=PaymentPlanFactory(business_area=cls.business_area, created_by=cls.user, program_cycle=cls.program.cycles.first()), created_by=UserFactory()
+            3,
+            payment_plan=PaymentPlanFactory(
+                business_area=cls.business_area, created_by=cls.user, program_cycle=cls.program.cycles.first()
+            ),
+            created_by=UserFactory(),
         )
         cls.sampling_data = {
             Survey.SAMPLING_FULL_LIST: {

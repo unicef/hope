@@ -11,7 +11,7 @@ from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory, PaymentFactory
+from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
@@ -64,7 +64,9 @@ class TestListQueryMessage(APITestCase):
         cls.user = UserFactory(first_name="John", last_name="Wick", partner=cls.partner)
         cls.business_area = create_afghanistan()
         cls.program = ProgramFactory(status=Program.ACTIVE, business_area=cls.business_area)
-        cls.pp = PaymentPlanFactory(business_area=cls.business_area, created_by=cls.user, program_cycle=cls.program.cycles.first())
+        cls.pp = PaymentPlanFactory(
+            business_area=cls.business_area, created_by=cls.user, program_cycle=cls.program.cycles.first()
+        )
         households = [create_household()[0] for _ in range(14)]
         cls.household = households[0]
         for household in households:
