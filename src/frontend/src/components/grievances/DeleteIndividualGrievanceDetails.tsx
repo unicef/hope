@@ -18,6 +18,7 @@ import { LoadingComponent } from '@core/LoadingComponent';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
+import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
 
 export type RoleReassignData = {
@@ -36,6 +37,8 @@ export function DeleteIndividualGrievanceDetails({
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const confirm = useConfirmation();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const isForApproval = ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
   const isHeadOfHousehold =
@@ -154,11 +157,11 @@ export function DeleteIndividualGrievanceDetails({
   const allLabels = [...labels, ...documentLabels];
 
   let dialogText = t(
-    'You did not approve the following individual to be withdrawn. Are you sure you want to continue?',
+    `You did not approve the following ${beneficiaryGroup?.memberLabel} to be withdrawn. Are you sure you want to continue?`,
   );
   if (!ticket.deleteIndividualTicketDetails.approveStatus) {
     dialogText = t(
-      'You are approving the following individual to be withdrawn. Are you sure you want to continue?',
+      `You are approving the following ${beneficiaryGroup?.memberLabel} to be withdrawn. Are you sure you want to continue?`,
     );
   }
   return (
@@ -166,7 +169,7 @@ export function DeleteIndividualGrievanceDetails({
       <Title>
         <Box display="flex" justifyContent="space-between">
           <Typography variant="h6">
-            {t('Individual to be withdrawn')}
+            {t(`${beneficiaryGroup?.memberLabel} to be withdrawn`)}
           </Typography>
           {canApproveDataChange && (
             <Button

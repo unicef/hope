@@ -50,6 +50,8 @@ export function CreateFollowUpPaymentPlan({
   const [mutate, { loading }] = useCreateFollowUpPpMutation();
   const { isActiveProgram } = useProgramContext();
   const { showMessage } = useSnackbar();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const { id, totalWithdrawnHouseholdsCount, unsuccessfulPaymentsCount } =
     paymentPlan;
@@ -154,7 +156,7 @@ export function CreateFollowUpPaymentPlan({
                         <FieldBorder color="#FF0200">
                           <GreyText>
                             {t(
-                              'Withdrawn Household cannot be added into follow-up payment plan',
+                              `Withdrawn ${beneficiaryGroup?.groupLabel} cannot be added into follow-up payment plan`,
                             )}
                           </GreyText>
                         </FieldBorder>
@@ -189,7 +191,11 @@ export function CreateFollowUpPaymentPlan({
                       </LabelizedField>
                     </Grid> */}
                     <Grid item xs={6}>
-                      <LabelizedField label={t('Withdrawn Households')}>
+                      <LabelizedField
+                        label={t(
+                          `Withdrawn ${beneficiaryGroup?.groupLabelPlural}`,
+                        )}
+                      >
                         {totalWithdrawnHouseholdsCount}
                       </LabelizedField>
                     </Grid>

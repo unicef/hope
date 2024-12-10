@@ -32,6 +32,7 @@ export const TargetPopulationsPage = (): ReactElement => {
   const { t } = useTranslation();
   const permissions = usePermissions();
   const { programId } = useBaseUrl();
+
   const { data: programData } = useProgramQuery({
     variables: { id: programId },
   });
@@ -54,6 +55,7 @@ export const TargetPopulationsPage = (): ReactElement => {
     Table = TargetPopulationForPeopleTable;
     Filters = TargetPopulationForPeopleFilters;
   }
+
   return (
     <UniversalErrorBoundary
       location={location}

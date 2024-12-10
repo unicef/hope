@@ -99,10 +99,10 @@ exports[`components/population/HouseholdDetails should render 1`] = `
               class="sc-gtLWhw bkWrmx"
               color="textSecondary"
             >
-              FEMALE CHILD HEADED HOUSEHOLD
+              FEMALE CHILD HEADED Household
             </span>
             <div
-              data-cy="label-FEMALE CHILD HEADED HOUSEHOLD"
+              data-cy="label-FEMALE CHILD HEADED Household"
             >
               <span
                 class="sc-egkSDF XYdBd"
@@ -121,10 +121,10 @@ exports[`components/population/HouseholdDetails should render 1`] = `
               class="sc-gtLWhw bkWrmx"
               color="textSecondary"
             >
-              CHILD HEADED HOUSEHOLD
+              CHILD HEADED Household
             </span>
             <div
-              data-cy="label-CHILD HEADED HOUSEHOLD"
+              data-cy="label-CHILD HEADED Household"
             >
               <span
                 class="sc-egkSDF XYdBd"
@@ -374,16 +374,40 @@ exports[`components/population/HouseholdDetails should render 1`] = `
               class="sc-gtLWhw bkWrmx"
               color="textSecondary"
             >
-              IS THIS A RETURNEE HOUSEHOLD?
+              IS THIS A RETURNEE Household?
             </span>
             <div
-              data-cy="label-IS THIS A RETURNEE HOUSEHOLD?"
+              data-cy="label-IS THIS A RETURNEE Household?"
             >
               <span
                 class="sc-egkSDF XYdBd"
                 color="textSecondary"
               >
                 No
+              </span>
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
+        >
+          <div>
+            <span
+              class="sc-gtLWhw bkWrmx"
+              color="textSecondary"
+            >
+              Linked Grievances
+            </span>
+            <div
+              data-cy="label-Linked Grievances"
+            >
+              <span
+                class="sc-egkSDF XYdBd"
+                color="textSecondary"
+              >
+                <span>
+                  -
+                </span>
               </span>
             </div>
           </div>

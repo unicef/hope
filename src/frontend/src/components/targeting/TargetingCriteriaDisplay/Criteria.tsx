@@ -23,6 +23,7 @@ import { BlueText } from '@components/grievances/LookUps/LookUpStyles';
 import { ReactElement, useState } from 'react';
 import { Fragment } from 'react/jsx-runtime';
 import { t } from 'i18next';
+import { useProgramContext } from 'src/programContext';
 
 interface CriteriaElementProps {
   alternative?: boolean;
@@ -266,6 +267,8 @@ export function Criteria({
   householdIds,
   individualIds,
 }: CriteriaProps): ReactElement {
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const [openHH, setOpenHH] = useState(false);
   const [openIND, setOpenIND] = useState(false);
   const [currentHouseholdIds, setCurrentHouseholdIds] = useState<string[]>([]);
@@ -326,7 +329,7 @@ export function Criteria({
       {householdIds && (
         <div>
           <Typography data-cy="household-ids-modal-title" variant="body1">
-            {t('Household IDs selected')}:
+            {t(`${beneficiaryGroup?.groupLabel} IDs selected`)}:
           </Typography>
           <BlueText
             onClick={() => handleOpenHouseholdIds(householdIds)}
@@ -340,7 +343,7 @@ export function Criteria({
       {individualIds && (
         <div>
           <Typography data-cy="individual-ids-modal-title" variant="body1">
-            {t('Individual IDs selected')}:
+            {t(`${beneficiaryGroup?.groupLabel} IDs selected`)}:
           </Typography>
           <BlueText
             onClick={() => handleOpenIndividualIds(individualIds)}
@@ -408,7 +411,9 @@ export function Criteria({
         </ButtonsContainer>
       )}
       <Dialog open={openHH} onClose={handleClose} maxWidth="sm" fullWidth>
-        <DialogTitle>{t('Selected Households')}</DialogTitle>
+        <DialogTitle>
+          {t(`Selected ${beneficiaryGroup?.groupLabelPlural}`)}
+        </DialogTitle>
         <DialogContent>
           <Table>
             <TableHead>
