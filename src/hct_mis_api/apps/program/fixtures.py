@@ -12,7 +12,7 @@ from faker import Faker
 
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
-from hct_mis_api.apps.program.models import Program, ProgramCycle
+from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
 
 fake = Faker()
 
@@ -45,10 +45,23 @@ class ProgramCycleFactory(DjangoModelFactory):
     program = factory.SubFactory("hct_mis_api.apps.program.fixtures.ProgramFactory")
 
 
+class BeneficiaryGroupFactory(DjangoModelFactory):
+    name = "Household"
+    group_label = factory.Faker("word")
+    group_label_plural = factory.Faker("word")
+    member_label = factory.Faker("word")
+    member_label_plural = factory.Faker("word")
+    master_detail = True
+
+    class Meta:
+        model = BeneficiaryGroup
+        django_get_or_create = ("name",)
+
+
 class ProgramFactory(DjangoModelFactory):
     class Meta:
         model = Program
-        django_get_or_create = ("programme_code", "business_area")
+        django_get_or_create = ("name", "business_area", "programme_code")
 
     business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first())
     name = factory.Faker(
@@ -97,6 +110,14 @@ class ProgramFactory(DjangoModelFactory):
     data_collecting_type = factory.SubFactory(DataCollectingTypeFactory)
     programme_code = factory.LazyAttribute(
         lambda o: "".join(random.choice(string.ascii_uppercase + string.digits) for _ in range(4))
+    )
+    beneficiary_group = factory.LazyAttribute(
+        lambda o: BeneficiaryGroupFactory(
+            master_detail=False if o.data_collecting_type.type == DataCollectingType.Type.SOCIAL else True,
+            name=factory.Faker("word")
+            if o.data_collecting_type.type == DataCollectingType.Type.SOCIAL
+            else "Household",
+        )
     )
 
     @factory.post_generation
