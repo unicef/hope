@@ -201,6 +201,8 @@ class PaymentPlanFilter(FilterSet):
     dispersion_start_date = DateFilter(field_name="dispersion_start_date", lookup_expr="gte")
     dispersion_end_date = DateFilter(field_name="dispersion_end_date", lookup_expr="lte")
     is_follow_up = BooleanFilter(field_name="is_follow_up")
+    is_payment_plan = BooleanFilter(method="filter_is_payment_plan")
+    is_target_population = BooleanFilter(method="filter_is_target_population")
     source_payment_plan_id = CharFilter(method="source_payment_plan_filter")
     program = CharFilter(method="filter_by_program")
     program_cycle = CharFilter(method="filter_by_program_cycle")
@@ -242,6 +244,16 @@ class PaymentPlanFilter(FilterSet):
 
     def filter_by_program_cycle(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[PaymentPlan]":
         return qs.filter(program_cycle_id=decode_id_string_required(value))
+
+    def filter_is_payment_plan(self, qs: "QuerySet", name: str, value: bool) -> "QuerySet[PaymentPlan]":
+        if value:
+            return qs.exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
+        return qs
+
+    def filter_is_target_population(self, qs: "QuerySet", name: str, value: bool) -> "QuerySet[PaymentPlan]":
+        if value:
+            return qs.filter(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
+        return qs
 
 
 class PaymentFilter(FilterSet):

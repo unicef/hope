@@ -1,11 +1,12 @@
 import { gql } from '@apollo/client';
 
-export const DeleteTargetPopulation = gql`
-  mutation DeleteTargetPopulation(
-    $input: DeleteTargetPopulationMutationInput!
-  ) {
-    deleteTargetPopulation(input: $input) {
-      clientMutationId
+export const DeletePaymentPlan = gql`
+  mutation DeletePaymentPlan($paymentPlanId: ID!) {
+    deletePaymentPlan(paymentPlanId: $paymentPlanId) {
+      paymentPlan {
+        id
+        status
+      }
     }
   }
 `;

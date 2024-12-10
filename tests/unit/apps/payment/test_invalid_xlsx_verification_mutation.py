@@ -54,7 +54,11 @@ class TestXlsxVerificationMarkAsInvalid(APITestCase):
         program = ProgramFactory(business_area=cls.business_area)
         program.admin_areas.set(Area.objects.order_by("?")[:3])
 
-        payment_plan = PaymentPlanFactory(program_cycle=program.cycles.first(), business_area=cls.business_area)
+        payment_plan = PaymentPlanFactory(
+            program_cycle=program.cycles.first(),
+            business_area=cls.business_area,
+            created_by=cls.user,
+        )
         PaymentVerificationSummaryFactory(payment_plan=payment_plan)
         cls.payment_verification_plan = PaymentVerificationPlanFactory(
             payment_plan=payment_plan,

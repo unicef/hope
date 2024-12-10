@@ -27,7 +27,11 @@ class TestExportPDFPaymentPlanSummary(APITestCase):
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.user = UserFactory.create()
         cls.create_user_role_with_permissions(cls.user, [Permissions.PM_EXPORT_PDF_SUMMARY], cls.business_area)
-        cls.payment_plan = PaymentPlanFactory(business_area=cls.business_area, status=PaymentPlan.Status.ACCEPTED)
+        cls.payment_plan = PaymentPlanFactory(
+            business_area=cls.business_area,
+            status=PaymentPlan.Status.ACCEPTED,
+            created_by=cls.user,
+        )
 
     def test_export_pdf_payment_plan_summary_mutation(self) -> None:
         self.snapshot_graphql_request(

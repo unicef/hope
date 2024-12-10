@@ -89,10 +89,9 @@ export const CreatePaymentPlanPage = (): ReactElement => {
       const res = await mutate({
         variables: {
           input: {
-            businessAreaSlug: businessArea,
-            currency,
-            targetingId,
-            dispersionStartDate,
+            programCycleId,
+            name,
+            targetingCriteria,
             dispersionEndDate,
           },
         },

@@ -64,7 +64,7 @@ class MessageAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase, IsOriginalAdmi
         ("created_by", AutoCompleteFilter),
         "created_at",
     )
-    raw_id_fields = ["created_by", "target_population", "program"]
+    raw_id_fields = ["created_by", "payment_plan", "program"]
     filter_horizontal = ["households"]
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:

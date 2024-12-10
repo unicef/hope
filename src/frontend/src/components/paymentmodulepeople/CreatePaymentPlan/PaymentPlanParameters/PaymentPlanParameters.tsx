@@ -6,7 +6,7 @@ import { FormikCurrencyAutocomplete } from '@shared/Formik/FormikCurrencyAutocom
 import { FormikDateField } from '@shared/Formik/FormikDateField';
 import { tomorrow } from '@utils/utils';
 import { Field } from 'formik';
-import { ReactElement, useEffect } from 'react';
+import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PaperContainer } from '../../../targeting/PaperContainer';
 import { CalendarTodayRounded } from '@mui/icons-material';
@@ -21,18 +21,6 @@ export const PaymentPlanParameters = ({
   paymentPlan,
 }: PaymentPlanParametersProps): ReactElement => {
   const { t } = useTranslation();
-  const [loadTargetPopulation, { data, loading }] =
-    useTargetPopulationLazyQuery();
-
-  useEffect(() => {
-    if (values.targetingId) {
-      loadTargetPopulation({
-        variables: {
-          id: values.targetingId,
-        },
-      });
-    }
-  }, [values.targetingId, loadTargetPopulation]);
 
   return (
     <PaperContainer>
