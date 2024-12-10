@@ -96,7 +96,6 @@ class HouseholdCollectionFactory(DjangoModelFactory):
 class HouseholdFactory(DjangoModelFactory):
     class Meta:
         model = Household
-        django_get_or_create = ("unicef_id",)
 
     unicef_id = factory.Sequence(lambda n: f"HH-{n}")
     consent_sign = factory.django.ImageField(color="blue")
