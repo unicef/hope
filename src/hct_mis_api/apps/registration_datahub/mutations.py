@@ -232,10 +232,21 @@ class RegistrationProgramPopulationImportMutation(BaseValidator, PermissionMutat
     ) -> "RegistrationProgramPopulationImportMutation":
         import_to_program_id: str = decode_id_string_required(info.context.headers.get("Program"))
         program = Program.objects.get(id=import_to_program_id)
-        if program.status == Program.FINISHED:
-            raise ValidationError("In order to proceed this action, program status must not be finished")
-
         import_from_program_id = decode_id_string_required(registration_data_import_data["import_from_program_id"])
+        import_from_program = Program.objects.get(id=import_from_program_id)
+
+        if program.status == Program.FINISHED:
+            raise ValidationError("In order to proceed this action, program status must not be finished.")
+
+        if program.beneficiary_group != import_from_program.beneficiary_group:
+            raise ValidationError("Cannot import data from a program with a different Beneficiary Group.")
+
+        if (
+            program.data_collecting_type.code != import_from_program.data_collecting_type.code
+            and program.data_collecting_type not in import_from_program.data_collecting_type.compatible_types.all()
+        ):
+            raise ValidationError("Cannot import data from a program with not compatible data collecting type.")
+
         registration_data_import_data["import_from_program_id"] = import_from_program_id
         (
             created_obj_hct,

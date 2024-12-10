@@ -7,6 +7,7 @@ import { ContentLink } from '@core/ContentLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { AllHouseholdsQuery, useHouseholdLazyQuery } from '@generated/graphql';
 import { LoadingComponent } from '@core/LoadingComponent';
+import { useProgramContext } from 'src/programContext';
 
 interface HouseholdQuestionnaireProps {
   values;
@@ -17,6 +18,8 @@ export function HouseholdQuestionnaire({
 }: HouseholdQuestionnaireProps): ReactElement {
   const { baseUrl } = useBaseUrl();
   const { t } = useTranslation();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const household: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'] =
     values.selectedHousehold;
   const [getHousehold, { data: fullHousehold, loading: fullHouseholdLoading }] =
@@ -39,7 +42,7 @@ export function HouseholdQuestionnaire({
       {[
         {
           name: 'questionnaire_size',
-          label: t('Household Size'),
+          label: t(`${beneficiaryGroup?.groupLabel} Size`),
           value: selectedHouseholdData.size,
           size: 3,
         },
@@ -63,7 +66,7 @@ export function HouseholdQuestionnaire({
         },
         {
           name: 'questionnaire_headOfHousehold',
-          label: t('Head of Household'),
+          label: t(`Head of ${beneficiaryGroup?.groupLabel}`),
           value: (
             <ContentLink
               href={`/${baseUrl}/population/individuals/${selectedHouseholdData.headOfHousehold.id}`}

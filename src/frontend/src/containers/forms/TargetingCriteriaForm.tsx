@@ -41,6 +41,7 @@ import { DialogTitleWrapper } from '../dialogs/DialogTitleWrapper';
 import { TargetingCriteriaIndividualFilterBlocks } from './TargetingCriteriaIndividualFilterBlocks';
 import { AndDivider, AndDividerLabel } from '@components/targeting/AndDivider';
 import { TargetingCriteriaHouseholdFilter } from './TargetingCriteriaHouseholdFilter';
+import { useProgramContext } from 'src/programContext';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { TargetingCriteriaCollectorFilterBlocks } from './TargetingCriteriaCollectorFilterBlocks';
 import { useAllCollectorFieldsAttributesQuery } from '@generated/graphql';
@@ -148,6 +149,8 @@ export const TargetingCriteriaForm = ({
 }: TargetingCriteriaFormPropTypes): ReactElement => {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const { data, loading } = useCachedIndividualFieldsQuery(
     businessArea,
@@ -269,7 +272,7 @@ export const TargetingCriteriaForm = ({
       (!values.individualIds || values.individualIds.length === 0)
     ) {
       errors.nonFieldErrors = [
-        'You need to add at least one household filter, an individual block filter, a collector block filter, a household ID, or an individual ID.',
+        `You need to add at least one ${beneficiaryGroup?.groupLabel} filter or an ${beneficiaryGroup?.memberLabel} block filter.`,
       ];
     } else if (
       values.individualsFiltersBlocks.filter(
@@ -280,7 +283,7 @@ export const TargetingCriteriaForm = ({
       ).length > 0
     ) {
       errors.nonFieldErrors = [
-        'You need to add at least one household filter, an individual block filter, a collector block filter, a household IDs, or an individual IDs.',
+        `You need to add at least one ${beneficiaryGroup?.groupLabel} filter or an ${beneficiaryGroup?.memberLabel} block filter.`,
       ];
     }
     return errors;
@@ -356,7 +359,7 @@ export const TargetingCriteriaForm = ({
                 <DialogDescription>
                   {isSocialWorkingProgram
                     ? ''
-                    : 'All rules defined below have to be true for the entire household.'}
+                    : `All rules defined below have to be true for the entire ${beneficiaryGroup?.groupLabelPlural}.`}{' '}
                 </DialogDescription>
                 <Grid container spacing={3}>
                   {householdFiltersAvailable && (
@@ -367,7 +370,7 @@ export const TargetingCriteriaForm = ({
                         fullWidth
                         multiline
                         variant="outlined"
-                        label={t('Household IDs')}
+                        label={t(`${beneficiaryGroup?.groupLabelPlural} IDs`)}
                         component={FormikTextField}
                       />
                     </Grid>
@@ -425,7 +428,10 @@ export const TargetingCriteriaForm = ({
                         startIcon={<AddCircleOutline />}
                         data-cy="button-household-rule"
                       >
-                        ADD {isSocialWorkingProgram ? 'PEOPLE' : 'HOUSEHOLD'}{' '}
+                        ADD{' '}
+                        {isSocialWorkingProgram
+                          ? 'PEOPLE'
+                          : beneficiaryGroup?.groupLabel.toUpperCase()}{' '}
                         RULE
                       </Button>
                     </ButtonBox>
@@ -447,7 +453,9 @@ export const TargetingCriteriaForm = ({
                               name="individualIds"
                               fullWidth
                               variant="outlined"
-                              label={t('Individual IDs')}
+                              label={t(
+                                `${beneficiaryGroup?.memberLabelPlural} IDs`,
+                              )}
                               component={FormikTextField}
                             />
                           </Box>
@@ -496,7 +504,8 @@ export const TargetingCriteriaForm = ({
                           color="primary"
                           startIcon={<AddCircleOutline />}
                         >
-                          ADD INDIVIDUAL RULE GROUP
+                          {`ADD ${beneficiaryGroup?.memberLabel.toUpperCase()}
+                          RULE GROUP`}
                         </Button>
                       </ButtonBox>
                     </Box>
