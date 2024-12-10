@@ -48,10 +48,10 @@ export type AccountabilityRandomSamplingArguments = {
 
 export type AccountabilitySampleSizeInput = {
   fullListArguments?: InputMaybe<AccountabilityFullListArguments>;
+  paymentPlan?: InputMaybe<Scalars['ID']['input']>;
   program?: InputMaybe<Scalars['ID']['input']>;
   randomSamplingArguments?: InputMaybe<AccountabilityRandomSamplingArguments>;
   samplingType: Scalars['String']['input'];
-  targetPopulation?: InputMaybe<Scalars['ID']['input']>;
 };
 
 export type AccountabilitySampleSizeNode = {
@@ -767,6 +767,7 @@ export type CommunicationMessageNode = Node & {
   isOriginal: Scalars['Boolean']['output'];
   migratedAt?: Maybe<Scalars['DateTime']['output']>;
   numberOfRecipients: Scalars['Int']['output'];
+  paymentPlan?: Maybe<PaymentPlanNode>;
   program?: Maybe<ProgramNode>;
   randomSamplingArguments?: Maybe<Scalars['JSONString']['output']>;
   registrationDataImport?: Maybe<RegistrationDataImportNode>;
@@ -948,10 +949,10 @@ export type CreateAccountabilityCommunicationMessageInput = {
   body: Scalars['String']['input'];
   fullListArguments?: InputMaybe<AccountabilityFullListArguments>;
   households?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
+  paymentPlan?: InputMaybe<Scalars['ID']['input']>;
   randomSamplingArguments?: InputMaybe<AccountabilityRandomSamplingArguments>;
   registrationDataImport?: InputMaybe<Scalars['ID']['input']>;
   samplingType: SamplingChoices;
-  targetPopulation?: InputMaybe<Scalars['ID']['input']>;
   title: Scalars['String']['input'];
 };
 
@@ -1092,10 +1093,10 @@ export type CreateSurveyInput = {
   category: Scalars['String']['input'];
   flow: Scalars['String']['input'];
   fullListArguments?: InputMaybe<AccountabilityFullListArguments>;
+  paymentPlan?: InputMaybe<Scalars['ID']['input']>;
   program?: InputMaybe<Scalars['ID']['input']>;
   randomSamplingArguments?: InputMaybe<AccountabilityRandomSamplingArguments>;
   samplingType: Scalars['String']['input'];
-  targetPopulation?: InputMaybe<Scalars['ID']['input']>;
   title: Scalars['String']['input'];
 };
 
@@ -1791,6 +1792,7 @@ export type FinancialServiceProviderXlsxTemplateNode = Node & {
   coreFields: Array<Scalars['String']['output']>;
   createdAt: Scalars['DateTime']['output'];
   createdBy?: Maybe<UserNode>;
+  documentTypes: Array<Scalars['String']['output']>;
   financialServiceProviders: FinancialServiceProviderNodeConnection;
   flexFields: Array<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
@@ -1900,10 +1902,10 @@ export type GenericPaymentPlanNodeVerificationPlansArgs = {
 export type GetAccountabilityCommunicationMessageSampleSizeInput = {
   fullListArguments?: InputMaybe<AccountabilityFullListArguments>;
   households?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
+  paymentPlan?: InputMaybe<Scalars['ID']['input']>;
   randomSamplingArguments?: InputMaybe<AccountabilityRandomSamplingArguments>;
   registrationDataImport?: InputMaybe<Scalars['ID']['input']>;
   samplingType: SamplingChoices;
-  targetPopulation?: InputMaybe<Scalars['ID']['input']>;
 };
 
 export type GetCashplanVerificationSampleSizeInput = {
@@ -4201,6 +4203,7 @@ export type PaymentPlanNode = Node & {
   isRemoved: Scalars['Boolean']['output'];
   maleAdultsCount: Scalars['Int']['output'];
   maleChildrenCount: Scalars['Int']['output'];
+  messages: CommunicationMessageNodeConnection;
   name?: Maybe<Scalars['String']['output']>;
   paymentItems: PaymentNodeConnection;
   paymentVerificationPlans: PaymentVerificationPlanNodeConnection;
@@ -4219,6 +4222,7 @@ export type PaymentPlanNode = Node & {
   steficonRuleTargeting?: Maybe<RuleCommitNode>;
   steficonTargetingAppliedDate?: Maybe<Scalars['DateTime']['output']>;
   supportingDocuments?: Maybe<Array<Maybe<PaymentPlanSupportingDocumentNode>>>;
+  surveys: SurveyNodeConnection;
   targetingCriteria?: Maybe<TargetingCriteriaNode>;
   totalDeliveredQuantity?: Maybe<Scalars['Float']['output']>;
   totalDeliveredQuantityUsd?: Maybe<Scalars['Float']['output']>;
@@ -4269,6 +4273,15 @@ export type PaymentPlanNodeFollowUpsArgs = {
 };
 
 
+export type PaymentPlanNodeMessagesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
 export type PaymentPlanNodePaymentItemsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -4279,6 +4292,15 @@ export type PaymentPlanNodePaymentItemsArgs = {
 
 
 export type PaymentPlanNodePaymentVerificationPlansArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type PaymentPlanNodeSurveysArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -5128,9 +5150,9 @@ export type QueryAllAccountabilityCommunicationMessagesArgs = {
   numberOfRecipients_Lte?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
   orderBy?: InputMaybe<Scalars['String']['input']>;
+  paymentPlan?: InputMaybe<Scalars['ID']['input']>;
   program?: InputMaybe<Scalars['String']['input']>;
   samplingType?: InputMaybe<Scalars['String']['input']>;
-  targetPopulation?: InputMaybe<Scalars['ID']['input']>;
   title?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -5444,6 +5466,8 @@ export type QueryAllPaymentPlansArgs = {
   dispersionStartDate?: InputMaybe<Scalars['Date']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   isFollowUp?: InputMaybe<Scalars['Boolean']['input']>;
+  isPaymentPlan?: InputMaybe<Scalars['Boolean']['input']>;
+  isTargetPopulation?: InputMaybe<Scalars['Boolean']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
   orderBy?: InputMaybe<Scalars['String']['input']>;
@@ -5631,9 +5655,9 @@ export type QueryAllSurveysArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
   orderBy?: InputMaybe<Scalars['String']['input']>;
+  paymentPlan?: InputMaybe<Scalars['ID']['input']>;
   program?: InputMaybe<Scalars['ID']['input']>;
   search?: InputMaybe<Scalars['String']['input']>;
-  targetPopulation?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -6800,6 +6824,7 @@ export type SurveyNode = Node & {
   hasValidSampleFile?: Maybe<Scalars['Boolean']['output']>;
   id: Scalars['ID']['output'];
   numberOfRecipients: Scalars['Int']['output'];
+  paymentPlan?: Maybe<PaymentPlanNode>;
   program?: Maybe<ProgramNode>;
   randomSamplingArguments: Scalars['JSONString']['output'];
   rapidProUrl?: Maybe<Scalars['String']['output']>;
@@ -8306,7 +8331,11 @@ export type CreateFollowUpPpMutationVariables = Exact<{
 export type CreateFollowUpPpMutation = { __typename?: 'Mutations', createFollowUpPaymentPlan?: { __typename?: 'CreateFollowUpPaymentPlanMutation', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, unicefId?: string | null } | null } | null };
 
 export type CreatePpMutationVariables = Exact<{
-  input: CreatePaymentPlanInput;
+  programCycleId: Scalars['ID']['input'];
+  name: Scalars['String']['input'];
+  targetingCriteria: TargetingCriteriaObjectType;
+  excludedIds: Scalars['String']['input'];
+  exclusionReason?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -8608,6 +8637,15 @@ export type RestartCreateReportMutationVariables = Exact<{
 
 export type RestartCreateReportMutation = { __typename?: 'Mutations', restartCreateReport?: { __typename?: 'RestartCreateReport', report?: { __typename?: 'ReportNode', id: string, status: number, reportType: number, createdAt: any, dateFrom: any, dateTo: any, fileUrl?: string | null, createdBy: { __typename?: 'UserNode', firstName: string, lastName: string }, adminArea: { __typename?: 'AreaNodeConnection', edges: Array<{ __typename?: 'AreaNodeEdge', node?: { __typename?: 'AreaNode', name: string } | null } | null> }, program?: { __typename?: 'ProgramNode', name: string } | null } | null } | null };
 
+export type CopyTargetingCriteriaMutationMutationVariables = Exact<{
+  name: Scalars['String']['input'];
+  paymentPlanId: Scalars['ID']['input'];
+  programCycleId: Scalars['ID']['input'];
+}>;
+
+
+export type CopyTargetingCriteriaMutationMutation = { __typename?: 'Mutations', copyTargetingCriteria?: { __typename?: 'CopyTargetingCriteriaMutation', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, name?: string | null } | null } | null };
+
 export type CreateTpMutationVariables = Exact<{
   input: CreatePaymentPlanInput;
 }>;
@@ -8643,7 +8681,7 @@ export type AccountabilityCommunicationMessageQueryVariables = Exact<{
 }>;
 
 
-export type AccountabilityCommunicationMessageQuery = { __typename?: 'Query', accountabilityCommunicationMessage?: { __typename?: 'CommunicationMessageNode', id: string, unicefId?: string | null, adminUrl?: string | null, createdAt: any, title: string, body: string, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', id: string, name: string } | null } | null };
+export type AccountabilityCommunicationMessageQuery = { __typename?: 'Query', accountabilityCommunicationMessage?: { __typename?: 'CommunicationMessageNode', id: string, unicefId?: string | null, adminUrl?: string | null, createdAt: any, title: string, body: string, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, name?: string | null } | null, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', id: string, name: string } | null } | null };
 
 export type AccountabilityCommunicationMessageSampleSizeQueryVariables = Exact<{
   input: GetAccountabilityCommunicationMessageSampleSizeInput;
@@ -8685,7 +8723,7 @@ export type AllAccountabilityCommunicationMessagesQueryVariables = Exact<{
   numberOfRecipients?: InputMaybe<Scalars['Int']['input']>;
   numberOfRecipients_Gte?: InputMaybe<Scalars['Int']['input']>;
   numberOfRecipients_Lte?: InputMaybe<Scalars['Int']['input']>;
-  targetPopulation?: InputMaybe<Scalars['ID']['input']>;
+  paymentPlan?: InputMaybe<Scalars['ID']['input']>;
   createdBy?: InputMaybe<Scalars['ID']['input']>;
   program?: InputMaybe<Scalars['String']['input']>;
   createdAtRange?: InputMaybe<Scalars['String']['input']>;
@@ -9603,7 +9641,7 @@ export type AllSurveysQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   program: Scalars['ID']['input'];
-  targetPopulation?: InputMaybe<Scalars['ID']['input']>;
+  paymentPlan?: InputMaybe<Scalars['ID']['input']>;
   createdAtRange?: InputMaybe<Scalars['String']['input']>;
   createdBy?: InputMaybe<Scalars['String']['input']>;
   search?: InputMaybe<Scalars['String']['input']>;
@@ -9661,6 +9699,13 @@ export type AllSteficonRulesQueryVariables = Exact<{
 
 
 export type AllSteficonRulesQuery = { __typename?: 'Query', allSteficonRules?: { __typename?: 'SteficonRuleNodeConnection', edges: Array<{ __typename?: 'SteficonRuleNodeEdge', node?: { __typename?: 'SteficonRuleNode', id: string, name: string } | null } | null> } | null };
+
+export type TargetPopulationQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type TargetPopulationQuery = { __typename?: 'Query', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, name?: string | null, status: PaymentPlanStatus, adminUrl?: string | null, buildStatus?: PaymentPlanBuildStatus | null, totalHouseholdsCount: number, totalIndividualsCount: number, excludedIds: string, exclusionReason: string, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, steficonRule?: { __typename: 'RuleCommitNode', id: string, rule?: { __typename: 'SteficonRuleNode', id: string, name: string } | null } | null, program?: { __typename: 'ProgramNode', id: string, name: string, status: ProgramStatus, startDate: any, endDate?: any | null, isSocialWorkerProgram?: boolean | null } | null, programCycle: { __typename: 'ProgramCycleNode', id: string, title?: string | null }, createdBy: { __typename: 'UserNode', id: string, email: string, firstName: string, lastName: string }, targetingCriteria?: { __typename: 'TargetingCriteriaNode', id: any, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, householdIds?: string | null, individualIds?: string | null, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, householdIds: string, individualIds: string, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingIndividualBlockRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null, collectorsFiltersBlocks: Array<{ __typename: 'TargetingCollectorRuleFilterBlockNode', id: any, createdAt: any, updatedAt: any, collectorBlockFilters?: Array<{ __typename: 'TargetingCollectorBlockRuleFilterNode', id: any, createdAt: any, updatedAt: any, fieldName: string, comparisonMethod?: string | null, flexFieldClassification: TargetingCollectorBlockRuleFilterFlexFieldClassification, arguments?: Array<any | null> | null, labelEn?: string | null } | null> | null }>, householdsFiltersBlocks?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, flexFieldClassification: TargetingCriteriaRuleFilterFlexFieldClassification, roundNumber?: number | null, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null, pduData?: { __typename?: 'PeriodicFieldDataNode', id: string, subtype: PeriodicFieldDataSubtype, numberOfRounds: number, roundsNames: Array<string> } | null } | null } | null> | null } | null> | null } | null } | null };
 
 export const IndividualMinimalFragmentDoc = gql`
     fragment individualMinimal on IndividualNode {
@@ -12041,8 +12086,10 @@ export type CreateFollowUpPpMutationHookResult = ReturnType<typeof useCreateFoll
 export type CreateFollowUpPpMutationResult = Apollo.MutationResult<CreateFollowUpPpMutation>;
 export type CreateFollowUpPpMutationOptions = Apollo.BaseMutationOptions<CreateFollowUpPpMutation, CreateFollowUpPpMutationVariables>;
 export const CreatePpDocument = gql`
-    mutation CreatePP($input: CreatePaymentPlanInput!) {
-  createPaymentPlan(input: $input) {
+    mutation CreatePP($programCycleId: ID!, $name: String!, $targetingCriteria: TargetingCriteriaObjectType!, $excludedIds: String!, $exclusionReason: String) {
+  createPaymentPlan(
+    input: {programCycleId: $programCycleId, name: $name, targetingCriteria: $targetingCriteria, excludedIds: $excludedIds, exclusionReason: $exclusionReason}
+  ) {
     paymentPlan {
       id
     }
@@ -12064,7 +12111,11 @@ export type CreatePpMutationFn = Apollo.MutationFunction<CreatePpMutation, Creat
  * @example
  * const [createPpMutation, { data, loading, error }] = useCreatePpMutation({
  *   variables: {
- *      input: // value for 'input'
+ *      programCycleId: // value for 'programCycleId'
+ *      name: // value for 'name'
+ *      targetingCriteria: // value for 'targetingCriteria'
+ *      excludedIds: // value for 'excludedIds'
+ *      exclusionReason: // value for 'exclusionReason'
  *   },
  * });
  */
@@ -13694,6 +13745,48 @@ export function useRestartCreateReportMutation(baseOptions?: Apollo.MutationHook
 export type RestartCreateReportMutationHookResult = ReturnType<typeof useRestartCreateReportMutation>;
 export type RestartCreateReportMutationResult = Apollo.MutationResult<RestartCreateReportMutation>;
 export type RestartCreateReportMutationOptions = Apollo.BaseMutationOptions<RestartCreateReportMutation, RestartCreateReportMutationVariables>;
+export const CopyTargetingCriteriaMutationDocument = gql`
+    mutation CopyTargetingCriteriaMutation($name: String!, $paymentPlanId: ID!, $programCycleId: ID!) {
+  copyTargetingCriteria(
+    name: $name
+    paymentPlanId: $paymentPlanId
+    programCycleId: $programCycleId
+  ) {
+    paymentPlan {
+      id
+      name
+    }
+  }
+}
+    `;
+export type CopyTargetingCriteriaMutationMutationFn = Apollo.MutationFunction<CopyTargetingCriteriaMutationMutation, CopyTargetingCriteriaMutationMutationVariables>;
+
+/**
+ * __useCopyTargetingCriteriaMutationMutation__
+ *
+ * To run a mutation, you first call `useCopyTargetingCriteriaMutationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCopyTargetingCriteriaMutationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [copyTargetingCriteriaMutationMutation, { data, loading, error }] = useCopyTargetingCriteriaMutationMutation({
+ *   variables: {
+ *      name: // value for 'name'
+ *      paymentPlanId: // value for 'paymentPlanId'
+ *      programCycleId: // value for 'programCycleId'
+ *   },
+ * });
+ */
+export function useCopyTargetingCriteriaMutationMutation(baseOptions?: Apollo.MutationHookOptions<CopyTargetingCriteriaMutationMutation, CopyTargetingCriteriaMutationMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CopyTargetingCriteriaMutationMutation, CopyTargetingCriteriaMutationMutationVariables>(CopyTargetingCriteriaMutationDocument, options);
+      }
+export type CopyTargetingCriteriaMutationMutationHookResult = ReturnType<typeof useCopyTargetingCriteriaMutationMutation>;
+export type CopyTargetingCriteriaMutationMutationResult = Apollo.MutationResult<CopyTargetingCriteriaMutationMutation>;
+export type CopyTargetingCriteriaMutationMutationOptions = Apollo.BaseMutationOptions<CopyTargetingCriteriaMutationMutation, CopyTargetingCriteriaMutationMutationVariables>;
 export const CreateTpDocument = gql`
     mutation CreateTP($input: CreatePaymentPlanInput!) {
   createPaymentPlan(input: $input) {
@@ -13859,6 +13952,10 @@ export const AccountabilityCommunicationMessageDocument = gql`
       firstName
       lastName
       email
+    }
+    paymentPlan {
+      id
+      name
     }
     createdAt
     registrationDataImport {
@@ -14077,7 +14174,7 @@ export type AllAccountabilityCommunicationMessageRecipientsLazyQueryHookResult =
 export type AllAccountabilityCommunicationMessageRecipientsSuspenseQueryHookResult = ReturnType<typeof useAllAccountabilityCommunicationMessageRecipientsSuspenseQuery>;
 export type AllAccountabilityCommunicationMessageRecipientsQueryResult = Apollo.QueryResult<AllAccountabilityCommunicationMessageRecipientsQuery, AllAccountabilityCommunicationMessageRecipientsQueryVariables>;
 export const AllAccountabilityCommunicationMessagesDocument = gql`
-    query allAccountabilityCommunicationMessages($offset: Int, $before: String, $after: String, $first: Int, $last: Int, $numberOfRecipients: Int, $numberOfRecipients_Gte: Int, $numberOfRecipients_Lte: Int, $targetPopulation: ID, $createdBy: ID, $program: String, $createdAtRange: String, $title: String, $body: String, $samplingType: String, $orderBy: String) {
+    query allAccountabilityCommunicationMessages($offset: Int, $before: String, $after: String, $first: Int, $last: Int, $numberOfRecipients: Int, $numberOfRecipients_Gte: Int, $numberOfRecipients_Lte: Int, $paymentPlan: ID, $createdBy: ID, $program: String, $createdAtRange: String, $title: String, $body: String, $samplingType: String, $orderBy: String) {
   allAccountabilityCommunicationMessages(
     offset: $offset
     before: $before
@@ -14087,7 +14184,7 @@ export const AllAccountabilityCommunicationMessagesDocument = gql`
     numberOfRecipients: $numberOfRecipients
     numberOfRecipients_Gte: $numberOfRecipients_Gte
     numberOfRecipients_Lte: $numberOfRecipients_Lte
-    targetPopulation: $targetPopulation
+    paymentPlan: $paymentPlan
     createdBy: $createdBy
     program: $program
     createdAtRange: $createdAtRange
@@ -14141,7 +14238,7 @@ export const AllAccountabilityCommunicationMessagesDocument = gql`
  *      numberOfRecipients: // value for 'numberOfRecipients'
  *      numberOfRecipients_Gte: // value for 'numberOfRecipients_Gte'
  *      numberOfRecipients_Lte: // value for 'numberOfRecipients_Lte'
- *      targetPopulation: // value for 'targetPopulation'
+ *      paymentPlan: // value for 'paymentPlan'
  *      createdBy: // value for 'createdBy'
  *      program: // value for 'program'
  *      createdAtRange: // value for 'createdAtRange'
@@ -20313,7 +20410,7 @@ export type RdiAutocompleteLazyQueryHookResult = ReturnType<typeof useRdiAutocom
 export type RdiAutocompleteSuspenseQueryHookResult = ReturnType<typeof useRdiAutocompleteSuspenseQuery>;
 export type RdiAutocompleteQueryResult = Apollo.QueryResult<RdiAutocompleteQuery, RdiAutocompleteQueryVariables>;
 export const AllSurveysDocument = gql`
-    query AllSurveys($offset: Int, $before: String, $after: String, $first: Int, $last: Int, $program: ID!, $targetPopulation: ID, $createdAtRange: String, $createdBy: String, $search: String, $orderBy: String) {
+    query AllSurveys($offset: Int, $before: String, $after: String, $first: Int, $last: Int, $program: ID!, $paymentPlan: ID, $createdAtRange: String, $createdBy: String, $search: String, $orderBy: String) {
   allSurveys(
     offset: $offset
     before: $before
@@ -20321,7 +20418,7 @@ export const AllSurveysDocument = gql`
     first: $first
     last: $last
     program: $program
-    targetPopulation: $targetPopulation
+    paymentPlan: $paymentPlan
     createdAtRange: $createdAtRange
     createdBy: $createdBy
     search: $search
@@ -20371,7 +20468,7 @@ export const AllSurveysDocument = gql`
  *      first: // value for 'first'
  *      last: // value for 'last'
  *      program: // value for 'program'
- *      targetPopulation: // value for 'targetPopulation'
+ *      paymentPlan: // value for 'paymentPlan'
  *      createdAtRange: // value for 'createdAtRange'
  *      createdBy: // value for 'createdBy'
  *      search: // value for 'search'
@@ -20766,6 +20863,172 @@ export type AllSteficonRulesQueryHookResult = ReturnType<typeof useAllSteficonRu
 export type AllSteficonRulesLazyQueryHookResult = ReturnType<typeof useAllSteficonRulesLazyQuery>;
 export type AllSteficonRulesSuspenseQueryHookResult = ReturnType<typeof useAllSteficonRulesSuspenseQuery>;
 export type AllSteficonRulesQueryResult = Apollo.QueryResult<AllSteficonRulesQuery, AllSteficonRulesQueryVariables>;
+export const TargetPopulationDocument = gql`
+    query TargetPopulation($id: ID!) {
+  paymentPlan(id: $id) {
+    id
+    name
+    status
+    adminUrl
+    buildStatus
+    totalHouseholdsCount
+    totalIndividualsCount
+    excludedIds
+    exclusionReason
+    steficonRule {
+      __typename
+      id
+      rule {
+        __typename
+        id
+        name
+      }
+    }
+    vulnerabilityScoreMin
+    vulnerabilityScoreMax
+    program {
+      __typename
+      id
+      name
+      status
+      startDate
+      endDate
+      isSocialWorkerProgram
+    }
+    programCycle {
+      __typename
+      id
+      title
+    }
+    createdBy {
+      __typename
+      id
+      email
+      firstName
+      lastName
+    }
+    targetingCriteria {
+      __typename
+      id
+      flagExcludeIfActiveAdjudicationTicket
+      flagExcludeIfOnSanctionList
+      householdIds
+      individualIds
+      rules {
+        __typename
+        id
+        householdIds
+        individualIds
+        individualsFiltersBlocks {
+          __typename
+          individualBlockFilters {
+            __typename
+            id
+            fieldName
+            flexFieldClassification
+            roundNumber
+            arguments
+            comparisonMethod
+            fieldAttribute {
+              __typename
+              id
+              name
+              labelEn
+              type
+              choices {
+                value
+                labelEn
+              }
+              pduData {
+                id
+                subtype
+                numberOfRounds
+                roundsNames
+              }
+            }
+          }
+        }
+        collectorsFiltersBlocks {
+          __typename
+          id
+          createdAt
+          updatedAt
+          collectorBlockFilters {
+            __typename
+            id
+            createdAt
+            updatedAt
+            fieldName
+            comparisonMethod
+            flexFieldClassification
+            arguments
+            labelEn
+          }
+        }
+        householdsFiltersBlocks {
+          __typename
+          id
+          fieldName
+          flexFieldClassification
+          roundNumber
+          arguments
+          comparisonMethod
+          fieldAttribute {
+            __typename
+            id
+            name
+            labelEn
+            type
+            choices {
+              value
+              labelEn
+            }
+            pduData {
+              id
+              subtype
+              numberOfRounds
+              roundsNames
+            }
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useTargetPopulationQuery__
+ *
+ * To run a query within a React component, call `useTargetPopulationQuery` and pass it any options that fit your needs.
+ * When your component renders, `useTargetPopulationQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useTargetPopulationQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useTargetPopulationQuery(baseOptions: Apollo.QueryHookOptions<TargetPopulationQuery, TargetPopulationQueryVariables> & ({ variables: TargetPopulationQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<TargetPopulationQuery, TargetPopulationQueryVariables>(TargetPopulationDocument, options);
+      }
+export function useTargetPopulationLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<TargetPopulationQuery, TargetPopulationQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<TargetPopulationQuery, TargetPopulationQueryVariables>(TargetPopulationDocument, options);
+        }
+export function useTargetPopulationSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<TargetPopulationQuery, TargetPopulationQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<TargetPopulationQuery, TargetPopulationQueryVariables>(TargetPopulationDocument, options);
+        }
+export type TargetPopulationQueryHookResult = ReturnType<typeof useTargetPopulationQuery>;
+export type TargetPopulationLazyQueryHookResult = ReturnType<typeof useTargetPopulationLazyQuery>;
+export type TargetPopulationSuspenseQueryHookResult = ReturnType<typeof useTargetPopulationSuspenseQuery>;
+export type TargetPopulationQueryResult = Apollo.QueryResult<TargetPopulationQuery, TargetPopulationQueryVariables>;
 
 
 export type ResolverTypeWrapper<T> = Promise<T> | T;
@@ -22152,6 +22415,7 @@ export type CommunicationMessageNodeResolvers<ContextType = any, ParentType exte
   isOriginal?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   migratedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   numberOfRecipients?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  paymentPlan?: Resolver<Maybe<ResolversTypes['PaymentPlanNode']>, ParentType, ContextType>;
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>;
   randomSamplingArguments?: Resolver<Maybe<ResolversTypes['JSONString']>, ParentType, ContextType>;
   registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>;
@@ -22740,6 +23004,7 @@ export type FinancialServiceProviderXlsxTemplateNodeResolvers<ContextType = any,
   coreFields?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   createdBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>;
+  documentTypes?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
   financialServiceProviders?: Resolver<ResolversTypes['FinancialServiceProviderNodeConnection'], ParentType, ContextType, Partial<FinancialServiceProviderXlsxTemplateNodeFinancialServiceProvidersArgs>>;
   flexFields?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
@@ -23801,6 +24066,7 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   maleAdultsCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   maleChildrenCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  messages?: Resolver<ResolversTypes['CommunicationMessageNodeConnection'], ParentType, ContextType, Partial<PaymentPlanNodeMessagesArgs>>;
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   paymentItems?: Resolver<ResolversTypes['PaymentNodeConnection'], ParentType, ContextType, Partial<PaymentPlanNodePaymentItemsArgs>>;
   paymentVerificationPlans?: Resolver<ResolversTypes['PaymentVerificationPlanNodeConnection'], ParentType, ContextType, Partial<PaymentPlanNodePaymentVerificationPlansArgs>>;
@@ -23819,6 +24085,7 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   steficonRuleTargeting?: Resolver<Maybe<ResolversTypes['RuleCommitNode']>, ParentType, ContextType>;
   steficonTargetingAppliedDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   supportingDocuments?: Resolver<Maybe<Array<Maybe<ResolversTypes['PaymentPlanSupportingDocumentNode']>>>, ParentType, ContextType>;
+  surveys?: Resolver<ResolversTypes['SurveyNodeConnection'], ParentType, ContextType, Partial<PaymentPlanNodeSurveysArgs>>;
   targetingCriteria?: Resolver<Maybe<ResolversTypes['TargetingCriteriaNode']>, ParentType, ContextType>;
   totalDeliveredQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   totalDeliveredQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
@@ -24829,6 +25096,7 @@ export type SurveyNodeResolvers<ContextType = any, ParentType extends ResolversP
   hasValidSampleFile?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   numberOfRecipients?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  paymentPlan?: Resolver<Maybe<ResolversTypes['PaymentPlanNode']>, ParentType, ContextType>;
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>;
   randomSamplingArguments?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>;
   rapidProUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;

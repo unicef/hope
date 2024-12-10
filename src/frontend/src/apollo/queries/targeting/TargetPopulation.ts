@@ -1,7 +1,7 @@
 import { gql } from '@apollo/client';
 
-export const PAYMENT_PLAN_QUERY = gql`
-  query PaymentPlan($id: ID!) {
+export const TARGET_POPULATION_QUERY = gql`
+  query TargetPopulation($id: ID!) {
     paymentPlan(id: $id) {
       id
       name
@@ -10,11 +10,6 @@ export const PAYMENT_PLAN_QUERY = gql`
       buildStatus
       totalHouseholdsCount
       totalIndividualsCount
-      childMaleCount
-      childFemaleCount
-      adultMaleCount
-      adultFemaleCount
-      caHashId
       excludedIds
       exclusionReason
       steficonRule {
@@ -28,14 +23,6 @@ export const PAYMENT_PLAN_QUERY = gql`
       }
       vulnerabilityScoreMin
       vulnerabilityScoreMax
-      changeDate
-      finalizedAt
-      finalizedBy {
-        __typename
-        id
-        firstName
-        lastName
-      }
       program {
         __typename
         id
@@ -57,8 +44,6 @@ export const PAYMENT_PLAN_QUERY = gql`
         firstName
         lastName
       }
-      hasEmptyCriteria
-      hasEmptyIdsCriteria
       targetingCriteria {
         __typename
         id
