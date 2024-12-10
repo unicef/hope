@@ -288,6 +288,19 @@ input BankTransferObjectType {
   accountHolderName: String!
 }
 
+type BeneficiaryGroupNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String!
+  groupLabel: String!
+  groupLabelPlural: String!
+  memberLabel: String!
+  memberLabelPlural: String!
+  masterDetail: Boolean!
+  programs(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
+}
+
 scalar BigInt
 
 type BulkGrievanceAddNoteMutation {
@@ -699,6 +712,7 @@ input CreateProgramInput {
   administrativeAreasOfImplementation: String
   businessAreaSlug: String
   dataCollectingTypeCode: String
+  beneficiaryGroup: String
   partners: [ProgramPartnerThroughInput]
   partnerAccess: String
   programmeCode: String
@@ -2513,8 +2527,8 @@ type PaymentNode implements Node {
   fspAuthCode: String
   isCashAssist: Boolean!
   followUps(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
-  paymentVerification: PaymentVerificationNode
   householdSnapshot: PaymentHouseholdSnapshotNode
+  paymentVerification: PaymentVerificationNode
   ticketComplaintDetails: TicketComplaintDetailsNode
   ticketSensitiveDetails: TicketSensitiveDetailsNode
   adminUrl: String
@@ -2607,13 +2621,13 @@ type PaymentPlanNode implements Node {
   excludeHouseholdError: String!
   name: String
   isCashAssist: Boolean!
+  approvalProcess(offset: Int, before: String, after: String, first: Int, last: Int): ApprovalProcessNodeConnection!
   followUps(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanNodeConnection!
   deliveryMechanisms: [DeliveryMechanismPerPaymentPlanNode]
   paymentItems(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
+  documents(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanSupportingDocumentNodeConnection!
   paymentVerificationPlans(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationPlanNodeConnection!
   paymentVerificationSummary: PaymentVerificationSummaryNode
-  approvalProcess(offset: Int, before: String, after: String, first: Int, last: Int): ApprovalProcessNodeConnection!
-  documents(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanSupportingDocumentNodeConnection!
   adminUrl: String
   currencyName: String
   hasPaymentListExportFile: Boolean
@@ -2988,6 +3002,7 @@ type ProgramNode implements Node {
   partners: [PartnerNode]
   biometricDeduplicationEnabled: Boolean!
   deduplicationSetId: UUID
+  beneficiaryGroup: BeneficiaryGroupNode
   pduFields: [PeriodicFieldNode]
   households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   householdSet(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
@@ -3157,7 +3172,7 @@ type Query {
   dataCollectionTypeChoices: [DataCollectingTypeChoiceObject]
   pduSubtypeChoices: [PDUSubtypeChoiceObject]
   program(id: ID!): ProgramNode
-  allPrograms(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], sector: [String], numberOfHouseholds: String, budget: String, startDate: Date, endDate: Date, name: String, numberOfHouseholdsWithTpInProgram: String, dataCollectingType: String, compatibleDct: Boolean, orderBy: String): ProgramNodeConnection
+  allPrograms(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], sector: [String], numberOfHouseholds: String, budget: String, startDate: Date, endDate: Date, name: String, beneficiaryGroupMatch: Boolean, numberOfHouseholdsWithTpInProgram: String, dataCollectingType: String, compatibleDct: Boolean, orderBy: String): ProgramNodeConnection
   chartProgrammesBySector(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartDetailedDatasetsNode
   chartTotalTransferredByMonth(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartDetailedDatasetsNode
   programStatusChoices: [ChoiceObject]
@@ -3167,7 +3182,7 @@ type Query {
   programScopeChoices: [ChoiceObject]
   cashPlanStatusChoices: [ChoiceObject]
   dataCollectingTypeChoices: [ChoiceObject]
-  allActivePrograms(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], sector: [String], numberOfHouseholds: String, budget: String, startDate: Date, endDate: Date, name: String, numberOfHouseholdsWithTpInProgram: String, dataCollectingType: String, compatibleDct: Boolean, orderBy: String): ProgramNodeConnection
+  allActivePrograms(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], sector: [String], numberOfHouseholds: String, budget: String, startDate: Date, endDate: Date, name: String, beneficiaryGroupMatch: Boolean, numberOfHouseholdsWithTpInProgram: String, dataCollectingType: String, compatibleDct: Boolean, orderBy: String): ProgramNodeConnection
   programCycle(id: ID!): ProgramCycleNode
   canRunDeduplication: Boolean
   isDeduplicationDisabled: Boolean
@@ -4550,6 +4565,7 @@ input UpdateProgramInput {
   populationGoal: Int
   administrativeAreasOfImplementation: String
   dataCollectingTypeCode: String
+  beneficiaryGroup: String
   programmeCode: String
   pduFields: [PDUFieldInput]
 }
@@ -4681,13 +4697,13 @@ type UserNode implements Node {
   doapHash: String!
   userRoles: [UserRoleNode!]!
   documentSet(offset: Int, before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
+  approvalSet: [ApprovalNode!]!
   registrationDataImports(offset: Int, before: String, after: String, first: Int, last: Int): RegistrationDataImportNodeConnection!
   createdPaymentPlans(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanNodeConnection!
   createdFinancialServiceProviderXlsxTemplates(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderXlsxTemplateNodeConnection!
   createdFinancialServiceProviders(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderNodeConnection!
   createdDeliveryMechanisms(offset: Int, before: String, after: String, first: Int, last: Int): DeliveryMechanismPerPaymentPlanNodeConnection!
   sentDeliveryMechanisms(offset: Int, before: String, after: String, first: Int, last: Int): DeliveryMechanismPerPaymentPlanNodeConnection!
-  approvalSet: [ApprovalNode!]!
   createdTickets(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   assignedTickets(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   ticketNotes(offset: Int, before: String, after: String, first: Int, last: Int): TicketNoteNodeConnection!

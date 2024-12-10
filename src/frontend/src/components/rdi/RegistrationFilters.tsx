@@ -10,6 +10,7 @@ import { NumberTextField } from '@core/NumberTextField';
 import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import { FiltersSection } from '@core/FiltersSection';
+import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
 
 interface RegistrationFiltersProps {
@@ -29,6 +30,8 @@ export const RegistrationFilters = ({
 }: RegistrationFiltersProps): ReactElement => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const { handleFilterChange, applyFilterChanges, clearFilter } =
     createHandleApplyFilterChange(
@@ -100,7 +103,7 @@ export const RegistrationFilters = ({
         <Grid item xs={3}>
           <NumberTextField
             id="minFilter"
-            topLabel={t('Num. of Households')}
+            topLabel={`Num. of ${beneficiaryGroup?.groupLabelPlural}`}
             value={filter.sizeMin}
             placeholder="From"
             icon={<GroupIcon />}

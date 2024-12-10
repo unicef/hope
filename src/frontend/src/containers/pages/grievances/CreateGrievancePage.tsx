@@ -82,6 +82,8 @@ export const CreateGrievancePage = (): ReactElement => {
   const { isSocialDctType } = useProgramContext();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const [activeStep, setActiveStep] = useState(GrievanceSteps.Selection);
   const [validateData, setValidateData] = useState(false);
@@ -235,13 +237,13 @@ export const CreateGrievancePage = (): ReactElement => {
   let steps = isSocialDctType
     ? [
         'Category Selection',
-        'Individual Look up',
+        `${beneficiaryGroup?.memberLabel} Look up`,
         'Identity Verification',
         'Description',
       ]
     : [
         'Category Selection',
-        'Household/Individual Look up',
+        `${beneficiaryGroup?.groupLabel}/${beneficiaryGroup?.memberLabel} Look up`,
         'Identity Verification',
         'Description',
       ];
@@ -317,6 +319,7 @@ export const CreateGrievancePage = (): ReactElement => {
             householdFieldsDict,
             activeStep,
             setValidateData,
+            beneficiaryGroup,
           )
         }
         validationSchema={validationSchemaWithSteps(activeStep)}

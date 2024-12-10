@@ -3,6 +3,12 @@ import { GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
 import { thingForSpecificGrievanceType } from '@utils/utils';
 import { removeIdPropertyFromObjects } from './helpers';
 
+export const replaceLabels = (text, _beneficiaryGroup) => {
+  return text
+    .replace(/Individual/g, _beneficiaryGroup.memberLabel)
+    .replace(/Household/g, _beneficiaryGroup.groupLabel);
+};
+
 export const selectedIssueType = (
   formValues,
   grievanceTicketIssueTypeChoices,
