@@ -292,9 +292,8 @@ class Command(BaseCommand):
             print("Old incompatible roles pairs were deleted.")
 
         roles_created = []
-        roles_updated = []
         for default_role in default_roles_matrix:
-            role, created = Role.objects.update_or_create(
+            role, created = Role.objects.get_or_create(
                 subsystem=Role.HOPE,
                 name=default_role["name"],
                 defaults={"permissions": [permission.value for permission in default_role["permissions"]]},
@@ -302,17 +301,11 @@ class Command(BaseCommand):
 
             if created:
                 roles_created.append(role.name)
-            else:
-                roles_updated.append(role.name)
 
         if roles_created:
             print(f"New roles were created: {', '.join(roles_created)}")
         else:
             print("No new roles were created.")
-        if roles_updated:
-            print(f"These roles were updated: {', '.join(roles_updated)}")
-        else:
-            print("No roles were updated")
 
         incompatible_roles_created = []
         for role_pair in default_incompatible_roles:
