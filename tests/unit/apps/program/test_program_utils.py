@@ -132,11 +132,12 @@ class TestEnrolHouseholdToProgram(TestCase):
         hh_count = Household.objects.count()
         ind_count = Individual.objects.count()
 
-        enroll_households_to_program(
-            Household.objects.filter(id=self.household_already_enrolled.id),
-            self.program2,
-            self.str_user_id,
-        )
+        with self.assertRaises(Exception):
+            enroll_households_to_program(
+                Household.objects.filter(id=self.household_already_enrolled.id),
+                self.program2,
+                self.str_user_id,
+            )
         self.assertEqual(hh_count, Household.objects.count())
         self.assertEqual(ind_count, Individual.objects.count())
 
@@ -144,11 +145,12 @@ class TestEnrolHouseholdToProgram(TestCase):
         hh_count = Household.objects.count()
         ind_count = Individual.objects.count()
 
-        enroll_households_to_program(
-            Household.objects.filter(id=self.household_original_already_enrolled.id),
-            self.program2,
-            self.str_user_id,
-        )
+        with self.assertRaises(Exception):
+            enroll_households_to_program(
+                Household.objects.filter(id=self.household_original_already_enrolled.id),
+                self.program2,
+                self.str_user_id,
+            )
         self.assertEqual(hh_count, Household.objects.count())
         self.assertEqual(ind_count, Individual.objects.count())
 
@@ -280,9 +282,10 @@ class TestEnrolHouseholdToProgram(TestCase):
     def test_enroll_households_to_program_task(self) -> None:
         hh_count = Household.objects.count()
         ind_count = Individual.objects.count()
-        enroll_households_to_program_task(
-            [str(self.household_already_enrolled.id)], str(self.program2.pk), self.str_user_id
-        )
+        with self.assertRaises(Exception):
+            enroll_households_to_program_task(
+                [str(self.household_already_enrolled.id)], str(self.program2.pk), self.str_user_id
+            )
         self.assertEqual(hh_count, Household.objects.count())
         self.assertEqual(ind_count, Individual.objects.count())
 
