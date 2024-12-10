@@ -801,7 +801,7 @@ class CashPlanAndPaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, gra
         return self.payment_items.count()
 
     def resolve_verification_status(self, info: Any, **kwargs: Any) -> Optional[graphene.String]:
-        return self.payment_verification_summary.status if self.payment_verification_summary else None
+        return self.payment_verification_summary.status if hasattr(self, "payment_verification_summary") else None
 
     def resolve_status(self, info: Any, **kwargs: Any) -> Optional[graphene.String]:
         return self.status

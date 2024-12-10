@@ -60,6 +60,8 @@ export const PaymentPlanDetailsHeader = ({
     return null;
   }
 
+  if (!programCycleData) return null;
+
   const breadCrumbsItems: BreadCrumbsItem[] = [];
 
   if (programCycleId) {
