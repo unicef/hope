@@ -10,6 +10,8 @@ import { TableWrapper } from '@components/core/TableWrapper';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './LookUpProgrammesHeadCellsSurveys';
 import { LookUpProgrammesTableRowSurveys } from './LookUpProgrammesTableRowSurveys';
+import { adjustHeadCells } from '@utils/utils';
+import { useProgramContext } from 'src/programContext';
 
 const NoTableStyling = styled.div`
   .MuiPaper-elevation1 {
@@ -35,6 +37,8 @@ export function LookUpProgrammesTableSurveys({
   handleChange,
   setFieldValue,
 }: LookUpProgrammesTableSurveysProps): ReactElement {
+  const { selectedProgram: programFromContext } = useProgramContext();
+  const beneficiaryGroup = programFromContext?.beneficiaryGroup;
   const initialVariables: AllActiveProgramsQueryVariables = {
     businessArea,
     search: filter.search,
@@ -55,14 +59,25 @@ export function LookUpProgrammesTableSurveys({
     setFieldValue('program', id);
   };
 
+  const replacements = {
+    totalHhCount: (_beneficiaryGroup) =>
+      `Num. of ${_beneficiaryGroup?.groupLabelPlural}`,
+  };
+
+  const adjustedHeadCells = adjustHeadCells(
+    headCells,
+    beneficiaryGroup,
+    replacements,
+  );
+
   return (
     <NoTableStyling>
       <TableWrapper>
         <UniversalTable<
-        AllProgramsQuery['allPrograms']['edges'][number]['node'],
-        AllActiveProgramsQueryVariables
+          AllProgramsQuery['allPrograms']['edges'][number]['node'],
+          AllActiveProgramsQueryVariables
         >
-          headCells={headCells}
+          headCells={adjustedHeadCells}
           query={useAllActiveProgramsQuery}
           queriedObjectName="allActivePrograms"
           initialVariables={initialVariables}

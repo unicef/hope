@@ -14,11 +14,12 @@ import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box } from '@mui/material';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import React, { FC, SetStateAction, useState } from 'react';
+import { FC, SetStateAction, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 import { useLocation } from 'react-router-dom';
+
 export const ManagerialConsolePage: FC = () => {
   const { t } = useTranslation();
   const { businessArea } = useBaseUrl();
