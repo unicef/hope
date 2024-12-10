@@ -23,6 +23,7 @@ import { isPermissionDeniedError } from '@utils/utils';
 import { ImportedHouseholdTable } from '../../tables/rdi/ImportedHouseholdsTable';
 import { ImportedIndividualsTable } from '../../tables/rdi/ImportedIndividualsTable';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { useProgramContext } from 'src/programContext';
 
 const Container = styled.div`
   && {
@@ -59,6 +60,8 @@ export const RegistrationDataImportDetailsPage = (): ReactElement => {
   const { id } = useParams();
   const permissions = usePermissions();
   const location = useLocation();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const { businessArea } = useBaseUrl();
   const { data, loading, error, stopPolling, startPolling } =
@@ -124,8 +127,14 @@ export const RegistrationDataImportDetailsPage = (): ReactElement => {
                   variant="fullWidth"
                   aria-label="full width tabs example"
                 >
-                  <Tab data-cy="tab-Households" label={t('Households')} />
-                  <Tab data-cy="tab-Individuals" label={t('Individuals')} />
+                  <Tab
+                    data-cy="tab-Households"
+                    label={beneficiaryGroup?.groupLabelPlural}
+                  />
+                  <Tab
+                    data-cy="tab-Individuals"
+                    label={beneficiaryGroup?.memberLabelPlural}
+                  />
                 </StyledTabs>
               </TabsContainer>
               <TabPanel value={selectedTab} index={0}>

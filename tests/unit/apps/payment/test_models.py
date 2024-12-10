@@ -50,7 +50,7 @@ from hct_mis_api.apps.payment.models import (
 from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
 )
-from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.fixtures import BeneficiaryGroupFactory, ProgramFactory
 from hct_mis_api.apps.program.models import ProgramCycle
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory
@@ -616,9 +616,12 @@ class TestFinancialServiceProviderModel(TestCase):
 
         payment = PaymentFactory(program=ProgramFactory(), household=household, collector=individuals[0])
         data_collecting_type = DataCollectingTypeFactory(type=DataCollectingType.Type.SOCIAL)
+        beneficiary_group = BeneficiaryGroupFactory(name="People", master_detail=False)
         fsp_xlsx_template = FinancialServiceProviderXlsxTemplate
         payment.parent.program.data_collecting_type = data_collecting_type
+        payment.parent.program.beneficiary_group = beneficiary_group
         payment.parent.program.save()
+
         primary = IndividualRoleInHousehold.objects.filter(role=ROLE_PRIMARY).first().individual
         # update primary collector
         primary.household = household

@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { Title } from '@components/core/Title';
 import { HouseholdNode } from '@generated/graphql';
+import { useProgramContext } from 'src/programContext';
 
 const GreyTableCell = styled(TableCell)`
   background-color: #eeeeee;
@@ -28,10 +29,12 @@ export function HouseholdCompositionTable({
   household,
 }: HouseholdCompositionTableProps): ReactElement {
   const { t } = useTranslation();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   return (
     <OverviewPaper>
       <Title>
-        <Typography variant="h6">{t('Household Composition')}</Typography>
+        <Typography variant="h6">{`${beneficiaryGroup?.groupLabel} Composition`}</Typography>
       </Title>
       <Table>
         <TableHead>
