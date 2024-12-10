@@ -122,7 +122,7 @@ class TestHouseholdWithdrawFromListMixin(TestCase):
         )
         self.assertIsNotNone(self.household.withdrawn_date)
         self.assertEqual(
-            self.household.user_fields["withdrawn_tag"],
+            self.household.internal_data["withdrawn_tag"],
             tag,
         )
         self.assertEqual(
@@ -155,7 +155,7 @@ class TestHouseholdWithdrawFromListMixin(TestCase):
         )
         self.assertIsNotNone(self.household2.withdrawn_date)
         self.assertEqual(
-            self.household2.user_fields["withdrawn_tag"],
+            self.household2.internal_data["withdrawn_tag"],
             tag,
         )
         self.assertEqual(

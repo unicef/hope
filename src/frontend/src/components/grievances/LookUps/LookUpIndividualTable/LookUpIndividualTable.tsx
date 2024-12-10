@@ -55,7 +55,7 @@ export function LookUpIndividualTable({
   const handleRadioChange = (individual): void => {
     setSelectedIndividual(individual);
 
-    if (individual.household && !isSocialDctType) {
+    if (individual.household) {
       setSelectedHousehold(individual.household);
       setFieldValue('selectedHousehold', individual.household);
     }

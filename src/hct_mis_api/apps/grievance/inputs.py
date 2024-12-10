@@ -5,7 +5,7 @@ from hct_mis_api.apps.account.schema import PartnerType, UserNode
 from hct_mis_api.apps.core.schema import BusinessAreaNode
 from hct_mis_api.apps.grievance.schema import GrievanceTicketNode
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
-from hct_mis_api.apps.payment.schema import PaymentRecordNode
+from hct_mis_api.apps.payment.schema import PaymentNode
 from hct_mis_api.apps.program.schema import ProgramNode
 from hct_mis_api.apps.utils.schema import Arg
 
@@ -211,6 +211,19 @@ class IndividualUpdateDataObjectType(graphene.InputObjectType):
     delivery_mechanism_data = graphene.List(DeliveryMechanismDataObjectType)
     delivery_mechanism_data_to_edit = graphene.List(EditDeliveryMechanismDataObjectType)
     delivery_mechanism_data_to_remove = graphene.List(graphene.ID)
+    # people fields
+    consent = graphene.Boolean(description="People update")
+    residence_status = graphene.String(description="People update")
+    country_origin = graphene.String(description="People update")
+    country = graphene.String(description="People update")
+    address = graphene.String(description="People update")
+    village = graphene.String(description="People update")
+    currency = graphene.String(description="People update")
+    unhcr_id = graphene.String(description="People update")
+    name_enumerator = graphene.String(description="People update")
+    org_enumerator = graphene.String(description="People update")
+    org_name_enumerator = graphene.String(description="People update")
+    registration_method = graphene.String(description="People update")
 
 
 class AddIndividualDataObjectType(graphene.InputObjectType):
@@ -359,7 +372,7 @@ class UpdateGrievanceTicketInput(graphene.InputObjectType):
     linked_tickets = graphene.List(graphene.ID)
     household = graphene.GlobalID(node=HouseholdNode, required=False)
     individual = graphene.GlobalID(node=IndividualNode, required=False)
-    payment_record = graphene.GlobalID(node=PaymentRecordNode, required=False)
+    payment_record = graphene.GlobalID(node=PaymentNode, required=False)
     extras = UpdateGrievanceTicketExtrasInput()
     priority = graphene.Int(required=False)
     urgency = graphene.Int(required=False)

@@ -1,7 +1,7 @@
 import { Box, Grid, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { paymentVerificationStatusToColor } from '@utils/utils';
-import { CashPlanQuery, PaymentPlanQuery } from '@generated/graphql';
+import { PaymentPlanQuery } from '@generated/graphql';
 import { LabelizedField } from '@core/LabelizedField';
 import { StatusBox } from '@core/StatusBox';
 import { Title } from '@core/Title';
@@ -9,7 +9,7 @@ import { UniversalMoment } from '@core/UniversalMoment';
 import { ReactElement } from 'react';
 
 interface VerificationPlansSummaryProps {
-  planNode: CashPlanQuery['cashPlan'] | PaymentPlanQuery['paymentPlan'];
+  planNode: PaymentPlanQuery['paymentPlan'];
 }
 
 export function VerificationPlansSummary({

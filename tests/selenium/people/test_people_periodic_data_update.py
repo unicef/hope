@@ -5,7 +5,6 @@ from time import sleep
 import pytest
 from dateutil.relativedelta import relativedelta
 
-from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
 from hct_mis_api.apps.core.models import (
     BusinessArea,
@@ -15,7 +14,7 @@ from hct_mis_api.apps.core.models import (
 )
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.household.models import HOST, SEEING, Individual
-from hct_mis_api.apps.payment.fixtures import CashPlanFactory, PaymentRecordFactory
+from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
 from hct_mis_api.apps.payment.models import GenericPayment
 from hct_mis_api.apps.periodic_data_update.fixtures import (
     PeriodicDataUpdateTemplateFactory,
@@ -32,10 +31,6 @@ from hct_mis_api.apps.periodic_data_update.utils import (
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.targeting.fixtures import (
-    TargetingCriteriaFactory,
-    TargetPopulationFactory,
-)
 from tests.selenium.page_object.people.people import People
 from tests.selenium.page_object.people.people_details import PeopleDetails
 from tests.selenium.page_object.programme_population.individuals import Individuals
@@ -87,32 +82,22 @@ def date_attribute(program: Program) -> FlexibleAttribute:
 @pytest.fixture
 def individual(add_people: Individual) -> Individual:
     program = Program.objects.filter(name="Test Program").first()
-
-    cash_plan = CashPlanFactory(
+    payment_plan = PaymentPlanFactory(
         name="TEST",
-        program=program,
+        program_cycle=program.cycles.first(),
         business_area=BusinessArea.objects.first(),
         start_date=datetime.now() - relativedelta(months=1),
         end_date=datetime.now() + relativedelta(months=1),
     )
-
-    targeting_criteria = TargetingCriteriaFactory()
-
-    target_population = TargetPopulationFactory(
-        created_by=User.objects.first(),
-        targeting_criteria=targeting_criteria,
-        business_area=BusinessArea.objects.first(),
-    )
-    PaymentRecordFactory(
+    PaymentFactory(
         household=add_people.household,
-        parent=cash_plan,
-        target_population=target_population,
-        entitlement_quantity="21.36",
-        delivered_quantity="21.36",
+        parent=payment_plan,
+        entitlement_quantity=21.36,
+        delivered_quantity=21.36,
         currency="PLN",
         status=GenericPayment.STATUS_DISTRIBUTION_SUCCESS,
     )
-    add_people.total_cash_received_usd = "21.36"
+    add_people.total_cash_received_usd = 21.36
     add_people.save()
     return add_people
 

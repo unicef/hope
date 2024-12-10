@@ -31,7 +31,7 @@ snapshots['TestCreatePaymentVerificationMutation::test_create_cash_plan_payment_
     'data': {
         'createPaymentVerificationPlan': {
             'paymentPlan': {
-                'id': 'Q2FzaFBsYW5Ob2RlOjBlMjkyN2FmLWM4NGQtNDg1Mi1iYjBiLTc3M2VmZTA1OWUwNQ=='
+                'id': 'UGF5bWVudFBsYW5Ob2RlOjBlMjkyN2FmLWM4NGQtNDg1Mi1iYjBiLTc3M2VmZTA1OWUwNQ=='
             }
         }
     }

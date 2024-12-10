@@ -228,13 +228,12 @@ class TestPaymentPlanModel(TestCase):
         program = RealProgramFactory()
         program_cycle = program.cycles.first()
 
-        pp1 = PaymentPlanFactory(program=program, program_cycle=program_cycle)
+        pp1 = PaymentPlanFactory(program_cycle=program_cycle)
         self.assertEqual(pp1.can_be_locked, False)
 
         # create hard conflicted payment
         pp1_conflicted = PaymentPlanFactory(
             status=PaymentPlan.Status.LOCKED,
-            program=program,
             program_cycle=program_cycle,
         )
         p1 = PaymentFactory(parent=pp1, conflicted=False, currency="PLN")
@@ -311,23 +310,20 @@ class TestPaymentModel(TestCase):
         program = RealProgramFactory()
         program_cycle = program.cycles.first()
 
-        pp1 = PaymentPlanFactory(program=program, program_cycle=program_cycle)
+        pp1 = PaymentPlanFactory(program_cycle=program_cycle)
 
         # create hard conflicted payment
         pp2 = PaymentPlanFactory(
             status=PaymentPlan.Status.LOCKED,
-            program=program,
             program_cycle=program_cycle,
         )
         # create soft conflicted payments
         pp3 = PaymentPlanFactory(
             status=PaymentPlan.Status.OPEN,
-            program=program,
             program_cycle=program_cycle,
         )
         pp4 = PaymentPlanFactory(
             status=PaymentPlan.Status.OPEN,
-            program=program,
             program_cycle=program_cycle,
         )
         p1 = PaymentFactory(parent=pp1, conflicted=False, currency="PLN")

@@ -1,10 +1,9 @@
 import { MouseEvent, ReactElement, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import {
-  LookUpPaymentRecordsQueryVariables,
+  AllPaymentRecordsAndPaymentsQueryVariables,
   PaymentRecordAndPaymentNode,
   useAllPaymentRecordsAndPaymentsQuery,
-  useLookUpPaymentRecordsQuery,
 } from '@generated/graphql';
 import { UniversalTable } from '@containers/tables/UniversalTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -21,12 +20,13 @@ export function LookUpPaymentRecordTable({
   setFieldValue,
   initialValues,
 }: LookUpPaymentRecordTableProps): ReactElement {
-  const { businessArea } = useBaseUrl();
+  const { businessArea, programId } = useBaseUrl();
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   const initialVariables = {
     household: initialValues?.selectedHousehold?.id,
     businessArea,
+    program: programId === 'all' ? null : programId,
   };
   const [selected, setSelected] = useState(
     initialValues.selectedPaymentRecords,
@@ -64,11 +64,11 @@ export function LookUpPaymentRecordTable({
     return (
       <UniversalTable<
         PaymentRecordAndPaymentNode,
-        LookUpPaymentRecordsQueryVariables
+        AllPaymentRecordsAndPaymentsQueryVariables
       >
         headCells={headCells}
-        query={useLookUpPaymentRecordsQuery}
-        queriedObjectName="allPaymentRecords"
+        query={useAllPaymentRecordsAndPaymentsQuery}
+        queriedObjectName="allPaymentRecordsAndPayments"
         initialVariables={initialVariables}
         renderRow={(row) => (
           <LookUpPaymentRecordTableRow
@@ -85,7 +85,7 @@ export function LookUpPaymentRecordTable({
   return (
     <UniversalTable<
       PaymentRecordAndPaymentNode,
-      LookUpPaymentRecordsQueryVariables
+      AllPaymentRecordsAndPaymentsQueryVariables
     >
       headCells={headCells}
       query={useAllPaymentRecordsAndPaymentsQuery}

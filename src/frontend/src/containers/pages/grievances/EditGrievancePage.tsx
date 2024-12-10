@@ -7,6 +7,7 @@ import {
   GrievanceTicketDocument,
   useAllAddIndividualFieldsQuery,
   useAllEditHouseholdFieldsQuery,
+  useAllEditPeopleFieldsQuery,
   useAllProgramsForChoicesQuery,
   useGrievanceTicketQuery,
   useGrievanceTicketStatusChangeMutation,
@@ -72,6 +73,7 @@ import {
 import { grievancePermissions } from './GrievancesDetailsPage/grievancePermissions';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 import { ReactElement } from 'react';
+import { useProgramContext } from 'src/programContext';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -90,6 +92,7 @@ export const EditGrievancePage = (): ReactElement => {
   const location = useLocation();
   const { t } = useTranslation();
   const { baseUrl, businessArea, isAllPrograms } = useBaseUrl();
+  const { isSocialDctType } = useProgramContext();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
   const { id } = useParams();
@@ -119,6 +122,9 @@ export const EditGrievancePage = (): ReactElement => {
   } = useAllAddIndividualFieldsQuery();
   const { data: householdFieldsData, loading: householdFieldsLoading } =
     useAllEditHouseholdFieldsQuery();
+  const { data: allEditPeopleFieldsData, loading: allEditPeopleFieldsLoading } =
+    useAllEditPeopleFieldsQuery();
+
   const { data: programsData, loading: programsDataLoading } =
     useAllProgramsForChoicesQuery({
       variables: {
@@ -137,10 +143,17 @@ export const EditGrievancePage = (): ReactElement => {
     '*',
   );
 
+  const peopleFieldsDict = useArrayToDict(
+    allEditPeopleFieldsData?.allEditPeopleFieldsAttributes,
+    'name',
+    '*',
+  );
+
   if (
     choicesLoading ||
     ticketLoading ||
     allAddIndividualFieldsDataLoading ||
+    allEditPeopleFieldsLoading ||
     householdFieldsLoading ||
     currentUserDataLoading ||
     programsDataLoading
@@ -155,6 +168,7 @@ export const EditGrievancePage = (): ReactElement => {
     !householdFieldsData ||
     !householdFieldsDict ||
     !individualFieldsDict ||
+    !peopleFieldsDict ||
     !programsData
   )
     return null;
@@ -216,6 +230,7 @@ export const EditGrievancePage = (): ReactElement => {
       'individualDataUpdateIdentitiesToEdit',
       'individualDataUpdateFieldsPaymentChannels',
       'individualDataUpdatePaymentChannelsToEdit',
+      'peopleDataUpdateFields',
     ].map(
       (fieldname) =>
         isInvalid(fieldname, errors, touched) && (
@@ -252,6 +267,10 @@ export const EditGrievancePage = (): ReactElement => {
   const deliveryMechanismDataToEdit =
     ticket?.individualDataUpdateTicketDetails?.individualData
       ?.delivery_mechanism_data_to_edit;
+
+  const individualFieldsDictForValidation = isSocialDctType
+    ? peopleFieldsDict
+    : individualFieldsDict;
 
   return (
     <UniversalErrorBoundary
@@ -296,7 +315,7 @@ export const EditGrievancePage = (): ReactElement => {
           validate(
             values,
             allAddIndividualFieldsData,
-            individualFieldsDict,
+            individualFieldsDictForValidation,
             householdFieldsDict,
           )
         }

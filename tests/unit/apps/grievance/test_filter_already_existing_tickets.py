@@ -21,7 +21,7 @@ from hct_mis_api.apps.grievance.fixtures import (
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.payment.fixtures import CashPlanFactory, PaymentRecordFactory
+from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
@@ -97,19 +97,19 @@ class TestAlreadyExistingFilterTickets(APITestCase):
             {"given_name": "Jane", "family_name": "XDoe", "middle_name": "", "full_name": "Jane XDoe"},
         )
         program = ProgramFactory(business_area=cls.business_area)
-        cash_plan = CashPlanFactory(program=program, business_area=cls.business_area)
-        cls.payment_record = PaymentRecordFactory(
+        payment_plan = PaymentPlanFactory(program_cycle=program.cycles.first(), business_area=cls.business_area)
+        cls.payment = PaymentFactory(
             household=cls.household_1,
-            full_name=cls.individuals_1[0].full_name,
+            collector=cls.individuals_1[0],
             business_area=cls.business_area,
-            parent=cash_plan,
+            parent=payment_plan,
             currency="PLN",
         )
-        cls.payment_record2 = PaymentRecordFactory(
-            household=cls.household_1,
-            full_name=cls.individuals_1[0].full_name,
+        cls.payment2 = PaymentFactory(
+            household=cls.household_2,
+            collector=cls.individuals_2[0],
             business_area=cls.business_area,
-            parent=cash_plan,
+            parent=payment_plan,
             currency="PLN",
         )
         grievance_1 = GrievanceTicketFactory(
@@ -130,7 +130,7 @@ class TestAlreadyExistingFilterTickets(APITestCase):
         cls.ticket = SensitiveGrievanceTicketWithoutExtrasFactory(
             household=cls.household_1,
             individual=cls.individuals_1[0],
-            payment_obj=cls.payment_record,
+            payment_obj=cls.payment,
             ticket=grievance_1,
         )
         SensitiveGrievanceTicketWithoutExtrasFactory(

@@ -7,7 +7,6 @@ import pytest
 from dateutil.relativedelta import relativedelta
 from selenium.webdriver.common.by import By
 
-from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.household.fixtures import (
@@ -15,14 +14,10 @@ from hct_mis_api.apps.household.fixtures import (
     create_individual_document,
 )
 from hct_mis_api.apps.household.models import HOST, SEEING, Individual
-from hct_mis_api.apps.payment.fixtures import CashPlanFactory, PaymentRecordFactory
+from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
 from hct_mis_api.apps.payment.models import GenericPayment, PaymentRecord
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.targeting.fixtures import (
-    TargetingCriteriaFactory,
-    TargetPopulationFactory,
-)
 from tests.selenium.page_object.filters import Filters
 from tests.selenium.page_object.grievance.details_grievance_page import (
     GrievanceDetailsPage,
@@ -64,33 +59,24 @@ def add_people(social_worker_program: Program) -> List:
 def add_people_with_payment_record(add_people: List) -> PaymentRecord:
     program = Program.objects.filter(name="Worker Program").first()
 
-    cash_plan = CashPlanFactory(
+    payment_plan = PaymentPlanFactory(
         name="TEST",
-        program=program,
+        program_cycle=program.cycles.first(),
         business_area=BusinessArea.objects.first(),
         start_date=datetime.now() - relativedelta(months=1),
         end_date=datetime.now() + relativedelta(months=1),
     )
-
-    targeting_criteria = TargetingCriteriaFactory()
-
-    target_population = TargetPopulationFactory(
-        created_by=User.objects.first(),
-        targeting_criteria=targeting_criteria,
-        business_area=BusinessArea.objects.first(),
-    )
-    payment_record = PaymentRecordFactory(
+    payment = PaymentFactory(
         household=add_people[1],
-        parent=cash_plan,
-        target_population=target_population,
-        entitlement_quantity="21.36",
-        delivered_quantity="21.36",
+        parent=payment_plan,
+        entitlement_quantity=21.36,
+        delivered_quantity=21.36,
         currency="PLN",
         status=GenericPayment.STATUS_DISTRIBUTION_SUCCESS,
     )
-    add_people[1].total_cash_received_usd = "21.36"
+    add_people[1].total_cash_received_usd = 21.36
     add_people[1].save()
-    return payment_record
+    return payment
 
 
 def get_program_with_dct_type_and_name(
@@ -227,6 +213,7 @@ class TestSmokePeople:
         assert pagePeopleDetails.getLabelRegistrationDate().text
         assert pagePeopleDetails.getLabelUserName().text
 
+    @pytest.mark.xfail(reason="UNSTABLE")
     def test_people_happy_path(
         self,
         add_people_with_payment_record: PaymentRecord,

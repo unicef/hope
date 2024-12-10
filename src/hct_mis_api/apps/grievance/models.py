@@ -28,7 +28,7 @@ from hct_mis_api.apps.grievance.constants import (
     URGENCY_NOT_SET,
 )
 from hct_mis_api.apps.household.models import Individual
-from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification
+from hct_mis_api.apps.payment.models import Payment, PaymentVerification
 from hct_mis_api.apps.utils.models import (
     AdminUrlMixin,
     ConcurrencyModel,
@@ -628,7 +628,7 @@ FEEDBACK_STATUS_FLOW = {
 }
 
 
-class TicketComplaintDetails(GenericPaymentTicket):
+class TicketComplaintDetails(GenericPaymentTicket):  # TODO TP drop GenericPaymentTicket
     STATUS_FLOW = GENERAL_STATUS_FLOW
 
     ticket = models.OneToOneField(
@@ -647,13 +647,19 @@ class TicketComplaintDetails(GenericPaymentTicket):
         related_name="complaint_ticket_details",
         on_delete=models.CASCADE,
         null=True,
+    )
+    payment = models.OneToOneField(
+        Payment,
+        on_delete=models.CASCADE,
+        null=True,
+        related_name="ticket_complaint_details",
     )
 
     class Meta:
         verbose_name_plural = "Ticket Complaint Details"
 
 
-class TicketSensitiveDetails(GenericPaymentTicket):
+class TicketSensitiveDetails(GenericPaymentTicket):  # TODO TP drop GenericPaymentTicket
     STATUS_FLOW = GENERAL_STATUS_FLOW
 
     ticket = models.OneToOneField(
@@ -672,6 +678,12 @@ class TicketSensitiveDetails(GenericPaymentTicket):
         related_name="sensitive_ticket_details",
         on_delete=models.CASCADE,
         null=True,
+    )
+    payment = models.OneToOneField(
+        Payment,
+        on_delete=models.CASCADE,
+        null=True,
+        related_name="ticket_sensitive_details",
     )
 
     class Meta:
@@ -955,9 +967,9 @@ class TicketPaymentVerificationDetails(TimeStampedUUIDModel):
         return getattr(self.payment_record, "head_of_household", None)
 
     @property
-    def payment_record(self) -> Optional["PaymentRecord"]:
+    def payment_record(self) -> Optional["Payment"]:
         # TODO: need to double check this property sometimes return null ???
-        return getattr(self.payment_verification, "payment_obj", None)
+        return getattr(self.payment_verification, "payment", None)
 
     class Meta:
         verbose_name_plural = "Ticket Payment Verification Details"

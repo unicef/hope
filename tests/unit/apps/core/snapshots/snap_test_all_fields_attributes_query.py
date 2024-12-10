@@ -8528,6 +8528,36 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'MALE'
+                    },
+                    {
+                        'labelEn': 'Not answered',
+                        'labels': [
+                            {
+                                'label': 'Not answered',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'NOT_ANSWERED'
+                    },
+                    {
+                        'labelEn': 'Not collected',
+                        'labels': [
+                            {
+                                'label': 'Not collected',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'NOT_COLLECTED'
+                    },
+                    {
+                        'labelEn': 'Other',
+                        'labels': [
+                            {
+                                'label': 'Other',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'OTHER'
                     }
                 ],
                 'hint': '',
@@ -20157,16 +20187,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'UA0108079'
                     },
                     {
-                        'labelEn': 'Simferopolska-UA0116033',
-                        'labels': [
-                            {
-                                'label': 'Simferopolska-UA0116033',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'UA0116033'
-                    },
-                    {
                         'labelEn': 'Skalystivska-UA0102039',
                         'labels': [
                             {
@@ -20833,6 +20853,16 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
             {
                 'associatedWith': 'Household',
                 'choices': [
+                    {
+                        'labelEn': 'TESTlevel4-UA011603311',
+                        'labels': [
+                            {
+                                'label': 'TESTlevel4-UA011603311',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UA011603311'
+                    }
                 ],
                 'hint': '',
                 'isFlexField': False,
