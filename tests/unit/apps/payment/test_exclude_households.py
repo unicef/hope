@@ -60,19 +60,19 @@ class TestExcludeHouseholds(APITestCase):
         cls.payment_plan_id = encode_id_base64(cls.payment_plan.id, "PaymentPlan")
 
         hoh1 = IndividualFactory(household=None)
-        cls.household_1 = HouseholdFactory(id="3d7087be-e8f8-478d-9ca2-4ca6d5e96f51", head_of_household=hoh1)
+        cls.household_1 = HouseholdFactory(head_of_household=hoh1)
         cls.payment_1 = PaymentFactory(
             parent=cls.payment_plan, household=cls.household_1, excluded=False, currency="PLN"
         )
 
         hoh2 = IndividualFactory(household=None)
-        cls.household_2 = HouseholdFactory(id="4ccd6a58-d56a-4ad2-9448-dabca4cfcb84", head_of_household=hoh2)
+        cls.household_2 = HouseholdFactory(head_of_household=hoh2)
         cls.payment_2 = PaymentFactory(
             parent=cls.payment_plan, household=cls.household_2, excluded=False, currency="PLN"
         )
 
         hoh3 = IndividualFactory(household=None)
-        cls.household_3 = HouseholdFactory(id="e1bdabf2-a54a-40c4-b92d-166b79d10542", head_of_household=hoh3)
+        cls.household_3 = HouseholdFactory(head_of_household=hoh3)
         cls.payment_3 = PaymentFactory(
             parent=cls.payment_plan, household=cls.household_3, excluded=False, currency="PLN"
         )
@@ -81,7 +81,7 @@ class TestExcludeHouseholds(APITestCase):
         cls.individual_3 = IndividualFactory(household=cls.household_3, program=cls.program)
 
         hoh4 = IndividualFactory(household=None)
-        cls.household_4 = HouseholdFactory(id="7e14efa4-3ff3-4947-aecc-b517c659ebda", head_of_household=hoh4)
+        cls.household_4 = HouseholdFactory(head_of_household=hoh4)
         cls.payment_4 = PaymentFactory(
             parent=cls.another_payment_plan, household=cls.household_4, excluded=False, currency="PLN"
         )

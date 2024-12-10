@@ -31,7 +31,7 @@ class TestReassignRolesOnUpdate(APITestCase):
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.program_one = ProgramFactory(name="Test program ONE", business_area=cls.business_area)
 
-        cls.household = HouseholdFactory.build(id="b5cb9bb2-a4f3-49f0-a9c8-a2f260026054", program=cls.program_one)
+        cls.household = HouseholdFactory.build(program=cls.program_one)
         cls.household.household_collection.save()
         cls.household.registration_data_import.imported_by.save()
         cls.household.registration_data_import.program = cls.program_one
