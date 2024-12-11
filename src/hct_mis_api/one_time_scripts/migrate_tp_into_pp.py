@@ -109,9 +109,9 @@ def tc_migrate_hh_ind_ids(tc: TargetingCriteria) -> Tuple[Optional[TargetingCrit
         return None, False
 
     if first_rule := rules.first():
-        if tc.household_ids:
+        if tc.household_ids and tc.household_ids != first_rule.household_ids:
             first_rule.household_ids = tc.household_ids
-        if tc.individual_ids:
+        if tc.individual_ids and tc.individual_ids != first_rule.individual_ids:
             first_rule.individual_ids = tc.individual_ids
         return first_rule, False
     return None, False
@@ -128,11 +128,12 @@ def migrate_tp_qs(tp_qs: QuerySet["TargetPopulation"]) -> None:
 
     for tp in tp_qs:
         # migrate ind_ids and hh_ids
-        tcr, create = tc_migrate_hh_ind_ids(tp.targeting_criteria)
-        if tcr and not create:
-            update_tc_rules.append(tcr)
-        if tcr and create:
-            create_tc_rules.append(tcr)
+        if tp.targeting_criteria:
+            tcr, create = tc_migrate_hh_ind_ids(tp.targeting_criteria)
+            if tcr and not create:
+                update_tc_rules.append(tcr)
+            if tcr and create:
+                create_tc_rules.append(tcr)
 
         # update existing PaymentPlan
         existing_payment_plans = list(tp.payment_plans.all())
