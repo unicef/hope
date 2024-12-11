@@ -117,9 +117,9 @@ def create_flexible_attribute(
 
 @pytest.mark.usefixtures("login")
 class TestPeriodicDataTemplates:
-    @pytest.mark.xfail(reason="UNSTABLE")
     def test_periodic_data_template_export_and_download(
         self,
+        clear_downloaded_files: None,
         program: Program,
         string_attribute: FlexibleAttribute,
         pageIndividuals: Individuals,
