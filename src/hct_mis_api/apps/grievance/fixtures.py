@@ -105,8 +105,7 @@ class GrievanceComplaintTicketFactory(DjangoModelFactory):
     )
     household = None
     individual = None
-    payment_object_id = None
-    payment_content_type_id = None
+    payment = None
 
     @factory.post_generation
     def create_extras(obj, create: bool, extracted: bool, **kwargs: Any) -> None:

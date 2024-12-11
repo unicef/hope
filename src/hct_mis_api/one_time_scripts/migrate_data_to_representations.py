@@ -23,7 +23,7 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.models import Payment, PaymentRecord
+from hct_mis_api.apps.payment.models import Payment
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
@@ -598,8 +598,6 @@ def adjust_payment_objects(business_area: Optional[BusinessArea] = None) -> None
     for business_area in business_areas:
         logger.info(f"Adjusting payments for business area {business_area.name}")
         adjust_payments(business_area)  # type: ignore
-        logger.info(f"Adjusting payment records for business area {business_area.name}")
-        adjust_payment_records(business_area)  # type: ignore
 
 
 def adjust_payments(business_area: BusinessArea) -> None:
@@ -652,46 +650,6 @@ def adjust_payments(business_area: BusinessArea) -> None:
 
         Payment.objects.bulk_update(payment_updates, fields=["collector_id", "head_of_household_id", "household_id"])
         del payment_updates
-
-
-def adjust_payment_records(business_area: BusinessArea) -> None:
-    """
-    Adjust PaymentRecord individuals and households to their representations.
-    PaymentRecord is already related to program through TargetPopulation.
-    """
-    payment_records_ids = list(
-        PaymentRecord.objects.filter(
-            target_population__program__business_area=business_area, household__is_original=True
-        ).values_list("pk", flat=True)
-    )
-    payment_records_count = len(payment_records_ids)
-    for batch_start in range(0, payment_records_count, BATCH_SIZE):
-        batch_end = batch_start + BATCH_SIZE
-        logger.info(f"Adjusting payment records {batch_start} - {batch_end}/{payment_records_count}")
-        payment_record_updates = []
-
-        payment_records_batch = PaymentRecord.objects.filter(id__in=payment_records_ids[batch_start:batch_end])
-        for payment_record in payment_records_batch:
-            payment_record_program = payment_record.target_population.program
-            if payment_record.head_of_household:
-                representation_head_of_household = get_individual_representation_per_program_by_old_individual_id(
-                    program=payment_record_program,
-                    old_individual_id=payment_record.head_of_household_id,
-                )
-            else:
-                representation_head_of_household = None
-            representation_household = get_household_representation_per_program_by_old_household_id(
-                program=payment_record_program,
-                old_household_id=payment_record.household_id,
-            )
-            payment_record.refresh_from_db()
-            if representation_household:
-                payment_record.head_of_household = representation_head_of_household
-                payment_record.household = representation_household
-                payment_record_updates.append(payment_record)
-
-        PaymentRecord.objects.bulk_update(payment_record_updates, fields=["head_of_household_id", "household_id"])
-        del payment_record_updates
 
 
 def handle_rdis(rdis: QuerySet, program: Program, hhs_to_ignore: Optional[QuerySet] = None) -> None:

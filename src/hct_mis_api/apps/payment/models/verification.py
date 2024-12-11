@@ -3,12 +3,10 @@ from decimal import Decimal
 from typing import TYPE_CHECKING, Any, Optional
 
 from django.contrib.admin.options import get_content_type_for_model
-from django.contrib.contenttypes.fields import GenericForeignKey
-from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.fields import ArrayField
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models import Count, JSONField, Q, UniqueConstraint, UUIDField
+from django.db.models import Count, JSONField, Q
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils import timezone
@@ -81,11 +79,6 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
     )
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING, db_index=True)
 
-    # TODO TP DROP
-    payment_plan_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
-    payment_plan_object_id = UUIDField(null=True)
-    payment_plan_obj = GenericForeignKey("payment_plan_content_type", "payment_plan_object_id")
-
     payment_plan = models.ForeignKey(
         "payment.PaymentPlan", on_delete=models.CASCADE, related_name="payment_verification_plans", null=True
     )
@@ -112,10 +105,6 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
 
     class Meta:
         ordering = ("created_at",)
-        # TODO TP DROP
-        indexes = [
-            models.Index(fields=["payment_plan_content_type", "payment_plan_object_id"]),
-        ]
 
     @property
     def business_area(self) -> BusinessArea:
@@ -240,11 +229,6 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMixin)
         related_name="payment_record_verifications",
     )
 
-    # TODO TP DROP
-    payment_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
-    payment_object_id = UUIDField(null=True)
-    payment_obj = GenericForeignKey("payment_content_type", "payment_object_id")
-
     payment = models.OneToOneField(
         "payment.Payment",
         on_delete=models.CASCADE,
@@ -261,17 +245,6 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMixin)
         null=True,
     )
     sent_to_rapid_pro = models.BooleanField(default=False)
-
-    class Meta:
-        indexes = [
-            models.Index(fields=["payment_content_type", "payment_object_id"]),
-        ]
-        constraints = [
-            UniqueConstraint(
-                fields=["payment_content_type", "payment_object_id"],
-                name="payment_content_type_and_payment_id",
-            )
-        ]
 
     @property
     def is_manually_editable(self) -> bool:
@@ -311,23 +284,6 @@ class PaymentVerificationSummary(TimeStampedUUIDModel):
         related_name="payment_verification_summary",
         null=True,
     )
-
-    # TODO TP drop
-    payment_plan_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
-    payment_plan_object_id = UUIDField(null=True)
-    payment_plan_obj = GenericForeignKey("payment_plan_content_type", "payment_plan_object_id")
-
-    class Meta:
-        # TODO TP DROP
-        indexes = [
-            models.Index(fields=["payment_plan_content_type", "payment_plan_object_id"]),
-        ]
-        constraints = [
-            UniqueConstraint(
-                fields=["payment_plan_content_type", "payment_plan_object_id"],
-                name="payment_plan_content_type_and_payment_plan_id",
-            )
-        ]
 
     def mark_as_active(self) -> None:
         self.status = self.STATUS_ACTIVE
