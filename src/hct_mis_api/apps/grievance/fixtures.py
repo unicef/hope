@@ -79,7 +79,7 @@ class SensitiveGrievanceTicketFactory(DjangoModelFactory):
     )
     household = None
     individual = None
-    payment_obj = None
+    payment = None
 
     @factory.post_generation
     def create_extras(obj, create: bool, extracted: bool, **kwargs: Any) -> None:
@@ -132,7 +132,7 @@ class SensitiveGrievanceTicketWithoutExtrasFactory(DjangoModelFactory):
     )
     household = None
     individual = None
-    payment_obj = None
+    payment = None
 
 
 class GrievanceComplaintTicketWithoutExtrasFactory(DjangoModelFactory):
