@@ -1,5 +1,9 @@
+import json
 from typing import Any, Callable
 
+from django.core.cache import cache
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 
 import pytest
@@ -124,20 +128,20 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
 
         update_partner_access_to_program(self.partner, self.program2)
 
-        # with CaptureQueriesContext(connection) as ctx:
-        #     # response = _test_list()
-        #     # etag = response.headers["etag"]
-        #
-        #     # assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
-        #     assert len(ctx.captured_queries) == 28
+        with CaptureQueriesContext(connection) as ctx:
+            response = _test_list()
+            etag = response.headers["etag"]
+
+            assert json.loads(cache.get(etag)[0].decode("utf8")) == response.json()
+            assert len(ctx.captured_queries) == 28
 
         # Test that reoccurring request use cached data
-        # with CaptureQueriesContext(connection) as ctx:
-        #     response = _test_list()
-        #     etag_second_call = response.headers["etag"]
-        #     assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
-        #     assert etag_second_call == etag
-        #     assert len(ctx.captured_queries) == 12
+        with CaptureQueriesContext(connection) as ctx:
+            response = _test_list()
+            etag_second_call = response.headers["etag"]
+            assert json.loads(cache.get(response.headers["etag"])[0].decode("utf8")) == response.json()
+            assert etag_second_call == etag
+            assert len(ctx.captured_queries) == 12
 
     def test_list_payment_plans_approval_process_data(
         self,
