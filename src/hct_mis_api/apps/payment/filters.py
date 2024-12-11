@@ -5,12 +5,10 @@ from uuid import UUID
 from django.db.models import Case, Count, IntegerField, Q, QuerySet, Value, When
 from django.db.models.functions import Lower
 from django.shortcuts import get_object_or_404
-from django.utils.translation import gettext_lazy as _
 
 from django_filters import (
     BooleanFilter,
     CharFilter,
-    ChoiceFilter,
     DateFilter,
     FilterSet,
     MultipleChoiceFilter,
@@ -26,7 +24,6 @@ from hct_mis_api.apps.core.utils import (
     decode_id_string_required,
 )
 from hct_mis_api.apps.payment.models import (
-    CashPlan,
     DeliveryMechanism,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
@@ -124,26 +121,18 @@ class PaymentVerificationSummaryFilter(FilterSet):
 
 
 class PaymentVerificationLogEntryFilter(LogEntryFilter):
-    PLAN_TYPE_CASH = "CashPlan"
-    PLAN_TYPE_PAYMENT = "PaymentPlan"
-    PLAN_TYPE_CHOICES = (
-        (PLAN_TYPE_CASH, _("CashPlan")),
-        (PLAN_TYPE_PAYMENT, _("PaymentPlan")),
-    )
     object_id = UUIDFilter(method="object_id_filter")
-    object_type = ChoiceFilter(method="object_type_filter", choices=PLAN_TYPE_CHOICES)
 
     def filter_queryset(self, queryset: QuerySet) -> QuerySet:
         cleaned_data = self.form.cleaned_data
-        object_type = cleaned_data.get("object_type")
         object_id = cleaned_data.get("object_id")
-        plan_object = (PaymentPlan if object_type == self.PLAN_TYPE_PAYMENT else CashPlan).objects.get(pk=object_id)
+        plan_object = PaymentPlan.objects.get(pk=object_id)
         verifications_ids = plan_object.payment_verification_plans.all().values_list("pk", flat=True)
         return queryset.filter(object_id__in=verifications_ids)
 
     def object_id_filter(self, qs: QuerySet, name: str, value: UUID) -> QuerySet:
-        cash_plan = CashPlan.objects.get(pk=value)
-        verifications_ids = cash_plan.verifications.all().values_list("pk", flat=True)
+        payment_plan = PaymentPlan.objects.get(pk=value)
+        verifications_ids = payment_plan.payment_verification_plans.all().values_list("pk", flat=True)
         return qs.filter(object_id__in=verifications_ids)
 
 

@@ -20,7 +20,7 @@ from hct_mis_api.apps.payment.fixtures import (
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
 )
-from hct_mis_api.apps.payment.models import GenericPayment, Payment, PaymentPlan
+from hct_mis_api.apps.payment.models import Payment, PaymentPlan
 from hct_mis_api.apps.payment.models import PaymentVerification as PV
 from hct_mis_api.apps.payment.models import PaymentVerificationPlan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
@@ -131,7 +131,7 @@ def payment_verification_multiple_verification_plans(number_verification_plans: 
                 entitlement_quantity=Decimal(21.36),
                 delivered_quantity=Decimal(21.36),
                 currency="PLN",
-                status=GenericPayment.STATUS_DISTRIBUTION_SUCCESS,
+                status=Payment.STATUS_DISTRIBUTION_SUCCESS,
             )
         )
 
@@ -178,7 +178,7 @@ def empty_payment_verification(social_worker_program: Program) -> None:
         entitlement_quantity=Decimal(21.36),
         delivered_quantity=Decimal(21.36),
         currency="PLN",
-        status=GenericPayment.STATUS_DISTRIBUTION_SUCCESS,
+        status=Payment.STATUS_DISTRIBUTION_SUCCESS,
     )
     PaymentVerificationSummaryFactory(payment_plan=payment_plan)
 
@@ -229,7 +229,7 @@ def payment_verification_creator(channel: str = PaymentVerificationPlan.VERIFICA
         entitlement_quantity=21.36,
         delivered_quantity=21.36,
         currency="PLN",
-        status=GenericPayment.STATUS_DISTRIBUTION_SUCCESS,
+        status=Payment.STATUS_DISTRIBUTION_SUCCESS,
     )
     payment_verification_plan = PaymentVerificationPlanFactory(
         payment_plan=payment_plan,

@@ -117,20 +117,17 @@ def total_cash_transferred_by_administrative_area_table_query(
 
     return (
         Area.objects.filter(
-            Q(household__paymentrecord__id__in=payment_items_ids) | Q(household__payment__id__in=payment_items_ids),
+            household__payment__id__in=payment_items_ids,
             area_type__area_level=2,
         )
         .distinct()
         .annotate(
-            total_transferred_payment_records=Coalesce(
-                Sum("household__paymentrecord__delivered_quantity_usd", output_field=DecimalField()), Decimal(0.0)
-            ),
             total_transferred_payments=Coalesce(
                 Sum("household__payment__delivered_quantity_usd", output_field=DecimalField()), Decimal(0.0)
             ),
         )
         .annotate(
             num_households=Count("household", distinct=True),
-            total_transferred=F("total_transferred_payments") + F("total_transferred_payment_records"),
+            total_transferred=F("total_transferred_payments"),
         )
     )
