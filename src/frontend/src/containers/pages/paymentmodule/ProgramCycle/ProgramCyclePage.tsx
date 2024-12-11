@@ -36,7 +36,7 @@ export const ProgramCyclePage = (): ReactElement => {
 
   if (permissions === null) return null;
   if (!selectedProgram) return null;
-  if (!hasPermissions(PERMISSIONS.PM_VIEW_LIST, permissions))
+  if (!hasPermissions(PERMISSIONS.PM_PROGRAMME_CYCLE_VIEW_LIST, permissions))
     return <PermissionDenied />;
 
   return (
