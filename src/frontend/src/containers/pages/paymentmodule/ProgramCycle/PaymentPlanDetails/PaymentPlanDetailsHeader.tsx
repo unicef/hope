@@ -35,7 +35,7 @@ export const PaymentPlanDetailsHeader = ({
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
   const programCycleId = paymentPlan.programCycle?.id;
-  const { data: programCycleData, isLoading: isLoadingProgramCycle } = useQuery(
+  const { data: programCycleData } = useQuery(
     {
       queryKey: [
         'programCyclesDetails',
@@ -54,12 +54,6 @@ export const PaymentPlanDetailsHeader = ({
     },
   );
 
-  if (isLoadingProgramCycle) {
-    return null;
-  }
-
-  if (!programCycleData) return null;
-
   const breadCrumbsItems: BreadCrumbsItem[] = [];
 
   if (programCycleId) {
@@ -68,7 +62,7 @@ export const PaymentPlanDetailsHeader = ({
       to: '../../..',
     });
     breadCrumbsItems.push({
-      title: `${programCycleData.title}`,
+      title: `${programCycleData?.title || ''}`,
       to: '../..',
     });
   } else {
