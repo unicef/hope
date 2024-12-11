@@ -1318,7 +1318,7 @@ class TestTargeting:
         assert "Copy TP" in pageTargeting.chooseTargetPopulations(0).text
         pageTargeting.getColumnCreatedBy().click()
         pageTargeting.disappearLoadingRows()
-        pageTargeting.wait_for_text("Test NEW TP", pageTargeting.rows)
+        pageTargeting.wait_for_text("Copy TP", pageTargeting.rows)
 
     def test_targeting_parametrized_rules_filters(
         self,
