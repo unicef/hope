@@ -26,7 +26,6 @@ from django.db.models.functions import Coalesce, Greatest, Least
 from django.template.loader import render_to_string
 
 import openpyxl
-from apps.payment.models import Payment
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.worksheet import Worksheet
 
@@ -45,6 +44,7 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.models import (
+    Payment,
     PaymentPlan,
     PaymentVerification,
     PaymentVerificationPlan,
