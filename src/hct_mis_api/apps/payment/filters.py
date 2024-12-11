@@ -20,6 +20,7 @@ from django_filters import (
 )
 
 from hct_mis_api.apps.activity_log.schema import LogEntryFilter
+from hct_mis_api.apps.core.filters import DateTimeRangeFilter, IntegerFilter
 from hct_mis_api.apps.core.utils import (
     CustomOrderingFilter,
     decode_id_string,
@@ -206,6 +207,17 @@ class PaymentPlanFilter(FilterSet):
     source_payment_plan_id = CharFilter(method="source_payment_plan_filter")
     program = CharFilter(method="filter_by_program")
     program_cycle = CharFilter(method="filter_by_program_cycle")
+    name = CharFilter(field_name="name", lookup_expr="startswith")
+    payment_plan_applicable = BooleanFilter(method="filter_payment_plan_applicable")
+    total_households_count_min = IntegerFilter(
+        field_name="total_number_of_hh",
+        lookup_expr="gte",
+    )
+    total_households_count_max = IntegerFilter(
+        field_name="total_number_of_hh",
+        lookup_expr="lte",
+    )
+    created_at_range = DateTimeRangeFilter(field_name="created_at")
 
     class Meta:
         fields = tuple()
@@ -219,6 +231,7 @@ class PaymentPlanFilter(FilterSet):
 
     order_by = OrderingFilter(
         fields=(
+            "name",
             "unicef_id",
             "status",
             "total_households_count",
@@ -254,6 +267,15 @@ class PaymentPlanFilter(FilterSet):
         if value:
             return qs.filter(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
         return qs
+
+    # copied from TP need for filtering
+    @staticmethod
+    def filter_payment_plan_applicable(queryset: "QuerySet", model_field: str, value: Any) -> "QuerySet":
+        if value is True:
+            return queryset.filter(
+                Q(business_area__is_payment_plan_applicable=True) & Q(status=PaymentPlan.Status.DRAFT)
+            )
+        return queryset
 
 
 class PaymentFilter(FilterSet):
