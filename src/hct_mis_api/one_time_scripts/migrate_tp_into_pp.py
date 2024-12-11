@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Any, Dict, Optional, Tuple, List, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from django.db import transaction
 from django.db.models import QuerySet
@@ -193,19 +193,29 @@ def get_statistics() -> None:
         print(f"##### Found {tp_without_ba} without BA")
 
 
-def migrate_message_and_survey(list_ids: List[str], model: Union[Message, Survey], business_area: BusinessArea) -> List:
+def get_payment_plan_id_from_tp_id(business_area_id: str, target_population_id: str) -> Optional[str]:
+    for pp in PaymentPlan.all_objects.filter(business_area_id=business_area_id):
+        if pp.internal_data.get("target_population_id") == target_population_id:
+            return str(pp.pk)
+    print(f"****** Not found PaymentPlan for old target_population_id: {target_population_id}, BA: {business_area_id}")
+    # just return None if no data
+    return None
+
+
+def migrate_message_and_survey(list_ids: List[str], model: Union[Message, Survey], business_area_id: str) -> List:
     objects_to_update = []
 
     for obj_id in list_ids:
         obj = model.objects.get(pk=obj_id)
-        if obj.target_population and obj.target_population.payment_plan_id:
+        if obj.target_population_id and obj.target_population.payment_plan_id:
             obj.payment_plan_id = obj.target_population.payment_plan_id
             objects_to_update.append(obj)
-        if obj.target_population and not obj.target_population.payment_plan_id:
+        if obj.target_population_id and not obj.target_population.payment_plan_id:
             # find new PP id from 'internal_data__target_population_id'
-            # TODO: fix it
-            obj.payment_plan_id = ""
-            objects_to_update.append(obj)
+            payment_plan_id = get_payment_plan_id_from_tp_id(business_area_id, target_population_id)
+            if payment_plan_id:
+                obj.payment_plan_id = payment_plan_id
+                objects_to_update.append(obj)
 
     return objects_to_update
 
@@ -250,10 +260,11 @@ def migrate_tp_into_pp(batch_size: int = 500) -> None:
         # Migrate Message & Survey
         for model in [Message, Survey]:
             print(f"Processing with migrations {model} objects.")
-            model_qs = model.objects.filter(business_area_id=business_area.id, target_population__isnull=False).only("id")
+            model_qs = model.objects.filter(business_area_id=business_area.id, target_population__isnull=False).only(
+                "id"
+            )
             list_ids = [str(obj_id) for obj_id in model_qs.values_list("id", flat=True).iterator(chunk_size=batch_size)]
-            update_list = migrate_message_and_survey(list_ids, model, business_area)
+            update_list = migrate_message_and_survey(list_ids, model, str(business_area.id))
             model.objects.bulk_update(update_list, ["payment_plan_id"], 1000)
-
 
     print(f"Completed in {timezone.now() - start_time}\n", "*" * 55)
