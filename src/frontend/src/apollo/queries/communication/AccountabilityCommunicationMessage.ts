@@ -14,6 +14,7 @@ export const AccountabilityCommunicationMessage = gql`
       }
       paymentPlan {
         id
+        unicefId
         name
       }
       createdAt

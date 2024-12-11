@@ -20,6 +20,11 @@ export const Survey = gql`
         id
         name
       }
+      paymentPlan {
+        id
+        unicefId
+        name
+      }
       body
       title
       rapidProUrl

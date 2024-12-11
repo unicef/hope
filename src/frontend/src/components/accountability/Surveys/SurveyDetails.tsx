@@ -22,8 +22,7 @@ export function SurveyDetails({
 }: SurveyDetailsProps): ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
-  const { category, title, createdBy, createdAt, paymentPlan, program, body } =
-    survey;
+  const { category, title, createdBy, createdAt, program, body } = survey;
   const categoryDict = choicesToDict(choicesData.surveyCategoryChoices);
 
   return (
@@ -55,11 +54,15 @@ export function SurveyDetails({
           </Grid>
           <Grid item xs={3}>
             <LabelizedField label={t('Target Population')}>
-              <BlackLink
-                to={`/${baseUrl}/payment-module/payment-plans/${survey.paymentPlan.id}`}
-              >
-                {survey.paymentPlan.unicefId}
-              </BlackLink>
+              {survey?.paymentPlan ? (
+                <BlackLink
+                  to={`/${baseUrl}/target-population/${survey?.paymentPlan.id}`}
+                >
+                  {survey?.paymentPlan.name}
+                </BlackLink>
+              ) : (
+                '-'
+              )}
             </LabelizedField>
           </Grid>
           <Grid item xs={3}>

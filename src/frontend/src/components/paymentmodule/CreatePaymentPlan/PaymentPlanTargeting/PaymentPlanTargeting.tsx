@@ -9,6 +9,7 @@ import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
 import { PaperContainer } from '../../../targeting/PaperContainer';
 import { ReactElement } from 'react';
+import { AllTargetPopulationsQuery } from '@generated/graphql';
 
 const StyledBox = styled(Box)`
   width: 100%;

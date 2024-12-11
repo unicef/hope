@@ -38,15 +38,19 @@ export function CommunicationDetails({
               <UniversalMoment>{message.createdAt}</UniversalMoment>
             </LabelizedField>
           </Grid>
-          {message.paymentPlan && (
+          {message.paymentPlan ? (
             <Grid item xs={4}>
               <LabelizedField label={t('Target Population')}>
                 <BlackLink
-                  to={`/${baseUrl}/payment-module/payment-plans/${message.paymentPlan.id}`}
+                  to={`/${baseUrl}/target-population/${message?.paymentPlan.id}`}
                 >
-                  {message.paymentPlan.unicefId}
+                  {message?.paymentPlan.name}
                 </BlackLink>
               </LabelizedField>
+            </Grid>
+          ) : (
+            <Grid item xs={4}>
+              <LabelizedField label={t('Target Population')}>-</LabelizedField>
             </Grid>
           )}
           {message.registrationDataImport && (
