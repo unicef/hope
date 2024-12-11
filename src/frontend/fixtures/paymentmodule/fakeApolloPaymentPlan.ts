@@ -14,6 +14,9 @@ export const fakeApolloPaymentPlan: PaymentPlanQuery['paymentPlan'] = {
   version: 1000,
   unicefId: 'PP-0060-22-00000001',
   status: PaymentPlanStatus.Locked,
+  programCycle: {
+    id: 'UHJvZ3JhbUN5Y2xlOjljNDMzZWQzLTcwZjUtNDRhOC1iZmQ5LTA1Mjg3YTAwNzQxNQ==',
+  },
   isFollowUp: false,
   sourcePaymentPlan: null,
   excludedHouseholds: null,
@@ -43,7 +46,7 @@ export const fakeApolloPaymentPlan: PaymentPlanQuery['paymentPlan'] = {
     name: 'Report should property early adult.',
     __typename: 'TargetPopulationNode',
   },
-  currency: "PLN",
+  currency: 'PLN',
   currencyName: 'Polish złoty',
   startDate: '2020-10-27',
   endDate: '2021-09-08',
@@ -301,7 +304,8 @@ export const fakeApolloPaymentPlan: PaymentPlanQuery['paymentPlan'] = {
   __typename: 'PaymentPlanNode',
 };
 
-export const fakeApolloPaymentPlanWithWrongBackgroundActionStatus: PaymentPlanQuery['paymentPlan'] = {
-  ...fakeApolloPaymentPlan,
-  backgroundActionStatus: PaymentPlanBackgroundActionStatus.XlsxExporting,
-};
+export const fakeApolloPaymentPlanWithWrongBackgroundActionStatus: PaymentPlanQuery['paymentPlan'] =
+  {
+    ...fakeApolloPaymentPlan,
+    backgroundActionStatus: PaymentPlanBackgroundActionStatus.XlsxExporting,
+  };

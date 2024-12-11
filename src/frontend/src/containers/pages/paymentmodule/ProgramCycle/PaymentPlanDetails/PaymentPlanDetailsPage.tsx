@@ -38,6 +38,8 @@ export const PaymentPlanDetailsPage = (): ReactElement => {
       fetchPolicy: 'network-only',
     });
 
+
+
   const status = data?.paymentPlan?.status;
   const backgroundActionStatus = data?.paymentPlan?.backgroundActionStatus;
 
@@ -73,6 +75,7 @@ export const PaymentPlanDetailsPage = (): ReactElement => {
     status === PaymentPlanStatus.Finished;
 
   const { paymentPlan } = data;
+  if (!paymentPlan) return null;
 
   return (
     <UniversalErrorBoundary
@@ -116,7 +119,7 @@ export const PaymentPlanDetailsPage = (): ReactElement => {
           </>
         )}
         {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
-          <UniversalActivityLogTable objectId={paymentPlan.id} />
+          <UniversalActivityLogTable objectId={paymentPlan?.id} />
         )}
       </Box>
     </UniversalErrorBoundary>

@@ -7,6 +7,9 @@ export const PAYMENT_PLAN_QUERY = gql`
       version
       unicefId
       status
+      programCycle {
+        id
+      }
       canCreateFollowUp
       backgroundActionStatus
       canCreatePaymentVerificationPlan

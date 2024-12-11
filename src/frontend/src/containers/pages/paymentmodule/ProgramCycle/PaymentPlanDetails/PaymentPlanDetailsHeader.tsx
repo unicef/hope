@@ -21,7 +21,6 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { fetchProgramCycle } from '@api/programCycleApi';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useParams } from 'react-router-dom';
 import { AdminButton } from '@core/AdminButton';
 
 interface PaymentPlanDetailsHeaderProps {
@@ -35,8 +34,7 @@ export const PaymentPlanDetailsHeader = ({
 }: PaymentPlanDetailsHeaderProps): ReactElement => {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
-  const { programCycleId } = useParams();
-
+  const programCycleId = paymentPlan.programCycle?.id;
   const { data: programCycleData, isLoading: isLoadingProgramCycle } = useQuery(
     {
       queryKey: [
@@ -59,6 +57,8 @@ export const PaymentPlanDetailsHeader = ({
   if (isLoadingProgramCycle) {
     return null;
   }
+
+  if (!programCycleData) return null;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [];
 
