@@ -120,29 +120,33 @@ class TestSmokeManagerialConsole:
             pageManagerialConsole.getReleaseButton().click()
 
         program = Program.objects.filter(name="Test Programm").first()
-        program_cycle = ProgramCycleFactory(program=program)
+        program_cycle = program.cycles.first()
+        ba = BusinessArea.objects.filter(slug="afghanistan").first()
+        user = User.objects.first()
         PaymentPlanFactory(
             program_cycle=program_cycle,
             status=PaymentPlan.Status.IN_APPROVAL,
-            business_area=BusinessArea.objects.filter(slug="afghanistan").first(),
+            business_area=ba,
+            created_by=user,
         )
         PaymentPlanFactory(
             program_cycle=program_cycle,
             status=PaymentPlan.Status.IN_AUTHORIZATION,
-            business_area=BusinessArea.objects.filter(slug="afghanistan").first(),
+            business_area=ba,
+            created_by=user,
         )
         PaymentPlanFactory(
             program_cycle=program_cycle,
             status=PaymentPlan.Status.IN_REVIEW,
-            business_area=BusinessArea.objects.filter(slug="afghanistan").first(),
+            business_area=ba,
+            created_by=user,
         )
         PaymentPlanFactory(
             program_cycle=program_cycle,
             status=PaymentPlan.Status.ACCEPTED,
-            business_area=BusinessArea.objects.filter(slug="afghanistan").first(),
+            business_area=ba,
+            created_by=user,
         )
-        program.save()
-        program.refresh_from_db()
         pageManagerialConsole.getMenuUserProfile().click()
         pageManagerialConsole.getMenuItemClearCache().click()
 
