@@ -1,10 +1,11 @@
 from collections import defaultdict
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple, List, Union
 
 from django.db import transaction
 from django.db.models import QuerySet
 from django.utils import timezone
 
+from hct_mis_api.apps.accountability.models import Message, Survey
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.payment.celery_tasks import prepare_payment_plan_task
 from hct_mis_api.apps.payment.models import PaymentPlan
@@ -45,7 +46,8 @@ INTERNAL_DATA_FIELDS = {
     "ca_id": "internal_data__ca_id",
     "ca_hash_id": "internal_data__ca_hash_id",
     "sent_to_datahub": "internal_data__sent_to_datahub",
-    "id": "internal_data__target_population_id",  # we need to store ID in case to migrate maybe data in future
+    # we need to store ID in case to migrate maybe data in future like Message or Survey
+    "id": "internal_data__target_population_id",
 }
 
 ALL_TP_MIGRATION_MAPPING = TP_MIGRATION_MAPPING | INTERNAL_DATA_FIELDS
@@ -190,6 +192,23 @@ def get_statistics() -> None:
         print(f"##### Found {tp_without_ba} without BA")
 
 
+def migrate_message_and_survey(list_ids: List[str], model: Union[Message, Survey], business_area: BusinessArea) -> List:
+    objects_to_update = []
+
+    for obj_id in list_ids:
+        obj = model.objects.get(pk=obj_id)
+        if obj.target_population and obj.target_population.payment_plan_id:
+            obj.payment_plan_id = obj.target_population.payment_plan_id
+            objects_to_update.append(obj)
+        if obj.target_population and not obj.target_population.payment_plan_id:
+            # find new PP id from 'internal_data__target_population_id'
+            # TODO: fix it
+            obj.payment_plan_id = ""
+            objects_to_update.append(obj)
+
+    return objects_to_update
+
+
 def migrate_tp_into_pp(batch_size: int = 500) -> None:
     start_time = timezone.now()
     # queryset.model.__name__
@@ -226,5 +245,14 @@ def migrate_tp_into_pp(batch_size: int = 500) -> None:
                 print("Create payments for New Created Payment Plans")
                 for payment_plan in build_payment_plans_qs.only("id"):
                     prepare_payment_plan_task(str(payment_plan.id))
+
+        # Migrate Message & Survey
+        for model in [Message, Survey]:
+            print(f"Processing with migrations {model} objects.")
+            model_qs = model.objects.filter(business_area_id=business_area.id, target_population__isnull=False).only("id")
+            list_ids = [str(obj_id) for obj_id in model_qs.values_list("id", flat=True).iterator(chunk_size=batch_size)]
+            update_list = migrate_message_and_survey(list_ids, model, business_area)
+            model.objects.bulk_update(update_list, ["payment_plan_id"], 1000)
+
 
     print(f"Completed in {timezone.now() - start_time}\n", "*" * 55)
