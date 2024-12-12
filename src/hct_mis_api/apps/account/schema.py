@@ -68,7 +68,13 @@ class RoleNode(DjangoObjectType):
 
 class PartnerRoleNode(DjangoObjectType):
     class Meta:
-        model = BusinessAreaPartnerThrough
+        model = RoleAssignment
+        exclude = ("id",)
+
+
+class UserRoleNode(DjangoObjectType):
+    class Meta:
+        model = RoleAssignment
         exclude = ("id",)
 
 
@@ -103,12 +109,16 @@ class PartnerType(DjangoObjectType):
 class UserNode(DjangoObjectType):
     business_areas = DjangoFilterConnectionField(UserBusinessAreaNode)
     partner_roles = graphene.List(PartnerRoleNode)
+    user_roles = graphene.List(UserRoleNode)
 
     def resolve_business_areas(self, info: Any) -> "QuerySet[BusinessArea]":
         return info.context.user.business_areas
 
     def resolve_partner_roles(self, info: Any) -> "QuerySet[Role]":
-        return self.partner.business_area_partner_through.all()
+        return self.partner.role_assignments.all()
+
+    def resolve_user_roles(self, info: Any) -> "QuerySet[Role]":
+        return self.role_assignments.all()
 
     class Meta:
         model = get_user_model()
@@ -233,7 +243,7 @@ class Query(graphene.ObjectType):
     def resolve_has_available_users_to_export(self, info: Any, business_area_slug: str) -> bool:
         return (
             get_user_model()
-            .objects.prefetch_related("user_roles")
+            .objects.prefetch_related("role_assignments")
             .filter(available_for_export=True, is_superuser=False, user_roles__business_area__slug=business_area_slug)
             .exists()
         )

@@ -16,14 +16,8 @@ from django.core.cache import cache
 
 
 @receiver(post_save, sender=RoleAssignment)
-def post_save_pre_delete_role_assignment(sender: Any, instance: User, *args: Any, **kwargs: Any) -> None:
-    if instance.user:
-        instance.user.last_modify_date = timezone.now()
-        instance.user.save()
-
-
 @receiver(pre_delete, sender=RoleAssignment)
-def pre_delete_role_assignment(sender: Any, instance: User, *args: Any, **kwargs: Any) -> None:
+def post_save_pre_delete_role_assignment(sender: Any, instance: User, *args: Any, **kwargs: Any) -> None:
     if instance.user:
         instance.user.last_modify_date = timezone.now()
         instance.user.save()
@@ -124,3 +118,30 @@ def invalidate_permissions_cache_on_group_change(sender, instance, **kwargs):
         Q(groups=instance) | Q(role_assignments__group=instance) | Q(partner__role_assignments__group=instance)
     ).distinct()
     _invalidate_user_permissions_cache(users)
+
+
+@receiver(m2m_changed, sender=User.groups.through)
+def invalidate_permissions_cache_on_user_groups_change(action, instance, pk_set, **kwargs):
+    """
+    Invalidate the cache for a User when their Groups are modified.
+    """
+    if action in {"post_add", "post_remove", "post_clear"}:
+        _invalidate_user_permissions_cache([instance])
+
+
+@receiver(post_save, sender=User)
+@receiver(pre_delete, sender=User)
+def invalidate_permissions_cache_on_user_change(sender, instance, **kwargs):
+    """
+    Invalidate the cache for a User when they are updated. (For example change of partner or is_superuser flag)
+    """
+    _invalidate_user_permissions_cache([instance])
+
+
+@receiver(post_save, sender=Partner)
+@receiver(pre_delete, sender=Partner)
+def invalidate_permissions_cache_on_partner_change(sender, instance, **kwargs):
+    """
+    Invalidate the cache for a User when they are updated. (For example change of partner or is_superuser flag)
+    """
+    _invalidate_user_permissions_cache([instance])

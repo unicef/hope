@@ -8,6 +8,7 @@ from django_filters import BooleanFilter, CharFilter, FilterSet, MultipleChoiceF
 
 from hct_mis_api.apps.account.models import USER_STATUS_CHOICES, Partner, Role
 from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string
+from hct_mis_api.apps.program.models import Program
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -66,11 +67,15 @@ class UsersFilter(FilterSet):
         return qs.filter(q_obj)
 
     def business_area_filter(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[User]":
-        return qs.filter(Q(user_roles__business_area__slug=value) | Q(partner__business_areas__slug=value))
+        return qs.filter(Q(role_assignments__business_area__slug=value) | Q(partner__role_assignments__business_area__slug=value))
 
     def program_filter(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[User]":
         program_id = decode_id_string(value)
-        return qs.filter(partner__programs__id=program_id)
+        business_area = Program.objects.get(id=program_id).business_area
+        return qs.filter(
+            Q(partner__role_assignments__program__id=program_id)
+            | Q(partner__role_assignments__program=None, partner__role_assignments__business_area=business_area)
+        )
 
     def partners_filter(self, qs: "QuerySet", name: str, values: List["UUID"]) -> "QuerySet[User]":
         q_obj = Q()
@@ -83,10 +88,10 @@ class UsersFilter(FilterSet):
         q_obj = Q()
         for value in values:
             q_obj |= Q(
-                user_roles__role__id=value,
-                user_roles__business_area__slug=business_area_slug,
+                role_assignments__role__id=value,
+                role_assignments__business_area__slug=business_area_slug,
             ) | Q(
-                partner__business_area_partner_through__roles__id=value,
-                partner__business_areas__slug=business_area_slug,
+                partner__role_assignments__roles__id=value,
+                partner__role_assignments__business_areas__slug=business_area_slug,
             )
         return qs.filter(q_obj)

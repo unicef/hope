@@ -9,7 +9,7 @@ from django.core.cache import cache
 
 from hct_mis_api.apps.account.caches import get_user_permissions_version_key
 from hct_mis_api.apps.account.fixtures import PartnerFactory, RoleFactory, RoleAssignmentFactory, UserFactory
-from hct_mis_api.apps.account.models import User
+from hct_mis_api.apps.account.models import User, RoleAssignment
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.program.fixtures import ProgramFactory
@@ -76,6 +76,21 @@ class TestSignalsForInvalidatePermissionCaches(TestCase):
         self.version_key_user2_partner1_before = self._get_cache_version(self.user2_partner1)
         self.version_key_user1_partner2_before = self._get_cache_version(self.user1_partner2)
         self.version_key_user2_partner2_before = self._get_cache_version(self.user2_partner2)
+
+    def test_invalidate_cache_on_user_change(self) -> None:
+        self.user1_partner1.is_superuser = True
+        self.user1_partner1.save()
+        self.assertEqual(self._get_cache_version(self.user1_partner1), self.version_key_user1_partner1_before + 1)
+
+        self.user1_partner1.partner = self.partner2
+        self.user1_partner1.save()
+
+        self.assertEqual(self._get_cache_version(self.user1_partner1), self.version_key_user1_partner1_before + 2)
+
+        # no invalidation for the rest of the users
+        self.assertEqual(self._get_cache_version(self.user1_partner2), self.version_key_user1_partner2_before)
+        self.assertEqual(self._get_cache_version(self.user2_partner1), self.version_key_user2_partner1_before)
+        self.assertEqual(self._get_cache_version(self.user2_partner2), self.version_key_user2_partner2_before)
 
     def test_invalidate_cache_on_role_change_for_user(self) -> None:
         self.role1.permissions = ["PROGRAMME_CREATE", "PROGRAMME_FINISH"]
@@ -170,7 +185,18 @@ class TestSignalsForInvalidatePermissionCaches(TestCase):
         self.assertEqual(self._get_cache_version(self.user1_partner2), self.version_key_user1_partner2_before)
         self.assertEqual(self._get_cache_version(self.user2_partner2), self.version_key_user2_partner2_before)
 
-    def test_invalidate_permissions_cache_on_group_change_for_user(self) -> None:
+    def test_invalidate_cache_on_group_change_for_user(self) -> None:
+        self.user1_partner1.groups.remove(self.group1)
+
+        # user with changed group should have their cache invalidated
+        self.assertEqual(self._get_cache_version(self.user1_partner1), self.version_key_user1_partner1_before + 1)
+
+        # no invalidation for the rest of the users
+        self.assertEqual(self._get_cache_version(self.user2_partner1), self.version_key_user2_partner1_before)
+        self.assertEqual(self._get_cache_version(self.user1_partner2), self.version_key_user1_partner2_before)
+        self.assertEqual(self._get_cache_version(self.user2_partner2), self.version_key_user2_partner2_before)
+
+    def test_invalidate_cache_on_group_delete_for_user(self):
         self.group1.delete()
 
         # users connected with the group should have their cache invalidated
@@ -181,19 +207,20 @@ class TestSignalsForInvalidatePermissionCaches(TestCase):
         self.assertEqual(self._get_cache_version(self.user1_partner2), self.version_key_user1_partner2_before)
         self.assertEqual(self._get_cache_version(self.user2_partner2), self.version_key_user2_partner2_before)
 
-    def test_invalidate_permissions_cache_on_group_change_for_user_role_assignment(self) -> None:
+    def test_invalidate_cache_on_group_delete_for_user_role_assignment(self) -> None:
         self.group2.delete()
-
         # users with role_assignments connected with the group should have their cache invalidated
-        # increased by 2 because of the signal on the  RoleAssignment as well
-        self.assertEqual(self._get_cache_version(self.user1_partner2), self.version_key_user1_partner2_before + 2)
+        # increased by additional 2 signals:
+        # * signal on the  RoleAssignment
+        # * signal on User update triggered because of cascade delete of the RoleAssignment
+        self.assertEqual(self._get_cache_version(self.user1_partner2), self.version_key_user1_partner2_before + 3)
 
         # no invalidation for the rest of the users
         self.assertEqual(self._get_cache_version(self.user1_partner1), self.version_key_user1_partner1_before)
         self.assertEqual(self._get_cache_version(self.user2_partner1), self.version_key_user2_partner1_before)
         self.assertEqual(self._get_cache_version(self.user2_partner2), self.version_key_user2_partner2_before)
 
-    def test_invalidate_permissions_cache_on_group_change_for_partner_role_assignment(self) -> None:
+    def test_invalidate_cache_on_group_delete_for_partner_role_assignment(self) -> None:
         self.group3.delete()
 
         # users with partner with role_assignments connected with the group should have their cache invalidated
@@ -205,25 +232,28 @@ class TestSignalsForInvalidatePermissionCaches(TestCase):
         self.assertEqual(self._get_cache_version(self.user1_partner2), self.version_key_user1_partner2_before)
         self.assertEqual(self._get_cache_version(self.user2_partner2), self.version_key_user2_partner2_before)
 
-    def test_invalidate_permissions_cache_on_role_assignment_change_for_user(self) -> None:
+    def test_invalidate_cache_on_role_assignment_change_for_user(self) -> None:
         self.role_assignment1.expiry_date = (timezone.now() - timedelta(days=1)).date()
         self.role_assignment1.save()
 
         self.role_assignment1.group = self.group3
         self.role_assignment1.save()
 
+
         self.role_assignment1.role = self.role2
         self.role_assignment1.save()
 
+
         # users connected to the role_assignment should have their cache invalidated
-        self.assertEqual(self._get_cache_version(self.user1_partner1), self.version_key_user1_partner1_before + 3)
+        # +6: 3 signals on RoleAssignment and 3 signals on User to update modify_date because of role_assignment change
+        self.assertEqual(self._get_cache_version(self.user1_partner1), self.version_key_user1_partner1_before + 6)
 
         # no invalidation for the rest of the users
         self.assertEqual(self._get_cache_version(self.user2_partner1), self.version_key_user2_partner1_before)
         self.assertEqual(self._get_cache_version(self.user1_partner2), self.version_key_user1_partner2_before)
         self.assertEqual(self._get_cache_version(self.user2_partner2), self.version_key_user2_partner2_before)
 
-    def test_invalidate_permissions_cache_on_role_assignment_change_for_partner(self) -> None:
+    def test_invalidate_cache_on_role_assignment_change_for_partner(self) -> None:
         self.role_assignment3.expiry_date = (timezone.now() - timedelta(days=1)).date()
         self.role_assignment3.save()
 
