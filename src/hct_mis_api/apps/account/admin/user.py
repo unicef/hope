@@ -176,10 +176,10 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
         context["permissions"] = [p.split(".") for p in sorted(all_perms)]
         ba_perms = defaultdict(list)
         ba_roles = defaultdict(list)
-        for role in user.user_roles.all():
+        for role in user.role_assignments.all():
             ba_roles[role.business_area.slug].append(role.role)
 
-        for role in user.user_roles.values_list("business_area__slug", flat=True).distinct("business_area"):
+        for role in user.role_assignments.values_list("business_area__slug", flat=True).distinct("business_area"):
             ba_perms[role].extend(user.permissions_in_business_area(role))
 
         context["business_ares_permissions"] = dict(ba_perms)
@@ -212,14 +212,14 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
                             if crud == "ADD":
                                 try:
                                     account_models.IncompatibleRoles.objects.validate_user_role(u, ba, role)
-                                    ur, is_new = u.user_roles.get_or_create(business_area=ba, role=role)
+                                    ur, is_new = u.role_assignments.get_or_create(business_area=ba, role=role)
                                     if is_new:
                                         added += 1
                                         self.log_addition(request, ur, "Role added")
                                 except ValidationError as e:
                                     self.message_user(request, str(e), messages.ERROR)
                             elif crud == "REMOVE":
-                                to_delete = u.user_roles.filter(business_area=ba, role=role).first()
+                                to_delete = u.role_assignments.filter(business_area=ba, role=role).first()
                                 if to_delete:
                                     removed += 1
                                     self.log_deletion(request, to_delete, str(to_delete))
@@ -298,7 +298,7 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
                                     defaults={"username": username},
                                 )
                                 if isnew:
-                                    ur = u.user_roles.create(business_area=business_area, role=role)
+                                    ur = u.role_assignments.create(business_area=business_area, role=role)
                                     self.log_addition(request, u, "User imported by CSV")
                                     self.log_addition(request, ur, "User Role added")
                                 else:  # check role validity
@@ -306,7 +306,7 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
                                         account_models.IncompatibleRoles.objects.validate_user_role(
                                             u, business_area, role
                                         )
-                                        u.user_roles.get_or_create(business_area=business_area, role=role)
+                                        u.role_assignments.get_or_create(business_area=business_area, role=role)
                                         self.log_addition(request, ur, "User Role added")
                                     except ValidationError as e:
                                         self.message_user(

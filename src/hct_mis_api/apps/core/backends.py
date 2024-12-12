@@ -16,8 +16,12 @@ if TYPE_CHECKING:
     from hct_mis_api.apps.account.models import User
 
 
+# TODO: perms: add area check
 class PermissionsBackend(BaseBackend):
     def get_all_permissions(self, user: "User", obj: "Model|None" = None) -> set[str]:
+        print(user)
+        print(obj)
+
         if not obj:
             program = None
             business_area = None
@@ -49,6 +53,9 @@ class PermissionsBackend(BaseBackend):
         cache_key = get_user_permissions_cache_key(user, user_version, business_area, program)
 
         cached_permissions = cache.get(cache_key)
+
+        print(cached_permissions)
+        print(user_version)
 
         if cached_permissions:
             return cached_permissions
@@ -99,9 +106,14 @@ class PermissionsBackend(BaseBackend):
 
         cache.set(cache_key, permissions_set, timeout=None)
 
+        print("sd")
+        print(permissions_set)
+
         return permissions_set
 
     def has_perm(self, user_obj: "User|AnonymousUser", perm: str, obj: Optional[Model] = None) -> bool:
+        print("sd original")
+        print(perm)
         if user_obj.is_superuser:
             return True
         if isinstance(user_obj, AnonymousUser):

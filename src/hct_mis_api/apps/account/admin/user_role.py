@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 
 class RoleAssignmentInline(admin.TabularInline):
     model = account_models.RoleAssignment
+    fields = ["business_area", "role", "expiry_date"]
     extra = 0
     formset = RoleAssignmentInlineFormSet
 
