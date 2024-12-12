@@ -272,7 +272,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
 
     @property
     def households_with_payments_in_program(self) -> QuerySet:
-        # TODO: filter by status ?
+        # TODO: filter Payments by status ?
         household_ids = (
             Payment.objects.filter(program=self)
             .exclude(conflicted=True, excluded=True)
@@ -280,7 +280,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
             .distinct()
         )
 
-        return Household.objects.filter(id__in=household_ids)
+        return Household.objects.filter(id__in=household_ids, program=self)
 
     @property
     def admin_areas_log(self) -> str:

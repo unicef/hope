@@ -4,6 +4,7 @@ from typing import Any
 from unittest import mock
 from unittest.mock import patch
 
+from django.db import IntegrityError
 from django.utils import timezone
 
 from aniso8601 import parse_date
@@ -23,6 +24,7 @@ from hct_mis_api.apps.household.fixtures import (
     IndividualFactory,
     IndividualRoleInHouseholdFactory,
     create_household_and_individuals,
+    create_household_with_individual_with_collectors,
 )
 from hct_mis_api.apps.household.models import ROLE_PRIMARY
 from hct_mis_api.apps.payment.celery_tasks import (
@@ -46,6 +48,10 @@ from hct_mis_api.apps.payment.models import (
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program, ProgramCycle
+from hct_mis_api.apps.targeting.fixtures import (
+    TargetingCriteriaFactory,
+    TargetingCriteriaRuleFactory,
+)
 
 
 class TestPaymentPlanServices(APITestCase):
@@ -441,6 +447,27 @@ class TestPaymentPlanServices(APITestCase):
             e.exception.message,
             "Cannot create a follow-up of a follow-up Payment Plan",
         )
+
+    def test_update_follow_up_dates_and_not_currency(self) -> None:
+        payment_plan = PaymentPlanFactory(
+            program_cycle=self.cycle,
+            created_by=self.user,
+            status=PaymentPlan.Status.OPEN,
+            currency="PLN",
+            is_follow_up=True,
+        )
+        dispersion_start_date = (payment_plan.dispersion_start_date + timedelta(days=1)).date()
+        dispersion_end_date = (payment_plan.dispersion_end_date + timedelta(days=1)).date()
+        payment_plan = PaymentPlanService(payment_plan).update(
+            {
+                "dispersion_start_date": dispersion_start_date,
+                "dispersion_end_date": dispersion_end_date,
+                "currency": "UAH",
+            }
+        )
+        self.assertEqual(payment_plan.currency, "PLN")
+        self.assertEqual(payment_plan.dispersion_start_date, dispersion_start_date)
+        self.assertEqual(payment_plan.dispersion_end_date, dispersion_end_date)
 
     @flaky(max_runs=5, min_passes=1)
     @freeze_time("2023-10-10")
@@ -964,3 +991,40 @@ class TestPaymentPlanServices(APITestCase):
 
         self.assertEqual(FileTemp.objects.all().count(), 1)
         self.assertEqual(FileTemp.objects.first().object_id, str(payment_plan.pk))
+
+    def test_create_payments_integrity_error_handling(self) -> None:
+        household, individuals = create_household_with_individual_with_collectors(
+            household_args={
+                "business_area": self.business_area,
+                "program": self.program,
+            },
+        )
+        targeting_criteria = TargetingCriteriaFactory()
+        TargetingCriteriaRuleFactory(household_ids=f"{household.unicef_id}", targeting_criteria=targeting_criteria)
+        payment_plan = PaymentPlanFactory(
+            created_by=self.user,
+            status=PaymentPlan.Status.PREPARING,
+            business_area=self.business_area,
+            program_cycle=self.cycle,
+            targeting_criteria=targeting_criteria,
+        )
+        PaymentFactory(
+            parent=payment_plan,
+            program_id=self.program.id,
+            business_area_id=payment_plan.business_area_id,
+            status=Payment.STATUS_PENDING,
+            household_id=household.pk,
+            collector_id=individuals[0].pk,
+        )
+
+        # check households with payments in program
+        hh_qs = self.program.households_with_payments_in_program
+        self.assertEqual(hh_qs.count(), 1)
+        self.assertEqual(hh_qs.first().unicef_id, household.unicef_id)
+
+        with self.assertRaises(IntegrityError) as error:
+            PaymentPlanService.create_payments(payment_plan)
+
+        self.assertIn(
+            'duplicate key value violates unique constraint "payment_plan_and_household"', str(error.exception)
+        )

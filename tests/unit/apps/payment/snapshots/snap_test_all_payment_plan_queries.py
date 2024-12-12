@@ -504,6 +504,39 @@ snapshots['TestPaymentPlanQueries::test_payment_plan_filter_is_payment_plan 1'] 
     }
 }
 
+snapshots['TestPaymentPlanQueries::test_payment_plan_filter_is_payment_plan 2'] = {
+    'data': {
+        'allPaymentPlans': {
+            'edges': [
+                {
+                    'node': {
+                        'name': 'Payment Plan within FINISHED status',
+                        'status': 'FINISHED'
+                    }
+                },
+                {
+                    'node': {
+                        'name': 'PaymentPlan with conflicts',
+                        'status': 'LOCKED'
+                    }
+                },
+                {
+                    'node': {
+                        'name': 'Main Payment Plan',
+                        'status': 'OPEN'
+                    }
+                },
+                {
+                    'node': {
+                        'name': 'Payment Plan within TP_LOCK status',
+                        'status': 'TP_LOCKED'
+                    }
+                }
+            ]
+        }
+    }
+}
+
 snapshots['TestPaymentPlanQueries::test_payment_plan_filter_is_target_population 1'] = {
     'data': {
         'allPaymentPlans': {
@@ -518,6 +551,123 @@ snapshots['TestPaymentPlanQueries::test_payment_plan_filter_is_target_population
                     'node': {
                         'name': 'Payment Plan within TP_LOCK status',
                         'status': 'TP_LOCKED'
+                    }
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestPaymentPlanQueries::test_payment_plan_filter_is_target_population 2'] = {
+    'data': {
+        'allPaymentPlans': {
+            'edges': [
+                {
+                    'node': {
+                        'name': 'Payment Plan within DRAFT status',
+                        'status': 'DRAFT'
+                    }
+                },
+                {
+                    'node': {
+                        'name': 'PaymentPlan with conflicts',
+                        'status': 'LOCKED'
+                    }
+                },
+                {
+                    'node': {
+                        'name': 'Main Payment Plan',
+                        'status': 'OPEN'
+                    }
+                },
+                {
+                    'node': {
+                        'name': 'Payment Plan within TP_LOCK status',
+                        'status': 'TP_LOCKED'
+                    }
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestPaymentPlanQueries::test_payment_plan_filter_name 1'] = {
+    'data': {
+        'allPaymentPlans': {
+            'edges': [
+                {
+                    'node': {
+                        'name': 'PaymentPlan with conflicts',
+                        'status': 'LOCKED'
+                    }
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestPaymentPlanQueries::test_payment_plan_filter_payment_plan_applicable 1'] = {
+    'data': {
+        'allPaymentPlans': {
+            'edges': [
+                {
+                    'node': {
+                        'name': 'Payment Plan within DRAFT for test filter payment_plan_applicable',
+                        'status': 'DRAFT'
+                    }
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestPaymentPlanQueries::test_payment_plan_filter_total_households_count_max 1'] = {
+    'data': {
+        'allPaymentPlans': {
+            'edges': [
+                {
+                    'node': {
+                        'name': 'Payment Plan with 2 payments',
+                        'status': 'DRAFT'
+                    }
+                },
+                {
+                    'node': {
+                        'name': 'PaymentPlan with conflicts',
+                        'status': 'LOCKED'
+                    }
+                },
+                {
+                    'node': {
+                        'name': 'Main Payment Plan',
+                        'status': 'OPEN'
+                    }
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestPaymentPlanQueries::test_payment_plan_filter_total_households_count_min 1'] = {
+    'data': {
+        'allPaymentPlans': {
+            'edges': [
+                {
+                    'node': {
+                        'name': 'Payment Plan with 3 payments',
+                        'status': 'DRAFT'
+                    }
+                },
+                {
+                    'node': {
+                        'name': 'PaymentPlan with conflicts',
+                        'status': 'LOCKED'
+                    }
+                },
+                {
+                    'node': {
+                        'name': 'Main Payment Plan',
+                        'status': 'OPEN'
                     }
                 }
             ]

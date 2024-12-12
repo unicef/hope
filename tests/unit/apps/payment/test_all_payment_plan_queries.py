@@ -219,8 +219,8 @@ class TestPaymentPlanQueries(APITestCase):
         """
 
     PAYMENT_PLANS_FILTER_QUERY = """
-        query AllPaymentPlans($businessArea: String!, $search: String, $status: [String], $totalEntitledQuantityFrom: Float, $totalEntitledQuantityTo: Float, $dispersionStartDate: Date, $dispersionEndDate: Date, $program: String, $programCycle: String, $isPaymentPlan: Boolean, $isTargetPopulation: Boolean) {
-            allPaymentPlans(businessArea: $businessArea, search: $search, status: $status, totalEntitledQuantityFrom: $totalEntitledQuantityFrom, totalEntitledQuantityTo: $totalEntitledQuantityTo, dispersionStartDate: $dispersionStartDate, dispersionEndDate: $dispersionEndDate, program: $program, orderBy: "status", programCycle: $programCycle, isPaymentPlan: $isPaymentPlan, isTargetPopulation: $isTargetPopulation) {
+        query AllPaymentPlans($businessArea: String!, $search: String, $status: [String], $totalEntitledQuantityFrom: Float, $totalEntitledQuantityTo: Float, $dispersionStartDate: Date, $dispersionEndDate: Date, $program: String, $programCycle: String, $isPaymentPlan: Boolean, $isTargetPopulation: Boolean, $name: String, $paymentPlanApplicable: Boolean, $totalHouseholdsCountMin: Int, $totalHouseholdsCountMax: Int) {
+            allPaymentPlans(businessArea: $businessArea, search: $search, status: $status, totalEntitledQuantityFrom: $totalEntitledQuantityFrom, totalEntitledQuantityTo: $totalEntitledQuantityTo, dispersionStartDate: $dispersionStartDate, dispersionEndDate: $dispersionEndDate, program: $program, orderBy: "status", programCycle: $programCycle, isPaymentPlan: $isPaymentPlan, isTargetPopulation: $isTargetPopulation, name: $name, paymentPlanApplicable: $paymentPlanApplicable, totalHouseholdsCountMin: $totalHouseholdsCountMin, totalHouseholdsCountMax: $totalHouseholdsCountMax) {
             edges {
               node {
                 name
@@ -234,7 +234,7 @@ class TestPaymentPlanQueries(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        cls.business_area = create_afghanistan()
+        cls.business_area = create_afghanistan(is_payment_plan_applicable=True)
         cls.user = UserFactory.create(username="qazxsw321")
         cls.create_user_role_with_permissions(
             cls.user,
@@ -583,11 +583,15 @@ class TestPaymentPlanQueries(APITestCase):
             is_follow_up=False,
             created_by=self.user,
         )
-
         self.snapshot_graphql_request(
             request_string=self.PAYMENT_PLANS_FILTER_QUERY,
             context={"user": self.user},
             variables={"businessArea": "afghanistan", "isPaymentPlan": True},
+        )
+        self.snapshot_graphql_request(
+            request_string=self.PAYMENT_PLANS_FILTER_QUERY,
+            context={"user": self.user},
+            variables={"businessArea": "afghanistan", "isPaymentPlan": False},
         )
 
     def test_payment_plan_filter_is_target_population(self) -> None:
@@ -615,4 +619,76 @@ class TestPaymentPlanQueries(APITestCase):
             request_string=self.PAYMENT_PLANS_FILTER_QUERY,
             context={"user": self.user},
             variables={"businessArea": "afghanistan", "isTargetPopulation": True},
+        )
+        self.snapshot_graphql_request(
+            request_string=self.PAYMENT_PLANS_FILTER_QUERY,
+            context={"user": self.user},
+            variables={"businessArea": "afghanistan", "isTargetPopulation": False},
+        )
+
+    def test_payment_plan_filter_name(self) -> None:
+        self.snapshot_graphql_request(
+            request_string=self.PAYMENT_PLANS_FILTER_QUERY,
+            context={"user": self.user},
+            variables={"businessArea": "afghanistan", "name": "PaymentPlan with"},
+        )
+
+    def test_payment_plan_filter_payment_plan_applicable(self) -> None:
+        PaymentPlanFactory(
+            name="Payment Plan within DRAFT for test filter payment_plan_applicable",
+            status=PaymentPlan.Status.DRAFT,
+            program_cycle=self.program_cycle,
+            business_area=self.business_area,
+            created_by=self.user,
+        )
+        self.snapshot_graphql_request(
+            request_string=self.PAYMENT_PLANS_FILTER_QUERY,
+            context={"user": self.user},
+            variables={"businessArea": "afghanistan", "paymentPlanApplicable": True},
+        )
+
+    def test_payment_plan_filter_total_households_count_max(self) -> None:
+        pp_1 = PaymentPlanFactory(
+            name="Payment Plan with 2 payments",
+            status=PaymentPlan.Status.DRAFT,
+            program_cycle=self.program_cycle,
+            business_area=self.business_area,
+            created_by=self.user,
+        )
+        PaymentFactory.create_batch(2, parent=pp_1)
+        pp_2 = PaymentPlanFactory(
+            name="Payment Plan with 5 payments",
+            status=PaymentPlan.Status.DRAFT,
+            program_cycle=self.program_cycle,
+            business_area=self.business_area,
+            created_by=self.user,
+        )
+        PaymentFactory.create_batch(5, parent=pp_2)
+        self.snapshot_graphql_request(
+            request_string=self.PAYMENT_PLANS_FILTER_QUERY,
+            context={"user": self.user},
+            variables={"businessArea": "afghanistan", "totalHouseholdsCountMax": 3},
+        )
+
+    def test_payment_plan_filter_total_households_count_min(self) -> None:
+        pp_1 = PaymentPlanFactory(
+            name="Payment Plan with 1 payments",
+            status=PaymentPlan.Status.DRAFT,
+            program_cycle=self.program_cycle,
+            business_area=self.business_area,
+            created_by=self.user,
+        )
+        PaymentFactory.create_batch(1, parent=pp_1)
+        pp_2 = PaymentPlanFactory(
+            name="Payment Plan with 3 payments",
+            status=PaymentPlan.Status.DRAFT,
+            program_cycle=self.program_cycle,
+            business_area=self.business_area,
+            created_by=self.user,
+        )
+        PaymentFactory.create_batch(3, parent=pp_2)
+        self.snapshot_graphql_request(
+            request_string=self.PAYMENT_PLANS_FILTER_QUERY,
+            context={"user": self.user},
+            variables={"businessArea": "afghanistan", "totalHouseholdsCountMin": 2},
         )
