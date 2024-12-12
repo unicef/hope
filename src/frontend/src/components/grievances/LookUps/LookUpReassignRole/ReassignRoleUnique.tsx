@@ -8,6 +8,7 @@ import {
   useReassignRoleGrievanceMutation,
 } from '@generated/graphql';
 import { Button } from '@mui/material';
+import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
 
 const ReassignRoleButton = styled(Button)`
@@ -35,6 +36,8 @@ export function ReassignRoleUnique({
   const { id } = useParams();
   const { showMessage } = useSnackbar();
   const [mutate] = useReassignRoleGrievanceMutation();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   return (
     <Formik
@@ -74,7 +77,7 @@ export function ReassignRoleUnique({
           data-cy="button-submit"
           variant="contained"
         >
-          {t('Reassign To Unique Individual')}
+          {t(`Reassign To Unique ${beneficiaryGroup?.memberLabel}`)}
         </ReassignRoleButton>
       )}
     </Formik>

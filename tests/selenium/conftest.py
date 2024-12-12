@@ -31,6 +31,7 @@ from hct_mis_api.apps.core.models import (
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.household.fixtures import DocumentTypeFactory
 from hct_mis_api.apps.household.models import DocumentType
+from hct_mis_api.apps.program.fixtures import BeneficiaryGroupFactory
 from hct_mis_api.config.env import env
 from tests.selenium.page_object.accountability.communication import (
     AccountabilityCommunication,
@@ -270,10 +271,6 @@ def driver(download_path: str) -> Chrome:
     chrome_options.add_experimental_option("prefs", prefs)
     driver = webdriver.Chrome(options=chrome_options)
     yield driver
-    # try:
-    #     shutil.rmtree(download_path)
-    # except FileNotFoundError:
-    #     pass
 
 
 @pytest.fixture(scope="session")
@@ -577,6 +574,26 @@ def change_super_user(business_area: BusinessArea) -> None:
 
 @pytest.fixture(autouse=True)
 def create_super_user(business_area: BusinessArea) -> User:
+    BeneficiaryGroupFactory(
+        id="913700c0-3b8b-429a-b68f-0cd3d2bcd09a",
+        name="Main Menu",
+        group_label="Items Group",
+        group_label_plural="Items Groups",
+        member_label="Item",
+        member_label_plural="Items",
+        master_detail=True,
+    )
+
+    BeneficiaryGroupFactory(
+        id="9cf21adb-74a9-4c3c-9057-6fb27feb4220",
+        name="People",
+        group_label="Household",
+        group_label_plural="Households",
+        member_label="Individual",
+        member_label_plural="Individuals",
+        master_detail=False,
+    )
+
     Partner.objects.get_or_create(name="TEST")
     partner, _ = Partner.objects.get_or_create(name="UNICEF")
     Partner.objects.get_or_create(name="UNHCR")
@@ -607,7 +624,7 @@ def create_super_user(business_area: BusinessArea) -> User:
     for partner in Partner.objects.exclude(name="UNICEF"):
         partner.allowed_business_areas.add(business_area)
         role = RoleFactory(name=f"Role for {partner.name}")
-        partner_through = BusinessAreaPartnerThrough.objects.create(
+        partner_through, _ = BusinessAreaPartnerThrough.objects.get_or_create(
             business_area=business_area,
             partner=partner,
         )
@@ -643,7 +660,7 @@ def create_super_user(business_area: BusinessArea) -> User:
             "code": "partial",
             "description": "Partial individuals collected",
             "active": True,
-            "type": DataCollectingType.Type.STANDARD,
+            "type": DataCollectingType.Type.SOCIAL,
         },
         {
             "label": "size/age/gender disaggregated",
@@ -655,7 +672,7 @@ def create_super_user(business_area: BusinessArea) -> User:
     ]
 
     for dct in dct_list:
-        data_collecting_type = DataCollectingType.objects.create(
+        data_collecting_type, _ = DataCollectingType.objects.get_or_create(
             label=dct["label"],
             code=dct["code"],
             description=dct["description"],

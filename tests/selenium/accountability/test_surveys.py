@@ -119,10 +119,10 @@ class TestSmokeAccountabilitySurveys:
             in pageAccountabilitySurveysDetails.getLabelDateCreated().text
         )
         assert "Test Program" in pageAccountabilitySurveysDetails.getLabelProgramme().text
-        assert "Household Id" in pageAccountabilitySurveysDetails.getHouseholdId().text
+        assert "Items Group ID" in pageAccountabilitySurveysDetails.getHouseholdId().text
         assert "Status" in pageAccountabilitySurveysDetails.getStatus().text
-        assert "Head of Household" in pageAccountabilitySurveysDetails.getHouseholdHeadName().text
-        assert "Household Size" in pageAccountabilitySurveysDetails.getHouseholdSize().text
+        assert "Head of Items Group" in pageAccountabilitySurveysDetails.getHouseholdHeadName().text
+        assert "Items Group Size" in pageAccountabilitySurveysDetails.getHouseholdSize().text
         assert "Administrative Level 2" in pageAccountabilitySurveysDetails.getHouseholdLocation().text
         assert "Residence Status" in pageAccountabilitySurveysDetails.getHouseholdResidenceStatus().text
         assert "Registration Date" in pageAccountabilitySurveysDetails.getHouseholdRegistrationDate().text
