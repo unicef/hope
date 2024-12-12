@@ -2,7 +2,7 @@ import { Button, DialogContent, DialogTitle } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { LoadingButton } from '@components/core/LoadingButton';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { Action, useFinalizeTpMutation } from '@generated/graphql';
+import { Action } from '@generated/graphql';
 import { Dialog } from '../Dialog';
 import { DialogActions } from '../DialogActions';
 import { DialogDescription } from '../DialogDescription';

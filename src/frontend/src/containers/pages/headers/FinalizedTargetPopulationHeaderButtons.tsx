@@ -5,7 +5,7 @@ import { ReactElement, useState } from 'react';
 import styled from 'styled-components';
 import {
   BusinessAreaDataQuery,
-  TargetPopulationQuery,
+  PaymentPlanQuery,
   useCashAssistUrlPrefixQuery,
 } from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';

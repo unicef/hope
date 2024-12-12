@@ -7,12 +7,10 @@ import { LoadingButton } from '@components/core/LoadingButton';
 import { useSnackbar } from '@hooks/useSnackBar';
 import {
   BusinessAreaDataQuery,
+  PaymentPlanQuery,
   ProgramStatus,
-  TargetPopulationQuery,
-  useUnlockTpMutation,
 } from '@generated/graphql';
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
-import { FinalizeTargetPopulation } from '../../dialogs/targetPopulation/FinalizeTargetPopulation';
 import { FinalizeTargetPopulationPaymentPlan } from '../../dialogs/targetPopulation/FinalizeTargetPopulationPaymentPlan';
 import { useProgramContext } from '../../../programContext';
 
@@ -138,21 +136,12 @@ export function LockedTargetPopulationHeaderButtons({
         setOpen={setOpenDuplicate}
         targetPopulationId={targetPopulation.id}
       />
-      {isPaymentPlanApplicable ? (
-        <FinalizeTargetPopulationPaymentPlan
-          open={openFinalizePaymentPlan}
-          setOpen={setOpenFinalizePaymentPlan}
-          targetPopulationId={targetPopulation.id}
-          totalHouseholds={targetPopulation.totalHouseholdsCount}
-        />
-      ) : (
-        <FinalizeTargetPopulation
-          open={openFinalize}
-          setOpen={setOpenFinalize}
-          targetPopulationId={targetPopulation.id}
-          totalHouseholds={targetPopulation.totalHouseholdsCount}
-        />
-      )}
+      <FinalizeTargetPopulationPaymentPlan
+        open={openFinalizePaymentPlan}
+        setOpen={setOpenFinalizePaymentPlan}
+        targetPopulationId={targetPopulation.id}
+        totalHouseholds={targetPopulation.totalHouseholdsCount}
+      />
     </Box>
   );
 }
