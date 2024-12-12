@@ -5,7 +5,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { PaymentPlanStatus } from '@generated/graphql';
 import {
   createHandleApplyFilterChange,
-  targetPopulationStatusMapping,
+  paymentPlanStatusMapping,
 } from '@utils/utils';
 import { DatePickerFilter } from '@core/DatePickerFilter';
 import { FiltersSection } from '@core/FiltersSection';
@@ -82,7 +82,7 @@ export function LookUpTargetPopulationFiltersCommunication({
           >
             {preparedStatusChoices.sort().map((key) => (
               <MenuItem key={key} value={key}>
-                {targetPopulationStatusMapping(key)}
+                {paymentPlanStatusMapping(key)}
               </MenuItem>
             ))}
           </SelectFilter>

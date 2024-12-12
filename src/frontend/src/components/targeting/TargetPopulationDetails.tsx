@@ -1,7 +1,7 @@
 import { Grid, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { targetPopulationStatusToColor } from '@utils/utils';
-import { TargetPopulationQuery } from '@generated/graphql';
+import { paymentPlanStatusToColor } from '@utils/utils';
+import { PaymentPlanQuery } from '@generated/graphql';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { LabelizedField } from '@core/LabelizedField';
 import { OverviewContainer } from '@core/OverviewContainer';
@@ -11,7 +11,7 @@ import { UniversalMoment } from '@core/UniversalMoment';
 import { ReactElement } from 'react';
 
 interface ProgramDetailsProps {
-  targetPopulation: TargetPopulationQuery['targetPopulation'];
+  targetPopulation: PaymentPlanQuery['paymentPlan'];
 }
 
 export function TargetPopulationDetails({
@@ -52,7 +52,7 @@ export function TargetPopulationDetails({
               <StatusBox
                 dataCy="target-population-status"
                 status={targetPopulation.status}
-                statusToColor={targetPopulationStatusToColor}
+                statusToColor={paymentPlanStatusToColor}
               />
             </LabelizedField>
           </Grid>

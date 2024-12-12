@@ -12,8 +12,6 @@ import {
   PaymentPlanStatus,
   PaymentStatus,
   ProgramStatus,
-  TargetPopulationBuildStatus,
-  TargetPopulationStatus,
 } from '@generated/graphql';
 import {
   GRIEVANCE_CATEGORIES,
@@ -264,43 +262,45 @@ export function registrationDataImportDeduplicationEngineStatusToColor(
 export const registrationDataImportErasedColor = (): string =>
   themeObj.palette.error.main;
 
-export function targetPopulationStatusToColor(
-  theme: typeof themeObj,
-  status: string,
-): string {
-  const colorsMap = {
-    [TargetPopulationStatus.Open]: theme.hctPalette.gray,
-    [TargetPopulationStatus.Locked]: theme.hctPalette.red,
-    [TargetPopulationStatus.Processing]: theme.hctPalette.blue,
-    [TargetPopulationStatus.ReadyForCashAssist]: theme.hctPalette.green,
-    [TargetPopulationStatus.ReadyForPaymentModule]: theme.hctPalette.green,
-    [TargetPopulationStatus.Assigned]: theme.hctPalette.green,
-    [TargetPopulationStatus.SteficonWait]: theme.hctPalette.orange,
-    [TargetPopulationStatus.SteficonRun]: theme.hctPalette.blue,
-    [TargetPopulationStatus.SteficonCompleted]: theme.hctPalette.green,
-    [TargetPopulationStatus.SteficonError]: theme.palette.error.main,
-  };
-  if (status in colorsMap) {
-    return colorsMap[status];
-  }
-  return theme.palette.error.main;
-}
+// export function paymentPlanStatusToColor(
+//   theme: typeof themeObj,
+//   status: string,
+// ): string {
+//   const colorsMap = {
+//     [TargetPopulationStatus.Open]: theme.hctPalette.gray,
+//     [TargetPopulationStatus.Locked]: theme.hctPalette.red,
+//     [TargetPopulationStatus.Processing]: theme.hctPalette.blue,
+//     [TargetPopulationStatus.ReadyForCashAssist]: theme.hctPalette.green,
+//     [TargetPopulationStatus.ReadyForPaymentModule]: theme.hctPalette.green,
+//     [TargetPopulationStatus.Assigned]: theme.hctPalette.green,
+//     [TargetPopulationStatus.SteficonWait]: theme.hctPalette.orange,
+//     [TargetPopulationStatus.SteficonRun]: theme.hctPalette.blue,
+//     [TargetPopulationStatus.SteficonCompleted]: theme.hctPalette.green,
+//     [TargetPopulationStatus.SteficonError]: theme.palette.error.main,
+//   };
+//   if (status in colorsMap) {
+//     return colorsMap[status];
+//   }
+//   return theme.palette.error.main;
+// }
 
-export function targetPopulationBuildStatusToColor(
-  theme: typeof themeObj,
-  status: string,
-): string {
-  const colorsMap = {
-    [TargetPopulationBuildStatus.Ok]: theme.hctPalette.green,
-    [TargetPopulationBuildStatus.Failed]: theme.hctPalette.red,
-    [TargetPopulationBuildStatus.Building]: theme.hctPalette.orange,
-    [TargetPopulationBuildStatus.Pending]: theme.hctPalette.gray,
-  };
-  if (status in colorsMap) {
-    return colorsMap[status];
-  }
-  return theme.palette.error.main;
-}
+//TODO: check if some statuses need to be moved to PP
+// export function targetPopulationBuildStatusToColor(
+//   theme: typeof themeObj,
+//   status: string,
+// ): string {
+//   const colorsMap = {
+//     [TargetPopulationBuildStatus.Ok]: theme.hctPalette.green,
+//     [TargetPopulationBuildStatus.Failed]: theme.hctPalette.red,
+//     [TargetPopulationBuildStatus.Building]: theme.hctPalette.orange,
+//     [TargetPopulationBuildStatus.Pending]: theme.hctPalette.gray,
+//   };
+//   if (status in colorsMap) {
+//     return colorsMap[status];
+//   }
+//   return theme.palette.error.main;
+// }
+
 export function periodicDataUpdateTemplateStatusToColor(
   theme: typeof themeObj,
   status: string,

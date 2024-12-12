@@ -51,7 +51,7 @@ const ChartContainer = styled.div`
 `;
 
 interface ResultsProps {
-  targetPopulation: TargetPopulationQuery['targetPopulation'];
+  targetPopulation: PaymentPlanQuery['paymentPlan'];
 }
 
 export function ResultsForHouseholds({

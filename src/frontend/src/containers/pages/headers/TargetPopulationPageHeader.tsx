@@ -32,7 +32,7 @@ const StatusWrapper = styled.div`
 `;
 
 export interface ProgramDetailsPageHeaderPropTypes {
-  targetPopulation: TargetPopulationQuery['targetPopulation'];
+  targetPopulation: PaymentPlanQuery['paymentPlan'];
   canEdit: boolean;
   canRemove: boolean;
   canDuplicate: boolean;

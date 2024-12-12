@@ -23,7 +23,7 @@ const IconContainer = styled.span`
 `;
 
 export interface FinalizedTargetPopulationHeaderButtonsPropTypes {
-  targetPopulation: TargetPopulationQuery['targetPopulation'];
+  targetPopulation: PaymentPlanQuery['paymentPlan'];
   canDuplicate: boolean;
   businessAreaData: BusinessAreaDataQuery;
 }

@@ -28,7 +28,7 @@ const IconContainer = styled.span`
 `;
 
 export interface ApprovedTargetPopulationHeaderButtonsPropTypes {
-  targetPopulation: TargetPopulationQuery['targetPopulation'];
+  targetPopulation: PaymentPlanQuery['paymentPlan'];
   canUnlock: boolean;
   canDuplicate: boolean;
   canSend: boolean;

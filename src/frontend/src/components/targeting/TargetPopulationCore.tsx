@@ -4,8 +4,8 @@ import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../config/permissions';
 import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityLogTable';
 import {
+  PaymentPlanQuery,
   TargetPopulationBuildStatus,
-  TargetPopulationQuery,
   useTargetPopulationHouseholdsQuery,
 } from '@generated/graphql';
 import { PaperContainer } from './PaperContainer';
@@ -24,7 +24,7 @@ const Label = styled.p`
 
 interface TargetPopulationCoreProps {
   id: string;
-  targetPopulation: TargetPopulationQuery['targetPopulation'];
+  targetPopulation: PaymentPlanQuery['paymentPlan'];
   permissions: string[];
   screenBeneficiary: boolean;
   isStandardDctType: boolean;

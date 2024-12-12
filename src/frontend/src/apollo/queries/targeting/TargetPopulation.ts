@@ -10,8 +10,13 @@ export const TARGET_POPULATION_QUERY = gql`
       buildStatus
       totalHouseholdsCount
       totalIndividualsCount
+      finalizedBy
+      changeDate
+      finalizedAt
       excludedIds
       exclusionReason
+      vulnerabilityScoreMin
+      vulnerabilityScoreMax
       steficonRule {
         __typename
         id

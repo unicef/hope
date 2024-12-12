@@ -22,7 +22,7 @@ import { t } from 'i18next';
 import { useSnackbar } from '@hooks/useSnackBar';
 
 export interface InProgressTargetPopulationHeaderButtonsPropTypes {
-  targetPopulation: TargetPopulationQuery['targetPopulation'];
+  targetPopulation: PaymentPlanQuery['paymentPlan'];
   canDuplicate: boolean;
   canRemove: boolean;
   canEdit: boolean;

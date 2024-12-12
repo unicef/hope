@@ -21147,6 +21147,8 @@ export const TargetPopulationDocument = gql`
     totalIndividualsCount
     excludedIds
     exclusionReason
+    vulnerabilityScoreMin
+    vulnerabilityScoreMax
     steficonRule {
       __typename
       id

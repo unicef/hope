@@ -1,12 +1,12 @@
 import TableCell from '@mui/material/TableCell';
 import { useNavigate } from 'react-router-dom';
 import { Radio } from '@mui/material';
-import { TargetPopulationNode } from '@generated/graphql';
+import { PaymentPlanNode } from '@generated/graphql';
 import { useBusinessArea } from '@hooks/useBusinessArea';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { StatusBox } from '@components/core/StatusBox';
 import {
-  targetPopulationStatusToColor,
+  paymentPlanStatusToColor,
   targetPopulationStatusMapping,
 } from '@utils/utils';
 import { UniversalMoment } from '@components/core/UniversalMoment';
@@ -14,7 +14,7 @@ import { BlackLink } from '@components/core/BlackLink';
 import { ReactElement } from 'react';
 
 interface LookUpTargetPopulationTableRowCommunicationProps {
-  targetPopulation: TargetPopulationNode;
+  targetPopulation: PaymentPlanNode;
   canViewDetails: boolean;
   selectedTargetPopulation?;
   radioChangeHandler?: (id: string) => void;
@@ -69,7 +69,7 @@ export function LookUpTargetPopulationTableRowCommunication({
       <TableCell align="left">
         <StatusBox
           status={targetPopulation.status}
-          statusToColor={targetPopulationStatusToColor}
+          statusToColor={paymentPlanStatusToColor}
           statusNameMapping={targetPopulationStatusMapping}
         />
       </TableCell>
