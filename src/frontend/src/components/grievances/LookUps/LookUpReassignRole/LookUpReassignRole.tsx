@@ -119,7 +119,7 @@ export function LookUpReassignRole({
   return (
     <Formik
       initialValues={{
-        selectedIndividual: individualData.individual,
+        selectedIndividual: individualData?.individual,
         selectedHousehold,
         role: individualRole.role,
       }}
