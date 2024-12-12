@@ -169,6 +169,7 @@ class TestSmokeGrievanceDashboard:
         pageGrievanceDashboard: GrievanceDashboard,
         pageGrievanceTickets: GrievanceTickets,
         pageGrievanceDetailsPage: GrievanceDetailsPage,
+        download_path: str,
     ) -> None:
         pageGrievanceTickets.getNavGrievance().click()
         pageGrievanceDashboard.getNavGrievanceDashboard().click()

@@ -1,10 +1,7 @@
-import json
 import logging
 from collections import defaultdict
 from functools import reduce
 from typing import Any, List
-
-from django.core.serializers.json import DjangoJSONEncoder
 
 from hct_mis_api.apps.core.utils import (
     get_combined_attributes,
@@ -95,7 +92,7 @@ class RdiBaseCreateTask:
                     PendingDeliveryMechanismData(
                         individual=individual,
                         delivery_mechanism=self.available_delivery_mechanisms[delivery_type],
-                        data=json.dumps(values, cls=DjangoJSONEncoder),
+                        data=values,
                         rdi_merge_status=MergeStatusModel.PENDING,
                     )
                 )

@@ -7,6 +7,7 @@ import { createHandleApplyFilterChange } from '@utils/utils';
 import { FiltersSection } from './FiltersSection';
 import { SearchTextField } from './SearchTextField';
 import { SelectFilter } from './SelectFilter';
+import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
 
 interface ActivityLogPageFiltersProps {
@@ -26,6 +27,8 @@ export function ActivityLogPageFilters({
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const { handleFilterChange, applyFilterChanges, clearFilter } =
     createHandleApplyFilterChange(
@@ -48,8 +51,8 @@ export function ActivityLogPageFilters({
 
   const modules = {
     program: 'Programme',
-    household: 'Household',
-    individual: 'Individual',
+    household: `${beneficiaryGroup?.groupLabel}`,
+    individual: `${beneficiaryGroup?.memberLabel}`,
     grievanceticket: 'Grievance Tickets',
     paymentverificationplan: 'Payment Plan Payment Verification',
     targetpopulation: 'Target Population',
