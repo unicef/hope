@@ -207,12 +207,14 @@ def migrate_message_and_survey(list_ids: List[str], model: Any, business_area_id
 
     for obj_id in list_ids:
         obj = model.objects.get(pk=obj_id)
-        if obj.target_population_id and obj.target_population.payment_plan_id:
-            obj.payment_plan_id = obj.target_population.payment_plan_id
+        if obj.target_population_id and obj.target_population.payment_plans.first():
+            obj.payment_plan_id = str(obj.target_population.payment_plans.first().id)
             objects_to_update.append(obj)
-        if obj.target_population_id and not obj.target_population.payment_plan_id:
-            # find new PP id from 'internal_data__target_population_id'
-            payment_plan_id = get_payment_plan_id_from_tp_id(business_area_id, str(obj.target_population_id))
+        if obj.target_population_id and not obj.target_population.payment_plans.first():
+            # find new migrated PP by payment_plan.internal_data["target_population_id"]
+            payment_plan_id: Optional[str] = get_payment_plan_id_from_tp_id(
+                business_area_id, str(obj.target_population_id)
+            )
             if payment_plan_id:
                 obj.payment_plan_id = payment_plan_id
                 objects_to_update.append(obj)
@@ -259,7 +261,7 @@ def migrate_tp_into_pp(batch_size: int = 500) -> None:
 
         # Migrate Message & Survey
         for model in (Message, Survey):
-            print(f"Processing with migrations {model.__name__} objects.")
+            print(f"Processing with migration {model.__name__} objects.")
             model_qs = model.objects.filter(business_area_id=business_area.id, target_population__isnull=False).only(
                 "id"
             )

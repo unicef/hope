@@ -2,6 +2,10 @@ from django.test import TestCase
 from django.utils import timezone
 
 from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.accountability.fixtures import (
+    CommunicationMessageFactory,
+    SurveyFactory,
+)
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
 from hct_mis_api.apps.payment.models import Payment, PaymentPlan
@@ -136,7 +140,7 @@ class MigrationTPIntoPPTest(TestCase):
                 status=tp_status,
             )
         # removed TP
-        TargetPopulationFactory(
+        removed_tp = TargetPopulationFactory(
             name="Removed TP",
             targeting_criteria=TargetingCriteriaFactory(),
             business_area=cls.business_area,
@@ -145,6 +149,28 @@ class MigrationTPIntoPPTest(TestCase):
             is_removed=True,
         )
 
+        # create Message & Survey
+        # tp with PP
+        cls.message_1 = CommunicationMessageFactory(
+            title="For TP with Open PP",
+            business_area=cls.business_area,
+            target_population=cls.tp_3,
+            created_by=cls.user,
+        )
+        # tp without PP
+        cls.message_2 = CommunicationMessageFactory(
+            title="222",
+            business_area=cls.business_area,
+            target_population=cls.tp_1,
+            created_by=cls.user,
+        )
+        # tp with PP
+        cls.survey_1 = SurveyFactory(target_population=cls.tp_4, created_by=cls.user)
+        # tp without PP
+        cls.survey_2 = SurveyFactory(target_population=cls.tp_2, created_by=cls.user)
+        # just for test add survey with removed tp
+        cls.survey_without_pp = SurveyFactory(target_population=removed_tp, created_by=cls.user)
+
     def test_migrate_tp_into_pp(self) -> None:
         self.assertEqual(TargetPopulation.all_objects.all().count(), 14)
         self.assertEqual(TargetingCriteriaRule.objects.all().count(), 1)
@@ -152,6 +178,12 @@ class MigrationTPIntoPPTest(TestCase):
 
         self.assertEqual(PaymentPlan.all_objects.count(), 3)
         self.assertEqual(Payment.objects.filter(parent=self.preparing_payment_plan).count(), 0)
+
+        self.assertIsNone(self.message_1.payment_plan)
+        self.assertIsNone(self.message_2.payment_plan)
+        self.assertIsNone(self.survey_1.payment_plan)
+        self.assertIsNone(self.survey_2.payment_plan)
+        self.assertIsNone(self.survey_without_pp.payment_plan)
 
         migrate_tp_into_pp()
 
@@ -208,3 +240,15 @@ class MigrationTPIntoPPTest(TestCase):
         self.assertEqual(new_pp.female_children_count, 0)
         self.assertEqual(new_pp.male_adults_count, 0)
         self.assertEqual(new_pp.female_adults_count, 0)
+
+        # check Message & Survey
+        self.message_1.refresh_from_db()
+        self.message_2.refresh_from_db()
+        self.survey_1.refresh_from_db()
+        self.survey_2.refresh_from_db()
+        self.survey_without_pp.refresh_from_db()
+        self.assertEqual(self.message_1.payment_plan, self.payment_plan_2)
+        self.assertEqual(self.message_2.payment_plan.internal_data["target_population_id"], str(self.tp_1.pk))
+        self.assertEqual(self.survey_1.payment_plan, self.payment_plan_3)
+        self.assertEqual(self.survey_2.payment_plan.internal_data["target_population_id"], str(self.tp_2.pk))
+        self.assertIsNone(self.survey_without_pp.payment_plan)
