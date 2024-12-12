@@ -7,7 +7,7 @@ from django.contrib.auth import get_user_model
 import factory
 from factory.django import DjangoModelFactory
 
-from hct_mis_api.apps.account.models import Partner, Role, User, UserRole
+from hct_mis_api.apps.account.models import Partner, Role, User, RoleAssignment
 from hct_mis_api.apps.core.models import BusinessArea
 
 
@@ -64,11 +64,20 @@ class RoleFactory(DjangoModelFactory):
         django_get_or_create = ("name", "subsystem")
 
 
-class UserRoleFactory(DjangoModelFactory):
-    user = factory.SubFactory(UserFactory)
+class RoleAssignmentFactory(DjangoModelFactory):
     role = factory.SubFactory(RoleFactory)
     business_area = factory.SubFactory(BusinessAreaFactory)
 
     class Meta:
-        model = UserRole
-        django_get_or_create = ("user", "role")
+        model = RoleAssignment
+        django_get_or_create = ("user", "partner", "role")
+
+    @factory.lazy_attribute
+    def partner(self):
+        # Only create partner if user is not provided
+        return None if self.user else PartnerFactory()
+
+    @factory.lazy_attribute
+    def user(self):
+        # Only create user if partner is not provided
+        return None if self.partner else UserFactory()

@@ -144,18 +144,17 @@ class GrievanceTicketNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObje
             owner_perm, business_area, program_id
         )
         partner = user.partner
-        has_partner_area_access = partner.is_unicef
         ticket_program_id = str(object_instance.programs.first().id) if object_instance.programs.first() else None
-        if not partner.is_unicef:
-            if not object_instance.admin2 or not ticket_program_id:
-                # admin2 is empty or non-program ticket -> no restrictions for admin area
-                has_partner_area_access = True
-            else:
-                has_partner_area_access = partner.has_area_access(
-                    area_id=object_instance.admin2.id, program_id=ticket_program_id
-                )
+        # TODO: perms: move area check to has_perm
+        if not object_instance.admin2 or not ticket_program_id:
+            # admin2 is empty or non-program ticket -> no restrictions for admin area
+            has_partner_area_access = True
+        else:
+            has_partner_area_access = partner.has_area_access(
+                area_id=object_instance.admin2.id, program_id=ticket_program_id
+            )
         if (
-            user.has_permission(perm, business_area, ticket_program_id) or check_creator or check_assignee
+            user.has_perm(perm, ticket_program_id or business_area) or check_creator or check_assignee
         ) and has_partner_area_access:
             return None
 
@@ -576,13 +575,8 @@ class Query(graphene.ObjectType):
 
         queryset = queryset.prefetch_related(*to_prefetch)
 
-        # Full access to all AdminAreas if is_unicef
-        # and ignore filtering for Cross Area tickets
-        if not user.partner.is_unicef and not (
-            kwargs.get("is_cross_area", False)
-            and program_id
-            and user.partner.has_full_area_access_in_program(program_id)
-        ):
+        # Ignore filtering for Cross Area tickets
+        if not (kwargs.get("is_cross_area", False) and program_id and user.partner.has_full_area_access_in_program(program_id)):
             queryset = filter_grievance_tickets_based_on_partner_areas_2(
                 queryset, user.partner, business_area_id, program_id
             )
