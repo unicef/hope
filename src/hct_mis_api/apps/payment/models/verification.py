@@ -229,11 +229,10 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMixin)
         related_name="payment_record_verifications",
     )
 
-    payment = models.OneToOneField(
+    payment = models.ForeignKey(
         "payment.Payment",
         on_delete=models.CASCADE,
-        related_name="payment_verification",
-        null=True,
+        related_name="payment_verifications",
     )
 
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING)

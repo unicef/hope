@@ -368,7 +368,7 @@ class PaymentNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
         return self.head_of_household.full_name if self.head_of_household else ""
 
     def resolve_verification(self, info: Any) -> Optional[Any]:
-        return getattr(self, "payment_verification", None)
+        return self.payment_verifications.first()
 
     def resolve_distribution_modality(self, info: Any) -> str:
         return self.parent.unicef_id
@@ -851,7 +851,7 @@ class PaymentRecordAndPaymentNode(BaseNodePermissionMixin, graphene.ObjectType):
         return self.status.replace(" ", "_").upper()
 
     def resolve_verification(self, info: Any, **kwargs: Any) -> Any:
-        return getattr(self, "payment_verification", None)
+        return self.payment_verifications.first()
 
 
 class PageInfoNode(graphene.ObjectType):
