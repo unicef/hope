@@ -123,13 +123,6 @@ class PaymentVerificationSummaryFilter(FilterSet):
 class PaymentVerificationLogEntryFilter(LogEntryFilter):
     object_id = UUIDFilter(method="object_id_filter")
 
-    def filter_queryset(self, queryset: QuerySet) -> QuerySet:
-        cleaned_data = self.form.cleaned_data
-        object_id = cleaned_data.get("object_id")
-        plan_object = PaymentPlan.objects.get(pk=object_id)
-        verifications_ids = plan_object.payment_verification_plans.all().values_list("pk", flat=True)
-        return queryset.filter(object_id__in=verifications_ids)
-
     def object_id_filter(self, qs: QuerySet, name: str, value: UUID) -> QuerySet:
         payment_plan = PaymentPlan.objects.get(pk=value)
         verifications_ids = payment_plan.payment_verification_plans.all().values_list("pk", flat=True)

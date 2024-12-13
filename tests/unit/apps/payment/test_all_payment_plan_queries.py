@@ -588,6 +588,3 @@ class TestPaymentPlanQueries(APITestCase):
             context={"user": self.user},
             variables={"objectId": payment_plan_id, "businessArea": "afghanistan"},
         )
-        # payment_plan = PaymentPlan.objects.get(pk=value)
-        # verifications_ids = payment_plan.payment_verification_plans.all().values_list("pk", flat=True)
-        # return qs.filter(object_id__in=verifications_ids)
