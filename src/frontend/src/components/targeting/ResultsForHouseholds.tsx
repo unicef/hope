@@ -3,6 +3,7 @@ import { Pie } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
+  PaymentPlanQuery,
   TargetPopulationBuildStatus,
   TargetPopulationQuery,
 } from '@generated/graphql';
@@ -60,6 +61,7 @@ export function ResultsForHouseholds({
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  //TODO CHECK MAPPING FILE FROM PAVLO
 
   if (targetPopulation.buildStatus !== TargetPopulationBuildStatus.Ok) {
     return null;

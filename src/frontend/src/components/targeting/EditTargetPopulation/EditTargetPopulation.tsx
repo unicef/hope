@@ -1,5 +1,9 @@
 import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
-import { PaymentPlanQuery, useUpdateTpMutation } from '@generated/graphql';
+import {
+  PaymentPlanQuery,
+  PaymentPlanStatus,
+  useUpdatePpMutation,
+} from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Divider, Grid, Typography } from '@mui/material';
@@ -33,6 +37,7 @@ export const EditTargetPopulation = ({
 }: EditTargetPopulationProps): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  //UPDATE PP MUTATION
   const initialValues = {
     id: paymentPlan.id,
     name: paymentPlan.name || '',
@@ -50,7 +55,8 @@ export const EditTargetPopulation = ({
       name: paymentPlan.programCycle.title,
     },
   };
-  const [mutate, { loading }] = useUpdateTpMutation();
+
+  const [mutate, { loading }] = useUpdatePpMutation();
   const { showMessage } = useSnackbar();
   const { baseUrl } = useBaseUrl();
   const { selectedProgram, isSocialDctType, isStandardDctType } =
@@ -86,11 +92,11 @@ export const EditTargetPopulation = ({
       await mutate({
         variables: {
           input: {
-            id: values.id,
+            paymentPlanId: values.id,
             excludedIds: values.excludedIds,
             exclusionReason: values.exclusionReason,
             programCycleId: values.programCycleId.value,
-            ...(paymentPlan.status === TargetPopulationStatus.Open && {
+            ...(paymentPlan.status === PaymentPlanStatus.Open && {
               name: values.name,
             }),
             ...getTargetingCriteriaVariables({
@@ -124,7 +130,7 @@ export const EditTargetPopulation = ({
             values={values}
             loading={loading}
             baseUrl={baseUrl}
-            targetPopulation={targetPopulation}
+            targetPopulation={paymentPlan}
             data-cy="edit-target-population-header"
           />
           <PaperContainer data-cy="paper-container">

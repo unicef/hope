@@ -1,7 +1,7 @@
 import { gql } from '@apollo/client';
 
 export const COPY_TARGETING_CRITERIA_MUTATION = gql`
-  mutation CopyTargetingCriteriaMutation(
+  mutation CopyTargetingCriteria(
     $name: String!
     $paymentPlanId: ID!
     $programCycleId: ID!

@@ -10,10 +10,7 @@ import { PaymentPlanTargeting } from '@components/paymentmodule/CreatePaymentPla
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
-import {
-  useAllTargetPopulationsQuery,
-  useCreatePpMutation,
-} from '@generated/graphql';
+import { useAllTargetPopulationsQuery } from '@generated/graphql';
 import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -24,7 +21,8 @@ export const CreatePaymentPlanPage = (): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const location = useLocation();
-  const [mutate, { loading: loadingCreate }] = useCreatePpMutation();
+  //TODO useUpdatePpMutation
+  const [mutate, { loading: loadingCreate }] = useUpdatePpMutation();
   const { showMessage } = useSnackbar();
   const { businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
@@ -35,7 +33,7 @@ export const CreatePaymentPlanPage = (): ReactElement => {
       variables: {
         businessArea,
         paymentPlanApplicable: true,
-        program: [programId],
+        program: programId,
         programCycle: programCycleId,
       },
       fetchPolicy: 'network-only',
@@ -48,7 +46,7 @@ export const CreatePaymentPlanPage = (): ReactElement => {
     return <PermissionDenied />;
 
   const validationSchema = Yup.object().shape({
-    targetingId: Yup.string().required(t('Target Population is required')),
+    paymentPlanId: Yup.string().required(t('Target Population is required')),
     currency: Yup.string().nullable().required(t('Currency is required')),
     dispersionStartDate: Yup.date().required(
       t('Dispersion Start Date is required'),
@@ -70,7 +68,7 @@ export const CreatePaymentPlanPage = (): ReactElement => {
 
   type FormValues = Yup.InferType<typeof validationSchema>;
   const initialValues: FormValues = {
-    targetingId: '',
+    paymentPlanId: '',
     currency: null,
     dispersionStartDate: null,
     dispersionEndDate: null,
@@ -84,16 +82,14 @@ export const CreatePaymentPlanPage = (): ReactElement => {
       const dispersionEndDate = values.dispersionEndDate
         ? format(new Date(values.dispersionEndDate), 'yyyy-MM-dd')
         : null;
-      const { currency, targetingId } = values;
+      const { currency } = values;
 
       const res = await mutate({
         variables: {
-          input: {
-            programCycleId,
-            name,
-            targetingCriteria,
-            dispersionEndDate,
-          },
+          programCycleId,
+          dispersionStartDate,
+          dispersionEndDate,
+          currency,
         },
       });
       showMessage(t('Payment Plan Created'));
@@ -127,6 +123,7 @@ export const CreatePaymentPlanPage = (): ReactElement => {
               permissions={permissions}
               loadingCreate={loadingCreate}
             />
+            {/* //list of pp with filter isPaymentPlanApplicable = true */}
             <PaymentPlanTargeting
               allTargetPopulations={allTargetPopulationsData}
               loading={loadingTargetPopulations}

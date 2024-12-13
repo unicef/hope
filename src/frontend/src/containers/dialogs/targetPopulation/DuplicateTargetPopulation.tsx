@@ -15,6 +15,10 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useNavigate } from 'react-router-dom';
 import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
 import { ReactElement } from 'react';
+import {
+  useCopyTargetingCriteriaMutation,
+  useCopyTargetingCriteriaMutationMutation,
+} from '@generated/graphql';
 
 const validationSchema = Yup.object().shape({
   name: Yup.string().required('Name is required'),

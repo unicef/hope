@@ -43,6 +43,8 @@ export function TargetPopulationHouseholdTable({
     replacements,
   );
 
+  //TODO: adjust headcells and renderRow
+
   return (
     <TableWrapper>
       <UniversalTable

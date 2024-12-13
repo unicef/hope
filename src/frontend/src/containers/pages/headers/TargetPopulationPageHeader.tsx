@@ -1,9 +1,9 @@
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
-  TargetPopulationBuildStatus,
-  TargetPopulationQuery,
-  TargetPopulationStatus,
+  PaymentPlanBuildStatus,
+  PaymentPlanQuery,
+  PaymentPlanStatus,
   useBusinessAreaDataQuery,
 } from '@generated/graphql';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
@@ -11,7 +11,7 @@ import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { StatusBox } from '@components/core/StatusBox';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { targetPopulationBuildStatusToColor } from '@utils/utils';
+import { paymentPlanBuildStatusToColor } from '@utils/utils';
 import { FinalizedTargetPopulationHeaderButtons } from './FinalizedTargetPopulationHeaderButtons';
 import { LockedTargetPopulationHeaderButtons } from './LockedTargetPopulationHeaderButtons';
 import { OpenTargetPopulationHeaderButtons } from './OpenTargetPopulationHeaderButtons';
@@ -69,7 +69,7 @@ export function TargetPopulationPageHeader({
   let buttons;
 
   switch (targetPopulation.status) {
-    case TargetPopulationStatus.Open:
+    case PaymentPlanStatus.Open:
       buttons = (
         <OpenTargetPopulationHeaderButtons
           targetPopulation={targetPopulation}
@@ -80,10 +80,10 @@ export function TargetPopulationPageHeader({
         />
       );
       break;
-    case TargetPopulationStatus.Locked:
-    case TargetPopulationStatus.SteficonCompleted:
-    case TargetPopulationStatus.SteficonError:
-    case TargetPopulationStatus.SteficonRun:
+    case PaymentPlanStatus.Locked:
+    case PaymentPlanStatus.SteficonCompleted:
+    case PaymentPlanStatus.SteficonError:
+    case PaymentPlanStatus.SteficonRun:
       buttons = (
         <LockedTargetPopulationHeaderButtons
           targetPopulation={targetPopulation}
@@ -110,11 +110,11 @@ export function TargetPopulationPageHeader({
       title={
         <HeaderWrapper>
           {t(`${targetPopulation.name}`)}
-          {targetPopulation.buildStatus !== TargetPopulationBuildStatus.Ok && (
+          {targetPopulation.buildStatus !== PaymentPlanBuildStatus.Ok && (
             <StatusWrapper>
               <StatusBox
                 status={targetPopulation.buildStatus}
-                statusToColor={targetPopulationBuildStatusToColor}
+                statusToColor={paymentPlanBuildStatusToColor}
               />
             </StatusWrapper>
           )}

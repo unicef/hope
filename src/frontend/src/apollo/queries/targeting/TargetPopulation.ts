@@ -6,13 +6,12 @@ export const TARGET_POPULATION_QUERY = gql`
       id
       name
       status
+      buildStatus
       adminUrl
       buildStatus
       totalHouseholdsCount
       totalIndividualsCount
-      finalizedBy
-      changeDate
-      finalizedAt
+      statusDate
       excludedIds
       exclusionReason
       vulnerabilityScoreMin

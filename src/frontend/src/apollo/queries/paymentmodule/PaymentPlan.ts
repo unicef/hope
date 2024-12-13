@@ -8,6 +8,7 @@ export const PAYMENT_PLAN_QUERY = gql`
       version
       unicefId
       status
+      buildStatus
       canCreateFollowUp
       backgroundActionStatus
       canCreatePaymentVerificationPlan
@@ -15,6 +16,11 @@ export const PAYMENT_PLAN_QUERY = gql`
       bankReconciliationSuccess
       bankReconciliationError
       exchangeRate
+      programCycle {
+        id
+        title
+      }
+      excludedIds
       createdBy {
         id
         firstName
@@ -263,6 +269,93 @@ export const PAYMENT_PLAN_QUERY = gql`
         id
         title
         file
+      }
+      targetingCriteria {
+        __typename
+        id
+        flagExcludeIfActiveAdjudicationTicket
+        flagExcludeIfOnSanctionList
+        householdIds
+        individualIds
+        rules {
+          __typename
+          id
+          householdIds
+          individualIds
+          individualsFiltersBlocks {
+            __typename
+            individualBlockFilters {
+              __typename
+
+              id
+              fieldName
+              flexFieldClassification
+              roundNumber
+              arguments
+              comparisonMethod
+              fieldAttribute {
+                __typename
+                id
+                name
+                labelEn
+                type
+                choices {
+                  value
+                  labelEn
+                }
+                pduData {
+                  id
+                  subtype
+                  numberOfRounds
+                  roundsNames
+                }
+              }
+            }
+          }
+          collectorsFiltersBlocks {
+            __typename
+            id
+            createdAt
+            updatedAt
+            collectorBlockFilters {
+              __typename
+              id
+              createdAt
+              updatedAt
+              fieldName
+              comparisonMethod
+              flexFieldClassification
+              arguments
+              labelEn
+            }
+          }
+          householdsFiltersBlocks {
+            __typename
+            id
+            fieldName
+            flexFieldClassification
+            roundNumber
+            arguments
+            comparisonMethod
+            fieldAttribute {
+              __typename
+              id
+              name
+              labelEn
+              type
+              choices {
+                value
+                labelEn
+              }
+              pduData {
+                id
+                subtype
+                numberOfRounds
+                roundsNames
+              }
+            }
+          }
+        }
       }
     }
   }

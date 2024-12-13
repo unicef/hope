@@ -8,14 +8,13 @@ import {
 import { useTranslation } from 'react-i18next';
 import { LoadingButton } from '@components/core/LoadingButton';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { Action } from '@generated/graphql';
+import { useDeletePpMutation } from '@generated/graphql';
 import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useNavigate } from 'react-router-dom';
 import { ReactElement } from 'react';
-import { usePaymentPlanAction } from '@hooks/usePaymentPlanAction';
 
 export interface DeleteTargetPopulationProps {
   open: boolean;
@@ -32,12 +31,21 @@ export const DeleteTargetPopulation = ({
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const { showMessage } = useSnackbar();
+  const [mutate, { loading: loadingDelete }] = useDeletePpMutation();
 
-  const { mutatePaymentPlanAction: deleteAction, loading: loadingDelete } =
-    usePaymentPlanAction(Action.TpDelete, targetPopulationId, () => {
+  const handleDelete = async (): Promise<void> => {
+    try {
+      await mutate({
+        variables: {
+          paymentPlanId: targetPopulationId,
+        },
+      });
       showMessage(t('Target Population Deleted'));
-      navigate(`/${baseUrl}/target-population/`);
-    });
+      navigate(`/${baseUrl}/payment-module/payment-plans`);
+    } catch (e) {
+      e.graphQLErrors.map((x) => showMessage(x.message));
+    }
+  };
 
   return (
     <Dialog
@@ -62,11 +70,7 @@ export const DeleteTargetPopulation = ({
               color="primary"
               variant="contained"
               loading={loadingDelete}
-              onClick={() => {
-                deleteAction().then(() => {
-                  setOpen(false);
-                });
-              }}
+              onClick={() => handleDelete()}
               data-cy="button-delete"
             >
               {t('Delete')}

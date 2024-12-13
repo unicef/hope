@@ -9,6 +9,7 @@ import {
   AllProgramsQuery,
   ChoiceObject,
   PaymentPlanBackgroundActionStatus,
+  PaymentPlanBuildStatus,
   PaymentPlanStatus,
   PaymentStatus,
   ProgramStatus,
@@ -262,44 +263,44 @@ export function registrationDataImportDeduplicationEngineStatusToColor(
 export const registrationDataImportErasedColor = (): string =>
   themeObj.palette.error.main;
 
-// export function paymentPlanStatusToColor(
-//   theme: typeof themeObj,
-//   status: string,
-// ): string {
-//   const colorsMap = {
-//     [TargetPopulationStatus.Open]: theme.hctPalette.gray,
-//     [TargetPopulationStatus.Locked]: theme.hctPalette.red,
-//     [TargetPopulationStatus.Processing]: theme.hctPalette.blue,
-//     [TargetPopulationStatus.ReadyForCashAssist]: theme.hctPalette.green,
-//     [TargetPopulationStatus.ReadyForPaymentModule]: theme.hctPalette.green,
-//     [TargetPopulationStatus.Assigned]: theme.hctPalette.green,
-//     [TargetPopulationStatus.SteficonWait]: theme.hctPalette.orange,
-//     [TargetPopulationStatus.SteficonRun]: theme.hctPalette.blue,
-//     [TargetPopulationStatus.SteficonCompleted]: theme.hctPalette.green,
-//     [TargetPopulationStatus.SteficonError]: theme.palette.error.main,
-//   };
-//   if (status in colorsMap) {
-//     return colorsMap[status];
-//   }
-//   return theme.palette.error.main;
-// }
+export function paymentPlanStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  const colorsMap = {
+    [PaymentPlanStatus.Draft]: theme.hctPalette.green,
+    [PaymentPlanStatus.Open]: theme.hctPalette.gray,
+    [PaymentPlanStatus.TpOpen]: theme.hctPalette.gray,
+    [PaymentPlanStatus.Locked]: theme.hctPalette.red,
+    [PaymentPlanStatus.TpLocked]: theme.hctPalette.red,
+    [PaymentPlanStatus.Processing]: theme.hctPalette.blue,
+    [PaymentPlanStatus.SteficonWait]: theme.hctPalette.orange,
+    [PaymentPlanStatus.SteficonRun]: theme.hctPalette.blue,
+    [PaymentPlanStatus.SteficonCompleted]: theme.hctPalette.green,
+    [PaymentPlanStatus.SteficonError]: theme.palette.error.main,
+  };
+  if (status in colorsMap) {
+    return colorsMap[status];
+  }
+  return theme.palette.error.main;
+}
 
 //TODO: check if some statuses need to be moved to PP
-// export function targetPopulationBuildStatusToColor(
-//   theme: typeof themeObj,
-//   status: string,
-// ): string {
-//   const colorsMap = {
-//     [TargetPopulationBuildStatus.Ok]: theme.hctPalette.green,
-//     [TargetPopulationBuildStatus.Failed]: theme.hctPalette.red,
-//     [TargetPopulationBuildStatus.Building]: theme.hctPalette.orange,
-//     [TargetPopulationBuildStatus.Pending]: theme.hctPalette.gray,
-//   };
-//   if (status in colorsMap) {
-//     return colorsMap[status];
-//   }
-//   return theme.palette.error.main;
-// }
+export function paymentPlanBuildStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  const colorsMap = {
+    [PaymentPlanBuildStatus.Ok]: theme.hctPalette.green,
+    [PaymentPlanBuildStatus.Failed]: theme.hctPalette.red,
+    [PaymentPlanBuildStatus.Building]: theme.hctPalette.orange,
+    [PaymentPlanBuildStatus.Pending]: theme.hctPalette.gray,
+  };
+  if (status in colorsMap) {
+    return colorsMap[status];
+  }
+  return theme.palette.error.main;
+}
 
 export function periodicDataUpdateTemplateStatusToColor(
   theme: typeof themeObj,
@@ -329,27 +330,6 @@ export function periodicDataUpdatesUpdatesStatusToColor(
     ['NOT_SCHEDULED']: theme.hctPalette.gray,
     ['CANCELED']: theme.hctPalette.gray,
     PROCESSING: theme.hctPalette.orange,
-  };
-  if (status in colorsMap) {
-    return colorsMap[status];
-  }
-  return theme.palette.error.main;
-}
-
-export function paymentPlanStatusToColor(
-  theme: typeof themeObj,
-  status: string,
-): string {
-  const colorsMap = {
-    [PaymentPlanStatus.Preparing]: theme.hctPalette.gray,
-    [PaymentPlanStatus.Open]: theme.hctPalette.gray,
-    [PaymentPlanStatus.Locked]: theme.hctPalette.orange,
-    [PaymentPlanStatus.LockedFsp]: theme.hctPalette.orange,
-    [PaymentPlanStatus.InApproval]: theme.hctPalette.darkerBlue,
-    [PaymentPlanStatus.InAuthorization]: theme.hctPalette.darkerBlue,
-    [PaymentPlanStatus.InReview]: theme.hctPalette.blue,
-    [PaymentPlanStatus.Accepted]: theme.hctPalette.green,
-    [PaymentPlanStatus.Finished]: theme.hctPalette.green,
   };
   if (status in colorsMap) {
     return colorsMap[status];
@@ -652,7 +632,7 @@ export function formatThousands(value: string): string {
   return value;
 }
 
-export function targetPopulationStatusMapping(status): string {
+export function PaymentPlanStatusMapping(status): string {
   return TARGETING_STATES[status];
 }
 

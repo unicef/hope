@@ -21,6 +21,7 @@ export interface FinalizeTargetPopulationPaymentPlanProps {
   targetPopulationId: string;
 }
 
+//TODO: remove this Finalize mutation is not existent in the backend
 export const FinalizeTargetPopulationPaymentPlan = ({
   open,
   setOpen,

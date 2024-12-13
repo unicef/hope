@@ -1,17 +1,17 @@
-import TableCell from '@mui/material/TableCell';
-import { useNavigate } from 'react-router-dom';
-import { Radio } from '@mui/material';
+import { BlackLink } from '@components/core/BlackLink';
+import { StatusBox } from '@components/core/StatusBox';
+import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
+import { UniversalMoment } from '@components/core/UniversalMoment';
 import { PaymentPlanNode } from '@generated/graphql';
 import { useBusinessArea } from '@hooks/useBusinessArea';
-import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
-import { StatusBox } from '@components/core/StatusBox';
+import { Radio } from '@mui/material';
+import TableCell from '@mui/material/TableCell';
 import {
+  paymentPlanStatusMapping,
   paymentPlanStatusToColor,
-  targetPopulationStatusMapping,
 } from '@utils/utils';
-import { UniversalMoment } from '@components/core/UniversalMoment';
-import { BlackLink } from '@components/core/BlackLink';
 import { ReactElement } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface LookUpTargetPopulationTableRowCommunicationProps {
   targetPopulation: PaymentPlanNode;
@@ -70,7 +70,7 @@ export function LookUpTargetPopulationTableRowCommunication({
         <StatusBox
           status={targetPopulation.status}
           statusToColor={paymentPlanStatusToColor}
-          statusNameMapping={targetPopulationStatusMapping}
+          statusNameMapping={paymentPlanStatusMapping}
         />
       </TableCell>
       <TableCell align="left">

@@ -7,11 +7,7 @@ import {
   FileCopy,
   RefreshRounded,
 } from '@mui/icons-material';
-import {
-  Action,
-  TargetPopulationQuery,
-  useRebuildTpMutation,
-} from '@generated/graphql';
+import { Action, PaymentPlanQuery } from '@generated/graphql';
 import { DeleteTargetPopulation } from '../../dialogs/targetPopulation/DeleteTargetPopulation';
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
 import { LockTargetPopulationDialog } from '../../dialogs/targetPopulation/LockTargetPopulationDialog';

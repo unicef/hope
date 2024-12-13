@@ -5,7 +5,7 @@ import { hasPermissions, PERMISSIONS } from '../../config/permissions';
 import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityLogTable';
 import {
   PaymentPlanQuery,
-  TargetPopulationBuildStatus,
+  PaymentPlanBuildStatus,
   useTargetPopulationHouseholdsQuery,
 } from '@generated/graphql';
 import { PaperContainer } from './PaperContainer';
@@ -71,7 +71,7 @@ export const TargetPopulationCore = ({
   );
 
   const recordInfo =
-    targetPopulation.buildStatus === TargetPopulationBuildStatus.Ok ? (
+    targetPopulation.buildStatus === PaymentPlanBuildStatus.Ok ? (
       recordsTable
     ) : (
       <PaperContainer>

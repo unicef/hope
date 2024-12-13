@@ -9,6 +9,8 @@ export const AllTargetPopulationForChoices = gql`
     $orderBy: String
     $name: String
     $businessArea: String!
+    $program: String!
+    $paymentPlanApplicable: Boolean
   ) {
     allPaymentPlans(
       after: $after
@@ -18,6 +20,8 @@ export const AllTargetPopulationForChoices = gql`
       orderBy: $orderBy
       name: $name
       businessArea: $businessArea
+      program: $program
+      paymentPlanApplicable: $paymentPlanApplicable
     ) {
       edges {
         node {

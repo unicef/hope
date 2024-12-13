@@ -35,7 +35,7 @@ export const CreatePeoplePaymentPlanPage = (): ReactElement => {
       variables: {
         businessArea,
         paymentPlanApplicable: true,
-        program: [programId],
+        program: programId,
         programCycle: programCycleId,
       },
       fetchPolicy: 'network-only',

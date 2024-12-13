@@ -31,7 +31,7 @@ export const FinalizeTargetPopulation = ({
   const { showMessage } = useSnackbar();
   const { baseUrl } = useBaseUrl();
   const { mutatePaymentPlanAction: finalizeAction, loading: loadingFinalize } =
-    usePaymentPlanAction(Action.TpFinalize, targetPopulationId, () => {
+    usePaymentPlanAction(Action.TpFinish, targetPopulationId, () => {
       showMessage(t('Target Population Finalized'));
       navigate(`/${baseUrl}/target-population/`);
     });
