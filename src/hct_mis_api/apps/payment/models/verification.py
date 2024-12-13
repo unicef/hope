@@ -22,8 +22,9 @@ from hct_mis_api.apps.utils.models import (
     UnicefIdentifiedModel,
 )
 
-if TYPE_CHECKING:
-    from hct_mis_api.apps.program.models import Program  # pragma: no cover
+if TYPE_CHECKING:  # pragma: no cover
+    from hct_mis_api.apps.payment.models import PaymentPlan
+    from hct_mis_api.apps.program.models import Program
 
 logger = logging.getLogger(__name__)
 
@@ -162,7 +163,7 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
         return self.payment_plan.program_cycle.program
 
 
-def build_summary(payment_plan: Optional[Any]) -> None:
+def build_summary(payment_plan: Optional["PaymentPlan"]) -> None:
     if not payment_plan:
         return
 

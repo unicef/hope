@@ -7,6 +7,22 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
+snapshots['TestPaymentPlanQueries::test_all_payment_verification_log_entries 1'] = {
+    'data': {
+        'allPaymentVerificationLogEntries': {
+            'edges': [
+                {
+                    'node': {
+                        'action': 'CREATE',
+                        'isUserGenerated': None
+                    }
+                }
+            ],
+            'totalCount': 1
+        }
+    }
+}
+
 snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans 1'] = {
     'data': {
         'allPaymentPlans': {
@@ -410,7 +426,8 @@ snapshots['TestPaymentPlanQueries::test_payment_node_with_legacy_data 1'] = {
             'snapshotCollectorDebitCardNumber': None,
             'snapshotCollectorDeliveryPhoneNo': None,
             'snapshotCollectorFullName': None,
-            'totalPersonsCovered': 5
+            'totalPersonsCovered': 5,
+            'verification': None
         }
     }
 }
@@ -425,7 +442,8 @@ snapshots['TestPaymentPlanQueries::test_payment_node_with_legacy_data 2'] = {
             'snapshotCollectorDebitCardNumber': 'PrimaryCollDebitCardNumber',
             'snapshotCollectorDeliveryPhoneNo': '1111111',
             'snapshotCollectorFullName': 'PrimaryCollectorFullName',
-            'totalPersonsCovered': 99
+            'totalPersonsCovered': 99,
+            'verification': None
         }
     }
 }
@@ -440,7 +458,8 @@ snapshots['TestPaymentPlanQueries::test_payment_node_with_legacy_data 3'] = {
             'snapshotCollectorDebitCardNumber': 'AlternateCollDebitCardNumber',
             'snapshotCollectorDeliveryPhoneNo': '222222222',
             'snapshotCollectorFullName': 'AlternateCollectorFullName',
-            'totalPersonsCovered': 55
+            'totalPersonsCovered': 55,
+            'verification': None
         }
     }
 }

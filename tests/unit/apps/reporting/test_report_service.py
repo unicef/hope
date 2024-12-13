@@ -10,7 +10,6 @@ from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
@@ -31,7 +30,7 @@ class TestGenerateReportService(TestCase):
 
     @classmethod
     def setUpTestData(self) -> None:
-        create_afghanistan()
+        self.business_area = create_afghanistan()
         PartnerFactory(name="UNICEF")
         from hct_mis_api.apps.reporting.services.generate_report_service import (
             GenerateReportService,
@@ -39,7 +38,6 @@ class TestGenerateReportService(TestCase):
 
         self.GenerateReportService = GenerateReportService
 
-        self.business_area = BusinessArea.objects.get(slug="afghanistan")
         self.partner = PartnerFactory(name="Test1")
         self.user = UserFactory.create(partner=self.partner)
         family_sizes_list = (2, 4, 5, 1, 3, 11, 14)
@@ -86,20 +84,20 @@ class TestGenerateReportService(TestCase):
         self.payment_plan_1 = PaymentPlanFactory(
             business_area=self.business_area,
             program_cycle=self.program_1.cycles.first(),
-            # end_date=datetime.datetime.fromisoformat("2020-01-01 00:01:11+00:00"),
+            created_by=self.user,
         )
         self.payment_plan_2 = PaymentPlanFactory(
             business_area=self.business_area,
-            # end_date=datetime.datetime.fromisoformat("2020-01-01 00:01:11+00:00")
+            created_by=self.user,
         )
         self.payment_plan_3 = PaymentPlanFactory(
             business_area=self.business_area,
             program_cycle=self.program_1.cycles.first(),
-            # end_date=datetime.datetime.fromisoformat("2020-01-01 00:01:11+00:00"),
+            created_by=self.user,
         )
         self.payment_plan_4 = PaymentPlanFactory(
             business_area=self.business_area,
-            # end_date=datetime.datetime.fromisoformat("2020-01-01 00:01:11+00:00")
+            created_by=self.user,
         )
         PaymentVerificationSummary.objects.create(payment_plan=self.payment_plan_1)
         PaymentVerificationSummary.objects.create(payment_plan=self.payment_plan_2)
@@ -180,6 +178,7 @@ class TestGenerateReportService(TestCase):
             ("individuals_payments_admin_area", Report.INDIVIDUALS_AND_PAYMENT, True, False, 2),
             ("individuals_payments_program", Report.INDIVIDUALS_AND_PAYMENT, False, True, 2),
             ("individuals_payments_admin_area_and_program", Report.INDIVIDUALS_AND_PAYMENT, True, True, 2),
+            ("cash_plan_verification", Report.CASH_PLAN_VERIFICATION, False, True, 0),
         ]
     )
     def test_report_types(
