@@ -285,26 +285,26 @@ class PaymentPlanFilter(FilterSet):
 
     @staticmethod
     def filter_total_households_count_with_valid_phone_no_max(
-            queryset: "QuerySet", model_field: str, value: Any
+        queryset: "QuerySet", model_field: str, value: Any
     ) -> "QuerySet":
         queryset = queryset.annotate(
             household_count_with_phone_number=Count(
                 "payment_items",
                 filter=Q(payment_items__household__head_of_household__phone_no_valid=True)
-                       | Q(payment_items__household__head_of_household__phone_no_alternative_valid=True),
+                | Q(payment_items__household__head_of_household__phone_no_alternative_valid=True),
             )
         ).filter(household_count_with_phone_number__lte=value)
         return queryset
 
     @staticmethod
     def filter_total_households_count_with_valid_phone_no_min(
-            queryset: "QuerySet", model_field: str, value: Any
+        queryset: "QuerySet", model_field: str, value: Any
     ) -> "QuerySet":
         queryset = queryset.annotate(
             household_count_with_phone_number=Count(
                 "payment_items",
                 filter=Q(payment_items__household__head_of_household__phone_no_valid=True)
-                       | Q(payment_items__household__head_of_household__phone_no_alternative_valid=True),
+                | Q(payment_items__household__head_of_household__phone_no_alternative_valid=True),
             )
         ).filter(household_count_with_phone_number__gte=value)
         return queryset

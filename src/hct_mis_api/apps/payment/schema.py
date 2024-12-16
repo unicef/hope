@@ -581,6 +581,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
     can_split = graphene.Boolean()
     supporting_documents = graphene.List(PaymentPlanSupportingDocumentNode)
     program = graphene.Field(ProgramNode)
+    total_households_count_with_valid_phone_no = graphene.Int()
 
     class Meta:
         model = PaymentPlan
@@ -718,6 +719,12 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
 
     def resolve_supporting_documents(self, info: Any) -> "QuerySet":
         return self.documents.all()
+
+    def resolve_total_households_count_with_valid_phone_no(self, info: Any) -> int:
+        return self.eligible_payments.exclude(
+            household__head_of_household__phone_no_valid=False,
+            household__head_of_household__phone_no_alternative_valid=False,
+        ).count()
 
 
 class PaymentVerificationNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
