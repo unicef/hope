@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING, List, Tuple
 
 from django.conf import settings
 from django.core.files import File
-from django.db import models
 from django.db.models import (
     Case,
     Count,
@@ -273,7 +272,9 @@ class GenerateReportContentHelpers:
             "payment_verification_plan__completion_date__date__range": (report.date_from, report.date_to),
         }
         if report.program:
-            pp_program_ids = list(PaymentPlan.objects.filter(program=report.program).values_list("id", flat=True))
+            pp_program_ids = list(
+                PaymentPlan.objects.filter(program_cycle__program=report.program).values_list("id", flat=True)
+            )
             filter_vars["payment_verification_plan__payment_plan_id__in"] = pp_program_ids
         return PaymentVerification.objects.filter(**filter_vars)
 
@@ -330,7 +331,7 @@ class GenerateReportContentHelpers:
         if report.admin_area.all().exists():
             filter_q &= Q(household__admin_area__in=report.admin_area.all())
         if report.program:
-            filter_q &= Q(household__payment__parent__program=report.program)
+            filter_q &= Q(household__payment__parent__program_cycle__program=report.program)
 
         return (
             Individual.objects.filter(filter_q)
@@ -338,6 +339,7 @@ class GenerateReportContentHelpers:
             .annotate(
                 first_delivery_date=Least(
                     F("first_delivery_date_payment"),
+                    Value("2099-12-31"),
                     output_field=DateTimeField(),
                 )
             )
@@ -345,6 +347,7 @@ class GenerateReportContentHelpers:
             .annotate(
                 last_delivery_date=Greatest(
                     F("last_delivery_date_payment"),
+                    Value("1990-01-01"),
                     output_field=DateTimeField(),
                 )
             )
@@ -359,10 +362,7 @@ class GenerateReportContentHelpers:
                     )
                 )
             )
-            .annotate(
-                payment_currency="household__payment__currency",
-                output_field=models.CharField(),
-            )
+            .annotate(payment_currency=F("household__payment__currency"))
             .annotate(
                 total_delivered_quantity_local=Coalesce(
                     Sum("household__payment__delivered_quantity"), Value(0), output_field=DecimalField()

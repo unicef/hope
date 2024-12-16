@@ -1,5 +1,4 @@
 from typing import Any
-from unittest.mock import patch
 
 from django.conf import settings
 from django.test import TestCase
@@ -172,13 +171,13 @@ class TestGenerateReportService(TestCase):
             ("payments_filter_admin_area", Report.PAYMENTS, True, False, 1),
             ("payment_verifications_no_filter", Report.PAYMENT_VERIFICATION, False, False, 2),
             ("payment_verifications_program", Report.PAYMENT_VERIFICATION, False, True, 1),
-            ("cash_plans_no_filter", Report.CASH_PLAN, False, False, 2),
-            ("cash_plans_program", Report.CASH_PLAN, False, True, 1),
+            ("cash_plans_no_filter", Report.PAYMENT_PLAN, False, False, 2),
+            ("cash_plans_program", Report.PAYMENT_PLAN, False, True, 1),
             ("individuals_payments_no_filter", Report.INDIVIDUALS_AND_PAYMENT, False, False, 4),
             ("individuals_payments_admin_area", Report.INDIVIDUALS_AND_PAYMENT, True, False, 2),
             ("individuals_payments_program", Report.INDIVIDUALS_AND_PAYMENT, False, True, 2),
             ("individuals_payments_admin_area_and_program", Report.INDIVIDUALS_AND_PAYMENT, True, True, 2),
-            ("cash_plan_verification", Report.CASH_PLAN_VERIFICATION, False, True, 0),
+            ("cash_plan_verification", Report.CASH_PLAN_VERIFICATION, True, True, 2),
         ]
     )
     def test_report_types(
@@ -202,17 +201,17 @@ class TestGenerateReportService(TestCase):
             report.save()
 
         report_service = self.GenerateReportService(report)
-        with (
-            patch(
-                "hct_mis_api.apps.reporting.services.generate_report_service.GenerateReportService.save_wb_file_in_db"
-            ) as mock_save_wb_file_in_db,
-            patch(
-                "hct_mis_api.apps.reporting.services.generate_report_service.GenerateReportService.generate_workbook"
-            ) as mock_generate_workbook,
-        ):
-            report_service.generate_report()
-            assert mock_generate_workbook.called
-            assert mock_save_wb_file_in_db.called
+        # with (
+        #     # patch(
+        #     #     "hct_mis_api.apps.reporting.services.generate_report_service.GenerateReportService.save_wb_file_in_db"
+        #     # ) as mock_save_wb_file_in_db,
+        #     # patch(
+        #     #     "hct_mis_api.apps.reporting.services.generate_report_service.GenerateReportService.generate_workbook"
+        #     # ) as mock_generate_workbook,
+        # ):
+        report_service.generate_report()
+        # assert mock_generate_workbook.called
+        # assert mock_save_wb_file_in_db.called
         report.refresh_from_db()
         self.assertEqual(report.status, Report.COMPLETED)
         # self.assertEqual(report.number_of_records, number_of_records) # when mocking generating workbook, this is not set
