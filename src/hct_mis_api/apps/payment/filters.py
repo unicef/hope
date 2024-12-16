@@ -217,6 +217,12 @@ class PaymentPlanFilter(FilterSet):
         field_name="total_number_of_hh",
         lookup_expr="lte",
     )
+    total_households_count_with_valid_phone_no_max = IntegerFilter(
+        method="filter_total_households_count_with_valid_phone_no_max"
+    )
+    total_households_count_with_valid_phone_no_min = IntegerFilter(
+        method="filter_total_households_count_with_valid_phone_no_min"
+    )
     created_at_range = DateTimeRangeFilter(field_name="created_at")
 
     class Meta:
@@ -275,6 +281,32 @@ class PaymentPlanFilter(FilterSet):
             return queryset.filter(
                 Q(business_area__is_payment_plan_applicable=True) & Q(status=PaymentPlan.Status.DRAFT)
             )
+        return queryset
+
+    @staticmethod
+    def filter_total_households_count_with_valid_phone_no_max(
+            queryset: "QuerySet", model_field: str, value: Any
+    ) -> "QuerySet":
+        queryset = queryset.annotate(
+            household_count_with_phone_number=Count(
+                "payment_items",
+                filter=Q(payment_items__household__head_of_household__phone_no_valid=True)
+                       | Q(payment_items__household__head_of_household__phone_no_alternative_valid=True),
+            )
+        ).filter(household_count_with_phone_number__lte=value)
+        return queryset
+
+    @staticmethod
+    def filter_total_households_count_with_valid_phone_no_min(
+            queryset: "QuerySet", model_field: str, value: Any
+    ) -> "QuerySet":
+        queryset = queryset.annotate(
+            household_count_with_phone_number=Count(
+                "payment_items",
+                filter=Q(payment_items__household__head_of_household__phone_no_valid=True)
+                       | Q(payment_items__household__head_of_household__phone_no_alternative_valid=True),
+            )
+        ).filter(household_count_with_phone_number__gte=value)
         return queryset
 
 
