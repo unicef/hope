@@ -96,10 +96,7 @@ class PaymentVerificationFilter(FilterSet):
         )
 
     def business_area_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
-        return qs.filter(
-            Q(payment_verification_plan__payment_plan__business_area__slug=value)
-            | Q(payment_verification_plan__cash_plan__business_area__slug=value)
-        )
+        return qs.filter(payment_verification_plan__payment_plan__business_area__slug=value)
 
 
 class PaymentVerificationPlanFilter(FilterSet):

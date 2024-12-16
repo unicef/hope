@@ -207,6 +207,7 @@ class TestPaymentPlanQueries(APITestCase):
         query Payment($id: ID!) {
           payment(id: $id) {
             totalPersonsCovered
+            fullName
             snapshotCollectorFullName
             snapshotCollectorDeliveryPhoneNo
             snapshotCollectorBankName
@@ -475,9 +476,9 @@ class TestPaymentPlanQueries(APITestCase):
             dispersion_end_date=datetime(2023, 12, 10),
             is_follow_up=False,
         )
-        hoh_1 = IndividualFactory(household=None)
-        hoh_2 = IndividualFactory(household=None)
-        hoh_3 = IndividualFactory(household=None)
+        hoh_1 = IndividualFactory(household=None, given_name="First1", middle_name="Mid1", family_name="Last1")
+        hoh_2 = IndividualFactory(household=None, given_name="First2", middle_name="Mid2", family_name="Last3")
+        hoh_3 = IndividualFactory(household=None, given_name="First3", middle_name="Mid3", family_name="Last3")
         household_1 = HouseholdFactory(head_of_household=hoh_1, size=5)
         household_2 = HouseholdFactory(head_of_household=hoh_2, size=10)
         household_3 = HouseholdFactory(head_of_household=hoh_3, size=15)
@@ -548,7 +549,7 @@ class TestPaymentPlanQueries(APITestCase):
             )
 
     def test_all_payment_verification_log_entries(self) -> None:
-        QUERY = """
+        query = """
         query allPaymentVerificationLogEntries($objectId: UUID, $businessArea: String!) {
           allPaymentVerificationLogEntries(objectId: $objectId, businessArea: $businessArea) {
             totalCount
@@ -584,7 +585,7 @@ class TestPaymentPlanQueries(APITestCase):
         )
 
         self.snapshot_graphql_request(
-            request_string=QUERY,
+            request_string=query,
             context={"user": self.user},
             variables={"objectId": payment_plan_id, "businessArea": "afghanistan"},
         )

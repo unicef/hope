@@ -365,6 +365,7 @@ class PaymentNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
         return self.parent.target_population
 
     def resolve_full_name(self, info: Any) -> str:
+        # TODO: add to test this one
         return self.head_of_household.full_name if self.head_of_household else ""
 
     def resolve_verification(self, info: Any) -> Optional[Any]:

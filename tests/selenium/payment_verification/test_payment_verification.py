@@ -194,8 +194,9 @@ def add_payment_verification_xlsx() -> PV:
 
 
 def payment_verification_creator(channel: str = PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL) -> PV:
+    user = User.objects.first()
     registration_data_import = RegistrationDataImportFactory(
-        imported_by=User.objects.first(), business_area=BusinessArea.objects.first()
+        imported_by=user, business_area=BusinessArea.objects.first()
     )
     program = Program.objects.filter(name="Active Program").first()
     household, individuals = create_household(
@@ -214,6 +215,7 @@ def payment_verification_creator(channel: str = PaymentVerificationPlan.VERIFICA
         business_area=BusinessArea.objects.first(),
         start_date=datetime.now() - relativedelta(months=1),
         end_date=datetime.now() + relativedelta(months=1),
+        created_by=user,
     )
 
     payment_plan.unicef_id = "PP-0000-00-1122334"

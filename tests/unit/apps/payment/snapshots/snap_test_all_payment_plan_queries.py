@@ -420,6 +420,7 @@ snapshots['TestPaymentPlanQueries::test_payment_node_with_legacy_data 1'] = {
     'data': {
         'payment': {
             'additionalCollectorName': None,
+            'fullName': 'First1 Mid1 Last1',
             'reasonForUnsuccessfulPayment': 'reason 123',
             'snapshotCollectorBankAccountNumber': None,
             'snapshotCollectorBankName': None,
@@ -436,6 +437,7 @@ snapshots['TestPaymentPlanQueries::test_payment_node_with_legacy_data 2'] = {
     'data': {
         'payment': {
             'additionalCollectorName': 'AddCollectorName11',
+            'fullName': 'First2 Mid2 Last3',
             'reasonForUnsuccessfulPayment': 'reason 222',
             'snapshotCollectorBankAccountNumber': 'PrimaryCollBankNumber',
             'snapshotCollectorBankName': 'PrimaryCollBankName',
@@ -452,6 +454,7 @@ snapshots['TestPaymentPlanQueries::test_payment_node_with_legacy_data 3'] = {
     'data': {
         'payment': {
             'additionalCollectorName': 'AddCollectorName22',
+            'fullName': 'First3 Mid3 Last3',
             'reasonForUnsuccessfulPayment': 'reason 333',
             'snapshotCollectorBankAccountNumber': 'AlternateCollBankNumber',
             'snapshotCollectorBankName': 'AlternateCollBankName',
