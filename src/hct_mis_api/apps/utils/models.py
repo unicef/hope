@@ -636,7 +636,7 @@ class CeleryEnabledModel(models.Model):  # pragma: no cover
 
 
 class InternalDataFieldModel(models.Model):
-    internal_data = models.JSONField(default=dict)
+    internal_data = models.JSONField(default=dict, blank=True)
 
     class Meta:
         abstract = True
