@@ -15,7 +15,7 @@ from hct_mis_api.apps.household.fixtures import (
 )
 from hct_mis_api.apps.household.models import HOST, SEEING, Individual
 from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
-from hct_mis_api.apps.payment.models import GenericPayment, PaymentRecord
+from hct_mis_api.apps.payment.models import Payment
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
 from tests.selenium.page_object.filters import Filters
@@ -58,7 +58,7 @@ def add_people(social_worker_program: Program) -> List:
 
 
 @pytest.fixture
-def add_people_with_payment_record(add_people: List) -> PaymentRecord:
+def add_people_with_payment_record(add_people: List) -> Payment:
     program = Program.objects.filter(name="Worker Program").first()
 
     payment_plan = PaymentPlanFactory(
@@ -74,7 +74,7 @@ def add_people_with_payment_record(add_people: List) -> PaymentRecord:
         entitlement_quantity=21.36,
         delivered_quantity=21.36,
         currency="PLN",
-        status=GenericPayment.STATUS_DISTRIBUTION_SUCCESS,
+        status=Payment.STATUS_DISTRIBUTION_SUCCESS,
     )
     add_people[1].total_cash_received_usd = 21.36
     add_people[1].save()
@@ -239,7 +239,7 @@ class TestSmokePeople:
     @pytest.mark.xfail(reason="UNSTABLE")
     def test_people_happy_path(
         self,
-        add_people_with_payment_record: PaymentRecord,
+        add_people_with_payment_record: Payment,
         pagePeople: People,
         pagePeopleDetails: PeopleDetails,
     ) -> None:
