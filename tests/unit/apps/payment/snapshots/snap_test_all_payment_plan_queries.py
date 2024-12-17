@@ -484,19 +484,22 @@ snapshots['TestPaymentPlanQueries::test_payment_plan_filter_is_payment_plan 1'] 
                 {
                     'node': {
                         'name': 'Payment Plan within FINISHED status',
-                        'status': 'FINISHED'
+                        'status': 'FINISHED',
+                        'totalHouseholdsCountWithValidPhoneNo': 0
                     }
                 },
                 {
                     'node': {
                         'name': 'PaymentPlan with conflicts',
-                        'status': 'LOCKED'
+                        'status': 'LOCKED',
+                        'totalHouseholdsCountWithValidPhoneNo': 1
                     }
                 },
                 {
                     'node': {
                         'name': 'Main Payment Plan',
-                        'status': 'OPEN'
+                        'status': 'OPEN',
+                        'totalHouseholdsCountWithValidPhoneNo': 1
                     }
                 }
             ]
@@ -511,25 +514,29 @@ snapshots['TestPaymentPlanQueries::test_payment_plan_filter_is_payment_plan 2'] 
                 {
                     'node': {
                         'name': 'Payment Plan within FINISHED status',
-                        'status': 'FINISHED'
+                        'status': 'FINISHED',
+                        'totalHouseholdsCountWithValidPhoneNo': 0
                     }
                 },
                 {
                     'node': {
                         'name': 'PaymentPlan with conflicts',
-                        'status': 'LOCKED'
+                        'status': 'LOCKED',
+                        'totalHouseholdsCountWithValidPhoneNo': 1
                     }
                 },
                 {
                     'node': {
                         'name': 'Main Payment Plan',
-                        'status': 'OPEN'
+                        'status': 'OPEN',
+                        'totalHouseholdsCountWithValidPhoneNo': 1
                     }
                 },
                 {
                     'node': {
                         'name': 'Payment Plan within TP_LOCK status',
-                        'status': 'TP_LOCKED'
+                        'status': 'TP_LOCKED',
+                        'totalHouseholdsCountWithValidPhoneNo': 0
                     }
                 }
             ]
@@ -544,13 +551,15 @@ snapshots['TestPaymentPlanQueries::test_payment_plan_filter_is_target_population
                 {
                     'node': {
                         'name': 'Payment Plan within DRAFT status',
-                        'status': 'DRAFT'
+                        'status': 'DRAFT',
+                        'totalHouseholdsCountWithValidPhoneNo': 0
                     }
                 },
                 {
                     'node': {
                         'name': 'Payment Plan within TP_LOCK status',
-                        'status': 'TP_LOCKED'
+                        'status': 'TP_LOCKED',
+                        'totalHouseholdsCountWithValidPhoneNo': 0
                     }
                 }
             ]
@@ -565,25 +574,29 @@ snapshots['TestPaymentPlanQueries::test_payment_plan_filter_is_target_population
                 {
                     'node': {
                         'name': 'Payment Plan within DRAFT status',
-                        'status': 'DRAFT'
+                        'status': 'DRAFT',
+                        'totalHouseholdsCountWithValidPhoneNo': 0
                     }
                 },
                 {
                     'node': {
                         'name': 'PaymentPlan with conflicts',
-                        'status': 'LOCKED'
+                        'status': 'LOCKED',
+                        'totalHouseholdsCountWithValidPhoneNo': 1
                     }
                 },
                 {
                     'node': {
                         'name': 'Main Payment Plan',
-                        'status': 'OPEN'
+                        'status': 'OPEN',
+                        'totalHouseholdsCountWithValidPhoneNo': 1
                     }
                 },
                 {
                     'node': {
                         'name': 'Payment Plan within TP_LOCK status',
-                        'status': 'TP_LOCKED'
+                        'status': 'TP_LOCKED',
+                        'totalHouseholdsCountWithValidPhoneNo': 0
                     }
                 }
             ]
@@ -598,7 +611,8 @@ snapshots['TestPaymentPlanQueries::test_payment_plan_filter_name 1'] = {
                 {
                     'node': {
                         'name': 'PaymentPlan with conflicts',
-                        'status': 'LOCKED'
+                        'status': 'LOCKED',
+                        'totalHouseholdsCountWithValidPhoneNo': 1
                     }
                 }
             ]
@@ -613,7 +627,8 @@ snapshots['TestPaymentPlanQueries::test_payment_plan_filter_payment_plan_applica
                 {
                     'node': {
                         'name': 'Payment Plan within DRAFT for test filter payment_plan_applicable',
-                        'status': 'DRAFT'
+                        'status': 'DRAFT',
+                        'totalHouseholdsCountWithValidPhoneNo': 0
                     }
                 }
             ]
@@ -628,19 +643,22 @@ snapshots['TestPaymentPlanQueries::test_payment_plan_filter_total_households_cou
                 {
                     'node': {
                         'name': 'Payment Plan with 2 payments',
-                        'status': 'DRAFT'
+                        'status': 'DRAFT',
+                        'totalHouseholdsCountWithValidPhoneNo': 2
                     }
                 },
                 {
                     'node': {
                         'name': 'PaymentPlan with conflicts',
-                        'status': 'LOCKED'
+                        'status': 'LOCKED',
+                        'totalHouseholdsCountWithValidPhoneNo': 1
                     }
                 },
                 {
                     'node': {
                         'name': 'Main Payment Plan',
-                        'status': 'OPEN'
+                        'status': 'OPEN',
+                        'totalHouseholdsCountWithValidPhoneNo': 1
                     }
                 }
             ]
@@ -655,19 +673,75 @@ snapshots['TestPaymentPlanQueries::test_payment_plan_filter_total_households_cou
                 {
                     'node': {
                         'name': 'Payment Plan with 3 payments',
-                        'status': 'DRAFT'
+                        'status': 'DRAFT',
+                        'totalHouseholdsCountWithValidPhoneNo': 3
                     }
                 },
                 {
                     'node': {
                         'name': 'PaymentPlan with conflicts',
-                        'status': 'LOCKED'
+                        'status': 'LOCKED',
+                        'totalHouseholdsCountWithValidPhoneNo': 1
                     }
                 },
                 {
                     'node': {
                         'name': 'Main Payment Plan',
-                        'status': 'OPEN'
+                        'status': 'OPEN',
+                        'totalHouseholdsCountWithValidPhoneNo': 1
+                    }
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestPaymentPlanQueries::test_payment_plan_filter_total_households_count_with_valid_phone_no_max_2 1'] = {
+    'data': {
+        'allPaymentPlans': {
+            'edges': [
+                {
+                    'node': {
+                        'name': 'PaymentPlan with conflicts',
+                        'status': 'LOCKED',
+                        'totalHouseholdsCountWithValidPhoneNo': 1
+                    }
+                },
+                {
+                    'node': {
+                        'name': 'Main Payment Plan',
+                        'status': 'OPEN',
+                        'totalHouseholdsCountWithValidPhoneNo': 1
+                    }
+                },
+                {
+                    'node': {
+                        'name': 'Payment Plan just random with invalid phone numbers',
+                        'status': 'PROCESSING',
+                        'totalHouseholdsCountWithValidPhoneNo': 0
+                    }
+                },
+                {
+                    'node': {
+                        'name': 'Payment Plan with valid 2 phone numbers',
+                        'status': 'TP_LOCKED',
+                        'totalHouseholdsCountWithValidPhoneNo': 2
+                    }
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestPaymentPlanQueries::test_payment_plan_filter_total_households_count_with_valid_phone_no_min_2 1'] = {
+    'data': {
+        'allPaymentPlans': {
+            'edges': [
+                {
+                    'node': {
+                        'name': 'Payment Plan with valid 2 phone numbers',
+                        'status': 'DRAFT',
+                        'totalHouseholdsCountWithValidPhoneNo': 2
                     }
                 }
             ]

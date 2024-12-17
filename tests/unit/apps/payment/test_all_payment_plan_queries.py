@@ -219,12 +219,13 @@ class TestPaymentPlanQueries(APITestCase):
         """
 
     PAYMENT_PLANS_FILTER_QUERY = """
-        query AllPaymentPlans($businessArea: String!, $search: String, $status: [String], $totalEntitledQuantityFrom: Float, $totalEntitledQuantityTo: Float, $dispersionStartDate: Date, $dispersionEndDate: Date, $program: String, $programCycle: String, $isPaymentPlan: Boolean, $isTargetPopulation: Boolean, $name: String, $paymentPlanApplicable: Boolean, $totalHouseholdsCountMin: Int, $totalHouseholdsCountMax: Int) {
-            allPaymentPlans(businessArea: $businessArea, search: $search, status: $status, totalEntitledQuantityFrom: $totalEntitledQuantityFrom, totalEntitledQuantityTo: $totalEntitledQuantityTo, dispersionStartDate: $dispersionStartDate, dispersionEndDate: $dispersionEndDate, program: $program, orderBy: "status", programCycle: $programCycle, isPaymentPlan: $isPaymentPlan, isTargetPopulation: $isTargetPopulation, name: $name, paymentPlanApplicable: $paymentPlanApplicable, totalHouseholdsCountMin: $totalHouseholdsCountMin, totalHouseholdsCountMax: $totalHouseholdsCountMax) {
+        query AllPaymentPlans($businessArea: String!, $search: String, $status: [String], $totalEntitledQuantityFrom: Float, $totalEntitledQuantityTo: Float, $dispersionStartDate: Date, $dispersionEndDate: Date, $program: String, $programCycle: String, $isPaymentPlan: Boolean, $isTargetPopulation: Boolean, $name: String, $paymentPlanApplicable: Boolean, $totalHouseholdsCountMin: Int, $totalHouseholdsCountMax: Int, $totalHouseholdsCountWithValidPhoneNoMax: Int, $totalHouseholdsCountWithValidPhoneNoMin: Int) {
+            allPaymentPlans(businessArea: $businessArea, search: $search, status: $status, totalEntitledQuantityFrom: $totalEntitledQuantityFrom, totalEntitledQuantityTo: $totalEntitledQuantityTo, dispersionStartDate: $dispersionStartDate, dispersionEndDate: $dispersionEndDate, program: $program, orderBy: "status", programCycle: $programCycle, isPaymentPlan: $isPaymentPlan, isTargetPopulation: $isTargetPopulation, name: $name, paymentPlanApplicable: $paymentPlanApplicable, totalHouseholdsCountMin: $totalHouseholdsCountMin, totalHouseholdsCountMax: $totalHouseholdsCountMax, totalHouseholdsCountWithValidPhoneNoMax: $totalHouseholdsCountWithValidPhoneNoMax, totalHouseholdsCountWithValidPhoneNoMin: $totalHouseholdsCountWithValidPhoneNoMin) {
             edges {
               node {
                 name
                 status
+                totalHouseholdsCountWithValidPhoneNo
               }
             }
           }
@@ -691,4 +692,108 @@ class TestPaymentPlanQueries(APITestCase):
             request_string=self.PAYMENT_PLANS_FILTER_QUERY,
             context={"user": self.user},
             variables={"businessArea": "afghanistan", "totalHouseholdsCountMin": 2},
+        )
+
+    def test_payment_plan_filter_total_households_count_with_valid_phone_no_min_2(self) -> None:
+        valid_phone_no = "+48 123 456 987"
+        invalid_phone_no = "+48 ABC"
+        pp_with_2_valid_numbers = PaymentPlanFactory(
+            name="Payment Plan with valid 2 phone numbers",
+            status=PaymentPlan.Status.DRAFT,
+            program_cycle=self.program_cycle,
+            business_area=self.business_area,
+            created_by=self.user,
+        )
+        hoh_1 = IndividualFactory(household=None, phone_no_valid=True, phone_no_alternative_valid=False)
+        hoh_2 = IndividualFactory(
+            household=None, phone_no_valid=False, phone_no_alternative_valid=True, phone_no_alternative=valid_phone_no
+        )
+        household_1 = HouseholdFactory(head_of_household=hoh_1)
+        household_2 = HouseholdFactory(head_of_household=hoh_2)
+        PaymentFactory(parent=pp_with_2_valid_numbers, household=household_1, head_of_household=hoh_1, currency="PLN")
+        PaymentFactory(parent=pp_with_2_valid_numbers, household=household_2, head_of_household=hoh_2, currency="PLN")
+        pp_2 = PaymentPlanFactory(
+            name="Payment Plan with 2 payments and not valid phone numbers",
+            status=PaymentPlan.Status.DRAFT,
+            program_cycle=self.program_cycle,
+            business_area=self.business_area,
+            created_by=self.user,
+        )
+        household11 = HouseholdFactory(
+            head_of_household=IndividualFactory(
+                household=None, phone_no_valid=False, phone_no_alternative_valid=False, phone_no=invalid_phone_no
+            )
+        )
+        household22 = HouseholdFactory(
+            head_of_household=IndividualFactory(
+                household=None, phone_no_valid=False, phone_no_alternative_valid=False, phone_no=invalid_phone_no
+            )
+        )
+        PaymentFactory(parent=pp_2, household=household11, head_of_household=household11.head_of_household)
+        PaymentFactory(parent=pp_2, household=household22, head_of_household=household22.head_of_household)
+        self.snapshot_graphql_request(
+            request_string=self.PAYMENT_PLANS_FILTER_QUERY,
+            context={"user": self.user},
+            variables={"businessArea": "afghanistan", "totalHouseholdsCountWithValidPhoneNoMin": 2},
+        )
+
+    def test_payment_plan_filter_total_households_count_with_valid_phone_no_max_2(self) -> None:
+        valid_phone_no = "+48 123 456 777"
+        invalid_phone_no = "+48 TEST"
+        pp_with_3_valid_numbers = PaymentPlanFactory(
+            name="Payment Plan with valid 3 phone numbers",
+            status=PaymentPlan.Status.DRAFT,
+            program_cycle=self.program_cycle,
+            business_area=self.business_area,
+            created_by=self.user,
+        )
+        hoh_1 = IndividualFactory(household=None, phone_no_valid=True, phone_no_alternative_valid=False)
+        hoh_2 = IndividualFactory(
+            household=None, phone_no_valid=False, phone_no_alternative_valid=True, phone_no_alternative=valid_phone_no
+        )
+        hoh_3 = IndividualFactory(household=None, phone_no_valid=True, phone_no_alternative_valid=False)
+        household_1 = HouseholdFactory(head_of_household=hoh_1)
+        household_2 = HouseholdFactory(head_of_household=hoh_2)
+        household_3 = HouseholdFactory(head_of_household=hoh_3)
+        PaymentFactory(parent=pp_with_3_valid_numbers, household=household_1, head_of_household=hoh_1, currency="PLN")
+        PaymentFactory(parent=pp_with_3_valid_numbers, household=household_2, head_of_household=hoh_2, currency="PLN")
+        PaymentFactory(parent=pp_with_3_valid_numbers, household=household_3, head_of_household=hoh_3, currency="PLN")
+        pp_with_2_valid_numbers = PaymentPlanFactory(
+            name="Payment Plan with valid 2 phone numbers",
+            status=PaymentPlan.Status.TP_LOCKED,
+            program_cycle=self.program_cycle,
+            business_area=self.business_area,
+            created_by=self.user,
+        )
+        hoh_4 = IndividualFactory(
+            household=None, phone_no_valid=False, phone_no_alternative_valid=True, phone_no_alternative=valid_phone_no
+        )
+        hoh_5 = IndividualFactory(household=None, phone_no_valid=True, phone_no_alternative_valid=False)
+        household_4 = HouseholdFactory(head_of_household=hoh_4)
+        household_5 = HouseholdFactory(head_of_household=hoh_5)
+        PaymentFactory(parent=pp_with_2_valid_numbers, household=household_4, head_of_household=hoh_4, currency="PLN")
+        PaymentFactory(parent=pp_with_2_valid_numbers, household=household_5, head_of_household=hoh_5, currency="PLN")
+        pp = PaymentPlanFactory(
+            name="Payment Plan just random with invalid phone numbers",
+            status=PaymentPlan.Status.TP_PROCESSING,
+            program_cycle=self.program_cycle,
+            business_area=self.business_area,
+            created_by=self.user,
+        )
+        household11 = HouseholdFactory(
+            head_of_household=IndividualFactory(
+                household=None, phone_no_valid=False, phone_no_alternative_valid=False, phone_no=invalid_phone_no
+            )
+        )
+        household22 = HouseholdFactory(
+            head_of_household=IndividualFactory(
+                household=None, phone_no_valid=False, phone_no_alternative_valid=False, phone_no=invalid_phone_no
+            )
+        )
+        PaymentFactory(parent=pp, household=household11, head_of_household=household11.head_of_household)
+        PaymentFactory(parent=pp, household=household22, head_of_household=household22.head_of_household)
+        self.snapshot_graphql_request(
+            request_string=self.PAYMENT_PLANS_FILTER_QUERY,
+            context={"user": self.user},
+            variables={"businessArea": "afghanistan", "totalHouseholdsCountWithValidPhoneNoMax": 2},
         )

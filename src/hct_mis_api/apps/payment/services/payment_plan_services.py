@@ -394,6 +394,7 @@ class PaymentPlanService:
             business_area=payment_plan.business_area, program=payment_plan.program_cycle.program
         )
         households = households.filter(payment_plan.targeting_criteria.get_query())
+        # TODO: add filtering by 'vulnerability_score_min', 'vulnerability_score_max'
         households = (
             households.annotate(
                 collector=IndividualRoleInHousehold.objects.filter(household=OuterRef("pk"), role=ROLE_PRIMARY).values(

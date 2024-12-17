@@ -290,8 +290,12 @@ class PaymentPlanFilter(FilterSet):
         queryset = queryset.annotate(
             household_count_with_phone_number=Count(
                 "payment_items",
-                filter=Q(payment_items__household__head_of_household__phone_no_valid=True)
-                | Q(payment_items__household__head_of_household__phone_no_alternative_valid=True),
+                filter=Q(
+                    Q(payment_items__household__head_of_household__phone_no_valid=True)
+                    | Q(payment_items__household__head_of_household__phone_no_alternative_valid=True)
+                )
+                & Q(payment_items__conflicted=False)
+                & Q(payment_items__excluded=False),
             )
         ).filter(household_count_with_phone_number__lte=value)
         return queryset
@@ -303,8 +307,12 @@ class PaymentPlanFilter(FilterSet):
         queryset = queryset.annotate(
             household_count_with_phone_number=Count(
                 "payment_items",
-                filter=Q(payment_items__household__head_of_household__phone_no_valid=True)
-                | Q(payment_items__household__head_of_household__phone_no_alternative_valid=True),
+                filter=Q(
+                    Q(payment_items__household__head_of_household__phone_no_valid=True)
+                    | Q(payment_items__household__head_of_household__phone_no_alternative_valid=True)
+                )
+                & Q(payment_items__conflicted=False)
+                & Q(payment_items__excluded=False),
             )
         ).filter(household_count_with_phone_number__gte=value)
         return queryset
