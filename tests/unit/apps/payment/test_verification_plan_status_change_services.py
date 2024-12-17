@@ -125,7 +125,7 @@ class TestPhoneNumberVerification(TestCase):
 
             PaymentVerificationFactory(
                 payment_verification_plan=other_payment_plan_payment_verification,
-                payment_obj=other_payment_record,
+                payment=other_payment_record,
                 status=PaymentVerification.STATUS_PENDING,
             )
             EntitlementCardFactory(household=other_household)

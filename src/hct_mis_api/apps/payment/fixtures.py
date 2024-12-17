@@ -38,7 +38,6 @@ from hct_mis_api.apps.payment.models import (
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     FspXlsxTemplatePerDeliveryMechanism,
-    GenericPayment,
     Payment,
     PaymentPlan,
     PaymentPlanSplit,
@@ -288,7 +287,7 @@ class PaymentFactory(DjangoModelFactory):
 
     parent = factory.SubFactory(PaymentPlanFactory)
     business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first())
-    status = GenericPayment.STATUS_PENDING
+    status = Payment.STATUS_PENDING
     status_date = factory.Faker(
         "date_time_this_decade",
         before_now=True,
