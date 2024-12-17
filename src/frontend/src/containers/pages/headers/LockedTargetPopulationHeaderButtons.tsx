@@ -6,6 +6,7 @@ import styled from 'styled-components';
 import { LoadingButton } from '@components/core/LoadingButton';
 import { useSnackbar } from '@hooks/useSnackBar';
 import {
+  Action,
   BusinessAreaDataQuery,
   PaymentPlanQuery,
   ProgramStatus,
@@ -13,6 +14,9 @@ import {
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
 import { FinalizeTargetPopulationPaymentPlan } from '../../dialogs/targetPopulation/FinalizeTargetPopulationPaymentPlan';
 import { useProgramContext } from '../../../programContext';
+import { usePaymentPlanAction } from '@hooks/usePaymentPlanAction';
+import { useNavigate } from 'react-router-dom';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const IconContainer = styled.span`
   button {
@@ -41,6 +45,8 @@ export function LockedTargetPopulationHeaderButtons({
   businessAreaData,
 }: ApprovedTargetPopulationHeaderButtonsPropTypes): ReactElement {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { baseUrl } = useBaseUrl();
   const [openDuplicate, setOpenDuplicate] = useState(false);
   const [openFinalize, setOpenFinalize] = useState(false);
   const [openFinalizePaymentPlan, setOpenFinalizePaymentPlan] = useState(false);
@@ -48,7 +54,20 @@ export function LockedTargetPopulationHeaderButtons({
   const { isActiveProgram } = useProgramContext();
 
   //TODO: Action.TpUnlock
-  const [mutate, { loading }] = useUnlockTpMutation();
+  const { mutatePaymentPlanAction: lockAction, loading: loadingLock } =
+    usePaymentPlanAction(Action.TpLock, targetPopulationId, () => {
+      showMessage(t('Target Population Finalized'));
+      navigate(`/${baseUrl}/target-population/`);
+      setOpenFinalize(false);
+    });
+
+  const { mutatePaymentPlanAction: unlockAction, loading: loadingUnlock } =
+    usePaymentPlanAction(Action.TpLock, targetPopulationId, () => {
+      showMessage(t('Target Population Finalized'));
+      navigate(`/${baseUrl}/target-population/`);
+      setOpenFinalize(false);
+    });
+
   const { isPaymentPlanApplicable } = businessAreaData.businessArea;
 
   return (

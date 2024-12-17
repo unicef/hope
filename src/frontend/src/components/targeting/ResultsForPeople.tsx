@@ -1,16 +1,13 @@
 import { Grid, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import {
-  TargetPopulationBuildStatus,
-  TargetPopulationQuery,
-} from '@generated/graphql';
 import { MiśTheme } from '../../theme';
 import { LabelizedField } from '@core/LabelizedField';
 import { PaperContainer } from './PaperContainer';
 import { FieldBorder } from '@core/FieldBorder';
 import { Pie } from 'react-chartjs-2';
 import { ReactElement } from 'react';
+import { PaymentPlanBuildStatus, PaymentPlanQuery } from '@generated/graphql';
 
 const colors = {
   femaleChildren: '#5F02CF',
@@ -57,7 +54,7 @@ export function ResultsForPeople({
   targetPopulation,
 }: ResultsProps): ReactElement {
   const { t } = useTranslation();
-  if (targetPopulation.buildStatus !== TargetPopulationBuildStatus.Ok) {
+  if (targetPopulation.buildStatus !== PaymentPlanBuildStatus.Ok) {
     return null;
   }
   return (
@@ -74,7 +71,7 @@ export function ResultsForPeople({
                   <FieldBorder color={colors.femaleChildren}>
                     <LabelizedField
                       label={t('Female Children')}
-                      value={targetPopulation.childFemaleCount}
+                      value={targetPopulation.femaleChildrenCount}
                     />
                   </FieldBorder>
                 </Grid>
@@ -82,7 +79,7 @@ export function ResultsForPeople({
                   <FieldBorder color={colors.femaleAdult}>
                     <LabelizedField
                       label={t('Female Adults')}
-                      value={targetPopulation.adultFemaleCount}
+                      value={targetPopulation.femaleAdultsCount}
                     />
                   </FieldBorder>
                 </Grid>
@@ -90,7 +87,7 @@ export function ResultsForPeople({
                   <FieldBorder color={colors.maleChildren}>
                     <LabelizedField
                       label={t('Male Children')}
-                      value={targetPopulation.childMaleCount}
+                      value={targetPopulation.maleChildrenCount}
                     />
                   </FieldBorder>
                 </Grid>
@@ -98,7 +95,7 @@ export function ResultsForPeople({
                   <FieldBorder color={colors.maleAdult}>
                     <LabelizedField
                       label={t('Male Adults')}
-                      value={targetPopulation.adultMaleCount}
+                      value={targetPopulation.maleAdultsCount}
                     />
                   </FieldBorder>
                 </Grid>
@@ -133,10 +130,10 @@ export function ResultsForPeople({
                         datasets: [
                           {
                             data: [
-                              targetPopulation.childFemaleCount,
-                              targetPopulation.adultFemaleCount,
-                              targetPopulation.childMaleCount,
-                              targetPopulation.adultMaleCount,
+                              targetPopulation.femaleChildrenCount,
+                              targetPopulation.femaleAdultsCount,
+                              targetPopulation.maleChildrenCount,
+                              targetPopulation.maleAdultsCount,
                             ],
                             backgroundColor: [
                               colors.femaleChildren,

@@ -31,7 +31,11 @@ export const PAYMENT_PLAN_QUERY = gql`
         id
         name
         caId
+        caHashId
+        isSocialWorkerProgram
       }
+      vulnerabilityScoreMin
+      vulnerabilityScoreMax
       adminUrl
       currency
       currencyName

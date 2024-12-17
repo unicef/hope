@@ -8,10 +8,12 @@ export const TARGET_POPULATION_QUERY = gql`
       status
       buildStatus
       adminUrl
-      buildStatus
       totalHouseholdsCount
       totalIndividualsCount
-      statusDate
+      femaleChildrenCount
+      femaleAdultsCount
+      maleChildrenCount
+      maleAdultsCount
       excludedIds
       exclusionReason
       vulnerabilityScoreMin

@@ -15,10 +15,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useNavigate } from 'react-router-dom';
 import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/ProgramCycleAutocompleteRest';
 import { ReactElement } from 'react';
-import {
-  useCopyTargetingCriteriaMutation,
-  useCopyTargetingCriteriaMutationMutation,
-} from '@generated/graphql';
+import { useCopyTargetingCriteriaMutation } from '@generated/graphql';
 
 const validationSchema = Yup.object().shape({
   name: Yup.string().required('Name is required'),
@@ -75,7 +72,7 @@ export const DuplicateTargetPopulation = ({
             setOpen(false);
             showMessage(t('Target Population Duplicated'));
             navigate(
-              `/${baseUrl}/target-population/${res.data.copyTargetingCriteria.paymentPlan.id}`,
+              `/${baseUrl}/target-population/${res.data.paymentPlan.id}`,
             );
           } catch (e) {
             e.graphQLErrors.map((x) => showMessage(x.message));

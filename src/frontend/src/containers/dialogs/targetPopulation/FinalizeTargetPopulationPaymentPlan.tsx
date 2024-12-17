@@ -34,7 +34,7 @@ export const FinalizeTargetPopulationPaymentPlan = ({
   const { baseUrl } = useBaseUrl();
   const { mutatePaymentPlanAction: finish, loading: loadingFinish } =
     usePaymentPlanAction(
-      Action.TPFinalize,
+      Action.Finish,
       targetPopulationId,
       () => showMessage(t('Target Population Finalized')),
       () => setOpen(false),

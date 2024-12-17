@@ -8,15 +8,14 @@ export const AllActiveTargetPopulations = gql`
     $last: Int
     $orderBy: String
     $name: String
-    $status: String
+    $status: String[]
     $totalHouseholdsCountWithValidPhoneNoMin: Int
     $totalHouseholdsCountWithValidPhoneNoMax: Int
     $totalHouseholdsCountMin: Int
     $totalHouseholdsCountMax: Int
-    $businessArea: String
-    $program: ID
+    $businessArea: String!
+    $program: String
     $createdAtRange: String
-    $statusNot: String
   ) {
     allPaymentPlans(
       after: $after
@@ -33,7 +32,6 @@ export const AllActiveTargetPopulations = gql`
       businessArea: $businessArea
       program: $program
       createdAtRange: $createdAtRange
-      statusNot: $statusNot
     ) {
       edges {
         node {

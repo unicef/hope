@@ -55,9 +55,9 @@ export function FinalizedTargetPopulationHeaderButtons({
             variant="contained"
             color="primary"
             component="a"
-            disabled={!targetPopulation.caHashId}
+            disabled={!targetPopulation.program?.caHashId}
             target="_blank"
-            href={`${data.cashAssistUrlPrefix}&pagetype=entityrecord&etn=progres_targetpopulation&id=${targetPopulation.caHashId}`}
+            href={`${data.cashAssistUrlPrefix}&pagetype=entityrecord&etn=progres_targetpopulation&id=${targetPopulation.program?.caHashId}`}
             startIcon={<OpenInNewRoundedIcon />}
           >
             Open in CashAssist
