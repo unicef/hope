@@ -1,10 +1,7 @@
 # AB#225622
-from celery.bin.control import status
+# from hope_smart_export import ExportAsXls
 
 from hct_mis_api.apps.payment.models import Payment
-
-from hope_smart_export import ExportAsXls
-
 
 # Allow user to download MTCNs/FSP auth codes
 # Define new permission to download records with AUTH Code
@@ -17,14 +14,14 @@ from hope_smart_export import ExportAsXls
 
 
 class XLSXPaymentPlanExportAuthCodeService:
-
     @staticmethod
-    def export_xlsx(payment_plan_id: str, xlsx_template_id: str, user_id: str):
+    def export_xlsx(payment_plan_id: str, xlsx_template_id: str, user_id: str) -> None:
         for payment in Payment.objects.all():
             payment.fsp_auth_code
             continue
 
         # use ExportAsXls
+
 
 # for payment in Payment Plan
 # if payment status == Payment.STATUS_SENT_TO_FSP

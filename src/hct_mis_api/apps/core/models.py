@@ -11,10 +11,10 @@ from django.utils.translation import gettext_lazy as _
 
 from django_celery_beat.models import PeriodicTask
 from django_celery_beat.schedulers import DatabaseScheduler, ModelEntry
+from fernet_fields import EncryptedTextField
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel, TimeStampedModel
 from natural_keys import NaturalKeyModel
-from fernet_fields import EncryptedTextField
 
 import mptt
 from hct_mis_api.apps.core.utils import unique_slugify
