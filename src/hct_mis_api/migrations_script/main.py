@@ -50,6 +50,7 @@ if __name__ == "__main__":
         ("program", "0002_migration"),
         ("household", "0003_migration"),
         ("household", "0004_migration"),
+        ("household", "0005_migration"),
         ("grievance", "0004_migration"),
         ("payment", "0002_migration"),
         ("payment", "0003_migration"),
@@ -57,6 +58,8 @@ if __name__ == "__main__":
         ("payment", "0005_migration"),
         ("payment", "0006_migration"),
         ("payment", "0007_migration"),
+        ("payment", "0008_migration"),
+        ("payment", "0009_migration"),
         ("aurora", "0003_migration"),
         ("registration_data", "0002_migration"),
     ]

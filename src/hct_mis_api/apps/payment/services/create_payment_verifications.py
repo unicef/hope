@@ -3,16 +3,14 @@ from typing import Iterable
 from django.utils import timezone
 
 from hct_mis_api.apps.payment.models import (
-    PaymentRecord,
+    Payment,
     PaymentVerification,
     PaymentVerificationPlan,
 )
 
 
 class CreatePaymentVerifications:
-    def __init__(
-        self, payment_verification_plan: PaymentVerificationPlan, payment_records: Iterable[PaymentRecord]
-    ) -> None:
+    def __init__(self, payment_verification_plan: PaymentVerificationPlan, payment_records: Iterable[Payment]) -> None:
         self.payment_verification_plan = payment_verification_plan
         self.payment_records = payment_records
 
