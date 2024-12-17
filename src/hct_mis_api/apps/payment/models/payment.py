@@ -1081,11 +1081,11 @@ class PaymentPlan(
 
         if payment_verification_plan:
             params &= Q(
-                Q(payment_verification__isnull=True)
-                | Q(payment_verification__payment_verification_plan=payment_verification_plan)
+                Q(payment_verifications__isnull=True)
+                | Q(payment_verifications__payment_verification_plan=payment_verification_plan)
             )
         else:
-            params &= Q(payment_verification__isnull=True)
+            params &= Q(payment_verifications__isnull=True)
 
         payment_records = self.payment_items.select_related("head_of_household").filter(params).distinct()
 

@@ -17,7 +17,7 @@ from hct_mis_api.apps.payment.fixtures import (
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
 )
-from hct_mis_api.apps.payment.models import GenericPayment, PaymentPlan
+from hct_mis_api.apps.payment.models import Payment, PaymentPlan
 from hct_mis_api.apps.payment.models import PaymentVerification as PV
 from hct_mis_api.apps.payment.models import PaymentVerificationPlan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
@@ -195,7 +195,7 @@ def payment_verification_creator(
         entitlement_quantity=21.36,
         delivered_quantity=21.36,
         currency="PLN",
-        status=GenericPayment.STATUS_DISTRIBUTION_SUCCESS,
+        status=Payment.STATUS_DISTRIBUTION_SUCCESS,
     )
     pv_summary = PaymentVerificationSummaryFactory(payment_plan=payment_plan)
     pv_summary.activation_date = datetime.now() - relativedelta(months=1)

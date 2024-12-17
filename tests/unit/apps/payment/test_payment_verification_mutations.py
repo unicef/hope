@@ -25,7 +25,7 @@ from hct_mis_api.apps.payment.fixtures import (
     PaymentVerificationSummaryFactory,
 )
 from hct_mis_api.apps.payment.models import (
-    GenericPayment,
+    Payment,
     PaymentPlan,
     PaymentVerification,
     PaymentVerificationPlan,
@@ -228,7 +228,7 @@ class TestPaymentVerificationMutations(APITestCase):
             created_by=self.user,
         )
         PaymentVerificationSummaryFactory(payment_plan=payment_plan)
-        PaymentFactory(parent=payment_plan, currency="PLN", status=GenericPayment.STATUS_SUCCESS)
+        PaymentFactory(parent=payment_plan, currency="PLN", status=Payment.STATUS_SUCCESS)
         payment_verification_plan = PaymentVerificationPlanFactory(
             payment_plan=payment_plan,
             status=PaymentVerificationPlan.STATUS_PENDING,

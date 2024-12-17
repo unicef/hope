@@ -20,7 +20,7 @@ from hct_mis_api.apps.payment.fixtures import (
     PaymentVerificationPlanFactory,
     PaymentVerificationSummaryFactory,
 )
-from hct_mis_api.apps.payment.models import GenericPayment, Payment, PaymentPlan
+from hct_mis_api.apps.payment.models import Payment, PaymentPlan
 from hct_mis_api.apps.payment.models import PaymentVerification as PV
 from hct_mis_api.apps.payment.models import PaymentVerificationPlan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
@@ -131,7 +131,7 @@ def payment_verification_multiple_verification_plans(number_verification_plans: 
                 entitlement_quantity=Decimal(21.36),
                 delivered_quantity=Decimal(21.36),
                 currency="PLN",
-                status=GenericPayment.STATUS_DISTRIBUTION_SUCCESS,
+                status=Payment.STATUS_DISTRIBUTION_SUCCESS,
             )
         )
 
@@ -178,7 +178,7 @@ def empty_payment_verification(social_worker_program: Program) -> None:
         entitlement_quantity=Decimal(21.36),
         delivered_quantity=Decimal(21.36),
         currency="PLN",
-        status=GenericPayment.STATUS_DISTRIBUTION_SUCCESS,
+        status=Payment.STATUS_DISTRIBUTION_SUCCESS,
     )
     PaymentVerificationSummaryFactory(payment_plan=payment_plan)
 
@@ -194,8 +194,9 @@ def add_payment_verification_xlsx() -> PV:
 
 
 def payment_verification_creator(channel: str = PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL) -> PV:
+    user = User.objects.first()
     registration_data_import = RegistrationDataImportFactory(
-        imported_by=User.objects.first(), business_area=BusinessArea.objects.first()
+        imported_by=user, business_area=BusinessArea.objects.first()
     )
     program = Program.objects.filter(name="Active Program").first()
     household, individuals = create_household(
@@ -214,6 +215,7 @@ def payment_verification_creator(channel: str = PaymentVerificationPlan.VERIFICA
         business_area=BusinessArea.objects.first(),
         start_date=datetime.now() - relativedelta(months=1),
         end_date=datetime.now() + relativedelta(months=1),
+        created_by=user,
     )
 
     payment_plan.unicef_id = "PP-0000-00-1122334"
@@ -229,7 +231,7 @@ def payment_verification_creator(channel: str = PaymentVerificationPlan.VERIFICA
         entitlement_quantity=21.36,
         delivered_quantity=21.36,
         currency="PLN",
-        status=GenericPayment.STATUS_DISTRIBUTION_SUCCESS,
+        status=Payment.STATUS_DISTRIBUTION_SUCCESS,
     )
     payment_verification_plan = PaymentVerificationPlanFactory(
         payment_plan=payment_plan,
@@ -363,7 +365,7 @@ class TestSmokePaymentVerification:
         assert payment_record.household.unicef_id in pagePaymentRecord.getLabelHousehold().text
         assert payment_record.parent.target_population.name in pagePaymentRecord.getLabelTargetPopulation().text
         assert payment_record.parent.unicef_id in pagePaymentRecord.getLabelDistributionModality().text
-        assert payment_record.payment_verification.status in pagePaymentRecord.getLabelStatus()[1].text
+        assert payment_record.payment_verifications.first().status in pagePaymentRecord.getLabelStatus()[1].text
         assert "PLN 0.00" in pagePaymentRecord.getLabelAmountReceived().text
         assert payment_record.household.unicef_id in pagePaymentRecord.getLabelHouseholdId().text
         assert "21.36" in pagePaymentRecord.getLabelEntitlementQuantity().text

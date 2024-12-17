@@ -85,7 +85,6 @@ from hct_mis_api.apps.payment.models import (
     DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
-    GenericPayment,
     Payment,
     PaymentHouseholdSnapshot,
     PaymentPlan,
@@ -365,10 +364,11 @@ class PaymentNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
         return self.parent.target_population
 
     def resolve_full_name(self, info: Any) -> str:
+        # TODO: add to test this one
         return self.head_of_household.full_name if self.head_of_household else ""
 
     def resolve_verification(self, info: Any) -> Optional[Any]:
-        return getattr(self, "payment_verification", None)
+        return self.payment_verifications.first()
 
     def resolve_distribution_modality(self, info: Any) -> str:
         return self.parent.unicef_id
@@ -654,21 +654,21 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
     @staticmethod
     def resolve_reconciliation_summary(parent: PaymentPlan, info: Any) -> Dict[str, int]:
         return parent.eligible_payments.aggregate(
-            delivered_fully=Count("id", filter=Q(status=GenericPayment.STATUS_DISTRIBUTION_SUCCESS)),
-            delivered_partially=Count("id", filter=Q(status=GenericPayment.STATUS_DISTRIBUTION_PARTIAL)),
-            not_delivered=Count("id", filter=Q(status=GenericPayment.STATUS_NOT_DISTRIBUTED)),
+            delivered_fully=Count("id", filter=Q(status=Payment.STATUS_DISTRIBUTION_SUCCESS)),
+            delivered_partially=Count("id", filter=Q(status=Payment.STATUS_DISTRIBUTION_PARTIAL)),
+            not_delivered=Count("id", filter=Q(status=Payment.STATUS_NOT_DISTRIBUTED)),
             unsuccessful=Count(
                 "id",
                 filter=Q(
                     status__in=[
-                        GenericPayment.STATUS_ERROR,
-                        GenericPayment.STATUS_FORCE_FAILED,
-                        GenericPayment.STATUS_MANUALLY_CANCELLED,
+                        Payment.STATUS_ERROR,
+                        Payment.STATUS_FORCE_FAILED,
+                        Payment.STATUS_MANUALLY_CANCELLED,
                     ]
                 ),
             ),
-            pending=Count("id", filter=Q(status__in=GenericPayment.PENDING_STATUSES)),
-            reconciled=Count("id", filter=~Q(status__in=GenericPayment.PENDING_STATUSES)),
+            pending=Count("id", filter=Q(status__in=Payment.PENDING_STATUSES)),
+            reconciled=Count("id", filter=~Q(status__in=Payment.PENDING_STATUSES)),
             number_of_payments=Count("id"),
         )
 
@@ -858,7 +858,7 @@ class PaymentRecordAndPaymentNode(BaseNodePermissionMixin, graphene.ObjectType):
         return self.status.replace(" ", "_").upper()
 
     def resolve_verification(self, info: Any, **kwargs: Any) -> Any:
-        return getattr(self, "payment_verification", None)
+        return self.payment_verifications.first()
 
 
 class PageInfoNode(graphene.ObjectType):
@@ -1294,8 +1294,8 @@ class Query(graphene.ObjectType):
             year, business_area_slug, chart_filters_decoder(kwargs)
         )
         payment_items_dict = payment_items_qs.aggregate(
-            successful=Count("id", filter=~Q(status=GenericPayment.STATUS_ERROR)),
-            unsuccessful=Count("id", filter=Q(status=GenericPayment.STATUS_ERROR)),
+            successful=Count("id", filter=~Q(status=Payment.STATUS_ERROR)),
+            unsuccessful=Count("id", filter=Q(status=Payment.STATUS_ERROR)),
         )
 
         dataset = [

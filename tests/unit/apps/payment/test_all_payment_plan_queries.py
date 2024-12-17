@@ -12,6 +12,8 @@ from pytz import utc
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.activity_log.models import LogEntry
+from hct_mis_api.apps.activity_log.utils import create_diff
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.utils import encode_id_base64
@@ -20,6 +22,8 @@ from hct_mis_api.apps.payment.fixtures import (
     FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
+    PaymentVerificationPlanFactory,
+    PaymentVerificationSummaryFactory,
     RealProgramFactory,
 )
 from hct_mis_api.apps.payment.models import (
@@ -28,6 +32,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentHouseholdSnapshot,
     PaymentPlan,
     PaymentPlanSupportingDocument,
+    PaymentVerificationPlan,
 )
 from hct_mis_api.apps.program.fixtures import ProgramCycleFactory
 
@@ -207,6 +212,7 @@ class TestPaymentPlanQueries(APITestCase):
         query Payment($id: ID!) {
           payment(id: $id) {
             totalPersonsCovered
+            fullName
             snapshotCollectorFullName
             snapshotCollectorDeliveryPhoneNo
             snapshotCollectorBankName
@@ -214,6 +220,9 @@ class TestPaymentPlanQueries(APITestCase):
             snapshotCollectorDebitCardNumber
             additionalCollectorName
             reasonForUnsuccessfulPayment
+            verification {
+              status
+            }
           }
         }
         """
@@ -239,7 +248,7 @@ class TestPaymentPlanQueries(APITestCase):
         cls.user = UserFactory.create(username="qazxsw321")
         cls.create_user_role_with_permissions(
             cls.user,
-            [Permissions.PM_VIEW_LIST, Permissions.PM_VIEW_DETAILS],
+            [Permissions.PM_VIEW_LIST, Permissions.PM_VIEW_DETAILS, Permissions.ACTIVITY_LOG_VIEW],
             cls.business_area,
         )
 
@@ -491,9 +500,9 @@ class TestPaymentPlanQueries(APITestCase):
             is_follow_up=False,
             created_by=self.user,
         )
-        hoh_1 = IndividualFactory(household=None)
-        hoh_2 = IndividualFactory(household=None)
-        hoh_3 = IndividualFactory(household=None)
+        hoh_1 = IndividualFactory(household=None, given_name="First1", middle_name="Mid1", family_name="Last1")
+        hoh_2 = IndividualFactory(household=None, given_name="First2", middle_name="Mid2", family_name="Last3")
+        hoh_3 = IndividualFactory(household=None, given_name="First3", middle_name="Mid3", family_name="Last3")
         household_1 = HouseholdFactory(head_of_household=hoh_1, size=5)
         household_2 = HouseholdFactory(head_of_household=hoh_2, size=10)
         household_3 = HouseholdFactory(head_of_household=hoh_3, size=15)
@@ -562,6 +571,48 @@ class TestPaymentPlanQueries(APITestCase):
                 context={"user": self.user},
                 variables={"id": encode_id_base64(payment_id, "Payment")},
             )
+
+    def test_all_payment_verification_log_entries(self) -> None:
+        query = """
+        query allPaymentVerificationLogEntries($objectId: UUID, $businessArea: String!) {
+          allPaymentVerificationLogEntries(objectId: $objectId, businessArea: $businessArea) {
+            totalCount
+            edges {
+              node {
+                isUserGenerated
+                action
+              }
+            }
+          }
+        }
+        """
+        payment_plan_id = str(self.pp.id)
+        PaymentVerificationSummaryFactory(payment_plan=self.pp)
+        PaymentVerificationSummaryFactory(payment_plan=self.pp_conflicted)
+        pvp = PaymentVerificationPlanFactory(payment_plan=self.pp)
+        pvp2 = PaymentVerificationPlanFactory(payment_plan=self.pp_conflicted)
+        LogEntry.objects.create(
+            action=LogEntry.CREATE,
+            content_object=pvp,
+            user=self.user,
+            business_area=self.business_area,
+            object_repr=str(pvp),
+            changes=create_diff(None, pvp, PaymentVerificationPlan.ACTIVITY_LOG_MAPPING),
+        )
+        LogEntry.objects.create(
+            action=LogEntry.CREATE,
+            content_object=pvp2,
+            user=self.user,
+            business_area=self.business_area,
+            object_repr=str(pvp2),
+            changes=create_diff(None, pvp2, PaymentVerificationPlan.ACTIVITY_LOG_MAPPING),
+        )
+
+        self.snapshot_graphql_request(
+            request_string=query,
+            context={"user": self.user},
+            variables={"objectId": payment_plan_id, "businessArea": "afghanistan"},
+        )
 
     def test_payment_plan_filter_is_payment_plan(self) -> None:
         PaymentPlanFactory(
