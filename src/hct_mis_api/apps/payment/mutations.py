@@ -1024,7 +1024,12 @@ class ImportXLSXPaymentPlanPaymentListPerFSPMutation(PermissionMutation):
 
         if payment_plan.status not in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED):
             msg = "You can only import for ACCEPTED or FINISHED Payment Plan"
-            logger.error(msg)
+            raise GraphQLError(msg)
+
+        if not payment_plan.delivery_mechanisms.filter(
+                financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
+            ).exists():
+            msg = "Only for FSP with Communication Channel XLSX can be imported reconciliation manually."
             raise GraphQLError(msg)
 
         import_service = XlsxPaymentPlanImportPerFspService(payment_plan, file)
@@ -1032,7 +1037,6 @@ class ImportXLSXPaymentPlanPaymentListPerFSPMutation(PermissionMutation):
             import_service.open_workbook()
         except BadZipFile:
             msg = "Wrong file type or password protected .zip file. Upload another file, or remove the password."
-            logger.info(msg)
             raise GraphQLError(msg)
 
         import_service.validate()

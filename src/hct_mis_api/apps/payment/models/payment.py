@@ -1427,50 +1427,6 @@ class Payment(
     delivery_date = models.DateTimeField(null=True, blank=True)
     transaction_reference_id = models.CharField(max_length=255, null=True, blank=True)  # transaction_id
     transaction_status_blockchain_link = models.CharField(max_length=255, null=True, blank=True)
-
-    def mark_as_failed(self) -> None:  # pragma: no cover
-        if self.status is self.STATUS_FORCE_FAILED:
-            raise ValidationError("Status shouldn't be failed")
-        self.status = self.STATUS_FORCE_FAILED
-        self.status_date = timezone.now()
-        self.delivered_quantity = 0
-        self.delivered_quantity_usd = 0
-        self.delivery_date = None
-
-    def revert_mark_as_failed(self, delivered_quantity: Decimal, delivery_date: datetime) -> None:  # pragma: no cover
-        if self.status != self.STATUS_FORCE_FAILED:
-            raise ValidationError("Only payment marked as force failed can be reverted")
-        if self.entitlement_quantity is None:
-            raise ValidationError("Entitlement quantity need to be set in order to revert")
-
-        self.status = self.get_revert_mark_as_failed_status(delivered_quantity)
-        self.status_date = timezone.now()
-        self.delivered_quantity = delivered_quantity
-        self.delivery_date = delivery_date
-
-    @property
-    def payment_status(self) -> str:  # pragma: no cover
-        status = "-"
-        if self.status == Payment.STATUS_PENDING:
-            status = "Pending"
-
-        elif self.status in (Payment.STATUS_DISTRIBUTION_SUCCESS, Payment.STATUS_SUCCESS):
-            status = "Delivered Fully"
-
-        elif self.status == Payment.STATUS_DISTRIBUTION_PARTIAL:
-            status = "Delivered Partially"
-
-        elif self.status == Payment.STATUS_NOT_DISTRIBUTED:
-            status = "Not Delivered"
-
-        elif self.status == Payment.STATUS_ERROR:
-            status = "Unsuccessful"
-
-        elif self.status == Payment.STATUS_FORCE_FAILED:
-            status = "Force Failed"
-
-        return status
-
     parent = models.ForeignKey(
         "payment.PaymentPlan",
         on_delete=models.CASCADE,
@@ -1519,25 +1475,6 @@ class Payment(
     )
     fsp_auth_code = models.CharField(max_length=128, blank=True, null=True, help_text="FSP Auth Code")
     is_cash_assist = models.BooleanField(default=False)
-
-    @property
-    def full_name(self) -> str:
-        return self.collector.full_name
-
-    def get_revert_mark_as_failed_status(self, delivered_quantity: Decimal) -> str:  # pragma: no cover
-        if delivered_quantity == 0:
-            return Payment.STATUS_NOT_DISTRIBUTED
-
-        elif delivered_quantity < self.entitlement_quantity:
-            return Payment.STATUS_DISTRIBUTION_PARTIAL
-
-        elif delivered_quantity == self.entitlement_quantity:
-            return Payment.STATUS_DISTRIBUTION_SUCCESS
-
-        else:
-            raise ValidationError(
-                f"Wrong delivered quantity {delivered_quantity} for entitlement quantity {self.entitlement_quantity}"
-            )
 
     objects = PaymentManager()
 
@@ -1588,6 +1525,68 @@ class Payment(
         "delivery_date",
         "transaction_reference_id",
     )
+
+    def mark_as_failed(self) -> None:  # pragma: no cover
+        if self.status is self.STATUS_FORCE_FAILED:
+            raise ValidationError("Status shouldn't be failed")
+        self.status = self.STATUS_FORCE_FAILED
+        self.status_date = timezone.now()
+        self.delivered_quantity = 0
+        self.delivered_quantity_usd = 0
+        self.delivery_date = None
+
+    def revert_mark_as_failed(self, delivered_quantity: Decimal, delivery_date: datetime) -> None:  # pragma: no cover
+        if self.status != self.STATUS_FORCE_FAILED:
+            raise ValidationError("Only payment marked as force failed can be reverted")
+        if self.entitlement_quantity is None:
+            raise ValidationError("Entitlement quantity need to be set in order to revert")
+
+        self.status = self.get_revert_mark_as_failed_status(delivered_quantity)
+        self.status_date = timezone.now()
+        self.delivered_quantity = delivered_quantity
+        self.delivery_date = delivery_date
+
+    @property
+    def payment_status(self) -> str:  # pragma: no cover
+        status = "-"
+        if self.status == Payment.STATUS_PENDING:
+            status = "Pending"
+
+        elif self.status in (Payment.STATUS_DISTRIBUTION_SUCCESS, Payment.STATUS_SUCCESS):
+            status = "Delivered Fully"
+
+        elif self.status == Payment.STATUS_DISTRIBUTION_PARTIAL:
+            status = "Delivered Partially"
+
+        elif self.status == Payment.STATUS_NOT_DISTRIBUTED:
+            status = "Not Delivered"
+
+        elif self.status == Payment.STATUS_ERROR:
+            status = "Unsuccessful"
+
+        elif self.status == Payment.STATUS_FORCE_FAILED:
+            status = "Force Failed"
+
+        return status
+
+    @property
+    def full_name(self) -> str:
+        return self.collector.full_name
+
+    def get_revert_mark_as_failed_status(self, delivered_quantity: Decimal) -> str:  # pragma: no cover
+        if delivered_quantity == 0:
+            return Payment.STATUS_NOT_DISTRIBUTED
+
+        elif delivered_quantity < self.entitlement_quantity:
+            return Payment.STATUS_DISTRIBUTION_PARTIAL
+
+        elif delivered_quantity == self.entitlement_quantity:
+            return Payment.STATUS_DISTRIBUTION_SUCCESS
+
+        else:
+            raise ValidationError(
+                f"Wrong delivered quantity {delivered_quantity} for entitlement quantity {self.entitlement_quantity}"
+            )
 
 
 class PaymentHouseholdSnapshot(TimeStampedUUIDModel):

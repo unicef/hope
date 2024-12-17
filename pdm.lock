@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform", "inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:dffcc5e57d10348c34bee7b2599f6f069357d6b2f783dbcb9314a82727d5724d"
+content_hash = "sha256:dd5b5f819e934edaa418a164c46beb203bdfbebe5dca6155be79c7a16c61925e"
 
 [[metadata.targets]]
 requires_python = "==3.12.*"
@@ -931,6 +931,19 @@ files = [
 ]
 
 [[package]]
+name = "django-fernet-fields"
+version = "0.6"
+summary = "Fernet-encrypted model fields for Django"
+groups = ["default"]
+dependencies = [
+    "Django>=1.11",
+    "cryptography>=0.9",
+]
+files = [
+    {file = "django-fernet-fields-0.6.tar.gz", hash = "sha256:7f7e03c86d9473a42031ebade2b15be1484aad18ef5576ddab156c4667e04c4a"},
+]
+
+[[package]]
 name = "django-filter"
 version = "22.1"
 requires_python = ">=3.7"
@@ -1247,8 +1260,8 @@ dependencies = [
     "django-environ>=0.11.2",
 ]
 files = [
-    {file = "smart_envdjango_-0.1.0-py3-none-any.whl", hash = "sha256:ffcbc03ab2b28808d1ac80b5165543549396dde4a24107e969a9635ba9321849"},
     {file = "django_smart_env-0.1.0.tar.gz", hash = "sha256:09ef06a2ae9223c68ba893dae2b6188938f41e464cb38e4714c341950fc1caf3"},
+    {file = "smart_envdjango_-0.1.0-py3-none-any.whl", hash = "sha256:ffcbc03ab2b28808d1ac80b5165543549396dde4a24107e969a9635ba9321849"},
 ]
 
 [[package]]
@@ -1975,6 +1988,23 @@ dependencies = [
 files = [
     {file = "h11-0.14.0-py3-none-any.whl", hash = "sha256:e3fe4ac4b851c468cc8363d500db52c2ead036020723024a109d37346efaa761"},
     {file = "h11-0.14.0.tar.gz", hash = "sha256:8f19fbbe99e72420ff35c00b27a34cb9937e902a8b810e2c88300c6f0a3b699d"},
+]
+
+[[package]]
+name = "hope-smart-export"
+version = "0.3.0"
+requires_python = ">=3.11"
+summary = ""
+groups = ["default"]
+dependencies = [
+    "django-admin-extra-buttons>=1.5.8",
+    "django-adminactions>=2.3.0",
+    "django-strategy-field>=3.1.0",
+    "xlsxwriter>=3.2.0",
+]
+files = [
+    {file = "hope_smart_export-0.3.0-py3-none-any.whl", hash = "sha256:5f5477f0bc3d4f2fa19392bb4ba9ce2fde42f8a3214ae050f1865f0e4cb39e04"},
+    {file = "hope_smart_export-0.3.0.tar.gz", hash = "sha256:32dfbdae942093abed7b3f18bad59c6ea82f3ac4109a123fa829715e6b678960"},
 ]
 
 [[package]]

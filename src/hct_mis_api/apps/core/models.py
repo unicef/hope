@@ -14,6 +14,7 @@ from django_celery_beat.schedulers import DatabaseScheduler, ModelEntry
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel, TimeStampedModel
 from natural_keys import NaturalKeyModel
+from fernet_fields import EncryptedTextField
 
 import mptt
 from hct_mis_api.apps.core.utils import unique_slugify
@@ -513,6 +514,7 @@ class FileTemp(TimeStampedModel):
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
     file = models.FileField()
     was_downloaded = models.BooleanField(default=False)
+    password = EncryptedTextField(max_length=250, null=True, blank=True)
 
     def __str__(self) -> str:
         return f"{self.file.name} - {self.created}"

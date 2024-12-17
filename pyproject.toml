@@ -238,6 +238,8 @@ dependencies = [
     "elastic-transport==8.13.0",
     "flower>=2.0.1",
     "factory-boy<4,>=3",
+    "django-fernet-fields>=0.6",
+    "hope-smart-export>=0.3.0",
 ]
 requires-python = "==3.12.*"
 readme = "README.md"
