@@ -6,7 +6,7 @@ from django.db.models import Count, Q, Sum
 from django.urls import reverse
 
 from hct_mis_api.apps.core.utils import encode_id_base64
-from hct_mis_api.apps.payment.models import Approval, GenericPayment, PaymentPlan
+from hct_mis_api.apps.payment.models import Approval, Payment, PaymentPlan
 from hct_mis_api.apps.utils.pdf_generator import generate_pdf_from_html
 
 if TYPE_CHECKING:
@@ -75,12 +75,12 @@ class PaymentPlanPDFExportService:
         release = approval_process.approvals.filter(type=Approval.FINANCE_RELEASE).first()
 
         reconciliation_qs = self.payment_plan.eligible_payments.aggregate(
-            pending=Count("id", filter=Q(status__in=GenericPayment.PENDING_STATUSES)),
-            pending_usd=Sum("entitlement_quantity_usd", filter=Q(status__in=GenericPayment.PENDING_STATUSES)),
-            pending_local=Sum("entitlement_quantity", filter=Q(status__in=GenericPayment.PENDING_STATUSES)),
-            reconciled=Count("id", filter=~Q(status__in=GenericPayment.PENDING_STATUSES)),
-            reconciled_usd=Sum("delivered_quantity_usd", filter=~Q(status__in=GenericPayment.PENDING_STATUSES)),
-            reconciled_local=Sum("delivered_quantity", filter=~Q(status__in=GenericPayment.PENDING_STATUSES)),
+            pending=Count("id", filter=Q(status__in=Payment.PENDING_STATUSES)),
+            pending_usd=Sum("entitlement_quantity_usd", filter=Q(status__in=Payment.PENDING_STATUSES)),
+            pending_local=Sum("entitlement_quantity", filter=Q(status__in=Payment.PENDING_STATUSES)),
+            reconciled=Count("id", filter=~Q(status__in=Payment.PENDING_STATUSES)),
+            reconciled_usd=Sum("delivered_quantity_usd", filter=~Q(status__in=Payment.PENDING_STATUSES)),
+            reconciled_local=Sum("delivered_quantity", filter=~Q(status__in=Payment.PENDING_STATUSES)),
         )
 
         pdf_context_data = {

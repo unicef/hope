@@ -347,9 +347,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
 
                 self.payments_to_save.append(payment)
                 # update PaymentVerification status
-                if hasattr(payment, "payment_verification"):
-                    payment_verification = payment.payment_verification
-
+                if payment_verification := payment.payment_verifications.first():
                     if payment_verification.status != PaymentVerification.STATUS_PENDING:
                         if payment_verification.received_amount == delivered_quantity:
                             pv_status = PaymentVerification.STATUS_RECEIVED
