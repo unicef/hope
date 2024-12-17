@@ -6,15 +6,17 @@ import styled from 'styled-components';
 import { LoadingButton } from '@components/core/LoadingButton';
 import { useSnackbar } from '@hooks/useSnackBar';
 import {
+  Action,
   BusinessAreaDataQuery,
+  PaymentPlanQuery,
   ProgramStatus,
-  TargetPopulationQuery,
-  useUnlockTpMutation,
 } from '@generated/graphql';
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
-import { FinalizeTargetPopulation } from '../../dialogs/targetPopulation/FinalizeTargetPopulation';
 import { FinalizeTargetPopulationPaymentPlan } from '../../dialogs/targetPopulation/FinalizeTargetPopulationPaymentPlan';
 import { useProgramContext } from '../../../programContext';
+import { usePaymentPlanAction } from '@hooks/usePaymentPlanAction';
+import { useNavigate } from 'react-router-dom';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const IconContainer = styled.span`
   button {
@@ -28,7 +30,7 @@ const IconContainer = styled.span`
 `;
 
 export interface ApprovedTargetPopulationHeaderButtonsPropTypes {
-  targetPopulation: TargetPopulationQuery['targetPopulation'];
+  targetPopulation: PaymentPlanQuery['paymentPlan'];
   canUnlock: boolean;
   canDuplicate: boolean;
   canSend: boolean;
@@ -43,12 +45,29 @@ export function LockedTargetPopulationHeaderButtons({
   businessAreaData,
 }: ApprovedTargetPopulationHeaderButtonsPropTypes): ReactElement {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { baseUrl } = useBaseUrl();
   const [openDuplicate, setOpenDuplicate] = useState(false);
   const [openFinalize, setOpenFinalize] = useState(false);
   const [openFinalizePaymentPlan, setOpenFinalizePaymentPlan] = useState(false);
   const { showMessage } = useSnackbar();
   const { isActiveProgram } = useProgramContext();
-  const [mutate, { loading }] = useUnlockTpMutation();
+
+  //TODO: Action.TpUnlock
+  const { mutatePaymentPlanAction: lockAction, loading: loadingLock } =
+    usePaymentPlanAction(Action.TpLock, targetPopulationId, () => {
+      showMessage(t('Target Population Finalized'));
+      navigate(`/${baseUrl}/target-population/`);
+      setOpenFinalize(false);
+    });
+
+  const { mutatePaymentPlanAction: unlockAction, loading: loadingUnlock } =
+    usePaymentPlanAction(Action.TpLock, targetPopulationId, () => {
+      showMessage(t('Target Population Finalized'));
+      navigate(`/${baseUrl}/target-population/`);
+      setOpenFinalize(false);
+    });
+
   const { isPaymentPlanApplicable } = businessAreaData.businessArea;
 
   return (
@@ -138,21 +157,12 @@ export function LockedTargetPopulationHeaderButtons({
         setOpen={setOpenDuplicate}
         targetPopulationId={targetPopulation.id}
       />
-      {isPaymentPlanApplicable ? (
-        <FinalizeTargetPopulationPaymentPlan
-          open={openFinalizePaymentPlan}
-          setOpen={setOpenFinalizePaymentPlan}
-          targetPopulationId={targetPopulation.id}
-          totalHouseholds={targetPopulation.totalHouseholdsCount}
-        />
-      ) : (
-        <FinalizeTargetPopulation
-          open={openFinalize}
-          setOpen={setOpenFinalize}
-          targetPopulationId={targetPopulation.id}
-          totalHouseholds={targetPopulation.totalHouseholdsCount}
-        />
-      )}
+      <FinalizeTargetPopulationPaymentPlan
+        open={openFinalizePaymentPlan}
+        setOpen={setOpenFinalizePaymentPlan}
+        targetPopulationId={targetPopulation.id}
+        totalHouseholds={targetPopulation.totalHouseholdsCount}
+      />
     </Box>
   );
 }

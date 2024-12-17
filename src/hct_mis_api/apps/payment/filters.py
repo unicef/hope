@@ -18,6 +18,7 @@ from django_filters import (
 )
 
 from hct_mis_api.apps.activity_log.schema import LogEntryFilter
+from hct_mis_api.apps.core.filters import DateTimeRangeFilter, IntegerFilter
 from hct_mis_api.apps.core.utils import (
     CustomOrderingFilter,
     decode_id_string,
@@ -180,9 +181,28 @@ class PaymentPlanFilter(FilterSet):
     dispersion_start_date = DateFilter(field_name="dispersion_start_date", lookup_expr="gte")
     dispersion_end_date = DateFilter(field_name="dispersion_end_date", lookup_expr="lte")
     is_follow_up = BooleanFilter(field_name="is_follow_up")
+    is_payment_plan = BooleanFilter(method="filter_is_payment_plan")
+    is_target_population = BooleanFilter(method="filter_is_target_population")
     source_payment_plan_id = CharFilter(method="source_payment_plan_filter")
     program = CharFilter(method="filter_by_program")
     program_cycle = CharFilter(method="filter_by_program_cycle")
+    name = CharFilter(field_name="name", lookup_expr="startswith")
+    payment_plan_applicable = BooleanFilter(method="filter_payment_plan_applicable")
+    total_households_count_min = IntegerFilter(
+        field_name="total_number_of_hh",
+        lookup_expr="gte",
+    )
+    total_households_count_max = IntegerFilter(
+        field_name="total_number_of_hh",
+        lookup_expr="lte",
+    )
+    total_households_count_with_valid_phone_no_max = IntegerFilter(
+        method="filter_total_households_count_with_valid_phone_no_max"
+    )
+    total_households_count_with_valid_phone_no_min = IntegerFilter(
+        method="filter_total_households_count_with_valid_phone_no_min"
+    )
+    created_at_range = DateTimeRangeFilter(field_name="created_at")
 
     class Meta:
         fields = tuple()
@@ -196,6 +216,7 @@ class PaymentPlanFilter(FilterSet):
 
     order_by = OrderingFilter(
         fields=(
+            "name",
             "unicef_id",
             "status",
             "total_households_count",
@@ -221,6 +242,59 @@ class PaymentPlanFilter(FilterSet):
 
     def filter_by_program_cycle(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[PaymentPlan]":
         return qs.filter(program_cycle_id=decode_id_string_required(value))
+
+    def filter_is_payment_plan(self, qs: "QuerySet", name: str, value: bool) -> "QuerySet[PaymentPlan]":
+        if value:
+            return qs.exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
+        return qs
+
+    def filter_is_target_population(self, qs: "QuerySet", name: str, value: bool) -> "QuerySet[PaymentPlan]":
+        if value:
+            return qs.filter(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
+        return qs
+
+    # copied from TP need for filtering
+    @staticmethod
+    def filter_payment_plan_applicable(queryset: "QuerySet", model_field: str, value: Any) -> "QuerySet":
+        if value is True:
+            return queryset.filter(
+                Q(business_area__is_payment_plan_applicable=True) & Q(status=PaymentPlan.Status.DRAFT)
+            )
+        return queryset
+
+    @staticmethod
+    def filter_total_households_count_with_valid_phone_no_max(
+        queryset: "QuerySet", model_field: str, value: Any
+    ) -> "QuerySet":
+        queryset = queryset.annotate(
+            household_count_with_phone_number=Count(
+                "payment_items",
+                filter=Q(
+                    Q(payment_items__household__head_of_household__phone_no_valid=True)
+                    | Q(payment_items__household__head_of_household__phone_no_alternative_valid=True)
+                )
+                & Q(payment_items__conflicted=False)
+                & Q(payment_items__excluded=False),
+            )
+        ).filter(household_count_with_phone_number__lte=value)
+        return queryset
+
+    @staticmethod
+    def filter_total_households_count_with_valid_phone_no_min(
+        queryset: "QuerySet", model_field: str, value: Any
+    ) -> "QuerySet":
+        queryset = queryset.annotate(
+            household_count_with_phone_number=Count(
+                "payment_items",
+                filter=Q(
+                    Q(payment_items__household__head_of_household__phone_no_valid=True)
+                    | Q(payment_items__household__head_of_household__phone_no_alternative_valid=True)
+                )
+                & Q(payment_items__conflicted=False)
+                & Q(payment_items__excluded=False),
+            )
+        ).filter(household_count_with_phone_number__gte=value)
+        return queryset
 
 
 class PaymentFilter(FilterSet):

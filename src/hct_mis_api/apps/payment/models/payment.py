@@ -19,11 +19,13 @@ from django.core.validators import (
     MaxValueValidator,
     MinLengthValidator,
     MinValueValidator,
+    ProhibitNullCharactersValidator,
 )
 from django.db import models
 from django.db.models import Count, JSONField, Q, QuerySet, Sum, UniqueConstraint
 from django.db.models.functions import Coalesce
 from django.utils import timezone
+from django.utils.text import Truncator
 from django.utils.translation import gettext_lazy as _
 
 from dateutil.relativedelta import relativedelta
@@ -49,13 +51,14 @@ from hct_mis_api.apps.core.field_attributes.fields_types import (
     Scope,
 )
 from hct_mis_api.apps.core.mixins import LimitBusinessAreaModelMixin
-from hct_mis_api.apps.core.models import FileTemp, FlexibleAttribute
+from hct_mis_api.apps.core.models import FileTemp, FlexibleAttribute, StorageFile
+from hct_mis_api.apps.core.utils import map_unicef_ids_to_households_unicef_ids
 from hct_mis_api.apps.geo.models import Area, Country
 from hct_mis_api.apps.household.models import FEMALE, MALE, DocumentType, Individual
 from hct_mis_api.apps.payment.fields import DynamicChoiceArrayField
 from hct_mis_api.apps.payment.managers import PaymentManager
 from hct_mis_api.apps.payment.validators import payment_token_and_order_number_validator
-from hct_mis_api.apps.steficon.models import RuleCommit
+from hct_mis_api.apps.steficon.models import Rule, RuleCommit
 from hct_mis_api.apps.utils.models import (
     AdminUrlMixin,
     ConcurrencyModel,
@@ -66,6 +69,10 @@ from hct_mis_api.apps.utils.models import (
     SignatureMixin,
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
+)
+from hct_mis_api.apps.utils.validators import (
+    DoubleSpaceValidator,
+    StartEndSpaceValidator,
 )
 
 if TYPE_CHECKING:
@@ -148,6 +155,8 @@ class PaymentPlan(
 ):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
+            "name",
+            "created_by",
             "status",
             "status_date",
             "target_population",
@@ -163,12 +172,41 @@ class PaymentPlan(
             "export_file",
             "steficon_rule",
             "steficon_applied_date",
+            "steficon_rule_targeting",
+            "steficon_targeting_applied_date",
             "exclusion_reason",
-        ]
+            "male_children_count",
+            "female_children_count",
+            "male_adults_count",
+            "female_adults_count",
+            "total_households_count",
+            "total_individuals_count",
+            "targeting_criteria_string",
+            "excluded_ids",
+        ],
+        {
+            "steficon_rule": "additional_formula",
+            "steficon_applied_date": "additional_formula_applied_date",
+            "steficon_rule_targeting": "additional_formula_targeting",
+            "steficon_targeting_applied_date": "additional_formula_targeting_applied_date",
+            "vulnerability_score_min": "score_min",
+            "vulnerability_score_max": "score_max",
+        },
     )
 
     class Status(models.TextChoices):
-        PREPARING = "PREPARING", "Preparing"
+        # new from TP
+        TP_OPEN = "TP_OPEN", "Open"
+        TP_LOCKED = "TP_LOCKED", "Locked"
+        TP_PROCESSING = "PROCESSING", "Processing"  # TODO: do we need this one?
+        TP_STEFICON_WAIT = "STEFICON_WAIT", "Steficon Wait"
+        TP_STEFICON_RUN = "STEFICON_RUN", "Steficon Run"
+        TP_STEFICON_COMPLETED = "STEFICON_COMPLETED", "Steficon Completed"
+        TP_STEFICON_ERROR = "STEFICON_ERROR", "Steficon Error"
+        DRAFT = "DRAFT", "Draft"  # like ready for PP create
+
+        PREPARING = "PREPARING", "Preparing"  # deprecated will remove it after data migrations
+
         OPEN = "OPEN", "Open"
         LOCKED = "LOCKED", "Locked"
         LOCKED_FSP = "LOCKED_FSP", "Locked FSP"
@@ -177,6 +215,23 @@ class PaymentPlan(
         IN_REVIEW = "IN_REVIEW", "In Review"
         ACCEPTED = "ACCEPTED", "Accepted"
         FINISHED = "FINISHED", "Finished"
+
+    PRE_PAYMENT_PLAN_STATUSES = (
+        Status.TP_OPEN,
+        Status.TP_LOCKED,
+        Status.TP_PROCESSING,
+        Status.TP_STEFICON_WAIT,
+        Status.TP_STEFICON_RUN,
+        Status.TP_STEFICON_COMPLETED,
+        Status.TP_STEFICON_ERROR,
+        Status.DRAFT,
+    )
+
+    class BuildStatus(models.TextChoices):
+        BUILD_STATUS_PENDING = "PENDING", "Pending"
+        BUILD_STATUS_BUILDING = "BUILDING", "Building"
+        BUILD_STATUS_FAILED = "FAILED", "Failed"
+        BUILD_STATUS_OK = "OK", "Ok"
 
     class BackgroundActionStatus(models.TextChoices):
         RULE_ENGINE_RUN = "RULE_ENGINE_RUN", "Rule Engine Running"
@@ -200,6 +255,10 @@ class PaymentPlan(
     ]
 
     class Action(models.TextChoices):
+        TP_LOCK = "TP_LOCK", "Population Lock"
+        TP_UNLOCK = "TP_UNLOCK", "Population Unlock"
+        TP_REBUILD = "TP_REBUILD", "Population Rebuild"
+        DRAFT = "DRAFT", "Draft"
         LOCK = "LOCK", "Lock"
         LOCK_FSP = "LOCK_FSP", "Lock FSP"
         UNLOCK = "UNLOCK", "Unlock"
@@ -283,7 +342,7 @@ class PaymentPlan(
         on_delete=models.PROTECT,
         related_name="created_payment_plans",
     )
-    status = FSMField(default=Status.OPEN, protected=False, db_index=True, choices=Status.choices)
+    status = FSMField(default=Status.TP_OPEN, protected=False, db_index=True, choices=Status.choices)
     background_action_status = FSMField(
         default=None,
         protected=False,
@@ -292,14 +351,29 @@ class PaymentPlan(
         null=True,
         choices=BackgroundActionStatus.choices,
     )
+    build_status = FSMField(
+        choices=BuildStatus.choices, default=None, protected=False, db_index=True, null=True, blank=True
+    )
+    built_at = models.DateTimeField(null=True, blank=True)
+    # TODO: remove this field after migrations
     target_population = models.ForeignKey(
         "targeting.TargetPopulation",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         related_name="payment_plans",
+        null=True,
+        blank=True,
     )
-    currency = models.CharField(max_length=4, choices=CURRENCY_CHOICES)
-    dispersion_start_date = models.DateField()
-    dispersion_end_date = models.DateField()
+    # TODO: remove null=True after data migrations
+    targeting_criteria = models.OneToOneField(
+        "targeting.TargetingCriteria",
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="payment_plan",
+    )
+    currency = models.CharField(max_length=4, choices=CURRENCY_CHOICES, blank=True, null=True)
+    dispersion_start_date = models.DateField(blank=True, null=True)
+    dispersion_end_date = models.DateField(blank=True, null=True)
     female_children_count = models.PositiveIntegerField(default=0)
     male_children_count = models.PositiveIntegerField(default=0)
     female_adults_count = models.PositiveIntegerField(default=0)
@@ -325,11 +399,21 @@ class PaymentPlan(
         blank=True,
     )
     steficon_applied_date = models.DateTimeField(blank=True, null=True)
+    steficon_rule_targeting = models.ForeignKey(
+        RuleCommit,
+        null=True,
+        on_delete=models.PROTECT,
+        related_name="payment_plans_target",
+        blank=True,
+    )
+    steficon_targeting_applied_date = models.DateTimeField(blank=True, null=True)
 
     source_payment_plan = models.ForeignKey(
         "self", null=True, blank=True, on_delete=models.CASCADE, related_name="follow_ups"
     )
     is_follow_up = models.BooleanField(default=False)
+
+    excluded_ids = models.TextField(blank=True, help_text="Targeting level exclusion")
     exclusion_reason = models.TextField(blank=True)
     exclude_household_error = models.TextField(blank=True)
     name = models.CharField(
@@ -337,10 +421,28 @@ class PaymentPlan(
         validators=[
             MinLengthValidator(3),
             MaxLengthValidator(255),
+            DoubleSpaceValidator,
+            StartEndSpaceValidator,
+            ProhibitNullCharactersValidator(),
         ],
         null=True,
         blank=True,
     )
+    vulnerability_score_min = models.DecimalField(
+        null=True,
+        decimal_places=3,
+        max_digits=6,
+        help_text="Written by a tool such as Corticon.",
+        blank=True,
+    )
+    vulnerability_score_max = models.DecimalField(
+        null=True,
+        decimal_places=3,
+        max_digits=6,
+        help_text="Written by a tool such as Corticon.",
+        blank=True,
+    )
+    storage_file = models.OneToOneField(StorageFile, blank=True, null=True, on_delete=models.SET_NULL)
     is_cash_assist = models.BooleanField(default=False)
 
     class Meta:
@@ -349,11 +451,22 @@ class PaymentPlan(
         constraints = [
             UniqueConstraint(
                 fields=["name", "program", "is_removed"], condition=Q(is_removed=False), name="name_unique_per_program"
-            )
+            ),
         ]
 
     def __str__(self) -> str:
         return self.unicef_id or ""
+
+    def save(self, *args: Any, **kwargs: Any) -> None:
+        if self.steficon_rule_targeting and self.steficon_rule_targeting.rule.type != Rule.TYPE_TARGETING:
+            raise ValidationError(
+                f"The selected RuleCommit must be associated with a Rule of type {Rule.TYPE_TARGETING}."
+            )
+        if self.steficon_rule and self.steficon_rule.rule.type != Rule.TYPE_PAYMENT_PLAN:
+            raise ValidationError(
+                f"The selected RuleCommit must be associated with a Rule of type {Rule.TYPE_PAYMENT_PLAN}."
+            )
+        super().save(*args, **kwargs)
 
     @property
     def bank_reconciliation_success(self) -> int:
@@ -376,6 +489,28 @@ class PaymentPlan(
             else list(self.payment_items.filter(excluded=True).values_list("household__unicef_id", flat=True))
         )
         return beneficiaries_ids
+
+    @property
+    def excluded_household_ids_targeting_level(self) -> List:
+        return map_unicef_ids_to_households_unicef_ids(self.excluded_ids)
+
+    def get_criteria_string(self) -> str:
+        try:
+            return self.targeting_criteria.get_criteria_string()
+        except Exception:
+            return ""
+
+    @property
+    def targeting_criteria_string(self) -> str:
+        return Truncator(self.get_criteria_string()).chars(390, "...")
+
+    @property
+    def has_empty_criteria(self) -> bool:
+        return self.targeting_criteria is None or self.targeting_criteria.rules.count() == 0
+
+    @property
+    def has_empty_ids_criteria(self) -> bool:
+        return not bool(self.targeting_criteria.household_ids) and not bool(self.targeting_criteria.individual_ids)
 
     @transition(
         field=background_action_status,
@@ -459,6 +594,42 @@ class PaymentPlan(
     @transition(field=background_action_status, source="*", target=None)
     def background_action_status_none(self) -> None:
         self.background_action_status = None  # little hack
+
+    @transition(
+        field=build_status,
+        source="*",
+        target=BuildStatus.BUILD_STATUS_PENDING,
+        conditions=[lambda obj: obj.status in [PaymentPlan.Status.TP_OPEN, PaymentPlan.Status.TP_LOCKED]],
+    )
+    def build_status_pending(self) -> None:
+        self.built_at = timezone.now()
+
+    @transition(
+        field=build_status,
+        source=[BuildStatus.BUILD_STATUS_PENDING, BuildStatus.BUILD_STATUS_FAILED, BuildStatus.BUILD_STATUS_OK],
+        target=BuildStatus.BUILD_STATUS_BUILDING,
+        conditions=[lambda obj: obj.status in [PaymentPlan.Status.TP_OPEN, PaymentPlan.Status.TP_LOCKED]],
+    )
+    def build_status_building(self) -> None:
+        self.built_at = timezone.now()
+
+    @transition(
+        field=build_status,
+        source=BuildStatus.BUILD_STATUS_BUILDING,
+        target=BuildStatus.BUILD_STATUS_FAILED,
+        conditions=[lambda obj: obj.status in [PaymentPlan.Status.TP_OPEN, PaymentPlan.Status.TP_LOCKED]],
+    )
+    def build_status_failed(self) -> None:
+        self.built_at = timezone.now()
+
+    @transition(
+        field=build_status,
+        source=BuildStatus.BUILD_STATUS_BUILDING,
+        target=BuildStatus.BUILD_STATUS_OK,
+        conditions=[lambda obj: obj.status in [PaymentPlan.Status.TP_OPEN, PaymentPlan.Status.TP_LOCKED]],
+    )
+    def build_status_ok(self) -> None:
+        self.built_at = timezone.now()
 
     @transition(
         field=background_action_status,
@@ -585,7 +756,15 @@ class PaymentPlan(
 
     @transition(
         field=status,
-        source=Status.PREPARING,
+        source=[Status.TP_LOCKED, Status.TP_STEFICON_COMPLETED, Status.TP_STEFICON_ERROR, Status.OPEN],
+        target=Status.DRAFT,
+    )
+    def status_draft(self) -> None:
+        self.status_date = timezone.now()
+
+    @transition(
+        field=status,
+        source=Status.DRAFT,
         target=Status.OPEN,
     )
     def status_open(self) -> None:
@@ -716,6 +895,19 @@ class PaymentPlan(
         return (
             self.eligible_payments.exclude(status__in=Payment.PENDING_STATUSES).count()
             == self.eligible_payments.count()
+        )
+
+    def is_population_open(self) -> bool:
+        return self.status in (self.Status.TP_OPEN,)
+
+    def is_population_finalized(self) -> bool:
+        return self.status in (self.Status.TP_PROCESSING,)
+
+    def is_population_locked(self) -> bool:
+        return self.status in (
+            self.Status.TP_LOCKED,
+            self.Status.TP_STEFICON_COMPLETED,
+            self.Status.TP_STEFICON_ERROR,
         )
 
     def remove_export_file_entitlement(self) -> None:
@@ -1411,6 +1603,8 @@ class Payment(
     delivery_type = models.ForeignKey("payment.DeliveryMechanism", on_delete=models.SET_NULL, null=True)
     currency = models.CharField(
         max_length=4,
+        null=True,
+        blank=True,
     )
     entitlement_quantity = models.DecimalField(
         decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
@@ -1519,6 +1713,9 @@ class Payment(
     )
     fsp_auth_code = models.CharField(max_length=128, blank=True, null=True, help_text="FSP Auth Code")
     is_cash_assist = models.BooleanField(default=False)
+    vulnerability_score = models.DecimalField(
+        blank=True, null=True, decimal_places=3, max_digits=6, help_text="Written by Steficon", db_index=True
+    )
 
     @property
     def full_name(self) -> str:

@@ -10,7 +10,7 @@ export const allAccountabilityCommunicationMessages = gql`
     $numberOfRecipients: Int
     $numberOfRecipients_Gte: Int
     $numberOfRecipients_Lte: Int
-    $targetPopulation: ID
+    $paymentPlan: ID
     $createdBy: ID
     $program: String
     $createdAtRange: String
@@ -28,7 +28,7 @@ export const allAccountabilityCommunicationMessages = gql`
       numberOfRecipients: $numberOfRecipients
       numberOfRecipients_Gte: $numberOfRecipients_Gte
       numberOfRecipients_Lte: $numberOfRecipients_Lte
-      targetPopulation: $targetPopulation
+      paymentPlan: $paymentPlan
       createdBy: $createdBy
       program: $program
       createdAtRange: $createdAtRange

@@ -45,7 +45,7 @@ export const EditFollowUpPaymentPlanPage = (): ReactElement => {
       variables: {
         businessArea,
         paymentPlanApplicable: false,
-        program: [programId],
+        program: programId,
       },
     });
   if (loadingTargetPopulations || loadingPaymentPlan)
@@ -58,7 +58,7 @@ export const EditFollowUpPaymentPlanPage = (): ReactElement => {
   const { paymentPlan } = paymentPlanData;
 
   const initialValues = {
-    targetingId: paymentPlan.targetPopulation.id,
+    paymentPlanId: paymentPlan.id,
     currency: {
       name: paymentPlan.currencyName,
       value: paymentPlan.currency,
@@ -68,7 +68,7 @@ export const EditFollowUpPaymentPlanPage = (): ReactElement => {
   };
 
   const validationSchema = Yup.object().shape({
-    targetingId: Yup.string().required(t('Target Population is required')),
+    paymentPlanId: Yup.string().required(t('Target Population is required')),
     currency: Yup.string().nullable().required(t('Currency is required')),
     dispersionStartDate: Yup.date().required(
       t('Dispersion Start Date is required'),
@@ -96,7 +96,6 @@ export const EditFollowUpPaymentPlanPage = (): ReactElement => {
         variables: {
           input: {
             paymentPlanId,
-            targetingId: values.targetingId,
             dispersionStartDate: values.dispersionStartDate,
             dispersionEndDate: values.dispersionEndDate,
             currency: values.currency?.value

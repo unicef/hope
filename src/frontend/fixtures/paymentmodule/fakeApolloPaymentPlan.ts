@@ -38,12 +38,7 @@ export const fakeApolloPaymentPlan: PaymentPlanQuery['paymentPlan'] = {
     name: 'Already attention fear well hit instead person.',
     __typename: 'ProgramNode',
   },
-  targetPopulation: {
-    id: 'VGFyZ2V0UG9wdWxhdGlvbk5vZGU6MzlmMjQ0YzEtZGRiMC00ZGZmLWE0MzEtN2JiMDFhMTdiMThm',
-    name: 'Report should property early adult.',
-    __typename: 'TargetPopulationNode',
-  },
-  currency: "PLN",
+  currency: 'PLN',
   currencyName: 'Polish złoty',
   startDate: '2020-10-27',
   endDate: '2021-09-08',
@@ -299,9 +294,16 @@ export const fakeApolloPaymentPlan: PaymentPlanQuery['paymentPlan'] = {
     __typename: 'ReconciliationSummaryNode',
   },
   __typename: 'PaymentPlanNode',
+  excludedIds: '',
+  programCycle: {
+    __typename: 'ProgramCycleNode',
+    id: '',
+    title: '',
+  },
 };
 
-export const fakeApolloPaymentPlanWithWrongBackgroundActionStatus: PaymentPlanQuery['paymentPlan'] = {
-  ...fakeApolloPaymentPlan,
-  backgroundActionStatus: PaymentPlanBackgroundActionStatus.XlsxExporting,
-};
+export const fakeApolloPaymentPlanWithWrongBackgroundActionStatus: PaymentPlanQuery['paymentPlan'] =
+  {
+    ...fakeApolloPaymentPlan,
+    backgroundActionStatus: PaymentPlanBackgroundActionStatus.XlsxExporting,
+  };

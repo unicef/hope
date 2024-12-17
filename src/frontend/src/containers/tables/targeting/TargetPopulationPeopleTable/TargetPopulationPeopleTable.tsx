@@ -4,19 +4,16 @@ import { TableWrapper } from '@components/core/TableWrapper';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './TargetPopulationPeopleHeadCells';
 import { TargetPopulationPeopleTableRow } from './TargetPopulationPeopleRow';
+import { useAllPaymentsForTableQuery } from '@generated/graphql';
 
 interface TargetPopulationHouseholdProps {
   id?: string;
-  query?;
-  queryObjectName?;
   variables?;
   canViewDetails?: boolean;
 }
 
 export function TargetPopulationPeopleTable({
   id,
-  query,
-  queryObjectName,
   variables,
   canViewDetails,
 }: TargetPopulationHouseholdProps): ReactElement {
@@ -31,8 +28,8 @@ export function TargetPopulationPeopleTable({
         title={t('People')}
         headCells={headCells}
         rowsPerPageOptions={[10, 15, 20]}
-        query={query}
-        queriedObjectName={queryObjectName}
+        query={useAllPaymentsForTableQuery}
+        queriedObjectName="allPayments"
         initialVariables={initialVariables}
         renderRow={(row) => (
           <TargetPopulationPeopleTableRow

@@ -103,9 +103,9 @@ export function PaymentDetails({
           <Grid item xs={3}>
             <LabelizedField label={t('TARGET POPULATION')}>
               <BlackLink
-                to={`/${businessArea}/programs/${programId}/target-population/${payment.targetPopulation.id}`}
+                to={`/${businessArea}/programs/${programId}/target-population/${payment.parent.id}`}
               >
-                {payment.targetPopulation?.name}
+                {payment.parent?.name}
               </BlackLink>
             </LabelizedField>
           </Grid>
