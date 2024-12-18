@@ -135,6 +135,7 @@ export const PAYMENT_PLAN_QUERY = gql`
       }
       hasPaymentListExportFile
       hasFspDeliveryMechanismXlsxTemplate
+      canCreateXlsxWithFspAuthCode
       importedFileDate
       importedFileName
       totalEntitledQuantityUsd

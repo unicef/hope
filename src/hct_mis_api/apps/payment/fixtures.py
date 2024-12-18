@@ -52,7 +52,10 @@ from hct_mis_api.apps.program.fixtures import (
 )
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
+from hct_mis_api.apps.targeting.fixtures import (
+    TargetingCriteriaFactory,
+    TargetPopulationFactory,
+)
 from hct_mis_api.apps.targeting.models import (
     TargetingCriteria,
     TargetingCriteriaRule,
@@ -638,6 +641,18 @@ def generate_payment_plan() -> None:
     full_rebuild(target_population)
     target_population.save()
 
+    target_population = TargetPopulation.objects.update_or_create(
+        name="Test Target Population for PM",
+        targeting_criteria=TargetingCriteriaFactory(),
+        status=TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE,
+        business_area=afghanistan,
+        program=program,
+        created_by=root,
+        program_cycle=program_cycle,
+    )[0]
+    full_rebuild(target_population)
+    target_population.save()
+
     payment_plan_pk = UUID("00000000-feed-beef-0000-00000badf00d")
     payment_plan = PaymentPlan.objects.update_or_create(
         name="Test Payment Plan",
@@ -662,6 +677,13 @@ def generate_payment_plan() -> None:
         vision_vendor_number=123456789,
     )[0]
     fsp_1.delivery_mechanisms.add(delivery_mechanism_cash)
+
+    fsp_api = FinancialServiceProvider.objects.update_or_create(
+        name="Test FSP API",
+        communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+        vision_vendor_number=554433,
+    )[0]
+    fsp_api.delivery_mechanisms.add(delivery_mechanism_cash)
 
     FspXlsxTemplatePerDeliveryMechanismFactory(
         financial_service_provider=fsp_1, delivery_mechanism=delivery_mechanism_cash
