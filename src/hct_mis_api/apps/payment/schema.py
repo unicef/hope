@@ -582,6 +582,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
     can_split = graphene.Boolean()
     supporting_documents = graphene.List(PaymentPlanSupportingDocumentNode)
     program = graphene.Field(ProgramNode)
+    can_create_xlsx_with_fsp_auth_code = graphene.Boolean()
 
     class Meta:
         model = PaymentPlan
@@ -650,6 +651,9 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
             )
             .count()
         )
+
+    def resolve_can_create_xlsx_with_fsp_auth_code(self, info: Any) -> graphene.Boolean:
+        return self.can_create_xlsx_with_fsp_auth_code
 
     @staticmethod
     def resolve_reconciliation_summary(parent: PaymentPlan, info: Any) -> Dict[str, int]:
