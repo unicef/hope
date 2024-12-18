@@ -20,7 +20,6 @@ interface ImportedIndividualsTableRowProps {
 export function ImportedIndividualsTableRow({
   individual,
   choices,
-  isMerged,
   rdi,
 }: ImportedIndividualsTableRowProps): ReactElement {
   const navigate = useNavigate();
@@ -56,7 +55,7 @@ export function ImportedIndividualsTableRow({
     >
       <TableCell align="left">
         <BlackLink to={individualDetailsPath}>
-          {isMerged ? individual.unicefId : individual.importId}
+          {individual.unicefId}
         </BlackLink>
       </TableCell>
       <AnonTableCell>{individual.fullName}</AnonTableCell>
