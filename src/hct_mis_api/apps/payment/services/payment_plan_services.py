@@ -314,7 +314,7 @@ class PaymentPlanService:
     def create_payments(payment_plan: PaymentPlan) -> None:
         payments_to_create = []
         households = (
-            payment_plan.target_population.households.annotate(
+            payment_plan.target_population.household_list.annotate(
                 collector=IndividualRoleInHousehold.objects.filter(household=OuterRef("pk"), role=ROLE_PRIMARY).values(
                     "individual"
                 )[:1]
