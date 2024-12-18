@@ -20,7 +20,6 @@ interface ImportedIndividualsTableRowProps {
 export function ImportedIndividualsTableRow({
   individual,
   choices,
-  isMerged,
   rdi,
 }: ImportedIndividualsTableRowProps): ReactElement {
   const navigate = useNavigate();
