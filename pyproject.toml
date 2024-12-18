@@ -75,8 +75,9 @@ disable_error_code = [
 [tool.django-stubs]
 django_settings_module = "hct_mis_api.settings"
 
-[tool.pdm.dev-dependencies]
-dev = [
+[tool.uv]
+package = true
+dev-dependencies = [
     "mypy==0.982",
     "django-stubs~=1.12.0",
     "django-stubs-ext<1.0.0,>=0.7.0",
@@ -126,8 +127,8 @@ dev = [
 ]
 
 [build-system]
-requires = ["pdm-backend"]
-build-backend = "pdm.backend"
+requires = ["setuptools>=42"]
+build-backend = "setuptools.build_meta"
 
 [tool.pdm.build]
 includes = ['src/hct_mis_api', 'src/data']
