@@ -53,23 +53,18 @@ WORKDIR $CODE
 COPY --from=waitforit /data/waitforit /usr/local/bin/waitforit
 
 # Dist builder image
-FROM base as pdm
+FROM base as uv
 RUN pip install --upgrade pip &&\
-    pip install pdm==2.19.2 &&\
-    pip install pdm-backend &&\
-    pip install setuptools==71.1.0 &&\
-    pdm config cache_dir /var/cache/pdm &&\
-    pdm config python.use_venv false &&\
-    pdm config venv.in_project true &&\
-    pdm config check_update false
+    pip install uv &&\
+    pip install setuptools==71.1.0
 WORKDIR $PDM_PACKAGES
-COPY README.md LICENSE pyproject.toml pdm.lock ./
+COPY README.md LICENSE pyproject.toml uv.lock ./
 
 
 
 
 # Dev image
-FROM pdm AS dev
+FROM uv AS dev
 
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
@@ -84,13 +79,17 @@ RUN apt-get update \
   && rm -rf /var/lib/apt/lists/*
 
 ENV PYTHONPATH=$CODE/src:$CODE/test/:$PYTHONPATH
-RUN pdm sync --no-editable --no-self --no-isolation
+RUN --mount=type=cache,target=/root/.uv-cache \
+    uv sync --cache-dir=/root/.uv-cache \
+        --python=/usr/local/bin/python \
+        --python-preference=system \
+        --no-editable --frozen --extra distribution
 
 WORKDIR $CODE
 COPY ./src/ ./src/
 COPY ./tests ./tests
 COPY ./manage.py ./manage.py
-COPY .flake8 pyproject.toml pdm.lock ./
+COPY .flake8 pyproject.toml uv.lock ./
 COPY ./docker/entrypoint.sh /bin/
 ENTRYPOINT ["entrypoint.sh"]
 
@@ -106,10 +105,14 @@ COPY ./src/frontend ./
 RUN NODE_ENV="production" NODE_OPTIONS="--max-old-space-size=4096" yarn build
 
 # Dist builder image
-FROM pdm as dist-builder
+FROM uv as dist-builder
 COPY ./src/ ./src/
 COPY --chown=hope:hope --from=frontend-builder /fe-build/build $PDM_PACKAGES/src/hct_mis_api/apps/web/static/web
-RUN pdm sync --prod --no-editable --no-isolation
+RUN --mount=type=cache,target=/root/.uv-cache \
+    uv sync --cache-dir=/root/.uv-cache \
+        --python=/usr/local/bin/python \
+        --python-preference=system \
+        --no-dev --no-editable --frozen --extra distribution
 
 
 ## Dist (backend only) image
