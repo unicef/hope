@@ -47,7 +47,7 @@ export function PaymentPlanTargeting({
           <Grid container>
             <Grid item xs={6}>
               <Field
-                name="targetingId"
+                name="paymentPlanId"
                 label={t('Target Population')}
                 fullWidth
                 variant="outlined"

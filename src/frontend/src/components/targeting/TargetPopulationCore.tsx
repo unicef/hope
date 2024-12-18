@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../config/permissions';
 import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityLogTable';
-import { PaymentPlanQuery, PaymentPlanBuildStatus } from '@generated/graphql';
+import { PaymentPlanBuildStatus } from '@generated/graphql';
 import { PaperContainer } from './PaperContainer';
 import { ResultsForHouseholds } from './ResultsForHouseholds';
 import { TargetingHouseholds } from './TargetingHouseholds';
@@ -19,7 +19,7 @@ const Label = styled.p`
 
 interface TargetPopulationCoreProps {
   id: string;
-  targetPopulation: PaymentPlanQuery['paymentPlan'];
+  targetPopulation;
   permissions: string[];
   screenBeneficiary: boolean;
   isStandardDctType: boolean;

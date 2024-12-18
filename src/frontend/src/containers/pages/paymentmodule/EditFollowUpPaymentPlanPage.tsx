@@ -94,14 +94,12 @@ export const EditFollowUpPaymentPlanPage = (): ReactElement => {
     try {
       const res = await mutate({
         variables: {
-          input: {
-            paymentPlanId,
-            dispersionStartDate: values.dispersionStartDate,
-            dispersionEndDate: values.dispersionEndDate,
-            currency: values.currency?.value
-              ? values.currency.value
-              : values.currency,
-          },
+          paymentPlanId,
+          dispersionStartDate: values.dispersionStartDate,
+          dispersionEndDate: values.dispersionEndDate,
+          currency: values.currency?.value
+            ? values.currency.value
+            : values.currency,
         },
       });
       showMessage(t('Follow-up Payment Plan Edited'));

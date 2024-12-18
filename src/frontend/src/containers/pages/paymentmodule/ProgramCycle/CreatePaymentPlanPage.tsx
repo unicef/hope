@@ -10,7 +10,10 @@ import { PaymentPlanTargeting } from '@components/paymentmodule/CreatePaymentPla
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { useAllTargetPopulationsQuery } from '@generated/graphql';
+import {
+  useAllTargetPopulationsQuery,
+  useUpdatePpMutation,
+} from '@generated/graphql';
 import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -21,7 +24,6 @@ export const CreatePaymentPlanPage = (): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const location = useLocation();
-  //TODO useUpdatePpMutation
   const [mutate, { loading: loadingCreate }] = useUpdatePpMutation();
   const { showMessage } = useSnackbar();
   const { businessArea, programId } = useBaseUrl();
@@ -86,6 +88,7 @@ export const CreatePaymentPlanPage = (): ReactElement => {
 
       const res = await mutate({
         variables: {
+          paymentPlanId: values.paymentPlanId,
           programCycleId,
           dispersionStartDate,
           dispersionEndDate,
@@ -93,7 +96,7 @@ export const CreatePaymentPlanPage = (): ReactElement => {
         },
       });
       showMessage(t('Payment Plan Created'));
-      navigate(`../${res.data.createPaymentPlan.paymentPlan.id}`);
+      navigate(`../${res.data.updatePaymentPlan.paymentPlan.id}`);
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
     }

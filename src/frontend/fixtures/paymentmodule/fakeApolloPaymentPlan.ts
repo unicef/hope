@@ -7,6 +7,7 @@ import {
   PaymentVerificationPlanSampling,
   PaymentVerificationPlanStatus,
   PaymentVerificationPlanVerificationChannel,
+  ProgramStatus,
 } from '../../src/__generated__/graphql';
 
 export const fakeApolloPaymentPlan: PaymentPlanQuery['paymentPlan'] = {
@@ -36,6 +37,7 @@ export const fakeApolloPaymentPlan: PaymentPlanQuery['paymentPlan'] = {
   program: {
     id: 'UHJvZ3JhbU5vZGU6NWJhMjEzY2UtNmNlOS00NTc4LThhNDgtYjFmMDgyM2Q2MDAy',
     name: 'Already attention fear well hit instead person.',
+    status: ProgramStatus.Active,
     __typename: 'ProgramNode',
   },
   currency: 'PLN',

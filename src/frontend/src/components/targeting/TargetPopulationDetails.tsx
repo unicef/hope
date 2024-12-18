@@ -1,7 +1,6 @@
 import { Grid, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { paymentPlanStatusToColor } from '@utils/utils';
-import { PaymentPlanQuery } from '@generated/graphql';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { LabelizedField } from '@core/LabelizedField';
 import { OverviewContainer } from '@core/OverviewContainer';
@@ -10,7 +9,7 @@ import { Title } from '@core/Title';
 import { ReactElement } from 'react';
 
 interface ProgramDetailsProps {
-  targetPopulation: PaymentPlanQuery['paymentPlan'];
+  targetPopulation;
 }
 
 export function TargetPopulationDetails({

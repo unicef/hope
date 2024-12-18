@@ -17,6 +17,9 @@ export const AllPaymentPlansForTable = gql`
     $isFollowUp: Boolean
     $program: String
     $programCycle: String
+    $totalHouseholdsCountWithValidPhoneNoMin: Int
+    $totalHouseholdsCountWithValidPhoneNoMax: Int
+    $createdAtRange: String
   ) {
     allPaymentPlans(
       after: $after
@@ -34,6 +37,9 @@ export const AllPaymentPlansForTable = gql`
       isFollowUp: $isFollowUp
       program: $program
       programCycle: $programCycle
+      totalHouseholdsCountWithValidPhoneNoMin: $totalHouseholdsCountWithValidPhoneNoMin
+      totalHouseholdsCountWithValidPhoneNoMax: $totalHouseholdsCountWithValidPhoneNoMax
+      createdAtRange: $createdAtRange
     ) {
       pageInfo {
         hasNextPage

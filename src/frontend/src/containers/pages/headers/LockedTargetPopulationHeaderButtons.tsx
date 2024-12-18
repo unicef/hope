@@ -48,24 +48,14 @@ export function LockedTargetPopulationHeaderButtons({
   const navigate = useNavigate();
   const { baseUrl } = useBaseUrl();
   const [openDuplicate, setOpenDuplicate] = useState(false);
-  const [openFinalize, setOpenFinalize] = useState(false);
   const [openFinalizePaymentPlan, setOpenFinalizePaymentPlan] = useState(false);
   const { showMessage } = useSnackbar();
   const { isActiveProgram } = useProgramContext();
 
-  //TODO: Action.TpUnlock
-  const { mutatePaymentPlanAction: lockAction, loading: loadingLock } =
-    usePaymentPlanAction(Action.TpLock, targetPopulationId, () => {
-      showMessage(t('Target Population Finalized'));
-      navigate(`/${baseUrl}/target-population/`);
-      setOpenFinalize(false);
-    });
-
   const { mutatePaymentPlanAction: unlockAction, loading: loadingUnlock } =
-    usePaymentPlanAction(Action.TpLock, targetPopulationId, () => {
+    usePaymentPlanAction(Action.TpUnlock, targetPopulation.id, () => {
       showMessage(t('Target Population Finalized'));
       navigate(`/${baseUrl}/target-population/`);
-      setOpenFinalize(false);
     });
 
   const { isPaymentPlanApplicable } = businessAreaData.businessArea;
@@ -85,19 +75,10 @@ export function LockedTargetPopulationHeaderButtons({
       {canUnlock && (
         <Box m={2}>
           <LoadingButton
-            loading={loading}
+            loading={loadingUnlock}
             color="primary"
             variant="outlined"
-            onClick={async () => {
-              try {
-                await mutate({
-                  variables: { id: targetPopulation.id },
-                });
-                showMessage('Target Population Unlocked');
-              } catch (e) {
-                e.graphQLErrors.map((x) => showMessage(x.message));
-              }
-            }}
+            onClick={() => unlockAction()}
             data-cy="button-target-population-unlocked"
             disabled={!isActiveProgram}
           >
@@ -127,29 +108,7 @@ export function LockedTargetPopulationHeaderButtons({
                 </Button>
               </span>
             </Tooltip>
-          ) : (
-            <Tooltip
-              title={
-                targetPopulation.program.status !== ProgramStatus.Active
-                  ? t('Assigned programme is not ACTIVE')
-                  : t('Send to Cash Assist')
-              }
-            >
-              <span>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  disabled={
-                    targetPopulation.program.status !== ProgramStatus.Active
-                  }
-                  onClick={() => setOpenFinalize(true)}
-                  data-cy="button-target-population-send-to-cash-assist"
-                >
-                  {t('Send to Cash Assist')}
-                </Button>
-              </span>
-            </Tooltip>
-          )}
+          ) : null}
         </Box>
       )}
       <DuplicateTargetPopulation

@@ -6,6 +6,9 @@ import { useBusinessArea } from '@hooks/useBusinessArea';
 import { decodeIdString } from '@utils/utils';
 import {
   AllActiveTargetPopulationsQueryVariables,
+  AllPaymentPlansForTableQuery,
+  AllPaymentPlansForTableQueryVariables,
+  PaymentPlanNode,
   TargetPopulationNode,
   TargetPopulationStatus,
   useAllActiveTargetPopulationsQuery,
@@ -42,18 +45,19 @@ export const LookUpTargetPopulationTableCommunication = ({
 }: LookUpTargetPopulationTableCommunicationProps): ReactElement => {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
-  const initialVariables: AllActiveTargetPopulationsQueryVariables = {
-    name: filter.name,
+  const initialVariables: AllPaymentPlansForTableQueryVariables = {
     totalHouseholdsCountWithValidPhoneNoMin:
       filter.totalHouseholdsCountWithValidPhoneNoMin || 0,
     totalHouseholdsCountWithValidPhoneNoMax:
       filter.totalHouseholdsCountWithValidPhoneNoMax || null,
     status: filter.status,
     businessArea,
+    //TODO: createdAtRange missing?
     createdAtRange: JSON.stringify({
       min: filter.createdAtRangeMin || null,
       max: filter.createdAtRangeMax || null,
     }),
+    //TODO: statusNot add this filter?
     statusNot: TargetPopulationStatus.Open,
   };
 
@@ -61,22 +65,9 @@ export const LookUpTargetPopulationTableCommunication = ({
     handleChange(id);
   };
 
-  if (filter.program) {
-    if (Array.isArray(filter.program)) {
-      initialVariables.program = filter.program.map((programId) =>
-        decodeIdString(programId),
-      );
-    } else {
-      initialVariables.program = [decodeIdString(filter.program)];
-    }
-  }
-
   const renderTable = (): ReactElement => (
     <TableWrapper>
-      <UniversalTable<
-        TargetPopulationNode,
-        AllActiveTargetPopulationsQueryVariables
-      >
+      <UniversalTable<PaymentPlanNode, AllPaymentPlansForTableQueryVariables>
         title={noTitle ? null : t('Target Populations')}
         headCells={enableRadioButton ? headCells : headCells.slice(1)}
         rowsPerPageOptions={[10, 15, 20]}

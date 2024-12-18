@@ -6,7 +6,7 @@ import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { StatusBox } from '@components/core/StatusBox';
 import {
   paymentPlanStatusToColor,
-  targetPopulationStatusMapping,
+  paymentPlanStatusMapping,
 } from '@utils/utils';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { BlackLink } from '@components/core/BlackLink';
@@ -70,7 +70,7 @@ export function LookUpTargetPopulationTableRowSurveys({
         <StatusBox
           status={targetPopulation.status}
           statusToColor={paymentPlanStatusToColor}
-          statusNameMapping={targetPopulationStatusMapping}
+          statusNameMapping={paymentPlanStatusMapping}
         />
       </TableCell>
       <TableCell align="left">

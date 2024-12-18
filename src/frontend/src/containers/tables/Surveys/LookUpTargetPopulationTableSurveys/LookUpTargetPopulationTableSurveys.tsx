@@ -1,17 +1,12 @@
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import {
-  AllActiveTargetPopulationsQueryVariables,
-  TargetPopulationNode,
-  TargetPopulationStatus,
-  useAllActiveTargetPopulationsQuery,
-} from '@generated/graphql';
 import { TableWrapper } from '@components/core/TableWrapper';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './LookUpTargetPopulationTableHeadCellsSurveys';
 import { LookUpTargetPopulationTableRowSurveys } from './LookUpTargetPopulationTableRowSurveys';
+import { PaymentPlanStatus } from '@generated/graphql';
 
 interface LookUpTargetPopulationTableSurveysProps {
   filter;
@@ -41,6 +36,7 @@ export function LookUpTargetPopulationTableSurveys({
 }: LookUpTargetPopulationTableSurveysProps): ReactElement {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
+  //TODO: statusNot add this filter?
   const initialVariables: AllActiveTargetPopulationsQueryVariables = {
     name: filter.name,
     totalHouseholdsCountMin: filter.totalHouseholdsCountMin || 0,
@@ -52,7 +48,7 @@ export function LookUpTargetPopulationTableSurveys({
       min: filter.createdAtRangeMin || null,
       max: filter.createdAtRangeMax || null,
     }),
-    statusNot: TargetPopulationStatus.Open,
+    statusNot: PaymentPlanStatus.Open,
   };
 
   const handleRadioChange = (id: string): void => {

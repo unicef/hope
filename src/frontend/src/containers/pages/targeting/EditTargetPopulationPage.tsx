@@ -1,6 +1,7 @@
 import { ReactElement, useEffect } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import {
+  PaymentPlanBuildStatus,
   useBusinessAreaDataQuery,
   usePaymentPlanQuery,
 } from '@generated/graphql';
@@ -27,12 +28,12 @@ export const EditTargetPopulationPage = (): ReactElement => {
   const { data: businessAreaData } = useBusinessAreaDataQuery({
     variables: { businessAreaSlug: businessArea },
   });
-  const buildStatus = data?.targetPopulation?.buildStatus;
+  const buildStatus = data?.paymentPlan?.buildStatus;
   useEffect(() => {
     if (
       [
-        TargetPopulationBuildStatus.Building,
-        TargetPopulationBuildStatus.Pending,
+        PaymentPlanBuildStatus.Building,
+        PaymentPlanBuildStatus.Pending,
       ].includes(buildStatus)
     ) {
       startPolling(3000);
@@ -60,7 +61,7 @@ export const EditTargetPopulationPage = (): ReactElement => {
       componentName="EditTargetPopulationPage"
     >
       <EditTargetPopulation
-        targetPopulation={paymentPlan}
+        paymentPlan={paymentPlan}
         screenBeneficiary={businessAreaData?.businessArea?.screenBeneficiary}
       />
     </UniversalErrorBoundary>

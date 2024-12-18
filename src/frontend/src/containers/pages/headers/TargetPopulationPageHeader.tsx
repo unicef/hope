@@ -32,7 +32,7 @@ const StatusWrapper = styled.div`
 `;
 
 export interface ProgramDetailsPageHeaderPropTypes {
-  targetPopulation: PaymentPlanQuery['paymentPlan'];
+  paymentPlan;
   canEdit: boolean;
   canRemove: boolean;
   canDuplicate: boolean;
@@ -42,7 +42,7 @@ export interface ProgramDetailsPageHeaderPropTypes {
 }
 
 export function TargetPopulationPageHeader({
-  targetPopulation,
+  paymentPlan,
   canEdit,
   canRemove,
   canDuplicate,
@@ -68,11 +68,11 @@ export function TargetPopulationPageHeader({
 
   let buttons;
 
-  switch (targetPopulation.status) {
+  switch (paymentPlan.status) {
     case PaymentPlanStatus.Open:
       buttons = (
         <OpenTargetPopulationHeaderButtons
-          targetPopulation={targetPopulation}
+          targetPopulation={paymentPlan}
           canDuplicate={canDuplicate}
           canRemove={canRemove}
           canEdit={canEdit}
@@ -86,7 +86,7 @@ export function TargetPopulationPageHeader({
     case PaymentPlanStatus.SteficonRun:
       buttons = (
         <LockedTargetPopulationHeaderButtons
-          targetPopulation={targetPopulation}
+          targetPopulation={paymentPlan}
           canDuplicate={canDuplicate}
           canUnlock={canUnlock}
           canSend={canSend}
@@ -98,7 +98,7 @@ export function TargetPopulationPageHeader({
       // Ready for Cash Assist, Processing, Ready, Accepted
       buttons = (
         <FinalizedTargetPopulationHeaderButtons
-          targetPopulation={targetPopulation}
+          targetPopulation={paymentPlan}
           canDuplicate={canDuplicate}
           businessAreaData={businessAreaData}
         />
@@ -109,11 +109,11 @@ export function TargetPopulationPageHeader({
     <PageHeader
       title={
         <HeaderWrapper>
-          {t(`${targetPopulation.name}`)}
-          {targetPopulation.buildStatus !== PaymentPlanBuildStatus.Ok && (
+          {t(`${paymentPlan.name}`)}
+          {paymentPlan.buildStatus !== PaymentPlanBuildStatus.Ok && (
             <StatusWrapper>
               <StatusBox
-                status={targetPopulation.buildStatus}
+                status={paymentPlan.buildStatus}
                 statusToColor={paymentPlanBuildStatusToColor}
               />
             </StatusWrapper>
@@ -121,7 +121,7 @@ export function TargetPopulationPageHeader({
         </HeaderWrapper>
       }
       breadCrumbs={breadCrumbsItems}
-      flags={<AdminButton adminUrl={targetPopulation.adminUrl} />}
+      flags={<AdminButton adminUrl={paymentPlan.adminUrl} />}
     >
       {buttons}
     </PageHeader>

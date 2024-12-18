@@ -32,6 +32,7 @@ export const PAYMENT_PLAN_QUERY = gql`
         name
         caId
         caHashId
+        status
         isSocialWorkerProgram
       }
       vulnerabilityScoreMin

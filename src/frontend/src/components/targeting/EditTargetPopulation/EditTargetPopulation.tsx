@@ -91,21 +91,19 @@ export const EditTargetPopulation = ({
     try {
       await mutate({
         variables: {
-          input: {
-            paymentPlanId: values.id,
-            excludedIds: values.excludedIds,
-            exclusionReason: values.exclusionReason,
-            programCycleId: values.programCycleId.value,
-            ...(paymentPlan.status === PaymentPlanStatus.Open && {
-              name: values.name,
-            }),
-            ...getTargetingCriteriaVariables({
-              flagExcludeIfActiveAdjudicationTicket:
-                values.flagExcludeIfActiveAdjudicationTicket,
-              flagExcludeIfOnSanctionList: values.flagExcludeIfOnSanctionList,
-              criterias: values.targetingCriteria,
-            }),
-          },
+          paymentPlanId: values.id,
+          excludedIds: values.excludedIds,
+          exclusionReason: values.exclusionReason,
+          programCycleId: values.programCycleId.value,
+          ...(paymentPlan.status === PaymentPlanStatus.Open && {
+            name: values.name,
+          }),
+          ...getTargetingCriteriaVariables({
+            flagExcludeIfActiveAdjudicationTicket:
+              values.flagExcludeIfActiveAdjudicationTicket,
+            flagExcludeIfOnSanctionList: values.flagExcludeIfOnSanctionList,
+            criterias: values.targetingCriteria,
+          }),
         },
       });
       showMessage(t('Target Population Updated'));
