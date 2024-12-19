@@ -8,7 +8,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { LoadingButton } from '@components/core/LoadingButton';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { useDeletePpMutation } from '@generated/graphql';
+import { useDeletePaymentPMutation } from '@generated/graphql';
 import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
@@ -31,7 +31,7 @@ export const DeleteTargetPopulation = ({
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const { showMessage } = useSnackbar();
-  const [mutate, { loading: loadingDelete }] = useDeletePpMutation();
+  const [mutate, { loading: loadingDelete }] = useDeletePaymentPMutation();
 
   const handleDelete = async (): Promise<void> => {
     try {
