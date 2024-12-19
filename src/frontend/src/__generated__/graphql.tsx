@@ -1190,11 +1190,6 @@ export type DeleteHouseholdApproveMutation = {
   grievanceTicket?: Maybe<GrievanceTicketNode>;
 };
 
-export type DeletePaymentPlanMutation = {
-  __typename?: 'DeletePaymentPlanMutation';
-  paymentPlan?: Maybe<PaymentPlanNode>;
-};
-
 export type DeletePaymentVerificationPlan = {
   __typename?: 'DeletePaymentVerificationPlan';
   paymentPlan?: Maybe<GenericPaymentPlanNode>;
@@ -8667,8 +8662,6 @@ export type SetSteficonRuleOnTargetPopulationMutationVariables = Exact<{
 }>;
 
 
-export type SetSteficonRuleOnTargetPopulationMutation = { __typename?: 'Mutations', setSteficonRuleOnTargetPopulation?: { __typename?: 'SetSteficonRuleOnTargetPopulationMutation', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, name?: string | null } | null } | null };
-
 export type UpdateTpMutationVariables = Exact<{
   input: UpdatePaymentPlanInput;
 }>;
@@ -9076,6 +9069,8 @@ export type AllPaymentPlansForTableQueryVariables = Exact<{
   totalHouseholdsCountWithValidPhoneNoMax?: InputMaybe<Scalars['Int']['input']>;
   createdAtRange?: InputMaybe<Scalars['String']['input']>;
   statusNot?: InputMaybe<Scalars['String']['input']>;
+  isPaymentPlan?: InputMaybe<Scalars['Boolean']['input']>;
+  isTargetPopulation?: InputMaybe<Scalars['Boolean']['input']>;
 }>;
 
 

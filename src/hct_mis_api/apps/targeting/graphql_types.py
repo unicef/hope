@@ -89,7 +89,7 @@ class TargetingIndividualBlockRuleFilterNode(DjangoObjectType):
         if parent.flex_field_classification == FlexFieldClassification.NOT_FLEX_FIELD:
             field_attribute = get_field_by_name(
                 parent.field_name,
-                parent.individuals_filters_block.targeting_criteria_rule.targeting_criteria.target_population,
+                parent.individuals_filters_block.targeting_criteria_rule.targeting_criteria.payment_plan,
             )
             return filter_choices(field_attribute, parent.arguments)  # type: ignore # can't convert graphene list to list
 

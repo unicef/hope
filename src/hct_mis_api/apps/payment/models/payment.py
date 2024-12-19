@@ -163,7 +163,6 @@ class PaymentPlan(
             "created_by",
             "status",
             "status_date",
-            "target_population",
             "currency",
             "dispersion_start_date",
             "dispersion_end_date",
@@ -185,6 +184,7 @@ class PaymentPlan(
             "female_adults_count",
             "total_households_count",
             "total_individuals_count",
+            "targeting_criteria",
             "targeting_criteria_string",
             "excluded_ids",
         ],
@@ -692,7 +692,7 @@ class PaymentPlan(
         # filter by targeting_criteria
         households = all_households.filter(self.targeting_criteria.get_query())
         if self.status == PaymentPlan.Status.TP_OPEN:
-            return households
+            return households.distinct()
 
         params = {}
         if self.vulnerability_score_max is not None:
@@ -700,6 +700,10 @@ class PaymentPlan(
         if self.vulnerability_score_min is not None:
             params["payment__vulnerability_score__gte"] = self.vulnerability_score_min
         return households.filter(**params).distinct()
+
+    @property
+    def household_count(self) -> int:
+        return self.household_list.count()
 
     @property
     def eligible_payments(self) -> QuerySet:
