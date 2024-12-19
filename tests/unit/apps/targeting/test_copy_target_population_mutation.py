@@ -86,7 +86,7 @@ class TestCopyTargetPopulationMutation(APITestCase):
             },
         )
         individual = individuals[0]
-        individual.unicef_id = "IND-1"
+        individual.unicef_id = "IND-12"
         individual.save()
         cls.household = household
         cls.update_partner_access_to_program(partner, cls.program)
