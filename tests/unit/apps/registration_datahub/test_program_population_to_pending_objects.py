@@ -515,10 +515,12 @@ class TestProgramPopulationToPendingObjects(APITestCase):
         household_already_in_program.household_collection = household_collection
         household_already_in_program.save()
         household_already_in_program_repr.household_collection = household_collection
+        household_already_in_program_repr.unicef_id = household_already_in_program.unicef_id
         household_already_in_program_repr.save()
         individuals_already_in_program[0].individual_collection = individual_collection
         individuals_already_in_program[0].save()
         individuals_already_in_program_repr[0].individual_collection = individual_collection
+        individuals_already_in_program_repr[0].unicef_id = individuals_already_in_program[0].unicef_id
         individuals_already_in_program_repr[0].save()
 
         self._object_count_before_after()
