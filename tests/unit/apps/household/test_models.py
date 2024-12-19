@@ -9,9 +9,9 @@ from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.household.fixtures import (
     BankAccountInfoFactory,
-    create_household,
     HouseholdFactory,
     IndividualFactory,
+    create_household,
 )
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
@@ -442,9 +442,7 @@ class TestDocument(TestCase):
         Document.objects.bulk_create(documents_to_create)
 
         # make representation with different number
-        (individual_to_create, _, _, _) = copy_individual_fast(
-            self.individual, program_3
-        )
+        (individual_to_create, _, _, _) = copy_individual_fast(self.individual, program_3)
         (program_3_individual_representation,) = Individual.objects.bulk_create([individual_to_create])
         Document.objects.create(
             document_number="456",
