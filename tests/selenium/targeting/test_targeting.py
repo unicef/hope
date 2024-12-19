@@ -168,7 +168,6 @@ def create_custom_household(observed_disability: list[str], residence_status: st
     program = Program.objects.get(name="Test Programm")
     household, _ = create_household_and_individuals(
         household_data={
-            "unicef_id": "HH-00-0000.0442",
             "rdi_merge_status": "MERGED",
             "business_area": program.business_area,
             "program": program,
@@ -235,7 +234,6 @@ def create_targeting(household_without_disabilities: Household) -> TargetPopulat
     target_population.save()
     household, _ = create_household(
         household_args={
-            "unicef_id": "HH-00-0000.0442",
             "business_area": program.business_area,
             "program": program,
             "residence_status": HOST,
