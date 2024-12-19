@@ -642,6 +642,22 @@ snapshots['TestPaymentPlanQueries::test_payment_plan_filter_name 1'] = {
     }
 }
 
+snapshots['TestPaymentPlanQueries::test_payment_plan_filter_not_status 1'] = {
+    'data': {
+        'allPaymentPlans': {
+            'edges': [
+                {
+                    'node': {
+                        'name': 'PaymentPlan with conflicts',
+                        'status': 'LOCKED',
+                        'totalHouseholdsCountWithValidPhoneNo': 1
+                    }
+                }
+            ]
+        }
+    }
+}
+
 snapshots['TestPaymentPlanQueries::test_payment_plan_filter_payment_plan_applicable 1'] = {
     'data': {
         'allPaymentPlans': {
