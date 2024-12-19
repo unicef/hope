@@ -120,9 +120,9 @@ class TestDocument(TestCase):
     def setUpTestData(cls) -> None:
         super().setUpTestData()
         call_command("loadcountries")
-        business_area = create_afghanistan()
+        cls.business_area = create_afghanistan()
         afghanistan = Country.objects.get(name="Afghanistan")
-        _, (individual,) = create_household(household_args={"size": 1, "business_area": business_area})
+        _, (individual,) = create_household(household_args={"size": 1, "business_area": cls.business_area})
 
         cls.country = afghanistan
         cls.individual = individual
@@ -187,10 +187,9 @@ class TestDocument(TestCase):
         program_3 = ProgramFactory()
         program_4 = ProgramFactory()
 
-        for _program in [program_1, program_2]:
-            (individual_to_create, documents_to_create, _, _) = copy_individual_fast(self.individual, _program)
-            Individual.objects.bulk_create([individual_to_create])
-            Document.objects.bulk_create(documents_to_create)
+        (individual_to_create, documents_to_create, _, _) = copy_individual_fast(self.individual, program_2)
+        Individual.objects.bulk_create([individual_to_create])
+        Document.objects.bulk_create(documents_to_create)
 
         # test regular create
         for _program in [program_3, program_4]:
@@ -209,8 +208,7 @@ class TestDocument(TestCase):
             )
 
         # don't allow to create representations with the same document number and programs
-        (individual_to_create, _, _, _) = copy_individual_fast(self.individual, _program)
-        (created_individual_representation,) = Individual.objects.bulk_create([individual_to_create])
+        _, (individual,) = create_household(household_args={"size": 1, "business_area": self.business_area, "program": program_1})
         with self.assertRaises(IntegrityError):
             with transaction.atomic():
                 # bulk create
@@ -218,7 +216,7 @@ class TestDocument(TestCase):
                     [
                         Document(
                             document_number="213123",
-                            individual=created_individual_representation,
+                            individual=individual,
                             country=self.country,
                             type=document_type,
                             status=Document.STATUS_VALID,
@@ -234,7 +232,7 @@ class TestDocument(TestCase):
                 # regular create
                 Document.objects.create(
                     document_number="213123",
-                    individual=created_individual_representation,
+                    individual=individual,
                     country=self.country,
                     type=document_type,
                     status=Document.STATUS_VALID,
@@ -426,11 +424,10 @@ class TestDocument(TestCase):
         program_2 = ProgramFactory()
         program_3 = ProgramFactory()
 
-        # make representations with the same number
-        for _program in [program_1, program_2]:
-            (individual_to_create, documents_to_create, _, _) = copy_individual_fast(self.individual, _program)
-            Individual.objects.bulk_create([individual_to_create])
-            Document.objects.bulk_create(documents_to_create)
+        # make representation with the same number
+        (individual_to_create, documents_to_create, _, _) = copy_individual_fast(self.individual, program_2)
+        Individual.objects.bulk_create([individual_to_create])
+        Document.objects.bulk_create(documents_to_create)
 
         # make representation with different number
         program_3_individual_representation = (individual_to_create, _, _, _) = copy_individual_fast(
