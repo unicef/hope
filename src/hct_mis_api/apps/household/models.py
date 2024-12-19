@@ -576,6 +576,13 @@ class Household(
     class Meta:
         verbose_name = "Household"
         permissions = (("can_withdrawn", "Can withdrawn Household"),)
+        constraints = [
+            UniqueConstraint(
+                fields=["unicef_id", "program"],
+                condition=Q(is_removed=False),
+                name="unique_ind_unicef_id_in_program",
+            )
+        ]
 
     def save(self, *args: Any, **kwargs: Any) -> None:
         from hct_mis_api.apps.targeting.models import (
@@ -1187,6 +1194,13 @@ class Individual(
     class Meta:
         verbose_name = "Individual"
         indexes = (GinIndex(fields=["vector_column"]),)
+        constraints = [
+            UniqueConstraint(
+                fields=["unicef_id", "program"],
+                condition=Q(is_removed=False) & Q(duplicate=False),
+                name="unique_hh_unicef_id_in_program",
+            )
+        ]
 
     def recalculate_data(self, save: bool = True) -> Tuple[Any, List[str]]:
         update_fields = ["disability"]
