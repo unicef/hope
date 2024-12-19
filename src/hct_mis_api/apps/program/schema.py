@@ -17,6 +17,7 @@ import graphene
 from graphene import relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
+from graphql import GraphQLError
 
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.account.permissions import (
@@ -240,6 +241,8 @@ class Query(graphene.ObjectType):
         return is_still_processing or all_rdis_deduplicated or rdi_merging
 
     def resolve_all_programs(self, info: Any, **kwargs: Any) -> QuerySet[Program]:
+        if not info.context.headers.get("Business-Area"):
+            raise GraphQLError("Not found header Business-Area")
         user = info.context.user
         filters = {
             "business_area__slug": info.context.headers.get("Business-Area").lower(),
