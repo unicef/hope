@@ -11,6 +11,7 @@ export POSTGRES_PASS=postgres
 export PGUSER=postgres
 export POSTGRES_HOST_AUTH_METHOD=trust
 export DATABASE_URL=postgis://postgres:postgres@localhost:5432/postgres
+export REP_DATABASE_URL=postgis://postgres:postgres@localhost:5432/postgres
 export POSTGRES_SSL_MODE=off
 export EMAIL_HOST=TBD
 export EMAIL_HOST_USER=TBD
