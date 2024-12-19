@@ -2,11 +2,11 @@ import { Grid, MenuItem } from '@mui/material';
 import { Group, Person } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { PaymentPlanStatus } from '@generated/graphql';
 import {
-  createHandleApplyFilterChange,
-  paymentPlanStatusMapping,
-} from '@utils/utils';
+  PaymentPlanStatus,
+  usePaymentPlanStatusChoicesQueryQuery,
+} from '@generated/graphql';
+import { createHandleApplyFilterChange } from '@utils/utils';
 import { DatePickerFilter } from '@core/DatePickerFilter';
 import { NumberTextField } from '@core/NumberTextField';
 import { SearchTextField } from '@core/SearchTextField';
@@ -32,7 +32,6 @@ export const TargetPopulationTableFilters = ({
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
-  const isAccountability = location.pathname.includes('accountability');
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
@@ -54,9 +53,18 @@ export const TargetPopulationTableFilters = ({
     clearFilter();
   };
 
-  const preparedStatusChoices = isAccountability
-    ? Object.values(PaymentPlanStatus).filter((key) => key !== 'OPEN')
-    : Object.values(PaymentPlanStatus);
+  const allowedStatusChoices = [
+    PaymentPlanStatus.TpOpen,
+    PaymentPlanStatus.TpLocked,
+    PaymentPlanStatus.Finished,
+  ];
+
+  const { data: statusChoicesData } = usePaymentPlanStatusChoicesQueryQuery();
+
+  const preparedStatusChoices =
+    statusChoicesData?.paymentPlanStatusChoices?.filter((el) =>
+      allowedStatusChoices.includes(el.value as PaymentPlanStatus),
+    ) || [];
 
   return (
     <FiltersSection
@@ -82,9 +90,9 @@ export const TargetPopulationTableFilters = ({
             fullWidth
             data-cy="filters-status"
           >
-            {preparedStatusChoices.sort().map((key) => (
-              <MenuItem key={key} value={key}>
-                {paymentPlanStatusMapping(key)}
+            {preparedStatusChoices.map((item) => (
+              <MenuItem key={item.value} value={item.value}>
+                {item.name}
               </MenuItem>
             ))}
           </SelectFilter>

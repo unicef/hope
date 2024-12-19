@@ -1,6 +1,9 @@
 import { Grid, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { paymentPlanStatusToColor } from '@utils/utils';
+import {
+  paymentPlanStatusToColor,
+  targetPopulationStatusDisplayMap,
+} from '@utils/utils';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { LabelizedField } from '@core/LabelizedField';
 import { OverviewContainer } from '@core/OverviewContainer';
@@ -46,6 +49,7 @@ export function TargetPopulationDetails({
                 dataCy="target-population-status"
                 status={targetPopulation.status}
                 statusToColor={paymentPlanStatusToColor}
+                statusNameMapping={targetPopulationStatusDisplayMap}
               />
             </LabelizedField>
           </Grid>

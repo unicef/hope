@@ -30,7 +30,7 @@ const StatusWrapper = styled.div`
   flex-direction: row;
 `;
 
-export interface ProgramDetailsPageHeaderPropTypes {
+export interface TargetPopulationPageHeaderProps {
   paymentPlan;
   canEdit: boolean;
   canRemove: boolean;
@@ -48,7 +48,7 @@ export function TargetPopulationPageHeader({
   canLock,
   canUnlock,
   canSend,
-}: ProgramDetailsPageHeaderPropTypes): ReactElement {
+}: TargetPopulationPageHeaderProps): ReactElement {
   const { t } = useTranslation();
   const { baseUrl, businessArea } = useBaseUrl();
   const { data: businessAreaData, loading: businessAreaDataLoading } =
@@ -68,7 +68,7 @@ export function TargetPopulationPageHeader({
   let buttons;
 
   switch (paymentPlan.status) {
-    case PaymentPlanStatus.Open:
+    case PaymentPlanStatus.TpOpen:
       buttons = (
         <OpenTargetPopulationHeaderButtons
           targetPopulation={paymentPlan}
@@ -79,7 +79,7 @@ export function TargetPopulationPageHeader({
         />
       );
       break;
-    case PaymentPlanStatus.Locked:
+    case PaymentPlanStatus.TpLocked:
     case PaymentPlanStatus.SteficonCompleted:
     case PaymentPlanStatus.SteficonError:
     case PaymentPlanStatus.SteficonRun:

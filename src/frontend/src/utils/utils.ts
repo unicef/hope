@@ -190,6 +190,20 @@ export function paymentStatusDisplayMap(status: string): string {
       return 'UNSUCCESSFUL';
   }
 }
+
+export function targetPopulationStatusDisplayMap(status: string): string {
+  switch (status) {
+    case PaymentPlanStatus.TpOpen:
+      return 'OPEN';
+    case PaymentPlanStatus.TpLocked:
+      return 'LOCKED';
+    case PaymentPlanStatus.Finished:
+      return 'FINISHED';
+    default:
+      return 'UNKNOWN STATUS';
+  }
+}
+
 export function paymentVerificationStatusToColor(
   theme: typeof themeObj,
   status: string,
