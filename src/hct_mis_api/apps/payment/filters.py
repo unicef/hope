@@ -177,7 +177,7 @@ class PaymentPlanFilter(FilterSet):
     business_area = CharFilter(field_name="business_area__slug", required=True)
     search = CharFilter(method="search_filter")
     status = MultipleChoiceFilter(field_name="status", choices=PaymentPlan.Status.choices)
-    not_status = ChoiceFilter(method="filter_not_status", choices=PaymentPlan.Status.choices)
+    status_not = ChoiceFilter(method="filter_status_not", choices=PaymentPlan.Status.choices)
     total_entitled_quantity_from = NumberFilter(field_name="total_entitled_quantity", lookup_expr="gte")
     total_entitled_quantity_to = NumberFilter(field_name="total_entitled_quantity", lookup_expr="lte")
     dispersion_start_date = DateFilter(field_name="dispersion_start_date", lookup_expr="gte")
@@ -299,7 +299,7 @@ class PaymentPlanFilter(FilterSet):
         return queryset
 
     @staticmethod
-    def filter_not_status(queryset: "QuerySet", model_field: str, value: Any) -> "QuerySet":
+    def filter_status_not(queryset: "QuerySet", model_field: str, value: Any) -> "QuerySet":
         return queryset.exclude(status=value)
 
 
