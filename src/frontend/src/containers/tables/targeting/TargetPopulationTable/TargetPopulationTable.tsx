@@ -80,7 +80,7 @@ export function TargetPopulationTable({
         }
         rowsPerPageOptions={[10, 15, 20]}
         query={useAllTargetPopulationsQuery}
-        queriedObjectName="allTargetPopulation"
+        queriedObjectName="allPaymentPlans"
         defaultOrderBy="createdAt"
         defaultOrderDirection="desc"
         initialVariables={initialVariables}
