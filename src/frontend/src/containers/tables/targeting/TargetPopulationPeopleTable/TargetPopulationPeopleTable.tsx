@@ -5,6 +5,7 @@ import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './TargetPopulationPeopleHeadCells';
 import { TargetPopulationPeopleTableRow } from './TargetPopulationPeopleRow';
 import { useAllPaymentsForTableQuery } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface TargetPopulationHouseholdProps {
   id?: string;
@@ -18,7 +19,9 @@ export function TargetPopulationPeopleTable({
   canViewDetails,
 }: TargetPopulationHouseholdProps): ReactElement {
   const { t } = useTranslation();
+  const { businessArea } = useBaseUrl();
   const initialVariables = {
+    businessArea,
     ...(id && { paymentPlanId: id }),
     ...variables,
   };
