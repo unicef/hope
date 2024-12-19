@@ -10,7 +10,7 @@ from hct_mis_api.apps.core.field_attributes.fields_types import Scope
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.core.schema import FieldAttributeNode
 from hct_mis_api.apps.core.utils import decode_id_string
-from hct_mis_api.apps.payment.models import DeliveryMechanism
+from hct_mis_api.apps.payment.models import DeliveryMechanism, PaymentPlan
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.choices import FlexFieldClassification
 from hct_mis_api.apps.targeting.filters import TargetPopulationFilter
@@ -24,12 +24,12 @@ if TYPE_CHECKING:
     from hct_mis_api.apps.targeting.models import TargetingIndividualRuleFilterBlock
 
 
-def get_field_by_name(field_name: str, target_population: target_models.TargetPopulation) -> Dict:
+def get_field_by_name(field_name: str, payment_plan: PaymentPlan) -> Dict:
     scopes = [Scope.TARGETING]
-    if target_population.program.is_social_worker_program:
+    if payment_plan.is_social_worker_program:
         scopes.append(Scope.XLSX_PEOPLE)
     factory = FieldFactory.from_only_scopes(scopes)
-    factory.apply_business_area(target_population.business_area.slug)
+    factory.apply_business_area(payment_plan.business_area.slug)
     field = factory.to_dict_by("name")[field_name]
     choices = field.get("choices") or field.get("_choices")
     if choices and callable(choices):
@@ -63,7 +63,7 @@ class TargetingCriteriaRuleFilterNode(DjangoObjectType):
     def resolve_field_attribute(parent, info: Any) -> Optional[Dict]:
         if parent.flex_field_classification == FlexFieldClassification.NOT_FLEX_FIELD:
             field_attribute = get_field_by_name(
-                parent.field_name, parent.targeting_criteria_rule.targeting_criteria.target_population
+                parent.field_name, parent.targeting_criteria_rule.targeting_criteria.payment_plan
             )
             return filter_choices(
                 field_attribute, parent.arguments  # type: ignore # can't convert graphene list to list

@@ -126,7 +126,7 @@ class ProgramNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
 
     @staticmethod
     def resolve_total_number_of_households_with_tp_in_program(program: Program, info: Any, **kwargs: Any) -> int:
-        return program.households_with_tp_in_program.count()
+        return program.households_with_payments_in_program.count()
 
     @staticmethod
     def resolve_partners(program: Program, info: Any, **kwargs: Any) -> QuerySet[Partner]:
