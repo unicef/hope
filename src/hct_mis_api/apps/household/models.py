@@ -580,7 +580,7 @@ class Household(
             UniqueConstraint(
                 fields=["unicef_id", "program"],
                 condition=Q(is_removed=False),
-                name="unique_ind_unicef_id_in_program",
+                name="unique_hh_unicef_id_in_program",
             )
         ]
 
@@ -1198,7 +1198,7 @@ class Individual(
             UniqueConstraint(
                 fields=["unicef_id", "program"],
                 condition=Q(is_removed=False) & Q(duplicate=False),
-                name="unique_hh_unicef_id_in_program",
+                name="unique_ind_unicef_id_in_program",
             )
         ]
 
