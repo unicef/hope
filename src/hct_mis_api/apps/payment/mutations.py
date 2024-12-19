@@ -88,12 +88,6 @@ from hct_mis_api.apps.payment.xlsx.xlsx_verification_import_service import (
 )
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.steficon.models import Rule
-from hct_mis_api.apps.targeting.models import (
-    TargetingCollectorRuleFilterBlock,
-    TargetingCriteria,
-    TargetingCriteriaRule,
-    TargetingIndividualRuleFilterBlock,
-)
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 
@@ -1387,7 +1381,9 @@ class CopyTargetingCriteriaMutation(PermissionMutation):
             program_cycle=program_cycle,
         )
         if payment_plan.targeting_criteria:
-            payment_plan_copy.targeting_criteria = cls.copy_target_criteria(payment_plan.targeting_criteria)
+            payment_plan_copy.targeting_criteria = PaymentPlanService.copy_target_criteria(
+                payment_plan.targeting_criteria
+            )
 
         payment_plan_copy.save()
         payment_plan_copy.refresh_from_db()
@@ -1402,45 +1398,6 @@ class CopyTargetingCriteriaMutation(PermissionMutation):
             payment_plan_copy,
         )
         return cls(payment_plan=payment_plan_copy)
-
-    @classmethod
-    def copy_target_criteria(cls, targeting_criteria: TargetingCriteria) -> TargetingCriteria:
-        targeting_criteria_copy = TargetingCriteria()
-        targeting_criteria_copy.save()
-        for rule in targeting_criteria.rules.all():
-            rule_copy = TargetingCriteriaRule(
-                targeting_criteria=targeting_criteria_copy,
-                household_ids=rule.household_ids,
-                individual_ids=rule.individual_ids,
-            )
-            rule_copy.save()
-            for hh_filter in rule.filters.all():
-                hh_filter.pk = None
-                hh_filter.targeting_criteria_rule = rule_copy
-                hh_filter.save()
-            for ind_filter_block in rule.individuals_filters_blocks.all():
-                ind_filter_block_copy = TargetingIndividualRuleFilterBlock(
-                    targeting_criteria_rule=rule_copy, target_only_hoh=ind_filter_block.target_only_hoh
-                )
-                ind_filter_block_copy.save()
-                for ind_filter in ind_filter_block.individual_block_filters.all():
-                    ind_filter.pk = None
-                    ind_filter.individuals_filters_block = ind_filter_block_copy
-                    ind_filter.save()
-
-            for col_filter_block in rule.collectors_filters_blocks.all():
-                col_filter_block_copy = TargetingCollectorRuleFilterBlock(targeting_criteria_rule=rule_copy)
-                col_filter_block_copy.save()
-                for col_filter in col_filter_block.collector_block_filters.all():
-                    col_filter.pk = None
-                    col_filter.collector_block_filters = col_filter_block_copy
-                    col_filter.save()
-        # TODO: will remove after refactoring
-        targeting_criteria_copy.household_ids = targeting_criteria.household_ids
-        targeting_criteria_copy.individual_ids = targeting_criteria.individual_ids
-        targeting_criteria_copy.save()
-
-        return targeting_criteria_copy
 
 
 class Mutations(graphene.ObjectType):

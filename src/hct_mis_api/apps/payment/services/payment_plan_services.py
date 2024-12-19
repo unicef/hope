@@ -18,11 +18,7 @@ from psycopg2._psycopg import IntegrityError
 
 from hct_mis_api.apps.core.models import BusinessArea, FileTemp
 from hct_mis_api.apps.core.utils import chunks, decode_id_string
-from hct_mis_api.apps.household.models import (
-    ROLE_PRIMARY,
-    Household,
-    IndividualRoleInHousehold,
-)
+from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
 from hct_mis_api.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx,
     create_payment_plan_payment_list_xlsx_per_fsp,
@@ -45,7 +41,12 @@ from hct_mis_api.apps.payment.services.payment_household_snapshot_service import
     create_payment_plan_snapshot_data,
 )
 from hct_mis_api.apps.program.models import Program, ProgramCycle
-from hct_mis_api.apps.targeting.models import TargetingCriteria
+from hct_mis_api.apps.targeting.models import (
+    TargetingCollectorRuleFilterBlock,
+    TargetingCriteria,
+    TargetingCriteriaRule,
+    TargetingIndividualRuleFilterBlock,
+)
 from hct_mis_api.apps.targeting.services.utils import from_input_to_targeting_criteria
 from hct_mis_api.apps.targeting.validators import TargetingCriteriaInputValidator
 
@@ -163,6 +164,16 @@ class PaymentPlanService:
         if self.payment_plan.status != PaymentPlan.Status.TP_OPEN:
             raise GraphQLError("Can only Lock Population for Open Population status")
 
+        # just remove all with vulnerability_score filter
+        if self.payment_plan.vulnerability_score_max or self.payment_plan.vulnerability_score_min:
+            params = {}
+            if self.payment_plan.vulnerability_score_max is not None:
+                params["vulnerability_score__lte"] = self.payment_plan.vulnerability_score_max
+            if self.payment_plan.vulnerability_score_min is not None:
+                params["vulnerability_score__gte"] = self.payment_plan.vulnerability_score_min
+
+            self.payment_plan.payment_items.exclude(**params).update(is_removed=True)
+
         self.payment_plan.status = PaymentPlan.Status.TP_LOCKED
         self.payment_plan.build_status_pending()
         self.payment_plan.save(update_fields=("build_status", "built_at", "status"))
@@ -173,6 +184,9 @@ class PaymentPlanService:
     def tp_unlock(self) -> PaymentPlan:
         if self.payment_plan.status != PaymentPlan.Status.TP_LOCKED:
             raise GraphQLError("Can only Unlock Population for Locked Population status")
+
+        # revert all soft deleted by vulnerability_score filter
+        self.payment_plan.payment_items(manager="all_objects").filter(is_removed=True).update(is_removed=False)
 
         self.payment_plan.status = PaymentPlan.Status.TP_OPEN
         self.payment_plan.build_status_pending()
@@ -390,11 +404,8 @@ class PaymentPlanService:
     @staticmethod
     def create_payments(payment_plan: PaymentPlan) -> None:
         payments_to_create = []
-        households = Household.objects.filter(
-            business_area=payment_plan.business_area, program=payment_plan.program_cycle.program
-        )
-        households = households.filter(payment_plan.targeting_criteria.get_query())
-        # TODO: add filtering by 'vulnerability_score_min', 'vulnerability_score_max'
+        households = payment_plan.household_list
+
         households = (
             households.annotate(
                 collector=IndividualRoleInHousehold.objects.filter(household=OuterRef("pk"), role=ROLE_PRIMARY).values(
@@ -753,7 +764,7 @@ class PaymentPlanService:
             build_status=PaymentPlan.BuildStatus.BUILD_STATUS_OK,
             built_at=timezone.now(),
             status_date=timezone.now(),
-            # targeting_criteria=source_pp.targeting_criteria,  # TODO: copy criteria from source_pp?
+            targeting_criteria=self.copy_target_criteria(source_pp.targeting_criteria),
             is_follow_up=True,
             source_payment_plan=source_pp,
             business_area=source_pp.business_area,
@@ -849,8 +860,7 @@ class PaymentPlanService:
     def full_rebuild(self) -> None:
         payment_plan: PaymentPlan = self.payment_plan
         # remove all payment and recreate
-        # TODO: do we need soft delete here, probably not?
-        payment_plan.payment_items.all().delete()
+        payment_plan.payment_items(manager="all_objects").all().delete()
 
         self.create_payments(payment_plan)
 
@@ -865,3 +875,39 @@ class PaymentPlanService:
             payment_plan_full_rebuild.delay(payment_plan.id)
         if rebuild_stats and not rebuild_list:
             payment_plan_rebuild_stats.delay(payment_plan.id)
+
+    @staticmethod
+    def copy_target_criteria(targeting_criteria: TargetingCriteria) -> TargetingCriteria:
+        targeting_criteria_copy = TargetingCriteria()
+        targeting_criteria_copy.save()
+        for rule in targeting_criteria.rules.all():
+            rule_copy = TargetingCriteriaRule(
+                targeting_criteria=targeting_criteria_copy,
+                household_ids=rule.household_ids,
+                individual_ids=rule.individual_ids,
+            )
+            rule_copy.save()
+            for hh_filter in rule.filters.all():
+                hh_filter.pk = None
+                hh_filter.targeting_criteria_rule = rule_copy
+                hh_filter.save()
+            for ind_filter_block in rule.individuals_filters_blocks.all():
+                ind_filter_block_copy = TargetingIndividualRuleFilterBlock(
+                    targeting_criteria_rule=rule_copy, target_only_hoh=ind_filter_block.target_only_hoh
+                )
+                ind_filter_block_copy.save()
+                for ind_filter in ind_filter_block.individual_block_filters.all():
+                    ind_filter.pk = None
+                    ind_filter.individuals_filters_block = ind_filter_block_copy
+                    ind_filter.save()
+
+            for col_filter_block in rule.collectors_filters_blocks.all():
+                col_filter_block_copy = TargetingCollectorRuleFilterBlock(targeting_criteria_rule=rule_copy)
+                col_filter_block_copy.save()
+                for col_filter in col_filter_block.collector_block_filters.all():
+                    col_filter.pk = None
+                    col_filter.collector_block_filters = col_filter_block_copy
+                    col_filter.save()
+        targeting_criteria_copy.save()
+
+        return targeting_criteria_copy
