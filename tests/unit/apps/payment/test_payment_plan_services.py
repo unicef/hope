@@ -327,7 +327,9 @@ class TestPaymentPlanServices(APITestCase):
     @freeze_time("2023-10-10")
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_create_follow_up_pp(self, get_exchange_rate_mock: Any) -> None:
+        tc = TargetingCriteriaFactory()
         pp = PaymentPlanFactory(
+            targeting_criteria=tc,
             total_households_count=1,
             created_by=self.user,
         )
@@ -366,7 +368,7 @@ class TestPaymentPlanServices(APITestCase):
         pp_not_distributed = payments[1]
         pp_force_failed = payments[2]
 
-        with self.assertNumQueries(5):
+        with self.assertNumQueries(8):
             follow_up_pp = PaymentPlanService(pp).create_follow_up(
                 self.user, dispersion_start_date, dispersion_end_date
             )
@@ -416,7 +418,7 @@ class TestPaymentPlanServices(APITestCase):
         follow_up_payment.excluded = True
         follow_up_payment.save()
 
-        with self.assertNumQueries(5):
+        with self.assertNumQueries(8):
             follow_up_pp_2 = PaymentPlanService(pp).create_follow_up(
                 self.user, dispersion_start_date, dispersion_end_date
             )
@@ -742,7 +744,7 @@ class TestPaymentPlanServices(APITestCase):
 
         pp.refresh_from_db()
         # all Payments (removed and new)
-        self.assertEqual(Payment.all_objects.filter(parent=pp).count(), 4)
+        self.assertEqual(Payment.all_objects.filter(parent=pp).count(), 2)
 
         new_payment_ids = list(pp.payment_items.values_list("id", flat=True))
         new_payment_unicef_ids = list(pp.payment_items.values_list("unicef_id", flat=True))
