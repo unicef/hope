@@ -140,6 +140,7 @@ class IndividualSerializer(serializers.ModelSerializer):
             "updated_at",
             "version",
             "vector_column",
+            "unicef_id",
         ]
 
     def validate_role(self, value: str) -> Optional[str]:
@@ -175,6 +176,7 @@ class HouseholdSerializer(CollectDataMixin, serializers.ModelSerializer):
             "geopoint",
             "detail_id",
             "version",
+            "unicef_id",
         ]
         validators = [HouseholdValidator()]
 
