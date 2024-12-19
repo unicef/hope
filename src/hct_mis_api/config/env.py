@@ -11,6 +11,13 @@ DEFAULTS = {
         "",
         "https://django-environ.readthedocs.io/en/latest/types.html#environ-env-db-url",
     ),
+    "REP_DATABASE_URL": (
+        str,
+        "sqlite://",
+        "",
+        "",
+        "https://django-environ.readthedocs.io/en/latest/types.html#environ-env-db-url",
+    ),
     "DEBUG": (bool, False),
     "ENV": (str, "dev"),
     "DOMAIN": (str, "localhost:8000"),
