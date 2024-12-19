@@ -43,7 +43,7 @@ export const TargetPopulationCore = ({
   const ResultComponent = targetPopulation.program.isSocialWorkerProgram
     ? ResultsForPeople
     : ResultsForHouseholds;
-  //TODO: PP - list of payments - take hh info from there>
+
   const recordsTable = targetPopulation.program.isSocialWorkerProgram ? (
     <TargetPopulationPeopleTable
       id={id}

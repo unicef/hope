@@ -6,7 +6,6 @@ import { ReactElement } from 'react';
 export function TargetingHouseholds({ id, canViewDetails }): ReactElement {
   const { businessArea } = useBaseUrl();
 
-  //TODO: PP - list of payments - take hh info from there
   return (
     <TargetPopulationHouseholdTable
       id={id}

@@ -19,7 +19,7 @@ export function TargetPopulationPeopleTable({
 }: TargetPopulationHouseholdProps): ReactElement {
   const { t } = useTranslation();
   const initialVariables = {
-    ...(id && { targetPopulation: id }),
+    ...(id && { paymentPlanId: id }),
     ...variables,
   };
   return (
