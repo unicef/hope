@@ -8,7 +8,7 @@ export const AllSurveys = gql`
     $first: Int
     $last: Int
     $program: ID!
-    $targetPopulation: ID
+    $paymentPlan: ID
     $createdAtRange: String
     $createdBy: String
     $search: String
@@ -21,7 +21,7 @@ export const AllSurveys = gql`
       first: $first
       last: $last
       program: $program
-      targetPopulation: $targetPopulation
+      paymentPlan: $paymentPlan
       createdAtRange: $createdAtRange
       createdBy: $createdBy
       search: $search

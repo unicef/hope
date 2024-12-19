@@ -39,7 +39,9 @@ export const fakeApolloAllPrograms = [
                 startDate: '2020-01-20',
                 endDate: '2020-08-19',
                 status: 'ACTIVE',
-                caId: '123-21-PRG-00001',
+                internalData: {
+                  caId: '123-21-PRG-00001',
+                },
                 description:
                   'Purpose she occur lose new wish day per little because east like bill.',
                 budget: '691946197.49',

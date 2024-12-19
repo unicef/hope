@@ -24,7 +24,7 @@ export function TargetPopulationHouseholdTable({
 }: TargetPopulationHouseholdProps): ReactElement {
   const { t } = useTranslation();
   const initialVariables = {
-    ...(id && { targetPopulation: id }),
+    ...(id && { paymentPlanId: id }),
     ...variables,
   };
   const { selectedProgram } = useProgramContext();
@@ -42,6 +42,8 @@ export function TargetPopulationHouseholdTable({
     beneficiaryGroup,
     replacements,
   );
+
+  //TODO: adjust headcells and renderRow
 
   return (
     <TableWrapper>

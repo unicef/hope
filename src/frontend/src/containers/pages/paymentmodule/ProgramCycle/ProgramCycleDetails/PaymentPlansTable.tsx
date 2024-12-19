@@ -40,6 +40,7 @@ export const PaymentPlansTable = ({
     isFollowUp: null,
     program: programId,
     programCycle: programCycle.id,
+    isPaymentPlan: true,
   };
 
   const replacements = {

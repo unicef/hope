@@ -13,7 +13,10 @@ import { Delete } from '@mui/icons-material';
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { PaymentPlanQuery, useDeletePpMutation } from '@generated/graphql';
+import {
+  PaymentPlanQuery,
+  useDeletePaymentPMutation,
+} from '@generated/graphql';
 import { LoadingButton } from '@core/LoadingButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -32,7 +35,7 @@ export function DeletePaymentPlan({
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const { baseUrl } = useBaseUrl();
   const { showMessage } = useSnackbar();
-  const [mutate, { loading: loadingDelete }] = useDeletePpMutation();
+  const [mutate, { loading: loadingDelete }] = useDeletePaymentPMutation();
   const { id } = paymentPlan;
   const { isActiveProgram } = useProgramContext();
 

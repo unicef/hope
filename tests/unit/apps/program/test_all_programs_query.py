@@ -12,7 +12,7 @@ from hct_mis_api.apps.core.fixtures import (
     create_afghanistan,
     generate_data_collecting_types,
 )
-from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
+from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
 from hct_mis_api.apps.program.fixtures import (
     BeneficiaryGroupFactory,
@@ -64,14 +64,13 @@ class TestAllProgramsQuery(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        create_afghanistan()
+        cls.business_area = create_afghanistan()
         generate_data_collecting_types()
         data_collecting_type = DataCollectingType.objects.get(code="full_collection")
         cls.data_collecting_type_compatible = DataCollectingType.objects.get(code="size_only")
         cls.data_collecting_type_compatible.compatible_types.add(cls.data_collecting_type_compatible)
         data_collecting_type.compatible_types.add(cls.data_collecting_type_compatible, data_collecting_type)
 
-        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.business_area.data_collecting_types.set(DataCollectingType.objects.all().values_list("id", flat=True))
 
         cls.partner = PartnerFactory(name="WFP")
@@ -406,4 +405,14 @@ class TestAllProgramsQuery(APITestCase):
                 },
             },
             variables={},
+        )
+
+    def test_all_programs_query_without_ba_header(self) -> None:
+        self.snapshot_graphql_request(
+            request_string=self.ALL_PROGRAMS_QUERY,
+            context={
+                "user": self.user,
+                "headers": {},
+            },
+            variables={"businessArea": self.business_area.slug},
         )

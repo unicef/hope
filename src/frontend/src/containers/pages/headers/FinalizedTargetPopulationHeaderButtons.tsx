@@ -5,7 +5,7 @@ import { ReactElement, useState } from 'react';
 import styled from 'styled-components';
 import {
   BusinessAreaDataQuery,
-  TargetPopulationQuery,
+  PaymentPlanQuery,
   useCashAssistUrlPrefixQuery,
 } from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
@@ -23,7 +23,7 @@ const IconContainer = styled.span`
 `;
 
 export interface FinalizedTargetPopulationHeaderButtonsPropTypes {
-  targetPopulation: TargetPopulationQuery['targetPopulation'];
+  targetPopulation: PaymentPlanQuery['paymentPlan'];
   canDuplicate: boolean;
   businessAreaData: BusinessAreaDataQuery;
 }
@@ -55,9 +55,9 @@ export function FinalizedTargetPopulationHeaderButtons({
             variant="contained"
             color="primary"
             component="a"
-            disabled={!targetPopulation.caHashId}
+            disabled={!targetPopulation.program?.caHashId}
             target="_blank"
-            href={`${data.cashAssistUrlPrefix}&pagetype=entityrecord&etn=progres_targetpopulation&id=${targetPopulation.caHashId}`}
+            href={`${data.cashAssistUrlPrefix}&pagetype=entityrecord&etn=progres_targetpopulation&id=${targetPopulation.program?.caHashId}`}
             startIcon={<OpenInNewRoundedIcon />}
           >
             Open in CashAssist
