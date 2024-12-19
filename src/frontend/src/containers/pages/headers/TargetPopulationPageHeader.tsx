@@ -2,7 +2,6 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
   PaymentPlanBuildStatus,
-  PaymentPlanQuery,
   PaymentPlanStatus,
   useBusinessAreaDataQuery,
 } from '@generated/graphql';
