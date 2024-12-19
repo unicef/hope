@@ -208,7 +208,9 @@ class TestDocument(TestCase):
             )
 
         # don't allow to create representations with the same document number and programs
-        _, (individual,) = create_household(household_args={"size": 1, "business_area": self.business_area, "program": program_1})
+        _, (individual,) = create_household(
+            household_args={"size": 1, "business_area": self.business_area, "program": program_1}
+        )
         with self.assertRaises(IntegrityError):
             with transaction.atomic():
                 # bulk create
@@ -419,8 +421,6 @@ class TestDocument(TestCase):
         # allow to create representations with the same document number within different programs
         self.individual.is_original = True
         self.individual.save()
-
-        program_1 = self.individual.program
         program_2 = ProgramFactory()
         program_3 = ProgramFactory()
 
@@ -430,9 +430,6 @@ class TestDocument(TestCase):
         Document.objects.bulk_create(documents_to_create)
 
         # make representation with different number
-        program_3_individual_representation = (individual_to_create, _, _, _) = copy_individual_fast(
-            self.individual, program_3
-        )
         (program_3_individual_representation,) = Individual.objects.bulk_create([individual_to_create])
         Document.objects.create(
             document_number="456",
