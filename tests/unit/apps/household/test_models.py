@@ -7,7 +7,12 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.geo.models import Country
-from hct_mis_api.apps.household.fixtures import BankAccountInfoFactory, create_household
+from hct_mis_api.apps.household.fixtures import (
+    BankAccountInfoFactory,
+    create_household,
+    HouseholdFactory,
+    IndividualFactory,
+)
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
     IDENTIFICATION_TYPE_OTHER,
@@ -30,6 +35,7 @@ class TestHousehold(TestCase):
         super().setUpTestData()
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.program = ProgramFactory(business_area=cls.business_area)
 
         area_type_level_1 = AreaTypeFactory(
             name="State1",
@@ -113,6 +119,12 @@ class TestHousehold(TestCase):
         self.assertEqual(Household.all_objects.filter(unicef_id="HH-9090").first().is_removed, True)
         household2.delete(soft=False)
         self.assertIsNone(Household.all_objects.filter(unicef_id="HH-9191").first())
+
+    def test_unique_unicef_id_per_program_constraint(self) -> None:
+        HouseholdFactory(unicef_id="HH-123", program=self.program)
+        HouseholdFactory(unicef_id="HH-000", program=self.program)
+        with self.assertRaises(IntegrityError):
+            HouseholdFactory(unicef_id="HH-123", program=self.program)
 
 
 class TestDocument(TestCase):
@@ -430,6 +442,9 @@ class TestDocument(TestCase):
         Document.objects.bulk_create(documents_to_create)
 
         # make representation with different number
+        (individual_to_create, _, _, _) = copy_individual_fast(
+            self.individual, program_3
+        )
         (program_3_individual_representation,) = Individual.objects.bulk_create([individual_to_create])
         Document.objects.create(
             document_number="456",
@@ -503,8 +518,8 @@ class TestIndividualModel(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        create_afghanistan()
-        ProgramFactory()
+        business_area = create_afghanistan()
+        cls.program = ProgramFactory(business_area=business_area)
 
     def test_bank_name(self) -> None:
         individual = create_household({"size": 1})[1][0]
@@ -525,3 +540,9 @@ class TestIndividualModel(TestCase):
         individual = create_household({"size": 1})[1][0]
         bank_account_info = BankAccountInfoFactory(individual=individual)
         self.assertEqual(individual.bank_branch_name, bank_account_info.bank_branch_name)
+
+    def test_unique_unicef_id_per_program_constraint(self) -> None:
+        IndividualFactory(unicef_id="IND-123", program=self.program)
+        IndividualFactory(unicef_id="IND-000", program=self.program)
+        with self.assertRaises(IntegrityError):
+            IndividualFactory(unicef_id="IND-123", program=self.program)
