@@ -21,6 +21,8 @@ export const AllPaymentPlansForTable = gql`
     $totalHouseholdsCountWithValidPhoneNoMax: Int
     $createdAtRange: String
     $statusNot: String
+    $isPaymentPlan: Boolean
+    $isTargetPopulation: Boolean
   ) {
     allPaymentPlans(
       after: $after
@@ -42,6 +44,8 @@ export const AllPaymentPlansForTable = gql`
       totalHouseholdsCountWithValidPhoneNoMax: $totalHouseholdsCountWithValidPhoneNoMax
       createdAtRange: $createdAtRange
       statusNot: $statusNot
+      isPaymentPlan: $isPaymentPlan
+      isTargetPopulation: $isTargetPopulation
     ) {
       pageInfo {
         hasNextPage

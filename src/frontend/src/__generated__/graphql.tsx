@@ -1190,6 +1190,11 @@ export type DeleteHouseholdApproveMutation = {
   grievanceTicket?: Maybe<GrievanceTicketNode>;
 };
 
+export type DeletePaymentPlanMutation = {
+  __typename?: 'DeletePaymentPlanMutation';
+  paymentPlan?: Maybe<PaymentPlanNode>;
+};
+
 export type DeletePaymentVerificationPlan = {
   __typename?: 'DeletePaymentVerificationPlan';
   paymentPlan?: Maybe<GenericPaymentPlanNode>;
@@ -8661,6 +8666,8 @@ export type SetSteficonRuleOnTargetPopulationMutationVariables = Exact<{
   version?: InputMaybe<Scalars['BigInt']['input']>;
 }>;
 
+
+export type SetSteficonRuleOnTargetPopulationMutation = { __typename?: 'Mutations', setSteficonRuleOnTargetPopulation?: { __typename?: 'SetSteficonRuleOnTargetPopulationMutation', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, name?: string | null } | null } | null };
 
 export type UpdateTpMutationVariables = Exact<{
   input: UpdatePaymentPlanInput;
@@ -16590,7 +16597,7 @@ export type AllDeliveryMechanismsLazyQueryHookResult = ReturnType<typeof useAllD
 export type AllDeliveryMechanismsSuspenseQueryHookResult = ReturnType<typeof useAllDeliveryMechanismsSuspenseQuery>;
 export type AllDeliveryMechanismsQueryResult = Apollo.QueryResult<AllDeliveryMechanismsQuery, AllDeliveryMechanismsQueryVariables>;
 export const AllPaymentPlansForTableDocument = gql`
-    query AllPaymentPlansForTable($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $businessArea: String!, $search: String, $status: [String], $totalEntitledQuantityFrom: Float, $totalEntitledQuantityTo: Float, $dispersionStartDate: Date, $dispersionEndDate: Date, $isFollowUp: Boolean, $program: String, $programCycle: String, $totalHouseholdsCountWithValidPhoneNoMin: Int, $totalHouseholdsCountWithValidPhoneNoMax: Int, $createdAtRange: String, $statusNot: String) {
+    query AllPaymentPlansForTable($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $businessArea: String!, $search: String, $status: [String], $totalEntitledQuantityFrom: Float, $totalEntitledQuantityTo: Float, $dispersionStartDate: Date, $dispersionEndDate: Date, $isFollowUp: Boolean, $program: String, $programCycle: String, $totalHouseholdsCountWithValidPhoneNoMin: Int, $totalHouseholdsCountWithValidPhoneNoMax: Int, $createdAtRange: String, $statusNot: String, $isPaymentPlan: Boolean, $isTargetPopulation: Boolean) {
   allPaymentPlans(
     after: $after
     before: $before
@@ -16611,6 +16618,8 @@ export const AllPaymentPlansForTableDocument = gql`
     totalHouseholdsCountWithValidPhoneNoMax: $totalHouseholdsCountWithValidPhoneNoMax
     createdAtRange: $createdAtRange
     statusNot: $statusNot
+    isPaymentPlan: $isPaymentPlan
+    isTargetPopulation: $isTargetPopulation
   ) {
     pageInfo {
       hasNextPage
@@ -16700,6 +16709,8 @@ export const AllPaymentPlansForTableDocument = gql`
  *      totalHouseholdsCountWithValidPhoneNoMax: // value for 'totalHouseholdsCountWithValidPhoneNoMax'
  *      createdAtRange: // value for 'createdAtRange'
  *      statusNot: // value for 'statusNot'
+ *      isPaymentPlan: // value for 'isPaymentPlan'
+ *      isTargetPopulation: // value for 'isTargetPopulation'
  *   },
  * });
  */

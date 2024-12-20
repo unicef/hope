@@ -21,20 +21,6 @@ export function TargetPopulationDetails({
   const { createdBy, program, programCycle } = targetPopulation;
   const { t } = useTranslation();
 
-  //TODO: ?? replace it with some other?
-  // const closeDate = changeDate ? (
-  //   <UniversalMoment>{changeDate}</UniversalMoment>
-  // ) : (
-  //   '-'
-  // );
-  // const sendBy = sentForFinanceReleaseBy
-  //   ? `${sentForFinanceReleaseBy.firstName} ${sentForFinanceReleaseBy.lastName}`
-  //   : '-';
-  // const sendDate = sentForFinanceReleaseDate ? (
-  //   <UniversalMoment>{sentForFinanceReleaseDate}</UniversalMoment>
-  // ) : (
-  //   '-'
-  // );
   const programName = program?.name ? program.name : '-';
   return (
     <ContainerColumnWithBorder data-cy="target-population-details-container">
@@ -60,13 +46,6 @@ export function TargetPopulationDetails({
               value={`${createdBy.firstName} ${createdBy.lastName}`}
             />
           </Grid>
-          {/* <Grid item xs={4}>
-            <LabelizedField
-              dataCy="close-date"
-              label={t('Programme population close date')}
-              value={closeDate}
-            />
-          </Grid> */}
           <Grid item xs={4}>
             <LabelizedField
               dataCy="program-name"
@@ -81,20 +60,6 @@ export function TargetPopulationDetails({
               value={programCycle?.title ?? '-'}
             />
           </Grid>
-          {/* <Grid item xs={4}>
-            <LabelizedField
-              dataCy="send-by"
-              label={t('Send by')}
-              value={sendBy}
-            />
-          </Grid>
-          <Grid item xs={4}>
-            <LabelizedField
-              dataCy="send-date"
-              label={t('Send date')}
-              value={sendDate}
-            />
-          </Grid> */}
         </Grid>
       </OverviewContainer>
     </ContainerColumnWithBorder>

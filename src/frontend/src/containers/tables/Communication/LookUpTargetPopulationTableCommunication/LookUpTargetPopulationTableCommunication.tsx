@@ -53,6 +53,7 @@ export const LookUpTargetPopulationTableCommunication = ({
       max: filter.createdAtRangeMax || null,
     }),
     statusNot: PaymentPlanStatus.Open,
+    isTargetPopulation: true,
   };
 
   const handleRadioChange = (id: string): void => {

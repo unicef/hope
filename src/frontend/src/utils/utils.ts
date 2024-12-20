@@ -299,7 +299,6 @@ export function paymentPlanStatusToColor(
   return theme.palette.error.main;
 }
 
-//TODO: check if some statuses need to be moved to PP
 export function paymentPlanBuildStatusToColor(
   theme: typeof themeObj,
   status: string,
