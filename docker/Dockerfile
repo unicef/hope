@@ -1,6 +1,5 @@
 FROM alpine:3.19.1 as curl
 RUN apk add curl && mkdir /data
-
 FROM curl as waitforit
 RUN curl -o /data/waitforit -sSL https://github.com/maxcnunes/waitforit/releases/download/v2.4.1/waitforit-linux_amd64 \
     && chmod +x /data/waitforit
@@ -10,7 +9,7 @@ RUN curl -o /data/psql-cert.crt -L https://dl.cacerts.digicert.com/DigiCertGloba
 
 # Base image
 FROM python:3.12.7-slim-bookworm as base
-
+ENV APP_PATH=/app
 ARG UID=82
 
 RUN apt-get update \
@@ -35,20 +34,14 @@ RUN apt-get update \
   && rm -rf /var/lib/apt/lists/* \
   && addgroup --system --gid "${UID}" hope \
   && adduser --system --uid "${UID}" --disabled-password --home /home/hope --shell /sbin.nologin --group hope --gecos hope \
-  && mkdir -p /code /tmp /data \
+  && mkdir -p $APP_PATH /tmp /data \
   && mkdir -p -m 0700 /run/user/"${UID}" \
-  && chown -R hope:hope /code /tmp /data /run/user/"${UID}"
+  && chown -R hope:hope $APP_PATH /tmp /data /run/user/"${UID}"
 
-ENV PDM_PACKAGES=/packages
-ENV CODE=/code
-ENV PDM_PROJECT=$PDM_PACKAGES
-ENV PYPACKAGES=$PDM_PACKAGES/__pypackages__/3.12
-ENV PYTHONPYCACHEPREFIX=/tmp/pycache \
-    PYTHONPATH=$PYPACKAGES/lib:$PYTHONPATH \
-    PATH=$PYPACKAGES/bin:$PATH \
-    XDG_RUNTIME_DIR=/run/user/"${UID}"
+
+ENV XDG_RUNTIME_DIR=/run/user/"${UID}"
 ENV DJANGO_SETTINGS_MODULE=hct_mis_api.config.settings
-WORKDIR $CODE
+WORKDIR $APP_PATH
 
 COPY --from=waitforit /data/waitforit /usr/local/bin/waitforit
 
@@ -57,8 +50,7 @@ FROM base as uv
 RUN pip install --upgrade pip &&\
     pip install uv &&\
     pip install setuptools==71.1.0
-WORKDIR $PDM_PACKAGES
-COPY README.md LICENSE pyproject.toml uv.lock ./
+COPY README.md LICENSE pyproject.toml uv.lock MANIFEST.in ./
 
 
 
@@ -77,19 +69,17 @@ RUN apt-get update \
     dbus \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
-
-ENV PYTHONPATH=$CODE/src:$CODE/test/:$PYTHONPATH
+WORKDIR $APP_PATH
+COPY ./src/ ./src/
 RUN --mount=type=cache,target=/root/.uv-cache \
     uv sync --cache-dir=/root/.uv-cache \
         --python=/usr/local/bin/python \
         --python-preference=system \
         --no-editable --frozen --extra distribution
-
-WORKDIR $CODE
-COPY ./src/ ./src/
 COPY ./tests ./tests
+COPY ./src/data /app/data
 COPY ./manage.py ./manage.py
-COPY .flake8 pyproject.toml uv.lock ./
+COPY .flake8 pyproject.toml uv.lock MANIFEST.in ./
 COPY ./docker/entrypoint.sh /bin/
 ENTRYPOINT ["entrypoint.sh"]
 
@@ -106,11 +96,10 @@ RUN NODE_ENV="production" NODE_OPTIONS="--max-old-space-size=4096" yarn build
 
 # Dist builder image
 FROM uv as dist-builder
+WORKDIR $APP_PATH
 COPY ./src/ ./src/
-COPY --chown=hope:hope --from=frontend-builder /fe-build/build $PDM_PACKAGES/src/hct_mis_api/apps/web/static/web
-RUN --mount=type=cache,target=/root/.uv-cache \
-    uv sync --cache-dir=/root/.uv-cache \
-        --python=/usr/local/bin/python \
+COPY --chown=hope:hope --from=frontend-builder /fe-build/build $APP_PATH/src/hct_mis_api/apps/web/static/web
+RUN uv sync --python=/usr/local/bin/python \
         --python-preference=system \
         --no-dev --no-editable --frozen --extra distribution
 
@@ -120,9 +109,9 @@ FROM base AS dist
 
 
 COPY ./src/gunicorn_config.py /conf/gunicorn_config.py
-COPY --chown=hope:hope --from=dist-builder $PDM_PACKAGES $PDM_PACKAGES
+COPY --chown=hope:hope --from=dist-builder $APP_PATH/.venv $APP_PATH/.venv
 COPY --chown=hope:hope --from=certs /data/psql-cert.crt /certs/psql-cert.crt
-
+COPY ./src/data /app/data
 USER hope
 
 COPY ./docker/entrypoint.sh /bin/
