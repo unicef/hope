@@ -1,0 +1,19 @@
+exclude *
+exclude __pycache__
+exclude node_modules
+
+include README.md
+include MANIFEST.in
+include AUTHORS
+include CHANGES.md
+include LICENSE.md
+include pyproject.toml
+include *.py
+include uv.lock
+
+
+recursive-include src/hct_mis_api *
+recursive-include src/hct_mis_api *.html
+recursive-include src/hct_mis_api *.json
+
+recursive-exclude src/**/node_modules *.*

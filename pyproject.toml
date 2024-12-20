@@ -55,6 +55,7 @@ exclude = [
     "venv",
     "snapshots",
     "__pypackages__",
+    "build"
 ]
 
 strict = true
@@ -75,8 +76,9 @@ disable_error_code = [
 [tool.django-stubs]
 django_settings_module = "hct_mis_api.settings"
 
-[tool.pdm.dev-dependencies]
-dev = [
+[tool.uv]
+package = true
+dev-dependencies = [
     "mypy==0.982",
     "django-stubs~=1.12.0",
     "django-stubs-ext<1.0.0,>=0.7.0",
@@ -124,13 +126,6 @@ dev = [
     "flaky<4.0.0,>=3.8.1",
     "coverage<8.0.0,>=7.3.2",
 ]
-
-[build-system]
-requires = ["pdm-backend"]
-build-backend = "pdm.backend"
-
-[tool.pdm.build]
-includes = ['src/hct_mis_api', 'src/data']
 
 [tool.pdm]
 distribution = true
@@ -243,5 +238,12 @@ requires-python = "==3.12.*"
 readme = "README.md"
 license = { text = "None" }
 
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [tool.setuptools]
-py-modules = ["hct_mis_api"]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]

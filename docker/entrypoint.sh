@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-
+source .venv/bin/activate
 wait_for_db() {
   until pg_isready -h $1 -p 5432;
   do echo "waiting for database ${1}"; sleep 2; done;
