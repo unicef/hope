@@ -520,11 +520,13 @@ class PaymentPlanService:
         self.payment_plan.refresh_from_db(fields=["background_action_status"])
         return self.payment_plan
 
-    def export_xlsx_per_fsp(self, user_id: "UUID") -> PaymentPlan:
+    def export_xlsx_per_fsp(self, user_id: "UUID", fsp_xlsx_template_id: Optional[str]) -> PaymentPlan:
         self.payment_plan.background_action_status_xlsx_exporting()
         self.payment_plan.save()
 
-        create_payment_plan_payment_list_xlsx_per_fsp.delay(self.payment_plan.pk, user_id)
+        create_payment_plan_payment_list_xlsx_per_fsp.delay(
+            str(self.payment_plan.pk), str(user_id), fsp_xlsx_template_id
+        )
         self.payment_plan.refresh_from_db(fields=["background_action_status"])
         return self.payment_plan
 

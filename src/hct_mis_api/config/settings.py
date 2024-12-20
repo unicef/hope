@@ -269,6 +269,7 @@ OTHER_APPS = [
     "flags",
     "admin_cursor_paginator",
     "markdownify.apps.MarkdownifyConfig",
+    "hope_smart_export",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + OTHER_APPS + PROJECT_APPS

@@ -129,6 +129,7 @@ class PaymentVerificationLogEntryFilter(LogEntryFilter):
 class FinancialServiceProviderXlsxTemplateFilter(FilterSet):
     class Meta:
         fields = (
+            "financial_service_providers",
             "name",
             "created_by",
         )
