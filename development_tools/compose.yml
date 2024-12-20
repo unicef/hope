@@ -146,7 +146,6 @@ services:
     profiles:
       - default
       - services
-    container_name: elasticsearch
     build:
       context: elasticsearch
       dockerfile: ./Dockerfile
