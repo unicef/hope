@@ -908,6 +908,5 @@ class PaymentPlanService:
                     col_filter.pk = None
                     col_filter.collector_block_filters = col_filter_block_copy
                     col_filter.save()
-        targeting_criteria_copy.save()
 
         return targeting_criteria_copy
