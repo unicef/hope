@@ -16,7 +16,7 @@ from hct_mis_api.apps.account.fixtures import (
     PartnerFactory,
     UserFactory,
 )
-from hct_mis_api.apps.account.models import Role, User, UserRole
+from hct_mis_api.apps.account.models import Role, User, RoleAssignment
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
 from hct_mis_api.apps.payment.models import PaymentPlan
@@ -47,7 +47,7 @@ class ProgramCycleAPITestCase(HOPEApiTestCase):
         cls.user = UserFactory(username="Hope_Test_DRF", password="SpeedUp", partner=partner, is_superuser=True)
         permission_list = [perm.value for perm in user_permissions]
         role, created = Role.objects.update_or_create(name="TestName", defaults={"permissions": permission_list})
-        user_role, _ = UserRole.objects.get_or_create(user=cls.user, role=role, business_area=cls.business_area)
+        user_role, _ = RoleAssignment.objects.get_or_create(user=cls.user, role=role, business_area=cls.business_area)
         cls.client = APIClient()
 
         cls.program = ProgramFactory(

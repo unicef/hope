@@ -367,7 +367,7 @@ class PartnersDataValidator(BaseValidator):
 
         if (
             partner_access == Program.SELECTED_PARTNERS_ACCESS
-            and not partner.is_unicef
+            and not partner.is_unicef_subpartner
             and partner.id not in partners_ids
         ):
             raise ValidationError("Please assign access to your partner before saving the programme.")
