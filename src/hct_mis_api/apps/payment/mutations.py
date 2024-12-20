@@ -699,7 +699,7 @@ class ActionPaymentPlanMutation(PermissionMutation):
             PaymentPlan.Action.TP_LOCK.name: Permissions.TARGETING_LOCK,
             PaymentPlan.Action.TP_UNLOCK.name: Permissions.TARGETING_UNLOCK,
             PaymentPlan.Action.TP_REBUILD.name: Permissions.TARGETING_LOCK,
-            PaymentPlan.Action.DRAFT.name: Permissions.PM_CREATE,
+            PaymentPlan.Action.DRAFT.name: [Permissions.PM_CREATE, Permissions.TARGETING_SEND],
             PaymentPlan.Action.LOCK.name: Permissions.PM_LOCK_AND_UNLOCK,
             PaymentPlan.Action.UNLOCK.name: Permissions.PM_LOCK_AND_UNLOCK,
             PaymentPlan.Action.LOCK_FSP.name: Permissions.PM_LOCK_AND_UNLOCK_FSP,

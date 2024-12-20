@@ -184,7 +184,6 @@ class PaymentPlan(
             "female_adults_count",
             "total_households_count",
             "total_individuals_count",
-            "targeting_criteria",
             "targeting_criteria_string",
             "excluded_ids",
         ],
@@ -687,19 +686,14 @@ class PaymentPlan(
 
     @property
     def household_list(self) -> "QuerySet":
-        """copied from TP"""
+        """copied from TP
+        used in:
+        1) create PP.create_payments() all list just filter by targeting_criteria, PaymentPlan.Status.TP_OPEN
+        2)
+        """
         all_households = Household.objects.filter(business_area=self.business_area, program=self.program_cycle.program)
-        # filter by targeting_criteria
         households = all_households.filter(self.targeting_criteria.get_query())
-        if self.status == PaymentPlan.Status.TP_OPEN:
-            return households.distinct()
-
-        params = {}
-        if self.vulnerability_score_max is not None:
-            params["payment__vulnerability_score__lte"] = self.vulnerability_score_max
-        if self.vulnerability_score_min is not None:
-            params["payment__vulnerability_score__gte"] = self.vulnerability_score_min
-        return households.filter(**params).distinct()
+        return households.distinct()
 
     @property
     def household_count(self) -> int:
@@ -1024,6 +1018,24 @@ class PaymentPlan(
     )
     def background_action_status_send_to_payment_gateway_error(self) -> None:
         pass
+
+    @transition(
+        field=status,
+        source=Status.TP_OPEN,
+        target=Status.TP_LOCKED,
+    )
+    def status_tp_lock(self) -> None:
+        self.status_date = timezone.now()
+
+    @transition(
+        field=status,
+        source=[Status.TP_LOCKED, Status.TP_STEFICON_COMPLETED, Status.TP_STEFICON_ERROR],
+        target=Status.TP_OPEN,
+    )
+    def status_tp_open(self) -> None:
+        # revert all soft deleted by vulnerability_score filter
+        self.payment_items(manager="all_objects").filter(is_removed=True).update(is_removed=False)
+        self.status_date = timezone.now()
 
     @transition(
         field=status,

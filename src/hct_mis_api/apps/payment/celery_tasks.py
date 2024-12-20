@@ -691,10 +691,14 @@ def payment_plan_rebuild_stats(self: Any, payment_plan_id: str) -> None:
     ):
         payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
         set_sentry_business_area_tag(payment_plan.business_area.name)
+        payment_plan.build_status_building()
+        payment_plan.save(update_fields=("build_status", "built_at"))
         try:
             with transaction.atomic():
                 payment_plan.update_population_count_fields()
                 payment_plan.update_money_fields()
+                payment_plan.build_status_ok()
+                payment_plan.save(update_fields=("build_status", "built_at"))
         except Exception as e:
             logger.exception(e)
             raise self.retry(exc=e)

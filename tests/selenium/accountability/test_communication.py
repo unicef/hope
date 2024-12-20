@@ -5,7 +5,7 @@ from hct_mis_api.apps.accountability.fixtures import CommunicationMessageFactory
 from hct_mis_api.apps.accountability.models import Message
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
-from hct_mis_api.apps.payment.models import Payment, PaymentPlan
+from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.models import Program
 from tests.selenium.helpers.fixtures import get_program_with_dct_type_and_name
 from tests.selenium.page_object.accountability.communication import (
@@ -101,8 +101,7 @@ class TestSmokeAccountabilityCommunication:
             in pageAccountabilityCommunicationDetails.getLabelDateCreated().text
         )
         assert (
-            PaymentPlan.objects.first().name
-            in pageAccountabilityCommunicationDetails.getLabelTargetPopulation().text
+            PaymentPlan.objects.first().name in pageAccountabilityCommunicationDetails.getLabelTargetPopulation().text
         )
         assert "Recipients" in pageAccountabilityCommunicationDetails.getTableTitle().text
         assert "Items Group ID" in pageAccountabilityCommunicationDetails.getHouseholdId().text

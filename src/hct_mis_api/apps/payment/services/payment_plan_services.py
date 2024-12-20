@@ -161,36 +161,16 @@ class PaymentPlanService:
         return self.payment_plan
 
     def tp_lock(self) -> PaymentPlan:
-        if self.payment_plan.status != PaymentPlan.Status.TP_OPEN:
-            raise GraphQLError("Can only Lock Population for Open Population status")
-
-        # just remove all with vulnerability_score filter
-        if self.payment_plan.vulnerability_score_max or self.payment_plan.vulnerability_score_min:
-            params = {}
-            if self.payment_plan.vulnerability_score_max is not None:
-                params["vulnerability_score__lte"] = self.payment_plan.vulnerability_score_max
-            if self.payment_plan.vulnerability_score_min is not None:
-                params["vulnerability_score__gte"] = self.payment_plan.vulnerability_score_min
-
-            self.payment_plan.payment_items.exclude(**params).update(is_removed=True)
-
-        self.payment_plan.status = PaymentPlan.Status.TP_LOCKED
-        self.payment_plan.build_status_pending()
-        self.payment_plan.save(update_fields=("build_status", "built_at", "status"))
-        transaction.on_commit(lambda: payment_plan_rebuild_stats.delay(str(self.payment_plan.id)))
+        self.payment_plan.status_tp_lock()
+        self.payment_plan.save(update_fields=("status", "status_date"))
 
         return self.payment_plan
 
     def tp_unlock(self) -> PaymentPlan:
-        if self.payment_plan.status != PaymentPlan.Status.TP_LOCKED:
-            raise GraphQLError("Can only Unlock Population for Locked Population status")
+        self.payment_plan.status_tp_open()
 
-        # revert all soft deleted by vulnerability_score filter
-        self.payment_plan.payment_items(manager="all_objects").filter(is_removed=True).update(is_removed=False)
-
-        self.payment_plan.status = PaymentPlan.Status.TP_OPEN
         self.payment_plan.build_status_pending()
-        self.payment_plan.save(update_fields=("build_status", "built_at", "status"))
+        self.payment_plan.save(update_fields=("build_status", "built_at", "status", "status_date"))
         transaction.on_commit(lambda: payment_plan_rebuild_stats.delay(str(self.payment_plan.id)))
 
         return self.payment_plan
@@ -205,16 +185,11 @@ class PaymentPlanService:
         return self.payment_plan
 
     def draft(self) -> PaymentPlan:
-        if not self.payment_plan.is_population_locked():
-            raise GraphQLError("Only Locked Population status can be moved to next step")
         self.payment_plan.status_draft()
         self.payment_plan.save(update_fields=("status_date", "status"))
         return self.payment_plan
 
     def open(self, input_data: Dict) -> PaymentPlan:
-        if self.payment_plan.status != PaymentPlan.Status.DRAFT:
-            raise GraphQLError("Can only move from Draft status to Open")
-
         dispersion_end_date = input_data["dispersion_end_date"]
         if not dispersion_end_date or dispersion_end_date <= timezone.now().date():
             raise GraphQLError(f"Dispersion End Date [{dispersion_end_date}] cannot be a past date")
@@ -502,8 +477,9 @@ class PaymentPlanService:
 
     def update(self, input_data: Dict) -> PaymentPlan:
         program = self.payment_plan.program_cycle.program
-        should_rebuild_stats = False
+        should_update_money_stats = False
         should_rebuild_list = False
+        vulnerability_filter = False
 
         name = input_data.get("name", "").strip()
         vulnerability_score_min = input_data.get("vulnerability_score_min")
@@ -556,10 +532,10 @@ class PaymentPlanService:
         if name:
             self.payment_plan.name = name
         if vulnerability_score_min is not None:
-            should_rebuild_list = True
+            vulnerability_filter = True
             self.payment_plan.vulnerability_score_min = vulnerability_score_min
         if vulnerability_score_max is not None:
-            should_rebuild_list = True
+            vulnerability_filter = True
             self.payment_plan.vulnerability_score_max = vulnerability_score_max
 
         if targeting_criteria_input:
@@ -588,18 +564,16 @@ class PaymentPlanService:
         new_currency = input_data.get("currency")
         if new_currency and new_currency != self.payment_plan.currency:
             self.payment_plan.currency = new_currency
-            should_rebuild_list = True
-            should_rebuild_stats = True
+            should_update_money_stats = True
 
         self.payment_plan.save()
 
         # prevent race between commit transaction and using in task
         transaction.on_commit(
             lambda: PaymentPlanService.rebuild_payment_plan_population(
-                should_rebuild_list, should_rebuild_stats, self.payment_plan
+                should_rebuild_list, should_update_money_stats, vulnerability_filter, self.payment_plan
             )
         )
-
         return self.payment_plan
 
     def delete(self) -> PaymentPlan:
@@ -867,14 +841,28 @@ class PaymentPlanService:
         payment_plan.update_population_count_fields()
 
     @staticmethod
-    def rebuild_payment_plan_population(rebuild_list: bool, rebuild_stats: bool, payment_plan: PaymentPlan) -> None:
-        rebuild_list = payment_plan.is_population_open() and rebuild_list
-        if rebuild_list:
-            payment_plan.build_status = PaymentPlan.BuildStatus.BUILD_STATUS_PENDING
-            payment_plan.save()
-            payment_plan_full_rebuild.delay(payment_plan.id)
-        if rebuild_stats and not rebuild_list:
-            payment_plan_rebuild_stats.delay(payment_plan.id)
+    def rebuild_payment_plan_population(
+        rebuild_list: bool, should_update_money_stats: bool, vulnerability_filter: bool, payment_plan: PaymentPlan
+    ) -> None:
+        rebuild_full_list = payment_plan.status in PaymentPlan.PRE_PAYMENT_PLAN_STATUSES and rebuild_list
+        payment_plan.build_status_pending()
+        payment_plan.save(update_fields=("build_status", "built_at"))
+
+        if rebuild_full_list:
+            payment_plan_full_rebuild.delay(str(payment_plan.id))
+
+        if should_update_money_stats:
+            payment_plan_rebuild_stats.delay(str(payment_plan.id))
+
+        if vulnerability_filter:
+            # just remove all with vulnerability_score filter
+            params = {}
+            if payment_plan.vulnerability_score_max is not None:
+                params["vulnerability_score__lte"] = payment_plan.vulnerability_score_max
+            if payment_plan.vulnerability_score_min is not None:
+                params["vulnerability_score__gte"] = payment_plan.vulnerability_score_min
+            payment_plan.payment_items.exclude(**params).update(is_removed=True)
+            payment_plan_rebuild_stats.delay(str(payment_plan.id))
 
     @staticmethod
     def copy_target_criteria(targeting_criteria: TargetingCriteria) -> TargetingCriteria:
