@@ -1,7 +1,7 @@
 import logging
 import zipfile
 from tempfile import NamedTemporaryFile
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Optional
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
@@ -58,16 +58,18 @@ def generate_token_and_order_numbers(payment: Payment) -> Payment:
 
 
 class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
-    def __init__(self, payment_plan: PaymentPlan):
+    def __init__(self, payment_plan: PaymentPlan, fsp_xlsx_template_id: Optional[str] = None):
         self.batch_size = 5000
         self.payment_plan = payment_plan
-        self.is_social_worker_program = self.payment_plan.program.is_social_worker_program
+        self.is_social_worker_program = self.payment_plan.is_social_worker_program
         # TODO: in future will be per BA or program flag?
         self.payment_generate_token_and_order_numbers = True
         flexible_attributes = FlexibleAttribute.objects.all()
         self.flexible_attributes = {
             flexible_attribute.name: flexible_attribute for flexible_attribute in flexible_attributes
         }
+        self.export_fsp_auth_code = bool(fsp_xlsx_template_id)
+        self.fsp_xlsx_template_id = fsp_xlsx_template_id
 
     def open_workbook(self, title: str) -> tuple[Workbook, Worksheet]:
         wb = openpyxl.Workbook()
@@ -206,12 +208,13 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         self,
         delivery_mechanism_per_payment_plan_list: QuerySet["DeliveryMechanismPerPaymentPlan"],
         zip_file: zipfile.ZipFile,
+        fsp_xlsx_template: Optional["FinancialServiceProviderXlsxTemplate"] = None,
     ) -> None:
         for delivery_mechanism_per_payment_plan in delivery_mechanism_per_payment_plan_list:
             fsp: FinancialServiceProvider = delivery_mechanism_per_payment_plan.financial_service_provider
             delivery_mechanism: DeliveryMechanism = delivery_mechanism_per_payment_plan.delivery_mechanism
             wb, ws_fsp = self.open_workbook(fsp.name)
-            fsp_xlsx_template = self.get_template(fsp, delivery_mechanism)
+            fsp_xlsx_template = fsp_xlsx_template or self.get_template(fsp, delivery_mechanism)
             payment_ids = list(
                 self.payment_plan.eligible_payments.filter(financial_service_provider=fsp)
                 .order_by("unicef_id")

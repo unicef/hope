@@ -109,6 +109,7 @@ class Permissions(Enum):
     PM_EXPORT_PDF_SUMMARY = auto()
     PM_SEND_TO_PAYMENT_GATEWAY = auto()
     PM_VIEW_FSP_AUTH_CODE = auto()
+    PM_DOWNLOAD_MTCN = auto()
 
     # PaymentPlanSupportingDocument
     PM_DOWNLOAD_SUPPORTING_DOCUMENT = auto()

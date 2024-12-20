@@ -356,6 +356,21 @@ class PaymentPlan(
         return self.unicef_id or ""
 
     @property
+    def can_create_xlsx_with_fsp_auth_code(self) -> bool:
+        """
+        export MTCN file
+        xlsx file with password
+        """
+        has_fsp_with_api = self.eligible_payments.filter(
+            financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API
+        ).exists()
+        not_send_to_fsp_exists = self.eligible_payments.exclude(status=Payment.STATUS_SENT_TO_FSP).exists()
+        print("==>> can_create_xlsx_with_fsp_auth_code ", has_fsp_with_api and not not_send_to_fsp_exists)
+        # TODO: just for test
+        return has_fsp_with_api
+        # return has_fsp_with_api and not not_send_to_fsp_exists
+
+    @property
     def bank_reconciliation_success(self) -> int:
         return self.payment_items.filter(status__in=Payment.ALLOW_CREATE_VERIFICATION).count()
 
@@ -846,17 +861,6 @@ class PaymentPlan(
     @property
     def last_approval_process_by(self) -> Optional[str]:
         return self._get_last_approval_process_data().modified_by
-
-    @property
-    def can_create_xlsx_with_fsp_auth_code(self) -> bool:
-        has_api_fsp = self.delivery_mechanisms.filter(
-            financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API
-        ).exists()
-        not_send_to_fsp = self.eligible_payments.exclude(status=Payment.STATUS_SENT_TO_FSP).exists()
-        print("==>> ", has_api_fsp and not not_send_to_fsp)
-        # TODO: just for test
-        return has_api_fsp
-        # return has_api_fsp and not not_send_to_fsp
 
     @property
     def can_send_to_payment_gateway(self) -> bool:
