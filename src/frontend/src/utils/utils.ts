@@ -197,10 +197,21 @@ export function targetPopulationStatusDisplayMap(status: string): string {
       return 'OPEN';
     case PaymentPlanStatus.TpLocked:
       return 'LOCKED';
-    case PaymentPlanStatus.Finished:
-      return 'FINISHED';
+    case PaymentPlanStatus.Processing:
+      return 'PROCESSING';
+    case PaymentPlanStatus.SteficonWait:
+      return 'STEFICON WAIT';
+    case PaymentPlanStatus.SteficonRun:
+      return 'STEFICON RUN';
+    case PaymentPlanStatus.SteficonError:
+      return 'STEFICON ERROR';
+    case PaymentPlanStatus.SteficonCompleted:
+      return 'STEFICON COMPLETED';
+    case PaymentPlanStatus.Draft:
+      return 'READY FOR PAYMENT MODULE';
+    //   if other PP statuses ==> ASSIGNED
     default:
-      return 'UNKNOWN STATUS';
+      return 'ASSIGNED';
   }
 }
 

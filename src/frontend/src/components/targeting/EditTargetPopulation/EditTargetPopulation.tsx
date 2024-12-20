@@ -95,7 +95,7 @@ export const EditTargetPopulation = ({
           excludedIds: values.excludedIds,
           exclusionReason: values.exclusionReason,
           programCycleId: values.programCycleId.value,
-          ...(paymentPlan.status === PaymentPlanStatus.Open && {
+          ...(paymentPlan.status === PaymentPlanStatus.TpOpen && {
             name: values.name,
           }),
           ...getTargetingCriteriaVariables({
