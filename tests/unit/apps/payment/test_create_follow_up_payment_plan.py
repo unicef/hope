@@ -18,6 +18,8 @@ mutation createFollowUpPaymentPlan($paymentPlanId: ID!, $dispersionStartDate: Da
     paymentPlan {
       status
       isFollowUp
+      canCreateFollowUp
+      totalWithdrawnHouseholdsCount
     }
   }
 }

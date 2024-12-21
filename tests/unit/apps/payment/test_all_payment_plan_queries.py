@@ -89,6 +89,24 @@ class TestPaymentPlanQueries(APITestCase):
               }
             }
             canCreateFollowUp
+            canSplit
+            canSendToPaymentGateway
+            unsuccessfulPaymentsCount
+            hasFspDeliveryMechanismXlsxTemplate
+            availablePaymentRecordsCount
+            importedFileName
+            hasPaymentListExportFile
+            currencyName
+            verificationPlans{
+                totalCount
+            }
+            program{
+              name
+            }
+            splitChoices{
+              name
+              value
+            }
             dispersionEndDate
             dispersionStartDate
             exchangeRate
@@ -254,6 +272,7 @@ class TestPaymentPlanQueries(APITestCase):
 
         with freeze_time("2020-10-10"):
             program = RealProgramFactory(
+                name="Test All PP QS",
                 cycle__start_date=timezone.datetime(2020, 9, 10, tzinfo=utc).date(),
                 cycle__end_date=timezone.datetime(2020, 11, 10, tzinfo=utc).date(),
             )
@@ -265,6 +284,7 @@ class TestPaymentPlanQueries(APITestCase):
                 dispersion_end_date=datetime(2020, 12, 10),
                 is_follow_up=False,
                 created_by=cls.user,
+                currency="PLN",
             )
             cls.pp.unicef_id = "PP-01"
             cls.pp.save()
@@ -306,6 +326,7 @@ class TestPaymentPlanQueries(APITestCase):
                 dispersion_start_date=cls.pp.dispersion_start_date + relativedelta(months=2),
                 dispersion_end_date=cls.pp.dispersion_end_date - relativedelta(months=2),
                 created_by=cls.user,
+                currency="UAH",
             )
             cls.pp_conflicted.unicef_id = "PP-02"
             cls.pp_conflicted.save()

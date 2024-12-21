@@ -928,6 +928,9 @@ class TestPaymentPlanServices(APITestCase):
         PaymentPlanService.rebuild_payment_plan_population(
             rebuild_list=True, should_update_money_stats=False, vulnerability_filter=False, payment_plan=pp
         )
+        PaymentPlanService.rebuild_payment_plan_population(
+            rebuild_list=False, should_update_money_stats=False, vulnerability_filter=True, payment_plan=pp
+        )
 
         self.payment_plan.refresh_from_db(fields=("build_status",))
         self.assertEqual(pp.build_status, PaymentPlan.BuildStatus.BUILD_STATUS_PENDING)

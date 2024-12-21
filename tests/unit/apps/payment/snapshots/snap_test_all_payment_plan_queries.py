@@ -41,7 +41,11 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans 1'] = {
                             ],
                             'totalCount': 1
                         },
+                        'availablePaymentRecordsCount': 0,
                         'canCreateFollowUp': False,
+                        'canSendToPaymentGateway': False,
+                        'canSplit': False,
+                        'currencyName': 'Polish złoty',
                         'dispersionEndDate': '2020-12-10',
                         'dispersionStartDate': '2020-08-10',
                         'exchangeRate': 2.0,
@@ -51,16 +55,44 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans 1'] = {
                         ],
                         'femaleAdultsCount': 0,
                         'femaleChildrenCount': 1,
+                        'hasFspDeliveryMechanismXlsxTemplate': False,
+                        'hasPaymentListExportFile': False,
+                        'importedFileName': '',
                         'maleAdultsCount': 0,
                         'maleChildrenCount': 1,
                         'paymentItems': {
                             'totalCount': 2
                         },
                         'paymentsConflictsCount': 1,
+                        'program': {
+                            'name': 'Test All PP QS'
+                        },
                         'programCycle': {
                             'endDate': '2020-11-10',
                             'startDate': '2020-09-10'
                         },
+                        'splitChoices': [
+                            {
+                                'name': 'By Admin Area 1',
+                                'value': 'BY_ADMIN_AREA1'
+                            },
+                            {
+                                'name': 'By Admin Area 2',
+                                'value': 'BY_ADMIN_AREA2'
+                            },
+                            {
+                                'name': 'By Admin Area 3',
+                                'value': 'BY_ADMIN_AREA3'
+                            },
+                            {
+                                'name': 'By Collector',
+                                'value': 'BY_COLLECTOR'
+                            },
+                            {
+                                'name': 'By Records',
+                                'value': 'BY_RECORDS'
+                            }
+                        ],
                         'status': 'OPEN',
                         'supportingDocuments': [
                             {
@@ -77,7 +109,11 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans 1'] = {
                         'totalIndividualsCount': 2,
                         'totalUndeliveredQuantity': 50.0,
                         'totalUndeliveredQuantityUsd': 100.0,
-                        'unicefId': 'PP-01'
+                        'unicefId': 'PP-01',
+                        'unsuccessfulPaymentsCount': 0,
+                        'verificationPlans': {
+                            'totalCount': 0
+                        }
                     }
                 },
                 {
@@ -87,7 +123,11 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans 1'] = {
                             ],
                             'totalCount': 0
                         },
+                        'availablePaymentRecordsCount': 0,
                         'canCreateFollowUp': False,
+                        'canSendToPaymentGateway': False,
+                        'canSplit': False,
+                        'currencyName': 'Ukrainian hryvnia',
                         'dispersionEndDate': '2020-10-10',
                         'dispersionStartDate': '2020-10-10',
                         'exchangeRate': 2.0,
@@ -97,16 +137,44 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans 1'] = {
                         ],
                         'femaleAdultsCount': 1,
                         'femaleChildrenCount': 0,
+                        'hasFspDeliveryMechanismXlsxTemplate': False,
+                        'hasPaymentListExportFile': False,
+                        'importedFileName': '',
                         'maleAdultsCount': 1,
                         'maleChildrenCount': 0,
                         'paymentItems': {
                             'totalCount': 2
                         },
                         'paymentsConflictsCount': 0,
+                        'program': {
+                            'name': 'Test All PP QS'
+                        },
                         'programCycle': {
                             'endDate': '2020-11-10',
                             'startDate': '2020-09-10'
                         },
+                        'splitChoices': [
+                            {
+                                'name': 'By Admin Area 1',
+                                'value': 'BY_ADMIN_AREA1'
+                            },
+                            {
+                                'name': 'By Admin Area 2',
+                                'value': 'BY_ADMIN_AREA2'
+                            },
+                            {
+                                'name': 'By Admin Area 3',
+                                'value': 'BY_ADMIN_AREA3'
+                            },
+                            {
+                                'name': 'By Collector',
+                                'value': 'BY_COLLECTOR'
+                            },
+                            {
+                                'name': 'By Records',
+                                'value': 'BY_RECORDS'
+                            }
+                        ],
                         'status': 'LOCKED',
                         'supportingDocuments': [
                         ],
@@ -120,7 +188,11 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans 1'] = {
                         'totalIndividualsCount': 2,
                         'totalUndeliveredQuantity': 50.0,
                         'totalUndeliveredQuantityUsd': 100.0,
-                        'unicefId': 'PP-02'
+                        'unicefId': 'PP-02',
+                        'unsuccessfulPaymentsCount': 0,
+                        'verificationPlans': {
+                            'totalCount': 0
+                        }
                     }
                 }
             ]
