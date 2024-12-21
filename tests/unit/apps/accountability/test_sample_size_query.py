@@ -8,9 +8,9 @@ from hct_mis_api.apps.accountability.models import Message
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import create_household
+from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
+from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
-from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
 
 
 class TestSampleSizeQuery(APITestCase):
@@ -29,11 +29,12 @@ class TestSampleSizeQuery(APITestCase):
         cls.user = UserFactory(first_name="John", last_name="Wick")
         cls.business_area = create_afghanistan()
 
-        cls.tp = TargetPopulationFactory(business_area=cls.business_area, status=TargetPopulation.STATUS_PROCESSING)
-        cls.households = [create_household()[0] for _ in range(4)]
-        HouseholdSelection.objects.bulk_create(
-            [HouseholdSelection(household=household, target_population=cls.tp) for household in cls.households]
+        cls.pp = PaymentPlanFactory(
+            business_area=cls.business_area, status=PaymentPlan.Status.TP_PROCESSING, created_by=cls.user
         )
+        cls.households = [create_household()[0] for _ in range(4)]
+        for household in cls.households:
+            PaymentFactory(household=household, parent=cls.pp)
 
         cls.rdi_id = RegistrationDataImport.objects.order_by("?").first().id
 
@@ -77,7 +78,7 @@ class TestSampleSizeQuery(APITestCase):
 
         data = {
             "input": {
-                "targetPopulation": self.id_to_base64(self.tp.id, "TargetPopulationNode"),
+                "paymentPlan": self.id_to_base64(self.pp.id, "PaymentPlanNode"),
                 "samplingType": sampling_type,
                 **self.sampling_data[sampling_type],
             },

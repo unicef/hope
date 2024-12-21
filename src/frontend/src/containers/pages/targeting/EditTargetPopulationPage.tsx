@@ -1,9 +1,9 @@
 import { ReactElement, useEffect } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import {
-  TargetPopulationBuildStatus,
+  PaymentPlanBuildStatus,
   useBusinessAreaDataQuery,
-  useTargetPopulationQuery,
+  usePaymentPlanQuery,
 } from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
@@ -19,7 +19,7 @@ export const EditTargetPopulationPage = (): ReactElement => {
   const location = useLocation();
 
   const { data, loading, error, startPolling, stopPolling } =
-    useTargetPopulationQuery({
+    usePaymentPlanQuery({
       variables: { id },
       fetchPolicy: 'cache-and-network',
     });
@@ -28,12 +28,12 @@ export const EditTargetPopulationPage = (): ReactElement => {
   const { data: businessAreaData } = useBusinessAreaDataQuery({
     variables: { businessAreaSlug: businessArea },
   });
-  const buildStatus = data?.targetPopulation?.buildStatus;
+  const buildStatus = data?.paymentPlan?.buildStatus;
   useEffect(() => {
     if (
       [
-        TargetPopulationBuildStatus.Building,
-        TargetPopulationBuildStatus.Pending,
+        PaymentPlanBuildStatus.Building,
+        PaymentPlanBuildStatus.Pending,
       ].includes(buildStatus)
     ) {
       startPolling(3000);
@@ -49,7 +49,7 @@ export const EditTargetPopulationPage = (): ReactElement => {
 
   if (!data || permissions === null || !businessAreaData) return null;
 
-  const { targetPopulation } = data;
+  const { paymentPlan } = data;
 
   return (
     <UniversalErrorBoundary
@@ -61,7 +61,7 @@ export const EditTargetPopulationPage = (): ReactElement => {
       componentName="EditTargetPopulationPage"
     >
       <EditTargetPopulation
-        targetPopulation={targetPopulation}
+        paymentPlan={paymentPlan}
         screenBeneficiary={businessAreaData?.businessArea?.screenBeneficiary}
       />
     </UniversalErrorBoundary>

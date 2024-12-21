@@ -1,8 +1,7 @@
 import { MockedProvider } from '@apollo/react-testing';
 import { act } from 'react';
-
-import wait from 'waait';
 import { fakeApolloAllTargetPopulation } from '../../../../../fixtures/targeting/fakeApolloAllTargetPopulation';
+import wait from 'waait';
 import { ApolloLoadingLink, render } from '../../../../testUtils/testUtils';
 import { TargetPopulationForPeopleTable } from '.';
 

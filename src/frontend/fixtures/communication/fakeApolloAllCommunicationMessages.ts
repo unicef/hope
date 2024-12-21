@@ -11,6 +11,7 @@ export const fakeApolloAllCommunicationMessages = [
         targetPopulation: '',
         createdBy: '',
         first: 10,
+        paymentPlan: '',
         orderBy: '-created_at',
       },
     },
@@ -27,14 +28,12 @@ export const fakeApolloAllCommunicationMessages = [
             {
               cursor: 'YXJyYXljb25uZWN0aW9uOjA=',
               node: {
-                id:
-                  'Q29tbXVuaWNhdGlvbk1lc3NhZ2VOb2RlOjExMDZmNThmLTJkZDMtNDQ5OC1hZjNkLTI2YzNhNDc2ZjkwZg==',
+                id: 'Q29tbXVuaWNhdGlvbk1lc3NhZ2VOb2RlOjExMDZmNThmLTJkZDMtNDQ5OC1hZjNkLTI2YzNhNDc2ZjkwZg==',
                 unicefId: 'MSG-23-0005',
                 title: 'jij',
                 numberOfRecipients: 1,
                 createdBy: {
-                  id:
-                    'VXNlck5vZGU6NDE5NmMyYzUtYzJkZC00OGQyLTg4N2YtM2E5ZDM5ZTc4OTE2',
+                  id: 'VXNlck5vZGU6NDE5NmMyYzUtYzJkZC00OGQyLTg4N2YtM2E5ZDM5ZTc4OTE2',
                   firstName: 'Root',
                   lastName: 'Rootkowski',
                   email: 'root@root.com',
@@ -48,14 +47,12 @@ export const fakeApolloAllCommunicationMessages = [
             {
               cursor: 'YXJyYXljb25uZWN0aW9uOjE=',
               node: {
-                id:
-                  'Q29tbXVuaWNhdGlvbk1lc3NhZ2VOb2RlOjExNzVmMzMwLTM2Y2MtNDM5NC04MjAyLWU4NjY3ZTI5ZTc4MA==',
+                id: 'Q29tbXVuaWNhdGlvbk1lc3NhZ2VOb2RlOjExNzVmMzMwLTM2Y2MtNDM5NC04MjAyLWU4NjY3ZTI5ZTc4MA==',
                 unicefId: 'MSG-22-0002',
                 title: 'You got credit of USD 200',
                 numberOfRecipients: 2,
                 createdBy: {
-                  id:
-                    'VXNlck5vZGU6NDE5NmMyYzUtYzJkZC00OGQyLTg4N2YtM2E5ZDM5ZTc4OTE2',
+                  id: 'VXNlck5vZGU6NDE5NmMyYzUtYzJkZC00OGQyLTg4N2YtM2E5ZDM5ZTc4OTE2',
                   firstName: 'Root',
                   lastName: 'Rootkowski',
                   email: 'root@root.com',
@@ -69,14 +66,12 @@ export const fakeApolloAllCommunicationMessages = [
             {
               cursor: 'YXJyYXljb25uZWN0aW9uOjI=',
               node: {
-                id:
-                  'Q29tbXVuaWNhdGlvbk1lc3NhZ2VOb2RlOjc1OGJiMjg0LTJjZjAtNGZjYy1hY2YyLTY5NDdlZDhkZGNlNg==',
+                id: 'Q29tbXVuaWNhdGlvbk1lc3NhZ2VOb2RlOjc1OGJiMjg0LTJjZjAtNGZjYy1hY2YyLTY5NDdlZDhkZGNlNg==',
                 unicefId: 'MSG-22-0004',
                 title: 'We hold your back!',
                 numberOfRecipients: 2,
                 createdBy: {
-                  id:
-                    'VXNlck5vZGU6NDE5NmMyYzUtYzJkZC00OGQyLTg4N2YtM2E5ZDM5ZTc4OTE2',
+                  id: 'VXNlck5vZGU6NDE5NmMyYzUtYzJkZC00OGQyLTg4N2YtM2E5ZDM5ZTc4OTE2',
                   firstName: 'Root',
                   lastName: 'Rootkowski',
                   email: 'root@root.com',
@@ -90,14 +85,12 @@ export const fakeApolloAllCommunicationMessages = [
             {
               cursor: 'YXJyYXljb25uZWN0aW9uOjM=',
               node: {
-                id:
-                  'Q29tbXVuaWNhdGlvbk1lc3NhZ2VOb2RlOjQxYjllNTE0LWI1NmMtNDY1OS1hYmFhLWE5ZWYwNzVlOThlMQ==',
+                id: 'Q29tbXVuaWNhdGlvbk1lc3NhZ2VOb2RlOjQxYjllNTE0LWI1NmMtNDY1OS1hYmFhLWE5ZWYwNzVlOThlMQ==',
                 unicefId: 'MSG-22-0003',
                 title: 'Hello There!',
                 numberOfRecipients: 2,
                 createdBy: {
-                  id:
-                    'VXNlck5vZGU6NDE5NmMyYzUtYzJkZC00OGQyLTg4N2YtM2E5ZDM5ZTc4OTE2',
+                  id: 'VXNlck5vZGU6NDE5NmMyYzUtYzJkZC00OGQyLTg4N2YtM2E5ZDM5ZTc4OTE2',
                   firstName: 'Root',
                   lastName: 'Rootkowski',
                   email: 'root@root.com',
@@ -111,14 +104,12 @@ export const fakeApolloAllCommunicationMessages = [
             {
               cursor: 'YXJyYXljb25uZWN0aW9uOjQ=',
               node: {
-                id:
-                  'Q29tbXVuaWNhdGlvbk1lc3NhZ2VOb2RlOjBkMDQ3NDg0LTUzODAtNGJmMi1hOTViLWM4NjVmNWUzYmM4OQ==',
+                id: 'Q29tbXVuaWNhdGlvbk1lc3NhZ2VOb2RlOjBkMDQ3NDg0LTUzODAtNGJmMi1hOTViLWM4NjVmNWUzYmM4OQ==',
                 unicefId: 'MSG-22-0001',
                 title: 'Hello World!',
                 numberOfRecipients: 2,
                 createdBy: {
-                  id:
-                    'VXNlck5vZGU6NDE5NmMyYzUtYzJkZC00OGQyLTg4N2YtM2E5ZDM5ZTc4OTE2',
+                  id: 'VXNlck5vZGU6NDE5NmMyYzUtYzJkZC00OGQyLTg4N2YtM2E5ZDM5ZTc4OTE2',
                   firstName: 'Root',
                   lastName: 'Rootkowski',
                   email: 'root@root.com',

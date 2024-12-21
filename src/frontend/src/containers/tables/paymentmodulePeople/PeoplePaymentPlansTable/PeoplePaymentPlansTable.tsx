@@ -31,6 +31,7 @@ export const PeoplePaymentPlansTable = ({
     dispersionEndDate: filter.dispersionEndDate || null,
     isFollowUp: filter.isFollowUp ? true : null,
     program: programId,
+    isPaymentPlan: true,
   };
 
   return (

@@ -1,29 +1,19 @@
 import uuid
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 import graphene
-from graphene import relay
 from graphene_django import DjangoObjectType
-from graphene_django.filter import DjangoFilterConnectionField
 
 import hct_mis_api.apps.targeting.models as target_models
-from hct_mis_api.apps.account.permissions import (
-    AdminUrlNodeMixin,
-    BaseNodePermissionMixin,
-    BasePermission,
-    Permissions,
-    hopePermissionClass,
-)
 from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hct_mis_api.apps.core.field_attributes.fields_types import Scope
 from hct_mis_api.apps.core.models import FlexibleAttribute
-from hct_mis_api.apps.core.schema import ExtendedConnection, FieldAttributeNode
+from hct_mis_api.apps.core.schema import FieldAttributeNode
 from hct_mis_api.apps.core.utils import decode_id_string
-from hct_mis_api.apps.household.schema import HouseholdNode
-from hct_mis_api.apps.payment.models import DeliveryMechanism
+from hct_mis_api.apps.payment.models import DeliveryMechanism, PaymentPlan
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.choices import FlexFieldClassification
-from hct_mis_api.apps.targeting.filters import HouseholdFilter, TargetPopulationFilter
+from hct_mis_api.apps.targeting.filters import TargetPopulationFilter
 from hct_mis_api.apps.utils.schema import Arg
 
 if TYPE_CHECKING:
@@ -34,12 +24,12 @@ if TYPE_CHECKING:
     from hct_mis_api.apps.targeting.models import TargetingIndividualRuleFilterBlock
 
 
-def get_field_by_name(field_name: str, target_population: target_models.TargetPopulation) -> Dict:
+def get_field_by_name(field_name: str, payment_plan: PaymentPlan) -> Dict:
     scopes = [Scope.TARGETING]
-    if target_population.program.is_social_worker_program:
+    if payment_plan.is_social_worker_program:
         scopes.append(Scope.XLSX_PEOPLE)
     factory = FieldFactory.from_only_scopes(scopes)
-    factory.apply_business_area(target_population.business_area.slug)
+    factory.apply_business_area(payment_plan.business_area.slug)
     field = factory.to_dict_by("name")[field_name]
     choices = field.get("choices") or field.get("_choices")
     if choices and callable(choices):
@@ -73,7 +63,7 @@ class TargetingCriteriaRuleFilterNode(DjangoObjectType):
     def resolve_field_attribute(parent, info: Any) -> Optional[Dict]:
         if parent.flex_field_classification == FlexFieldClassification.NOT_FLEX_FIELD:
             field_attribute = get_field_by_name(
-                parent.field_name, parent.targeting_criteria_rule.targeting_criteria.target_population
+                parent.field_name, parent.targeting_criteria_rule.targeting_criteria.payment_plan
             )
             return filter_choices(
                 field_attribute, parent.arguments  # type: ignore # can't convert graphene list to list
@@ -99,7 +89,7 @@ class TargetingIndividualBlockRuleFilterNode(DjangoObjectType):
         if parent.flex_field_classification == FlexFieldClassification.NOT_FLEX_FIELD:
             field_attribute = get_field_by_name(
                 parent.field_name,
-                parent.individuals_filters_block.targeting_criteria_rule.targeting_criteria.target_population,
+                parent.individuals_filters_block.targeting_criteria_rule.targeting_criteria.payment_plan,
             )
             return filter_choices(field_attribute, parent.arguments)  # type: ignore # can't convert graphene list to list
 
@@ -198,36 +188,6 @@ class TargetingCriteriaNode(DjangoObjectType):
 
     class Meta:
         model = target_models.TargetingCriteria
-
-
-class TargetPopulationNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
-    """Defines an individual target population record."""
-
-    permission_classes: Tuple[Type[BasePermission]] = (
-        hopePermissionClass(
-            Permissions.TARGETING_VIEW_DETAILS,
-        ),
-    )
-
-    total_family_size = graphene.Int(source="total_family_size")
-    targeting_criteria = TargetingCriteriaRuleFilterNode()
-    household_list = DjangoFilterConnectionField(HouseholdNode, filterset_class=HouseholdFilter)
-    households = DjangoFilterConnectionField(HouseholdNode, filterset_class=HouseholdFilter)
-    total_households_count_with_valid_phone_no = graphene.Int()
-    has_empty_criteria = graphene.Boolean()
-    has_empty_ids_criteria = graphene.Boolean()
-
-    def resolve_total_households_count_with_valid_phone_no(self, info: Any) -> int:
-        return self.households.exclude(
-            head_of_household__phone_no_valid=False,
-            head_of_household__phone_no_alternative_valid=False,
-        ).count()
-
-    class Meta:
-        model = target_models.TargetPopulation
-        interfaces = (relay.Node,)
-        connection_class = ExtendedConnection
-        filterset_class = TargetPopulationFilter
 
 
 class TargetingCriteriaRuleFilterObjectType(graphene.InputObjectType):

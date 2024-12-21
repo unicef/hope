@@ -5,7 +5,7 @@ export const headCells: HeadCell<PaymentRecordAndPaymentNode>[] = [
   {
     disablePadding: false,
     label: 'Payment ID',
-    id: 'caId',
+    id: 'internalData__caId',
     numeric: false,
   },
   {

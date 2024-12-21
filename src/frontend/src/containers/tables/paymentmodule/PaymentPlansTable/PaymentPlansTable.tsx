@@ -36,6 +36,7 @@ export function PaymentPlansTable({
     dispersionEndDate: filter.dispersionEndDate || null,
     isFollowUp: filter.isFollowUp ? true : null,
     program: programId,
+    isPaymentPlan: true,
   };
   const replacements = {
     totalHouseholdsCount: (_beneficiaryGroup) =>

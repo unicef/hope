@@ -44,8 +44,8 @@ export const EditPeopleFollowUpPaymentPlanPage = (): ReactElement => {
     useAllTargetPopulationsQuery({
       variables: {
         businessArea,
-        paymentPlanApplicable: false,
-        program: [programId],
+        paymentPlanApplicable: true,
+        program: programId,
       },
     });
   if (loadingTargetPopulations || loadingPaymentPlan)
@@ -58,7 +58,7 @@ export const EditPeopleFollowUpPaymentPlanPage = (): ReactElement => {
   const { paymentPlan } = paymentPlanData;
 
   const initialValues = {
-    targetingId: paymentPlan.targetPopulation.id,
+    paymentPlanId: paymentPlan.id,
     currency: {
       name: paymentPlan.currencyName,
       value: paymentPlan.currency,
@@ -94,15 +94,12 @@ export const EditPeopleFollowUpPaymentPlanPage = (): ReactElement => {
     try {
       const res = await mutate({
         variables: {
-          input: {
-            paymentPlanId,
-            targetingId: values.targetingId,
-            dispersionStartDate: values.dispersionStartDate,
-            dispersionEndDate: values.dispersionEndDate,
-            currency: values.currency?.value
-              ? values.currency.value
-              : values.currency,
-          },
+          paymentPlanId: values.paymentPlanId,
+          dispersionStartDate: values.dispersionStartDate,
+          dispersionEndDate: values.dispersionEndDate,
+          currency: values.currency?.value
+            ? values.currency.value
+            : values.currency,
         },
       });
       showMessage(t('Follow-up Payment Plan Edited'));

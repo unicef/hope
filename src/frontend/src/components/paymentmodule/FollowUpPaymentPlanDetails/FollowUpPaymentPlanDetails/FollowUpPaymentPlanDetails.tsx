@@ -33,7 +33,6 @@ export function FollowUpPaymentPlanDetails({
       id: sourcePaymentPlanId,
       unicefId: sourcePaymentPlanUnicefId,
     },
-    targetPopulation,
     exchangeRate,
   } = paymentPlan;
 
@@ -69,9 +68,9 @@ export function FollowUpPaymentPlanDetails({
             <Grid item xs={3}>
               <LabelizedField label={t('Target Population')}>
                 <BlackLink
-                  to={`/${baseUrl}/target-population/${targetPopulation.id}`}
+                  to={`/${baseUrl}/target-population/${paymentPlan.id}`}
                 >
-                  {targetPopulation.name}
+                  {paymentPlan.name}
                 </BlackLink>
               </LabelizedField>
             </Grid>

@@ -7,13 +7,9 @@ import { DialogActions } from '@containers/dialogs/DialogActions';
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { useSnackbar } from '@hooks/useSnackBar';
 import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import {
-  PaymentVerificationStatus,
-  useUpdatePaymentVerificationReceivedAndReceivedAmountMutation,
-} from '@generated/graphql';
+import { PaymentVerificationStatus } from '@generated/graphql';
 import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 
 export interface Props {
@@ -31,30 +27,32 @@ export function VerifyManual({
 }: Props): ReactElement {
   const { t } = useTranslation();
   const [verifyManualDialogOpen, setVerifyManualDialogOpen] = useState(false);
-  const { showMessage } = useSnackbar();
-  const [mutate, { error }] =
-    useUpdatePaymentVerificationReceivedAndReceivedAmountMutation();
+  // const { showMessage } = useSnackbar();
+  //TODO: WE DONT KNOW NOW
+  // const [mutate, { error }] =
+  //   useUpdatePaymentVerificationReceivedAndReceivedAmountMutation();
 
-  const submit = async (values): Promise<void> => {
-    try {
-      await mutate({
-        variables: {
-          paymentVerificationId,
-          received: values.status === 'RECEIVED',
-          receivedAmount:
-            values.status === 'RECEIVED'
-              ? parseFloat(values.receivedAmount).toFixed(2)
-              : 0,
-        },
-      });
-    } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
-      return;
-    }
-    if (!error) {
-      setVerifyManualDialogOpen(false);
-      showMessage(t('Payment has been verified.'));
-    }
+  const submit = (values): void => {
+    console.log(values);
+    // try {
+    //   await mutate({
+    //     variables: {
+    //       paymentVerificationId,
+    //       received: values.status === 'RECEIVED',
+    //       receivedAmount:
+    //         values.status === 'RECEIVED'
+    //           ? parseFloat(values.receivedAmount).toFixed(2)
+    //           : 0,
+    //     },
+    //   });
+    // } catch (e) {
+    //   e.graphQLErrors.map((x) => showMessage(x.message));
+    //   return;
+    // }
+    // if (!error) {
+    //   setVerifyManualDialogOpen(false);
+    //   showMessage(t('Payment has been verified.'));
+    // }
   };
 
   const initialValues = {
@@ -100,8 +98,16 @@ export function VerifyManual({
                       label="Status"
                       style={{ flexDirection: 'row' }}
                       choices={[
-                        { value: 'RECEIVED', name: t('Received'), dataCy: 'choice-received' },
-                        { value: 'NOT_RECEIVED', name: t('Not Received'), dataCy: 'choice-not-received' },
+                        {
+                          value: 'RECEIVED',
+                          name: t('Received'),
+                          dataCy: 'choice-received',
+                        },
+                        {
+                          value: 'NOT_RECEIVED',
+                          name: t('Not Received'),
+                          dataCy: 'choice-not-received',
+                        },
                       ]}
                       component={FormikRadioGroup}
                     />

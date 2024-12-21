@@ -14,6 +14,7 @@ from hct_mis_api.apps.household.fixtures import (
     create_household_and_individuals,
 )
 from hct_mis_api.apps.household.models import Household, Individual
+from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
 from hct_mis_api.apps.targeting.models import (
     TargetingCriteria,
     TargetingCriteriaRule,
@@ -55,13 +56,12 @@ class TestTargetingCriteriaQuery(APITestCase):
     @classmethod
     def create_criteria(cls, *args: Any, **kwargs: Any) -> TargetingCriteria:
         criteria = cls.get_targeting_criteria_for_rule(*args, **kwargs)
-        TargetPopulation(
+        PaymentPlanFactory(
             name="tp",
             created_by=cls.user,
             business_area=cls.business_area,
             targeting_criteria=criteria,
         )
-        criteria.save()
         return criteria
 
     def test_size(self) -> None:
@@ -150,13 +150,12 @@ class TestTargetingCriteriaIndividualRules(APITestCase):
     @classmethod
     def create_criteria(cls, *args: Any, **kwargs: Any) -> TargetPopulation:
         criteria = cls.get_targeting_criteria_for_filters(*args, **kwargs)
-        TargetPopulation(
+        PaymentPlanFactory(
             name="tp",
             created_by=cls.user,
             business_area=cls.business_area,
             targeting_criteria=criteria,
         )
-        criteria.save()
         return criteria
 
     @classmethod
@@ -367,13 +366,12 @@ class TestTargetingCriteriaByIdQuery(APITestCase):
     def create_criteria(cls, targeting_criteria_data: Dict) -> TargetingCriteria:
         criteria = TargetingCriteria(**targeting_criteria_data)
         criteria.save()
-        TargetPopulation(
+        PaymentPlanFactory(
             name="tp",
             created_by=cls.user,
             business_area=cls.business_area,
             targeting_criteria=criteria,
         )
-        criteria.save()
         return criteria
 
     def test_household_ids(self) -> None:

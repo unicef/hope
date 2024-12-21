@@ -1,7 +1,7 @@
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
-import { TargetPopulationNode } from '@generated/graphql';
+import { PaymentPlanNode } from '@generated/graphql';
 
-export const headCells: HeadCell<TargetPopulationNode>[] = [
+export const headCells: HeadCell<PaymentPlanNode>[] = [
   {
     disablePadding: false,
     label: 'ID',

@@ -2,7 +2,6 @@ import { Button, DialogContent, DialogTitle, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { LoadingButton } from '@components/core/LoadingButton';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { useFinalizeTpMutation } from '@generated/graphql';
 import { Dialog } from '../Dialog';
 import { DialogActions } from '../DialogActions';
 import { DialogDescription } from '../DialogDescription';
@@ -12,6 +11,8 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useNavigate } from 'react-router-dom';
 import { useProgramContext } from '../../../programContext';
 import { ReactElement } from 'react';
+import { Action } from '@generated/graphql';
+import { usePaymentPlanAction } from '@hooks/usePaymentPlanAction';
 
 export interface FinalizeTargetPopulationPaymentPlanProps {
   open: boolean;
@@ -20,6 +21,7 @@ export interface FinalizeTargetPopulationPaymentPlanProps {
   targetPopulationId: string;
 }
 
+//TODO: remove this Finalize mutation is not existent in the backend
 export const FinalizeTargetPopulationPaymentPlan = ({
   open,
   setOpen,
@@ -30,18 +32,17 @@ export const FinalizeTargetPopulationPaymentPlan = ({
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const { baseUrl } = useBaseUrl();
-  const [mutate, { loading }] = useFinalizeTpMutation();
+  const { mutatePaymentPlanAction: finish, loading: loadingFinish } =
+    usePaymentPlanAction(
+      Action.Draft,
+      targetPopulationId,
+      () => showMessage(t('Target Population Finalized')),
+      () => setOpen(false),
+    );
   const { isSocialDctType } = useProgramContext();
-  const onSubmit = (id: string): void => {
-    mutate({
-      variables: {
-        id,
-      },
-    }).then(() => {
-      setOpen(false);
-      showMessage(t('Target Population Finalized'));
-      navigate(`/${baseUrl}/target-population/${id}`);
-    });
+  const onSubmit = (): void => {
+    finish();
+    navigate(`/${baseUrl}/target-population/${targetPopulationId}`);
   };
   return (
     <Dialog
@@ -68,11 +69,11 @@ export const FinalizeTargetPopulationPaymentPlan = ({
         <DialogActions>
           <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
           <LoadingButton
-            onClick={() => onSubmit(targetPopulationId)}
+            onClick={() => onSubmit()}
             color="primary"
             variant="contained"
-            loading={loading}
-            disabled={loading || !totalHouseholds}
+            loading={loadingFinish}
+            disabled={loadingFinish || !totalHouseholds}
             data-cy="button-target-population-modal-send-to-hope"
           >
             {t('Mark Ready')}

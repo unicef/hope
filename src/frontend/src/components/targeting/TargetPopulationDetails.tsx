@@ -1,44 +1,26 @@
 import { Grid, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { targetPopulationStatusToColor } from '@utils/utils';
-import { TargetPopulationQuery } from '@generated/graphql';
+import {
+  paymentPlanStatusToColor,
+  targetPopulationStatusDisplayMap,
+} from '@utils/utils';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { LabelizedField } from '@core/LabelizedField';
 import { OverviewContainer } from '@core/OverviewContainer';
 import { StatusBox } from '@core/StatusBox';
 import { Title } from '@core/Title';
-import { UniversalMoment } from '@core/UniversalMoment';
 import { ReactElement } from 'react';
 
 interface ProgramDetailsProps {
-  targetPopulation: TargetPopulationQuery['targetPopulation'];
+  targetPopulation;
 }
 
 export function TargetPopulationDetails({
   targetPopulation,
 }: ProgramDetailsProps): ReactElement {
-  const {
-    createdBy,
-    finalizedBy,
-    changeDate,
-    finalizedAt,
-    program,
-    programCycle,
-  } = targetPopulation;
+  const { createdBy, program, programCycle } = targetPopulation;
   const { t } = useTranslation();
-  const closeDate = changeDate ? (
-    <UniversalMoment>{changeDate}</UniversalMoment>
-  ) : (
-    '-'
-  );
-  const sendBy = finalizedBy
-    ? `${finalizedBy.firstName} ${finalizedBy.lastName}`
-    : '-';
-  const sendDate = finalizedAt ? (
-    <UniversalMoment>{finalizedAt}</UniversalMoment>
-  ) : (
-    '-'
-  );
+
   const programName = program?.name ? program.name : '-';
   return (
     <ContainerColumnWithBorder data-cy="target-population-details-container">
@@ -52,7 +34,8 @@ export function TargetPopulationDetails({
               <StatusBox
                 dataCy="target-population-status"
                 status={targetPopulation.status}
-                statusToColor={targetPopulationStatusToColor}
+                statusToColor={paymentPlanStatusToColor}
+                statusNameMapping={targetPopulationStatusDisplayMap}
               />
             </LabelizedField>
           </Grid>
@@ -61,13 +44,6 @@ export function TargetPopulationDetails({
               dataCy="created-by"
               label={t('created by')}
               value={`${createdBy.firstName} ${createdBy.lastName}`}
-            />
-          </Grid>
-          <Grid item xs={4}>
-            <LabelizedField
-              dataCy="close-date"
-              label={t('Programme population close date')}
-              value={closeDate}
             />
           </Grid>
           <Grid item xs={4}>
@@ -82,20 +58,6 @@ export function TargetPopulationDetails({
               dataCy="programme-cycle-title"
               label={t('Programme Cycle')}
               value={programCycle?.title ?? '-'}
-            />
-          </Grid>
-          <Grid item xs={4}>
-            <LabelizedField
-              dataCy="send-by"
-              label={t('Send by')}
-              value={sendBy}
-            />
-          </Grid>
-          <Grid item xs={4}>
-            <LabelizedField
-              dataCy="send-date"
-              label={t('Send date')}
-              value={sendDate}
             />
           </Grid>
         </Grid>

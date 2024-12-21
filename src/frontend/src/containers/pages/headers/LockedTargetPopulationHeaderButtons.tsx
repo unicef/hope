@@ -6,15 +6,17 @@ import styled from 'styled-components';
 import { LoadingButton } from '@components/core/LoadingButton';
 import { useSnackbar } from '@hooks/useSnackBar';
 import {
+  Action,
   BusinessAreaDataQuery,
+  PaymentPlanQuery,
   ProgramStatus,
-  TargetPopulationQuery,
-  useUnlockTpMutation,
 } from '@generated/graphql';
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
-import { FinalizeTargetPopulation } from '../../dialogs/targetPopulation/FinalizeTargetPopulation';
 import { FinalizeTargetPopulationPaymentPlan } from '../../dialogs/targetPopulation/FinalizeTargetPopulationPaymentPlan';
 import { useProgramContext } from '../../../programContext';
+import { usePaymentPlanAction } from '@hooks/usePaymentPlanAction';
+import { useNavigate } from 'react-router-dom';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const IconContainer = styled.span`
   button {
@@ -28,7 +30,7 @@ const IconContainer = styled.span`
 `;
 
 export interface ApprovedTargetPopulationHeaderButtonsPropTypes {
-  targetPopulation: TargetPopulationQuery['targetPopulation'];
+  targetPopulation: PaymentPlanQuery['paymentPlan'];
   canUnlock: boolean;
   canDuplicate: boolean;
   canSend: boolean;
@@ -43,12 +45,19 @@ export function LockedTargetPopulationHeaderButtons({
   businessAreaData,
 }: ApprovedTargetPopulationHeaderButtonsPropTypes): ReactElement {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { baseUrl } = useBaseUrl();
   const [openDuplicate, setOpenDuplicate] = useState(false);
-  const [openFinalize, setOpenFinalize] = useState(false);
   const [openFinalizePaymentPlan, setOpenFinalizePaymentPlan] = useState(false);
   const { showMessage } = useSnackbar();
   const { isActiveProgram } = useProgramContext();
-  const [mutate, { loading }] = useUnlockTpMutation();
+
+  const { mutatePaymentPlanAction: unlockAction, loading: loadingUnlock } =
+    usePaymentPlanAction(Action.TpUnlock, targetPopulation.id, () => {
+      showMessage(t('Target Population Finalized'));
+      navigate(`/${baseUrl}/target-population/`);
+    });
+
   const { isPaymentPlanApplicable } = businessAreaData.businessArea;
 
   return (
@@ -66,19 +75,10 @@ export function LockedTargetPopulationHeaderButtons({
       {canUnlock && (
         <Box m={2}>
           <LoadingButton
-            loading={loading}
+            loading={loadingUnlock}
             color="primary"
             variant="outlined"
-            onClick={async () => {
-              try {
-                await mutate({
-                  variables: { id: targetPopulation.id },
-                });
-                showMessage('Target Population Unlocked');
-              } catch (e) {
-                e.graphQLErrors.map((x) => showMessage(x.message));
-              }
-            }}
+            onClick={() => unlockAction()}
             data-cy="button-target-population-unlocked"
             disabled={!isActiveProgram}
           >
@@ -108,29 +108,7 @@ export function LockedTargetPopulationHeaderButtons({
                 </Button>
               </span>
             </Tooltip>
-          ) : (
-            <Tooltip
-              title={
-                targetPopulation.program.status !== ProgramStatus.Active
-                  ? t('Assigned programme is not ACTIVE')
-                  : t('Send to Cash Assist')
-              }
-            >
-              <span>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  disabled={
-                    targetPopulation.program.status !== ProgramStatus.Active
-                  }
-                  onClick={() => setOpenFinalize(true)}
-                  data-cy="button-target-population-send-to-cash-assist"
-                >
-                  {t('Send to Cash Assist')}
-                </Button>
-              </span>
-            </Tooltip>
-          )}
+          ) : null}
         </Box>
       )}
       <DuplicateTargetPopulation
@@ -138,21 +116,12 @@ export function LockedTargetPopulationHeaderButtons({
         setOpen={setOpenDuplicate}
         targetPopulationId={targetPopulation.id}
       />
-      {isPaymentPlanApplicable ? (
-        <FinalizeTargetPopulationPaymentPlan
-          open={openFinalizePaymentPlan}
-          setOpen={setOpenFinalizePaymentPlan}
-          targetPopulationId={targetPopulation.id}
-          totalHouseholds={targetPopulation.totalHouseholdsCount}
-        />
-      ) : (
-        <FinalizeTargetPopulation
-          open={openFinalize}
-          setOpen={setOpenFinalize}
-          targetPopulationId={targetPopulation.id}
-          totalHouseholds={targetPopulation.totalHouseholdsCount}
-        />
-      )}
+      <FinalizeTargetPopulationPaymentPlan
+        open={openFinalizePaymentPlan}
+        setOpen={setOpenFinalizePaymentPlan}
+        targetPopulationId={targetPopulation.id}
+        totalHouseholds={targetPopulation.totalHouseholdsCount}
+      />
     </Box>
   );
 }

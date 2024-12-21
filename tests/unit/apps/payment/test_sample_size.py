@@ -43,7 +43,9 @@ query SampleSize($input: GetCashplanVerificationSampleSizeInput!) {
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.household, cls.individuals = create_household(household_args={"size": 2})
 
-        cls.payment_plan = PaymentPlanFactory()
+        cls.payment_plan = PaymentPlanFactory(
+            created_by=cls.user,
+        )
 
         cls.individuals[0].phone_no = "invalid-phone-no"
         cls.individuals[0].phone_no_alternative = "invalid-phone-no"
