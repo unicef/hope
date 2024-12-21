@@ -53,6 +53,7 @@ from hct_mis_api.apps.payment.fixtures import (
 )
 from hct_mis_api.apps.payment.models import (
     DeliveryMechanism,
+    FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     Payment,
     PaymentPlan,
@@ -454,6 +455,7 @@ class TestPaymentPlanReconciliation(APITestCase):
         santander_fsp = FinancialServiceProviderFactory(
             name="Santander",
             distribution_limit=None,
+            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
         )
         santander_fsp.delivery_mechanisms.set([dm_cash, dm_transfer])
         FspXlsxTemplatePerDeliveryMechanismFactory(financial_service_provider=santander_fsp, delivery_mechanism=dm_cash)
@@ -702,9 +704,11 @@ class TestPaymentPlanReconciliation(APITestCase):
 
             self.assertEqual(sheet.cell(row=1, column=1).value, "payment_id")
             assert payment_plan.payment_items.count() == 4
-            payment = payment_plan.payment_items.order_by("unicef_id").first()
-            self.assertEqual(sheet.cell(row=2, column=1).value, payment.unicef_id)  # unintuitive
+            payment = payment_plan.eligible_payments.filter(household=household_1).first()
+            # check if there is the same HH
+            self.assertEqual(payment.household.unicef_id, household_1.unicef_id)
 
+            self.assertEqual(sheet.cell(row=2, column=1).value, payment.unicef_id)  # unintuitive
             self.assertEqual(sheet.cell(row=1, column=2).value, "household_id")
             self.assertEqual(sheet.cell(row=2, column=2).value, household_1.unicef_id)
             self.assertEqual(sheet.cell(row=1, column=3).value, "household_size")

@@ -692,7 +692,7 @@ class PaymentPlan(
         2)
         """
         all_households = Household.objects.filter(business_area=self.business_area, program=self.program_cycle.program)
-        households = all_households.filter(self.targeting_criteria.get_query())
+        households = all_households.filter(self.targeting_criteria.get_query()).order_by("unicef_id")
         return households.distinct()
 
     @property
@@ -960,7 +960,16 @@ class PaymentPlan(
         field=build_status,
         source=[BuildStatus.BUILD_STATUS_PENDING, BuildStatus.BUILD_STATUS_FAILED, BuildStatus.BUILD_STATUS_OK],
         target=BuildStatus.BUILD_STATUS_BUILDING,
-        conditions=[lambda obj: obj.status in [PaymentPlan.Status.TP_OPEN, PaymentPlan.Status.TP_LOCKED]],
+        conditions=[
+            lambda obj: obj.status
+            in [
+                PaymentPlan.Status.TP_OPEN,
+                PaymentPlan.Status.TP_LOCKED,
+                PaymentPlan.Status.TP_STEFICON_WAIT,
+                PaymentPlan.Status.TP_STEFICON_COMPLETED,
+                PaymentPlan.Status.TP_STEFICON_ERROR,
+            ]
+        ],
     )
     def build_status_building(self) -> None:
         self.built_at = timezone.now()
@@ -969,7 +978,16 @@ class PaymentPlan(
         field=build_status,
         source=BuildStatus.BUILD_STATUS_BUILDING,
         target=BuildStatus.BUILD_STATUS_FAILED,
-        conditions=[lambda obj: obj.status in [PaymentPlan.Status.TP_OPEN, PaymentPlan.Status.TP_LOCKED]],
+        conditions=[
+            lambda obj: obj.status
+            in [
+                PaymentPlan.Status.TP_OPEN,
+                PaymentPlan.Status.TP_LOCKED,
+                PaymentPlan.Status.TP_STEFICON_WAIT,
+                PaymentPlan.Status.TP_STEFICON_COMPLETED,
+                PaymentPlan.Status.TP_STEFICON_ERROR,
+            ]
+        ],
     )
     def build_status_failed(self) -> None:
         self.built_at = timezone.now()
@@ -978,7 +996,16 @@ class PaymentPlan(
         field=build_status,
         source=BuildStatus.BUILD_STATUS_BUILDING,
         target=BuildStatus.BUILD_STATUS_OK,
-        conditions=[lambda obj: obj.status in [PaymentPlan.Status.TP_OPEN, PaymentPlan.Status.TP_LOCKED]],
+        conditions=[
+            lambda obj: obj.status
+            in [
+                PaymentPlan.Status.TP_OPEN,
+                PaymentPlan.Status.TP_LOCKED,
+                PaymentPlan.Status.TP_STEFICON_COMPLETED,
+                PaymentPlan.Status.TP_STEFICON_ERROR,
+                PaymentPlan.Status.TP_STEFICON_WAIT,
+            ]
+        ],
     )
     def build_status_ok(self) -> None:
         self.built_at = timezone.now()

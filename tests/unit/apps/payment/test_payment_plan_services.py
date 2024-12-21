@@ -8,6 +8,7 @@ from django.db import IntegrityError
 from django.utils import timezone
 
 from aniso8601 import parse_date
+from django_fsm import TransitionNotAllowed
 from flaky import flaky
 from freezegun import freeze_time
 from graphql import GraphQLError
@@ -220,8 +221,12 @@ class TestPaymentPlanServices(APITestCase):
             dispersion_end_date=parse_date("2020-09-11"),
             currency="USD",
         )
-        with self.assertRaisesMessage(GraphQLError, "Can only move from Draft status to Open"):
+        with self.assertRaises(TransitionNotAllowed) as e:
             PaymentPlanService(payment_plan=pp).open(input_data=open_input_data)
+        self.assertEqual(
+            str(e.exception),
+            "Can't switch from state 'TP_OPEN' using method 'status_open'",
+        )
 
         pp.status = PaymentPlan.Status.DRAFT
         pp.save()
@@ -230,6 +235,8 @@ class TestPaymentPlanServices(APITestCase):
         ):
             PaymentPlanService(payment_plan=pp).open(input_data=open_input_data)
         open_input_data["dispersion_end_date"] = parse_date("2020-11-11")
+        pp.refresh_from_db()
+        self.assertEqual(pp.status, PaymentPlan.Status.DRAFT)
         pp = PaymentPlanService(payment_plan=pp).open(input_data=open_input_data)
         pp.refresh_from_db()
         self.assertEqual(pp.status, PaymentPlan.Status.OPEN)
@@ -368,7 +375,7 @@ class TestPaymentPlanServices(APITestCase):
         pp_not_distributed = payments[1]
         pp_force_failed = payments[2]
 
-        with self.assertNumQueries(8):
+        with self.assertNumQueries(7):
             follow_up_pp = PaymentPlanService(pp).create_follow_up(
                 self.user, dispersion_start_date, dispersion_end_date
             )
@@ -418,7 +425,7 @@ class TestPaymentPlanServices(APITestCase):
         follow_up_payment.excluded = True
         follow_up_payment.save()
 
-        with self.assertNumQueries(8):
+        with self.assertNumQueries(7):
             follow_up_pp_2 = PaymentPlanService(pp).create_follow_up(
                 self.user, dispersion_start_date, dispersion_end_date
             )
@@ -776,22 +783,22 @@ class TestPaymentPlanServices(APITestCase):
         payment_plan = PaymentPlanFactory(
             program_cycle=self.cycle, created_by=self.user, status=PaymentPlan.Status.DRAFT
         )
-        with self.assertRaises(GraphQLError) as e:
+        with self.assertRaises(TransitionNotAllowed) as e:
             PaymentPlanService(payment_plan).tp_lock()
         self.assertEqual(
-            e.exception.message,
-            "Can only Lock Population for Open Population status",
+            str(e.exception),
+            "Can't switch from state 'DRAFT' using method 'status_tp_lock'",
         )
 
     def test_tp_unlock(self) -> None:
         payment_plan = PaymentPlanFactory(
             program_cycle=self.cycle, created_by=self.user, status=PaymentPlan.Status.DRAFT
         )
-        with self.assertRaises(GraphQLError) as e:
+        with self.assertRaises(TransitionNotAllowed) as e:
             PaymentPlanService(payment_plan).tp_unlock()
         self.assertEqual(
-            e.exception.message,
-            "Can only Unlock Population for Locked Population status",
+            str(e.exception),
+            "Can't switch from state 'DRAFT' using method 'status_tp_open'",
         )
         payment_plan.status = PaymentPlan.Status.TP_LOCKED
         payment_plan.save()
@@ -828,11 +835,11 @@ class TestPaymentPlanServices(APITestCase):
             created_by=self.user,
             status=PaymentPlan.Status.DRAFT,
         )
-        with self.assertRaises(GraphQLError) as e:
+        with self.assertRaises(TransitionNotAllowed) as e:
             PaymentPlanService(payment_plan).draft()
         self.assertEqual(
-            e.exception.message,
-            "Only Locked Population status can be moved to next step",
+            str(e.exception),
+            "Can't switch from state 'DRAFT' using method 'status_draft'",
         )
 
     def test_lock_if_no_valid_payments(self) -> None:

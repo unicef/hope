@@ -166,6 +166,7 @@ class TestPaymentCeleryTask(TestCase):
             program_cycle=self.program.cycles.first(),
             created_by=self.user,
             status=PaymentPlan.Status.TP_STEFICON_WAIT,
+            build_status=PaymentPlan.BuildStatus.BUILD_STATUS_PENDING,
         )
         PaymentFactory(parent=payment_plan)
         pp_id_str = str(payment_plan.pk)
@@ -181,6 +182,7 @@ class TestPaymentCeleryTask(TestCase):
             program_cycle=self.program.cycles.first(),
             created_by=self.user,
             status=PaymentPlan.Status.TP_STEFICON_WAIT,
+            build_status=PaymentPlan.BuildStatus.BUILD_STATUS_PENDING,
         )
         PaymentFactory(parent=payment_plan)
         mock_update_population_count_fields.side_effect = Exception("Simulated exception just for test")

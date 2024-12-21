@@ -190,6 +190,7 @@ class PaymentPlanService:
         return self.payment_plan
 
     def open(self, input_data: Dict) -> PaymentPlan:
+        self.payment_plan.status_open()
         dispersion_end_date = input_data["dispersion_end_date"]
         if not dispersion_end_date or dispersion_end_date <= timezone.now().date():
             raise GraphQLError(f"Dispersion End Date [{dispersion_end_date}] cannot be a past date")
@@ -198,7 +199,6 @@ class PaymentPlanService:
         self.payment_plan.dispersion_start_date = input_data["dispersion_start_date"]
         self.payment_plan.dispersion_end_date = dispersion_end_date
 
-        self.payment_plan.status_open()
         self.payment_plan.save(
             update_fields=("status_date", "status", "currency", "dispersion_start_date", "dispersion_end_date")
         )
