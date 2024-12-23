@@ -31,7 +31,7 @@ services:
       - backend-web-app:/tmp/
     command: |
       sh -c "
-        cp -r /packages/__pypackages__/3.12/lib/hct_mis_api/apps/web/* /tmp/
+        cp -r /app/.venv/lib/python3.12/site-packages/hct_mis_api/apps/web/* /tmp/
       "
     restart: "no"
 
