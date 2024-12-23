@@ -57,7 +57,7 @@ export function ImportedHouseholdTableRow({
       </TableCell>
       <TableCell align="left">
         <StyledLink onClick={() => handleClick()}>
-          {isMerged ? household.unicefId : household.importId}
+          {household.unicefId}
         </StyledLink>
       </TableCell>
       <AnonTableCell>{household?.headOfHousehold?.fullName}</AnonTableCell>
