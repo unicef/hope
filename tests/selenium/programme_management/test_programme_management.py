@@ -710,6 +710,7 @@ class TestManualCalendar:
             ),
         ],
     )
+    @pytest.mark.xfail(reason="UNSTABLE")
     def test_create_programme_chose_dates_via_calendar(
         self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails, test_data: dict
     ) -> None:

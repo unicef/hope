@@ -2,18 +2,17 @@ import hashlib
 import json
 import re
 import sys
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from django.db.models import Q, QuerySet
 from django.shortcuts import get_object_or_404
 
 from hct_mis_api.apps.core.kobo.common import get_field_name
-from hct_mis_api.apps.household.models import Household, Individual
+from hct_mis_api.apps.household.models import Household, Individual, PendingIndividual
 from hct_mis_api.apps.program.models import Program
 
 
-def post_process_dedupe_results(record: Any) -> None:
-    # TODO: record: ImportedIndividual but circular import
+def post_process_dedupe_results(record: "PendingIndividual") -> None:
     max_score = 0
     min_score = sys.maxsize
     for field in [record.deduplication_batch_results, record.deduplication_golden_record_results]:
@@ -102,15 +101,21 @@ def get_rdi_program_population(
         individual_ids_q = Q()
         household_ids_q = Q()
 
+    households_to_exclude = Household.all_merge_status_objects.filter(
+        program=import_to_program_id,
+    ).values_list("unicef_id", flat=True)
     households = (
         Household.objects.filter(
             household_ids_q,
             program_id=import_from_program_id,
             withdrawn=False,
         )
-        .exclude(household_collection__households__program=import_to_program_id)
+        .exclude(unicef_id__in=households_to_exclude)
         .distinct()
     )
+    individuals_to_exclude = Individual.all_merge_status_objects.filter(
+        program=import_to_program_id,
+    ).values_list("unicef_id", flat=True)
     individuals = (
         Individual.objects.filter(
             individual_ids_q,
@@ -118,7 +123,7 @@ def get_rdi_program_population(
             withdrawn=False,
             duplicate=False,
         )
-        .exclude(individual_collection__individuals__program=import_to_program_id)
+        .exclude(unicef_id__in=individuals_to_exclude)
         .distinct()
         .order_by("first_registration_date")
     )
