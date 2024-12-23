@@ -9,6 +9,7 @@ import { OverviewContainer } from '@core/OverviewContainer';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
 
 interface FeedbackDetailsProps {
@@ -24,6 +25,8 @@ export function FeedbackDetails({
 }: FeedbackDetailsProps): ReactElement {
   const { t } = useTranslation();
   const { baseUrl, isAllPrograms } = useBaseUrl();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   return (
     <Grid item xs={12}>
@@ -51,7 +54,7 @@ export function FeedbackDetails({
                 size: 3,
               },
               {
-                label: t('Household ID'),
+                label: `${beneficiaryGroup?.groupLabel} ID`,
                 value: (
                   <span>
                     {feedback.householdLookup?.id &&
@@ -74,7 +77,7 @@ export function FeedbackDetails({
                 size: 3,
               },
               {
-                label: t('Individual ID'),
+                label: `${beneficiaryGroup?.memberLabel} ID`,
                 value: (
                   <span>
                     {feedback.individualLookup?.id &&

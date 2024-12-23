@@ -1,6 +1,7 @@
 import contextlib
 from typing import Iterator
 
+from django.core.cache import cache
 from django.urls import reverse
 
 from rest_framework import status
@@ -55,6 +56,13 @@ class HOPEApiTestCase(APITestCase):
 
     def setUp(self) -> None:
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token.key)
+
+    def tearDown(self) -> None:
+        """
+        Clears all cache keys after each test. This ensures no cached data interferes with subsequent tests.
+        """
+        cache.clear()
+        super().tearDown()
 
 
 class ConstanceSettingsAPITest(APITestCase):

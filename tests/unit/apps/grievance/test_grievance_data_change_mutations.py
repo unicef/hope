@@ -62,13 +62,13 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
           }
           householdDataUpdateTicketDetails{
             household{
-              id
+              unicefId
             }
             householdData
           }
           addIndividualTicketDetails{
             household{
-              id
+              unicefId
             }
             individualData
           }
@@ -112,9 +112,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         )
         cls.update_partner_access_to_program(partner, cls.program)
 
-        household_one = HouseholdFactory.build(
-            id="07a901ed-d2a5-422a-b962-3570da1d5d07", size=3, country=country, program=cls.program
-        )
+        household_one = HouseholdFactory.build(size=3, country=country, program=cls.program, unicef_id="HH-0001")
         household_one.household_collection.save()
         household_one.program.save()
         household_one.registration_data_import.imported_by.save()
@@ -122,7 +120,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         household_one.registration_data_import.save()
         household_one.programs.add(program_one)
 
-        household_two = HouseholdFactory.build(id="ac540aa1-5c7a-47d0-a013-32054e2af454", program=cls.program)
+        household_two = HouseholdFactory.build(program=cls.program, unicef_id="HH-0002")
         household_two.household_collection.save()
         household_two.program.save()
         household_two.registration_data_import.imported_by.save()

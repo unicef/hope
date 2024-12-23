@@ -21,6 +21,12 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_create_payment_channel_fo
                             'fullName': 'Benjamin Butler'
                         },
                         'individualData': {
+                            'delivery_mechanism_data': [
+                            ],
+                            'delivery_mechanism_data_to_edit': [
+                            ],
+                            'delivery_mechanism_data_to_remove': [
+                            ],
                             'documents': [
                             ],
                             'documents_to_edit': [
@@ -56,13 +62,7 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_create_payment_channel_fo
                             'previous_identities': {
                             },
                             'previous_payment_channels': {
-                            },
-                            'delivery_mechanism_data': [
-                            ],
-                            'delivery_mechanism_data_to_edit': [
-                            ],
-                            'delivery_mechanism_data_to_remove': [
-                            ],
+                            }
                         }
                     },
                     'issueType': 14,
@@ -107,6 +107,12 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_edit_payment_channel_for_
                             'fullName': 'Benjamin Butler'
                         },
                         'individualData': {
+                            'delivery_mechanism_data': [
+                            ],
+                            'delivery_mechanism_data_to_edit': [
+                            ],
+                            'delivery_mechanism_data_to_remove': [
+                            ],
                             'documents': [
                             ],
                             'documents_to_edit': [
@@ -153,13 +159,7 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_edit_payment_channel_for_
                             'previous_identities': {
                             },
                             'previous_payment_channels': {
-                            },
-                            'delivery_mechanism_data': [
-                            ],
-                            'delivery_mechanism_data_to_edit': [
-                            ],
-                            'delivery_mechanism_data_to_remove': [
-                            ],
+                            }
                         }
                     },
                     'issueType': 14,
@@ -200,7 +200,7 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_create_househol
                     'description': 'AreaTest',
                     'householdDataUpdateTicketDetails': {
                         'household': {
-                            'id': 'SG91c2Vob2xkTm9kZTowN2E5MDFlZC1kMmE1LTQyMmEtYjk2Mi0zNTcwZGExZDVkMDc='
+                            'unicefId': 'HH-0001'
                         },
                         'householdData': {
                             'admin_area_title': {
@@ -228,7 +228,7 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_create_individu
                 {
                     'addIndividualTicketDetails': {
                         'household': {
-                            'id': 'SG91c2Vob2xkTm9kZTowN2E5MDFlZC1kMmE1LTQyMmEtYjk2Mi0zNTcwZGExZDVkMDc='
+                            'unicefId': 'HH-0001'
                         },
                         'individualData': {
                             'birth_date': '1980-02-01',
@@ -387,7 +387,7 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_househol
                     'description': 'Test',
                     'householdDataUpdateTicketDetails': {
                         'household': {
-                            'id': 'SG91c2Vob2xkTm9kZTowN2E5MDFlZC1kMmE1LTQyMmEtYjk2Mi0zNTcwZGExZDVkMDc='
+                            'unicefId': 'HH-0001'
                         },
                         'householdData': {
                             'country': {
@@ -457,6 +457,12 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individu
                                 'previous_value': '1943-07-30',
                                 'value': '1980-02-01'
                             },
+                            'delivery_mechanism_data': [
+                            ],
+                            'delivery_mechanism_data_to_edit': [
+                            ],
+                            'delivery_mechanism_data_to_remove': [
+                            ],
                             'disability': {
                                 'approve_status': False,
                                 'previous_value': 'not disabled',
@@ -566,13 +572,7 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individu
                                 'approve_status': False,
                                 'previous_value': 'FEMALE',
                                 'value': 'MALE'
-                            },
-                            'delivery_mechanism_data': [
-                            ],
-                            'delivery_mechanism_data_to_edit': [
-                            ],
-                            'delivery_mechanism_data_to_remove': [
-                            ]
+                            }
                         }
                     },
                     'issueType': 14,

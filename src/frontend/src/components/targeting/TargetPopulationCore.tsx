@@ -14,6 +14,7 @@ import { TargetingHouseholds } from './TargetingHouseholds';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { TargetPopulationPeopleTable } from '@containers/tables/targeting/TargetPopulationPeopleTable';
 import { ResultsForPeople } from '@components/targeting/ResultsForPeople';
+import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
 import { AddFilterTargetingCriteriaDisplay } from './TargetingCriteriaDisplay/AddFilterTargetingCriteriaDisplay';
 
@@ -40,6 +41,9 @@ export const TargetPopulationCore = ({
 }: TargetPopulationCoreProps): ReactElement => {
   const { t } = useTranslation();
   const { businessArea } = useBaseUrl();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   if (!targetPopulation) return null;
 
   const ResultComponent = targetPopulation.program.isSocialWorkerProgram
@@ -75,8 +79,8 @@ export const TargetPopulationCore = ({
           {t('Target Population is building')}
         </Typography>
         <Label>
-          Target population is processing, the list of households will be
-          available when the process is finished
+          {`Target population is processing, the list of ${beneficiaryGroup?.groupLabelPlural} will be
+         available when the process is finished`}
         </Label>
       </PaperContainer>
     );
@@ -103,7 +107,7 @@ export const TargetPopulationCore = ({
             {isSocialDctType
               ? t('Excluded Target Population Entries')
               : t(
-                  'Excluded Target Population Entries (Households or Individuals)',
+                  `Excluded Target Population Entries (${beneficiaryGroup?.groupLabelPlural} or ${beneficiaryGroup?.memberLabelPlural})`,
                 )}
           </Typography>
           <Box mt={2}>

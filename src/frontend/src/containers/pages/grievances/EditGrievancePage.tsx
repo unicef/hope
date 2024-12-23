@@ -7,6 +7,7 @@ import {
   GrievanceTicketDocument,
   useAllAddIndividualFieldsQuery,
   useAllEditHouseholdFieldsQuery,
+  useAllEditPeopleFieldsQuery,
   useAllProgramsForChoicesQuery,
   useGrievanceTicketQuery,
   useGrievanceTicketStatusChangeMutation,
@@ -55,12 +56,12 @@ import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutoc
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import {
+  getGrievanceCategoryDescriptions,
+  getGrievanceIssueTypeDescriptions,
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_CATEGORIES_NAMES,
-  GRIEVANCE_CATEGORY_DESCRIPTIONS,
   GRIEVANCE_ISSUE_TYPES,
   GRIEVANCE_ISSUE_TYPES_NAMES,
-  GRIEVANCE_ISSUE_TYPE_DESCRIPTIONS,
   GRIEVANCE_TICKET_STATES,
 } from '@utils/constants';
 import {
@@ -71,6 +72,7 @@ import {
 } from '@utils/utils';
 import { grievancePermissions } from './GrievancesDetailsPage/grievancePermissions';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
 
 const BoxPadding = styled.div`
@@ -90,9 +92,11 @@ export const EditGrievancePage = (): ReactElement => {
   const location = useLocation();
   const { t } = useTranslation();
   const { baseUrl, businessArea, isAllPrograms } = useBaseUrl();
+  const { selectedProgram, isSocialDctType } = useProgramContext();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
   const { id } = useParams();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const {
     data: ticketData,
@@ -119,6 +123,9 @@ export const EditGrievancePage = (): ReactElement => {
   } = useAllAddIndividualFieldsQuery();
   const { data: householdFieldsData, loading: householdFieldsLoading } =
     useAllEditHouseholdFieldsQuery();
+  const { data: allEditPeopleFieldsData, loading: allEditPeopleFieldsLoading } =
+    useAllEditPeopleFieldsQuery();
+
   const { data: programsData, loading: programsDataLoading } =
     useAllProgramsForChoicesQuery({
       variables: {
@@ -137,10 +144,17 @@ export const EditGrievancePage = (): ReactElement => {
     '*',
   );
 
+  const peopleFieldsDict = useArrayToDict(
+    allEditPeopleFieldsData?.allEditPeopleFieldsAttributes,
+    'name',
+    '*',
+  );
+
   if (
     choicesLoading ||
     ticketLoading ||
     allAddIndividualFieldsDataLoading ||
+    allEditPeopleFieldsLoading ||
     householdFieldsLoading ||
     currentUserDataLoading ||
     programsDataLoading
@@ -155,6 +169,7 @@ export const EditGrievancePage = (): ReactElement => {
     !householdFieldsData ||
     !householdFieldsDict ||
     !individualFieldsDict ||
+    !peopleFieldsDict ||
     !programsData
   )
     return null;
@@ -216,6 +231,7 @@ export const EditGrievancePage = (): ReactElement => {
       'individualDataUpdateIdentitiesToEdit',
       'individualDataUpdateFieldsPaymentChannels',
       'individualDataUpdatePaymentChannelsToEdit',
+      'peopleDataUpdateFields',
     ].map(
       (fieldname) =>
         isInvalid(fieldname, errors, touched) && (
@@ -236,15 +252,6 @@ export const EditGrievancePage = (): ReactElement => {
     baseUrl,
   );
 
-  const categoryDescription =
-    GRIEVANCE_CATEGORY_DESCRIPTIONS[
-      GRIEVANCE_CATEGORIES_NAMES[ticket.category]
-    ] || '';
-  const issueTypeDescription =
-    GRIEVANCE_ISSUE_TYPE_DESCRIPTIONS[
-      GRIEVANCE_ISSUE_TYPES_NAMES[ticket.issueType]
-    ] || '';
-
   const mappedProgramChoices = programsData?.allPrograms?.edges?.map(
     (element) => ({ name: element.node.name, value: element.node.id }),
   );
@@ -252,6 +259,10 @@ export const EditGrievancePage = (): ReactElement => {
   const deliveryMechanismDataToEdit =
     ticket?.individualDataUpdateTicketDetails?.individualData
       ?.delivery_mechanism_data_to_edit;
+
+  const individualFieldsDictForValidation = isSocialDctType
+    ? peopleFieldsDict
+    : individualFieldsDict;
 
   return (
     <UniversalErrorBoundary
@@ -296,8 +307,9 @@ export const EditGrievancePage = (): ReactElement => {
           validate(
             values,
             allAddIndividualFieldsData,
-            individualFieldsDict,
+            individualFieldsDictForValidation,
             householdFieldsDict,
+            beneficiaryGroup,
           )
         }
         validationSchema={validationSchema}
@@ -308,6 +320,18 @@ export const EditGrievancePage = (): ReactElement => {
             dataChangeComponentDict,
             EmptyComponent,
           );
+          const categoryDescriptions =
+            getGrievanceCategoryDescriptions(beneficiaryGroup);
+          const issueTypeDescriptions =
+            getGrievanceIssueTypeDescriptions(beneficiaryGroup);
+
+          const categoryDescription =
+            categoryDescriptions[GRIEVANCE_CATEGORIES_NAMES[values.category]] ||
+            '';
+          const issueTypeDescription =
+            issueTypeDescriptions[
+              GRIEVANCE_ISSUE_TYPES_NAMES[values.issueType]
+            ] || '';
           return (
             <>
               <AutoSubmitFormOnEnter />
@@ -374,7 +398,9 @@ export const EditGrievancePage = (): ReactElement => {
                         )}
                         <Grid container xs={12} item>
                           <Grid item xs={3}>
-                            <LabelizedField label={t('Household ID')}>
+                            <LabelizedField
+                              label={`${beneficiaryGroup?.groupLabel}`}
+                            >
                               <span>
                                 {ticket.household?.id &&
                                 canViewHouseholdDetails &&

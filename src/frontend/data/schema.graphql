@@ -288,6 +288,19 @@ input BankTransferObjectType {
   accountHolderName: String!
 }
 
+type BeneficiaryGroupNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String!
+  groupLabel: String!
+  groupLabelPlural: String!
+  memberLabel: String!
+  memberLabelPlural: String!
+  masterDetail: Boolean!
+  programs(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
+}
+
 scalar BigInt
 
 type BulkGrievanceAddNoteMutation {
@@ -520,11 +533,6 @@ type ContentTypeObjectType {
   id: ID!
   appLabel: String!
   model: String!
-  paymentverificationplanSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationPlanNodeConnection!
-  paymentverificationSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationNodeConnection!
-  paymentverificationsummarySet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationSummaryNodeConnection!
-  ticketcomplaintdetailsSet(offset: Int, before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
-  ticketsensitivedetailsSet(offset: Int, before: String, after: String, first: Int, last: Int): TicketSensitiveDetailsNodeConnection!
   logEntries(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationLogEntryNodeConnection!
   name: String
 }
@@ -699,6 +707,7 @@ input CreateProgramInput {
   administrativeAreasOfImplementation: String
   businessAreaSlug: String
   dataCollectingTypeCode: String
+  beneficiaryGroup: String
   partners: [ProgramPartnerThroughInput]
   partnerAccess: String
   programmeCode: String
@@ -2130,6 +2139,18 @@ input IndividualUpdateDataObjectType {
   deliveryMechanismData: [DeliveryMechanismDataObjectType]
   deliveryMechanismDataToEdit: [EditDeliveryMechanismDataObjectType]
   deliveryMechanismDataToRemove: [ID]
+  consent: Boolean
+  residenceStatus: String
+  countryOrigin: String
+  country: String
+  address: String
+  village: String
+  currency: String
+  unhcrId: String
+  nameEnumerator: String
+  orgEnumerator: String
+  orgNameEnumerator: String
+  registrationMethod: String
 }
 
 type InvalidPaymentVerificationPlan {
@@ -2516,8 +2537,8 @@ type PaymentNode implements Node {
   followUps(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   householdSnapshot: PaymentHouseholdSnapshotNode
   paymentVerification: PaymentVerificationNode
-  ticketComplaintDetails: TicketComplaintDetailsNode
-  ticketSensitiveDetails: TicketSensitiveDetailsNode
+  ticketComplaintDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
+  ticketSensitiveDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketSensitiveDetailsNodeConnection!
   adminUrl: String
   paymentPlanHardConflicted: Boolean
   paymentPlanHardConflictedData: [PaymentConflictDataNode]
@@ -2749,8 +2770,6 @@ type PaymentVerificationNode implements Node {
   updatedAt: DateTime!
   version: BigInt!
   paymentVerificationPlan: PaymentVerificationPlanNode!
-  paymentContentType: ContentTypeObjectType
-  paymentObjectId: UUID
   payment: GenericPaymentNode
   status: PaymentVerificationStatus!
   statusDate: DateTime
@@ -2781,8 +2800,6 @@ type PaymentVerificationPlanNode implements Node {
   version: BigInt!
   unicefId: String
   status: PaymentVerificationPlanStatus!
-  paymentPlanContentType: ContentTypeObjectType
-  paymentPlanObjectId: UUID
   paymentPlan: PaymentPlanNode
   sampling: PaymentVerificationPlanSampling!
   verificationChannel: PaymentVerificationPlanVerificationChannel!
@@ -2862,20 +2879,6 @@ type PaymentVerificationSummaryNode implements Node {
   activationDate: DateTime
   completionDate: DateTime
   paymentPlan: PaymentPlanNode
-  paymentPlanContentType: ContentTypeObjectType
-  paymentPlanObjectId: UUID
-}
-
-type PaymentVerificationSummaryNodeConnection {
-  pageInfo: PageInfo!
-  edges: [PaymentVerificationSummaryNodeEdge]!
-  totalCount: Int
-  edgeCount: Int
-}
-
-type PaymentVerificationSummaryNodeEdge {
-  node: PaymentVerificationSummaryNode
-  cursor: String!
 }
 
 enum PaymentVerificationSummaryStatus {
@@ -2989,6 +2992,7 @@ type ProgramNode implements Node {
   partners: [PartnerNode]
   biometricDeduplicationEnabled: Boolean!
   deduplicationSetId: UUID
+  beneficiaryGroup: BeneficiaryGroupNode
   pduFields: [PeriodicFieldNode]
   households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   householdSet(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
@@ -3135,7 +3139,7 @@ type Query {
   paymentVerificationStatusChoices: [ChoiceObject]
   allRapidProFlows(businessAreaSlug: String!): [RapidProFlow]
   sampleSize(input: GetCashplanVerificationSampleSizeInput): GetCashplanVerificationSampleSizeObject
-  allPaymentVerificationLogEntries(offset: Int, before: String, after: String, first: Int, last: Int, objectId: UUID, user: ID, businessArea: String!, search: String, module: String, userId: String, programId: String, objectType: String): PaymentVerificationLogEntryNodeConnection
+  allPaymentVerificationLogEntries(offset: Int, before: String, after: String, first: Int, last: Int, objectId: UUID, user: ID, businessArea: String!, search: String, module: String, userId: String, programId: String): PaymentVerificationLogEntryNodeConnection
   paymentPlan(id: ID!): PaymentPlanNode
   allPaymentPlans(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], totalEntitledQuantityFrom: Float, totalEntitledQuantityTo: Float, dispersionStartDate: Date, dispersionEndDate: Date, isFollowUp: Boolean, sourcePaymentPlanId: String, program: String, programCycle: String, orderBy: String): PaymentPlanNodeConnection
   paymentPlanStatusChoices: [ChoiceObject]
@@ -3158,7 +3162,7 @@ type Query {
   dataCollectionTypeChoices: [DataCollectingTypeChoiceObject]
   pduSubtypeChoices: [PDUSubtypeChoiceObject]
   program(id: ID!): ProgramNode
-  allPrograms(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], sector: [String], numberOfHouseholds: String, budget: String, startDate: Date, endDate: Date, name: String, numberOfHouseholdsWithTpInProgram: String, dataCollectingType: String, compatibleDct: Boolean, orderBy: String): ProgramNodeConnection
+  allPrograms(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], sector: [String], numberOfHouseholds: String, budget: String, startDate: Date, endDate: Date, name: String, beneficiaryGroupMatch: Boolean, numberOfHouseholdsWithTpInProgram: String, dataCollectingType: String, compatibleDct: Boolean, orderBy: String): ProgramNodeConnection
   chartProgrammesBySector(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartDetailedDatasetsNode
   chartTotalTransferredByMonth(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartDetailedDatasetsNode
   programStatusChoices: [ChoiceObject]
@@ -3168,7 +3172,7 @@ type Query {
   programScopeChoices: [ChoiceObject]
   cashPlanStatusChoices: [ChoiceObject]
   dataCollectingTypeChoices: [ChoiceObject]
-  allActivePrograms(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], sector: [String], numberOfHouseholds: String, budget: String, startDate: Date, endDate: Date, name: String, numberOfHouseholdsWithTpInProgram: String, dataCollectingType: String, compatibleDct: Boolean, orderBy: String): ProgramNodeConnection
+  allActivePrograms(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], sector: [String], numberOfHouseholds: String, budget: String, startDate: Date, endDate: Date, name: String, beneficiaryGroupMatch: Boolean, numberOfHouseholdsWithTpInProgram: String, dataCollectingType: String, compatibleDct: Boolean, orderBy: String): ProgramNodeConnection
   programCycle(id: ID!): ProgramCycleNode
   canRunDeduplication: Boolean
   isDeduplicationDisabled: Boolean
@@ -4127,8 +4131,6 @@ type TicketComplaintDetailsNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
-  paymentContentType: ContentTypeObjectType
-  paymentObjectId: UUID
   household: HouseholdNode
   individual: IndividualNode
   payment: PaymentNode
@@ -4400,8 +4402,6 @@ type TicketSensitiveDetailsNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
-  paymentContentType: ContentTypeObjectType
-  paymentObjectId: UUID
   household: HouseholdNode
   individual: IndividualNode
   payment: PaymentNode
@@ -4551,6 +4551,7 @@ input UpdateProgramInput {
   populationGoal: Int
   administrativeAreasOfImplementation: String
   dataCollectingTypeCode: String
+  beneficiaryGroup: String
   programmeCode: String
   pduFields: [PDUFieldInput]
 }

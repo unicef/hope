@@ -11,6 +11,7 @@ import { ContentLink } from '@core/ContentLink';
 import { LabelizedField } from '@core/LabelizedField';
 import { LookUpReassignRole } from './LookUps/LookUpReassignRole/LookUpReassignRole';
 import { ReassignRoleUnique } from './LookUps/LookUpReassignRole/ReassignRoleUnique';
+import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
 
 const StyledBox = styled(Paper)`
@@ -44,6 +45,9 @@ export const ReassignRoleBox = ({
 }): ReactElement => {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   let { individual } = ticket;
   let { household } = ticket;
   let reassignData;
@@ -103,7 +107,7 @@ export const ReassignRoleBox = ({
           <LabelizedField label={t('ROLE')}>
             <>{capitalize(el.role)} Collector</>
           </LabelizedField>
-          <LabelizedField label={t('HOUSEHOLD ID')}>
+          <LabelizedField label={t(`${beneficiaryGroup?.groupLabel} ID`)}>
             <ContentLink
               href={`/${baseUrl}/population/household/${el.household.id}`}
             >
@@ -154,7 +158,7 @@ export const ReassignRoleBox = ({
       return (
         <Typography variant="body2">
           {t(
-            'Upon removing you will need to select new individual(s) for this role.',
+            `Upon removing you will need to select new ${beneficiaryGroup?.memberLabelPlural} for this role.`,
           )}
         </Typography>
       );
@@ -167,7 +171,9 @@ export const ReassignRoleBox = ({
       <OrangeTitle>
         <Typography variant="h6">
           <WarnIcon />
-          {t('Individual is the HOH or the collector for the household')}
+          {t(
+            `${beneficiaryGroup?.memberLabel} is the Head of Household or the collector for the ${beneficiaryGroup?.groupLabel}`,
+          )}{' '}
         </Typography>
       </OrangeTitle>
       {showMessage()}
@@ -176,9 +182,9 @@ export const ReassignRoleBox = ({
           <Box mb={2} mt={2}>
             <Box mb={2}>
               <LabelizedField label={t('ROLE')}>
-                <>{t('Head of Household')}</>
+                <>{t(`Head of ${beneficiaryGroup?.groupLabel}`)}</>
               </LabelizedField>
-              <LabelizedField label={t('HOUSEHOLD ID')}>
+              <LabelizedField label={t(`${beneficiaryGroup?.groupLabel} ID`)}>
                 <ContentLink
                   href={`/${baseUrl}/population/household/${ticket?.household.id}`}
                 >

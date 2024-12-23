@@ -24,6 +24,7 @@ import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { DialogDescription } from '@containers/dialogs/DialogDescription';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useProgramContext } from 'src/programContext';
 
 const Error = styled.span`
   color: ${({ theme }: { theme: MiśTheme }) => theme.hctPalette.red};
@@ -56,6 +57,8 @@ export function DedupeResults({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { baseUrl } = useBaseUrl();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   function createData(
     hitId,
@@ -136,7 +139,7 @@ export function DedupeResults({
             <TableHead>
               <TableRow>
                 <TableCell style={{ width: 100 }}>
-                  {t('Individual ID')}
+                  {t(`${beneficiaryGroup?.memberLabel} ID`)}
                 </TableCell>
                 <TableCell style={{ width: 100 }}>{t('Full Name')}</TableCell>
                 <TableCell style={{ width: 100 }}>{t('Age')}</TableCell>

@@ -1,11 +1,14 @@
 import logging
 import os
+import re
 from datetime import datetime
+from typing import Any
 
 from django.conf import settings
 from django.core.management import call_command
 
 import pytest
+import redis
 from _pytest.fixtures import FixtureRequest
 from _pytest.nodes import Item
 from _pytest.runner import CallInfo
@@ -28,6 +31,8 @@ from hct_mis_api.apps.core.models import (
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.household.fixtures import DocumentTypeFactory
 from hct_mis_api.apps.household.models import DocumentType
+from hct_mis_api.apps.program.fixtures import BeneficiaryGroupFactory
+from hct_mis_api.config.env import env
 from tests.selenium.page_object.accountability.communication import (
     AccountabilityCommunication,
 )
@@ -113,11 +118,42 @@ def pytest_addoption(parser) -> None:  # type: ignore
     parser.addoption("--mapping", action="store_true", default=False, help="Enable mapping mode")
 
 
+def get_redis_host() -> str:
+    regex = "\\/\\/(.*):"
+    redis_host = re.search(regex, env("CACHE_LOCATION")).group(1)
+    return redis_host
+
+
+@pytest.fixture(autouse=True)
+def configure_cache_for_tests(worker_id: str, settings: Any) -> None:
+    """
+    Dynamically configure Django's cache backend for each pytest-xdist worker.
+    """
+    redis_db = 0 if worker_id == "master" else int(worker_id.replace("gw", ""))
+    settings.CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": f"redis://{get_redis_host()}:6379/{redis_db}",
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            },
+        }
+    }
+
+
+@pytest.fixture(autouse=True)
+def flush_redis(worker_id: str) -> None:
+    redis_db = 0 if worker_id == "master" else int(worker_id.replace("gw", ""))
+    redis_client = redis.StrictRedis(host=get_redis_host(), port=6379, db=redis_db)
+    redis_client.flushdb()
+
+
 def pytest_configure(config) -> None:  # type: ignore
-    env = Env()
-    settings.OUTPUT_DATA_ROOT = env("OUTPUT_DATA_ROOT", default="/tests/selenium/output_data")
     config.addinivalue_line("markers", "night: This marker is intended for e2e tests conducted during the night on CI")
     # delete all old screenshots
+
+    env = Env()
+    settings.OUTPUT_DATA_ROOT = env("OUTPUT_DATA_ROOT", default="/tests/selenium/output_data")
     settings.REPORT_DIRECTORY = f"{settings.OUTPUT_DATA_ROOT}/report"
     settings.DOWNLOAD_DIRECTORY = f"{settings.OUTPUT_DATA_ROOT}/report/downloads"
     settings.SCREENSHOT_DIRECTORY = f"{settings.REPORT_DIRECTORY}/screenshot"
@@ -146,12 +182,6 @@ def pytest_configure(config) -> None:  # type: ignore
     settings.SECURE_CONTENT_TYPE_NOSNIFF = True
     settings.SECURE_REFERRER_POLICY = "same-origin"
     settings.CACHE_ENABLED = False
-    settings.CACHES = {
-        "default": {
-            "BACKEND": "hct_mis_api.apps.core.memcache.LocMemCache",
-            "TIMEOUT": 1800,
-        }
-    }
 
     settings.LOGGING["loggers"].update(
         {
@@ -241,10 +271,6 @@ def driver(download_path: str) -> Chrome:
     chrome_options.add_experimental_option("prefs", prefs)
     driver = webdriver.Chrome(options=chrome_options)
     yield driver
-    # try:
-    #     shutil.rmtree(download_path)
-    # except FileNotFoundError:
-    #     pass
 
 
 @pytest.fixture(scope="session")
@@ -548,6 +574,26 @@ def change_super_user(business_area: BusinessArea) -> None:
 
 @pytest.fixture(autouse=True)
 def create_super_user(business_area: BusinessArea) -> User:
+    BeneficiaryGroupFactory(
+        id="913700c0-3b8b-429a-b68f-0cd3d2bcd09a",
+        name="Main Menu",
+        group_label="Items Group",
+        group_label_plural="Items Groups",
+        member_label="Item",
+        member_label_plural="Items",
+        master_detail=True,
+    )
+
+    BeneficiaryGroupFactory(
+        id="9cf21adb-74a9-4c3c-9057-6fb27feb4220",
+        name="People",
+        group_label="Household",
+        group_label_plural="Households",
+        member_label="Individual",
+        member_label_plural="Individuals",
+        master_detail=False,
+    )
+
     Partner.objects.get_or_create(name="TEST")
     partner, _ = Partner.objects.get_or_create(name="UNICEF")
     Partner.objects.get_or_create(name="UNHCR")
@@ -578,7 +624,7 @@ def create_super_user(business_area: BusinessArea) -> User:
     for partner in Partner.objects.exclude(name="UNICEF"):
         partner.allowed_business_areas.add(business_area)
         role = RoleFactory(name=f"Role for {partner.name}")
-        partner_through = BusinessAreaPartnerThrough.objects.create(
+        partner_through, _ = BusinessAreaPartnerThrough.objects.get_or_create(
             business_area=business_area,
             partner=partner,
         )
@@ -614,7 +660,7 @@ def create_super_user(business_area: BusinessArea) -> User:
             "code": "partial",
             "description": "Partial individuals collected",
             "active": True,
-            "type": DataCollectingType.Type.STANDARD,
+            "type": DataCollectingType.Type.SOCIAL,
         },
         {
             "label": "size/age/gender disaggregated",
@@ -626,7 +672,7 @@ def create_super_user(business_area: BusinessArea) -> User:
     ]
 
     for dct in dct_list:
-        data_collecting_type = DataCollectingType.objects.create(
+        data_collecting_type, _ = DataCollectingType.objects.get_or_create(
             label=dct["label"],
             code=dct["code"],
             description=dct["description"],
