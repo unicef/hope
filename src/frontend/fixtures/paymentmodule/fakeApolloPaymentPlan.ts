@@ -300,11 +300,6 @@ export const fakeApolloPaymentPlan: PaymentPlanQuery['paymentPlan'] = {
   },
   __typename: 'PaymentPlanNode',
   excludedIds: '',
-  programCycle: {
-    __typename: 'ProgramCycleNode',
-    id: '',
-    title: '',
-  },
 };
 
 export const fakeApolloPaymentPlanWithWrongBackgroundActionStatus: PaymentPlanQuery['paymentPlan'] =
