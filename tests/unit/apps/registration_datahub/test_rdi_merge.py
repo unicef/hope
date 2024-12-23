@@ -483,7 +483,6 @@ class TestRdiMergeTask(TestCase):
                 business_area=self.rdi.business_area,
                 program=program_2,
                 unicef_id="HH-9",
-                rdi_merge_status=MergeStatusModel.PENDING,
             )
             household.household_collection = None
             household.save()
@@ -508,10 +507,10 @@ class TestRdiMergeTask(TestCase):
         if household_representation_exists is not None:
             if household_representation_exists:
                 household_collection.refresh_from_db()
-                self.assertEqual(household_collection.households.count(), 2)  # 1
+                self.assertEqual(household_collection.households.count(), 2)
             else:
                 household.refresh_from_db()
-                self.assertIsNotNone(household.household_collection)  # None
+                self.assertIsNotNone(household.household_collection)
                 self.assertEqual(household.household_collection.households.count(), 2)
 
     def test_merging_external_collector(self) -> None:
