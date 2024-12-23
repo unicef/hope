@@ -55,7 +55,7 @@ export function TargetPopulationHouseholdTable({
         renderRow={(row) => (
           <TargetPopulationHouseholdTableRow
             key={(row as { id: string }).id}
-            household={row}
+            payment={row}
             canViewDetails={canViewDetails}
           />
         )}
