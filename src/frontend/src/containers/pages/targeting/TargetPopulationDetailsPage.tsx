@@ -80,7 +80,7 @@ export const TargetPopulationDetailsPage = (): ReactElement => {
       />
       <TargetPopulationDetails targetPopulation={paymentPlan} />
       <TargetPopulationCore
-        id={paymentPlan.id}
+        id={paymentPlan?.id}
         targetPopulation={paymentPlan}
         isStandardDctType={isStandardDctType}
         isSocialDctType={isSocialDctType}

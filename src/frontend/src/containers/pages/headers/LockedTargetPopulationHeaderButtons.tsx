@@ -1,22 +1,20 @@
-import { Box, Button, Tooltip } from '@mui/material';
-import { FileCopy } from '@mui/icons-material';
-import { ReactElement, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import { LoadingButton } from '@components/core/LoadingButton';
-import { useSnackbar } from '@hooks/useSnackBar';
 import {
   Action,
   BusinessAreaDataQuery,
   PaymentPlanQuery,
   ProgramStatus,
 } from '@generated/graphql';
+import { usePaymentPlanAction } from '@hooks/usePaymentPlanAction';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { FileCopy } from '@mui/icons-material';
+import { Box, Button, Tooltip } from '@mui/material';
+import { ReactElement, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+import { useProgramContext } from '../../../programContext';
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
 import { FinalizeTargetPopulationPaymentPlan } from '../../dialogs/targetPopulation/FinalizeTargetPopulationPaymentPlan';
-import { useProgramContext } from '../../../programContext';
-import { usePaymentPlanAction } from '@hooks/usePaymentPlanAction';
-import { useNavigate } from 'react-router-dom';
-import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const IconContainer = styled.span`
   button {
@@ -45,8 +43,6 @@ export function LockedTargetPopulationHeaderButtons({
   businessAreaData,
 }: ApprovedTargetPopulationHeaderButtonsPropTypes): ReactElement {
   const { t } = useTranslation();
-  const navigate = useNavigate();
-  const { baseUrl } = useBaseUrl();
   const [openDuplicate, setOpenDuplicate] = useState(false);
   const [openFinalizePaymentPlan, setOpenFinalizePaymentPlan] = useState(false);
   const { showMessage } = useSnackbar();
@@ -54,8 +50,7 @@ export function LockedTargetPopulationHeaderButtons({
 
   const { mutatePaymentPlanAction: unlockAction, loading: loadingUnlock } =
     usePaymentPlanAction(Action.TpUnlock, targetPopulation.id, () => {
-      showMessage(t('Target Population Finalized'));
-      navigate(`/${baseUrl}/target-population/`);
+      showMessage(t('Target Population Unlocked'));
     });
 
   const { isPaymentPlanApplicable } = businessAreaData.businessArea;
