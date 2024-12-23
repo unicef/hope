@@ -363,7 +363,7 @@ class TestSmokePaymentModule:
         assert "Dispersion End Date" in pagePaymentModule.getTableLabel()[9].text
         assert "Follow-up Payment Plans" in pagePaymentModule.getTableLabel()[10].text
         assert "ACCEPTED" in pagePaymentModule.getStatusContainer().text
-        assert "Rows per page: 5 1–2 of 2" in pagePaymentModule.getTablePagination().text.replace("\n", " ")
+        assert "Rows per page: 5 1–1 of 1" in pagePaymentModule.getTablePagination().text.replace("\n", " ")
 
     def test_smoke_new_payment_plan(
         self,

@@ -195,9 +195,8 @@ def add_payment_verification_xlsx() -> PV:
 
 def payment_verification_creator(channel: str = PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL) -> PV:
     user = User.objects.first()
-    registration_data_import = RegistrationDataImportFactory(
-        imported_by=user, business_area=BusinessArea.objects.first()
-    )
+    business_area = BusinessArea.objects.first()
+    registration_data_import = RegistrationDataImportFactory(imported_by=user, business_area=business_area)
     program = Program.objects.filter(name="Active Program").first()
     household, individuals = create_household(
         {
@@ -212,7 +211,7 @@ def payment_verification_creator(channel: str = PaymentVerificationPlan.VERIFICA
         name="TEST",
         status=PaymentPlan.Status.FINISHED,
         program_cycle=program.cycles.first(),
-        business_area=BusinessArea.objects.first(),
+        business_area=business_area,
         start_date=datetime.now() - relativedelta(months=1),
         end_date=datetime.now() + relativedelta(months=1),
         created_by=user,
@@ -363,7 +362,7 @@ class TestSmokePaymentVerification:
         assert "DELIVERED FULLY" in pagePaymentRecord.getLabelStatus()[0].text
         assert "DELIVERED FULLY" in pagePaymentRecord.getStatusContainer().text
         assert payment_record.household.unicef_id in pagePaymentRecord.getLabelHousehold().text
-        assert payment_record.parent.target_population.name in pagePaymentRecord.getLabelTargetPopulation().text
+        assert payment_record.parent.name in pagePaymentRecord.getLabelTargetPopulation().text
         assert payment_record.parent.unicef_id in pagePaymentRecord.getLabelDistributionModality().text
         assert payment_record.payment_verifications.first().status in pagePaymentRecord.getLabelStatus()[1].text
         assert "PLN 0.00" in pagePaymentRecord.getLabelAmountReceived().text

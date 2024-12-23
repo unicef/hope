@@ -19,12 +19,15 @@ from hct_mis_api.apps.core.models import (
 from hct_mis_api.apps.household.fixtures import (
     HouseholdFactory,
     IndividualFactory,
+    IndividualRoleInHouseholdFactory,
     create_household_and_individuals,
+    create_household_with_individual_with_collectors,
 )
 from hct_mis_api.apps.household.models import (
     HEARING,
     HOST,
     REFUGEE,
+    ROLE_PRIMARY,
     SEEING,
     Household,
     Individual,
@@ -33,24 +36,28 @@ from hct_mis_api.apps.payment.fixtures import (
     FinancialServiceProviderFactory,
     FinancialServiceProviderXlsxTemplateFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
+    PaymentPlanFactory,
     generate_delivery_mechanisms,
 )
-from hct_mis_api.apps.payment.models import DeliveryMechanism, FinancialServiceProvider
+from hct_mis_api.apps.payment.models import (
+    DeliveryMechanism,
+    FinancialServiceProvider,
+    PaymentPlan,
+)
+from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.periodic_data_update.utils import (
     field_label_to_field_name,
     populate_pdu_with_null_values,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
+from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory, RuleFactory
 from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
-    TargetPopulationFactory,
+    TargetingCriteriaRuleFactory,
 )
-from hct_mis_api.apps.targeting.models import TargetPopulation
-from hct_mis_api.apps.targeting.services.targeting_stats_refresher import refresh_stats
 from tests.selenium.page_object.filters import Filters
 from tests.selenium.page_object.targeting.targeting import Targeting
 from tests.selenium.page_object.targeting.targeting_create import TargetingCreate
@@ -93,19 +100,18 @@ def individual() -> Callable:
     def _individual(program: Program) -> Individual:
         business_area = create_afghanistan()
         rdi = RegistrationDataImportFactory()
-        household, individuals = create_household_and_individuals(
-            household_data={
+
+        household, individuals = create_household_with_individual_with_collectors(
+            household_args={
                 "business_area": business_area,
                 "program_id": program.pk,
                 "registration_data_import": rdi,
             },
-            individuals_data=[
-                {
-                    "business_area": business_area,
-                    "program_id": program.pk,
-                    "registration_data_import": rdi,
-                },
-            ],
+            individual_args={
+                "business_area": business_area,
+                "program_id": program.pk,
+                "registration_data_import": rdi,
+            },
         )
         individual = individuals[0]
         individual.flex_fields = populate_pdu_with_null_values(program, individual.flex_fields)
@@ -237,113 +243,108 @@ def get_program_with_dct_type_and_name(
 
 
 @pytest.fixture
-def create_targeting() -> TargetPopulation:
-    create_test_program = Program.objects.filter(name="Test Programm").first()
+def create_targeting() -> PaymentPlan:
+    test_program = Program.objects.get(name="Test Programm")
     generate_delivery_mechanisms()
     dm_cash = DeliveryMechanism.objects.get(code="cash")
+    business_area = BusinessArea.objects.get(slug="afghanistan")
 
     targeting_criteria = TargetingCriteriaFactory()
-
-    tp = TargetPopulationFactory(
+    pp = PaymentPlanFactory(
         name="Test Target Population",
-        program=create_test_program,
-        status=TargetPopulation.STATUS_OPEN,
+        status=PaymentPlan.Status.TP_OPEN,
         targeting_criteria=targeting_criteria,
-        program_cycle=create_test_program.cycles.first(),
-        build_status=TargetPopulation.BUILD_STATUS_OK,
+        program_cycle=test_program.cycles.first(),
+        build_status=PaymentPlan.BuildStatus.BUILD_STATUS_OK,
     )
-    program = tp.program
 
     hoh1 = IndividualFactory(household=None)
     hoh2 = IndividualFactory(household=None)
     household_1 = HouseholdFactory(
-        program=program,
+        program=test_program,
         id="3d7087be-e8f8-478d-9ca2-4ca6d5e96f51",
         unicef_id="HH-17-0000.3340",
         head_of_household=hoh1,
         size=5,
     )
     household_2 = HouseholdFactory(
-        program=program,
+        program=test_program,
         id="3d7087be-e8f8-478d-9ca2-4ca6d5e96f52",
         unicef_id="HH-17-0000.3341",
         head_of_household=hoh2,
         size=6,
     )
-
     # HH1 - Female Children: 1; Female Adults: 1; Male Children: 2; Male Adults: 1;
-    IndividualFactory(
+    ind_1 = IndividualFactory(
         household=household_1,
-        program=program,
+        program=test_program,
         sex="MALE",
         birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=11, maximum_age=16),
     )
     IndividualFactory(
         household=household_1,
-        program=program,
+        program=test_program,
         sex="MALE",
         birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=11, maximum_age=16),
     )
     IndividualFactory(
         household=household_1,
-        program=program,
+        program=test_program,
         sex="FEMALE",
         birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=1, maximum_age=10),
     )
     IndividualFactory(
         household=household_1,
-        program=program,
+        program=test_program,
         sex="FEMALE",
         birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=20, maximum_age=40),
     )
     IndividualFactory(
         household=household_1,
-        program=program,
+        program=test_program,
         sex="MALE",
         unicef_id="IND-06-0001.1828",
         birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=20, maximum_age=40),
     )
-
     # HH2 - Female Children: 4; Female Adults: 1; Male Children: 1; Male Adults: 0;
-    IndividualFactory(
+    ind_2 = IndividualFactory(
         household=household_2,
-        program=program,
+        program=test_program,
         sex="MALE",
         birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=1, maximum_age=3),
     )
     IndividualFactory(
         household=household_2,
-        program=program,
+        program=test_program,
         sex="FEMALE",
         birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=1, maximum_age=10),
     )
     IndividualFactory(
         household=household_2,
-        program=program,
+        program=test_program,
         sex="FEMALE",
         birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=1, maximum_age=10),
     )
     IndividualFactory(
         household=household_2,
-        program=program,
+        program=test_program,
         sex="FEMALE",
         birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=1, maximum_age=10),
     )
     IndividualFactory(
         household=household_2,
-        program=program,
+        program=test_program,
         sex="FEMALE",
         birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=1, maximum_age=10),
     )
     IndividualFactory(
         household=household_2,
-        program=program,
+        program=test_program,
         sex="FEMALE",
         birth_date=factory.Faker("date_of_birth", tzinfo=utc, minimum_age=30, maximum_age=45),
     )
-
-    tp.households.set([household_1, household_2])
-    business_area = BusinessArea.objects.get(slug="afghanistan")
+    IndividualRoleInHouseholdFactory(individual=ind_1, household=household_1, role=ROLE_PRIMARY)
+    IndividualRoleInHouseholdFactory(individual=ind_2, household=household_2, role=ROLE_PRIMARY)
     rule = RuleFactory(
         name="Test Rule",
         type=Rule.TYPE_PAYMENT_PLAN,
@@ -368,10 +369,15 @@ def create_targeting() -> TargetPopulation:
         xlsx_template=fsp_xlsx_template,
         delivery_mechanism=dm_cash,
     )
-    tp.refresh_from_db()
-    tp = refresh_stats(tp)
-    tp.save()
-    yield tp
+    TargetingCriteriaRuleFactory(
+        household_ids=f"{household_1.unicef_id}, {household_2.unicef_id}",
+        individual_ids="",
+        targeting_criteria=targeting_criteria,
+    )
+    PaymentPlanService.create_payments(pp)
+    pp.update_population_count_fields()
+    pp.refresh_from_db()
+    yield pp
 
 
 @pytest.fixture
@@ -392,9 +398,13 @@ def create_programs() -> None:
 @pytest.mark.usefixtures("login")
 class TestSmokeTargeting:
     def test_smoke_targeting_page(
-        self, create_programs: None, create_targeting: TargetPopulation, pageTargeting: Targeting
+        self, create_programs: None, create_targeting: PaymentPlan, pageTargeting: Targeting
     ) -> None:
-        TargetPopulationFactory(program=Program.objects.get(name="Test Programm"), name="Copy TP")
+        PaymentPlanFactory(
+            program_cycle=ProgramCycle.objects.get(program__name="Test Programm"),
+            name="Copy TP",
+            status=PaymentPlan.Status.TP_OPEN,
+        )
         pageTargeting.selectGlobalProgramFilter("Test Programm")
         pageTargeting.getNavTargeting().click()
         assert "Targeting" in pageTargeting.getTitlePage().text
@@ -414,7 +424,7 @@ class TestSmokeTargeting:
     def test_smoke_targeting_create_use_filters(
         self,
         create_programs: None,
-        create_targeting: TargetPopulation,
+        create_targeting: PaymentPlan,
         pageTargeting: Targeting,
         pageTargetingCreate: TargetingCreate,
     ) -> None:
@@ -432,7 +442,7 @@ class TestSmokeTargeting:
     def test_smoke_targeting_create_use_ids(
         self,
         create_programs: None,
-        create_targeting: TargetPopulation,
+        create_targeting: PaymentPlan,
         pageTargeting: Targeting,
         pageTargetingCreate: TargetingCreate,
     ) -> None:
@@ -451,7 +461,7 @@ class TestSmokeTargeting:
     def test_smoke_targeting_details_page(
         self,
         create_programs: None,
-        create_targeting: TargetPopulation,
+        create_targeting: PaymentPlan,
         pageTargeting: Targeting,
         pageTargetingDetails: TargetingDetails,
     ) -> None:
@@ -881,7 +891,10 @@ class TestCreateTargeting:
         assert pageTargetingCreate.getAddPeopleRuleButton().text.upper() == "ADD PEOPLE RULE"
         pageTargetingCreate.getAddPeopleRuleButton().click()
         pageTargetingCreate.getTargetingCriteriaAutoComplete().click()
-        pageTargetingCreate.select_listbox_element("Test String Attribute SW")
+        # pageTargetingCreate.select_listbox_element("Test String Attribute SW")  # not works
+        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys("Test String Attribute")
+        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys(Keys.ARROW_DOWN)
+        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys(Keys.ENTER)
         pageTargetingCreate.getSelectFiltersRoundNumber().click()
         pageTargetingCreate.getSelectRoundOption(1).click()
         pageTargetingCreate.getInputFiltersValue().send_keys("Text")
@@ -908,7 +921,7 @@ class TestTargeting:
         self,
         create_programs: None,
         household_with_disability: Household,
-        create_targeting: TargetPopulation,
+        create_targeting: PaymentPlan,
         pageTargeting: Targeting,
         pageTargetingDetails: TargetingDetails,
         pageTargetingCreate: TargetingCreate,
@@ -925,9 +938,7 @@ class TestTargeting:
         pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
         pageTargetingCreate.getInputName().send_keys(f"Target Population for {household_with_disability.unicef_id}")
         pageTargetingCreate.clickButtonTargetPopulationCreate()
-        target_population = TargetPopulation.objects.get(
-            name=f"Target Population for {household_with_disability.unicef_id}"
-        )
+        target_population = PaymentPlan.objects.get(name=f"Target Population for {household_with_disability.unicef_id}")
         assert str(target_population.total_individuals_count) == pageTargetingDetails.getLabelTargetedIndividuals().text
         assert (
             str(target_population.total_households_count) == pageTargetingDetails.getLabelTotalNumberOfHouseholds().text
@@ -939,7 +950,7 @@ class TestTargeting:
         self,
         create_programs: None,
         household_with_disability: Household,
-        create_targeting: TargetPopulation,
+        create_targeting: PaymentPlan,
         pageTargeting: Targeting,
         pageTargetingDetails: TargetingDetails,
         pageTargetingCreate: TargetingCreate,
@@ -954,7 +965,7 @@ class TestTargeting:
         pageTargetingCreate.getInputIndividualids().send_keys("IND-88-0000.0002")
         pageTargetingCreate.getInputName().send_keys("Target Population for IND-88-0000.0002")
         pageTargetingCreate.clickButtonTargetPopulationCreate()
-        target_population = TargetPopulation.objects.get(name="Target Population for IND-88-0000.0002")
+        target_population = PaymentPlan.objects.get(name="Target Population for IND-88-0000.0002")
         assert (
             "4"
             == str(target_population.total_individuals_count)
@@ -970,7 +981,7 @@ class TestTargeting:
     def test_targeting_rebuild(
         self,
         create_programs: None,
-        create_targeting: TargetPopulation,
+        create_targeting: PaymentPlan,
         pageTargeting: Targeting,
         pageTargetingDetails: TargetingDetails,
         pageTargetingCreate: TargetingCreate,
@@ -987,7 +998,7 @@ class TestTargeting:
         self,
         create_programs: None,
         household_with_disability: Household,
-        create_targeting: TargetPopulation,
+        create_targeting: PaymentPlan,
         pageTargeting: Targeting,
         filters: Filters,
         pageTargetingDetails: TargetingDetails,
@@ -1009,7 +1020,7 @@ class TestTargeting:
     def test_copy_targeting(
         self,
         create_programs: None,
-        create_targeting: TargetPopulation,
+        create_targeting: PaymentPlan,
         pageTargeting: Targeting,
         pageTargetingDetails: TargetingDetails,
         pageTargetingCreate: TargetingCreate,
@@ -1035,7 +1046,7 @@ class TestTargeting:
         self,
         create_programs: None,
         household_with_disability: Household,
-        create_targeting: TargetPopulation,
+        create_targeting: PaymentPlan,
         pageTargeting: Targeting,
         pageTargetingDetails: TargetingDetails,
         pageTargetingCreate: TargetingCreate,
@@ -1062,11 +1073,15 @@ class TestTargeting:
         self,
         create_programs: None,
         household_with_disability: Household,
-        create_targeting: TargetPopulation,
+        create_targeting: PaymentPlan,
         pageTargeting: Targeting,
         pageTargetingDetails: TargetingDetails,
     ) -> None:
-        TargetPopulationFactory(program=Program.objects.get(name="Test Programm"), name="Copy TP")
+        PaymentPlanFactory(
+            program_cycle=ProgramCycle.objects.get(program__name="Test Programm"),
+            name="Copy TP",
+            status=PaymentPlan.Status.TP_OPEN,
+        )
         pageTargeting.selectGlobalProgramFilter("Test Programm")
         pageTargeting.getNavTargeting().click()
         pageTargeting.disappearLoadingRows()
@@ -1125,7 +1140,7 @@ class TestTargeting:
         test_data: dict,
         create_programs: None,
         household_with_disability: Household,
-        create_targeting: TargetPopulation,
+        create_targeting: PaymentPlan,
         pageTargeting: Targeting,
         pageTargetingDetails: TargetingDetails,
         pageTargetingCreate: TargetingCreate,
@@ -1196,7 +1211,7 @@ class TestTargeting:
         test_data: dict,
         create_programs: None,
         household_with_disability: Household,
-        create_targeting: TargetPopulation,
+        create_targeting: PaymentPlan,
         pageTargeting: Targeting,
         pageTargetingDetails: TargetingDetails,
         pageTargetingCreate: TargetingCreate,
@@ -1242,14 +1257,14 @@ class TestTargeting:
         self,
         create_programs: None,
         household_with_disability: Household,
-        create_targeting: TargetPopulation,
+        create_targeting: PaymentPlan,
         pageTargeting: Targeting,
         filters: Filters,
     ) -> None:
-        TargetPopulationFactory(
-            program=Program.objects.get(name="Test Programm"),
+        PaymentPlanFactory(
+            program_cycle=ProgramCycle.objects.get(program__name="Test Programm"),
             name="Copy TP",
-            status=TargetPopulation.STATUS_PROCESSING,
+            status=PaymentPlan.Status.TP_PROCESSING,
         )
         pageTargeting.selectGlobalProgramFilter("Test Programm")
         pageTargeting.getNavTargeting().click()
@@ -1278,13 +1293,13 @@ class TestTargeting:
         self,
         create_programs: None,
         household_with_disability: Household,
-        create_targeting: TargetPopulation,
+        create_targeting: PaymentPlan,
         pageTargeting: Targeting,
     ) -> None:
-        TargetPopulationFactory(
-            program=Program.objects.get(name="Test Programm"),
+        PaymentPlanFactory(
+            program_cycle=ProgramCycle.objects.get(program__name="Test Programm"),
             name="Copy TP",
-            status=TargetPopulation.STATUS_PROCESSING,
+            status=PaymentPlan.Status.TP_PROCESSING,
         )
 
         pageTargeting.selectGlobalProgramFilter("Test Programm")
@@ -1324,7 +1339,7 @@ class TestTargeting:
         self,
         create_programs: None,
         household_with_disability: Household,
-        create_targeting: TargetPopulation,
+        create_targeting: PaymentPlan,
         pageTargeting: Targeting,
         pageTargetingDetails: TargetingDetails,
         pageTargetingCreate: TargetingCreate,
@@ -1353,7 +1368,7 @@ class TestTargeting:
         self,
         create_programs: None,
         household_with_disability: Household,
-        create_targeting: TargetPopulation,
+        create_targeting: PaymentPlan,
         pageTargeting: Targeting,
         pageTargetingDetails: TargetingDetails,
         pageTargetingCreate: TargetingCreate,
