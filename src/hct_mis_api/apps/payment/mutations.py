@@ -1411,9 +1411,12 @@ class Mutations(graphene.ObjectType):
     discard_payment_verification_plan = DiscardPaymentVerificationPlan.Field()
     invalid_payment_verification_plan = InvalidPaymentVerificationPlan.Field()
     delete_payment_verification_plan = DeletePaymentVerificationPlan.Field()
-    update_payment_verification_status_and_received_amount = UpdatePaymentVerificationStatusAndReceivedAmount.Field()
     mark_payment_as_failed = MarkPaymentAsFailedMutation.Field()
     revert_mark_payment_as_failed = RevertMarkPaymentAsFailedMutation.Field()
+    update_payment_verification_status_and_received_amount = UpdatePaymentVerificationStatusAndReceivedAmount.Field()
+    update_payment_verification_received_and_received_amount = (
+        UpdatePaymentVerificationReceivedAndReceivedAmount.Field()
+    )
 
     # Payment Plan
     action_payment_plan_mutation = ActionPaymentPlanMutation.Field()
