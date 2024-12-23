@@ -46,17 +46,17 @@ class TestTargetingCriteriaInputValidator(TestCase):
 
     def test_TargetingCriteriaInputValidator(self) -> None:
         validator = TargetingCriteriaInputValidator
-        create_household({"unicef_id": "HH-1", "size": 1}, {"unicef_id": "IND-1"})
+        create_household({"unicef_id": "HH-1", "size": 1}, {"unicef_id": "IND-12"})
         self._update_program(self.program_standard)
         validator.validate(
-            {"rules": [{"Rule1": {"test": "123"}, "household_ids": "HH-1", "individual_ids": "IND-1"}]},
+            {"rules": [{"Rule1": {"test": "123"}, "household_ids": "HH-1", "individual_ids": "IND-12"}]},
             self.program_standard,
         )
 
         with self.assertRaisesMessage(ValidationError, "Target criteria can only have individual ids"):
             self._update_program(self.program_standard_ind_only)
             validator.validate(
-                {"rules": [{"household_ids": "HH-1", "individual_ids": "IND-1"}]}, self.program_standard_ind_only
+                {"rules": [{"household_ids": "HH-1", "individual_ids": "IND-12"}]}, self.program_standard_ind_only
             )
 
         with self.assertRaisesMessage(ValidationError, "There should be at least 1 rule in target criteria"):
