@@ -164,11 +164,13 @@ def create_flexible_attribute(
     return flexible_attribute
 
 
-def create_custom_household(observed_disability: list[str], residence_status: str = HOST) -> Household:
+def create_custom_household(
+    observed_disability: list[str], residence_status: str = HOST, unicef_id: str = "HH-00-0000.0442"
+) -> Household:
     program = Program.objects.get(name="Test Programm")
     household, _ = create_household_and_individuals(
         household_data={
-            "unicef_id": "HH-00-0000.0442",
+            "unicef_id": unicef_id,
             "rdi_merge_status": "MERGED",
             "business_area": program.business_area,
             "program": program,
@@ -187,17 +189,17 @@ def create_custom_household(observed_disability: list[str], residence_status: st
 
 @pytest.fixture
 def household_with_disability() -> Household:
-    yield create_custom_household(observed_disability=[SEEING, HEARING])
+    yield create_custom_household(observed_disability=[SEEING, HEARING], unicef_id="HH-00-0000.0443")
 
 
 @pytest.fixture
 def household_without_disabilities() -> Household:
-    yield create_custom_household(observed_disability=[])
+    yield create_custom_household(observed_disability=[], unicef_id="HH-00-0000.0444")
 
 
 @pytest.fixture
 def household_refugee() -> Household:
-    yield create_custom_household(observed_disability=[], residence_status=REFUGEE)
+    yield create_custom_household(observed_disability=[], residence_status=REFUGEE, unicef_id="HH-00-0000.0445")
 
 
 def get_program_with_dct_type_and_name(
@@ -235,7 +237,7 @@ def create_targeting(household_without_disabilities: Household) -> TargetPopulat
     target_population.save()
     household, _ = create_household(
         household_args={
-            "unicef_id": "HH-00-0000.0442",
+            "unicef_id": "HH-00-0000.0440",
             "business_area": program.business_area,
             "program": program,
             "residence_status": HOST,
