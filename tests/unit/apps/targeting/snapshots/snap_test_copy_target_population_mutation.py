@@ -151,7 +151,7 @@ snapshots['TestCopyTargetPopulationMutation::test_copy_with_individual_ids_0_wit
                 'status': 'OPEN',
                 'targetingCriteria': {
                     'householdIds': '',
-                    'individualIds': "['IND-1']",
+                    'individualIds': "['IND-12']",
                     'rules': [
                     ]
                 },
