@@ -54,15 +54,23 @@ export const TargetPopulationTableFilters = ({
   };
 
   const allowedStatusChoices = [
+    'ASSIGNED',
+    PaymentPlanStatus.Draft,
     PaymentPlanStatus.TpOpen,
     PaymentPlanStatus.TpLocked,
-    PaymentPlanStatus.Finished,
+    PaymentPlanStatus.Processing,
+    PaymentPlanStatus.SteficonRun,
+    PaymentPlanStatus.SteficonWait,
+    PaymentPlanStatus.SteficonCompleted,
   ];
 
   const { data: statusChoicesData } = usePaymentPlanStatusChoicesQueryQuery();
 
   const preparedStatusChoices =
-    statusChoicesData?.paymentPlanStatusChoices?.filter((el) =>
+    [
+      { name: 'Assigned', value: 'ASSIGNED' },
+      ...(statusChoicesData?.paymentPlanStatusChoices || []),
+    ]?.filter((el) =>
       allowedStatusChoices.includes(el.value as PaymentPlanStatus),
     ) || [];
 

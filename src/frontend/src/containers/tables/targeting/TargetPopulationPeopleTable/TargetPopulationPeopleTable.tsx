@@ -37,7 +37,7 @@ export function TargetPopulationPeopleTable({
         renderRow={(row) => (
           <TargetPopulationPeopleTableRow
             key={row.id}
-            household={row}
+            payment={row}
             canViewDetails={canViewDetails}
           />
         )}
