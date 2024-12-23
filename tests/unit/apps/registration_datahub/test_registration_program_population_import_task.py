@@ -207,7 +207,7 @@ class TestRegistrationProgramPopulationImportTask(TestCase):
             str(self.program_from.id),
             str(self.program_to.id),
         )
-        self._imported_objects_count_after(2)
+        self._imported_objects_count_after(1)
 
     def test_registration_program_population_import_task_error(self) -> None:
         rdi_id = self.registration_data_import.id

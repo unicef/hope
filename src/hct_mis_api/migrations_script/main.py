@@ -47,10 +47,8 @@ if __name__ == "__main__":
     clear_migration_table()
     excluded_migrations = [
         ("targeting", "0002_migration"),
-        ("program", "0002_migration"),
         ("household", "0003_migration"),
         ("household", "0004_migration"),
-        ("household", "0005_migration"),
         ("grievance", "0004_migration"),
         ("payment", "0002_migration"),
         ("payment", "0003_migration"),

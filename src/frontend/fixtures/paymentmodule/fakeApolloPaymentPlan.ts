@@ -15,6 +15,9 @@ export const fakeApolloPaymentPlan: PaymentPlanQuery['paymentPlan'] = {
   version: 1000,
   unicefId: 'PP-0060-22-00000001',
   status: PaymentPlanStatus.Locked,
+  programCycle: {
+    id: 'UHJvZ3JhbUN5Y2xlOjljNDMzZWQzLTcwZjUtNDRhOC1iZmQ5LTA1Mjg3YTAwNzQxNQ==',
+  },
   isFollowUp: false,
   sourcePaymentPlan: null,
   excludedHouseholds: null,

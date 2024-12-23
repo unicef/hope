@@ -8,17 +8,23 @@ from hct_mis_api.apps.utils.models import MergeStatusModel
 def import_program_population(
     import_from_program_id: str, import_to_program_id: str, rdi: RegistrationDataImport
 ) -> None:
+    households_to_exclude = Household.all_merge_status_objects.filter(
+        program=import_to_program_id,
+    ).values_list("unicef_id", flat=True)
     copy_from_households = Household.objects.filter(
         program=import_from_program_id,
         withdrawn=False,
-    ).exclude(household_collection__households__program_id=import_to_program_id)
+    ).exclude(unicef_id__in=households_to_exclude)
+    individuals_to_exclude = Individual.all_merge_status_objects.filter(
+        program=import_to_program_id,
+    ).values_list("unicef_id", flat=True)
     copy_from_individuals = (
         Individual.objects.filter(
             program_id=import_from_program_id,
             withdrawn=False,
             duplicate=False,
         )
-        .exclude(individual_collection__individuals__program_id=import_to_program_id)
+        .exclude(unicef_id__in=individuals_to_exclude)
         .order_by("first_registration_date")
     )
     import_to_program = Program.objects.get(id=import_to_program_id)
