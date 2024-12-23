@@ -379,9 +379,12 @@ class BaseNodePermissionMixin:
             raise PermissionDenied("Permission Denied")
 
     @classmethod
-    def get_node(cls, info: Any, object_id: str) -> Optional[Model]:
+    def get_node(cls, info: Any, object_id: str, **kwargs: Any) -> Optional[Model]:
         try:
-            object_instance = cls._meta.model.objects.get(pk=object_id)
+            if "get_object_queryset" in kwargs:
+                object_instance = kwargs.get("get_object_queryset").get(pk=object_id)
+            else:
+                object_instance = cls.get_queryset(cls._meta.model.objects, info).get(pk=object_id)
             cls.check_node_permission(info, object_instance)
         except cls._meta.model.DoesNotExist:
             object_instance = None
