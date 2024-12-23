@@ -5,6 +5,7 @@ from django.db.models import (
     Case,
     F,
     Func,
+    Model,
     OuterRef,
     Prefetch,
     Q,
@@ -264,13 +265,17 @@ class IndividualNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTyp
         IndividualIdentityNode,
     )
 
+    @classmethod
+    def get_node(cls, info: Any, object_id: str, **kwargs: Any) -> Optional[Model]:
+        return super().get_node(info, object_id, get_object_queryset=Individual.all_merge_status_objects)
+
     @staticmethod
     def resolve_documents(parent: Individual, info: Any) -> QuerySet[Document]:
-        return Document.objects.filter(pk__in=parent.documents.values("id"))
+        return parent.documents(manager="all_merge_status_objects")
 
     @staticmethod
     def resolve_identities(parent: Individual, info: Any) -> QuerySet[IndividualIdentity]:
-        return IndividualIdentity.objects.filter(pk__in=parent.identities.values("id"))
+        return parent.identities(manager="all_merge_status_objects")
 
     @staticmethod
     def resolve_import_id(parent: Individual, info: Any) -> str:
@@ -282,16 +287,16 @@ class IndividualNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTyp
 
     @staticmethod
     def resolve_payment_channels(parent: Individual, info: Any) -> QuerySet[BankAccountInfo]:
-        return BankAccountInfo.objects.filter(individual=parent).annotate(type=Value("BANK_TRANSFER"))
+        return BankAccountInfo.all_merge_status_objects.filter(individual=parent).annotate(type=Value("BANK_TRANSFER"))
 
     def resolve_bank_account_info(parent, info: Any) -> Optional[BankAccountInfo]:
-        bank_account_info = parent.bank_account_info.first()
+        bank_account_info = parent.bank_account_info(manager="all_merge_status_objects").first()  # type: ignore
         if bank_account_info:
             return bank_account_info
         return None
 
     def resolve_role(parent, info: Any) -> str:
-        role = parent.households_and_roles.first()
+        role = parent.households_and_roles(manager="all_merge_status_objects").first()
         if role is not None:
             return role.role
         return ROLE_NO_ROLE
@@ -481,13 +486,14 @@ class HouseholdNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType
 
     @staticmethod
     def resolve_individuals(parent: Household, info: Any, *arg: Any, **kwargs: Any) -> QuerySet:
-        individuals_ids = list(parent.individuals.values_list("id", flat=True))
-        collectors_ids = list(parent.representatives.values_list("id", flat=True))
+        individuals_ids = list(parent.individuals(manager="all_merge_status_objects").values_list("id", flat=True))
+
+        collectors_ids = list(parent.representatives(manager="all_merge_status_objects").values_list("id", flat=True))
         ids = list(set(individuals_ids + collectors_ids))
-        return Individual.objects.filter(id__in=ids).prefetch_related(
+        return Individual.all_merge_status_objects.filter(id__in=ids).prefetch_related(
             Prefetch(
                 "households_and_roles",
-                queryset=IndividualRoleInHousehold.objects.filter(household=parent.id),
+                queryset=IndividualRoleInHousehold.all_merge_status_objects.filter(household=parent.id),
             )
         )
 
@@ -577,6 +583,10 @@ class HouseholdNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType
         )
         qs = super().get_queryset(queryset, info)
         return qs
+
+    @classmethod
+    def get_node(cls, info: Any, object_id: str, **kwargs: Any) -> Optional[Model]:
+        return super().get_node(info, object_id, get_object_queryset=Household.all_merge_status_objects)
 
     class Meta:
         model = Household
@@ -706,7 +716,7 @@ class Query(graphene.ObjectType):
             if program and program.status == Program.DRAFT:
                 return Individual.objects.none()
 
-        queryset = Individual.objects.all()
+        queryset = Individual.all_merge_status_objects.all()
         if does_path_exist_in_query("edges.node.household", info):
             queryset = queryset.select_related("household")
         if does_path_exist_in_query("edges.node.household.admin2", info):
@@ -762,7 +772,7 @@ class Query(graphene.ObjectType):
             if program and program.status == Program.DRAFT:
                 return Household.objects.none()
 
-        queryset = Household.objects.all()
+        queryset = Household.all_merge_status_objects.all()
 
         if not user.partner.is_unicef:  # Unicef partner has full access to all AdminAreas
             business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
