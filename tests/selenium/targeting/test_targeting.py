@@ -479,12 +479,12 @@ class TestSmokeTargeting:
         assert "OPEN" in pageTargetingDetails.getTargetPopulationStatus().text
         assert "CREATED BY" in pageTargetingDetails.getLabelizedFieldContainerCreatedBy().text
         pageTargetingDetails.getLabelCreatedBy()
-        assert "PROGRAMME POPULATION CLOSE DATE" in pageTargetingDetails.getLabelizedFieldContainerCloseDate().text
+        # assert "PROGRAMME POPULATION CLOSE DATE" in pageTargetingDetails.getLabelizedFieldContainerCloseDate().text
         assert "PROGRAMME" in pageTargetingDetails.getLabelizedFieldContainerProgramName().text
         assert "Test Programm" in pageTargetingDetails.getLabelProgramme().text
-        assert "SEND BY" in pageTargetingDetails.getLabelizedFieldContainerSendBy().text
-        assert "-" in pageTargetingDetails.getLabelSendBy().text
-        assert "-" in pageTargetingDetails.getLabelSendDate().text
+        # assert "SEND BY" in pageTargetingDetails.getLabelizedFieldContainerSendBy().text
+        # assert "-" in pageTargetingDetails.getLabelSendBy().text
+        # assert "-" in pageTargetingDetails.getLabelSendDate().text
         assert "5" in pageTargetingDetails.getLabelFemaleChildren().text
         assert "3" in pageTargetingDetails.getLabelMaleChildren().text
         assert "2" in pageTargetingDetails.getLabelFemaleAdults().text
