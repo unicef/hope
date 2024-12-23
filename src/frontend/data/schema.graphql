@@ -2285,9 +2285,10 @@ type Mutations {
   discardPaymentVerificationPlan(paymentVerificationPlanId: ID!, version: BigInt): DiscardPaymentVerificationPlan
   invalidPaymentVerificationPlan(paymentVerificationPlanId: ID!, version: BigInt): InvalidPaymentVerificationPlan
   deletePaymentVerificationPlan(paymentVerificationPlanId: ID!, version: BigInt): DeletePaymentVerificationPlan
-  updatePaymentVerificationStatusAndReceivedAmount(paymentVerificationId: ID!, receivedAmount: Decimal!, status: PaymentVerificationStatusForUpdate, version: BigInt): UpdatePaymentVerificationStatusAndReceivedAmount
   markPaymentAsFailed(paymentId: ID!): MarkPaymentAsFailedMutation
   revertMarkPaymentAsFailed(deliveredQuantity: Decimal!, deliveryDate: Date!, paymentId: ID!): RevertMarkPaymentAsFailedMutation
+  updatePaymentVerificationStatusAndReceivedAmount(paymentVerificationId: ID!, receivedAmount: Decimal!, status: PaymentVerificationStatusForUpdate, version: BigInt): UpdatePaymentVerificationStatusAndReceivedAmount
+  updatePaymentVerificationReceivedAndReceivedAmount(paymentVerificationId: ID!, received: Boolean!, receivedAmount: Decimal!, version: BigInt): UpdatePaymentVerificationReceivedAndReceivedAmount
   actionPaymentPlanMutation(input: ActionPaymentPlanInput!, version: BigInt): ActionPaymentPlanMutation
   createPaymentPlan(input: CreatePaymentPlanInput!): CreatePaymentPlanMutation
   openPaymentPlan(input: OpenPaymentPlanInput!, version: BigInt): OpenPaymentPlanMutation
@@ -4411,6 +4412,10 @@ input UpdatePaymentPlanInput {
 
 type UpdatePaymentPlanMutation {
   paymentPlan: PaymentPlanNode
+}
+
+type UpdatePaymentVerificationReceivedAndReceivedAmount {
+  paymentVerification: PaymentVerificationNode
 }
 
 type UpdatePaymentVerificationStatusAndReceivedAmount {

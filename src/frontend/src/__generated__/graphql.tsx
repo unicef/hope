@@ -3312,6 +3312,7 @@ export type Mutations = {
   updateFeedback?: Maybe<UpdateFeedbackMutation>;
   updateGrievanceTicket?: Maybe<UpdateGrievanceTicketMutation>;
   updatePaymentPlan?: Maybe<UpdatePaymentPlanMutation>;
+  updatePaymentVerificationReceivedAndReceivedAmount?: Maybe<UpdatePaymentVerificationReceivedAndReceivedAmount>;
   updatePaymentVerificationStatusAndReceivedAmount?: Maybe<UpdatePaymentVerificationStatusAndReceivedAmount>;
   updateProgram?: Maybe<UpdateProgram>;
   updateProgramPartners?: Maybe<UpdateProgramPartners>;
@@ -3737,6 +3738,14 @@ export type MutationsUpdateGrievanceTicketArgs = {
 
 export type MutationsUpdatePaymentPlanArgs = {
   input: UpdatePaymentPlanInput;
+  version?: InputMaybe<Scalars['BigInt']['input']>;
+};
+
+
+export type MutationsUpdatePaymentVerificationReceivedAndReceivedAmountArgs = {
+  paymentVerificationId: Scalars['ID']['input'];
+  received: Scalars['Boolean']['input'];
+  receivedAmount: Scalars['Decimal']['input'];
   version?: InputMaybe<Scalars['BigInt']['input']>;
 };
 
@@ -7521,6 +7530,11 @@ export type UpdatePaymentPlanMutation = {
   paymentPlan?: Maybe<PaymentPlanNode>;
 };
 
+export type UpdatePaymentVerificationReceivedAndReceivedAmount = {
+  __typename?: 'UpdatePaymentVerificationReceivedAndReceivedAmount';
+  paymentVerification?: Maybe<PaymentVerificationNode>;
+};
+
 export type UpdatePaymentVerificationStatusAndReceivedAmount = {
   __typename?: 'UpdatePaymentVerificationStatusAndReceivedAmount';
   paymentVerification?: Maybe<PaymentVerificationNode>;
@@ -8498,6 +8512,15 @@ export type SplitPpMutationVariables = Exact<{
 
 
 export type SplitPpMutation = { __typename?: 'Mutations', splitPaymentPlan?: { __typename?: 'SplitPaymentPlanMutation', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string } | null } | null };
+
+export type UpdatePaymentVerificationReceivedAndReceivedAmountMutationVariables = Exact<{
+  paymentVerificationId: Scalars['ID']['input'];
+  receivedAmount: Scalars['Decimal']['input'];
+  received: Scalars['Boolean']['input'];
+}>;
+
+
+export type UpdatePaymentVerificationReceivedAndReceivedAmountMutation = { __typename?: 'Mutations', updatePaymentVerificationReceivedAndReceivedAmount?: { __typename?: 'UpdatePaymentVerificationReceivedAndReceivedAmount', paymentVerification?: { __typename?: 'PaymentVerificationNode', id: string, status: PaymentVerificationStatus, receivedAmount?: number | null, paymentVerificationPlan: { __typename?: 'PaymentVerificationPlanNode', id: string, receivedCount?: number | null, notReceivedCount?: number | null, respondedCount?: number | null, receivedWithProblemsCount?: number | null } } | null } | null };
 
 export type UpdatePaymentVerificationStatusAndReceivedAmountMutationVariables = Exact<{
   paymentVerificationId: Scalars['ID']['input'];
@@ -13082,6 +13105,57 @@ export function useSplitPpMutation(baseOptions?: Apollo.MutationHookOptions<Spli
 export type SplitPpMutationHookResult = ReturnType<typeof useSplitPpMutation>;
 export type SplitPpMutationResult = Apollo.MutationResult<SplitPpMutation>;
 export type SplitPpMutationOptions = Apollo.BaseMutationOptions<SplitPpMutation, SplitPpMutationVariables>;
+export const UpdatePaymentVerificationReceivedAndReceivedAmountDocument = gql`
+    mutation updatePaymentVerificationReceivedAndReceivedAmount($paymentVerificationId: ID!, $receivedAmount: Decimal!, $received: Boolean!) {
+  updatePaymentVerificationReceivedAndReceivedAmount(
+    paymentVerificationId: $paymentVerificationId
+    receivedAmount: $receivedAmount
+    received: $received
+  ) {
+    paymentVerification {
+      id
+      status
+      receivedAmount
+      paymentVerificationPlan {
+        id
+        receivedCount
+        notReceivedCount
+        respondedCount
+        receivedCount
+        receivedWithProblemsCount
+      }
+    }
+  }
+}
+    `;
+export type UpdatePaymentVerificationReceivedAndReceivedAmountMutationFn = Apollo.MutationFunction<UpdatePaymentVerificationReceivedAndReceivedAmountMutation, UpdatePaymentVerificationReceivedAndReceivedAmountMutationVariables>;
+
+/**
+ * __useUpdatePaymentVerificationReceivedAndReceivedAmountMutation__
+ *
+ * To run a mutation, you first call `useUpdatePaymentVerificationReceivedAndReceivedAmountMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdatePaymentVerificationReceivedAndReceivedAmountMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updatePaymentVerificationReceivedAndReceivedAmountMutation, { data, loading, error }] = useUpdatePaymentVerificationReceivedAndReceivedAmountMutation({
+ *   variables: {
+ *      paymentVerificationId: // value for 'paymentVerificationId'
+ *      receivedAmount: // value for 'receivedAmount'
+ *      received: // value for 'received'
+ *   },
+ * });
+ */
+export function useUpdatePaymentVerificationReceivedAndReceivedAmountMutation(baseOptions?: Apollo.MutationHookOptions<UpdatePaymentVerificationReceivedAndReceivedAmountMutation, UpdatePaymentVerificationReceivedAndReceivedAmountMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdatePaymentVerificationReceivedAndReceivedAmountMutation, UpdatePaymentVerificationReceivedAndReceivedAmountMutationVariables>(UpdatePaymentVerificationReceivedAndReceivedAmountDocument, options);
+      }
+export type UpdatePaymentVerificationReceivedAndReceivedAmountMutationHookResult = ReturnType<typeof useUpdatePaymentVerificationReceivedAndReceivedAmountMutation>;
+export type UpdatePaymentVerificationReceivedAndReceivedAmountMutationResult = Apollo.MutationResult<UpdatePaymentVerificationReceivedAndReceivedAmountMutation>;
+export type UpdatePaymentVerificationReceivedAndReceivedAmountMutationOptions = Apollo.BaseMutationOptions<UpdatePaymentVerificationReceivedAndReceivedAmountMutation, UpdatePaymentVerificationReceivedAndReceivedAmountMutationVariables>;
 export const UpdatePaymentVerificationStatusAndReceivedAmountDocument = gql`
     mutation updatePaymentVerificationStatusAndReceivedAmount($paymentVerificationId: ID!, $receivedAmount: Decimal!, $status: PaymentVerificationStatusForUpdate) {
   updatePaymentVerificationStatusAndReceivedAmount(
@@ -21856,6 +21930,7 @@ export type ResolversTypes = {
   UpdateIndividualDataUpdateIssueTypeExtras: UpdateIndividualDataUpdateIssueTypeExtras;
   UpdatePaymentPlanInput: UpdatePaymentPlanInput;
   UpdatePaymentPlanMutation: ResolverTypeWrapper<UpdatePaymentPlanMutation>;
+  UpdatePaymentVerificationReceivedAndReceivedAmount: ResolverTypeWrapper<UpdatePaymentVerificationReceivedAndReceivedAmount>;
   UpdatePaymentVerificationStatusAndReceivedAmount: ResolverTypeWrapper<UpdatePaymentVerificationStatusAndReceivedAmount>;
   UpdateProgram: ResolverTypeWrapper<UpdateProgram>;
   UpdateProgramInput: UpdateProgramInput;
@@ -22289,6 +22364,7 @@ export type ResolversParentTypes = {
   UpdateIndividualDataUpdateIssueTypeExtras: UpdateIndividualDataUpdateIssueTypeExtras;
   UpdatePaymentPlanInput: UpdatePaymentPlanInput;
   UpdatePaymentPlanMutation: UpdatePaymentPlanMutation;
+  UpdatePaymentVerificationReceivedAndReceivedAmount: UpdatePaymentVerificationReceivedAndReceivedAmount;
   UpdatePaymentVerificationStatusAndReceivedAmount: UpdatePaymentVerificationStatusAndReceivedAmount;
   UpdateProgram: UpdateProgram;
   UpdateProgramInput: UpdateProgramInput;
@@ -24097,6 +24173,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   updateFeedback?: Resolver<Maybe<ResolversTypes['UpdateFeedbackMutation']>, ParentType, ContextType, RequireFields<MutationsUpdateFeedbackArgs, 'input'>>;
   updateGrievanceTicket?: Resolver<Maybe<ResolversTypes['UpdateGrievanceTicketMutation']>, ParentType, ContextType, RequireFields<MutationsUpdateGrievanceTicketArgs, 'input'>>;
   updatePaymentPlan?: Resolver<Maybe<ResolversTypes['UpdatePaymentPlanMutation']>, ParentType, ContextType, RequireFields<MutationsUpdatePaymentPlanArgs, 'input'>>;
+  updatePaymentVerificationReceivedAndReceivedAmount?: Resolver<Maybe<ResolversTypes['UpdatePaymentVerificationReceivedAndReceivedAmount']>, ParentType, ContextType, RequireFields<MutationsUpdatePaymentVerificationReceivedAndReceivedAmountArgs, 'paymentVerificationId' | 'received' | 'receivedAmount'>>;
   updatePaymentVerificationStatusAndReceivedAmount?: Resolver<Maybe<ResolversTypes['UpdatePaymentVerificationStatusAndReceivedAmount']>, ParentType, ContextType, RequireFields<MutationsUpdatePaymentVerificationStatusAndReceivedAmountArgs, 'paymentVerificationId' | 'receivedAmount'>>;
   updateProgram?: Resolver<Maybe<ResolversTypes['UpdateProgram']>, ParentType, ContextType, Partial<MutationsUpdateProgramArgs>>;
   updateProgramPartners?: Resolver<Maybe<ResolversTypes['UpdateProgramPartners']>, ParentType, ContextType, Partial<MutationsUpdateProgramPartnersArgs>>;
@@ -25881,6 +25958,11 @@ export type UpdatePaymentPlanMutationResolvers<ContextType = any, ParentType ext
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type UpdatePaymentVerificationReceivedAndReceivedAmountResolvers<ContextType = any, ParentType extends ResolversParentTypes['UpdatePaymentVerificationReceivedAndReceivedAmount'] = ResolversParentTypes['UpdatePaymentVerificationReceivedAndReceivedAmount']> = {
+  paymentVerification?: Resolver<Maybe<ResolversTypes['PaymentVerificationNode']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type UpdatePaymentVerificationStatusAndReceivedAmountResolvers<ContextType = any, ParentType extends ResolversParentTypes['UpdatePaymentVerificationStatusAndReceivedAmount'] = ResolversParentTypes['UpdatePaymentVerificationStatusAndReceivedAmount']> = {
   paymentVerification?: Resolver<Maybe<ResolversTypes['PaymentVerificationNode']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -26424,6 +26506,7 @@ export type Resolvers<ContextType = any> = {
   UpdateFeedbackMutation?: UpdateFeedbackMutationResolvers<ContextType>;
   UpdateGrievanceTicketMutation?: UpdateGrievanceTicketMutationResolvers<ContextType>;
   UpdatePaymentPlanMutation?: UpdatePaymentPlanMutationResolvers<ContextType>;
+  UpdatePaymentVerificationReceivedAndReceivedAmount?: UpdatePaymentVerificationReceivedAndReceivedAmountResolvers<ContextType>;
   UpdatePaymentVerificationStatusAndReceivedAmount?: UpdatePaymentVerificationStatusAndReceivedAmountResolvers<ContextType>;
   UpdateProgram?: UpdateProgramResolvers<ContextType>;
   UpdateProgramPartners?: UpdateProgramPartnersResolvers<ContextType>;
