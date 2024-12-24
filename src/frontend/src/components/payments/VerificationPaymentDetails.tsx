@@ -49,7 +49,7 @@ export function VerificationPaymentDetails({
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
-              label={t('Payment Plan')}
+              label={t('TARGET POPULATION')}
               value={payment.parent.name}
             />
           </Grid>

@@ -101,7 +101,7 @@ export function PaymentDetails({
             />
           </Grid>
           <Grid item xs={3}>
-            <LabelizedField label={t('Payment Plan')}>
+            <LabelizedField label={t('TARGET POPULATION')}>
               <BlackLink
                 to={`/${businessArea}/programs/${programId}/target-population/${payment.parent.id}`}
               >

@@ -546,6 +546,7 @@ def generate_payment_plan() -> None:
     individual_1_pk = UUID("cc000000-0000-0000-0000-000000000001")
     individual_1 = Individual.objects.update_or_create(
         pk=individual_1_pk,
+        rdi_merge_status=MergeStatusModel.MERGED,
         birth_date=now - timedelta(days=365 * 30),
         first_registration_date=now - timedelta(days=365),
         last_registration_date=now,
@@ -560,6 +561,7 @@ def generate_payment_plan() -> None:
     individual_2_pk = UUID("cc000000-0000-0000-0000-000000000002")
     individual_2 = Individual.objects.update_or_create(
         pk=individual_2_pk,
+        rdi_merge_status=MergeStatusModel.MERGED,
         birth_date=now - timedelta(days=365 * 30),
         first_registration_date=now - timedelta(days=365),
         last_registration_date=now,
@@ -574,6 +576,7 @@ def generate_payment_plan() -> None:
     household_1_pk = UUID("aa000000-0000-0000-0000-000000000001")
     household_1 = Household.objects.update_or_create(
         pk=household_1_pk,
+        rdi_merge_status=MergeStatusModel.MERGED,
         size=4,
         head_of_household=individual_1,
         business_area=afghanistan,
@@ -590,6 +593,7 @@ def generate_payment_plan() -> None:
     household_2_pk = UUID("aa000000-0000-0000-0000-000000000002")
     household_2 = Household.objects.update_or_create(
         pk=household_2_pk,
+        rdi_merge_status=MergeStatusModel.MERGED,
         size=4,
         head_of_household=individual_2,
         business_area=afghanistan,

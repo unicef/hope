@@ -538,7 +538,7 @@ class TestCreateTargeting:
         pageTargetingCreate.getFieldName().send_keys(targeting_name)
         pageTargetingCreate.getTargetPopulationSaveButton().click()
         pageTargetingDetails.getLockButton()
-        assert pageTargetingDetails.getTitlePage().text == targeting_name
+        assert pageTargetingDetails.getTitlePage().text.split("\n")[0].strip() == targeting_name
         assert pageTargetingDetails.getCriteriaContainer().text == disability_expected_criteria_text
         assert Household.objects.count() == 2
         assert (
@@ -578,7 +578,7 @@ class TestCreateTargeting:
         pageTargetingCreate.getFieldName().send_keys(targeting_name)
         pageTargetingCreate.getTargetPopulationSaveButton().click()
         pageTargetingDetails.getLockButton()
-        assert pageTargetingDetails.getTitlePage().text == targeting_name
+        assert pageTargetingDetails.getTitlePage().text.split("\n")[0].strip() == targeting_name
         assert pageTargetingDetails.getCriteriaContainer().text == disability_expected_criteria_text
         assert Household.objects.count() == 3
         assert Program.objects.count() == 1
@@ -624,7 +624,7 @@ class TestCreateTargeting:
         pageTargetingCreate.getFieldName().send_keys(targeting_name)
         pageTargetingCreate.getTargetPopulationSaveButton().click()
         pageTargetingDetails.getLockButton()
-        assert pageTargetingDetails.getTitlePage().text == targeting_name
+        assert pageTargetingDetails.getTitlePage().text.split("\n")[0].strip() == targeting_name
         assert pageTargetingDetails.getCriteriaContainer().text == expected_criteria_text
         assert Household.objects.count() == 3
         assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == individual1.household.unicef_id
@@ -673,7 +673,7 @@ class TestCreateTargeting:
 
         pageTargetingDetails.getLockButton()
 
-        assert pageTargetingDetails.getTitlePage().text == targeting_name
+        assert pageTargetingDetails.getTitlePage().text.split("\n")[0].strip() == targeting_name
         assert pageTargetingDetails.getCriteriaContainer().text == bool_yes_expected_criteria_text
         assert Household.objects.count() == 3
         assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == individual1.household.unicef_id
@@ -736,7 +736,7 @@ class TestCreateTargeting:
         pageTargetingCreate.getFieldName().send_keys(targeting_name)
         pageTargetingCreate.getTargetPopulationSaveButton().click()
         pageTargetingDetails.getLockButton()
-        assert pageTargetingDetails.getTitlePage().text == targeting_name
+        assert pageTargetingDetails.getTitlePage().text.split("\n")[0].strip() == targeting_name
         assert pageTargetingDetails.getCriteriaContainer().text == expected_criteria_text
         assert Household.objects.count() == 3
         assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == individual1.household.unicef_id
@@ -808,7 +808,7 @@ class TestCreateTargeting:
         pageTargetingCreate.getFieldName().send_keys(targeting_name)
         pageTargetingCreate.getTargetPopulationSaveButton().click()
         pageTargetingDetails.getLockButton()
-        assert pageTargetingDetails.getTitlePage().text == targeting_name
+        assert pageTargetingDetails.getTitlePage().text.split("\n")[0].strip() == targeting_name
         assert pageTargetingDetails.getCriteriaContainer().text == expected_criteria_text
         assert Household.objects.count() == 3
         pageTargetingDetails.wait_for_text(
@@ -854,7 +854,7 @@ class TestCreateTargeting:
         pageTargetingCreate.getFieldName().send_keys(targeting_name)
         pageTargetingCreate.getTargetPopulationSaveButton().click()
         pageTargetingDetails.getLockButton()
-        assert pageTargetingDetails.getTitlePage().text == targeting_name
+        assert pageTargetingDetails.getTitlePage().text.split("\n")[0].strip() == targeting_name
         assert pageTargetingDetails.getCriteriaContainer().text == expected_criteria_text
         assert Household.objects.count() == 3
 
@@ -908,7 +908,7 @@ class TestCreateTargeting:
         pageTargetingCreate.getTargetPopulationSaveButton().click()
         pageTargetingDetails.getLockButton()
 
-        assert pageTargetingDetails.getTitlePage().text == targeting_name
+        assert pageTargetingDetails.getTitlePage().text.split("\n")[0].strip() == targeting_name
         assert pageTargetingDetails.getCriteriaContainer().text == expected_criteria_text
         assert Household.objects.count() == 3
         assert pageTargetingDetails.getHouseholdTableCell(1, 1).text == individual1.unicef_id

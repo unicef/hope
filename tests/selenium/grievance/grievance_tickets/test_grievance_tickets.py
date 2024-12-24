@@ -107,6 +107,7 @@ def hh_with_payment_record(household_without_disabilities: Household) -> Payment
     payment_plan = PaymentPlanFactory(
         program_cycle=household_without_disabilities.program.cycles.first(),
         business_area=household_without_disabilities.business_area,
+        created_by=User.objects.first(),
     )
     payment = PaymentFactory(
         parent=payment_plan,
