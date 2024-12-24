@@ -81,7 +81,13 @@ class DashboardDataCache:
                     "financial_service_provider",
                     "delivery_type",
                 )
-                .filter(business_area=area, household__is_removed=False, parent__status__in=["ACCEPTED", "FINISHED"])
+                .filter(
+                    business_area=area,
+                    household__is_removed=False,
+                    parent__status__in=["ACCEPTED", "FINISHED"],
+                    is_removed=False,
+                    conflicted=False,
+                )  # noqa
                 .exclude(status__in=["Transaction Erroneous", "Not Distributed", "Force failed", "Manually Cancelled"])
                 .annotate(
                     year=ExtractYear(Coalesce("delivery_date", "entitlement_date", "status_date")),
