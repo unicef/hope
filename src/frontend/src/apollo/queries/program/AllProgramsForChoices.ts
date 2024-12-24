@@ -17,6 +17,7 @@ export const AllProgramsForChoices = gql`
     $orderBy: String
     $name: String
     $compatibleDct: Boolean
+    $beneficiaryGroupMatch: Boolean
   ) {
     allPrograms(
       before: $before
@@ -34,6 +35,7 @@ export const AllProgramsForChoices = gql`
       endDate: $endDate
       name: $name
       compatibleDct: $compatibleDct
+      beneficiaryGroupMatch: $beneficiaryGroupMatch
     ) {
       pageInfo {
         hasNextPage
@@ -58,6 +60,17 @@ export const AllProgramsForChoices = gql`
             individualFiltersAvailable
             householdFiltersAvailable
             description
+          }
+          beneficiaryGroup {
+            id
+            createdAt
+            updatedAt
+            name
+            groupLabel
+            groupLabelPlural
+            memberLabel
+            memberLabelPlural
+            masterDetail
           }
           pduFields {
             id

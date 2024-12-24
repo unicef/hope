@@ -5,12 +5,13 @@ import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { HouseholdChoiceDataQuery } from '@generated/graphql';
 import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomplete';
-import { householdTableOrderOptions } from '@utils/constants';
+import { generateTableOrderOptionsGroup } from '@utils/constants';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { FiltersSection } from '@core/FiltersSection';
 import { NumberTextField } from '@core/NumberTextField';
 import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
+import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
 
 interface LookUpHouseholdFiltersCommunicationProps {
@@ -33,6 +34,8 @@ export function LookUpHouseholdFiltersCommunication({
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const { handleFilterChange, applyFilterChanges, clearFilter } =
     createHandleApplyFilterChange(
@@ -52,6 +55,9 @@ export function LookUpHouseholdFiltersCommunication({
   const handleClearFilter = (): void => {
     clearFilter();
   };
+
+  const householdTableOrderOptions =
+    generateTableOrderOptionsGroup(beneficiaryGroup);
 
   return (
     <FiltersSection
@@ -102,7 +108,7 @@ export function LookUpHouseholdFiltersCommunication({
         </Grid>
         <Grid item xs={3}>
           <NumberTextField
-            topLabel={t('Household Size')}
+            topLabel={`${beneficiaryGroup?.groupLabel} Size`}
             value={filter.householdSizeMin}
             placeholder={t('From')}
             icon={<GroupIcon />}
