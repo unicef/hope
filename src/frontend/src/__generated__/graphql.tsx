@@ -4206,7 +4206,7 @@ export type PaymentNode = Node & {
   paymentPlanHardConflictedData?: Maybe<Array<Maybe<PaymentConflictDataNode>>>;
   paymentPlanSoftConflicted?: Maybe<Scalars['Boolean']['output']>;
   paymentPlanSoftConflictedData?: Maybe<Array<Maybe<PaymentConflictDataNode>>>;
-  paymentVerification?: Maybe<PaymentVerificationNode>;
+  paymentVerifications: PaymentVerificationNodeConnection;
   program?: Maybe<ProgramNode>;
   reasonForUnsuccessfulPayment?: Maybe<Scalars['String']['output']>;
   serviceProvider?: Maybe<FinancialServiceProviderNode>;
@@ -4233,6 +4233,15 @@ export type PaymentNode = Node & {
 
 
 export type PaymentNodeFollowUpsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type PaymentNodePaymentVerificationsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -25264,7 +25273,7 @@ export type PaymentNodeResolvers<ContextType = any, ParentType extends Resolvers
   paymentPlanHardConflictedData?: Resolver<Maybe<Array<Maybe<ResolversTypes['PaymentConflictDataNode']>>>, ParentType, ContextType>;
   paymentPlanSoftConflicted?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   paymentPlanSoftConflictedData?: Resolver<Maybe<Array<Maybe<ResolversTypes['PaymentConflictDataNode']>>>, ParentType, ContextType>;
-  paymentVerification?: Resolver<Maybe<ResolversTypes['PaymentVerificationNode']>, ParentType, ContextType>;
+  paymentVerifications?: Resolver<ResolversTypes['PaymentVerificationNodeConnection'], ParentType, ContextType, Partial<PaymentNodePaymentVerificationsArgs>>;
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>;
   reasonForUnsuccessfulPayment?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   serviceProvider?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNode']>, ParentType, ContextType>;
