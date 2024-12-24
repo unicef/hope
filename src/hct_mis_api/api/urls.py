@@ -39,6 +39,7 @@ urlpatterns = [
     path("lookups/program-statuses/", endpoints.lookups.ProgramStatuses().as_view(), name="program-statuses-list"),
     path("business_areas/", endpoints.core.BusinessAreaListView.as_view(), name="business-area-list"),
     path("programs/", ProgramGlobalListView.as_view(), name="program-global-list"),
+    path("", include("hct_mis_api.apps.program.api.urls.beneficiary_group", namespace="beneficiary-group")),
     path("dashboard/", include("hct_mis_api.apps.dashboard.urls")),
     path(
         "<slug:business_area>/",
@@ -90,7 +91,10 @@ urlpatterns = [
                                 "targeting/",
                                 include("hct_mis_api.apps.targeting.api.urls", namespace="targeting"),
                             ),
-                            path("", include("hct_mis_api.apps.program.api.urls", namespace="programs")),
+                            path(
+                                "",
+                                include("hct_mis_api.apps.program.api.urls.program_related", namespace="programs"),
+                            ),
                         ]
                     ),
                 ),

@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Optional
 
 from hct_mis_api.apps.core.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.payment.models import (
-    PaymentRecord,
+    Payment,
     PaymentVerification,
     PaymentVerificationPlan,
 )
@@ -13,7 +13,7 @@ from hct_mis_api.apps.utils.phone import is_valid_phone_number
 logger = logging.getLogger(__name__)
 
 
-def does_payment_record_have_right_hoh_phone_number(record: PaymentRecord) -> bool:
+def does_payment_record_have_right_hoh_phone_number(record: Payment) -> bool:
     hoh = record.head_of_household
     if not hoh:
         logging.warning("Payment record has no head of household")

@@ -37,7 +37,6 @@ class TestCreateNeedsAdjudicationTickets(APITestCase):
             business_area=BusinessArea.objects.first(),
         )
         cls.household = HouseholdFactory.build(
-            id="12a123ed-d2a5-123a-b123-1234da1d5d23",
             size=2,
             program=program,
         )
@@ -143,12 +142,10 @@ class TestCreateNeedsAdjudicationTicketsBiometrics(APITestCase):
             business_area=BusinessArea.objects.first(),
         )
         cls.household = HouseholdFactory.build(
-            id="12a123ed-d2a5-123a-b123-1234da1d5d11",
             size=2,
             program=program,
         )
         cls.household2 = HouseholdFactory.build(
-            id="12a123ed-d2a5-123a-b123-1234da1d5d22",
             size=1,
             program=program,
         )
