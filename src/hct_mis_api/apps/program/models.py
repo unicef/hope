@@ -64,6 +64,23 @@ class ProgramPartnerThrough(TimeStampedUUIDModel):
         ]
 
 
+class BeneficiaryGroup(TimeStampedUUIDModel):
+    name = models.CharField(max_length=255, unique=True)
+    group_label = models.CharField(max_length=255)
+    group_label_plural = models.CharField(max_length=255)
+    member_label = models.CharField(max_length=255)
+    member_label_plural = models.CharField(max_length=255)
+    master_detail = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = "Beneficiary Group"
+        verbose_name_plural = "Beneficiary Groups"
+        ordering = ("name",)
+
+    def __str__(self) -> str:
+        return self.name
+
+
 class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel, AdminUrlMixin):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
@@ -205,10 +222,28 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         default=False, help_text="Enable Deduplication of Face Images"
     )
     deduplication_set_id = models.UUIDField(blank=True, null=True)
+    beneficiary_group = models.ForeignKey(
+        BeneficiaryGroup,
+        on_delete=models.PROTECT,
+        related_name="programs",
+    )
 
     objects = SoftDeletableIsVisibleManager()
 
+    def clean(self) -> None:
+        super().clean()
+        if self.data_collecting_type and self.beneficiary_group:
+            if (
+                self.data_collecting_type.type == DataCollectingType.Type.SOCIAL
+                and self.beneficiary_group.master_detail
+            ) or (
+                self.data_collecting_type.type == DataCollectingType.Type.STANDARD
+                and not self.beneficiary_group.master_detail
+            ):
+                raise ValidationError("Selected combination of data collecting type and beneficiary group is invalid.")
+
     def save(self, *args: Any, **kwargs: Any) -> None:
+        self.clean()
         if not self.programme_code:
             self.programme_code = self._generate_programme_code()
         if self.data_collecting_type_id is None and self.data_collecting_type:

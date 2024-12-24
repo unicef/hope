@@ -26,7 +26,7 @@ from hct_mis_api.apps.payment.fixtures import (
 from hct_mis_api.apps.payment.models import (
     DeliveryMechanism,
     DeliveryMechanismPerPaymentPlan,
-    GenericPayment,
+    Payment,
     PaymentPlan,
 )
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
@@ -774,7 +774,7 @@ class TestFSPAssignment(APITestCase):
             collector=self.individuals_2[0],
             entitlement_quantity=1000000,  # a lot
             entitlement_quantity_usd=200000,  # a lot
-            status=GenericPayment.STATUS_NOT_DISTRIBUTED,
+            status=Payment.STATUS_NOT_DISTRIBUTED,
             household=self.household_2,
             delivery_type=None,
             financial_service_provider=None,
@@ -934,7 +934,7 @@ class TestVolumeByDeliveryMechanism(APITestCase):
             entitlement_quantity=500,
             entitlement_quantity_usd=100,
             delivery_type=self.dm_cash,
-            status=GenericPayment.STATUS_NOT_DISTRIBUTED,
+            status=Payment.STATUS_NOT_DISTRIBUTED,
             household=self.household_2,
             currency="PLN",
         )
@@ -945,7 +945,7 @@ class TestVolumeByDeliveryMechanism(APITestCase):
             entitlement_quantity=1000,
             entitlement_quantity_usd=200,
             delivery_type=self.dm_transfer,
-            status=GenericPayment.STATUS_NOT_DISTRIBUTED,
+            status=Payment.STATUS_NOT_DISTRIBUTED,
             household=self.household_3,
             currency="PLN",
         )
@@ -1139,7 +1139,7 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
             collector=self.individuals_2[0],  # DELIVERY_TYPE_TRANSFER
             entitlement_quantity=100,
             entitlement_quantity_usd=500,
-            status=GenericPayment.STATUS_NOT_DISTRIBUTED,
+            status=Payment.STATUS_NOT_DISTRIBUTED,
             household=self.household_2,
             delivery_type=None,
             financial_service_provider=None,
@@ -1150,7 +1150,7 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
             collector=self.individuals_3[0],  # DELIVERY_TYPE_TRANSFER
             entitlement_quantity=100,
             entitlement_quantity_usd=500,
-            status=GenericPayment.STATUS_NOT_DISTRIBUTED,
+            status=Payment.STATUS_NOT_DISTRIBUTED,
             household=self.household_3,
             delivery_type=None,
             financial_service_provider=None,
@@ -1161,7 +1161,7 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
             collector=self.individuals_1[0],  # DELIVERY_TYPE_VOUCHER
             entitlement_quantity=100,
             entitlement_quantity_usd=1000,
-            status=GenericPayment.STATUS_NOT_DISTRIBUTED,
+            status=Payment.STATUS_NOT_DISTRIBUTED,
             household=self.household_1,
             delivery_type=None,
             financial_service_provider=None,
@@ -1218,7 +1218,7 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
             collector=self.individuals_2[0],  # DELIVERY_TYPE_TRANSFER
             entitlement_quantity=100,
             entitlement_quantity_usd=1000,
-            status=GenericPayment.STATUS_NOT_DISTRIBUTED,
+            status=Payment.STATUS_NOT_DISTRIBUTED,
             household=self.household_2,
             delivery_type=None,
             financial_service_provider=None,
@@ -1229,7 +1229,7 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
             collector=self.individuals_3[0],  # DELIVERY_TYPE_TRANSFER
             entitlement_quantity=100,
             entitlement_quantity_usd=1000,
-            status=GenericPayment.STATUS_NOT_DISTRIBUTED,
+            status=Payment.STATUS_NOT_DISTRIBUTED,
             household=self.household_3,
             delivery_type=None,
             financial_service_provider=None,

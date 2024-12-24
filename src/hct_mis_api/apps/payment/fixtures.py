@@ -38,7 +38,6 @@ from hct_mis_api.apps.payment.models import (
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     FspXlsxTemplatePerDeliveryMechanism,
-    GenericPayment,
     Payment,
     PaymentPlan,
     PaymentPlanSplit,
@@ -47,7 +46,10 @@ from hct_mis_api.apps.payment.models import (
     PaymentVerificationSummary,
 )
 from hct_mis_api.apps.payment.utils import to_decimal
-from hct_mis_api.apps.program.fixtures import ProgramCycleFactory
+from hct_mis_api.apps.program.fixtures import (
+    BeneficiaryGroupFactory,
+    ProgramCycleFactory,
+)
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
@@ -207,6 +209,14 @@ class RealProgramFactory(DjangoModelFactory):
         lambda o: "".join(random.choice(string.ascii_uppercase + string.digits) for _ in range(4))
     )
     data_collecting_type = factory.SubFactory(DataCollectingTypeFactory)
+    beneficiary_group = factory.LazyAttribute(
+        lambda o: BeneficiaryGroupFactory(
+            master_detail=False if o.data_collecting_type.type == DataCollectingType.Type.SOCIAL else True,
+            name=factory.Faker("word")
+            if o.data_collecting_type.type == DataCollectingType.Type.SOCIAL
+            else "Household",
+        )
+    )
 
     @factory.post_generation
     def cycle(self, create: bool, extracted: bool, **kwargs: Any) -> None:
@@ -277,7 +287,7 @@ class PaymentFactory(DjangoModelFactory):
 
     parent = factory.SubFactory(PaymentPlanFactory)
     business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first())
-    status = GenericPayment.STATUS_PENDING
+    status = Payment.STATUS_PENDING
     status_date = factory.Faker(
         "date_time_this_decade",
         before_now=True,
@@ -498,6 +508,11 @@ def generate_payment_plan() -> None:
     address = "Ohio"
 
     program_pk = UUID("00000000-0000-0000-0000-faceb00c0000")
+    data_collecting_type = DataCollectingType.objects.get(code="full")
+    if data_collecting_type.type == DataCollectingType.Type.SOCIAL:
+        beneficiary_group = BeneficiaryGroupFactory(name="Social", master_detail=False)
+    else:
+        beneficiary_group = BeneficiaryGroupFactory(name="Household", master_detail=True)
     program = Program.objects.update_or_create(
         pk=program_pk,
         business_area=afghanistan,
@@ -511,8 +526,9 @@ def generate_payment_plan() -> None:
         frequency_of_payments=Program.ONE_OFF,
         sector=Program.MULTI_PURPOSE,
         scope=Program.SCOPE_UNICEF,
-        data_collecting_type=DataCollectingType.objects.get(code="full"),
+        data_collecting_type=data_collecting_type,
         programme_code="T3ST",
+        beneficiary_group=beneficiary_group,
     )[0]
     program_cycle = ProgramCycleFactory(
         program=program,
