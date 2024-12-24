@@ -2536,7 +2536,7 @@ type PaymentNode implements Node {
   isCashAssist: Boolean!
   followUps(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   householdSnapshot: PaymentHouseholdSnapshotNode
-  paymentVerification: PaymentVerificationNode
+  paymentVerifications(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationNodeConnection!
   ticketComplaintDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
   ticketSensitiveDetails(offset: Int, before: String, after: String, first: Int, last: Int): TicketSensitiveDetailsNodeConnection!
   adminUrl: String
