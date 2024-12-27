@@ -4,7 +4,6 @@ from typing import Callable
 import factory
 import pytest
 from dateutil.relativedelta import relativedelta
-from flaky import flaky
 from pytz import utc
 from selenium.common import NoSuchElementException
 from selenium.webdriver import ActionChains, Keys
@@ -1049,7 +1048,7 @@ class TestTargeting:
         assert "2" in pageTargetingDetails.getLabelTotalNumberOfHouseholds().text
         assert "8" in pageTargetingDetails.getLabelTargetedIndividuals().text
 
-    @flaky(max_runs=6, min_passes=1)
+    # @flaky(max_runs=6, min_passes=1)
     def test_edit_targeting(
         self,
         create_programs: None,
@@ -1064,7 +1063,10 @@ class TestTargeting:
         pageTargeting.chooseTargetPopulations(0).click()
         pageTargetingDetails.getButtonEdit().click()
         pageTargetingDetails.getButtonIconEdit().click()
-        pageTargetingCreate.getButtonHouseholdRule().click()
+        pageTargetingCreate.getButtonHouseholdRule().send_keys(Keys.TAB)
+        pageTargetingCreate.getButtonHouseholdRule().send_keys(Keys.TAB)
+        pageTargetingCreate.getButtonHouseholdRule().send_keys(Keys.SPACE)
+        # pageTargetingCreate.getButtonHouseholdRule().click()
         pageTargetingCreate.getAutocompleteTargetCriteriaOption().click()
         pageTargetingCreate.select_listbox_element("What is the Household size?")
         # pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys("What is the Household size")
