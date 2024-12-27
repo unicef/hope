@@ -55,13 +55,14 @@ export const TargetPopulationTableFilters = ({
 
   const allowedStatusChoices = [
     'ASSIGNED',
-    PaymentPlanStatus.Draft,
+    'DRAFT',
     PaymentPlanStatus.TpOpen,
     PaymentPlanStatus.TpLocked,
     PaymentPlanStatus.Processing,
     PaymentPlanStatus.SteficonRun,
     PaymentPlanStatus.SteficonWait,
     PaymentPlanStatus.SteficonCompleted,
+    PaymentPlanStatus.SteficonError,
   ];
 
   const { data: statusChoicesData } = usePaymentPlanStatusChoicesQueryQuery();
@@ -69,6 +70,7 @@ export const TargetPopulationTableFilters = ({
   const preparedStatusChoices =
     [
       { name: 'Assigned', value: 'ASSIGNED' },
+      { name: 'Ready For Payment Module', value: 'DRAFT' },
       ...(statusChoicesData?.paymentPlanStatusChoices || []),
     ]?.filter((el) =>
       allowedStatusChoices.includes(el.value as PaymentPlanStatus),

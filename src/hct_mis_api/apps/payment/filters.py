@@ -176,8 +176,9 @@ class FinancialServiceProviderFilter(FilterSet):
 class PaymentPlanFilter(FilterSet):
     business_area = CharFilter(field_name="business_area__slug", required=True)
     search = CharFilter(method="search_filter")
-    status = MultipleChoiceFilter(field_name="status", choices=PaymentPlan.Status.choices)
-    # TODO: update status filter for "ASSIGNED"
+    status = MultipleChoiceFilter(
+        method="filter_by_status", choices=PaymentPlan.Status.choices + [("ASSIGNED", "Assigned")]
+    )
     status_not = ChoiceFilter(method="filter_status_not", choices=PaymentPlan.Status.choices)
     total_entitled_quantity_from = NumberFilter(field_name="total_entitled_quantity", lookup_expr="gte")
     total_entitled_quantity_to = NumberFilter(field_name="total_entitled_quantity", lookup_expr="lte")
@@ -256,6 +257,25 @@ class PaymentPlanFilter(FilterSet):
         if value:
             return qs.filter(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
         return qs
+
+    @staticmethod
+    def filter_by_status(queryset: "QuerySet", model_field: str, value: Any) -> "QuerySet":
+        # assigned TP statuses
+        is_assigned = [
+            PaymentPlan.Status.PREPARING,
+            PaymentPlan.Status.OPEN,
+            PaymentPlan.Status.LOCKED,
+            PaymentPlan.Status.LOCKED_FSP,
+            PaymentPlan.Status.IN_APPROVAL,
+            PaymentPlan.Status.IN_AUTHORIZATION,
+            PaymentPlan.Status.IN_REVIEW,
+            PaymentPlan.Status.ACCEPTED,
+            PaymentPlan.Status.FINISHED,
+        ]
+        if "ASSIGNED" in value:
+            # add all list of statuses
+            value = is_assigned + [status for status in value if status != "ASSIGNED"]
+        return queryset.filter(status__in=value)
 
     # copied from TP need for filtering
     @staticmethod

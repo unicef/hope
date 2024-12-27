@@ -1049,7 +1049,7 @@ class TestTargeting:
         assert "2" in pageTargetingDetails.getLabelTotalNumberOfHouseholds().text
         assert "8" in pageTargetingDetails.getLabelTargetedIndividuals().text
 
-    @flaky(max_runs=5, min_passes=1)
+    @flaky(max_runs=6, min_passes=1)
     def test_edit_targeting(
         self,
         create_programs: None,

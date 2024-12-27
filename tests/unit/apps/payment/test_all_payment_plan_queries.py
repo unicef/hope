@@ -876,3 +876,37 @@ class TestPaymentPlanQueries(APITestCase):
             context={"user": self.user},
             variables={"businessArea": "afghanistan", "statusNot": "OPEN"},
         )
+
+    def test_payment_plan_filter_status_assigned(self) -> None:
+        PaymentPlanFactory(
+            name="NEW TP OPEN",
+            status=PaymentPlan.Status.TP_OPEN,
+            program_cycle=self.program_cycle,
+            business_area=self.business_area,
+            created_by=self.user,
+        )
+        PaymentPlanFactory(
+            name="TP Processing",
+            status=PaymentPlan.Status.TP_PROCESSING,
+            program_cycle=self.program_cycle,
+            business_area=self.business_area,
+            created_by=self.user,
+        )
+        self.snapshot_graphql_request(
+            request_string=self.PAYMENT_PLANS_FILTER_QUERY,
+            context={"user": self.user},
+            variables={
+                "businessArea": "afghanistan",
+                "program": encode_id_base64(self.pp.program.pk, "Program"),
+                "status": ["TP_OPEN", "ASSIGNED"],
+            },
+        )
+        self.snapshot_graphql_request(
+            request_string=self.PAYMENT_PLANS_FILTER_QUERY,
+            context={"user": self.user},
+            variables={
+                "businessArea": "afghanistan",
+                "program": encode_id_base64(self.pp.program.pk, "Program"),
+                "status": ["TP_OPEN"],
+            },
+        )

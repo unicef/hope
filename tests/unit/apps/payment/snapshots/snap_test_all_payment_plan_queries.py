@@ -746,6 +746,52 @@ snapshots['TestPaymentPlanQueries::test_payment_plan_filter_payment_plan_applica
     }
 }
 
+snapshots['TestPaymentPlanQueries::test_payment_plan_filter_status_assigned 1'] = {
+    'data': {
+        'allPaymentPlans': {
+            'edges': [
+                {
+                    'node': {
+                        'name': 'PaymentPlan with conflicts',
+                        'status': 'LOCKED',
+                        'totalHouseholdsCountWithValidPhoneNo': 1
+                    }
+                },
+                {
+                    'node': {
+                        'name': 'Main Payment Plan',
+                        'status': 'OPEN',
+                        'totalHouseholdsCountWithValidPhoneNo': 1
+                    }
+                },
+                {
+                    'node': {
+                        'name': 'NEW TP OPEN',
+                        'status': 'TP_OPEN',
+                        'totalHouseholdsCountWithValidPhoneNo': 0
+                    }
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestPaymentPlanQueries::test_payment_plan_filter_status_assigned 2'] = {
+    'data': {
+        'allPaymentPlans': {
+            'edges': [
+                {
+                    'node': {
+                        'name': 'NEW TP OPEN',
+                        'status': 'TP_OPEN',
+                        'totalHouseholdsCountWithValidPhoneNo': 0
+                    }
+                }
+            ]
+        }
+    }
+}
+
 snapshots['TestPaymentPlanQueries::test_payment_plan_filter_total_households_count_max 1'] = {
     'data': {
         'allPaymentPlans': {
