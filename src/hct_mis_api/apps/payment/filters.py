@@ -177,6 +177,7 @@ class PaymentPlanFilter(FilterSet):
     business_area = CharFilter(field_name="business_area__slug", required=True)
     search = CharFilter(method="search_filter")
     status = MultipleChoiceFilter(field_name="status", choices=PaymentPlan.Status.choices)
+    # TODO: update status filter for "ASSIGNED"
     status_not = ChoiceFilter(method="filter_status_not", choices=PaymentPlan.Status.choices)
     total_entitled_quantity_from = NumberFilter(field_name="total_entitled_quantity", lookup_expr="gte")
     total_entitled_quantity_to = NumberFilter(field_name="total_entitled_quantity", lookup_expr="lte")
@@ -229,7 +230,8 @@ class PaymentPlanFilter(FilterSet):
             "dispersion_start_date",
             "dispersion_end_date",
             "created_at",
-            "mark",
+            "updated_at",
+            "created_by",
         )
     )
 

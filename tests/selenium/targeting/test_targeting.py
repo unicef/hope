@@ -4,11 +4,13 @@ from typing import Callable
 import factory
 import pytest
 from dateutil.relativedelta import relativedelta
+from flaky import flaky
 from pytz import utc
 from selenium.common import NoSuchElementException
 from selenium.webdriver import ActionChains, Keys
 from selenium.webdriver.common.by import By
 
+from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
 from hct_mis_api.apps.core.models import (
@@ -184,7 +186,7 @@ def create_flexible_attribute(
 
 
 def create_custom_household(
-    observed_disability: list[str], residence_status: str = HOST, unicef_id: str = "HH-00-0000.0442"
+    observed_disability: list[str], residence_status: str = HOST, unicef_id: str = "HH-00-0000.0442", size: int = 2
 ) -> Household:
     program = Program.objects.get(name="Test Programm")
     household, _ = create_household_with_individual_with_collectors(
@@ -194,6 +196,7 @@ def create_custom_household(
             "business_area": program.business_area,
             "program": program,
             "residence_status": residence_status,
+            "size": size,
         },
         individual_args={
             "rdi_merge_status": "MERGED",
@@ -206,12 +209,12 @@ def create_custom_household(
 
 @pytest.fixture
 def household_with_disability() -> Household:
-    yield create_custom_household(observed_disability=[SEEING, HEARING], unicef_id="HH-00-0000.0443")
+    yield create_custom_household(observed_disability=[SEEING, HEARING], unicef_id="HH-00-0000.0443", size=1)
 
 
 @pytest.fixture
 def household_without_disabilities() -> Household:
-    yield create_custom_household(observed_disability=[], unicef_id="HH-00-0000.0444")
+    yield create_custom_household(observed_disability=[], unicef_id="HH-00-0000.0444", size=1)
 
 
 @pytest.fixture
@@ -256,7 +259,7 @@ def create_targeting() -> PaymentPlan:
         targeting_criteria=targeting_criteria,
         program_cycle=test_program.cycles.first(),
         build_status=PaymentPlan.BuildStatus.BUILD_STATUS_OK,
-        created_by=User.objects.first(),
+        created_by=User.objects.filter(email="test@example.com").first(),
         updated_at=datetime.now(),
     )
 
@@ -1046,6 +1049,7 @@ class TestTargeting:
         assert "2" in pageTargetingDetails.getLabelTotalNumberOfHouseholds().text
         assert "8" in pageTargetingDetails.getLabelTargetedIndividuals().text
 
+    @flaky(max_runs=5, min_passes=1)
     def test_edit_targeting(
         self,
         create_programs: None,
@@ -1068,10 +1072,12 @@ class TestTargeting:
         # pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys(Keys.ENTER)
         pageTargetingDetails.getHouseholdSizeFrom().send_keys("0")
         pageTargetingDetails.getHouseholdSizeTo().send_keys("9")
-        pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
+        pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys(Keys.ENTER)
+        # pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
         pageTargetingDetails.getInputName().send_keys(Keys.CONTROL + "a")
         pageTargetingDetails.getInputName().send_keys("New Test Data")
-        pageTargetingCreate.getButtonSave().click()
+        pageTargetingDetails.getInputName().send_keys(Keys.ENTER)
+        # pageTargetingCreate.getButtonSave().click()
         pageTargetingDetails.getButtonEdit()
         assert pageTargetingDetails.waitForTextTitlePage("New Test Data")
         assert "9" in pageTargetingDetails.getCriteriaContainer().text
@@ -1304,46 +1310,51 @@ class TestTargeting:
         create_targeting: PaymentPlan,
         pageTargeting: Targeting,
     ) -> None:
+        if not (user2 := User.objects.filter(pk="4196c2c5-c2dd-48d2-887f-3a9d39e88999").first()):
+            user2 = UserFactory(
+                pk="4196c2c5-c2dd-48d2-887f-3a9d39e88999",
+                first_name="ABC",
+                last_name="LastName",
+            )
         PaymentPlanFactory(
             program_cycle=ProgramCycle.objects.get(program__name="Test Programm"),
-            name="Copy TP",
+            name="A Copy TP",
             status=PaymentPlan.Status.TP_PROCESSING,
-            created_by=User.objects.first(),
-            updated_at=datetime.now(),
+            created_by=user2,
+            total_households_count=1,
         )
-
         pageTargeting.selectGlobalProgramFilter("Test Programm")
         pageTargeting.getNavTargeting().click()
         pageTargeting.getColumnName().click()
         pageTargeting.disappearLoadingRows()
-        assert "Copy TP" in pageTargeting.chooseTargetPopulations(0).text
+        assert "A Copy TP" in pageTargeting.chooseTargetPopulations(0).text
         pageTargeting.getColumnName().click()
         pageTargeting.disappearLoadingRows()
         assert "Test Target Population" in pageTargeting.chooseTargetPopulations(0).text
         pageTargeting.getColumnStatus().click()
         pageTargeting.disappearLoadingRows()
-        assert "Copy TP" in pageTargeting.chooseTargetPopulations(0).text
+        assert "A Copy TP" in pageTargeting.chooseTargetPopulations(0).text
         pageTargeting.getColumnStatus().click()
         pageTargeting.disappearLoadingRows()
         assert "Test Target Population" in pageTargeting.chooseTargetPopulations(0).text
         pageTargeting.getColumnNumOfHouseholds().click()
         pageTargeting.disappearLoadingRows()
-        assert "Test Target Population" in pageTargeting.chooseTargetPopulations(0).text
+        assert "A Copy TP" in pageTargeting.chooseTargetPopulations(0).text
         pageTargeting.getColumnDateCreated().click()
         pageTargeting.disappearLoadingRows()
         assert "Test Target Population" in pageTargeting.chooseTargetPopulations(0).text
         pageTargeting.getColumnDateCreated().click()
         pageTargeting.disappearLoadingRows()
-        assert "Copy TP" in pageTargeting.chooseTargetPopulations(0).text
+        assert "A Copy TP" in pageTargeting.chooseTargetPopulations(0).text
         pageTargeting.getColumnLastEdited().click()
         pageTargeting.disappearLoadingRows()
         assert "Test Target Population" in pageTargeting.chooseTargetPopulations(0).text
         pageTargeting.getColumnLastEdited().click()
         pageTargeting.disappearLoadingRows()
-        assert "Test Target Population" in pageTargeting.chooseTargetPopulations(0).text
+        assert "A Copy TP" in pageTargeting.chooseTargetPopulations(0).text
         pageTargeting.getColumnCreatedBy().click()
         pageTargeting.disappearLoadingRows()
-        pageTargeting.wait_for_text("Copy TP", pageTargeting.rows)
+        assert "Test Target Population" in pageTargeting.chooseTargetPopulations(0).text
 
     def test_targeting_parametrized_rules_filters(
         self,

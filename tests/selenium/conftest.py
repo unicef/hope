@@ -613,6 +613,8 @@ def create_super_user(business_area: BusinessArea) -> User:
             username="superuser",
             password="testtest2",
             email="test@example.com",
+            first_name="Test",
+            last_name="Selenium",
             partner=partner,
         )
     UserRole.objects.get_or_create(

@@ -52,6 +52,8 @@ export const AllTargetPopulations = gql`
             }
           }
           status
+          createdAt
+          updatedAt
           createdBy {
             id
             firstName
