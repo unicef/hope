@@ -9,6 +9,7 @@ from selenium.common import NoSuchElementException
 from selenium.webdriver import ActionChains, Keys
 from selenium.webdriver.common.by import By
 
+from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
 from hct_mis_api.apps.core.models import (
     BusinessArea,
@@ -20,7 +21,6 @@ from hct_mis_api.apps.household.fixtures import (
     HouseholdFactory,
     IndividualFactory,
     IndividualRoleInHouseholdFactory,
-    create_household_and_individuals,
     create_household_with_individual_with_collectors,
 )
 from hct_mis_api.apps.household.models import (
@@ -187,21 +187,19 @@ def create_custom_household(
     observed_disability: list[str], residence_status: str = HOST, unicef_id: str = "HH-00-0000.0442"
 ) -> Household:
     program = Program.objects.get(name="Test Programm")
-    household, _ = create_household_and_individuals(
-        household_data={
+    household, _ = create_household_with_individual_with_collectors(
+        household_args={
             "unicef_id": unicef_id,
             "rdi_merge_status": "MERGED",
             "business_area": program.business_area,
             "program": program,
             "residence_status": residence_status,
         },
-        individuals_data=[
-            {
-                "rdi_merge_status": "MERGED",
-                "business_area": program.business_area,
-                "observed_disability": observed_disability,
-            },
-        ],
+        individual_args={
+            "rdi_merge_status": "MERGED",
+            "business_area": program.business_area,
+            "observed_disability": observed_disability,
+        },
     )
     return household
 
@@ -258,6 +256,8 @@ def create_targeting() -> PaymentPlan:
         targeting_criteria=targeting_criteria,
         program_cycle=test_program.cycles.first(),
         build_status=PaymentPlan.BuildStatus.BUILD_STATUS_OK,
+        created_by=User.objects.first(),
+        updated_at=datetime.now(),
     )
 
     hoh1 = IndividualFactory(household=None)
@@ -755,6 +755,7 @@ class TestCreateTargeting:
         assert pageTargetingCreate.getCriteriaContainer().text == bool_no_expected_criteria_text
         pageTargetingCreate.getButtonSave().click()
         pageTargetingDetails.getLockButton()
+        pageTargetingDetails.disappearStatusContainer()
 
         assert pageTargetingDetails.getCriteriaContainer().text == bool_no_expected_criteria_text
         assert pageTargetingDetails.getHouseholdTableCell(1, 1).text in [
@@ -945,7 +946,8 @@ class TestTargeting:
         assert (
             str(target_population.total_households_count) == pageTargetingDetails.getLabelTotalNumberOfHouseholds().text
         )
-        assert str(target_population.status) in pageTargetingDetails.getLabelStatus().text
+        assert str(target_population.status) == "TP_OPEN"
+        assert "OPEN" in pageTargetingDetails.getLabelStatus().text
 
     @pytest.mark.xfail(reason="Problem with deadlock during test - 202318")
     def test_targeting_create_use_ids_individual(
@@ -1008,7 +1010,7 @@ class TestTargeting:
     ) -> None:
         pageTargeting.selectGlobalProgramFilter("Test Programm")
         pageTargeting.getNavTargeting().click()
-        filters.selectFiltersSatus("OPEN")
+        # filters.selectFiltersSatus("TP_OPEN")
         pageTargeting.chooseTargetPopulations(0).click()
         pageTargetingDetails.getLabelStatus()
         pageTargetingDetails.getLockButton().click()
@@ -1057,15 +1059,18 @@ class TestTargeting:
         pageTargeting.getNavTargeting().click()
         pageTargeting.chooseTargetPopulations(0).click()
         pageTargetingDetails.getButtonEdit().click()
-        pageTargetingDetails.getInputName().send_keys(Keys.CONTROL + "a")
-        pageTargetingDetails.getInputName().send_keys("New Test Data")
-        pageTargetingDetails.getButtonTargetPopulationAddCriteria().click()
+        pageTargetingDetails.getButtonIconEdit().click()
         pageTargetingCreate.getButtonHouseholdRule().click()
         pageTargetingCreate.getAutocompleteTargetCriteriaOption().click()
         pageTargetingCreate.select_listbox_element("What is the Household size?")
+        # pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys("What is the Household size")
+        # pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys(Keys.ARROW_DOWN)
+        # pageTargetingCreate.getTargetingCriteriaAutoComplete().send_keys(Keys.ENTER)
         pageTargetingDetails.getHouseholdSizeFrom().send_keys("0")
         pageTargetingDetails.getHouseholdSizeTo().send_keys("9")
         pageTargetingCreate.getTargetingCriteriaAddDialogSaveButton().click()
+        pageTargetingDetails.getInputName().send_keys(Keys.CONTROL + "a")
+        pageTargetingDetails.getInputName().send_keys("New Test Data")
         pageTargetingCreate.getButtonSave().click()
         pageTargetingDetails.getButtonEdit()
         assert pageTargetingDetails.waitForTextTitlePage("New Test Data")
@@ -1095,6 +1100,7 @@ class TestTargeting:
         pageTargetingDetails.getButtonDelete().click()
         pageTargetingDetails.getDialogBox()
         pageTargetingDetails.get_elements(pageTargetingDetails.buttonDelete)[1].click()
+        pageTargeting.getNavTargeting().click()
         pageTargeting.disappearLoadingRows()
         new_list = pageTargeting.getTargetPopulationsRows()
         assert 1 == len(new_list)
@@ -1302,6 +1308,8 @@ class TestTargeting:
             program_cycle=ProgramCycle.objects.get(program__name="Test Programm"),
             name="Copy TP",
             status=PaymentPlan.Status.TP_PROCESSING,
+            created_by=User.objects.first(),
+            updated_at=datetime.now(),
         )
 
         pageTargeting.selectGlobalProgramFilter("Test Programm")
@@ -1314,10 +1322,10 @@ class TestTargeting:
         assert "Test Target Population" in pageTargeting.chooseTargetPopulations(0).text
         pageTargeting.getColumnStatus().click()
         pageTargeting.disappearLoadingRows()
-        assert "Test Target Population" in pageTargeting.chooseTargetPopulations(0).text
+        assert "Copy TP" in pageTargeting.chooseTargetPopulations(0).text
         pageTargeting.getColumnStatus().click()
         pageTargeting.disappearLoadingRows()
-        assert "Copy TP" in pageTargeting.chooseTargetPopulations(0).text
+        assert "Test Target Population" in pageTargeting.chooseTargetPopulations(0).text
         pageTargeting.getColumnNumOfHouseholds().click()
         pageTargeting.disappearLoadingRows()
         assert "Test Target Population" in pageTargeting.chooseTargetPopulations(0).text
@@ -1332,7 +1340,7 @@ class TestTargeting:
         assert "Test Target Population" in pageTargeting.chooseTargetPopulations(0).text
         pageTargeting.getColumnLastEdited().click()
         pageTargeting.disappearLoadingRows()
-        assert "Copy TP" in pageTargeting.chooseTargetPopulations(0).text
+        assert "Test Target Population" in pageTargeting.chooseTargetPopulations(0).text
         pageTargeting.getColumnCreatedBy().click()
         pageTargeting.disappearLoadingRows()
         pageTargeting.wait_for_text("Copy TP", pageTargeting.rows)
