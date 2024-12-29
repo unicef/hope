@@ -10,7 +10,6 @@ from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
 from single_source import get_version
-from smart_env.exceptions import SmartEnvMissing
 
 from hct_mis_api.config.env import env
 
@@ -110,15 +109,8 @@ if ENV != "prod":
 else:
     EMAIL_SUBJECT_PREFIX = ""
 
-try:
-    REPLICA_DB = env("REP_DATABASE_URL", default=None)
-except SmartEnvMissing:
-    REPLICA_DB = None
 
-if REPLICA_DB:
-    RO_CONN = dict(**env.db("REP_DATABASE_URL")).copy()
-else:
-    RO_CONN = dict(**env.db("DATABASE_URL")).copy()
+RO_CONN = env.db("REP_DATABASE_URL")
 RO_CONN.update(
     {
         "OPTIONS": {"options": "-c default_transaction_read_only=on"},
