@@ -7,10 +7,12 @@ def migrate_onetoone_to_foreignkey(apps, schema_editor):
     TicketSensitiveDetails = apps.get_model("grievance", "TicketSensitiveDetails")
     TicketComplaintDetails = apps.get_model("grievance", "TicketComplaintDetails")
     TicketSensitiveDetails.objects.filter(
-        payment_object_id__isnull=False
+        payment_object_id__isnull=False,
+        payment_fk__isnull=True
     ).update(payment_fk=models.F("payment_object_id"))
     TicketComplaintDetails.objects.filter(
-        payment_object_id__isnull=False
+        payment_object_id__isnull=False,
+        payment_fk__isnull=True
     ).update(payment_fk=models.F("payment_object_id"))
 
 
