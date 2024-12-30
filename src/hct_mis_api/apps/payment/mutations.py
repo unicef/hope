@@ -701,6 +701,7 @@ class ActionPaymentPlanMutation(PermissionMutation):
             PaymentPlan.Action.REJECT.name: _get_reject_permission(pp_status),
             PaymentPlan.Action.FINISH.name: [],
             PaymentPlan.Action.SEND_TO_PAYMENT_GATEWAY.name: [Permissions.PM_SEND_TO_PAYMENT_GATEWAY],
+            PaymentPlan.Action.SEND_XLSX_PASSWORD.name: [Permissions.PM_SEND_XLSX_PASSWORD],
         }
         cls.has_permission(info, action_to_permissions_map[action], business_area)
 
@@ -791,7 +792,7 @@ class ExportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
 
     class Arguments:
         payment_plan_id = graphene.ID(required=True)
-        fsp_xlsx_template_id = graphene.ID()
+        fsp_xlsx_template_id = graphene.ID(description="Using from MTCN/Auth Code export")
 
     @classmethod
     def export_action(
@@ -843,8 +844,8 @@ class ExportXLSXPaymentPlanPaymentListPerFSPMutation(ExportXLSXPaymentPlanPaymen
             msg = "Export failed: The Payment List is empty."
             raise GraphQLError(msg)
 
-        if not payment_plan.can_create_xlsx_with_fsp_auth_code:
-            # TODO: ask Marek what is the status of PP if payments are in 'STATUS_SENT_TO_FSP'
+        if fsp_xlsx_template_id and not payment_plan.can_create_xlsx_with_fsp_auth_code:
+            # TODO: ask Marek what is the status of PP if payments are in 'STATUS_SENT_TO_FSP' ???
             msg = "Export failed: All Payments must have the status 'Sent to FSP' and FSP communication channel set to API."
             raise GraphQLError(msg)
 

@@ -1,11 +1,13 @@
 import logging
+import string
 import zipfile
 from tempfile import NamedTemporaryFile
-from typing import TYPE_CHECKING, List, Optional
+from typing import List, Optional
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
 from django.db.models import QuerySet
+from django.shortcuts import get_object_or_404
 
 import openpyxl
 from openpyxl import Workbook
@@ -24,9 +26,7 @@ from hct_mis_api.apps.payment.models import (
 from hct_mis_api.apps.payment.validators import generate_numeric_token
 from hct_mis_api.apps.payment.xlsx.base_xlsx_export_service import XlsxExportBaseService
 from hct_mis_api.apps.utils.exceptions import log_and_raise
-
-if TYPE_CHECKING:
-    from hct_mis_api.apps.account.models import User
+from hct_mis_api.apps.account.models import User
 
 logger = logging.getLogger(__name__)
 
@@ -81,6 +81,12 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
     def get_template(
         self, fsp: "FinancialServiceProvider", delivery_mechanism: DeliveryMechanism
     ) -> FinancialServiceProviderXlsxTemplate:
+        if (
+            self.fsp_xlsx_template_id
+            and fsp.communication_channel == FinancialServiceProvider.COMMUNICATION_CHANNEL_API
+        ):
+            return get_object_or_404(FinancialServiceProviderXlsxTemplate, pk=self.fsp_xlsx_template_id)
+
         fsp_xlsx_template_per_delivery_mechanism = FspXlsxTemplatePerDeliveryMechanism.objects.filter(
             delivery_mechanism=delivery_mechanism,
             financial_service_provider=fsp,
@@ -120,6 +126,9 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
                 msg = f"Please contact admin because we can't export columns: {diff_columns}"
                 log_and_raise(msg)
             column_list = list(template_column_list)
+            # add fsp_auth_code if fsp_xlsx_template_id
+            if self.export_fsp_auth_code:
+                column_list.append("fsp_auth_code")
 
         for core_field in fsp_xlsx_template.core_fields:
             column_list.append(core_field)
@@ -147,6 +156,8 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
 
     def get_payment_row(self, payment: Payment, fsp_xlsx_template: "FinancialServiceProviderXlsxTemplate") -> List[str]:
         fsp_template_columns = self._remove_column_for_people(fsp_xlsx_template.columns)
+        if self.export_fsp_auth_code:
+            fsp_template_columns.append("fsp_auth_code")
         fsp_template_core_fields = self._remove_core_fields_for_people(fsp_xlsx_template.core_fields)
         fsp_template_document_fields = fsp_xlsx_template.document_types
 
@@ -208,13 +219,13 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         self,
         delivery_mechanism_per_payment_plan_list: QuerySet["DeliveryMechanismPerPaymentPlan"],
         zip_file: zipfile.ZipFile,
-        fsp_xlsx_template: Optional["FinancialServiceProviderXlsxTemplate"] = None,
+        password: Optional[str] = None,
     ) -> None:
         for delivery_mechanism_per_payment_plan in delivery_mechanism_per_payment_plan_list:
             fsp: FinancialServiceProvider = delivery_mechanism_per_payment_plan.financial_service_provider
             delivery_mechanism: DeliveryMechanism = delivery_mechanism_per_payment_plan.delivery_mechanism
             wb, ws_fsp = self.open_workbook(fsp.name)
-            fsp_xlsx_template = fsp_xlsx_template or self.get_template(fsp, delivery_mechanism)
+            fsp_xlsx_template = self.get_template(fsp, delivery_mechanism)
             payment_ids = list(
                 self.payment_plan.eligible_payments.filter(financial_service_provider=fsp)
                 .order_by("unicef_id")
@@ -223,6 +234,8 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
             ws_fsp.append(self.prepare_headers(fsp_xlsx_template))
             self.add_rows(fsp_xlsx_template, payment_ids, ws_fsp)
             self._adjust_column_width_from_col(ws_fsp)
+            if password is not None:
+                wb.security.set_workbook_password(password, already_hashed=True)
             self.save_workbook(
                 zip_file,
                 wb,
@@ -269,17 +282,27 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
 
         # create temp zip file
         with NamedTemporaryFile() as tmp_zip:
+            password = None
+            if self.fsp_xlsx_template_id:
+                allowed_chars = (
+                    f"{string.ascii_lowercase} {string.ascii_uppercase} {string.digits} {string.punctuation}"
+                )
+                allowed_chars_formated = " ".join(f'"{part}"' for part in allowed_chars.split())
+                password = User.objects.make_random_password(length=12, allowed_chars=allowed_chars_formated)
+
             with zipfile.ZipFile(tmp_zip.name, mode="w") as zip_file:
                 if self.payment_plan.splits.exists():
+                    # TODO ask Marek how about split for API FSP is it possible?
                     self.create_workbooks_per_split(delivery_mechanism_per_payment_plan_list, zip_file)
                 else:
-                    self.create_workbooks_per_fsp(delivery_mechanism_per_payment_plan_list, zip_file)
+                    self.create_workbooks_per_fsp(delivery_mechanism_per_payment_plan_list, zip_file, password)
 
             zip_file_name = f"payment_plan_payment_list_{self.payment_plan.unicef_id}.zip"
             zip_obj = FileTemp(
                 object_id=self.payment_plan.pk,
                 content_type=get_content_type_for_model(self.payment_plan),
                 created_by=user,
+                password=password,
             )
             tmp_zip.seek(0)
             # remove old file

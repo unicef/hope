@@ -9,6 +9,7 @@ from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.db import transaction
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
 from concurrency.api import disable_concurrency
@@ -156,13 +157,16 @@ def create_payment_plan_payment_list_xlsx_per_fsp(
             with transaction.atomic():
                 # regenerate always xlsx
                 service = XlsxPaymentPlanExportPerFspService(payment_plan, fsp_xlsx_template_id)
-                # TODO: check it
                 service.export_per_fsp(user)
                 payment_plan.background_action_status_none()
                 payment_plan.save()
 
                 if payment_plan.business_area.enable_email_notification:
                     send_email_notification_on_commit(service, user)
+                    if fsp_xlsx_template_id:
+                        # TODO: add user method for this action
+                        print("Send Email Notification with password ====== ")
+
 
         except Exception as e:
             payment_plan.background_action_status_xlsx_export_error()
@@ -172,6 +176,28 @@ def create_payment_plan_payment_list_xlsx_per_fsp(
 
     except Exception as e:
         logger.exception("Create Payment Plan List XLSX Per FSP Error")
+        raise self.retry(exc=e)
+
+
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@log_start_and_end
+@sentry_tags
+def send_payment_plan_payment_list_xlsx_per_fsp_password(
+    self: Any,
+    payment_plan_id: str,
+    user_id: str,
+) -> None:
+    try:
+        from hct_mis_api.apps.payment.models import PaymentPlan
+
+        user = get_object_or_404(get_user_model(), pk=user_id)
+        payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
+        set_sentry_business_area_tag(payment_plan.business_area.name)
+        # TODO: add user method for this action
+        print("====>> send password for user ", user, "=>>> Xlsx password: ", payment_plan.export_file_per_fsp.password)
+
+    except Exception as e:
+        logger.exception("Send Payment Plan List XLSX Per FSP Password Error")
         raise self.retry(exc=e)
 
 

@@ -54,7 +54,7 @@ from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
-    TargetPopulationFactory,
+    TargetPopulationFactory, TargetingCriteriaRuleFactory, TargetingCriteriaRuleFilterFactory,
 )
 from hct_mis_api.apps.targeting.models import (
     TargetingCriteria,
@@ -641,17 +641,28 @@ def generate_payment_plan() -> None:
     full_rebuild(target_population)
     target_population.save()
 
-    target_population = TargetPopulation.objects.update_or_create(
+    tc2 = TargetingCriteriaFactory()
+    tcr2 = TargetingCriteriaRuleFactory(
+        targeting_criteria=tc2,
+    )
+    TargetingCriteriaRuleFilterFactory(
+        targeting_criteria_rule=tcr2,
+        comparison_method="EQUALS",
+        field_name="address",
+        arguments=[address],
+    )
+
+    tp2 = TargetPopulation.objects.update_or_create(
         name="Test Target Population for PM",
-        targeting_criteria=TargetingCriteriaFactory(),
+        targeting_criteria=tc2,
         status=TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE,
         business_area=afghanistan,
         program=program,
         created_by=root,
         program_cycle=program_cycle,
     )[0]
-    full_rebuild(target_population)
-    target_population.save()
+    full_rebuild(tp2)
+    tp2.save()
 
     payment_plan_pk = UUID("00000000-feed-beef-0000-00000badf00d")
     payment_plan = PaymentPlan.objects.update_or_create(

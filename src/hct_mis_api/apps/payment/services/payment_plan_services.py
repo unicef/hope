@@ -25,6 +25,7 @@ from hct_mis_api.apps.payment.celery_tasks import (
     prepare_follow_up_payment_plan_task,
     prepare_payment_plan_task,
     send_payment_notification_emails,
+    send_payment_plan_payment_list_xlsx_per_fsp_password,
     send_to_payment_gateway,
 )
 from hct_mis_api.apps.payment.models import (
@@ -68,6 +69,7 @@ class PaymentPlanService:
             PaymentPlan.Action.REVIEW.value: self.acceptance_process,
             PaymentPlan.Action.REJECT.value: self.acceptance_process,
             PaymentPlan.Action.SEND_TO_PAYMENT_GATEWAY.value: self.send_to_payment_gateway,
+            PaymentPlan.Action.SEND_XLSX_PASSWORD.value: self.send_xlsx_password,
         }
 
     def get_required_number_by_approval_type(self, approval_process: ApprovalProcess) -> Optional[int]:
@@ -744,4 +746,8 @@ class PaymentPlanService:
             for i, chunk in enumerate(payments_chunks):
                 payment_plan_splits_to_create[i].payments.add(*chunk)
 
+        return self.payment_plan
+
+    def send_xlsx_password(self) -> PaymentPlan:
+        send_payment_plan_payment_list_xlsx_per_fsp_password.delay(str(self.payment_plan.pk), str(self.user.pk))
         return self.payment_plan

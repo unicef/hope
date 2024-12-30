@@ -211,6 +211,7 @@ class PaymentPlan(
         REJECT = "REJECT", "Reject"
         FINISH = "FINISH", "Finish"
         SEND_TO_PAYMENT_GATEWAY = "SEND_TO_PAYMENT_GATEWAY", "Send to Payment Gateway"
+        SEND_XLSX_PASSWORD = "SEND_XLSX_PASSWORD", "Send XLSX Password"
 
     usd_fields = [
         "total_entitled_quantity_usd",
@@ -313,7 +314,7 @@ class PaymentPlan(
     )
     export_file_per_fsp = models.ForeignKey(
         FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL
-    )
+    )  # save xlsx with auth code for API communication channel FSP, and just xlsx for others
     export_pdf_file_summary = models.ForeignKey(
         FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL
     )
@@ -365,10 +366,9 @@ class PaymentPlan(
             financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API
         ).exists()
         not_send_to_fsp_exists = self.eligible_payments.exclude(status=Payment.STATUS_SENT_TO_FSP).exists()
-        print("==>> can_create_xlsx_with_fsp_auth_code ", has_fsp_with_api and not not_send_to_fsp_exists)
-        # TODO: just for test
-        return has_fsp_with_api
-        # return has_fsp_with_api and not not_send_to_fsp_exists
+        # # TODO: just for test will remove it
+        # return has_fsp_with_api
+        return has_fsp_with_api and not not_send_to_fsp_exists
 
     @property
     def bank_reconciliation_success(self) -> int:
@@ -969,7 +969,6 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         ("registration_token", _("Registration Token")),
         ("status", _("Status")),
         ("transaction_status_blockchain_link", _("Transaction Status on the Blockchain")),
-        # ("fsp_auth_code", _("FSP Auth Code")),
     )
 
     DEFAULT_COLUMNS = [col[0] for col in COLUMNS_CHOICES]
@@ -1142,7 +1141,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
                 payment,
                 "transaction_status_blockchain_link",
             ),
-            # "fsp_auth_code": (payment, "fsp_auth_code")  # TODO add only specific permissions
+            "fsp_auth_code": (payment, "fsp_auth_code"),
         }
         additional_columns = {
             "admin_level_2": cls.get_admin_level_2,
