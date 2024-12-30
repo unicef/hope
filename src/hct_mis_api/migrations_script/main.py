@@ -46,7 +46,6 @@ if __name__ == "__main__":
     export_migration_info_to_csv()
     clear_migration_table()
     excluded_migrations = [
-        ("core", "0003_migration"),
         ("targeting", "0002_migration"),
         ("household", "0003_migration"),
         ("household", "0004_migration"),

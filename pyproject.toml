@@ -239,7 +239,7 @@ dependencies = [
     "flower>=2.0.1",
     "factory-boy<4,>=3",
     "django-fernet-fields>=0.6",
-    "hope-smart-export>=0.3.0",
+    "msoffcrypto-tool>=5.4.2",
 ]
 requires-python = "==3.12.*"
 readme = "README.md"

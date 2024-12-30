@@ -845,7 +845,6 @@ class ExportXLSXPaymentPlanPaymentListPerFSPMutation(ExportXLSXPaymentPlanPaymen
             raise GraphQLError(msg)
 
         if fsp_xlsx_template_id and not payment_plan.can_create_xlsx_with_fsp_auth_code:
-            # TODO: ask Marek what is the status of PP if payments are in 'STATUS_SENT_TO_FSP' ???
             msg = "Export failed: All Payments must have the status 'Sent to FSP' and FSP communication channel set to API."
             raise GraphQLError(msg)
 

@@ -362,13 +362,16 @@ class PaymentPlan(
         export MTCN file
         xlsx file with password
         """
-        has_fsp_with_api = self.eligible_payments.filter(
-            financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API
+        # self.delivery_mech
+        has_fsp_with_api = self.delivery_mechanisms.filter(
+            financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+            financial_service_provider__payment_gateway_id__isnull=False,
         ).exists()
-        not_send_to_fsp_exists = self.eligible_payments.exclude(status=Payment.STATUS_SENT_TO_FSP).exists()
+
+        # all_sent_to_fsp = not self.eligible_payments.exclude(status=Payment.STATUS_SENT_TO_FSP).exists()
         # # TODO: just for test will remove it
-        # return has_fsp_with_api
-        return has_fsp_with_api and not not_send_to_fsp_exists
+        return has_fsp_with_api
+        # return has_fsp_with_api and all_sent_to_fsp
 
     @property
     def bank_reconciliation_success(self) -> int:
@@ -969,6 +972,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         ("registration_token", _("Registration Token")),
         ("status", _("Status")),
         ("transaction_status_blockchain_link", _("Transaction Status on the Blockchain")),
+        ("fsp_auth_code", _("Auth Code")),
     )
 
     DEFAULT_COLUMNS = [col[0] for col in COLUMNS_CHOICES]

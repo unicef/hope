@@ -167,7 +167,6 @@ def create_payment_plan_payment_list_xlsx_per_fsp(
                         # TODO: add user method for this action
                         print("Send Email Notification with password ====== ")
 
-
         except Exception as e:
             payment_plan.background_action_status_xlsx_export_error()
             payment_plan.save()
@@ -194,7 +193,13 @@ def send_payment_plan_payment_list_xlsx_per_fsp_password(
         payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
         set_sentry_business_area_tag(payment_plan.business_area.name)
         # TODO: add user method for this action
-        print("====>> send password for user ", user, "=>>> Xlsx password: ", payment_plan.export_file_per_fsp.password)
+        print(
+            "====>> send password for user ",
+            user,
+            "=>>> Zip and Xlsx passwords: ",
+            payment_plan.export_file_per_fsp.password,
+            payment_plan.export_file_per_fsp.xlsx_password,
+        )
 
     except Exception as e:
         logger.exception("Send Payment Plan List XLSX Per FSP Password Error")

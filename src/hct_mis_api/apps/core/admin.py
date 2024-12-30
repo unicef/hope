@@ -52,6 +52,7 @@ from hct_mis_api.apps.core.models import (
     BusinessArea,
     CountryCodeMap,
     DataCollectingType,
+    FileTemp,
     FlexibleAttribute,
     FlexibleAttributeChoice,
     FlexibleAttributeGroup,
@@ -719,3 +720,8 @@ class DataCollectingTypeAdmin(AdminFiltersMixin, admin.ModelAdmin):
         "recalculate_composition",
     )
     filter_horizontal = ("compatible_types", "limit_to")
+
+
+@admin.register(FileTemp)
+class FileTempAdmin(AdminFiltersMixin, admin.ModelAdmin):
+    list_display = ("id",)

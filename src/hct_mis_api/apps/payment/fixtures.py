@@ -54,7 +54,9 @@ from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
-    TargetPopulationFactory, TargetingCriteriaRuleFactory, TargetingCriteriaRuleFilterFactory,
+    TargetingCriteriaRuleFactory,
+    TargetingCriteriaRuleFilterFactory,
+    TargetPopulationFactory,
 )
 from hct_mis_api.apps.targeting.models import (
     TargetingCriteria,
