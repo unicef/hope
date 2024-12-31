@@ -9,9 +9,11 @@ from django.contrib.admin.options import get_content_type_for_model
 from django.core.files import File
 from django.db.models import QuerySet
 from django.shortcuts import get_object_or_404
+from django.template.loader import render_to_string
 
 import msoffcrypto
 import openpyxl
+import pyzipper
 from openpyxl import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
@@ -223,9 +225,8 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
                 output = BytesIO()
                 office_file = msoffcrypto.OfficeFile(tmp)
                 office_file.load_key(password=password)
-                office_file.encrypt(output)
+                office_file.encrypt(password, output)
                 output.seek(0)
-
                 # add xlsx to zip
                 zip_file.writestr(filename, output.getvalue())
             else:
@@ -279,13 +280,11 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
             ws_fsp.append(self.prepare_headers(fsp_xlsx_template))
             self.add_rows(fsp_xlsx_template, payment_ids, ws_fsp)
             self._adjust_column_width_from_col(ws_fsp)
-            if password is not None:
-                # TODO: Full File Encryption with msoffcrypto?
-                wb.security.set_workbook_password(password, already_hashed=True)
             self.save_workbook(
                 zip_file,
                 wb,
                 f"payment_plan_payment_list_{self.payment_plan.unicef_id}_FSP_{fsp.name}_{delivery_mechanism_per_payment_plan.delivery_mechanism}_chunk{i + 1}.xlsx",
+                password,
             )
 
     def export_per_fsp(self, user: "User") -> None:
@@ -300,27 +299,29 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
             )
             log_and_raise(msg)
 
-        # create temp zip file
         with NamedTemporaryFile(suffix=".zip") as tmp_zip:
             zip_file_name = f"payment_plan_payment_list_{self.payment_plan.unicef_id}.zip"
 
-        password, xlsx_password = None, None
-        if self.fsp_xlsx_template_id:
-            allowed_chars = f"{string.ascii_lowercase} {string.ascii_uppercase} {string.digits} {string.punctuation}"
-            allowed_chars_formated = " ".join(f'"{part}"' for part in allowed_chars.split())
-            password = User.objects.make_random_password(length=12, allowed_chars=allowed_chars_formated)
-            xlsx_password = User.objects.make_random_password(length=12, allowed_chars=allowed_chars_formated)
-
-        with zipfile.ZipFile(zip_file_name, mode="w", compression=zipfile.ZIP_DEFLATED) as zip_file:
-            if self.payment_plan.splits.exists():
-                self.create_workbooks_per_split(delivery_mechanism_per_payment_plan_list, zip_file, xlsx_password)
-            else:
-                self.create_workbooks_per_fsp(delivery_mechanism_per_payment_plan_list, zip_file, xlsx_password)
-
+            # generate passwords only if export_fsp_auth_code=True
+            password, xlsx_password = None, None
             if self.export_fsp_auth_code:
-                zip_file.setpassword(password.encode("utf-8"))
+                allowed_chars = f"{string.ascii_lowercase}{string.ascii_uppercase}{string.digits}{string.punctuation}"
+                password = User.objects.make_random_password(length=12, allowed_chars=allowed_chars)
+                xlsx_password = User.objects.make_random_password(length=12, allowed_chars=allowed_chars)
 
-            zip_obj = FileTemp(
+            with pyzipper.AESZipFile(
+                tmp_zip, mode="w", compression=pyzipper.ZIP_DEFLATED, encryption=pyzipper.WZ_AES
+            ) as zip_file:
+                # set password
+                if self.export_fsp_auth_code:
+                    zip_file.setpassword(password.encode("utf-8"))
+
+                if self.payment_plan.splits.exists():
+                    self.create_workbooks_per_split(delivery_mechanism_per_payment_plan_list, zip_file, xlsx_password)
+                else:
+                    self.create_workbooks_per_fsp(delivery_mechanism_per_payment_plan_list, zip_file, xlsx_password)
+
+            file_temp_obj = FileTemp(
                 object_id=self.payment_plan.pk,
                 content_type=get_content_type_for_model(self.payment_plan),
                 created_by=user,
@@ -330,6 +331,31 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
             tmp_zip.seek(0)
             # remove old file
             self.payment_plan.remove_export_files()
-            zip_obj.file.save(zip_file_name, File(tmp_zip))
-            self.payment_plan.export_file_per_fsp = zip_obj
+            file_temp_obj.file.save(zip_file_name, File(tmp_zip))
+            self.payment_plan.export_file_per_fsp = file_temp_obj
             self.payment_plan.save()
+
+    @staticmethod
+    def sent_email_with_passwords(user: "User", payment_plan: PaymentPlan) -> None:
+        text_template = "payment/xlsx_file_password_email.txt"
+        html_template = "payment/xlsx_file_password_email.html"
+
+        msg = (
+            f"Payment Plan {payment_plan.unicef_id} Payment List export file's Passwords.\n"
+            f"ZIP file password: {payment_plan.export_file_per_fsp.password}\n"
+            f"XLSX file password: {payment_plan.export_file_per_fsp.xlsx_password}\n"
+        )
+
+        context = {
+            "first_name": getattr(user, "first_name", ""),
+            "last_name": getattr(user, "last_name", ""),
+            "email": getattr(user, "email", ""),
+            "message": msg,
+            "title": f"Payment Plan {payment_plan.unicef_id} Payment List file's Passwords",
+            "link": "",
+        }
+        user.email_user(
+            subject=context["title"],
+            html_body=render_to_string(html_template, context=context),
+            text_body=render_to_string(text_template, context=context),
+        )

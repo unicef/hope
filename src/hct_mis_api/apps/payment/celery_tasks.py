@@ -164,8 +164,7 @@ def create_payment_plan_payment_list_xlsx_per_fsp(
                 if payment_plan.business_area.enable_email_notification:
                     send_email_notification_on_commit(service, user)
                     if fsp_xlsx_template_id:
-                        # TODO: add user method for this action
-                        print("Send Email Notification with password ====== ")
+                        service.sent_email_with_passwords(user, payment_plan)
 
         except Exception as e:
             payment_plan.background_action_status_xlsx_export_error()
@@ -188,18 +187,14 @@ def send_payment_plan_payment_list_xlsx_per_fsp_password(
 ) -> None:
     try:
         from hct_mis_api.apps.payment.models import PaymentPlan
+        from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import (
+            XlsxPaymentPlanExportPerFspService,
+        )
 
-        user = get_object_or_404(get_user_model(), pk=user_id)
+        user: User = get_user_model().objects.get(pk=user_id)
         payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
         set_sentry_business_area_tag(payment_plan.business_area.name)
-        # TODO: add user method for this action
-        print(
-            "====>> send password for user ",
-            user,
-            "=>>> Zip and Xlsx passwords: ",
-            payment_plan.export_file_per_fsp.password,
-            payment_plan.export_file_per_fsp.xlsx_password,
-        )
+        XlsxPaymentPlanExportPerFspService.sent_email_with_passwords(user, payment_plan)
 
     except Exception as e:
         logger.exception("Send Payment Plan List XLSX Per FSP Password Error")

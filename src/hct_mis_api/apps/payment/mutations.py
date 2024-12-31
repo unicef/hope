@@ -844,6 +844,10 @@ class ExportXLSXPaymentPlanPaymentListPerFSPMutation(ExportXLSXPaymentPlanPaymen
             msg = "Export failed: The Payment List is empty."
             raise GraphQLError(msg)
 
+        if fsp_xlsx_template_id and payment_plan.export_file_per_fsp is not None:
+            msg = "Export failed: Payment Plan already has created exported file."
+            raise GraphQLError(msg)
+
         if fsp_xlsx_template_id and not payment_plan.can_create_xlsx_with_fsp_auth_code:
             msg = "Export failed: All Payments must have the status 'Sent to FSP' and FSP communication channel set to API."
             raise GraphQLError(msg)

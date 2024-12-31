@@ -362,16 +362,13 @@ class PaymentPlan(
         export MTCN file
         xlsx file with password
         """
-        # self.delivery_mech
         has_fsp_with_api = self.delivery_mechanisms.filter(
             financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
             financial_service_provider__payment_gateway_id__isnull=False,
         ).exists()
 
-        # all_sent_to_fsp = not self.eligible_payments.exclude(status=Payment.STATUS_SENT_TO_FSP).exists()
-        # # TODO: just for test will remove it
-        return has_fsp_with_api
-        # return has_fsp_with_api and all_sent_to_fsp
+        all_sent_to_fsp = not self.eligible_payments.exclude(status=Payment.STATUS_SENT_TO_FSP).exists()
+        return has_fsp_with_api and all_sent_to_fsp
 
     @property
     def bank_reconciliation_success(self) -> int:
