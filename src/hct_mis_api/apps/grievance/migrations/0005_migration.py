@@ -9,7 +9,7 @@ def migrate_onetoone_to_foreignkey(apps, schema_editor):
     PaymentRecord = apps.get_model("payment", "PaymentRecord")
     Payment = apps.get_model("payment", "Payment")
     ContentType = apps.get_model("contenttypes", "ContentType")
-    ct_pr = ContentType.objects.get(app_label="payment", model="paymentrecord")
+    ct_pr = ContentType.objects.get_for_model(PaymentRecord)
 
     # not migrated tickets related to more than one payment
     ts = TicketComplaintDetails.objects.filter(
