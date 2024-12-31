@@ -6,11 +6,30 @@ import django.db.models.deletion
 def migrate_onetoone_to_foreignkey(apps, schema_editor):
     TicketSensitiveDetails = apps.get_model("grievance", "TicketSensitiveDetails")
     TicketComplaintDetails = apps.get_model("grievance", "TicketComplaintDetails")
+    PaymentRecord = apps.get_model("payment", "PaymentRecord")
+    Payment = apps.get_model("payment", "Payment")
+    ContentType = apps.get_model("contenttypes", "ContentType")
+    ct_pr = ContentType.objects.get_for_model(PaymentRecord)
+
+    # not migrated tickets related to more than one payment
+    ts = TicketComplaintDetails.objects.filter(
+        payment_object_id__isnull=False,
+        payment__isnull=True,
+        payment_content_type=ct_pr
+    )
+    for t in ts:
+        pr = PaymentRecord.objects.get(id=t.payment_object_id)
+        p = Payment.objects.get(internal_data__ca_hash_id=str(pr.ca_hash_id))
+        t.payment_fk = p
+        t.save()
+
     TicketSensitiveDetails.objects.filter(
-        payment_object_id__isnull=False
+        payment_object_id__isnull=False,
+        payment_fk__isnull=True
     ).update(payment_fk=models.F("payment_object_id"))
     TicketComplaintDetails.objects.filter(
-        payment_object_id__isnull=False
+        payment_object_id__isnull=False,
+        payment_fk__isnull=True
     ).update(payment_fk=models.F("payment_object_id"))
 
 
@@ -19,6 +38,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('grievance', '0004_migration'),
+        ('payment', '0001_migration'),
     ]
 
     operations = [
