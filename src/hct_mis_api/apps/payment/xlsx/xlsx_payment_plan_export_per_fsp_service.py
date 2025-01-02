@@ -303,16 +303,17 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
             zip_file_name = f"payment_plan_payment_list_{self.payment_plan.unicef_id}.zip"
 
             # generate passwords only if export_fsp_auth_code=True
-            password, xlsx_password = None, None
+            password, xlsx_password, encryption_arg = None, None, {}
             if self.export_fsp_auth_code:
                 allowed_chars = f"{string.ascii_lowercase}{string.ascii_uppercase}{string.digits}{string.punctuation}"
                 password = User.objects.make_random_password(length=12, allowed_chars=allowed_chars)
                 xlsx_password = User.objects.make_random_password(length=12, allowed_chars=allowed_chars)
+                encryption_arg = {"encryption": pyzipper.WZ_AES}
 
             with pyzipper.AESZipFile(
-                tmp_zip, mode="w", compression=pyzipper.ZIP_DEFLATED, encryption=pyzipper.WZ_AES
+                tmp_zip, mode="w", compression=pyzipper.ZIP_DEFLATED, **encryption_arg
             ) as zip_file:
-                # set password
+                # set password only for auth code export
                 if self.export_fsp_auth_code:
                     zip_file.setpassword(password.encode("utf-8"))
 

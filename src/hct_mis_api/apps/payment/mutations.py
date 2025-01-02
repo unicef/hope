@@ -792,7 +792,7 @@ class ExportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
 
     class Arguments:
         payment_plan_id = graphene.ID(required=True)
-        fsp_xlsx_template_id = graphene.ID(description="Using from MTCN/Auth Code export")
+        fsp_xlsx_template_id = graphene.ID(description="Using for MTCN/Auth Code export")
 
     @classmethod
     def export_action(

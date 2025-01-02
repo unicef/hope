@@ -45,6 +45,7 @@ enum Action {
   REJECT
   FINISH
   SEND_TO_PAYMENT_GATEWAY
+  SEND_XLSX_PASSWORD
 }
 
 input ActionPaymentPlanInput {

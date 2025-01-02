@@ -80,6 +80,7 @@ export function AcceptedPaymentPlanHeaderButtons({
                   await mutateExport({
                     variables: {
                       paymentPlanId: paymentPlan.id,
+                      fspXlsxTemplateId: "",
                     },
                   });
                   showMessage(t('Exporting XLSX started'));

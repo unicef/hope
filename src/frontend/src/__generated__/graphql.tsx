@@ -70,6 +70,7 @@ export enum Action {
   Review = 'REVIEW',
   SendForApproval = 'SEND_FOR_APPROVAL',
   SendToPaymentGateway = 'SEND_TO_PAYMENT_GATEWAY',
+  SendXlsxPassword = 'SEND_XLSX_PASSWORD',
   Unlock = 'UNLOCK',
   UnlockFsp = 'UNLOCK_FSP'
 }
@@ -8935,6 +8936,7 @@ export type ExportXlsxPpListMutation = { __typename?: 'Mutations', exportXlsxPay
 
 export type ExportXlsxPpListPerFspMutationVariables = Exact<{
   paymentPlanId: Scalars['ID']['input'];
+  fspXlsxTemplateId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -13155,8 +13157,11 @@ export type ExportXlsxPpListMutationHookResult = ReturnType<typeof useExportXlsx
 export type ExportXlsxPpListMutationResult = Apollo.MutationResult<ExportXlsxPpListMutation>;
 export type ExportXlsxPpListMutationOptions = Apollo.BaseMutationOptions<ExportXlsxPpListMutation, ExportXlsxPpListMutationVariables>;
 export const ExportXlsxPpListPerFspDocument = gql`
-    mutation ExportXlsxPPListPerFsp($paymentPlanId: ID!) {
-  exportXlsxPaymentPlanPaymentListPerFsp(paymentPlanId: $paymentPlanId) {
+    mutation ExportXlsxPPListPerFsp($paymentPlanId: ID!, $fspXlsxTemplateId: ID) {
+  exportXlsxPaymentPlanPaymentListPerFsp(
+    paymentPlanId: $paymentPlanId
+    fspXlsxTemplateId: $fspXlsxTemplateId
+  ) {
     paymentPlan {
       id
       status
@@ -13181,6 +13186,7 @@ export type ExportXlsxPpListPerFspMutationFn = Apollo.MutationFunction<ExportXls
  * const [exportXlsxPpListPerFspMutation, { data, loading, error }] = useExportXlsxPpListPerFspMutation({
  *   variables: {
  *      paymentPlanId: // value for 'paymentPlanId'
+ *      fspXlsxTemplateId: // value for 'fspXlsxTemplateId'
  *   },
  * });
  */
