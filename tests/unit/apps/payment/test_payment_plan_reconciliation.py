@@ -12,6 +12,8 @@ from unittest.mock import patch
 from zipfile import ZipFile
 
 from django.conf import settings
+from django.contrib.admin.options import get_content_type_for_model
+from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils import timezone
 
@@ -1221,4 +1223,46 @@ class TestPaymentPlanReconciliation(APITestCase):
         self.assertIsNotNone(payment_plan.export_file_per_fsp)
         self.assertEqual(
             payment_plan.export_file_per_fsp_id, FileTemp.objects.filter(object_id=payment_plan.id).first().pk
+        )
+
+    def test_export_xlsx_per_fsp_error_msg(self) -> None:
+        payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED, created_by=self.user)
+        fsp = FinancialServiceProviderFactory(
+            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API, payment_gateway_id="ABC_aaa"
+        )
+        xlsx_template = FinancialServiceProviderXlsxTemplateFactory()
+        DeliveryMechanismPerPaymentPlanFactory(
+            payment_plan=payment_plan,
+            financial_service_provider=fsp,
+        )
+        variables = {
+            "paymentPlanId": encode_id_base64_required(str(payment_plan.pk), "PaymentPlan"),
+            "fspXlsxTemplateId": encode_id_base64_required(
+                str(xlsx_template.pk), "FinancialServiceProviderXlsxTemplate"
+            ),
+        }
+        # wrong Payment Plan status
+        self.snapshot_graphql_request(
+            request_string=EXPORT_XLSX_PER_FSP_MUTATION_AUTH_CODE, context={"user": self.user}, variables=variables
+        )
+        # upd payment plan status
+        payment_plan.status = PaymentPlan.Status.ACCEPTED
+        payment_plan.save()
+        # no eligible payments
+        self.snapshot_graphql_request(
+            request_string=EXPORT_XLSX_PER_FSP_MUTATION_AUTH_CODE, context={"user": self.user}, variables=variables
+        )
+        # create temp file
+        file = FileTemp.objects.create(
+            object_id=payment_plan.pk,
+            content_type=get_content_type_for_model(payment_plan),
+            created=timezone.now(),
+            file=ContentFile(b"Aaa", f"Test_File_ABC{payment_plan.pk}.xlsx"),
+        )
+        PaymentFactory(parent=payment_plan, fsp_auth_code="TestAuthCode", status=Payment.STATUS_SENT_TO_FSP)
+        payment_plan.export_file_per_fsp = file
+        payment_plan.save()
+        # Payment Plan already has created exported file
+        self.snapshot_graphql_request(
+            request_string=EXPORT_XLSX_PER_FSP_MUTATION_AUTH_CODE, context={"user": self.user}, variables=variables
         )

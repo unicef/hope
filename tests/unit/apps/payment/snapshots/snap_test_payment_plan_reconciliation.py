@@ -127,6 +127,66 @@ snapshots['TestPaymentPlanReconciliation::test_error_message_when_engine_rule_no
     ]
 }
 
+snapshots['TestPaymentPlanReconciliation::test_export_xlsx_per_fsp_error_msg 1'] = {
+    'data': {
+        'exportXlsxPaymentPlanPaymentListPerFsp': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 5,
+                    'line': 3
+                }
+            ],
+            'message': 'Payment List Per FSP export is only available for ACCEPTED or FINISHED Payment Plans.',
+            'path': [
+                'exportXlsxPaymentPlanPaymentListPerFsp'
+            ]
+        }
+    ]
+}
+
+snapshots['TestPaymentPlanReconciliation::test_export_xlsx_per_fsp_error_msg 2'] = {
+    'data': {
+        'exportXlsxPaymentPlanPaymentListPerFsp': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 5,
+                    'line': 3
+                }
+            ],
+            'message': 'Export failed: The Payment List is empty.',
+            'path': [
+                'exportXlsxPaymentPlanPaymentListPerFsp'
+            ]
+        }
+    ]
+}
+
+snapshots['TestPaymentPlanReconciliation::test_export_xlsx_per_fsp_error_msg 3'] = {
+    'data': {
+        'exportXlsxPaymentPlanPaymentListPerFsp': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 5,
+                    'line': 3
+                }
+            ],
+            'message': 'Export failed: Payment Plan already has created exported file.',
+            'path': [
+                'exportXlsxPaymentPlanPaymentListPerFsp'
+            ]
+        }
+    ]
+}
+
 snapshots['TestPaymentPlanReconciliation::test_export_xlsx_per_fsp_with_auth_code 1'] = {
     'data': {
         'exportXlsxPaymentPlanPaymentListPerFsp': None
