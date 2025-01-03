@@ -25,11 +25,12 @@ from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
+from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType, FileTemp
 from hct_mis_api.apps.core.utils import (
     decode_id_string,
     decode_id_string_required,
     encode_id_base64,
+    encode_id_base64_required,
 )
 from hct_mis_api.apps.household.fixtures import (
     IndividualRoleInHouseholdFactory,
@@ -44,6 +45,7 @@ from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoice
 from hct_mis_api.apps.payment.fixtures import (
     DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
+    FinancialServiceProviderXlsxTemplateFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
     PaymentFactory,
     PaymentPlanFactory,
@@ -226,6 +228,18 @@ mutation ExportXlsxPaymentPlanPaymentListPerFsp($paymentPlanId: ID!, $fspXlsxTem
 }
 """
 
+EXPORT_XLSX_PER_FSP_MUTATION_AUTH_CODE = """
+mutation ExportXlsxPaymentPlanPaymentListPerFsp($paymentPlanId: ID!, $fspXlsxTemplateId: ID) {
+    exportXlsxPaymentPlanPaymentListPerFsp(paymentPlanId: $paymentPlanId, fspXlsxTemplateId: $fspXlsxTemplateId) {
+        paymentPlan {
+            status
+            canCreateXlsxWithFspAuthCode
+            hasPaymentListExportFile
+        }
+    }
+}
+"""
+
 IMPORT_XLSX_PER_FSP_MUTATION = """
 mutation ImportXlsxPaymentPlanPaymentListPerFsp($paymentPlanId: ID!, $file: Upload!) {
     importXlsxPaymentPlanPaymentListPerFsp(paymentPlanId: $paymentPlanId, file: $file) {
@@ -303,6 +317,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
             Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
             Permissions.PM_IMPORT_XLSX_WITH_RECONCILIATION,
+            Permissions.PM_DOWNLOAD_MTCN,
         ]
         cls.create_user_role_with_permissions(
             cls.user,
@@ -885,7 +900,7 @@ class TestPaymentPlanReconciliation(APITestCase):
         expected_delivered_quantity: Decimal,
         expected_status: str,
     ) -> None:
-        service = XlsxPaymentPlanImportPerFspService(PaymentPlanFactory(), None)  # type: ignore
+        service = XlsxPaymentPlanImportPerFspService(PaymentPlanFactory(created_by=self.user), None)  # type: ignore
 
         if not expected_status:
             with self.assertRaisesMessage(
@@ -902,7 +917,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             self.assertEqual(value, expected_delivered_quantity)
 
     def test_xlsx_payment_plan_import_per_fsp_service_import_row(self) -> None:
-        pp = PaymentPlanFactory(status=PaymentPlan.Status.FINISHED)
+        pp = PaymentPlanFactory(status=PaymentPlan.Status.FINISHED, created_by=self.user)
         pp.refresh_from_db()
         pvs = PaymentVerificationSummaryFactory()
         pvs.payment_plan = pp
@@ -1019,7 +1034,7 @@ class TestPaymentPlanReconciliation(APITestCase):
         self.assertEqual(verification_3.status, PaymentVerification.STATUS_PENDING)
 
     def test_payment_plan_is_fully_delivered(self) -> None:
-        payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.ACCEPTED)
+        payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.ACCEPTED, created_by=self.user)
         for hh, ind in [
             (self.household_1, self.individual_1),
             (self.household_2, self.individual_2),
@@ -1052,7 +1067,7 @@ class TestPaymentPlanReconciliation(APITestCase):
 
     @freeze_time("2023-12-12")
     def test_follow_up_pp_entitlements_can_be_changed_with_steficon_rule(self) -> None:
-        pp = PaymentPlanFactory(is_follow_up=True, status=PaymentPlan.Status.LOCKED)
+        pp = PaymentPlanFactory(is_follow_up=True, status=PaymentPlan.Status.LOCKED, created_by=self.user)
         pp.unicef_id = "PP-0060-23-00000002"
         pp.save()
 
@@ -1068,7 +1083,7 @@ class TestPaymentPlanReconciliation(APITestCase):
         )
 
     def test_apply_steficon_rule_with_wrong_payment_plan_status(self) -> None:
-        payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.OPEN)
+        payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.OPEN, created_by=self.user)
         rule = RuleFactory(name="SomeRule")
 
         self.snapshot_graphql_request(
@@ -1097,7 +1112,7 @@ class TestPaymentPlanReconciliation(APITestCase):
         )
 
     def test_error_message_when_engine_rule_not_enabled_or_deprecated(self) -> None:
-        payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED)
+        payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED, created_by=self.user)
         rule_not_enabled = RuleFactory(enabled=False)
         rule_deprecated = RuleFactory(deprecated=True)
 
@@ -1113,7 +1128,7 @@ class TestPaymentPlanReconciliation(APITestCase):
 
     def test_follow_up_pp_entitlements_updated_with_file(self) -> None:
         content = Path(f"{settings.TESTS_ROOT}/apps/payment/test_file/pp_payment_list_valid.xlsx").read_bytes()
-        pp = PaymentPlanFactory(is_follow_up=True, status=PaymentPlan.Status.LOCKED)
+        pp = PaymentPlanFactory(is_follow_up=True, status=PaymentPlan.Status.LOCKED, created_by=self.user)
 
         self.snapshot_graphql_request(
             request_string=IMPORT_XLSX_PP_MUTATION,
@@ -1127,7 +1142,7 @@ class TestPaymentPlanReconciliation(APITestCase):
     def test_correct_message_displayed_when_file_is_protected(self) -> None:
         content = Path(f"{settings.TESTS_ROOT}/apps/payment/test_file/import_file_protected.xlsx").read_bytes()
         fsp = FinancialServiceProviderFactory(communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX)
-        pp = PaymentPlanFactory(status=PaymentPlan.Status.ACCEPTED)
+        pp = PaymentPlanFactory(status=PaymentPlan.Status.ACCEPTED, created_by=self.user)
         DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=pp,
             financial_service_provider=fsp,
@@ -1143,7 +1158,7 @@ class TestPaymentPlanReconciliation(APITestCase):
         )
 
     def test_import_with_wrong_payment_plan_status(self) -> None:
-        payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.OPEN)
+        payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.OPEN, created_by=self.user)
 
         self.assertEqual(payment_plan.status, PaymentPlan.Status.OPEN)
         self.snapshot_graphql_request(
@@ -1156,7 +1171,7 @@ class TestPaymentPlanReconciliation(APITestCase):
         )
 
     def test_assign_fsp_mutation_payment_plan_wrong_status(self) -> None:
-        payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.OPEN)
+        payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.OPEN, created_by=self.user)
         fsp = FinancialServiceProviderFactory()
         encoded_santander_fsp_id = encode_id_base64(fsp.id, "FinancialServiceProvider")
 
@@ -1173,4 +1188,37 @@ class TestPaymentPlanReconciliation(APITestCase):
                     }
                 ],
             },
+        )
+
+    def test_export_xlsx_per_fsp_with_auth_code(self) -> None:
+        payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.FINISHED, created_by=self.user)
+        payment_1 = PaymentFactory(parent=payment_plan, fsp_auth_code="TestAuthCode")
+        fsp = FinancialServiceProviderFactory(
+            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API, payment_gateway_id="ABC_333"
+        )
+        xlsx_template = FinancialServiceProviderXlsxTemplateFactory()
+        DeliveryMechanismPerPaymentPlanFactory(
+            payment_plan=payment_plan,
+            financial_service_provider=fsp,
+        )
+        variables = {
+            "paymentPlanId": encode_id_base64_required(str(payment_plan.pk), "PaymentPlan"),
+            "fspXlsxTemplateId": encode_id_base64_required(
+                str(xlsx_template.pk), "FinancialServiceProviderXlsxTemplate"
+            ),
+        }
+        self.snapshot_graphql_request(
+            request_string=EXPORT_XLSX_PER_FSP_MUTATION_AUTH_CODE, context={"user": self.user}, variables=variables
+        )
+        # upd payment status
+        payment_1.status = Payment.STATUS_SENT_TO_FSP
+        payment_1.save()
+        self.snapshot_graphql_request(
+            request_string=EXPORT_XLSX_PER_FSP_MUTATION_AUTH_CODE, context={"user": self.user}, variables=variables
+        )
+        payment_plan.refresh_from_db()
+        self.assertEqual(FileTemp.objects.filter(object_id=payment_plan.id).count(), 1)
+        self.assertIsNotNone(payment_plan.export_file_per_fsp)
+        self.assertEqual(
+            payment_plan.export_file_per_fsp_id, FileTemp.objects.filter(object_id=payment_plan.id).first().pk
         )
