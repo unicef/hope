@@ -42,6 +42,7 @@ from hct_mis_api.apps.payment.celery_tasks import (
 )
 from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.fixtures import (
+    DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
     FspXlsxTemplatePerDeliveryMechanismFactory,
     PaymentFactory,
@@ -53,6 +54,7 @@ from hct_mis_api.apps.payment.fixtures import (
 )
 from hct_mis_api.apps.payment.models import (
     DeliveryMechanism,
+    FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     Payment,
     PaymentPlan,
@@ -215,8 +217,8 @@ mutation AssignFspToDeliveryMechanism($paymentPlanId: ID!, $mappings: [FSPToDeli
 """
 
 EXPORT_XLSX_PER_FSP_MUTATION = """
-mutation ExportXlsxPaymentPlanPaymentListPerFsp($paymentPlanId: ID!) {
-    exportXlsxPaymentPlanPaymentListPerFsp(paymentPlanId: $paymentPlanId) {
+mutation ExportXlsxPaymentPlanPaymentListPerFsp($paymentPlanId: ID!, $fspXlsxTemplateId: ID) {
+    exportXlsxPaymentPlanPaymentListPerFsp(paymentPlanId: $paymentPlanId, fspXlsxTemplateId: $fspXlsxTemplateId) {
         paymentPlan {
             id
         }
@@ -465,6 +467,7 @@ class TestPaymentPlanReconciliation(APITestCase):
         santander_fsp = FinancialServiceProviderFactory(
             name="Santander",
             distribution_limit=None,
+            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
         )
         santander_fsp.delivery_mechanisms.set([dm_cash, dm_transfer])
         FspXlsxTemplatePerDeliveryMechanismFactory(financial_service_provider=santander_fsp, delivery_mechanism=dm_cash)
@@ -680,6 +683,7 @@ class TestPaymentPlanReconciliation(APITestCase):
                 context={"user": self.user},
                 variables={
                     "paymentPlanId": encoded_payment_plan_id,
+                    "fspXlsxTemplateId": "",
                 },
             )
             assert "errors" not in export_file_mutation, export_file_mutation
@@ -1122,7 +1126,12 @@ class TestPaymentPlanReconciliation(APITestCase):
 
     def test_correct_message_displayed_when_file_is_protected(self) -> None:
         content = Path(f"{settings.TESTS_ROOT}/apps/payment/test_file/import_file_protected.xlsx").read_bytes()
+        fsp = FinancialServiceProviderFactory(communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX)
         pp = PaymentPlanFactory(status=PaymentPlan.Status.ACCEPTED)
+        DeliveryMechanismPerPaymentPlanFactory(
+            payment_plan=pp,
+            financial_service_provider=fsp,
+        )
 
         self.snapshot_graphql_request(
             request_string=IMPORT_XLSX_PER_FSP_MUTATION,
