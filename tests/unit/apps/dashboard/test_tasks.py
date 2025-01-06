@@ -1,3 +1,4 @@
+from typing import Callable
 from unittest.mock import patch
 
 import pytest
@@ -11,7 +12,7 @@ from hct_mis_api.apps.dashboard.services import DashboardDataCache
 
 
 @pytest.mark.django_db(databases=["default", "read_only"])
-def test_generate_dash_report_task(afghanistan: BusinessArea) -> None:
+def test_generate_dash_report_task(afghanistan: BusinessArea, populate_dashboard_cache: Callable) -> None:
     """
     Test that generate_dash_report_task refreshes data for the given business area.
     """
