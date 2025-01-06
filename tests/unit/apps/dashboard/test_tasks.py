@@ -11,12 +11,12 @@ from hct_mis_api.apps.dashboard.celery_tasks import (
 from hct_mis_api.apps.dashboard.services import DashboardDataCache
 
 
-@pytest.mark.django_db(databases=["default", "read_only"])
+@pytest.mark.django_db(databases=["default", "read_only"], transaction=True)
 def test_generate_dash_report_task(afghanistan: BusinessArea, populate_dashboard_cache: Callable) -> None:
     """
     Test that generate_dash_report_task refreshes data for the given business area.
     """
-
+    populate_dashboard_cache(afghanistan)
     generate_dash_report_task.apply(args=[afghanistan.slug])
     data = DashboardDataCache.get_data(afghanistan.slug)
     assert data is not None
