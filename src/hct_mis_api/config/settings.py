@@ -116,6 +116,7 @@ RO_CONN.update(
         "OPTIONS": {"options": "-c default_transaction_read_only=on"},
         "TEST": {
             "READ_ONLY": True,  # Do not manage this database during tests
+            "MIRROR": "default"
         },
     }
 )
