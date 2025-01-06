@@ -14,7 +14,6 @@ def migrate_onetoone_to_foreignkey(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('grievance', '0006_migration'),
         ('payment', '0007_migration'),
     ]
 
