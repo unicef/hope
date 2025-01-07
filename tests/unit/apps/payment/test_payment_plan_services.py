@@ -859,10 +859,10 @@ class TestPaymentPlanServices(APITestCase):
         payment_plan = PaymentPlanFactory(
             program_cycle=self.cycle,
             created_by=self.user,
-            status=PaymentPlan.Status.DRAFT,
+            status=PaymentPlan.Status.LOCKED,
         )
         with self.assertRaises(GraphQLError) as e:
-            PaymentPlanService(payment_plan).update({"exclusion_reason": "test_data"})
+            PaymentPlanService(payment_plan).update({"exclusion_reason": "ABC"})
         self.assertEqual(
             e.exception.message,
             f"Not Allow edit targeting criteria within status {payment_plan.status}",
