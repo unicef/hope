@@ -564,6 +564,7 @@ class PaymentPlanService:
         if new_currency and new_currency != self.payment_plan.currency:
             self.payment_plan.currency = new_currency
             should_update_money_stats = True
+            Payment.objects.filter(parent=self.payment_plan).update(currency=self.payment_plan.currency)
 
         self.payment_plan.save()
 
