@@ -27,7 +27,7 @@ exports[`components/paymentmodule/PaymentPlanTargeting should render 1`] = `
             class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
           >
             <div
-              choices=""
+              choices="[object Object],[object Object],[object Object],[object Object],[object Object]"
               class="MuiFormControl-root MuiFormControl-fullWidth css-q8hpuo-MuiFormControl-root"
               data-cy="input-target-population"
               label="Target Population"
@@ -46,7 +46,7 @@ exports[`components/paymentmodule/PaymentPlanTargeting should render 1`] = `
                 </span>
               </label>
               <div
-                choices=""
+                choices="[object Object],[object Object],[object Object],[object Object],[object Object]"
                 class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-fullWidth MuiInputBase-formControl MuiInputBase-sizeSmall css-7088dt-MuiInputBase-root-MuiOutlinedInput-root-MuiSelect-root"
                 data-cy="input-target-population"
                 required=""
