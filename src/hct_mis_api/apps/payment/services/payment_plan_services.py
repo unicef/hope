@@ -481,7 +481,7 @@ class PaymentPlanService:
         should_rebuild_list = False
         vulnerability_filter = False
 
-        name = input_data.get("name", "").strip() if "name" in input_data else None
+        name = input_data.get("name")
         vulnerability_score_min = input_data.get("vulnerability_score_min")
         vulnerability_score_max = input_data.get("vulnerability_score_max")
         excluded_ids = input_data.get("excluded_ids")
@@ -509,6 +509,7 @@ class PaymentPlanService:
         if name:
             if self.payment_plan.status != PaymentPlan.Status.TP_OPEN:
                 raise GraphQLError("Name can be changed only within Open status")
+            name = name.strip()
 
             if (
                 PaymentPlan.objects.filter(name=name, program_cycle__program=program, is_removed=False)

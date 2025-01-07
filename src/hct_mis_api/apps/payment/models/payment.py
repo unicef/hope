@@ -953,7 +953,12 @@ class PaymentPlan(
         target=BuildStatus.BUILD_STATUS_PENDING,
         conditions=[
             lambda obj: obj.status
-            in [PaymentPlan.Status.TP_OPEN, PaymentPlan.Status.TP_LOCKED, PaymentPlan.Status.DRAFT]
+            in [
+                PaymentPlan.Status.TP_OPEN,
+                PaymentPlan.Status.TP_LOCKED,
+                PaymentPlan.Status.DRAFT,
+                PaymentPlan.Status.OPEN,
+            ]
         ],
     )
     def build_status_pending(self) -> None:
