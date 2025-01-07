@@ -8422,6 +8422,16 @@ export type MarkPayAsFailedMutationVariables = Exact<{
 
 export type MarkPayAsFailedMutation = { __typename?: 'Mutations', markPaymentAsFailed?: { __typename?: 'MarkPaymentAsFailedMutation', payment?: { __typename?: 'PaymentNode', id: string, unicefId?: string | null, status: PaymentStatus, statusDate: any, deliveredQuantity?: number | null, deliveryDate?: any | null } | null } | null };
 
+export type OpenPpMutationVariables = Exact<{
+  paymentPlanId: Scalars['ID']['input'];
+  dispersionStartDate: Scalars['Date']['input'];
+  dispersionEndDate: Scalars['Date']['input'];
+  currency: Scalars['String']['input'];
+}>;
+
+
+export type OpenPpMutation = { __typename?: 'Mutations', openPaymentPlan?: { __typename?: 'OpenPaymentPlanMutation', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string } | null } | null };
+
 export type RevertMarkPayAsFailedMutationVariables = Exact<{
   paymentId: Scalars['ID']['input'];
   deliveredQuantity: Scalars['Decimal']['input'];
@@ -12555,6 +12565,46 @@ export function useMarkPayAsFailedMutation(baseOptions?: Apollo.MutationHookOpti
 export type MarkPayAsFailedMutationHookResult = ReturnType<typeof useMarkPayAsFailedMutation>;
 export type MarkPayAsFailedMutationResult = Apollo.MutationResult<MarkPayAsFailedMutation>;
 export type MarkPayAsFailedMutationOptions = Apollo.BaseMutationOptions<MarkPayAsFailedMutation, MarkPayAsFailedMutationVariables>;
+export const OpenPpDocument = gql`
+    mutation OpenPP($paymentPlanId: ID!, $dispersionStartDate: Date!, $dispersionEndDate: Date!, $currency: String!) {
+  openPaymentPlan(
+    input: {paymentPlanId: $paymentPlanId, dispersionStartDate: $dispersionStartDate, dispersionEndDate: $dispersionEndDate, currency: $currency}
+  ) {
+    paymentPlan {
+      id
+    }
+  }
+}
+    `;
+export type OpenPpMutationFn = Apollo.MutationFunction<OpenPpMutation, OpenPpMutationVariables>;
+
+/**
+ * __useOpenPpMutation__
+ *
+ * To run a mutation, you first call `useOpenPpMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useOpenPpMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [openPpMutation, { data, loading, error }] = useOpenPpMutation({
+ *   variables: {
+ *      paymentPlanId: // value for 'paymentPlanId'
+ *      dispersionStartDate: // value for 'dispersionStartDate'
+ *      dispersionEndDate: // value for 'dispersionEndDate'
+ *      currency: // value for 'currency'
+ *   },
+ * });
+ */
+export function useOpenPpMutation(baseOptions?: Apollo.MutationHookOptions<OpenPpMutation, OpenPpMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<OpenPpMutation, OpenPpMutationVariables>(OpenPpDocument, options);
+      }
+export type OpenPpMutationHookResult = ReturnType<typeof useOpenPpMutation>;
+export type OpenPpMutationResult = Apollo.MutationResult<OpenPpMutation>;
+export type OpenPpMutationOptions = Apollo.BaseMutationOptions<OpenPpMutation, OpenPpMutationVariables>;
 export const RevertMarkPayAsFailedDocument = gql`
     mutation revertMarkPayAsFailed($paymentId: ID!, $deliveredQuantity: Decimal!, $deliveryDate: Date!) {
   revertMarkPaymentAsFailed(

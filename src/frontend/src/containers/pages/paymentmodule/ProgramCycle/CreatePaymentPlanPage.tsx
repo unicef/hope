@@ -12,7 +12,7 @@ import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import {
   useAllTargetPopulationsQuery,
-  useUpdatePpMutation,
+  useOpenPpMutation,
 } from '@generated/graphql';
 import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -24,7 +24,7 @@ export const CreatePaymentPlanPage = (): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const location = useLocation();
-  const [mutate, { loading: loadingCreate }] = useUpdatePpMutation();
+  const [mutate, { loading: loadingCreate }] = useOpenPpMutation();
   const { showMessage } = useSnackbar();
   const { businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
@@ -89,14 +89,13 @@ export const CreatePaymentPlanPage = (): ReactElement => {
       const res = await mutate({
         variables: {
           paymentPlanId: values.paymentPlanId,
-          programCycleId,
           dispersionStartDate,
           dispersionEndDate,
           currency,
         },
       });
       showMessage(t('Payment Plan Created'));
-      navigate(`../${res.data.updatePaymentPlan.paymentPlan.id}`);
+      navigate(`../${res.data.openPaymentPlan.paymentPlan.id}`);
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
     }
