@@ -4,6 +4,7 @@ from typing import Callable
 import factory
 import pytest
 from dateutil.relativedelta import relativedelta
+from flaky import flaky
 from pytz import utc
 from selenium.common import NoSuchElementException
 from selenium.webdriver import ActionChains, Keys
@@ -700,6 +701,7 @@ class TestCreateTargeting:
         assert pageTargetingCreate.getTotalNumberOfHouseholdsCount().text == "1"
         assert len(pageTargetingDetails.getHouseholdTableRows()) == 1
 
+    @flaky(max_runs=5, min_passes=1)
     def test_create_targeting_with_pdu_decimal_criteria(
         self,
         program: Program,

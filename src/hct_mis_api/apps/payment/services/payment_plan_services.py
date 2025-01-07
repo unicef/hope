@@ -481,7 +481,7 @@ class PaymentPlanService:
         should_rebuild_list = False
         vulnerability_filter = False
 
-        name = input_data.get("name", "").strip()
+        name = input_data.get("name", "").strip() if "name" in input_data else None
         vulnerability_score_min = input_data.get("vulnerability_score_min")
         vulnerability_score_max = input_data.get("vulnerability_score_max")
         excluded_ids = input_data.get("excluded_ids")
@@ -501,10 +501,9 @@ class PaymentPlanService:
                 "You can only set vulnerability_score_min and vulnerability_score_max on Locked Population status"
             )
 
-        if (
-            any([dispersion_start_date, dispersion_end_date, input_data.get("currency")])
-            and self.payment_plan.status != PaymentPlan.Status.OPEN
-        ):
+        if any(
+            [dispersion_start_date, dispersion_end_date, input_data.get("currency")]
+        ) and self.payment_plan.status not in [PaymentPlan.Status.OPEN, PaymentPlan.Status.DRAFT]:
             raise GraphQLError(f"Not Allow edit Payment Plan within status {self.payment_plan.status}")
 
         if name:
@@ -517,6 +516,7 @@ class PaymentPlanService:
                 .exists()
             ):
                 raise GraphQLError(f"Name '{name}' and program '{program.name}' already exists.")
+            self.payment_plan.name = name
 
         if self.payment_plan.is_follow_up:
             # can change only dispersion_start_date/dispersion_end_date for Follow Up Payment Plan
@@ -529,8 +529,6 @@ class PaymentPlanService:
                 raise GraphQLError("Not possible to assign Finished Program Cycle")
             self.payment_plan.program_cycle = program_cycle
 
-        if name:
-            self.payment_plan.name = name
         if vulnerability_score_min is not None:
             vulnerability_filter = True
             self.payment_plan.vulnerability_score_min = vulnerability_score_min

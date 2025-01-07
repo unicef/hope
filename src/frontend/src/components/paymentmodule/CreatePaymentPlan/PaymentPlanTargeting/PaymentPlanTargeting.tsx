@@ -29,7 +29,7 @@ export function PaymentPlanTargeting({
 
   const allTargetPopulationsEdges = get(
     allTargetPopulations,
-    'allTargetPopulation.edges',
+    'allPaymentPlans.edges',
     [],
   );
   const mappedTargetPopulations = allTargetPopulationsEdges.map((edge) => ({
