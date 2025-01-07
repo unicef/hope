@@ -172,13 +172,6 @@ class TestPaymentPlanServices(APITestCase):
             },
         )
 
-        with self.assertRaisesMessage(GraphQLError, "PaymentPlan can not be created in provided Business Area"):
-            PaymentPlanService.create(
-                input_data=create_input_data, user=self.user, business_area_slug=self.business_area.slug
-            )
-        self.business_area.is_payment_plan_applicable = True
-        self.business_area.save()
-
         with self.assertRaisesMessage(
             GraphQLError, f"Payment Plan with name: TEST_123 and program: {program.name} already exists."
         ):
@@ -250,9 +243,6 @@ class TestPaymentPlanServices(APITestCase):
             end_date=timezone.datetime(2099, 10, 10, tzinfo=utc).date(),
         )
         program_cycle = program.cycles.first()
-
-        self.business_area.is_payment_plan_applicable = True
-        self.business_area.save()
 
         hoh1 = IndividualFactory(household=None)
         hoh2 = IndividualFactory(household=None)
@@ -630,8 +620,6 @@ class TestPaymentPlanServices(APITestCase):
 
     @freeze_time("2020-10-10")
     def test_create_with_program_cycle_validation_error(self) -> None:
-        self.business_area.is_payment_plan_applicable = True
-        self.business_area.save()
         program = ProgramFactory(
             status=Program.ACTIVE,
             start_date=timezone.datetime(2000, 9, 10, tzinfo=utc).date(),
@@ -694,8 +682,6 @@ class TestPaymentPlanServices(APITestCase):
             end_date=timezone.datetime(2099, 10, 10, tzinfo=utc).date(),
         )
         program_cycle = program.cycles.first()
-        self.business_area.is_payment_plan_applicable = True
-        self.business_area.save()
 
         hoh1 = IndividualFactory(household=None)
         hoh2 = IndividualFactory(household=None)

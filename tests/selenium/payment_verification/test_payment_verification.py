@@ -50,7 +50,6 @@ def active_program() -> Program:
 def get_program_with_dct_type_and_name(
     name: str, programme_code: str, dct_type: str = DataCollectingType.Type.STANDARD, status: str = Program.ACTIVE
 ) -> Program:
-    BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
     dct = DataCollectingTypeFactory(type=dct_type)
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     program = ProgramFactory(
@@ -70,7 +69,6 @@ def create_program(
     dct_type: str = DataCollectingType.Type.STANDARD,
     beneficiary_group_name: str = "Main Menu",
 ) -> Program:
-    BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
     dct = DataCollectingTypeFactory(type=dct_type)
     beneficiary_group = BeneficiaryGroup.objects.filter(name=beneficiary_group_name).first()
     yield ProgramFactory(

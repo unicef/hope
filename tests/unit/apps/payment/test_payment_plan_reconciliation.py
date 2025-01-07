@@ -264,9 +264,7 @@ class TestPaymentPlanReconciliation(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        cls.business_area = create_afghanistan(
-            is_payment_plan_applicable=True,
-        )
+        cls.business_area = create_afghanistan()
         partner = PartnerFactory(name="Partner")
         cls.user = UserFactory.create(partner=partner)
         cls.all_necessary_permissions = [

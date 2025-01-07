@@ -108,9 +108,6 @@ class TestPaymentSignature(APITestCase):
     @freeze_time("2020-10-10")
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_signature_after_prepare_payment_plan(self, get_exchange_rate_mock: Any) -> None:
-        self.business_area.is_payment_plan_applicable = True
-        self.business_area.save()
-
         program = ProgramFactory(
             status=Program.ACTIVE,
             start_date=timezone.datetime(2000, 9, 10, tzinfo=utc).date(),

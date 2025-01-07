@@ -79,7 +79,6 @@ def get_program_with_dct_type_and_name(
         cycle_start_date = datetime.now() - relativedelta(days=25)
     if not cycle_end_date:
         cycle_end_date = datetime.now() + relativedelta(days=10)
-    BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
     dct = DataCollectingTypeFactory(type=dct_type)
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     program = ProgramFactory(
@@ -148,7 +147,6 @@ def get_program_without_cycle_end_date(
 ) -> Program:
     if not cycle_start_date:
         cycle_start_date = datetime.now() - relativedelta(days=25)
-    BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
     dct = DataCollectingTypeFactory(type=dct_type)
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     program = ProgramFactory(

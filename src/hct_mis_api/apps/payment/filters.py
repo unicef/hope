@@ -281,9 +281,7 @@ class PaymentPlanFilter(FilterSet):
     @staticmethod
     def filter_payment_plan_applicable(queryset: "QuerySet", model_field: str, value: Any) -> "QuerySet":
         if value is True:
-            return queryset.filter(
-                Q(business_area__is_payment_plan_applicable=True) & Q(status=PaymentPlan.Status.DRAFT)
-            )
+            return queryset.filter(status=PaymentPlan.Status.DRAFT)
         return queryset
 
     @staticmethod

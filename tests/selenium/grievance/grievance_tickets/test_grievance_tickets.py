@@ -133,7 +133,6 @@ def create_program(
     status: str = Program.ACTIVE,
     beneficiary_group: str = "Main Menu",
 ) -> Program:
-    BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
     dct = DataCollectingTypeFactory(type=dct_type)
     beneficiary_group = BeneficiaryGroup.objects.filter(name=beneficiary_group).first()
     program = ProgramFactory(

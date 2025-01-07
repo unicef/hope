@@ -13,7 +13,7 @@ from sorl.thumbnail.conf import settings
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
-from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
+from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.fixtures import (
     FinancialServiceProviderFactory,
@@ -76,7 +76,6 @@ def create_program(
     dct_type: str = DataCollectingType.Type.STANDARD,
     beneficiary_group_name: str = "Main Menu",
 ) -> Program:
-    BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
     dct = DataCollectingTypeFactory(type=dct_type)
     beneficiary_group = BeneficiaryGroup.objects.filter(name=beneficiary_group_name).first()
     return ProgramFactory(

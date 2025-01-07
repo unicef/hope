@@ -262,7 +262,7 @@ class TestPaymentPlanQueries(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        cls.business_area = create_afghanistan(is_payment_plan_applicable=True)
+        cls.business_area = create_afghanistan()
         cls.user = UserFactory.create(username="qazxsw321")
         cls.create_user_role_with_permissions(
             cls.user,

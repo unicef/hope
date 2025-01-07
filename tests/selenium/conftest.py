@@ -543,7 +543,6 @@ def business_area() -> BusinessArea:
             "slug": "afghanistan",
             "screen_beneficiary": True,
             "has_data_sharing_agreement": True,
-            "is_payment_plan_applicable": True,
             "is_accountability_applicable": True,
             "kobo_token": "XXX",
         },

@@ -228,7 +228,6 @@ def get_program_with_dct_type_and_name(
     status: str = Program.ACTIVE,
     beneficiary_group_name: str = "Main Menu",
 ) -> Program:
-    BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
     dct = DataCollectingTypeFactory(type=dct_type)
     beneficiary_group = BeneficiaryGroup.objects.filter(name=beneficiary_group_name).first()
     program = ProgramFactory(

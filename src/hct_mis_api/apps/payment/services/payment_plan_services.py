@@ -434,11 +434,7 @@ class PaymentPlanService:
 
     @staticmethod
     def create(input_data: Dict, user: "User", business_area_slug: str) -> PaymentPlan:
-        business_area = BusinessArea.objects.only("is_payment_plan_applicable").get(slug=business_area_slug)
-        if not business_area.is_payment_plan_applicable:
-            # TODO: now all BA will be payment plan applicable
-            raise GraphQLError("PaymentPlan can not be created in provided Business Area")
-
+        business_area = BusinessArea.objects.get(slug=business_area_slug)
         program_cycle_id = decode_id_string(input_data["program_cycle_id"])
         program_cycle = get_object_or_404(ProgramCycle, pk=program_cycle_id)
         program = program_cycle.program

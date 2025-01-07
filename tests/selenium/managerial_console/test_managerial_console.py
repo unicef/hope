@@ -39,7 +39,6 @@ def create_program(
     status: str = Program.ACTIVE,
     partner: Optional[Partner] = None,
 ) -> Program:
-    BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
     dct = DataCollectingTypeFactory(type=dct_type)
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     program = ProgramFactory(
@@ -58,15 +57,16 @@ def create_program(
 @pytest.fixture
 def create_payment_plan(create_active_test_program: Program, second_test_program: Program) -> PaymentPlan:
     program_cycle_second = ProgramCycleFactory(program=second_test_program)
+    ba = BusinessArea.objects.get(slug="afghanistan")
     PaymentPlanFactory(
         program_cycle=program_cycle_second,
         status=PaymentPlan.Status.IN_APPROVAL,
-        business_area=BusinessArea.objects.filter(slug="afghanistan").first(),
+        business_area=ba,
     )
 
     payment_plan = PaymentPlan.objects.update_or_create(
         name="Test Payment Plan",
-        business_area=BusinessArea.objects.only("is_payment_plan_applicable").get(slug="afghanistan"),
+        business_area=ba,
         targeting_criteria=TargetingCriteriaFactory(),
         currency="USD",
         dispersion_start_date=datetime.now(),
