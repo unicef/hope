@@ -488,7 +488,6 @@ export type BusinessAreaNode = Node & {
   id: Scalars['ID']['output'];
   individualSet: IndividualNodeConnection;
   isAccountabilityApplicable?: Maybe<Scalars['Boolean']['output']>;
-  isPaymentPlanApplicable: Scalars['Boolean']['output'];
   isSplit: Scalars['Boolean']['output'];
   koboToken?: Maybe<Scalars['String']['output']>;
   koboUrl?: Maybe<Scalars['String']['output']>;
@@ -7608,7 +7607,6 @@ export type UserBusinessAreaNode = Node & {
   id: Scalars['ID']['output'];
   individualSet: IndividualNodeConnection;
   isAccountabilityApplicable?: Maybe<Scalars['Boolean']['output']>;
-  isPaymentPlanApplicable: Scalars['Boolean']['output'];
   isSplit: Scalars['Boolean']['output'];
   koboToken?: Maybe<Scalars['String']['output']>;
   koboUrl?: Maybe<Scalars['String']['output']>;
@@ -8846,7 +8844,7 @@ export type BusinessAreaDataQueryVariables = Exact<{
 }>;
 
 
-export type BusinessAreaDataQuery = { __typename?: 'Query', businessArea?: { __typename?: 'BusinessAreaNode', id: string, screenBeneficiary: boolean, isPaymentPlanApplicable: boolean, isAccountabilityApplicable?: boolean | null } | null };
+export type BusinessAreaDataQuery = { __typename?: 'Query', businessArea?: { __typename?: 'BusinessAreaNode', id: string, screenBeneficiary: boolean, isAccountabilityApplicable?: boolean | null } | null };
 
 export type CashAssistUrlPrefixQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -14896,7 +14894,6 @@ export const BusinessAreaDataDocument = gql`
   businessArea(businessAreaSlug: $businessAreaSlug) {
     id
     screenBeneficiary
-    isPaymentPlanApplicable
     isAccountabilityApplicable
   }
 }
@@ -22697,7 +22694,6 @@ export type BusinessAreaNodeResolvers<ContextType = any, ParentType extends Reso
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   individualSet?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, Partial<BusinessAreaNodeIndividualSetArgs>>;
   isAccountabilityApplicable?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
-  isPaymentPlanApplicable?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   isSplit?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   koboToken?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   koboUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -26072,7 +26068,6 @@ export type UserBusinessAreaNodeResolvers<ContextType = any, ParentType extends 
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   individualSet?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, Partial<UserBusinessAreaNodeIndividualSetArgs>>;
   isAccountabilityApplicable?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
-  isPaymentPlanApplicable?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   isSplit?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   koboToken?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   koboUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;

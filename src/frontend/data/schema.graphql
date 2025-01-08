@@ -354,7 +354,6 @@ type BusinessAreaNode implements Node {
   screenBeneficiary: Boolean!
   deduplicationIgnoreWithdraw: Boolean!
   biometricDeduplicationThreshold: Float!
-  isPaymentPlanApplicable: Boolean!
   isAccountabilityApplicable: Boolean
   active: Boolean!
   enableEmailNotification: Boolean!
@@ -4495,7 +4494,6 @@ type UserBusinessAreaNode implements Node {
   screenBeneficiary: Boolean!
   deduplicationIgnoreWithdraw: Boolean!
   biometricDeduplicationThreshold: Float!
-  isPaymentPlanApplicable: Boolean!
   isAccountabilityApplicable: Boolean
   active: Boolean!
   enableEmailNotification: Boolean!
