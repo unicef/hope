@@ -2298,8 +2298,7 @@ type Mutations {
   assignFspToDeliveryMechanism(input: AssignFspToDeliveryMechanismInput!): AssignFspToDeliveryMechanismMutation
   splitPaymentPlan(paymentPlanId: ID!, paymentsNo: Int, splitType: String!): SplitPaymentPlanMutation
   excludeHouseholds(excludedHouseholdsIds: [String]!, exclusionReason: String, paymentPlanId: ID!): ExcludeHouseholdsMutation
-  setSteficonRuleOnPaymentPlanPaymentList(paymentPlanId: ID!, steficonRuleId: ID!): SetSteficonRuleOnPaymentPlanPaymentListMutation
-  setSteficonRuleOnTargetPopulation(paymentPlanId: ID!, steficonRuleId: ID, version: BigInt): SetSteficonRuleOnTargetPopulationMutation
+  setSteficonRuleOnPaymentPlanPaymentList(paymentPlanId: ID!, steficonRuleId: ID!, version: BigInt): SetSteficonRuleOnPaymentPlanPaymentListMutation
   copyTargetingCriteria(name: String!, paymentPlanId: ID!, programCycleId: ID!): CopyTargetingCriteriaMutation
   exportXlsxPaymentPlanPaymentList(paymentPlanId: ID!): ExportXLSXPaymentPlanPaymentListMutation
   exportXlsxPaymentPlanPaymentListPerFsp(paymentPlanId: ID!): ExportXLSXPaymentPlanPaymentListPerFSPMutation
@@ -3728,10 +3727,6 @@ input SensitiveGrievanceTicketExtras {
 }
 
 type SetSteficonRuleOnPaymentPlanPaymentListMutation {
-  paymentPlan: PaymentPlanNode
-}
-
-type SetSteficonRuleOnTargetPopulationMutation {
   paymentPlan: PaymentPlanNode
 }
 

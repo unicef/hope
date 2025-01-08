@@ -3306,7 +3306,6 @@ export type Mutations = {
   revertMarkPaymentAsFailed?: Maybe<RevertMarkPaymentAsFailedMutation>;
   saveKoboImportDataAsync?: Maybe<SaveKoboProjectImportDataAsync>;
   setSteficonRuleOnPaymentPlanPaymentList?: Maybe<SetSteficonRuleOnPaymentPlanPaymentListMutation>;
-  setSteficonRuleOnTargetPopulation?: Maybe<SetSteficonRuleOnTargetPopulationMutation>;
   splitPaymentPlan?: Maybe<SplitPaymentPlanMutation>;
   updateFeedback?: Maybe<UpdateFeedbackMutation>;
   updateGrievanceTicket?: Maybe<UpdateGrievanceTicketMutation>;
@@ -3707,12 +3706,6 @@ export type MutationsSaveKoboImportDataAsyncArgs = {
 export type MutationsSetSteficonRuleOnPaymentPlanPaymentListArgs = {
   paymentPlanId: Scalars['ID']['input'];
   steficonRuleId: Scalars['ID']['input'];
-};
-
-
-export type MutationsSetSteficonRuleOnTargetPopulationArgs = {
-  paymentPlanId: Scalars['ID']['input'];
-  steficonRuleId?: InputMaybe<Scalars['ID']['input']>;
   version?: InputMaybe<Scalars['BigInt']['input']>;
 };
 
@@ -6737,11 +6730,6 @@ export type SetSteficonRuleOnPaymentPlanPaymentListMutation = {
   paymentPlan?: Maybe<PaymentPlanNode>;
 };
 
-export type SetSteficonRuleOnTargetPopulationMutation = {
-  __typename?: 'SetSteficonRuleOnTargetPopulationMutation';
-  paymentPlan?: Maybe<PaymentPlanNode>;
-};
-
 export type SimpleApproveMutation = {
   __typename?: 'SimpleApproveMutation';
   grievanceTicket?: Maybe<GrievanceTicketNode>;
@@ -8445,14 +8433,6 @@ export type SetSteficonRuleOnPpListMutationVariables = Exact<{
 
 
 export type SetSteficonRuleOnPpListMutation = { __typename?: 'Mutations', setSteficonRuleOnPaymentPlanPaymentList?: { __typename?: 'SetSteficonRuleOnPaymentPlanPaymentListMutation', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, steficonRule?: { __typename?: 'RuleCommitNode', id: string, rule?: { __typename?: 'SteficonRuleNode', id: string, name: string } | null } | null } | null } | null };
-
-export type SetSteficonRuleOnTargetPopulationMutationVariables = Exact<{
-  paymentPlanId: Scalars['ID']['input'];
-  steficonRuleId: Scalars['ID']['input'];
-}>;
-
-
-export type SetSteficonRuleOnTargetPopulationMutation = { __typename?: 'Mutations', setSteficonRuleOnTargetPopulation?: { __typename?: 'SetSteficonRuleOnTargetPopulationMutation', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, steficonRule?: { __typename?: 'RuleCommitNode', id: string, rule?: { __typename?: 'SteficonRuleNode', id: string, name: string } | null } | null } | null } | null };
 
 export type ActivatePaymentVerificationPlanMutationVariables = Exact<{
   paymentVerificationPlanId: Scalars['ID']['input'];
@@ -12701,52 +12681,6 @@ export function useSetSteficonRuleOnPpListMutation(baseOptions?: Apollo.Mutation
 export type SetSteficonRuleOnPpListMutationHookResult = ReturnType<typeof useSetSteficonRuleOnPpListMutation>;
 export type SetSteficonRuleOnPpListMutationResult = Apollo.MutationResult<SetSteficonRuleOnPpListMutation>;
 export type SetSteficonRuleOnPpListMutationOptions = Apollo.BaseMutationOptions<SetSteficonRuleOnPpListMutation, SetSteficonRuleOnPpListMutationVariables>;
-export const SetSteficonRuleOnTargetPopulationDocument = gql`
-    mutation SetSteficonRuleOnTargetPopulation($paymentPlanId: ID!, $steficonRuleId: ID!) {
-  setSteficonRuleOnTargetPopulation(
-    paymentPlanId: $paymentPlanId
-    steficonRuleId: $steficonRuleId
-  ) {
-    paymentPlan {
-      id
-      steficonRule {
-        id
-        rule {
-          id
-          name
-        }
-      }
-    }
-  }
-}
-    `;
-export type SetSteficonRuleOnTargetPopulationMutationFn = Apollo.MutationFunction<SetSteficonRuleOnTargetPopulationMutation, SetSteficonRuleOnTargetPopulationMutationVariables>;
-
-/**
- * __useSetSteficonRuleOnTargetPopulationMutation__
- *
- * To run a mutation, you first call `useSetSteficonRuleOnTargetPopulationMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useSetSteficonRuleOnTargetPopulationMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [setSteficonRuleOnTargetPopulationMutation, { data, loading, error }] = useSetSteficonRuleOnTargetPopulationMutation({
- *   variables: {
- *      paymentPlanId: // value for 'paymentPlanId'
- *      steficonRuleId: // value for 'steficonRuleId'
- *   },
- * });
- */
-export function useSetSteficonRuleOnTargetPopulationMutation(baseOptions?: Apollo.MutationHookOptions<SetSteficonRuleOnTargetPopulationMutation, SetSteficonRuleOnTargetPopulationMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<SetSteficonRuleOnTargetPopulationMutation, SetSteficonRuleOnTargetPopulationMutationVariables>(SetSteficonRuleOnTargetPopulationDocument, options);
-      }
-export type SetSteficonRuleOnTargetPopulationMutationHookResult = ReturnType<typeof useSetSteficonRuleOnTargetPopulationMutation>;
-export type SetSteficonRuleOnTargetPopulationMutationResult = Apollo.MutationResult<SetSteficonRuleOnTargetPopulationMutation>;
-export type SetSteficonRuleOnTargetPopulationMutationOptions = Apollo.BaseMutationOptions<SetSteficonRuleOnTargetPopulationMutation, SetSteficonRuleOnTargetPopulationMutationVariables>;
 export const ActivatePaymentVerificationPlanDocument = gql`
     mutation ActivatePaymentVerificationPlan($paymentVerificationPlanId: ID!) {
   activatePaymentVerificationPlan(
@@ -21946,7 +21880,6 @@ export type ResolversTypes = {
   SectionTotalNode: ResolverTypeWrapper<SectionTotalNode>;
   SensitiveGrievanceTicketExtras: SensitiveGrievanceTicketExtras;
   SetSteficonRuleOnPaymentPlanPaymentListMutation: ResolverTypeWrapper<SetSteficonRuleOnPaymentPlanPaymentListMutation>;
-  SetSteficonRuleOnTargetPopulationMutation: ResolverTypeWrapper<SetSteficonRuleOnTargetPopulationMutation>;
   SimpleApproveMutation: ResolverTypeWrapper<SimpleApproveMutation>;
   SplitPaymentPlanMutation: ResolverTypeWrapper<SplitPaymentPlanMutation>;
   SteficonRuleNode: ResolverTypeWrapper<SteficonRuleNode>;
@@ -22389,7 +22322,6 @@ export type ResolversParentTypes = {
   SectionTotalNode: SectionTotalNode;
   SensitiveGrievanceTicketExtras: SensitiveGrievanceTicketExtras;
   SetSteficonRuleOnPaymentPlanPaymentListMutation: SetSteficonRuleOnPaymentPlanPaymentListMutation;
-  SetSteficonRuleOnTargetPopulationMutation: SetSteficonRuleOnTargetPopulationMutation;
   SimpleApproveMutation: SimpleApproveMutation;
   SplitPaymentPlanMutation: SplitPaymentPlanMutation;
   SteficonRuleNode: SteficonRuleNode;
@@ -24272,7 +24204,6 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   revertMarkPaymentAsFailed?: Resolver<Maybe<ResolversTypes['RevertMarkPaymentAsFailedMutation']>, ParentType, ContextType, RequireFields<MutationsRevertMarkPaymentAsFailedArgs, 'deliveredQuantity' | 'deliveryDate' | 'paymentId'>>;
   saveKoboImportDataAsync?: Resolver<Maybe<ResolversTypes['SaveKoboProjectImportDataAsync']>, ParentType, ContextType, RequireFields<MutationsSaveKoboImportDataAsyncArgs, 'businessAreaSlug' | 'onlyActiveSubmissions' | 'pullPictures' | 'uid'>>;
   setSteficonRuleOnPaymentPlanPaymentList?: Resolver<Maybe<ResolversTypes['SetSteficonRuleOnPaymentPlanPaymentListMutation']>, ParentType, ContextType, RequireFields<MutationsSetSteficonRuleOnPaymentPlanPaymentListArgs, 'paymentPlanId' | 'steficonRuleId'>>;
-  setSteficonRuleOnTargetPopulation?: Resolver<Maybe<ResolversTypes['SetSteficonRuleOnTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsSetSteficonRuleOnTargetPopulationArgs, 'paymentPlanId'>>;
   splitPaymentPlan?: Resolver<Maybe<ResolversTypes['SplitPaymentPlanMutation']>, ParentType, ContextType, RequireFields<MutationsSplitPaymentPlanArgs, 'paymentPlanId' | 'splitType'>>;
   updateFeedback?: Resolver<Maybe<ResolversTypes['UpdateFeedbackMutation']>, ParentType, ContextType, RequireFields<MutationsUpdateFeedbackArgs, 'input'>>;
   updateGrievanceTicket?: Resolver<Maybe<ResolversTypes['UpdateGrievanceTicketMutation']>, ParentType, ContextType, RequireFields<MutationsUpdateGrievanceTicketArgs, 'input'>>;
@@ -25485,11 +25416,6 @@ export type SetSteficonRuleOnPaymentPlanPaymentListMutationResolvers<ContextType
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type SetSteficonRuleOnTargetPopulationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['SetSteficonRuleOnTargetPopulationMutation'] = ResolversParentTypes['SetSteficonRuleOnTargetPopulationMutation']> = {
-  paymentPlan?: Resolver<Maybe<ResolversTypes['PaymentPlanNode']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
 export type SimpleApproveMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['SimpleApproveMutation'] = ResolversParentTypes['SimpleApproveMutation']> = {
   grievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNode']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -26543,7 +26469,6 @@ export type Resolvers<ContextType = any> = {
   SaveKoboProjectImportDataAsync?: SaveKoboProjectImportDataAsyncResolvers<ContextType>;
   SectionTotalNode?: SectionTotalNodeResolvers<ContextType>;
   SetSteficonRuleOnPaymentPlanPaymentListMutation?: SetSteficonRuleOnPaymentPlanPaymentListMutationResolvers<ContextType>;
-  SetSteficonRuleOnTargetPopulationMutation?: SetSteficonRuleOnTargetPopulationMutationResolvers<ContextType>;
   SimpleApproveMutation?: SimpleApproveMutationResolvers<ContextType>;
   SplitPaymentPlanMutation?: SplitPaymentPlanMutationResolvers<ContextType>;
   SteficonRuleNode?: SteficonRuleNodeResolvers<ContextType>;
