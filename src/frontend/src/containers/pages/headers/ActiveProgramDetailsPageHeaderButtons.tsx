@@ -1,8 +1,7 @@
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { EditProgramMenu } from '@components/programs/EditProgram/EditProgramMenu';
 import { ProgramQuery, useCashAssistUrlPrefixQuery } from '@generated/graphql';
-import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
-import { Box, Button } from '@mui/material';
+import { Box } from '@mui/material';
 import { DuplicateProgramButtonLink } from '../../dialogs/programs/DuplicateProgramButtonLink';
 import { FinishProgram } from '../../dialogs/programs/FinishProgram';
 import { ReactElement } from 'react';

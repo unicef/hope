@@ -44,7 +44,7 @@ export const EditPeoplePaymentPlanPage = (): ReactElement => {
     useAllTargetPopulationsQuery({
       variables: {
         businessArea,
-        status: "DRAFT",
+        status: 'DRAFT',
         program: programId,
       },
     });
