@@ -79,7 +79,10 @@ class UniversalIndividualUpdateScript:
         errors = []
         for number_column_name, country_column_name in self.document_fields:
             document_type = self.document_types.get(number_column_name)
+            number_text = row[headers.index(number_column_name)]
             country_text = row[headers.index(country_column_name)]
+            if country_text is None and number_text is None:
+                continue
             country = Country.objects.filter(name=country_text).first()
             if country is None:
                 errors.append(
@@ -170,7 +173,7 @@ class UniversalIndividualUpdateScript:
         individual_ids = []
         for row in sheet.iter_rows(min_row=2, values_only=True):
             row_index += 1
-            if (row_index - 2) % 1000 == 0:
+            if (row_index - 2) % 100 == 0:
                 print(f"Updating row {row_index - 2} to {row_index - 2 + 100} Individuals")
             unicef_id = row[headers.index("unicef_id")]
             individual = Individual.objects.filter(

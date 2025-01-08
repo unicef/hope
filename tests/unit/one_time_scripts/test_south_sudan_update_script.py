@@ -77,11 +77,27 @@ class TestSouthSudanUpdateScript(TestCase):
             country=poland,
             rdi_merge_status="MERGED",
         )
-
-        with Capturing():
+        Document.objects.create(
+            individual=self.individual,
+            type=DocumentType.objects.get(key="birth_certificate"),
+            document_number="OLD",
+            country=germany,
+            rdi_merge_status="MERGED",
+        )
+        with Capturing() as output:
             south_sudan_update_script(
                 f"{settings.TESTS_ROOT}/one_time_scripts/files/update_script_sudan.xlsx", self.program.id
             )
+        expected_output = [
+            "Validating row 0 to 100 Indivduals",
+            "Validation successful",
+            "Updating row 0 to 100 Individuals",
+            "Deduplicating individuals Elasticsearch",
+            "Deduplicating documents",
+            "Update successful",
+        ]
+
+        self.assertEqual(output, expected_output)
         self.individual.refresh_from_db()
         individual = self.individual
         household = individual.household
@@ -102,7 +118,8 @@ class TestSouthSudanUpdateScript(TestCase):
         self.assertEqual(individual.flex_fields.get("ss_hw_cadre_i_f"), "aaaaa")
         self.assertEqual(individual.documents.get(type__key="national_id").document_number, "TEST123")
         self.assertEqual(individual.documents.get(type__key="national_id").country.iso_code3, "POL")
-        self.assertEqual(individual.documents.get(type__key="birth_certificate").document_number, "TEST456")
+
+        self.assertEqual(individual.documents.get(type__key="birth_certificate").document_number, "OLD")
         self.assertEqual(individual.documents.get(type__key="birth_certificate").country.iso_code3, "DEU")
 
     def test_south_sudan_update_script_validation_fails(self) -> None:
@@ -110,6 +127,7 @@ class TestSouthSudanUpdateScript(TestCase):
             south_sudan_update_script(
                 f"{settings.TESTS_ROOT}/one_time_scripts/files/update_script_sudan.xlsx", self.program.id
             )
+
         expected_output = [
             "Validating row 0 to 100 Indivduals",
             "Validation failed",
@@ -117,7 +135,5 @@ class TestSouthSudanUpdateScript(TestCase):
             "Row: 2 - Administrative area admin2 with p_code AF1115 not found",
             "Row: 2 - Country not found for field national_id_country_i_c and value Poland",
             "Row: 2 - Document type not found for field national_id_no_i_c",
-            "Row: 2 - Country not found for field birth_certificate_country_i_c and value Germany",
-            "Row: 2 - Document type not found for field birth_certificate_no_i_c",
         ]
         self.assertEqual(output, expected_output)
