@@ -8429,6 +8429,7 @@ export type RevertMarkPayAsFailedMutation = { __typename?: 'Mutations', revertMa
 export type SetSteficonRuleOnPpListMutationVariables = Exact<{
   paymentPlanId: Scalars['ID']['input'];
   steficonRuleId: Scalars['ID']['input'];
+  version?: InputMaybe<Scalars['BigInt']['input']>;
 }>;
 
 
@@ -12636,10 +12637,11 @@ export type RevertMarkPayAsFailedMutationHookResult = ReturnType<typeof useRever
 export type RevertMarkPayAsFailedMutationResult = Apollo.MutationResult<RevertMarkPayAsFailedMutation>;
 export type RevertMarkPayAsFailedMutationOptions = Apollo.BaseMutationOptions<RevertMarkPayAsFailedMutation, RevertMarkPayAsFailedMutationVariables>;
 export const SetSteficonRuleOnPpListDocument = gql`
-    mutation SetSteficonRuleOnPPList($paymentPlanId: ID!, $steficonRuleId: ID!) {
+    mutation SetSteficonRuleOnPPList($paymentPlanId: ID!, $steficonRuleId: ID!, $version: BigInt) {
   setSteficonRuleOnPaymentPlanPaymentList(
     paymentPlanId: $paymentPlanId
     steficonRuleId: $steficonRuleId
+    version: $version
   ) {
     paymentPlan {
       id
@@ -12671,6 +12673,7 @@ export type SetSteficonRuleOnPpListMutationFn = Apollo.MutationFunction<SetStefi
  *   variables: {
  *      paymentPlanId: // value for 'paymentPlanId'
  *      steficonRuleId: // value for 'steficonRuleId'
+ *      version: // value for 'version'
  *   },
  * });
  */
