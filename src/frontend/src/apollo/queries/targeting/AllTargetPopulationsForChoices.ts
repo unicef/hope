@@ -10,7 +10,6 @@ export const AllTargetPopulationForChoices = gql`
     $name: String
     $businessArea: String!
     $program: String!
-    $paymentPlanApplicable: Boolean
   ) {
     allPaymentPlans(
       after: $after
@@ -21,7 +20,6 @@ export const AllTargetPopulationForChoices = gql`
       name: $name
       businessArea: $businessArea
       program: $program
-      paymentPlanApplicable: $paymentPlanApplicable
     ) {
       edges {
         node {

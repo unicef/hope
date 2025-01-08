@@ -5466,7 +5466,6 @@ export type QueryAllPaymentPlansArgs = {
   name?: InputMaybe<Scalars['String']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
   orderBy?: InputMaybe<Scalars['String']['input']>;
-  paymentPlanApplicable?: InputMaybe<Scalars['Boolean']['input']>;
   program?: InputMaybe<Scalars['String']['input']>;
   programCycle?: InputMaybe<Scalars['String']['input']>;
   search?: InputMaybe<Scalars['String']['input']>;
@@ -9735,7 +9734,6 @@ export type AllTargetPopulationsQueryVariables = Exact<{
   program?: InputMaybe<Scalars['String']['input']>;
   programCycle?: InputMaybe<Scalars['String']['input']>;
   createdAtRange?: InputMaybe<Scalars['String']['input']>;
-  paymentPlanApplicable?: InputMaybe<Scalars['Boolean']['input']>;
 }>;
 
 
@@ -9750,7 +9748,6 @@ export type AllTargetPopulationForChoicesQueryVariables = Exact<{
   name?: InputMaybe<Scalars['String']['input']>;
   businessArea: Scalars['String']['input'];
   program: Scalars['String']['input'];
-  paymentPlanApplicable?: InputMaybe<Scalars['Boolean']['input']>;
 }>;
 
 
@@ -21086,7 +21083,7 @@ export type AllSteficonRulesLazyQueryHookResult = ReturnType<typeof useAllStefic
 export type AllSteficonRulesSuspenseQueryHookResult = ReturnType<typeof useAllSteficonRulesSuspenseQuery>;
 export type AllSteficonRulesQueryResult = Apollo.QueryResult<AllSteficonRulesQuery, AllSteficonRulesQueryVariables>;
 export const AllTargetPopulationsDocument = gql`
-    query AllTargetPopulations($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String, $status: [String], $totalHouseholdsCountMin: Int, $totalHouseholdsCountMax: Int, $businessArea: String!, $program: String, $programCycle: String, $createdAtRange: String, $paymentPlanApplicable: Boolean) {
+    query AllTargetPopulations($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String, $status: [String], $totalHouseholdsCountMin: Int, $totalHouseholdsCountMax: Int, $businessArea: String!, $program: String, $programCycle: String, $createdAtRange: String) {
   allPaymentPlans(
     after: $after
     before: $before
@@ -21101,7 +21098,6 @@ export const AllTargetPopulationsDocument = gql`
     program: $program
     programCycle: $programCycle
     createdAtRange: $createdAtRange
-    paymentPlanApplicable: $paymentPlanApplicable
   ) {
     edges {
       cursor
@@ -21180,7 +21176,6 @@ export const AllTargetPopulationsDocument = gql`
  *      program: // value for 'program'
  *      programCycle: // value for 'programCycle'
  *      createdAtRange: // value for 'createdAtRange'
- *      paymentPlanApplicable: // value for 'paymentPlanApplicable'
  *   },
  * });
  */
@@ -21201,7 +21196,7 @@ export type AllTargetPopulationsLazyQueryHookResult = ReturnType<typeof useAllTa
 export type AllTargetPopulationsSuspenseQueryHookResult = ReturnType<typeof useAllTargetPopulationsSuspenseQuery>;
 export type AllTargetPopulationsQueryResult = Apollo.QueryResult<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables>;
 export const AllTargetPopulationForChoicesDocument = gql`
-    query AllTargetPopulationForChoices($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String, $businessArea: String!, $program: String!, $paymentPlanApplicable: Boolean) {
+    query AllTargetPopulationForChoices($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String, $businessArea: String!, $program: String!) {
   allPaymentPlans(
     after: $after
     before: $before
@@ -21211,7 +21206,6 @@ export const AllTargetPopulationForChoicesDocument = gql`
     name: $name
     businessArea: $businessArea
     program: $program
-    paymentPlanApplicable: $paymentPlanApplicable
   ) {
     edges {
       node {
@@ -21246,7 +21240,6 @@ export const AllTargetPopulationForChoicesDocument = gql`
  *      name: // value for 'name'
  *      businessArea: // value for 'businessArea'
  *      program: // value for 'program'
- *      paymentPlanApplicable: // value for 'paymentPlanApplicable'
  *   },
  * });
  */

@@ -15,7 +15,6 @@ export const AllTargetPopulations = gql`
     $program: String
     $programCycle: String
     $createdAtRange: String
-    $paymentPlanApplicable: Boolean
   ) {
     allPaymentPlans(
       after: $after
@@ -31,7 +30,6 @@ export const AllTargetPopulations = gql`
       program: $program
       programCycle: $programCycle
       createdAtRange: $createdAtRange
-      paymentPlanApplicable: $paymentPlanApplicable
     ) {
       edges {
         cursor
