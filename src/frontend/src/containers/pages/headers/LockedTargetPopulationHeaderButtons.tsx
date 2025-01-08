@@ -40,7 +40,6 @@ export function LockedTargetPopulationHeaderButtons({
   canSend,
   canDuplicate,
   canUnlock,
-  businessAreaData,
 }: ApprovedTargetPopulationHeaderButtonsPropTypes): ReactElement {
   const { t } = useTranslation();
   const [openDuplicate, setOpenDuplicate] = useState(false);
@@ -52,8 +51,6 @@ export function LockedTargetPopulationHeaderButtons({
     usePaymentPlanAction(Action.TpUnlock, targetPopulation.id, () => {
       showMessage(t('Target Population Unlocked'));
     });
-
-  const { isPaymentPlanApplicable } = businessAreaData.businessArea;
 
   return (
     <Box display="flex" alignItems="center">
@@ -83,27 +80,25 @@ export function LockedTargetPopulationHeaderButtons({
       )}
       {canSend && (
         <Box m={2}>
-          {isPaymentPlanApplicable ? (
-            <Tooltip
-              title={
-                targetPopulation.program.status !== ProgramStatus.Active
-                  ? t('Assigned programme is not ACTIVE')
-                  : ''
-              }
-            >
-              <span>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  disabled={!isActiveProgram}
-                  onClick={() => setOpenFinalizePaymentPlan(true)}
-                  data-cy="button-target-population-send-to-hope"
-                >
-                  {t('Mark Ready')}
-                </Button>
-              </span>
-            </Tooltip>
-          ) : null}
+          <Tooltip
+            title={
+              targetPopulation.program.status !== ProgramStatus.Active
+                ? t('Assigned programme is not ACTIVE')
+                : ''
+            }
+          >
+            <span>
+              <Button
+                variant="contained"
+                color="primary"
+                disabled={!isActiveProgram}
+                onClick={() => setOpenFinalizePaymentPlan(true)}
+                data-cy="button-target-population-send-to-hope"
+              >
+                {t('Mark Ready')}
+              </Button>
+            </span>
+          </Tooltip>
         </Box>
       )}
       <DuplicateTargetPopulation

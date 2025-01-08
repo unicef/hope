@@ -55,7 +55,6 @@ export const TargetPopulationTableFilters = ({
 
   const allowedStatusChoices = [
     'ASSIGNED',
-    'DRAFT',
     PaymentPlanStatus.TpOpen,
     PaymentPlanStatus.TpLocked,
     PaymentPlanStatus.Processing,
@@ -70,7 +69,6 @@ export const TargetPopulationTableFilters = ({
   const preparedStatusChoices =
     [
       { name: 'Assigned', value: 'ASSIGNED' },
-      { name: 'Ready For Payment Module', value: 'DRAFT' },
       ...(statusChoicesData?.paymentPlanStatusChoices || []),
     ]?.filter((el) =>
       allowedStatusChoices.includes(el.value as PaymentPlanStatus),

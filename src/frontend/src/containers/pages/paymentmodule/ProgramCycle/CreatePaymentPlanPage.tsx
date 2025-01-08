@@ -125,7 +125,6 @@ export const CreatePaymentPlanPage = (): ReactElement => {
               permissions={permissions}
               loadingCreate={loadingCreate}
             />
-            {/* //list of pp with filter isPaymentPlanApplicable = true */}
             <PaymentPlanTargeting
               allTargetPopulations={allTargetPopulationsData}
               loading={loadingTargetPopulations}
