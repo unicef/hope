@@ -241,6 +241,8 @@ class IndividualNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTyp
     flex_fields = FlexFieldsScalar()
     deduplication_golden_record_results = graphene.List(DeduplicationResultNode)
     deduplication_batch_results = graphene.List(DeduplicationResultNode)
+    biometric_deduplication_golden_record_results = graphene.List(DeduplicationResultNode)
+    biometric_deduplication_batch_results = graphene.List(DeduplicationResultNode)
     observed_disability = graphene.List(graphene.String)
     relationship = graphene.Enum(
         "IndividualRelationship",
@@ -309,7 +311,25 @@ class IndividualNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTyp
     def resolve_deduplication_batch_results(parent, info: Any) -> List[Dict]:
         key = "duplicates" if parent.deduplication_batch_status == DUPLICATE_IN_BATCH else "possible_duplicates"
         results = parent.deduplication_batch_results.get(key, {})
-        return encode_ids(results, "ImportedIndividual", "hit_id")
+        return encode_ids(results, "Individual", "hit_id")
+
+    def resolve_biometric_deduplication_golden_record_results(parent, info: Any) -> List[Dict]:
+        duplicates = parent.biometric_deduplication_golden_record_results
+        for duplicate in duplicates:
+            duplicate_ind = Individual.objects.get(id=duplicate["id"])
+            # photo url serialization storage timeout
+            duplicate["photo"] = str(duplicate_ind.photo.url) if duplicate_ind.photo else None
+
+        return encode_ids(duplicates, "Individual", "id")
+
+    def resolve_biometric_deduplication_batch_results(parent, info: Any) -> List[Dict]:
+        duplicates = parent.biometric_deduplication_batch_results
+        for duplicate in duplicates:
+            duplicate_ind = Individual.objects.get(id=duplicate["id"])
+            # photo url serialization storage timeout
+            duplicate["photo"] = str(duplicate_ind.photo.url) if duplicate_ind.photo else None
+
+        return encode_ids(duplicates, "Individual", "id")
 
     def resolve_relationship(parent, info: Any) -> Optional[Enum]:
         # custom resolver so when relationship value is empty string, query does not break (since empty string is not one of enum choices, we need to return None)

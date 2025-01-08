@@ -15,6 +15,7 @@ from hct_mis_api.apps.household.fixtures import (
     IndividualFactory,
     PendingIndividualFactory,
 )
+from hct_mis_api.apps.household.models import DUPLICATE, NOT_PROCESSED, UNIQUE
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
@@ -398,9 +399,6 @@ class BiometricDeduplicationServiceTest(TestCase):
             },
         ]
 
-        duplicate_individuals_count = service.get_duplicate_individuals_for_rdi_against_population_count(rdi1)
-        assert duplicate_individuals_count == 2
-
     def test_get_duplicates_for_merged_rdi_against_population(self) -> None:
         self.program.deduplication_set_id = uuid.uuid4()
         self.program.business_area.save()
@@ -531,8 +529,6 @@ class BiometricDeduplicationServiceTest(TestCase):
                 "similarity_score": Decimal("90.00"),
             },
         ]
-        duplicate_individuals_count = service.get_duplicate_individuals_for_rdi_against_batch_count(rdi1)
-        assert duplicate_individuals_count == 2
 
     @patch(
         "hct_mis_api.apps.grievance.services.needs_adjudication_ticket_services.create_needs_adjudication_tickets_for_biometrics"
@@ -592,35 +588,124 @@ class BiometricDeduplicationServiceTest(TestCase):
         )
 
     def test_store_rdis_deduplication_statistics(self) -> None:
-        deduplication_set_id = str(uuid.uuid4())
-        self.program.deduplication_set_id = deduplication_set_id
+        self.program.deduplication_set_id = uuid.uuid4()
+        self.program.business_area.save()
         self.program.save()
 
-        service = BiometricDeduplicationService()
-
         rdi1 = RegistrationDataImportFactory(
+            status=RegistrationDataImport.IN_REVIEW,
             program=self.program,
             deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS,
         )
+        rdi2 = RegistrationDataImportFactory(
+            program=self.program,
+            deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_FINISHED,
+        )
 
-        service.get_duplicate_individuals_for_rdi_against_batch_count = mock.Mock(return_value=8)
-        service.get_duplicate_individuals_for_rdi_against_population_count = mock.Mock(return_value=9)
+        individuals = IndividualFactory.create_batch(5, program=self.program)
+        ind1, ind2, ind3, ind4, ind5 = sorted(individuals, key=lambda x: x.id)
 
-        service.store_rdis_deduplication_statistics(deduplication_set_id)
+        ind1.registration_data_import = rdi1
+        ind2.registration_data_import = rdi1
+        ind3.registration_data_import = rdi1
+        ind4.registration_data_import = rdi2
+        ind5.registration_data_import = rdi2
 
-        service.get_duplicate_individuals_for_rdi_against_batch_count.assert_called_once_with(rdi1)
-        service.get_duplicate_individuals_for_rdi_against_population_count.assert_called_once_with(rdi1)
+        ind1.save()
+        ind2.save()
+        ind3.save()
+        ind4.save()
+        ind5.save()
+
+        for ind in [ind1, ind2, ind3]:
+            ind.rdi_merge_status = MergeStatusModel.PENDING
+            ind.save()
+
+        service = BiometricDeduplicationService()
+        similarity_pairs = [
+            SimilarityPair(score=0.7, first=ind1.id, second=ind2.id),  # within pending rdi1
+            SimilarityPair(score=0.8, first=ind1.id, second=ind3.id),  # within pending rdi1
+            SimilarityPair(score=0.85, first=ind1.id, second=ind4.id),  # across pending rdi1 and population
+            SimilarityPair(score=0.8, first=ind2.id, second=ind4.id),  # across pending rdi1 and population
+            SimilarityPair(score=0.9, first=ind2.id, second=ind5.id),  # across pending rdi1 and population
+        ]
+        service.store_similarity_pairs(str(self.program.deduplication_set_id), similarity_pairs)
+
+        service.store_rdis_deduplication_statistics(str(self.program.deduplication_set_id))
 
         rdi1.refresh_from_db()
-        assert rdi1.dedup_engine_batch_duplicates == 8
-        assert rdi1.dedup_engine_golden_record_duplicates == 9
+        assert rdi1.dedup_engine_batch_duplicates == 3
+        assert rdi1.dedup_engine_golden_record_duplicates == 2
+        ind1.refresh_from_db()
+        assert ind1.biometric_deduplication_golden_record_results == [
+            {
+                "id": str(ind4.id),
+                "unicef_id": str(ind4.unicef_id),
+                "full_name": str(ind4.full_name),
+                "similarity_score": 85.0,
+            },
+        ]
+        assert ind1.biometric_deduplication_golden_record_status == DUPLICATE
+        assert ind1.biometric_deduplication_batch_results == [
+            {
+                "id": str(ind2.id),
+                "unicef_id": str(ind2.unicef_id),
+                "full_name": str(ind2.full_name),
+                "similarity_score": 70.0,
+            },
+            {
+                "id": str(ind3.id),
+                "unicef_id": str(ind3.unicef_id),
+                "full_name": str(ind3.full_name),
+                "similarity_score": 80.0,
+            },
+        ]
+        assert ind1.biometric_deduplication_batch_status == DUPLICATE
+
+        ind2.refresh_from_db()
+        assert ind2.biometric_deduplication_golden_record_results == [
+            {
+                "id": str(ind4.id),
+                "unicef_id": str(ind4.unicef_id),
+                "full_name": str(ind4.full_name),
+                "similarity_score": 80.0,
+            },
+            {
+                "id": str(ind5.id),
+                "unicef_id": str(ind5.unicef_id),
+                "full_name": str(ind5.full_name),
+                "similarity_score": 90.0,
+            },
+        ]
+        assert ind2.biometric_deduplication_golden_record_status == DUPLICATE
+
+        assert ind2.biometric_deduplication_batch_results == [
+            {
+                "id": str(ind1.id),
+                "unicef_id": str(ind1.unicef_id),
+                "full_name": str(ind1.full_name),
+                "similarity_score": 70.0,
+            },
+        ]
+        assert ind2.biometric_deduplication_batch_status == DUPLICATE
+
+        ind3.refresh_from_db()
+        assert ind3.biometric_deduplication_batch_results == [
+            {
+                "id": str(ind1.id),
+                "unicef_id": str(ind1.unicef_id),
+                "full_name": str(ind1.full_name),
+                "similarity_score": 80.0,
+            },
+        ]
+        assert ind2.biometric_deduplication_batch_status == DUPLICATE
+        assert ind3.biometric_deduplication_golden_record_results == []
+        assert ind3.biometric_deduplication_golden_record_status == UNIQUE
 
     def test_update_rdis_deduplication_statistics(self) -> None:
         deduplication_set_id = str(uuid.uuid4())
         self.program.deduplication_set_id = deduplication_set_id
         self.program.save()
-
-        service = BiometricDeduplicationService()
 
         rdi1 = RegistrationDataImportFactory(
             program=self.program,
@@ -635,15 +720,40 @@ class BiometricDeduplicationServiceTest(TestCase):
             status=RegistrationDataImport.IN_REVIEW,
         )
 
-        service.get_duplicate_individuals_for_rdi_against_population_count = mock.Mock(return_value=9)
+        individuals = IndividualFactory.create_batch(2, program=self.program)
+        ind1, ind2 = sorted(individuals, key=lambda x: x.id)
+
+        ind1.registration_data_import = rdi1
+        ind2.registration_data_import = rdi2
+
+        ind1.save()
+        ind2.save()
+
+        ind1.rdi_merge_status = MergeStatusModel.PENDING
+        ind1.save()
+
+        service = BiometricDeduplicationService()
+        similarity_pairs = [
+            SimilarityPair(score=0.7, first=ind1.id, second=ind2.id),  # across pending rdi1 and population
+        ]
+        service.store_similarity_pairs(str(self.program.deduplication_set_id), similarity_pairs)
 
         service.update_rdis_deduplication_statistics(self.program, exclude_rdi=rdi2)
 
-        service.get_duplicate_individuals_for_rdi_against_population_count.assert_called_once_with(rdi1)
-
         rdi1.refresh_from_db()
         assert rdi1.dedup_engine_batch_duplicates == 5
-        assert rdi1.dedup_engine_golden_record_duplicates == 9
+        assert rdi1.dedup_engine_golden_record_duplicates == 1
+        ind1.refresh_from_db()
+        assert ind1.biometric_deduplication_golden_record_results == [
+            {
+                "id": str(ind2.id),
+                "unicef_id": str(ind2.unicef_id),
+                "full_name": str(ind2.full_name),
+                "similarity_score": 70.0,
+            },
+        ]
+        assert ind1.biometric_deduplication_golden_record_status == DUPLICATE
+        assert ind1.biometric_deduplication_batch_status == NOT_PROCESSED
 
     @patch(
         "hct_mis_api.apps.registration_datahub.apis.deduplication_engine.DeduplicationEngineAPI.report_false_positive_duplicate"
