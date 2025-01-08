@@ -52,7 +52,7 @@ export function TargetPopulationAutocomplete({
         orderBy: 'name',
         name: debouncedInputText,
         program: programId,
-        status: "DRAFT",
+        status: ['DRAFT'],
       },
       fetchPolicy: 'cache-and-network',
     });

@@ -9748,6 +9748,7 @@ export type AllTargetPopulationForChoicesQueryVariables = Exact<{
   name?: InputMaybe<Scalars['String']['input']>;
   businessArea: Scalars['String']['input'];
   program: Scalars['String']['input'];
+  status?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
 }>;
 
 
@@ -21196,7 +21197,7 @@ export type AllTargetPopulationsLazyQueryHookResult = ReturnType<typeof useAllTa
 export type AllTargetPopulationsSuspenseQueryHookResult = ReturnType<typeof useAllTargetPopulationsSuspenseQuery>;
 export type AllTargetPopulationsQueryResult = Apollo.QueryResult<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables>;
 export const AllTargetPopulationForChoicesDocument = gql`
-    query AllTargetPopulationForChoices($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String, $businessArea: String!, $program: String!) {
+    query AllTargetPopulationForChoices($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String, $businessArea: String!, $program: String!, $status: [String]) {
   allPaymentPlans(
     after: $after
     before: $before
@@ -21206,6 +21207,7 @@ export const AllTargetPopulationForChoicesDocument = gql`
     name: $name
     businessArea: $businessArea
     program: $program
+    status: $status
   ) {
     edges {
       node {
@@ -21240,6 +21242,7 @@ export const AllTargetPopulationForChoicesDocument = gql`
  *      name: // value for 'name'
  *      businessArea: // value for 'businessArea'
  *      program: // value for 'program'
+ *      status: // value for 'status'
  *   },
  * });
  */

@@ -99,7 +99,6 @@ export function TargetPopulationPageHeader({
         <FinalizedTargetPopulationHeaderButtons
           targetPopulation={paymentPlan}
           canDuplicate={canDuplicate}
-          businessAreaData={businessAreaData}
         />
       );
       break;
