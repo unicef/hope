@@ -8446,6 +8446,14 @@ export type SetSteficonRuleOnPpListMutationVariables = Exact<{
 
 export type SetSteficonRuleOnPpListMutation = { __typename?: 'Mutations', setSteficonRuleOnPaymentPlanPaymentList?: { __typename?: 'SetSteficonRuleOnPaymentPlanPaymentListMutation', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, steficonRule?: { __typename?: 'RuleCommitNode', id: string, rule?: { __typename?: 'SteficonRuleNode', id: string, name: string } | null } | null } | null } | null };
 
+export type SetSteficonRuleOnTargetPopulationMutationVariables = Exact<{
+  paymentPlanId: Scalars['ID']['input'];
+  steficonRuleId: Scalars['ID']['input'];
+}>;
+
+
+export type SetSteficonRuleOnTargetPopulationMutation = { __typename?: 'Mutations', setSteficonRuleOnTargetPopulation?: { __typename?: 'SetSteficonRuleOnTargetPopulationMutation', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, steficonRule?: { __typename?: 'RuleCommitNode', id: string, rule?: { __typename?: 'SteficonRuleNode', id: string, name: string } | null } | null } | null } | null };
+
 export type ActivatePaymentVerificationPlanMutationVariables = Exact<{
   paymentVerificationPlanId: Scalars['ID']['input'];
 }>;
@@ -12693,6 +12701,52 @@ export function useSetSteficonRuleOnPpListMutation(baseOptions?: Apollo.Mutation
 export type SetSteficonRuleOnPpListMutationHookResult = ReturnType<typeof useSetSteficonRuleOnPpListMutation>;
 export type SetSteficonRuleOnPpListMutationResult = Apollo.MutationResult<SetSteficonRuleOnPpListMutation>;
 export type SetSteficonRuleOnPpListMutationOptions = Apollo.BaseMutationOptions<SetSteficonRuleOnPpListMutation, SetSteficonRuleOnPpListMutationVariables>;
+export const SetSteficonRuleOnTargetPopulationDocument = gql`
+    mutation SetSteficonRuleOnTargetPopulation($paymentPlanId: ID!, $steficonRuleId: ID!) {
+  setSteficonRuleOnTargetPopulation(
+    paymentPlanId: $paymentPlanId
+    steficonRuleId: $steficonRuleId
+  ) {
+    paymentPlan {
+      id
+      steficonRule {
+        id
+        rule {
+          id
+          name
+        }
+      }
+    }
+  }
+}
+    `;
+export type SetSteficonRuleOnTargetPopulationMutationFn = Apollo.MutationFunction<SetSteficonRuleOnTargetPopulationMutation, SetSteficonRuleOnTargetPopulationMutationVariables>;
+
+/**
+ * __useSetSteficonRuleOnTargetPopulationMutation__
+ *
+ * To run a mutation, you first call `useSetSteficonRuleOnTargetPopulationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSetSteficonRuleOnTargetPopulationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [setSteficonRuleOnTargetPopulationMutation, { data, loading, error }] = useSetSteficonRuleOnTargetPopulationMutation({
+ *   variables: {
+ *      paymentPlanId: // value for 'paymentPlanId'
+ *      steficonRuleId: // value for 'steficonRuleId'
+ *   },
+ * });
+ */
+export function useSetSteficonRuleOnTargetPopulationMutation(baseOptions?: Apollo.MutationHookOptions<SetSteficonRuleOnTargetPopulationMutation, SetSteficonRuleOnTargetPopulationMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SetSteficonRuleOnTargetPopulationMutation, SetSteficonRuleOnTargetPopulationMutationVariables>(SetSteficonRuleOnTargetPopulationDocument, options);
+      }
+export type SetSteficonRuleOnTargetPopulationMutationHookResult = ReturnType<typeof useSetSteficonRuleOnTargetPopulationMutation>;
+export type SetSteficonRuleOnTargetPopulationMutationResult = Apollo.MutationResult<SetSteficonRuleOnTargetPopulationMutation>;
+export type SetSteficonRuleOnTargetPopulationMutationOptions = Apollo.BaseMutationOptions<SetSteficonRuleOnTargetPopulationMutation, SetSteficonRuleOnTargetPopulationMutationVariables>;
 export const ActivatePaymentVerificationPlanDocument = gql`
     mutation ActivatePaymentVerificationPlan($paymentVerificationPlanId: ID!) {
   activatePaymentVerificationPlan(
