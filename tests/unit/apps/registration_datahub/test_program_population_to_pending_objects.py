@@ -598,6 +598,11 @@ class TestProgramPopulationToPendingObjects(APITestCase):
             individual_already_in_program_to,
         )
 
+        self.assertEqual(
+            new_hh_repr.head_of_household,
+            individual_already_in_program_to,
+        )
+
         # role in original program
         self.assertIsNotNone(
             IndividualRoleInHousehold.objects.filter(
