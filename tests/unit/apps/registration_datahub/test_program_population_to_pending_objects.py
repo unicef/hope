@@ -8,6 +8,7 @@ from hct_mis_api.apps.household.fixtures import (
     DocumentTypeFactory,
     HouseholdCollectionFactory,
     IndividualCollectionFactory,
+    IndividualFactory,
     IndividualIdentityFactory,
     IndividualRoleInHouseholdFactory,
     create_household_and_individuals,
@@ -538,4 +539,76 @@ class TestProgramPopulationToPendingObjects(APITestCase):
         )
         self.assertFalse(
             Individual.pending_objects.filter(unicef_id=individuals_already_in_program[0].unicef_id).exists(),
+        )
+
+    def test_import_program_population_with_excluded_individuals(self) -> None:
+        individual_already_in_program_to = IndividualFactory(
+            registration_data_import=self.rdi_other,
+            program=self.program_to,
+        )
+        household, individuals = create_household_and_individuals(
+            household_data={
+                "registration_data_import": self.registration_data_import,
+                "program": self.program_from,
+            },
+            individuals_data=[
+                {
+                    "registration_data_import": self.registration_data_import,
+                    "program": self.program_from,
+                },
+            ],
+        )
+        individual_already_in_program_from = individuals[0]
+        IndividualRoleInHouseholdFactory(
+            household=household,
+            individual=individual_already_in_program_from,
+            role=ROLE_PRIMARY,
+        )
+        individual_collection = IndividualCollectionFactory()
+        individual_already_in_program_to.individual_collection = individual_collection
+        individual_already_in_program_to.save()
+        individual_already_in_program_from.individual_collection = individual_collection
+        individual_already_in_program_from.unicef_id = individual_already_in_program_to.unicef_id
+        individual_already_in_program_from.save()
+
+        self.assertFalse(
+            Individual.pending_objects.filter(unicef_id=individuals[0].unicef_id).exists(),
+        )
+        import_program_population(
+            import_from_program_id=str(self.program_from.id),
+            import_to_program_id=str(self.program_to.id),
+            rdi=self.registration_data_import,
+        )
+
+        # still no pending individual as it is excluded from the import (representation already in the program)
+        self.assertFalse(
+            Individual.pending_objects.filter(unicef_id=individual_already_in_program_from.unicef_id).exists(),
+        )
+
+        new_hh_repr = Household.pending_objects.filter(
+            unicef_id=household.unicef_id,
+            program=self.program_to,
+        ).first()
+        self.assertEqual(
+            new_hh_repr.representatives.count(),
+            1,
+        )
+        self.assertEqual(
+            new_hh_repr.representatives.first(),
+            individual_already_in_program_to,
+        )
+
+        # role in original program
+        self.assertIsNotNone(
+            IndividualRoleInHousehold.objects.filter(
+                household=household,
+                individual=individual_already_in_program_from,
+            ).first(),
+        )
+        # role in new program
+        self.assertIsNotNone(
+            IndividualRoleInHousehold.original_and_repr_objects.filter(
+                household=new_hh_repr,
+                individual=individual_already_in_program_to,
+            ).first(),
         )
