@@ -191,7 +191,6 @@ class PaymentPlanFilter(FilterSet):
     program = CharFilter(method="filter_by_program")
     program_cycle = CharFilter(method="filter_by_program_cycle")
     name = CharFilter(field_name="name", lookup_expr="startswith")
-    payment_plan_applicable = BooleanFilter(method="filter_payment_plan_applicable")
     total_households_count_min = IntegerFilter(
         field_name="total_number_of_hh",
         lookup_expr="gte",
@@ -276,13 +275,6 @@ class PaymentPlanFilter(FilterSet):
             # add all list of statuses
             value = is_assigned + [status for status in value if status != "ASSIGNED"]
         return queryset.filter(status__in=value)
-
-    # copied from TP need for filtering
-    @staticmethod
-    def filter_payment_plan_applicable(queryset: "QuerySet", model_field: str, value: Any) -> "QuerySet":
-        if value is True:
-            return queryset.filter(status=PaymentPlan.Status.DRAFT)
-        return queryset
 
     @staticmethod
     def filter_total_households_count_with_valid_phone_no_max(

@@ -246,8 +246,8 @@ class TestPaymentPlanQueries(APITestCase):
         """
 
     PAYMENT_PLANS_FILTER_QUERY = """
-        query AllPaymentPlans($businessArea: String!, $search: String, $status: [String], $totalEntitledQuantityFrom: Float, $totalEntitledQuantityTo: Float, $dispersionStartDate: Date, $dispersionEndDate: Date, $program: String, $programCycle: String, $isPaymentPlan: Boolean, $isTargetPopulation: Boolean, $name: String, $paymentPlanApplicable: Boolean, $totalHouseholdsCountMin: Int, $totalHouseholdsCountMax: Int, $totalHouseholdsCountWithValidPhoneNoMax: Int, $totalHouseholdsCountWithValidPhoneNoMin: Int, $statusNot: String) {
-            allPaymentPlans(businessArea: $businessArea, search: $search, status: $status, totalEntitledQuantityFrom: $totalEntitledQuantityFrom, totalEntitledQuantityTo: $totalEntitledQuantityTo, dispersionStartDate: $dispersionStartDate, dispersionEndDate: $dispersionEndDate, program: $program, orderBy: "status", programCycle: $programCycle, isPaymentPlan: $isPaymentPlan, isTargetPopulation: $isTargetPopulation, name: $name, paymentPlanApplicable: $paymentPlanApplicable, totalHouseholdsCountMin: $totalHouseholdsCountMin, totalHouseholdsCountMax: $totalHouseholdsCountMax, totalHouseholdsCountWithValidPhoneNoMax: $totalHouseholdsCountWithValidPhoneNoMax, totalHouseholdsCountWithValidPhoneNoMin: $totalHouseholdsCountWithValidPhoneNoMin, statusNot: $statusNot) {
+        query AllPaymentPlans($businessArea: String!, $search: String, $status: [String], $totalEntitledQuantityFrom: Float, $totalEntitledQuantityTo: Float, $dispersionStartDate: Date, $dispersionEndDate: Date, $program: String, $programCycle: String, $isPaymentPlan: Boolean, $isTargetPopulation: Boolean, $name: String, $totalHouseholdsCountMin: Int, $totalHouseholdsCountMax: Int, $totalHouseholdsCountWithValidPhoneNoMax: Int, $totalHouseholdsCountWithValidPhoneNoMin: Int, $statusNot: String) {
+            allPaymentPlans(businessArea: $businessArea, search: $search, status: $status, totalEntitledQuantityFrom: $totalEntitledQuantityFrom, totalEntitledQuantityTo: $totalEntitledQuantityTo, dispersionStartDate: $dispersionStartDate, dispersionEndDate: $dispersionEndDate, program: $program, orderBy: "status", programCycle: $programCycle, isPaymentPlan: $isPaymentPlan, isTargetPopulation: $isTargetPopulation, name: $name, totalHouseholdsCountMin: $totalHouseholdsCountMin, totalHouseholdsCountMax: $totalHouseholdsCountMax, totalHouseholdsCountWithValidPhoneNoMax: $totalHouseholdsCountWithValidPhoneNoMax, totalHouseholdsCountWithValidPhoneNoMin: $totalHouseholdsCountWithValidPhoneNoMin, statusNot: $statusNot) {
             edges {
               node {
                 name
@@ -704,20 +704,6 @@ class TestPaymentPlanQueries(APITestCase):
             request_string=self.PAYMENT_PLANS_FILTER_QUERY,
             context={"user": self.user},
             variables={"businessArea": "afghanistan", "name": "PaymentPlan with"},
-        )
-
-    def test_payment_plan_filter_payment_plan_applicable(self) -> None:
-        PaymentPlanFactory(
-            name="Payment Plan within DRAFT for test filter payment_plan_applicable",
-            status=PaymentPlan.Status.DRAFT,
-            program_cycle=self.program_cycle,
-            business_area=self.business_area,
-            created_by=self.user,
-        )
-        self.snapshot_graphql_request(
-            request_string=self.PAYMENT_PLANS_FILTER_QUERY,
-            context={"user": self.user},
-            variables={"businessArea": "afghanistan", "paymentPlanApplicable": True},
         )
 
     def test_payment_plan_filter_total_households_count_max(self) -> None:
