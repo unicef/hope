@@ -64,6 +64,45 @@ export const AllIndividuals = gql`
           sanctionListPossibleMatch
           sanctionListConfirmedMatch
           deduplicationGoldenRecordStatus
+          deduplicationBatchStatus
+          biometricDeduplicationGoldenRecordStatus
+          biometricDeduplicationBatchStatus
+          biometricDeduplicationBatchResults {
+            id
+            unicefId
+            fullName
+            # age
+            similarityScore
+            photo
+          }
+          biometricDeduplicationGoldenRecordResults {
+            id
+            unicefId
+            fullName
+            # age
+            similarityScore
+            photo
+          }
+          deduplicationBatchResults {
+            hitId
+            fullName
+            score
+            proximityToScore
+            location
+            age
+            duplicate
+            distinct
+          }
+          deduplicationGoldenRecordResults {
+            hitId
+            fullName
+            score
+            proximityToScore
+            location
+            age
+            duplicate
+            distinct
+          }
           sanctionListLastCheck
           fullName
           household {
