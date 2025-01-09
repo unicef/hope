@@ -5,12 +5,19 @@ from openpyxl.worksheet.worksheet import Worksheet
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Country
-from hct_mis_api.apps.household.models import Document, DocumentType, Individual
+from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
+from hct_mis_api.apps.household.models import (
+    Document,
+    DocumentType,
+    Household,
+    Individual,
+)
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
     DeduplicateTask,
     HardDocumentDeduplication,
 )
+from hct_mis_api.apps.utils.elasticsearch_utils import populate_index
 
 
 class UniversalIndividualUpdateScript:
@@ -26,6 +33,7 @@ class UniversalIndividualUpdateScript:
         ignore_empty_values: bool = True,
         deduplicate_es: bool = True,
         deduplicate_documents: bool = True,
+        batch_size: int = 100,
     ) -> None:
         self.business_area = business_area
         self.program = program
@@ -38,7 +46,9 @@ class UniversalIndividualUpdateScript:
         self.deduplicate_es = deduplicate_es
         self.deduplicate_documents = deduplicate_documents
         document_types = DocumentType.objects.filter()
+        self.countries = {country.name: country for country in Country.objects.all()}
         self.document_types = {f"{document_type.key}_no_i_c": document_type for document_type in document_types}
+        self.batch_size = batch_size
 
     def validate_household_fields(
         self, row: Tuple[Any, ...], headers: List[str], household: Any, row_index: int
@@ -99,8 +109,8 @@ class UniversalIndividualUpdateScript:
         row_index = 1
         for row in sheet.iter_rows(min_row=2, values_only=True):
             row_index += 1
-            if (row_index - 2) % 1000 == 0:
-                print(f"Validating row {row_index - 2} to {row_index - 2 + 100} Indivduals")
+            if (row_index - 2) % self.batch_size == 0:
+                print(f"Validating row {row_index - 2} to {row_index - 2 + self.batch_size} Indivduals")
             unicef_id = row[headers.index("unicef_id")]
             individuals_queryset = Individual.objects.filter(
                 unicef_id=unicef_id, business_area=self.business_area, program=self.program
@@ -146,48 +156,116 @@ class UniversalIndividualUpdateScript:
                 continue
             individual.flex_fields[name] = handled_value
 
-    def handle_documents_update(self, row: Tuple[Any, ...], headers: List[str], individual: Individual) -> None:
+    def handle_documents_update(
+        self, row: Tuple[Any, ...], headers: List[str], individual: Individual
+    ) -> Tuple[list, list]:
+        documents_to_update = []
+        documents_to_create = []
         for number_column_name, country_column_name in self.document_fields:
             document_type = self.document_types.get(number_column_name)
             document_number = row[headers.index(number_column_name)]
             document_country = row[headers.index(country_column_name)]
-            country = Country.objects.filter(name=document_country).first()
             if self.ignore_empty_values and (document_number is None or document_number == ""):  # pragma: no cover
                 continue
-            document = individual.documents.filter(type=document_type).first()
+            country = self.countries[document_country]
+            document = None
+            for doc in individual.documents.all():
+                if doc.type == document_type:
+                    document = doc
+                    break
             if document:
                 document.document_number = document_number
                 document.status = Document.STATUS_PENDING
-                document.save()
+                document.country = country
+                documents_to_update.append(document)
             else:
-                Document.objects.create(
-                    individual=individual,
-                    type=document_type,
-                    document_number=document_number,
-                    country=country,
-                    rdi_merge_status="MERGED",
+                documents_to_create.append(
+                    Document(
+                        individual=individual,
+                        type=document_type,
+                        document_number=document_number,
+                        country=country,
+                        rdi_merge_status="MERGED",
+                    )
                 )
+        return documents_to_update, documents_to_create
 
     def handle_update(self, sheet: Worksheet, headers: List[str]) -> List[str]:
         row_index = 1
         individual_ids = []
+        household_fields_to_update = ["flex_fields"]
+        individual_fields_to_update = ["flex_fields"]
+        document_fields_to_create = ["document_number", "status", "country"]
+        household_fields_to_update.extend([field for _, (field, _, _) in self.household_fields.items()])
+        individual_fields_to_update.extend([field for _, (field, _, _) in self.individual_fields.items()])
+        individuals_to_update = []
+        households_to_update = []
+        documents_to_update = []
+        documents_to_create = []
         for row in sheet.iter_rows(min_row=2, values_only=True):
             row_index += 1
-            if (row_index - 2) % 100 == 0:
-                print(f"Updating row {row_index - 2} to {row_index - 2 + 100} Individuals")
+            if (row_index - 2) % self.batch_size == 0:
+                print(f"Updating row {row_index - 2} to {row_index - 2 + self.batch_size} Individuals")
             unicef_id = row[headers.index("unicef_id")]
-            individual = Individual.objects.filter(
-                unicef_id=unicef_id, business_area=self.business_area, program=self.program
-            ).first()
+            individual = (
+                Individual.objects.select_related("household")
+                .prefetch_related("documents")
+                .get(unicef_id=unicef_id, business_area=self.business_area, program=self.program)
+            )
             individual_ids.append(str(individual.id))
             household = individual.household
             self.handle_household_update(row, headers, household)
             self.handle_individual_update(row, headers, individual)
             self.handle_individual_flex_update(row, headers, individual)
-            self.handle_documents_update(row, headers, individual)
-            household.save()
-            individual.save()
+            documents_to_update_part, documents_to_create_part = self.handle_documents_update(row, headers, individual)
+            documents_to_update.extend(documents_to_update_part)
+            documents_to_create.extend(documents_to_create_part)
+            households_to_update.append(household)
+            individuals_to_update.append(individual)
+            if len(individuals_to_update) == self.batch_size:
+                self.batch_update(
+                    document_fields_to_create,
+                    documents_to_create,
+                    documents_to_update,
+                    household_fields_to_update,
+                    households_to_update,
+                    individual_fields_to_update,
+                    individuals_to_update,
+                )
+                households_to_update = []
+                individuals_to_update = []
+        self.batch_update(
+            document_fields_to_create,
+            documents_to_create,
+            documents_to_update,
+            household_fields_to_update,
+            households_to_update,
+            individual_fields_to_update,
+            individuals_to_update,
+        )
         return individual_ids
+
+    def batch_update(
+        self,
+        document_fields_to_create: list,
+        documents_to_create: list,
+        documents_to_update: list,
+        household_fields_to_update: list,
+        households_to_update: list,
+        individual_fields_to_update: list,
+        individuals_to_update: list,
+    ) -> None:
+        Document.objects.bulk_update(documents_to_update, document_fields_to_create)
+        Document.objects.bulk_create(documents_to_create)
+        Household.objects.bulk_update(households_to_update, household_fields_to_update)
+        Individual.objects.bulk_update(individuals_to_update, individual_fields_to_update)
+        populate_index(
+            Individual.objects.filter(id__in=[individual.id for individual in individuals_to_update]),
+            get_individual_doc(self.business_area.slug),
+        )
+        populate_index(
+            Household.objects.filter(id__in=[household.id for household in households_to_update]), HouseholdDocument
+        )
 
     def execute(self) -> None:
         workbook = load_workbook(filename=self.file_path)
