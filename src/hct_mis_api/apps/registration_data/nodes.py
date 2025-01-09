@@ -2,6 +2,7 @@ from datetime import date
 from typing import Any, Optional
 
 import graphene
+from apps.core.utils import encode_id_base64
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 
@@ -40,9 +41,11 @@ class DeduplicationResultNode(graphene.ObjectType):
 
 
 class DeduplicationEngineSimilarityPairIndividualNode(graphene.ObjectType):
+    id = graphene.String()
     photo = graphene.String()
     full_name = graphene.String()
     unicef_id = graphene.String()
+    similarity_score = graphene.Float()  # optional for RDI population view duplicates modal
 
     @staticmethod
     def resolve_photo(parent: Any, info: Any) -> Optional[graphene.String]:
@@ -51,6 +54,14 @@ class DeduplicationEngineSimilarityPairIndividualNode(graphene.ObjectType):
         # photo url serialization storage timeout
         individual = Individual.objects.get(id=parent.get("id"))
         return individual.photo.url if individual.photo else None
+
+    @staticmethod
+    def resolve_id(parent: Any, info: Any) -> str:
+        return encode_id_base64(parent.get("id"), "Individual")
+
+    @staticmethod
+    def resolve_similarity_score(parent: Any, info: Any) -> Optional[float]:
+        return parent.get("similarity_score", None)
 
 
 class DeduplicationEngineSimilarityPairNode(BaseNodePermissionMixin, graphene.ObjectType):

@@ -87,7 +87,10 @@ from hct_mis_api.apps.household.services.household_programs_with_delivered_quant
 from hct_mis_api.apps.payment.models import DeliveryMechanismData
 from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.registration_data.nodes import DeduplicationResultNode
+from hct_mis_api.apps.registration_data.nodes import (
+    DeduplicationEngineSimilarityPairIndividualNode,
+    DeduplicationResultNode,
+)
 from hct_mis_api.apps.targeting.models import HouseholdSelection
 from hct_mis_api.apps.utils.graphql import does_path_exist_in_query
 from hct_mis_api.apps.utils.schema import (
@@ -241,8 +244,8 @@ class IndividualNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTyp
     flex_fields = FlexFieldsScalar()
     deduplication_golden_record_results = graphene.List(DeduplicationResultNode)
     deduplication_batch_results = graphene.List(DeduplicationResultNode)
-    biometric_deduplication_golden_record_results = graphene.List(DeduplicationResultNode)
-    biometric_deduplication_batch_results = graphene.List(DeduplicationResultNode)
+    biometric_deduplication_golden_record_results = graphene.List(DeduplicationEngineSimilarityPairIndividualNode)
+    biometric_deduplication_batch_results = graphene.List(DeduplicationEngineSimilarityPairIndividualNode)
     observed_disability = graphene.List(graphene.String)
     relationship = graphene.Enum(
         "IndividualRelationship",
@@ -312,24 +315,6 @@ class IndividualNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTyp
         key = "duplicates" if parent.deduplication_batch_status == DUPLICATE_IN_BATCH else "possible_duplicates"
         results = parent.deduplication_batch_results.get(key, {})
         return encode_ids(results, "Individual", "hit_id")
-
-    def resolve_biometric_deduplication_golden_record_results(parent, info: Any) -> List[Dict]:
-        duplicates = parent.biometric_deduplication_golden_record_results
-        for duplicate in duplicates:
-            duplicate_ind = Individual.objects.get(id=duplicate["id"])
-            # photo url serialization storage timeout
-            duplicate["photo"] = str(duplicate_ind.photo.url) if duplicate_ind.photo else None
-
-        return encode_ids(duplicates, "Individual", "id")
-
-    def resolve_biometric_deduplication_batch_results(parent, info: Any) -> List[Dict]:
-        duplicates = parent.biometric_deduplication_batch_results
-        for duplicate in duplicates:
-            duplicate_ind = Individual.objects.get(id=duplicate["id"])
-            # photo url serialization storage timeout
-            duplicate["photo"] = str(duplicate_ind.photo.url) if duplicate_ind.photo else None
-
-        return encode_ids(duplicates, "Individual", "id")
 
     def resolve_relationship(parent, info: Any) -> Optional[Enum]:
         # custom resolver so when relationship value is empty string, query does not break (since empty string is not one of enum choices, we need to return None)
@@ -886,6 +871,9 @@ class Query(graphene.ObjectType):
         return to_choice_object(INDIVIDUAL_FLAGS_CHOICES)
 
     def resolve_work_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+        return to_choice_object(WORK_STATUS_CHOICE)
+
+    def resolve_deduplication_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(WORK_STATUS_CHOICE)
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
