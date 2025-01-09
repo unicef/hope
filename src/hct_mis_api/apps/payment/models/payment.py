@@ -964,6 +964,8 @@ class PaymentPlan(
             in [
                 PaymentPlan.Status.TP_OPEN,
                 PaymentPlan.Status.TP_LOCKED,
+                PaymentPlan.Status.TP_STEFICON_COMPLETED,
+                PaymentPlan.Status.TP_STEFICON_ERROR,
                 PaymentPlan.Status.DRAFT,
                 PaymentPlan.Status.OPEN,
             ]

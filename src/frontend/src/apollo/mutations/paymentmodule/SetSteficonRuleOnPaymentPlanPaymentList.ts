@@ -16,6 +16,13 @@ export const SET_STEFICON_RULE_ON_P_P_PAYMENT_LIST = gql`
             name
           }
         }
+        steficonRuleTargeting {
+          id
+          rule {
+            id
+            name
+          }
+        }
       }
     }
   }

@@ -857,7 +857,8 @@ class PaymentPlanService:
                 params["vulnerability_score__lte"] = payment_plan.vulnerability_score_max
             if payment_plan.vulnerability_score_min is not None:
                 params["vulnerability_score__gte"] = payment_plan.vulnerability_score_min
-            payment_plan.payment_items.exclude(**params).update(is_removed=True)
+            payment_plan.payment_items(manager="all_objects").filter(**params).update(is_removed=False)
+            payment_plan.payment_items(manager="all_objects").exclude(**params).update(is_removed=True)
             payment_plan_rebuild_stats.delay(str(payment_plan.id))
 
     @staticmethod

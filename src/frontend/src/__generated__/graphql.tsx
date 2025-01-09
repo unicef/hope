@@ -8433,7 +8433,7 @@ export type SetSteficonRuleOnPpListMutationVariables = Exact<{
 }>;
 
 
-export type SetSteficonRuleOnPpListMutation = { __typename?: 'Mutations', setSteficonRuleOnPaymentPlanPaymentList?: { __typename?: 'SetSteficonRuleOnPaymentPlanPaymentListMutation', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, steficonRule?: { __typename?: 'RuleCommitNode', id: string, rule?: { __typename?: 'SteficonRuleNode', id: string, name: string } | null } | null } | null } | null };
+export type SetSteficonRuleOnPpListMutation = { __typename?: 'Mutations', setSteficonRuleOnPaymentPlanPaymentList?: { __typename?: 'SetSteficonRuleOnPaymentPlanPaymentListMutation', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, steficonRule?: { __typename?: 'RuleCommitNode', id: string, rule?: { __typename?: 'SteficonRuleNode', id: string, name: string } | null } | null, steficonRuleTargeting?: { __typename?: 'RuleCommitNode', id: string, rule?: { __typename?: 'SteficonRuleNode', id: string, name: string } | null } | null } | null } | null };
 
 export type ActivatePaymentVerificationPlanMutationVariables = Exact<{
   paymentVerificationPlanId: Scalars['ID']['input'];
@@ -12646,6 +12646,13 @@ export const SetSteficonRuleOnPpListDocument = gql`
     paymentPlan {
       id
       steficonRule {
+        id
+        rule {
+          id
+          name
+        }
+      }
+      steficonRuleTargeting {
         id
         rule {
           id
