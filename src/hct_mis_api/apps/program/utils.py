@@ -239,15 +239,10 @@ class CopyProgramPopulation:
         BankAccountInfo.objects.bulk_create(bank_account_infos_to_create)
 
     def set_household_per_individual(self, new_individual: Individual) -> Individual:
-        new_individual.household = (
-            getattr(Household, self.manager)
-            .filter(
-                program=self.program,
-                copied_from_id=new_individual.household_id,
-                registration_data_import=self.rdi,
-            )
-            .first()
-        )
+        new_individual.household = Household.original_and_repr_objects.filter(
+            program=self.program,
+            unicef_id=new_individual.household.unicef_id,
+        ).first()
         return new_individual
 
     @staticmethod
