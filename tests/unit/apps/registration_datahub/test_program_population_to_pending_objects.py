@@ -148,6 +148,8 @@ class TestProgramPopulationToPendingObjects(APITestCase):
         cls.household, cls.individuals = create_household_and_individuals(
             household_data={
                 "registration_data_import": cls.rdi_other,
+                "first_registration_date": "2021-01-01",
+                "last_registration_date": "2021-01-01",
                 "program": cls.program_from,
                 "admin_area": AreaFactory(),
                 "admin1": AreaFactory(),
@@ -162,6 +164,8 @@ class TestProgramPopulationToPendingObjects(APITestCase):
             individuals_data=[
                 {
                     "registration_data_import": cls.rdi_other,
+                    "first_registration_date": "2021-01-01",
+                    "last_registration_date": "2021-01-01",
                     "given_name": "Test",
                     "full_name": "Test Testowski",
                     "middle_name": "",
