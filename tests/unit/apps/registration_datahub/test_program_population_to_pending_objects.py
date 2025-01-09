@@ -175,8 +175,6 @@ class TestProgramPopulationToPendingObjects(APITestCase):
                     "relationship": HEAD,
                     "sex": MALE,
                     "birth_date": "1955-09-07",
-                    "first_registration_date": "2024-02-21",
-                    "last_registration_date": "2024-02-24",
                 },
                 {
                     "first_registration_date": "2024-02-21",
