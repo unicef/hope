@@ -19,15 +19,6 @@ export const TARGET_POPULATION_QUERY = gql`
       exclusionReason
       vulnerabilityScoreMin
       vulnerabilityScoreMax
-      steficonRule {
-        __typename
-        id
-        rule {
-          __typename
-          id
-          name
-        }
-      }
       steficonRuleTargeting {
         __typename
         id

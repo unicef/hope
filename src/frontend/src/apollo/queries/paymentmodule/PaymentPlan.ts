@@ -141,6 +141,13 @@ export const PAYMENT_PLAN_QUERY = gql`
           name
         }
       }
+      steficonRuleTargeting {
+        id
+        rule {
+          id
+          name
+        }
+      }
       hasPaymentListExportFile
       hasFspDeliveryMechanismXlsxTemplate
       importedFileDate
