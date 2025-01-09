@@ -163,6 +163,7 @@ class TestProgramPopulationToPendingObjects(APITestCase):
             individuals_data=[
                 {
                     "registration_data_import": cls.rdi_other,
+                    "first_registration_date": "2021-01-01",
                     "given_name": "Test",
                     "full_name": "Test Testowski",
                     "middle_name": "",
