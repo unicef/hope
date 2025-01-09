@@ -111,10 +111,12 @@ class TestCopyProgram(APITestCase):
             household_data={
                 "business_area": cls.business_area,
                 "program": cls.program,
+                "first_registration_date": "2021-01-01",
             },
             individuals_data=[
                 {
                     "business_area": cls.business_area,
+                    "first_registration_date": "2021-01-01",
                 },
             ],
         )
