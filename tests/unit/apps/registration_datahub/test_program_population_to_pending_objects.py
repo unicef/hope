@@ -150,6 +150,7 @@ class TestProgramPopulationToPendingObjects(APITestCase):
             household_data={
                 "registration_data_import": cls.rdi_other,
                 "first_registration_date": "2021-01-01",
+                "last_registration_date": "2021-01-01",
                 "program": cls.program_from,
                 "admin_area": AreaFactory(),
                 "admin1": AreaFactory(),
@@ -164,6 +165,8 @@ class TestProgramPopulationToPendingObjects(APITestCase):
             individuals_data=[
                 {
                     "registration_data_import": cls.rdi_other,
+                    "first_registration_date": "2021-01-01",
+                    "last_registration_date": "2021-01-01",
                     "given_name": "Test",
                     "full_name": "Test Testowski",
                     "middle_name": "",
@@ -618,3 +621,39 @@ class TestProgramPopulationToPendingObjects(APITestCase):
                 individual=individual_already_in_program_to,
             ).first(),
         )
+
+    def test_import_program_population_individual_without_household(self) -> None:
+        program_from_1 = ProgramFactory(business_area=self.afghanistan)
+
+        create_household_and_individuals(
+            household_data={
+                "registration_data_import": self.registration_data_import,
+                "program": program_from_1,
+            },
+            individuals_data=[
+                {
+                    "registration_data_import": self.registration_data_import,
+                    "program": program_from_1,
+                },
+            ],
+        )
+        individual_without_hh = IndividualFactory(
+            registration_data_import=self.registration_data_import,
+            program=program_from_1,
+        )
+
+        import_program_population(
+            import_from_program_id=str(program_from_1.id),
+            import_to_program_id=str(self.program_to.id),
+            rdi=self.registration_data_import,
+        )
+
+        self.assertEqual(Individual.pending_objects.filter(program=self.program_to).count(), 2)
+
+        individual_without_hh_repr = Individual.pending_objects.filter(
+            program=self.program_to,
+            unicef_id=individual_without_hh.unicef_id,
+        ).first()
+
+        self.assertIsNotNone(individual_without_hh_repr)
+        self.assertEqual(individual_without_hh_repr.household, None)
