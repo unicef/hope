@@ -4,6 +4,7 @@ import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import {
+  DeduplicationEngineSimilarityPairIndividualNode,
   IndividualDetailedFragment,
   useIndividualLazyQuery,
 } from '@generated/graphql';
@@ -21,18 +22,10 @@ import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { useProgramContext } from 'src/programContext';
 
-export interface Individual {
-  __typename?: 'DeduplicationEngineSimilarityPairIndividualNode';
-  unicefId?: string;
-  fullName?: string;
-  photo?: string;
-}
-
 export interface BiometricsResultsProps {
-  ticketId: string;
   similarityScore: string;
   individual1?: IndividualDetailedFragment;
-  individual2?: Individual;
+  individual2?: DeduplicationEngineSimilarityPairIndividualNode;
   openLinkText?: string;
   modalTitle?: string;
 }
@@ -65,15 +58,13 @@ export const BiometricsResultsRdi = ({
     IndividualDetailedFragment | undefined
   >(individual1);
   const [individual2Data, setIndividual2Data] = useState<
-    Individual | undefined
+    DeduplicationEngineSimilarityPairIndividualNode | IndividualDetailedFragment
   >(individual2);
 
-  console.log(individual1, individual2);
+  //TODO: ADD PERMISSIONS
+  const canViewBiometricsResults = true;
+  hasPermissions(PERMISSIONS.GRIEVANCES_VIEW_BIOMETRIC_RESULTS, permissions);
 
-  const canViewBiometricsResults = hasPermissions(
-    PERMISSIONS.GRIEVANCES_VIEW_BIOMETRIC_RESULTS,
-    permissions,
-  );
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
@@ -102,20 +93,22 @@ export const BiometricsResultsRdi = ({
       loadIndividual1Data();
       loadIndividual2Data();
     }
-  }, [dialogOpen]);
+  }, [dialogOpen, loadIndividual1Data, loadIndividual2Data]);
 
   return (
     <>
       <Box p={2}>
-        <Button
-          onClick={(e) => {
-            e.stopPropagation();
-            setDialogOpen(true);
-          }}
-          data-cy="button-open-biometrics-results"
-        >
-          {t(openLinkText)}
-        </Button>
+        {canViewBiometricsResults && (
+          <Button
+            onClick={(e) => {
+              e.stopPropagation();
+              setDialogOpen(true);
+            }}
+            data-cy="button-open-biometrics-results"
+          >
+            {t(openLinkText)}
+          </Button>
+        )}
       </Box>
       <Dialog
         open={dialogOpen}

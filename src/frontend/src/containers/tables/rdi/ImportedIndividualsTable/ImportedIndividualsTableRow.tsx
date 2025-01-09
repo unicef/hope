@@ -9,7 +9,6 @@ import { BlackLink } from '@components/core/BlackLink';
 import { AnonTableCell } from '@components/core/Table/AnonTableCell';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
-import { DedupeResults } from '@components/rdi/details/DedupeResults';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { choicesToDict, sexToCapitalize } from '@utils/utils';
 import { ReactElement } from 'react';

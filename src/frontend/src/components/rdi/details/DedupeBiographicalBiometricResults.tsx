@@ -99,7 +99,7 @@ export function DedupeBiographicalBiometricResults({
     );
   });
 
-  console.log('biometricResults:', biometricResults);
+  //TODO: Add biometric results (ID, Full Name, Age, Administrative Level 2, Similarity Score, Proximity to the Score)
   const biometricRows = biometricResults.map((result) => {
     return createData(
       result.unicefId,
@@ -118,8 +118,9 @@ export function DedupeBiographicalBiometricResults({
 
   const biographicalRows = rows.sort((a, b) => b.score - a.score);
   const biometricSortedRows = biometricRows.sort((a, b) => b.score - a.score);
-  console.log('biographicalRows:', biographicalRows);
-  console.log('biometricSortedRows:', biometricSortedRows);
+  console.log('biographicalRows', biographicalRows);
+  console.log('biometricSortedRows', biometricSortedRows);
+
   return (
     <>
       <Error
