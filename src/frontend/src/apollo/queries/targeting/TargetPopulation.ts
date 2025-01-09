@@ -4,6 +4,7 @@ export const TARGET_POPULATION_QUERY = gql`
   query TargetPopulation($id: ID!) {
     paymentPlan(id: $id) {
       id
+      version
       name
       status
       buildStatus
@@ -19,6 +20,15 @@ export const TARGET_POPULATION_QUERY = gql`
       vulnerabilityScoreMin
       vulnerabilityScoreMax
       steficonRule {
+        __typename
+        id
+        rule {
+          __typename
+          id
+          name
+        }
+      }
+      steficonRuleTargeting {
         __typename
         id
         rule {
