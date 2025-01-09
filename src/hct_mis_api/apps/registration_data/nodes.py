@@ -52,7 +52,7 @@ class DeduplicationEngineSimilarityPairIndividualNode(graphene.ObjectType):
         from hct_mis_api.apps.household.models import Individual
 
         # photo url serialization storage timeout
-        individual = Individual.objects.get(id=parent.get("id"))
+        individual = Individual.all_objects.get(id=parent.get("id"))
         return individual.photo.url if individual.photo else None
 
     @staticmethod
