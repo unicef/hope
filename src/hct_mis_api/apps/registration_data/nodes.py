@@ -2,7 +2,6 @@ from datetime import date
 from typing import Any, Optional
 
 import graphene
-from apps.core.utils import encode_id_base64
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 
@@ -11,6 +10,7 @@ from hct_mis_api.apps.account.permissions import (
     Permissions,
     hopePermissionClass,
 )
+from hct_mis_api.apps.core.utils import encode_id_base64
 
 
 class DeduplicationResultNode(graphene.ObjectType):
@@ -56,7 +56,7 @@ class DeduplicationEngineSimilarityPairIndividualNode(graphene.ObjectType):
         return individual.photo.url if individual.photo else None
 
     @staticmethod
-    def resolve_id(parent: Any, info: Any) -> str:
+    def resolve_id(parent: Any, info: Any) -> Optional[str]:
         return encode_id_base64(parent.get("id"), "Individual")
 
     @staticmethod
