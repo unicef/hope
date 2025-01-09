@@ -1118,7 +1118,14 @@ class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
         payment_plan_id = decode_id_string_required(payment_plan_id)
         payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
         check_concurrency_version_in_mutation(version, payment_plan)
-        cls.has_permission(info, Permissions.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS, payment_plan.business_area)
+
+        if payment_plan.status in PaymentPlan.CAN_RUN_ENGINE_FORMULA_FOR_VULNERABILITY_SCORE:
+            cls.has_permission(info, Permissions.TARGETING_UPDATE, payment_plan.business_area)
+        if payment_plan.status in PaymentPlan.CAN_RUN_ENGINE_FORMULA_FOR_ENTITLEMENT:
+            cls.has_permission(
+                info, Permissions.PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS, payment_plan.business_area
+            )
+
         if payment_plan.status not in PaymentPlan.CAN_RUN_ENGINE_FORMULA:
             raise GraphQLError("You can run formula only for 'Locked', 'Error' or 'Completed' statuses.")
 
@@ -1126,6 +1133,16 @@ class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
         engine_rule = get_object_or_404(Rule, id=decode_id_string(steficon_rule_id))
         if not engine_rule.enabled or engine_rule.deprecated:
             raise GraphQLError("This engine rule is not enabled or is deprecated.")
+
+        # PaymentPlan vulnerability_score
+        if payment_plan.status in PaymentPlan.CAN_RUN_ENGINE_FORMULA_FOR_VULNERABILITY_SCORE:
+            rule_commit = engine_rule.latest
+            if not engine_rule.enabled or engine_rule.deprecated:
+                raise GraphQLError("This engine rule is not enabled or is deprecated.")
+            payment_plan.steficon_rule_targeting = rule_commit
+            payment_plan.status = PaymentPlan.Status.TP_STEFICON_WAIT
+            payment_plan.save()
+            payment_plan_apply_steficon_hh_selection.delay(str(payment_plan.pk), str(engine_rule.pk))
 
         # PaymentPlan entitlement
         if payment_plan.status in PaymentPlan.CAN_RUN_ENGINE_FORMULA_FOR_ENTITLEMENT:
@@ -1135,24 +1152,6 @@ class SetSteficonRuleOnPaymentPlanPaymentListMutation(PermissionMutation):
             payment_plan.save()
             payment_plan_apply_engine_rule.delay(str(payment_plan.pk), str(engine_rule.pk))
 
-        # PaymentPlan vulnerability_score
-        if payment_plan.status in PaymentPlan.CAN_RUN_ENGINE_FORMULA_FOR_VULNERABILITY_SCORE:
-            encoded_steficon_rule_id = steficon_rule_id
-            if encoded_steficon_rule_id is not None:
-                steficon_rule_id = decode_id_string_required(encoded_steficon_rule_id)
-                steficon_rule = get_object_or_404(Rule, id=steficon_rule_id)
-                steficon_rule_commit = steficon_rule.latest
-                if not steficon_rule.enabled or steficon_rule.deprecated:
-                    raise GraphQLError("This engine rule is not enabled or is deprecated.")
-                payment_plan.steficon_rule_targeting = steficon_rule_commit
-                payment_plan.status = PaymentPlan.Status.TP_STEFICON_WAIT
-                payment_plan.save()
-                payment_plan_apply_steficon_hh_selection.delay(str(payment_plan.pk), str(engine_rule.pk))
-            else:
-                payment_plan.steficon_rule_targeting = None
-                payment_plan.vulnerability_score_min = None
-                payment_plan.vulnerability_score_max = None
-                payment_plan.save()
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
             business_area_field="business_area",

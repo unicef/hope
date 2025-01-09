@@ -71,8 +71,8 @@ mutation DeletePaymentPlan($paymentPlanId: ID!) {
 """
 
 SET_STEFICON_RULE_ON_TP_MUTATION = """
-mutation setSteficonRuleOnTargetPopulation($paymentPlanId: ID!, $steficonRuleId: ID) {
-    setSteficonRuleOnTargetPopulation(paymentPlanId: $paymentPlanId, steficonRuleId: $steficonRuleId) {
+mutation setSteficonRuleOnPaymentPlanPaymentList($paymentPlanId: ID!, $steficonRuleId: ID!, $version: BigInt) {
+    setSteficonRuleOnPaymentPlanPaymentList(paymentPlanId: $paymentPlanId, steficonRuleId: $steficonRuleId, version: $version) {
         paymentPlan {
             name
             status
@@ -231,31 +231,27 @@ class TestPaymentPlanMutation(APITestCase):
         [
             ("without_permission", []),
             ("with_permission", [Permissions.TARGETING_UPDATE]),
-            ("with_permission_without_rule_engine_id", [Permissions.TARGETING_UPDATE]),
         ]
     )
     def test_set_steficon_target_population_mutation(self, name: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         payment_plan = PaymentPlanFactory(
             name="TestSetSteficonTP",
-            status=PaymentPlan.Status.OPEN,
+            status=PaymentPlan.Status.TP_LOCKED,
             program_cycle=self.cycle,
             created_by=self.user,
         )
 
         rule_for_tp = RuleCommitFactory(rule__type=Rule.TYPE_TARGETING, version=11)
 
-        rule_commit_id = (
-            self.id_to_base64(rule_for_tp.rule.id, "RuleCommitNode")
-            if name != "with_permission_without_rule_engine_id"
-            else None
-        )
+        rule_commit_id = self.id_to_base64(rule_for_tp.rule.id, "RuleCommitNode")
         self.snapshot_graphql_request(
             request_string=SET_STEFICON_RULE_ON_TP_MUTATION,
             context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
             variables={
                 "paymentPlanId": self.id_to_base64(payment_plan.id, "PaymentPlanNode"),
                 "steficonRuleId": rule_commit_id,
+                "version": payment_plan.version,
             },
         )
 

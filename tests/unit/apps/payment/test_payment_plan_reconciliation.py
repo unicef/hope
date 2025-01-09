@@ -126,8 +126,8 @@ mutation FinalizeTP($id: ID!) {
 """
 
 SET_STEFICON_RULE_MUTATION = """
-mutation SetSteficonRuleOnPaymentPlanPaymentList($paymentPlanId: ID!, $steficonRuleId: ID!) {
-    setSteficonRuleOnPaymentPlanPaymentList(paymentPlanId: $paymentPlanId, steficonRuleId: $steficonRuleId) {
+mutation setSteficonRuleOnPaymentPlanPaymentList($paymentPlanId: ID!, $steficonRuleId: ID!, $version: BigInt) {
+    setSteficonRuleOnPaymentPlanPaymentList(paymentPlanId: $paymentPlanId, steficonRuleId: $steficonRuleId, version: $version) {
         paymentPlan {
             unicefId
         }
@@ -498,12 +498,14 @@ class TestPaymentPlanReconciliation(APITestCase):
         self.assertEqual(payment_plan.background_action_status, None)
 
         with patch("hct_mis_api.apps.payment.mutations.payment_plan_apply_engine_rule") as mock:
+            payment_plan.refresh_from_db()
             set_steficon_response = self.graphql_request(
                 request_string=SET_STEFICON_RULE_MUTATION,
                 context={"user": self.user},
                 variables={
                     "paymentPlanId": encoded_payment_plan_id,
                     "steficonRuleId": encode_id_base64(rule.id, "Rule"),
+                    "version": payment_plan.version,
                 },
             )
             assert "errors" not in set_steficon_response, set_steficon_response
@@ -1063,6 +1065,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             variables={
                 "paymentPlanId": encode_id_base64(pp.id, "PaymentPlan"),
                 "steficonRuleId": encode_id_base64(rule.id, "Rule"),
+                "version": pp.version,
             },
         )
 
@@ -1079,6 +1082,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             variables={
                 "paymentPlanId": encode_id_base64(payment_plan.id, "PaymentPlan"),
                 "steficonRuleId": encode_id_base64(rule.id, "Rule"),
+                "version": payment_plan.version,
             },
         )
 
@@ -1095,6 +1099,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             variables={
                 "paymentPlanId": encode_id_base64(payment_plan.id, "PaymentPlan"),
                 "steficonRuleId": encode_id_base64(rule.id, "Rule"),
+                "version": payment_plan.version,
             },
         )
 
@@ -1113,6 +1118,7 @@ class TestPaymentPlanReconciliation(APITestCase):
                 variables={
                     "paymentPlanId": encode_id_base64(payment_plan.id, "PaymentPlan"),
                     "steficonRuleId": encode_id_base64(rule.id, "Rule"),
+                    "version": payment_plan.version,
                 },
             )
 

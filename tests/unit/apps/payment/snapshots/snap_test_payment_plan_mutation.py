@@ -143,7 +143,7 @@ snapshots['TestPaymentPlanMutation::test_delete_payment_plan_mutation_1_with_per
 
 snapshots['TestPaymentPlanMutation::test_set_steficon_target_population_mutation_0_without_permission 1'] = {
     'data': {
-        'setSteficonRuleOnTargetPopulation': None
+        'setSteficonRuleOnPaymentPlanPaymentList': None
     },
     'errors': [
         {
@@ -155,7 +155,7 @@ snapshots['TestPaymentPlanMutation::test_set_steficon_target_population_mutation
             ],
             'message': 'Permission Denied: User does not have correct permission.',
             'path': [
-                'setSteficonRuleOnTargetPopulation'
+                'setSteficonRuleOnPaymentPlanPaymentList'
             ]
         }
     ]
@@ -163,21 +163,10 @@ snapshots['TestPaymentPlanMutation::test_set_steficon_target_population_mutation
 
 snapshots['TestPaymentPlanMutation::test_set_steficon_target_population_mutation_1_with_permission 1'] = {
     'data': {
-        'setSteficonRuleOnTargetPopulation': {
+        'setSteficonRuleOnPaymentPlanPaymentList': {
             'paymentPlan': {
                 'name': 'TestSetSteficonTP',
                 'status': 'STEFICON_WAIT'
-            }
-        }
-    }
-}
-
-snapshots['TestPaymentPlanMutation::test_set_steficon_target_population_mutation_2_with_permission_without_rule_engine_id 1'] = {
-    'data': {
-        'setSteficonRuleOnTargetPopulation': {
-            'paymentPlan': {
-                'name': 'TestSetSteficonTP',
-                'status': 'OPEN'
             }
         }
     }
