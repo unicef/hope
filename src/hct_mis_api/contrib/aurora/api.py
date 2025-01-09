@@ -1,3 +1,17 @@
+from rest_framework import serializers
+
+from hct_mis_api.contrib.aurora.models import Organization
+
+
+class OrganizationSerializer(serializers.ModelSerializer):
+    aurora_id = serializers.ReadOnlyField(source="source_id")
+    hope_id = serializers.ReadOnlyField(source="business_area.pk")
+
+    class Meta:
+        model = Organization
+        fields = ("aurora_id", "hope_id", "name")
+
+
 # from rest_framework import serializers
 # from rest_framework.generics import ListAPIView
 #

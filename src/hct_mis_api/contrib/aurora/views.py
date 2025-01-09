@@ -4,14 +4,20 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.http import Http404, HttpRequest
+from django.http.response import HttpResponseBase
+from django.utils.decorators import method_decorator
 from django.utils.functional import cached_property
+from django.views.decorators.cache import cache_page
 from django.views.generic import TemplateView
 from django.views.generic.edit import ProcessFormView
 
 from admin_extra_buttons.utils import HttpResponseRedirectToReferrer
+from rest_framework.generics import ListAPIView
 from sentry_sdk import set_tag
 
-from hct_mis_api.contrib.aurora.models import Registration
+from hct_mis_api.api.models import Grant
+from hct_mis_api.contrib.aurora.api import OrganizationSerializer
+from hct_mis_api.contrib.aurora.models import Organization, Registration
 from hct_mis_api.contrib.aurora.utils import fetch_metadata
 
 
@@ -60,3 +66,13 @@ class RegistrationDataView(PermissionRequiredMixin, TemplateView):
             return reg
         except Registration.DoesNotExist:  # pragma: no coalidateer
             raise Http404
+
+
+class OrganizationListView(ListAPIView):
+    queryset = Organization.objects.all()
+    serializer_class = OrganizationSerializer
+    permission = Grant.API_READ_ONLY
+
+    @method_decorator(cache_page(60 * 50 * 12))  # TODO: what cache we have to use?? 12 hrs OR
+    def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponseBase:
+        return super().dispatch(*args, **kwargs)
