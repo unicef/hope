@@ -1217,8 +1217,10 @@ export enum DataCollectingTypeType {
 
 export type DeduplicationEngineSimilarityPairIndividualNode = {
   __typename?: 'DeduplicationEngineSimilarityPairIndividualNode';
+  age?: Maybe<Scalars['Int']['output']>;
   fullName?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['String']['output']>;
+  location?: Maybe<Scalars['String']['output']>;
   photo?: Maybe<Scalars['String']['output']>;
   similarityScore?: Maybe<Scalars['Float']['output']>;
   unicefId?: Maybe<Scalars['String']['output']>;
@@ -23942,8 +23944,10 @@ export interface DecimalScalarConfig extends GraphQLScalarTypeConfig<ResolversTy
 }
 
 export type DeduplicationEngineSimilarityPairIndividualNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeduplicationEngineSimilarityPairIndividualNode'] = ResolversParentTypes['DeduplicationEngineSimilarityPairIndividualNode']> = {
+  age?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   fullName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  location?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   photo?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   similarityScore?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   unicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;

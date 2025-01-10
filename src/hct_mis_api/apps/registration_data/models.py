@@ -449,12 +449,15 @@ class DeduplicationEngineSimilarityPair(models.Model):
         duplicates = []
         for pair in similarity_pairs:
             duplicate = pair.individual2 if pair.individual1 == individual else pair.individual1
+            household = duplicate.household
             duplicates.append(
                 dict(
                     id=str(duplicate.id),
                     unicef_id=str(duplicate.unicef_id),
                     full_name=duplicate.full_name,
                     similarity_score=float(pair.similarity_score),
+                    age=duplicate.age,
+                    location=household.admin2.name if duplicate.household and duplicate.household.admin2 else None,
                 )
             )
 

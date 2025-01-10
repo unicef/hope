@@ -45,7 +45,10 @@ class DeduplicationEngineSimilarityPairIndividualNode(graphene.ObjectType):
     photo = graphene.String()
     full_name = graphene.String()
     unicef_id = graphene.String()
-    similarity_score = graphene.Float()  # optional for RDI population view duplicates modal
+    # optional for RDI population view duplicates modal:
+    similarity_score = graphene.Float()
+    age = graphene.Int()
+    location = graphene.String()
 
     @staticmethod
     def resolve_photo(parent: Any, info: Any) -> Optional[graphene.String]:

@@ -823,6 +823,8 @@ type DeduplicationEngineSimilarityPairIndividualNode {
   fullName: String
   unicefId: String
   similarityScore: Float
+  age: Int
+  location: String
 }
 
 type DeduplicationEngineSimilarityPairNode {

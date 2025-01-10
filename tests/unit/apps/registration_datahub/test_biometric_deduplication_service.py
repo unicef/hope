@@ -643,6 +643,8 @@ class BiometricDeduplicationServiceTest(TestCase):
                 "unicef_id": str(ind4.unicef_id),
                 "full_name": str(ind4.full_name),
                 "similarity_score": 85.0,
+                "age": ind4.age,
+                "location": None,
             },
         ]
         assert ind1.biometric_deduplication_golden_record_status == DUPLICATE
@@ -652,12 +654,16 @@ class BiometricDeduplicationServiceTest(TestCase):
                 "unicef_id": str(ind2.unicef_id),
                 "full_name": str(ind2.full_name),
                 "similarity_score": 70.0,
+                "age": ind2.age,
+                "location": None,
             },
             {
                 "id": str(ind3.id),
                 "unicef_id": str(ind3.unicef_id),
                 "full_name": str(ind3.full_name),
                 "similarity_score": 80.0,
+                "age": ind3.age,
+                "location": None,
             },
         ]
         assert ind1.biometric_deduplication_batch_status == DUPLICATE
@@ -669,12 +675,16 @@ class BiometricDeduplicationServiceTest(TestCase):
                 "unicef_id": str(ind4.unicef_id),
                 "full_name": str(ind4.full_name),
                 "similarity_score": 80.0,
+                "age": ind4.age,
+                "location": None,
             },
             {
                 "id": str(ind5.id),
                 "unicef_id": str(ind5.unicef_id),
                 "full_name": str(ind5.full_name),
                 "similarity_score": 90.0,
+                "age": ind5.age,
+                "location": None,
             },
         ]
         assert ind2.biometric_deduplication_golden_record_status == DUPLICATE
@@ -685,6 +695,8 @@ class BiometricDeduplicationServiceTest(TestCase):
                 "unicef_id": str(ind1.unicef_id),
                 "full_name": str(ind1.full_name),
                 "similarity_score": 70.0,
+                "age": ind1.age,
+                "location": None,
             },
         ]
         assert ind2.biometric_deduplication_batch_status == DUPLICATE
@@ -696,6 +708,8 @@ class BiometricDeduplicationServiceTest(TestCase):
                 "unicef_id": str(ind1.unicef_id),
                 "full_name": str(ind1.full_name),
                 "similarity_score": 80.0,
+                "age": ind1.age,
+                "location": None,
             },
         ]
         assert ind2.biometric_deduplication_batch_status == DUPLICATE
@@ -750,6 +764,8 @@ class BiometricDeduplicationServiceTest(TestCase):
                 "unicef_id": str(ind2.unicef_id),
                 "full_name": str(ind2.full_name),
                 "similarity_score": 70.0,
+                "age": ind2.age,
+                "location": None,
             },
         ]
         assert ind1.biometric_deduplication_golden_record_status == DUPLICATE
