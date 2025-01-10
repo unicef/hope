@@ -14,6 +14,7 @@ from hct_mis_api.apps.core.utils import encode_id_base64
 
 
 class DeduplicationResultNode(graphene.ObjectType):
+    unicef_id = graphene.String()
     hit_id = graphene.ID()
     full_name = graphene.String()
     score = graphene.Float()
@@ -39,6 +40,12 @@ class DeduplicationResultNode(graphene.ObjectType):
     def resolve_distinct(self, info: Any) -> bool:
         return self.get("distinct", False)
 
+    def resolve_unicef_id(self, info: Any) -> str:
+        from hct_mis_api.apps.household.models import Individual
+
+        individual = Individual.all_objects.get(id=self.get("hit_id"))
+        return str(individual.unicef_id)
+
 
 class DeduplicationEngineSimilarityPairIndividualNode(graphene.ObjectType):
     id = graphene.String()
@@ -61,10 +68,6 @@ class DeduplicationEngineSimilarityPairIndividualNode(graphene.ObjectType):
     @staticmethod
     def resolve_id(parent: Any, info: Any) -> Optional[str]:
         return encode_id_base64(parent.get("id"), "Individual")
-
-    @staticmethod
-    def resolve_similarity_score(parent: Any, info: Any) -> Optional[float]:
-        return parent.get("similarity_score", None)
 
 
 class DeduplicationEngineSimilarityPairNode(BaseNodePermissionMixin, graphene.ObjectType):

@@ -834,6 +834,7 @@ type DeduplicationEngineSimilarityPairNode {
 }
 
 type DeduplicationResultNode {
+  unicefId: String
   hitId: ID
   fullName: String
   score: Float

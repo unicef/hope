@@ -1243,6 +1243,7 @@ export type DeduplicationResultNode = {
   location?: Maybe<Scalars['String']['output']>;
   proximityToScore?: Maybe<Scalars['Float']['output']>;
   score?: Maybe<Scalars['Float']['output']>;
+  unicefId?: Maybe<Scalars['String']['output']>;
 };
 
 export type DeleteHouseholdApproveMutation = {
@@ -23970,6 +23971,7 @@ export type DeduplicationResultNodeResolvers<ContextType = any, ParentType exten
   location?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   proximityToScore?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   score?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  unicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
