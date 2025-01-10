@@ -61,9 +61,10 @@ export const BiometricsResultsRdi = ({
     DeduplicationEngineSimilarityPairIndividualNode | IndividualDetailedFragment
   >(individual2);
 
-  //TODO: ADD PERMISSIONS
-  const canViewBiometricsResults = true;
-  hasPermissions(PERMISSIONS.GRIEVANCES_VIEW_BIOMETRIC_RESULTS, permissions);
+  const canViewBiometricsResults = hasPermissions(
+    PERMISSIONS.GRIEVANCES_VIEW_BIOMETRIC_RESULTS,
+    permissions,
+  );
 
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;

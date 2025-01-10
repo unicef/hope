@@ -20,13 +20,13 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import { decodeIdString } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import { MiśTheme } from '../../../theme';
 import { BiometricsResultsRdi } from './BiometricsResultsRdi';
+import { decodeIdString } from '@utils/utils';
 
 const Error = styled.span`
   color: ${({ theme }: { theme: MiśTheme }) => theme.hctPalette.red};
@@ -65,9 +65,10 @@ export function DedupeBiographicalBiometricResults({
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const createBiographicalData = (
+    unicefId: string,
     hitId: string,
     fullName: string,
-    age: string,
+    age: number,
     location: string | undefined,
     score: number | undefined,
     proximityToScore: number | undefined,
@@ -79,6 +80,7 @@ export function DedupeBiographicalBiometricResults({
       location: location || 'N/A',
       score: score || 0,
       proximityToScore: proximityToScore || 0,
+      unicefId,
     };
   };
 
@@ -86,7 +88,7 @@ export function DedupeBiographicalBiometricResults({
     unicefId: string,
     hitId: string,
     fullName: string,
-    age: string,
+    age: number,
     location: string | undefined,
     similarityScore: number | undefined,
     proximityToScore: number | undefined,
@@ -106,6 +108,7 @@ export function DedupeBiographicalBiometricResults({
 
   const rows = results.map((result) => {
     return createBiographicalData(
+      null,
       result.hitId,
       result.fullName,
       result.age,
@@ -136,8 +139,6 @@ export function DedupeBiographicalBiometricResults({
   const biometricSortedRows = biometricRows.sort(
     (a, b) => b.similarityScore - a.similarityScore,
   );
-  console.log('biographicalRows', biographicalRows);
-  console.log('biometricSortedRows', biometricSortedRows);
 
   return (
     <>
@@ -165,7 +166,7 @@ export function DedupeBiographicalBiometricResults({
             <div>
               {t('Duplicates of')}{' '}
               <Bold>
-                {individual.fullName} ({decodeIdString(individual.id)})
+                {individual.fullName} ({individual.unicefId})
               </Bold>{' '}
               {isInBatch ? t('within batch ') : t('against population ')}
               {t('are listed below.')}
@@ -194,12 +195,11 @@ export function DedupeBiographicalBiometricResults({
               </TableHead>
               <TableBody>
                 {biographicalRows.map((row) => {
-                  console.log('row', row);
                   return (
                     <TableRow key={row.hitId}>
                       <TableCell>
                         <BlackLink to={getIndividualDetailsPath(row.hitId)}>
-                          {row.hitId}
+                          {decodeIdString(row.hitId)}
                         </BlackLink>
                       </TableCell>
                       <TableCell align="left">{row.fullName}</TableCell>

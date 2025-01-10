@@ -17,7 +17,6 @@ import { DedupeBiographicalBiometricResults } from '@components/rdi/details/Dedu
 interface ImportedIndividualsTableRowProps {
   individual;
   choices: HouseholdChoiceDataQuery;
-  isMerged: boolean;
   rdi;
 }
 
