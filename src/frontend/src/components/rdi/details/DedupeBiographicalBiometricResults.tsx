@@ -26,7 +26,6 @@ import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import { MiśTheme } from '../../../theme';
 import { BiometricsResultsRdi } from './BiometricsResultsRdi';
-import { decodeIdString } from '@utils/utils';
 
 const Error = styled.span`
   color: ${({ theme }: { theme: MiśTheme }) => theme.hctPalette.red};
