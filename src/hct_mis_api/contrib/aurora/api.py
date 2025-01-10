@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from hct_mis_api.contrib.aurora.models import Organization
+from hct_mis_api.contrib.aurora.models import Organization, Project, Registration
 
 
 class OrganizationSerializer(serializers.ModelSerializer):
@@ -10,6 +10,26 @@ class OrganizationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Organization
         fields = ("aurora_id", "hope_id", "name")
+
+
+class ProjectSerializer(serializers.ModelSerializer):
+    organization = serializers.ReadOnlyField(source="organization.slug")
+    aurora_id = serializers.ReadOnlyField(source="source_id")
+    hope_id = serializers.ReadOnlyField(source="programme.pk")
+
+    class Meta:
+        model = Project
+        fields = ("organization", "aurora_id", "hope_id", "name")
+
+
+class RegistrationSerializer(serializers.ModelSerializer):
+    organization = serializers.ReadOnlyField(source="project.organization.slug")
+    aurora_id = serializers.ReadOnlyField(source="source_id")
+    project = serializers.ReadOnlyField(source="project.pk")
+
+    class Meta:
+        model = Registration
+        fields = ("organization", "aurora_id", "project", "name")
 
 
 # from rest_framework import serializers

@@ -12,12 +12,18 @@ from django.views.generic import TemplateView
 from django.views.generic.edit import ProcessFormView
 
 from admin_extra_buttons.utils import HttpResponseRedirectToReferrer
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.generics import ListAPIView
 from sentry_sdk import set_tag
 
-from hct_mis_api.api.models import Grant
-from hct_mis_api.contrib.aurora.api import OrganizationSerializer
-from hct_mis_api.contrib.aurora.models import Organization, Registration
+from hct_mis_api.api.endpoints.base import HOPEAPIView
+from hct_mis_api.api.filters import ProjectFilter, RegistrationFilter
+from hct_mis_api.contrib.aurora.api import (
+    OrganizationSerializer,
+    ProjectSerializer,
+    RegistrationSerializer,
+)
+from hct_mis_api.contrib.aurora.models import Organization, Project, Registration
 from hct_mis_api.contrib.aurora.utils import fetch_metadata
 
 
@@ -68,11 +74,32 @@ class RegistrationDataView(PermissionRequiredMixin, TemplateView):
             raise Http404
 
 
-class OrganizationListView(ListAPIView):
+class OrganizationListView(HOPEAPIView, ListAPIView):
     queryset = Organization.objects.all()
     serializer_class = OrganizationSerializer
-    permission = Grant.API_READ_ONLY
 
     @method_decorator(cache_page(60 * 50 * 12))  # TODO: what cache we have to use?? 12 hrs OR
     def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponseBase:
-        return super().dispatch(*args, **kwargs)
+        return super().dispatch(request, *args, **kwargs)
+
+
+class ProjectListView(HOPEAPIView, ListAPIView):
+    queryset = Project.objects.all()
+    serializer_class = ProjectSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = ProjectFilter
+
+    @method_decorator(cache_page(60 * 1))  # TODO: fix it!!! XD
+    def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponseBase:
+        return super().dispatch(request, *args, **kwargs)
+
+
+class RegistrationListView(HOPEAPIView, ListAPIView):
+    queryset = Registration.objects.all()
+    serializer_class = RegistrationSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = RegistrationFilter
+
+    @method_decorator(cache_page(60 * 1))  # TODO:  just added for test fix it!
+    def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponseBase:
+        return super().dispatch(request, *args, **kwargs)
