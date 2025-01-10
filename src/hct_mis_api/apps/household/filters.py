@@ -454,7 +454,7 @@ class IndividualFilter(FilterSet):
                 Q(deduplication_golden_record_status=DUPLICATE)
                 | Q(deduplication_batch_status=DUPLICATE_IN_BATCH)
                 | Q(biometric_deduplication_batch_status=DUPLICATE_IN_BATCH)
-                | Q(biomdeduplication_golden_record_status=DUPLICATE)
+                | Q(biometric_deduplication_golden_record_status=DUPLICATE)
             )
         return queryset
 
