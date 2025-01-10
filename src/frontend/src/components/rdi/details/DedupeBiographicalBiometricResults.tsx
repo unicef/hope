@@ -64,32 +64,48 @@ export function DedupeBiographicalBiometricResults({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
-  function createData(
-    hitId,
-    fullName,
-    age,
-    location,
-    score,
-    proximityToScore,
-  ): {
-    hitId: number;
-    fullName: string;
-    age: number;
-    location: string;
-    score: number;
-    proximityToScore: number;
-  } {
+  const createBiographicalData = (
+    hitId: string,
+    fullName: string,
+    age: string,
+    location: string | undefined,
+    score: number | undefined,
+    proximityToScore: number | undefined,
+  ) => {
     return {
       hitId,
       fullName,
       age,
-      location,
-      score,
-      proximityToScore,
+      location: location || 'N/A',
+      score: score || 0,
+      proximityToScore: proximityToScore || 0,
     };
-  }
+  };
+
+  const createBiometricData = (
+    unicefId: string,
+    hitId: string,
+    fullName: string,
+    age: string,
+    location: string | undefined,
+    similarityScore: number | undefined,
+    proximityToScore: number | undefined,
+    id: string,
+  ) => {
+    return {
+      unicefId,
+      hitId,
+      fullName,
+      age,
+      location: location || 'N/A',
+      similarityScore: similarityScore || 0,
+      proximityToScore: proximityToScore || 0,
+      id,
+    };
+  };
+
   const rows = results.map((result) => {
-    return createData(
+    return createBiographicalData(
       result.hitId,
       result.fullName,
       result.age,
@@ -99,25 +115,27 @@ export function DedupeBiographicalBiometricResults({
     );
   });
 
-  //TODO: Add biometric results (ID, Full Name, Age, Administrative Level 2, Similarity Score, Proximity to the Score)
   const biometricRows = biometricResults.map((result) => {
-    return createData(
+    return createBiometricData(
       result.unicefId,
+      result.id,
       result.fullName,
       result.age,
       result.location,
-      result.score,
+      result.similarityScore,
       null,
+      result.id,
     );
   });
-
   const getIndividualDetailsPath = (id): string => {
     const path = `/${baseUrl}/population/individuals/${id}`;
     return path;
   };
 
   const biographicalRows = rows.sort((a, b) => b.score - a.score);
-  const biometricSortedRows = biometricRows.sort((a, b) => b.score - a.score);
+  const biometricSortedRows = biometricRows.sort(
+    (a, b) => b.similarityScore - a.similarityScore,
+  );
   console.log('biographicalRows', biographicalRows);
   console.log('biometricSortedRows', biometricSortedRows);
 
@@ -175,24 +193,27 @@ export function DedupeBiographicalBiometricResults({
                 </TableRow>
               </TableHead>
               <TableBody>
-                {biographicalRows.map((row) => (
-                  <TableRow key={row.hitId}>
-                    <TableCell>
-                      <BlackLink to={getIndividualDetailsPath(row.hitId)}>
-                        {decodeIdString(row.hitId.toString())}
-                      </BlackLink>
-                    </TableCell>
-                    <TableCell align="left">{row.fullName}</TableCell>
-                    <TableCell align="left">
-                      {row.age || t('Not provided')}
-                    </TableCell>
-                    <TableCell align="left">{row.location}</TableCell>
-                    <TableCell align="left">{row.score}</TableCell>
-                    <TableCell align="left">
-                      {row.proximityToScore > 0 && '+'} {row.proximityToScore}
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {biographicalRows.map((row) => {
+                  console.log('row', row);
+                  return (
+                    <TableRow key={row.hitId}>
+                      <TableCell>
+                        <BlackLink to={getIndividualDetailsPath(row.hitId)}>
+                          {row.hitId}
+                        </BlackLink>
+                      </TableCell>
+                      <TableCell align="left">{row.fullName}</TableCell>
+                      <TableCell align="left">
+                        {row.age || t('Not provided')}
+                      </TableCell>
+                      <TableCell align="left">{row.location}</TableCell>
+                      <TableCell align="left">{row.score}</TableCell>
+                      <TableCell align="left">
+                        {row.proximityToScore > 0 && '+'} {row.proximityToScore}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}{' '}
               </TableBody>
             </StyledTable>
           </div>
@@ -219,8 +240,8 @@ export function DedupeBiographicalBiometricResults({
                 {biometricSortedRows.map((row) => (
                   <TableRow key={row.hitId}>
                     <TableCell>
-                      <BlackLink to={getIndividualDetailsPath(row.hitId)}>
-                        {decodeIdString(row.hitId.toString())}
+                      <BlackLink to={getIndividualDetailsPath(row.id)}>
+                        {row.unicefId}
                       </BlackLink>
                     </TableCell>
                     <TableCell align="left">{row.fullName}</TableCell>
@@ -228,10 +249,10 @@ export function DedupeBiographicalBiometricResults({
                       {row.age || t('Not provided')}
                     </TableCell>
                     <TableCell align="left">{row.location}</TableCell>
-                    <TableCell align="left">{row.score}</TableCell>
+                    <TableCell align="left">{row.similarityScore}</TableCell>
                     <TableCell align="left">
                       <BiometricsResultsRdi
-                        similarityScore={row.score?.toString()}
+                        similarityScore={row.similarityScore}
                         individual1={individual}
                         individual2={row}
                       />

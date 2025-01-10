@@ -23,7 +23,7 @@ import { hasPermissions, PERMISSIONS } from 'src/config/permissions';
 import { useProgramContext } from 'src/programContext';
 
 export interface BiometricsResultsProps {
-  similarityScore: string;
+  similarityScore: number;
   individual1?: IndividualDetailedFragment;
   individual2?: DeduplicationEngineSimilarityPairIndividualNode;
   openLinkText?: string;
