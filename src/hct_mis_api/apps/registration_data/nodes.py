@@ -10,7 +10,7 @@ from hct_mis_api.apps.account.permissions import (
     Permissions,
     hopePermissionClass,
 )
-from hct_mis_api.apps.core.utils import encode_id_base64
+from hct_mis_api.apps.core.utils import decode_id_string, encode_id_base64
 
 
 class DeduplicationResultNode(graphene.ObjectType):
@@ -43,7 +43,7 @@ class DeduplicationResultNode(graphene.ObjectType):
     def resolve_unicef_id(self, info: Any) -> str:
         from hct_mis_api.apps.household.models import Individual
 
-        individual = Individual.all_objects.get(id=self.get("hit_id"))
+        individual = Individual.all_objects.get(id=decode_id_string(self.get("hit_id")))
         return str(individual.unicef_id)
 
 

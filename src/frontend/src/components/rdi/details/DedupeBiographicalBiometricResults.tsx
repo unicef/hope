@@ -66,42 +66,38 @@ export function DedupeBiographicalBiometricResults({
 
   const createBiographicalData = (
     unicefId: string,
-    hitId: string,
     fullName: string,
     age: number,
     location: string | undefined,
     score: number | undefined,
     proximityToScore: number | undefined,
+    hitId: string,
   ) => {
     return {
-      hitId,
+      unicefId,
       fullName,
       age,
       location: location || 'N/A',
       score: score || 0,
       proximityToScore: proximityToScore || 0,
-      unicefId,
+      hitId,
     };
   };
 
   const createBiometricData = (
     unicefId: string,
-    hitId: string,
     fullName: string,
     age: number,
     location: string | undefined,
     similarityScore: number | undefined,
-    proximityToScore: number | undefined,
     id: string,
   ) => {
     return {
       unicefId,
-      hitId,
       fullName,
       age,
       location: location || 'N/A',
       similarityScore: similarityScore || 0,
-      proximityToScore: proximityToScore || 0,
       id,
     };
   };
@@ -109,24 +105,22 @@ export function DedupeBiographicalBiometricResults({
   const rows = results.map((result) => {
     return createBiographicalData(
       result.unicefId,
-      result.hitId,
       result.fullName,
       result.age,
       result.location,
-      result.similarityScore,
+      result.score,
       result.proximityToScore,
+      result.hitId,
     );
   });
 
   const biometricRows = biometricResults.map((result) => {
     return createBiometricData(
       result.unicefId,
-      result.id,
       result.fullName,
       result.age,
       result.location,
       result.similarityScore,
-      null,
       result.id,
     );
   });
@@ -136,7 +130,7 @@ export function DedupeBiographicalBiometricResults({
   };
 
   const biographicalRows = rows.sort(
-    (a, b) => b.similarityScore - a.similarityScore,
+    (a, b) => b.score - a.score,
   );
   const biometricSortedRows = biometricRows.sort(
     (a, b) => b.similarityScore - a.similarityScore,
@@ -146,6 +140,7 @@ export function DedupeBiographicalBiometricResults({
     <>
       <Error
         onClick={(e) => {
+          e.preventDefault();
           e.stopPropagation();
           setOpen(true);
         }}
@@ -209,7 +204,7 @@ export function DedupeBiographicalBiometricResults({
                         {row.age || t('Not provided')}
                       </TableCell>
                       <TableCell align="left">{row.location}</TableCell>
-                      <TableCell align="left">{row.similarityScore}</TableCell>
+                      <TableCell align="left">{row.score}</TableCell>
                       <TableCell align="left">
                         {row.proximityToScore > 0 && '+'} {row.proximityToScore}
                       </TableCell>
@@ -240,7 +235,7 @@ export function DedupeBiographicalBiometricResults({
               </TableHead>
               <TableBody>
                 {biometricSortedRows.map((row) => (
-                  <TableRow key={row.hitId}>
+                  <TableRow key={row.id}>
                     <TableCell>
                       <BlackLink to={getIndividualDetailsPath(row.id)}>
                         {row.unicefId}
@@ -270,6 +265,7 @@ export function DedupeBiographicalBiometricResults({
             <Button
               onClick={(e) => {
                 setOpen(false);
+                e.preventDefault();
                 e.stopPropagation();
               }}
             >

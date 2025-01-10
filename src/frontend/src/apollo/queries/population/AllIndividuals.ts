@@ -72,6 +72,7 @@ export const AllIndividuals = gql`
             unicefId
             fullName
             age
+            location
             similarityScore
             photo
           }
@@ -80,10 +81,12 @@ export const AllIndividuals = gql`
             unicefId
             fullName
             age
+            location
             similarityScore
             photo
           }
           deduplicationBatchResults {
+            unicefId
             hitId
             fullName
             score
@@ -94,6 +97,7 @@ export const AllIndividuals = gql`
             distinct
           }
           deduplicationGoldenRecordResults {
+            unicefId
             hitId
             fullName
             score
