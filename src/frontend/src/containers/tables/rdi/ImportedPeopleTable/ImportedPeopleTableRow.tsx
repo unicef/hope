@@ -53,11 +53,11 @@ export function ImportedPeopleTableRow({
     IndividualBiometricDeduplicationBatchStatus.DuplicateInBatch,
     IndividualBiometricDeduplicationGoldenRecordStatus.NeedsAdjudication,
     IndividualBiometricDeduplicationBatchStatus.SimilarInBatch,
-    IndividualBiometricDeduplicationGoldenRecordStatus.NotProcessed,
-    IndividualBiometricDeduplicationBatchStatus.NotProcessed,
     IndividualBiometricDeduplicationGoldenRecordStatus.Postpone,
     IndividualBiometricDeduplicationGoldenRecordStatus.Unique,
     IndividualBiometricDeduplicationBatchStatus.UniqueInBatch,
+    IndividualBiometricDeduplicationGoldenRecordStatus.NotProcessed,
+    IndividualBiometricDeduplicationBatchStatus.NotProcessed,
   ];
 
   function renderDeduplicationStatus(
