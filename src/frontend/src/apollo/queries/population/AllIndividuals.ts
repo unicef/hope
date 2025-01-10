@@ -71,7 +71,7 @@ export const AllIndividuals = gql`
             id
             unicefId
             fullName
-            # age
+            age
             similarityScore
             photo
           }
@@ -79,7 +79,7 @@ export const AllIndividuals = gql`
             id
             unicefId
             fullName
-            # age
+            age
             similarityScore
             photo
           }

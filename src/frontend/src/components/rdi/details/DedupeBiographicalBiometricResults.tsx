@@ -108,12 +108,12 @@ export function DedupeBiographicalBiometricResults({
 
   const rows = results.map((result) => {
     return createBiographicalData(
-      null,
+      result.unicefId,
       result.hitId,
       result.fullName,
       result.age,
       result.location,
-      result.score,
+      result.similarityScore,
       result.proximityToScore,
     );
   });
@@ -135,7 +135,9 @@ export function DedupeBiographicalBiometricResults({
     return path;
   };
 
-  const biographicalRows = rows.sort((a, b) => b.score - a.score);
+  const biographicalRows = rows.sort(
+    (a, b) => b.similarityScore - a.similarityScore,
+  );
   const biometricSortedRows = biometricRows.sort(
     (a, b) => b.similarityScore - a.similarityScore,
   );
@@ -199,7 +201,7 @@ export function DedupeBiographicalBiometricResults({
                     <TableRow key={row.hitId}>
                       <TableCell>
                         <BlackLink to={getIndividualDetailsPath(row.hitId)}>
-                          {decodeIdString(row.hitId)}
+                          {row.unicefId}
                         </BlackLink>
                       </TableCell>
                       <TableCell align="left">{row.fullName}</TableCell>
@@ -207,7 +209,7 @@ export function DedupeBiographicalBiometricResults({
                         {row.age || t('Not provided')}
                       </TableCell>
                       <TableCell align="left">{row.location}</TableCell>
-                      <TableCell align="left">{row.score}</TableCell>
+                      <TableCell align="left">{row.similarityScore}</TableCell>
                       <TableCell align="left">
                         {row.proximityToScore > 0 && '+'} {row.proximityToScore}
                       </TableCell>
