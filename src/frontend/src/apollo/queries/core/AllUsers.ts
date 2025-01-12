@@ -50,6 +50,10 @@ export const ALL_USERS_QUERY = gql`
             businessArea {
               name
             }
+            program {
+              id
+              name
+            }
             role {
               name
               permissions
@@ -57,11 +61,15 @@ export const ALL_USERS_QUERY = gql`
           }
           partnerRoles {
             businessArea {
-                name
-                }
-            roles {
-                name
-                permissions
+              name
+            }
+            program {
+              id
+              name
+            }
+            role {
+              name
+              permissions
             }
           }
         }

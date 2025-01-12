@@ -77,6 +77,8 @@ class UsersFilter(FilterSet):
         return qs.filter(
             Q(partner__role_assignments__program__id=program_id)
             | Q(partner__role_assignments__program=None, partner__role_assignments__business_area=business_area)
+            | Q(role_assignments__program__id=program_id)
+            | Q(role_assignments__program=None, role_assignments__business_area=business_area)
         )
 
     def partners_filter(self, qs: "QuerySet", name: str, values: List["UUID"]) -> "QuerySet[User]":
