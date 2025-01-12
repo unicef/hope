@@ -36,8 +36,6 @@ from adminfilters.autocomplete import AutoCompleteFilter
 from django_filters import OrderingFilter
 from PIL import Image
 
-from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 
 if TYPE_CHECKING:
@@ -48,6 +46,9 @@ if TYPE_CHECKING:
     from openpyxl.worksheet.worksheet import Worksheet
 
     from hct_mis_api.apps.account.models import User
+    from hct_mis_api.apps.core.models import BusinessArea
+    from hct_mis_api.apps.program.models import Program
+
 
 logger = logging.getLogger(__name__)
 
@@ -94,7 +95,7 @@ def get_program_id_from_headers(headers: Union[Dict, "HttpHeaders"]) -> Optional
 
 
 # TODO: change
-def get_selected_program(request: Any) -> Optional[Program]:
+def get_selected_program(request: Any) -> Optional["Program"]:
     if hasattr(request, "data") and isinstance(request.data, dict):  # GraphQL Request
         program = request.data.get("variables", {}).get("program")
     elif isinstance(request.GET, dict):  # REST API Request
@@ -102,7 +103,7 @@ def get_selected_program(request: Any) -> Optional[Program]:
     return program
 
 
-def get_selected_business_area(request: Any) -> Optional[BusinessArea]:
+def get_selected_business_area(request: Any) -> Optional["BusinessArea"]:
     if hasattr(request, "data") and isinstance(request.data, dict):  # GraphQL Request
         program = request.data.get("variables", {}).get("business_area")
     elif isinstance(request.GET, dict):  # REST API Request
@@ -658,10 +659,8 @@ def chart_permission_decorator(
         if resolve_info.context.user.is_authenticated:
             business_area_slug = kwargs.get("business_area_slug", "global")
             business_area = BusinessArea.objects.filter(slug=business_area_slug).first()
-            program_id = get_program_id_from_headers(resolve_info.context.headers)
-            if any(
-                resolve_info.context.user.has_permission(per.name, business_area, program_id) for per in permissions
-            ):
+            program = Program.objects.filter(id=get_program_id_from_headers(resolve_info.context.headers)).first()
+            if any(resolve_info.context.user.has_perm(per.name, program or business_area) for per in permissions):
                 return chart_resolve(*args, **kwargs)
             log_and_raise("Permission Denied")
 

@@ -442,10 +442,9 @@ class PaymentNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     def resolve_fsp_auth_code(self, info: Any) -> str:
         user = info.context.user
 
-        if not user.has_permission(
+        if not user.has_perm(
             Permissions.PM_VIEW_FSP_AUTH_CODE.value,
-            self.business_area,
-            self.program_id,
+            self.program or self.business_area,
         ):
             return ""
         return self.fsp_auth_code or ""  # type: ignore

@@ -136,10 +136,9 @@ class PaymentPlanManagerialViewSet(BusinessAreaMixin, PaymentPlanMixin, mixins.L
         payment_plan_id = decode_id_string(payment_plan_id_str)
         payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
 
-        if not self.request.user.has_permission(
-            self._get_action_permission(input_data["action"]),
-            business_area,
-            payment_plan.program_cycle.program_id,
+        if not self.request.user.has_perm(
+            self._get_action_permission(input_data["action"]),  # type: ignore
+            payment_plan.program_cycle.program or business_area,
         ):
             raise PermissionDenied(
                 f"You do not have permission to perform action {input_data['action']} "
