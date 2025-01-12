@@ -7,8 +7,9 @@ from django.contrib.auth import get_user_model
 import factory
 from factory.django import DjangoModelFactory
 
-from hct_mis_api.apps.account.models import Partner, Role, User, RoleAssignment
+from hct_mis_api.apps.account.models import Partner, Role, User, RoleAssignment, AdminAreaLimitedTo
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 class PartnerFactory(DjangoModelFactory):
@@ -81,3 +82,20 @@ class RoleAssignmentFactory(DjangoModelFactory):
     def user(self):
         # Only create user if partner is not provided
         return None if self.partner else UserFactory()
+
+
+class AdminAreaLimitedToFactory(DjangoModelFactory):
+    partner = factory.SubFactory(PartnerFactory)
+    program = factory.SubFactory(ProgramFactory)
+
+    class Meta:
+        model = AdminAreaLimitedTo
+
+    @factory.post_generation
+    def areas(self, create, extracted, **kwargs):
+        if not create:
+            return
+
+        if extracted:
+            for area in extracted:
+                self.areas.add(area)

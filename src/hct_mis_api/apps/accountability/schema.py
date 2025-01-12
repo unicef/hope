@@ -120,7 +120,7 @@ class Query(graphene.ObjectType):
         business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
         queryset = Feedback.objects.filter(business_area__slug=business_area_slug).select_related("admin2")
 
-        if not user.partner.has_full_area_access_in_program:
+        if user.partner.has_area_limits_in_program(program_id):
             queryset = filter_feedback_based_on_partner_areas_2(queryset, user.partner, business_area_id, program_id)
 
         return queryset

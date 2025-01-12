@@ -123,10 +123,15 @@ class TestPermissionsBackend(TestCase):
         self.assertNotIn(self._get_permission_name_combined(self.permission), permissions)
 
     def test_get_permissions_for_program(self):
+        # User's Role Assignmenmts grants
+        program_empty = ProgramFactory(status=Program.ACTIVE, name="Test Program Empty", business_area=self.business_area)
         role = RoleFactory(name="Role for Partner", permissions=["PROGRAMME_FINISH"])
         self.role_assignment_partner.role = role
         self.role_assignment_partner.program = self.program
         self.role_assignment_partner.save()
+
+        self.role_assignment_user.program = program_empty
+        self.role_assignment_user.save()
 
         role = RoleFactory(name="Role for User", permissions=["PROGRAMME_CREATE", "PROGRAMME_UPDATE"])
         self.role_assignment_user.role = role
@@ -134,19 +139,31 @@ class TestPermissionsBackend(TestCase):
 
         permissions_in_program = self.backend.get_all_permissions(self.user, self.program)
         self.assertIn("PROGRAMME_FINISH", permissions_in_program)
-        self.assertIn("PROGRAMME_CREATE", permissions_in_program)
-        self.assertIn("PROGRAMME_UPDATE", permissions_in_program)
 
         # no permissions for other program
         program_other = ProgramFactory(status=Program.ACTIVE, name="Test Program Other", business_area=self.business_area)
         permissions_in_program_other = self.backend.get_all_permissions(self.user, program_other)
         self.assertEqual(set(), permissions_in_program_other)
 
+        # permissions from user's RoleAssignment in program_empty
+        permissions_in_program_empty = self.backend.get_all_permissions(self.user, program_empty)
+        self.assertIn("PROGRAMME_CREATE", permissions_in_program_empty)
+        self.assertIn("PROGRAMME_UPDATE", permissions_in_program_empty)
+        self.assertNotIn("PROGRAMME_FINISH", permissions_in_program_other)
+
         # partner loses permission for the program and gets permission for the other
         self.role_assignment_partner.program = program_other
         self.role_assignment_partner.save()
         permissions_in_program = self.backend.get_all_permissions(self.user, self.program)
         self.assertEqual(set(), permissions_in_program)
+        permissions_in_program_other = self.backend.get_all_permissions(self.user, program_other)
+        self.assertIn("PROGRAMME_FINISH", permissions_in_program_other)
+        self.assertNotIn("PROGRAMME_CREATE", permissions_in_program_other)
+        self.assertNotIn("PROGRAMME_UPDATE", permissions_in_program_other)
+
+        # user loses permission for the program and gets permission for the other
+        self.role_assignment_user.program = program_other
+        self.role_assignment_user.save()
         permissions_in_program_other = self.backend.get_all_permissions(self.user, program_other)
         self.assertIn("PROGRAMME_FINISH", permissions_in_program_other)
         self.assertIn("PROGRAMME_CREATE", permissions_in_program_other)
@@ -157,6 +174,18 @@ class TestPermissionsBackend(TestCase):
         self.role_assignment_partner.save()
         permissions_in_program = self.backend.get_all_permissions(self.user, self.program)
         self.assertIn("PROGRAMME_FINISH", permissions_in_program)
+        self.assertNotIn("PROGRAMME_CREATE", permissions_in_program)
+        self.assertNotIn("PROGRAMME_UPDATE", permissions_in_program)
+        permissions_in_program_other = self.backend.get_all_permissions(self.user, program_other)
+        self.assertIn("PROGRAMME_FINISH", permissions_in_program_other)
+        self.assertIn("PROGRAMME_CREATE", permissions_in_program_other)
+        self.assertIn("PROGRAMME_UPDATE", permissions_in_program_other)
+
+        # user gets access to all programs in the business area (program=None)
+        self.role_assignment_user.program = None
+        self.role_assignment_user.save()
+        permissions_in_program = self.backend.get_all_permissions(self.user, self.program)
+        self.assertIn("PROGRAMME_FINISH", permissions_in_program)
         self.assertIn("PROGRAMME_CREATE", permissions_in_program)
         self.assertIn("PROGRAMME_UPDATE", permissions_in_program)
         permissions_in_program_other = self.backend.get_all_permissions(self.user, program_other)
@@ -165,6 +194,7 @@ class TestPermissionsBackend(TestCase):
         self.assertIn("PROGRAMME_UPDATE", permissions_in_program_other)
 
     def test_get_permissions_from_all_sources(self):
+        program_for_user = ProgramFactory(status=Program.ACTIVE, name="Test Program For User", business_area=self.business_area)
         permission1 = Permission.objects.create(codename="test_permission1", name="Test Permission 1",
                                                 content_type=self.content_type)
         permission2 = Permission.objects.create(codename="test_permission2", name="Test Permission 2",
@@ -180,6 +210,7 @@ class TestPermissionsBackend(TestCase):
         group_role_assignment_user = Group.objects.create(name="TestGroupRoleAssignmentUser")
         group_role_assignment_user.permissions.add(permission2)
         self.role_assignment_user.group = group_role_assignment_user
+        self.role_assignment_user.program = program_for_user
         self.role_assignment_user.save()
 
         # permission on a RoleAssignment group for partner
@@ -217,14 +248,23 @@ class TestPermissionsBackend(TestCase):
         self.assertEqual(set(), permissions)
 
         # permissions for program
+        # only RoleAssignment for partner is connected to this Program
         permissions = self.backend.get_all_permissions(self.user, self.program)
         self.assertIn(self._get_permission_name_combined(permission1), permissions)
-        self.assertIn(self._get_permission_name_combined(permission2), permissions)
+        self.assertNotIn(self._get_permission_name_combined(permission2), permissions)
         self.assertIn(self._get_permission_name_combined(permission3), permissions)
-        self.assertIn("PROGRAMME_CREATE", permissions)
         self.assertIn("PROGRAMME_FINISH", permissions)
+        self.assertNotIn("PROGRAMME_CREATE", permissions)
 
-        # permissions for other program - empty (partner does not have access to this program)
+        # permissions for program for user
+        permissions = self.backend.get_all_permissions(self.user, program_for_user)
+        self.assertIn(self._get_permission_name_combined(permission1), permissions)
+        self.assertIn(self._get_permission_name_combined(permission2), permissions)
+        self.assertNotIn(self._get_permission_name_combined(permission3), permissions)
+        self.assertIn("PROGRAMME_CREATE", permissions)
+        self.assertNotIn("PROGRAMME_FINISH", permissions)
+
+        # permissions for other program - empty (neither partner nor user has access to this program)
         program_other = ProgramFactory(status=Program.ACTIVE, name="Test Program Other", business_area=self.business_area)
         permissions = self.backend.get_all_permissions(self.user, program_other)
         self.assertEqual(set(), permissions)
