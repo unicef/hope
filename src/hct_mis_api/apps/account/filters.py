@@ -67,7 +67,9 @@ class UsersFilter(FilterSet):
         return qs.filter(q_obj)
 
     def business_area_filter(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[User]":
-        return qs.filter(Q(role_assignments__business_area__slug=value) | Q(partner__role_assignments__business_area__slug=value))
+        return qs.filter(
+            Q(role_assignments__business_area__slug=value) | Q(partner__role_assignments__business_area__slug=value)
+        )
 
     def program_filter(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[User]":
         program_id = decode_id_string(value)

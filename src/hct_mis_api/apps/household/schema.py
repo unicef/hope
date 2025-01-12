@@ -367,7 +367,6 @@ class IndividualNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTyp
                     if not area_limits.filter(id__in=areas_from_household).exists():
                         raise PermissionDenied("Permission Denied")
 
-
         # if user can't simply view all individuals, we check if they can do it because of grievance or rdi details
         if not user.has_permission(
             Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS.value,
@@ -536,7 +535,11 @@ class HouseholdNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType
                 # check if user has access to the area
                 area_limits = user.partner.get_area_limits_for_program(program_id)
                 if area_limits.exists():
-                    areas_from_household = [object_instance.admin1_id, object_instance.admin2_id, object_instance.admin3_id]
+                    areas_from_household = [
+                        object_instance.admin1_id,
+                        object_instance.admin2_id,
+                        object_instance.admin3_id,
+                    ]
                     if not area_limits.filter(id__in=areas_from_household).exists():
                         raise PermissionDenied("Permission Denied")
 
@@ -737,11 +740,15 @@ class Query(graphene.ObjectType):
                 areas_null_and_program_q = program_q & Q(household__admin_area__isnull=True)
                 # apply admin area limits if partner has restrictions
                 area_limits = user.partner.get_area_limits_for_program(program_id)
-                areas_query = Q(
-                    Q(household__admin1__in=area_limits)
-                    | Q(household__admin2__in=area_limits)
-                    | Q(household__admin3__in=area_limits)
-                ) if area_limits.exists() else Q()
+                areas_query = (
+                    Q(
+                        Q(household__admin1__in=area_limits)
+                        | Q(household__admin2__in=area_limits)
+                        | Q(household__admin3__in=area_limits)
+                    )
+                    if area_limits.exists()
+                    else Q()
+                )
 
                 filter_q |= Q(areas_null_and_program_q | Q(program_q & areas_query))
 
@@ -787,11 +794,11 @@ class Query(graphene.ObjectType):
                 areas_null_and_program_q = program_q & Q(admin_area__isnull=True)
                 # apply admin area limits if partner has restrictions
                 area_limits = user.partner.get_area_limits_for_program(program_id)
-                areas_query = Q(
-                    Q(admin1__in=area_limits)
-                    | Q(admin2__in=area_limits)
-                    | Q(admin3__in=area_limits)
-                ) if area_limits.exists() else Q()
+                areas_query = (
+                    Q(Q(admin1__in=area_limits) | Q(admin2__in=area_limits) | Q(admin3__in=area_limits))
+                    if area_limits.exists()
+                    else Q()
+                )
 
                 filter_q |= Q(areas_null_and_program_q | Q(program_q & areas_query))
 

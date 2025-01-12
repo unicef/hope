@@ -1,25 +1,33 @@
-from django.contrib.contenttypes.models import ContentType
-from django.test import TestCase
-from django.contrib.auth.models import Group, Permission
+from typing import Any
 from unittest.mock import patch
 
-from hct_mis_api.apps.account.fixtures import UserFactory, PartnerFactory, RoleFactory, RoleAssignmentFactory
+from django.contrib.auth.models import Group, Permission
+from django.contrib.contenttypes.models import ContentType
+from django.test import TestCase
+from django.utils import timezone
+
+from hct_mis_api.apps.account.fixtures import (
+    PartnerFactory,
+    RoleAssignmentFactory,
+    RoleFactory,
+    UserFactory,
+)
+from hct_mis_api.apps.core.backends import PermissionsBackend
 from hct_mis_api.apps.core.fixtures import create_afghanistan, create_ukraine
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.core.backends import PermissionsBackend
-from django.utils import timezone
 
 
 class TestPermissionsBackend(TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.partner = PartnerFactory(name="TestPartner")
         self.user = UserFactory(partner=self.partner)
 
         self.content_type = ContentType.objects.get_for_model(BusinessArea)
-        self.permission = Permission.objects.create(codename="test_permission", name="Test Permission",
-                                                    content_type=self.content_type)
+        self.permission = Permission.objects.create(
+            codename="test_permission", name="Test Permission", content_type=self.content_type
+        )
         self.group = Group.objects.create(name="TestGroup")
         self.group.permissions.add(self.permission)
 
@@ -39,7 +47,7 @@ class TestPermissionsBackend(TestCase):
 
         self.backend = PermissionsBackend()
 
-    def test_get_all_permissions_with_cache(self):
+    def test_get_all_permissions_with_cache(self) -> None:
         self.group.permissions.add(self.permission)
         self.user.groups.add(self.group)
 
@@ -51,14 +59,14 @@ class TestPermissionsBackend(TestCase):
         self.assertEqual(permissions, cached_permissions)
 
     @patch("hct_mis_api.apps.core.backends.cache.get")
-    def test_cache_get(self, mock_cache_get):
+    def test_cache_get(self, mock_cache_get: Any) -> None:
         mock_cache_get.return_value = {self._get_permission_name_combined(self.permission)}
         permissions = self.backend.get_all_permissions(self.user, self.business_area)
         mock_cache_get.assert_called()
         assert mock_cache_get.call_count == 2
         self.assertIn(self._get_permission_name_combined(self.permission), permissions)
 
-    def test_user_group_permissions(self):
+    def test_user_group_permissions(self) -> None:
         self.group.permissions.add(self.permission)
         self.user.groups.add(self.group)
 
@@ -66,7 +74,7 @@ class TestPermissionsBackend(TestCase):
 
         self.assertIn(self._get_permission_name_combined(self.permission), permissions)
 
-    def test_role_assignment_user_role_permissions(self):
+    def test_role_assignment_user_role_permissions(self) -> None:
         role = RoleFactory(name="Role for User", permissions=["PROGRAMME_CREATE", "PROGRAMME_UPDATE"])
 
         self.role_assignment_user.role = role
@@ -77,7 +85,7 @@ class TestPermissionsBackend(TestCase):
         self.assertIn("PROGRAMME_CREATE", permissions)
         self.assertIn("PROGRAMME_UPDATE", permissions)
 
-    def test_role_assignment_user_group_permissions(self):
+    def test_role_assignment_user_group_permissions(self) -> None:
         self.role_assignment_user.group = self.group
         self.role_assignment_user.save()
 
@@ -85,7 +93,7 @@ class TestPermissionsBackend(TestCase):
 
         self.assertIn(self._get_permission_name_combined(self.permission), permissions)
 
-    def test_role_assignment_partner_role_permissions(self):
+    def test_role_assignment_partner_role_permissions(self) -> None:
         role = RoleFactory(name="Role for Partner", permissions=["PROGRAMME_FINISH"])
         self.role_assignment_partner.role = role
         self.role_assignment_partner.save()
@@ -93,8 +101,8 @@ class TestPermissionsBackend(TestCase):
         permissions = self.backend.get_all_permissions(self.user, self.business_area)
 
         self.assertIn("PROGRAMME_FINISH", permissions)
-        
-    def test_role_assignment_partner_group_permissions(self):
+
+    def test_role_assignment_partner_group_permissions(self) -> None:
         self.role_assignment_partner.group = self.group
         self.role_assignment_partner.save()
 
@@ -102,14 +110,14 @@ class TestPermissionsBackend(TestCase):
 
         self.assertIn(self._get_permission_name_combined(self.permission), permissions)
 
-    def test_has_perm_for_superuser(self):
+    def test_has_perm_for_superuser(self) -> None:
         self.user.is_superuser = True
         self.user.save()
 
         self.assertTrue(self.backend.has_perm(self.user, f"{self.content_type.app_label}.{self.permission.codename}"))
         self.assertTrue(self.backend.has_perm(self.user, "PROGRAMME_FINISH", self.program))
 
-    def test_role_expired(self):
+    def test_role_expired(self) -> None:
         self.role_assignment_user.group = self.group
         self.role_assignment_user.save()
 
@@ -122,9 +130,11 @@ class TestPermissionsBackend(TestCase):
         permissions = self.backend.get_all_permissions(self.user, self.business_area)
         self.assertNotIn(self._get_permission_name_combined(self.permission), permissions)
 
-    def test_get_permissions_for_program(self):
+    def test_get_permissions_for_program(self) -> None:
         # User's Role Assignmenmts grants
-        program_empty = ProgramFactory(status=Program.ACTIVE, name="Test Program Empty", business_area=self.business_area)
+        program_empty = ProgramFactory(
+            status=Program.ACTIVE, name="Test Program Empty", business_area=self.business_area
+        )
         role = RoleFactory(name="Role for Partner", permissions=["PROGRAMME_FINISH"])
         self.role_assignment_partner.role = role
         self.role_assignment_partner.program = self.program
@@ -141,7 +151,9 @@ class TestPermissionsBackend(TestCase):
         self.assertIn("PROGRAMME_FINISH", permissions_in_program)
 
         # no permissions for other program
-        program_other = ProgramFactory(status=Program.ACTIVE, name="Test Program Other", business_area=self.business_area)
+        program_other = ProgramFactory(
+            status=Program.ACTIVE, name="Test Program Other", business_area=self.business_area
+        )
         permissions_in_program_other = self.backend.get_all_permissions(self.user, program_other)
         self.assertEqual(set(), permissions_in_program_other)
 
@@ -193,14 +205,19 @@ class TestPermissionsBackend(TestCase):
         self.assertIn("PROGRAMME_CREATE", permissions_in_program_other)
         self.assertIn("PROGRAMME_UPDATE", permissions_in_program_other)
 
-    def test_get_permissions_from_all_sources(self):
-        program_for_user = ProgramFactory(status=Program.ACTIVE, name="Test Program For User", business_area=self.business_area)
-        permission1 = Permission.objects.create(codename="test_permission1", name="Test Permission 1",
-                                                content_type=self.content_type)
-        permission2 = Permission.objects.create(codename="test_permission2", name="Test Permission 2",
-                                                content_type=self.content_type)
-        permission3 = Permission.objects.create(codename="test_permission3", name="Test Permission 3",
-                                                content_type=self.content_type)
+    def test_get_permissions_from_all_sources(self) -> None:
+        program_for_user = ProgramFactory(
+            status=Program.ACTIVE, name="Test Program For User", business_area=self.business_area
+        )
+        permission1 = Permission.objects.create(
+            codename="test_permission1", name="Test Permission 1", content_type=self.content_type
+        )
+        permission2 = Permission.objects.create(
+            codename="test_permission2", name="Test Permission 2", content_type=self.content_type
+        )
+        permission3 = Permission.objects.create(
+            codename="test_permission3", name="Test Permission 3", content_type=self.content_type
+        )
         # permission on a user group
         group_user = Group.objects.create(name="TestGroupUser")
         group_user.permissions.add(permission1)
@@ -265,9 +282,11 @@ class TestPermissionsBackend(TestCase):
         self.assertNotIn("PROGRAMME_FINISH", permissions)
 
         # permissions for other program - empty (neither partner nor user has access to this program)
-        program_other = ProgramFactory(status=Program.ACTIVE, name="Test Program Other", business_area=self.business_area)
+        program_other = ProgramFactory(
+            status=Program.ACTIVE, name="Test Program Other", business_area=self.business_area
+        )
         permissions = self.backend.get_all_permissions(self.user, program_other)
         self.assertEqual(set(), permissions)
 
-    def _get_permission_name_combined(self, permission):
+    def _get_permission_name_combined(self, permission: Permission) -> str:
         return f"{self.content_type.app_label}.{permission.codename}"

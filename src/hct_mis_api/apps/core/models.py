@@ -25,7 +25,7 @@ from hct_mis_api.apps.utils.models import (
 from mptt.fields import TreeForeignKey
 
 
-class BusinessAreaPartnerThrough(TimeStampedUUIDModel):   # TODO: remove after migration to RoleAssignment
+class BusinessAreaPartnerThrough(TimeStampedUUIDModel):  # TODO: remove after migration to RoleAssignment
     business_area = models.ForeignKey(
         "BusinessArea",
         on_delete=models.CASCADE,

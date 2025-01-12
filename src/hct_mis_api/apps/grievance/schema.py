@@ -575,10 +575,12 @@ class Query(graphene.ObjectType):
         queryset = queryset.prefetch_related(*to_prefetch)
 
         # Ignore filtering for Cross Area tickets
-        if not (kwargs.get("is_cross_area", False) and program_id and not user.partner.has_area_limits_in_program(program_id)):
-            queryset = filter_grievance_tickets_based_on_partner_areas_2(
-                queryset, user, business_area_id, program_id
-            )
+        if not (
+            kwargs.get("is_cross_area", False)
+            and program_id
+            and not user.partner.has_area_limits_in_program(program_id)
+        ):
+            queryset = filter_grievance_tickets_based_on_partner_areas_2(queryset, user, business_area_id, program_id)
 
         if program_id is None:
             queryset = queryset | (

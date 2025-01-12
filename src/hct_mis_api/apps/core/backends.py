@@ -1,23 +1,24 @@
-from typing import Optional, TYPE_CHECKING
+from typing import Any, Optional, Union
 
 from django.contrib.auth.backends import BaseBackend
-from django.contrib.auth.models import Permission, AnonymousUser
+from django.contrib.auth.models import AnonymousUser, Permission
 from django.core.cache import cache
-from django.db.models import Q, Model
+from django.db.models import Model, Q
 from django.utils import timezone
 
 from hct_mis_api.api.caches import get_or_create_cache_key
-from hct_mis_api.apps.account.caches import get_user_permissions_version_key, get_user_permissions_cache_key
-from hct_mis_api.apps.account.models import RoleAssignment, User, Role
+from hct_mis_api.apps.account.caches import (
+    get_user_permissions_cache_key,
+    get_user_permissions_version_key,
+)
+from hct_mis_api.apps.account.models import Role, RoleAssignment, User
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.program.models import Program
 
-if TYPE_CHECKING:
-    from hct_mis_api.apps.account.models import User
-
 
 class PermissionsBackend(BaseBackend):
-    def get_all_permissions(self, user: "User", obj: "Model|None" = None) -> set[str]:
+    def get_all_permissions(self, user: User, obj: Optional[Model] = None) -> set[str]:  # type: ignore
+        filters: dict[str, Any]
         if not obj:
             program = None
             business_area = None
@@ -50,18 +51,19 @@ class PermissionsBackend(BaseBackend):
 
         cached_permissions = cache.get(cache_key)
 
-        print(cached_permissions)
-        print(user_version)
-
         if cached_permissions:
             return cached_permissions
 
         # If permission is checked for a Program and User does not have access to it, return empty set
-        if program and not RoleAssignment.objects.filter(
-            Q(partner=user.partner) | Q(user=user)
-            & Q(business_area=business_area)
-            & (Q(program=None) | Q(program=program))
-        ).exclude(expiry_date__lt=timezone.now()).exists():
+        if (
+            program
+            and not RoleAssignment.objects.filter(
+                Q(partner=user.partner)
+                | Q(user=user) & Q(business_area=business_area) & (Q(program=None) | Q(program=program))
+            )
+            .exclude(expiry_date__lt=timezone.now())
+            .exists()
+        ):
             return set()
 
         """
@@ -74,7 +76,7 @@ class PermissionsBackend(BaseBackend):
         # role assignments from the User or their Partner
         role_assignments = RoleAssignment.objects.filter(
             (Q(user=user) | Q(partner__user=user))
-            & (Q(business_area=filters.get('business_area'), program=None) | Q(**filters))
+            & (Q(business_area=filters.get("business_area"), program=None) | Q(**filters))
         ).exclude(expiry_date__lt=timezone.now())
 
         if business_area and not role_assignments.exists():
@@ -89,25 +91,24 @@ class PermissionsBackend(BaseBackend):
         permissions_set.update(f"{app}.{codename}" for app, codename in role_assignment_group_permissions)
 
         # permissions from RoleAssignment's Roles
-        role_assignment_role_permissions = Role.objects.filter(
-            role_assignments__in=role_assignments
-        ).values_list("permissions", flat=True)
-        permissions_set.update(permission for permission_list in role_assignment_role_permissions for permission in permission_list)
+        role_assignment_role_permissions = Role.objects.filter(role_assignments__in=role_assignments).values_list(
+            "permissions", flat=True
+        )
+        permissions_set.update(
+            permission for permission_list in role_assignment_role_permissions for permission in permission_list
+        )
 
         # permissions from the User's Group
-        user_group_permissions = Permission.objects.filter(
-            group__user=user
-        ).values_list("content_type__app_label", "codename")
+        user_group_permissions = Permission.objects.filter(group__user=user).values_list(
+            "content_type__app_label", "codename"
+        )
         permissions_set.update(f"{app}.{codename}" for app, codename in user_group_permissions)
 
         cache.set(cache_key, permissions_set, timeout=None)
 
-        print("sd")
-        print(permissions_set)
-
         return permissions_set
 
-    def has_perm(self, user_obj: "User|AnonymousUser", perm: str, obj: Optional[Model] = None) -> bool:
+    def has_perm(self, user_obj: Union[User, AnonymousUser], perm: str, obj: Optional[Model] = None) -> bool:  # type: ignore
         print("sd original")
         print(perm)
         if user_obj.is_superuser:

@@ -10,9 +10,9 @@ from django_webtest import WebTest
 from hct_mis_api.apps.account.admin.mixins import get_valid_kobo_username
 from hct_mis_api.apps.account.fixtures import (
     PartnerFactory,
+    RoleAssignmentFactory,
     RoleFactory,
     UserFactory,
-    RoleAssignmentFactory,
 )
 from hct_mis_api.apps.account.models import IncompatibleRoles, Role, User
 from hct_mis_api.apps.core.fixtures import create_afghanistan

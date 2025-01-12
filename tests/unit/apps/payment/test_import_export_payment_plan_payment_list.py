@@ -14,7 +14,7 @@ from django.urls import reverse
 from graphql import GraphQLError
 
 from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.account.models import Role, User, RoleAssignment
+from hct_mis_api.apps.account.models import Role, RoleAssignment, User
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import (

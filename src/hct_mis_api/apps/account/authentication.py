@@ -9,7 +9,7 @@ from social_core.pipeline import social_auth
 from social_core.pipeline import user as social_core_user
 
 from hct_mis_api.apps.account.microsoft_graph import MicrosoftGraphAPI
-from hct_mis_api.apps.account.models import ACTIVE, Role, User, RoleAssignment
+from hct_mis_api.apps.account.models import ACTIVE, Role, RoleAssignment, User
 from hct_mis_api.apps.core.models import BusinessArea
 
 logger = logging.getLogger(__name__)

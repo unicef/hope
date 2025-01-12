@@ -16,7 +16,7 @@ from hct_mis_api.apps.account.fixtures import (
     PartnerFactory,
     UserFactory,
 )
-from hct_mis_api.apps.account.models import Role, User, RoleAssignment
+from hct_mis_api.apps.account.models import Role, RoleAssignment, User
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
 from hct_mis_api.apps.payment.models import PaymentPlan

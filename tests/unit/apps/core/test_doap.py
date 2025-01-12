@@ -7,7 +7,7 @@ from django.urls import reverse
 
 from django_webtest import WebTest
 
-from hct_mis_api.apps.account.fixtures import UserFactory, RoleAssignmentFactory
+from hct_mis_api.apps.account.fixtures import RoleAssignmentFactory, UserFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 
@@ -19,7 +19,9 @@ class TestDOAP(WebTest):
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.user = UserFactory(is_superuser=True, is_staff=True)
-        cls.user_role = RoleAssignmentFactory(role__name="Approver", role__subsystem="CA", business_area=cls.business_area)
+        cls.user_role = RoleAssignmentFactory(
+            role__name="Approver", role__subsystem="CA", business_area=cls.business_area
+        )
         cls.officer = cls.user_role.user
 
     def test_get_matrix(self) -> None:

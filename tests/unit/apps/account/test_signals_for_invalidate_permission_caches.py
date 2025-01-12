@@ -1,15 +1,19 @@
 from datetime import timedelta
+
+from django.contrib.auth.models import Group, Permission
+from django.contrib.contenttypes.models import ContentType
+from django.core.cache import cache
+from django.test import TestCase
 from django.utils import timezone
 
-from django.contrib.auth.models import Permission, Group
-from django.test import TestCase
-from django.contrib.contenttypes.models import ContentType
-
-from django.core.cache import cache
-
 from hct_mis_api.apps.account.caches import get_user_permissions_version_key
-from hct_mis_api.apps.account.fixtures import PartnerFactory, RoleFactory, RoleAssignmentFactory, UserFactory
-from hct_mis_api.apps.account.models import User, RoleAssignment
+from hct_mis_api.apps.account.fixtures import (
+    PartnerFactory,
+    RoleAssignmentFactory,
+    RoleFactory,
+    UserFactory,
+)
+from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.program.fixtures import ProgramFactory
@@ -58,7 +62,9 @@ class TestSignalsForInvalidatePermissionCaches(TestCase):
         # group on a user
         self.group1 = Group.objects.create(name="Test Group")
         self.content_type = ContentType.objects.get_for_model(BusinessArea)
-        permission = Permission.objects.create(codename="test_permission", name="Test Permission", content_type=self.content_type)
+        permission = Permission.objects.create(
+            codename="test_permission", name="Test Permission", content_type=self.content_type
+        )
         self.group1.permissions.add(permission)
         self.user1_partner1.groups.add(self.group1)
 
@@ -117,7 +123,9 @@ class TestSignalsForInvalidatePermissionCaches(TestCase):
         self.assertEqual(self._get_cache_version(self.user2_partner2), self.version_key_user2_partner2_before)
 
     def test_invalidate_cache_on_group_permissions_change_for_user(self) -> None:
-        permission = Permission.objects.create(codename="test_permission_new_1", name="Test Permission 2", content_type=self.content_type)
+        permission = Permission.objects.create(
+            codename="test_permission_new_1", name="Test Permission 2", content_type=self.content_type
+        )
         self.group1.permissions.add(permission)
 
         # users connected with the group should have their cache invalidated
@@ -140,7 +148,9 @@ class TestSignalsForInvalidatePermissionCaches(TestCase):
         self.assertEqual(self._get_cache_version(self.user2_partner2), self.version_key_user2_partner2_before)
 
     def test_invalidate_cache_on_group_permissions_change_for_user_role_assignment(self) -> None:
-        permission = Permission.objects.create(codename="test_permission_new_2", name="Test Permission 2", content_type=self.content_type)
+        permission = Permission.objects.create(
+            codename="test_permission_new_2", name="Test Permission 2", content_type=self.content_type
+        )
         self.group2.permissions.add(permission)
 
         # users with role_assignments connected with the group should have their cache invalidated
@@ -163,8 +173,9 @@ class TestSignalsForInvalidatePermissionCaches(TestCase):
         self.assertEqual(self._get_cache_version(self.user2_partner2), self.version_key_user2_partner2_before)
 
     def test_invalidate_cache_on_group_permissions_change_for_partner_role_assignment(self) -> None:
-        permission = Permission.objects.create(codename="test_permission_new_3", name="Test Permission 2",
-                                               content_type=self.content_type)
+        permission = Permission.objects.create(
+            codename="test_permission_new_3", name="Test Permission 2", content_type=self.content_type
+        )
         self.group3.permissions.add(permission)
 
         # users with partner with role_assignments connected with the group should have their cache invalidated
@@ -196,7 +207,7 @@ class TestSignalsForInvalidatePermissionCaches(TestCase):
         self.assertEqual(self._get_cache_version(self.user1_partner2), self.version_key_user1_partner2_before)
         self.assertEqual(self._get_cache_version(self.user2_partner2), self.version_key_user2_partner2_before)
 
-    def test_invalidate_cache_on_group_delete_for_user(self):
+    def test_invalidate_cache_on_group_delete_for_user(self) -> None:
         self.group1.delete()
 
         # users connected with the group should have their cache invalidated
@@ -239,10 +250,8 @@ class TestSignalsForInvalidatePermissionCaches(TestCase):
         self.role_assignment1.group = self.group3
         self.role_assignment1.save()
 
-
         self.role_assignment1.role = self.role2
         self.role_assignment1.save()
-
 
         # users connected to the role_assignment should have their cache invalidated
         # +6: 3 signals on RoleAssignment and 3 signals on User to update modify_date because of role_assignment change

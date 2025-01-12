@@ -23,10 +23,7 @@ from model_utils.models import UUIDModel
 from natural_keys import NaturalKeyModel
 
 from hct_mis_api.apps.account.fields import ChoiceArrayField
-from hct_mis_api.apps.account.permissions import (
-    DEFAULT_PERMISSIONS_LIST_FOR_IS_UNICEF_PARTNER,
-    Permissions,
-)
+from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.account.utils import test_conditional
 from hct_mis_api.apps.core.mixins import LimitBusinessAreaModelMixin
 from hct_mis_api.apps.core.models import BusinessArea
@@ -98,10 +95,7 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
             role_assignments.filter(Q(program_id=program_id) | Q(program=None))
         partners = cls.objects.filter(role_assignments__in=role_assignments).distinct()
 
-        return [
-            (partner.id, partner.name)
-            for partner in partners
-        ]
+        return [(partner.id, partner.name) for partner in partners]
 
     @property
     def is_unicef(self) -> bool:
@@ -117,22 +111,27 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
 
     def get_program_ids_for_business_area(self, business_area_id: str) -> List[str]:
         from hct_mis_api.apps.program.models import Program
+
         if self.role_assignments.filter(business_area_id=business_area_id, program=None).exists():
             programs_ids = Program.objects.filter(business_area_id=business_area_id).values_list("id", flat=True)
         else:
-            programs_ids = self.role_assignments.filter(business_area_id=business_area_id).values_list("program_id", flat=True)
-        return [
-            str(program_id)
-            for program_id in programs_ids
-        ]
+            programs_ids = self.role_assignments.filter(business_area_id=business_area_id).values_list(
+                "program_id", flat=True
+            )
+        return [str(program_id) for program_id in programs_ids]
 
     def has_program_access(self, program_id: Union[str, UUID]) -> bool:
         from hct_mis_api.apps.program.models import Program
-        return RoleAssignment.objects.filter(
-            Q(partner=self)
-            & Q(business_area=Program.objects.get(id=program_id).business_area)
-            & (Q(program=None) | Q(program_id=program_id))
-        ).exclude(expiry_date__lt=timezone.now()).exists()
+
+        return (
+            RoleAssignment.objects.filter(
+                Q(partner=self)
+                & Q(business_area=Program.objects.get(id=program_id).business_area)
+                & (Q(program=None) | Q(program_id=program_id))
+            )
+            .exclude(expiry_date__lt=timezone.now())
+            .exists()
+        )
 
     def has_area_access(self, area_id: Union[str, UUID], program_id: Union[str, UUID]) -> bool:
         return (
@@ -186,26 +185,31 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
 
     def has_program_access(self, program_id: Union[str, UUID]) -> bool:
         from hct_mis_api.apps.program.models import Program
-        return RoleAssignment.objects.filter(
-            Q(user=self) | Q(partner__user=self)
-            & Q(business_area=Program.objects.get(id=program_id).business_area)
-            & (Q(program=None) | Q(program_id=program_id))
-        ).exclude(expiry_date__lt=timezone.now()).exists()
+
+        return (
+            RoleAssignment.objects.filter(
+                Q(user=self)
+                | Q(partner__user=self)
+                & Q(business_area=Program.objects.get(id=program_id).business_area)
+                & (Q(program=None) | Q(program_id=program_id))
+            )
+            .exclude(expiry_date__lt=timezone.now())
+            .exists()
+        )
 
     def get_program_ids_for_business_area(self, business_area_id: str) -> List[str]:
         from hct_mis_api.apps.program.models import Program
+
         if RoleAssignment.objects.filter(
             Q(user=self) | Q(partner__user=self), business_area_id=business_area_id, program=None
         ).exists():
             programs_ids = Program.objects.filter(business_area_id=business_area_id).values_list("id", flat=True)
         else:
             RoleAssignment.objects.filter(
-                Q(user=self) | Q(partner__user=self), business_area_id=business_area_id,
+                Q(user=self) | Q(partner__user=self),
+                business_area_id=business_area_id,
             ).values_list("program_id", flat=True)
-        return [
-            str(program_id)
-            for program_id in programs_ids
-        ]
+        return [str(program_id) for program_id in programs_ids]
 
     def permissions_in_business_area(self, business_area_slug: str, program_id: Optional[UUID] = None) -> set:
         """
@@ -216,15 +220,15 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             if not self.has_program_access(program_id):
                 return set()
             role_assignments = RoleAssignment.objects.filter(
-                Q(partner__user=self, business_area__slug=business_area_slug, program_id=program_id) |
-                Q(partner__user=self, business_area__slug=business_area_slug, program=None) |
-                Q(user=self, business_area__slug=business_area_slug, program_id=program_id) |
-                Q(user=self, business_area__slug=business_area_slug, program=None)
+                Q(partner__user=self, business_area__slug=business_area_slug, program_id=program_id)
+                | Q(partner__user=self, business_area__slug=business_area_slug, program=None)
+                | Q(user=self, business_area__slug=business_area_slug, program_id=program_id)
+                | Q(user=self, business_area__slug=business_area_slug, program=None)
             ).exclude(expiry_date__lt=timezone.now())
         else:
             role_assignments = RoleAssignment.objects.filter(
-                Q(partner__user=self, business_area__slug=business_area_slug) |
-                Q(user=self, business_area__slug=business_area_slug)
+                Q(partner__user=self, business_area__slug=business_area_slug)
+                | Q(user=self, business_area__slug=business_area_slug)
             ).exclude(expiry_date__lt=timezone.now())
 
         permissions_set = set()
@@ -235,18 +239,22 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
         permissions_set.update(f"{app}.{codename}" for app, codename in role_assignment_group_permissions)
 
         # permissions from role field in RoleAssignment
-        role_assignment_role_permissions = Role.objects.filter(
-            role_assignments__in=role_assignments
-        ).values_list("permissions", flat=True)
-        permissions_set.update(permission for permission_list in role_assignment_role_permissions for permission in permission_list)
+        role_assignment_role_permissions = Role.objects.filter(role_assignments__in=role_assignments).values_list(
+            "permissions", flat=True
+        )
+        permissions_set.update(
+            permission for permission_list in role_assignment_role_permissions for permission in permission_list
+        )
 
         return permissions_set
 
     @property
     def business_areas(self) -> QuerySet[BusinessArea]:
-        return BusinessArea.objects.filter(
-            Q(role_assignments__user=self) | Q(role_assignments__partner__user=self)
-        ).exclude(role_assignments__expiry_date__lt=timezone.now()).distinct()
+        return (
+            BusinessArea.objects.filter(Q(role_assignments__user=self) | Q(role_assignments__partner__user=self))
+            .exclude(role_assignments__expiry_date__lt=timezone.now())
+            .distinct()
+        )
 
     @test_conditional(lru_cache())
     def cached_role_assignments(self) -> QuerySet["RoleAssignment"]:
@@ -327,10 +335,18 @@ class HorizontalChoiceArrayField(ArrayField):
 
 class RoleAssignment(NaturalKeyModel, TimeStampedUUIDModel):
     business_area = models.ForeignKey("core.BusinessArea", related_name="role_assignments", on_delete=models.CASCADE)
-    user = models.ForeignKey("account.User", related_name="role_assignments", on_delete=models.CASCADE, null=True, blank=True)
-    partner = models.ForeignKey("account.Partner", related_name="role_assignments", on_delete=models.CASCADE, null=True, blank=True)
-    role = models.ForeignKey("account.Role", related_name="role_assignments", on_delete=models.CASCADE, null=True, blank=True)
-    program = models.ForeignKey("program.Program", related_name="role_assignments", on_delete=models.CASCADE, null=True, blank=True)
+    user = models.ForeignKey(
+        "account.User", related_name="role_assignments", on_delete=models.CASCADE, null=True, blank=True
+    )
+    partner = models.ForeignKey(
+        "account.Partner", related_name="role_assignments", on_delete=models.CASCADE, null=True, blank=True
+    )
+    role = models.ForeignKey(
+        "account.Role", related_name="role_assignments", on_delete=models.CASCADE, null=True, blank=True
+    )
+    program = models.ForeignKey(
+        "program.Program", related_name="role_assignments", on_delete=models.CASCADE, null=True, blank=True
+    )
     expiry_date = models.DateField(
         blank=True, null=True, help_text="After expiry date this Role Assignment will be inactive."
     )
@@ -341,7 +357,7 @@ class RoleAssignment(NaturalKeyModel, TimeStampedUUIDModel):
             # either user or partner should be assigned; not both
             models.CheckConstraint(
                 check=Q(user__isnull=False, partner__isnull=True) | Q(user__isnull=True, partner__isnull=False),
-                name="user_or_partner_not_both"
+                name="user_or_partner_not_both",
             ),
         ]
 
@@ -371,6 +387,7 @@ class AdminAreaLimitedTo(TimeStampedUUIDModel):
     Model to limit the admin area access for a partner.
     Partners with full area access for a certain program will not have any area limits - no record in this model.
     """
+
     partner = models.ForeignKey("account.Partner", related_name="admin_area_limits", on_delete=models.CASCADE)
     program = models.ForeignKey("program.Program", related_name="admin_area_limits", on_delete=models.CASCADE)
     areas = models.ManyToManyField("geo.Area", related_name="admin_area_limits", blank=True)

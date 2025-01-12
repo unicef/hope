@@ -19,8 +19,8 @@ from hct_mis_api.apps.account.models import (
     USER_STATUS_CHOICES,
     Partner,
     Role,
-    User,
     RoleAssignment,
+    User,
 )
 from hct_mis_api.apps.account.permissions import (
     ALL_GRIEVANCES_CREATE_MODIFY,
@@ -29,7 +29,7 @@ from hct_mis_api.apps.account.permissions import (
     hopeOneOfPermissionClass,
 )
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
-from hct_mis_api.apps.core.models import BusinessArea, BusinessAreaPartnerThrough
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import decode_id_string, to_choice_object
 from hct_mis_api.apps.geo.models import Area
