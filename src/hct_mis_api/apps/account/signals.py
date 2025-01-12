@@ -1,18 +1,17 @@
 from typing import Any, Iterable
 
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
+from django.core.cache import cache
 from django.db.models import Q
-from django.db.models.signals import m2m_changed, post_save, pre_delete, pre_save, post_delete
+from django.db.models.signals import m2m_changed, post_save, pre_delete, pre_save
 from django.dispatch import receiver
 from django.utils import timezone
 
 from hct_mis_api.api.caches import get_or_create_cache_key
 from hct_mis_api.apps.account.caches import get_user_permissions_version_key
-from hct_mis_api.apps.account.models import Partner, Role, User, RoleAssignment
+from hct_mis_api.apps.account.models import Partner, Role, RoleAssignment, User
 from hct_mis_api.apps.core.models import BusinessArea, BusinessAreaPartnerThrough
-
-from django.contrib.auth.models import Group
-from django.core.cache import cache
 
 
 @receiver(post_save, sender=RoleAssignment)
@@ -58,6 +57,7 @@ def allowed_business_areas_changed(sender: Any, instance: Partner, action: str, 
 
 # Signals for permissions caches invalidation
 
+
 def _invalidate_user_permissions_cache(users: Iterable) -> None:
     for user in users:
         version_key = get_user_permissions_version_key(user)
@@ -67,7 +67,9 @@ def _invalidate_user_permissions_cache(users: Iterable) -> None:
 
 @receiver(post_save, sender=RoleAssignment)
 @receiver(pre_delete, sender=RoleAssignment)
-def invalidate_permissions_cache_on_role_assignment_change(sender, instance, **kwargs):
+def invalidate_permissions_cache_on_role_assignment_change(
+    sender: Any, instance: RoleAssignment, **kwargs: Any
+) -> None:
     """
     Invalidate the cache for the User/Partner's Users associated with the RoleAssignment
     when the RoleAssignment is created, updated, or deleted.
@@ -81,17 +83,21 @@ def invalidate_permissions_cache_on_role_assignment_change(sender, instance, **k
 
 @receiver(post_save, sender=Role)
 @receiver(pre_delete, sender=Role)
-def invalidate_permissions_cache_on_role_change(sender, instance, **kwargs):
+def invalidate_permissions_cache_on_role_change(sender: Any, instance: Role, **kwargs: Any) -> None:
     """
     Invalidate the cache for the User/Partner's Users associated with the Role through a RoleAssignment
     when the Role is created, updated, or deleted.
     """
-    users = User.objects.filter(Q(role_assignments__role=instance) | Q(partner__role_assignments__role=instance)).distinct()
+    users = User.objects.filter(
+        Q(role_assignments__role=instance) | Q(partner__role_assignments__role=instance)
+    ).distinct()
     _invalidate_user_permissions_cache(users)
 
 
 @receiver(m2m_changed, sender=Group.permissions.through)
-def invalidate_permissions_cache_on_group_permissions_change(sender, instance, action, **kwargs):
+def invalidate_permissions_cache_on_group_permissions_change(
+    sender: Any, instance: Group, action: str, **kwargs: Any
+) -> None:
     """
     Invalidate the cache for all Users that are assigned to that Group
     or are assigned to this Group's RoleAssignment
@@ -107,7 +113,7 @@ def invalidate_permissions_cache_on_group_permissions_change(sender, instance, a
 
 @receiver(post_save, sender=Group)
 @receiver(pre_delete, sender=Group)
-def invalidate_permissions_cache_on_group_change(sender, instance, **kwargs):
+def invalidate_permissions_cache_on_group_change(sender: Any, instance: Group, **kwargs: Any) -> None:
     """
     Invalidate the cache for all Users that are assigned to that Group
     or are assigned to this Group's RoleAssignment
@@ -121,7 +127,7 @@ def invalidate_permissions_cache_on_group_change(sender, instance, **kwargs):
 
 
 @receiver(m2m_changed, sender=User.groups.through)
-def invalidate_permissions_cache_on_user_groups_change(action, instance, pk_set, **kwargs):
+def invalidate_permissions_cache_on_user_groups_change(action: str, instance: User, pk_set: set, **kwargs: Any) -> None:
     """
     Invalidate the cache for a User when their Groups are modified.
     """
@@ -131,7 +137,7 @@ def invalidate_permissions_cache_on_user_groups_change(action, instance, pk_set,
 
 @receiver(post_save, sender=User)
 @receiver(pre_delete, sender=User)
-def invalidate_permissions_cache_on_user_change(sender, instance, **kwargs):
+def invalidate_permissions_cache_on_user_change(sender: Any, instance: User, **kwargs: Any) -> None:
     """
     Invalidate the cache for a User when they are updated. (For example change of partner or is_superuser flag)
     """

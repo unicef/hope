@@ -1,13 +1,17 @@
 from django.test import TestCase
 
-from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory, AdminAreaLimitedToFactory
-from hct_mis_api.apps.account.models import Role, User, RoleAssignment, AdminAreaLimitedTo
+from hct_mis_api.apps.account.fixtures import (
+    AdminAreaLimitedToFactory,
+    PartnerFactory,
+    UserFactory,
+)
+from hct_mis_api.apps.account.models import Role, RoleAssignment, User
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea, BusinessAreaPartnerThrough
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.fixtures import AreaFactory
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import Program, ProgramPartnerThrough
+from hct_mis_api.apps.program.models import Program
 
 
 class UserPartnerTest(TestCase):
@@ -147,28 +151,18 @@ class UserPartnerTest(TestCase):
         self.assertTrue(user_with_partner_role)
 
         # check user_roles and partner_roles with program_id
-        user_with_partner_role_and_program_access = User.has_perm(
-            self.other_user, "PROGRAMME_CREATE", self.program
-        )
+        user_with_partner_role_and_program_access = User.has_perm(self.other_user, "PROGRAMME_CREATE", self.program)
         self.assertTrue(user_with_partner_role_and_program_access)
-        user_with_partner_role_and_program_access = User.has_perm(
-            self.other_user, "PROGRAMME_FINISH", self.program
-        )
+        user_with_partner_role_and_program_access = User.has_perm(self.other_user, "PROGRAMME_FINISH", self.program)
         self.assertTrue(user_with_partner_role_and_program_access)
 
         # check perms wrong program_id
-        user_without_access = User.has_perm(
-            self.other_user, "PROGRAMME_FINISH", self.business_area
-        )
+        user_without_access = User.has_perm(self.other_user, "PROGRAMME_FINISH", self.business_area)
         self.assertFalse(user_without_access)
 
         # check with program_id user partner is_unicef
-        unicef_user_without_perms = User.has_perm(
-            self.unicef_user, "PROGRAMME_FINISH", self.program
-        )
+        unicef_user_without_perms = User.has_perm(self.unicef_user, "PROGRAMME_FINISH", self.program)
         self.assertFalse(unicef_user_without_perms)
 
-        unicef_user_with_perms = User.has_perm(
-            self.unicef_user, "PROGRAMME_CREATE", self.program
-        )
+        unicef_user_with_perms = User.has_perm(self.unicef_user, "PROGRAMME_CREATE", self.program)
         self.assertTrue(unicef_user_with_perms)

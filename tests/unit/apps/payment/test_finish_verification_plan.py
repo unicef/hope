@@ -6,7 +6,11 @@ from django.test import TestCase, override_settings
 
 from constance.test import override_config
 
-from hct_mis_api.apps.account.fixtures import RoleFactory, UserFactory, RoleAssignmentFactory
+from hct_mis_api.apps.account.fixtures import (
+    RoleAssignmentFactory,
+    RoleFactory,
+    UserFactory,
+)
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.models import GrievanceTicket

@@ -8,7 +8,7 @@ from django.utils import timezone
 
 from constance import config
 
-from hct_mis_api.apps.account.models import User, RoleAssignment
+from hct_mis_api.apps.account.models import RoleAssignment, User
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.utils.mailjet import MailjetClient

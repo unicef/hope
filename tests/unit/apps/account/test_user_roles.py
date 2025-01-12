@@ -9,7 +9,12 @@ from hct_mis_api.apps.account.admin.forms import (
     RoleAssignmentInlineFormSet,
 )
 from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
-from hct_mis_api.apps.account.models import IncompatibleRoles, Role, User, RoleAssignment
+from hct_mis_api.apps.account.models import (
+    IncompatibleRoles,
+    Role,
+    RoleAssignment,
+    User,
+)
 from hct_mis_api.apps.account.permissions import (
     DEFAULT_PERMISSIONS_IS_UNICEF_PARTNER,
     Permissions,
@@ -37,7 +42,9 @@ class RoleAssignmentsTest(TestCase):
 
     def test_user_cannot_be_assigned_incompatible_role_in_same_business_area(self) -> None:
         IncompatibleRoles.objects.create(role_one=self.role_1, role_two=self.role_2)
-        user_role = RoleAssignment.objects.create(role=self.role_1, business_area=self.business_area_afg, user=self.user)
+        user_role = RoleAssignment.objects.create(
+            role=self.role_1, business_area=self.business_area_afg, user=self.user
+        )
 
         data = {"role": self.role_2.id, "user": self.user.id, "business_area": self.business_area_afg.id}
         form = RoleAssignmentAdminForm(data=data)
@@ -63,7 +70,9 @@ class RoleAssignmentsTest(TestCase):
             "user_roles-0-business_area": self.business_area_afg.id,
             "user_roles-1-business_area": self.business_area_afg.id,
         }
-        RoleAssignmentFormSet = inlineformset_factory(User, RoleAssignment, fields=("__all__"), formset=RoleAssignmentInlineFormSet)
+        RoleAssignmentFormSet = inlineformset_factory(
+            User, RoleAssignment, fields=("__all__"), formset=RoleAssignmentInlineFormSet
+        )
         formset = RoleAssignmentFormSet(instance=self.user, data=data)
         self.assertTrue(formset.is_valid())
 
@@ -78,7 +87,9 @@ class RoleAssignmentsTest(TestCase):
             "user_roles-0-business_area": self.business_area_afg.id,
             "user_roles-1-business_area": self.business_area_afg.id,
         }
-        RoleAssignmentFormSet = inlineformset_factory(User, RoleAssignment, fields=("__all__"), formset=RoleAssignmentInlineFormSet)
+        RoleAssignmentFormSet = inlineformset_factory(
+            User, RoleAssignment, fields=("__all__"), formset=RoleAssignmentInlineFormSet
+        )
         formset = RoleAssignmentFormSet(instance=self.user, data=data)
         self.assertFalse(formset.is_valid())
         self.assertEqual(len(formset.errors), 2)

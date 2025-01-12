@@ -3,7 +3,7 @@ from typing import Any, Callable, Iterable, List, Optional
 import pytest
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory
-from hct_mis_api.apps.account.models import Partner, Role, User, RoleAssignment
+from hct_mis_api.apps.account.models import Partner, Role, RoleAssignment, User
 from hct_mis_api.apps.core.models import BusinessArea, BusinessAreaPartnerThrough
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.program.models import Program, ProgramPartnerThrough

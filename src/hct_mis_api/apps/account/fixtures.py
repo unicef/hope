@@ -1,13 +1,19 @@
 import random
 import time
-from typing import Any
+from typing import Any, List
 
 from django.contrib.auth import get_user_model
 
 import factory
 from factory.django import DjangoModelFactory
 
-from hct_mis_api.apps.account.models import Partner, Role, User, RoleAssignment, AdminAreaLimitedTo
+from hct_mis_api.apps.account.models import (
+    AdminAreaLimitedTo,
+    Partner,
+    Role,
+    RoleAssignment,
+    User,
+)
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
@@ -74,12 +80,12 @@ class RoleAssignmentFactory(DjangoModelFactory):
         django_get_or_create = ("user", "partner", "role")
 
     @factory.lazy_attribute
-    def partner(self):
+    def partner(self) -> Any:
         # Only create partner if user is not provided
         return None if self.user else PartnerFactory()
 
     @factory.lazy_attribute
-    def user(self):
+    def user(self) -> Any:
         # Only create user if partner is not provided
         return None if self.partner else UserFactory()
 
@@ -92,7 +98,7 @@ class AdminAreaLimitedToFactory(DjangoModelFactory):
         model = AdminAreaLimitedTo
 
     @factory.post_generation
-    def areas(self, create, extracted, **kwargs):
+    def areas(self, create: bool, extracted: List[Any], **kwargs: Any) -> None:
         if not create:
             return
 

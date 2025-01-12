@@ -1,8 +1,8 @@
 from hct_mis_api.apps.account.fixtures import (
     PartnerFactory,
+    RoleAssignmentFactory,
     RoleFactory,
     UserFactory,
-    RoleAssignmentFactory,
 )
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.account.permissions import Permissions

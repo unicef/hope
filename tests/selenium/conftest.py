@@ -18,7 +18,7 @@ from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
 
 from hct_mis_api.apps.account.fixtures import RoleFactory, UserFactory
-from hct_mis_api.apps.account.models import Partner, Role, User, RoleAssignment
+from hct_mis_api.apps.account.models import Partner, Role, RoleAssignment, User
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.models import (
     BusinessArea,

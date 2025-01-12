@@ -36,6 +36,8 @@ from adminfilters.autocomplete import AutoCompleteFilter
 from django_filters import OrderingFilter
 from PIL import Image
 
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.exceptions import log_and_raise
 
 if TYPE_CHECKING:
@@ -90,8 +92,9 @@ def get_program_id_from_headers(headers: Union[Dict, "HttpHeaders"]) -> Optional
     program_id = decode_id_string(program_id) if program_id != "all" and program_id != "undefined" else None
     return program_id
 
+
 # TODO: change
-def get_selected_program(request) -> "Program | None":
+def get_selected_program(request: Any) -> Optional[Program]:
     if hasattr(request, "data") and isinstance(request.data, dict):  # GraphQL Request
         program = request.data.get("variables", {}).get("program")
     elif isinstance(request.GET, dict):  # REST API Request
@@ -99,7 +102,7 @@ def get_selected_program(request) -> "Program | None":
     return program
 
 
-def get_selected_business_area(request) -> "BusinessArea | None":
+def get_selected_business_area(request: Any) -> Optional[BusinessArea]:
     if hasattr(request, "data") and isinstance(request.data, dict):  # GraphQL Request
         program = request.data.get("variables", {}).get("business_area")
     elif isinstance(request.GET, dict):  # REST API Request

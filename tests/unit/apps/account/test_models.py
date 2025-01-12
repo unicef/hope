@@ -1,7 +1,12 @@
 from django.core.exceptions import ValidationError
 from django.test import TransactionTestCase
 
-from hct_mis_api.apps.account.fixtures import RoleFactory, UserFactory, RoleAssignmentFactory, PartnerFactory
+from hct_mis_api.apps.account.fixtures import (
+    PartnerFactory,
+    RoleAssignmentFactory,
+    RoleFactory,
+    UserFactory,
+)
 from hct_mis_api.apps.account.models import RoleAssignment
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
@@ -47,7 +52,7 @@ class TestRoleAssignmentModel(TransactionTestCase):
                 business_area=self.business_area,
             )
         self.assertIn(
-            'Either user or partner must be set, but not both.',
+            "Either user or partner must be set, but not both.",
             str(ve_context.exception),
         )
 
@@ -62,7 +67,7 @@ class TestRoleAssignmentModel(TransactionTestCase):
                 program=self.program1,
             )
         self.assertIn(
-            'Either user or partner must be set, but not both.',
+            "Either user or partner must be set, but not both.",
             str(ve_context.exception),
         )
 
@@ -87,7 +92,7 @@ class TestRoleAssignmentModel(TransactionTestCase):
                 business_area=self.business_area,
             )
         self.assertIn(
-            'Partner can only be assigned roles that are available for partners.',
+            "Partner can only be assigned roles that are available for partners.",
             str(ve_context.exception),
         )
 

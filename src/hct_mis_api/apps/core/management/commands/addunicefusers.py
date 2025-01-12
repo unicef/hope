@@ -2,7 +2,7 @@ from typing import Any
 
 from django.core.management import BaseCommand
 
-from hct_mis_api.apps.account.models import Role, User, RoleAssignment
+from hct_mis_api.apps.account.models import Role, RoleAssignment, User
 from hct_mis_api.apps.core.models import BusinessArea
 
 emails = [

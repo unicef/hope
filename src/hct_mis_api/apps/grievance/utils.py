@@ -141,13 +141,13 @@ def filter_grievance_tickets_based_on_partner_areas_2(
 
 def filter_feedback_based_on_partner_areas_2(
     queryset: QuerySet["Feedback"],
-    user_partner: Partner,
+    user: User,
     business_area_id: str,
     program_id: Optional[str],
 ) -> QuerySet["Feedback"]:
     return filter_based_on_partner_areas_2(
         queryset=queryset,
-        user_partner=user_partner,
+        user=user,
         business_area_id=business_area_id,
         program_id=program_id,
         lookup_id="program__id__in",

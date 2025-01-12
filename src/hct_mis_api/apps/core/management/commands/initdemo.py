@@ -59,7 +59,8 @@ from django.db import OperationalError, connections
 from django.utils import timezone
 
 import elasticsearch
-from hct_mis_api.apps.account.models import Partner, Role, User, RoleAssignment
+
+from hct_mis_api.apps.account.models import Partner, Role, RoleAssignment, User
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.payment.fixtures import (
     generate_delivery_mechanisms,
