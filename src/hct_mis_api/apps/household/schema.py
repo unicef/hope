@@ -333,11 +333,10 @@ class IndividualNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTyp
         return parent.phone_no_alternative_valid
 
     def resolve_delivery_mechanisms_data(parent, info: Any) -> QuerySet[DeliveryMechanismData]:
-        program_id = get_program_id_from_headers(info.context.headers)
-        if not info.context.user.has_permission(
+        program = Program.objects.filter(id=get_program_id_from_headers(info.context.headers)).first()
+        if not info.context.user.has_perm(
             Permissions.POPULATION_VIEW_INDIVIDUAL_DELIVERY_MECHANISMS_SECTION.value,
-            parent.business_area,
-            program_id,
+            program or parent.business_area,
         ):
             return parent.delivery_mechanisms_data.none()
 
@@ -368,14 +367,12 @@ class IndividualNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTyp
                         raise PermissionDenied("Permission Denied")
 
         # if user can't simply view all individuals, we check if they can do it because of grievance or rdi details
-        if not user.has_permission(
+        if not user.has_perm(
             Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS.value,
-            object_instance.business_area,
-            object_instance.program_id,
-        ) and not user.has_permission(
+            object_instance.program or object_instance.business_area,
+        ) and not user.has_perm(
             Permissions.RDI_VIEW_DETAILS.value,
-            object_instance.business_area,
-            object_instance.program_id,
+            object_instance.program or object_instance.business_area,
         ):
             grievance_tickets = GrievanceTicket.objects.filter(
                 complaint_ticket_details__in=object_instance.complaint_ticket_details.all()
@@ -544,14 +541,12 @@ class HouseholdNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType
                         raise PermissionDenied("Permission Denied")
 
         # if user doesn't have permission to view all households or RDI details, we check based on their grievance tickets
-        if not user.has_permission(
+        if not user.has_perm(
             Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS.value,
-            object_instance.business_area,
-            object_instance.program_id,
-        ) and not user.has_permission(
+            object_instance.program or object_instance.business_area,
+        ) and not user.has_perm(
             Permissions.RDI_VIEW_DETAILS.value,
-            object_instance.business_area,
-            object_instance.program_id,
+            object_instance.program or object_instance.business_area,
         ):
             grievance_tickets = GrievanceTicket.objects.filter(
                 complaint_ticket_details__in=object_instance.complaint_ticket_details.all()

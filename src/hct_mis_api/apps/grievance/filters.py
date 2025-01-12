@@ -307,11 +307,12 @@ class GrievanceTicketFilter(FilterSet):
         user = self.request.user
         business_area = BusinessArea.objects.get(slug=self.request.headers.get("Business-Area"))
         program_id = get_program_id_from_headers(self.request.headers)
+        program = Program.objects.filter(id=program_id).first()
 
         perm = Permissions.GRIEVANCES_CROSS_AREA_FILTER.value
         if (
             value is True
-            and user.has_permission(perm, business_area, program_id)
+            and user.has_perm(perm, program or business_area)
             and (not user.partner.has_area_limits_in_program(program_id) or not program_id)
         ):
             return qs.filter(needs_adjudication_ticket_details__is_cross_area=True)

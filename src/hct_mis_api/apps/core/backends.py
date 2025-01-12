@@ -18,6 +18,7 @@ from hct_mis_api.apps.program.models import Program
 
 class PermissionsBackend(BaseBackend):
     def get_all_permissions(self, user: User, obj: Optional[Model] = None) -> set[str]:  # type: ignore
+        print("PERMISSIONS CHECK")
         filters: dict[str, Any]
         if not obj:
             program = None
@@ -52,6 +53,8 @@ class PermissionsBackend(BaseBackend):
         cached_permissions = cache.get(cache_key)
 
         if cached_permissions:
+            print("cached")
+            print(cached_permissions)
             return cached_permissions
 
         # If permission is checked for a Program and User does not have access to it, return empty set
@@ -78,6 +81,8 @@ class PermissionsBackend(BaseBackend):
             (Q(user=user) | Q(partner__user=user))
             & (Q(business_area=filters.get("business_area"), program=None) | Q(**filters))
         ).exclude(expiry_date__lt=timezone.now())
+
+        print(role_assignments)
 
         if business_area and not role_assignments.exists():
             return set()
