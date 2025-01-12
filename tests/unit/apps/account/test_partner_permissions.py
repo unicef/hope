@@ -1,7 +1,7 @@
 from django.test import TestCase
 
-from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
-from hct_mis_api.apps.account.models import Role, User, RoleAssignment
+from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory, AdminAreaLimitedToFactory
+from hct_mis_api.apps.account.models import Role, User, RoleAssignment, AdminAreaLimitedTo
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea, BusinessAreaPartnerThrough
 from hct_mis_api.apps.geo.fixtures import AreaFactory
@@ -23,24 +23,22 @@ class UserPartnerTest(TestCase):
         cls.program = ProgramFactory.create(status=Program.DRAFT, business_area=cls.business_area)
         cls.other_partner = PartnerFactory(name="Partner")
         cls.other_user = UserFactory(partner=cls.other_partner)
-        role_assignment_partner_other = RoleAssignment.objects.create(
+        RoleAssignment.objects.create(
             business_area=cls.business_area,
             program=cls.program,
             partner=cls.other_partner,
             role=cls.role_2,
         )
-        role_assignment_partner_other.areas.set([cls.area_1])
+        AdminAreaLimitedToFactory.objects.create(partner=cls.other_partner, program=cls.program, areas=[cls.area_1])
 
         cls.unicef_partner = PartnerFactory(name="UNICEF")
         cls.unicef_user = UserFactory(partner=cls.unicef_partner)
-        role_assignment_partner_unicef = RoleAssignment.objects.create(
+        RoleAssignment.objects.create(
             business_area=cls.business_area,
             program=cls.program,
             partner=cls.unicef_partner,
             role=cls.role_1,
         )
-        role_assignment_partner_unicef.areas.set([cls.area_1, cls.area_2])
-
 
         RoleAssignment.objects.create(
             business_area=cls.business_area,
@@ -67,25 +65,16 @@ class UserPartnerTest(TestCase):
         resp_2 = self.unicef_user.partner.get_program_ids_for_business_area(business_area_id=self.business_area.pk)
         self.assertListEqual(resp_2, [str(self.program.pk)])
 
-    def test_get_partner_roles_for_business_area(self) -> None:
-        empty_qs = self.other_user.partner.get_roles_for_business_area()
-        self.assertQuerysetEqual(empty_qs, Role.objects.none())
-
-        resp_1 = self.other_user.partner.get_roles_for_business_area(business_area_slug=self.business_area.slug)
-        resp_2 = self.other_user.partner.get_roles_for_business_area(business_area_id=self.business_area.pk)
-
-        self.assertQuerysetEqual(resp_1, resp_2)
-        self.assertQuerysetEqual(resp_1, Role.objects.filter(pk=self.role_2.pk))
-
-        resp_3 = self.unicef_user.partner.get_roles_for_business_area(business_area_slug=self.business_area.slug)
-        self.assertQuerysetEqual(resp_3, Role.objects.none())
-
-    def test_get_partner_areas_per_program(self) -> None:
-        other_partner_areas = self.other_user.partner.get_program_areas(self.program.pk)
+    def test_get_partner_area_limits_per_program(self) -> None:
+        other_partner_areas = self.other_user.partner.get_area_limits_for_program(self.program.pk)
         self.assertQuerysetEqual(other_partner_areas, Area.objects.filter(id=self.area_1.pk))
 
-        unicef_partner_areas = self.unicef_user.partner.get_program_areas(self.program.pk)
-        self.assertQuerysetEqual(unicef_partner_areas, Area.objects.filter(id__in=[self.area_1.pk, self.area_2.pk]))
+    def test_has_area_access(self) -> None:
+        self.assertTrue(self.other_user.partner.has_area_access(self.area_1.pk, self.program.pk))
+        self.assertFalse(self.other_user.partner.has_area_access(self.area_2.pk, self.program.pk))
+
+        self.assertTrue(self.unicef_user.partner.has_area_access(self.area_1.pk, self.program.pk))
+        self.assertTrue(self.unicef_user.partner.has_area_access(self.area_2.pk, self.program.pk))
 
     def test_partner_permissions_in_business_area(self) -> None:
         # two roles without program

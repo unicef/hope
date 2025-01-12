@@ -145,7 +145,6 @@ class GrievanceTicketNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObje
         )
         partner = user.partner
         ticket_program_id = str(object_instance.programs.first().id) if object_instance.programs.first() else None
-        # TODO: perms: move area check to has_perm
         if not object_instance.admin2 or not ticket_program_id:
             # admin2 is empty or non-program ticket -> no restrictions for admin area
             has_partner_area_access = True
@@ -576,9 +575,9 @@ class Query(graphene.ObjectType):
         queryset = queryset.prefetch_related(*to_prefetch)
 
         # Ignore filtering for Cross Area tickets
-        if not (kwargs.get("is_cross_area", False) and program_id and user.partner.has_full_area_access_in_program(program_id)):
+        if not (kwargs.get("is_cross_area", False) and program_id and not user.partner.has_area_limits_in_program(program_id)):
             queryset = filter_grievance_tickets_based_on_partner_areas_2(
-                queryset, user.partner, business_area_id, program_id
+                queryset, user, business_area_id, program_id
             )
 
         if program_id is None:
@@ -610,7 +609,9 @@ class Query(graphene.ObjectType):
 
         perm = Permissions.GRIEVANCES_CROSS_AREA_FILTER.value
 
-        return user.has_permission(perm, business_area, program_id) and user.partner.has_full_area_access_in_program(
+        # Access to the cross-area filter, in addition to the standard permissions check,
+        # is available only if user does not have ANY area limits in the program (has full-area-access)
+        return user.has_permission(perm, business_area, program_id) and not user.partner.has_area_limits_in_program(
             program_id
         )
 

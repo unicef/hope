@@ -115,9 +115,6 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
     def is_editable(self) -> bool:
         return not self.is_unicef and not self.is_default
 
-    def has_full_area_access_in_program(self, program_id: Union[str, UUID]) -> bool:
-        return RoleAssignment.objects.filter(partner=self, program_id=program_id, full_area_access=True).exists()
-
     def get_program_ids_for_business_area(self, business_area_id: str) -> List[str]:
         from hct_mis_api.apps.program.models import Program
         if self.role_assignments.filter(business_area_id=business_area_id, program=None).exists():
@@ -138,34 +135,17 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
         ).exclude(expiry_date__lt=timezone.now()).exists()
 
     def has_area_access(self, area_id: Union[str, UUID], program_id: Union[str, UUID]) -> bool:
-        return self.get_program_areas(program_id).filter(id=area_id).exists()
-
-    def get_program_areas(self, program_id: Union[str, UUID]) -> QuerySet[Area]:
-        return Area.objects.filter(role_assignments__partner=self, role_assignments__program_id=program_id)
-
-    def get_roles_for_business_area(
-        self, business_area_slug: Optional[str] = None, business_area_id: Optional["UUID"] = None
-    ) -> QuerySet["Role"]:
-        if not business_area_slug and not business_area_id:
-            return Role.objects.none()
-
-        if not business_area_id and business_area_slug:
-            business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
-
-        return Role.objects.filter(
-            role_assignments__partner=self,
-            role_assignments__business_area_id=business_area_id,
+        return (
+            not self.has_area_limits_in_program(program_id)
+            or self.get_area_limits_for_program(program_id).filter(id=area_id).exists()
         )
 
-    # TODO: permissions: possibly remove
-    def add_roles_in_business_area(self, business_area_id: str, roles: List["Role"], program_id: Optional[str] = None) -> None:
-        for role in roles:
-            RoleAssignment.objects.get_or_create(
-                partner=self,
-                business_area_id=business_area_id,
-                program_id=program_id,
-                role=role
-            )
+    def get_area_limits_for_program(self, program_id: Union[str, UUID]) -> QuerySet[Area]:
+        area_limits = AdminAreaLimitedTo.objects.filter(partner=self, program_id=program_id)
+        return Area.objects.filter(admin_area_limits__in=area_limits)
+
+    def has_area_limits_in_program(self, program_id: Union[str, UUID]) -> bool:
+        return self.get_area_limits_for_program(program_id).exists()
 
 
 class User(AbstractUser, NaturalKeyModel, UUIDModel):
@@ -198,12 +178,34 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
         return self.email or self.username
 
     def save(self, *args: Any, **kwargs: Any) -> None:
-        print("Saving user:")
         if not self.partner:
             self.partner, _ = Partner.objects.get_or_create(name=settings.DEFAULT_EMPTY_PARTNER)
         if not self.partner.pk:
             self.partner.save()
         super().save(*args, **kwargs)
+
+    def has_program_access(self, program_id: Union[str, UUID]) -> bool:
+        from hct_mis_api.apps.program.models import Program
+        return RoleAssignment.objects.filter(
+            Q(user=self) | Q(partner__user=self)
+            & Q(business_area=Program.objects.get(id=program_id).business_area)
+            & (Q(program=None) | Q(program_id=program_id))
+        ).exclude(expiry_date__lt=timezone.now()).exists()
+
+    def get_program_ids_for_business_area(self, business_area_id: str) -> List[str]:
+        from hct_mis_api.apps.program.models import Program
+        if RoleAssignment.objects.filter(
+            Q(user=self) | Q(partner__user=self), business_area_id=business_area_id, program=None
+        ).exists():
+            programs_ids = Program.objects.filter(business_area_id=business_area_id).values_list("id", flat=True)
+        else:
+            RoleAssignment.objects.filter(
+                Q(user=self) | Q(partner__user=self), business_area_id=business_area_id,
+            ).values_list("program_id", flat=True)
+        return [
+            str(program_id)
+            for program_id in programs_ids
+        ]
 
     def permissions_in_business_area(self, business_area_slug: str, program_id: Optional[UUID] = None) -> set:
         """
@@ -211,12 +213,13 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
         retrieved from RoleAssignments of the user and their partner
         """
         if program_id:
-            if not self.partner.has_program_access(program_id):
+            if not self.has_program_access(program_id):
                 return set()
             role_assignments = RoleAssignment.objects.filter(
                 Q(partner__user=self, business_area__slug=business_area_slug, program_id=program_id) |
                 Q(partner__user=self, business_area__slug=business_area_slug, program=None) |
-                Q(user=self, business_area__slug=business_area_slug)
+                Q(user=self, business_area__slug=business_area_slug, program_id=program_id) |
+                Q(user=self, business_area__slug=business_area_slug, program=None)
             ).exclude(expiry_date__lt=timezone.now())
         else:
             role_assignments = RoleAssignment.objects.filter(
@@ -328,8 +331,6 @@ class RoleAssignment(NaturalKeyModel, TimeStampedUUIDModel):
     partner = models.ForeignKey("account.Partner", related_name="role_assignments", on_delete=models.CASCADE, null=True, blank=True)
     role = models.ForeignKey("account.Role", related_name="role_assignments", on_delete=models.CASCADE, null=True, blank=True)
     program = models.ForeignKey("program.Program", related_name="role_assignments", on_delete=models.CASCADE, null=True, blank=True)
-    areas = models.ManyToManyField("geo.Area", related_name="role_assignments", blank=True)
-    full_area_access = models.BooleanField(default=False)
     expiry_date = models.DateField(
         blank=True, null=True, help_text="After expiry date this Role Assignment will be inactive."
     )
@@ -342,19 +343,6 @@ class RoleAssignment(NaturalKeyModel, TimeStampedUUIDModel):
                 check=Q(user__isnull=False, partner__isnull=True) | Q(user__isnull=True, partner__isnull=False),
                 name="user_or_partner_not_both"
             ),
-            # program can only be assigned for partner roles; not for user roles
-            models.CheckConstraint(
-                check=Q(user__isnull=True) | (Q(user__isnull=False) & Q(program__isnull=True)),
-                name="program_and_areas_null_for_user"
-            ),
-            # unique combination of user, role, and business_area; applies only when a user is assigned, not a partner.
-            # (For partner assignments, the role can be reused within the same business_area
-            # if linked to different programs, as the assignment is considered per program, not per business_area.)
-            models.UniqueConstraint(
-                fields=["business_area", "role", "user"],
-                condition=Q(user__isnull=False),
-                name="unique_user_role_assignment"
-            ),
         ]
 
     def clean(self) -> None:
@@ -363,14 +351,6 @@ class RoleAssignment(NaturalKeyModel, TimeStampedUUIDModel):
         # Ensure either user or partner is set, but not both
         if bool(self.user) == bool(self.partner):
             errors.append("Either user or partner must be set, but not both.")
-        # Ensure program and areas can only be assigned for partner roles; not for user roles
-        if self.user and (self.program or self.areas.exists()):
-            errors.append("Program and areas can only be assigned for partner roles; not for user roles.")
-        # Ensure user role assignment is unique within the business area
-        if self.user and RoleAssignment.objects.filter(
-            business_area=self.business_area, role=self.role, user=self.user
-        ).exclude(id=self.id).exists():
-            errors.append("This role is already assigned to the user in the business area.")
         # Ensure partner can only be assigned roles that have flag is_available_for_partner as True
         if self.partner and self.role and not self.role.is_available_for_partner:
             errors.append("Partner can only be assigned roles that are available for partners.")
@@ -384,6 +364,16 @@ class RoleAssignment(NaturalKeyModel, TimeStampedUUIDModel):
     def __str__(self) -> str:
         role_holder = self.user if self.user else self.partner
         return f"{role_holder} {self.role} in {self.business_area}"
+
+
+class AdminAreaLimitedTo(TimeStampedUUIDModel):
+    """
+    Model to limit the admin area access for a partner.
+    Partners with full area access for a certain program will not have any area limits - no record in this model.
+    """
+    partner = models.ForeignKey("account.Partner", related_name="admin_area_limits", on_delete=models.CASCADE)
+    program = models.ForeignKey("program.Program", related_name="admin_area_limits", on_delete=models.CASCADE)
+    areas = models.ManyToManyField("geo.Area", related_name="admin_area_limits", blank=True)
 
 
 class UserGroup(NaturalKeyModel, models.Model):

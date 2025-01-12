@@ -136,12 +136,3 @@ def invalidate_permissions_cache_on_user_change(sender, instance, **kwargs):
     Invalidate the cache for a User when they are updated. (For example change of partner or is_superuser flag)
     """
     _invalidate_user_permissions_cache([instance])
-
-
-@receiver(post_save, sender=Partner)
-@receiver(pre_delete, sender=Partner)
-def invalidate_permissions_cache_on_partner_change(sender, instance, **kwargs):
-    """
-    Invalidate the cache for a User when they are updated. (For example change of partner or is_superuser flag)
-    """
-    _invalidate_user_permissions_cache([instance])

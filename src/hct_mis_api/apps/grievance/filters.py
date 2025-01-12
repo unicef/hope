@@ -312,7 +312,7 @@ class GrievanceTicketFilter(FilterSet):
         if (
             value is True
             and user.has_permission(perm, business_area, program_id)
-            and (user.partner.has_full_area_access_in_program(program_id) or not program_id)
+            and (not user.partner.has_area_limits_in_program(program_id) or not program_id)
         ):
             return qs.filter(needs_adjudication_ticket_details__is_cross_area=True)
         else:

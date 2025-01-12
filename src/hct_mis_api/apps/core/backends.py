@@ -16,12 +16,8 @@ if TYPE_CHECKING:
     from hct_mis_api.apps.account.models import User
 
 
-# TODO: perms: add area check
 class PermissionsBackend(BaseBackend):
     def get_all_permissions(self, user: "User", obj: "Model|None" = None) -> set[str]:
-        print(user)
-        print(obj)
-
         if not obj:
             program = None
             business_area = None
@@ -62,7 +58,7 @@ class PermissionsBackend(BaseBackend):
 
         # If permission is checked for a Program and User does not have access to it, return empty set
         if program and not RoleAssignment.objects.filter(
-            Q(partner=user.partner)
+            Q(partner=user.partner) | Q(user=user)
             & Q(business_area=business_area)
             & (Q(program=None) | Q(program=program))
         ).exclude(expiry_date__lt=timezone.now()).exists():
