@@ -500,18 +500,13 @@ class PaymentGatewayService:
                 delivered_quantity = 0
 
             update_fields.extend(["delivered_quantity", "delivered_quantity_usd"])
-            try:
-                _payment.delivered_quantity = to_decimal(delivered_quantity)
-                _payment.delivered_quantity_usd = get_quantity_in_usd(
-                    amount=Decimal(delivered_quantity),  # type: ignore
-                    currency=_payment_plan.currency,
-                    exchange_rate=Decimal(_exchange_rate),
-                    currency_exchange_date=_payment_plan.currency_exchange_date,
-                )
-            except (ValueError, TypeError):
-                logger.warning(f"Invalid delivered_amount for Payment {_payment.id}: {delivered_quantity}")
-                _payment.delivered_quantity = None
-                _payment.delivered_quantity_usd = None
+            _payment.delivered_quantity = to_decimal(delivered_quantity)
+            _payment.delivered_quantity_usd = get_quantity_in_usd(
+                amount=Decimal(delivered_quantity),  # type: ignore
+                currency=_payment_plan.currency,
+                exchange_rate=Decimal(_exchange_rate),
+                currency_exchange_date=_payment_plan.currency_exchange_date,
+            )
 
         _payment.save(update_fields=update_fields)
 
