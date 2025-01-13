@@ -54,7 +54,7 @@ class AreaTypeFilter(UpdatedAtFilter):
 
 class ProjectFilter(FilterSet):
     org_slug = CharFilter(field_name="organization__slug", lookup_expr="exact")
-    org_pk = NumberFilter(field_name="organization__pk", lookup_expr="exact")
+    org_pk = CharFilter(field_name="organization__pk", lookup_expr="exact")
 
     class Meta:
         model = Project
@@ -63,8 +63,8 @@ class ProjectFilter(FilterSet):
 
 class RegistrationFilter(FilterSet):
     org_slug = CharFilter(field_name="project__organization__slug", lookup_expr="exact")
-    org_pk = NumberFilter(field_name="project__organization__pk", lookup_expr="exact")
-    programme_pk = NumberFilter(field_name="project__programme__pk", lookup_expr="exact")
+    org_pk = CharFilter(field_name="project__organization__pk", lookup_expr="exact")
+    programme_pk = CharFilter(field_name="project__programme__pk", lookup_expr="exact")
 
     class Meta:
         model = Registration
