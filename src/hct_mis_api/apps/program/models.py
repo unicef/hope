@@ -25,8 +25,7 @@ from rest_framework.exceptions import ValidationError as DRFValidationError
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.payment.models import PaymentPlan
-from hct_mis_api.apps.targeting.models import TargetPopulation
+from hct_mis_api.apps.payment.models import Payment, PaymentPlan
 from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
     AdminUrlMixin,
@@ -272,11 +271,16 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         self.individual_count = self.individuals.count()
 
     @property
-    def households_with_tp_in_program(self) -> QuerySet:
-        target_populations_in_program_ids = (
-            TargetPopulation.objects.filter(program=self).exclude(status=TargetPopulation.STATUS_OPEN).values("id")
+    def households_with_payments_in_program(self) -> QuerySet:
+        # for now all Payments or maybe can filter just status__in=Payment.DELIVERED_STATUSES
+        household_ids = (
+            Payment.objects.filter(program=self)
+            .exclude(conflicted=True, excluded=True)
+            .values_list("household_id", flat=True)
+            .distinct()
         )
-        return Household.objects.filter(target_populations__id__in=target_populations_in_program_ids).distinct()
+
+        return Household.objects.filter(id__in=household_ids, program=self)
 
     @property
     def admin_areas_log(self) -> str:
@@ -284,8 +288,6 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
 
     @property
     def is_social_worker_program(self) -> bool:
-        if self.data_collecting_type is None:
-            return False
         return self.data_collecting_type.type == DataCollectingType.Type.SOCIAL
 
     class Meta:

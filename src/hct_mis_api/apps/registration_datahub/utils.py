@@ -2,17 +2,17 @@ import hashlib
 import json
 import re
 import sys
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from django.db.models import Q, QuerySet
 from django.shortcuts import get_object_or_404
 
 from hct_mis_api.apps.core.kobo.common import get_field_name
-from hct_mis_api.apps.household.models import Household, Individual, PendingIndividual
+from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.program.models import Program
 
 
-def post_process_dedupe_results(record: "PendingIndividual") -> None:
+def post_process_dedupe_results(record: Any) -> None:
     max_score = 0
     min_score = sys.maxsize
     for field in [record.deduplication_batch_results, record.deduplication_golden_record_results]:
