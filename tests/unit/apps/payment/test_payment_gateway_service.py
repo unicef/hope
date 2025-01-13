@@ -69,9 +69,7 @@ class TestPaymentGatewayService(APITestCase):
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.user = UserFactory.create()
 
-        cls.pp = PaymentPlanFactory(
-            status=PaymentPlan.Status.ACCEPTED,
-        )
+        cls.pp = PaymentPlanFactory(status=PaymentPlan.Status.ACCEPTED, created_by=cls.user)
         cls.pg_fsp = FinancialServiceProviderFactory(
             name="Western Union",
             communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
