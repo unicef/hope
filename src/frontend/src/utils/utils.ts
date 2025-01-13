@@ -582,14 +582,22 @@ export function programStatusToPriority(status: ProgramStatus): number {
       return 3;
   }
 }
-export function decodeIdString(idString): string | null {
+export function decodeIdString(idString: string): string | null {
   if (!idString) {
     return null;
   }
-  const decoded = atob(idString);
-  return decoded.split(':')[1];
+  if (idString.includes(':')) {
+    // Already decoded
+    return idString.split(':')[1];
+  }
+  try {
+    const decoded = atob(idString);
+    return decoded.split(':')[1];
+  } catch (e) {
+    console.error('Failed to decode string:', e);
+    return null;
+  }
 }
-
 export function programCompare(
   a: AllProgramsQuery['allPrograms']['edges'][number],
   b: AllProgramsQuery['allPrograms']['edges'][number],

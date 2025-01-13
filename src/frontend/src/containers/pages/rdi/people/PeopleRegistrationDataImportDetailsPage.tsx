@@ -138,6 +138,7 @@ export const PeopleRegistrationDataImportDetailsPage = (): ReactElement => {
                 <ImportedPeopleTable
                   showCheckbox
                   rdiId={id}
+                  rdi={data?.registrationDataImport}
                   isMerged={isMerged}
                   businessArea={businessArea}
                   key={`${data.registrationDataImport.status}-individual`}

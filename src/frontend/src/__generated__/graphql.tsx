@@ -1160,8 +1160,12 @@ export enum DataCollectingTypeType {
 
 export type DeduplicationEngineSimilarityPairIndividualNode = {
   __typename?: 'DeduplicationEngineSimilarityPairIndividualNode';
+  age?: Maybe<Scalars['Int']['output']>;
   fullName?: Maybe<Scalars['String']['output']>;
+  id?: Maybe<Scalars['String']['output']>;
+  location?: Maybe<Scalars['String']['output']>;
   photo?: Maybe<Scalars['String']['output']>;
+  similarityScore?: Maybe<Scalars['Float']['output']>;
   unicefId?: Maybe<Scalars['String']['output']>;
 };
 
@@ -1182,6 +1186,7 @@ export type DeduplicationResultNode = {
   location?: Maybe<Scalars['String']['output']>;
   proximityToScore?: Maybe<Scalars['Float']['output']>;
   score?: Maybe<Scalars['Float']['output']>;
+  unicefId?: Maybe<Scalars['String']['output']>;
 };
 
 export type DeleteHouseholdApproveMutation = {
@@ -2559,6 +2564,21 @@ export type ImportedDocumentTypeNodeDocumentsArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
+export enum IndividualBiometricDeduplicationBatchStatus {
+  DuplicateInBatch = 'DUPLICATE_IN_BATCH',
+  NotProcessed = 'NOT_PROCESSED',
+  SimilarInBatch = 'SIMILAR_IN_BATCH',
+  UniqueInBatch = 'UNIQUE_IN_BATCH'
+}
+
+export enum IndividualBiometricDeduplicationGoldenRecordStatus {
+  Duplicate = 'DUPLICATE',
+  NeedsAdjudication = 'NEEDS_ADJUDICATION',
+  NotProcessed = 'NOT_PROCESSED',
+  Postpone = 'POSTPONE',
+  Unique = 'UNIQUE'
+}
+
 export type IndividualDataChangeApproveMutation = {
   __typename?: 'IndividualDataChangeApproveMutation';
   grievanceTicket?: Maybe<GrievanceTicketNode>;
@@ -2669,6 +2689,10 @@ export type IndividualNode = Node & {
   age?: Maybe<Scalars['Int']['output']>;
   ageAtRegistration?: Maybe<Scalars['Int']['output']>;
   bankAccountInfo?: Maybe<BankAccountInfoNode>;
+  biometricDeduplicationBatchResults?: Maybe<Array<Maybe<DeduplicationEngineSimilarityPairIndividualNode>>>;
+  biometricDeduplicationBatchStatus: IndividualBiometricDeduplicationBatchStatus;
+  biometricDeduplicationGoldenRecordResults?: Maybe<Array<Maybe<DeduplicationEngineSimilarityPairIndividualNode>>>;
+  biometricDeduplicationGoldenRecordStatus: IndividualBiometricDeduplicationGoldenRecordStatus;
   birthDate: Scalars['Date']['output'];
   blockchainName: Scalars['String']['output'];
   businessArea: UserBusinessAreaNode;
@@ -9319,7 +9343,7 @@ export type AllIndividualsQueryVariables = Exact<{
 }>;
 
 
-export type AllIndividualsQuery = { __typename?: 'Query', allIndividuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'IndividualNodeEdge', cursor: string, node?: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, fullName: string, relationship?: IndividualRelationship | null, age?: number | null, sex: IndividualSex, lastRegistrationDate: any, phoneNo: string, birthDate: any, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, countryIso3?: string | null, number: string } | null } | null> } | null, paymentChannels?: Array<{ __typename?: 'BankAccountInfoNode', id: string, bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null> | null } | null } | null> } | null };
+export type AllIndividualsQuery = { __typename?: 'Query', allIndividuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'IndividualNodeEdge', cursor: string, node?: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, biometricDeduplicationGoldenRecordStatus: IndividualBiometricDeduplicationGoldenRecordStatus, biometricDeduplicationBatchStatus: IndividualBiometricDeduplicationBatchStatus, sanctionListLastCheck?: any | null, fullName: string, relationship?: IndividualRelationship | null, age?: number | null, sex: IndividualSex, lastRegistrationDate: any, phoneNo: string, birthDate: any, biometricDeduplicationBatchResults?: Array<{ __typename?: 'DeduplicationEngineSimilarityPairIndividualNode', id?: string | null, unicefId?: string | null, fullName?: string | null, age?: number | null, location?: string | null, similarityScore?: number | null, photo?: string | null } | null> | null, biometricDeduplicationGoldenRecordResults?: Array<{ __typename?: 'DeduplicationEngineSimilarityPairIndividualNode', id?: string | null, unicefId?: string | null, fullName?: string | null, age?: number | null, location?: string | null, similarityScore?: number | null, photo?: string | null } | null> | null, deduplicationBatchResults?: Array<{ __typename?: 'DeduplicationResultNode', unicefId?: string | null, hitId?: string | null, fullName?: string | null, score?: number | null, proximityToScore?: number | null, location?: string | null, age?: number | null, duplicate?: boolean | null, distinct?: boolean | null } | null> | null, deduplicationGoldenRecordResults?: Array<{ __typename?: 'DeduplicationResultNode', unicefId?: string | null, hitId?: string | null, fullName?: string | null, score?: number | null, proximityToScore?: number | null, location?: string | null, age?: number | null, duplicate?: boolean | null, distinct?: boolean | null } | null> | null, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null, documents?: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> } | null, identities?: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, countryIso3?: string | null, number: string } | null } | null> } | null, paymentChannels?: Array<{ __typename?: 'BankAccountInfoNode', id: string, bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null> | null } | null } | null> } | null };
 
 export type AllIndividualsForPopulationTableQueryVariables = Exact<{
   before?: InputMaybe<Scalars['String']['input']>;
@@ -9351,7 +9375,7 @@ export type AllIndividualsForPopulationTableQueryVariables = Exact<{
 }>;
 
 
-export type AllIndividualsForPopulationTableQuery = { __typename?: 'Query', allIndividuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'IndividualNodeEdge', cursor: string, node?: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, status?: string | null, sanctionListLastCheck?: any | null, fullName: string, relationship?: IndividualRelationship | null, age?: number | null, sex: IndividualSex, lastRegistrationDate: any, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null } | null, program?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null } | null> } | null };
+export type AllIndividualsForPopulationTableQuery = { __typename?: 'Query', allIndividuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'IndividualNodeEdge', cursor: string, node?: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, status?: string | null, sanctionListLastCheck?: any | null, fullName: string, relationship?: IndividualRelationship | null, age?: number | null, sex: IndividualSex, lastRegistrationDate: any, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null } | null, program?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null } | null> } | null };
 
 export type HouseholdQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -18519,6 +18543,49 @@ export const AllIndividualsDocument = gql`
         sanctionListPossibleMatch
         sanctionListConfirmedMatch
         deduplicationGoldenRecordStatus
+        deduplicationBatchStatus
+        biometricDeduplicationGoldenRecordStatus
+        biometricDeduplicationBatchStatus
+        biometricDeduplicationBatchResults {
+          id
+          unicefId
+          fullName
+          age
+          location
+          similarityScore
+          photo
+        }
+        biometricDeduplicationGoldenRecordResults {
+          id
+          unicefId
+          fullName
+          age
+          location
+          similarityScore
+          photo
+        }
+        deduplicationBatchResults {
+          unicefId
+          hitId
+          fullName
+          score
+          proximityToScore
+          location
+          age
+          duplicate
+          distinct
+        }
+        deduplicationGoldenRecordResults {
+          unicefId
+          hitId
+          fullName
+          score
+          proximityToScore
+          location
+          age
+          duplicate
+          distinct
+        }
         sanctionListLastCheck
         fullName
         household {
@@ -18679,6 +18746,7 @@ export const AllIndividualsForPopulationTableDocument = gql`
         sanctionListPossibleMatch
         sanctionListConfirmedMatch
         deduplicationGoldenRecordStatus
+        deduplicationBatchStatus
         status
         sanctionListLastCheck
         fullName
@@ -21719,6 +21787,8 @@ export type ResolversTypes = {
   ImportXLSXPaymentPlanPaymentListPerFSPMutation: ResolverTypeWrapper<ImportXlsxPaymentPlanPaymentListPerFspMutation>;
   ImportXlsxPaymentVerificationPlanFile: ResolverTypeWrapper<ImportXlsxPaymentVerificationPlanFile>;
   ImportedDocumentTypeNode: ResolverTypeWrapper<ImportedDocumentTypeNode>;
+  IndividualBiometricDeduplicationBatchStatus: IndividualBiometricDeduplicationBatchStatus;
+  IndividualBiometricDeduplicationGoldenRecordStatus: IndividualBiometricDeduplicationGoldenRecordStatus;
   IndividualDataChangeApproveMutation: ResolverTypeWrapper<IndividualDataChangeApproveMutation>;
   IndividualDataUpdateIssueTypeExtras: IndividualDataUpdateIssueTypeExtras;
   IndividualDeduplicationBatchStatus: IndividualDeduplicationBatchStatus;
@@ -23028,8 +23098,12 @@ export interface DecimalScalarConfig extends GraphQLScalarTypeConfig<ResolversTy
 }
 
 export type DeduplicationEngineSimilarityPairIndividualNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeduplicationEngineSimilarityPairIndividualNode'] = ResolversParentTypes['DeduplicationEngineSimilarityPairIndividualNode']> = {
+  age?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   fullName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  location?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   photo?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  similarityScore?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   unicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
@@ -23050,6 +23124,7 @@ export type DeduplicationResultNodeResolvers<ContextType = any, ParentType exten
   location?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   proximityToScore?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   score?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  unicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -23888,6 +23963,10 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   age?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   ageAtRegistration?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   bankAccountInfo?: Resolver<Maybe<ResolversTypes['BankAccountInfoNode']>, ParentType, ContextType>;
+  biometricDeduplicationBatchResults?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeduplicationEngineSimilarityPairIndividualNode']>>>, ParentType, ContextType>;
+  biometricDeduplicationBatchStatus?: Resolver<ResolversTypes['IndividualBiometricDeduplicationBatchStatus'], ParentType, ContextType>;
+  biometricDeduplicationGoldenRecordResults?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeduplicationEngineSimilarityPairIndividualNode']>>>, ParentType, ContextType>;
+  biometricDeduplicationGoldenRecordStatus?: Resolver<ResolversTypes['IndividualBiometricDeduplicationGoldenRecordStatus'], ParentType, ContextType>;
   birthDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
   blockchainName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>;

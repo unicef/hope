@@ -794,9 +794,13 @@ scalar DateTime
 scalar Decimal
 
 type DeduplicationEngineSimilarityPairIndividualNode {
+  id: String
   photo: String
   fullName: String
   unicefId: String
+  similarityScore: Float
+  age: Int
+  location: String
 }
 
 type DeduplicationEngineSimilarityPairNode {
@@ -806,6 +810,7 @@ type DeduplicationEngineSimilarityPairNode {
 }
 
 type DeduplicationResultNode {
+  unicefId: String
   hitId: ID
   fullName: String
   score: Float
@@ -1778,6 +1783,21 @@ type ImportedDocumentTypeNode {
   documents(offset: Int, before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
 }
 
+enum IndividualBiometricDeduplicationBatchStatus {
+  DUPLICATE_IN_BATCH
+  NOT_PROCESSED
+  SIMILAR_IN_BATCH
+  UNIQUE_IN_BATCH
+}
+
+enum IndividualBiometricDeduplicationGoldenRecordStatus {
+  DUPLICATE
+  NEEDS_ADJUDICATION
+  NOT_PROCESSED
+  POSTPONE
+  UNIQUE
+}
+
 type IndividualDataChangeApproveMutation {
   grievanceTicket: GrievanceTicketNode
 }
@@ -1913,6 +1933,10 @@ type IndividualNode implements Node {
   deduplicationBatchStatus: IndividualDeduplicationBatchStatus!
   deduplicationGoldenRecordResults: [DeduplicationResultNode]
   deduplicationBatchResults: [DeduplicationResultNode]
+  biometricDeduplicationGoldenRecordStatus: IndividualBiometricDeduplicationGoldenRecordStatus!
+  biometricDeduplicationBatchStatus: IndividualBiometricDeduplicationBatchStatus!
+  biometricDeduplicationGoldenRecordResults: [DeduplicationEngineSimilarityPairIndividualNode]
+  biometricDeduplicationBatchResults: [DeduplicationEngineSimilarityPairIndividualNode]
   importedIndividualId: UUID
   sanctionListPossibleMatch: Boolean!
   sanctionListConfirmedMatch: Boolean!
