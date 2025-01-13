@@ -624,9 +624,9 @@ def generate_payment_plan() -> None:
     TargetingCriteriaRuleFilter.objects.update_or_create(
         pk=targeting_criteria_rule_condition_pk,
         targeting_criteria_rule=targeting_criteria_rule,
-        comparison_method="EQUALS",
-        field_name="address",
-        arguments=[address],
+        comparison_method="CONTAINS",
+        field_name="registration_data_import",
+        arguments=["4d100000-0000-0000-0000-000000000000"],
     )
 
     target_population_pk = UUID("00000000-0000-0000-0000-faceb00c0123")
@@ -649,21 +649,22 @@ def generate_payment_plan() -> None:
     )
     TargetingCriteriaRuleFilterFactory(
         targeting_criteria_rule=tcr2,
-        comparison_method="EQUALS",
-        field_name="address",
-        arguments=[address],
+        comparison_method="RANGE",
+        field_name="size",
+        arguments=[1, 11],
     )
 
     tp2 = TargetPopulation.objects.update_or_create(
-        name="Test Target Population for PM",
+        name="Test TP for PM (just click rebuild)",
         targeting_criteria=tc2,
-        status=TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE,
+        status=TargetPopulation.STATUS_OPEN,
         business_area=afghanistan,
         program=program,
         created_by=root,
         program_cycle=program_cycle,
     )[0]
     full_rebuild(tp2)
+    # tp2.status = TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
     tp2.save()
 
     payment_plan_pk = UUID("00000000-feed-beef-0000-00000badf00d")
