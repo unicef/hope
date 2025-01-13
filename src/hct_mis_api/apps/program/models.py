@@ -272,9 +272,9 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
 
     @property
     def households_with_payments_in_program(self) -> QuerySet:
-        # TODO: filter Payments by status ?
+        # payments within statuses [STATUS_SUCCESS, STATUS_DISTRIBUTION_SUCCESS, STATUS_DISTRIBUTION_PARTIAL]
         household_ids = (
-            Payment.objects.filter(program=self)
+            Payment.objects.filter(program=self, status__in=Payment.DELIVERED_STATUSES)
             .exclude(conflicted=True, excluded=True)
             .values_list("household_id", flat=True)
             .distinct()
