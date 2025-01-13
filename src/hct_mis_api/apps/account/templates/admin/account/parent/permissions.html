@@ -21,7 +21,9 @@
                             <thead>
                             <tr>
                                 <th class="column-business_area required">Business area</th>
-                                <th class="column-roles required">Roles</th>
+                                <th class="column-program required">Program</th>
+                                <th class="column-roles required">Role</th>
+                                <th class="column-expiry_date">Expiry date</th>
                                 <th>Delete?</th>
                             </tr>
                             </thead>
@@ -39,9 +41,17 @@
                                         {{ form.business_area.errors.as_ul }}
                                         {{ form.business_area }}
                                     </td>
+                                    <td class="field-program">
+                                        {{ form.program.errors.as_ul }}
+                                        {{ form.program }}
+                                    </td>
                                     <td class="field-roles">
-                                        {{ form.roles.errors.as_ul }}
-                                        {{ form.roles }}
+                                        {{ form.role.errors.as_ul }}
+                                        {{ form.role }}
+                                    </td>
+                                    <td class="field-expiry_date">
+                                        {{ form.expiry_date.errors.as_ul }}
+                                        {{ form.expiry_date }}
                                     </td>
                                     <td>
                                         {{ form.DELETE }}
@@ -53,9 +63,17 @@
                                     {{ business_area_role_formset.empty_form.business_area.errors.as_ul }}
                                     {{ business_area_role_formset.empty_form.business_area }}
                                 </td>
+                                <td class="field-program">
+                                    {{ business_area_role_formset.empty_form.program.errors.as_ul }}
+                                    {{ business_area_role_formset.empty_form.program }}
+                                </td>
                                 <td class="field-roles">
-                                    {{ business_area_role_formset.empty_form.roles.errors.as_ul }}
-                                    {{ business_area_role_formset.empty_form.roles }}
+                                    {{ business_area_role_formset.empty_form.role.errors.as_ul }}
+                                    {{ business_area_role_formset.empty_form.role }}
+                                </td>
+                                <td class="field-expiry_date">
+                                    {{ business_area_role_formset.empty_form.expiry_date.errors.as_ul }}
+                                    {{ business_area_role_formset.empty_form.expiry_date }}
                                 </td>
                                 <td>
                                     {{ business_area_role_formset.empty_form.DELETE }}
