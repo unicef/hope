@@ -14,7 +14,8 @@ from hct_mis_api.apps.account.admin.forms import (
     RoleAssignmentAdminForm,
     RoleAssignmentInlineFormSet,
 )
-from hct_mis_api.apps.account.models import Role
+from hct_mis_api.apps.account.models import Partner, Role
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
 logger = logging.getLogger(__name__)
@@ -22,14 +23,31 @@ logger = logging.getLogger(__name__)
 
 class RoleAssignmentInline(admin.TabularInline):
     model = account_models.RoleAssignment
-    fields = ["business_area", "role", "expiry_date"]
+    fields = ["business_area", "program", "role", "expiry_date"]
     extra = 0
     formset = RoleAssignmentInlineFormSet
+
+    def formfield_for_foreignkey(self, db_field: Any, request=None, **kwargs: Any) -> Any:
+        if db_field.name == "business_area":
+            partner_id = request.resolver_match.kwargs.get("object_id")
+
+            if partner_id and partner_id.isdigit():
+                partner = Partner.objects.get(id=partner_id)
+                kwargs["queryset"] = BusinessArea.objects.filter(
+                    id__in=partner.allowed_business_areas.all().values("id"),
+                    is_split=False,
+                )
+            else:
+                kwargs["queryset"] = BusinessArea.objects.filter(is_split=False)
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+    def has_change_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
+        return request.user.can_add_business_area_to_partner()
 
 
 @admin.register(account_models.RoleAssignment)
 class RoleAssignmentAdmin(HOPEModelAdminBase):
-    list_display = ("user", "role", "business_area")
+    list_display = ("user", "partner", "role", "business_area", "program")
     form = RoleAssignmentAdminForm
     autocomplete_fields = ("role",)
     raw_id_fields = ("user", "business_area", "role")
@@ -40,6 +58,7 @@ class RoleAssignmentAdmin(HOPEModelAdminBase):
     )
     list_filter = (
         ("business_area", AutoCompleteFilter),
+        ("program", AutoCompleteFilter),
         ("role", AutoCompleteFilter),
         ("role__subsystem", AllValuesComboFilter),
     )
@@ -50,7 +69,9 @@ class RoleAssignmentAdmin(HOPEModelAdminBase):
             .get_queryset(request)
             .select_related(
                 "business_area",
+                "program",
                 "user",
+                "partner",
                 "role",
             )
         )

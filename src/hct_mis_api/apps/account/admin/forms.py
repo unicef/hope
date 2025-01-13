@@ -56,9 +56,6 @@ class RoleAssignmentInlineFormSet(forms.BaseInlineFormSet):
 
     def add_fields(self, form: "forms.Form", index: Optional[int]) -> None:
         super().add_fields(form, index)
-        form.fields["business_area"].choices = [
-            (str(x.id), str(x)) for x in BusinessArea.objects.filter(is_split=False)
-        ]
         form.fields["role"].required = True
 
     def clean(self) -> None:
