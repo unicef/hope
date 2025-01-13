@@ -1017,6 +1017,20 @@ class Individual(
     )
     deduplication_golden_record_results = JSONField(default=dict, blank=True)
     deduplication_batch_results = JSONField(default=dict, blank=True)
+    biometric_deduplication_golden_record_status = models.CharField(
+        max_length=50,
+        default=NOT_PROCESSED,
+        choices=DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE,
+        db_index=True,
+    )
+    biometric_deduplication_batch_status = models.CharField(
+        max_length=50,
+        default=NOT_PROCESSED,
+        choices=DEDUPLICATION_BATCH_STATUS_CHOICE,
+        db_index=True,
+    )
+    biometric_deduplication_golden_record_results = JSONField(default=list, blank=True)
+    biometric_deduplication_batch_results = JSONField(default=list, blank=True)
     imported_individual_id = models.UUIDField(null=True, blank=True)
     sanction_list_possible_match = models.BooleanField(default=False, db_index=True)
     sanction_list_confirmed_match = models.BooleanField(default=False, db_index=True)
