@@ -1,8 +1,9 @@
 from collections import defaultdict
 from typing import TYPE_CHECKING, Any, Optional, Sequence, Type, Union
-
+from django.utils.translation import gettext_lazy as _
 from django import forms
 from django.contrib import admin, messages
+from django.core.exceptions import ValidationError
 from django.forms import CheckboxSelectMultiple, ModelForm, formset_factory
 from django.http import HttpRequest, HttpResponseRedirect
 from django.template.response import TemplateResponse
@@ -10,10 +11,9 @@ from django.urls import reverse
 from django.utils.html import format_html
 
 from admin_extra_buttons.decorators import button
-
 from hct_mis_api.apps.account import models as account_models
 from hct_mis_api.apps.account.admin.user_role import RoleAssignmentInline
-from hct_mis_api.apps.account.models import IncompatibleRoles, Role, RoleAssignment
+from hct_mis_api.apps.account.models import IncompatibleRoles, Role, RoleAssignment, Partner
 from hct_mis_api.apps.core.models import BusinessArea, BusinessAreaPartnerThrough
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.program.models import Program
@@ -49,8 +49,37 @@ class ProgramAreaForm(forms.Form):
     areas = TreeNodeMultipleChoiceField(queryset=Area.objects.all(), widget=CheckboxSelectMultiple(), required=False)
 
 
+class PartnerAdminForm(forms.ModelForm):
+    class Meta:
+        model = Partner
+        fields = ['name', 'allowed_business_areas', 'is_un', 'parent']
+
+    def clean_allowed_business_areas(self):
+        # Get the original allowed business areas for the partner
+        partner = self.instance
+        previous_allowed_ba = set(partner.allowed_business_areas.all())
+
+        # Get the allowed business from form submission
+        current_allowed_ba = set(self.cleaned_data.get('allowed_business_areas'))
+
+        # Identify which business areas were removed
+        removed_ba = previous_allowed_ba - current_allowed_ba
+
+        # Check if there are any removed business areas with existing role assignments
+        for ba in removed_ba:
+            if RoleAssignment.objects.filter(partner=partner, business_area=ba).exists():
+                # Add a form error instead of raising a ValidationError
+                self.add_error(
+                    'allowed_business_areas',
+                    f"You cannot remove {ba} because there are existing role assignments for this business area."
+                )
+
+        return self.cleaned_data.get('allowed_business_areas', [])
+
+
 @admin.register(account_models.Partner)
 class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
+    form = PartnerAdminForm
     list_filter = ("is_un", "parent")
     search_fields = ("name",)
     readonly_fields = ("sub_partners",)

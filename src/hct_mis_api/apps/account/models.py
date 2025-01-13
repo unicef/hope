@@ -354,10 +354,34 @@ class RoleAssignment(NaturalKeyModel, TimeStampedUUIDModel):
 
     class Meta:
         constraints = [
-            # either user or partner should be assigned; not both
+            # Either user or partner should be assigned; not both
             models.CheckConstraint(
                 check=Q(user__isnull=False, partner__isnull=True) | Q(user__isnull=True, partner__isnull=False),
                 name="user_or_partner_not_both",
+            ),
+            # Unique constraint for user + role + business_area + program when program is NOT NULL
+            models.UniqueConstraint(
+                fields=["user", "role", "business_area", "program"],
+                name="unique_user_role_business_area_program",
+                condition=Q(user__isnull=False),
+            ),
+            # Unique constraint for user + role + business_area when program is NULL
+            models.UniqueConstraint(
+                fields=["user", "role", "business_area"],
+                name="unique_user_role_business_area_no_program",
+                condition=Q(user__isnull=False, program__isnull=True),
+            ),
+            # Unique constraint for partner + role + business_area + program when program is NOT NULL
+            models.UniqueConstraint(
+                fields=["partner", "role", "business_area", "program"],
+                name="unique_partner_role_business_area_program",
+                condition=Q(partner__isnull=False),
+            ),
+            # Unique constraint for partner + role + business_area when program is NULL
+            models.UniqueConstraint(
+                fields=["partner", "role", "business_area"],
+                name="unique_partner_role_business_area_no_program",
+                condition=Q(partner__isnull=False, program__isnull=True),
             ),
         ]
 
@@ -370,6 +394,11 @@ class RoleAssignment(NaturalKeyModel, TimeStampedUUIDModel):
         # Ensure partner can only be assigned roles that have flag is_available_for_partner as True
         if self.partner and self.role and not self.role.is_available_for_partner:
             errors.append("Partner can only be assigned roles that are available for partners.")
+        # Validate that business_area is within the partner's allowed_business_areas
+        if self.partner:
+            if self.business_area not in self.partner.allowed_business_areas.all():
+                errors.append(f"{self.business_area} is not within the allowed business areas for {self.partner}.")
+
         if errors:
             raise ValidationError(errors)
 

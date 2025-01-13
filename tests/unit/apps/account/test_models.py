@@ -1,4 +1,5 @@
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 from django.test import TransactionTestCase
 
 from hct_mis_api.apps.account.fixtures import (
@@ -8,7 +9,7 @@ from hct_mis_api.apps.account.fixtures import (
     UserFactory,
 )
 from hct_mis_api.apps.account.models import RoleAssignment
-from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.fixtures import create_afghanistan, create_ukraine
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
@@ -26,6 +27,7 @@ class TestRoleAssignmentModel(TransactionTestCase):
         )
         self.user = UserFactory(first_name="Test", last_name="User")
         self.partner = PartnerFactory(name="Partner")
+        self.partner.allowed_business_areas.add(self.business_area)
         self.program1 = ProgramFactory(
             business_area=self.business_area,
             name="Program 1",
@@ -104,3 +106,104 @@ class TestRoleAssignmentModel(TransactionTestCase):
             business_area=self.business_area,
         )
         self.assertIsNotNone(role_assignment_user.id)
+
+    def test_partner_role_in_business_area_vs_allowed_business_areas(self) -> None:
+        # Possible to create RoleAssignment for a business area that is allowed for the partner
+        RoleAssignment.objects.create(
+            user=None,
+            partner=self.partner,
+            role=self.role,
+            business_area=self.business_area,
+        )
+
+        # Partner with a different business area should raise a validation error
+        not_allowed_ba = create_ukraine()
+        with self.assertRaises(ValidationError) as ve_context:
+            RoleAssignment.objects.create(
+                user=None,
+                partner=self.partner,
+                role=self.role,
+                business_area=not_allowed_ba,
+            )
+        self.assertIn(
+            f"{not_allowed_ba} is not within the allowed business areas for {self.partner}.",
+            str(ve_context.exception),
+        )
+
+        # Validation not relevant for user
+        RoleAssignment.objects.create(
+            user=self.user,
+            partner=None,
+            role=self.role,
+            business_area=not_allowed_ba,
+        )
+
+    def test_unique_user_role_business_area_program_constraint(self) -> None:
+        # Creating a second role assignment with the same user, role, business area, and program should raise an error
+        role_new = RoleFactory(name="Test Role Duplicate")
+        RoleAssignment.objects.create(
+            user=self.user,
+            partner=None,
+            role=role_new,
+            business_area=self.business_area,
+            program=self.program1,
+        )
+        with self.assertRaises(IntegrityError):
+            RoleAssignment.objects.create(
+                user=self.user,
+                partner=None,
+                role=role_new,
+                business_area=self.business_area,
+                program=self.program1,
+            )
+
+        RoleAssignment.objects.create(
+            user=self.user,
+            partner=None,
+            role=role_new,
+            business_area=self.business_area,
+            program=None,
+        )
+        with self.assertRaises(IntegrityError):
+            RoleAssignment.objects.create(
+                user=self.user,
+                partner=None,
+                role=role_new,
+                business_area=self.business_area,
+                program=None,
+            )
+
+    def test_unique_partner_role_business_area_program_constraint(self) -> None:
+        # Creating a second role assignment with the same partner, role, business area, and program should raise an error
+        role_new = RoleFactory(name="Test Role Duplicate")
+        RoleAssignment.objects.create(
+            user=None,
+            partner=self.partner,
+            role=role_new,
+            business_area=self.business_area,
+            program=self.program1,
+        )
+        with self.assertRaises(IntegrityError):
+            RoleAssignment.objects.create(
+                user=None,
+                partner=self.partner,
+                role=role_new,
+                business_area=self.business_area,
+                program=self.program1,
+            )
+
+        RoleAssignment.objects.create(
+            user=None,
+            partner=self.partner,
+            role=role_new,
+            business_area=self.business_area,
+            program=None,
+        )
+        with self.assertRaises(IntegrityError):
+            RoleAssignment.objects.create(
+                user=None,
+                partner=self.partner,
+                role=role_new,
+                business_area=self.business_area,
+                program=None,
+            )
