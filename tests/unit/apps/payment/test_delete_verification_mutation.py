@@ -57,6 +57,7 @@ class TestDeleteVerificationMutation(APITestCase):
             name="TEST",
             program_cycle=cls.program.cycles.first(),
             business_area=cls.business_area,
+            created_by=cls.user,
         )
         PaymentVerificationSummaryFactory(payment_plan=cls.payment_plan)
         cls.verification = cls.payment_plan.payment_verification_plans.first()
@@ -109,7 +110,6 @@ class TestDeleteVerificationMutation(APITestCase):
             self.user,
             self.business_area,
             self.program,
-            self.target_population,
             PaymentVerificationPlan.STATUS_PENDING,
         )
 
@@ -119,6 +119,5 @@ class TestDeleteVerificationMutation(APITestCase):
             self.user,
             self.business_area,
             self.program,
-            self.target_population,
             PaymentVerificationPlan.STATUS_ACTIVE,
         )

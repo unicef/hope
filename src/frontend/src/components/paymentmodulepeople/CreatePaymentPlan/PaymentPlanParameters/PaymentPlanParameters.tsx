@@ -47,10 +47,8 @@ export const PaymentPlanParameters = ({
               label={t('Start Date')}
               component={FormikDateField}
               required
-              minDate={data?.targetPopulation?.program?.startDate}
-              maxDate={
-                values.endDate || data?.targetPopulation?.program?.endDate
-              }
+              minDate={data?.paymentPlan?.program?.startDate}
+              maxDate={values.endDate || data?.paymentPlan?.program?.endDate}
               disabled={!data || loading || Boolean(paymentPlan?.isFollowUp)}
               fullWidth
               decoratorEnd={<CalendarTodayRounded color="disabled" />}
@@ -67,7 +65,7 @@ export const PaymentPlanParameters = ({
               component={FormikDateField}
               required
               minDate={values.startDate}
-              maxDate={data?.targetPopulation?.program?.endDate}
+              maxDate={data?.paymentPlan?.program?.endDate}
               disabled={!values.startDate || Boolean(paymentPlan?.isFollowUp)}
               initialFocusedDate={values.startDate}
               fullWidth

@@ -26,7 +26,6 @@ export const PaymentPlanDetails = ({
   const {
     createdBy,
     program,
-    targetPopulation,
     currency,
     startDate,
     endDate,
@@ -60,9 +59,9 @@ export const PaymentPlanDetails = ({
               <Grid item xs={3}>
                 <LabelizedField label={t('Target Population')}>
                   <BlackLink
-                    to={`/${baseUrl}/target-population/${targetPopulation.id}`}
+                    to={`/${baseUrl}/target-population/${paymentPlan.id}`}
                   >
-                    {targetPopulation.name}
+                    {paymentPlan.name}
                   </BlackLink>
                 </LabelizedField>
               </Grid>
