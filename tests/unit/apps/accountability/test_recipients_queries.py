@@ -8,7 +8,7 @@ from hct_mis_api.apps.accountability.fixtures import SurveyFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
+from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
 
 
 class TestSurveyQueries(APITestCase):
@@ -28,11 +28,12 @@ class TestSurveyQueries(APITestCase):
         cls.business_area = create_afghanistan()
         cls.partner = PartnerFactory(name="TestPartner")
         cls.user = UserFactory.create(first_name="John", last_name="Wick", partner=cls.partner)
-        cls.target_population = TargetPopulationFactory(business_area=cls.business_area)
+        cls.payment_plan = PaymentPlanFactory(business_area=cls.business_area, created_by=cls.user)
 
         create_household()
         cls.households = [create_household()[0] for _ in range(4)]
-        cls.target_population.households.set(cls.households)
+        for household in cls.households:
+            PaymentFactory(parent=cls.payment_plan, household=household)
 
     @parameterized.expand(
         [
@@ -43,7 +44,7 @@ class TestSurveyQueries(APITestCase):
     def test_query_list(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
-        survey = SurveyFactory(target_population=self.target_population, created_by=self.user)
+        survey = SurveyFactory(payment_plan=self.payment_plan, created_by=self.user)
         survey.recipients.set(self.households)
 
         self.snapshot_graphql_request(

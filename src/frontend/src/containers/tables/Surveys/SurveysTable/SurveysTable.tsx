@@ -29,7 +29,7 @@ export function SurveysTable({
 
   const initialVariables: AllSurveysQueryVariables = {
     search: filter.search,
-    targetPopulation: filter.targetPopulation || '',
+    paymentPlan: filter.targetPopulation || '',
     createdBy: filter.createdBy || '',
     program: programId,
     createdAtRange: JSON.stringify({
