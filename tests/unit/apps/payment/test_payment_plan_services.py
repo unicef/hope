@@ -1014,7 +1014,7 @@ class TestPaymentPlanServices(APITestCase):
             parent=payment_plan,
             program_id=self.program.id,
             business_area_id=payment_plan.business_area_id,
-            status=Payment.STATUS_DISTRIBUTION_PARTIAL,
+            status=Payment.PENDING_STATUSES,
             household_id=household.pk,
             collector_id=individuals[0].pk,
         )
