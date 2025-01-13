@@ -69,6 +69,7 @@ class FinancialServiceProviderXlsxTemplateTest(APITestCase):
             program_cycle=self.program.cycles.first(),
             status=PaymentPlan.Status.ACCEPTED,
             business_area=self.business_area,
+            created_by=self.user,
         )
         payment = PaymentFactory(parent=payment_plan, household=household, collector=individual, currency="PLN")
         primary = IndividualRoleInHousehold.objects.filter(role=ROLE_PRIMARY).first().individual

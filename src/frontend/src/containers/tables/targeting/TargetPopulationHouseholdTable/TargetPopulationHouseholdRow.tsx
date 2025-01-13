@@ -1,5 +1,5 @@
 import TableCell from '@mui/material/TableCell';
-import { HouseholdNode } from '@generated/graphql';
+import { PaymentNode } from '@generated/graphql';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { AnonTableCell } from '@components/core/Table/AnonTableCell';
 import { BlackLink } from '@components/core/BlackLink';
@@ -7,16 +7,16 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ReactElement } from 'react';
 
 interface TargetPopulationHouseholdTableRowProps {
-  household: HouseholdNode;
+  payment: PaymentNode;
   canViewDetails?: boolean;
 }
 
 export function TargetPopulationHouseholdTableRow({
-  household,
+  payment,
   canViewDetails,
 }): ReactElement<TargetPopulationHouseholdTableRowProps> {
   const { baseUrl } = useBaseUrl();
-  const householdDetailsPath = `/${baseUrl}/population/household/${household.id}`;
+  const householdDetailsPath = `/${baseUrl}/population/household/${payment.household.id}`;
   const handleClick = (): void => {
     const win = window.open(householdDetailsPath, '_blank');
     if (win != null) {
@@ -30,22 +30,26 @@ export function TargetPopulationHouseholdTableRow({
       onClick={canViewDetails ? handleClick : undefined}
       role="checkbox"
       data-cy="target-population-household-row"
-      key={household.id}
+      key={payment.household.id}
     >
       <TableCell align="left">
         {canViewDetails ? (
-          <BlackLink to={householdDetailsPath}>{household.unicefId}</BlackLink>
+          <BlackLink to={householdDetailsPath}>
+            {payment.household.unicefId}
+          </BlackLink>
         ) : (
-          household.unicefId
+          payment.household.unicefId
         )}
       </TableCell>
-      <AnonTableCell>{household.headOfHousehold?.fullName}</AnonTableCell>
-      <TableCell align="left">{household.size}</TableCell>
-      <TableCell align="left">{household.adminArea?.name || '-'}</TableCell>
+      <AnonTableCell>
+        {payment.household.headOfHousehold?.fullName}
+      </AnonTableCell>
+      <TableCell align="left">{payment.household.size}</TableCell>
       <TableCell align="left">
-        {household.selection?.vulnerabilityScore == null
-          ? '-'
-          : household.selection?.vulnerabilityScore}
+        {payment.household.admin2?.name || '-'}
+      </TableCell>
+      <TableCell align="left">
+        {payment.vulnerabilityScore == null ? '-' : payment.vulnerabilityScore}
       </TableCell>
     </ClickableTableRow>
   );

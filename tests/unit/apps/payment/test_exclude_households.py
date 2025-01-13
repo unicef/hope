@@ -47,7 +47,10 @@ class TestExcludeHouseholds(APITestCase):
         cls.program_cycle = cls.program.cycles.first()
 
         cls.source_payment_plan = PaymentPlanFactory(
-            is_follow_up=False, status=PaymentPlan.Status.FINISHED, program_cycle=cls.program_cycle
+            is_follow_up=False,
+            status=PaymentPlan.Status.FINISHED,
+            program_cycle=cls.program_cycle,
+            created_by=cls.user,
         )
 
         cls.payment_plan = PaymentPlanFactory(
@@ -55,8 +58,11 @@ class TestExcludeHouseholds(APITestCase):
             is_follow_up=True,
             status=PaymentPlan.Status.LOCKED,
             program_cycle=cls.program_cycle,
+            created_by=cls.user,
         )
-        cls.another_payment_plan = PaymentPlanFactory()
+        cls.another_payment_plan = PaymentPlanFactory(
+            created_by=cls.user,
+        )
         cls.payment_plan_id = encode_id_base64(cls.payment_plan.id, "PaymentPlan")
 
         hoh1 = IndividualFactory(household=None)
@@ -202,6 +208,7 @@ class TestExcludeHouseholds(APITestCase):
             status=PaymentPlan.Status.FINISHED,
             is_follow_up=False,
             program_cycle=self.program_cycle,
+            created_by=self.user,
         )
         PaymentFactory(parent=finished_payment_plan, household=self.household_1, excluded=False, currency="PLN")
 
