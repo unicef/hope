@@ -86,7 +86,7 @@ export const ProgramCyclesTablePaymentModule = ({
       await finishMutation({ programCycleId: decodedProgramCycleId });
       showMessage(t('Programme Cycle Finished'));
     } catch (e) {
-      e.data?.forEach((message: string) => showMessage(message));
+      showMessage(e?.message);
     }
   };
 
@@ -96,7 +96,7 @@ export const ProgramCyclesTablePaymentModule = ({
       await reactivateMutation({ programCycleId: decodedProgramCycleId });
       showMessage(t('Programme Cycle Reactivated'));
     } catch (e) {
-      e.data?.forEach((message: string) => showMessage(message));
+      showMessage(e?.message);
     }
   };
 
