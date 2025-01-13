@@ -8,7 +8,6 @@ from hct_mis_api.apps.core.kobo.common import get_field_name
 
 
 def post_process_dedupe_results(record: Any) -> None:
-    # TODO: record: ImportedIndividual but circular import
     max_score = 0
     min_score = sys.maxsize
     for field in [record.deduplication_batch_results, record.deduplication_golden_record_results]:
