@@ -103,7 +103,6 @@ export function ImportedIndividualsTable({
             <ImportedIndividualsTableRow
               choices={choicesData}
               key={row.id}
-              isMerged={isMerged}
               individual={row}
               rdi={rdi}
             />
@@ -122,7 +121,6 @@ export function ImportedIndividualsTable({
             <ImportedIndividualsTableRow
               choices={choicesData}
               key={row.id}
-              isMerged={isMerged}
               individual={row}
               rdi={rdi}
             />
