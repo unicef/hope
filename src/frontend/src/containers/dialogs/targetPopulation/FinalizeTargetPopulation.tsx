@@ -2,7 +2,7 @@ import { Button, DialogContent, DialogTitle } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { LoadingButton } from '@components/core/LoadingButton';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { useFinalizeTpMutation } from '@generated/graphql';
+import { Action } from '@generated/graphql';
 import { Dialog } from '../Dialog';
 import { DialogActions } from '../DialogActions';
 import { DialogDescription } from '../DialogDescription';
@@ -11,6 +11,7 @@ import { DialogTitleWrapper } from '../DialogTitleWrapper';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useNavigate } from 'react-router-dom';
 import { ReactElement } from 'react';
+import { usePaymentPlanAction } from '@hooks/usePaymentPlanAction';
 
 export interface FinalizeTargetPopulationPropTypes {
   open: boolean;
@@ -29,18 +30,12 @@ export const FinalizeTargetPopulation = ({
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const { baseUrl } = useBaseUrl();
-  const [mutate, { loading }] = useFinalizeTpMutation();
-  const onSubmit = (id: string): void => {
-    mutate({
-      variables: {
-        id,
-      },
-    }).then(() => {
-      setOpen(false);
+  const { mutatePaymentPlanAction: finalizeAction, loading: loadingFinalize } =
+    usePaymentPlanAction(Action.Finish, targetPopulationId, () => {
       showMessage(t('Target Population Finalized'));
-      navigate(`/${baseUrl}/target-population/${id}`);
+      navigate(`/${baseUrl}/target-population/`);
     });
-  };
+
   return (
     <Dialog
       open={open}
@@ -63,11 +58,11 @@ export const FinalizeTargetPopulation = ({
         <DialogActions>
           <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
           <LoadingButton
-            onClick={() => onSubmit(targetPopulationId)}
+            onClick={() => finalizeAction(targetPopulationId)}
             color="primary"
             variant="contained"
-            loading={loading}
-            disabled={loading || !totalHouseholds}
+            loading={loadingFinalize}
+            disabled={loadingFinalize || !totalHouseholds}
             data-cy="button-target-population-send-to-cash-assist"
           >
             {t('Send to cash assist')}

@@ -13,7 +13,7 @@ from sorl.thumbnail.conf import settings
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
-from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
+from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.fixtures import (
     FinancialServiceProviderFactory,
@@ -26,15 +26,15 @@ from hct_mis_api.apps.payment.models import (
     FinancialServiceProvider,
     PaymentPlan,
 )
+from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
 from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory, RuleFactory
 from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
-    TargetPopulationFactory,
+    TargetingCriteriaRuleFactory,
 )
-from hct_mis_api.apps.targeting.models import TargetPopulation
 from src.hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from src.hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
 from tests.selenium.helpers.date_time_format import FormatTime
@@ -76,7 +76,6 @@ def create_program(
     dct_type: str = DataCollectingType.Type.STANDARD,
     beneficiary_group_name: str = "Main Menu",
 ) -> Program:
-    BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
     dct = DataCollectingTypeFactory(type=dct_type)
     beneficiary_group = BeneficiaryGroup.objects.filter(name=beneficiary_group_name).first()
     return ProgramFactory(
@@ -98,24 +97,25 @@ def create_program(
 def create_targeting(create_test_program: Program) -> None:
     generate_delivery_mechanisms()
     dm_cash = DeliveryMechanism.objects.get(code="cash")
+    program = create_test_program
+    business_area = program.business_area
+    program_cycle = program.cycles.first()
 
-    targeting_criteria = TargetingCriteriaFactory()
-
-    tp = TargetPopulationFactory(
-        program=create_test_program,
-        status=TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE,
-        targeting_criteria=targeting_criteria,
-        program_cycle=create_test_program.cycles.first(),
-    )
     households = [
         create_household(
-            household_args={"size": 2, "business_area": tp.business_area, "program": tp.program},
+            household_args={"size": 2, "business_area": business_area, "program": program},
         )[0]
         for _ in range(14)
     ]
+    hh_ids_str = ", ".join([hh.unicef_id for hh in households])
 
-    tp.households.set(households)
-    business_area = BusinessArea.objects.get(slug="afghanistan")
+    targeting_criteria = TargetingCriteriaFactory()
+    TargetingCriteriaRuleFactory(household_ids=hh_ids_str, individual_ids="", targeting_criteria=targeting_criteria)
+    PaymentPlanFactory(
+        program_cycle=program_cycle,
+        status=PaymentPlan.Status.DRAFT,
+        targeting_criteria=targeting_criteria,
+    )
     rule = RuleFactory(
         name="Test Rule",
         type=Rule.TYPE_PAYMENT_PLAN,
@@ -144,9 +144,12 @@ def create_targeting(create_test_program: Program) -> None:
 
 @pytest.fixture
 def create_payment_plan(create_targeting: None) -> PaymentPlan:
-    tp = TargetPopulation.objects.get(program__name="Test Program")
+    pp = PaymentPlan.objects.get(program_cycle__program__name="Test Program")
+    program = pp.program_cycle.program
+    new_targeting_criteria = PaymentPlanService.copy_target_criteria(pp.targeting_criteria)
+
     cycle = ProgramCycleFactory(
-        program=tp.program,
+        program=program,
         title="Cycle for PaymentPlan",
         status=ProgramCycle.ACTIVE,
         start_date=datetime.now() + relativedelta(days=10),
@@ -154,8 +157,8 @@ def create_payment_plan(create_targeting: None) -> PaymentPlan:
     )
     payment_plan = PaymentPlan.objects.update_or_create(
         name="Test Payment Plan",
-        business_area=BusinessArea.objects.only("is_payment_plan_applicable").get(slug="afghanistan"),
-        target_population=tp,
+        business_area=program.business_area,
+        targeting_criteria=new_targeting_criteria,
         program_cycle=cycle,
         currency="USD",
         dispersion_start_date=datetime.now() + relativedelta(days=10),
@@ -191,7 +194,7 @@ def create_payment_plan_open(social_worker_program: Program) -> PaymentPlan:
     )
 
     payment_plan = PaymentPlanFactory(
-        status=PaymentPlan.Status.PREPARING,
+        status=PaymentPlan.Status.DRAFT,
         is_follow_up=False,
         program_cycle=program_cycle,
         business_area=social_worker_program.business_area,
@@ -442,7 +445,7 @@ class TestSmokePaymentModule:
         pageProgramCycleDetails: ProgramCycleDetailsPage,
         download_path: str,
     ) -> None:
-        targeting = TargetPopulation.objects.first()
+        payment_plan = PaymentPlan.objects.first()
         pageProgramCycle.selectGlobalProgramFilter("Test Program")
         pageProgramCycle.getNavPaymentModule().click()
         pageProgramCycle.getNavProgrammeCycles().click()
@@ -457,7 +460,7 @@ class TestSmokePaymentModule:
         ).find_element(By.TAG_NAME, "a").click()
         pageProgramCycleDetails.getButtonCreatePaymentPlan().click()
         pageNewPaymentPlan.getInputTargetPopulation().click()
-        pageNewPaymentPlan.select_listbox_element(targeting.name)
+        pageNewPaymentPlan.select_listbox_element(payment_plan.name)
         pageNewPaymentPlan.getInputCurrency().click()
         pageNewPaymentPlan.select_listbox_element("Czech koruna")
         pageNewPaymentPlan.getInputDispersionStartDate().click()
