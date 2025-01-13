@@ -49,6 +49,7 @@ export const RegistrationDataImportCreateDialog = (): ReactElement => {
   const [submitDisabled, setSubmitDisabled] = useState(true);
   const [submitForm, setSubmitForm] = usePassFunctionFromChild();
   const { isActiveProgram, selectedProgram } = useProgramContext();
+
   let programUUID = '';
   if (selectedProgram) {
     programUUID = atob(selectedProgram.id).split(':')[1];
