@@ -23,6 +23,7 @@ export const CreateImportFromProgramPopulationForm = ({
   setSubmitDisabled,
 }): ReactElement => {
   const { baseUrl, businessArea } = useBaseUrl();
+  const { isSocialDctType } = useProgramContext();
   const { showMessage } = useSnackbar();
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -93,9 +94,9 @@ export const CreateImportFromProgramPopulationForm = ({
     initialValues: {
       name: '',
       screenBeneficiary: false,
-      program: '',
       importFromIds: '',
       importType: 'all',
+      importFromProgramId: '',
     },
     validationSchema,
     onSubmit,
@@ -135,7 +136,7 @@ export const CreateImportFromProgramPopulationForm = ({
       <ScreenBeneficiaryField />
       <Box mt={2}>
         <Field
-          name="program"
+          name="importFromProgramId"
           label={t('Programme Name')}
           fullWidth
           variant="outlined"
@@ -168,7 +169,9 @@ export const CreateImportFromProgramPopulationForm = ({
             multiline
             variant="outlined"
             label={t(
-              `${beneficiaryGroup?.memberLabelPlural} or ${beneficiaryGroup?.groupLabelPlural} IDs`,
+              isSocialDctType
+                ? `${beneficiaryGroup?.memberLabelPlural} IDs`
+                : `${beneficiaryGroup?.groupLabelPlural} IDs`,
             )}
             component={FormikTextField}
           />
