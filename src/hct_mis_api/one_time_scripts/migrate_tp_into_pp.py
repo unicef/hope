@@ -147,7 +147,7 @@ def migrate_tp_qs(tp_qs: QuerySet["TargetPopulation"]) -> None:
 
                 for field, value in payment_plan_data.items():
                     setattr(payment_plan, field, value)
-                # create copy targeting_criteria for next PP from this TP
+                # create copy targeting_criteria for other PP from the same TP
                 # in DEV env found TP with multiple PPs ???
                 if pp_count > 1:
                     copy_new_target_criteria = PaymentPlanService.copy_target_criteria(tp.targeting_criteria)
@@ -155,6 +155,7 @@ def migrate_tp_qs(tp_qs: QuerySet["TargetPopulation"]) -> None:
                 # full rebuild for PREPARING Payment Plan
                 if payment_plan.status == PaymentPlan.Status.PREPARING:
                     full_rebuild_payment_plans.append(str(payment_plan.pk))
+                update_payment_plans.append(payment_plan)
         else:
             # create new PaymentPlan in no PP with tp.targeting_criteria
             payment_plan_data = map_tp_to_pp(tp)
