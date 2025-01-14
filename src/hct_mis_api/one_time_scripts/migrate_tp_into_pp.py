@@ -136,19 +136,27 @@ def migrate_tp_qs(tp_qs: QuerySet["TargetPopulation"]) -> None:
                 create_tc_rules.append(tcr)
 
         # update existing PaymentPlan
-        existing_payment_plans = list(tp.payment_plans.all())
+        pp_count = 0
+        existing_payment_plans = list(tp.payment_plans.filter(targeting_criteria__isnull=True))
         if existing_payment_plans:
+            if len(existing_payment_plans) > 1:
+                print(f"Found more then 1 PP for TP {str(tp.pk)}, {len(existing_payment_plans)} PPs")
             for payment_plan in existing_payment_plans:
+                pp_count += 1
                 payment_plan_data = map_tp_to_pp(tp)
 
                 for field, value in payment_plan_data.items():
                     setattr(payment_plan, field, value)
-                update_payment_plans.append(payment_plan)
+                # create copy targeting_criteria for next PP from this TP
+                # in DEV env found TP with multiple PPs ???
+                if pp_count > 1:
+                    copy_new_target_criteria = PaymentPlanService.copy_target_criteria(tp.targeting_criteria)
+                    payment_plan.targeting_criteria = copy_new_target_criteria
                 # full rebuild for PREPARING Payment Plan
                 if payment_plan.status == PaymentPlan.Status.PREPARING:
                     full_rebuild_payment_plans.append(str(payment_plan.pk))
         else:
-            # create new PaymentPlan
+            # create new PaymentPlan in no PP with tp.targeting_criteria
             payment_plan_data = map_tp_to_pp(tp)
             payment_plan_data["start_date"] = tp.program_cycle.start_date
             payment_plan_data["end_date"] = tp.program_cycle.end_date
@@ -156,24 +164,32 @@ def migrate_tp_qs(tp_qs: QuerySet["TargetPopulation"]) -> None:
             payment_plan_data["status_date"] = timezone.now()
             payment_plan_data["build_status"] = PaymentPlan.BuildStatus.BUILD_STATUS_PENDING
             payment_plan_data["built_at"] = timezone.now()
-            new_payment_plans.append(PaymentPlan(**payment_plan_data))
+            if not PaymentPlan.objects.filter(targeting_criteria=tp.targeting_criteria).exists():
+                # check if PaymentPlan exists for this targeting_criteria
+                new_payment_plans.append(PaymentPlan(**payment_plan_data))
+            else:
+                print(
+                    "*** = Payment Plan already exists for TP with targeting_criteria",
+                    str(tp.pk),
+                    str(tp.targeting_criteria.pk),
+                )
+
+    if update_tc_rules:
+        print("* processing update_tc_rules")
+        TargetingCriteriaRule.objects.bulk_update(update_tc_rules, ["household_ids", "individual_ids"], 500)
+
+    if create_tc_rules:
+        print("** processing create_tc_rules")
+        TargetingCriteriaRule.objects.bulk_create(create_tc_rules, 500)
 
     if update_payment_plans:
-        print("* processing update_payment_plans")
+        print("*** processing update_payment_plans")
         PaymentPlan.objects.bulk_update(
             update_payment_plans, list(TP_MIGRATION_MAPPING.values()) + ["internal_data"], 500
         )
     if new_payment_plans:
-        print("** processing new_payment_plans")
+        print("**** processing new_payment_plans")
         PaymentPlan.objects.bulk_create(new_payment_plans, 500)
-
-    if update_tc_rules:
-        print("*** processing update_tc_rules")
-        TargetingCriteriaRule.objects.bulk_update(update_tc_rules, ["household_ids", "individual_ids"], 500)
-
-    if create_tc_rules:
-        print("**** processing create_tc_rules")
-        TargetingCriteriaRule.objects.bulk_create(create_tc_rules, 500)
 
     # rebuild Preparing Payment Plans
     if full_rebuild_payment_plans:
@@ -182,15 +198,39 @@ def migrate_tp_qs(tp_qs: QuerySet["TargetPopulation"]) -> None:
         PaymentPlanService(payment_plan=payment_plan).full_rebuild()
 
 
-def get_statistics() -> None:
-    tp_qs_count = TargetPopulation.objects.all().count()
-    pp_qs_count = PaymentPlan.objects.all().count()
+def get_statistics(after_migration_status: bool = False) -> None:
+    tp_qs_count = TargetPopulation.objects.count()
+    pp_qs_count = PaymentPlan.objects.count()
     print("*=" * 50)
     print(f"TargetPopulation.objects : {tp_qs_count}")
     print(f"PaymentPlan.objects : {pp_qs_count}")
+    print(
+        f"TPs with Statuses Not assigned to PP: {TargetPopulation.objects.exclude(status=TargetPopulation.STATUS_ASSIGNED).count()}"
+    )
     print("*=" * 50)
     if tp_without_ba := TargetPopulation.objects.filter(business_area__isnull=True).count():
         print(f"##### Found {tp_without_ba} without BA")
+
+    if after_migration_status:
+        not_migrated_tps = TargetPopulation.objects.exclude(
+            targeting_criteria_id__in=PaymentPlan.objects.filter(targeting_criteria__isnull=False).values_list(
+                "targeting_criteria_id", flat=True
+            )
+        ).filter(payment_plans__targeting_criteria__isnull=True)
+        if not_migrated_tps.exists():
+            print(f"Found {not_migrated_tps.count()} TargetPopulation objects didn't migrated into PaymentPlan.")
+            for tp in not_migrated_tps:
+                print(
+                    f"### TargetPopulation ID: {tp.id}, status: {tp.status}, targeting_criteria: {tp.targeting_criteria_id}"
+                )
+        else:
+            print("All TargetPopulation's targeting_criteria had assigned to PaymentPlans.")
+
+        pp_without_targeting_criteria = PaymentPlan.objects.filter(targeting_criteria__isnull=True)
+        if pp_without_targeting_criteria:
+            print("#### Found PaymentPlan without targeting_criteria ", pp_without_targeting_criteria.count())
+            for pp in pp_without_targeting_criteria:
+                print(pp.unicef_id, pp.status, pp.business_area.slug, pp.program_cycle.program.name)
 
 
 def get_payment_plan_id_from_tp_id(business_area_id: str, target_population_id: str) -> Optional[str]:
@@ -231,42 +271,46 @@ def migrate_tp_into_pp(batch_size: int = 500) -> None:
     get_statistics()
 
     for business_area in BusinessArea.objects.all().only("id", "name"):
-        queryset = TargetPopulation.objects.filter(business_area_id=business_area.id).only(
-            "id",
-        )
-        if queryset:
-            print(f"Processing {queryset.count()} {model_name} for {business_area.name}.")
+        with transaction.atomic():
+            queryset = TargetPopulation.objects.filter(business_area_id=business_area.id).only(
+                "id",
+            )
+            if queryset:
+                print(f"Processing {queryset.count()} {model_name} for {business_area.name}.")
 
-            list_ids = [str(obj_id) for obj_id in queryset.values_list("id", flat=True).iterator(chunk_size=batch_size)]
-            page_count = 0
-            total_count = len(list_ids)
+                list_ids = [
+                    str(obj_id) for obj_id in queryset.values_list("id", flat=True).iterator(chunk_size=batch_size)
+                ]
+                page_count = 0
+                total_count = len(list_ids)
 
-            for i in range(0, total_count, batch_size):
-                batch_ids = list_ids[i : i + batch_size]
-
-                with transaction.atomic():
+                for i in range(0, total_count, batch_size):
+                    batch_ids = list_ids[i : i + batch_size]
                     processing_qs = TargetPopulation.objects.filter(id__in=batch_ids)
                     migrate_tp_qs(processing_qs)
 
                     page_count += 1
-                print(f"Progress: {page_count}/{-(-total_count // batch_size)} page(s) migrated.")
+                    print(f"Progress: {page_count}/{-(-total_count // batch_size)} page(s) migrated.")
 
-            build_payment_plans_qs = PaymentPlan.objects.filter(
-                build_status=PaymentPlan.BuildStatus.BUILD_STATUS_PENDING, business_area_id=business_area.id
-            )
-            if build_payment_plans_qs.exists():
-                print("Create payments for New Created Payment Plans")
-                for payment_plan in build_payment_plans_qs.only("id"):
-                    prepare_payment_plan_task(str(payment_plan.id))
+                build_payment_plans_qs = PaymentPlan.objects.filter(
+                    build_status=PaymentPlan.BuildStatus.BUILD_STATUS_PENDING, business_area_id=business_area.id
+                )
+                if build_payment_plans_qs.exists():
+                    print("Create payments for New Created Payment Plans")
+                    for payment_plan in build_payment_plans_qs.only("id"):
+                        prepare_payment_plan_task(str(payment_plan.id))
 
-        # Migrate Message & Survey
-        for model in (Message, Survey):
-            print(f"Processing with migration {model.__name__} objects.")
-            model_qs = model.objects.filter(business_area_id=business_area.id, target_population__isnull=False).only(
-                "id"
-            )
-            list_ids = [str(obj_id) for obj_id in model_qs.values_list("id", flat=True).iterator(chunk_size=batch_size)]
-            update_list = migrate_message_and_survey(list_ids, model, str(business_area.id))
-            model.objects.bulk_update(update_list, ["payment_plan_id"], 1000)
+            # Migrate Message & Survey
+            for model in (Message, Survey):
+                print(f"Processing with migration {model.__name__} objects.")
+                model_qs = model.objects.filter(
+                    business_area_id=business_area.id, target_population__isnull=False
+                ).only("id")
+                list_ids = [
+                    str(obj_id) for obj_id in model_qs.values_list("id", flat=True).iterator(chunk_size=batch_size)
+                ]
+                update_list = migrate_message_and_survey(list_ids, model, str(business_area.id))
+                model.objects.bulk_update(update_list, ["payment_plan_id"], 1000)
 
     print(f"Completed in {timezone.now() - start_time}\n", "*" * 55)
+    get_statistics(after_migration_status=True)
