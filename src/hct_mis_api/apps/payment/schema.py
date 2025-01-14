@@ -32,6 +32,7 @@ from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
     DjangoPermissionFilterConnectionField,
     Permissions,
+    hopeOneOfPermissionClass,
     hopePermissionClass,
 )
 from hct_mis_api.apps.activity_log.models import LogEntry
@@ -106,7 +107,6 @@ from hct_mis_api.apps.payment.utils import (
     get_payment_plan_object,
 )
 from hct_mis_api.apps.program.schema import ProgramNode
-from hct_mis_api.apps.targeting.graphql_types import TargetPopulationNode
 from hct_mis_api.apps.targeting.models import TargetPopulation
 from hct_mis_api.apps.utils.schema import (
     ChartDatasetNode,
@@ -322,7 +322,6 @@ class PaymentNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     payment_plan_soft_conflicted = graphene.Boolean()
     payment_plan_soft_conflicted_data = graphene.List(PaymentConflictDataNode)
     full_name = graphene.String()
-    target_population = graphene.Field(TargetPopulationNode)
     verification = graphene.Field("hct_mis_api.apps.payment.schema.PaymentVerificationNode")
     distribution_modality = graphene.String()
     service_provider = graphene.Field(FinancialServiceProviderNode)
@@ -582,70 +581,86 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
     can_split = graphene.Boolean()
     supporting_documents = graphene.List(PaymentPlanSupportingDocumentNode)
     program = graphene.Field(ProgramNode)
+    total_households_count_with_valid_phone_no = graphene.Int()
 
     class Meta:
         model = PaymentPlan
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
-    def resolve_program(self, info: Any) -> ProgramNode:
-        return self.program_cycle.program
+    @staticmethod
+    def resolve_program(parent: PaymentPlan, info: Any) -> ProgramNode:
+        """PaymentPlan has property program"""
+        return parent.program
 
-    def resolve_split_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+    @staticmethod
+    def resolve_split_choices(parent: PaymentPlan, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(PaymentPlanSplit.SplitType.choices)
 
-    def resolve_verification_plans(self, info: Any) -> graphene.List:
-        return self.payment_verification_plans.all()
+    @staticmethod
+    def resolve_verification_plans(parent: PaymentPlan, info: Any) -> graphene.List:
+        return parent.payment_verification_plans.all()
 
-    def resolve_payments_conflicts_count(self, info: Any) -> graphene.Int:
-        return self.payment_items.filter(excluded=False, payment_plan_hard_conflicted=True).count()
+    @staticmethod
+    def resolve_payments_conflicts_count(parent: PaymentPlan, info: Any) -> graphene.Int:
+        return parent.payment_items.filter(excluded=False, payment_plan_hard_conflicted=True).count()
 
-    def resolve_currency_name(self, info: Any) -> graphene.String:
-        return self.get_currency_display()
+    @staticmethod
+    def resolve_currency_name(parent: PaymentPlan, info: Any) -> graphene.String:
+        return parent.get_currency_display()
 
-    def resolve_delivery_mechanisms(self, info: Any) -> graphene.List:
-        return DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=self).order_by("delivery_mechanism_order")
+    @staticmethod
+    def resolve_delivery_mechanisms(parent: PaymentPlan, info: Any) -> graphene.List:
+        return DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=parent).order_by("delivery_mechanism_order")
 
-    def resolve_has_payment_list_export_file(self, info: Any) -> graphene.Boolean:
-        return self.has_export_file
+    @staticmethod
+    def resolve_has_payment_list_export_file(parent: PaymentPlan, info: Any) -> bool:
+        return parent.has_export_file
 
-    def resolve_imported_file_name(self, info: Any) -> graphene.String:
-        return self.imported_file_name
+    @staticmethod
+    def resolve_imported_file_name(parent: PaymentPlan, info: Any) -> str:
+        return parent.imported_file_name
 
-    def resolve_volume_by_delivery_mechanism(self, info: Any) -> graphene.List:
-        return DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=self).order_by("delivery_mechanism_order")
+    @staticmethod
+    def resolve_volume_by_delivery_mechanism(parent: PaymentPlan, info: Any) -> graphene.List:
+        return DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=parent).order_by("delivery_mechanism_order")
 
-    def resolve_available_payment_records_count(self, info: Any, **kwargs: Any) -> graphene.Int:
-        return self.payment_items.filter(status__in=Payment.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0).count()
+    @staticmethod
+    def resolve_available_payment_records_count(parent: PaymentPlan, info: Any, **kwargs: Any) -> graphene.Int:
+        return parent.payment_items.filter(
+            status__in=Payment.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0
+        ).count()
 
-    def resolve_has_fsp_delivery_mechanism_xlsx_template(self, info: Any) -> bool:
+    @staticmethod
+    def resolve_has_fsp_delivery_mechanism_xlsx_template(parent: PaymentPlan, info: Any) -> bool:
         if (
-            not self.delivery_mechanisms.exists()
-            or self.delivery_mechanisms.filter(
+            not parent.delivery_mechanisms.exists()
+            or parent.delivery_mechanisms.filter(
                 Q(financial_service_provider__isnull=True) | Q(delivery_mechanism__isnull=True)
             ).exists()
         ):
             return False
         else:
-            for dm_per_payment_plan in self.delivery_mechanisms.all():
+            for dm_per_payment_plan in parent.delivery_mechanisms.all():
                 if not dm_per_payment_plan.financial_service_provider.get_xlsx_template(
                     dm_per_payment_plan.delivery_mechanism
                 ):
                     return False
             return True
 
-    def resolve_total_withdrawn_households_count(self, info: Any) -> graphene.Int:
+    @staticmethod
+    def resolve_total_withdrawn_households_count(parent: PaymentPlan, info: Any) -> int:
         return (
-            self.eligible_payments.filter(household__withdrawn=True)
+            parent.eligible_payments.filter(household__withdrawn=True)
             .exclude(
                 # Exclude beneficiaries who are currently in different follow-up Payment Plan within the same cycle
                 household_id__in=Payment.objects.filter(
                     is_follow_up=True,
-                    parent__source_payment_plan=self,
-                    parent__program_cycle=self.program_cycle,
+                    parent__source_payment_plan=parent,
+                    parent__program_cycle=parent.program_cycle,
                     excluded=False,
                 )
-                .exclude(parent=self)
+                .exclude(parent=parent)
                 .values_list("household_id", flat=True)
             )
             .count()
@@ -672,53 +687,67 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
             number_of_payments=Count("id"),
         )
 
-    def resolve_excluded_households(self, info: Any) -> "QuerySet":
+    @staticmethod
+    def resolve_excluded_households(parent: PaymentPlan, info: Any) -> "QuerySet":
         return (
-            Household.objects.filter(unicef_id__in=self.excluded_beneficiaries_ids)
-            if not self.is_social_worker_program
+            Household.objects.filter(unicef_id__in=parent.excluded_beneficiaries_ids)
+            if not parent.is_social_worker_program
             else Household.objects.none()
         )
 
-    def resolve_excluded_individuals(self, info: Any) -> "QuerySet":
+    @staticmethod
+    def resolve_excluded_individuals(parent: PaymentPlan, info: Any) -> "QuerySet":
         return (
-            Individual.objects.filter(unicef_id__in=self.excluded_beneficiaries_ids)
-            if self.is_social_worker_program
+            Individual.objects.filter(unicef_id__in=parent.excluded_beneficiaries_ids)
+            if parent.is_social_worker_program
             else Individual.objects.none()
         )
 
-    def resolve_can_create_follow_up(self, info: Any) -> bool:
+    @staticmethod
+    def resolve_can_create_follow_up(parent: PaymentPlan, info: Any) -> bool:
         # Check there are payments in error/not distributed status and excluded withdrawn households
-        if self.is_follow_up:
+        if parent.is_follow_up:
             return False
 
-        qs = self.unsuccessful_payments_for_follow_up()
+        qs = parent.unsuccessful_payments_for_follow_up()
 
         # Check if all payments are used in FPPs
-        follow_up_payment = self.payments_used_in_follow_payment_plans()
+        follow_up_payment = parent.payments_used_in_follow_payment_plans()
 
         return qs.exists() and set(follow_up_payment.values_list("source_payment_id", flat=True)) != set(
             qs.values_list("id", flat=True)
         )
 
-    def resolve_unsuccessful_payments_count(self, info: Any) -> int:
-        return self.unsuccessful_payments_for_follow_up().count()
+    @staticmethod
+    def resolve_unsuccessful_payments_count(parent: PaymentPlan, info: Any) -> int:
+        return parent.unsuccessful_payments_for_follow_up().count()
 
-    def resolve_can_send_to_payment_gateway(self, info: Any) -> bool:
-        return self.can_send_to_payment_gateway  # type: ignore
+    @staticmethod
+    def resolve_can_send_to_payment_gateway(parent: PaymentPlan, info: Any) -> bool:
+        return parent.can_send_to_payment_gateway
 
-    def resolve_can_split(self, info: Any) -> bool:
-        if self.status != PaymentPlan.Status.ACCEPTED:
+    @staticmethod
+    def resolve_can_split(parent: PaymentPlan, info: Any) -> bool:
+        if parent.status != PaymentPlan.Status.ACCEPTED:
             return False
 
-        if self.splits.filter(
+        if parent.splits.filter(
             sent_to_payment_gateway=True,
         ).exists():
             return False
 
         return True
 
-    def resolve_supporting_documents(self, info: Any) -> "QuerySet":
-        return self.documents.all()
+    @staticmethod
+    def resolve_supporting_documents(parent: PaymentPlan, info: Any) -> "QuerySet":
+        return parent.documents.all()
+
+    @staticmethod
+    def resolve_total_households_count_with_valid_phone_no(parent: PaymentPlan, info: Any) -> int:
+        return parent.eligible_payments.exclude(
+            household__head_of_household__phone_no_valid=False,
+            household__head_of_household__phone_no_alternative_valid=False,
+        ).count()
 
 
 class PaymentVerificationNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
@@ -1070,7 +1099,7 @@ class Query(graphene.ObjectType):
     all_payment_plans = DjangoPermissionFilterConnectionField(
         PaymentPlanNode,
         filterset_class=PaymentPlanFilter,
-        permission_classes=(hopePermissionClass(Permissions.PM_VIEW_LIST),),
+        permission_classes=(hopeOneOfPermissionClass(Permissions.PM_VIEW_LIST, Permissions.TARGETING_VIEW_LIST),),
     )
     payment_plan_status_choices = graphene.List(ChoiceObject)
     currency_choices = graphene.List(ChoiceObject)

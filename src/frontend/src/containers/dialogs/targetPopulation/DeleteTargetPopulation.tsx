@@ -5,12 +5,10 @@ import {
   DialogContent,
   DialogTitle,
 } from '@mui/material';
-import { Formik } from 'formik';
 import { useTranslation } from 'react-i18next';
-import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 import { LoadingButton } from '@components/core/LoadingButton';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { useDeleteTargetPopulationMutation } from '@generated/graphql';
+import { useDeletePaymentPMutation } from '@generated/graphql';
 import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
@@ -31,12 +29,24 @@ export const DeleteTargetPopulation = ({
 }: DeleteTargetPopulationProps): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const [mutate, { loading }] = useDeleteTargetPopulationMutation();
-  const { showMessage } = useSnackbar();
   const { baseUrl } = useBaseUrl();
-  const initialValues = {
-    id: targetPopulationId,
+  const { showMessage } = useSnackbar();
+  const [mutate, { loading: loadingDelete }] = useDeletePaymentPMutation();
+
+  const handleDelete = async (): Promise<void> => {
+    try {
+      await mutate({
+        variables: {
+          paymentPlanId: targetPopulationId,
+        },
+      });
+      showMessage(t('Target Population Deleted'));
+      navigate(`/${baseUrl}/payment-module/payment-plans`);
+    } catch (e) {
+      e.graphQLErrors.map((x) => showMessage(x.message));
+    }
   };
+
   return (
     <Dialog
       open={open}
@@ -44,47 +54,30 @@ export const DeleteTargetPopulation = ({
       scroll="paper"
       aria-labelledby="form-dialog-title"
     >
-      <Formik
-        validationSchema={null}
-        initialValues={initialValues}
-        onSubmit={async () => {
-          await mutate({
-            variables: { input: { targetId: targetPopulationId } },
-          });
-          setOpen(false);
-          showMessage('Target Population Deleted');
-          navigate(`/${baseUrl}/target-population/`);
-        }}
-      >
-        {({ submitForm }) => (
-          <>
-            {open && <AutoSubmitFormOnEnter />}
-            <DialogTitleWrapper>
-              <DialogTitle>{t('Delete Target Population')}</DialogTitle>
-            </DialogTitleWrapper>
-            <DialogContent>
-              <DialogDescription>
-                {t('Are you sure you want to remove this Target Population?')}
-              </DialogDescription>
-            </DialogContent>
-            <DialogFooter>
-              <DialogActions>
-                <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
-                <LoadingButton
-                  loading={loading}
-                  type="submit"
-                  color="primary"
-                  variant="contained"
-                  onClick={submitForm}
-                  data-cy="button-delete"
-                >
-                  {t('Delete')}
-                </LoadingButton>
-              </DialogActions>
-            </DialogFooter>
-          </>
-        )}
-      </Formik>
+      <>
+        <DialogTitleWrapper>
+          <DialogTitle>{t('Delete Target Population')}</DialogTitle>
+        </DialogTitleWrapper>
+        <DialogContent>
+          <DialogDescription>
+            {t('Are you sure you want to remove this Target Population?')}
+          </DialogDescription>
+        </DialogContent>
+        <DialogFooter>
+          <DialogActions>
+            <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
+            <LoadingButton
+              color="primary"
+              variant="contained"
+              loading={loadingDelete}
+              onClick={() => handleDelete()}
+              data-cy="button-delete"
+            >
+              {t('Delete')}
+            </LoadingButton>
+          </DialogActions>
+        </DialogFooter>
+      </>
     </Dialog>
   );
 };
