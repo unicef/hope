@@ -23,20 +23,22 @@ export const CreateImportFromProgramPopulationForm = ({
   setSubmitDisabled,
 }): ReactElement => {
   const { baseUrl, businessArea } = useBaseUrl();
-  const { isSocialDctType } = useProgramContext();
   const { showMessage } = useSnackbar();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [createImport] = useCreateRegistrationProgramPopulationImportMutation();
-  const { selectedProgram } = useProgramContext();
+  const { selectedProgram, isSocialDctType } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const regex = isSocialDctType
+    ? /^\s*(IND)-\d{2}-\d{4}\.\d{4}\s*$/
+    : /^\s*(HH)-\d{2}-\d{4}\.\d{4}\s*$/;
 
   const validationSchema = Yup.object().shape({
     name: Yup.string()
       .required('Title is required')
       .min(4, 'Too short')
       .max(255, 'Too long'),
-    program: Yup.string().required('Programme is required'),
+    importFromProgramId: Yup.string().required('Programme is required'),
     importType: Yup.string(),
     // eslint-disable-next-line @typescript-eslint/no-shadow
     importFromIds: Yup.string().when('importType', ([importType], schema) =>
@@ -48,9 +50,7 @@ export const CreateImportFromProgramPopulationForm = ({
                 return true;
               }
               const idsArr = ids.split(',');
-              return idsArr.every((el) =>
-                /^\s*(IND|HH)-\d{2}-\d{4}\.\d{4}\s*$/.test(el),
-              );
+              return idsArr.every((el) => regex.test(el));
             })
         : schema,
     ),
@@ -77,7 +77,7 @@ export const CreateImportFromProgramPopulationForm = ({
             screenBeneficiary: values.screenBeneficiary,
             importFromProgramId: values.importFromProgramId,
             importFromIds: values.importFromIds,
-            businessAreaSlug: values.businessAreaSlug,
+            businessAreaSlug: businessArea,
           },
         },
       });
