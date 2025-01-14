@@ -6,7 +6,7 @@ RUN curl -o /data/waitforit -sSL https://github.com/maxcnunes/waitforit/releases
     && chmod +x /data/waitforit
 
 FROM curl as certs
-RUN curl -o /data/psql-cert.crt -L https://dl.cacerts.digicert.com/DigiCertGlobalRootCA.crt.pem
+RUN curl -o /data/psql-cert.crt -L https://cacerts.digicert.com/DigiCertGlobalRootCA.crt.pem
 
 # Base image
 FROM python:3.12.7-slim-bookworm as base
