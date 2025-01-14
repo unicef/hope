@@ -89,11 +89,7 @@ class GrievanceTicketAdmin(LinkedObjectsMixin, HOPEModelAdminBase, IsOriginalAdm
         qs = (
             self.model.default_for_migrations_fix.get_queryset()
             .select_related(
-                "registration_data_import",
-                "business_area",
-                "assigned_to",
-                "created_by",
-                "admin2",
+                "registration_data_import", "business_area", "assigned_to", "created_by", "admin2", "partner"
             )
             .prefetch_related("programs")
         )
