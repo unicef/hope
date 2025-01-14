@@ -682,8 +682,6 @@ class PaymentPlan(
 
         return qs
 
-    # @properties #####################################################################
-
     @property
     def program(self) -> "Program":
         return self.program_cycle.program
