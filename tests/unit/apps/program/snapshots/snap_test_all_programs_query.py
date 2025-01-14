@@ -187,6 +187,26 @@ snapshots['TestAllProgramsQuery::test_all_programs_query_user_not_authenticated 
     ]
 }
 
+snapshots['TestAllProgramsQuery::test_all_programs_query_without_ba_header 1'] = {
+    'data': {
+        'allPrograms': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 9,
+                    'line': 3
+                }
+            ],
+            'message': 'Not found header Business-Area',
+            'path': [
+                'allPrograms'
+            ]
+        }
+    ]
+}
+
 snapshots['TestAllProgramsQuery::test_all_programs_with_cycles_filter 1'] = {
     'data': {
         'allPrograms': {

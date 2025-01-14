@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
   AllTargetPopulationsQueryVariables,
-  TargetPopulationNode,
+  PaymentPlanNode,
   useAllTargetPopulationsQuery,
 } from '@generated/graphql';
 import { TableWrapper } from '@components/core/TableWrapper';
@@ -50,7 +50,7 @@ export function TargetPopulationTable({
     totalHouseholdsCountMax: filter.totalHouseholdsCountMax || null,
     status: filter.status,
     businessArea,
-    program: [programId],
+    program: programId,
     createdAtRange: JSON.stringify({
       min: dateToIsoString(filter.createdAtRangeMin, 'startOfDay'),
       max: dateToIsoString(filter.createdAtRangeMax, 'endOfDay'),
@@ -73,14 +73,14 @@ export function TargetPopulationTable({
 
   const renderTable = (): ReactElement => (
     <TableWrapper>
-      <UniversalTable<TargetPopulationNode, AllTargetPopulationsQueryVariables>
+      <UniversalTable<PaymentPlanNode, AllTargetPopulationsQueryVariables>
         title={noTitle ? null : t('Target Populations')}
         headCells={
           enableRadioButton ? adjustedHeadCells : adjustedHeadCells.slice(1)
         }
         rowsPerPageOptions={[10, 15, 20]}
         query={useAllTargetPopulationsQuery}
-        queriedObjectName="allTargetPopulation"
+        queriedObjectName="allPaymentPlans"
         defaultOrderBy="createdAt"
         defaultOrderDirection="desc"
         initialVariables={initialVariables}

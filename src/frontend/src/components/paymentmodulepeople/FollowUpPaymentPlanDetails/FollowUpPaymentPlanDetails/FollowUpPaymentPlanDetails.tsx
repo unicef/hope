@@ -22,6 +22,8 @@ export function FollowUpPaymentPlanDetails({
 }: FollowUpPaymentPlanDetailsProps): ReactElement {
   const { t } = useTranslation();
   const {
+    id,
+    name,
     createdBy,
     program,
     currency,
@@ -33,7 +35,6 @@ export function FollowUpPaymentPlanDetails({
       id: sourcePaymentPlanId,
       unicefId: sourcePaymentPlanUnicefId,
     },
-    targetPopulation,
     exchangeRate,
   } = paymentPlan;
 
@@ -68,10 +69,8 @@ export function FollowUpPaymentPlanDetails({
             </Grid>
             <Grid item xs={3}>
               <LabelizedField label={t('Target Population')}>
-                <BlackLink
-                  to={`/${baseUrl}/target-population/${targetPopulation.id}`}
-                >
-                  {targetPopulation.name}
+                <BlackLink to={`/${baseUrl}/target-population/${id}`}>
+                  {name}
                 </BlackLink>
               </LabelizedField>
             </Grid>

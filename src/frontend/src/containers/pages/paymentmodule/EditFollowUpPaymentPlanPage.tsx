@@ -44,8 +44,8 @@ export const EditFollowUpPaymentPlanPage = (): ReactElement => {
     useAllTargetPopulationsQuery({
       variables: {
         businessArea,
-        paymentPlanApplicable: false,
-        program: [programId],
+        status: 'DRAFT',
+        program: programId,
       },
     });
   if (loadingTargetPopulations || loadingPaymentPlan)
@@ -58,7 +58,7 @@ export const EditFollowUpPaymentPlanPage = (): ReactElement => {
   const { paymentPlan } = paymentPlanData;
 
   const initialValues = {
-    targetingId: paymentPlan.targetPopulation.id,
+    paymentPlanId: paymentPlan.id,
     currency: {
       name: paymentPlan.currencyName,
       value: paymentPlan.currency,
@@ -68,7 +68,7 @@ export const EditFollowUpPaymentPlanPage = (): ReactElement => {
   };
 
   const validationSchema = Yup.object().shape({
-    targetingId: Yup.string().required(t('Target Population is required')),
+    paymentPlanId: Yup.string().required(t('Target Population is required')),
     currency: Yup.string().nullable().required(t('Currency is required')),
     dispersionStartDate: Yup.date().required(
       t('Dispersion Start Date is required'),
@@ -94,15 +94,12 @@ export const EditFollowUpPaymentPlanPage = (): ReactElement => {
     try {
       const res = await mutate({
         variables: {
-          input: {
-            paymentPlanId,
-            targetingId: values.targetingId,
-            dispersionStartDate: values.dispersionStartDate,
-            dispersionEndDate: values.dispersionEndDate,
-            currency: values.currency?.value
-              ? values.currency.value
-              : values.currency,
-          },
+          paymentPlanId,
+          dispersionStartDate: values.dispersionStartDate,
+          dispersionEndDate: values.dispersionEndDate,
+          currency: values.currency?.value
+            ? values.currency.value
+            : values.currency,
         },
       });
       showMessage(t('Follow-up Payment Plan Edited'));
