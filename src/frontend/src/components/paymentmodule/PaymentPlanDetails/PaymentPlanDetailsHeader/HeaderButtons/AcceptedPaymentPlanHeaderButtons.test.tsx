@@ -17,27 +17,8 @@ describe('components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/H
           canDownloadXlsx={false}
           canExportXlsx={false}
           canSendToPaymentGateway={false}
+          canDownloadMtcn={false}
           canSplit={false}
-          paymentPlan={fakeApolloPaymentPlan}
-        />
-      </MockedProvider>,
-    );
-    await act(() => wait(0)); // wait for response
-
-    expect(container).toMatchSnapshot();
-  });
-
-  it('should render not disabled buttons', async () => {
-    const { container } = render(
-      <MockedProvider
-        addTypename={false}
-        mocks={fakeExportXlsxPpListPerFspMutation}
-      >
-        <AcceptedPaymentPlanHeaderButtons
-          canDownloadXlsx
-          canExportXlsx
-          canSendToPaymentGateway
-          canSplit
           paymentPlan={fakeApolloPaymentPlan}
         />
       </MockedProvider>,

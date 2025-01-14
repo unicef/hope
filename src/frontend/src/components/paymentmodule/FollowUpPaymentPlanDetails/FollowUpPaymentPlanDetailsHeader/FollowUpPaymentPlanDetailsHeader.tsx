@@ -75,6 +75,10 @@ export function FollowUpPaymentPlanDetailsHeader({
     paymentPlan.canSendToPaymentGateway;
   const canSplit =
     hasPermissions(PERMISSIONS.PM_SPLIT, permissions) && paymentPlan.canSplit;
+  const canDownloadMtcn = hasPermissions(
+    PERMISSIONS.PM_DOWNLOAD_MTCN,
+    permissions,
+  );
 
   let buttons: ReactElement | null = null;
   switch (paymentPlan.status) {
@@ -150,6 +154,7 @@ export function FollowUpPaymentPlanDetailsHeader({
           canSendToPaymentGateway={canSendToPaymentGateway}
           paymentPlan={paymentPlan}
           canSplit={canSplit}
+          canDownloadMtcn={canDownloadMtcn}
         />
       );
       break;
@@ -161,6 +166,7 @@ export function FollowUpPaymentPlanDetailsHeader({
           canSendToPaymentGateway={false}
           paymentPlan={paymentPlan}
           canSplit={false}
+          canDownloadMtcn={canDownloadMtcn}
         />
       );
       break;

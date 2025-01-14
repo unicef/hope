@@ -71,7 +71,10 @@ export function PaymentPlanDetailsHeader({
     paymentPlan.canSendToPaymentGateway;
   const canSplit =
     hasPermissions(PERMISSIONS.PM_SPLIT, permissions) && paymentPlan.canSplit;
-
+  const canDownloadMtcn = hasPermissions(
+    PERMISSIONS.PM_DOWNLOAD_MTCN,
+    permissions,
+  );
   let buttons: ReactElement | null = null;
   switch (paymentPlan.status) {
     case 'OPEN':
@@ -146,6 +149,7 @@ export function PaymentPlanDetailsHeader({
           canSendToPaymentGateway={canSendToPaymentGateway}
           canSplit={canSplit}
           paymentPlan={paymentPlan}
+          canDownloadMtcn={canDownloadMtcn}
         />
       );
       break;
@@ -157,6 +161,7 @@ export function PaymentPlanDetailsHeader({
           canSendToPaymentGateway={false}
           canSplit={false}
           paymentPlan={paymentPlan}
+          canDownloadMtcn={canDownloadMtcn}
         />
       );
       break;

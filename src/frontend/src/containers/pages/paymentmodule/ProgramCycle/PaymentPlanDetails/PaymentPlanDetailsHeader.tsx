@@ -35,24 +35,22 @@ export const PaymentPlanDetailsHeader = ({
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
   const programCycleId = paymentPlan.programCycle?.id;
-  const { data: programCycleData } = useQuery(
-    {
-      queryKey: [
-        'programCyclesDetails',
+  const { data: programCycleData } = useQuery({
+    queryKey: [
+      'programCyclesDetails',
+      businessArea,
+      programId,
+      decodeIdString(programCycleId),
+    ],
+    queryFn: async () => {
+      return fetchProgramCycle(
         businessArea,
         programId,
         decodeIdString(programCycleId),
-      ],
-      queryFn: async () => {
-        return fetchProgramCycle(
-          businessArea,
-          programId,
-          decodeIdString(programCycleId),
-        );
-      },
-      enabled: !!programCycleId,
+      );
     },
-  );
+    enabled: !!programCycleId,
+  });
 
   const breadCrumbsItems: BreadCrumbsItem[] = [];
 
@@ -105,6 +103,10 @@ export const PaymentPlanDetailsHeader = ({
   const canSendToPaymentGateway =
     hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) &&
     paymentPlan.canSendToPaymentGateway;
+  const canDownloadMtcn = hasPermissions(
+    PERMISSIONS.PM_DOWNLOAD_MTCN,
+    permissions,
+  );
 
   let buttons: ReactElement | null = null;
   switch (paymentPlan.status) {
@@ -181,6 +183,7 @@ export const PaymentPlanDetailsHeader = ({
           canSplit={canSplit}
           paymentPlan={paymentPlan}
           canSendToPaymentGateway={canSendToPaymentGateway}
+          canDownloadMtcn={canDownloadMtcn}
         />
       );
       break;

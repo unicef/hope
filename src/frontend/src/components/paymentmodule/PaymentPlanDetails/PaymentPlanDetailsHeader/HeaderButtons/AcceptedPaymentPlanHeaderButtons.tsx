@@ -1,4 +1,13 @@
-import { Box, Button } from '@mui/material';
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  MenuItem,
+  Select,
+} from '@mui/material';
 import { GetApp } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -10,13 +19,16 @@ import {
   Action,
   PaymentPlanBackgroundActionStatus,
   PaymentPlanQuery,
+  useAllFinancialServiceProviderXlsxTemplatesQuery,
   useExportXlsxPpListPerFspMutation,
 } from '../../../../../__generated__/graphql';
 import { SplitIntoPaymentLists } from '../SplitIntoPaymentLists';
-import { ReactElement } from 'react';
+import { ReactElement, useState } from 'react';
+import { LoadingComponent } from '@components/core/LoadingComponent';
 
 export interface AcceptedPaymentPlanHeaderButtonsProps {
   canDownloadXlsx: boolean;
+  canDownloadMtcn: boolean;
   canExportXlsx: boolean;
   canSendToPaymentGateway: boolean;
   canSplit: boolean;
@@ -25,14 +37,22 @@ export interface AcceptedPaymentPlanHeaderButtonsProps {
 
 export function AcceptedPaymentPlanHeaderButtons({
   canDownloadXlsx,
+  canDownloadMtcn,
   canExportXlsx,
   canSendToPaymentGateway,
   canSplit,
   paymentPlan,
 }: AcceptedPaymentPlanHeaderButtonsProps): ReactElement {
   const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState('');
   const { showMessage } = useSnackbar();
   const { isActiveProgram } = useProgramContext();
+  const { data, loading } = useAllFinancialServiceProviderXlsxTemplatesQuery();
+  const { mutatePaymentPlanAction: sendXlsxPassword, loading: loadingSend } =
+    usePaymentPlanAction(Action.SendXlsxPassword, paymentPlan.id, () =>
+      showMessage(t('Password has been sent.')),
+    );
 
   const [mutateExport, { loading: loadingExport }] =
     useExportXlsxPpListPerFspMutation();
@@ -52,6 +72,36 @@ export function AcceptedPaymentPlanHeaderButtons({
       PaymentPlanBackgroundActionStatus.XlsxExporting ||
     !isActiveProgram;
 
+  if (loading) return <LoadingComponent />;
+  if (!data) return null;
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const handleTemplateChange = (event) => {
+    setSelectedTemplate(event.target.value);
+  };
+
+  const handleExport = async () => {
+    try {
+      await mutateExport({
+        variables: {
+          paymentPlanId: paymentPlan.id,
+          fspXlsxTemplateId: selectedTemplate,
+        },
+      });
+      showMessage(t('Exporting XLSX started'));
+      handleClose();
+    } catch (e) {
+      e.graphQLErrors.map((x) => showMessage(x.message));
+    }
+  };
+
   return (
     <Box display="flex" alignItems="center">
       <>
@@ -70,29 +120,55 @@ export function AcceptedPaymentPlanHeaderButtons({
           <Box m={2}>
             <LoadingButton
               loading={loadingExport}
-              disabled={shouldDisableExportXlsx}
+              disabled={shouldDisableExportXlsx || !canDownloadMtcn}
               color="primary"
               variant="contained"
               startIcon={<GetApp />}
               data-cy="button-export-xlsx"
-              onClick={async () => {
-                try {
-                  await mutateExport({
-                    variables: {
-                      paymentPlanId: paymentPlan.id,
-                      fspXlsxTemplateId: '',
-                    },
-                  });
-                  showMessage(t('Exporting XLSX started'));
-                } catch (e) {
-                  e.graphQLErrors.map((x) => showMessage(x.message));
-                }
-              }}
+              onClick={handleClickOpen}
             >
               {t('Export Xlsx')}
             </LoadingButton>
           </Box>
         )}
+        <Dialog open={open} onClose={handleClose}>
+          <DialogTitle>{t('Select Template')}</DialogTitle>
+          <DialogContent>
+            <Select
+              value={selectedTemplate}
+              onChange={handleTemplateChange}
+              fullWidth
+              variant="outlined"
+              size="small"
+              data-cy="select-template"
+            >
+              {data.allFinancialServiceProviderXlsxTemplates.edges.map(
+                ({ node }) => (
+                  <MenuItem key={node.id} value={node.id}>
+                    {node.name}
+                  </MenuItem>
+                ),
+              )}
+            </Select>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              data-cy="cancel-button"
+              onClick={handleClose}
+              color="primary"
+            >
+              {t('Cancel')}
+            </Button>
+            <Button
+              onClick={handleExport}
+              data-cy="export-button"
+              color="primary"
+              disabled={!selectedTemplate}
+            >
+              {t('Export Xlsx')}
+            </Button>
+          </DialogActions>
+        </Dialog>
         {paymentPlan.hasPaymentListExportFile && (
           <Box m={2}>
             <Button
@@ -111,6 +187,18 @@ export function AcceptedPaymentPlanHeaderButtons({
             </Button>
           </Box>
         )}
+        <Box m={2}>
+          <LoadingButton
+            loading={loadingSend}
+            disabled={loadingSend}
+            color="primary"
+            variant="contained"
+            data-cy="button-send-xlsx-password"
+            onClick={() => sendXlsxPassword()}
+          >
+            {t('Send Xlsx Password')}
+          </LoadingButton>
+        </Box>
         {canSendToPaymentGateway && (
           <Box m={2}>
             <Button

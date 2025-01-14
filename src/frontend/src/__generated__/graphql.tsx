@@ -9670,6 +9670,11 @@ export type AllDeliveryMechanismsQueryVariables = Exact<{ [key: string]: never; 
 
 export type AllDeliveryMechanismsQuery = { __typename?: 'Query', allDeliveryMechanisms?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null };
 
+export type AllFinancialServiceProviderXlsxTemplatesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type AllFinancialServiceProviderXlsxTemplatesQuery = { __typename?: 'Query', allFinancialServiceProviderXlsxTemplates?: { __typename?: 'FinancialServiceProviderXlsxTemplateNodeConnection', edges: Array<{ __typename?: 'FinancialServiceProviderXlsxTemplateNodeEdge', node?: { __typename?: 'FinancialServiceProviderXlsxTemplateNode', id: string, name: string } | null } | null> } | null };
+
 export type AllPaymentPlansForTableQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -17573,6 +17578,50 @@ export type AllDeliveryMechanismsQueryHookResult = ReturnType<typeof useAllDeliv
 export type AllDeliveryMechanismsLazyQueryHookResult = ReturnType<typeof useAllDeliveryMechanismsLazyQuery>;
 export type AllDeliveryMechanismsSuspenseQueryHookResult = ReturnType<typeof useAllDeliveryMechanismsSuspenseQuery>;
 export type AllDeliveryMechanismsQueryResult = Apollo.QueryResult<AllDeliveryMechanismsQuery, AllDeliveryMechanismsQueryVariables>;
+export const AllFinancialServiceProviderXlsxTemplatesDocument = gql`
+    query AllFinancialServiceProviderXlsxTemplates {
+  allFinancialServiceProviderXlsxTemplates {
+    edges {
+      node {
+        id
+        name
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useAllFinancialServiceProviderXlsxTemplatesQuery__
+ *
+ * To run a query within a React component, call `useAllFinancialServiceProviderXlsxTemplatesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllFinancialServiceProviderXlsxTemplatesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllFinancialServiceProviderXlsxTemplatesQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useAllFinancialServiceProviderXlsxTemplatesQuery(baseOptions?: Apollo.QueryHookOptions<AllFinancialServiceProviderXlsxTemplatesQuery, AllFinancialServiceProviderXlsxTemplatesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<AllFinancialServiceProviderXlsxTemplatesQuery, AllFinancialServiceProviderXlsxTemplatesQueryVariables>(AllFinancialServiceProviderXlsxTemplatesDocument, options);
+      }
+export function useAllFinancialServiceProviderXlsxTemplatesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllFinancialServiceProviderXlsxTemplatesQuery, AllFinancialServiceProviderXlsxTemplatesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<AllFinancialServiceProviderXlsxTemplatesQuery, AllFinancialServiceProviderXlsxTemplatesQueryVariables>(AllFinancialServiceProviderXlsxTemplatesDocument, options);
+        }
+export function useAllFinancialServiceProviderXlsxTemplatesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<AllFinancialServiceProviderXlsxTemplatesQuery, AllFinancialServiceProviderXlsxTemplatesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<AllFinancialServiceProviderXlsxTemplatesQuery, AllFinancialServiceProviderXlsxTemplatesQueryVariables>(AllFinancialServiceProviderXlsxTemplatesDocument, options);
+        }
+export type AllFinancialServiceProviderXlsxTemplatesQueryHookResult = ReturnType<typeof useAllFinancialServiceProviderXlsxTemplatesQuery>;
+export type AllFinancialServiceProviderXlsxTemplatesLazyQueryHookResult = ReturnType<typeof useAllFinancialServiceProviderXlsxTemplatesLazyQuery>;
+export type AllFinancialServiceProviderXlsxTemplatesSuspenseQueryHookResult = ReturnType<typeof useAllFinancialServiceProviderXlsxTemplatesSuspenseQuery>;
+export type AllFinancialServiceProviderXlsxTemplatesQueryResult = Apollo.QueryResult<AllFinancialServiceProviderXlsxTemplatesQuery, AllFinancialServiceProviderXlsxTemplatesQueryVariables>;
 export const AllPaymentPlansForTableDocument = gql`
     query AllPaymentPlansForTable($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $businessArea: String!, $search: String, $status: [String], $totalEntitledQuantityFrom: Float, $totalEntitledQuantityTo: Float, $dispersionStartDate: Date, $dispersionEndDate: Date, $isFollowUp: Boolean, $program: String, $programCycle: String) {
   allPaymentPlans(

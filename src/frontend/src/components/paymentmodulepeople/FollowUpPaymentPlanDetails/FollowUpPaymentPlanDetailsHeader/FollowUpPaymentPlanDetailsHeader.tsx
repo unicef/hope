@@ -75,7 +75,10 @@ export function FollowUpPaymentPlanDetailsHeader({
     paymentPlan.canSendToPaymentGateway;
   const canSplit =
     hasPermissions(PERMISSIONS.PM_SPLIT, permissions) && paymentPlan.canSplit;
-
+  const canDownloadMtcn = hasPermissions(
+    PERMISSIONS.PM_DOWNLOAD_MTCN,
+    permissions,
+  );
   let buttons: ReactElement | null = null;
   switch (paymentPlan.status) {
     case 'OPEN':
@@ -146,6 +149,7 @@ export function FollowUpPaymentPlanDetailsHeader({
       buttons = (
         <AcceptedPaymentPlanHeaderButtons
           canDownloadXlsx={canDownloadXlsx}
+          canDownloadMtcn={canDownloadMtcn}
           canExportXlsx={canExportXlsx}
           canSendToPaymentGateway={canSendToPaymentGateway}
           paymentPlan={paymentPlan}
@@ -157,6 +161,7 @@ export function FollowUpPaymentPlanDetailsHeader({
       buttons = (
         <AcceptedPaymentPlanHeaderButtons
           canDownloadXlsx={canDownloadXlsx}
+          canDownloadMtcn={canDownloadMtcn}
           canExportXlsx={canExportXlsx}
           canSendToPaymentGateway={false}
           paymentPlan={paymentPlan}
