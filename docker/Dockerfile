@@ -57,7 +57,7 @@ COPY README.md LICENSE pyproject.toml uv.lock MANIFEST.in ./
 
 # Dev image
 FROM uv AS dev
-
+ENV PYTHONPATH=$APP_PATH/src:$APP_PATH/test/:$PYTHONPATH
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
     python3-dev \
