@@ -16,12 +16,13 @@ export const Survey = gql`
         email
       }
       createdAt
-      targetPopulation {
+      program {
         id
         name
       }
-      program {
+      paymentPlan {
         id
+        unicefId
         name
       }
       body

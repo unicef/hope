@@ -50,7 +50,7 @@ export function VerificationPaymentDetails({
           <Grid item xs={3}>
             <LabelizedField
               label={t('TARGET POPULATION')}
-              value={payment.targetPopulation.name}
+              value={payment.parent.name}
             />
           </Grid>
           <Grid item xs={3}>

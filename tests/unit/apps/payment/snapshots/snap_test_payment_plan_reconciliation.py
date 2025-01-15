@@ -19,7 +19,7 @@ snapshots['TestPaymentPlanReconciliation::test_apply_steficon_rule_with_wrong_pa
                     'line': 3
                 }
             ],
-            'message': "You can run formula only for 'Locked' status of Payment Plan",
+            'message': "You can run formula only for 'Locked', 'Error' or 'Completed' statuses.",
             'path': [
                 'setSteficonRuleOnPaymentPlanPaymentList'
             ]

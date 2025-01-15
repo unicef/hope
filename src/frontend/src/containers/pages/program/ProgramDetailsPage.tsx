@@ -94,9 +94,6 @@ export function ProgramDetailsPage(): ReactElement {
           PERMISSIONS.PROGRAMME_DUPLICATE,
           permissions,
         )}
-        isPaymentPlanApplicable={
-          businessAreaData.businessArea.isPaymentPlanApplicable
-        }
       />
       <Container>
         <ProgramDetails program={program} choices={choices} />

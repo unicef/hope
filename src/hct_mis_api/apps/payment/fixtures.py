@@ -56,15 +56,12 @@ from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
     TargetingCriteriaRuleFactory,
     TargetingCriteriaRuleFilterFactory,
-    TargetPopulationFactory,
 )
 from hct_mis_api.apps.targeting.models import (
     TargetingCriteria,
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
-    TargetPopulation,
 )
-from hct_mis_api.apps.targeting.services.targeting_stats_refresher import full_rebuild
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
 
@@ -241,6 +238,8 @@ class PaymentPlanFactory(DjangoModelFactory):
         after_now=False,
         tzinfo=utc,
     )
+    status = PaymentPlan.Status.OPEN
+    build_status = PaymentPlan.BuildStatus.BUILD_STATUS_PENDING
     exchange_rate = factory.fuzzy.FuzzyDecimal(0.1, 9.9)
 
     total_entitled_quantity = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
@@ -255,8 +254,8 @@ class PaymentPlanFactory(DjangoModelFactory):
 
     created_by = factory.SubFactory(UserFactory)
     unicef_id = factory.Faker("uuid4")
-    target_population = factory.SubFactory(TargetPopulationFactory)
     program_cycle = factory.SubFactory(ProgramCycleFactory)
+    targeting_criteria = factory.SubFactory(TargetingCriteriaFactory)
     currency = factory.fuzzy.FuzzyChoice(CURRENCY_CHOICES, getter=lambda c: c[0])
 
     dispersion_start_date = factory.Faker(
@@ -390,7 +389,6 @@ def create_payment_verification_plan_with_status(
     user: "User",
     business_area: BusinessArea,
     program: Program,
-    target_population: "TargetPopulation",
     status: str,
     verification_channel: Optional[str] = None,
     create_failed_payments: bool = False,
@@ -458,20 +456,21 @@ def generate_reconciled_payment_plan() -> None:
     afghanistan = BusinessArea.objects.get(slug="afghanistan")
     root = User.objects.get(username="root")
     now = timezone.now()
-    tp: TargetPopulation = TargetPopulation.objects.all()[0]
+    targeting_criteria: TargetingCriteria = TargetingCriteriaFactory()
+    program = Program.objects.filter(business_area=afghanistan, name="Test Program").first()
 
     payment_plan = PaymentPlan.objects.update_or_create(
         name="Reconciled Payment Plan",
         unicef_id="PP-0060-22-11223344",
         business_area=afghanistan,
-        target_population=tp,
+        targeting_criteria=targeting_criteria,
         currency="USD",
         dispersion_start_date=now,
         dispersion_end_date=now + timedelta(days=14),
         status_date=now,
         status=PaymentPlan.Status.ACCEPTED,
         created_by=root,
-        program_cycle=tp.program.cycles.first(),
+        program_cycle=program.cycles.first(),
         total_delivered_quantity=999,
         total_entitled_quantity=2999,
         is_follow_up=False,
@@ -495,8 +494,7 @@ def generate_reconciled_payment_plan() -> None:
         payment_plan,
         root,
         afghanistan,
-        tp.program,
-        tp,
+        program,
         PaymentVerificationPlan.STATUS_ACTIVE,
         PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL,
         True,  # create failed payments
@@ -552,6 +550,7 @@ def generate_payment_plan() -> None:
     individual_1_pk = UUID("cc000000-0000-0000-0000-000000000001")
     individual_1 = Individual.objects.update_or_create(
         pk=individual_1_pk,
+        rdi_merge_status=MergeStatusModel.MERGED,
         birth_date=now - timedelta(days=365 * 30),
         first_registration_date=now - timedelta(days=365),
         last_registration_date=now,
@@ -566,6 +565,7 @@ def generate_payment_plan() -> None:
     individual_2_pk = UUID("cc000000-0000-0000-0000-000000000002")
     individual_2 = Individual.objects.update_or_create(
         pk=individual_2_pk,
+        rdi_merge_status=MergeStatusModel.MERGED,
         birth_date=now - timedelta(days=365 * 30),
         first_registration_date=now - timedelta(days=365),
         last_registration_date=now,
@@ -580,6 +580,7 @@ def generate_payment_plan() -> None:
     household_1_pk = UUID("aa000000-0000-0000-0000-000000000001")
     household_1 = Household.objects.update_or_create(
         pk=household_1_pk,
+        rdi_merge_status=MergeStatusModel.MERGED,
         size=4,
         head_of_household=individual_1,
         business_area=afghanistan,
@@ -596,6 +597,7 @@ def generate_payment_plan() -> None:
     household_2_pk = UUID("aa000000-0000-0000-0000-000000000002")
     household_2 = Household.objects.update_or_create(
         pk=household_2_pk,
+        rdi_merge_status=MergeStatusModel.MERGED,
         size=4,
         head_of_household=individual_2,
         business_area=afghanistan,
@@ -629,20 +631,19 @@ def generate_payment_plan() -> None:
         arguments=["4d100000-0000-0000-0000-000000000000"],
     )
 
-    target_population_pk = UUID("00000000-0000-0000-0000-faceb00c0123")
-    target_population = TargetPopulation.objects.update_or_create(
-        pk=target_population_pk,
-        name="Test Target Population",
-        targeting_criteria=targeting_criteria,
-        status=TargetPopulation.STATUS_ASSIGNED,
+    payment_plan_pk = UUID("00000000-feed-beef-0000-00000badf00d")
+    payment_plan = PaymentPlan.objects.update_or_create(
+        name="Test Payment Plan",
+        pk=payment_plan_pk,
         business_area=afghanistan,
-        program=program,
+        targeting_criteria=targeting_criteria,
+        currency="USD",
+        dispersion_start_date=now,
+        dispersion_end_date=now + timedelta(days=14),
+        status_date=now,
         created_by=root,
         program_cycle=program_cycle,
     )[0]
-    full_rebuild(target_population)
-    target_population.save()
-
     tc2 = TargetingCriteriaFactory()
     tcr2 = TargetingCriteriaRuleFactory(
         targeting_criteria=tc2,
@@ -653,33 +654,18 @@ def generate_payment_plan() -> None:
         field_name="size",
         arguments=[1, 11],
     )
-
-    tp2 = TargetPopulation.objects.update_or_create(
+    PaymentPlan.objects.update_or_create(
         name="Test TP for PM (just click rebuild)",
         targeting_criteria=tc2,
-        status=TargetPopulation.STATUS_OPEN,
+        status=PaymentPlan.Status.TP_OPEN,
         business_area=afghanistan,
-        program=program,
-        created_by=root,
-        program_cycle=program_cycle,
-    )[0]
-    full_rebuild(tp2)
-    # tp2.status = TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
-    tp2.save()
-
-    payment_plan_pk = UUID("00000000-feed-beef-0000-00000badf00d")
-    payment_plan = PaymentPlan.objects.update_or_create(
-        name="Test Payment Plan",
-        pk=payment_plan_pk,
-        business_area=afghanistan,
-        target_population=target_population,
         currency="USD",
         dispersion_start_date=now,
         dispersion_end_date=now + timedelta(days=14),
         status_date=now,
         created_by=root,
         program_cycle=program_cycle,
-    )[0]
+    )
 
     delivery_mechanism_cash = DeliveryMechanism.objects.get(code="cash")
 
