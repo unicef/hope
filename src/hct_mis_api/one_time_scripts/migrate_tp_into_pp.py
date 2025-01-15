@@ -148,7 +148,7 @@ def migrate_tp_qs(tp_qs: QuerySet["TargetPopulation"]) -> None:
                 for field, value in payment_plan_data.items():
                     setattr(payment_plan, field, value)
                 # create copy targeting_criteria for other PP from the same TP
-                # in DEV env found TP with multiple PPs ???
+                # like for follow up PPs and from Cash Assist maybe as well
                 if pp_count > 1:
                     copy_new_target_criteria = PaymentPlanService.copy_target_criteria(tp.targeting_criteria)
                     payment_plan.targeting_criteria = copy_new_target_criteria
