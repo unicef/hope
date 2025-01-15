@@ -6,10 +6,11 @@ from hct_mis_api.apps.account.fixtures import (
     PartnerFactory,
     RoleAssignmentFactory,
     RoleFactory,
-    UserFactory,
+    UserFactory, AdminAreaLimitedToFactory,
 )
-from hct_mis_api.apps.account.models import RoleAssignment
+from hct_mis_api.apps.account.models import RoleAssignment, AdminAreaLimitedTo
 from hct_mis_api.apps.core.fixtures import create_afghanistan, create_ukraine
+from hct_mis_api.apps.geo.fixtures import AreaFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
@@ -43,6 +44,8 @@ class TestRoleAssignmentModel(TransactionTestCase):
             role=self.role,
             business_area=self.business_area,
         )
+
+        self.area_1 = AreaFactory(name="Area 1", p_code="AREA1")
 
     def test_user_or_partner(self) -> None:
         # Either user or partner must be set
@@ -207,3 +210,90 @@ class TestRoleAssignmentModel(TransactionTestCase):
                 business_area=self.business_area,
                 program=None,
             )
+
+    def test_role_assignment_for_parent_partner(self) -> None:
+        parent_partner = PartnerFactory(name="Parent Partner")
+        child_partner = PartnerFactory(name="Child Partner", parent=parent_partner)
+        parent_partner.allowed_business_areas.add(self.business_area)
+        child_partner.allowed_business_areas.add(self.business_area)
+
+        # Can create RoleAssignment for child partner
+        RoleAssignment.objects.create(
+            user=None,
+            partner=child_partner,
+            role=self.role,
+            business_area=self.business_area,
+        )
+
+        with self.assertRaises(ValidationError) as ve_context:
+            RoleAssignment.objects.create(
+                user=None,
+                partner=parent_partner,
+                role=self.role,
+                business_area=self.business_area,
+            )
+        self.assertIn(
+            f"{parent_partner} is a parent partner and cannot have role assignments.",
+            str(ve_context.exception),
+        )
+
+    def test_parent_partner_with_role_assignment(self) -> None:
+        parent_partner = PartnerFactory(name="Parent Partner")
+        parent_partner.allowed_business_areas.add(self.business_area)
+
+        # Role for the Partner
+        RoleAssignment.objects.create(
+            user=None,
+            partner=parent_partner,
+            role=self.role,
+            business_area=self.business_area,
+        )
+
+        with self.assertRaises(ValidationError) as ve_context:
+            PartnerFactory(name="Child Partner", parent=parent_partner)
+
+        self.assertIn(
+            f"{parent_partner} cannot become a parent as it has RoleAssignments.",
+            str(ve_context.exception),
+        )
+
+    def test_area_limits_for_program_with_selected_partner_access(self) -> None:
+        # Possible to have area limits for a program with selected partner access
+        self.program1.partner_access = Program.SELECTED_PARTNERS_ACCESS
+        self.program1.save()
+
+        AdminAreaLimitedToFactory(
+            partner=self.partner,
+            program=self.program1,
+            areas=[self.area_1]
+        )
+
+    def test_area_limits_for_program_with_all_partner_access(self) -> None:
+        # Not possible to have area limits for a program with ALL_PARTNERS_ACCESS
+        self.program1.partner_access = Program.ALL_PARTNERS_ACCESS
+        self.program1.save()
+        with self.assertRaises(ValidationError) as ve_context:
+            AdminAreaLimitedToFactory(
+                partner=self.partner,
+                program=self.program1,
+                areas=[self.area_1]
+            )
+        self.assertIn(
+            f"Area limits cannot be set for programs with {self.program1.partner_access} access.",
+            str(ve_context.exception),
+        )
+
+    def test_area_limits_for_program_with_none_partner_access(self) -> None:
+        # Not possible to have area limits for a program with NONE_PARTNERS_ACCESS
+        self.program1.partner_access = Program.NONE_PARTNERS_ACCESS
+        self.program1.save()
+        with self.assertRaises(ValidationError) as ve_context:
+            AdminAreaLimitedToFactory(
+                partner=self.partner,
+                program=self.program1,
+                areas=[self.area_1]
+            )
+        self.assertIn(
+            f"Area limits cannot be set for programs with {self.program1.partner_access} access.",
+            str(ve_context.exception),
+        )
