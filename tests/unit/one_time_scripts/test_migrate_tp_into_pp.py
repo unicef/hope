@@ -28,7 +28,7 @@ class MigrationTPIntoPPTest(TestCase):
     def setUp(cls) -> None:
         cls.business_area = create_afghanistan()
         cls.user = UserFactory()
-        cls.program = ProgramFactory()
+        cls.program = ProgramFactory(name="Unit Test")
         cls.program_cycle = cls.program.cycles.first()
 
         # preparing PaymentPlan
