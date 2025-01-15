@@ -181,7 +181,9 @@ class CopyProgramPopulation:
         new_household: Household,
     ) -> List[IndividualRoleInHousehold]:
         roles_in_household = []
-        copied_from_roles = IndividualRoleInHousehold.objects.filter(household=new_household.copied_from)
+        copied_from_roles = IndividualRoleInHousehold.objects.filter(household=new_household.copied_from).exclude(
+            Q(individual__withdrawn=True) | Q(individual__duplicate=True)
+        )
         for role in copied_from_roles:
             role.pk = None
             role.household = new_household
