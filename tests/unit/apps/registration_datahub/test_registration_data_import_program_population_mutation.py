@@ -7,7 +7,8 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
 from hct_mis_api.apps.core.models import DataCollectingType
-from hct_mis_api.apps.household.fixtures import create_household_and_individuals
+from hct_mis_api.apps.household.fixtures import create_household_and_individuals, IndividualFactory
+from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
 from hct_mis_api.apps.program.fixtures import BeneficiaryGroupFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
@@ -264,6 +265,9 @@ class TestRegistrationDataProgramPopulationImportMutations(APITestCase):
         user = UserFactory(partner=self.partner)
         self.create_user_role_with_permissions(user, [Permissions.RDI_IMPORT_DATA], self.afghanistan)
         self.update_partner_access_to_program(self.partner, self.import_to_program)
+
+        # collector for
+
         self.household_1, self.individuals_1 = create_household_and_individuals(
             household_data={"program": self.import_from_program},
             individuals_data=[{}],
@@ -280,6 +284,10 @@ class TestRegistrationDataProgramPopulationImportMutations(APITestCase):
             household_data={"program": self.import_from_program},
             individuals_data=[{}, {}],
         )
+        # create for collector for household_4
+        external_collector = IndividualFactory(household=None)
+        IndividualRoleInHousehold.objects.create(household=self.household_4, individual=external_collector, role=ROLE_PRIMARY)
+        print("Extr ==>> ", external_collector.unicef_id)
 
         hh_ids = f"{self.household_3.unicef_id}, {self.household_4.unicef_id}, HH-000001"
         ind_ids = f"{self.individuals_1[0].unicef_id}, {self.individuals_2[0].unicef_id}, IND-111222"
@@ -306,6 +314,32 @@ class TestRegistrationDataProgramPopulationImportMutations(APITestCase):
         self.assertEqual(rdi.import_from_ids, hh_ids)
         self.assertEqual(rdi.program.data_collecting_type.type, DataCollectingType.Type.STANDARD)
         self.assertEqual(rdi.number_of_individuals, 4)
+        self.assertEqual(rdi.number_of_households, 2)
+        self.assertEqual(rdi.program_id, self.import_to_program.id)
+
+        # check with external collector
+        self.snapshot_graphql_request(
+            request_string=self.CREATE_REGISTRATION_DATA_IMPORT,
+            context={
+                "user": user,
+                "headers": {"Program": self.id_to_base64(self.import_to_program.id, "ProgramNode")},
+            },
+            variables={
+                "registrationDataImportData": {
+                    "importFromProgramId": self.id_to_base64(self.import_from_program.id, "ProgramNode"),
+                    "name": "New Import of Data HH Ids with external collector",
+                    "businessAreaSlug": self.afghanistan.slug,
+                    "importFromIds": hh_ids,
+                }
+            },
+        )
+
+        rdi = RegistrationDataImport.objects.filter(name="New Import of Data HH Ids with external collector").first()
+        self.assertEqual(rdi.status, RegistrationDataImport.IMPORT_SCHEDULED)
+        self.assertEqual(rdi.data_source, RegistrationDataImport.PROGRAM_POPULATION)
+        self.assertEqual(rdi.import_from_ids, hh_ids)
+        self.assertEqual(rdi.program.data_collecting_type.type, DataCollectingType.Type.STANDARD)
+        self.assertEqual(rdi.number_of_individuals, 5)
         self.assertEqual(rdi.number_of_households, 2)
         self.assertEqual(rdi.program_id, self.import_to_program.id)
 
