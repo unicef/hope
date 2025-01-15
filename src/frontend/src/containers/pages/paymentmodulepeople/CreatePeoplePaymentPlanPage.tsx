@@ -12,7 +12,7 @@ import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import {
   useAllTargetPopulationsQuery,
-  useCreatePpMutation,
+  useUpdatePpMutation,
 } from '@generated/graphql';
 import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -24,7 +24,7 @@ export const CreatePeoplePaymentPlanPage = (): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const location = useLocation();
-  const [mutate, { loading: loadingCreate }] = useCreatePpMutation();
+  const [mutate, { loading: loadingCreate }] = useUpdatePpMutation();
   const { showMessage } = useSnackbar();
   const { baseUrl, businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
@@ -34,8 +34,8 @@ export const CreatePeoplePaymentPlanPage = (): ReactElement => {
     useAllTargetPopulationsQuery({
       variables: {
         businessArea,
-        paymentPlanApplicable: true,
-        program: [programId],
+        status: 'DRAFT',
+        program: programId,
         programCycle: programCycleId,
       },
       fetchPolicy: 'network-only',
@@ -48,7 +48,7 @@ export const CreatePeoplePaymentPlanPage = (): ReactElement => {
     return <PermissionDenied />;
 
   const validationSchema = Yup.object().shape({
-    targetingId: Yup.string().required(t('Target Population is required')),
+    paymentPlanId: Yup.string().required(t('Target Population is required')),
     currency: Yup.string().required(t('Currency is required')),
     dispersionStartDate: Yup.date().required(
       t('Dispersion Start Date is required'),
@@ -70,7 +70,7 @@ export const CreatePeoplePaymentPlanPage = (): ReactElement => {
 
   type FormValues = Yup.InferType<typeof validationSchema>;
   const initialValues: FormValues = {
-    targetingId: '',
+    paymentPlanId: '',
     currency: null,
     dispersionStartDate: null,
     dispersionEndDate: null,
@@ -84,22 +84,19 @@ export const CreatePeoplePaymentPlanPage = (): ReactElement => {
       const dispersionEndDate = values.dispersionEndDate
         ? format(new Date(values.dispersionEndDate), 'yyyy-MM-dd')
         : null;
-      const { currency, targetingId } = values;
+      const { currency, paymentPlanId } = values;
 
       const res = await mutate({
         variables: {
-          input: {
-            businessAreaSlug: businessArea,
-            currency,
-            targetingId,
-            dispersionStartDate,
-            dispersionEndDate,
-          },
+          currency,
+          paymentPlanId,
+          dispersionStartDate,
+          dispersionEndDate,
         },
       });
       showMessage(t('Payment Plan Created'));
       navigate(
-        `/${baseUrl}/payment-module/payment-plans/${res.data.createPaymentPlan.paymentPlan.id}`,
+        `/${baseUrl}/payment-module/payment-plans/${res.data.updatePaymentPlan.paymentPlan.id}`,
       );
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));

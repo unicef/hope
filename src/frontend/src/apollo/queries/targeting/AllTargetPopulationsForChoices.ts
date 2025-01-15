@@ -8,24 +8,20 @@ export const AllTargetPopulationForChoices = gql`
     $last: Int
     $orderBy: String
     $name: String
-    $status: String
-    $numberOfHouseholdsMin: Int
-    $numberOfHouseholdsMax: Int
-    $businessArea: String
-    $program: [ID]
+    $businessArea: String!
+    $program: String!
+    $status: [String]
   ) {
-    allTargetPopulation(
+    allPaymentPlans(
       after: $after
       before: $before
       first: $first
       last: $last
       orderBy: $orderBy
       name: $name
-      status: $status
-      totalHouseholdsCountMin: $numberOfHouseholdsMin
-      totalHouseholdsCountMax: $numberOfHouseholdsMax
       businessArea: $businessArea
       program: $program
+      status: $status
     ) {
       edges {
         node {

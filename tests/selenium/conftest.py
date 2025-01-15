@@ -543,7 +543,6 @@ def business_area() -> BusinessArea:
             "slug": "afghanistan",
             "screen_beneficiary": True,
             "has_data_sharing_agreement": True,
-            "is_payment_plan_applicable": True,
             "is_accountability_applicable": True,
             "kobo_token": "XXX",
         },
@@ -613,6 +612,8 @@ def create_super_user(business_area: BusinessArea) -> User:
             username="superuser",
             password="testtest2",
             email="test@example.com",
+            first_name="Test",
+            last_name="Selenium",
             partner=partner,
         )
     UserRole.objects.get_or_create(

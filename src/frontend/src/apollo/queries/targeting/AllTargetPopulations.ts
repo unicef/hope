@@ -8,16 +8,15 @@ export const AllTargetPopulations = gql`
     $last: Int
     $orderBy: String
     $name: String
-    $status: String
+    $status: [String]
     $totalHouseholdsCountMin: Int
     $totalHouseholdsCountMax: Int
-    $businessArea: String
-    $program: [ID]
+    $businessArea: String!
+    $program: String
     $programCycle: String
     $createdAtRange: String
-    $paymentPlanApplicable: Boolean
   ) {
-    allTargetPopulation(
+    allPaymentPlans(
       after: $after
       before: $before
       first: $first
@@ -31,16 +30,55 @@ export const AllTargetPopulations = gql`
       program: $program
       programCycle: $programCycle
       createdAtRange: $createdAtRange
-      paymentPlanApplicable: $paymentPlanApplicable
     ) {
       edges {
-        node {
-          ...targetPopulationMinimal
-        }
         cursor
+        node {
+          id
+          unicefId
+          name
+          isFollowUp
+          followUps {
+            totalCount
+            edges {
+              node {
+                id
+                unicefId
+                dispersionStartDate
+                dispersionEndDate
+              }
+            }
+          }
+          status
+          createdAt
+          updatedAt
+          createdBy {
+            id
+            firstName
+            lastName
+            email
+          }
+          program {
+            id
+            name
+          }
+          currency
+          currencyName
+          startDate
+          endDate
+          dispersionStartDate
+          dispersionEndDate
+          femaleChildrenCount
+          femaleAdultsCount
+          maleChildrenCount
+          maleAdultsCount
+          totalHouseholdsCount
+          totalIndividualsCount
+          totalEntitledQuantity
+          totalDeliveredQuantity
+          totalUndeliveredQuantity
+        }
       }
-      totalCount
-      edgeCount
     }
   }
 `;

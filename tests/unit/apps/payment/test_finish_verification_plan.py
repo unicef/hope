@@ -47,6 +47,7 @@ class TestFinishVerificationPlan(TestCase):
         payment_plan = PaymentPlanFactory(
             program_cycle=cls.program.cycles.first(),
             business_area=business_area,
+            created_by=user,
         )
         PaymentVerificationSummaryFactory(payment_plan=payment_plan)
         payment_plan_payment_verification = PaymentVerificationPlanFactory(

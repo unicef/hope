@@ -4,14 +4,28 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.http import Http404, HttpRequest
+from django.http.response import HttpResponseBase
 from django.utils.functional import cached_property
 from django.views.generic import TemplateView
 from django.views.generic.edit import ProcessFormView
 
 from admin_extra_buttons.utils import HttpResponseRedirectToReferrer
+from constance import config
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.generics import ListAPIView
+from rest_framework_extensions.cache.decorators import cache_response
 from sentry_sdk import set_tag
 
-from hct_mis_api.contrib.aurora.models import Registration
+from hct_mis_api.api.caches import etag_decorator
+from hct_mis_api.api.endpoints.base import HOPEAPIView
+from hct_mis_api.api.filters import ProjectFilter, RegistrationFilter
+from hct_mis_api.contrib.aurora.api import (
+    OrganizationSerializer,
+    ProjectSerializer,
+    RegistrationSerializer,
+)
+from hct_mis_api.contrib.aurora.caches import AuroraKeyConstructor
+from hct_mis_api.contrib.aurora.models import Organization, Project, Registration
 from hct_mis_api.contrib.aurora.utils import fetch_metadata
 
 
@@ -60,3 +74,37 @@ class RegistrationDataView(PermissionRequiredMixin, TemplateView):
             return reg
         except Registration.DoesNotExist:  # pragma: no coalidateer
             raise Http404
+
+
+class OrganizationListView(HOPEAPIView, ListAPIView):
+    queryset = Organization.objects.all()
+    serializer_class = OrganizationSerializer
+
+    @etag_decorator(AuroraKeyConstructor)
+    @cache_response(timeout=config.REST_API_TTL, key_func=AuroraKeyConstructor())
+    def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponseBase:
+        return super().dispatch(request, *args, **kwargs)
+
+
+class ProjectListView(HOPEAPIView, ListAPIView):
+    queryset = Project.objects.all()
+    serializer_class = ProjectSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = ProjectFilter
+
+    @etag_decorator(AuroraKeyConstructor)
+    @cache_response(timeout=config.REST_API_TTL, key_func=AuroraKeyConstructor())
+    def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponseBase:
+        return super().dispatch(request, *args, **kwargs)
+
+
+class RegistrationListView(HOPEAPIView, ListAPIView):
+    queryset = Registration.objects.all()
+    serializer_class = RegistrationSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = RegistrationFilter
+
+    @etag_decorator(AuroraKeyConstructor)
+    @cache_response(timeout=config.REST_API_TTL, key_func=AuroraKeyConstructor())
+    def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponseBase:
+        return super().dispatch(request, *args, **kwargs)
