@@ -287,7 +287,7 @@ class TestDocument(TestCase):
             )
 
     def test_raise_error_on_creating_duplicated_documents_with_different_numbers_and_unique_for_individual(
-            self,
+        self,
     ) -> None:
         document_type, _ = DocumentType.objects.update_or_create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_PASSPORT],
@@ -318,45 +318,44 @@ class TestDocument(TestCase):
                 rdi_merge_status=MergeStatusModel.MERGED,
             )
 
+    def test_create_duplicated_documents_with_different_numbers_and_types_and_unique_for_individual(self) -> None:
+        document_type, _ = DocumentType.objects.update_or_create(
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_PASSPORT],
+            defaults=dict(
+                label="National Passport",
+                unique_for_individual=True,
+            ),
+        )
+        document_type2, _ = DocumentType.objects.update_or_create(
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID],
+            defaults=dict(
+                label="Tax Number Identification",
+                unique_for_individual=True,
+            ),
+        )
 
-def test_create_duplicated_documents_with_different_numbers_and_types_and_unique_for_individual(self) -> None:
-    document_type, _ = DocumentType.objects.update_or_create(
-        key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_PASSPORT],
-        defaults=dict(
-            label="National Passport",
-            unique_for_individual=True,
-        ),
-    )
-    document_type2, _ = DocumentType.objects.update_or_create(
-        key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID],
-        defaults=dict(
-            label="Tax Number Identification",
-            unique_for_individual=True,
-        ),
-    )
-
-    Document.objects.create(
-        document_number="213123",
-        individual=self.individual,
-        country=self.country,
-        type=document_type,
-        status=Document.STATUS_VALID,
-        program=self.program,
-        rdi_merge_status=MergeStatusModel.MERGED,
-    )
-
-    try:
         Document.objects.create(
-            document_number="213124",
+            document_number="213123",
             individual=self.individual,
             country=self.country,
-            type=document_type2,
+            type=document_type,
             status=Document.STATUS_VALID,
             program=self.program,
             rdi_merge_status=MergeStatusModel.MERGED,
         )
-    except IntegrityError:
-        self.fail("Shouldn't raise any errors!")
+
+        try:
+            Document.objects.create(
+                document_number="213124",
+                individual=self.individual,
+                country=self.country,
+                type=document_type2,
+                status=Document.STATUS_VALID,
+                program=self.program,
+                rdi_merge_status=MergeStatusModel.MERGED,
+            )
+        except IntegrityError:
+            self.fail("Shouldn't raise any errors!")
 
 
 class TestIndividualModel(TestCase):
