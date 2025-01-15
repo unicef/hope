@@ -11,7 +11,7 @@ from rest_framework.utils.serializer_helpers import ReturnDict
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.dashboard.serializers import DashboardHouseholdSerializer
-from hct_mis_api.apps.payment.models import Payment, PaymentRecord
+from hct_mis_api.apps.payment.models import Payment
 
 CACHE_TIMEOUT = 60 * 60 * 24  # 24 hours
 
@@ -88,7 +88,9 @@ class DashboardDataCache:
                     month=ExtractMonth(Coalesce("delivery_date", "entitlement_date", "status_date")),
                     programs=Coalesce(F("household__program__name"), Value("Unknown program")),
                     sectors=Coalesce(F("household__program__sector"), Value("Unknown sector")),
-                    admin1=Coalesce(F("household__admin1__name"), Value("Unknown admin1")),
+                    admin1=Coalesce(
+                        F("household__admin1__name"), F("household__admin_area__name"), Value("Unknown admin area")
+                    ),
                     fsp=Coalesce(F("financial_service_provider__name"), Value("Unknown fsp")),
                     delivery_types=F("delivery_type__name"),
                 )
@@ -113,58 +115,12 @@ class DashboardDataCache:
                         Coalesce("delivered_quantity", "entitlement_quantity", Value(0.0)), output_field=DecimalField()
                     ),
                     total_payments=Count("id", distinct=True),
-                    individuals=Sum("household__size"),
+                    individuals=Sum(Coalesce("household__size", Value(1))),
                     households=Count("household", distinct=True),
                     children_counts=Sum("household__children_count"),
                     pwd_counts=pwdSum,
                 )
             )
-
-            payment_records_aggregated = (
-                PaymentRecord.objects.using("read_only")
-                .select_related(
-                    "business_area", "household", "program", "household__admin1", "service_provider", "delivery_type"
-                )
-                .filter(business_area=area, household__is_removed=False)
-                .exclude(status__in=["Transaction Erroneous", "Not Distributed", "Force failed", "Manually Cancelled"])
-                .annotate(
-                    year=ExtractYear(Coalesce("delivery_date", "status_date")),
-                    month=ExtractMonth(Coalesce("delivery_date", "status_date")),
-                    programs=Coalesce(F("household__program__name"), Value("Unknown program")),
-                    sectors=Coalesce(F("household__program__sector"), Value("Unknown sector")),
-                    admin1=Coalesce(F("household__admin1__name"), Value("Unknown admin1")),
-                    fsp=Coalesce(F("service_provider__short_name"), Value("Unknown fsp")),
-                    delivery_types=F("delivery_type__name"),
-                )
-                .distinct()
-                .values(
-                    "currency",
-                    "year",
-                    "month",
-                    "status",
-                    "programs",
-                    "sectors",
-                    "admin1",
-                    "fsp",
-                    "delivery_types",
-                )
-                .annotate(
-                    total_usd=Sum(
-                        Coalesce("delivered_quantity_usd", "entitlement_quantity_usd", Value(0.0)),
-                        output_field=DecimalField(),
-                    ),
-                    total_quantity=Sum(
-                        Coalesce("delivered_quantity", "entitlement_quantity", Value(0.0)), output_field=DecimalField()
-                    ),
-                    total_payments=Count("id", distinct=True),
-                    individuals=Sum("household__size"),
-                    households=Count("household", distinct=True),
-                    children_counts=Sum("household__children_count"),
-                    pwd_counts=pwdSum,
-                )
-            )
-
-            combined_list = list(payments_aggregated) + list(payment_records_aggregated)
 
             summary = defaultdict(
                 lambda: {
@@ -178,7 +134,7 @@ class DashboardDataCache:
                     "pwd_counts": 0,
                 }
             )
-            for item in combined_list:
+            for item in list(payments_aggregated):
                 key = (
                     item["currency"],
                     item["year"],

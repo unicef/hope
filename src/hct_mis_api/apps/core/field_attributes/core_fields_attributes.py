@@ -363,8 +363,6 @@ CORE_FIELDS_ATTRIBUTES = [
             Scope.TARGETING,
             Scope.KOBO_IMPORT,
             Scope.HOUSEHOLD_UPDATE,
-            Scope.XLSX_PEOPLE,
-            Scope.PEOPLE_UPDATE,
         ],
     },
     {

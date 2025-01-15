@@ -31,6 +31,7 @@ import { StatusBox } from '@core/StatusBox';
 import { ClickableTableRow } from '@core/Table/ClickableTableRow';
 import { getGrievanceDetailsPath } from '../../grievances/utils/createGrievanceUtils';
 import { Bold } from '@components/core/Bold';
+import { useProgramContext } from 'src/programContext';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -62,6 +63,8 @@ export function LinkedGrievancesModal({
   const [dialogOpen, setDialogOpen] = useState(false);
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const { data: grievances } = useAllGrievanceTicketQuery({
     variables: { businessArea, household: household.unicefId },
@@ -173,8 +176,7 @@ export function LinkedGrievancesModal({
           <Box mt={2} mb={6}>
             <Typography>
               <Bold>
-                Household ID
-                {household.unicefId}
+                {beneficiaryGroup?.groupLabel} ID {household.unicefId}
               </Bold>
               is linked to following Grievances.
             </Typography>

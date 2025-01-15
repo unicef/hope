@@ -182,6 +182,7 @@ class GrievanceDetailsPage(BaseComponents):
     statusContainer = 'div[data-cy="status-container"]'
     labelPriority = 'div[data-cy="label-Priority"]'
     labelUrgency = 'div[data-cy="label-Urgency"]'
+    labelTicketId = '[data-cy="label-Ticket Id"]'
 
     def getLabelGender(self) -> WebElement:
         return self.wait_for(self.labelGender)
@@ -206,6 +207,9 @@ class GrievanceDetailsPage(BaseComponents):
 
     def getTitle(self) -> WebElement:
         return self.wait_for(self.title)
+
+    def getGrievanceLinedTicket(self) -> WebElement:
+        return self.wait_for(self.labelTicketId)
 
     def getButtonCloseTicket(self) -> WebElement:
         # Workaround because elements overlapped even though Selenium saw that they were available:

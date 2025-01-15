@@ -12,7 +12,7 @@ from django.utils.safestring import mark_safe
 
 from admin_extra_buttons.decorators import button
 from admin_extra_buttons.mixins import confirm_action
-from adminfilters.autocomplete import AutoCompleteFilter, LinkedAutoCompleteFilter
+from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.depot.widget import DepotManager
 from adminfilters.filters import ChoicesFieldComboFilter, ValueFilter
 from adminfilters.querystring import QueryStringFilter
@@ -20,7 +20,6 @@ from advanced_filters.admin import AdminAdvancedFiltersMixin
 from smart_admin.mixins import LinkedObjectsMixin
 
 from hct_mis_api.apps.payment.models import (
-    CashPlan,
     DeliveryMechanism,
     DeliveryMechanismData,
     DeliveryMechanismPerPaymentPlan,
@@ -31,10 +30,8 @@ from hct_mis_api.apps.payment.models import (
     PaymentHouseholdSnapshot,
     PaymentPlan,
     PaymentPlanSupportingDocument,
-    PaymentRecord,
     PaymentVerification,
     PaymentVerificationPlan,
-    ServiceProvider,
 )
 from hct_mis_api.apps.payment.services.verification_plan_status_change_services import (
     VerificationPlanStatusChangeServices,
@@ -48,49 +45,6 @@ if TYPE_CHECKING:
     from django.forms import Form
 
 
-@admin.register(PaymentRecord)
-class PaymentRecordAdmin(AdminAdvancedFiltersMixin, LinkedObjectsMixin, HOPEModelAdminBase):
-    list_display = (
-        "unicef_id",
-        "household",
-        "status",
-        "cash_plan_name",
-        "target_population",
-        "business_area",
-    )
-    list_filter = (
-        DepotManager,
-        QueryStringFilter,
-        ("status", ChoicesFieldComboFilter),
-        ("business_area", LinkedAutoCompleteFilter.factory(parent=None)),
-        ("target_population", LinkedAutoCompleteFilter.factory(parent="business_area")),
-        ("parent", LinkedAutoCompleteFilter.factory(parent="business_area")),
-        ("service_provider", LinkedAutoCompleteFilter.factory(parent="business_area")),
-    )
-    advanced_filter_fields = (
-        "status",
-        "delivery_date",
-        ("service_provider__name", "Service Provider"),
-        ("parent__name", "CashPlan"),
-        ("target_population__name", "TargetPopulation"),
-    )
-    date_hierarchy = "updated_at"
-    raw_id_fields = (
-        "business_area",
-        "parent",
-        "household",
-        "head_of_household",
-        "target_population",
-        "service_provider",
-    )
-
-    def cash_plan_name(self, obj: Any) -> str:
-        return obj.parent.name or ""
-
-    def get_queryset(self, request: HttpRequest) -> QuerySet:
-        return super().get_queryset(request).select_related("household", "parent", "target_population", "business_area")
-
-
 @admin.register(PaymentVerificationPlan)
 class PaymentVerificationPlanAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     list_display = ("payment_plan", "status", "verification_channel")
@@ -100,7 +54,7 @@ class PaymentVerificationPlanAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     )
     date_hierarchy = "updated_at"
     search_fields = ("payment_plan__name",)
-    raw_id_fields = ("payment_plan_content_type",)
+    raw_id_fields = ("payment_plan",)
 
     @button()
     def verifications(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
@@ -154,7 +108,7 @@ class PaymentVerificationAdmin(HOPEModelAdminBase):
         ("payment__household__unicef_id", ValueFilter),
     )
     date_hierarchy = "updated_at"
-    raw_id_fields = ("payment_verification_plan", "payment_content_type")
+    raw_id_fields = ("payment_verification_plan", "payment")
 
     def payment_plan_name(self, obj: PaymentVerification) -> str:  # pragma: no cover
         payment_plan = obj.payment_verification_plan.payment_plan
@@ -178,45 +132,17 @@ class PaymentVerificationAdmin(HOPEModelAdminBase):
         )
 
 
-@admin.register(ServiceProvider)
-class ServiceProviderAdmin(HOPEModelAdminBase):
-    list_display = ("full_name", "short_name", "country", "vision_id")
-    search_fields = ("full_name", "vision_id", "short_name")
-    list_filter = (("business_area", AutoCompleteFilter),)
-    autocomplete_fields = ("business_area",)
-
-
-@admin.register(CashPlan)
-class CashPlanAdmin(HOPEModelAdminBase):
-    list_display = ("name", "program", "delivery_type", "status", "verification_status", "ca_id")
-    list_filter = (
-        ("status", ChoicesFieldComboFilter),
-        ("business_area", AutoCompleteFilter),
-        ("delivery_type", ChoicesFieldComboFilter),
-        ("payment_verification_summary__status", ChoicesFieldComboFilter),
-        ("program__id", ValueFilter),
-        ("vision_id", ValueFilter),
-    )
-    raw_id_fields = ("business_area", "program", "service_provider")
-    search_fields = ("name",)
-
-    @button()
-    def payments(self, request: HttpRequest, pk: str) -> TemplateResponse:
-        context = self.get_common_context(request, pk, aeu_groups=[None], action="payments")
-
-        return TemplateResponse(request, "admin/cashplan/payments.html", context)
-
-
 @admin.register(PaymentPlan)
 class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
-    list_display = ("unicef_id", "program_cycle", "status", "target_population")
+    list_display = ("unicef_id", "name", "program_cycle", "status")
     list_filter = (
         ("status", ChoicesFieldComboFilter),
+        ("background_action_status", ChoicesFieldComboFilter),
+        ("build_status", ChoicesFieldComboFilter),
         ("business_area", AutoCompleteFilter),
         ("program_cycle__program__id", ValueFilter),
-        ("target_population", AutoCompleteFilter),
     )
-    raw_id_fields = ("business_area", "target_population", "created_by", "program_cycle")
+    raw_id_fields = ("business_area", "targeting_criteria", "created_by", "program_cycle")
     search_fields = ("id", "unicef_id")
 
     def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
@@ -279,7 +205,7 @@ class FinancialServiceProviderXlsxTemplateAdmin(HOPEModelAdminBase):
     )
     list_filter = (("created_by", AutoCompleteFilter),)
     search_fields = ("name",)
-    fields = ("name", "columns", "core_fields", "flex_fields")
+    fields = ("name", "columns", "core_fields", "flex_fields", "document_types")
 
     def total_selected_columns(self, obj: Any) -> str:
         return f"{len(obj.columns)} of {len(FinancialServiceProviderXlsxTemplate.COLUMNS_CHOICES)}"
@@ -419,8 +345,10 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
         "communication_channel",
     )
     search_fields = ("name",)
-    # filter_horizontal = ("delivery_mechanisms",)
-    filter_horizontal = ("allowed_business_areas",)
+    filter_horizontal = (
+        "allowed_business_areas",
+        "delivery_mechanisms",
+    )
     autocomplete_fields = ("created_by",)
     list_select_related = ("created_by",)
     fields = (

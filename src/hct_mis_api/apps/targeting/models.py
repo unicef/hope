@@ -28,6 +28,7 @@ from hct_mis_api.apps.household.models import (
     Individual,
     IndividualRoleInHousehold,
 )
+from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.steficon.models import Rule, RuleCommit
 from hct_mis_api.apps.targeting.choices import FlexFieldClassification
 from hct_mis_api.apps.targeting.services.targeting_service import (
@@ -49,8 +50,6 @@ from hct_mis_api.apps.utils.validators import (
 )
 
 if TYPE_CHECKING:
-    from uuid import UUID
-
     from django.db.models.query import QuerySet
 
 logger = logging.getLogger(__name__)
@@ -382,24 +381,22 @@ class TargetingCriteria(TimeStampedUUIDModel, TargetingCriteriaQueryingBase):
         default=False,
         help_text=_("Exclude households with individuals (members or collectors) on sanction list."),
     )
-    # TODO: deprecated and move 'TargetingCriteriaRule'
+    # TODO: deprecated already moved to 'TargetingCriteriaRule'
     household_ids = models.TextField(blank=True)
-    # TODO: deprecated and move 'TargetingCriteriaRule'
+    # TODO: deprecated already moved to 'TargetingCriteriaRule'
     individual_ids = models.TextField(blank=True)
 
     def get_rules(self) -> "QuerySet":
         return self.rules.all()
 
-    def get_excluded_household_ids(self) -> List["UUID"]:
-        return self.target_population.excluded_household_ids
+    def get_excluded_household_ids(self) -> List[str]:
+        hh_ids_list = []
+        hh_ids_list.extend(hh_id.strip() for hh_id in self.payment_plan.excluded_ids.split(",") if hh_id.strip())
+        return hh_ids_list
 
     def get_query(self) -> Q:
         query = super().get_query()
-        if (
-            self.target_population
-            and self.target_population.status != TargetPopulation.STATUS_OPEN
-            and self.target_population.program is not None
-        ):
+        if self.payment_plan.status != PaymentPlan.Status.TP_OPEN:
             query &= Q(size__gt=0)
 
         q_hh_ids = Q(unicef_id__in=self.household_ids.split(", "))
@@ -504,7 +501,9 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterB
     @property
     def is_social_worker_program(self) -> bool:
         try:
-            return self.targeting_criteria_rule.targeting_criteria.target_population.program.is_social_worker_program
+            return (
+                self.targeting_criteria_rule.targeting_criteria.payment_plan.program_cycle.program.is_social_worker_program
+            )
         except (
             AttributeError,
             TargetingCriteriaRuleFilter.targeting_criteria_rule.RelatedObjectDoesNotExist,
@@ -568,6 +567,9 @@ class TargetingCollectorRuleFilterBlock(
         related_name="collectors_filters_blocks",
     )
 
+    def get_collector_block_filters(self) -> "QuerySet":
+        return self.collector_block_filters.all()
+
 
 class TargetingCollectorBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterBase):
     """
@@ -596,7 +598,9 @@ class TargetingCollectorBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteriaF
     )
 
     def get_query(self) -> Q:
-        program = self.collector_block_filters.targeting_criteria_rule.targeting_criteria.target_population.program
+        program = (
+            self.collector_block_filters.targeting_criteria_rule.targeting_criteria.payment_plan.program_cycle.program
+        )
         argument = self.arguments[0] if len(self.arguments) else None
         if argument is None:
             return Q()

@@ -87,7 +87,7 @@ function prepareVariables(
   return {
     input: {
       households: values.households,
-      targetPopulation: values.targetPopulation,
+      paymentPlan: values.targetPopulation,
       registrationDataImport: values.registrationDataImport,
       samplingType:
         selectedSampleSizeType === 0
@@ -265,7 +265,7 @@ export const CreateCommunicationPage = (): ReactElement => {
   ): CreateAccountabilityCommunicationMessageMutationVariables => ({
     input: {
       households: values.households,
-      targetPopulation: values.targetPopulation,
+      paymentPlan: values.targetPopulation,
       registrationDataImport: values.registrationDataImport,
       samplingType:
         selectedSampleSizeType === 0
@@ -549,6 +549,15 @@ export const CreateCommunicationPage = (): ReactElement => {
                                     choices={[
                                       { value: 'FEMALE', name: t('Female') },
                                       { value: 'MALE', name: t('Male') },
+                                      { value: 'OTHER', name: t('Other') },
+                                      {
+                                        value: 'NOT_COLLECTED',
+                                        name: t('Not Collected'),
+                                      },
+                                      {
+                                        value: 'NOT_ANSWERED',
+                                        name: t('Not Answered'),
+                                      },
                                     ]}
                                     component={FormikSelectField}
                                   />

@@ -115,15 +115,21 @@ def create_registration_data_import_for_import_program_population(
     pull_pictures = registration_data_import_data.pop("pull_pictures", True)
     screen_beneficiary = registration_data_import_data.pop("screen_beneficiary", False)
     import_from_program_id = registration_data_import_data.pop("import_from_program_id", None)
+    households_to_exclude = Household.all_merge_status_objects.filter(
+        program=import_to_program_id,
+    ).values_list("unicef_id", flat=True)
     households = Household.objects.filter(
         program_id=import_from_program_id,
         withdrawn=False,
-    ).exclude(household_collection__households__program=import_to_program_id)
+    ).exclude(unicef_id__in=households_to_exclude)
+    individuals_to_exclude = Individual.all_merge_status_objects.filter(
+        program=import_to_program_id,
+    ).values_list("unicef_id", flat=True)
     individuals = Individual.objects.filter(
         program_id=import_from_program_id,
         withdrawn=False,
         duplicate=False,
-    ).exclude(individual_collection__individuals__program=import_to_program_id)
+    ).exclude(unicef_id__in=individuals_to_exclude)
     created_obj_hct = RegistrationDataImport(
         status=RegistrationDataImport.IMPORTING,
         imported_by=user,
@@ -237,10 +243,21 @@ class RegistrationProgramPopulationImportMutation(BaseValidator, PermissionMutat
     ) -> "RegistrationProgramPopulationImportMutation":
         import_to_program_id: str = decode_id_string_required(info.context.headers.get("Program"))
         program = Program.objects.get(id=import_to_program_id)
-        if program.status == Program.FINISHED:
-            raise ValidationError("In order to proceed this action, program status must not be finished")
-
         import_from_program_id = decode_id_string_required(registration_data_import_data["import_from_program_id"])
+        import_from_program = Program.objects.get(id=import_from_program_id)
+
+        if program.status == Program.FINISHED:
+            raise ValidationError("In order to proceed this action, program status must not be finished.")
+
+        if program.beneficiary_group != import_from_program.beneficiary_group:
+            raise ValidationError("Cannot import data from a program with a different Beneficiary Group.")
+
+        if (
+            program.data_collecting_type.code != import_from_program.data_collecting_type.code
+            and program.data_collecting_type not in import_from_program.data_collecting_type.compatible_types.all()
+        ):
+            raise ValidationError("Cannot import data from a program with not compatible data collecting type.")
+
         registration_data_import_data["import_from_program_id"] = import_from_program_id
         (
             created_obj_hct,

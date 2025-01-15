@@ -27,28 +27,18 @@ def payment_verification_chart_query(
     status_choices_mapping = dict(PaymentVerification.STATUS_CHOICES)
 
     params = Q()
-    params &= Q(Q(payment__delivery_date__year=year) | Q(payment_record__delivery_date__year=year))
-    params &= Q(
-        Q(payment__business_area__slug=business_area_slug) | Q(payment_record__business_area__slug=business_area_slug)
-    )
-    params &= Q(
-        Q(payment__household__collect_type=collect_type) | Q(payment_record__household__collect_type=collect_type)
-    )
+    params &= Q(payment__delivery_date__year=year)
+    params &= Q(payment__business_area__slug=business_area_slug)
+    params &= Q(payment__household__collect_type=collect_type)
 
     if program:
-        params &= Q(
-            Q(payment__parent__program_cycle__program__id=program) | Q(payment_record__parent__program__id=program)
-        )
+        params &= Q(payment__parent__program_cycle__program__id=program)
 
     if administrative_area:
         inner_params = Q()
         inner_params |= Q(
             Q(payment__household__admin_area__id=administrative_area)
             & Q(payment__household__admin_area__area_type__area_level=2)
-        )
-        inner_params |= Q(
-            Q(payment_record__household__admin_area__id=administrative_area)
-            & Q(payment_record__household__admin_area__area_type__area_level=2)
         )
         params &= inner_params
 
@@ -69,9 +59,7 @@ def payment_verification_chart_query(
         for (dataset_percentage_value, status) in zip(dataset_percentage, status_choices_mapping.values())
     ]
 
-    samples_count = payment_verifications.aggregate(payments_count=Count("payment") + Count("payment_record"))[
-        "payments_count"
-    ]
+    samples_count = payment_verifications.aggregate(payments_count=Count("payment"))["payments_count"]
     all_payment_records_for_created_verifications = (
         Payment.objects.filter(excluded=False, conflicted=False)
         .filter(
@@ -90,12 +78,7 @@ def payment_verification_chart_query(
     )
 
     households_number = (
-        Household.objects.filter(
-            Q(pk__in=payment_verifications.values("payment__household"))
-            | Q(pk__in=payment_verifications.values("payment_record__household"))
-        )
-        .distinct()
-        .count()
+        Household.objects.filter(Q(pk__in=payment_verifications.values("payment__household"))).distinct().count()
     )
 
     return {
@@ -117,20 +100,17 @@ def total_cash_transferred_by_administrative_area_table_query(
 
     return (
         Area.objects.filter(
-            Q(household__paymentrecord__id__in=payment_items_ids) | Q(household__payment__id__in=payment_items_ids),
+            household__payment__id__in=payment_items_ids,
             area_type__area_level=2,
         )
         .distinct()
         .annotate(
-            total_transferred_payment_records=Coalesce(
-                Sum("household__paymentrecord__delivered_quantity_usd", output_field=DecimalField()), Decimal(0.0)
-            ),
             total_transferred_payments=Coalesce(
                 Sum("household__payment__delivered_quantity_usd", output_field=DecimalField()), Decimal(0.0)
             ),
         )
         .annotate(
             num_households=Count("household", distinct=True),
-            total_transferred=F("total_transferred_payments") + F("total_transferred_payment_records"),
+            total_transferred=F("total_transferred_payments"),
         )
     )

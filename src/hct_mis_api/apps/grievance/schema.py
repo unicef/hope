@@ -680,7 +680,6 @@ class Query(graphene.ObjectType):
         all_options = list(fields) + list(
             FlexibleAttribute.objects.filter(
                 associated_with__in=[
-                    FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD,
                     FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL,
                 ]
             ).prefetch_related("choices")

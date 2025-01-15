@@ -3,17 +3,13 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../config/permissions';
 import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityLogTable';
-import {
-  TargetPopulationBuildStatus,
-  TargetPopulationQuery,
-  useTargetPopulationHouseholdsQuery,
-} from '@generated/graphql';
+import { PaymentPlanBuildStatus } from '@generated/graphql';
 import { PaperContainer } from './PaperContainer';
 import { ResultsForHouseholds } from './ResultsForHouseholds';
 import { TargetingHouseholds } from './TargetingHouseholds';
-import { useBaseUrl } from '@hooks/useBaseUrl';
 import { TargetPopulationPeopleTable } from '@containers/tables/targeting/TargetPopulationPeopleTable';
 import { ResultsForPeople } from '@components/targeting/ResultsForPeople';
+import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
 import { AddFilterTargetingCriteriaDisplay } from './TargetingCriteriaDisplay/AddFilterTargetingCriteriaDisplay';
 
@@ -23,7 +19,7 @@ const Label = styled.p`
 
 interface TargetPopulationCoreProps {
   id: string;
-  targetPopulation: TargetPopulationQuery['targetPopulation'];
+  targetPopulation;
   permissions: string[];
   screenBeneficiary: boolean;
   isStandardDctType: boolean;
@@ -39,22 +35,22 @@ export const TargetPopulationCore = ({
   isSocialDctType,
 }: TargetPopulationCoreProps): ReactElement => {
   const { t } = useTranslation();
-  const { businessArea } = useBaseUrl();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   if (!targetPopulation) return null;
 
   const ResultComponent = targetPopulation.program.isSocialWorkerProgram
     ? ResultsForPeople
     : ResultsForHouseholds;
+
   const recordsTable = targetPopulation.program.isSocialWorkerProgram ? (
     <TargetPopulationPeopleTable
       id={id}
-      query={useTargetPopulationHouseholdsQuery}
-      queryObjectName="targetPopulationHouseholds"
       canViewDetails={hasPermissions(
         PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
         permissions,
       )}
-      variables={{ businessArea }}
     />
   ) : (
     <TargetingHouseholds
@@ -67,7 +63,7 @@ export const TargetPopulationCore = ({
   );
 
   const recordInfo =
-    targetPopulation.buildStatus === TargetPopulationBuildStatus.Ok ? (
+    targetPopulation.buildStatus === PaymentPlanBuildStatus.Ok ? (
       recordsTable
     ) : (
       <PaperContainer>
@@ -75,8 +71,8 @@ export const TargetPopulationCore = ({
           {t('Target Population is building')}
         </Typography>
         <Label>
-          Target population is processing, the list of households will be
-          available when the process is finished
+          {`Target population is processing, the list of ${beneficiaryGroup?.groupLabelPlural} will be
+         available when the process is finished`}
         </Label>
       </PaperContainer>
     );
@@ -103,7 +99,7 @@ export const TargetPopulationCore = ({
             {isSocialDctType
               ? t('Excluded Target Population Entries')
               : t(
-                  'Excluded Target Population Entries (Households or Individuals)',
+                  `Excluded Target Population Entries (${beneficiaryGroup?.groupLabelPlural} or ${beneficiaryGroup?.memberLabelPlural})`,
                 )}
           </Typography>
           <Box mt={2}>

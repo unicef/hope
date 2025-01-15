@@ -8528,6 +8528,36 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'MALE'
+                    },
+                    {
+                        'labelEn': 'Not answered',
+                        'labels': [
+                            {
+                                'label': 'Not answered',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'NOT_ANSWERED'
+                    },
+                    {
+                        'labelEn': 'Not collected',
+                        'labels': [
+                            {
+                                'label': 'Not collected',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'NOT_COLLECTED'
+                    },
+                    {
+                        'labelEn': 'Other',
+                        'labels': [
+                            {
+                                'label': 'Other',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'OTHER'
                     }
                 ],
                 'hint': '',

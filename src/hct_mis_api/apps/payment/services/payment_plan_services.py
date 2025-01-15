@@ -9,6 +9,7 @@ from django.contrib.admin.options import get_content_type_for_model
 from django.db import transaction
 from django.db.models import OuterRef, Q, Sum
 from django.db.models.functions import Coalesce
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
 from constance import config
@@ -22,6 +23,8 @@ from hct_mis_api.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx,
     create_payment_plan_payment_list_xlsx_per_fsp,
     import_payment_plan_payment_list_per_fsp_from_xlsx,
+    payment_plan_full_rebuild,
+    payment_plan_rebuild_stats,
     prepare_follow_up_payment_plan_task,
     prepare_payment_plan_task,
     send_payment_notification_emails,
@@ -37,10 +40,17 @@ from hct_mis_api.apps.payment.models import (
 from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
 )
-from hct_mis_api.apps.program.models import ProgramCycle
-from hct_mis_api.apps.targeting.models import TargetPopulation
+from hct_mis_api.apps.program.models import Program, ProgramCycle
+from hct_mis_api.apps.targeting.models import (
+    TargetingCollectorRuleFilterBlock,
+    TargetingCriteria,
+    TargetingCriteriaRule,
+    TargetingIndividualRuleFilterBlock,
+)
+from hct_mis_api.apps.targeting.services.utils import from_input_to_targeting_criteria
+from hct_mis_api.apps.targeting.validators import TargetingCriteriaInputValidator
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from uuid import UUID
 
     from hct_mis_api.apps.account.models import User
@@ -57,6 +67,12 @@ class PaymentPlanService:
     @property
     def actions_map(self) -> Dict:
         return {
+            # old TP
+            PaymentPlan.Action.TP_LOCK.value: self.tp_lock,
+            PaymentPlan.Action.TP_UNLOCK.value: self.tp_unlock,
+            PaymentPlan.Action.TP_REBUILD.value: self.tp_rebuild,
+            PaymentPlan.Action.DRAFT.value: self.draft,
+            # PP
             PaymentPlan.Action.LOCK.value: self.lock,
             PaymentPlan.Action.LOCK_FSP.value: self.lock_fsp,
             PaymentPlan.Action.UNLOCK.value: self.unlock,
@@ -106,7 +122,7 @@ class PaymentPlanService:
         return payment_plan
 
     def validate_action(self) -> None:
-        actions = self.actions_map.keys()
+        actions = list(self.actions_map.keys())
         if self.action not in actions:
             raise GraphQLError(f"Not Implemented Action: {self.action}. List of possible actions: {actions}")
 
@@ -141,6 +157,56 @@ class PaymentPlanService:
             send_to_payment_gateway.delay(self.payment_plan.pk, self.user.pk)
         else:
             raise GraphQLError("Already sent to Payment Gateway")
+
+        return self.payment_plan
+
+    def tp_lock(self) -> PaymentPlan:
+        self.payment_plan.status_tp_lock()
+        self.payment_plan.save(update_fields=("status", "status_date"))
+
+        return self.payment_plan
+
+    def tp_unlock(self) -> PaymentPlan:
+        self.payment_plan.status_tp_open()
+
+        self.payment_plan.build_status_pending()
+        self.payment_plan.save(update_fields=("build_status", "built_at", "status", "status_date"))
+        transaction.on_commit(lambda: payment_plan_rebuild_stats.delay(str(self.payment_plan.id)))
+
+        return self.payment_plan
+
+    def tp_rebuild(self) -> PaymentPlan:
+        if self.payment_plan.status not in [PaymentPlan.Status.TP_OPEN, PaymentPlan.Status.TP_LOCKED]:
+            raise GraphQLError("Can only Rebuild Population for Locked or Open Population status")
+
+        self.payment_plan.build_status_pending()
+        self.payment_plan.save(update_fields=("build_status", "built_at"))
+        transaction.on_commit(lambda: payment_plan_full_rebuild.delay(str(self.payment_plan.id)))
+        return self.payment_plan
+
+    def draft(self) -> PaymentPlan:
+        self.payment_plan.status_draft()
+        self.payment_plan.save(update_fields=("status_date", "status"))
+        return self.payment_plan
+
+    def open(self, input_data: Dict) -> PaymentPlan:
+        self.payment_plan.status_open()
+        dispersion_end_date = input_data["dispersion_end_date"]
+        if not dispersion_end_date or dispersion_end_date <= timezone.now().date():
+            raise GraphQLError(f"Dispersion End Date [{dispersion_end_date}] cannot be a past date")
+
+        self.payment_plan.currency = input_data["currency"]
+        self.payment_plan.dispersion_start_date = input_data["dispersion_start_date"]
+        self.payment_plan.dispersion_end_date = dispersion_end_date
+
+        self.payment_plan.save(
+            update_fields=("status_date", "status", "currency", "dispersion_start_date", "dispersion_end_date")
+        )
+        self.payment_plan.program_cycle.set_active()
+
+        # add currency
+        Payment.objects.filter(parent=self.payment_plan).update(currency=self.payment_plan.currency)
+        self.payment_plan.update_money_fields()
 
         return self.payment_plan
 
@@ -313,8 +379,10 @@ class PaymentPlanService:
     @staticmethod
     def create_payments(payment_plan: PaymentPlan) -> None:
         payments_to_create = []
+        households = payment_plan.household_list
+
         households = (
-            payment_plan.target_population.households.annotate(
+            households.annotate(
                 collector=IndividualRoleInHousehold.objects.filter(household=OuterRef("pk"), role=ROLE_PRIMARY).values(
                     "individual"
                 )[:1]
@@ -322,9 +390,8 @@ class PaymentPlanService:
             .all()
             .values("pk", "collector", "unicef_id", "head_of_household")
         )
-
         for household in households:
-            collector_id = household["collector"]
+            collector_id = household.get("collector")
             if not collector_id:
                 msg = f"Couldn't find a primary collector in {household['unicef_id']}"
                 logging.exception(msg)
@@ -340,13 +407,12 @@ class PaymentPlanService:
                     household_id=household["pk"],
                     head_of_household_id=household["head_of_household"],
                     collector_id=collector_id,
-                    currency=payment_plan.currency,
                 )
             )
         try:
             Payment.objects.bulk_create(payments_to_create)
         except IntegrityError as e:
-            raise GraphQLError("Duplicated Households in provided Targeting") from e
+            raise GraphQLError("Duplicated Households in provided Targeting List") from e
         payment_plan.refresh_from_db()
         create_payment_plan_snapshot_data(payment_plan)
         PaymentPlanService.generate_signature(payment_plan)
@@ -359,56 +425,46 @@ class PaymentPlanService:
         Payment.objects.bulk_update(payments, ["signature_hash"])
 
     @staticmethod
-    def create(input_data: Dict, user: "User") -> PaymentPlan:
-        business_area_slug = input_data["business_area_slug"]
-        business_area = BusinessArea.objects.only("is_payment_plan_applicable").get(slug=business_area_slug)
-        if not business_area.is_payment_plan_applicable:
-            raise GraphQLError("PaymentPlan can not be created in provided Business Area")
+    def create_targeting_criteria(targeting_criteria_input: Dict, program: Program) -> TargetingCriteria:
+        TargetingCriteriaInputValidator.validate(targeting_criteria_input, program)
 
-        targeting_id = decode_id_string(input_data["targeting_id"])
-        try:
-            target_population = (
-                TargetPopulation.objects.select_related("program")
-                .only("program", "program__start_date", "program__end_date")
-                .get(id=targeting_id, status=TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE)
-            )
-        except TargetPopulation.DoesNotExist:
-            raise GraphQLError(
-                f"TargetPopulation id:{targeting_id} does not exist or is not in status 'Ready for Payment Module'"
-            )
-        if not target_population.program:
-            raise GraphQLError("TargetPopulation should have related Program defined")
+        targeting_criteria = from_input_to_targeting_criteria(targeting_criteria_input, program)
 
-        if not target_population.program_cycle:
-            raise GraphQLError("Target Population should have assigned Programme Cycle")
+        return targeting_criteria
 
-        program_cycle = target_population.program_cycle
-        if program_cycle.status not in (ProgramCycle.DRAFT, ProgramCycle.ACTIVE):
+    @staticmethod
+    def create(input_data: Dict, user: "User", business_area_slug: str) -> PaymentPlan:
+        business_area = BusinessArea.objects.get(slug=business_area_slug)
+        program_cycle_id = decode_id_string(input_data["program_cycle_id"])
+        program_cycle = get_object_or_404(ProgramCycle, pk=program_cycle_id)
+        program = program_cycle.program
+        if program_cycle.status == ProgramCycle.FINISHED:
             raise GraphQLError("Impossible to create Payment Plan for Programme Cycle within Finished status")
 
-        dispersion_end_date = input_data["dispersion_end_date"]
-        if not dispersion_end_date or dispersion_end_date <= timezone.now().date():
-            raise GraphQLError(f"Dispersion End Date [{dispersion_end_date}] cannot be a past date")
+        if program.status != Program.ACTIVE:
+            raise GraphQLError("Impossible to create Payment Plan for Programme within not Active status")
+
+        pp_name = input_data.get("name", "").strip()
+        if PaymentPlan.objects.filter(name=pp_name, program_cycle__program=program, is_removed=False).exists():
+            raise GraphQLError(f"Payment Plan with name: {pp_name} and program: {program.name} already exists.")
 
         with transaction.atomic():
+            targeting_criteria = PaymentPlanService.create_targeting_criteria(input_data["targeting_criteria"], program)
+
             payment_plan = PaymentPlan.objects.create(
                 business_area=business_area,
                 created_by=user,
-                target_population=target_population,
                 program_cycle=program_cycle,
-                name=target_population.name,
-                currency=input_data["currency"],
-                dispersion_start_date=input_data["dispersion_start_date"],
-                dispersion_end_date=dispersion_end_date,
+                targeting_criteria=targeting_criteria,
+                name=input_data["name"],
                 status_date=timezone.now(),
                 start_date=program_cycle.start_date,
                 end_date=program_cycle.end_date,
-                status=PaymentPlan.Status.PREPARING,
-            )
-            program_cycle.set_active()
-
-            TargetPopulation.objects.filter(id=payment_plan.target_population_id).update(
-                status=TargetPopulation.STATUS_ASSIGNED
+                status=PaymentPlan.Status.TP_OPEN,
+                build_status=PaymentPlan.BuildStatus.BUILD_STATUS_PENDING,
+                built_at=timezone.now(),
+                excluded_ids=input_data.get("excluded_ids", "").strip(),
+                exclusion_reason=input_data.get("exclusion_reason", "").strip(),
             )
 
             transaction.on_commit(lambda: prepare_payment_plan_task.delay(str(payment_plan.id)))
@@ -416,107 +472,132 @@ class PaymentPlanService:
         return payment_plan
 
     def update(self, input_data: Dict) -> PaymentPlan:
-        if self.payment_plan.status != PaymentPlan.Status.OPEN:
-            raise GraphQLError("Only Payment Plan in Open status can be edited")
+        program = self.payment_plan.program_cycle.program
+        should_update_money_stats = False
+        should_rebuild_list = False
+        vulnerability_filter = False
 
-        recreate_payments = False
-        recalculate_payments = False
+        name = input_data.get("name")
+        vulnerability_score_min = input_data.get("vulnerability_score_min")
+        vulnerability_score_max = input_data.get("vulnerability_score_max")
+        excluded_ids = input_data.get("excluded_ids")
+        exclusion_reason = input_data.get("exclusion_reason")
+        targeting_criteria_input = input_data.get("targeting_criteria")
+        dispersion_start_date = input_data.get("dispersion_start_date")
+        dispersion_end_date = input_data.get("dispersion_end_date")
+
+        if (
+            any([excluded_ids, exclusion_reason, targeting_criteria_input])
+            and not self.payment_plan.is_population_open()
+        ):
+            raise GraphQLError(f"Not Allow edit targeting criteria within status {self.payment_plan.status}")
+
+        if not self.payment_plan.is_population_locked() and (vulnerability_score_min or vulnerability_score_max):
+            raise GraphQLError(
+                "You can only set vulnerability_score_min and vulnerability_score_max on Locked Population status"
+            )
+
+        if any(
+            [dispersion_start_date, dispersion_end_date, input_data.get("currency")]
+        ) and self.payment_plan.status not in [PaymentPlan.Status.OPEN, PaymentPlan.Status.DRAFT]:
+            raise GraphQLError(f"Not Allow edit Payment Plan within status {self.payment_plan.status}")
+
+        if name:
+            if self.payment_plan.status != PaymentPlan.Status.TP_OPEN:
+                raise GraphQLError("Name can be changed only within Open status")
+            name = name.strip()
+
+            if (
+                PaymentPlan.objects.filter(name=name, program_cycle__program=program, is_removed=False)
+                .exclude(id=self.payment_plan.pk)
+                .exists()
+            ):
+                raise GraphQLError(f"Name '{name}' and program '{program.name}' already exists.")
+            self.payment_plan.name = name
 
         if self.payment_plan.is_follow_up:
             # can change only dispersion_start_date/dispersion_end_date for Follow Up Payment Plan
             # remove not editable fields
-            input_data.pop("targeting_id", None)
             input_data.pop("currency", None)
 
-        targeting_id = decode_id_string(input_data.get("targeting_id"))
-        if targeting_id and targeting_id != str(self.payment_plan.target_population.id):
-            try:
-                new_target_population = TargetPopulation.objects.get(
-                    id=targeting_id, status=TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
-                )
+        if program_cycle_id := input_data.get("program_cycle_id"):
+            program_cycle = get_object_or_404(ProgramCycle, pk=decode_id_string(program_cycle_id))
+            if program_cycle.status == ProgramCycle.FINISHED:
+                raise GraphQLError("Not possible to assign Finished Program Cycle")
+            self.payment_plan.program_cycle = program_cycle
 
-                if not new_target_population.program:
-                    raise GraphQLError("TargetPopulation should have related Program defined")
+        if vulnerability_score_min is not None:
+            vulnerability_filter = True
+            self.payment_plan.vulnerability_score_min = vulnerability_score_min
+        if vulnerability_score_max is not None:
+            vulnerability_filter = True
+            self.payment_plan.vulnerability_score_max = vulnerability_score_max
 
-                self.payment_plan.target_population.status = TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
-                self.payment_plan.target_population.save()
+        if targeting_criteria_input:
+            should_rebuild_list = True
+            TargetingCriteriaInputValidator.validate(targeting_criteria_input, program)
+            targeting_criteria = from_input_to_targeting_criteria(targeting_criteria_input, program)
+            if self.payment_plan.status == PaymentPlan.Status.TP_OPEN:
+                if self.payment_plan.targeting_criteria:
+                    self.payment_plan.targeting_criteria.delete()
+                self.payment_plan.targeting_criteria = targeting_criteria
+        if excluded_ids is not None:
+            should_rebuild_list = True
+            self.payment_plan.excluded_ids = excluded_ids
+        if exclusion_reason is not None:
+            should_rebuild_list = True
+            self.payment_plan.exclusion_reason = exclusion_reason
 
-                self.payment_plan.target_population = new_target_population
-                self.payment_plan.program_cycle = new_target_population.program_cycle
-                self.payment_plan.target_population.status = TargetPopulation.STATUS_ASSIGNED
-                self.payment_plan.target_population.save()
-                recreate_payments = True
-                recalculate_payments = True
+        if dispersion_start_date and dispersion_start_date != self.payment_plan.dispersion_start_date:
+            self.payment_plan.dispersion_start_date = dispersion_start_date
 
-            except TargetPopulation.DoesNotExist:
-                raise GraphQLError(f"TargetPopulation id:{targeting_id} does not exist or is not in status Ready")
+        if dispersion_end_date and dispersion_end_date != self.payment_plan.dispersion_end_date:
+            if dispersion_end_date <= timezone.now().date():
+                raise GraphQLError(f"Dispersion End Date [{dispersion_end_date}] cannot be a past date")
+            self.payment_plan.dispersion_end_date = dispersion_end_date
 
-        if (
-            input_data.get("dispersion_start_date")
-            and input_data["dispersion_start_date"] != self.payment_plan.dispersion_start_date
-        ):
-            self.payment_plan.dispersion_start_date = input_data["dispersion_start_date"]
-            recalculate_payments = True
-
-        if (
-            input_data.get("dispersion_end_date")
-            and input_data["dispersion_end_date"] != self.payment_plan.dispersion_end_date
-        ):
-            if input_data["dispersion_end_date"] <= timezone.now().date():
-                raise GraphQLError(f"Dispersion End Date [{input_data['dispersion_end_date']}] cannot be a past date")
-            self.payment_plan.dispersion_end_date = input_data["dispersion_end_date"]
-            recalculate_payments = True
-
-        if input_data.get("currency") and input_data["currency"] != self.payment_plan.currency:
-            self.payment_plan.currency = input_data["currency"]
-            recreate_payments = True
-            recalculate_payments = True
-
-        start_date = input_data.get("start_date")
-        start_date = start_date.date() if isinstance(start_date, (timezone.datetime, datetime.datetime)) else start_date
-        if start_date and start_date < self.payment_plan.target_population.program.start_date:
-            raise GraphQLError("Start date cannot be earlier than start date in the program")
-
-        end_date = input_data.get("end_date")
-        end_date = end_date.date() if isinstance(end_date, (timezone.datetime, datetime.datetime)) else end_date
-        if end_date and end_date > self.payment_plan.target_population.program.end_date:
-            raise GraphQLError("End date cannot be later that end date in the program")
+        new_currency = input_data.get("currency")
+        if new_currency and new_currency != self.payment_plan.currency:
+            self.payment_plan.currency = new_currency
+            should_update_money_stats = True
+            Payment.objects.filter(parent=self.payment_plan).update(currency=self.payment_plan.currency)
 
         self.payment_plan.save()
 
-        if recreate_payments:
-            self.payment_plan.payment_items.all().delete()
-            self.create_payments(self.payment_plan)
-
-        if recalculate_payments:
-            self.payment_plan.refresh_from_db()
-            self.payment_plan.update_population_count_fields()
-            self.payment_plan.update_money_fields()
-
+        # prevent race between commit transaction and using in task
+        transaction.on_commit(
+            lambda: PaymentPlanService.rebuild_payment_plan_population(
+                should_rebuild_list, should_update_money_stats, vulnerability_filter, self.payment_plan
+            )
+        )
         return self.payment_plan
 
     def delete(self) -> PaymentPlan:
-        if self.payment_plan.status != PaymentPlan.Status.OPEN:
-            raise GraphQLError("Only Payment Plan in Open status can be deleted")
+        if self.payment_plan.status not in [PaymentPlan.Status.OPEN, PaymentPlan.Status.TP_OPEN]:
+            raise GraphQLError("Deletion is only allowed when the status is 'Open'")
 
-        if not self.payment_plan.is_follow_up:
-            self.payment_plan.target_population.status = TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE
-            self.payment_plan.target_population.save()
+        if self.payment_plan.status == PaymentPlan.Status.OPEN:
+            if self.payment_plan.program_cycle.payment_plans.count() == 1:
+                # if it's the last Payment Plan in this Cycle need to update Cycle status
+                # move from Active to Draft Cycle need to delete all Payment Plans
+                self.payment_plan.program_cycle.set_draft()
 
-        if self.payment_plan.program_cycle.payment_plans.count() == 1:
-            # if it's the last Payment Plan in this Cycle need to update Cycle status
-            # move from Active to Draft Cycle need to delete all Payment Plans
-            self.payment_plan.program_cycle.set_draft()
+            # with new proces just update status and not remove Payments and PaymentPlan
+            self.payment_plan.status_draft()
 
-        self.payment_plan.payment_items.all().delete()
-        self.payment_plan.delete()
+        if self.payment_plan.status == PaymentPlan.Status.TP_OPEN:
+            self.payment_plan.payment_items.all().delete()
+            self.payment_plan.delete()
+
+        self.payment_plan.save()
+
         return self.payment_plan
 
     def export_xlsx(self, user_id: "UUID") -> PaymentPlan:
         self.payment_plan.background_action_status_xlsx_exporting()
         self.payment_plan.save()
 
-        create_payment_plan_payment_list_xlsx.delay(payment_plan_id=self.payment_plan.pk, user_id=user_id)
+        create_payment_plan_payment_list_xlsx.delay(payment_plan_id=str(self.payment_plan.pk), user_id=str(user_id))
         self.payment_plan.refresh_from_db(fields=["background_action_status"])
         return self.payment_plan
 
@@ -648,14 +729,16 @@ class PaymentPlanService:
             raise GraphQLError("Cannot create a follow-up for a payment plan with no unsuccessful payments")
 
         follow_up_pp = PaymentPlan.objects.create(
-            name=source_pp.name,
-            status=PaymentPlan.Status.PREPARING,
+            name=source_pp.name + " Follow Up",
+            status=PaymentPlan.Status.OPEN,
+            build_status=PaymentPlan.BuildStatus.BUILD_STATUS_OK,
+            built_at=timezone.now(),
             status_date=timezone.now(),
+            targeting_criteria=self.copy_target_criteria(source_pp.targeting_criteria),
             is_follow_up=True,
             source_payment_plan=source_pp,
             business_area=source_pp.business_area,
             created_by=user,
-            target_population=source_pp.target_population,
             program_cycle=source_pp.program_cycle,
             currency=source_pp.currency,
             dispersion_start_date=dispersion_start_date,
@@ -743,3 +826,72 @@ class PaymentPlanService:
                 payment_plan_splits_to_create[i].payments.add(*chunk)
 
         return self.payment_plan
+
+    def full_rebuild(self) -> None:
+        payment_plan: PaymentPlan = self.payment_plan
+        # remove all payment and recreate
+        payment_plan.payment_items(manager="all_objects").all().delete()
+
+        self.create_payments(payment_plan)
+
+        payment_plan.update_population_count_fields()
+
+    @staticmethod
+    def rebuild_payment_plan_population(
+        rebuild_list: bool, should_update_money_stats: bool, vulnerability_filter: bool, payment_plan: PaymentPlan
+    ) -> None:
+        rebuild_full_list = payment_plan.status in PaymentPlan.PRE_PAYMENT_PLAN_STATUSES and rebuild_list
+        payment_plan.build_status_pending()
+        payment_plan.save(update_fields=("build_status", "built_at"))
+
+        if rebuild_full_list:
+            payment_plan_full_rebuild.delay(str(payment_plan.id))
+
+        if should_update_money_stats:
+            payment_plan_rebuild_stats.delay(str(payment_plan.id))
+
+        if vulnerability_filter:
+            # just remove all with vulnerability_score filter
+            params = {}
+            if payment_plan.vulnerability_score_max is not None:
+                params["vulnerability_score__lte"] = payment_plan.vulnerability_score_max
+            if payment_plan.vulnerability_score_min is not None:
+                params["vulnerability_score__gte"] = payment_plan.vulnerability_score_min
+            payment_plan.payment_items(manager="all_objects").filter(**params).update(is_removed=False)
+            payment_plan.payment_items(manager="all_objects").exclude(**params).update(is_removed=True)
+            payment_plan_rebuild_stats.delay(str(payment_plan.id))
+
+    @staticmethod
+    def copy_target_criteria(targeting_criteria: TargetingCriteria) -> TargetingCriteria:
+        targeting_criteria_copy = TargetingCriteria()
+        targeting_criteria_copy.save()
+        for rule in targeting_criteria.rules.all():
+            rule_copy = TargetingCriteriaRule(
+                targeting_criteria=targeting_criteria_copy,
+                household_ids=rule.household_ids,
+                individual_ids=rule.individual_ids,
+            )
+            rule_copy.save()
+            for hh_filter in rule.filters.all():
+                hh_filter.pk = None
+                hh_filter.targeting_criteria_rule = rule_copy
+                hh_filter.save()
+            for ind_filter_block in rule.individuals_filters_blocks.all():
+                ind_filter_block_copy = TargetingIndividualRuleFilterBlock(
+                    targeting_criteria_rule=rule_copy, target_only_hoh=ind_filter_block.target_only_hoh
+                )
+                ind_filter_block_copy.save()
+                for ind_filter in ind_filter_block.individual_block_filters.all():
+                    ind_filter.pk = None
+                    ind_filter.individuals_filters_block = ind_filter_block_copy
+                    ind_filter.save()
+
+            for col_filter_block in rule.collectors_filters_blocks.all():
+                col_filter_block_copy = TargetingCollectorRuleFilterBlock(targeting_criteria_rule=rule_copy)
+                col_filter_block_copy.save()
+                for col_filter in col_filter_block.collector_block_filters.all():
+                    col_filter.pk = None
+                    col_filter.collector_block_filters = col_filter_block_copy
+                    col_filter.save()
+
+        return targeting_criteria_copy

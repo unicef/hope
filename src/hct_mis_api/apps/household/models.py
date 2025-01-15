@@ -75,11 +75,16 @@ RESIDENCE_STATUS_CHOICE = (
 # INDIVIDUALS
 MALE = "MALE"
 FEMALE = "FEMALE"
-UNKNOWN = "UNKNOWN"
+OTHER = "OTHER"
+NOT_COLLECTED = "NOT_COLLECTED"
+NOT_ANSWERED = "NOT_ANSWERED"
 
 SEX_CHOICE = (
     (MALE, _("Male")),
     (FEMALE, _("Female")),
+    (OTHER, _("Other")),
+    (NOT_COLLECTED, _("Not collected")),
+    (NOT_ANSWERED, _("Not answered")),
 )
 
 SINGLE = "SINGLE"
@@ -553,6 +558,13 @@ class Household(
     class Meta:
         verbose_name = "Household"
         permissions = (("can_withdrawn", "Can withdrawn Household"),)
+        constraints = [
+            UniqueConstraint(
+                fields=["unicef_id", "program"],
+                condition=Q(is_removed=False),
+                name="unique_hh_unicef_id_in_program",
+            )
+        ]
 
     def save(self, *args: Any, **kwargs: Any) -> None:
         from hct_mis_api.apps.targeting.models import (
@@ -675,6 +687,16 @@ class DocumentType(TimeStampedUUIDModel):
 
     def __str__(self) -> str:
         return f"{self.label}"
+
+    @classmethod
+    def get_all_doc_types_choices(cls) -> List[Tuple[str, str]]:
+        """return list of Document Types choices"""
+        return [(obj.key, obj.label) for obj in cls.objects.all()]
+
+    @classmethod
+    def get_all_doc_types(cls) -> List[str]:
+        """return list of Document Types keys"""
+        return list(cls.objects.all().only("key").values_list("key", flat=True))
 
 
 class Document(AbstractSyncable, SoftDeletableRepresentationMergeStatusModel, TimeStampedUUIDModel):
@@ -977,6 +999,20 @@ class Individual(
     )
     deduplication_golden_record_results = JSONField(default=dict, blank=True)
     deduplication_batch_results = JSONField(default=dict, blank=True)
+    biometric_deduplication_golden_record_status = models.CharField(
+        max_length=50,
+        default=NOT_PROCESSED,
+        choices=DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE,
+        db_index=True,
+    )
+    biometric_deduplication_batch_status = models.CharField(
+        max_length=50,
+        default=NOT_PROCESSED,
+        choices=DEDUPLICATION_BATCH_STATUS_CHOICE,
+        db_index=True,
+    )
+    biometric_deduplication_golden_record_results = JSONField(default=list, blank=True)
+    biometric_deduplication_batch_results = JSONField(default=list, blank=True)
     imported_individual_id = models.UUIDField(null=True, blank=True)
     sanction_list_possible_match = models.BooleanField(default=False, db_index=True)
     sanction_list_confirmed_match = models.BooleanField(default=False, db_index=True)
@@ -1154,6 +1190,13 @@ class Individual(
     class Meta:
         verbose_name = "Individual"
         indexes = (GinIndex(fields=["vector_column"]),)
+        constraints = [
+            UniqueConstraint(
+                fields=["unicef_id", "program"],
+                condition=Q(is_removed=False) & Q(duplicate=False),
+                name="unique_ind_unicef_id_in_program",
+            )
+        ]
 
     def recalculate_data(self, save: bool = True) -> Tuple[Any, List[str]]:
         update_fields = ["disability"]

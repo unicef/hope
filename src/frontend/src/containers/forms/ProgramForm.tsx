@@ -1,7 +1,7 @@
 import { Grid } from '@mui/material';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
-import { Field, Form } from 'formik';
-import { ReactElement } from 'react';
+import { Field, Form, useFormikContext } from 'formik';
+import { ReactElement, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   useDataCollectionTypeChoiceDataQuery,
@@ -10,25 +10,57 @@ import {
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
 import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
+import { useQuery } from '@tanstack/react-query';
+import { fetchBeneficiaryGroups } from '@api/programsApi';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 
 interface ProgramFormPropTypes {
   values;
+  programHasRdi?: boolean;
 }
 
-export const ProgramForm = ({ values }: ProgramFormPropTypes): ReactElement => {
+export const ProgramForm = ({
+  values,
+  programHasRdi,
+}: ProgramFormPropTypes): ReactElement => {
   const { t } = useTranslation();
   const { data } = useProgrammeChoiceDataQuery();
   const { data: dataCollectionTypeChoicesData } =
     useDataCollectionTypeChoiceDataQuery();
 
-  if (!data || !dataCollectionTypeChoicesData) return null;
+  const { data: beneficiaryGroupsData } = useQuery({
+    queryKey: ['beneficiaryGroups'],
+    queryFn: async () => fetchBeneficiaryGroups(),
+  });
+
+  const { setFieldValue } = useFormikContext();
 
   const filteredDataCollectionTypeChoicesData =
     dataCollectionTypeChoicesData?.dataCollectionTypeChoices.filter(
       (el) => el.name !== '',
     );
+
+  const mappedBeneficiaryGroupsData = useMemo(() => {
+    if (!beneficiaryGroupsData?.results) return [];
+    const filteredBeneficiaryGroups =
+      values.dataCollectingTypeCode === 'partial'
+        ? beneficiaryGroupsData.results.filter(
+            (el) => el.master_detail === false,
+          )
+        : beneficiaryGroupsData.results.filter(
+            (el) => el.master_detail === true,
+          );
+
+    return filteredBeneficiaryGroups.map((el) => ({
+      name: el.name,
+      value: el.id,
+    }));
+  }, [values.dataCollectingTypeCode, beneficiaryGroupsData]);
+
+  const isCopyProgramPage = location.pathname.includes('duplicate');
+  if (!data || !dataCollectionTypeChoicesData || !beneficiaryGroupsData)
+    return null;
 
   return (
     <Form>
@@ -76,6 +108,7 @@ export const ProgramForm = ({ values }: ProgramFormPropTypes): ReactElement => {
             disabled={!values.startDate}
             initialFocusedDate={values.startDate}
             fullWidth
+            required={values.editMode}
             decoratorEnd={<CalendarTodayRoundedIcon color="disabled" />}
             minDate={values.startDate}
             data-cy="input-end-date"
@@ -100,12 +133,27 @@ export const ProgramForm = ({ values }: ProgramFormPropTypes): ReactElement => {
             fullWidth
             variant="outlined"
             required
+            onChange={(e) => {
+              setFieldValue('beneficiaryGroup', '');
+              setFieldValue('dataCollectingTypeCode', e.target.value);
+            }}
             choices={filteredDataCollectionTypeChoicesData || []}
             component={FormikSelectField}
             data-cy="input-data-collecting-type"
           />
         </Grid>
-        <Grid item xs={6} />
+        <Grid item xs={6}>
+          <Field
+            name="beneficiaryGroup"
+            label={t('Beneficiary Group')}
+            fullWidth
+            variant="outlined"
+            choices={mappedBeneficiaryGroupsData}
+            component={FormikSelectField}
+            data-cy="input-beneficiary-group"
+            disabled={programHasRdi || isCopyProgramPage}
+          />
+        </Grid>
         <Grid item xs={12}>
           <Field
             name="description"
