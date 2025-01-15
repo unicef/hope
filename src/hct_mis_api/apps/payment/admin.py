@@ -134,14 +134,15 @@ class PaymentVerificationAdmin(HOPEModelAdminBase):
 
 @admin.register(PaymentPlan)
 class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
-    list_display = ("unicef_id", "program_cycle", "status", "target_population")
+    list_display = ("unicef_id", "name", "program_cycle", "status")
     list_filter = (
         ("status", ChoicesFieldComboFilter),
+        ("background_action_status", ChoicesFieldComboFilter),
+        ("build_status", ChoicesFieldComboFilter),
         ("business_area", AutoCompleteFilter),
         ("program_cycle__program__id", ValueFilter),
-        ("target_population", AutoCompleteFilter),
     )
-    raw_id_fields = ("business_area", "target_population", "created_by", "program_cycle")
+    raw_id_fields = ("business_area", "targeting_criteria", "created_by", "program_cycle")
     search_fields = ("id", "unicef_id")
 
     def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
@@ -344,8 +345,10 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
         "communication_channel",
     )
     search_fields = ("name",)
-    # filter_horizontal = ("delivery_mechanisms",)
-    filter_horizontal = ("allowed_business_areas",)
+    filter_horizontal = (
+        "allowed_business_areas",
+        "delivery_mechanisms",
+    )
     autocomplete_fields = ("created_by",)
     list_select_related = ("created_by",)
     fields = (

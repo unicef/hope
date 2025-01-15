@@ -50,7 +50,7 @@ class TargetingCriteriaQueryingBase:
     def get_rules(self) -> Any:
         return self.rules
 
-    def get_excluded_household_ids(self) -> Any:
+    def get_excluded_household_ids(self) -> List[Optional[str]]:
         return self._excluded_household_ids
 
     def get_criteria_string(self) -> str:
@@ -418,7 +418,7 @@ class TargetingCriteriaFilterBase:
             targeting_criteria_rule = (
                 getattr(self, "targeting_criteria_rule", None) or self.individuals_filters_block.targeting_criteria_rule
             )
-            program = targeting_criteria_rule.targeting_criteria.target_population.program
+            program = targeting_criteria_rule.targeting_criteria.payment_plan.program_cycle.program
             flex_field_attr = FlexibleAttribute.objects.filter(name=self.field_name, program=program).first()
             if not flex_field_attr:
                 logger.error(

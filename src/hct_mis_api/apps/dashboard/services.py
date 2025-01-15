@@ -88,7 +88,9 @@ class DashboardDataCache:
                     month=ExtractMonth(Coalesce("delivery_date", "entitlement_date", "status_date")),
                     programs=Coalesce(F("household__program__name"), Value("Unknown program")),
                     sectors=Coalesce(F("household__program__sector"), Value("Unknown sector")),
-                    admin1=Coalesce(F("household__admin1__name"), Value("Unknown admin1")),
+                    admin1=Coalesce(
+                        F("household__admin1__name"), F("household__admin_area__name"), Value("Unknown admin area")
+                    ),
                     fsp=Coalesce(F("financial_service_provider__name"), Value("Unknown fsp")),
                     delivery_types=F("delivery_type__name"),
                 )
@@ -113,7 +115,7 @@ class DashboardDataCache:
                         Coalesce("delivered_quantity", "entitlement_quantity", Value(0.0)), output_field=DecimalField()
                     ),
                     total_payments=Count("id", distinct=True),
-                    individuals=Sum("household__size"),
+                    individuals=Sum(Coalesce("household__size", Value(1))),
                     households=Count("household", distinct=True),
                     children_counts=Sum("household__children_count"),
                     pwd_counts=pwdSum,

@@ -24,9 +24,10 @@ export const PaymentPlanDetails = ({
 }: PaymentPlanDetailsProps): ReactElement => {
   const { t } = useTranslation();
   const {
+    id,
+    name,
     createdBy,
     program,
-    targetPopulation,
     currency,
     startDate,
     endDate,
@@ -59,10 +60,8 @@ export const PaymentPlanDetails = ({
               </Grid>
               <Grid item xs={3}>
                 <LabelizedField label={t('Target Population')}>
-                  <BlackLink
-                    to={`/${baseUrl}/target-population/${targetPopulation.id}`}
-                  >
-                    {targetPopulation.name}
+                  <BlackLink to={`/${baseUrl}/target-population/${id}`}>
+                    {name}
                   </BlackLink>
                 </LabelizedField>
               </Grid>
