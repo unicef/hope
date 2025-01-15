@@ -16,6 +16,7 @@ import { CreateFollowUpPaymentPlan } from '../../../CreateFollowUpPaymentPlan';
 import { usePaymentPlanAction } from '../../../../../hooks/usePaymentPlanAction';
 import {
   Action,
+  PaymentPlanBackgroundActionStatus,
   PaymentPlanQuery,
   useAllFinancialServiceProviderXlsxTemplatesQuery,
   useExportXlsxPpListPerFspMutation,
@@ -55,7 +56,11 @@ export function AcceptedPaymentPlanHeaderButtons({
     showMessage(t('Sending to Payment Gateway started')),
   );
 
-  const shouldDisableExportXlsx = loadingExport || !paymentPlan.canExportXlsx;
+  const shouldDisableExportXlsx =
+    loadingExport ||
+    !paymentPlan.canExportXlsx ||
+    paymentPlan.backgroundActionStatus ===
+      PaymentPlanBackgroundActionStatus.XlsxExporting;
 
   const shouldDisableDownloadXlsx = !paymentPlan.canDownloadXlsx;
 
