@@ -4,14 +4,14 @@ from collections import defaultdict
 from typing import Any, Dict, Optional
 
 from django.core.cache import cache
-from django.db.models import Count, DecimalField, F, Sum, Value
+from django.db.models import Count, DecimalField, F, Q, Sum, Value
 from django.db.models.functions import Coalesce, ExtractMonth, ExtractYear
 
 from rest_framework.utils.serializer_helpers import ReturnDict
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.dashboard.serializers import DashboardHouseholdSerializer
-from hct_mis_api.apps.payment.models import Payment
+from hct_mis_api.apps.payment.models import Payment, PaymentPlan
 
 CACHE_TIMEOUT = 60 * 60 * 24  # 24 hours
 
@@ -28,6 +28,10 @@ pwdSum = Sum(
     + Coalesce(F("household__male_age_group_60_disabled_count"), 0),
     default=0,
 )
+
+finished_payment_plans = Count("parent__id", filter=Q(parent__status=PaymentPlan.Status.FINISHED), distinct=True)
+
+total_payment_plans = Count("parent__id", distinct=True)
 
 
 class DashboardDataCache:
@@ -124,7 +128,10 @@ class DashboardDataCache:
                     individuals=Sum(Coalesce("household__size", Value(1))),
                     households=Count("household", distinct=True),
                     children_counts=Sum("household__children_count"),
+                    reconciled=Count("pk", distinct=False, filter=Q(payment_verifications__isnull=False)),
                     pwd_counts=pwdSum,
+                    finished_payment_plans=finished_payment_plans,
+                    total_payment_plans=total_payment_plans,
                 )
             )
 
@@ -138,6 +145,9 @@ class DashboardDataCache:
                     "individuals": 0,
                     "households": 0,
                     "pwd_counts": 0,
+                    "reconciled": 0,
+                    "finished_payment_plans": 0,
+                    "total_payment_plans": 0,
                 }
             )
             for item in list(payments_aggregated):
@@ -159,6 +169,9 @@ class DashboardDataCache:
                 summary[key]["households"] += item["households"] or 0
                 summary[key]["children_counts"] += item["children_counts"] or 0
                 summary[key]["pwd_counts"] += item["pwd_counts"] or 0
+                summary[key]["reconciled"] += item["reconciled"] or 0
+                summary[key]["finished_payment_plans"] += item["finished_payment_plans"]
+                summary[key]["total_payment_plans"] += item["total_payment_plans"]
 
             for (currency, year, month, program, sector, status, admin1, fsp, delivery_type), totals in summary.items():
                 result.append(
@@ -170,6 +183,9 @@ class DashboardDataCache:
                         "individuals": totals["individuals"],
                         "households": totals["households"],
                         "children_counts": totals["children_counts"],
+                        "reconciled": totals["reconciled"],
+                        "finished_payment_plans": totals["finished_payment_plans"],
+                        "total_payment_plans": totals["total_payment_plans"],
                         "month": calendar.month_name[month],
                         "year": year,
                         "program": program,
