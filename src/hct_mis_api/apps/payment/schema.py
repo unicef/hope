@@ -584,6 +584,9 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
     total_households_count_with_valid_phone_no = graphene.Int()
     can_create_xlsx_with_fsp_auth_code = graphene.Boolean()
     fsp_communication_channel = graphene.String()
+    can_export_xlsx = graphene.Boolean()
+    can_download_xlsx = graphene.Boolean()
+    can_send_xlsx_password = graphene.Boolean()
 
     class Meta:
         model = PaymentPlan
@@ -758,6 +761,24 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
             household__head_of_household__phone_no_valid=False,
             household__head_of_household__phone_no_alternative_valid=False,
         ).count()
+
+    @staticmethod
+    def can_export_xlsx(parent: PaymentPlan, info: Any) -> bool:
+        # FIXME
+        return True
+
+    @staticmethod
+    def can_download_xlsx(parent: PaymentPlan, info: Any) -> bool:
+        return True
+
+    @staticmethod
+    def can_send_xlsx_password(parent: PaymentPlan, info: Any) -> bool:
+        return True
+        # if not info.context.user.has_permission(
+        #         Permissions.PM_VIEW_FSP_AUTH_CODE.value,
+        #         parent.business_area,
+        #         parent.program_id,
+        # ):
 
 
 class PaymentVerificationNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
