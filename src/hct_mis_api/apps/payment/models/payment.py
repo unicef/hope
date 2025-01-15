@@ -731,6 +731,18 @@ class PaymentPlan(
         return has_fsp_with_api and all_sent_to_fsp
 
     @property
+    def fsp_communication_channel(self) -> str:
+        has_fsp_with_api = self.delivery_mechanisms.filter(
+            financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+            financial_service_provider__payment_gateway_id__isnull=False,
+        ).exists()
+        return (
+            FinancialServiceProvider.COMMUNICATION_CHANNEL_API
+            if has_fsp_with_api
+            else FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX
+        )
+
+    @property
     def bank_reconciliation_success(self) -> int:
         return self.payment_items.filter(status__in=Payment.ALLOW_CREATE_VERIFICATION).count()
 

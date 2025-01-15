@@ -28,12 +28,7 @@ from hct_mis_api.apps.household.fixtures import (
     IndividualRoleInHouseholdFactory,
     create_household,
 )
-from hct_mis_api.apps.household.models import (
-    MALE,
-    ROLE_PRIMARY,
-    Household,
-    Individual,
-)
+from hct_mis_api.apps.household.models import MALE, ROLE_PRIMARY, Household, Individual
 from hct_mis_api.apps.payment.models import (
     Approval,
     ApprovalProcess,

@@ -2662,6 +2662,7 @@ type PaymentPlanNode implements Node {
   program: ProgramNode
   totalHouseholdsCountWithValidPhoneNo: Int
   canCreateXlsxWithFspAuthCode: Boolean
+  fspCommunicationChannel: String
 }
 
 type PaymentPlanNodeConnection {
