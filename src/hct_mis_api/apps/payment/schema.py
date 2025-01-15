@@ -763,16 +763,16 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
         ).count()
 
     @staticmethod
-    def can_export_xlsx(parent: PaymentPlan, info: Any) -> bool:
+    def resolve_can_export_xlsx(parent: PaymentPlan, info: Any) -> bool:
         # FIXME
         return True
 
     @staticmethod
-    def can_download_xlsx(parent: PaymentPlan, info: Any) -> bool:
+    def resolve_can_download_xlsx(parent: PaymentPlan, info: Any) -> bool:
         return True
 
     @staticmethod
-    def can_send_xlsx_password(parent: PaymentPlan, info: Any) -> bool:
+    def resolve_can_send_xlsx_password(parent: PaymentPlan, info: Any) -> bool:
         return True
         # if not info.context.user.has_permission(
         #         Permissions.PM_VIEW_FSP_AUTH_CODE.value,
