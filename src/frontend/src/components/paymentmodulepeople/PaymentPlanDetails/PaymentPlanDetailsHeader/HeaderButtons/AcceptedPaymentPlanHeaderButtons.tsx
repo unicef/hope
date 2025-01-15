@@ -74,12 +74,26 @@ export function AcceptedPaymentPlanHeaderButtons({
     setSelectedTemplate(event.target.value);
   };
 
-  const handleExport = async () => {
+  const handleExportAPI = async () => {
     try {
       await mutateExport({
         variables: {
           paymentPlanId: paymentPlan.id,
           fspXlsxTemplateId: selectedTemplate,
+        },
+      });
+      showMessage(t('Exporting XLSX started'));
+      handleClose();
+    } catch (e) {
+      e.graphQLErrors.map((x) => showMessage(x.message));
+    }
+  };
+
+  const handleExport = async () => {
+    try {
+      await mutateExport({
+        variables: {
+          paymentPlanId: paymentPlan.id,
         },
       });
       showMessage(t('Exporting XLSX started'));
@@ -112,7 +126,11 @@ export function AcceptedPaymentPlanHeaderButtons({
               variant="contained"
               startIcon={<GetApp />}
               data-cy="button-export-xlsx"
-              onClick={handleClickOpen}
+              onClick={
+                paymentPlan.fspCommunicationChannel === 'API'
+                  ? handleClickOpen
+                  : handleExport
+              }
             >
               {t('Export Xlsx')}
             </LoadingButton>
@@ -147,7 +165,7 @@ export function AcceptedPaymentPlanHeaderButtons({
               {t('Cancel')}
             </Button>
             <Button
-              onClick={handleExport}
+              onClick={handleExportAPI}
               data-cy="export-button"
               color="primary"
               disabled={!selectedTemplate}

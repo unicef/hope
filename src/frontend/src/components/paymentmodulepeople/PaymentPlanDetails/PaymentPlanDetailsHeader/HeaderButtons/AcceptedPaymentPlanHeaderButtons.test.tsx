@@ -14,10 +14,7 @@ describe('components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/H
         mocks={fakeExportXlsxPpListPerFspMutation}
       >
         <AcceptedPaymentPlanHeaderButtons
-          canDownloadXlsx={false}
-          canExportXlsx={false}
           canSendToPaymentGateway={false}
-          canDownloadMtcn={false}
           canSplit={false}
           paymentPlan={fakeApolloPaymentPlan}
         />
