@@ -20,7 +20,7 @@ class MessageArgumentVerifier:
                 "not_allowed": ["full_list_arguments"],
             },
         },
-        "only_one_of_these": ["households", "target_population", "registration_data_import"],
+        "only_one_of_these": ["households", "payment_plan", "registration_data_import"],
     }
 
     def __init__(self, input_data: Dict) -> None:

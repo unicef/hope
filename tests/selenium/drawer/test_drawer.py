@@ -4,9 +4,9 @@ import pytest
 from dateutil.relativedelta import relativedelta
 
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
-from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
+from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
 from tests.selenium.page_object.programme_details.programme_details import (
     ProgrammeDetails,
 )
@@ -19,7 +19,7 @@ pytestmark = pytest.mark.django_db()
 
 @pytest.fixture
 def social_worker_program() -> Program:
-    yield get_program_with_dct_type_and_name("Worker Program", "WORK", DataCollectingType.Type.SOCIAL)
+    yield get_social_program_with_dct_type_and_name("Worker Program", "WORK", DataCollectingType.Type.SOCIAL)
 
 
 @pytest.fixture
@@ -43,10 +43,14 @@ def finished_program() -> Program:
 
 
 def get_program_with_dct_type_and_name(
-    name: str, programme_code: str, dct_type: str = DataCollectingType.Type.STANDARD, status: str = Program.ACTIVE
+    name: str,
+    programme_code: str,
+    dct_type: str = DataCollectingType.Type.STANDARD,
+    status: str = Program.ACTIVE,
+    beneficiary_group_name: str = "Main Menu",
 ) -> Program:
-    BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
     dct = DataCollectingTypeFactory(type=dct_type)
+    beneficiary_group = BeneficiaryGroup.objects.filter(name=beneficiary_group_name).first()
     program = ProgramFactory(
         name=name,
         programme_code=programme_code,
@@ -54,6 +58,24 @@ def get_program_with_dct_type_and_name(
         end_date=datetime.now() + relativedelta(months=1),
         data_collecting_type=dct,
         status=status,
+        beneficiary_group=beneficiary_group,
+    )
+    return program
+
+
+def get_social_program_with_dct_type_and_name(
+    name: str, programme_code: str, dct_type: str = DataCollectingType.Type.SOCIAL, status: str = Program.ACTIVE
+) -> Program:
+    dct = DataCollectingTypeFactory(type=dct_type)
+    beneficiary_group = BeneficiaryGroup.objects.filter(name="People").first()
+    program = ProgramFactory(
+        name=name,
+        programme_code=programme_code,
+        start_date=datetime.now() - relativedelta(months=1),
+        end_date=datetime.now() + relativedelta(months=1),
+        data_collecting_type=dct,
+        status=status,
+        beneficiary_group=beneficiary_group,
     )
     return program
 
@@ -95,7 +117,7 @@ class TestDrawer:
         expected_menu_items = [
             "Country Dashboard",
             "Registration Data Import",
-            "Programme Population",
+            "Main Menu",
             "Programme Details",
             "Targeting",
             "Payment Module",

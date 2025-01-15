@@ -9,4 +9,7 @@
 export enum SexEnum {
     MALE = 'MALE',
     FEMALE = 'FEMALE',
+    OTHER = 'OTHER',
+    NOT_COLLECTED = 'NOT_COLLECTED',
+    NOT_ANSWERED = 'NOT_ANSWERED',
 }

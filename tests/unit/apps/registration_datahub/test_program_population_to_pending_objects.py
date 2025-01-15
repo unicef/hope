@@ -147,6 +147,8 @@ class TestProgramPopulationToPendingObjects(APITestCase):
         cls.household, cls.individuals = create_household_and_individuals(
             household_data={
                 "registration_data_import": cls.rdi_other,
+                "first_registration_date": "2021-01-01",
+                "last_registration_date": "2021-01-01",
                 "program": cls.program_from,
                 "admin_area": AreaFactory(),
                 "admin1": AreaFactory(),
@@ -161,6 +163,8 @@ class TestProgramPopulationToPendingObjects(APITestCase):
             individuals_data=[
                 {
                     "registration_data_import": cls.rdi_other,
+                    "first_registration_date": "2021-01-01",
+                    "last_registration_date": "2021-01-01",
                     "given_name": "Test",
                     "full_name": "Test Testowski",
                     "middle_name": "",
@@ -455,32 +459,27 @@ class TestProgramPopulationToPendingObjects(APITestCase):
             pending_individual_role_in_household.individual,
             pending_individuals.exclude(relationship=HEAD).first(),
         )
-        for _ in range(10):
-            registration_data_import = RegistrationDataImportFactory(
-                business_area=self.afghanistan,
-                program=self.program_to,
-            )
-            import_program_population(
-                import_from_program_id=str(self.program_from.id),
-                import_to_program_id=str(self.program_to.id),
-                rdi=registration_data_import,
-            )
-            pending_household = Household.pending_objects.order_by("created_at").last()
-            pending_individual1 = Individual.pending_objects.order_by("-created_at")[0]
-            pending_individual2 = Individual.pending_objects.order_by("-created_at")[1]
-
-            self.assertIn(
-                pending_household.head_of_household,
-                [pending_individual1, pending_individual2],
-            )
-            self.assertEqual(
-                pending_individual1.household,
-                pending_household,
-            )
-            self.assertEqual(
-                pending_individual2.household,
-                pending_household,
-            )
+        registration_data_import = RegistrationDataImportFactory(
+            business_area=self.afghanistan,
+            program=self.program_to,
+        )
+        import_program_population(
+            import_from_program_id=str(self.program_from.id),
+            import_to_program_id=str(self.program_to.id),
+            rdi=registration_data_import,
+        )
+        pending_household_count = (
+            Household.pending_objects.filter(registration_data_import=registration_data_import)
+            .order_by("created_at")
+            .count()
+        )
+        pending_individual_count = (
+            Individual.pending_objects.filter(registration_data_import=registration_data_import)
+            .order_by("-created_at")
+            .count()
+        )
+        self.assertEqual(pending_household_count, 0)
+        self.assertEqual(pending_individual_count, 0)
 
     def test_not_import_excluded_objects(self) -> None:
         household_withdrawn, individuals = create_household_and_individuals(
@@ -519,10 +518,12 @@ class TestProgramPopulationToPendingObjects(APITestCase):
         household_already_in_program.household_collection = household_collection
         household_already_in_program.save()
         household_already_in_program_repr.household_collection = household_collection
+        household_already_in_program_repr.unicef_id = household_already_in_program.unicef_id
         household_already_in_program_repr.save()
         individuals_already_in_program[0].individual_collection = individual_collection
         individuals_already_in_program[0].save()
         individuals_already_in_program_repr[0].individual_collection = individual_collection
+        individuals_already_in_program_repr[0].unicef_id = individuals_already_in_program[0].unicef_id
         individuals_already_in_program_repr[0].save()
 
         self._object_count_before_after()

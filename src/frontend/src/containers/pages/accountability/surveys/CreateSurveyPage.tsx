@@ -69,7 +69,7 @@ function prepareVariables(
 ): AccountabilitySampleSizeQueryVariables {
   return {
     input: {
-      targetPopulation: values.targetPopulation,
+      paymentPlan: values.targetPopulation,
       program: values.program,
       samplingType: selectedSampleSizeType === 0 ? 'FULL_LIST' : 'RANDOM',
       fullListArguments:
@@ -294,7 +294,7 @@ export const CreateSurveyPage = (): ReactElement => {
       title: matchTitle(values),
       body: values.body,
       category: values.category,
-      targetPopulation: values.targetPopulation,
+      paymentPlan: values.targetPopulation,
       program: values.program,
       samplingType:
         selectedSampleSizeType === 0
@@ -575,6 +575,15 @@ export const CreateSurveyPage = (): ReactElement => {
                                   choices={[
                                     { value: 'FEMALE', name: t('Female') },
                                     { value: 'MALE', name: t('Male') },
+                                    { value: 'OTHER', name: t('Other') },
+                                    {
+                                      value: 'NOT_COLLECTED',
+                                      name: t('Not Collected'),
+                                    },
+                                    {
+                                      value: 'NOT_ANSWERED',
+                                      name: t('Not Answered'),
+                                    },
                                   ]}
                                   component={FormikSelectField}
                                 />

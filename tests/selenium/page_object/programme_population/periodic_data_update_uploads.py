@@ -5,7 +5,6 @@ from tests.selenium.page_object.base_components import BaseComponents
 
 class PeriodicDataUpdateUploads(BaseComponents):
     navProgramPopulation = 'a[data-cy="nav-Programme Population"]'
-    navHouseholdMembers = 'a[data-cy="nav-Household Members"]'
     navProgramDetails = 'a[data-cy="nav-Programme Details"]'
     pageHeaderContainer = 'div[data-cy="page-header-container"]'
     pageHeaderTitle = 'h5[data-cy="page-header-title"]'
@@ -35,9 +34,6 @@ class PeriodicDataUpdateUploads(BaseComponents):
 
     def getNavProgramPopulation(self) -> WebElement:
         return self.wait_for(self.navProgramPopulation)
-
-    def getNavHouseholdMembers(self) -> WebElement:
-        return self.wait_for(self.navHouseholdMembers)
 
     def getNavProgramDetails(self) -> WebElement:
         return self.wait_for(self.navProgramDetails)

@@ -65,6 +65,8 @@ export function HouseholdDetails({
     choicesData.residenceStatusChoices,
   );
   const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   return (
     <>
       <Container>
@@ -74,7 +76,7 @@ export function HouseholdDetails({
         <Overview>
           <Grid container spacing={3}>
             <Grid item xs={3}>
-              <LabelizedField label={t('Household Size')}>
+              <LabelizedField label={`${beneficiaryGroup?.groupLabel} Size`}>
                 {household?.size}
               </LabelizedField>
             </Grid>
@@ -84,7 +86,7 @@ export function HouseholdDetails({
               </LabelizedField>
             </Grid>
             <Grid item xs={6}>
-              <LabelizedField label={t('Head of Household')}>
+              <LabelizedField label={`Head of ${beneficiaryGroup?.groupLabel}`}>
                 <ContentLink
                   href={`/${baseUrl}/population/individuals/${household?.headOfHousehold?.id}`}
                 >
@@ -93,12 +95,16 @@ export function HouseholdDetails({
               </LabelizedField>
             </Grid>
             <Grid item xs={3}>
-              <LabelizedField label={t('FEMALE CHILD HEADED HOUSEHOLD')}>
+              <LabelizedField
+                label={t('FEMALE CHILD HEADED ' + beneficiaryGroup?.groupLabel)}
+              >
                 {household?.fchildHoh ? t('Yes') : t('No')}
               </LabelizedField>
             </Grid>
             <Grid item xs={3}>
-              <LabelizedField label={t('CHILD HEADED HOUSEHOLD')}>
+              <LabelizedField
+                label={t('CHILD HEADED ' + beneficiaryGroup?.groupLabel)}
+              >
                 {household?.childHoh ? t('Yes') : t('No')}
               </LabelizedField>
             </Grid>
@@ -171,9 +177,23 @@ export function HouseholdDetails({
               </LabelizedField>
             </Grid>
             <Grid item xs={3}>
-              <LabelizedField label={t('IS THIS A RETURNEE HOUSEHOLD?')}>
+              <LabelizedField
+                label={t(
+                  'IS THIS A RETURNEE ' + beneficiaryGroup?.groupLabel + '?',
+                )}
+              >
                 {household?.returnee ? t('Yes') : t('No')}
               </LabelizedField>
+            </Grid>
+            <Grid item xs={3}>
+              {household?.unicefId && (
+                <LinkedGrievancesModal
+                  household={household}
+                  baseUrl={baseUrl}
+                  businessArea={businessArea}
+                  grievancesChoices={grievancesChoices}
+                />
+              )}
             </Grid>
             <Grid item xs={3}>
               {household?.unicefId && (

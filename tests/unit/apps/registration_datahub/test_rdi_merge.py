@@ -441,17 +441,20 @@ class TestRdiMergeTask(TestCase):
         if False, another household representation exists, but it does not have collection,
         if None, household representation does not exist in another program
         """
+        program_2 = ProgramFactory(business_area=self.rdi.business_area)
         self.rdi.data_source = RegistrationDataImport.PROGRAM_POPULATION
         self.rdi.save()
         imported_household = HouseholdFactory(
             registration_data_import=self.rdi,
             unicef_id="HH-9",
             rdi_merge_status=MergeStatusModel.PENDING,
+            program=self.rdi.program,
         )
         self.set_imported_individuals(imported_household)
         individual_without_collection = IndividualFactory(
             unicef_id="IND-9",
             business_area=self.rdi.business_area,
+            program=program_2,
             household=None,
         )
         individual_without_collection.individual_collection = None
@@ -461,6 +464,7 @@ class TestRdiMergeTask(TestCase):
         IndividualFactory(
             unicef_id="IND-8",
             business_area=self.rdi.business_area,
+            program=program_2,
             individual_collection=individual_collection,
             household=None,
         )
@@ -470,6 +474,7 @@ class TestRdiMergeTask(TestCase):
             household = HouseholdFactory(
                 head_of_household=individual_without_collection,
                 business_area=self.rdi.business_area,
+                program=program_2,
                 unicef_id="HH-9",
             )
             household.household_collection = None
@@ -516,7 +521,7 @@ class TestRdiMergeTask(TestCase):
                 "family_name": "Collector",
                 "relationship": NON_BENEFICIARY,
                 "birth_date": "1962-02-02",  # age 39
-                "sex": "MALE",
+                "sex": "OTHER",
                 "registration_data_import": self.rdi,
                 "email": "xd@com",
             }

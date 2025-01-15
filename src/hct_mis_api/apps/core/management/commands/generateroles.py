@@ -74,11 +74,22 @@ class Command(BaseCommand):
                     Permissions.PAYMENT_VERIFICATION_INVALID,
                     Permissions.PAYMENT_VERIFICATION_DELETE,
                     Permissions.PAYMENT_VERIFICATION_VERIFY,
+                    Permissions.PAYMENT_VERIFICATION_EXPORT,
+                    Permissions.PAYMENT_VERIFICATION_IMPORT,
                     Permissions.PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS,
                     Permissions.REPORTING_EXPORT,
                     Permissions.USER_MANAGEMENT_VIEW_LIST,
                     Permissions.ACTIVITY_LOG_VIEW,
                     Permissions.ACTIVITY_LOG_DOWNLOAD,
+                    Permissions.PDU_VIEW_LIST_AND_DETAILS,
+                    Permissions.PDU_TEMPLATE_CREATE,
+                    Permissions.PDU_TEMPLATE_DOWNLOAD,
+                    Permissions.PDU_UPLOAD,
+                    Permissions.PM_PROGRAMME_CYCLE_CREATE,
+                    Permissions.PM_PROGRAMME_CYCLE_UPDATE,
+                    Permissions.PM_PROGRAMME_CYCLE_DELETE,
+                    Permissions.PM_PROGRAMME_CYCLE_VIEW_DETAILS,
+                    Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST,
                 ],
             },
             {
@@ -121,6 +132,8 @@ class Command(BaseCommand):
                     Permissions.USER_MANAGEMENT_VIEW_LIST,
                     Permissions.ACTIVITY_LOG_VIEW,
                     Permissions.ACTIVITY_LOG_DOWNLOAD,
+                    Permissions.PM_PROGRAMME_CYCLE_VIEW_DETAILS,
+                    Permissions.PM_PROGRAMME_CYCLE_VIEW_LIST,
                 ],
             },
             {
@@ -184,6 +197,12 @@ class Command(BaseCommand):
                     Permissions.GRIEVANCES_ADD_NOTE,
                     Permissions.GRIEVANCES_UPDATE_AS_CREATOR,
                     Permissions.GRIEVANCES_UPDATE_AS_OWNER,
+                    Permissions.GRIEVANCE_DOCUMENTS_UPLOAD,
+                    Permissions.GRIEVANCES_FEEDBACK_MESSAGE_VIEW_CREATE,
+                    Permissions.GRIEVANCES_FEEDBACK_VIEW_CREATE,
+                    Permissions.GRIEVANCES_FEEDBACK_VIEW_DETAILS,
+                    Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST,
+                    Permissions.GRIEVANCES_FEEDBACK_VIEW_UPDATE,
                 ],
             },
             {
@@ -273,9 +292,8 @@ class Command(BaseCommand):
             print("Old incompatible roles pairs were deleted.")
 
         roles_created = []
-        roles_updated = []
         for default_role in default_roles_matrix:
-            role, created = Role.objects.update_or_create(
+            role, created = Role.objects.get_or_create(
                 subsystem=Role.HOPE,
                 name=default_role["name"],
                 defaults={"permissions": [permission.value for permission in default_role["permissions"]]},
@@ -283,17 +301,11 @@ class Command(BaseCommand):
 
             if created:
                 roles_created.append(role.name)
-            else:
-                roles_updated.append(role.name)
 
         if roles_created:
             print(f"New roles were created: {', '.join(roles_created)}")
         else:
             print("No new roles were created.")
-        if roles_updated:
-            print(f"These roles were updated: {', '.join(roles_updated)}")
-        else:
-            print("No roles were updated")
 
         incompatible_roles_created = []
         for role_pair in default_incompatible_roles:

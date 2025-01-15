@@ -8,6 +8,8 @@ import {
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './RecipientsTableHeadCells';
 import { RecipientsTableRow } from './RecipientsTableRow';
+import { useProgramContext } from 'src/programContext';
+import { adjustHeadCells } from '@utils/utils';
 import { ReactElement } from 'react';
 
 interface RecipientsTableProps {
@@ -20,10 +22,25 @@ export function RecipientsTable({
   canViewDetails,
 }: RecipientsTableProps): ReactElement {
   const { t } = useTranslation();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const initialVariables: AllAccountabilityCommunicationMessageRecipientsQueryVariables =
     {
       messageId: id,
     };
+
+  const replacements = {
+    unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} ID`,
+    head_of_household__full_name: (_beneficiaryGroup) =>
+      `Head of ${_beneficiaryGroup?.groupLabel}`,
+    size: (_beneficiaryGroup) => `${_beneficiaryGroup?.groupLabel} Size`,
+  };
+
+  const adjustedHeadCells = adjustHeadCells(
+    headCells,
+    beneficiaryGroup,
+    replacements,
+  );
 
   return (
     <TableWrapper>
@@ -32,7 +49,7 @@ export function RecipientsTable({
         AllAccountabilityCommunicationMessageRecipientsQueryVariables
       >
         title={t('Recipients')}
-        headCells={headCells}
+        headCells={adjustedHeadCells}
         rowsPerPageOptions={[10, 15, 20]}
         query={useAllAccountabilityCommunicationMessageRecipientsQuery}
         queriedObjectName="allAccountabilityCommunicationMessageRecipients"

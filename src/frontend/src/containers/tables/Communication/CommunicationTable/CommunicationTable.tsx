@@ -30,14 +30,14 @@ export function CommunicationTable({
         max: dateToIsoString(filter.createdAtRangeMax, 'endOfDay'),
       }),
       program: programId,
-      targetPopulation: filter.targetPopulation,
+      paymentPlan: filter.targetPopulation,
       createdBy: filter.createdBy || '',
     };
   return (
     <TableWrapper>
       <UniversalTable<
-      CommunicationMessageNode,
-      AllAccountabilityCommunicationMessagesQueryVariables
+        CommunicationMessageNode,
+        AllAccountabilityCommunicationMessagesQueryVariables
       >
         title={t('Messages List')}
         headCells={headCells}

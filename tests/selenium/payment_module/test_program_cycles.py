@@ -6,10 +6,10 @@ from dateutil.relativedelta import relativedelta
 from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
-from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
+from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import Program, ProgramCycle
+from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
 from tests.selenium.page_object.payment_module.program_cycle import ProgramCyclePage
 from tests.selenium.page_object.payment_module.program_cycle_details import (
     ProgramCycleDetailsPage,
@@ -20,8 +20,8 @@ pytestmark = pytest.mark.django_db()
 
 @pytest.fixture
 def create_test_program() -> Program:
-    BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
     dct = DataCollectingTypeFactory(type=DataCollectingType.Type.STANDARD)
+    beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     yield ProgramFactory(
         name="Test Program",
         programme_code="1234",
@@ -32,6 +32,7 @@ def create_test_program() -> Program:
         cycle__title="Default Programme Cycle",
         cycle__start_date=(datetime.now() - relativedelta(days=25)).date(),
         cycle__end_date=(datetime.now() - relativedelta(days=20)).date(),
+        beneficiary_group=beneficiary_group,
     )
 
 

@@ -23,6 +23,7 @@ import {
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProgramContext } from 'src/programContext';
+import { replaceLabels } from '../utils/createGrievanceUtils';
 
 interface GrievancesDetailsProps {
   ticket: GrievanceTicketQuery['grievanceTicket'];
@@ -41,7 +42,9 @@ export function GrievancesDetails({
 }: GrievancesDetailsProps): ReactElement {
   const { t } = useTranslation();
   const { isAllPrograms } = useBaseUrl();
-  const { isSocialDctType } = useProgramContext();
+  const { selectedProgram, isSocialDctType } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const statusChoices: {
     [id: number]: string;
   } = choicesToDict(choicesData.grievanceTicketStatusChoices);
@@ -247,11 +250,13 @@ export function GrievancesDetails({
               },
               showIssueType && {
                 label: t('Issue Type'),
-                value: <span>{issueType}</span>,
+                value: (
+                  <span>{replaceLabels(issueType, beneficiaryGroup)}</span>
+                ),
                 size: 3,
               },
               !isAllPrograms && {
-                label: t('Household ID'),
+                label: `${beneficiaryGroup?.groupLabel} ID`,
                 value: (
                   <span>
                     {ticket.household?.id &&
@@ -275,7 +280,8 @@ export function GrievancesDetails({
                 label:
                   isAllPrograms || isSocialDctType
                     ? t('Target ID')
-                    : t('Individual ID'),
+                    : `${beneficiaryGroup?.memberLabel} ID`,
+
                 value:
                   isAllPrograms || isSocialDctType ? (
                     <div>{ticket?.targetId || '-'}</div>
