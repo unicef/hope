@@ -8,3 +8,4 @@ ELASTICSEARCH_DSL = {
     "default": {"hosts": ELASTICSEARCH_HOST, "timeout": 30},
 }
 ELASTICSEARCH_BASE_SETTINGS = {"number_of_shards": 1, "number_of_replicas": 0}
+ELASTICSEARCH_SYNONYMS_FILE = env("ELASTICSEARCH_SYNONYMS_FILE")
