@@ -90,23 +90,11 @@ export const PaymentPlanDetailsHeader = ({
     PERMISSIONS.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
     permissions,
   );
-  const canDownloadXlsx = hasPermissions(
-    PERMISSIONS.PM_DOWNLOAD_XLSX_FOR_FSP,
-    permissions,
-  );
-  const canExportXlsx = hasPermissions(
-    PERMISSIONS.PM_EXPORT_XLSX_FOR_FSP,
-    permissions,
-  );
   const canSplit =
     hasPermissions(PERMISSIONS.PM_SPLIT, permissions) && paymentPlan.canSplit;
   const canSendToPaymentGateway =
     hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) &&
     paymentPlan.canSendToPaymentGateway;
-  const canDownloadMtcn = hasPermissions(
-    PERMISSIONS.PM_DOWNLOAD_MTCN,
-    permissions,
-  );
 
   let buttons: ReactElement | null = null;
   switch (paymentPlan.status) {
@@ -178,12 +166,9 @@ export const PaymentPlanDetailsHeader = ({
     case 'ACCEPTED':
       buttons = (
         <AcceptedPaymentPlanHeaderButtons
-          canDownloadXlsx={canDownloadXlsx}
-          canExportXlsx={canExportXlsx}
+          canSendToPaymentGateway={canSendToPaymentGateway}
           canSplit={canSplit}
           paymentPlan={paymentPlan}
-          canSendToPaymentGateway={canSendToPaymentGateway}
-          canDownloadMtcn={canDownloadMtcn}
         />
       );
       break;

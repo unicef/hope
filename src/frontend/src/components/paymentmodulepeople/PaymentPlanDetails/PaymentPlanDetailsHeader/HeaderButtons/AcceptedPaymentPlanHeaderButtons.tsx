@@ -1,44 +1,36 @@
-import { ReactElement, useState } from 'react';
 import {
   Box,
+  Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  Button,
-  Select,
   MenuItem,
+  Select,
 } from '@mui/material';
-import LoadingButton from '@mui/lab/LoadingButton';
-import GetApp from '@mui/icons-material/GetApp';
+import { GetApp } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { LoadingButton } from '../../../../core/LoadingButton';
+import { CreateFollowUpPaymentPlan } from '../../../CreateFollowUpPaymentPlan';
+import { usePaymentPlanAction } from '../../../../../hooks/usePaymentPlanAction';
 import {
   Action,
-  PaymentPlanBackgroundActionStatus,
   PaymentPlanQuery,
   useAllFinancialServiceProviderXlsxTemplatesQuery,
   useExportXlsxPpListPerFspMutation,
-} from '@generated/graphql';
-import { LoadingComponent } from '@components/core/LoadingComponent';
-import { CreateFollowUpPaymentPlan } from '@components/paymentmodule/CreateFollowUpPaymentPlan';
+} from '../../../../../__generated__/graphql';
 import { SplitIntoPaymentLists } from '../SplitIntoPaymentLists';
-import { useTranslation } from 'react-i18next';
-import { usePaymentPlanAction } from '@hooks/usePaymentPlanAction';
-import { useSnackbar } from '@hooks/useSnackBar';
-import { useProgramContext } from 'src/programContext';
+import { ReactElement, useState } from 'react';
+import { LoadingComponent } from '@components/core/LoadingComponent';
 
 export interface AcceptedPaymentPlanHeaderButtonsProps {
-  canDownloadXlsx: boolean;
-  canDownloadMtcn: boolean;
-  canExportXlsx: boolean;
   canSendToPaymentGateway: boolean;
   canSplit: boolean;
   paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
 export function AcceptedPaymentPlanHeaderButtons({
-  canDownloadXlsx,
-  canDownloadMtcn,
-  canExportXlsx,
   canSendToPaymentGateway,
   canSplit,
   paymentPlan,
@@ -47,7 +39,6 @@ export function AcceptedPaymentPlanHeaderButtons({
   const [open, setOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState('');
   const { showMessage } = useSnackbar();
-  const { isActiveProgram } = useProgramContext();
   const { data, loading } = useAllFinancialServiceProviderXlsxTemplatesQuery();
   const { mutatePaymentPlanAction: sendXlsxPassword, loading: loadingSend } =
     usePaymentPlanAction(Action.SendXlsxPassword, paymentPlan.id, () =>
@@ -64,13 +55,9 @@ export function AcceptedPaymentPlanHeaderButtons({
     showMessage(t('Sending to Payment Gateway started')),
   );
 
-  const shouldDisableExportXlsx =
-    loadingExport ||
-    !paymentPlan.hasFspDeliveryMechanismXlsxTemplate ||
-    !canExportXlsx ||
-    paymentPlan?.backgroundActionStatus ===
-      PaymentPlanBackgroundActionStatus.XlsxExporting ||
-    !isActiveProgram;
+  const shouldDisableExportXlsx = loadingExport || !paymentPlan.canExportXlsx;
+
+  const shouldDisableDownloadXlsx = !paymentPlan.canDownloadXlsx;
 
   if (loading) return <LoadingComponent />;
   if (!data) return null;
@@ -120,7 +107,7 @@ export function AcceptedPaymentPlanHeaderButtons({
           <Box m={2}>
             <LoadingButton
               loading={loadingExport}
-              disabled={shouldDisableExportXlsx || !canDownloadMtcn}
+              disabled={shouldDisableExportXlsx}
               color="primary"
               variant="contained"
               startIcon={<GetApp />}
@@ -170,35 +157,37 @@ export function AcceptedPaymentPlanHeaderButtons({
           </DialogActions>
         </Dialog>
         {paymentPlan.hasPaymentListExportFile && (
-          <Box m={2}>
-            <Button
-              color="primary"
-              component="a"
-              variant="contained"
-              data-cy="button-download-xlsx"
-              download
-              href={`/api/download-payment-plan-payment-list/${paymentPlan.id}`}
-              disabled={
-                !paymentPlan.hasFspDeliveryMechanismXlsxTemplate ||
-                !canDownloadXlsx
-              }
-            >
-              {t('Download XLSX')}
-            </Button>
-          </Box>
+          <>
+            <Box m={2}>
+              <Button
+                color="primary"
+                component="a"
+                variant="contained"
+                data-cy="button-download-xlsx"
+                download
+                href={`/api/download-payment-plan-payment-list/${paymentPlan.id}`}
+                disabled={shouldDisableDownloadXlsx}
+              >
+                {t('Download XLSX')}
+              </Button>
+            </Box>
+            {paymentPlan.canSendXlsxPassword && (
+              <Box m={2}>
+                <LoadingButton
+                  loading={loadingSend}
+                  disabled={loadingSend}
+                  color="primary"
+                  variant="contained"
+                  data-cy="button-send-xlsx-password"
+                  onClick={() => sendXlsxPassword()}
+                >
+                  {t('Send Xlsx Password')}
+                </LoadingButton>
+              </Box>
+            )}
+          </>
         )}
-        <Box m={2}>
-          <LoadingButton
-            loading={loadingSend}
-            disabled={loadingSend}
-            color="primary"
-            variant="contained"
-            data-cy="button-send-xlsx-password"
-            onClick={() => sendXlsxPassword()}
-          >
-            {t('Send Xlsx Password')}
-          </LoadingButton>
-        </Box>
+
         {canSendToPaymentGateway && (
           <Box m={2}>
             <Button

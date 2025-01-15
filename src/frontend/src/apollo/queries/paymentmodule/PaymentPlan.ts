@@ -16,6 +16,10 @@ export const PAYMENT_PLAN_QUERY = gql`
       bankReconciliationSuccess
       bankReconciliationError
       exchangeRate
+      fspCommunicationChannel
+      canExportXlsx
+      canDownloadXlsx
+      canSendXlsxPassword
       programCycle {
         id
         title
