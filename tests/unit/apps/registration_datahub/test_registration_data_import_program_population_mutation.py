@@ -7,12 +7,14 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
 from hct_mis_api.apps.core.models import DataCollectingType
-from hct_mis_api.apps.household.fixtures import create_household_and_individuals, IndividualFactory
+from hct_mis_api.apps.household.fixtures import (
+    IndividualFactory,
+    create_household_and_individuals,
+)
 from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
 from hct_mis_api.apps.program.fixtures import BeneficiaryGroupFactory, ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.utils.models import MergeStatusModel
 
 
 class TestRegistrationDataProgramPopulationImportMutations(APITestCase):
@@ -289,7 +291,12 @@ class TestRegistrationDataProgramPopulationImportMutations(APITestCase):
         )
         # create external collector for household_5
         external_collector = IndividualFactory(program=self.import_from_program)
-        IndividualRoleInHousehold.objects.create(household=self.household_5, individual=external_collector, role=ROLE_PRIMARY, rdi_merge_status=MergeStatusModel.MERGED)
+        IndividualRoleInHousehold.objects.create(
+            household=self.household_5,
+            individual=external_collector,
+            role=ROLE_PRIMARY,
+            rdi_merge_status="MERGED",
+        )
 
         hh_ids = f"{self.household_3.unicef_id}, {self.household_4.unicef_id}, HH-000001"
         ind_ids = f"{self.individuals_1[0].unicef_id}, {self.individuals_2[0].unicef_id}, IND-111222"
@@ -339,7 +346,7 @@ class TestRegistrationDataProgramPopulationImportMutations(APITestCase):
         rdi = RegistrationDataImport.objects.filter(name="New Import of Data HH Ids with external collector").first()
         self.assertEqual(rdi.status, RegistrationDataImport.IMPORT_SCHEDULED)
         self.assertEqual(rdi.data_source, RegistrationDataImport.PROGRAM_POPULATION)
-        self.assertEqual(rdi.import_from_ids, hh_ids)
+        self.assertEqual(rdi.import_from_ids, self.household_5.unicef_id)
         self.assertEqual(rdi.program.data_collecting_type.type, DataCollectingType.Type.STANDARD)
         self.assertEqual(rdi.number_of_individuals, 3)  # 2 Inds and + one external collector
         self.assertEqual(rdi.number_of_households, 2)
