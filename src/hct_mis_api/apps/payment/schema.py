@@ -637,21 +637,25 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
         ).count()
 
     @staticmethod
-    def resolve_has_fsp_delivery_mechanism_xlsx_template(parent: PaymentPlan, info: Any) -> bool:
+    def _has_fsp_delivery_mechanism_xlsx_template(payment_plan: PaymentPlan):
         if (
-            not parent.delivery_mechanisms.exists()
-            or parent.delivery_mechanisms.filter(
+            not payment_plan.delivery_mechanisms.exists()
+            or payment_plan.delivery_mechanisms.filter(
                 Q(financial_service_provider__isnull=True) | Q(delivery_mechanism__isnull=True)
             ).exists()
         ):
             return False
         else:
-            for dm_per_payment_plan in parent.delivery_mechanisms.all():
+            for dm_per_payment_plan in payment_plan.delivery_mechanisms.all():
                 if not dm_per_payment_plan.financial_service_provider.get_xlsx_template(
                     dm_per_payment_plan.delivery_mechanism
                 ):
                     return False
             return True
+
+    @classmethod
+    def resolve_has_fsp_delivery_mechanism_xlsx_template(cls, parent: PaymentPlan, info: Any) -> bool:
+        return cls._has_fsp_delivery_mechanism_xlsx_template(parent)
 
     @staticmethod
     def resolve_total_withdrawn_households_count(parent: PaymentPlan, info: Any) -> int:
@@ -762,23 +766,46 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
             household__head_of_household__phone_no_alternative_valid=False,
         ).count()
 
-    @staticmethod
-    def resolve_can_export_xlsx(parent: PaymentPlan, info: Any) -> bool:
-        # FIXME
-        return True
+    @classmethod
+    def resolve_can_export_xlsx(cls, parent: PaymentPlan, info: Any) -> bool:
+        if parent.status in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]:
+            if parent.fsp_communication_channel == "API":
+                if not info.context.user.has_permission(Permissions.PM_DOWNLOAD_MTCN.value, parent.business_area):
+                    return False
+                return parent.can_create_xlsx_with_fsp_auth_code
+
+            if parent.fsp_communication_channel == "XLSX":
+                if not info.context.user.has_permission(Permissions.PM_EXPORT_XLSX_FOR_FSP.value, parent.business_area):
+                    return False
+                return cls._has_fsp_delivery_mechanism_xlsx_template(parent)
+
+        return False
 
     @staticmethod
     def resolve_can_download_xlsx(parent: PaymentPlan, info: Any) -> bool:
-        return True
+        if parent.status in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]:
+            if parent.fsp_communication_channel == "API":
+                if not info.context.user.has_permission(Permissions.PM_DOWNLOAD_MTCN.value, parent.business_area):
+                    return False
+                return parent.has_export_file
+
+            if parent.fsp_communication_channel == "XLSX":
+                if not info.context.user.has_permission(
+                    Permissions.PM_DOWNLOAD_XLSX_FOR_FSP.value, parent.business_area
+                ):
+                    return False
+                return parent.has_export_file
+
+        return False
 
     @staticmethod
     def resolve_can_send_xlsx_password(parent: PaymentPlan, info: Any) -> bool:
-        return True
-        # if not info.context.user.has_permission(
-        #         Permissions.PM_VIEW_FSP_AUTH_CODE.value,
-        #         parent.business_area,
-        #         parent.program_id,
-        # ):
+        if parent.status in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]:
+            if parent.fsp_communication_channel == "API":
+                if not info.context.user.has_permission(Permissions.PM_SEND_XLSX_PASSWORD.value, parent.business_area):
+                    return False
+                return parent.has_export_file
+        return False
 
 
 class PaymentVerificationNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
