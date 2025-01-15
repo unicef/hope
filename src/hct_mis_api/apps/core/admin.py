@@ -1,7 +1,11 @@
 import csv
 import logging
 from io import StringIO
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union, Sequence
+
+from django.contrib.admin.widgets import FilteredSelectMultiple
+
+from hct_mis_api.apps.account import models as account_models
 
 from django import forms
 from django.contrib import admin, messages
@@ -22,7 +26,7 @@ from django.http import (
     HttpResponsePermanentRedirect,
     HttpResponseRedirect,
 )
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.template.defaultfilters import slugify
 from django.template.response import TemplateResponse
 from django.urls import reverse
@@ -42,7 +46,7 @@ from constance import config
 from jsoneditor.forms import JSONEditor
 from xlrd import XLRDError
 
-from hct_mis_api.apps.account.models import Role, User
+from hct_mis_api.apps.account.models import Role, User, Partner, RoleAssignment
 from hct_mis_api.apps.administration.widgets import JsonWidget
 from hct_mis_api.apps.core.celery_tasks import (
     upload_new_kobo_template_and_update_flex_fields_task,
@@ -264,6 +268,57 @@ class BusinessAreaAdmin(
             context["form"] = BusinessOfficeForm()
 
         return TemplateResponse(request, "core/admin/split_ba.html", context)
+
+    @button(label="Partners", permission="account.can_change_allowed_partners")
+    def allowed_partners(self, request: HttpRequest, pk: int) -> Union[TemplateResponse, HttpResponseRedirect]:
+        business_area = get_object_or_404(BusinessArea, pk=pk)
+
+        class AllowedPartnersForm(forms.Form):
+            partners = forms.ModelMultipleChoiceField(
+                queryset=Partner.objects.all(),
+                required=False,
+                widget=FilteredSelectMultiple("Partners", is_stacked=False)
+            )
+
+        if request.method == "POST":
+            form = AllowedPartnersForm(request.POST)
+            if form.is_valid():
+                selected_partners = form.cleaned_data["partners"]
+                # Get the current allowed partners for the business area
+                previous_allowed_partners = set(Partner.objects.filter(allowed_business_areas=business_area))
+
+                # Identify which partners were removed
+                removed_partners = previous_allowed_partners - set(selected_partners)
+                # Check if there are any removed partners with existing role assignments in this business area
+                for partner in removed_partners:
+                    if RoleAssignment.objects.filter(partner=partner, business_area=business_area).exists():
+                        self.message_user(
+                            request,
+                            f"You cannot remove {partner.name} because it has existing role assignments in this business area.",
+                            messages.ERROR,
+                        )
+                        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+                for partner in Partner.objects.all():
+                    if partner in selected_partners:
+                        partner.allowed_business_areas.add(business_area)
+                    else:
+                        partner.allowed_business_areas.remove(business_area)
+                messages.success(request, "Allowed partners successfully updated.")
+                return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+        else:
+            form = AllowedPartnersForm(initial={
+                "partners": Partner.objects.filter(allowed_business_areas=business_area)
+            })
+
+        context = self.get_common_context(request, pk)
+        context.update({
+            "business_area": business_area,
+            "form": form,
+        })
+
+        return TemplateResponse(request, "core/admin/allowed_partners.html", context)
 
     def _get_doap_matrix(self, obj: Any) -> List[Any]:
         matrix = []

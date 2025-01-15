@@ -11,7 +11,7 @@ from django.utils import timezone
 from hct_mis_api.api.caches import get_or_create_cache_key
 from hct_mis_api.apps.account.caches import get_user_permissions_version_key
 from hct_mis_api.apps.account.models import Partner, Role, RoleAssignment, User
-from hct_mis_api.apps.core.models import BusinessArea, BusinessAreaPartnerThrough
+from hct_mis_api.apps.core.models import BusinessArea
 
 
 @receiver(post_save, sender=RoleAssignment)
@@ -43,7 +43,7 @@ def post_save_user(sender: Any, instance: User, created: bool, *args: Any, **kwa
 def allowed_business_areas_changed(sender: Any, instance: Partner, action: str, pk_set: set, **kwargs: Any) -> None:
     if action == "post_remove":
         removed_business_areas_ids = pk_set
-        BusinessAreaPartnerThrough.objects.filter(
+        RoleAssignment.objects.filter(
             partner=instance, business_area_id__in=removed_business_areas_ids
         ).delete()
 
@@ -52,7 +52,7 @@ def allowed_business_areas_changed(sender: Any, instance: Partner, action: str, 
 
     elif action == "post_clear":
         removed_business_areas = getattr(instance, "_removed_business_areas", [])
-        BusinessAreaPartnerThrough.objects.filter(partner=instance, business_area__in=removed_business_areas).delete()
+        RoleAssignment.objects.filter(partner=instance, business_area__in=removed_business_areas).delete()
 
 
 # Signals for permissions caches invalidation

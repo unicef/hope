@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from uuid import UUID
 
 from django import forms
+from django.apps import apps
 from django.conf import settings
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.auth.models import AbstractUser, Group, Permission
@@ -59,18 +60,16 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
         verbose_name=_("Parent"),
     )
     is_un = models.BooleanField(verbose_name="U.N.", default=False)
-    """
-        permissions structure
-        {
-            "business_area_id": {
-                "roles": ["role_id_1", "role_id_2"],
-                "programs": {"program_id":["admin_id"]}
-            }
-        }
-    """
 
     def __str__(self) -> str:
         return f"{self.name} [Sub-Partner of {self.parent.name}]" if self.parent else self.name
+
+    def save(self, *args, **kwargs):
+        # Partner cannot be a parent if it has RoleAssignments
+        if self.parent:
+            if RoleAssignment.objects.filter(partner=self.parent).exists():
+                raise ValidationError(f"{self.parent} cannot become a parent as it has RoleAssignments.")
+        super().save(*args, **kwargs)
 
     @property
     def is_child(self) -> bool:
@@ -318,6 +317,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             ("restrict_help_desk", "Limit fields to be editable for help desk"),
             ("can_reindex_programs", "Can reindex programs"),
             ("can_add_business_area_to_partner", "Can add business area to partner"),
+            ("can_change_allowed_partners", "Can change allowed partners"),
         )
 
 
@@ -394,10 +394,13 @@ class RoleAssignment(NaturalKeyModel, TimeStampedUUIDModel):
         # Ensure partner can only be assigned roles that have flag is_available_for_partner as True
         if self.partner and self.role and not self.role.is_available_for_partner:
             errors.append("Partner can only be assigned roles that are available for partners.")
-        # Validate that business_area is within the partner's allowed_business_areas
         if self.partner:
+            # Validate that business_area is within the partner's allowed_business_areas
             if self.business_area not in self.partner.allowed_business_areas.all():
                 errors.append(f"{self.business_area} is not within the allowed business areas for {self.partner}.")
+            # Only partners that are not parents can have role assignments
+            if self.partner.is_parent:
+                errors.append(f"{self.partner} is a parent partner and cannot have role assignments.")
 
         if errors:
             raise ValidationError(errors)
@@ -421,6 +424,15 @@ class AdminAreaLimitedTo(TimeStampedUUIDModel):
     program = models.ForeignKey("program.Program", related_name="admin_area_limits", on_delete=models.CASCADE)
     areas = models.ManyToManyField("geo.Area", related_name="admin_area_limits", blank=True)
 
+    def clean(self) -> None:
+        if self.program.partner_access != self.program.SELECTED_PARTNERS_ACCESS:
+            raise ValidationError(
+                f"Area limits cannot be set for programs with {self.program.partner_access} access."
+            )
+
+    def save(self, *args: Any, **kwargs: Any) -> None:
+        self.clean()
+        super().save(*args, **kwargs)
 
 class UserGroup(NaturalKeyModel, models.Model):
     business_area = models.ForeignKey("core.BusinessArea", related_name="user_groups", on_delete=models.CASCADE)
