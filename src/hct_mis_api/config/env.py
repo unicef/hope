@@ -49,6 +49,7 @@ DEFAULTS = {
     "SANCTION_LIST_CC_MAIL": (str, "dfam-cashassistance@unicef.org"),
     "ELASTICSEARCH_HOST": (str, "http://elasticsearch:9200"),
     "ELASTICSEARCH_INDEX_PREFIX": (str, ""),
+    "ELASTICSEARCH_SYNONYMS_FILE": (str, "/app/data/synonyms.txt"),
     "RAPID_PRO_URL": (str, "https://rapidpro.io"),
     "DATAMART_USER": (str, ""),
     "DATAMART_URL": (str, "https://datamart-dev.unicef.io"),
