@@ -349,7 +349,7 @@ class TestRegistrationDataProgramPopulationImportMutations(APITestCase):
         self.assertEqual(rdi.import_from_ids, self.household_5.unicef_id)
         self.assertEqual(rdi.program.data_collecting_type.type, DataCollectingType.Type.STANDARD)
         self.assertEqual(rdi.number_of_individuals, 3)  # 2 Inds and + one external collector
-        self.assertEqual(rdi.number_of_households, 2)
+        self.assertEqual(rdi.number_of_households, 1)  # household_5
         self.assertEqual(rdi.program_id, self.import_to_program.id)
 
         # update program DCT
