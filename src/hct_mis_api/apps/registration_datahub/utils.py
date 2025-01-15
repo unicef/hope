@@ -8,7 +8,11 @@ from django.db.models import Q, QuerySet
 from django.shortcuts import get_object_or_404
 
 from hct_mis_api.apps.core.kobo.common import get_field_name
-from hct_mis_api.apps.household.models import Household, Individual, IndividualRoleInHousehold
+from hct_mis_api.apps.household.models import (
+    Household,
+    Individual,
+    IndividualRoleInHousehold,
+)
 from hct_mis_api.apps.program.models import Program
 
 
@@ -87,19 +91,17 @@ def get_rdi_program_population(
     # filter by rdi.import_from_ids HH or Ins ids based on Program.DCT
     list_of_ids = [item.strip() for item in import_from_ids.split(",")] if import_from_ids else []
     if list_of_ids:
-        # add Individuals that have any role in household
-        ind_ids_with_role = IndividualRoleInHousehold.objects.filter(household__unicef_id__in=list_of_ids).exclude(
-            Q(individual__withdrawn=True) | Q(individual__duplicate=True)
-        ).values_list("individual__unicef_id", flat=True)
-
-        list_of_ids += ind_ids_with_role
-
-        print("Ids list after add PP ==>> ", list_of_ids)
+        # add Individuals who can have any role in household
+        ind_ids_with_role = (
+            IndividualRoleInHousehold.objects.filter(household__unicef_id__in=list_of_ids)
+            .exclude(Q(individual__withdrawn=True) | Q(individual__duplicate=True))
+            .values_list("individual__unicef_id", flat=True)
+        )
 
         individual_ids_q = (
-            Q(unicef_id__in=list_of_ids)
+            Q(unicef_id__in=list_of_ids + ind_ids_with_role)
             if program.is_social_worker_program
-            else Q(household__unicef_id__in=list_of_ids)
+            else Q(Q(household__unicef_id__in=list_of_ids) | Q(unicef_id__in=ind_ids_with_role))
         )
         household_ids_q = (
             Q(unicef_id__in=list_of_ids)
