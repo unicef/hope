@@ -28,7 +28,12 @@ from hct_mis_api.apps.household.fixtures import (
     IndividualRoleInHouseholdFactory,
     create_household,
 )
-from hct_mis_api.apps.household.models import MALE, ROLE_PRIMARY, Household, Individual
+from hct_mis_api.apps.household.models import (
+    MALE,
+    ROLE_PRIMARY,
+    Household,
+    Individual,
+)
 from hct_mis_api.apps.payment.models import (
     Approval,
     ApprovalProcess,
@@ -45,6 +50,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentVerificationPlan,
     PaymentVerificationSummary,
 )
+from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.payment.utils import to_decimal
 from hct_mis_api.apps.program.fixtures import (
     BeneficiaryGroupFactory,
@@ -654,19 +660,6 @@ def generate_payment_plan() -> None:
         field_name="size",
         arguments=[1, 11],
     )
-    PaymentPlan.objects.update_or_create(
-        name="Test TP for PM (just click rebuild)",
-        targeting_criteria=tc2,
-        status=PaymentPlan.Status.TP_OPEN,
-        business_area=afghanistan,
-        currency="USD",
-        dispersion_start_date=now,
-        dispersion_end_date=now + timedelta(days=14),
-        status_date=now,
-        created_by=root,
-        program_cycle=program_cycle,
-    )
-
     delivery_mechanism_cash = DeliveryMechanism.objects.get(code="cash")
 
     fsp_1_pk = UUID("00000000-0000-0000-0000-f00000000001")
@@ -682,6 +675,7 @@ def generate_payment_plan() -> None:
         name="Test FSP API",
         communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
         vision_vendor_number=554433,
+        payment_gateway_id="test_pg_id",
     )[0]
     fsp_api.delivery_mechanisms.add(delivery_mechanism_cash)
 
@@ -726,8 +720,21 @@ def generate_payment_plan() -> None:
         status=Payment.STATUS_PENDING,
         program=program,
     )
-
     payment_plan.update_population_count_fields()
+    # add one more PP
+    pp2 = PaymentPlan.objects.update_or_create(
+        name="Test TP for PM (just click rebuild)",
+        targeting_criteria=tc2,
+        status=PaymentPlan.Status.TP_OPEN,
+        business_area=afghanistan,
+        currency="USD",
+        dispersion_start_date=now,
+        dispersion_end_date=now + timedelta(days=14),
+        status_date=now,
+        created_by=root,
+        program_cycle=program_cycle,
+    )[0]
+    PaymentPlanService(payment_plan=pp2).full_rebuild()
 
 
 def update_fsps() -> None:
