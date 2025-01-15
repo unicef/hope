@@ -3,8 +3,8 @@ services:
   backend:
     image: ${dev_backend_image}
     volumes:
-      - ../../tests/test-coverage:/code/test-coverage
-      - ./dev.sh:/code/dev.sh
+      - ../../tests/test-coverage:/app/test-coverage
+      - ./dev.sh:/app/dev.sh
     depends_on:
       - db
       - redis
