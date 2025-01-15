@@ -854,7 +854,7 @@ class ExportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
     @is_authenticated
     @transaction.atomic
     def mutate(
-        cls, root: Any, info: Any, payment_plan_id: str, fsp_xlsx_template_id: Optional[str], **kwargs: Any
+        cls, root: Any, info: Any, payment_plan_id: str, fsp_xlsx_template_id: Optional[str] = None, **kwargs: Any
     ) -> "ExportXLSXPaymentPlanPaymentListMutation":
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
         fsp_xlsx_template_id_str: Optional[str] = decode_id_string(fsp_xlsx_template_id)

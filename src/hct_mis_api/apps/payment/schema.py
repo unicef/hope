@@ -637,7 +637,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
         ).count()
 
     @staticmethod
-    def _has_fsp_delivery_mechanism_xlsx_template(payment_plan: PaymentPlan):
+    def _has_fsp_delivery_mechanism_xlsx_template(payment_plan: PaymentPlan) -> bool:
         if (
             not payment_plan.delivery_mechanisms.exists()
             or payment_plan.delivery_mechanisms.filter(
