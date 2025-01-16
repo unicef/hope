@@ -92,7 +92,7 @@ def get_rdi_program_population(
     list_of_ids = [item.strip() for item in import_from_ids.split(",")] if import_from_ids else []
     if list_of_ids:
         # add Individuals who can have any role in household
-        ind_ids_with_role = (
+        ind_ids_with_role = list(
             IndividualRoleInHousehold.objects.filter(household__unicef_id__in=list_of_ids)
             .exclude(Q(individual__withdrawn=True) | Q(individual__duplicate=True))
             .values_list("individual__unicef_id", flat=True)
