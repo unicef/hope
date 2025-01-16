@@ -51,7 +51,11 @@ class TestSplitPaymentPlan(APITestCase):
     @patch("hct_mis_api.apps.payment.models.PaymentPlanSplit.MAX_CHUNKS")
     def test_split_payment_plan_mutation(self, max_chunks_mock: Any) -> None:
         max_chunks_mock.__get__ = mock.Mock(return_value=10)
-        pp = PaymentPlanFactory(business_area=self.business_area, status=PaymentPlan.Status.ACCEPTED)
+        pp = PaymentPlanFactory(
+            business_area=self.business_area,
+            status=PaymentPlan.Status.ACCEPTED,
+            created_by=self.user,
+        )
 
         dm_cash = DeliveryMechanism.objects.get(code="cash")
 

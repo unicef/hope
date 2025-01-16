@@ -4,7 +4,7 @@ import pytest
 from dateutil.relativedelta import relativedelta
 
 from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
-from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
+from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
 from tests.selenium.page_object.programme_details.programme_details import (
@@ -49,7 +49,6 @@ def get_program_with_dct_type_and_name(
     status: str = Program.ACTIVE,
     beneficiary_group_name: str = "Main Menu",
 ) -> Program:
-    BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
     dct = DataCollectingTypeFactory(type=dct_type)
     beneficiary_group = BeneficiaryGroup.objects.filter(name=beneficiary_group_name).first()
     program = ProgramFactory(
@@ -67,7 +66,6 @@ def get_program_with_dct_type_and_name(
 def get_social_program_with_dct_type_and_name(
     name: str, programme_code: str, dct_type: str = DataCollectingType.Type.SOCIAL, status: str = Program.ACTIVE
 ) -> Program:
-    BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
     dct = DataCollectingTypeFactory(type=dct_type)
     beneficiary_group = BeneficiaryGroup.objects.filter(name="People").first()
     program = ProgramFactory(

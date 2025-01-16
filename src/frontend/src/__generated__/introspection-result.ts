@@ -56,7 +56,6 @@
       "SanctionListIndividualNode",
       "SteficonRuleNode",
       "SurveyNode",
-      "TargetPopulationNode",
       "TicketAddIndividualDetailsNode",
       "TicketComplaintDetailsNode",
       "TicketDeleteHouseholdDetailsNode",

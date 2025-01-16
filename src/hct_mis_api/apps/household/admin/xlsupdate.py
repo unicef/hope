@@ -3,6 +3,7 @@ from typing import Any, Dict, Optional
 from django import forms
 from django.contrib import admin, messages
 from django.db import transaction
+from django.db.models.query import QuerySet
 from django.forms import Form
 from django.http import HttpRequest, HttpResponseRedirect
 from django.template.response import TemplateResponse
@@ -32,11 +33,17 @@ class XlsxUpdateFileAdmin(HOPEModelAdminBase):
         "uploaded_by",
         "program",
     )
+    list_display = ("file", "business_area", "program", "rdi", "uploaded_by")
     list_filter = (
         ("business_area", AutoCompleteFilter),
-        ("uploaded_by", AutoCompleteFilter),
+        ("rdi", AutoCompleteFilter),
         ("program", AutoCompleteFilter),
+        ("uploaded_by", AutoCompleteFilter),
     )
+    search_fields = ("file",)
+
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
+        return super().get_queryset(request).select_related("business_area", "rdi", "program", "uploaded_by")
 
     def xlsx_update_stage2(self, request: HttpRequest, old_form: Form) -> TemplateResponse:
         xlsx_update_file = XlsxUpdateFile(

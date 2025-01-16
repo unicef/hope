@@ -19,11 +19,13 @@ from django.core.validators import (
     MaxValueValidator,
     MinLengthValidator,
     MinValueValidator,
+    ProhibitNullCharactersValidator,
 )
 from django.db import models
 from django.db.models import Count, JSONField, Q, QuerySet, Sum, UniqueConstraint
 from django.db.models.functions import Coalesce
 from django.utils import timezone
+from django.utils.text import Truncator
 from django.utils.translation import gettext_lazy as _
 
 from dateutil.relativedelta import relativedelta
@@ -49,13 +51,20 @@ from hct_mis_api.apps.core.field_attributes.fields_types import (
     Scope,
 )
 from hct_mis_api.apps.core.mixins import LimitBusinessAreaModelMixin
-from hct_mis_api.apps.core.models import FileTemp, FlexibleAttribute
+from hct_mis_api.apps.core.models import FileTemp, FlexibleAttribute, StorageFile
+from hct_mis_api.apps.core.utils import map_unicef_ids_to_households_unicef_ids
 from hct_mis_api.apps.geo.models import Area, Country
-from hct_mis_api.apps.household.models import FEMALE, MALE, DocumentType, Individual
+from hct_mis_api.apps.household.models import (
+    FEMALE,
+    MALE,
+    DocumentType,
+    Household,
+    Individual,
+)
 from hct_mis_api.apps.payment.fields import DynamicChoiceArrayField
 from hct_mis_api.apps.payment.managers import PaymentManager
 from hct_mis_api.apps.payment.validators import payment_token_and_order_number_validator
-from hct_mis_api.apps.steficon.models import RuleCommit
+from hct_mis_api.apps.steficon.models import Rule, RuleCommit
 from hct_mis_api.apps.utils.models import (
     AdminUrlMixin,
     ConcurrencyModel,
@@ -67,18 +76,20 @@ from hct_mis_api.apps.utils.models import (
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
 )
+from hct_mis_api.apps.utils.validators import (
+    DoubleSpaceValidator,
+    StartEndSpaceValidator,
+)
 
-if TYPE_CHECKING:
-    from hct_mis_api.apps.account.models import User  # pragma: no cover
-    from hct_mis_api.apps.core.exchange_rates.api import (
-        ExchangeRateClient,  # pragma: no cover
-    )
-    from hct_mis_api.apps.grievance.models import GrievanceTicket  # pragma: no cover
-    from hct_mis_api.apps.payment.models import (  # pragma: no cover
+if TYPE_CHECKING:  # pragma: no cover
+    from hct_mis_api.apps.account.models import User
+    from hct_mis_api.apps.core.exchange_rates.api import ExchangeRateClient
+    from hct_mis_api.apps.grievance.models import GrievanceTicket
+    from hct_mis_api.apps.payment.models import (
         AcceptanceProcessThreshold,
         PaymentVerificationPlan,
     )
-    from hct_mis_api.apps.program.models import Program  # pragma: no cover
+    from hct_mis_api.apps.program.models import Program
 
 logger = logging.getLogger(__name__)
 
@@ -148,9 +159,10 @@ class PaymentPlan(
 ):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
+            "name",
+            "created_by",
             "status",
             "status_date",
-            "target_population",
             "currency",
             "dispersion_start_date",
             "dispersion_end_date",
@@ -163,12 +175,41 @@ class PaymentPlan(
             "export_file",
             "steficon_rule",
             "steficon_applied_date",
+            "steficon_rule_targeting",
+            "steficon_targeting_applied_date",
             "exclusion_reason",
-        ]
+            "male_children_count",
+            "female_children_count",
+            "male_adults_count",
+            "female_adults_count",
+            "total_households_count",
+            "total_individuals_count",
+            "targeting_criteria_string",
+            "excluded_ids",
+        ],
+        {
+            "steficon_rule": "additional_formula",
+            "steficon_applied_date": "additional_formula_applied_date",
+            "steficon_rule_targeting": "additional_formula_targeting",
+            "steficon_targeting_applied_date": "additional_formula_targeting_applied_date",
+            "vulnerability_score_min": "score_min",
+            "vulnerability_score_max": "score_max",
+        },
     )
 
     class Status(models.TextChoices):
-        PREPARING = "PREPARING", "Preparing"
+        # new from TP
+        TP_OPEN = "TP_OPEN", "Open"
+        TP_LOCKED = "TP_LOCKED", "Locked"
+        TP_PROCESSING = "PROCESSING", "Processing"  # TODO: do we need this one?
+        TP_STEFICON_WAIT = "STEFICON_WAIT", "Steficon Wait"
+        TP_STEFICON_RUN = "STEFICON_RUN", "Steficon Run"
+        TP_STEFICON_COMPLETED = "STEFICON_COMPLETED", "Steficon Completed"
+        TP_STEFICON_ERROR = "STEFICON_ERROR", "Steficon Error"
+        DRAFT = "DRAFT", "Draft"  # like ready for PP create
+
+        PREPARING = "PREPARING", "Preparing"  # deprecated will remove it after data migrations
+
         OPEN = "OPEN", "Open"
         LOCKED = "LOCKED", "Locked"
         LOCKED_FSP = "LOCKED_FSP", "Locked FSP"
@@ -177,6 +218,31 @@ class PaymentPlan(
         IN_REVIEW = "IN_REVIEW", "In Review"
         ACCEPTED = "ACCEPTED", "Accepted"
         FINISHED = "FINISHED", "Finished"
+
+    PRE_PAYMENT_PLAN_STATUSES = (
+        Status.TP_OPEN,
+        Status.TP_LOCKED,
+        Status.TP_PROCESSING,
+        Status.TP_STEFICON_WAIT,
+        Status.TP_STEFICON_RUN,
+        Status.TP_STEFICON_COMPLETED,
+        Status.TP_STEFICON_ERROR,
+        Status.DRAFT,
+    )
+
+    CAN_RUN_ENGINE_FORMULA_FOR_ENTITLEMENT = (Status.LOCKED,)
+    CAN_RUN_ENGINE_FORMULA_FOR_VULNERABILITY_SCORE = (
+        Status.TP_LOCKED,
+        Status.TP_STEFICON_COMPLETED,
+        Status.TP_STEFICON_ERROR,
+    )
+    CAN_RUN_ENGINE_FORMULA = CAN_RUN_ENGINE_FORMULA_FOR_ENTITLEMENT + CAN_RUN_ENGINE_FORMULA_FOR_VULNERABILITY_SCORE
+
+    class BuildStatus(models.TextChoices):
+        BUILD_STATUS_PENDING = "PENDING", "Pending"
+        BUILD_STATUS_BUILDING = "BUILDING", "Building"
+        BUILD_STATUS_FAILED = "FAILED", "Failed"
+        BUILD_STATUS_OK = "OK", "Ok"
 
     class BackgroundActionStatus(models.TextChoices):
         RULE_ENGINE_RUN = "RULE_ENGINE_RUN", "Rule Engine Running"
@@ -200,6 +266,10 @@ class PaymentPlan(
     ]
 
     class Action(models.TextChoices):
+        TP_LOCK = "TP_LOCK", "Population Lock"
+        TP_UNLOCK = "TP_UNLOCK", "Population Unlock"
+        TP_REBUILD = "TP_REBUILD", "Population Rebuild"
+        DRAFT = "DRAFT", "Draft"
         LOCK = "LOCK", "Lock"
         LOCK_FSP = "LOCK_FSP", "Lock FSP"
         UNLOCK = "UNLOCK", "Unlock"
@@ -211,6 +281,7 @@ class PaymentPlan(
         REJECT = "REJECT", "Reject"
         FINISH = "FINISH", "Finish"
         SEND_TO_PAYMENT_GATEWAY = "SEND_TO_PAYMENT_GATEWAY", "Send to Payment Gateway"
+        SEND_XLSX_PASSWORD = "SEND_XLSX_PASSWORD", "Send XLSX Password"
 
     usd_fields = [
         "total_entitled_quantity_usd",
@@ -283,7 +354,7 @@ class PaymentPlan(
         on_delete=models.PROTECT,
         related_name="created_payment_plans",
     )
-    status = FSMField(default=Status.OPEN, protected=False, db_index=True, choices=Status.choices)
+    status = FSMField(default=Status.TP_OPEN, protected=False, db_index=True, choices=Status.choices)
     background_action_status = FSMField(
         default=None,
         protected=False,
@@ -292,14 +363,29 @@ class PaymentPlan(
         null=True,
         choices=BackgroundActionStatus.choices,
     )
+    build_status = FSMField(
+        choices=BuildStatus.choices, default=None, protected=False, db_index=True, null=True, blank=True
+    )
+    built_at = models.DateTimeField(null=True, blank=True)
+    # TODO: remove this field after migrations
     target_population = models.ForeignKey(
         "targeting.TargetPopulation",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         related_name="payment_plans",
+        null=True,
+        blank=True,
     )
-    currency = models.CharField(max_length=4, choices=CURRENCY_CHOICES)
-    dispersion_start_date = models.DateField()
-    dispersion_end_date = models.DateField()
+    # TODO: remove null=True after data migrations
+    targeting_criteria = models.OneToOneField(
+        "targeting.TargetingCriteria",
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="payment_plan",
+    )
+    currency = models.CharField(max_length=4, choices=CURRENCY_CHOICES, blank=True, null=True)
+    dispersion_start_date = models.DateField(blank=True, null=True)
+    dispersion_end_date = models.DateField(blank=True, null=True)
     female_children_count = models.PositiveIntegerField(default=0)
     male_children_count = models.PositiveIntegerField(default=0)
     female_adults_count = models.PositiveIntegerField(default=0)
@@ -313,7 +399,7 @@ class PaymentPlan(
     )
     export_file_per_fsp = models.ForeignKey(
         FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL
-    )
+    )  # save xlsx with auth code for API communication channel FSP, and just xlsx for others
     export_pdf_file_summary = models.ForeignKey(
         FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL
     )
@@ -325,11 +411,21 @@ class PaymentPlan(
         blank=True,
     )
     steficon_applied_date = models.DateTimeField(blank=True, null=True)
+    steficon_rule_targeting = models.ForeignKey(
+        RuleCommit,
+        null=True,
+        on_delete=models.PROTECT,
+        related_name="payment_plans_target",
+        blank=True,
+    )
+    steficon_targeting_applied_date = models.DateTimeField(blank=True, null=True)
 
     source_payment_plan = models.ForeignKey(
         "self", null=True, blank=True, on_delete=models.CASCADE, related_name="follow_ups"
     )
     is_follow_up = models.BooleanField(default=False)
+
+    excluded_ids = models.TextField(blank=True, help_text="Targeting level exclusion")
     exclusion_reason = models.TextField(blank=True)
     exclude_household_error = models.TextField(blank=True)
     name = models.CharField(
@@ -337,10 +433,28 @@ class PaymentPlan(
         validators=[
             MinLengthValidator(3),
             MaxLengthValidator(255),
+            DoubleSpaceValidator,
+            StartEndSpaceValidator,
+            ProhibitNullCharactersValidator(),
         ],
         null=True,
         blank=True,
     )
+    vulnerability_score_min = models.DecimalField(
+        null=True,
+        decimal_places=3,
+        max_digits=6,
+        help_text="Written by a tool such as Corticon.",
+        blank=True,
+    )
+    vulnerability_score_max = models.DecimalField(
+        null=True,
+        decimal_places=3,
+        max_digits=6,
+        help_text="Written by a tool such as Corticon.",
+        blank=True,
+    )
+    storage_file = models.OneToOneField(StorageFile, blank=True, null=True, on_delete=models.SET_NULL)
     is_cash_assist = models.BooleanField(default=False)
 
     class Meta:
@@ -349,11 +463,282 @@ class PaymentPlan(
         constraints = [
             UniqueConstraint(
                 fields=["name", "program", "is_removed"], condition=Q(is_removed=False), name="name_unique_per_program"
-            )
+            ),
         ]
 
     def __str__(self) -> str:
         return self.unicef_id or ""
+
+    def save(self, *args: Any, **kwargs: Any) -> None:
+        if self.steficon_rule_targeting and self.steficon_rule_targeting.rule.type != Rule.TYPE_TARGETING:
+            raise ValidationError(
+                f"The selected RuleCommit must be associated with a Rule of type {Rule.TYPE_TARGETING}."
+            )
+        if self.steficon_rule and self.steficon_rule.rule.type != Rule.TYPE_PAYMENT_PLAN:
+            raise ValidationError(
+                f"The selected RuleCommit must be associated with a Rule of type {Rule.TYPE_PAYMENT_PLAN}."
+            )
+        super().save(*args, **kwargs)
+
+    def update_population_count_fields(self) -> None:
+        households_ids = self.eligible_payments.values_list("household_id", flat=True)
+
+        delta18 = relativedelta(years=+18)
+        date18ago = datetime.now() - delta18
+
+        targeted_individuals = Individual.objects.filter(household__id__in=households_ids).aggregate(
+            male_children_count=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=MALE)),
+            female_children_count=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=FEMALE)),
+            male_adults_count=Count("id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=MALE)),
+            female_adults_count=Count("id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=FEMALE)),
+            total_individuals_count=Count("id", distinct=True),
+        )
+
+        self.female_children_count = targeted_individuals.get("female_children_count", 0)
+        self.male_children_count = targeted_individuals.get("male_children_count", 0)
+        self.female_adults_count = targeted_individuals.get("female_adults_count", 0)
+        self.male_adults_count = targeted_individuals.get("male_adults_count", 0)
+        self.total_households_count = households_ids.count()
+        self.total_individuals_count = targeted_individuals.get("total_individuals_count", 0)
+
+        self.save(
+            update_fields=[
+                "female_children_count",
+                "male_children_count",
+                "female_adults_count",
+                "male_adults_count",
+                "total_households_count",
+                "total_individuals_count",
+            ]
+        )
+
+    def update_money_fields(self) -> None:
+        """update money fields only for PaymentPlan with currency"""
+        if self.status not in self.PRE_PAYMENT_PLAN_STATUSES:
+            self.exchange_rate = self.get_exchange_rate()
+            payments = self.eligible_payments.aggregate(
+                total_entitled_quantity=Coalesce(Sum("entitlement_quantity"), Decimal(0.0)),
+                total_entitled_quantity_usd=Coalesce(Sum("entitlement_quantity_usd"), Decimal(0.0)),
+                total_delivered_quantity=Coalesce(Sum("delivered_quantity"), Decimal(0.0)),
+                total_delivered_quantity_usd=Coalesce(Sum("delivered_quantity_usd"), Decimal(0.0)),
+            )
+
+            self.total_entitled_quantity = payments.get("total_entitled_quantity", 0.00)
+            self.total_entitled_quantity_usd = payments.get("total_entitled_quantity_usd", 0.00)
+            self.total_delivered_quantity = payments.get("total_delivered_quantity", 0.00)
+            self.total_delivered_quantity_usd = payments.get("total_delivered_quantity_usd", 0.00)
+
+            self.total_undelivered_quantity = self.total_entitled_quantity - self.total_delivered_quantity
+            self.total_undelivered_quantity_usd = self.total_entitled_quantity_usd - self.total_delivered_quantity_usd
+
+            self.save(
+                update_fields=[
+                    "exchange_rate",
+                    "total_entitled_quantity",
+                    "total_entitled_quantity_usd",
+                    "total_delivered_quantity",
+                    "total_delivered_quantity_usd",
+                    "total_undelivered_quantity",
+                    "total_undelivered_quantity_usd",
+                ]
+            )
+
+    def is_population_open(self) -> bool:
+        return self.status in (self.Status.TP_OPEN,)
+
+    def is_population_finalized(self) -> bool:
+        return self.status in (self.Status.TP_PROCESSING,)
+
+    def is_population_locked(self) -> bool:
+        return self.status in (
+            self.Status.TP_LOCKED,
+            self.Status.TP_STEFICON_COMPLETED,
+            self.Status.TP_STEFICON_ERROR,
+        )
+
+    def get_criteria_string(self) -> str:
+        try:
+            return self.targeting_criteria.get_criteria_string()
+        except Exception:
+            return ""
+
+    def remove_export_file_entitlement(self) -> None:
+        self.export_file_entitlement.file.delete(save=False)
+        self.export_file_entitlement.delete()
+        self.export_file_entitlement = None
+
+    def remove_export_file_per_fsp(self) -> None:
+        self.export_file_per_fsp.file.delete(save=False)
+        self.export_file_per_fsp.delete()
+        self.export_file_per_fsp = None
+
+    def remove_export_files(self) -> None:
+        # remove export_file_entitlement
+        if self.status == PaymentPlan.Status.LOCKED and self.export_file_entitlement:
+            self.remove_export_file_entitlement()
+        # remove export_file_per_fsp
+        if self.status in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED) and self.export_file_per_fsp:
+            self.remove_export_file_per_fsp()
+
+    def remove_imported_file(self) -> None:
+        if self.imported_file:
+            self.imported_file.file.delete(save=False)
+            self.imported_file.delete()
+            self.imported_file = None
+            self.imported_file_date = None
+
+    def unsuccessful_payments(self) -> "QuerySet":
+        return self.eligible_payments.filter(
+            status__in=[
+                Payment.STATUS_ERROR,  # delivered_quantity < 0 (-1)
+                Payment.STATUS_NOT_DISTRIBUTED,  # delivered_quantity == 0
+                Payment.STATUS_FORCE_FAILED,
+            ]
+        )
+
+    def unsuccessful_payments_for_follow_up(self) -> "QuerySet":
+        """
+        used for creation FPP
+        need to call from source_payment_plan level
+        like payment_plan.source_payment_plan.unsuccessful_payments_for_follow_up()
+        """
+        payments_qs = (
+            self.unsuccessful_payments()
+            .exclude(household__withdrawn=True)  # Exclude beneficiaries who have been withdrawn
+            .exclude(
+                # Exclude beneficiaries who are currently in different follow-up Payment Plan within the same cycle (contains excluded from other follow-ups)
+                household_id__in=Payment.objects.filter(
+                    is_follow_up=True,
+                    parent__source_payment_plan=self,
+                    parent__program_cycle=self.program_cycle,
+                    excluded=False,
+                )
+                .exclude(parent=self)
+                .values_list("household_id", flat=True)
+            )
+        )
+        return payments_qs
+
+    def payments_used_in_follow_payment_plans(self) -> "QuerySet":
+        return Payment.objects.filter(parent__source_payment_plan_id=self.id, excluded=False)
+
+    def _get_last_approval_process_data(self) -> ModifiedData:
+        from hct_mis_api.apps.payment.models import Approval
+
+        approval_process = hasattr(self, "approval_process") and self.approval_process.first()
+        if approval_process:
+            if self.status == PaymentPlan.Status.IN_APPROVAL:
+                return ModifiedData(approval_process.sent_for_approval_date, approval_process.sent_for_approval_by)
+            if self.status == PaymentPlan.Status.IN_AUTHORIZATION:
+                if approval := approval_process.approvals.filter(type=Approval.APPROVAL).order_by("created_at").last():
+                    return ModifiedData(approval.created_at, approval.created_by)
+            if self.status == PaymentPlan.Status.IN_REVIEW:
+                if (
+                    approval := approval_process.approvals.filter(type=Approval.AUTHORIZATION)
+                    .order_by("created_at")
+                    .last()
+                ):
+                    return ModifiedData(approval.created_at, approval.created_by)
+            if self.status == PaymentPlan.Status.ACCEPTED:
+                if (
+                    approval := approval_process.approvals.filter(type=Approval.FINANCE_RELEASE)
+                    .order_by("created_at")
+                    .last()
+                ):
+                    return ModifiedData(approval.created_at, approval.created_by)
+        return ModifiedData(self.updated_at)
+
+    # from generic pp
+    def get_exchange_rate(self, exchange_rates_client: Optional["ExchangeRateClient"] = None) -> float:
+        if self.currency == USDC:
+            # exchange rate for Digital currency USDC to USD
+            return 1.0
+
+        if exchange_rates_client is None:
+            exchange_rates_client = ExchangeRates()
+
+        return exchange_rates_client.get_exchange_rate_for_currency_code(self.currency, self.currency_exchange_date)
+
+    def available_payment_records(
+        self,
+        payment_verification_plan: Optional["PaymentVerificationPlan"] = None,
+        extra_validation: Optional[Callable] = None,
+    ) -> QuerySet:
+        params = Q(status__in=Payment.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0)
+
+        if payment_verification_plan:
+            params &= Q(
+                Q(payment_verifications__isnull=True)
+                | Q(payment_verifications__payment_verification_plan=payment_verification_plan)
+            )
+        else:
+            params &= Q(payment_verifications__isnull=True)
+
+        payment_records = self.payment_items.select_related("head_of_household").filter(params).distinct()
+
+        if extra_validation:
+            payment_records = list(map(lambda pr: pr.pk, filter(extra_validation, payment_records)))
+
+        qs = Payment.objects.filter(pk__in=payment_records)
+
+        return qs
+
+    @property
+    def program(self) -> "Program":
+        return self.program_cycle.program
+
+    @property
+    def is_social_worker_program(self) -> bool:
+        return self.program_cycle.program.is_social_worker_program
+
+    @property
+    def household_list(self) -> "QuerySet":
+        """copied from TP
+        used in:
+        1) create PP.create_payments() all list just filter by targeting_criteria, PaymentPlan.Status.TP_OPEN
+        2)
+        """
+        all_households = Household.objects.filter(business_area=self.business_area, program=self.program_cycle.program)
+        households = all_households.filter(self.targeting_criteria.get_query()).order_by("unicef_id")
+        return households.distinct()
+
+    @property
+    def household_count(self) -> int:
+        return self.household_list.count()
+
+    @property
+    def eligible_payments(self) -> QuerySet:
+        return self.payment_items.eligible()
+
+    @property
+    def can_be_locked(self) -> bool:
+        return self.payment_items.filter(Q(payment_plan_hard_conflicted=False) & Q(excluded=False)).exists()
+
+    @property
+    def can_create_xlsx_with_fsp_auth_code(self) -> bool:
+        """
+        export MTCN file
+        xlsx file with password
+        """
+        has_fsp_with_api = self.delivery_mechanisms.filter(
+            financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+            financial_service_provider__payment_gateway_id__isnull=False,
+        ).exists()
+
+        all_sent_to_fsp = not self.eligible_payments.exclude(status=Payment.STATUS_SENT_TO_FSP).exists()
+        return has_fsp_with_api and all_sent_to_fsp
+
+    @property
+    def fsp_communication_channel(self) -> str:
+        has_fsp_with_api = self.delivery_mechanisms.filter(
+            financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+            financial_service_provider__payment_gateway_id__isnull=False,
+        ).exists()
+        return (
+            FinancialServiceProvider.COMMUNICATION_CHANNEL_API
+            if has_fsp_with_api
+            else FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX
+        )
 
     @property
     def bank_reconciliation_success(self) -> int:
@@ -364,8 +749,20 @@ class PaymentPlan(
         return self.payment_items.filter(status=Payment.STATUS_ERROR).count()
 
     @property
-    def is_social_worker_program(self) -> bool:
-        return self.program.is_social_worker_program
+    def excluded_household_ids_targeting_level(self) -> List:
+        return map_unicef_ids_to_households_unicef_ids(self.excluded_ids)
+
+    @property
+    def targeting_criteria_string(self) -> str:
+        return Truncator(self.get_criteria_string()).chars(390, "...")
+
+    @property
+    def has_empty_criteria(self) -> bool:
+        return self.targeting_criteria is None or self.targeting_criteria.rules.count() == 0
+
+    @property
+    def has_empty_ids_criteria(self) -> bool:
+        return not bool(self.targeting_criteria.household_ids) and not bool(self.targeting_criteria.individual_ids)
 
     @property
     def excluded_beneficiaries_ids(self) -> List[str]:
@@ -376,6 +773,129 @@ class PaymentPlan(
             else list(self.payment_items.filter(excluded=True).values_list("household__unicef_id", flat=True))
         )
         return beneficiaries_ids
+
+    @property
+    def currency_exchange_date(self) -> datetime:
+        now = timezone.now().date()
+        return self.dispersion_end_date if self.dispersion_end_date < now else now
+
+    @property
+    def can_create_payment_verification_plan(self) -> int:
+        return self.available_payment_records().count() > 0
+
+    @property
+    def has_export_file(self) -> bool:
+        """
+        for Locked plan return export_file_entitlement file
+        for Accepted and Finished export_file_per_fsp file
+        """
+        try:
+            if self.status == PaymentPlan.Status.LOCKED:
+                return self.export_file_entitlement is not None
+            elif self.status in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED):
+                return self.export_file_per_fsp is not None
+            else:
+                return False
+        except FileTemp.DoesNotExist:
+            return False
+
+    @property
+    def payment_list_export_file_link(self) -> Optional[str]:
+        """
+        for Locked plan return export_file_entitlement file link
+        for Accepted and Finished export_file_per_fsp file link
+        """
+        pp_status_to_file_field = {
+            PaymentPlan.Status.LOCKED: "export_file_entitlement",
+            PaymentPlan.Status.ACCEPTED: "export_file_per_fsp",
+            PaymentPlan.Status.FINISHED: "export_file_per_fsp",
+        }
+
+        file_field = pp_status_to_file_field.get(self.status)
+        if file_field:
+            file_obj = getattr(self, file_field, None)
+            return file_obj.file.url if file_obj and file_obj.file else None
+        return None
+
+    @property
+    def imported_file_name(self) -> str:
+        """used for import entitlements"""
+        try:
+            return self.imported_file.file.name if self.imported_file else ""
+        except FileTemp.DoesNotExist:
+            return ""
+
+    @property
+    def is_reconciled(self) -> bool:
+        if not self.eligible_payments.exists():
+            return False
+
+        return (
+            self.eligible_payments.exclude(status__in=Payment.PENDING_STATUSES).count()
+            == self.eligible_payments.count()
+        )
+
+    @cached_property
+    def acceptance_process_threshold(self) -> Optional["AcceptanceProcessThreshold"]:
+        total_entitled_quantity_usd = int(self.total_entitled_quantity_usd or 0)
+
+        return self.business_area.acceptance_process_thresholds.filter(
+            payments_range_usd__contains=NumericRange(
+                total_entitled_quantity_usd, total_entitled_quantity_usd, bounds="[]"
+            )
+        ).first()
+
+    @property
+    def approval_number_required(self) -> int:
+        if not self.acceptance_process_threshold:
+            return 1
+
+        return self.acceptance_process_threshold.approval_number_required
+
+    @property
+    def authorization_number_required(self) -> int:
+        if not self.acceptance_process_threshold:
+            return 1
+
+        return self.acceptance_process_threshold.authorization_number_required
+
+    @property
+    def finance_release_number_required(self) -> int:
+        if not self.acceptance_process_threshold:
+            return 1
+        return self.acceptance_process_threshold.finance_release_number_required
+
+    @property
+    def last_approval_process_date(self) -> Optional[datetime]:
+        return self._get_last_approval_process_data().modified_date
+
+    @property
+    def last_approval_process_by(self) -> Optional[str]:
+        return self._get_last_approval_process_data().modified_by
+
+    @property
+    def can_send_to_payment_gateway(self) -> bool:
+        status_accepted = self.status == PaymentPlan.Status.ACCEPTED
+        if self.splits.exists():
+            has_payment_gateway_fsp = self.delivery_mechanisms.filter(
+                financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+                financial_service_provider__payment_gateway_id__isnull=False,
+            ).exists()
+            has_not_sent_to_payment_gateway_splits = self.splits.filter(
+                sent_to_payment_gateway=False,
+            ).exists()
+            return status_accepted and has_payment_gateway_fsp and has_not_sent_to_payment_gateway_splits
+        else:
+            return (
+                status_accepted
+                and self.delivery_mechanisms.filter(
+                    sent_to_payment_gateway=False,
+                    financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+                    financial_service_provider__payment_gateway_id__isnull=False,
+                ).exists()
+            )
+
+    # @transitions #####################################################################
 
     @transition(
         field=background_action_status,
@@ -461,6 +981,79 @@ class PaymentPlan(
         self.background_action_status = None  # little hack
 
     @transition(
+        field=build_status,
+        source="*",
+        target=BuildStatus.BUILD_STATUS_PENDING,
+        conditions=[
+            lambda obj: obj.status
+            in [
+                PaymentPlan.Status.TP_OPEN,
+                PaymentPlan.Status.TP_LOCKED,
+                PaymentPlan.Status.TP_STEFICON_COMPLETED,
+                PaymentPlan.Status.TP_STEFICON_ERROR,
+                PaymentPlan.Status.DRAFT,
+                PaymentPlan.Status.OPEN,
+            ]
+        ],
+    )
+    def build_status_pending(self) -> None:
+        self.built_at = timezone.now()
+
+    @transition(
+        field=build_status,
+        source=[BuildStatus.BUILD_STATUS_PENDING, BuildStatus.BUILD_STATUS_FAILED, BuildStatus.BUILD_STATUS_OK],
+        target=BuildStatus.BUILD_STATUS_BUILDING,
+        conditions=[
+            lambda obj: obj.status
+            in [
+                PaymentPlan.Status.TP_OPEN,
+                PaymentPlan.Status.TP_LOCKED,
+                PaymentPlan.Status.TP_STEFICON_WAIT,
+                PaymentPlan.Status.TP_STEFICON_COMPLETED,
+                PaymentPlan.Status.TP_STEFICON_ERROR,
+            ]
+        ],
+    )
+    def build_status_building(self) -> None:
+        self.built_at = timezone.now()
+
+    @transition(
+        field=build_status,
+        source=BuildStatus.BUILD_STATUS_BUILDING,
+        target=BuildStatus.BUILD_STATUS_FAILED,
+        conditions=[
+            lambda obj: obj.status
+            in [
+                PaymentPlan.Status.TP_OPEN,
+                PaymentPlan.Status.TP_LOCKED,
+                PaymentPlan.Status.TP_STEFICON_WAIT,
+                PaymentPlan.Status.TP_STEFICON_COMPLETED,
+                PaymentPlan.Status.TP_STEFICON_ERROR,
+            ]
+        ],
+    )
+    def build_status_failed(self) -> None:
+        self.built_at = timezone.now()
+
+    @transition(
+        field=build_status,
+        source=BuildStatus.BUILD_STATUS_BUILDING,
+        target=BuildStatus.BUILD_STATUS_OK,
+        conditions=[
+            lambda obj: obj.status
+            in [
+                PaymentPlan.Status.TP_OPEN,
+                PaymentPlan.Status.TP_LOCKED,
+                PaymentPlan.Status.TP_STEFICON_COMPLETED,
+                PaymentPlan.Status.TP_STEFICON_ERROR,
+                PaymentPlan.Status.TP_STEFICON_WAIT,
+            ]
+        ],
+    )
+    def build_status_ok(self) -> None:
+        self.built_at = timezone.now()
+
+    @transition(
         field=background_action_status,
         source=[None, BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR],
         target=BackgroundActionStatus.EXCLUDE_BENEFICIARIES,
@@ -495,6 +1088,24 @@ class PaymentPlan(
     )
     def background_action_status_send_to_payment_gateway_error(self) -> None:
         pass
+
+    @transition(
+        field=status,
+        source=Status.TP_OPEN,
+        target=Status.TP_LOCKED,
+    )
+    def status_tp_lock(self) -> None:
+        self.status_date = timezone.now()
+
+    @transition(
+        field=status,
+        source=[Status.TP_LOCKED, Status.TP_STEFICON_COMPLETED, Status.TP_STEFICON_ERROR],
+        target=Status.TP_OPEN,
+    )
+    def status_tp_open(self) -> None:
+        # revert all soft deleted by vulnerability_score filter
+        self.payment_items(manager="all_objects").filter(is_removed=True).update(is_removed=False)
+        self.status_date = timezone.now()
 
     @transition(
         field=status,
@@ -585,328 +1196,19 @@ class PaymentPlan(
 
     @transition(
         field=status,
-        source=Status.PREPARING,
+        source=[Status.TP_LOCKED, Status.TP_STEFICON_COMPLETED, Status.TP_STEFICON_ERROR, Status.OPEN],
+        target=Status.DRAFT,
+    )
+    def status_draft(self) -> None:
+        self.status_date = timezone.now()
+
+    @transition(
+        field=status,
+        source=Status.DRAFT,
         target=Status.OPEN,
     )
     def status_open(self) -> None:
         self.status_date = timezone.now()
-
-    @property
-    def currency_exchange_date(self) -> datetime:
-        now = timezone.now().date()
-        return self.dispersion_end_date if self.dispersion_end_date < now else now
-
-    @property
-    def eligible_payments(self) -> QuerySet:
-        return self.payment_items.eligible()
-
-    @property
-    def can_be_locked(self) -> bool:
-        return self.payment_items.filter(Q(payment_plan_hard_conflicted=False) & Q(excluded=False)).exists()
-
-    def update_population_count_fields(self) -> None:
-        households_ids = self.eligible_payments.values_list("household_id", flat=True)
-
-        delta18 = relativedelta(years=+18)
-        date18ago = datetime.now() - delta18
-
-        targeted_individuals = Individual.objects.filter(household__id__in=households_ids).aggregate(
-            male_children_count=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=MALE)),
-            female_children_count=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=FEMALE)),
-            male_adults_count=Count("id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=MALE)),
-            female_adults_count=Count("id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=FEMALE)),
-            total_individuals_count=Count("id", distinct=True),
-        )
-
-        self.female_children_count = targeted_individuals.get("female_children_count", 0)
-        self.male_children_count = targeted_individuals.get("male_children_count", 0)
-        self.female_adults_count = targeted_individuals.get("female_adults_count", 0)
-        self.male_adults_count = targeted_individuals.get("male_adults_count", 0)
-        self.total_households_count = households_ids.count()
-        self.total_individuals_count = targeted_individuals.get("total_individuals_count", 0)
-
-        self.save(
-            update_fields=[
-                "female_children_count",
-                "male_children_count",
-                "female_adults_count",
-                "male_adults_count",
-                "total_households_count",
-                "total_individuals_count",
-            ]
-        )
-
-    def update_money_fields(self) -> None:
-        self.exchange_rate = self.get_exchange_rate()
-        payments = self.eligible_payments.aggregate(
-            total_entitled_quantity=Coalesce(Sum("entitlement_quantity"), Decimal(0.0)),
-            total_entitled_quantity_usd=Coalesce(Sum("entitlement_quantity_usd"), Decimal(0.0)),
-            total_delivered_quantity=Coalesce(Sum("delivered_quantity"), Decimal(0.0)),
-            total_delivered_quantity_usd=Coalesce(Sum("delivered_quantity_usd"), Decimal(0.0)),
-        )
-
-        self.total_entitled_quantity = payments.get("total_entitled_quantity", 0.00)
-        self.total_entitled_quantity_usd = payments.get("total_entitled_quantity_usd", 0.00)
-        self.total_delivered_quantity = payments.get("total_delivered_quantity", 0.00)
-        self.total_delivered_quantity_usd = payments.get("total_delivered_quantity_usd", 0.00)
-
-        self.total_undelivered_quantity = self.total_entitled_quantity - self.total_delivered_quantity
-        self.total_undelivered_quantity_usd = self.total_entitled_quantity_usd - self.total_delivered_quantity_usd
-
-        self.save(
-            update_fields=[
-                "exchange_rate",
-                "total_entitled_quantity",
-                "total_entitled_quantity_usd",
-                "total_delivered_quantity",
-                "total_delivered_quantity_usd",
-                "total_undelivered_quantity",
-                "total_undelivered_quantity_usd",
-            ]
-        )
-
-    @property
-    def has_export_file(self) -> bool:
-        """
-        for Locked plan return export_file_entitlement file
-        for Accepted and Finished export_file_per_fsp file
-        """
-        try:
-            if self.status == PaymentPlan.Status.LOCKED:
-                return self.export_file_entitlement is not None
-            elif self.status in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED):
-                return self.export_file_per_fsp is not None
-            else:
-                return False
-        except FileTemp.DoesNotExist:
-            return False
-
-    @property
-    def payment_list_export_file_link(self) -> Optional[str]:
-        """
-        for Locked plan return export_file_entitlement file link
-        for Accepted and Finished export_file_per_fsp file link
-        """
-        if self.status == PaymentPlan.Status.LOCKED:
-            if self.export_file_entitlement and self.export_file_entitlement.file:
-                return self.export_file_entitlement.file.url
-            else:
-                return None
-        elif self.status in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED):
-            if self.export_file_per_fsp and self.export_file_per_fsp.file:
-                return self.export_file_per_fsp.file.url
-            else:
-                return None
-        else:
-            return None
-
-    @property
-    def imported_file_name(self) -> str:
-        """used for import entitlements"""
-        try:
-            return self.imported_file.file.name if self.imported_file else ""
-        except FileTemp.DoesNotExist:
-            return ""
-
-    @property
-    def is_reconciled(self) -> bool:
-        if not self.eligible_payments.exists():
-            return False
-
-        return (
-            self.eligible_payments.exclude(status__in=Payment.PENDING_STATUSES).count()
-            == self.eligible_payments.count()
-        )
-
-    def remove_export_file_entitlement(self) -> None:
-        self.export_file_entitlement.file.delete(save=False)
-        self.export_file_entitlement.delete()
-        self.export_file_entitlement = None
-
-    def remove_export_file_per_fsp(self) -> None:
-        self.export_file_per_fsp.file.delete(save=False)
-        self.export_file_per_fsp.delete()
-        self.export_file_per_fsp = None
-
-    def remove_export_files(self) -> None:
-        # remove export_file_entitlement
-        if self.status == PaymentPlan.Status.LOCKED and self.export_file_entitlement:
-            self.remove_export_file_entitlement()
-        # remove export_file_per_fsp
-        if self.status in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED) and self.export_file_per_fsp:
-            self.remove_export_file_per_fsp()
-
-    def remove_imported_file(self) -> None:
-        if self.imported_file:
-            self.imported_file.file.delete(save=False)
-            self.imported_file.delete()
-            self.imported_file = None
-            self.imported_file_date = None
-
-    @cached_property
-    def acceptance_process_threshold(self) -> Optional["AcceptanceProcessThreshold"]:
-        total_entitled_quantity_usd = int(self.total_entitled_quantity_usd or 0)
-
-        return self.business_area.acceptance_process_thresholds.filter(
-            payments_range_usd__contains=NumericRange(
-                total_entitled_quantity_usd, total_entitled_quantity_usd, bounds="[]"
-            )
-        ).first()
-
-    @property
-    def approval_number_required(self) -> int:
-        if not self.acceptance_process_threshold:
-            return 1
-
-        return self.acceptance_process_threshold.approval_number_required
-
-    @property
-    def authorization_number_required(self) -> int:
-        if not self.acceptance_process_threshold:
-            return 1
-
-        return self.acceptance_process_threshold.authorization_number_required
-
-    @property
-    def finance_release_number_required(self) -> int:
-        if not self.acceptance_process_threshold:
-            return 1
-
-        return self.acceptance_process_threshold.finance_release_number_required
-
-    def unsuccessful_payments(self) -> "QuerySet":
-        return self.eligible_payments.filter(
-            status__in=[
-                Payment.STATUS_ERROR,  # delivered_quantity < 0 (-1)
-                Payment.STATUS_NOT_DISTRIBUTED,  # delivered_quantity == 0
-                Payment.STATUS_FORCE_FAILED,
-            ]
-        )
-
-    def unsuccessful_payments_for_follow_up(self) -> "QuerySet":
-        """
-        used for creation FPP
-        need to call from source_payment_plan level
-        like payment_plan.source_payment_plan.unsuccessful_payments_for_follow_up()
-        """
-        payments_qs = (
-            self.unsuccessful_payments()
-            .exclude(household__withdrawn=True)  # Exclude beneficiaries who have been withdrawn
-            .exclude(
-                # Exclude beneficiaries who are currently in different follow-up Payment Plan within the same cycle (contains excluded from other follow-ups)
-                household_id__in=Payment.objects.filter(
-                    is_follow_up=True,
-                    parent__source_payment_plan=self,
-                    parent__program_cycle=self.program_cycle,
-                    excluded=False,
-                )
-                .exclude(parent=self)
-                .values_list("household_id", flat=True)
-            )
-        )
-        return payments_qs
-
-    def payments_used_in_follow_payment_plans(self) -> "QuerySet":
-        return Payment.objects.filter(parent__source_payment_plan_id=self.id, excluded=False)
-
-    @property
-    def program(self) -> "Program":
-        return self.program_cycle.program
-
-    def _get_last_approval_process_data(self) -> ModifiedData:
-        from hct_mis_api.apps.payment.models import Approval
-
-        approval_process = hasattr(self, "approval_process") and self.approval_process.first()
-        if approval_process:
-            if self.status == PaymentPlan.Status.IN_APPROVAL:
-                return ModifiedData(approval_process.sent_for_approval_date, approval_process.sent_for_approval_by)
-            if self.status == PaymentPlan.Status.IN_AUTHORIZATION:
-                if approval := approval_process.approvals.filter(type=Approval.APPROVAL).order_by("created_at").last():
-                    return ModifiedData(approval.created_at, approval.created_by)
-            if self.status == PaymentPlan.Status.IN_REVIEW:
-                if (
-                    approval := approval_process.approvals.filter(type=Approval.AUTHORIZATION)
-                    .order_by("created_at")
-                    .last()
-                ):
-                    return ModifiedData(approval.created_at, approval.created_by)
-            if self.status == PaymentPlan.Status.ACCEPTED:
-                if (
-                    approval := approval_process.approvals.filter(type=Approval.FINANCE_RELEASE)
-                    .order_by("created_at")
-                    .last()
-                ):
-                    return ModifiedData(approval.created_at, approval.created_by)
-        return ModifiedData(self.updated_at)
-
-    @property
-    def last_approval_process_date(self) -> Optional[datetime]:
-        return self._get_last_approval_process_data().modified_date
-
-    @property
-    def last_approval_process_by(self) -> Optional[str]:
-        return self._get_last_approval_process_data().modified_by
-
-    @property
-    def can_send_to_payment_gateway(self) -> bool:
-        status_accepted = self.status == PaymentPlan.Status.ACCEPTED
-        if self.splits.exists():
-            has_payment_gateway_fsp = self.delivery_mechanisms.filter(
-                financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-                financial_service_provider__payment_gateway_id__isnull=False,
-            ).exists()
-            has_not_sent_to_payment_gateway_splits = self.splits.filter(
-                sent_to_payment_gateway=False,
-            ).exists()
-            return status_accepted and has_payment_gateway_fsp and has_not_sent_to_payment_gateway_splits
-        else:
-            return (
-                status_accepted
-                and self.delivery_mechanisms.filter(
-                    sent_to_payment_gateway=False,
-                    financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-                    financial_service_provider__payment_gateway_id__isnull=False,
-                ).exists()
-            )
-
-    # from generic pp
-    def get_exchange_rate(self, exchange_rates_client: Optional["ExchangeRateClient"] = None) -> float:
-        if self.currency == USDC:
-            # exchange rate for Digital currency USDC to USD
-            return 1.0
-
-        if exchange_rates_client is None:
-            exchange_rates_client = ExchangeRates()
-
-        return exchange_rates_client.get_exchange_rate_for_currency_code(self.currency, self.currency_exchange_date)
-
-    def available_payment_records(
-        self,
-        payment_verification_plan: Optional["PaymentVerificationPlan"] = None,
-        extra_validation: Optional[Callable] = None,
-    ) -> QuerySet:
-        params = Q(status__in=Payment.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0)
-
-        if payment_verification_plan:
-            params &= Q(
-                Q(payment_verifications__isnull=True)
-                | Q(payment_verifications__payment_verification_plan=payment_verification_plan)
-            )
-        else:
-            params &= Q(payment_verifications__isnull=True)
-
-        payment_records = self.payment_items.select_related("head_of_household").filter(params).distinct()
-
-        if extra_validation:
-            payment_records = list(map(lambda pr: pr.pk, filter(extra_validation, payment_records)))
-
-        qs = Payment.objects.filter(pk__in=payment_records)
-
-        return qs
-
-    @property
-    def can_create_payment_verification_plan(self) -> int:
-        return self.available_payment_records().count() > 0
 
 
 class FlexFieldArrayField(ArrayField):
@@ -954,6 +1256,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         ("registration_token", _("Registration Token")),
         ("status", _("Status")),
         ("transaction_status_blockchain_link", _("Transaction Status on the Blockchain")),
+        ("fsp_auth_code", _("Auth Code")),
     )
 
     DEFAULT_COLUMNS = [col[0] for col in COLUMNS_CHOICES]
@@ -1126,6 +1429,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
                 payment,
                 "transaction_status_blockchain_link",
             ),
+            "fsp_auth_code": (payment, "fsp_auth_code"),
         }
         additional_columns = {
             "admin_level_2": cls.get_admin_level_2,
@@ -1202,7 +1506,7 @@ class FspXlsxTemplatePerDeliveryMechanism(TimeStampedUUIDModel):
         unique_together = ("financial_service_provider", "delivery_mechanism")
 
     def __str__(self) -> str:
-        return f"{self.financial_service_provider.name} - {self.xlsx_template} - {self.delivery_mechanism}"  # pragma: no cover
+        return f"{self.financial_service_provider.name} - {self.xlsx_template} - {self.delivery_mechanism}"
 
 
 class FinancialServiceProvider(InternalDataFieldModel, LimitBusinessAreaModelMixin, TimeStampedUUIDModel):
@@ -1389,8 +1693,14 @@ class Payment(
         (STATUS_MANUALLY_CANCELLED, _("Manually Cancelled")),
     )
 
-    ALLOW_CREATE_VERIFICATION = (STATUS_SUCCESS, STATUS_DISTRIBUTION_SUCCESS, STATUS_DISTRIBUTION_PARTIAL)
+    ALLOW_CREATE_VERIFICATION = (
+        STATUS_SUCCESS,
+        STATUS_DISTRIBUTION_SUCCESS,
+        STATUS_DISTRIBUTION_PARTIAL,
+        STATUS_NOT_DISTRIBUTED,
+    )
     PENDING_STATUSES = (STATUS_PENDING, STATUS_SENT_TO_PG, STATUS_SENT_TO_FSP)
+    DELIVERED_STATUSES = (STATUS_SUCCESS, STATUS_DISTRIBUTION_SUCCESS, STATUS_DISTRIBUTION_PARTIAL)
 
     ENTITLEMENT_CARD_STATUS_ACTIVE = "ACTIVE"
     ENTITLEMENT_CARD_STATUS_INACTIVE = "INACTIVE"
@@ -1411,6 +1721,8 @@ class Payment(
     delivery_type = models.ForeignKey("payment.DeliveryMechanism", on_delete=models.SET_NULL, null=True)
     currency = models.CharField(
         max_length=4,
+        null=True,
+        blank=True,
     )
     entitlement_quantity = models.DecimalField(
         decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.00"))], null=True, blank=True
@@ -1427,50 +1739,6 @@ class Payment(
     delivery_date = models.DateTimeField(null=True, blank=True)
     transaction_reference_id = models.CharField(max_length=255, null=True, blank=True)  # transaction_id
     transaction_status_blockchain_link = models.CharField(max_length=255, null=True, blank=True)
-
-    def mark_as_failed(self) -> None:  # pragma: no cover
-        if self.status is self.STATUS_FORCE_FAILED:
-            raise ValidationError("Status shouldn't be failed")
-        self.status = self.STATUS_FORCE_FAILED
-        self.status_date = timezone.now()
-        self.delivered_quantity = 0
-        self.delivered_quantity_usd = 0
-        self.delivery_date = None
-
-    def revert_mark_as_failed(self, delivered_quantity: Decimal, delivery_date: datetime) -> None:  # pragma: no cover
-        if self.status != self.STATUS_FORCE_FAILED:
-            raise ValidationError("Only payment marked as force failed can be reverted")
-        if self.entitlement_quantity is None:
-            raise ValidationError("Entitlement quantity need to be set in order to revert")
-
-        self.status = self.get_revert_mark_as_failed_status(delivered_quantity)
-        self.status_date = timezone.now()
-        self.delivered_quantity = delivered_quantity
-        self.delivery_date = delivery_date
-
-    @property
-    def payment_status(self) -> str:  # pragma: no cover
-        status = "-"
-        if self.status == Payment.STATUS_PENDING:
-            status = "Pending"
-
-        elif self.status in (Payment.STATUS_DISTRIBUTION_SUCCESS, Payment.STATUS_SUCCESS):
-            status = "Delivered Fully"
-
-        elif self.status == Payment.STATUS_DISTRIBUTION_PARTIAL:
-            status = "Delivered Partially"
-
-        elif self.status == Payment.STATUS_NOT_DISTRIBUTED:
-            status = "Not Delivered"
-
-        elif self.status == Payment.STATUS_ERROR:
-            status = "Unsuccessful"
-
-        elif self.status == Payment.STATUS_FORCE_FAILED:
-            status = "Force Failed"
-
-        return status
-
     parent = models.ForeignKey(
         "payment.PaymentPlan",
         on_delete=models.CASCADE,
@@ -1520,24 +1788,9 @@ class Payment(
     fsp_auth_code = models.CharField(max_length=128, blank=True, null=True, help_text="FSP Auth Code")
     is_cash_assist = models.BooleanField(default=False)
 
-    @property
-    def full_name(self) -> str:
-        return self.collector.full_name
-
-    def get_revert_mark_as_failed_status(self, delivered_quantity: Decimal) -> str:  # pragma: no cover
-        if delivered_quantity == 0:
-            return Payment.STATUS_NOT_DISTRIBUTED
-
-        elif delivered_quantity < self.entitlement_quantity:
-            return Payment.STATUS_DISTRIBUTION_PARTIAL
-
-        elif delivered_quantity == self.entitlement_quantity:
-            return Payment.STATUS_DISTRIBUTION_SUCCESS
-
-        else:
-            raise ValidationError(
-                f"Wrong delivered quantity {delivered_quantity} for entitlement quantity {self.entitlement_quantity}"
-            )
+    vulnerability_score = models.DecimalField(
+        blank=True, null=True, decimal_places=3, max_digits=6, help_text="Written by Steficon", db_index=True
+    )
 
     objects = PaymentManager()
 
@@ -1588,6 +1841,68 @@ class Payment(
         "delivery_date",
         "transaction_reference_id",
     )
+
+    def mark_as_failed(self) -> None:  # pragma: no cover
+        if self.status is self.STATUS_FORCE_FAILED:
+            raise ValidationError("Status shouldn't be failed")
+        self.status = self.STATUS_FORCE_FAILED
+        self.status_date = timezone.now()
+        self.delivered_quantity = 0
+        self.delivered_quantity_usd = 0
+        self.delivery_date = None
+
+    def revert_mark_as_failed(self, delivered_quantity: Decimal, delivery_date: datetime) -> None:  # pragma: no cover
+        if self.status != self.STATUS_FORCE_FAILED:
+            raise ValidationError("Only payment marked as force failed can be reverted")
+        if self.entitlement_quantity is None:
+            raise ValidationError("Entitlement quantity need to be set in order to revert")
+
+        self.status = self.get_revert_mark_as_failed_status(delivered_quantity)
+        self.status_date = timezone.now()
+        self.delivered_quantity = delivered_quantity
+        self.delivery_date = delivery_date
+
+    @property
+    def payment_status(self) -> str:  # pragma: no cover
+        status = "-"
+        if self.status == Payment.STATUS_PENDING:
+            status = "Pending"
+
+        elif self.status in (Payment.STATUS_DISTRIBUTION_SUCCESS, Payment.STATUS_SUCCESS):
+            status = "Delivered Fully"
+
+        elif self.status == Payment.STATUS_DISTRIBUTION_PARTIAL:
+            status = "Delivered Partially"
+
+        elif self.status == Payment.STATUS_NOT_DISTRIBUTED:
+            status = "Not Delivered"
+
+        elif self.status == Payment.STATUS_ERROR:
+            status = "Unsuccessful"
+
+        elif self.status == Payment.STATUS_FORCE_FAILED:
+            status = "Force Failed"
+
+        return status
+
+    @property
+    def full_name(self) -> str:
+        return self.collector.full_name
+
+    def get_revert_mark_as_failed_status(self, delivered_quantity: Decimal) -> str:  # pragma: no cover
+        if delivered_quantity == 0:
+            return Payment.STATUS_NOT_DISTRIBUTED
+
+        elif delivered_quantity < self.entitlement_quantity:
+            return Payment.STATUS_DISTRIBUTION_PARTIAL
+
+        elif delivered_quantity == self.entitlement_quantity:
+            return Payment.STATUS_DISTRIBUTION_SUCCESS
+
+        else:
+            raise ValidationError(
+                f"Wrong delivered quantity {delivered_quantity} for entitlement quantity {self.entitlement_quantity}"
+            )
 
 
 class PaymentHouseholdSnapshot(TimeStampedUUIDModel):

@@ -8,11 +8,9 @@ from hct_mis_api.apps.accountability.models import Survey
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.household.models import REFUGEE, Household
+from hct_mis_api.apps.payment.fixtures import PaymentPlanFactory
+from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.targeting.fixtures import (
-    TargetingCriteriaFactory,
-    TargetPopulationFactory,
-)
 from tests.selenium.helpers.fixtures import get_program_with_dct_type_and_name
 from tests.selenium.page_object.accountability.surveys import AccountabilitySurveys
 from tests.selenium.page_object.accountability.surveys_details import (
@@ -42,18 +40,20 @@ def add_household() -> Household:
 
 @pytest.fixture
 def add_accountability_surveys_message() -> Survey:
-    targeting_criteria = TargetingCriteriaFactory()
-
-    target_population = TargetPopulationFactory(
-        created_by=User.objects.first(),
-        targeting_criteria=targeting_criteria,
-        business_area=BusinessArea.objects.first(),
+    ba = BusinessArea.objects.first()
+    user = User.objects.first()
+    cycle = Program.objects.get(name="Test Program").cycles.first()
+    payment_plan = PaymentPlanFactory(
+        status=PaymentPlan.Status.TP_LOCKED,
+        created_by=user,
+        business_area=ba,
+        program_cycle=cycle,
     )
     return SurveyFactory(
         title="Test survey",
         category="MANUAL",
         unicef_id="SUR-24-0005",
-        target_population=target_population,
+        payment_plan=payment_plan,
         created_by=User.objects.first(),
     )
 

@@ -7,6 +7,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('payment', '0008_migration'),
+        ('grievance', '0006_migration'),
     ]
 
     operations = [
