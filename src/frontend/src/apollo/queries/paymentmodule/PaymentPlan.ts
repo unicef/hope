@@ -16,6 +16,10 @@ export const PAYMENT_PLAN_QUERY = gql`
       bankReconciliationSuccess
       bankReconciliationError
       exchangeRate
+      fspCommunicationChannel
+      canExportXlsx
+      canDownloadXlsx
+      canSendXlsxPassword
       programCycle {
         id
         title
@@ -150,6 +154,7 @@ export const PAYMENT_PLAN_QUERY = gql`
       }
       hasPaymentListExportFile
       hasFspDeliveryMechanismXlsxTemplate
+      canCreateXlsxWithFspAuthCode
       importedFileDate
       importedFileName
       totalEntitledQuantityUsd

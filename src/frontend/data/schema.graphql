@@ -49,6 +49,7 @@ enum Action {
   REJECT
   FINISH
   SEND_TO_PAYMENT_GATEWAY
+  SEND_XLSX_PASSWORD
 }
 
 input ActionPaymentPlanInput {
@@ -2324,8 +2325,8 @@ type Mutations {
   excludeHouseholds(excludedHouseholdsIds: [String]!, exclusionReason: String, paymentPlanId: ID!): ExcludeHouseholdsMutation
   setSteficonRuleOnPaymentPlanPaymentList(paymentPlanId: ID!, steficonRuleId: ID!, version: BigInt): SetSteficonRuleOnPaymentPlanPaymentListMutation
   copyTargetingCriteria(name: String!, paymentPlanId: ID!, programCycleId: ID!): CopyTargetingCriteriaMutation
-  exportXlsxPaymentPlanPaymentList(paymentPlanId: ID!): ExportXLSXPaymentPlanPaymentListMutation
-  exportXlsxPaymentPlanPaymentListPerFsp(paymentPlanId: ID!): ExportXLSXPaymentPlanPaymentListPerFSPMutation
+  exportXlsxPaymentPlanPaymentList(fspXlsxTemplateId: ID, paymentPlanId: ID!): ExportXLSXPaymentPlanPaymentListMutation
+  exportXlsxPaymentPlanPaymentListPerFsp(fspXlsxTemplateId: ID, paymentPlanId: ID!): ExportXLSXPaymentPlanPaymentListPerFSPMutation
   importXlsxPaymentPlanPaymentList(file: Upload!, paymentPlanId: ID!): ImportXLSXPaymentPlanPaymentListMutation
   importXlsxPaymentPlanPaymentListPerFsp(file: Upload!, paymentPlanId: ID!): ImportXLSXPaymentPlanPaymentListPerFSPMutation
   exportPdfPaymentPlanSummary(paymentPlanId: ID!): ExportPDFPaymentPlanSummaryMutation
@@ -2660,6 +2661,11 @@ type PaymentPlanNode implements Node {
   supportingDocuments: [PaymentPlanSupportingDocumentNode]
   program: ProgramNode
   totalHouseholdsCountWithValidPhoneNo: Int
+  canCreateXlsxWithFspAuthCode: Boolean
+  fspCommunicationChannel: String
+  canExportXlsx: Boolean
+  canDownloadXlsx: Boolean
+  canSendXlsxPassword: Boolean
 }
 
 type PaymentPlanNodeConnection {
@@ -3122,7 +3128,7 @@ type Query {
   allPayments(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, paymentPlanId: String!, programId: String, orderBy: String): PaymentNodeConnection
   allPaymentRecordsAndPayments(businessArea: String!, program: String, household: ID, orderBy: String, first: Int, last: Int, before: String, after: String): PaginatedPaymentRecordsAndPaymentsNode
   financialServiceProviderXlsxTemplate(id: ID!): FinancialServiceProviderXlsxTemplateNode
-  allFinancialServiceProviderXlsxTemplates(offset: Int, before: String, after: String, first: Int, last: Int, name: String, createdBy: ID, orderBy: String): FinancialServiceProviderXlsxTemplateNodeConnection
+  allFinancialServiceProviderXlsxTemplates(offset: Int, before: String, after: String, first: Int, last: Int, financialServiceProviders: [ID], name: String, createdBy: ID, orderBy: String): FinancialServiceProviderXlsxTemplateNodeConnection
   financialServiceProvider(id: ID!): FinancialServiceProviderNode
   allFinancialServiceProviders(offset: Int, before: String, after: String, first: Int, last: Int, createdBy: ID, name: String, visionVendorNumber: String, deliveryMechanisms: [String], distributionLimit: Float, communicationChannel: String, xlsxTemplates: [ID], orderBy: String): FinancialServiceProviderNodeConnection
   paymentRecordVerification(id: ID!): PaymentVerificationNode
