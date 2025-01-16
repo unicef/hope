@@ -25,7 +25,6 @@
                 <div id="year-tabs" class="mb-4">
                     <div class="tab-list flex space-x-2 overflow-x-auto bg-sky-50 rounded shadow p-2"></div>
                 </div>
-                <!-- Flex container for left and right sections -->
                 <div class="flex space-x-4">
                     <!-- Left block for metrics -->
                     <div class="basis-5/6 grid grid-cols-4 gap-2">
@@ -157,15 +156,15 @@
                                                 {% translate "Reconciliation" %}
                                             </h3>
                                             <div class="text-green-500 text-base font-bold reconciliation-percentage">%</div>
-                                            <p>{% translate "Payment records are reconciled" %}</p>
+                                            <p>{% translate "Payment are reconciled" %}</p>
                                         </div>
                                         <div class="bg-white p-4 rounded shadow text-center">
                                             <h3 class="text-lg font-semibold">
                                                 <span class="icon icon-report icon-blue"></span>
-                                                {% translate "Pending Reconciliation" %}
+                                                {% translate "Finished Payment Plans" %}
                                             </h3>
                                             <div class="text-red-500 text-base font-bold pending-reconciliation-percentage">%</div>
-                                            <p>{% translate "Payments pending" %}</p>
+                                            <p>{% translate "Payments plans" %}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -229,6 +228,9 @@
                                 payments: item.payments || 0,
                                 individuals: item.individuals || 0,
                                 households: item.households || 0,
+                                reconciled: item.reconciled || 0,
+                                finished_payment_plans: item.finished_payment_plans || 0,
+                                total_payment_plans: item.total_payment_plans || 0,
                                 children_counts: item.children_counts || 0,
                                 month: item.month || "Unknown month",
                                 year: item.year || "Unknown year",
@@ -387,6 +389,17 @@
 
                             function updateTopMetrics() {
                                 const totalPaymentsCount = ndx.groupAll().reduceSum(d => d.payments || 0).value();
+                                // Reconciled Payments Calculation
+                                const reconciledPaymentsCount = ndx
+                                    .groupAll()
+                                    .reduceSum(d => d.reconciled || 0)
+                                    .value();
+                                // Fetch total payment plans and finished payment plans from the data
+                                const totalPaymentPlans = ndx.groupAll().reduceSum(d => d.total_payment_plans || 0).value();
+                                const finishedPaymentPlans = ndx.groupAll().reduceSum(d => d.finished_payment_plans || 0).value();
+                                const finishedPercentage = totalPaymentPlans > 0
+                                ? (finishedPaymentPlans / totalPaymentPlans) * 100
+                                : 0;
                                 const successfulPaymentsGroupUSD = ndx
                                     .groupAll()
                                     .reduce(
@@ -521,11 +534,10 @@
                                 document.getElementById("children-reached").innerHTML =
                                     `${simplenumberFormatter(childrenReached)}`;
                                 document.querySelector(".reconciliation-percentage").innerHTML =
-                                    `${decimalnumberFormatter((successfulPaymentsCountUSD / totalPaymentsCount) * 100)}%`;
+                                    `${decimalnumberFormatter((reconciledPaymentsCount / totalPaymentsCount) * 100)}%`;
                                 document.querySelector(
                                         ".pending-reconciliation-percentage",
-                                    ).innerHTML =
-                                    `${decimalnumberFormatter((pendingPaymentsGroupUSD.count / totalPaymentsCount) * 100)}%`;
+                                    ).innerHTML =`${decimalnumberFormatter(finishedPercentage)}%`;
                             }
 
                             function filterByYear(year) {

@@ -38,7 +38,7 @@ def generate_dash_report_task(self: Any, business_area_slug: str) -> None:
     Celery task to refresh dashboard data for a specific business area.
     """
     try:
-        business_area = BusinessArea.objects.get(slug=business_area_slug)
+        business_area = BusinessArea.objects.using("read_only").get(slug=business_area_slug)
         set_sentry_business_area_tag(business_area.slug)
         DashboardDataCache.refresh_data(business_area.slug)
 

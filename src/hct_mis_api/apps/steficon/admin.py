@@ -235,6 +235,7 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
     change_form_template = None
     change_list_template = None
     resource_class = RuleResource
+    date_hierarchy = "created_at"
     fieldsets = [
         (
             None,
@@ -538,7 +539,7 @@ class RuleCommitResource(ModelResource):
 
 @register(RuleCommit)
 class RuleCommitAdmin(ImportExportMixin, LinkedObjectsMixin, TestRuleMixin, HOPEModelAdminBase):
-    list_display = ("timestamp", "rule", "version", "updated_by", "is_release", "enabled", "deprecated")
+    list_display = ("rule", "version", "updated_by", "timestamp", "is_release", "enabled", "deprecated")
     list_filter = (("rule", AutoCompleteFilter), "is_release", "enabled", "deprecated")
     search_fields = ("rule__name",)
     readonly_fields = ("updated_by",)
@@ -557,6 +558,7 @@ class RuleCommitAdmin(ImportExportMixin, LinkedObjectsMixin, TestRuleMixin, HOPE
         "affected_fields",
         "updated_by",
     )
+    date_hierarchy = "timestamp"
 
     def get_readonly_fields(self, request: HttpRequest, obj: Optional[RuleCommit] = None) -> List[str]:
         if is_root(request):
