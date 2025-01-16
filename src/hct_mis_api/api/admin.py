@@ -18,6 +18,7 @@ from smart_admin.modeladmin import SmartModelAdmin
 from hct_mis_api.api.models import APILogEntry, APIToken
 from hct_mis_api.apps.account.models import ChoiceArrayField
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.utils.security import is_root
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -142,7 +143,7 @@ class APITokenAdmin(SmartModelAdmin):
         except OSError:
             self.message_user(request, f"Unable to send notification email to {obj.user.email}", messages.ERROR)
 
-    @button()
+    @button(permission=is_root)
     def resend_email(self, request: HttpRequest, pk: "UUID") -> None:
         obj = self.get_object(request, str(pk))
         self._send_token_email(request, obj, TOKEN_INFO_EMAIL)
@@ -176,9 +177,10 @@ class APITokenAdmin(SmartModelAdmin):
 
 @admin.register(APILogEntry)
 class APILogEntryAdmin(SmartModelAdmin):
-    list_display = ("timestamp", "method", "url", "token")
-    list_filter = (("token", AutoCompleteFilter),)
+    list_display = ("token", "url", "method", "timestamp")
+    list_filter = (("token", AutoCompleteFilter), "method")
     date_hierarchy = "timestamp"
+    search_fields = "url"
 
     def has_add_permission(self, request: HttpRequest) -> bool:
         return False
