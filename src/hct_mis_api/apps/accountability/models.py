@@ -76,8 +76,6 @@ class Message(TimeStampedUUIDModel, AdminUrlMixin, UnicefIdentifiedModel):
         "program.Program", null=True, blank=True, on_delete=models.CASCADE, related_name="messages"
     )
     is_original = models.BooleanField(db_index=True, default=False)
-    is_migration_handled = models.BooleanField(default=False)
-    migrated_at = models.DateTimeField(null=True, blank=True)
     copied_from = models.ForeignKey(
         "self",
         null=True,
@@ -162,8 +160,6 @@ class Feedback(TimeStampedUUIDModel, AdminUrlMixin, UnicefIdentifiedModel):
         verbose_name=_("Linked grievance"),
     )
     is_original = models.BooleanField(db_index=True, default=False)
-    is_migration_handled = models.BooleanField(default=False)
-    migrated_at = models.DateTimeField(null=True, blank=True)
     copied_from = models.ForeignKey(
         "self",
         null=True,
