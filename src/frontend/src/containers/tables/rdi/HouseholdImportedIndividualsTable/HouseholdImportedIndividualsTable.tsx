@@ -107,7 +107,6 @@ export function HouseholdImportedIndividualsTable({
           choices={choicesData}
           individual={row}
           rdi={household.rdi}
-          isMerged={household.rdiMergeStatus}
         />
       )}
       headCells={adjustedHeadCells}

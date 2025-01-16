@@ -15,11 +15,7 @@ from hct_mis_api.apps.payment.fixtures import ApprovalProcessFactory, PaymentPla
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
-from hct_mis_api.apps.targeting.fixtures import (
-    TargetingCriteriaFactory,
-    TargetPopulationFactory,
-)
-from hct_mis_api.apps.targeting.models import TargetPopulation
+from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory
 from tests.selenium.page_object.managerial_console.managerial_console import (
     ManagerialConsole,
 )
@@ -43,7 +39,6 @@ def create_program(
     status: str = Program.ACTIVE,
     partner: Optional[Partner] = None,
 ) -> Program:
-    BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
     dct = DataCollectingTypeFactory(type=dct_type)
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     program = ProgramFactory(
@@ -62,30 +57,24 @@ def create_program(
 @pytest.fixture
 def create_payment_plan(create_active_test_program: Program, second_test_program: Program) -> PaymentPlan:
     program_cycle_second = ProgramCycleFactory(program=second_test_program)
+    ba = BusinessArea.objects.get(slug="afghanistan")
     PaymentPlanFactory(
-        target_population=TargetPopulationFactory(program=second_test_program),
         program_cycle=program_cycle_second,
         status=PaymentPlan.Status.IN_APPROVAL,
-        business_area=BusinessArea.objects.filter(slug="afghanistan").first(),
+        business_area=ba,
     )
-    targeting_criteria = TargetingCriteriaFactory()
-    TargetPopulationFactory(
-        program=create_active_test_program,
-        status=TargetPopulation.STATUS_OPEN,
-        targeting_criteria=targeting_criteria,
-    )
-    tp = TargetPopulation.objects.get(program__name="Test Programm")
+
     payment_plan = PaymentPlan.objects.update_or_create(
         name="Test Payment Plan",
-        business_area=BusinessArea.objects.only("is_payment_plan_applicable").get(slug="afghanistan"),
-        target_population=tp,
+        business_area=ba,
+        targeting_criteria=TargetingCriteriaFactory(),
         currency="USD",
         dispersion_start_date=datetime.now(),
         dispersion_end_date=datetime.now() + relativedelta(days=14),
         status_date=datetime.now(),
         status=PaymentPlan.Status.IN_APPROVAL,
         created_by=User.objects.first(),
-        program_cycle=tp.program.cycles.first(),
+        program_cycle=create_active_test_program.cycles.first(),
         total_delivered_quantity=999,
         total_entitled_quantity=2999,
         is_follow_up=False,

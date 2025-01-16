@@ -1,9 +1,8 @@
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
-  TargetPopulationBuildStatus,
-  TargetPopulationQuery,
-  TargetPopulationStatus,
+  PaymentPlanBuildStatus,
+  PaymentPlanStatus,
   useBusinessAreaDataQuery,
 } from '@generated/graphql';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
@@ -11,7 +10,7 @@ import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { StatusBox } from '@components/core/StatusBox';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { targetPopulationBuildStatusToColor } from '@utils/utils';
+import { paymentPlanBuildStatusToColor } from '@utils/utils';
 import { FinalizedTargetPopulationHeaderButtons } from './FinalizedTargetPopulationHeaderButtons';
 import { LockedTargetPopulationHeaderButtons } from './LockedTargetPopulationHeaderButtons';
 import { OpenTargetPopulationHeaderButtons } from './OpenTargetPopulationHeaderButtons';
@@ -31,8 +30,8 @@ const StatusWrapper = styled.div`
   flex-direction: row;
 `;
 
-export interface ProgramDetailsPageHeaderPropTypes {
-  targetPopulation: TargetPopulationQuery['targetPopulation'];
+export interface TargetPopulationPageHeaderProps {
+  paymentPlan;
   canEdit: boolean;
   canRemove: boolean;
   canDuplicate: boolean;
@@ -42,14 +41,14 @@ export interface ProgramDetailsPageHeaderPropTypes {
 }
 
 export function TargetPopulationPageHeader({
-  targetPopulation,
+  paymentPlan,
   canEdit,
   canRemove,
   canDuplicate,
   canLock,
   canUnlock,
   canSend,
-}: ProgramDetailsPageHeaderPropTypes): ReactElement {
+}: TargetPopulationPageHeaderProps): ReactElement {
   const { t } = useTranslation();
   const { baseUrl, businessArea } = useBaseUrl();
   const { data: businessAreaData, loading: businessAreaDataLoading } =
@@ -68,11 +67,11 @@ export function TargetPopulationPageHeader({
 
   let buttons;
 
-  switch (targetPopulation.status) {
-    case TargetPopulationStatus.Open:
+  switch (paymentPlan.status) {
+    case PaymentPlanStatus.TpOpen:
       buttons = (
         <OpenTargetPopulationHeaderButtons
-          targetPopulation={targetPopulation}
+          targetPopulation={paymentPlan}
           canDuplicate={canDuplicate}
           canRemove={canRemove}
           canEdit={canEdit}
@@ -80,13 +79,13 @@ export function TargetPopulationPageHeader({
         />
       );
       break;
-    case TargetPopulationStatus.Locked:
-    case TargetPopulationStatus.SteficonCompleted:
-    case TargetPopulationStatus.SteficonError:
-    case TargetPopulationStatus.SteficonRun:
+    case PaymentPlanStatus.TpLocked:
+    case PaymentPlanStatus.SteficonCompleted:
+    case PaymentPlanStatus.SteficonError:
+    case PaymentPlanStatus.SteficonRun:
       buttons = (
         <LockedTargetPopulationHeaderButtons
-          targetPopulation={targetPopulation}
+          targetPopulation={paymentPlan}
           canDuplicate={canDuplicate}
           canUnlock={canUnlock}
           canSend={canSend}
@@ -98,9 +97,8 @@ export function TargetPopulationPageHeader({
       // Ready for Cash Assist, Processing, Ready, Accepted
       buttons = (
         <FinalizedTargetPopulationHeaderButtons
-          targetPopulation={targetPopulation}
+          targetPopulation={paymentPlan}
           canDuplicate={canDuplicate}
-          businessAreaData={businessAreaData}
         />
       );
       break;
@@ -109,19 +107,19 @@ export function TargetPopulationPageHeader({
     <PageHeader
       title={
         <HeaderWrapper>
-          {t(`${targetPopulation.name}`)}
-          {targetPopulation.buildStatus !== TargetPopulationBuildStatus.Ok && (
+          {t(`${paymentPlan.name}`)}
+          {paymentPlan.buildStatus !== PaymentPlanBuildStatus.Ok && (
             <StatusWrapper>
               <StatusBox
-                status={targetPopulation.buildStatus}
-                statusToColor={targetPopulationBuildStatusToColor}
+                status={paymentPlan.buildStatus}
+                statusToColor={paymentPlanBuildStatusToColor}
               />
             </StatusWrapper>
           )}
         </HeaderWrapper>
       }
       breadCrumbs={breadCrumbsItems}
-      flags={<AdminButton adminUrl={targetPopulation.adminUrl} />}
+      flags={<AdminButton adminUrl={paymentPlan.adminUrl} />}
     >
       {buttons}
     </PageHeader>

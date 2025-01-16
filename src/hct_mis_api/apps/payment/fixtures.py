@@ -45,6 +45,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentVerificationPlan,
     PaymentVerificationSummary,
 )
+from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.payment.utils import to_decimal
 from hct_mis_api.apps.program.fixtures import (
     BeneficiaryGroupFactory,
@@ -52,14 +53,16 @@ from hct_mis_api.apps.program.fixtures import (
 )
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
+from hct_mis_api.apps.targeting.fixtures import (
+    TargetingCriteriaFactory,
+    TargetingCriteriaRuleFactory,
+    TargetingCriteriaRuleFilterFactory,
+)
 from hct_mis_api.apps.targeting.models import (
     TargetingCriteria,
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
-    TargetPopulation,
 )
-from hct_mis_api.apps.targeting.services.targeting_stats_refresher import full_rebuild
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
 
@@ -212,9 +215,9 @@ class RealProgramFactory(DjangoModelFactory):
     beneficiary_group = factory.LazyAttribute(
         lambda o: BeneficiaryGroupFactory(
             master_detail=False if o.data_collecting_type.type == DataCollectingType.Type.SOCIAL else True,
-            name=factory.Faker("word")
-            if o.data_collecting_type.type == DataCollectingType.Type.SOCIAL
-            else "Household",
+            name=(
+                factory.Faker("word") if o.data_collecting_type.type == DataCollectingType.Type.SOCIAL else "Household"
+            ),
         )
     )
 
@@ -236,6 +239,8 @@ class PaymentPlanFactory(DjangoModelFactory):
         after_now=False,
         tzinfo=utc,
     )
+    status = PaymentPlan.Status.OPEN
+    build_status = PaymentPlan.BuildStatus.BUILD_STATUS_PENDING
     exchange_rate = factory.fuzzy.FuzzyDecimal(0.1, 9.9)
 
     total_entitled_quantity = factory.fuzzy.FuzzyDecimal(20000.0, 90000000.0)
@@ -250,8 +255,8 @@ class PaymentPlanFactory(DjangoModelFactory):
 
     created_by = factory.SubFactory(UserFactory)
     unicef_id = factory.Faker("uuid4")
-    target_population = factory.SubFactory(TargetPopulationFactory)
     program_cycle = factory.SubFactory(ProgramCycleFactory)
+    targeting_criteria = factory.SubFactory(TargetingCriteriaFactory)
     currency = factory.fuzzy.FuzzyChoice(CURRENCY_CHOICES, getter=lambda c: c[0])
 
     dispersion_start_date = factory.Faker(
@@ -385,7 +390,6 @@ def create_payment_verification_plan_with_status(
     user: "User",
     business_area: BusinessArea,
     program: Program,
-    target_population: "TargetPopulation",
     status: str,
     verification_channel: Optional[str] = None,
     create_failed_payments: bool = False,
@@ -453,20 +457,21 @@ def generate_reconciled_payment_plan() -> None:
     afghanistan = BusinessArea.objects.get(slug="afghanistan")
     root = User.objects.get(username="root")
     now = timezone.now()
-    tp: TargetPopulation = TargetPopulation.objects.all()[0]
+    targeting_criteria: TargetingCriteria = TargetingCriteriaFactory()
+    program = Program.objects.filter(business_area=afghanistan, name="Test Program").first()
 
     payment_plan = PaymentPlan.objects.update_or_create(
         name="Reconciled Payment Plan",
         unicef_id="PP-0060-22-11223344",
         business_area=afghanistan,
-        target_population=tp,
+        targeting_criteria=targeting_criteria,
         currency="USD",
         dispersion_start_date=now,
         dispersion_end_date=now + timedelta(days=14),
         status_date=now,
         status=PaymentPlan.Status.ACCEPTED,
         created_by=root,
-        program_cycle=tp.program.cycles.first(),
+        program_cycle=program.cycles.first(),
         total_delivered_quantity=999,
         total_entitled_quantity=2999,
         is_follow_up=False,
@@ -490,8 +495,7 @@ def generate_reconciled_payment_plan() -> None:
         payment_plan,
         root,
         afghanistan,
-        tp.program,
-        tp,
+        program,
         PaymentVerificationPlan.STATUS_ACTIVE,
         PaymentVerificationPlan.VERIFICATION_CHANNEL_MANUAL,
         True,  # create failed payments
@@ -547,6 +551,7 @@ def generate_payment_plan() -> None:
     individual_1_pk = UUID("cc000000-0000-0000-0000-000000000001")
     individual_1 = Individual.objects.update_or_create(
         pk=individual_1_pk,
+        rdi_merge_status=MergeStatusModel.MERGED,
         birth_date=now - timedelta(days=365 * 30),
         first_registration_date=now - timedelta(days=365),
         last_registration_date=now,
@@ -561,6 +566,7 @@ def generate_payment_plan() -> None:
     individual_2_pk = UUID("cc000000-0000-0000-0000-000000000002")
     individual_2 = Individual.objects.update_or_create(
         pk=individual_2_pk,
+        rdi_merge_status=MergeStatusModel.MERGED,
         birth_date=now - timedelta(days=365 * 30),
         first_registration_date=now - timedelta(days=365),
         last_registration_date=now,
@@ -575,6 +581,7 @@ def generate_payment_plan() -> None:
     household_1_pk = UUID("aa000000-0000-0000-0000-000000000001")
     household_1 = Household.objects.update_or_create(
         pk=household_1_pk,
+        rdi_merge_status=MergeStatusModel.MERGED,
         size=4,
         head_of_household=individual_1,
         business_area=afghanistan,
@@ -591,6 +598,7 @@ def generate_payment_plan() -> None:
     household_2_pk = UUID("aa000000-0000-0000-0000-000000000002")
     household_2 = Household.objects.update_or_create(
         pk=household_2_pk,
+        rdi_merge_status=MergeStatusModel.MERGED,
         size=4,
         head_of_household=individual_2,
         business_area=afghanistan,
@@ -619,31 +627,17 @@ def generate_payment_plan() -> None:
     TargetingCriteriaRuleFilter.objects.update_or_create(
         pk=targeting_criteria_rule_condition_pk,
         targeting_criteria_rule=targeting_criteria_rule,
-        comparison_method="EQUALS",
-        field_name="address",
-        arguments=[address],
+        comparison_method="CONTAINS",
+        field_name="registration_data_import",
+        arguments=["4d100000-0000-0000-0000-000000000000"],
     )
-
-    target_population_pk = UUID("00000000-0000-0000-0000-faceb00c0123")
-    target_population = TargetPopulation.objects.update_or_create(
-        pk=target_population_pk,
-        name="Test Target Population",
-        targeting_criteria=targeting_criteria,
-        status=TargetPopulation.STATUS_ASSIGNED,
-        business_area=afghanistan,
-        program=program,
-        created_by=root,
-        program_cycle=program_cycle,
-    )[0]
-    full_rebuild(target_population)
-    target_population.save()
 
     payment_plan_pk = UUID("00000000-feed-beef-0000-00000badf00d")
     payment_plan = PaymentPlan.objects.update_or_create(
         name="Test Payment Plan",
         pk=payment_plan_pk,
         business_area=afghanistan,
-        target_population=target_population,
+        targeting_criteria=targeting_criteria,
         currency="USD",
         dispersion_start_date=now,
         dispersion_end_date=now + timedelta(days=14),
@@ -651,7 +645,16 @@ def generate_payment_plan() -> None:
         created_by=root,
         program_cycle=program_cycle,
     )[0]
-
+    tc2 = TargetingCriteriaFactory()
+    tcr2 = TargetingCriteriaRuleFactory(
+        targeting_criteria=tc2,
+    )
+    TargetingCriteriaRuleFilterFactory(
+        targeting_criteria_rule=tcr2,
+        comparison_method="RANGE",
+        field_name="size",
+        arguments=[1, 11],
+    )
     delivery_mechanism_cash = DeliveryMechanism.objects.get(code="cash")
 
     fsp_1_pk = UUID("00000000-0000-0000-0000-f00000000001")
@@ -662,6 +665,14 @@ def generate_payment_plan() -> None:
         vision_vendor_number=123456789,
     )[0]
     fsp_1.delivery_mechanisms.add(delivery_mechanism_cash)
+
+    fsp_api = FinancialServiceProvider.objects.update_or_create(
+        name="Test FSP API",
+        communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+        vision_vendor_number=554433,
+        payment_gateway_id="test_pg_id",
+    )[0]
+    fsp_api.delivery_mechanisms.add(delivery_mechanism_cash)
 
     FspXlsxTemplatePerDeliveryMechanismFactory(
         financial_service_provider=fsp_1, delivery_mechanism=delivery_mechanism_cash
@@ -704,8 +715,21 @@ def generate_payment_plan() -> None:
         status=Payment.STATUS_PENDING,
         program=program,
     )
-
     payment_plan.update_population_count_fields()
+    # add one more PP
+    pp2 = PaymentPlan.objects.update_or_create(
+        name="Test TP for PM (just click rebuild)",
+        targeting_criteria=tc2,
+        status=PaymentPlan.Status.TP_OPEN,
+        business_area=afghanistan,
+        currency="USD",
+        dispersion_start_date=now,
+        dispersion_end_date=now + timedelta(days=14),
+        status_date=now,
+        created_by=root,
+        program_cycle=program_cycle,
+    )[0]
+    PaymentPlanService(payment_plan=pp2).full_rebuild()
 
 
 def update_fsps() -> None:

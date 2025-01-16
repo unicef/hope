@@ -8,7 +8,7 @@ import { UniversalMoment } from '@core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import TableCell from '@mui/material/TableCell';
 import { useQuery } from '@tanstack/react-query';
-import { targetPopulationStatusToColor } from '@utils/utils';
+import { paymentPlanStatusToColor } from '@utils/utils';
 import { ReactElement, useState } from 'react';
 
 const headCells: HeadCell<TargetPopulation>[] = [
@@ -99,7 +99,7 @@ export const TargetPopulationTableRest = ({ program }) => {
         <TableCell data-cy="target-population-status">
           <StatusBox
             status={row.status}
-            statusToColor={targetPopulationStatusToColor}
+            statusToColor={paymentPlanStatusToColor}
           />
         </TableCell>
         <TableCell align="right" data-cy="target-population-num-households">
