@@ -16,6 +16,7 @@ from hct_mis_api.apps.household.fixtures import (
 from hct_mis_api.apps.household.models import (
     HEAD,
     MALE,
+    ROLE_ALTERNATE,
     ROLE_PRIMARY,
     BankAccountInfo,
     Document,
@@ -657,3 +658,48 @@ class TestProgramPopulationToPendingObjects(APITestCase):
 
         self.assertIsNotNone(individual_without_hh_repr)
         self.assertEqual(individual_without_hh_repr.household, None)
+
+    def test_import_program_population_withdrawn_individual_with_role(self) -> None:
+        program_from_1 = ProgramFactory(business_area=self.afghanistan)
+
+        household, individuals = create_household_and_individuals(
+            household_data={
+                "registration_data_import": self.registration_data_import,
+                "program": program_from_1,
+            },
+            individuals_data=[
+                {
+                    "registration_data_import": self.registration_data_import,
+                    "program": program_from_1,
+                },
+                {
+                    "registration_data_import": self.registration_data_import,
+                    "program": program_from_1,
+                },
+            ],
+        )
+
+        individual = individuals[1]
+        # alternate role held by withdrawn individual
+        IndividualRoleInHouseholdFactory(
+            household=household,
+            individual=individual,
+            role=ROLE_ALTERNATE,
+        )
+        individual.withdrawn = True
+        individual.save()
+
+        import_program_population(
+            import_from_program_id=str(program_from_1.id),
+            import_to_program_id=str(self.program_to.id),
+            rdi=self.registration_data_import,
+        )
+
+        # withdrawn individual not imported
+        self.assertEqual(Individual.pending_objects.filter(program=self.program_to).count(), 1)
+
+        self.assertFalse(
+            IndividualRoleInHousehold.pending_objects.filter(
+                role=ROLE_ALTERNATE,
+            ).exists(),
+        )
