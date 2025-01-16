@@ -931,14 +931,23 @@ class TestPaymentPlanQueries(APITestCase):
     @parameterized.expand(
         [
             (
-                "with_permission",
+                "with_permission_api",
                 [Permissions.PM_DOWNLOAD_MTCN, Permissions.PM_SEND_XLSX_PASSWORD],
+                FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
             ),
-            ("without_permission", []),
+            ("without_permission_api", [], FinancialServiceProvider.COMMUNICATION_CHANNEL_API),
+            (
+                "with_permission_xlsx",
+                [Permissions.PM_DOWNLOAD_MTCN, Permissions.PM_SEND_XLSX_PASSWORD],
+                FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
+            ),
+            ("without_permission_xlsx", [], FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX),
         ]
     )
     @freeze_time("2020-10-10")
-    def test_payment_plans_export_download_properties(self, _: Any, permissions: List[Permissions]) -> None:
+    def test_payment_plans_export_download_properties(
+        self, _: Any, permissions: List[Permissions], communication_channel: str
+    ) -> None:
         user = UserFactory.create(username="abc")
         self.create_user_role_with_permissions(user, permissions, self.business_area)
 
@@ -954,7 +963,7 @@ class TestPaymentPlanQueries(APITestCase):
         )
         dm_pp = DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=payment_plan,
-            financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+            financial_service_provider__communication_channel=communication_channel,
             financial_service_provider__payment_gateway_id="1243",
             created_by=user,
             sent_by=user,

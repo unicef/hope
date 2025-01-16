@@ -899,7 +899,7 @@ snapshots['TestPaymentPlanQueries::test_payment_plan_filter_total_households_cou
     }
 }
 
-snapshots['TestPaymentPlanQueries::test_payment_plans_export_download_properties_0_with_permission 1'] = {
+snapshots['TestPaymentPlanQueries::test_payment_plans_export_download_properties_0_with_permission_api 1'] = {
     'data': {
         'paymentPlan': {
             'canCreateXlsxWithFspAuthCode': True,
@@ -914,7 +914,7 @@ snapshots['TestPaymentPlanQueries::test_payment_plans_export_download_properties
     }
 }
 
-snapshots['TestPaymentPlanQueries::test_payment_plans_export_download_properties_1_without_permission 1'] = {
+snapshots['TestPaymentPlanQueries::test_payment_plans_export_download_properties_1_without_permission_api 1'] = {
     'data': {
         'paymentPlan': {
             'canCreateXlsxWithFspAuthCode': True,
@@ -923,6 +923,36 @@ snapshots['TestPaymentPlanQueries::test_payment_plans_export_download_properties
             'canSendToPaymentGateway': False,
             'canSendXlsxPassword': False,
             'fspCommunicationChannel': 'API',
+            'name': 'Test Finished PP',
+            'status': 'FINISHED'
+        }
+    }
+}
+
+snapshots['TestPaymentPlanQueries::test_payment_plans_export_download_properties_2_with_permission_xlsx 1'] = {
+    'data': {
+        'paymentPlan': {
+            'canCreateXlsxWithFspAuthCode': False,
+            'canDownloadXlsx': False,
+            'canExportXlsx': False,
+            'canSendToPaymentGateway': False,
+            'canSendXlsxPassword': False,
+            'fspCommunicationChannel': 'XLSX',
+            'name': 'Test Finished PP',
+            'status': 'FINISHED'
+        }
+    }
+}
+
+snapshots['TestPaymentPlanQueries::test_payment_plans_export_download_properties_3_without_permission_xlsx 1'] = {
+    'data': {
+        'paymentPlan': {
+            'canCreateXlsxWithFspAuthCode': False,
+            'canDownloadXlsx': False,
+            'canExportXlsx': False,
+            'canSendToPaymentGateway': False,
+            'canSendXlsxPassword': False,
+            'fspCommunicationChannel': 'XLSX',
             'name': 'Test Finished PP',
             'status': 'FINISHED'
         }
