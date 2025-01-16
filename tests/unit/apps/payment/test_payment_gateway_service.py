@@ -110,13 +110,21 @@ class TestPaymentGatewayService(APITestCase):
 
         create_payment_plan_snapshot_data(cls.pp)
 
+    @mock.patch(
+        "hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status",
+        return_value="FINALIZED",
+    )
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     @mock.patch(
         "hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_records_for_payment_instruction"
     )
     @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.get_quantity_in_usd", return_value=100.00)
     def test_sync_records_for_split(
-        self, get_quantity_in_usd_mock: Any, get_records_for_payment_instruction_mock: Any, get_exchange_rate_mock: Any
+        self,
+        get_quantity_in_usd_mock: Any,
+        get_records_for_payment_instruction_mock: Any,
+        get_exchange_rate_mock: Any,
+        change_payment_instruction_status_mock: Any,
     ) -> None:
         self.dm.sent_to_payment_gateway = True
         self.dm.save()
@@ -194,11 +202,22 @@ class TestPaymentGatewayService(APITestCase):
         pg_service.sync_records()
         assert get_records_for_payment_instruction_mock.call_count == 0
 
+        assert change_payment_instruction_status_mock.call_count == 2
+
+    @mock.patch(
+        "hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status",
+        return_value="FINALIZED",
+    )
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     @mock.patch(
         "hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_records_for_payment_instruction"
     )
-    def test_sync_records(self, get_records_for_payment_instruction_mock: Any, get_exchange_rate_mock: Any) -> None:
+    def test_sync_records(
+        self,
+        get_records_for_payment_instruction_mock: Any,
+        get_exchange_rate_mock: Any,
+        change_payment_instruction_status_mock: Any,
+    ) -> None:
         for _ in range(2):
             collector = IndividualFactory(household=None)
             hoh = IndividualFactory(household=None)
@@ -292,13 +311,23 @@ class TestPaymentGatewayService(APITestCase):
         assert self.payments[2].reason_for_unsuccessful_payment == "Unknown error"
         assert self.pp.is_reconciled
 
+        change_payment_instruction_status_mock.assert_called_once_with(PaymentInstructionStatus.FINALIZED, self.dm.id)
+
+    @mock.patch(
+        "hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.change_payment_instruction_status",
+        return_value="FINALIZED",
+    )
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     @mock.patch(
         "hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI.get_records_for_payment_instruction"
     )
     @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.get_quantity_in_usd", return_value=100.00)
     def test_sync_records_error_messages(
-        self, get_quantity_in_usd_mock: Any, get_records_for_payment_instruction_mock: Any, get_exchange_rate_mock: Any
+        self,
+        get_quantity_in_usd_mock: Any,
+        get_records_for_payment_instruction_mock: Any,
+        get_exchange_rate_mock: Any,
+        change_payment_instruction_status_mock: Any,
     ) -> None:
         self.dm.sent_to_payment_gateway = True
         self.dm.save()
@@ -347,6 +376,7 @@ class TestPaymentGatewayService(APITestCase):
         assert self.payments[1].fsp_auth_code == "2"
         assert self.payments[1].delivered_quantity == self.payments[1].entitlement_quantity - Decimal(10.00)
         assert self.pp.is_reconciled is False
+        assert change_payment_instruction_status_mock.call_count == 0
 
         get_records_for_payment_instruction_mock.return_value = [
             PaymentRecordData(
@@ -389,6 +419,7 @@ class TestPaymentGatewayService(APITestCase):
         get_records_for_payment_instruction_mock.reset_mock()
         pg_service.sync_records()
         assert get_records_for_payment_instruction_mock.call_count == 0
+        assert change_payment_instruction_status_mock.call_count == 1
 
     def test_get_hope_status(self) -> None:
         p = PaymentRecordData(

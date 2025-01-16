@@ -6221,6 +6221,7 @@ export type RegistrationDataImportNode = Node & {
   id: Scalars['ID']['output'];
   importData?: Maybe<ImportDataNode>;
   importDate: Scalars['DateTime']['output'];
+  importFromIds?: Maybe<Scalars['String']['output']>;
   importedBy?: Maybe<UserNode>;
   individuals: IndividualNodeConnection;
   messages: CommunicationMessageNodeConnection;
@@ -6331,6 +6332,7 @@ export type RegistrationProgramPopulationImportMutation = {
 
 export type RegistrationProgramPopulationImportMutationInput = {
   businessAreaSlug?: InputMaybe<Scalars['String']['input']>;
+  importFromIds?: InputMaybe<Scalars['String']['input']>;
   importFromProgramId?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   screenBeneficiary?: InputMaybe<Scalars['Boolean']['input']>;
@@ -25189,6 +25191,7 @@ export type RegistrationDataImportNodeResolvers<ContextType = any, ParentType ex
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   importData?: Resolver<Maybe<ResolversTypes['ImportDataNode']>, ParentType, ContextType>;
   importDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  importFromIds?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   importedBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>;
   individuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, Partial<RegistrationDataImportNodeIndividualsArgs>>;
   messages?: Resolver<ResolversTypes['CommunicationMessageNodeConnection'], ParentType, ContextType, Partial<RegistrationDataImportNodeMessagesArgs>>;
