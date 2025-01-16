@@ -1164,7 +1164,12 @@ class TestPaymentPlanReconciliation(APITestCase):
             status=PaymentPlan.Status.ACCEPTED,
             created_by=self.user,
         )
-
+        DeliveryMechanismPerPaymentPlanFactory(
+            payment_plan=pp,
+            financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
+            created_by=self.user,
+            sent_by=self.user,
+        )
         self.snapshot_graphql_request(
             request_string=IMPORT_XLSX_PER_FSP_MUTATION,
             context={"user": self.user},

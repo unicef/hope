@@ -91,6 +91,11 @@ class TestPaymentPlanQueries(APITestCase):
             canCreateFollowUp
             canSplit
             canSendToPaymentGateway
+            canCreateXlsxWithFspAuthCode
+            fspCommunicationChannel
+            canExportXlsx
+		    canDownloadXlsx
+		    canSendXlsxPassword
             unsuccessfulPaymentsCount
             hasFspDeliveryMechanismXlsxTemplate
             availablePaymentRecordsCount

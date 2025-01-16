@@ -758,11 +758,26 @@ class TestPaymentPlanServices(APITestCase):
             PaymentPlanService(self.payment_plan).execute_update_status_action(
                 input_data={"action": "INVALID_ACTION"}, user=self.user
             )
+        actions = [
+            "TP_LOCK",
+            "TP_UNLOCK",
+            "TP_REBUILD",
+            "DRAFT",
+            "LOCK",
+            "LOCK_FSP",
+            "UNLOCK",
+            "UNLOCK_FSP",
+            "SEND_FOR_APPROVAL",
+            "APPROVE",
+            "AUTHORIZE",
+            "REVIEW",
+            "REJECT",
+            "SEND_TO_PAYMENT_GATEWAY",
+            "SEND_XLSX_PASSWORD",
+        ]
         self.assertEqual(
             e.exception.message,
-            "Not Implemented Action: INVALID_ACTION. List of possible actions: "
-            "['TP_LOCK', 'TP_UNLOCK', 'TP_REBUILD', 'DRAFT', 'LOCK', 'LOCK_FSP', 'UNLOCK', 'UNLOCK_FSP', "
-            "'SEND_FOR_APPROVAL', 'APPROVE', 'AUTHORIZE', 'REVIEW', 'REJECT', 'SEND_TO_PAYMENT_GATEWAY']",
+            f"Not Implemented Action: INVALID_ACTION. List of possible actions: {actions}",
         )
 
     def test_tp_lock_invalid_pp_status(self) -> None:
