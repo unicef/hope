@@ -3393,6 +3393,7 @@ type RegistrationDataImportNode implements Node {
   refuseReason: String
   allowDeliveryMechanismsValidationErrors: Boolean!
   importData: ImportDataNode
+  importFromIds: String
   deduplicationEngineStatus: RegistrationDataImportDeduplicationEngineStatus
   households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
@@ -3462,6 +3463,7 @@ type RegistrationProgramPopulationImportMutation {
 
 input RegistrationProgramPopulationImportMutationInput {
   importFromProgramId: String
+  importFromIds: String
   name: String
   businessAreaSlug: String
   screenBeneficiary: Boolean

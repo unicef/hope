@@ -199,6 +199,7 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
         null=True,
         blank=True,
     )
+    import_from_ids = models.TextField(blank=True, null=True)
     deduplication_engine_status = models.CharField(
         max_length=255, choices=DEDUP_ENGINE_STATUS_CHOICE, blank=True, null=True, default=None
     )
