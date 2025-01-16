@@ -358,9 +358,11 @@ class TestUpdateIndividualDataService(TestCase):
             ind_data[hh_field] = {
                 "value": new_data.get(hh_field),
                 "approve_status": True,
-                "previous_value": getattr(hh, hh_field).iso_code3
-                if isinstance(getattr(hh, hh_field), Country)
-                else getattr(hh, hh_field),
+                "previous_value": (
+                    getattr(hh, hh_field).iso_code3
+                    if isinstance(getattr(hh, hh_field), Country)
+                    else getattr(hh, hh_field)
+                ),
             }
         self.ticket.individual_data_update_ticket_details.individual_data = ind_data
         self.ticket.individual_data_update_ticket_details.save()

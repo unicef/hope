@@ -10,6 +10,11 @@ from hct_mis_api.api import endpoints
 from hct_mis_api.api.endpoints.base import ConstanceSettingsAPIView
 from hct_mis_api.api.endpoints.program.views import ProgramGlobalListView
 from hct_mis_api.api.router import APIRouter
+from hct_mis_api.contrib.aurora.views import (
+    OrganizationListView,
+    ProjectListView,
+    RegistrationListView,
+)
 
 app_name = "api"
 router = APIRouter()
@@ -41,6 +46,16 @@ urlpatterns = [
     path("programs/", ProgramGlobalListView.as_view(), name="program-global-list"),
     path("", include("hct_mis_api.apps.program.api.urls.beneficiary_group", namespace="beneficiary-group")),
     path("dashboard/", include("hct_mis_api.apps.dashboard.urls")),
+    path(
+        "systems/aurora/",
+        include(
+            [
+                path("offices/", OrganizationListView.as_view(), name="organization-list"),
+                path("projects/", ProjectListView.as_view(), name="project-list"),
+                path("registrations/", RegistrationListView.as_view(), name="registration-list"),
+            ]
+        ),
+    ),
     path(
         "<slug:business_area>/",
         include(

@@ -24,7 +24,7 @@ export function TargetPopulationHouseholdTable({
 }: TargetPopulationHouseholdProps): ReactElement {
   const { t } = useTranslation();
   const initialVariables = {
-    ...(id && { targetPopulation: id }),
+    ...(id && { paymentPlanId: id }),
     ...variables,
   };
   const { selectedProgram } = useProgramContext();
@@ -55,7 +55,7 @@ export function TargetPopulationHouseholdTable({
         renderRow={(row) => (
           <TargetPopulationHouseholdTableRow
             key={(row as { id: string }).id}
-            household={row}
+            payment={row}
             canViewDetails={canViewDetails}
           />
         )}
