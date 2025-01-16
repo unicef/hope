@@ -58,6 +58,7 @@ COPY README.md LICENSE pyproject.toml uv.lock MANIFEST.in ./
 # Dev image
 FROM uv AS dev
 ENV PYTHONPATH=$APP_PATH/src:$APP_PATH/test/:$PYTHONPATH
+ENV PATH="$APP_PATH/.venv/bin:$PATH"
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
     python3-dev \
@@ -77,7 +78,7 @@ RUN --mount=type=cache,target=/root/.uv-cache \
         --python-preference=system \
         --no-editable --frozen --extra distribution --no-install-package hope
 COPY ./tests ./tests
-COPY ./src/data /app/data
+COPY ./src/data $APP_PATH/data
 COPY ./manage.py ./manage.py
 COPY .flake8 pyproject.toml uv.lock MANIFEST.in ./
 COPY ./docker/entrypoint.sh /bin/
@@ -106,12 +107,12 @@ RUN uv sync --python=/usr/local/bin/python \
 
 ## Dist (backend only) image
 FROM base AS dist
-
+ENV PATH="$APP_PATH/.venv/bin:$PATH"
 
 COPY ./src/gunicorn_config.py /conf/gunicorn_config.py
 COPY --chown=hope:hope --from=dist-builder $APP_PATH/.venv $APP_PATH/.venv
 COPY --chown=hope:hope --from=certs /data/psql-cert.crt /certs/psql-cert.crt
-COPY ./src/data /app/data
+COPY ./src/data $APP_PATH/data
 USER hope
 
 COPY ./docker/entrypoint.sh /bin/

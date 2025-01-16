@@ -208,11 +208,29 @@ class BusinessAreaAdmin(
         "region_name",
         "region_code",
         "active",
+        "has_data_sharing_agreement",
+        "screen_beneficiary",
+        "postpone_deduplication",
+        "is_split",
+        "parent",
+        "enable_email_notification",
+        "is_accountability_applicable",
     )
     search_fields = ("name", "slug")
-    list_filter = ("has_data_sharing_agreement", "active", "region_name", BusinessofficeFilter, "is_split")
+    list_filter = (
+        "has_data_sharing_agreement",
+        "active",
+        "region_name",
+        BusinessofficeFilter,
+        "has_data_sharing_agreement",
+        "screen_beneficiary",
+        "postpone_deduplication",
+        "is_split",
+        "enable_email_notification",
+        "is_accountability_applicable",
+    )
     readonly_fields = ("parent", "is_split", "document_types_valid_for_deduplication")
-    filter_horizontal = ("countries",)
+    filter_horizontal = ("countries", "partners")
 
     def document_types_valid_for_deduplication(self, obj: Any) -> List:
         return list(DocumentType.objects.filter(valid_for_deduplication=True).values_list("label", flat=True))
@@ -402,7 +420,7 @@ UNICEF HOPE""",
         )
         return TemplateResponse(request, "core/admin/ba_members.html", context)
 
-    @button(label="Test RapidPro Connection")
+    @button(label="Test RapidPro Connection", permission="core.ping_rapidpro")
     def _test_rapidpro_connection(self, request: HttpRequest, pk: "UUID") -> TemplateResponse:
         context: Dict = self.get_common_context(request, pk)
         context["business_area"] = self.object
@@ -474,32 +492,38 @@ class FlexibleAttributeInline(admin.TabularInline):
 
 
 @admin.register(FlexibleAttribute)
-class FlexibleAttributeAdmin(GetManyFromRemoteMixin, SoftDeletableAdminMixin):
-    list_display = ("type", "name", "required")
+class FlexibleAttributeAdmin(AdminFiltersMixin, GetManyFromRemoteMixin, SoftDeletableAdminMixin):
+    list_display = ("name", "type", "required", "program", "pdu_data", "group")
     list_filter = (
         ("type", ChoicesFieldComboFilter),
         ("associated_with", ChoicesFieldComboFilter),
         "required",
+        ("group", AutoCompleteFilter),
     )
     search_fields = ("name",)
     formfield_overrides = {
         JSONField: {"widget": JSONEditor},
     }
-    raw_id_fields = ("group",)
+    raw_id_fields = ("group", "program", "pdu_data")
+
+    def get_queryset(self, request: HttpRequest) -> "QuerySet":
+        return super().get_queryset(request).select_related("group", "program", "pdu_data")
 
 
 @admin.register(PeriodicFieldData)
 class PeriodicFieldDataAdmin(admin.ModelAdmin):
-    pass
+    list_filter = ("subtype", "number_of_rounds")
+    list_display = ("__str__", "subtype", "number_of_rounds")
 
 
 @admin.register(FlexibleAttributeGroup)
-class FlexibleAttributeGroupAdmin(GetManyFromRemoteMixin, SoftDeletableAdminMixin, MPTTModelAdmin):
+class FlexibleAttributeGroupAdmin(AdminFiltersMixin, GetManyFromRemoteMixin, SoftDeletableAdminMixin, MPTTModelAdmin):
     inlines = (FlexibleAttributeInline,)
     list_display = ("name", "parent", "required", "repeatable", "is_removed")
     # autocomplete_fields = ("parent",)
     raw_id_fields = ("parent",)
     list_filter = (
+        ("parent", AutoCompleteFilter),
         "repeatable",
         "required",
     )
@@ -524,7 +548,7 @@ class FlexibleAttributeChoiceAdmin(GetManyFromRemoteMixin, SoftDeletableAdminMix
 
 @admin.register(XLSXKoboTemplate)
 class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
-    list_display = ("original_file_name", "uploaded_by", "created_at", "file", "import_status")
+    list_display = ("file_name", "uploaded_by", "created_at", "file", "import_status")
     list_filter = (
         "status",
         ("uploaded_by", AutoCompleteFilter),
@@ -533,7 +557,7 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
     date_hierarchy = "created_at"
     exclude = ("is_removed", "file_name", "status", "template_id")
     readonly_fields = (
-        "original_file_name",
+        "file_name",
         "uploaded_by",
         "file",
         "import_status",
@@ -554,15 +578,12 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
             obj.status,
         )
 
-    def original_file_name(self, obj: Any) -> str:
-        return obj.file_name
-
     def get_form(self, request: HttpRequest, obj: Optional[Any] = None, change: bool = False, **kwargs: Any) -> Any:
         if obj is None:
             return XLSImportForm
         return super().get_form(request, obj, change, **kwargs)
 
-    @button()
+    @button(permission="core.download_last_valid_file")
     def download_last_valid_file(
         self, request: HttpRequest
     ) -> Optional[Union[HttpResponseRedirect, HttpResponsePermanentRedirect]]:
@@ -579,6 +600,7 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
     @button(
         label="Rerun KOBO Import",
         visible=lambda btn: btn.original is not None and btn.original.status != XLSXKoboTemplate.SUCCESSFUL,
+        permission="core.rerun_kobo_import",
     )
     def rerun_kobo_import(self, request: HttpRequest, pk: "UUID") -> HttpResponsePermanentRedirect:
         xlsx_kobo_template_object = get_object_or_404(XLSXKoboTemplate, pk=pk)
@@ -664,7 +686,7 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
 @admin.register(CountryCodeMap)
 class CountryCodeMapAdmin(HOPEModelAdminBase):
     list_display = ("country", "alpha2", "alpha3", "ca_code")
-    search_fields = ("country",)
+    search_fields = ("country", "alpha2", "alpha3", "ca_code")
     raw_id_fields = ("country",)
 
     def alpha2(self, obj: Any) -> str:
@@ -672,6 +694,15 @@ class CountryCodeMapAdmin(HOPEModelAdminBase):
 
     def alpha3(self, obj: Any) -> str:
         return obj.country.iso_code3
+
+    def get_queryset(self, request: HttpRequest) -> "QuerySet":
+        return (
+            super()
+            .get_queryset(request)
+            .select_related(
+                "country",
+            )
+        )
 
 
 @admin.register(StorageFile)
@@ -704,18 +735,23 @@ class DataCollectingTypeAdmin(AdminFiltersMixin, admin.ModelAdmin):
         "label",
         "code",
         "type",
-        "description",
         "active",
         "deprecated",
         "individual_filters_available",
         "household_filters_available",
         "recalculate_composition",
+        "weight",
     )
     list_filter = (
         ("limit_to", AutoCompleteFilter),
+        "type",
         "active",
         "individual_filters_available",
         "household_filters_available",
         "recalculate_composition",
     )
     filter_horizontal = ("compatible_types", "limit_to")
+    search_fields = (
+        "label",
+        "code",
+    )

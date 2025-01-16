@@ -329,9 +329,7 @@ logger = logging.getLogger(__name__)
 
 
 class HouseholdCollection(UnicefIdentifiedModel):
-    """
-    Collection of household representations.
-    """
+    """Collection of household representations."""
 
     def __str__(self) -> str:
         return self.unicef_id or ""
@@ -1215,6 +1213,7 @@ class Individual(
                 name="unique_ind_unicef_id_in_program",
             )
         ]
+        permissions = (("update_individual_iban", "Can update individual IBAN"),)
 
     def recalculate_data(self, save: bool = True) -> Tuple[Any, List[str]]:
         update_fields = ["disability"]

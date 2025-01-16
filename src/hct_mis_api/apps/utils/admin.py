@@ -66,7 +66,7 @@ class JSONWidgetMixin:
 
 
 class LastSyncDateResetMixin:
-    @button()
+    @button(permission=is_root)
     def reset_sync_date(self, request: HttpRequest) -> Optional[HttpResponse]:
         if request.method == "POST":
             self.get_queryset(request).update(last_sync_at=None)
@@ -81,7 +81,7 @@ class LastSyncDateResetMixin:
             )
         return None
 
-    @button(label="reset sync date")
+    @button(label="reset sync date", permission=is_root)
     def reset_sync_date_single(self, request: HttpRequest, pk: UUID) -> Optional[HttpResponse]:
         if request.method == "POST":
             self.get_queryset(request).filter(id=pk).update(last_sync_at=None)

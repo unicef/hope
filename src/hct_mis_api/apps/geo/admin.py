@@ -127,7 +127,6 @@ class AreaTypeAdmin(ValidityManagerMixin, FieldsetMixin, SyncMixin, HOPEModelAdm
     list_filter = (("country", AutoCompleteFilter), ("area_level", NumberFilter))
 
     search_fields = ("name",)
-    autocomplete_fields = ("country",)
     raw_id_fields = ("country", "parent")
     fieldsets = (
         (
@@ -148,6 +147,16 @@ class AreaTypeAdmin(ValidityManagerMixin, FieldsetMixin, SyncMixin, HOPEModelAdm
         # ("GIS", {"classes": ["collapse"], "fields": ("geom", "point")}),
         ("Others", {"classes": ["collapse"], "fields": ("__others__",)}),
     )
+
+    def get_queryset(self, request: "HttpRequest") -> "QuerySet":
+        return (
+            super()
+            .get_queryset(request)
+            .select_related(
+                "country",
+                "parent",
+            )
+        )
 
 
 class AreaTypeFilter(RelatedFieldListFilter):
@@ -190,7 +199,17 @@ class AreaAdmin(ValidityManagerMixin, FieldsetMixin, SyncMixin, HOPEModelAdminBa
         ("Others", {"classes": ["collapse"], "fields": ("__others__",)}),
     )
 
-    @button()
+    def get_queryset(self, request: "HttpRequest") -> "QuerySet":
+        return (
+            super()
+            .get_queryset(request)
+            .select_related(
+                "area_type",
+                "parent",
+            )
+        )
+
+    @button(permission="geo.import_areas")
     def import_areas(
         self, request: "HttpRequest"
     ) -> Union["HttpResponsePermanentRedirect", "HttpResponseRedirect", TemplateResponse]:

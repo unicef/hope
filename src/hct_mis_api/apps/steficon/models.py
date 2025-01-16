@@ -65,6 +65,14 @@ class Rule(LimitBusinessAreaModelMixin):
     )
     flags = JSONField(default=dict, blank=True)
 
+    class Meta:
+        permissions = (
+            ("process_file", "Can Process File"),
+            ("check_diff", "Can Check Diff"),
+            ("changelog", "Can Check Changelog"),
+            ("rerun_rule", "Can Rerun Rule"),
+        )
+
     def __str__(self) -> str:
         return self.name
 
