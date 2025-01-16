@@ -27,6 +27,7 @@ from hct_mis_api.apps.payment.fixtures import (
 from hct_mis_api.apps.payment.models import (
     AcceptanceProcessThreshold,
     DeliveryMechanism,
+    FinancialServiceProvider,
     PaymentPlan,
 )
 from hct_mis_api.apps.program.fixtures import ProgramCycleFactory
@@ -87,17 +88,16 @@ class TestActionPaymentPlanMutation(APITestCase):
         super().setUpTestData()
         generate_delivery_mechanisms()
         cls.user = UserFactory.create(first_name="Rachel", last_name="Walker")
-        create_afghanistan()
+        cls.business_area = create_afghanistan()
         AcceptanceProcessThreshold.objects.create(
             business_area=BusinessArea.objects.first(),
             approval_number_required=2,
             authorization_number_required=2,
             finance_release_number_required=3,
         )
-        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
         cls.payment_plan = PaymentPlanFactory.create(
-            business_area=cls.business_area, program_cycle=ProgramCycleFactory()
+            business_area=cls.business_area, program_cycle=ProgramCycleFactory(), created_by=cls.user
         )
         cls.registration_data_import = RegistrationDataImportFactory(business_area=cls.business_area)
         household, individuals = create_household_and_individuals(
@@ -109,7 +109,10 @@ class TestActionPaymentPlanMutation(APITestCase):
         )
         IndividualRoleInHouseholdFactory(household=household, individual=individuals[0], role=ROLE_PRIMARY)
 
-        cls.financial_service_provider = FinancialServiceProviderFactory()
+        cls.financial_service_provider = FinancialServiceProviderFactory(
+            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+            payment_gateway_id="Abc",
+        )
         dm_cash = DeliveryMechanism.objects.get(code="cash")
         cls.financial_service_provider.delivery_mechanisms.set([dm_cash])
         DeliveryMechanismPerPaymentPlanFactory(
@@ -247,3 +250,27 @@ class TestActionPaymentPlanMutation(APITestCase):
         mock_init.assert_any_call(
             self.payment_plan, PaymentPlan.Action.REVIEW.value, self.user, f"{timezone.now():%-d %B %Y}"
         )
+
+    def test_send_xlsx_password_action(self) -> None:
+        self.create_user_role_with_permissions(
+            self.user,
+            [
+                Permissions.PM_SEND_XLSX_PASSWORD,
+            ],
+            self.business_area,
+        )
+        self.payment_plan.status = PaymentPlan.Status.ACCEPTED
+        self.payment_plan.save()
+
+        self.graphql_request(
+            request_string=self.MUTATION,
+            context={"user": self.user},
+            variables={
+                "input": {
+                    "paymentPlanId": self.id_to_base64(self.payment_plan.id, "PaymentPlanNode"),
+                    "action": "SEND_XLSX_PASSWORD",
+                }
+            },
+        )
+        self.payment_plan.refresh_from_db()
+        self.assertIsNone(self.payment_plan.background_action_status)

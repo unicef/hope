@@ -209,7 +209,6 @@ export function formatCriteriaFilters(filters) {
   return filters.map((each) => {
     let comparisonMethod;
     let values;
-    console.log('each', each);
     switch (each?.fieldAttribute?.type || each?.type) {
       case 'SELECT_ONE':
         comparisonMethod = 'EQUALS';

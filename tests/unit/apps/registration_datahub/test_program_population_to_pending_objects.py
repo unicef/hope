@@ -178,7 +178,10 @@ class TestProgramPopulationToPendingObjects(APITestCase):
                     "sex": MALE,
                     "birth_date": "1955-09-07",
                 },
-                {},
+                {
+                    "first_registration_date": "2024-02-21",
+                    "last_registration_date": "2024-02-24",
+                },
             ],
         )
         cls.ind_role_in_hh = IndividualRoleInHouseholdFactory(
@@ -495,10 +498,14 @@ class TestProgramPopulationToPendingObjects(APITestCase):
                 {
                     "registration_data_import": self.rdi_other,
                     "withdrawn": True,
+                    "first_registration_date": "2024-02-21",
+                    "last_registration_date": "2024-02-24",
                 },
                 {
                     "registration_data_import": self.rdi_other,
                     "duplicate": True,
+                    "first_registration_date": "2024-02-21",
+                    "last_registration_date": "2024-02-24",
                 },
             ],
         )
@@ -507,14 +514,24 @@ class TestProgramPopulationToPendingObjects(APITestCase):
                 "registration_data_import": self.rdi_other,
                 "program": self.program_from,
             },
-            individuals_data=[{}],
+            individuals_data=[
+                {
+                    "first_registration_date": "2024-02-21",
+                    "last_registration_date": "2024-02-24",
+                }
+            ],
         )
         household_already_in_program_repr, individuals_already_in_program_repr = create_household_and_individuals(
             household_data={
                 "registration_data_import": self.rdi_other,
                 "program": self.program_to,
             },
-            individuals_data=[{}],
+            individuals_data=[
+                {
+                    "first_registration_date": "2024-02-21",
+                    "last_registration_date": "2024-02-24",
+                }
+            ],
         )
         household_collection = HouseholdCollectionFactory()
         individual_collection = IndividualCollectionFactory()
