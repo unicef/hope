@@ -91,7 +91,7 @@ export const ProgramCycleDetailsHeader = ({
       await finishMutation();
       showMessage(t('Programme Cycle Finished'));
     } catch (e) {
-      showMessage(e?.message);
+      e.data?.forEach((message: string) => showMessage(message));
     }
   };
 
@@ -100,7 +100,7 @@ export const ProgramCycleDetailsHeader = ({
       await reactivateMutation();
       showMessage(t('Programme Cycle Reactivated'));
     } catch (e) {
-      showMessage(e?.message);
+      e.data?.forEach((message: string) => showMessage(message));
     }
   };
 
