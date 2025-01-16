@@ -164,7 +164,7 @@ def create_payment_plan_payment_list_xlsx_per_fsp(
                 if payment_plan.business_area.enable_email_notification:
                     send_email_notification_on_commit(service, user)
                     if fsp_xlsx_template_id:
-                        service.sent_email_with_passwords(user, payment_plan)
+                        service.send_email_with_passwords(user, payment_plan)
 
         except Exception as e:
             payment_plan.background_action_status_xlsx_export_error()
@@ -194,7 +194,7 @@ def send_payment_plan_payment_list_xlsx_per_fsp_password(
         user: User = get_user_model().objects.get(pk=user_id)
         payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
         set_sentry_business_area_tag(payment_plan.business_area.name)
-        XlsxPaymentPlanExportPerFspService.sent_email_with_passwords(user, payment_plan)
+        XlsxPaymentPlanExportPerFspService.send_email_with_passwords(user, payment_plan)
 
     except Exception as e:
         logger.exception("Send Payment Plan List XLSX Per FSP Password Error")

@@ -337,7 +337,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
             self.payment_plan.save()
 
     @staticmethod
-    def sent_email_with_passwords(user: "User", payment_plan: PaymentPlan) -> None:
+    def send_email_with_passwords(user: "User", payment_plan: PaymentPlan) -> None:
         text_template = "payment/xlsx_file_password_email.txt"
         html_template = "payment/xlsx_file_password_email.html"
 

@@ -898,3 +898,33 @@ snapshots['TestPaymentPlanQueries::test_payment_plan_filter_total_households_cou
         }
     }
 }
+
+snapshots['TestPaymentPlanQueries::test_payment_plans_export_download_properties_0_with_permission 1'] = {
+    'data': {
+        'paymentPlan': {
+            'canCreateXlsxWithFspAuthCode': True,
+            'canDownloadXlsx': False,
+            'canExportXlsx': True,
+            'canSendToPaymentGateway': False,
+            'canSendXlsxPassword': False,
+            'fspCommunicationChannel': 'API',
+            'name': 'Test Finished PP',
+            'status': 'FINISHED'
+        }
+    }
+}
+
+snapshots['TestPaymentPlanQueries::test_payment_plans_export_download_properties_1_without_permission 1'] = {
+    'data': {
+        'paymentPlan': {
+            'canCreateXlsxWithFspAuthCode': True,
+            'canDownloadXlsx': False,
+            'canExportXlsx': False,
+            'canSendToPaymentGateway': False,
+            'canSendXlsxPassword': False,
+            'fspCommunicationChannel': 'API',
+            'name': 'Test Finished PP',
+            'status': 'FINISHED'
+        }
+    }
+}
