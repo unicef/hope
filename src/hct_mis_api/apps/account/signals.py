@@ -43,9 +43,7 @@ def post_save_user(sender: Any, instance: User, created: bool, *args: Any, **kwa
 def allowed_business_areas_changed(sender: Any, instance: Partner, action: str, pk_set: set, **kwargs: Any) -> None:
     if action == "post_remove":
         removed_business_areas_ids = pk_set
-        RoleAssignment.objects.filter(
-            partner=instance, business_area_id__in=removed_business_areas_ids
-        ).delete()
+        RoleAssignment.objects.filter(partner=instance, business_area_id__in=removed_business_areas_ids).delete()
 
     elif action == "pre_clear":
         instance._removed_business_areas = list(instance.allowed_business_areas.all())

@@ -4,7 +4,6 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from uuid import UUID
 
 from django import forms
-from django.apps import apps
 from django.conf import settings
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.auth.models import AbstractUser, Group, Permission
@@ -64,7 +63,7 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
     def __str__(self) -> str:
         return f"{self.name} [Sub-Partner of {self.parent.name}]" if self.parent else self.name
 
-    def save(self, *args, **kwargs):
+    def save(self, *args: Any, **kwargs: Any) -> None:
         # Partner cannot be a parent if it has RoleAssignments
         if self.parent:
             if RoleAssignment.objects.filter(partner=self.parent).exists():
@@ -318,6 +317,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             ("can_reindex_programs", "Can reindex programs"),
             ("can_add_business_area_to_partner", "Can add business area to partner"),
             ("can_change_allowed_partners", "Can change allowed partners"),
+            ("can_change_area_limits", "Can change area limits"),
         )
 
 
@@ -426,13 +426,12 @@ class AdminAreaLimitedTo(TimeStampedUUIDModel):
 
     def clean(self) -> None:
         if self.program.partner_access != self.program.SELECTED_PARTNERS_ACCESS:
-            raise ValidationError(
-                f"Area limits cannot be set for programs with {self.program.partner_access} access."
-            )
+            raise ValidationError(f"Area limits cannot be set for programs with {self.program.partner_access} access.")
 
     def save(self, *args: Any, **kwargs: Any) -> None:
         self.clean()
         super().save(*args, **kwargs)
+
 
 class UserGroup(NaturalKeyModel, models.Model):
     business_area = models.ForeignKey("core.BusinessArea", related_name="user_groups", on_delete=models.CASCADE)

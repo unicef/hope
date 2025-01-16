@@ -1,16 +1,13 @@
 import csv
 import logging
 from io import StringIO
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union, Sequence
-
-from django.contrib.admin.widgets import FilteredSelectMultiple
-
-from hct_mis_api.apps.account import models as account_models
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
 
 from django import forms
 from django.contrib import admin, messages
 from django.contrib.admin import SimpleListFilter, TabularInline
 from django.contrib.admin.templatetags.admin_urls import add_preserved_filters
+from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.messages import ERROR
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.contrib.postgres.fields import JSONField
@@ -26,7 +23,7 @@ from django.http import (
     HttpResponsePermanentRedirect,
     HttpResponseRedirect,
 )
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import get_object_or_404, redirect
 from django.template.defaultfilters import slugify
 from django.template.response import TemplateResponse
 from django.urls import reverse
@@ -46,7 +43,7 @@ from constance import config
 from jsoneditor.forms import JSONEditor
 from xlrd import XLRDError
 
-from hct_mis_api.apps.account.models import Role, User, Partner, RoleAssignment
+from hct_mis_api.apps.account.models import Partner, Role, RoleAssignment, User
 from hct_mis_api.apps.administration.widgets import JsonWidget
 from hct_mis_api.apps.core.celery_tasks import (
     upload_new_kobo_template_and_update_flex_fields_task,
@@ -275,9 +272,11 @@ class BusinessAreaAdmin(
 
         class AllowedPartnersForm(forms.Form):
             partners = forms.ModelMultipleChoiceField(
-                queryset=Partner.objects.all(),
+                queryset=Partner.objects.exclude(
+                    id__in=Partner.objects.filter(parent__isnull=False).values_list("parent_id", flat=True)
+                ),
                 required=False,
-                widget=FilteredSelectMultiple("Partners", is_stacked=False)
+                widget=FilteredSelectMultiple("Partners", is_stacked=False),
             )
 
         if request.method == "POST":
@@ -297,7 +296,7 @@ class BusinessAreaAdmin(
                             f"You cannot remove {partner.name} because it has existing role assignments in this business area.",
                             messages.ERROR,
                         )
-                        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+                        return HttpResponseRedirect(request.get_full_path())
 
                 for partner in Partner.objects.all():
                     if partner in selected_partners:
@@ -305,18 +304,20 @@ class BusinessAreaAdmin(
                     else:
                         partner.allowed_business_areas.remove(business_area)
                 messages.success(request, "Allowed partners successfully updated.")
-                return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+                return HttpResponseRedirect(request.get_full_path())
 
         else:
-            form = AllowedPartnersForm(initial={
-                "partners": Partner.objects.filter(allowed_business_areas=business_area)
-            })
+            form = AllowedPartnersForm(
+                initial={"partners": Partner.objects.filter(allowed_business_areas=business_area)}
+            )
 
         context = self.get_common_context(request, pk)
-        context.update({
-            "business_area": business_area,
-            "form": form,
-        })
+        context.update(
+            {
+                "business_area": business_area,
+                "form": form,
+            }
+        )
 
         return TemplateResponse(request, "core/admin/allowed_partners.html", context)
 

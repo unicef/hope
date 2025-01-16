@@ -27,7 +27,7 @@ class RoleAssignmentInline(admin.TabularInline):
     extra = 0
     formset = RoleAssignmentInlineFormSet
 
-    def formfield_for_foreignkey(self, db_field: Any, request=None, **kwargs: Any) -> Any:
+    def formfield_for_foreignkey(self, db_field: Any, request: Any = None, **kwargs: Any) -> Any:
         if db_field.name == "business_area":
             partner_id = request.resolver_match.kwargs.get("object_id")
 
@@ -41,8 +41,22 @@ class RoleAssignmentInline(admin.TabularInline):
                 kwargs["queryset"] = BusinessArea.objects.filter(is_split=False)
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
+    def has_add_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
+        if isinstance(obj, Partner):
+            if obj.is_parent:
+                return False  # Disable adding if Partner is a parent
+            return request.user.can_add_business_area_to_partner()
+        return True
+
     def has_change_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
-        return request.user.can_add_business_area_to_partner()
+        if isinstance(obj, Partner):
+            return request.user.can_add_business_area_to_partner()
+        return True
+
+    def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
+        if isinstance(obj, Partner):
+            return request.user.can_add_business_area_to_partner()
+        return True
 
 
 @admin.register(account_models.RoleAssignment)

@@ -3,12 +3,13 @@ from django.db import IntegrityError
 from django.test import TransactionTestCase
 
 from hct_mis_api.apps.account.fixtures import (
+    AdminAreaLimitedToFactory,
     PartnerFactory,
     RoleAssignmentFactory,
     RoleFactory,
-    UserFactory, AdminAreaLimitedToFactory,
+    UserFactory,
 )
-from hct_mis_api.apps.account.models import RoleAssignment, AdminAreaLimitedTo
+from hct_mis_api.apps.account.models import RoleAssignment
 from hct_mis_api.apps.core.fixtures import create_afghanistan, create_ukraine
 from hct_mis_api.apps.geo.fixtures import AreaFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
@@ -262,22 +263,14 @@ class TestRoleAssignmentModel(TransactionTestCase):
         self.program1.partner_access = Program.SELECTED_PARTNERS_ACCESS
         self.program1.save()
 
-        AdminAreaLimitedToFactory(
-            partner=self.partner,
-            program=self.program1,
-            areas=[self.area_1]
-        )
+        AdminAreaLimitedToFactory(partner=self.partner, program=self.program1, areas=[self.area_1])
 
     def test_area_limits_for_program_with_all_partner_access(self) -> None:
         # Not possible to have area limits for a program with ALL_PARTNERS_ACCESS
         self.program1.partner_access = Program.ALL_PARTNERS_ACCESS
         self.program1.save()
         with self.assertRaises(ValidationError) as ve_context:
-            AdminAreaLimitedToFactory(
-                partner=self.partner,
-                program=self.program1,
-                areas=[self.area_1]
-            )
+            AdminAreaLimitedToFactory(partner=self.partner, program=self.program1, areas=[self.area_1])
         self.assertIn(
             f"Area limits cannot be set for programs with {self.program1.partner_access} access.",
             str(ve_context.exception),
@@ -288,11 +281,7 @@ class TestRoleAssignmentModel(TransactionTestCase):
         self.program1.partner_access = Program.NONE_PARTNERS_ACCESS
         self.program1.save()
         with self.assertRaises(ValidationError) as ve_context:
-            AdminAreaLimitedToFactory(
-                partner=self.partner,
-                program=self.program1,
-                areas=[self.area_1]
-            )
+            AdminAreaLimitedToFactory(partner=self.partner, program=self.program1, areas=[self.area_1])
         self.assertIn(
             f"Area limits cannot be set for programs with {self.program1.partner_access} access.",
             str(ve_context.exception),
