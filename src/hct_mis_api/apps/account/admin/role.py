@@ -53,12 +53,12 @@ class RoleAdmin(ImportExportModelAdmin, SyncMixin, HOPEModelAdminBase):
     change_list_template = "admin/account/role/change_list.html"
     protocol_class = UnrelatedForeignKeysProtocol
 
-    @button()
+    @button(permission="account.view_role")
     def members(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
         url = reverse("admin:account_userrole_changelist")
         return HttpResponseRedirect(f"{url}?role__id__exact={pk}")
 
-    @button()
+    @button(permission="account.view_role")
     def matrix(self, request: HttpRequest) -> TemplateResponse:
         ctx = self.get_common_context(request, action="Matrix")
         matrix1 = {}
@@ -119,3 +119,4 @@ class RoleAdmin(ImportExportModelAdmin, SyncMixin, HOPEModelAdminBase):
 class IncompatibleRolesAdmin(HOPEModelAdminBase):
     list_display = ("role_one", "role_two")
     list_filter = (IncompatibleRoleFilter,)
+    search_fields = ("role_one__name", "role_two__name")
