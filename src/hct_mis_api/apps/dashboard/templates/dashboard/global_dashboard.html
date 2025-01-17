@@ -37,13 +37,6 @@
                         </div>
                         <div class="bg-white p-4 rounded shadow">
                             <h3 class="text-sm font-semibold">
-                                <span class="icon icon-financing icon-blue"></span>
-                                {% translate "In Local Currency" %}
-                            </h3>
-                            <div id="total-amount-paid-local" class="text-sm font-bold text-center"></div>
-                        </div>
-                        <div class="bg-white p-4 rounded shadow">
-                            <h3 class="text-sm font-semibold">
                                 <span class="icon icon-preparedness icon-blue"></span>
                                 {% translate "Number of Payments" %}
                             </h3>
@@ -97,14 +90,6 @@
                                             <div id="pwd-reached" class="text-sm font-bold text-center"></div>
                                         </div>
                                     </div>
-                                    <!-- Right block for Payments by Month chart -->
-                                    <div class="flex-grow bg-white p-4 rounded shadow h-full">
-                                        <h3 class="text-sm font-semibold">
-                                            <span class="icon icon-calendar icon-blue"></span>
-                                            {% translate "Months" %}
-                                        </h3>
-                                        <div id="payments-by-month" class="dc-chart w-full h-full"></div>
-                                    </div>
                                 </div>
                                 <!-- Other charts Section -->
                                 <div class="flex flex-grow grid grid-cols-3 gap-2 mt-8">
@@ -125,14 +110,6 @@
                                         <div id="volume-by-program" class="dc-chart w-full h-full"></div>
                                     </div>
                                     <!-- Chart 3 -->
-                                    <div class="bg-white p-3 rounded shadow">
-                                        <h3 class="text-sm font-semibold">
-                                            <span class="icon icon-cash-transfer icon-blue"></span>
-                                            {% translate "Payments by Admin area" %}
-                                        </h3>
-                                        <div id="payments-by-admin1" class="dc-chart w-full h-full"></div>
-                                    </div>
-                                    <!-- Chart 4 -->
                                     <div class="bg-white p-4 rounded shadow">
                                         <h3 class="text-sm font-semibold">
                                             <span class="icon icon-logistics icon-blue"></span>
@@ -140,7 +117,15 @@
                                         </h3>
                                         <div id="payments-by-fsp" class="dc-chart w-full h-full"></div>
                                     </div>
-                                    <!-- Chart 5 -->
+                                    <!-- Chart 3 - Bar Chart for Countries -->
+                                    <div class="bg-white p-4 rounded shadow col-span-3">
+                                        <h3 class="text-sm font-semibold">
+                                            <span class="icon icon-globe icon-blue"></span>
+                                            {% translate "Payments by Country" %}
+                                        </h3>
+                                        <div id="payments-by-country" class="dc-chart w-full h-[400px]"></div>
+                                    </div>
+                                    <!-- Chart 4 -->
                                     <div class="bg-white p-4 rounded shadow">
                                         <h3 class="text-sm font-semibold">
                                             <span class="icon icon-financing icon-blue"></span>
@@ -171,12 +156,12 @@
                             </div>
                         </div>
                     </div>
-                </div>
                 {% else %}
                     <div class="error-message">{{ error_message }}</div>
                 {% endif %}
-                        </div>
-                        <script>
+            </div>
+            <!-- JS Script -->
+            <script>
             document.addEventListener("DOMContentLoaded", () => {
                 const currentYear = new Date().getFullYear();
                 let isChartsInitialized = false;
@@ -215,8 +200,7 @@
                             "payments-by-delivery",
                             "payments-by-sector",
                             "volume-by-program",
-                            "payments-by-admin1",
-                            "payments-by-month",
+                            "payments-by-country",
                         ].forEach(showSpinner);
 
                         d3.json(url).then((data) => {
@@ -226,9 +210,7 @@
                             }
 
                             const processedPayments = data.map((item) => ({
-                                currency: item.currency || "USD",
                                 delivered_quantity_usd: Number.parseFloat(item.total_delivered_quantity_usd) || 0.0,
-                                delivered_quantity: Number.parseFloat(item.total_delivered_quantity) || 0.0,
                                 payments: item.payments || 0,
                                 individuals: item.individuals || 0,
                                 households: item.households || 0,
@@ -236,12 +218,11 @@
                                 finished_payment_plans: item.finished_payment_plans || 0,
                                 total_payment_plans: item.total_payment_plans || 0,
                                 children_counts: item.children_counts || 0,
-                                month: item.month || "Unknown month",
                                 year: item.year || "Unknown year",
                                 program: item.program || "Unknown program",
                                 sector: item.sector || "Unknown sector",
                                 payment_status: item.status || "Unknown status",
-                                admin1: item.admin1 || "Unknown admin1",
+                                country: item.country || "Unknown Country",
                                 fsp: item.fsp || "Unknown fsp",
                                 delivery_types: item.delivery_types || "Unknown delivery type",
                                 pwd_counts: item.pwd_counts || 0,
@@ -256,8 +237,8 @@
                             const deliveryDim = ndx.dimension((d) => d.delivery_types);
                             const sectorDim = ndx.dimension((d) => d.sector);
                             const programDim = ndx.dimension((d) => d.program);
-                            const monthDim = ndx.dimension((d) => d.month);
-                            const admin1Dim = ndx.dimension((d) => d.admin1);
+                            const countryDim = ndx.dimension((d) => d.country);
+
 
                             const fspGroup = fspDim
                                 .group()
@@ -271,21 +252,12 @@
                             const programGroup = programDim
                                 .group()
                                 .reduceSum((d) => d.delivered_quantity_usd);
-                            const admin1Group = admin1Dim
-                                .group()
-                                .reduceSum((d) => d.delivered_quantity_usd)
-                                .order((d) => -d);
-                            const topProgramGroup = {
-                                    all: () => programGroup.all().slice(0, 30), // Top 30 programs
-                                };
-                            const topAdmin1Group = {
-                                all: () => admin1Group.all().slice(0, 30), // Top 30 admin1
-                            };
-                            const monthGroup = monthDim
+                            const countryGroup = countryDim
                                 .group()
                                 .reduceSum((d) => d.delivered_quantity_usd);
-                            const localCurrency =
-                                processedPayments.find((item) => item.currency)?.currency || "USD";
+                                const topProgramGroup = {
+                                    all: () => programGroup.all().slice(0, 30), // Top 30 programs
+                                };
 
                             // Define charts
                             const fspChart = dc
@@ -346,52 +318,23 @@
                                 .xAxis()
                                 .ticks(3);
 
-                            const monthOrder = {
-                                January: 1,
-                                February: 2,
-                                March: 3,
-                                April: 4,
-                                May: 5,
-                                June: 6,
-                                July: 7,
-                                August: 8,
-                                September: 9,
-                                October: 10,
-                                November: 11,
-                                December: 12,
-                            };
-
-                            const monthChart = dc
-                                .rowChart("#payments-by-month")
-                                .dimension(monthDim)
-                                .group(monthGroup)
-                                .elasticX(true)
-                                .height(400)
-                                .useViewBoxResizing(true)
-                                .label(
-                                    (d) =>
-                                    `${d.key} ${((d.value / monthGroup.all().reduce((sum, g) => sum + g.value, 0)) * 100).toFixed(0)}%`,
-                                )
-                                .title((d) => `${d.key}: ${decimalnumberFormatter(d.value)} USD`)
-                                .ordering((d) => monthOrder[d.key])
+                            const countryChart = dc
+                                .rowChart("#payments-by-country")
+                                .dimension(countryDim)
+                                .group(countryGroup)
+                                .elasticX(true) // Allows the chart to resize based on data
+                                .height(400) // Adjust the height of the chart
+                                .margins({ top: 20, right: 30, bottom: 30, left: 50 }) // Margins for better spacing
+                                .useViewBoxResizing(true) // Enables responsive resizing
+                                .renderLabel(true)
+                                .label((d) =>
+                                    `${d.key}: ${d.value.toFixed(2)} USD (${((d.value / countryGroup.all().reduce((sum, g) => sum + g.value, 0)) * 100).toFixed(0)}%)`
+                                ) // Label with country name and percentage
+                                .title((d) => `${d.key}: ${d.value.toFixed(2)} USD`) // Tooltip with exact value
                                 .xAxis()
-                                .ticks(3);
+                                .ticks(5);
 
-                            const admin1Chart = dc
-                                .rowChart("#payments-by-admin1")
-                                .dimension(admin1Dim)
-                                .group(topAdmin1Group)
-                                .elasticX(true)
-                                .height(400)
-                                .label(
-                                    (d) =>
-                                    `${truncateLabel(d.key)}: ${decimalnumberFormatter(d.value)} USD (${((d.value / admin1Group.all().reduce((sum, g) => sum + g.value, 0)) * 100).toFixed(0)}%)`,
-                                )
-                                .title((d) => `${d.key}: ${decimalnumberFormatter(d.value)} USD`)
-                                .xAxis()
-                                .ticks(3);
-
-                            function updateTopMetrics() {
+                                function updateTopMetrics() {
                                 const totalPaymentsCount = ndx.groupAll().reduceSum(d => d.payments || 0).value();
                                 // Reconciled Payments Calculation
                                 const reconciledPaymentsCount = ndx
@@ -427,32 +370,8 @@
                                         }),
                                     )
                                     .value();
-                                const successfulPaymentsGroup = ndx
-                                    .groupAll()
-                                    .reduce(
-                                        (p, v) => {
-                                            if (successfulList.includes(v.payment_status)) {
-                                                p.count += 1;
-                                                p.sum += v.delivered_quantity || 0;
-                                            }
-                                            return p;
-                                        },
-                                        (p, v) => {
-                                            if (successfulList.includes(v.payment_status)) {
-                                                p.count -= 1;
-                                                p.sum -= v.delivered_quantity || 0;
-                                            }
-                                            return p;
-                                        },
-                                        () => ({
-                                            count: 0,
-                                            sum: 0,
-                                        }),
-                                    )
-                                    .value();
 
                                 const totalSuccessfulUSD = successfulPaymentsGroupUSD.sum;
-                                const totalSuccessful = successfulPaymentsGroup.sum;
                                 const successfulPaymentsCountUSD = successfulPaymentsGroupUSD.count;
                                 const pendingPaymentsGroupUSD = ndx
                                     .groupAll()
@@ -468,29 +387,6 @@
                                             if (pendingList.includes(v.payment_status)) {
                                                 p.count -= 1;
                                                 p.sum -= v.delivered_quantity_usd || 0;
-                                            }
-                                            return p;
-                                        },
-                                        () => ({
-                                            count: 0,
-                                            sum: 0,
-                                        }),
-                                    )
-                                    .value();
-                                const pendingPaymentsGroup = ndx
-                                    .groupAll()
-                                    .reduce(
-                                        (p, v) => {
-                                            if (pendingList.includes(v.payment_status)) {
-                                                p.count += 1;
-                                                p.sum += v.delivered_quantity || 0;
-                                            }
-                                            return p;
-                                        },
-                                        (p, v) => {
-                                            if (pendingList.includes(v.payment_status)) {
-                                                p.count -= 1;
-                                                p.sum -= v.delivered_quantity || 0;
                                             }
                                             return p;
                                         },
@@ -527,8 +423,6 @@
                                     `${decimalnumberFormatter(pendingPaymentsGroupUSD.sum)} USD`;
                                 document.getElementById("total-amount-paid").innerHTML =
                                     `${decimalnumberFormatter(totalSuccessfulUSD)} USD`;
-                                document.getElementById("total-amount-paid-local").innerHTML =
-                                    `${decimalnumberFormatter(totalSuccessful)} ${localCurrency}`;
                                 document.getElementById("households-reached").innerHTML =
                                     `${simplenumberFormatter(householdsReached)}`;
                                 document.getElementById("individuals-reached").innerHTML =
@@ -602,8 +496,7 @@
                             hideSpinner("payments-by-delivery");
                             hideSpinner("payments-by-sector");
                             hideSpinner("volume-by-program");
-                            hideSpinner("payments-by-admin1");
-                            hideSpinner("payments-by-month");
+                            hideSpinner("payments-by-country");
                             dc.renderAll();
                             isChartsInitialized = true;
                         });
@@ -612,6 +505,6 @@
                 }
                 fetchDataForCountry();
             });
-                        </script>
-                    </body>
-                </html>
+            </script>
+        </body>
+    </html>
