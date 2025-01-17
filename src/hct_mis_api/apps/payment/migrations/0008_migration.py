@@ -67,7 +67,7 @@ class Migration(migrations.Migration):
             name='payment_fk',
             field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='payment.payment'),
         ),
-        migrations.RunPython(migrate_onetoone_to_foreignkey),
+        migrations.RunPython(migrate_onetoone_to_foreignkey, reverse_code=migrations.RunPython.noop),
         migrations.RemoveField(
             model_name='paymentverification',
             name='payment',
