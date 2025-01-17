@@ -48,7 +48,7 @@ document_fields: List[Tuple[str, str]] = [
 
 
 @transaction.atomic
-def south_sudan_update_script(file_path: str, program_id: str) -> None:
+def south_sudan_update_script(file_path: str, program_id: str, batch_size: int) -> None:
     program = Program.objects.get(id=program_id)
     business_area = program.business_area
     update = UniversalIndividualUpdateScript(
@@ -61,5 +61,6 @@ def south_sudan_update_script(file_path: str, program_id: str) -> None:
         document_fields,
         deduplicate_documents=True,
         deduplicate_es=True,
+        batch_size=batch_size,
     )
     update.execute()
