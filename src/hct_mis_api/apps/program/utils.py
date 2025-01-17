@@ -94,12 +94,12 @@ class CopyProgramPopulation:
         with transaction.atomic():
             if self.create_collection:
                 individuals = self.copy_individuals_with_collections()
-                households = self.copy_households_with_collections(individuals)
+                households = self.copy_households_with_collections()
             else:
                 individuals = self.copy_individuals_without_collections()
-                households = self.copy_households_without_collections(individuals)
+                households = self.copy_households_without_collections()
 
-            self.copy_household_related_data(households, individuals)
+            self.copy_household_related_data(households)
             self.copy_individual_related_data(individuals)
 
     def copy_individual(self, individual: Individual) -> Individual:
@@ -132,7 +132,7 @@ class CopyProgramPopulation:
             individuals_to_create.append(copied_individual)
         return Individual.objects.bulk_create(individuals_to_create)
 
-    def copy_household(self, household: Household, new_individuals: List[Individual]) -> Household:
+    def copy_household(self, household: Household) -> Household:
         copy_from_household_id = household.pk
         household.pk = None
         household.program = self.program
@@ -143,39 +143,35 @@ class CopyProgramPopulation:
         household.copied_from_id = copy_from_household_id
         household.registration_data_import = self.rdi
         household.rdi_merge_status = self.rdi_merge_status
-        household.head_of_household = (
-            getattr(Individual, self.manager)
-            .filter(id__in=[ind.pk for ind in new_individuals])
-            .get(
-                program=self.program,
-                copied_from=household.head_of_household,
-            )
-        )
+        household.head_of_household = Individual.original_and_repr_objects.filter(
+            program=self.program,
+            unicef_id=household.head_of_household.unicef_id,
+        ).first()
 
         return household
 
-    def copy_households_without_collections(self, individuals: List[Individual]) -> List[Household]:
+    def copy_households_without_collections(self) -> List[Household]:
         households_to_create = []
         for household in self.copy_from_households:
-            copied_household = self.copy_household(household, individuals)
+            copied_household = self.copy_household(household)
             copied_household.household_collection = None
             households_to_create.append(copied_household)
         return Household.objects.bulk_create(households_to_create)
 
-    def copy_households_with_collections(self, individuals: List[Individual]) -> List[Household]:
+    def copy_households_with_collections(self) -> List[Household]:
         households_to_create = []
         for household in self.copy_from_households:
             if not household.household_collection:
                 household.household_collection = HouseholdCollection.objects.create()
                 household.save()
-            households_to_create.append(self.copy_household(household, individuals))
+            households_to_create.append(self.copy_household(household))
         return Household.objects.bulk_create(households_to_create)
 
-    def copy_household_related_data(self, new_households: List[Household], new_individuals: List[Individual]) -> None:
+    def copy_household_related_data(self, new_households: List[Household]) -> None:
         roles_to_create = []
         entitlement_cards_to_create = []
         for new_household in new_households:
-            roles_to_create.extend(self.copy_roles_per_household(new_household, new_individuals))
+            roles_to_create.extend(self.copy_roles_per_household(new_household))
             entitlement_cards_to_create.extend(self.copy_entitlement_cards_per_household(new_household))
         IndividualRoleInHousehold.objects.bulk_create(roles_to_create)
         EntitlementCard.objects.bulk_create(entitlement_cards_to_create)
@@ -183,17 +179,19 @@ class CopyProgramPopulation:
     def copy_roles_per_household(
         self,
         new_household: Household,
-        new_individuals: List[Individual],
     ) -> List[IndividualRoleInHousehold]:
         roles_in_household = []
-        copied_from_roles = IndividualRoleInHousehold.objects.filter(household=new_household.copied_from)
+        copied_from_roles = IndividualRoleInHousehold.objects.filter(household=new_household.copied_from).exclude(
+            Q(individual__withdrawn=True) | Q(individual__duplicate=True)
+        )
         for role in copied_from_roles:
             role.pk = None
             role.household = new_household
             role.rdi_merge_status = self.rdi_merge_status
-            role.individual = next(
-                filter(lambda ind: ind.program == self.program and ind.copied_from == role.individual, new_individuals)
-            )
+            role.individual = Individual.original_and_repr_objects.filter(
+                program=self.program,
+                unicef_id=role.individual.unicef_id,
+            ).first()
             roles_in_household.append(role)
         return roles_in_household
 
@@ -243,15 +241,11 @@ class CopyProgramPopulation:
         BankAccountInfo.objects.bulk_create(bank_account_infos_to_create)
 
     def set_household_per_individual(self, new_individual: Individual) -> Individual:
-        new_individual.household = (
-            getattr(Household, self.manager)
-            .filter(
+        if new_individual.household:
+            new_individual.household = Household.original_and_repr_objects.filter(
                 program=self.program,
-                copied_from_id=new_individual.household_id,
-                registration_data_import=self.rdi,
-            )
-            .first()
-        )
+                unicef_id=new_individual.household.unicef_id,
+            ).first()
         return new_individual
 
     @staticmethod

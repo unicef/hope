@@ -495,8 +495,6 @@ type CommunicationMessageNode implements Node {
   sampleSize: Int!
   program: ProgramNode
   isOriginal: Boolean!
-  isMigrationHandled: Boolean!
-  migratedAt: DateTime
   copiedFrom: CommunicationMessageNode
   copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
   adminUrl: String
@@ -1160,8 +1158,6 @@ type FeedbackNode implements Node {
   createdBy: UserNode
   linkedGrievance: GrievanceTicketNode
   isOriginal: Boolean!
-  isMigrationHandled: Boolean!
-  migratedAt: DateTime
   copiedFrom: FeedbackNode
   copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
   feedbackMessages(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackMessageNodeConnection!
