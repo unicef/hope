@@ -704,7 +704,7 @@ class BiometricDeduplicationServiceTest(TestCase):
                 "location": None,
             },
         ]
-        assert ind2.biometric_deduplication_batch_status == DUPLICATE
+        assert ind2.biometric_deduplication_batch_status == DUPLICATE_IN_BATCH
 
         ind3.refresh_from_db()
         assert ind3.biometric_deduplication_batch_results == [
@@ -717,7 +717,7 @@ class BiometricDeduplicationServiceTest(TestCase):
                 "location": None,
             },
         ]
-        assert ind2.biometric_deduplication_batch_status == DUPLICATE
+        assert ind2.biometric_deduplication_batch_status == DUPLICATE_IN_BATCH
         assert ind3.biometric_deduplication_golden_record_results == []
         assert ind3.biometric_deduplication_golden_record_status == UNIQUE
 
