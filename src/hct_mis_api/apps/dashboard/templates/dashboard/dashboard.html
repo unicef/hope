@@ -172,11 +172,11 @@
                         </div>
                     </div>
                 </div>
-                {% else %}
-                    <div class="error-message">{{ error_message }}</div>
-                {% endif %}
-                        </div>
-                        <script>
+            {% else %}
+                <div class="error-message">{{ error_message }}</div>
+            {% endif %}
+        </div>
+        <script>
             document.addEventListener("DOMContentLoaded", () => {
                 const currentYear = new Date().getFullYear();
                 let isChartsInitialized = false;
@@ -612,6 +612,6 @@
                 }
                 fetchDataForCountry();
             });
-                        </script>
-                    </body>
-                </html>
+        </script>
+    </body>
+</html>

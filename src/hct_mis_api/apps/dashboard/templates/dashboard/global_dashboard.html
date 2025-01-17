@@ -25,143 +25,132 @@
                 <div id="year-tabs" class="mb-4">
                     <div class="tab-list flex space-x-2 overflow-x-auto bg-sky-50 rounded shadow p-2"></div>
                 </div>
-                <div class="flex space-x-4">
-                    <!-- Left block for metrics -->
-                    <div class="basis-5/6 grid grid-cols-4 gap-2">
-                        <div class="bg-white p-4 rounded shadow">
-                            <h3 class="text-sm font-semibold">
-                                <span class="icon icon-financing icon-blue"></span>
-                                {% translate "Total Amount Paid" %}
-                            </h3>
-                            <div id="total-amount-paid" class="text-sm font-bold  text-center"></div>
-                        </div>
-                        <div class="bg-white p-4 rounded shadow">
-                            <h3 class="text-sm font-semibold">
-                                <span class="icon icon-preparedness icon-blue"></span>
-                                {% translate "Number of Payments" %}
-                            </h3>
-                            <div id="number-of-payments" class="text-sm font-bold text-center"></div>
-                        </div>
-                        <div class="bg-white p-4 rounded shadow">
-                            <h3 class="text-sm font-semibold">
-                                <span class="icon icon-financing icon-blue"></span>
-                                {% translate "Outstanding Payment" %}
-                            </h3>
-                            <div id="outstanding-payments" class="text-sm font-bold text-center"></div>
-                        </div>
-                        <div class="bg-white p-4 rounded shadow">
-                            <h3 class="text-sm font-semibold">
-                                <span class="icon icon-house icon-blue"></span>
-                                <span class="tooltip"
-                                      role="tooltip"
-                                      title="{% translate 'Aggregated count of households for the selected months' %}">
-                                    {% translate "Households Reached" %}
-                                </h3>
-                                <div id="households-reached" class="text-sm font-bold text-center"></div>
-                            </div>
-                            <div class="bg-white p-4 rounded shadow">
-                                <h3 class="text-sm font-semibold">
-                                    <span class="icon icon-people-targeted icon-blue"></span>
-                                    <span class="tooltip"
-                                          role="tooltip"
-                                          title="{% translate 'Aggregated count of individuals for the selected months' %}">
-                                        {% translate "Individuals Reached" %}
-                                    </h3>
-                                    <div id="individuals-reached" class="text-sm font-bold text-center"></div>
-                                </div>
-                                <div class="bg-white p-4 rounded shadow">
-                                    <h3 class="text-sm font-semibold">
-                                        <span class="icon icon-children icon-blue"></span>
-                                        <span class="tooltip"
-                                              role="tooltip"
-                                              title="{% translate 'Aggregated count of children for the selected months' %}">
-                                            {% translate "Children Reached" %}
-                                        </h3>
-                                        <div id="children-reached" class="text-sm font-bold text-center"></div>
-                                    </div>
-                                    <div class="bg-white p-4 rounded shadow">
-                                        <h3 class="text-sm font-semibold">
-                                            <span class="icon icon-users icon-blue"></span>
-                                            <span class="tooltip"
-                                                  role="tooltip"
-                                                  title="{% translate 'Aggregated count of pwd for the selected months' %}">
-                                                {% translate "PWD Reached" %}
-                                            </h3>
-                                            <div id="pwd-reached" class="text-sm font-bold text-center"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <!-- Other charts Section -->
-                                <div class="flex flex-grow grid grid-cols-3 gap-2 mt-8">
-                                    <!-- Chart 1 -->
-                                    <div class="bg-white p-3 rounded shadow">
-                                        <h3 class="text-sm font-semibold">
-                                            <span class="icon icon-analysis icon-blue"></span>
-                                            {% translate "Payments by Sector" %}
-                                        </h3>
-                                        <div id="payments-by-sector" class="dc-chart w-full h-full"></div>
-                                    </div>
-                                    <!-- Chart 2 -->
-                                    <div class="bg-white p-3 rounded shadow">
-                                        <h3 class="text-sm font-semibold">
-                                            <span class="icon icon-people-targeted icon-blue"></span>
-                                            {% translate "Payments by Programme" %}
-                                        </h3>
-                                        <div id="volume-by-program" class="dc-chart w-full h-full"></div>
-                                    </div>
-                                    <!-- Chart 3 -->
-                                    <div class="bg-white p-4 rounded shadow">
-                                        <h3 class="text-sm font-semibold">
-                                            <span class="icon icon-logistics icon-blue"></span>
-                                            {% translate "Payments by FSP" %}
-                                        </h3>
-                                        <div id="payments-by-fsp" class="dc-chart w-full h-full"></div>
-                                    </div>
-                                    <!-- Chart 3 - Bar Chart for Countries -->
-                                    <div class="bg-white p-4 rounded shadow col-span-3">
-                                        <h3 class="text-sm font-semibold">
-                                            <span class="icon icon-globe icon-blue"></span>
-                                            {% translate "Payments by Country" %}
-                                        </h3>
-                                        <div id="payments-by-country" class="dc-chart w-full h-[400px]"></div>
-                                    </div>
-                                    <!-- Chart 4 -->
-                                    <div class="bg-white p-4 rounded shadow">
-                                        <h3 class="text-sm font-semibold">
-                                            <span class="icon icon-financing icon-blue"></span>
-                                            {% translate "Payments by Delivery Mechanism" %}
-                                        </h3>
-                                        <div id="payments-by-delivery" class="dc-chart w-full h-full"></div>
-                                    </div>
-                                    <!-- Reconciliation Cards Section -->
-                                    <div class="flex flex-col gap-4 col-span-1">
-                                        <div class="bg-white p-4 rounded shadow text-center">
-                                            <h3 class="text-lg font-semibold">
-                                                <span class="icon icon-report icon-blue"></span>
-                                                {% translate "Reconciliation" %}
-                                            </h3>
-                                            <div class="text-green-500 text-base font-bold reconciliation-percentage">%</div>
-                                            <p>{% translate "Payment are reconciled" %}</p>
-                                        </div>
-                                        <div class="bg-white p-4 rounded shadow text-center">
-                                            <h3 class="text-lg font-semibold">
-                                                <span class="icon icon-report icon-blue"></span>
-                                                {% translate "Finished Payment Plans" %}
-                                            </h3>
-                                            <div class="text-red-500 text-base font-bold pending-reconciliation-percentage">%</div>
-                                            <p>{% translate "Payments plans" %}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                <!-- Payments by Country Chart -->
+                <div class="bg-white p-4 rounded shadow">
+                    <h3 class="text-lg font-semibold mb-2">
+                        <span class="icon icon-globe icon-blue"></span>
+                        {% translate "Payments by Country" %}
+                    </h3>
+                    <div id="payments-by-country" class="dc-chart w-full h-[600px]"></div>
+                </div>
+                <!-- Metric Cards -->
+                <div class="grid grid-cols-3 gap-4 mt-8">
+                    <!-- Total Amount Paid -->
+                    <div class="bg-white p-4 rounded shadow">
+                        <h3 class="text-sm font-semibold">
+                            <span class="icon icon-financing icon-blue"></span>
+                            {% translate "Total Amount Paid" %}
+                        </h3>
+                        <div id="total-amount-paid" class="text-sm font-bold text-center"></div>
                     </div>
-                {% else %}
-                    <div class="error-message">{{ error_message }}</div>
-                {% endif %}
-            </div>
-            <!-- JS Script -->
-            <script>
+                    <!-- Number of Payments -->
+                    <div class="bg-white p-4 rounded shadow">
+                        <h3 class="text-sm font-semibold">
+                            <span class="icon icon-preparedness icon-blue"></span>
+                            {% translate "Number of Payments" %}
+                        </h3>
+                        <div id="number-of-payments" class="text-sm font-bold text-center"></div>
+                    </div>
+                    <!-- Outstanding Payment -->
+                    <div class="bg-white p-4 rounded shadow">
+                        <h3 class="text-sm font-semibold">
+                            <span class="icon icon-financing icon-blue"></span>
+                            {% translate "Outstanding Payment" %}
+                        </h3>
+                        <div id="outstanding-payments" class="text-sm font-bold text-center"></div>
+                    </div>
+                    <!-- Households Reached -->
+                    <div class="bg-white p-4 rounded shadow">
+                        <h3 class="text-sm font-semibold">
+                            <span class="icon icon-house icon-blue"></span>
+                            {% translate "Households Reached" %}
+                        </h3>
+                        <div id="households-reached" class="text-sm font-bold text-center"></div>
+                    </div>
+                    <!-- Individuals Reached -->
+                    <div class="bg-white p-4 rounded shadow">
+                        <h3 class="text-sm font-semibold">
+                            <span class="icon icon-people-targeted icon-blue"></span>
+                            {% translate "Individuals Reached" %}
+                        </h3>
+                        <div id="individuals-reached" class="text-sm font-bold text-center"></div>
+                    </div>
+                    <!-- Children Reached -->
+                    <div class="bg-white p-4 rounded shadow">
+                        <h3 class="text-sm font-semibold">
+                            <span class="icon icon-children icon-blue"></span>
+                            {% translate "Children Reached" %}
+                        </h3>
+                        <div id="children-reached" class="text-sm font-bold text-center"></div>
+                    </div>
+                    <!-- PWD Reached -->
+                    <div class="bg-white p-4 rounded shadow">
+                        <h3 class="text-sm font-semibold">
+                            <span class="icon icon-users icon-blue"></span>
+                            {% translate "PWD Reached" %}
+                        </h3>
+                        <div id="pwd-reached" class="text-sm font-bold text-center"></div>
+                    </div>
+                    <!-- Reconciliation -->
+                    <div class="bg-white p-4 rounded shadow">
+                        <h3 class="text-sm font-semibold text-center">
+                            <span class="icon icon-report icon-blue"></span>
+                            {% translate "Reconciliation" %}
+                        </h3>
+                        <div class="text-green-500 text-base font-bold text-center reconciliation-percentage">%</div>
+                        <p class="text-center text-sm">{% translate "Payments are reconciled" %}</p>
+                    </div>
+                    <!-- Finished Payment Plans -->
+                    <div class="bg-white p-4 rounded shadow">
+                        <h3 class="text-sm font-semibold text-center">
+                            <span class="icon icon-report icon-blue"></span>
+                            {% translate "Finished Payment Plans" %}
+                        </h3>
+                        <div class="text-red-500 text-base font-bold text-center pending-reconciliation-percentage">%</div>
+                        <p class="text-center text-sm">{% translate "Payments plans" %}</p>
+                    </div>
+                </div>
+                <!-- Other Charts Section -->
+                <div class="grid grid-cols-2 gap-4 mt-8">
+                    <!-- Payments by Sector -->
+                    <div class="bg-white p-4 rounded shadow">
+                        <h3 class="text-sm font-semibold">
+                            <span class="icon icon-analysis icon-blue"></span>
+                            {% translate "Payments by Sector" %}
+                        </h3>
+                        <div id="payments-by-sector" class="dc-chart w-full h-full"></div>
+                    </div>
+                    <!-- Payments by Programme -->
+                    <div class="bg-white p-4 rounded shadow">
+                        <h3 class="text-sm font-semibold">
+                            <span class="icon icon-people-targeted icon-blue"></span>
+                            {% translate "Payments by Programme" %}
+                        </h3>
+                        <div id="volume-by-program" class="dc-chart w-full h-full"></div>
+                    </div>
+                    <!-- Payments by FSP -->
+                    <div class="bg-white p-4 rounded shadow">
+                        <h3 class="text-sm font-semibold">
+                            <span class="icon icon-logistics icon-blue"></span>
+                            {% translate "Payments by FSP" %}
+                        </h3>
+                        <div id="payments-by-fsp" class="dc-chart w-full h-full"></div>
+                    </div>
+                    <!-- Payments by Delivery Mechanism -->
+                    <div class="bg-white p-4 rounded shadow">
+                        <h3 class="text-sm font-semibold">
+                            <span class="icon icon-financing icon-blue"></span>
+                            {% translate "Payments by Delivery Mechanism" %}
+                        </h3>
+                        <div id="payments-by-delivery" class="dc-chart w-full h-full"></div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="error-message">{{ error_message }}</div>
+            {% endif %}
+        </div>
+        <!-- JS Script -->
+        <script>
             document.addEventListener("DOMContentLoaded", () => {
                 const currentYear = new Date().getFullYear();
                 let isChartsInitialized = false;
@@ -318,21 +307,33 @@
                                 .xAxis()
                                 .ticks(3);
 
-                            const countryChart = dc
-                                .rowChart("#payments-by-country")
+                            const countryChart = dc.barChart("#payments-by-country");
+                            const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+                            countryChart
                                 .dimension(countryDim)
                                 .group(countryGroup)
-                                .elasticX(true) // Allows the chart to resize based on data
-                                .height(400) // Adjust the height of the chart
-                                .margins({ top: 20, right: 30, bottom: 30, left: 50 }) // Margins for better spacing
-                                .useViewBoxResizing(true) // Enables responsive resizing
-                                .renderLabel(true)
-                                .label((d) =>
-                                    `${d.key}: ${d.value.toFixed(2)} USD (${((d.value / countryGroup.all().reduce((sum, g) => sum + g.value, 0)) * 100).toFixed(0)}%)`
-                                ) // Label with country name and percentage
-                                .title((d) => `${d.key}: ${d.value.toFixed(2)} USD`) // Tooltip with exact value
-                                .xAxis()
-                                .ticks(5);
+                                .x(d3.scaleBand())
+                                .xUnits(dc.units.ordinal)
+                                .brushOn(false)
+                                .elasticY(true)
+                                .renderHorizontalGridLines(true)
+                                .xAxisLabel("Countries")
+                                .yAxisLabel("{% translate 'Amount Paid (USD)' %}")
+                                .barPadding(0.01)
+                                .margins({ top: 20, right: 20, bottom: 50, left: 80 })
+                                .outerPadding(0.05)
+                                .ordering((d) => -d.value) // Order bars by value
+                                .title((d) => `${d.key}: ${d.value.toFixed(2)} USD`)
+                                .colors((d) => colorScale(d.key)) // Assign color based on key
+                                .colorAccessor((d) => d.key) 
+                                .render();
+                            countryChart.yAxis().ticks(5); // Y-axis ticks
+                                
+                            // Add axis labels
+                            countryChart
+                                .yAxisLabel("{% translate 'Amount Paid (USD)' %}")
+                                .xAxisLabel("{% translate 'Countries' %}");
+                            
 
                                 function updateTopMetrics() {
                                 const totalPaymentsCount = ndx.groupAll().reduceSum(d => d.payments || 0).value();
@@ -505,6 +506,6 @@
                 }
                 fetchDataForCountry();
             });
-            </script>
-        </body>
-    </html>
+        </script>
+    </body>
+</html>
