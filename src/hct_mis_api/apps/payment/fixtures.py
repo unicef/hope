@@ -45,6 +45,7 @@ from hct_mis_api.apps.payment.models import (
     PaymentVerificationPlan,
     PaymentVerificationSummary,
 )
+from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.payment.utils import to_decimal
 from hct_mis_api.apps.program.fixtures import (
     BeneficiaryGroupFactory,
@@ -52,7 +53,11 @@ from hct_mis_api.apps.program.fixtures import (
 )
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory
+from hct_mis_api.apps.targeting.fixtures import (
+    TargetingCriteriaFactory,
+    TargetingCriteriaRuleFactory,
+    TargetingCriteriaRuleFilterFactory,
+)
 from hct_mis_api.apps.targeting.models import (
     TargetingCriteria,
     TargetingCriteriaRule,
@@ -622,9 +627,9 @@ def generate_payment_plan() -> None:
     TargetingCriteriaRuleFilter.objects.update_or_create(
         pk=targeting_criteria_rule_condition_pk,
         targeting_criteria_rule=targeting_criteria_rule,
-        comparison_method="EQUALS",
-        field_name="address",
-        arguments=[address],
+        comparison_method="CONTAINS",
+        field_name="registration_data_import",
+        arguments=["4d100000-0000-0000-0000-000000000000"],
     )
 
     payment_plan_pk = UUID("00000000-feed-beef-0000-00000badf00d")
@@ -640,7 +645,16 @@ def generate_payment_plan() -> None:
         created_by=root,
         program_cycle=program_cycle,
     )[0]
-
+    tc2 = TargetingCriteriaFactory()
+    tcr2 = TargetingCriteriaRuleFactory(
+        targeting_criteria=tc2,
+    )
+    TargetingCriteriaRuleFilterFactory(
+        targeting_criteria_rule=tcr2,
+        comparison_method="RANGE",
+        field_name="size",
+        arguments=[1, 11],
+    )
     delivery_mechanism_cash = DeliveryMechanism.objects.get(code="cash")
 
     fsp_1_pk = UUID("00000000-0000-0000-0000-f00000000001")
@@ -651,6 +665,14 @@ def generate_payment_plan() -> None:
         vision_vendor_number=123456789,
     )[0]
     fsp_1.delivery_mechanisms.add(delivery_mechanism_cash)
+
+    fsp_api = FinancialServiceProvider.objects.update_or_create(
+        name="Test FSP API",
+        communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+        vision_vendor_number=554433,
+        payment_gateway_id="test_pg_id",
+    )[0]
+    fsp_api.delivery_mechanisms.add(delivery_mechanism_cash)
 
     FspXlsxTemplatePerDeliveryMechanismFactory(
         financial_service_provider=fsp_1, delivery_mechanism=delivery_mechanism_cash
@@ -693,8 +715,21 @@ def generate_payment_plan() -> None:
         status=Payment.STATUS_PENDING,
         program=program,
     )
-
     payment_plan.update_population_count_fields()
+    # add one more PP
+    pp2 = PaymentPlan.objects.update_or_create(
+        name="Test TP for PM (just click rebuild)",
+        targeting_criteria=tc2,
+        status=PaymentPlan.Status.TP_OPEN,
+        business_area=afghanistan,
+        currency="USD",
+        dispersion_start_date=now,
+        dispersion_end_date=now + timedelta(days=14),
+        status_date=now,
+        created_by=root,
+        program_cycle=program_cycle,
+    )[0]
+    PaymentPlanService(payment_plan=pp2).full_rebuild()
 
 
 def update_fsps() -> None:

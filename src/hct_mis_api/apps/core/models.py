@@ -11,6 +11,7 @@ from django.utils.translation import gettext_lazy as _
 
 from django_celery_beat.models import PeriodicTask
 from django_celery_beat.schedulers import DatabaseScheduler, ModelEntry
+from fernet_fields import EncryptedCharField
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel, TimeStampedModel
 from natural_keys import NaturalKeyModel
@@ -520,6 +521,8 @@ class FileTemp(TimeStampedModel):
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
     file = models.FileField()
     was_downloaded = models.BooleanField(default=False)
+    password = EncryptedCharField(max_length=255, null=True, blank=True)
+    xlsx_password = EncryptedCharField(max_length=255, null=True, blank=True)
 
     def __str__(self) -> str:
         return f"{self.file.name} - {self.created}"
