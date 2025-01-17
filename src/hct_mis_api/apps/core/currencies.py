@@ -124,7 +124,7 @@ SDG = "SDG"
 SEK = "SEK"
 SGD = "SGD"
 SHP = "SHP"
-SLL = "SLL"
+SLE = "SLE"
 SOS = "SOS"
 SRD = "SRD"
 SSP = "SSP"
@@ -289,7 +289,7 @@ CURRENCY_CHOICES = (
     (SEK, _("Swedish krona/kronor")),
     (SGD, _("Singapore dollar")),
     (SHP, _("Saint Helena pound")),
-    (SLL, _("Sierra Leonean leone")),
+    (SLE, _("Sierra Leonean leone")),
     (SOS, _("Somali shilling")),
     (SRD, _("Surinamese dollar")),
     (SSP, _("South Sudanese pound")),

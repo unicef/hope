@@ -787,9 +787,7 @@ export type CommunicationMessageNode = Node & {
   fullListArguments?: Maybe<Scalars['JSONString']['output']>;
   households: HouseholdNodeConnection;
   id: Scalars['ID']['output'];
-  isMigrationHandled: Scalars['Boolean']['output'];
   isOriginal: Scalars['Boolean']['output'];
-  migratedAt?: Maybe<Scalars['DateTime']['output']>;
   numberOfRecipients: Scalars['Int']['output'];
   paymentPlan?: Maybe<PaymentPlanNode>;
   program?: Maybe<ProgramNode>;
@@ -1612,12 +1610,10 @@ export type FeedbackNode = Node & {
   householdLookup?: Maybe<HouseholdNode>;
   id: Scalars['ID']['output'];
   individualLookup?: Maybe<IndividualNode>;
-  isMigrationHandled: Scalars['Boolean']['output'];
   isOriginal: Scalars['Boolean']['output'];
   issueType: FeedbackIssueType;
   language: Scalars['String']['output'];
   linkedGrievance?: Maybe<GrievanceTicketNode>;
-  migratedAt?: Maybe<Scalars['DateTime']['output']>;
   program?: Maybe<ProgramNode>;
   unicefId?: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['DateTime']['output'];
@@ -22973,9 +22969,7 @@ export type CommunicationMessageNodeResolvers<ContextType = any, ParentType exte
   fullListArguments?: Resolver<Maybe<ResolversTypes['JSONString']>, ParentType, ContextType>;
   households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, Partial<CommunicationMessageNodeHouseholdsArgs>>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-  isMigrationHandled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   isOriginal?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  migratedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   numberOfRecipients?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   paymentPlan?: Resolver<Maybe<ResolversTypes['PaymentPlanNode']>, ParentType, ContextType>;
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>;
@@ -23476,12 +23470,10 @@ export type FeedbackNodeResolvers<ContextType = any, ParentType extends Resolver
   householdLookup?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   individualLookup?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>;
-  isMigrationHandled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   isOriginal?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   issueType?: Resolver<ResolversTypes['FeedbackIssueType'], ParentType, ContextType>;
   language?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   linkedGrievance?: Resolver<Maybe<ResolversTypes['GrievanceTicketNode']>, ParentType, ContextType>;
-  migratedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>;
   unicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
