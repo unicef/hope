@@ -8,7 +8,9 @@ from django.db.models import Q, QuerySet
 
 from hct_mis_api.apps.household.models import (
     DUPLICATE,
+    DUPLICATE_IN_BATCH,
     UNIQUE,
+    UNIQUE_IN_BATCH,
     Individual,
     PendingIndividual,
 )
@@ -224,7 +226,9 @@ class BiometricDeduplicationService:
                         batch_ind_duplicates,
                     )
                 )
-                individual.biometric_deduplication_batch_status = DUPLICATE if batch_ind_duplicates.exists() else UNIQUE
+                individual.biometric_deduplication_batch_status = (
+                    DUPLICATE_IN_BATCH if batch_ind_duplicates.exists() else UNIQUE_IN_BATCH
+                )
 
                 individual.save(
                     update_fields=[
