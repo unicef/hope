@@ -331,6 +331,7 @@ def check_permissions(user: Any, permissions: Iterable[Permissions], **kwargs: A
     if business_area is None:
         return False
     program_id = get_program_id_from_headers(kwargs)
+    print(f"Program ID: {program_id}, business_area: {business_area}")
     return any(user.has_permission(permission.name, business_area, program_id) for permission in permissions)
 
 

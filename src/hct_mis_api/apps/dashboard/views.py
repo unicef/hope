@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict
+from typing import Any, Dict, Type
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.cache import cache
@@ -42,26 +42,28 @@ class DashboardDataView(APIView):
         Retrieve dashboard data for a given business area from Redis cache.
         If data is not cached or needs updating, refresh it.
         """
-        if business_area_slug.lower() == "global":
-            if not request.user.is_superuser:
-                return Response(
-                    {"detail": _("You do not have permission to view the global dashboard.")},
-                    status=status.HTTP_403_FORBIDDEN,
-                )
-            data = DashboardGlobalDataCache.get_data(business_area_slug)
-            if not data:
-                data = DashboardGlobalDataCache.refresh_data()
-            return Response(data, status=status.HTTP_200_OK)
+        is_global = business_area_slug.lower() == "global"
         business_area = get_object_or_404(BusinessArea, slug=business_area_slug)
+        data_cache: Type[DashboardDataCache] = DashboardGlobalDataCache if is_global else DashboardDataCache
+        if is_global:
+            data_cache = DashboardGlobalDataCache  # noqa
+        else:
+            data_cache = DashboardDataCache  # noqa
 
         if not check_permissions(request.user, [Permissions.DASHBOARD_VIEW_COUNTRY], business_area=business_area):
             return Response(
-                {"detail": _("You do not have permission to view this dashboard.")}, status=status.HTTP_403_FORBIDDEN
+                {
+                    "detail": _(
+                        "You do not have permission to view the global dashboard."
+                        if is_global
+                        else "You do not have permission to view this dashboard."
+                    )
+                },
+                status=status.HTTP_403_FORBIDDEN,
             )
-
-        data = DashboardDataCache.get_data(business_area_slug)
+        data = data_cache.get_data(business_area_slug)
         if not data:
-            data = DashboardDataCache.refresh_data(business_area_slug)
+            data = data_cache.refresh_data(business_area_slug if not is_global else "global")
 
         return Response(data, status=status.HTTP_200_OK)
 

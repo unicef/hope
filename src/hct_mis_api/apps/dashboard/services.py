@@ -1,7 +1,7 @@
 import calendar
 import json
 from collections import defaultdict
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Protocol
 
 from django.core.cache import cache
 from django.db.models import Count, DecimalField, F, Q, Sum, Value
@@ -37,7 +37,7 @@ finished_payment_plans = Count("parent__id", filter=Q(parent__status=PaymentPlan
 total_payment_plans = Count("parent__id", distinct=True)
 
 
-class DashboardDataCache:
+class DashboardDataCache(Protocol):
     """
     Utility class to manage dashboard data caching using Redis.
     """
@@ -235,8 +235,8 @@ class DashboardGlobalDataCache(DashboardDataCache):
             .annotate(
                 country=F("business_area__name"),
                 year=ExtractYear(Coalesce("delivery_date", "entitlement_date", "status_date")),
-                programs=Coalesce(F("program__name"), Value("Unknown program")),
-                sectors=Coalesce(F("program__sector"), Value("Unknown sector")),
+                programs=Coalesce(F("household__program__name"), Value("Unknown program")),
+                sectors=Coalesce(F("household__program__sector"), Value("Unknown sector")),
                 fsp=Coalesce(F("financial_service_provider__name"), Value("Unknown fsp")),
                 delivery_types=F("delivery_type__name"),
             )
