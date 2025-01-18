@@ -7,8 +7,14 @@ import pytest
 from rest_framework.utils.serializer_helpers import ReturnDict
 
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory
-from hct_mis_api.apps.dashboard.serializers import DashboardHouseholdSerializer, DashboardGlobalSerializer
-from hct_mis_api.apps.dashboard.services import DashboardDataCache, DashboardGlobalDataCache
+from hct_mis_api.apps.dashboard.serializers import (
+    DashboardGlobalSerializer,
+    DashboardHouseholdSerializer,
+)
+from hct_mis_api.apps.dashboard.services import (
+    DashboardDataCache,
+    DashboardGlobalDataCache,
+)
 
 CACHE_CONFIG = [
     ("DashboardDataCache", DashboardDataCache, "test-area"),
@@ -72,15 +78,18 @@ def test_refresh_data(
     cache_key = cache_class.get_cache_key(slug)
     cache.delete(cache_key)
     _ = populate_dashboard_cache(afghanistan)
-    if slug == "global":
-        data: ReturnDict = cache_class.refresh_data()
-    else:
-        data: ReturnDict = cache_class.refresh_data(afghanistan.slug)
 
-    assert len(data) > 0
-    assert sum(item["payments"] for item in data) > 0
+    refreshed_data: Optional[ReturnDict] = None
+    if slug == "global":
+        refreshed_data = cache_class.refresh_data()
+    else:
+        refreshed_data = cache_class.refresh_data(afghanistan.slug)
+
+    assert refreshed_data is not None, "Refresh data returned None"
+    assert len(refreshed_data) > 0, "No data returned by refresh"
+    assert sum(item["payments"] for item in refreshed_data) > 0, "Payments data mismatch"
     all_fields = serializer().get_fields().keys()
-    assert data[0].keys() >= all_fields
+    assert refreshed_data[0].keys() >= all_fields, "Fields mismatch with serializer"
 
     cached_data = cache.get(cache_key)
-    assert cached_data is not None
+    assert cached_data is not None, "Data not cached"
