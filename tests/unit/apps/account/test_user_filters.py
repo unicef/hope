@@ -138,17 +138,11 @@ class TestUserFilter(APITestCase):
         RoleAssignmentFactory(user=user_with_test_role, role=cls.role, business_area=business_area)
 
         # user with partner with role in BA and access to program
-        role_management = RoleFactory(
-            name="User Management View Role", permissions=[Permissions.USER_MANAGEMENT_VIEW_LIST.value]
-        )
         partner_with_test_role = PartnerFactory(name="Partner With Test Role")
-        cls.add_partner_role_in_business_area(
+        cls.create_partner_role_with_permissions(
             partner=partner_with_test_role,
+            permissions=[Permissions.USER_MANAGEMENT_VIEW_LIST],
             business_area=business_area,
-            roles=[cls.role, role_management],
-        )
-        cls.update_partner_access_to_program(
-            partner=partner_with_test_role,
             program=cls.program,
         )
         cls.user = UserFactory(username="user_with_partner_with_test_role", partner=partner_with_test_role)

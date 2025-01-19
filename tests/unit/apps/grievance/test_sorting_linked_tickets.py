@@ -4,7 +4,7 @@ from django.core.management import call_command
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import PartnerFactory, RoleFactory, UserFactory
+from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -71,18 +71,17 @@ class TestGrievanceQuery(APITestCase):
         cls.admin_area_2 = AreaFactory(name="City Example", area_type=area_type, p_code="sadasdasfd222")
 
         # update partner perms
-        role = RoleFactory(name="Test Role", permissions=[Permissions.PROGRAMME_CREATE])
-        cls.update_partner_access_to_program(cls.partner, cls.program, [cls.admin_area_1, cls.admin_area_2])
-        cls.add_partner_role_in_business_area(
+        cls.set_admin_area_limits_in_program(cls.partner, cls.program, [cls.admin_area_1, cls.admin_area_2])
+        cls.create_partner_role_with_permissions(
             cls.partner,
+            [Permissions.PROGRAMME_CREATE],
             cls.business_area,
-            [role],
         )
-        cls.update_partner_access_to_program(cls.partner_2, cls.program, [cls.admin_area_1, cls.admin_area_2])
-        cls.add_partner_role_in_business_area(
+        cls.set_admin_area_limits_in_program(cls.partner_2, cls.program, [cls.admin_area_1, cls.admin_area_2])
+        cls.create_partner_role_with_permissions(
             cls.partner_2,
+            [Permissions.PROGRAMME_CREATE],
             cls.business_area,
-            [role],
         )
 
         household_1, _ = create_household({"size": 1})

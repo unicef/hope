@@ -9,7 +9,6 @@ from parameterized import parameterized
 from hct_mis_api.apps.account.fixtures import (
     BusinessAreaFactory,
     PartnerFactory,
-    RoleFactory,
     UserFactory,
 )
 from hct_mis_api.apps.account.permissions import Permissions
@@ -242,14 +241,14 @@ class TestHouseholdQuery(APITestCase):
             individual=household.head_of_household,
         )
 
-        role = RoleFactory(name="Test Role", permissions=[Permissions.PROGRAMME_CREATE])
-        cls.add_partner_role_in_business_area(
+        cls.create_partner_role_with_permissions(
             cls.partner,
+            [Permissions.PROGRAMME_CREATE],
             cls.business_area,
-            [role],
         )
         for program in [cls.program_one, cls.program_two, cls.program_draft]:
-            cls.update_partner_access_to_program(cls.partner, program, [cls.households[0].admin_area])
+            cls.create_partner_role_with_permissions(cls.partner, [], program.business_area, program)
+            cls.set_admin_area_limits_in_program(cls.partner, program, [cls.households[0].admin_area])
 
         # just add one PENDING HH to be sure filters works correctly
         HouseholdFactory(

@@ -169,7 +169,7 @@ class TestUpdateTargetPopulationMutation(APITestCase):
         create_household({"size": 3, "residence_status": "HOST", "business_area": cls.business_area})
         cls.program = ProgramFactory(status=Program.ACTIVE, business_area=cls.business_area)
         cls.program_cycle = cls.program.cycles.first()
-        cls.update_partner_access_to_program(partner, cls.program)
+        cls.create_partner_role_with_permissions(partner, [], cls.business_area, cls.program)
         cls.draft_target_population = TargetPopulation(
             name="draft_target_population",
             targeting_criteria=cls.get_targeting_criteria_for_rule(

@@ -89,7 +89,7 @@ class TestCopyTargetPopulationMutation(APITestCase):
         individual.unicef_id = "IND-1"
         individual.save()
         cls.household = household
-        cls.update_partner_access_to_program(partner, cls.program)
+        cls.create_partner_role_with_permissions(partner, [], cls.business_area, cls.program)
         tp = TargetPopulation(
             name="Original Target Population",
             status="LOCKED",

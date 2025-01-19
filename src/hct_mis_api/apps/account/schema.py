@@ -167,13 +167,13 @@ class PartnerNode(DjangoObjectType):
         model = Partner
 
     def resolve_areas(self, info: Any) -> "List[Area]":
-        return self.program_partner_through.get(program_id=self.partner_program).areas.all().order_by("name")
+        return self.get_areas_for_program(self.partner_program.id).order_by("name")
 
     def resolve_area_access(self, info: Any, **kwargs: Any) -> str:
-        if self.program_partner_through.get(program_id=self.partner_program).full_area_access:
-            return "BUSINESS_AREA"
-        else:
+        if self.has_area_limits_for_program(self.partner_program.id):
             return "ADMIN_AREA"
+        else:
+            return "BUSINESS_AREA"
 
 
 class Query(graphene.ObjectType):
@@ -219,7 +219,7 @@ class Query(graphene.ObjectType):
         return to_choice_object(
             list(
                 Partner.objects.exclude(name=settings.DEFAULT_EMPTY_PARTNER)
-                .filter(business_areas__slug=business_area_slug)
+                .filter(allowed_business_areas__slug=business_area_slug)
                 .values_list("id", "name")
             )
             + [(unicef.id, unicef.name)]  # unicef partner is always available

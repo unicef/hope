@@ -115,7 +115,8 @@ class TestCrossAreaFilter(APITestCase):
         program_partner_through_without_area_restrictions.full_area_access = True
         program_partner_through_without_area_restrictions.save()
         cls.partner_with_area_restrictions = PartnerFactory(name="Partner with area restrictions")
-        cls.update_partner_access_to_program(
+        cls.create_partner_role_with_permissions(cls.partner_with_area_restrictions, [], cls.business_area, cls.program)
+        cls.set_admin_area_limits_in_program(
             cls.partner_with_area_restrictions, cls.program, [cls.admin_area1, cls.admin_area2]
         )
 

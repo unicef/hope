@@ -129,7 +129,7 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
         cls.business_area_slug = "afghanistan"
         cls.business_area = BusinessArea.objects.get(slug=cls.business_area_slug)
         cls.program = ProgramFactory(status=Program.ACTIVE)
-        cls.update_partner_access_to_program(partner, cls.program)
+        cls.create_partner_role_with_permissions(partner, [], cls.business_area, cls.program)
 
         img = io.BytesIO(Image.new("RGB", (60, 30), color="red").tobytes())
 
@@ -207,7 +207,7 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
             number_of_individuals=6,
         )
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-        self.update_partner_access_to_program(self.user.partner, program)
+        self.create_partner_role_with_permissions(self.user.partner, [], program.business_area, program)
         self.snapshot_graphql_request(
             request_string=self.CREATE_REGISTRATION_DATA_IMPORT,
             context={"user": self.user, "headers": {"Program": self.id_to_base64(program.id, "ProgramNode")}},
@@ -230,7 +230,7 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
             status=ImportData.STATUS_VALIDATION_ERROR,
         )
         self.create_user_role_with_permissions(self.user, [Permissions.RDI_IMPORT_DATA], self.business_area)
-        self.update_partner_access_to_program(self.user.partner, program)
+        self.create_partner_role_with_permissions(self.user.partner, [], program.business_area, program)
         self.snapshot_graphql_request(
             request_string=self.CREATE_REGISTRATION_DATA_IMPORT,
             context={"user": self.user, "headers": {"Program": self.id_to_base64(program.id, "ProgramNode")}},

@@ -294,8 +294,10 @@ class TestIndividualQuery(APITestCase):
 
         cls.household_one.set_admin_areas(cls.area2)
 
-        cls.update_partner_access_to_program(cls.partner, cls.program, [cls.household_one.admin_area])
-        cls.update_partner_access_to_program(cls.partner, cls.program_draft, [cls.household_one.admin_area])
+        cls.create_partner_role_with_permissions(cls.partner_no_access, [], cls.business_area, cls.program)
+        cls.set_admin_area_limits_in_program(cls.partner, cls.program, [cls.household_one.admin_area])
+        cls.create_partner_role_with_permissions(cls.partner, [], cls.business_area, cls.program_draft)
+        cls.set_admin_area_limits_in_program(cls.partner, cls.program_draft, [cls.household_one.admin_area])
 
         # just add one PENDING Ind to be sure filters works correctly
         IndividualFactory(

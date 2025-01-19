@@ -110,7 +110,7 @@ class TestIndividualPermissionsQuery(APITestCase):
         self._test_not_unicef_partner_with_program_and_with_full_admin_area_has_access("all")
 
     def _test_not_unicef_partner_with_program_and_with_full_admin_area_has_access(self, program: str) -> None:
-        self.update_partner_access_to_program(self.not_unicef_partner, self.program_one, [self.area2, self.area3])
+        self.create_partner_role_with_permissions(self.not_unicef_partner, [], self.business_area, self.program_one)
         self.user.partner = self.not_unicef_partner
         self.user.save()
 
@@ -135,7 +135,9 @@ class TestIndividualPermissionsQuery(APITestCase):
         self._test_not_unicef_partner_with_program_and_with_correct_admin_area_has_access("all")
 
     def _test_not_unicef_partner_with_program_and_with_correct_admin_area_has_access(self, program: str) -> None:
-        self.update_partner_access_to_program(self.not_unicef_partner, self.program_one, [self.area2])
+        self.create_partner_role_with_permissions(self.not_unicef_partner, [], self.business_area, self.program_one)
+        self.set_admin_area_limits_in_program(self.not_unicef_partner, self.program_one, [self.area2])
+
         self.user.partner = self.not_unicef_partner
         self.user.save()
 
@@ -162,7 +164,8 @@ class TestIndividualPermissionsQuery(APITestCase):
         self._test_not_unicef_partner_with_program_and_with_wrong_admin_area_doesnt_have_access("all")
 
     def _test_not_unicef_partner_with_program_and_with_wrong_admin_area_doesnt_have_access(self, program: str) -> None:
-        self.update_partner_access_to_program(self.not_unicef_partner, self.program_one, [self.area3])
+        self.create_partner_role_with_permissions(self.not_unicef_partner, [], self.business_area, self.program_one)
+        self.set_admin_area_limits_in_program(self.not_unicef_partner, self.program_one, [self.area3])
         self.user.partner = self.not_unicef_partner
         self.user.save()
 

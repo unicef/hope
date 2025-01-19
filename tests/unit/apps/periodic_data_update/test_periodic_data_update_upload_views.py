@@ -109,7 +109,6 @@ class TestPeriodicDataUpdateUploadViews:
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
         create_partner_role_with_permissions: Callable,
-        update_partner_access_to_program: Callable,
         id_to_base64: Callable,
     ) -> None:
         self.set_up(api_client, afghanistan, id_to_base64)
@@ -120,7 +119,9 @@ class TestPeriodicDataUpdateUploadViews:
         )
         create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan)
         if access_to_program:
-            update_partner_access_to_program(self.partner, self.program1)
+            create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan, self.program2)
+        else:
+            create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan)
 
         response = self.client.get(self.url_list)
         assert response.status_code == expected_status
@@ -236,7 +237,6 @@ class TestPeriodicDataUpdateUploadViews:
         afghanistan: BusinessAreaFactory,
         create_user_role_with_permissions: Callable,
         create_partner_role_with_permissions: Callable,
-        update_partner_access_to_program: Callable,
         id_to_base64: Callable,
     ) -> None:
         self.set_up(api_client, afghanistan, id_to_base64)
@@ -247,7 +247,9 @@ class TestPeriodicDataUpdateUploadViews:
         )
         create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan)
         if access_to_program:
-            update_partner_access_to_program(self.partner, self.program1)
+            create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan, self.program1)
+        else:
+            create_partner_role_with_permissions(self.partner, partner_permissions, self.afghanistan)
 
         create_household_and_individuals(
             household_data={

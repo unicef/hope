@@ -362,7 +362,7 @@ class TestPaymentPlanReconciliation(APITestCase):
         program_cycle_id = create_programme_response["data"]["createProgram"]["program"]["cycles"]["edges"][0]["node"][
             "id"
         ]
-        self.update_partner_access_to_program(self.user.partner, program)
+        self.create_partner_role_with_permissions(self.user.partner, [], program.business_area, program)
 
         create_target_population_response = self.graphql_request(
             request_string=CREATE_TARGET_POPULATION_MUTATION,

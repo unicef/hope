@@ -144,6 +144,14 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
     def has_area_limits_in_program(self, program_id: Union[str, UUID]) -> bool:
         return self.get_area_limits_for_program(program_id).exists()
 
+    def get_areas_for_program(self, program_id: Union[str, UUID]) -> QuerySet[Area]:
+        area_limits = self.get_area_limits_for_program(program_id)
+        return (
+            area_limits
+            if area_limits.exists()
+            else Area.objects.filter(area_type__country__business_areas__programs__id=program_id)
+        )
+
 
 class User(AbstractUser, NaturalKeyModel, UUIDModel):
     status = models.CharField(choices=USER_STATUS_CHOICES, max_length=10, default=INVITED)

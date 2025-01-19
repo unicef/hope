@@ -5,7 +5,7 @@ from django.contrib.auth.models import AnonymousUser
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import PartnerFactory, RoleFactory, UserFactory
+from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import (
@@ -72,8 +72,7 @@ class TestAllProgramsQuery(APITestCase):
 
         cls.partner = PartnerFactory(name="WFP")
         cls.partner.allowed_business_areas.add(cls.business_area)
-        role = RoleFactory(name="Role for WFP")
-        cls.add_partner_role_in_business_area(cls.partner, cls.business_area, [role])
+        cls.create_partner_role_with_permissions(cls.partner, [], cls.business_area)
 
         cls.user = UserFactory.create(partner=cls.partner)
 
