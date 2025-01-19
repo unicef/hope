@@ -758,14 +758,19 @@ class Query(graphene.ObjectType):
         return queryset
 
     def resolve_all_households_flex_fields_attributes(self, info: Any, **kwargs: Any) -> Iterable:
-        yield from FlexibleAttribute.objects.filter(
-            associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD
-        ).prefetch_related("choices").order_by("created_at")
+        yield from (
+            FlexibleAttribute.objects.filter(associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD)
+            .prefetch_related("choices")
+            .order_by("created_at")
+        )
 
     def resolve_all_individuals_flex_fields_attributes(self, info: Any, **kwargs: Any) -> Iterable:
-        yield from FlexibleAttribute.objects.filter(
-            associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL
-        ).exclude(type=FlexibleAttribute.PDU).prefetch_related("choices").order_by("created_at")
+        yield from (
+            FlexibleAttribute.objects.filter(associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL)
+            .exclude(type=FlexibleAttribute.PDU)
+            .prefetch_related("choices")
+            .order_by("created_at")
+        )
 
     def resolve_all_households(self, info: Any, **kwargs: Any) -> QuerySet:
         user = info.context.user

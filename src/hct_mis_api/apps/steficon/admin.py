@@ -497,9 +497,9 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
                 context["next"] = None
 
             context["state"] = state
-            context["title"] = (
-                f"Change #{state.version} on " f"{state.timestamp.strftime('%d, %b %Y at %H:%M')} by {state.updated_by}"
-            )
+            context[
+                "title"
+            ] = f"Change #{state.version} on {state.timestamp.strftime('%d, %b %Y at %H:%M')} by {state.updated_by}"
             return TemplateResponse(request, "admin/steficon/rule/diff.html", context)
         except Exception as e:
             logger.exception(e)

@@ -145,7 +145,7 @@ class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, AdminAutoCom
 
         elif "confirm" in request.POST:
             create_tp_from_list.delay(request.POST.dict(), str(request.user.pk), str(program.pk))
-            message = mark_safe(f'Creation of target population <b>{request.POST["name"]}</b> scheduled.')
+            message = mark_safe(f"Creation of target population <b>{request.POST['name']}</b> scheduled.")
             messages.success(request, message)
             url = reverse("admin:targeting_targetpopulation_changelist")
             return HttpResponseRedirect(url)

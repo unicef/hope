@@ -1279,7 +1279,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                     int(value)
                     return None
                 except Exception:
-                    return f"Invalid value {value} of type {value_type_name} for " f"field {field} of type int"
+                    return f"Invalid value {value} of type {value_type_name} for field {field} of type int"
             elif field_type == "STRING":
                 # everything from Kobo is string so cannot really validate it
                 # only check phone number
@@ -1296,7 +1296,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                 # to no not break import if they start returning integers
                 if value in ("True", "False", True, False, "0", "1", "TRUE", "FALSE", "true", "false"):
                     return None
-                return f"Invalid value {value} of type {value_type_name} for " f"field {field} of type bool"
+                return f"Invalid value {value} of type {value_type_name} for field {field} of type bool"
         except Exception as e:  # pragma: no cover
             logger.exception(e)
             raise
@@ -1313,7 +1313,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             file_extension = value.split(".")[-1]
 
             if file_extension.lower() not in allowed_extensions:
-                message = f"Specified image {value} for " f"field {field} is not a valid image file"
+                message = f"Specified image {value} for field {field} is not a valid image file"
                 return message
 
             message = f"Specified image {value} for field {field} is not in attachments"
@@ -1349,8 +1349,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
     def date_validator(self, value: str, field: str, *args: Any, **kwargs: Any) -> Union[str, None]:
         try:
             message = (
-                f"Invalid datetime/date {value} for field {field}, "
-                "accepted formats: datetime ISO 8601, date YYYY-MM-DD"
+                f"Invalid datetime/date {value} for field {field}, accepted formats: datetime ISO 8601, date YYYY-MM-DD"
             )
 
             if not value:
@@ -1631,7 +1630,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                             docs_and_identities_to_validate.append(current_individual_docs_and_identities)
 
                             i_expected_field_errors = [
-                                {"header": field, "message": "Missing individual " f"required field {field}"}
+                                {"header": field, "message": f"Missing individual required field {field}"}
                                 for field in expected_i_fields
                             ]
                             errors.extend(i_expected_field_errors)
@@ -1640,27 +1639,25 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                             errors.append(
                                 {
                                     "header": "relationship_i_c",
-                                    "message": "Household has to have a " "head of household",
+                                    "message": "Household has to have a head of household",
                                 }
                             )
                         if head_of_hh_counter > 1:
                             errors.append(
                                 {
                                     "header": "relationship_i_c",
-                                    "message": "Only one person can " "be a head of household",
+                                    "message": "Only one person can be a head of household",
                                 }
                             )
                         if primary_collector_counter == 0:
-                            errors.append(
-                                {"header": "role_i_c", "message": "Household must have a " "primary collector"}
-                            )
+                            errors.append({"header": "role_i_c", "message": "Household must have a primary collector"})
                         if primary_collector_counter > 1:
                             errors.append(
-                                {"header": "role_i_c", "message": "Only one person can " "be a primary collector"}
+                                {"header": "role_i_c", "message": "Only one person can be a primary collector"}
                             )
                         if alternate_collector_counter > 1:
                             errors.append(
-                                {"header": "role_i_c", "message": "Only one person can " "be a alternate collector"}
+                                {"header": "role_i_c", "message": "Only one person can be a alternate collector"}
                             )
                     else:
                         error = self._get_field_type_error(hh_field, hh_value, attachments, skip_validate_pictures)

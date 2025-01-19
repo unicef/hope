@@ -410,12 +410,7 @@ class LoadSanctionListXMLTask:
             individual_data_dict = self._get_individual_data(individual_tag)
             individual = individual_data_dict["individual"]
             individual.full_name = (
-                (
-                    f"{individual.first_name} "
-                    f"{individual.second_name} "
-                    f"{individual.third_name} "
-                    f"{individual.fourth_name}"
-                )
+                (f"{individual.first_name} {individual.second_name} {individual.third_name} {individual.fourth_name}")
                 .strip()
                 .title()
             )

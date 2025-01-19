@@ -66,7 +66,7 @@ class RuleFileProcessForm(CSVOptionsForm, forms.Form):
     results = forms.CharField(
         label="Results columns",
         required=True,
-        help_text="Comma separated list od Result attributes " "to add to the produced CSV. ",
+        help_text="Comma separated list od Result attributes to add to the produced CSV. ",
     )
     background = forms.BooleanField(label="Run in background", required=False)
 

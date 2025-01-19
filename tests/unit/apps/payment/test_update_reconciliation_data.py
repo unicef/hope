@@ -23,28 +23,24 @@ from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service impo
 
 def file_without_delivery_dates() -> BytesIO:
     content = Path(f"{settings.TESTS_ROOT}/apps/payment/test_file/import_file_no_delivery_date.xlsx").read_bytes()
-    file = BytesIO(content)
-    return file
+    return BytesIO(content)
 
 
 def file_with_existing_delivery_dates() -> BytesIO:
     content = Path(
         f"{settings.TESTS_ROOT}/apps/payment/test_file/import_file_with_existing_delivery_date.xlsx"
     ).read_bytes()
-    file = BytesIO(content)
-    return file
+    return BytesIO(content)
 
 
 def file_one_record() -> BytesIO:
     content = Path(f"{settings.TESTS_ROOT}/apps/payment/test_file/import_file_one_record.xlsx").read_bytes()
-    file = BytesIO(content)
-    return file
+    return BytesIO(content)
 
 
 def file_reference_id() -> BytesIO:
     content = Path(f"{settings.TESTS_ROOT}/apps/payment/test_file/import_file_reference_id.xlsx").read_bytes()
-    file = BytesIO(content)
-    return file
+    return BytesIO(content)
 
 
 class TestDeliveryDate(APITestCase):

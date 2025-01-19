@@ -52,7 +52,7 @@ def get_program_with_dct_type_and_name(
 ) -> Program:
     dct = DataCollectingTypeFactory(type=dct_type)
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
-    program = ProgramFactory(
+    return ProgramFactory(
         name=name,
         programme_code=programme_code,
         start_date=datetime.now() - relativedelta(months=1),
@@ -61,7 +61,6 @@ def get_program_with_dct_type_and_name(
         status=status,
         beneficiary_group=beneficiary_group,
     )
-    return program
 
 
 def create_program(
@@ -234,13 +233,11 @@ def payment_verification_creator(channel: str = PaymentVerificationPlan.VERIFICA
         payment_plan=payment_plan,
         verification_channel=channel,
     )
-    pv = PaymentVerificationFactory(
+    return PaymentVerificationFactory(
         payment=payment,
         payment_verification_plan=payment_verification_plan,
         status=PV.STATUS_PENDING,
     )
-
-    return pv
 
 
 @pytest.fixture

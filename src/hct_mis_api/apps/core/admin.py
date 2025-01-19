@@ -352,7 +352,7 @@ class BusinessAreaAdmin(
             for row in matrix[1:]:
                 writer.writerow(row)
             recipients = [request.user.email] + config.CASHASSIST_DOAP_RECIPIENT.split(";")
-            self.log_change(request, obj, f'DOAP sent to {", ".join(recipients)}')
+            self.log_change(request, obj, f"DOAP sent to {', '.join(recipients)}")
             buffer.seek(0)
             environment = Site.objects.first().name
             mail = EmailMessage(
@@ -372,7 +372,7 @@ UNICEF HOPE""",
                     User.objects.filter(email=row["Email"]).update(doap_hash=row["signature"])
             obj.custom_fields.update({"hope": {"last_doap_sync": str(timezone.now())}})
             obj.save()
-            self.message_user(request, f'Email sent to {", ".join(recipients)}', messages.SUCCESS)
+            self.message_user(request, f"Email sent to {', '.join(recipients)}", messages.SUCCESS)
         except Exception as e:
             logger.exception(e)
             self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)

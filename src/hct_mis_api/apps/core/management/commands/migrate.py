@@ -136,8 +136,9 @@ class Command(BaseCommand):
                     migration = executor.loader.get_migration_by_prefix(app_label, migration_name)
                 except AmbiguityError:
                     raise CommandError(
-                        "More than one migration matches '{}' in app '{}'. "
-                        "Please be more specific.".format(migration_name, app_label)
+                        "More than one migration matches '{}' in app '{}'. Please be more specific.".format(
+                            migration_name, app_label
+                        )
                     )
                 except KeyError:
                     raise CommandError(

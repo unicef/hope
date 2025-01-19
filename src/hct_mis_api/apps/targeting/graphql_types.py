@@ -66,7 +66,8 @@ class TargetingCriteriaRuleFilterNode(DjangoObjectType):
                 parent.field_name, parent.targeting_criteria_rule.targeting_criteria.payment_plan
             )
             return filter_choices(
-                field_attribute, parent.arguments  # type: ignore # can't convert graphene list to list
+                field_attribute,
+                parent.arguments,  # type: ignore # can't convert graphene list to list
             )
         program = None
         if parent.flex_field_classification == FlexFieldClassification.FLEX_FIELD_PDU:

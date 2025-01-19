@@ -590,13 +590,16 @@ class TestPaymentGatewayService(APITestCase):
 
     @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI._post")
     def test_api_add_records_to_payment_instruction(self, post_mock: Any) -> None:
-        post_mock.return_value = {
-            "remote_id": "123",
-            "records": {
-                "1": self.payments[0].id,
+        post_mock.return_value = (
+            {
+                "remote_id": "123",
+                "records": {
+                    "1": self.payments[0].id,
+                },
+                "errors": None,
             },
-            "errors": None,
-        }, 200
+            200,
+        )
 
         self.dm.delivery_mechanism = self.dm_cash_over_the_counter
         self.dm.save()
@@ -648,13 +651,16 @@ class TestPaymentGatewayService(APITestCase):
 
     @mock.patch("hct_mis_api.apps.payment.services.payment_gateway.PaymentGatewayAPI._post")
     def test_api_add_records_to_payment_instruction_wallet_integration(self, post_mock: Any) -> None:
-        post_mock.return_value = {
-            "remote_id": "123",
-            "records": {
-                "1": self.payments[0].id,
+        post_mock.return_value = (
+            {
+                "remote_id": "123",
+                "records": {
+                    "1": self.payments[0].id,
+                },
+                "errors": None,
             },
-            "errors": None,
-        }, 200
+            200,
+        )
 
         primary_collector = self.payments[0].collector
 

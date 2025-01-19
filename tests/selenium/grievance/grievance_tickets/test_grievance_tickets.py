@@ -109,13 +109,12 @@ def hh_with_payment_record(household_without_disabilities: Household) -> Payment
         business_area=household_without_disabilities.business_area,
         created_by=User.objects.first(),
     )
-    payment = PaymentFactory(
+    return PaymentFactory(
         parent=payment_plan,
         household=household_without_disabilities,
         delivered_quantity_usd=None,
         business_area=household_without_disabilities.business_area,
     )
-    return payment
 
 
 def find_text_of_label(element: WebElement) -> str:
@@ -135,7 +134,7 @@ def create_program(
 ) -> Program:
     dct = DataCollectingTypeFactory(type=dct_type)
     beneficiary_group = BeneficiaryGroup.objects.filter(name=beneficiary_group).first()
-    program = ProgramFactory(
+    return ProgramFactory(
         name=name,
         start_date=datetime.now() - relativedelta(months=1),
         end_date=datetime.now() + relativedelta(months=1),
@@ -143,7 +142,6 @@ def create_program(
         status=status,
         beneficiary_group=beneficiary_group,
     )
-    return program
 
 
 def create_custom_household(

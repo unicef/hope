@@ -1308,7 +1308,7 @@ class TestMigrateDataToRepresentations(BaseMigrateDataTestCase, TestCase):
         self.assertEqual(self.individual4_1.copied_to(manager="original_and_repr_objects").count(), 1)
 
         household4_representation = self.household4.copied_to(manager="original_and_repr_objects").first()
-        program_storage_full = Program.all_objects.get(name=f"Storage program - COLLECTION TYPE " f"{self.full.label}")
+        program_storage_full = Program.all_objects.get(name=f"Storage program - COLLECTION TYPE {self.full.label}")
         self.assertEqual(household4_representation.program, program_storage_full)
         self.assertEqual(household4_representation.is_original, False)
         self.assertEqual(household4_representation.origin_unicef_id, self.household4.unicef_id)
@@ -1553,7 +1553,7 @@ class TestMigrateDataToRepresentations(BaseMigrateDataTestCase, TestCase):
         ).first()
         self.assertEqual(
             repr_household_mixed_closed_tp_withdrawn_not_paid.program.name,
-            f"Storage program - COLLECTION TYPE " f"{self.size_only.label}",
+            f"Storage program - COLLECTION TYPE {self.size_only.label}",
         )
         self.assertFalse(
             repr_household_mixed_closed_tp_withdrawn_not_paid.program.is_visible,
@@ -1563,7 +1563,7 @@ class TestMigrateDataToRepresentations(BaseMigrateDataTestCase, TestCase):
         repr_household_mixed_no_tp = self.household_mixed_no_tp.copied_to(manager="original_and_repr_objects").first()
         self.assertEqual(
             repr_household_mixed_no_tp.program.name,
-            f"Storage program - COLLECTION TYPE " f"{self.size_only.label}",
+            f"Storage program - COLLECTION TYPE {self.size_only.label}",
         )
 
         # Test mixed households/rdi
@@ -1609,7 +1609,7 @@ class TestMigrateDataToRepresentations(BaseMigrateDataTestCase, TestCase):
         )
         self.assertEqual(
             repr_household_mixed_closed_tp_withdrawn_not_paid_active.program.name,
-            f"Storage program - COLLECTION TYPE " f"{self.size_only.label}",
+            f"Storage program - COLLECTION TYPE {self.size_only.label}",
         )
 
         self.assertEqual(self.household_mixed_no_tp_active.copied_to(manager="original_and_repr_objects").count(), 1)
@@ -1657,7 +1657,7 @@ class TestMigrateDataToRepresentations(BaseMigrateDataTestCase, TestCase):
         ).first()
         self.assertEqual(
             repr_household_mixed_active_size_only.program.name,
-            f"Storage program - COLLECTION TYPE " f"{self.size_only.label}",
+            f"Storage program - COLLECTION TYPE {self.size_only.label}",
         )
 
         self.assertEqual(
@@ -1668,7 +1668,7 @@ class TestMigrateDataToRepresentations(BaseMigrateDataTestCase, TestCase):
         ).first()
         self.assertEqual(
             repr_household_mixed_active_no_ind_data.program.name,
-            f"Storage program - COLLECTION TYPE " f"{self.no_ind_data.label}",
+            f"Storage program - COLLECTION TYPE {self.no_ind_data.label}",
         )
 
         self.assertEqual(
@@ -1679,7 +1679,7 @@ class TestMigrateDataToRepresentations(BaseMigrateDataTestCase, TestCase):
         ).first()
         self.assertEqual(
             repr_household_mixed_active_full_withdrawn.program.name,
-            f"Storage program - COLLECTION TYPE " f"{self.full.label}",
+            f"Storage program - COLLECTION TYPE {self.full.label}",
         )
 
         self.assertEqual(

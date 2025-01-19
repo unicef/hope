@@ -117,7 +117,7 @@ OBSERVED_DISABILITY_CHOICE = (
     (SELF_CARE, _("Difficulty with self care (washing, dressing)")),
     (
         COMMUNICATING,
-        _("Difficulty communicating " "(e.g understanding or being understood)"),
+        _("Difficulty communicating (e.g understanding or being understood)"),
     ),
 )
 NON_BENEFICIARY = "NON_BENEFICIARY"

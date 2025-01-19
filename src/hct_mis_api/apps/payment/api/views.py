@@ -156,7 +156,8 @@ class PaymentPlanManagerialViewSet(BusinessAreaMixin, PaymentPlanMixin, mixins.L
             old_payment_plan.export_file_per_fsp = copy_model_object(payment_plan.export_file_per_fsp)
 
         payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(
-            input_data=input_data, user=request.user  # type: ignore
+            input_data=input_data,
+            user=request.user,  # type: ignore
         )
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,

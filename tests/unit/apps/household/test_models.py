@@ -244,17 +244,19 @@ class TestDocument(TestCase):
         with self.assertRaises(IntegrityError):
             with transaction.atomic():
                 # regular create
-                Document.objects.create(
-                    document_number="213123",
-                    individual=individual,
-                    country=self.country,
-                    type=document_type,
-                    status=Document.STATUS_VALID,
-                    program=self.individual.program,
-                    is_original=False,
-                    copied_from=original_document,
-                    rdi_merge_status=MergeStatusModel.MERGED,
-                ),
+                (
+                    Document.objects.create(
+                        document_number="213123",
+                        individual=individual,
+                        country=self.country,
+                        type=document_type,
+                        status=Document.STATUS_VALID,
+                        program=self.individual.program,
+                        is_original=False,
+                        copied_from=original_document,
+                        rdi_merge_status=MergeStatusModel.MERGED,
+                    ),
+                )
 
     def test_create_duplicated_documents_with_different_numbers_and_not_unique_for_individual(self) -> None:
         document_type, _ = DocumentType.objects.update_or_create(
@@ -444,33 +446,37 @@ class TestDocument(TestCase):
         # make representation with different number
         (individual_to_create, _, _, _) = copy_individual_fast(self.individual, program_3)
         (program_3_individual_representation,) = Individual.objects.bulk_create([individual_to_create])
-        Document.objects.create(
-            document_number="456",
-            individual=program_3_individual_representation,
-            country=self.country,
-            type=document_type,
-            status=Document.STATUS_VALID,
-            program=program_3,
-            is_original=False,
-            copied_from=original_document,
-            rdi_merge_status=MergeStatusModel.MERGED,
-        ),
+        (
+            Document.objects.create(
+                document_number="456",
+                individual=program_3_individual_representation,
+                country=self.country,
+                type=document_type,
+                status=Document.STATUS_VALID,
+                program=program_3,
+                is_original=False,
+                copied_from=original_document,
+                rdi_merge_status=MergeStatusModel.MERGED,
+            ),
+        )
 
         # don't allow to create more than 1 representation within the same program and individual
         with self.assertRaises(IntegrityError):
             with transaction.atomic():
                 # regular create
-                Document.objects.create(
-                    document_number="789",
-                    individual=program_3_individual_representation,
-                    country=self.country,
-                    type=document_type,
-                    status=Document.STATUS_VALID,
-                    program=program_3,
-                    is_original=False,
-                    copied_from=original_document,
-                    rdi_merge_status=MergeStatusModel.MERGED,
-                ),
+                (
+                    Document.objects.create(
+                        document_number="789",
+                        individual=program_3_individual_representation,
+                        country=self.country,
+                        type=document_type,
+                        status=Document.STATUS_VALID,
+                        program=program_3,
+                        is_original=False,
+                        copied_from=original_document,
+                        rdi_merge_status=MergeStatusModel.MERGED,
+                    ),
+                )
 
     def test_create_duplicated_documents_with_different_numbers_and_types_and_unique_for_individual(self) -> None:
         document_type, _ = DocumentType.objects.update_or_create(

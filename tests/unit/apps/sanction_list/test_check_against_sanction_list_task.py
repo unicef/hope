@@ -79,8 +79,7 @@ class TestSanctionList(TestCase):
             "title": "Sanction List Check",
         }
         subject = (
-            f"Sanction List Check - file: {original_file_name}, "
-            f"date: {timezone.now().strftime('%Y-%m-%d %I:%M %p')}"
+            f"Sanction List Check - file: {original_file_name}, date: {timezone.now().strftime('%Y-%m-%d %I:%M %p')}"
         )
         expected_data = json.dumps(
             {

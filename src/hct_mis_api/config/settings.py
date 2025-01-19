@@ -463,7 +463,7 @@ FLAGS = {
 
 MARKDOWNIFY = {
     "default": {
-        "WHITELIST_TAGS": ["a", "abbr", "acronym", "b", "blockquote", "em", "i", "li", "ol", "p", "strong", "ul" "br"]
+        "WHITELIST_TAGS": ["a", "abbr", "acronym", "b", "blockquote", "em", "i", "li", "ol", "p", "strong", "ulbr"]
     }
 }
 

@@ -203,12 +203,11 @@ def payment_verification_creator(
         payment_plan=payment_plan,
         verification_channel=channel,
     )
-    pv = PaymentVerificationFactory(
+    return PaymentVerificationFactory(
         payment=payment,
         payment_verification_plan=payment_verification_plan,
         status=PV.STATUS_PENDING,
     )
-    return pv
 
 
 @pytest.fixture

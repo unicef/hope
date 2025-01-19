@@ -120,8 +120,7 @@ def pytest_addoption(parser) -> None:  # type: ignore
 
 def get_redis_host() -> str:
     regex = "\\/\\/(.*):"
-    redis_host = re.search(regex, env("CACHE_LOCATION")).group(1)
-    return redis_host
+    return re.search(regex, env("CACHE_LOCATION")).group(1)
 
 
 @pytest.fixture(autouse=True)
@@ -729,7 +728,7 @@ def test_failed_check(request: FixtureRequest, browser: Chrome) -> None:
 def screenshot(driver: Chrome, node_id: str) -> None:
     if not os.path.exists(settings.SCREENSHOT_DIRECTORY):
         os.makedirs(settings.SCREENSHOT_DIRECTORY)
-    file_name = f'{node_id.split("::")[-1]}_{datetime.today().strftime("%Y-%m-%d_%H.%M")}.png'.replace(
+    file_name = f"{node_id.split('::')[-1]}_{datetime.today().strftime('%Y-%m-%d_%H.%M')}.png".replace(
         "/", "_"
     ).replace("::", "__")
     file_path = os.path.join(settings.SCREENSHOT_DIRECTORY, file_name)

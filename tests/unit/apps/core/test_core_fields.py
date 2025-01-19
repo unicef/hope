@@ -16,7 +16,7 @@ class TestCoreFields(APITestCase):
 
     def test_all_fields_have_lookup(self) -> None:
         for field in get_core_fields_attributes():
-            self.assertTrue(field.get("lookup"), f'{field.get("name")} does not have a lookup')
+            self.assertTrue(field.get("lookup"), f"{field.get('name')} does not have a lookup")
 
     @patch(
         "hct_mis_api.apps.core.field_attributes.core_fields_attributes.get_core_fields_attributes",

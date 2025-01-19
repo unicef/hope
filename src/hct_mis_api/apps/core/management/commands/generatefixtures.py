@@ -74,7 +74,7 @@ class Command(BaseCommand):
             action="store",
             nargs="?",
             type=int,
-            help="Creates provided amount of payment records assigned to " "household and cash plan.",
+            help="Creates provided amount of payment records assigned to household and cash plan.",
         )
         parser.add_argument(
             "--business-area",

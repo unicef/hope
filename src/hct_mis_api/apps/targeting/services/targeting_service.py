@@ -343,9 +343,9 @@ class TargetingCriteriaFilterBase:
         comparison_attribute = TargetingCriteriaFilterBase.COMPARISON_ATTRIBUTES.get(self.comparison_method)
         args_count = comparison_attribute.get("arguments")
         if self.arguments is None:
-            logger.error(f"{self.field_name} {self.comparison_method} filter query expect {args_count} " f"arguments")
+            logger.error(f"{self.field_name} {self.comparison_method} filter query expect {args_count} arguments")
             raise ValidationError(
-                f"{self.field_name} {self.comparison_method} filter query expect {args_count} " f"arguments"
+                f"{self.field_name} {self.comparison_method} filter query expect {args_count} arguments"
             )
         args_input_count = len(self.arguments)
         if select_many:

@@ -697,6 +697,7 @@ class TestMigrateDataToRepresentationsPerformance(TestCase):
         context = _AssertNumQueriesContext(self, num, conn)
         if func is None:
             return context
+        return None
 
     @unittest.skip("need to adjust to new managers")
     def test_migrate_data_to_representations_per_business_area_running_number_queries(self) -> None:

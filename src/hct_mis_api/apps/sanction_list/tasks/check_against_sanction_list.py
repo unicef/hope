@@ -98,7 +98,7 @@ class CheckAgainstSanctionListTask:
         }
         text_body = render_to_string("sanction_list/check_results.txt", context)
         html_body = render_to_string("sanction_list/check_results.html", context)
-        subject = f"Sanction List Check - file: {original_file_name}, " f"date: {today.strftime('%Y-%m-%d %I:%M %p')}"
+        subject = f"Sanction List Check - file: {original_file_name}, date: {today.strftime('%Y-%m-%d %I:%M %p')}"
 
         attachment_wb = Workbook()
         attachment_ws = attachment_wb.active
