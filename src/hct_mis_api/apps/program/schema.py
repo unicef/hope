@@ -123,7 +123,8 @@ class ProgramNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
     def resolve_partners(program: Program, info: Any, **kwargs: Any) -> QuerySet[Partner]:
         return (
             Partner.objects.filter(
-                program_partner_through__program=program,
+                Q(role_assignments__program=program)
+                | (Q(role_assignments__program=None) & Q(role_assignments__business_area=program.business_area))
             )
             .annotate(partner_program=Value(program.id))
             .order_by("name")

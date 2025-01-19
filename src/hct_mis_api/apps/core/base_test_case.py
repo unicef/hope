@@ -19,11 +19,10 @@ from graphene.test import Client
 from snapshottest.django import TestCase as SnapshotTestTestCase
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory
-from hct_mis_api.apps.account.models import Role, RoleAssignment
-from hct_mis_api.apps.core.models import BusinessAreaPartnerThrough
+from hct_mis_api.apps.account.models import AdminAreaLimitedTo, Role, RoleAssignment
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_CHOICE, DocumentType
-from hct_mis_api.apps.program.models import ProgramPartnerThrough
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 if TYPE_CHECKING:  # pragma: no_cover
     from hct_mis_api.apps.account.models import Partner, User
@@ -116,31 +115,16 @@ class APITestCase(SnapshotTestTestCase):
                 context.FILES[name] = file
 
     @staticmethod
-    def update_partner_access_to_program(
+    def set_admin_area_limits_in_program(
         partner: "Partner",
         program: "Program",
-        areas: Optional[List["Area"]] = None,
-        full_area_access: Optional[bool] = False,
+        areas: List["Area"],
     ) -> None:
-        program_partner_through, _ = ProgramPartnerThrough.objects.get_or_create(
+        admin_area_limits, _ = AdminAreaLimitedTo.objects.get_or_create(
             program=program,
             partner=partner,
         )
-        if areas:
-            program_partner_through.areas.set(areas)
-        if full_area_access:
-            program_partner_through.full_area_access = True
-            program_partner_through.save(update_fields=["full_area_access"])
-
-    @staticmethod
-    def add_partner_role_in_business_area(
-        partner: "Partner", business_area: "BusinessArea", roles: List["Role"]
-    ) -> None:
-        business_area_partner_through, _ = BusinessAreaPartnerThrough.objects.get_or_create(
-            business_area=business_area,
-            partner=partner,
-        )
-        business_area_partner_through.roles.add(*roles)
+        admin_area_limits.areas.set(areas)
 
     @classmethod
     def create_partner_role_with_permissions(
@@ -151,16 +135,23 @@ class APITestCase(SnapshotTestTestCase):
         program: Optional["Program"] = None,
         areas: Optional[List["Area"]] = None,
         name: Optional[str] = "Partner Role with Permissions",
-    ) -> None:
-        business_area_partner_through, _ = BusinessAreaPartnerThrough.objects.get_or_create(
-            business_area=business_area,
-            partner=partner,
-        )
+        whole_business_area_access: Optional[bool] = False,
+    ) -> RoleAssignment:
+        """
+        whole_business_area_access: If True, the role is created for all programs in a business area (program=None).
+        """
         permission_list = [perm.value for perm in permissions]
         role, created = Role.objects.update_or_create(name=name, defaults={"permissions": permission_list})
-        business_area_partner_through.roles.add(role)
-        if program:
-            cls.update_partner_access_to_program(partner, program, areas)
+        # whole_business_area is used to create a role for all programs in a business area (program=None)
+        if not whole_business_area_access:
+            program = ProgramFactory(business_area=business_area, name="Program for Partner Role")
+        role_assignment, _ = RoleAssignment.objects.get_or_create(
+            partner=partner, role=role, business_area=business_area, program=program
+        )
+        # set admin area limits in program
+        if program and areas:
+            cls.set_admin_area_limits_in_program(partner, program, areas)
+        return role_assignment
 
     @classmethod
     def create_user_role_with_permissions(
@@ -171,15 +162,23 @@ class APITestCase(SnapshotTestTestCase):
         program: Optional["Program"] = None,
         areas: Optional[List["Area"]] = None,
         name: Optional[str] = "Role with Permissions",
+        whole_business_area_access: Optional[bool] = False,
     ) -> RoleAssignment:
+        """
+        whole_business_area_access: If True, the role is created for all programs in a business area (program=None).
+        """
         permission_list = [perm.value for perm in permissions]
         role, created = Role.objects.update_or_create(name=name, defaults={"permissions": permission_list})
-        user_role, _ = RoleAssignment.objects.get_or_create(user=user, role=role, business_area=business_area)
+        if not whole_business_area_access:
+            program = ProgramFactory(business_area=business_area, name="Program for Partner Role")
+        role_assignment, _ = RoleAssignment.objects.get_or_create(
+            user=user, role=role, business_area=business_area, program=program
+        )
 
-        # update Partner permissions for the program
-        if program:
-            cls.update_partner_access_to_program(user.partner, program, areas)
-        return user_role
+        # set admin area limits in program
+        if program and areas:
+            cls.set_admin_area_limits_in_program(user.partner, program, areas)
+        return role_assignment
 
 
 class UploadDocumentsBase(APITestCase):

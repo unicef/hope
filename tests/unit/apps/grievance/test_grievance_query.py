@@ -9,7 +9,7 @@ from django.utils import timezone
 import pytest
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import PartnerFactory, RoleFactory, UserFactory
+from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -230,26 +230,25 @@ class TestGrievanceQuery(APITestCase):
         cls.partner = PartnerFactory(name="Partner1")
         cls.partner_2 = PartnerFactory(name="Partner2")
         # update partner perms
-        role = RoleFactory(name="Partner Role", permissions=[Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS])
-        cls.update_partner_access_to_program(
+        cls.set_admin_area_limits_in_program(
             cls.partner,
             cls.program,
             [cls.admin_area_1, cls.admin_area_2],
         )
-        cls.add_partner_role_in_business_area(
+        cls.create_partner_role_with_permissions(
             cls.partner,
+            [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
             cls.business_area,
-            [role],
         )
-        cls.update_partner_access_to_program(
+        cls.set_admin_area_limits_in_program(
             cls.partner_2,
             cls.program,
             [cls.admin_area_1, cls.admin_area_2],
         )
-        cls.add_partner_role_in_business_area(
+        cls.create_partner_role_with_permissions(
             cls.partner_2,
+            [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS],
             cls.business_area,
-            [role],
         )
         cls.user = UserFactory.create(partner=cls.partner)
         cls.user2 = UserFactory.create(partner=cls.partner_2)
@@ -407,10 +406,11 @@ class TestGrievanceQuery(APITestCase):
 
         # user with full area access
         partner_with_full_area_access = PartnerFactory(name="Partner With Full Area Access")
-        cls.update_partner_access_to_program(
+        cls.create_partner_role_with_permissions(
             partner_with_full_area_access,
+            [],
+            cls.business_area,
             cls.program,
-            full_area_access=True,
         )
         cls.user_with_full_area_access = UserFactory(
             partner=partner_with_full_area_access, username="user_with_full_area_access"
@@ -418,7 +418,13 @@ class TestGrievanceQuery(APITestCase):
 
         # user with access to admin area 1
         partner_with_admin_area1_access = PartnerFactory(name="Partner With Admin Area 1 Access")
-        cls.update_partner_access_to_program(
+        cls.create_partner_role_with_permissions(
+            partner_with_admin_area1_access,
+            [],
+            cls.business_area,
+            cls.program,
+        )
+        cls.set_admin_area_limits_in_program(
             partner_with_admin_area1_access,
             cls.program,
             [cls.admin_area_1],
@@ -429,7 +435,13 @@ class TestGrievanceQuery(APITestCase):
 
         # user with access to admin area 2
         partner_with_admin_area2_access = PartnerFactory(name="Partner With Admin Area 2 Access")
-        cls.update_partner_access_to_program(
+        cls.create_partner_role_with_permissions(
+            partner_with_admin_area2_access,
+            [],
+            cls.business_area,
+            cls.program,
+        )
+        cls.set_admin_area_limits_in_program(
             partner_with_admin_area2_access,
             cls.program,
             [cls.admin_area_2],

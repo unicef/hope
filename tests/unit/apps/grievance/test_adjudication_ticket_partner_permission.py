@@ -167,7 +167,8 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
 
     def test_select_individual_when_partner_with_permission(self) -> None:
         partner = PartnerFactory(name="NOT_UNICEF")
-        self.update_partner_access_to_program(partner, self.program, [self.doshi])
+        self.create_partner_role_with_permissions(partner, [], self.business_area, self.program)
+        self.set_admin_area_limits_in_program(partner, self.program, [self.doshi])
 
         self.user.partner = partner
         self.user.save()
@@ -206,7 +207,8 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
 
     def test_select_individual_when_partner_with_permission_with_selectedIndividualId(self) -> None:
         partner = PartnerFactory(name="NOT_UNICEF")
-        self.update_partner_access_to_program(partner, self.program, [self.doshi])
+        self.create_partner_role_with_permissions(partner, [], self.business_area, self.program)
+        self.set_admin_area_limits_in_program(partner, self.program, [self.doshi])
 
         self.user.partner = partner
         self.user.save()
@@ -245,7 +247,8 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
 
     def test_select_individual_when_partner_with_permission_with_selectedIndividualId_incorrect(self) -> None:
         partner = PartnerFactory(name="NOT_UNICEF")
-        self.update_partner_access_to_program(partner, self.program, [self.doshi])
+        self.create_partner_role_with_permissions(partner, [], self.business_area, self.program)
+        self.set_admin_area_limits_in_program(partner, self.program, [self.doshi])
 
         self.user.partner = partner
         self.user.save()
@@ -293,7 +296,8 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
         self,
     ) -> None:
         partner = PartnerFactory(name="NOT_UNICEF")
-        self.update_partner_access_to_program(partner, self.program, [self.doshi])
+        self.create_partner_role_with_permissions(partner, [], self.business_area, self.program)
+        self.set_admin_area_limits_in_program(partner, self.program, [self.doshi])
 
         self.user.partner = partner
         self.user.save()
@@ -333,7 +337,8 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
 
     def test_select_individual_when_partner_with_permission_and_no_selected_program(self) -> None:
         partner = PartnerFactory(name="NOT_UNICEF")
-        self.update_partner_access_to_program(partner, self.program, [self.doshi])
+        self.create_partner_role_with_permissions(partner, [], self.business_area, self.program)
+        self.set_admin_area_limits_in_program(partner, self.program, [self.doshi])
 
         self.user.partner = partner
         self.user.save()
@@ -372,7 +377,9 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
 
     def test_close_ticket_when_partner_with_permission(self) -> None:
         partner = PartnerFactory()
-        self.update_partner_access_to_program(partner, self.program, [self.doshi])
+        self.create_partner_role_with_permissions(partner, [], self.business_area, self.program)
+        self.set_admin_area_limits_in_program(partner, self.program, [self.doshi])
+
         self.ticket_details.selected_distinct.add(self.individuals_1[0])
         self.ticket_details.selected_individuals.add(self.individuals_2[0])
 
@@ -403,7 +410,9 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
 
     def test_close_ticket_when_partner_with_permission_and_no_selected_program(self) -> None:
         partner = PartnerFactory()
-        self.update_partner_access_to_program(partner, self.program, [self.doshi])
+        self.create_partner_role_with_permissions(partner, [], self.business_area, self.program)
+        self.set_admin_area_limits_in_program(partner, self.program, [self.doshi])
+
         self.ticket_details.selected_distinct.add(self.individuals_2[0])
         self.ticket_details.selected_individuals.add(self.individuals_1[0])
 
@@ -434,7 +443,8 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
 
     def test_select_individual_when_partner_does_not_have_permission(self) -> None:
         partner = PartnerFactory(name="NOT_UNICEF")
-        self.update_partner_access_to_program(partner, self.program, [self.doshi])
+        self.create_partner_role_with_permissions(partner, [], self.business_area, self.program)
+        self.set_admin_area_limits_in_program(partner, self.program, [self.doshi])
 
         self.user.partner = partner
         self.user.save()
@@ -468,7 +478,9 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
 
     def test_close_ticket_when_partner_does_not_have_permission(self) -> None:
         partner = PartnerFactory(name="NOT_UNICEF")
-        self.update_partner_access_to_program(partner, self.program, [self.burka])
+        self.create_partner_role_with_permissions(partner, [], self.business_area, self.program)
+        self.set_admin_area_limits_in_program(partner, self.program, [self.burka])
+
         self.user.partner = partner
         self.user.save()
 

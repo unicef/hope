@@ -7,7 +7,6 @@ from django.utils import timezone
 from constance.test import override_config
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
-from hct_mis_api.apps.account.models import Role
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -62,10 +61,10 @@ class TestPaymentNotification(APITestCase):
         # potential recipients
         partner_unicef = PartnerFactory.create(name="UNICEF")
         partner_with_program_access = PartnerFactory.create(name="Partner with program access")
-        cls.update_partner_access_to_program(partner_with_program_access, cls.program)
+        cls.create_partner_role_with_permissions(partner_with_program_access, [], cls.business_area, cls.program)
 
         partner_without_program_access = PartnerFactory.create(name="Partner without program access")
-        cls.update_partner_access_to_program(partner_without_program_access, cls.program2)
+        cls.create_partner_role_with_permissions(partner_without_program_access, [], cls.business_area, cls.program2)
         # users with action permissions
         cls.user_with_approval_permission_partner_unicef = UserFactory.create(partner=partner_unicef)
         cls.create_user_role_with_permissions(
@@ -124,38 +123,29 @@ class TestPaymentNotification(APITestCase):
             name="Role with view list permission",
         )
         cls.user_without_BA_and_unicef_partner = UserFactory.create(partner=partner_unicef)
-        role = Role.objects.create(
-            name="Partner role",
-            permissions=[
-                Permissions.PM_ACCEPTANCE_PROCESS_APPROVE.name,
-                Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE.name,
-                Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW.name,
-                Permissions.PM_DOWNLOAD_XLSX_FOR_FSP.name,
-            ],
-        )
+        partner_permissions_list = [
+            Permissions.PM_ACCEPTANCE_PROCESS_APPROVE.name,
+            Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE.name,
+            Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW.name,
+            Permissions.PM_DOWNLOAD_XLSX_FOR_FSP.name,
+        ]
         partner_with_action_permissions_and_program_access = PartnerFactory.create(
             name="Partner with action permissions and program access"
         )
-        cls.update_partner_access_to_program(
+        cls.create_partner_role_with_permissions(
             partner_with_action_permissions_and_program_access,
-            cls.program,
-        )
-        cls.add_partner_role_in_business_area(
-            partner_with_action_permissions_and_program_access,
+            partner_permissions_list,
             cls.business_area,
-            [role],
+            cls.program,
         )
         partner_with_action_permissions_without_program_access = PartnerFactory.create(
             name="Partner with action permissions and without program access"
         )
-        cls.update_partner_access_to_program(
+        cls.create_partner_role_with_permissions(
             partner_with_action_permissions_without_program_access,
-            cls.program2,
-        )
-        cls.add_partner_role_in_business_area(
-            partner_with_action_permissions_without_program_access,
+            partner_permissions_list,
             cls.business_area,
-            [role],
+            cls.program2,
         )
 
         cls.user_with_partner_action_permissions_and_program_access = UserFactory.create(

@@ -70,7 +70,7 @@ class TestFeedbackMessages(APITestCase):
         cls.user = UserFactory.create(first_name="John", last_name="Doe", partner=cls.partner)
 
         cls.feedback = FeedbackFactory(id="1761d020-ead2-489f-95a8-61853fbe568e", issue_type=Feedback.NEGATIVE_FEEDBACK)
-        cls.update_partner_access_to_program(cls.partner, cls.program)
+        cls.create_partner_role_with_permissions(cls.partner, [], cls.business_area, cls.program)
 
     @parameterized.expand(
         [

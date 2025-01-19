@@ -54,7 +54,7 @@ mutation CreateAccountabilityCommunicationMessage (
         partner = PartnerFactory(name="Partner")
         cls.user = UserFactory(first_name="John", last_name="Wick", partner=partner)
         cls.program = ProgramFactory(status=Program.ACTIVE)
-        cls.update_partner_access_to_program(partner, cls.program)
+        cls.create_partner_role_with_permissions(partner, [], cls.business_area, cls.program)
         cls.target_population = TargetPopulationFactory(
             business_area=cls.business_area,
             status=TargetPopulation.STATUS_PROCESSING,

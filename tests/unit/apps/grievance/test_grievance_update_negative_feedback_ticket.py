@@ -65,7 +65,7 @@ class TestGrievanceUpdateNegativeFeedbackTicketQuery(APITestCase):
         cls.ticket.ticket.status = GrievanceTicket.STATUS_NEW
         cls.ticket.ticket.save()
         cls.program = ProgramFactory(business_area=BusinessArea.objects.first(), status=Program.ACTIVE)
-        cls.update_partner_access_to_program(partner, cls.program)
+        cls.create_partner_role_with_permissions(partner, [], cls.business_area, cls.program)
 
     @parameterized.expand(
         [

@@ -1,4 +1,4 @@
-from hct_mis_api.apps.account.fixtures import PartnerFactory, RoleFactory, UserFactory
+from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -31,8 +31,7 @@ class RoleAssignmentsTest(APITestCase):
 
         for partner in Partner.objects.exclude(name="UNICEF"):  # unicef partner should be available everywhere
             partner.allowed_business_areas.add(cls.business_area)
-            role = RoleFactory(name=f"Role for {partner.name}")
-            cls.add_partner_role_in_business_area(partner, cls.business_area, [role])
+            cls.create_partner_role_with_permissions(partner, [], cls.business_area)
 
         # partner allowed in BA but without role -> is not listed
         partner_without_role = PartnerFactory(name="Partner Without Role")
