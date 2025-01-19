@@ -25,8 +25,7 @@ from rest_framework.exceptions import ValidationError as DRFValidationError
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.payment.models import PaymentPlan
-from hct_mis_api.apps.targeting.models import TargetPopulation
+from hct_mis_api.apps.payment.models import Payment, PaymentPlan
 from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
     AdminUrlMixin,
@@ -62,6 +61,23 @@ class ProgramPartnerThrough(TimeStampedUUIDModel):  # TODO: remove after migrati
                 name="unique_program_partner",
             )
         ]
+
+
+class BeneficiaryGroup(TimeStampedUUIDModel):
+    name = models.CharField(max_length=255, unique=True)
+    group_label = models.CharField(max_length=255)
+    group_label_plural = models.CharField(max_length=255)
+    member_label = models.CharField(max_length=255)
+    member_label_plural = models.CharField(max_length=255)
+    master_detail = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = "Beneficiary Group"
+        verbose_name_plural = "Beneficiary Groups"
+        ordering = ("name",)
+
+    def __str__(self) -> str:
+        return self.name
 
 
 class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel, AdminUrlMixin):
@@ -205,10 +221,28 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         default=False, help_text="Enable Deduplication of Face Images"
     )
     deduplication_set_id = models.UUIDField(blank=True, null=True)
+    beneficiary_group = models.ForeignKey(
+        BeneficiaryGroup,
+        on_delete=models.PROTECT,
+        related_name="programs",
+    )
 
     objects = SoftDeletableIsVisibleManager()
 
+    def clean(self) -> None:
+        super().clean()
+        if self.data_collecting_type and self.beneficiary_group:
+            if (
+                self.data_collecting_type.type == DataCollectingType.Type.SOCIAL
+                and self.beneficiary_group.master_detail
+            ) or (
+                self.data_collecting_type.type == DataCollectingType.Type.STANDARD
+                and not self.beneficiary_group.master_detail
+            ):
+                raise ValidationError("Selected combination of data collecting type and beneficiary group is invalid.")
+
     def save(self, *args: Any, **kwargs: Any) -> None:
+        self.clean()
         if not self.programme_code:
             self.programme_code = self._generate_programme_code()
         if self.data_collecting_type_id is None and self.data_collecting_type:
@@ -237,11 +271,16 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         self.individual_count = self.individuals.count()
 
     @property
-    def households_with_tp_in_program(self) -> QuerySet:
-        target_populations_in_program_ids = (
-            TargetPopulation.objects.filter(program=self).exclude(status=TargetPopulation.STATUS_OPEN).values("id")
+    def households_with_payments_in_program(self) -> QuerySet:
+        # for now all Payments or maybe can filter just status__in=Payment.DELIVERED_STATUSES
+        household_ids = (
+            Payment.objects.filter(program=self)
+            .exclude(conflicted=True, excluded=True)
+            .values_list("household_id", flat=True)
+            .distinct()
         )
-        return Household.objects.filter(target_populations__id__in=target_populations_in_program_ids).distinct()
+
+        return Household.objects.filter(id__in=household_ids, program=self)
 
     @property
     def admin_areas_log(self) -> str:
@@ -249,8 +288,6 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
 
     @property
     def is_social_worker_program(self) -> bool:
-        if self.data_collecting_type is None:
-            return False
         return self.data_collecting_type.type == DataCollectingType.Type.SOCIAL
 
     class Meta:

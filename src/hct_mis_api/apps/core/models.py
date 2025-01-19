@@ -11,6 +11,7 @@ from django.utils.translation import gettext_lazy as _
 
 from django_celery_beat.models import PeriodicTask
 from django_celery_beat.schedulers import DatabaseScheduler, ModelEntry
+from fernet_fields import EncryptedCharField
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel, TimeStampedModel
 from natural_keys import NaturalKeyModel
@@ -133,8 +134,6 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
         help_text="Threshold for Face Image Deduplication",
         validators=[MinValueValidator(0.0), MaxValueValidator(100.0)],
     )
-
-    is_payment_plan_applicable = models.BooleanField(default=False)
     is_accountability_applicable = models.BooleanField(default=False)
     active = models.BooleanField(default=False)
     enable_email_notification = models.BooleanField(default=True, verbose_name="Automatic Email notifications enabled")
@@ -159,6 +158,8 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
             ("can_send_doap", "Can send DOAP matrix"),
             ("can_reset_doap", "Can force sync DOAP matrix"),
             ("can_export_doap", "Can export DOAP matrix"),
+            ("ping_rapidpro", "Can test RapidPRO connection"),
+            ("execute_sync_rapid_pro", "Can execute RapidPRO sync"),
         )
 
     def __str__(self) -> str:
@@ -353,6 +354,9 @@ class PeriodicFieldData(models.Model):
         verbose_name = "Periodic Field Data"
         verbose_name_plural = "Periodic Fields Data"
 
+    def __str__(self) -> str:
+        return f"Periodic Field Data: {self.pk}"
+
 
 class XLSXKoboTemplateManager(models.Manager):
     def latest_valid(self) -> Optional["XLSXKoboTemplate"]:
@@ -379,11 +383,6 @@ class XLSXKoboTemplate(SoftDeletableModel, TimeStampedUUIDModel):
         (UPLOADED, _("Uploaded")),
     )
 
-    class Meta:
-        ordering = ("-created_at",)
-
-    objects = XLSXKoboTemplateManager()
-
     file_name = models.CharField(max_length=255)
     uploaded_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -395,6 +394,15 @@ class XLSXKoboTemplate(SoftDeletableModel, TimeStampedUUIDModel):
     status = models.CharField(max_length=200, choices=KOBO_FORM_UPLOAD_STATUS_CHOICES)
     template_id = models.CharField(max_length=200, blank=True)
     first_connection_failed_time = models.DateTimeField(null=True, blank=True)
+
+    objects = XLSXKoboTemplateManager()
+
+    class Meta:
+        ordering = ("-created_at",)
+        permissions = (
+            ("download_last_valid_file", "Can download the last valid KOBO template"),
+            ("rerun_kobo_import", "Can rerun a KOBO import"),
+        )
 
     def __str__(self) -> str:
         return f"{self.file_name} - {self.created_at}"
@@ -513,6 +521,8 @@ class FileTemp(TimeStampedModel):
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
     file = models.FileField()
     was_downloaded = models.BooleanField(default=False)
+    password = EncryptedCharField(max_length=255, null=True, blank=True)
+    xlsx_password = EncryptedCharField(max_length=255, null=True, blank=True)
 
     def __str__(self) -> str:
         return f"{self.file.name} - {self.created}"

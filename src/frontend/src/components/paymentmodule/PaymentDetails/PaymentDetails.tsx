@@ -1,20 +1,4 @@
-import { Grid, Paper, Typography } from '@mui/material';
-import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
-import {
-  PaymentQuery,
-  PaymentStatus,
-  PaymentVerificationStatus,
-} from '@generated/graphql';
 import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityLogTable';
-import { useBusinessArea } from '@hooks/useBusinessArea';
-import {
-  formatCurrencyWithSymbol,
-  getPhoneNoLabel,
-  paymentStatusDisplayMap,
-  paymentStatusToColor,
-  verificationRecordsStatusToColor,
-} from '@utils/utils';
 import { BlackLink } from '@core/BlackLink';
 import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { DividerLine } from '@core/DividerLine';
@@ -22,8 +6,24 @@ import { LabelizedField } from '@core/LabelizedField';
 import { StatusBox } from '@core/StatusBox';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
+import {
+  PaymentQuery,
+  PaymentStatus,
+  PaymentVerificationStatus,
+} from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { Grid, Paper, Typography } from '@mui/material';
+import {
+  formatCurrencyWithSymbol,
+  getPhoneNoLabel,
+  paymentStatusDisplayMap,
+  paymentStatusToColor,
+  verificationRecordsStatusToColor,
+} from '@utils/utils';
 import { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useProgramContext } from 'src/programContext';
+import styled from 'styled-components';
 
 const Overview = styled(Paper)`
   margin: 20px;
@@ -42,9 +42,10 @@ export function PaymentDetails({
   canViewActivityLog,
   canViewHouseholdDetails,
 }: PaymentDetailsProps): ReactElement {
-  const businessArea = useBusinessArea();
   const { t } = useTranslation();
-  const { programId } = useBaseUrl();
+  const { businessArea, programId } = useBaseUrl();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   let paymentVerification: PaymentQuery['payment']['verification'] = null;
   if (
@@ -100,9 +101,9 @@ export function PaymentDetails({
           <Grid item xs={3}>
             <LabelizedField label={t('TARGET POPULATION')}>
               <BlackLink
-                to={`/${businessArea}/programs/${programId}/target-population/${payment.targetPopulation.id}`}
+                to={`/${businessArea}/programs/${programId}/target-population/${payment.parent.id}`}
               >
-                {payment.targetPopulation?.name}
+                {payment.parent?.name}
               </BlackLink>
             </LabelizedField>
           </Grid>
@@ -149,11 +150,11 @@ export function PaymentDetails({
       ) : null}
       <Overview>
         <Title>
-          <Typography variant="h6">{t('Household')}</Typography>
+          <Typography variant="h6">{beneficiaryGroup?.groupLabel}</Typography>
         </Title>
         <Grid container spacing={3}>
           <Grid item xs={3}>
-            <LabelizedField label={t('HOUSEHOLD ID')}>
+            <LabelizedField label={`${beneficiaryGroup?.groupLabel}`}>
               {payment.household?.id && canViewHouseholdDetails ? (
                 <BlackLink
                   to={`/${businessArea}/programs/${programId}/population/household/${payment.household.id}`}

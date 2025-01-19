@@ -7,6 +7,9 @@ from django.http import HttpRequest
 from django.urls import reverse
 from django.utils.html import format_html
 
+from admin_extra_buttons.decorators import button
+from adminfilters.autocomplete import AutoCompleteFilter
+
 from hct_mis_api.apps.account import models as account_models
 from hct_mis_api.apps.account.admin.user_role import RoleAssignmentInline
 from hct_mis_api.apps.core.models import BusinessArea
@@ -28,11 +31,12 @@ class ProgramAreaForm(forms.Form):
 
 @admin.register(account_models.Partner)
 class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
-    list_filter = ("is_un", "parent")
+    list_filter = ("is_un", ("parent", AutoCompleteFilter))
     search_fields = ("name",)
     readonly_fields = ("sub_partners",)
     list_display = (
-        "__str__",
+        "name",
+        "parent",
         "sub_partners",
         "is_un",
     )
@@ -73,3 +77,77 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
 
         form.base_fields["parent"].queryset = queryset
         return form
+
+    @button(enabled=lambda obj: obj.original.is_editable, permission="auth.view_permission")
+    def permissions(self, request: HttpRequest, pk: int) -> Union[TemplateResponse, HttpResponseRedirect]:
+        context = self.get_common_context(request, pk, title="Partner permissions")
+        partner: account_models.Partner = context["original"]
+        user_can_add_ba_to_partner = request.user.can_add_business_area_to_partner()
+        permissions_list = partner.business_area_partner_through.all()
+        context["can_add_business_area_to_partner"] = user_can_add_ba_to_partner
+
+        BusinessAreaRoleFormSet = formset_factory(
+            business_area_role_form_custom_query(partner.allowed_business_areas.all()),
+            extra=0,
+            can_delete=True,
+        )
+        if request.method == "GET":
+            business_area_role_data = []
+            for permission in permissions_list:
+                if permission.roles:
+                    business_area_role_data.append(
+                        {"business_area": permission.business_area_id, "roles": permission.roles.all()}
+                    )
+            business_area_role_form_set = BusinessAreaRoleFormSet(
+                initial=business_area_role_data, prefix="business_area_role"
+            )
+        else:
+            business_area_role_form_set = BusinessAreaRoleFormSet(request.POST or None, prefix="business_area_role")
+            incompatible_roles = defaultdict(list)
+            ba_partner_through_data = {}
+            ba_partner_through_to_be_deleted = []
+
+            business_area_role_form_set_is_valid = business_area_role_form_set.is_valid()
+            if user_can_add_ba_to_partner and business_area_role_form_set_is_valid:
+                for form in business_area_role_form_set.cleaned_data:
+                    if form and not form["DELETE"]:
+                        business_area_id = str(form["business_area"].id)
+                        role_ids = list(map(lambda role: str(role.id), form["roles"]))
+
+                        if incompatible_role := IncompatibleRoles.objects.filter(
+                            role_one__in=role_ids, role_two__in=role_ids
+                        ).first():
+                            incompatible_roles[form["business_area"]].append(str(incompatible_role))
+                        else:
+                            ba_partner, _ = BusinessAreaPartnerThrough.objects.get_or_create(
+                                partner=partner,
+                                business_area_id=business_area_id,
+                            )
+                            ba_partner_through_data[ba_partner] = form["roles"]
+                    elif form["DELETE"]:
+                        ba_partner_through_to_be_deleted.append(
+                            BusinessAreaPartnerThrough.objects.filter(
+                                partner=partner, business_area=form["business_area"]
+                            )
+                            .first()
+                            .id
+                        )
+
+            if incompatible_roles:
+                for business_area, roles in incompatible_roles.items():
+                    self.message_user(
+                        request, f"Roles in {business_area} are incompatible: {', '.join(roles)}", messages.ERROR
+                    )
+
+            if business_area_role_form_set_is_valid and not incompatible_roles:
+                if ba_partner_through_to_be_deleted:
+                    BusinessAreaPartnerThrough.objects.filter(pk__in=ba_partner_through_to_be_deleted).delete()
+                for ba_partner_through, areas in ba_partner_through_data.items():
+                    ba_partner_through.roles.add(*areas)
+
+                return HttpResponseRedirect(reverse("admin:account_partner_change", args=[pk]))
+
+        context["business_area_role_formset"] = business_area_role_form_set
+
+        return TemplateResponse(request, "admin/account/parent/permissions.html", context)
+>>>>>>> develop

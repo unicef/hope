@@ -118,9 +118,7 @@ class TestUpdateGrievanceTickets(APITestCase):
         )
         cls.create_partner_role_with_permissions(partner, [], cls.business_area, cls.program)
 
-        household_one = HouseholdFactory.build(
-            id="07a901ed-d2a5-422a-b962-3570da1d5d07", size=2, village="Example", program=cls.program
-        )
+        household_one = HouseholdFactory.build(size=2, village="Example", program=cls.program)
         household_one.household_collection.save()
         household_one.registration_data_import.imported_by.save()
         household_one.registration_data_import.program = cls.program

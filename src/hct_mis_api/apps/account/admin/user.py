@@ -168,7 +168,7 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
             to_delete.append(f"Kobo: {kobo_username}")  # type: ignore # this is somehow intentional
         return to_delete, model_count, perms_needed, protected
 
-    @button()
+    @button(permission="auth.view_permission")
     def privileges(self, request: HttpRequest, pk: "UUID") -> TemplateResponse:
         context = self.get_common_context(request, pk)
         user: account_models.User = context["original"]

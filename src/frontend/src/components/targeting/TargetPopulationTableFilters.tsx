@@ -2,16 +2,17 @@ import { Grid, MenuItem } from '@mui/material';
 import { Group, Person } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { TargetPopulationStatus } from '@generated/graphql';
 import {
-  createHandleApplyFilterChange,
-  targetPopulationStatusMapping,
-} from '@utils/utils';
+  PaymentPlanStatus,
+  usePaymentPlanStatusChoicesQueryQuery,
+} from '@generated/graphql';
+import { createHandleApplyFilterChange } from '@utils/utils';
 import { DatePickerFilter } from '@core/DatePickerFilter';
 import { NumberTextField } from '@core/NumberTextField';
 import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
 import { FiltersSection } from '@core/FiltersSection';
+import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
 
 interface TargetPopulationTableFiltersProps {
@@ -31,7 +32,8 @@ export const TargetPopulationTableFilters = ({
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
-  const isAccountability = location.pathname.includes('accountability');
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const { handleFilterChange, applyFilterChanges, clearFilter } =
     createHandleApplyFilterChange(
@@ -51,9 +53,26 @@ export const TargetPopulationTableFilters = ({
     clearFilter();
   };
 
-  const preparedStatusChoices = isAccountability
-    ? Object.values(TargetPopulationStatus).filter((key) => key !== 'OPEN')
-    : Object.values(TargetPopulationStatus);
+  const allowedStatusChoices = [
+    'ASSIGNED',
+    PaymentPlanStatus.TpOpen,
+    PaymentPlanStatus.TpLocked,
+    PaymentPlanStatus.Processing,
+    PaymentPlanStatus.SteficonRun,
+    PaymentPlanStatus.SteficonWait,
+    PaymentPlanStatus.SteficonCompleted,
+    PaymentPlanStatus.SteficonError,
+  ];
+
+  const { data: statusChoicesData } = usePaymentPlanStatusChoicesQueryQuery();
+
+  const preparedStatusChoices =
+    [
+      { name: 'Assigned', value: 'ASSIGNED' },
+      ...(statusChoicesData?.paymentPlanStatusChoices || []),
+    ]?.filter((el) =>
+      allowedStatusChoices.includes(el.value as PaymentPlanStatus),
+    ) || [];
 
   return (
     <FiltersSection
@@ -79,16 +98,16 @@ export const TargetPopulationTableFilters = ({
             fullWidth
             data-cy="filters-status"
           >
-            {preparedStatusChoices.sort().map((key) => (
-              <MenuItem key={key} value={key}>
-                {targetPopulationStatusMapping(key)}
+            {preparedStatusChoices.map((item) => (
+              <MenuItem key={item.value} value={item.value}>
+                {item.name}
               </MenuItem>
             ))}
           </SelectFilter>
         </Grid>
         <Grid item xs={3}>
           <NumberTextField
-            topLabel={t('Number of Households')}
+            topLabel={t(`Number of ${beneficiaryGroup?.groupLabelPlural}`)}
             value={filter.totalHouseholdsCountMin}
             placeholder={t('From')}
             onChange={(e) =>
