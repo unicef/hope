@@ -4,7 +4,6 @@ export const ALL_PAYMENT_VERIFICATION_LOG_ENTRIES_QUERY = gql`
   query AllPaymentVerificationLogEntries(
     $businessArea: String!
     $objectId: UUID
-    $objectType: String
     $after: String
     $before: String
     $first: Int
@@ -18,7 +17,6 @@ export const ALL_PAYMENT_VERIFICATION_LOG_ENTRIES_QUERY = gql`
       first: $first
       last: $last
       objectId: $objectId
-      objectType: $objectType
       businessArea: $businessArea
       search: $search
       module: $module

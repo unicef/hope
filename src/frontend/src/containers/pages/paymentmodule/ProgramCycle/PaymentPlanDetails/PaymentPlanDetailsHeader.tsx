@@ -21,7 +21,6 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { fetchProgramCycle } from '@api/programCycleApi';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useParams } from 'react-router-dom';
 import { AdminButton } from '@core/AdminButton';
 
 interface PaymentPlanDetailsHeaderProps {
@@ -35,30 +34,23 @@ export const PaymentPlanDetailsHeader = ({
 }: PaymentPlanDetailsHeaderProps): ReactElement => {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
-  const { programCycleId } = useParams();
-
-  const { data: programCycleData, isLoading: isLoadingProgramCycle } = useQuery(
-    {
-      queryKey: [
-        'programCyclesDetails',
+  const programCycleId = paymentPlan.programCycle?.id;
+  const { data: programCycleData } = useQuery({
+    queryKey: [
+      'programCyclesDetails',
+      businessArea,
+      programId,
+      decodeIdString(programCycleId),
+    ],
+    queryFn: async () => {
+      return fetchProgramCycle(
         businessArea,
         programId,
         decodeIdString(programCycleId),
-      ],
-      queryFn: async () => {
-        return fetchProgramCycle(
-          businessArea,
-          programId,
-          decodeIdString(programCycleId),
-        );
-      },
-      enabled: !!programCycleId,
+      );
     },
-  );
-
-  if (isLoadingProgramCycle) {
-    return null;
-  }
+    enabled: !!programCycleId,
+  });
 
   const breadCrumbsItems: BreadCrumbsItem[] = [];
 
@@ -68,7 +60,7 @@ export const PaymentPlanDetailsHeader = ({
       to: '../../..',
     });
     breadCrumbsItems.push({
-      title: `${programCycleData.title}`,
+      title: `${programCycleData?.title || ''}`,
       to: '../..',
     });
   } else {
@@ -96,14 +88,6 @@ export const PaymentPlanDetailsHeader = ({
   );
   const canMarkAsReleased = hasPermissions(
     PERMISSIONS.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
-    permissions,
-  );
-  const canDownloadXlsx = hasPermissions(
-    PERMISSIONS.PM_DOWNLOAD_XLSX_FOR_FSP,
-    permissions,
-  );
-  const canExportXlsx = hasPermissions(
-    PERMISSIONS.PM_EXPORT_XLSX_FOR_FSP,
     permissions,
   );
   const canSplit =
@@ -182,11 +166,9 @@ export const PaymentPlanDetailsHeader = ({
     case 'ACCEPTED':
       buttons = (
         <AcceptedPaymentPlanHeaderButtons
-          canDownloadXlsx={canDownloadXlsx}
-          canExportXlsx={canExportXlsx}
+          canSendToPaymentGateway={canSendToPaymentGateway}
           canSplit={canSplit}
           paymentPlan={paymentPlan}
-          canSendToPaymentGateway={canSendToPaymentGateway}
         />
       );
       break;

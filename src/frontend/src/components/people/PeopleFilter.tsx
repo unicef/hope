@@ -1,24 +1,24 @@
-import { Grid, MenuItem } from '@mui/material';
-import CakeIcon from '@mui/icons-material/Cake';
-import FlashOnIcon from '@mui/icons-material/FlashOn';
-import { useTranslation } from 'react-i18next';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { DatePickerFilter } from '@core/DatePickerFilter';
+import { FiltersSection } from '@core/FiltersSection';
+import { NumberTextField } from '@core/NumberTextField';
+import { SearchTextField } from '@core/SearchTextField';
+import { SelectFilter } from '@core/SelectFilter';
 import {
   DataCollectingTypeType,
   IndividualChoiceDataQuery,
   ProgramNode,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import CakeIcon from '@mui/icons-material/Cake';
+import FlashOnIcon from '@mui/icons-material/FlashOn';
+import { Grid, MenuItem } from '@mui/material';
 import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomplete';
-import { individualTableOrderOptions } from '@utils/constants';
+import { generateTableOrderOptionsMember } from '@utils/constants';
 import { createHandleApplyFilterChange } from '@utils/utils';
-import { DatePickerFilter } from '@core/DatePickerFilter';
-import { FiltersSection } from '@core/FiltersSection';
-import { NumberTextField } from '@core/NumberTextField';
-import { SearchTextField } from '@core/SearchTextField';
-import { SelectFilter } from '@core/SelectFilter';
-import { useProgramContext } from '../../programContext';
 import { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useProgramContext } from '../../programContext';
 
 interface PeopleFilterProps {
   filter;
@@ -46,6 +46,7 @@ export function PeopleFilter({
   const location = useLocation();
   const { isAllPrograms } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const { handleFilterChange, applyFilterChanges, clearFilter } =
     createHandleApplyFilterChange(
@@ -69,6 +70,9 @@ export function PeopleFilter({
   const showAdminAreaFilter =
     selectedProgram?.dataCollectingType?.type?.toUpperCase() ===
     DataCollectingTypeType.Social;
+
+  const individualTableOrderOptions =
+    generateTableOrderOptionsMember(beneficiaryGroup);
 
   return (
     <FiltersSection
@@ -176,6 +180,9 @@ export function PeopleFilter({
           >
             <MenuItem value="FEMALE">{t('Female')}</MenuItem>
             <MenuItem value="MALE">{t('Male')}</MenuItem>
+            <MenuItem value="OTHER">{t('Other')}</MenuItem>
+            <MenuItem value="NOT_COLLECTED">{t('Not Collected')}</MenuItem>
+            <MenuItem value="NOT_ANSWERED">{t('Not Answered')}</MenuItem>
           </SelectFilter>
         </Grid>
         <Grid item xs={2}>

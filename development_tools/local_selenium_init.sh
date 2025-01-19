@@ -11,6 +11,7 @@ export POSTGRES_PASS=postgres
 export PGUSER=postgres
 export POSTGRES_HOST_AUTH_METHOD=trust
 export DATABASE_URL=postgis://postgres:postgres@localhost:5432/postgres
+export REP_DATABASE_URL=postgis://postgres:postgres@localhost:5432/postgres
 export POSTGRES_SSL_MODE=off
 export EMAIL_HOST=TBD
 export EMAIL_HOST_USER=TBD
@@ -40,6 +41,7 @@ export CELERY_TASK_ALWAYS_EAGER=true
 export LIBRARY_PATHS=true
 SCRIPT_DIR=$(realpath "$(dirname $0)")
 MAIN_DIR=$(realpath $SCRIPT_DIR/..)
+export ELASTICSEARCH_SYNONYMS_FILE=$MAIN_DIR/src/data/synonyms.txt
 echo "SCRIPT_DIR: $SCRIPT_DIR"
 export PYTHONPATH=$MAIN_DIR/src:$PYTHONPATH
 export OUTPUT_DATA_ROOT=$MAIN_DIR/tests/selenium/output_data

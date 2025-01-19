@@ -91,7 +91,7 @@ export const CreateTargetPopulationPage = (): ReactElement => {
       });
       showMessage(t('Target Population Created'));
       navigate(
-        `/${baseUrl}/target-population/${res.data.createTargetPopulation.targetPopulation.id}`,
+        `/${baseUrl}/target-population/${res.data.createPaymentPlan.paymentPlan.id}`,
       );
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));

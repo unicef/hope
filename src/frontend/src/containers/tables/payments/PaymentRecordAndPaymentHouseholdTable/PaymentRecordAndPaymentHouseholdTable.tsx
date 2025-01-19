@@ -9,6 +9,9 @@ import {
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './PaymentRecordAndPaymentHouseholdTableHeadCells';
 import { PaymentRecordAndPaymentHouseholdTableRow } from './PaymentRecordAndPaymentHouseholdTableRow';
+import { adjustHeadCells } from '@utils/utils';
+import { useProgramContext } from 'src/programContext';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface PaymentRecordAndPaymentTableProps {
   household?: HouseholdNode;
@@ -23,17 +26,36 @@ export function PaymentRecordHouseholdTable({
   canViewPaymentRecordDetails,
 }: PaymentRecordAndPaymentTableProps): ReactElement {
   const { t } = useTranslation();
+  const { programId } = useBaseUrl();
   const initialVariables = {
     household: household?.id,
     businessArea,
+    program: programId,
   };
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
+  const replacements = {
+    headOfHousehold: (_beneficiaryGroup) =>
+      `Head of ${_beneficiaryGroup?.groupLabel}`,
+    fullName: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel}`,
+    relationship: (_beneficiaryGroup) =>
+      `Relationship to Head of ${_beneficiaryGroup?.groupLabel}`,
+  };
+
+  const adjustedHeadCells = adjustHeadCells(
+    headCells,
+    beneficiaryGroup,
+    replacements,
+  );
+
   return (
     <UniversalTable<
-    PaymentRecordAndPaymentNode,
-    AllPaymentRecordsAndPaymentsQueryVariables
+      PaymentRecordAndPaymentNode,
+      AllPaymentRecordsAndPaymentsQueryVariables
     >
       title={t('Payment Records')}
-      headCells={headCells}
+      headCells={adjustedHeadCells}
       query={useAllPaymentRecordsAndPaymentsQuery}
       queriedObjectName="allPaymentRecordsAndPayments"
       initialVariables={initialVariables}

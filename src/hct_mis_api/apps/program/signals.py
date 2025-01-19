@@ -1,11 +1,16 @@
 from typing import Any
 
+from django.core.cache import cache
 from django.db import transaction
-from django.db.models.signals import post_save, pre_save
+from django.db.models.signals import post_delete, post_save, pre_save
 from django.dispatch import Signal, receiver
 
+from hct_mis_api.api.caches import get_or_create_cache_key
 from hct_mis_api.apps.account.models import Partner
-from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.program.models import (
+    BeneficiaryGroup,
+    Program,
+)
 from hct_mis_api.apps.program.utils import (
     create_program_partner_access,
     remove_program_partner_access,
@@ -46,3 +51,9 @@ def handle_partner_access_change(sender: Any, instance: Program, created: bool, 
             create_program_partner_access([], instance, new_partner_access)
         elif new_partner_access == Program.NONE_PARTNERS_ACCESS:
             remove_program_partner_access([], instance)
+
+@receiver([post_save, post_delete], sender=BeneficiaryGroup)
+def increment_beneficiary_group_version_cache(sender: Any, instance: BeneficiaryGroup, **kwargs: dict) -> None:
+    version_key = "beneficiary_group_list"
+    get_or_create_cache_key(version_key, 0)
+    cache.incr(version_key)

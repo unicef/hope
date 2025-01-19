@@ -50,7 +50,7 @@ class GroupAdmin(ImportExportModelAdmin, SyncMixin, HopeModelAdminMixin, _GroupA
     def _perms(self, request: HttpRequest, object_id: str) -> set:
         return set(self.get_object(request, object_id).permissions.values_list("codename", flat=True))
 
-    @button()
+    @button(permission="auth.view_group")
     def users(self, request: HttpRequest, pk: str) -> HttpResponse:
         User = get_user_model()
         context = self.get_common_context(request, pk, aeu_groups=["1"])

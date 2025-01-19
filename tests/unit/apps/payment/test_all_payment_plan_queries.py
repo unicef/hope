@@ -1,5 +1,6 @@
 from datetime import datetime
 from io import BytesIO
+from typing import Any, List
 from unittest.mock import patch
 
 from django.core.files.uploadedfile import InMemoryUploadedFile
@@ -7,48 +8,61 @@ from django.utils import timezone
 
 from dateutil.relativedelta import relativedelta
 from freezegun import freeze_time
+from parameterized import parameterized
 from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.activity_log.models import LogEntry
+from hct_mis_api.apps.activity_log.utils import create_diff
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.payment.fixtures import (
+    DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
+    PaymentVerificationPlanFactory,
+    PaymentVerificationSummaryFactory,
     RealProgramFactory,
 )
 from hct_mis_api.apps.payment.models import (
     AcceptanceProcessThreshold,
     ApprovalProcess,
+    FinancialServiceProvider,
+    Payment,
     PaymentHouseholdSnapshot,
     PaymentPlan,
     PaymentPlanSupportingDocument,
+    PaymentVerificationPlan,
 )
 from hct_mis_api.apps.program.fixtures import ProgramCycleFactory
 
 
-def create_child_payment_plans(pp: PaymentPlan) -> None:
+def create_child_payment_plans(pp: PaymentPlan, created_by: User) -> None:
     fpp1 = PaymentPlanFactory(
+        name="PaymentPlan FollowUp 01",
         id="56aca38c-dc16-48a9-ace4-70d88b41d462",
         is_follow_up=True,
         source_payment_plan=pp,
         dispersion_start_date=datetime(2020, 8, 10),
         dispersion_end_date=datetime(2020, 12, 10),
+        created_by=created_by,
     )
     fpp1.unicef_id = "PP-0060-20-00000003"
     fpp1.save()
 
     fpp2 = PaymentPlanFactory(
+        name="PaymentPlan FollowUp 02",
         id="5b04f7c3-579a-48dd-a232-424daaefffe7",
         is_follow_up=True,
         source_payment_plan=pp,
         dispersion_start_date=datetime(2020, 8, 10),
         dispersion_end_date=datetime(2020, 12, 10),
+        created_by=created_by,
     )
     fpp2.unicef_id = "PP-0060-20-00000004"
     fpp2.save()
@@ -80,6 +94,29 @@ class TestPaymentPlanQueries(APITestCase):
               }
             }
             canCreateFollowUp
+            canSplit
+            canSendToPaymentGateway
+            canCreateXlsxWithFspAuthCode
+            fspCommunicationChannel
+            canExportXlsx
+            canDownloadXlsx
+            canSendXlsxPassword
+            unsuccessfulPaymentsCount
+            hasFspDeliveryMechanismXlsxTemplate
+            availablePaymentRecordsCount
+            importedFileName
+            hasPaymentListExportFile
+            currencyName
+            verificationPlans{
+                totalCount
+            }
+            program{
+              name
+            }
+            splitChoices{
+              name
+              value
+            }
             dispersionEndDate
             dispersionStartDate
             exchangeRate
@@ -203,6 +240,7 @@ class TestPaymentPlanQueries(APITestCase):
         query Payment($id: ID!) {
           payment(id: $id) {
             totalPersonsCovered
+            fullName
             snapshotCollectorFullName
             snapshotCollectorDeliveryPhoneNo
             snapshotCollectorBankName
@@ -210,32 +248,67 @@ class TestPaymentPlanQueries(APITestCase):
             snapshotCollectorDebitCardNumber
             additionalCollectorName
             reasonForUnsuccessfulPayment
+            verification {
+              status
+            }
           }
         }
         """
 
+    PAYMENT_PLANS_FILTER_QUERY = """
+        query AllPaymentPlans($businessArea: String!, $search: String, $status: [String], $totalEntitledQuantityFrom: Float, $totalEntitledQuantityTo: Float, $dispersionStartDate: Date, $dispersionEndDate: Date, $program: String, $programCycle: String, $isPaymentPlan: Boolean, $isTargetPopulation: Boolean, $name: String, $totalHouseholdsCountMin: Int, $totalHouseholdsCountMax: Int, $totalHouseholdsCountWithValidPhoneNoMax: Int, $totalHouseholdsCountWithValidPhoneNoMin: Int, $statusNot: String) {
+            allPaymentPlans(businessArea: $businessArea, search: $search, status: $status, totalEntitledQuantityFrom: $totalEntitledQuantityFrom, totalEntitledQuantityTo: $totalEntitledQuantityTo, dispersionStartDate: $dispersionStartDate, dispersionEndDate: $dispersionEndDate, program: $program, orderBy: "status", programCycle: $programCycle, isPaymentPlan: $isPaymentPlan, isTargetPopulation: $isTargetPopulation, name: $name, totalHouseholdsCountMin: $totalHouseholdsCountMin, totalHouseholdsCountMax: $totalHouseholdsCountMax, totalHouseholdsCountWithValidPhoneNoMax: $totalHouseholdsCountWithValidPhoneNoMax, totalHouseholdsCountWithValidPhoneNoMin: $totalHouseholdsCountWithValidPhoneNoMin, statusNot: $statusNot) {
+            edges {
+              node {
+                name
+                status
+                totalHouseholdsCountWithValidPhoneNo
+              }
+            }
+          }
+        }
+        """
+    PAYMENT_PLAN_QUERY = """
+      query PaymentPlan($id: ID!) {
+        paymentPlan(id: $id) {
+          name
+          status
+          canSendToPaymentGateway
+          canCreateXlsxWithFspAuthCode
+          fspCommunicationChannel
+          canExportXlsx
+          canDownloadXlsx
+          canSendXlsxPassword
+        }
+      }
+    """
+
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        create_afghanistan()
+        cls.business_area = create_afghanistan()
         cls.user = UserFactory.create(username="qazxsw321")
         cls.create_user_role_with_permissions(
             cls.user,
-            [Permissions.PM_VIEW_LIST, Permissions.PM_VIEW_DETAILS],
-            BusinessArea.objects.get(slug="afghanistan"),
+            [Permissions.PM_VIEW_LIST, Permissions.PM_VIEW_DETAILS, Permissions.ACTIVITY_LOG_VIEW],
+            cls.business_area,
         )
 
         with freeze_time("2020-10-10"):
             program = RealProgramFactory(
+                name="Test All PP QS",
                 cycle__start_date=timezone.datetime(2020, 9, 10, tzinfo=utc).date(),
                 cycle__end_date=timezone.datetime(2020, 11, 10, tzinfo=utc).date(),
             )
-            program_cycle = program.cycles.first()
+            cls.program_cycle = program.cycles.first()
             cls.pp = PaymentPlanFactory(
-                program_cycle=program_cycle,
+                name="Main Payment Plan",
+                program_cycle=cls.program_cycle,
                 dispersion_start_date=datetime(2020, 8, 10),
                 dispersion_end_date=datetime(2020, 12, 10),
                 is_follow_up=False,
+                created_by=cls.user,
+                currency="PLN",
             )
             cls.pp.unicef_id = "PP-01"
             cls.pp.save()
@@ -271,10 +344,13 @@ class TestPaymentPlanQueries(APITestCase):
 
             # create hard conflicted payment
             cls.pp_conflicted = PaymentPlanFactory(
-                program_cycle=program_cycle,
+                name="PaymentPlan with conflicts",
+                program_cycle=cls.program_cycle,
                 status=PaymentPlan.Status.LOCKED,
                 dispersion_start_date=cls.pp.dispersion_start_date + relativedelta(months=2),
                 dispersion_end_date=cls.pp.dispersion_end_date - relativedelta(months=2),
+                created_by=cls.user,
+                currency="UAH",
             )
             cls.pp_conflicted.unicef_id = "PP-02"
             cls.pp_conflicted.save()
@@ -309,7 +385,7 @@ class TestPaymentPlanQueries(APITestCase):
             IndividualFactory(household=hh2, sex="MALE", birth_date=datetime.now().date() - relativedelta(years=20))
 
             AcceptanceProcessThreshold.objects.create(
-                business_area=BusinessArea.objects.first(),
+                business_area=cls.business_area,
                 approval_number_required=2,
                 authorization_number_required=2,
                 finance_release_number_required=3,
@@ -332,6 +408,13 @@ class TestPaymentPlanQueries(APITestCase):
                     size=10,
                     content_type="image/jpeg",
                 ),
+            )
+            DeliveryMechanismPerPaymentPlanFactory(
+                payment_plan=cls.pp_conflicted,
+                financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
+                financial_service_provider__payment_gateway_id="test123",
+                created_by=cls.user,
+                sent_by=cls.user,
             )
 
             with patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0):
@@ -393,7 +476,7 @@ class TestPaymentPlanQueries(APITestCase):
 
     @freeze_time("2020-10-10")
     def test_filter_payment_plans_with_source_id(self) -> None:
-        create_child_payment_plans(self.pp)
+        create_child_payment_plans(self.pp, self.user)
 
         self.snapshot_graphql_request(
             request_string=self.ALL_PAYMENT_PLANS_FILTER_QUERY_2,
@@ -418,7 +501,7 @@ class TestPaymentPlanQueries(APITestCase):
 
     @freeze_time("2020-10-10")
     def test_filter_payment_plans_with_follow_up_flag(self) -> None:
-        create_child_payment_plans(self.pp)
+        create_child_payment_plans(self.pp, self.user)
 
         resp_data = self.graphql_request(
             request_string=self.ALL_PAYMENT_PLANS_FILTER_QUERY_2,
@@ -462,14 +545,16 @@ class TestPaymentPlanQueries(APITestCase):
             cycle__end_date=timezone.datetime(2023, 11, 10, tzinfo=utc).date(),
         )
         new_pp = PaymentPlanFactory(
+            name="PaymentPlan with legacy data",
             program_cycle=program.cycles.first(),
             dispersion_start_date=datetime(2023, 8, 10),
             dispersion_end_date=datetime(2023, 12, 10),
             is_follow_up=False,
+            created_by=self.user,
         )
-        hoh_1 = IndividualFactory(household=None)
-        hoh_2 = IndividualFactory(household=None)
-        hoh_3 = IndividualFactory(household=None)
+        hoh_1 = IndividualFactory(household=None, given_name="First1", middle_name="Mid1", family_name="Last1")
+        hoh_2 = IndividualFactory(household=None, given_name="First2", middle_name="Mid2", family_name="Last3")
+        hoh_3 = IndividualFactory(household=None, given_name="First3", middle_name="Mid3", family_name="Last3")
         household_1 = HouseholdFactory(head_of_household=hoh_1, size=5)
         household_2 = HouseholdFactory(head_of_household=hoh_2, size=10)
         household_3 = HouseholdFactory(head_of_household=hoh_3, size=15)
@@ -538,3 +623,367 @@ class TestPaymentPlanQueries(APITestCase):
                 context={"user": self.user},
                 variables={"id": encode_id_base64(payment_id, "Payment")},
             )
+
+    def test_all_payment_verification_log_entries(self) -> None:
+        query = """
+        query allPaymentVerificationLogEntries($objectId: UUID, $businessArea: String!) {
+          allPaymentVerificationLogEntries(objectId: $objectId, businessArea: $businessArea) {
+            totalCount
+            edges {
+              node {
+                isUserGenerated
+                action
+              }
+            }
+          }
+        }
+        """
+        payment_plan_id = str(self.pp.id)
+        PaymentVerificationSummaryFactory(payment_plan=self.pp)
+        PaymentVerificationSummaryFactory(payment_plan=self.pp_conflicted)
+        pvp = PaymentVerificationPlanFactory(payment_plan=self.pp)
+        pvp2 = PaymentVerificationPlanFactory(payment_plan=self.pp_conflicted)
+        LogEntry.objects.create(
+            action=LogEntry.CREATE,
+            content_object=pvp,
+            user=self.user,
+            business_area=self.business_area,
+            object_repr=str(pvp),
+            changes=create_diff(None, pvp, PaymentVerificationPlan.ACTIVITY_LOG_MAPPING),
+        )
+        LogEntry.objects.create(
+            action=LogEntry.CREATE,
+            content_object=pvp2,
+            user=self.user,
+            business_area=self.business_area,
+            object_repr=str(pvp2),
+            changes=create_diff(None, pvp2, PaymentVerificationPlan.ACTIVITY_LOG_MAPPING),
+        )
+
+        self.snapshot_graphql_request(
+            request_string=query,
+            context={"user": self.user},
+            variables={"objectId": payment_plan_id, "businessArea": "afghanistan"},
+        )
+
+    def test_payment_plan_filter_is_payment_plan(self) -> None:
+        PaymentPlanFactory(
+            name="Payment Plan within FINISHED status",
+            status=PaymentPlan.Status.FINISHED,
+            program_cycle=self.program_cycle,
+            business_area=self.business_area,
+            dispersion_start_date=datetime(2020, 8, 10),
+            dispersion_end_date=datetime(2020, 12, 10),
+            is_follow_up=False,
+            created_by=self.user,
+        )
+        PaymentPlanFactory(
+            name="Payment Plan within TP_LOCK status",
+            status=PaymentPlan.Status.TP_LOCKED,
+            program_cycle=self.program_cycle,
+            business_area=self.business_area,
+            dispersion_start_date=datetime(2020, 8, 10),
+            dispersion_end_date=datetime(2020, 12, 10),
+            is_follow_up=False,
+            created_by=self.user,
+        )
+        self.snapshot_graphql_request(
+            request_string=self.PAYMENT_PLANS_FILTER_QUERY,
+            context={"user": self.user},
+            variables={"businessArea": "afghanistan", "isPaymentPlan": True},
+        )
+        self.snapshot_graphql_request(
+            request_string=self.PAYMENT_PLANS_FILTER_QUERY,
+            context={"user": self.user},
+            variables={"businessArea": "afghanistan", "isPaymentPlan": False},
+        )
+
+    def test_payment_plan_filter_is_target_population(self) -> None:
+        PaymentPlanFactory(
+            name="Payment Plan within TP_LOCK status",
+            status=PaymentPlan.Status.TP_LOCKED,
+            program_cycle=self.program_cycle,
+            business_area=self.business_area,
+            dispersion_start_date=datetime(2020, 8, 10),
+            dispersion_end_date=datetime(2020, 12, 10),
+            is_follow_up=False,
+            created_by=self.user,
+        )
+        PaymentPlanFactory(
+            name="Payment Plan within DRAFT status",
+            status=PaymentPlan.Status.DRAFT,
+            program_cycle=self.program_cycle,
+            business_area=self.business_area,
+            dispersion_start_date=datetime(2020, 8, 10),
+            dispersion_end_date=datetime(2020, 12, 10),
+            is_follow_up=False,
+            created_by=self.user,
+        )
+        self.snapshot_graphql_request(
+            request_string=self.PAYMENT_PLANS_FILTER_QUERY,
+            context={"user": self.user},
+            variables={"businessArea": "afghanistan", "isTargetPopulation": True},
+        )
+        self.snapshot_graphql_request(
+            request_string=self.PAYMENT_PLANS_FILTER_QUERY,
+            context={"user": self.user},
+            variables={"businessArea": "afghanistan", "isTargetPopulation": False},
+        )
+
+    def test_payment_plan_filter_name(self) -> None:
+        self.snapshot_graphql_request(
+            request_string=self.PAYMENT_PLANS_FILTER_QUERY,
+            context={"user": self.user},
+            variables={"businessArea": "afghanistan", "name": "PaymentPlan with"},
+        )
+
+    def test_payment_plan_filter_total_households_count_max(self) -> None:
+        pp_1 = PaymentPlanFactory(
+            name="Payment Plan with 2 payments",
+            status=PaymentPlan.Status.DRAFT,
+            program_cycle=self.program_cycle,
+            business_area=self.business_area,
+            created_by=self.user,
+        )
+        PaymentFactory.create_batch(2, parent=pp_1)
+        pp_2 = PaymentPlanFactory(
+            name="Payment Plan with 5 payments",
+            status=PaymentPlan.Status.DRAFT,
+            program_cycle=self.program_cycle,
+            business_area=self.business_area,
+            created_by=self.user,
+        )
+        PaymentFactory.create_batch(5, parent=pp_2)
+        self.snapshot_graphql_request(
+            request_string=self.PAYMENT_PLANS_FILTER_QUERY,
+            context={"user": self.user},
+            variables={"businessArea": "afghanistan", "totalHouseholdsCountMax": 3},
+        )
+
+    def test_payment_plan_filter_total_households_count_min(self) -> None:
+        pp_1 = PaymentPlanFactory(
+            name="Payment Plan with 1 payments",
+            status=PaymentPlan.Status.DRAFT,
+            program_cycle=self.program_cycle,
+            business_area=self.business_area,
+            created_by=self.user,
+        )
+        PaymentFactory.create_batch(1, parent=pp_1)
+        pp_2 = PaymentPlanFactory(
+            name="Payment Plan with 3 payments",
+            status=PaymentPlan.Status.DRAFT,
+            program_cycle=self.program_cycle,
+            business_area=self.business_area,
+            created_by=self.user,
+        )
+        PaymentFactory.create_batch(3, parent=pp_2)
+        self.snapshot_graphql_request(
+            request_string=self.PAYMENT_PLANS_FILTER_QUERY,
+            context={"user": self.user},
+            variables={"businessArea": "afghanistan", "totalHouseholdsCountMin": 2},
+        )
+
+    def test_payment_plan_filter_total_households_count_with_valid_phone_no_min_2(self) -> None:
+        valid_phone_no = "+48 123 456 987"
+        invalid_phone_no = "+48 ABC"
+        pp_with_2_valid_numbers = PaymentPlanFactory(
+            name="Payment Plan with valid 2 phone numbers",
+            status=PaymentPlan.Status.DRAFT,
+            program_cycle=self.program_cycle,
+            business_area=self.business_area,
+            created_by=self.user,
+        )
+        hoh_1 = IndividualFactory(household=None, phone_no_valid=True, phone_no_alternative_valid=False)
+        hoh_2 = IndividualFactory(
+            household=None, phone_no_valid=False, phone_no_alternative_valid=True, phone_no_alternative=valid_phone_no
+        )
+        household_1 = HouseholdFactory(head_of_household=hoh_1)
+        household_2 = HouseholdFactory(head_of_household=hoh_2)
+        PaymentFactory(parent=pp_with_2_valid_numbers, household=household_1, head_of_household=hoh_1, currency="PLN")
+        PaymentFactory(parent=pp_with_2_valid_numbers, household=household_2, head_of_household=hoh_2, currency="PLN")
+        pp_2 = PaymentPlanFactory(
+            name="Payment Plan with 2 payments and not valid phone numbers",
+            status=PaymentPlan.Status.DRAFT,
+            program_cycle=self.program_cycle,
+            business_area=self.business_area,
+            created_by=self.user,
+        )
+        household11 = HouseholdFactory(
+            head_of_household=IndividualFactory(
+                household=None, phone_no_valid=False, phone_no_alternative_valid=False, phone_no=invalid_phone_no
+            )
+        )
+        household22 = HouseholdFactory(
+            head_of_household=IndividualFactory(
+                household=None, phone_no_valid=False, phone_no_alternative_valid=False, phone_no=invalid_phone_no
+            )
+        )
+        PaymentFactory(parent=pp_2, household=household11, head_of_household=household11.head_of_household)
+        PaymentFactory(parent=pp_2, household=household22, head_of_household=household22.head_of_household)
+        self.snapshot_graphql_request(
+            request_string=self.PAYMENT_PLANS_FILTER_QUERY,
+            context={"user": self.user},
+            variables={"businessArea": "afghanistan", "totalHouseholdsCountWithValidPhoneNoMin": 2},
+        )
+
+    def test_payment_plan_filter_total_households_count_with_valid_phone_no_max_2(self) -> None:
+        valid_phone_no = "+48 123 456 777"
+        invalid_phone_no = "+48 TEST"
+        pp_with_3_valid_numbers = PaymentPlanFactory(
+            name="Payment Plan with valid 3 phone numbers",
+            status=PaymentPlan.Status.DRAFT,
+            program_cycle=self.program_cycle,
+            business_area=self.business_area,
+            created_by=self.user,
+        )
+        hoh_1 = IndividualFactory(household=None, phone_no_valid=True, phone_no_alternative_valid=False)
+        hoh_2 = IndividualFactory(
+            household=None, phone_no_valid=False, phone_no_alternative_valid=True, phone_no_alternative=valid_phone_no
+        )
+        hoh_3 = IndividualFactory(household=None, phone_no_valid=True, phone_no_alternative_valid=False)
+        household_1 = HouseholdFactory(head_of_household=hoh_1)
+        household_2 = HouseholdFactory(head_of_household=hoh_2)
+        household_3 = HouseholdFactory(head_of_household=hoh_3)
+        PaymentFactory(parent=pp_with_3_valid_numbers, household=household_1, head_of_household=hoh_1, currency="PLN")
+        PaymentFactory(parent=pp_with_3_valid_numbers, household=household_2, head_of_household=hoh_2, currency="PLN")
+        PaymentFactory(parent=pp_with_3_valid_numbers, household=household_3, head_of_household=hoh_3, currency="PLN")
+        pp_with_2_valid_numbers = PaymentPlanFactory(
+            name="Payment Plan with valid 2 phone numbers",
+            status=PaymentPlan.Status.TP_LOCKED,
+            program_cycle=self.program_cycle,
+            business_area=self.business_area,
+            created_by=self.user,
+        )
+        hoh_4 = IndividualFactory(
+            household=None, phone_no_valid=False, phone_no_alternative_valid=True, phone_no_alternative=valid_phone_no
+        )
+        hoh_5 = IndividualFactory(household=None, phone_no_valid=True, phone_no_alternative_valid=False)
+        household_4 = HouseholdFactory(head_of_household=hoh_4)
+        household_5 = HouseholdFactory(head_of_household=hoh_5)
+        PaymentFactory(parent=pp_with_2_valid_numbers, household=household_4, head_of_household=hoh_4, currency="PLN")
+        PaymentFactory(parent=pp_with_2_valid_numbers, household=household_5, head_of_household=hoh_5, currency="PLN")
+        pp = PaymentPlanFactory(
+            name="Payment Plan just random with invalid phone numbers",
+            status=PaymentPlan.Status.TP_PROCESSING,
+            program_cycle=self.program_cycle,
+            business_area=self.business_area,
+            created_by=self.user,
+        )
+        household11 = HouseholdFactory(
+            head_of_household=IndividualFactory(
+                household=None, phone_no_valid=False, phone_no_alternative_valid=False, phone_no=invalid_phone_no
+            )
+        )
+        household22 = HouseholdFactory(
+            head_of_household=IndividualFactory(
+                household=None, phone_no_valid=False, phone_no_alternative_valid=False, phone_no=invalid_phone_no
+            )
+        )
+        PaymentFactory(parent=pp, household=household11, head_of_household=household11.head_of_household)
+        PaymentFactory(parent=pp, household=household22, head_of_household=household22.head_of_household)
+        self.snapshot_graphql_request(
+            request_string=self.PAYMENT_PLANS_FILTER_QUERY,
+            context={"user": self.user},
+            variables={"businessArea": "afghanistan", "totalHouseholdsCountWithValidPhoneNoMax": 2},
+        )
+
+    def test_payment_plan_filter_not_status(self) -> None:
+        self.snapshot_graphql_request(
+            request_string=self.PAYMENT_PLANS_FILTER_QUERY,
+            context={"user": self.user},
+            variables={"businessArea": "afghanistan", "statusNot": "OPEN"},
+        )
+
+    def test_payment_plan_filter_status_assigned(self) -> None:
+        PaymentPlanFactory(
+            name="NEW TP OPEN",
+            status=PaymentPlan.Status.TP_OPEN,
+            program_cycle=self.program_cycle,
+            business_area=self.business_area,
+            created_by=self.user,
+        )
+        PaymentPlanFactory(
+            name="TP Processing",
+            status=PaymentPlan.Status.TP_PROCESSING,
+            program_cycle=self.program_cycle,
+            business_area=self.business_area,
+            created_by=self.user,
+        )
+        self.snapshot_graphql_request(
+            request_string=self.PAYMENT_PLANS_FILTER_QUERY,
+            context={"user": self.user},
+            variables={
+                "businessArea": "afghanistan",
+                "program": encode_id_base64(self.pp.program.pk, "Program"),
+                "status": ["TP_OPEN", "ASSIGNED"],
+            },
+        )
+        self.snapshot_graphql_request(
+            request_string=self.PAYMENT_PLANS_FILTER_QUERY,
+            context={"user": self.user},
+            variables={
+                "businessArea": "afghanistan",
+                "program": encode_id_base64(self.pp.program.pk, "Program"),
+                "status": ["TP_OPEN"],
+            },
+        )
+
+    @parameterized.expand(
+        [
+            (
+                "with_permission_api",
+                [Permissions.PM_DOWNLOAD_MTCN, Permissions.PM_SEND_XLSX_PASSWORD],
+                FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+            ),
+            ("without_permission_api", [], FinancialServiceProvider.COMMUNICATION_CHANNEL_API),
+            (
+                "with_permission_xlsx",
+                [Permissions.PM_DOWNLOAD_MTCN, Permissions.PM_SEND_XLSX_PASSWORD],
+                FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
+            ),
+            ("without_permission_xlsx", [], FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX),
+        ]
+    )
+    @freeze_time("2020-10-10")
+    def test_payment_plans_export_download_properties(
+        self, _: Any, permissions: List[Permissions], communication_channel: str
+    ) -> None:
+        user = UserFactory.create(username="abc")
+        self.create_user_role_with_permissions(user, permissions, self.business_area)
+
+        payment_plan = PaymentPlanFactory(
+            name="Test Finished PP",
+            status=PaymentPlan.Status.FINISHED,
+            program_cycle=self.program_cycle,
+            dispersion_start_date=datetime(2020, 8, 10),
+            dispersion_end_date=datetime(2020, 12, 10),
+            is_follow_up=False,
+            created_by=user,
+            currency="PLN",
+        )
+        dm_pp = DeliveryMechanismPerPaymentPlanFactory(
+            payment_plan=payment_plan,
+            financial_service_provider__communication_channel=communication_channel,
+            financial_service_provider__payment_gateway_id="1243",
+            created_by=user,
+            sent_by=user,
+        )
+        PaymentFactory(
+            parent=payment_plan,
+            status=Payment.STATUS_SENT_TO_FSP,
+            conflicted=True,
+            entitlement_quantity=00.00,
+            entitlement_quantity_usd=00.00,
+            delivered_quantity=00.00,
+            delivered_quantity_usd=00.00,
+            financial_service_provider=dm_pp.financial_service_provider,
+            currency="PLN",
+            fsp_auth_code="987",
+        )
+
+        encoded_payment_plan_id = encode_id_base64(payment_plan.id, "PaymentPlan")
+        self.snapshot_graphql_request(
+            request_string=self.PAYMENT_PLAN_QUERY,
+            context={"user": user},
+            variables={"businessArea": "afghanistan", "id": encoded_payment_plan_id},
+        )

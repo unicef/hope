@@ -490,9 +490,9 @@ class ImportExportPaymentPlanPaymentListTest(TestCase):
         template_column_list = export_service.prepare_headers(fsp_xlsx_template)
         self.assertEqual(
             len(template_column_list),
-            len(FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS) - 1,
+            len(FinancialServiceProviderXlsxTemplate.DEFAULT_COLUMNS) - 2,
             template_column_list,
-        )  # - ind_id
+        )  # - ind_id - fsp_auth_code
         self.assertIn("household_id", template_column_list)
         self.assertIn("household_size", template_column_list)
         self.assertNotIn("individual_id", template_column_list)

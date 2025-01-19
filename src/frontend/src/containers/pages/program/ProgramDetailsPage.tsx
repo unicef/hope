@@ -67,7 +67,8 @@ export function ProgramDetailsPage(): ReactElement {
 
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
-  if (!choices || !businessAreaData || permissions === null) return null;
+  if (!choices || !businessAreaData || permissions === null || !data)
+    return null;
 
   const { program } = data;
   const canFinish = hasPermissions(PERMISSIONS.PROGRAMME_FINISH, permissions);
@@ -93,9 +94,6 @@ export function ProgramDetailsPage(): ReactElement {
           PERMISSIONS.PROGRAMME_DUPLICATE,
           permissions,
         )}
-        isPaymentPlanApplicable={
-          businessAreaData.businessArea.isPaymentPlanApplicable
-        }
       />
       <Container>
         <ProgramDetails program={program} choices={choices} />
