@@ -147,6 +147,7 @@ export const ProgramForm = ({
             name="beneficiaryGroup"
             label={t('Beneficiary Group')}
             fullWidth
+            required
             variant="outlined"
             choices={mappedBeneficiaryGroupsData}
             component={FormikSelectField}
