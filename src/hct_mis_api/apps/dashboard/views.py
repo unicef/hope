@@ -65,7 +65,6 @@ class DashboardDataView(APIView):
         return Response(data, status=status.HTTP_200_OK)
 
 
-
 class CreateOrUpdateDashReportView(APIView):
     """
     API to trigger the creation or update of a DashReport for a given business area.

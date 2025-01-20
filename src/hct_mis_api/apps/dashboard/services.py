@@ -11,7 +11,7 @@ from rest_framework.utils.serializer_helpers import ReturnDict
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.dashboard.serializers import DashboardBaseSerializer
-from hct_mis_api.apps.payment.models import Payment, PaymentPlan
+from hct_mis_api.apps.payment.models import Payment
 
 CACHE_TIMEOUT = 60 * 60 * 24  # 24 hours
 
@@ -29,9 +29,11 @@ pwdSum = Sum(
     default=0,
 )
 
-finished_payment_plans = Count("parent__id", filter=Q(parent__payment_verification_plans__status="FINISHED"), distinct=True)
+finished_payment_plans = Count(
+    "parent__id", filter=Q(parent__payment_verification_plans__status="FINISHED"), distinct=True
+)
 
-total_payment_plans = Count("parent__id", filter=Q(parent__status="FINISHED"),distinct=True)
+total_payment_plans = Count("parent__id", filter=Q(parent__status="FINISHED"), distinct=True)
 
 
 class DashboardDataCache(Protocol):

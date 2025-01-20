@@ -206,15 +206,48 @@
 
                         function updateTopMetrics() {
                         const totalPaymentsCount = ndx.groupAll().reduceSum(d => d.payments || 0).value();
-                        const reconciledPaymentsCount = ndx
-                            .groupAll()
-                            .reduceSum(d => d.reconciled || 0)
-                            .value();
-                        const totalPaymentPlans = ndx.groupAll().reduceSum(d => d.total_payment_plans || 0).value();
-                        const finishedPaymentPlans = ndx.groupAll().reduceSum(d => d.finished_payment_plans || 0).value();
-                        const finishedPercentage = totalPaymentPlans > 0
-                        ? (finishedPaymentPlans / totalPaymentPlans) * 100
-                        : 0;
+                        const reconciliationData = ndx.groupAll().reduce(
+                            (p, v) => {
+                                if (v.payment_status !== "Pending") {
+                                    p.reconciled += 1;
+                                }
+                                p.total += 1;
+                                return p;
+                            },
+                            (p, v) => {
+                                if (v.payment_status !== "Pending") {
+                                    p.reconciled -= 1;
+                                }
+                                p.total -= 1;
+                                return p;
+                            },
+                            () => ({
+                                reconciled: 0,
+                                total: 0,
+                            })
+                        ).value();
+                        const reconciliationPercentage = reconciliationData.total > 0
+                                ? (reconciliationData.reconciled / reconciliationData.total) * 100
+                                : 0;
+                        const paymentPlanMetrics = ndx.groupAll().reduce(
+                                    (p, v) => {
+                                        p.finished += v.finished_payment_plans || 0;
+                                        p.total += v.total_payment_plans || 0;
+                                        return p;
+                                    },
+                                    (p, v) => {
+                                        p.finished -= v.finished_payment_plans || 0;
+                                        p.total -= v.total_payment_plans || 0;
+                                        return p;
+                                    },
+                                    () => ({ finished: 0, total: 0 })
+                                ).value();
+                        const finishedPaymentPlans = paymentPlanMetrics.finished;
+                        const totalPaymentPlans = paymentPlanMetrics.total;
+                        
+                        const verificationPercentage = totalPaymentPlans > 0 
+                            ? (finishedPaymentPlans / totalPaymentPlans) * 100 
+                            : 0;
                         const successfulPaymentsGroupUSD = ndx
                             .groupAll()
                             .reduce(
@@ -300,10 +333,10 @@
                         document.getElementById("children-reached").innerHTML =
                             `${simplenumberFormatter(childrenReached)}`;
                         document.querySelector(".reconciliation-percentage").innerHTML =
-                            `${decimalnumberFormatter((reconciledPaymentsCount / totalPaymentsCount) * 100)}%`;
+                            `${decimalnumberFormatter(reconciliationPercentage)}%`;
                         document.querySelector(
                                 ".pending-reconciliation-percentage",
-                            ).innerHTML =`${decimalnumberFormatter(finishedPercentage)}%`;
+                            ).innerHTML =`${decimalnumberFormatter(verificationPercentage)}%`;
                     }
 
                     function filterByYear(year) {
