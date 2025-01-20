@@ -28,9 +28,9 @@ class RoleAssignmentInline(admin.TabularInline):
     formset = RoleAssignmentInlineFormSet
 
     def formfield_for_foreignkey(self, db_field: Any, request: Any = None, **kwargs: Any) -> Any:
-        if db_field.name == "business_area":
-            partner_id = request.resolver_match.kwargs.get("object_id")
+        partner_id = request.resolver_match.kwargs.get("object_id")
 
+        if db_field.name == "business_area":
             if partner_id and partner_id.isdigit():
                 partner = Partner.objects.get(id=partner_id)
                 kwargs["queryset"] = BusinessArea.objects.filter(
@@ -39,6 +39,15 @@ class RoleAssignmentInline(admin.TabularInline):
                 )
             else:
                 kwargs["queryset"] = BusinessArea.objects.filter(is_split=False)
+
+        elif db_field.name == "role":
+            if partner_id and partner_id.isdigit():
+                kwargs["queryset"] = Role.objects.filter(
+                    is_available_for_partner=True,
+                )
+            else:
+                kwargs["queryset"] = Role.objects.all()
+
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     def has_add_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:

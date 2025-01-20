@@ -557,6 +557,14 @@ def create_program_partner_access(
                 program=program,
             )
             area_limits.areas.set(Area.objects.filter(id__in=areas))
+        else:
+            # remove area limits if it is updated to full-area-access
+            if area_limits := AdminAreaLimitedTo.objects.filter(
+                partner_id=partner_data["partner"],
+                program=program,
+            ).first():
+                area_limits.delete()
+
     return partners_data
 
 
@@ -567,7 +575,7 @@ def remove_program_partner_access(partners_data: List, program: Program) -> None
         program=program,
     )
     removed_partner_access = existing_partner_role_assignments.exclude(
-        Q(partner_id__in=partner_ids) | Q(partner__name="UNICEF")
+        Q(partner_id__in=partner_ids) | Q(partner__parent__name="UNICEF")
     )
     removed_partner_access.delete()
 

@@ -31,7 +31,11 @@ from hct_mis_api.apps.account.permissions import (
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.schema import ChoiceObject
-from hct_mis_api.apps.core.utils import decode_id_string, to_choice_object
+from hct_mis_api.apps.core.utils import (
+    decode_id_string,
+    get_program_id_from_headers,
+    to_choice_object,
+)
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.geo.schema import AreaNode
 from hct_mis_api.apps.household.models import Household, Individual
@@ -108,6 +112,7 @@ class PartnerType(DjangoObjectType):
 
 class UserNode(DjangoObjectType):
     business_areas = DjangoFilterConnectionField(UserBusinessAreaNode)
+    permissions_in_scope = graphene.List(graphene.String)
     partner_roles = graphene.List(PartnerRoleNode)
     user_roles = graphene.List(UserRoleNode)
 
@@ -119,6 +124,12 @@ class UserNode(DjangoObjectType):
 
     def resolve_user_roles(self, info: Any) -> "QuerySet[Role]":
         return self.role_assignments.all()
+
+    def resolve_permissions_in_scope(self, info: Any) -> Set:
+        user = info.context.user
+        program_id = get_program_id_from_headers(info.context.headers)
+        business_area_slug = info.context.headers.get("Business-Area")
+        return user.permissions_in_business_area(business_area_slug, program_id)
 
     class Meta:
         model = get_user_model()
@@ -215,14 +226,13 @@ class Query(graphene.ObjectType):
 
     def resolve_user_partner_choices(self, info: Any) -> List[Dict[str, Any]]:
         business_area_slug = info.context.headers.get("Business-Area")
-        unicef = Partner.objects.get(name="UNICEF")
         return to_choice_object(
             list(
                 Partner.objects.exclude(name=settings.DEFAULT_EMPTY_PARTNER)
                 .filter(allowed_business_areas__slug=business_area_slug)
-                .values_list("id", "name")
+                .exclude(id__in=Partner.objects.filter(parent__isnull=False).values_list("parent_id", flat=True))
+                .values_list("id", "name", "parent")
             )
-            + [(unicef.id, unicef.name)]  # unicef partner is always available
         )
 
     def resolve_partner_for_grievance_choices(
