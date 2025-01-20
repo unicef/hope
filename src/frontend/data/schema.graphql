@@ -359,11 +359,10 @@ type BusinessAreaNode implements Node {
   active: Boolean!
   enableEmailNotification: Boolean!
   partners: [PartnerNode!]!
-  businessAreaPartnerThrough: [PartnerRoleNode!]!
   children(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   dataCollectingTypes(offset: Int, before: String, after: String, first: Int, last: Int): DataCollectingTypeNodeConnection!
   partnerSet: [PartnerNode!]!
-  userRoles: [UserRoleNode!]!
+  roleAssignments: [UserRoleNode!]!
   householdSet(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individualSet(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   registrationdataimportSet(offset: Int, before: String, after: String, first: Int, last: Int): RegistrationDataImportNodeConnection!
@@ -495,8 +494,6 @@ type CommunicationMessageNode implements Node {
   sampleSize: Int!
   program: ProgramNode
   isOriginal: Boolean!
-  isMigrationHandled: Boolean!
-  migratedAt: DateTime
   copiedFrom: CommunicationMessageNode
   copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
   adminUrl: String
@@ -559,7 +556,7 @@ input CopyProgramInput {
   administrativeAreasOfImplementation: String
   businessAreaSlug: String
   dataCollectingTypeCode: String
-  partners: [ProgramPartnerThroughInput]
+  partners: [ProgramPartnerAccessInput]
   partnerAccess: String
   programmeCode: String
   pduFields: [PDUFieldInput]
@@ -698,7 +695,7 @@ input CreateProgramInput {
   businessAreaSlug: String
   dataCollectingTypeCode: String
   beneficiaryGroup: String
-  partners: [ProgramPartnerThroughInput]
+  partners: [ProgramPartnerAccessInput]
   partnerAccess: String
   programmeCode: String
   pduFields: [PDUFieldInput]
@@ -1160,8 +1157,6 @@ type FeedbackNode implements Node {
   createdBy: UserNode
   linkedGrievance: GrievanceTicketNode
   isOriginal: Boolean!
-  isMigrationHandled: Boolean!
-  migratedAt: DateTime
   copiedFrom: FeedbackNode
   copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
   feedbackMessages(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackMessageNodeConnection!
@@ -2419,10 +2414,10 @@ type PartnerNode {
   rght: Int!
   treeId: Int!
   level: Int!
-  businessAreaPartnerThrough: [PartnerRoleNode!]!
   businessAreas(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   partnerSet: [PartnerNode!]!
   userSet(offset: Int, before: String, after: String, first: Int, last: Int): UserNodeConnection!
+  roleAssignments: [UserRoleNode!]!
   individualIdentities(offset: Int, before: String, after: String, first: Int, last: Int): IndividualIdentityNodeConnection!
   grievanceticketSet(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   programs(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
@@ -2434,8 +2429,11 @@ type PartnerRoleNode {
   createdAt: DateTime!
   updatedAt: DateTime!
   businessArea: UserBusinessAreaNode!
-  partner: PartnerNode!
-  roles: [RoleNode!]!
+  partner: PartnerNode
+  role: RoleNode
+  program: ProgramNode
+  expiryDate: Date
+  user: UserNode
 }
 
 type PartnerType {
@@ -2448,10 +2446,10 @@ type PartnerType {
   rght: Int!
   treeId: Int!
   level: Int!
-  businessAreaPartnerThrough: [PartnerRoleNode!]!
   businessAreas(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   partnerSet: [PartnerNode!]!
   userSet(offset: Int, before: String, after: String, first: Int, last: Int): UserNodeConnection!
+  roleAssignments: [UserRoleNode!]!
   individualIdentities(offset: Int, before: String, after: String, first: Int, last: Int): IndividualIdentityNodeConnection!
   grievanceticketSet(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   programs(offset: Int, before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
@@ -2662,6 +2660,10 @@ type PaymentPlanNode implements Node {
   program: ProgramNode
   totalHouseholdsCountWithValidPhoneNo: Int
   canCreateXlsxWithFspAuthCode: Boolean
+  fspCommunicationChannel: String
+  canExportXlsx: Boolean
+  canDownloadXlsx: Boolean
+  canSendXlsxPassword: Boolean
 }
 
 type PaymentPlanNodeConnection {
@@ -3004,6 +3006,7 @@ type ProgramNode implements Node {
   deduplicationSetId: UUID
   beneficiaryGroup: BeneficiaryGroupNode
   pduFields: [PeriodicFieldNode]
+  roleAssignments: [UserRoleNode!]!
   households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   householdSet(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
@@ -3045,7 +3048,7 @@ enum ProgramPartnerAccess {
   SELECTED_PARTNERS_ACCESS
 }
 
-input ProgramPartnerThroughInput {
+input ProgramPartnerAccessInput {
   partner: String
   areas: [String]
   areaAccess: String
@@ -3389,6 +3392,7 @@ type RegistrationDataImportNode implements Node {
   refuseReason: String
   allowDeliveryMechanismsValidationErrors: Boolean!
   importData: ImportDataNode
+  importFromIds: String
   deduplicationEngineStatus: RegistrationDataImportDeduplicationEngineStatus
   households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
@@ -3458,6 +3462,7 @@ type RegistrationProgramPopulationImportMutation {
 
 input RegistrationProgramPopulationImportMutationInput {
   importFromProgramId: String
+  importFromIds: String
   name: String
   businessAreaSlug: String
   screenBeneficiary: Boolean
@@ -3532,8 +3537,9 @@ type RoleNode {
   name: String!
   subsystem: RoleSubsystem!
   permissions: [String!]
-  businessAreaPartnerThrough: [PartnerRoleNode!]!
-  userRoles: [UserRoleNode!]!
+  isVisibleOnUi: Boolean!
+  isAvailableForPartner: Boolean!
+  roleAssignments: [UserRoleNode!]!
 }
 
 enum RoleSubsystem {
@@ -4473,7 +4479,7 @@ type UpdateProgramPartners {
 
 input UpdateProgramPartnersInput {
   id: String!
-  partners: [ProgramPartnerThroughInput]
+  partners: [ProgramPartnerAccessInput]
   partnerAccess: String
 }
 
@@ -4519,11 +4525,10 @@ type UserBusinessAreaNode implements Node {
   active: Boolean!
   enableEmailNotification: Boolean!
   partners: [PartnerNode!]!
-  businessAreaPartnerThrough: [PartnerRoleNode!]!
   children(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   dataCollectingTypes(offset: Int, before: String, after: String, first: Int, last: Int): DataCollectingTypeNodeConnection!
   partnerSet: [PartnerNode!]!
-  userRoles: [UserRoleNode!]!
+  roleAssignments: [UserRoleNode!]!
   householdSet(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individualSet(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   registrationdataimportSet(offset: Int, before: String, after: String, first: Int, last: Int): RegistrationDataImportNodeConnection!
@@ -4573,7 +4578,7 @@ type UserNode implements Node {
   lastModifyDate: DateTime
   lastDoapSync: DateTime
   doapHash: String!
-  userRoles: [UserRoleNode!]!
+  roleAssignments: [UserRoleNode!]!
   documentSet(offset: Int, before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
   approvalSet: [ApprovalNode!]!
   registrationDataImports(offset: Int, before: String, after: String, first: Int, last: Int): RegistrationDataImportNodeConnection!
@@ -4592,7 +4597,9 @@ type UserNode implements Node {
   feedbackMessages(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackMessageNodeConnection!
   surveys(offset: Int, before: String, after: String, first: Int, last: Int): SurveyNodeConnection!
   businessAreas(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection
+  permissionsInScope: [String]
   partnerRoles: [PartnerRoleNode]
+  userRoles: [UserRoleNode]
 }
 
 type UserNodeConnection {
@@ -4611,8 +4618,11 @@ type UserRoleNode {
   createdAt: DateTime!
   updatedAt: DateTime!
   businessArea: UserBusinessAreaNode!
-  role: RoleNode!
+  partner: PartnerNode
+  role: RoleNode
+  program: ProgramNode
   expiryDate: Date
+  user: UserNode
 }
 
 enum UserStatus {
