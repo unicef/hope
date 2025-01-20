@@ -4,7 +4,6 @@ from typing import Any, Callable, Dict, Optional
 from django.core.cache import cache
 
 import pytest
-from rest_framework.utils.serializer_helpers import ReturnDict
 
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory
 from hct_mis_api.apps.dashboard.serializers import DashboardBaseSerializer
@@ -92,7 +91,6 @@ def test_refresh_data(
     assert sum(item["payments"] for item in refreshed_data) > 0, "Payments data mismatch"
     serializer_fields = DashboardBaseSerializer().get_fields()
     required_fields = {key for key, field in serializer_fields.items() if field.required}
-    optional_fields = {key for key, field in serializer_fields.items() if not field.required}
 
     for item in refreshed_data:
         assert item.keys() >= required_fields, f"Missing required fields in {cache_name}: {item.keys()}"
