@@ -42,6 +42,11 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
     exclude = ("allowed_business_areas",)
     inlines = (RoleAssignmentInline,)
 
+    def get_inline_instances(self, request, obj=None):
+        if obj is None:  # if object is being created now, disable the inlines
+            return []
+        return super().get_inline_instances(request, obj)
+
     def sub_partners(self, obj: Any) -> Optional[str]:
         return self.links_to_objects(obj.get_children()) if obj else None
 
