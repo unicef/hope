@@ -231,7 +231,7 @@ class Query(graphene.ObjectType):
                 Partner.objects.exclude(name=settings.DEFAULT_EMPTY_PARTNER)
                 .filter(allowed_business_areas__slug=business_area_slug)
                 .exclude(id__in=Partner.objects.filter(parent__isnull=False).values_list("parent_id", flat=True))
-                .values_list("id", "name", "parent")
+                .values_list("id", "name")
             )
         )
 
