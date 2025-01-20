@@ -107,7 +107,6 @@ from hct_mis_api.apps.payment.utils import (
     get_payment_plan_object,
 )
 from hct_mis_api.apps.program.schema import ProgramNode
-from hct_mis_api.apps.targeting.models import TargetPopulation
 from hct_mis_api.apps.utils.schema import (
     ChartDatasetNode,
     ChartDetailedDatasetsNode,
@@ -359,9 +358,6 @@ class PaymentNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
 
     def resolve_payment_plan_soft_conflicted(self, info: Any) -> Union[Any, graphene.Boolean]:
         return self.parent.status == PaymentPlan.Status.OPEN and self.payment_plan_soft_conflicted
-
-    def resolve_target_population(self, info: Any) -> TargetPopulation:
-        return self.parent.target_population
 
     def resolve_full_name(self, info: Any) -> str:
         # TODO: add to test this one

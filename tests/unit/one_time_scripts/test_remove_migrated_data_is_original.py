@@ -45,8 +45,6 @@ from hct_mis_api.apps.household.models import (
     PendingIndividualIdentity,
     PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.apps.targeting.fixtures import HouseholdSelectionFactory
-from hct_mis_api.apps.targeting.models import HouseholdSelection
 from hct_mis_api.one_time_scripts.remove_migrated_data_is_original import (
     get_statistic_is_original,
     remove_migrated_data_is_original,
@@ -66,9 +64,6 @@ class BaseMigrateDataTestCase(TestCase):
         hh2 = HouseholdFactory(is_original=True)
         pending_hh = PendingHouseholdFactory()
         pending_hh2 = PendingHouseholdFactory(is_original=True)
-
-        HouseholdSelectionFactory(household=hh)
-        HouseholdSelectionFactory(is_original=True, household=hh2)
 
         DocumentFactory(individual=ind)
         DocumentFactory(is_original=True, individual=ind2)
@@ -118,7 +113,6 @@ class BaseMigrateDataTestCase(TestCase):
         self.assertEqual(PendingIndividual.all_objects.count(), 4)
         self.assertEqual(Household.all_objects.count(), 4)
         self.assertEqual(PendingHousehold.all_objects.count(), 4)
-        self.assertEqual(HouseholdSelection.original_and_repr_objects.count(), 2)
         self.assertEqual(Document.all_objects.count(), 4)
         self.assertEqual(PendingDocument.all_objects.count(), 4)
         self.assertEqual(IndividualIdentity.all_objects.count(), 4)
@@ -141,7 +135,6 @@ class BaseMigrateDataTestCase(TestCase):
         self.assertEqual(PendingIndividual.all_objects.count(), 2)
         self.assertEqual(Household.all_objects.count(), 2)
         self.assertEqual(PendingHousehold.all_objects.count(), 2)
-        self.assertEqual(HouseholdSelection.original_and_repr_objects.count(), 1)
         self.assertEqual(Document.all_objects.count(), 2)
         self.assertEqual(PendingDocument.all_objects.count(), 2)
         self.assertEqual(IndividualIdentity.all_objects.count(), 2)
@@ -160,7 +153,6 @@ class BaseMigrateDataTestCase(TestCase):
         self.assertEqual(PendingIndividual.all_objects.filter(is_original=True).count(), 0)
         self.assertEqual(Household.all_objects.filter(is_original=True).count(), 0)
         self.assertEqual(PendingHousehold.all_objects.filter(is_original=True).count(), 0)
-        self.assertEqual(HouseholdSelection.original_and_repr_objects.filter(is_original=True).count(), 0)
         self.assertEqual(Document.all_objects.filter(is_original=True).count(), 0)
         self.assertEqual(PendingDocument.all_objects.filter(is_original=True).count(), 0)
         self.assertEqual(IndividualIdentity.all_objects.filter(is_original=True).count(), 0)

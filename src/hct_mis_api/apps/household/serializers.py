@@ -2,8 +2,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Dict, Optional, Tuple
 
 from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.payment.models import Payment
-from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
+from hct_mis_api.apps.payment.models import Payment, PaymentPlan
 from hct_mis_api.apps.utils.models import MergeStatusModel
 
 if TYPE_CHECKING:
@@ -18,10 +17,10 @@ def get_household_status(household: Household) -> Tuple[str, datetime]:
         if payments.exists():
             return "paid", payments.first().delivery_date
 
-    selections = HouseholdSelection.objects.filter(household=household)
+    selections = Payment.objects.filter(household=household)
     if selections.exists():
         selection = selections.order_by("updated_at").first()
-        if selection.target_population.status == TargetPopulation.STATUS_PROCESSING:
+        if selection.parent.status == PaymentPlan.Status.TP_PROCESSING:
             return "sent to cash assist", selection.updated_at
         return "targeted", selection.updated_at
 

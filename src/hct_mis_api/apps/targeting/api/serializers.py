@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from hct_mis_api.api.utils import EncodedIdSerializerMixin
-from hct_mis_api.apps.targeting.models import TargetPopulation
+from hct_mis_api.apps.payment.models import PaymentPlan
 
 
 class TargetPopulationListSerializer(EncodedIdSerializerMixin):
@@ -9,7 +9,7 @@ class TargetPopulationListSerializer(EncodedIdSerializerMixin):
     created_by = serializers.CharField(source="created_by.get_full_name", default="")
 
     class Meta:
-        model = TargetPopulation
+        model = PaymentPlan
         fields = (
             "id",
             "name",

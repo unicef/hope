@@ -34,7 +34,6 @@ from hct_mis_api.apps.registration_data.models import (
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
     merge_registration_data_import_task,
 )
-from hct_mis_api.apps.targeting.models import HouseholdSelection
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 from hct_mis_api.apps.utils.elasticsearch_utils import (
     remove_elasticsearch_documents_by_matching_ids,
@@ -251,8 +250,8 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
             else:
                 number_of_households = rdi.households.count()
                 number_of_individuals = rdi.individuals.count()
-                number_of__household_selections = HouseholdSelection.objects.filter(
-                    household__registration_data_import=rdi,
+                number_of_household_selections = Payment.objects.filter(
+                    parent__household__registration_data_import=rdi,
                 ).count()
                 return confirm_action(
                     self,
@@ -263,7 +262,7 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
                     <h3>Deleting the RDI will also result in the removal of related households, individuals, and their associated grievance tickets.</h3>
                     <h3>Consequently, these households will no longer be part of any Target Population, if they were included previously.</h3>
                     <br>
-                    <h4>This action will result in removing: {number_of_households} Households, {number_of_individuals} Individuals and {number_of__household_selections} HouseholdSelections</h4>
+                    <h4>This action will result in removing: {number_of_households} Households, {number_of_individuals} Individuals and {number_of_household_selections} Payments</h4>
                     """
                     ),
                     "Successfully executed",

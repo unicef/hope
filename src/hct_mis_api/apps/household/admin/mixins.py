@@ -22,7 +22,8 @@ from hct_mis_api.apps.household.forms import (
 )
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.household.services.household_withdraw import HouseholdWithdraw
-from hct_mis_api.apps.targeting.services.targeting_stats_refresher import refresh_stats
+from hct_mis_api.apps.payment.models import PaymentPlan
+from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 
 
 class HouseholdWithDrawnMixin:
@@ -193,10 +194,9 @@ class HouseholdWithDrawnMixin:
 class CustomTargetPopulationMixin:
     def add_to_target_population(self, request: HttpRequest, qs: QuerySet) -> Optional[HttpResponse]:
         from hct_mis_api.apps.core.models import BusinessArea
-        from hct_mis_api.apps.targeting.models import TargetPopulation
 
         context = self.get_common_context(request, title="Extend TargetPopulation")
-        tp: TargetPopulation
+        tp: PaymentPlan
         ba: BusinessArea
         if "apply" in request.POST:
             form = AddToTargetPopulationForm(request.POST, read_only=True)
@@ -216,8 +216,9 @@ class CustomTargetPopulationMixin:
                 ba = tp.business_area
                 population = qs.filter(business_area=ba)
                 with atomic():
-                    tp.households.add(*population)
-                    refresh_stats(tp)
+                    # TODO: FIX this one??
+                    # tp.households.add(*population)
+                    # refresh_stats(tp)
                     tp.save()
                 url = reverse("admin:targeting_targetpopulation_change", args=[tp.pk])
                 return HttpResponseRedirect(url)
@@ -249,13 +250,11 @@ class CustomTargetPopulationMixin:
         elif "confirm" in request.POST:
             form = CreateTargetPopulationForm(request.POST)
             if form.is_valid():
-                from hct_mis_api.apps.targeting.models import TargetPopulation
-
                 program = form.cleaned_data["program"]
                 ba = program.business_area
                 population = qs.filter(business_area=ba)
                 with atomic():
-                    tp = TargetPopulation.objects.create(
+                    tp = PaymentPlan.objects.create(
                         targeting_criteria=None,
                         created_by=request.user,
                         name=form.cleaned_data["name"],
@@ -263,7 +262,7 @@ class CustomTargetPopulationMixin:
                         program=program,
                     )
                     tp.households.set(population)
-                    refresh_stats(tp)
+                    PaymentPlanService(tp)
                     tp.save()
                 url = reverse("admin:targeting_targetpopulation_change", args=[tp.pk])
                 return HttpResponseRedirect(url)

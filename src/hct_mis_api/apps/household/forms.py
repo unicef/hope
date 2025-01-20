@@ -15,10 +15,11 @@ from hct_mis_api.apps.household.models import (
     PendingIndividual,
     XlsxUpdateFile,
 )
+from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.steficon.admin import AutocompleteWidget
-from hct_mis_api.apps.targeting.models import TargetingCriteria, TargetPopulation
+from hct_mis_api.apps.targeting.models import TargetingCriteria
 
 
 def get_households_from_text(program: Program, text: Any, target_field: Any, separator: Any) -> Union[QuerySet, List]:
@@ -148,9 +149,7 @@ class MassRestoreForm(RestoreForm):
 class AddToTargetPopulationForm(forms.Form):
     _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
     action = forms.CharField(widget=forms.HiddenInput)
-    target_population = forms.ModelChoiceField(
-        queryset=TargetPopulation.objects.filter(status=TargetPopulation.STATUS_OPEN)
-    )
+    target_population = forms.ModelChoiceField(queryset=PaymentPlan.objects.filter(status=PaymentPlan.Status.TP_OPEN))
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         read_only = kwargs.pop("read_only", False)

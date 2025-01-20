@@ -367,14 +367,6 @@ class PaymentPlan(
         choices=BuildStatus.choices, default=None, protected=False, db_index=True, null=True, blank=True
     )
     built_at = models.DateTimeField(null=True, blank=True)
-    # TODO: remove this field after migrations
-    target_population = models.ForeignKey(
-        "targeting.TargetPopulation",
-        on_delete=models.SET_NULL,
-        related_name="payment_plans",
-        null=True,
-        blank=True,
-    )
     # TODO: remove null=True after data migrations
     targeting_criteria = models.OneToOneField(
         "targeting.TargetingCriteria",

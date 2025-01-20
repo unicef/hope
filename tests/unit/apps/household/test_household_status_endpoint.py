@@ -21,10 +21,9 @@ from hct_mis_api.apps.household.models import (
     ROLE_NO_ROLE,
     PendingIndividualRoleInHousehold,
 )
-from hct_mis_api.apps.payment.fixtures import PaymentFactory
+from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
+from hct_mis_api.apps.payment.models import Payment, PaymentPlan
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
-from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
 
 
 # used for ease of assertions, so it imitates serializer's behaviour
@@ -144,18 +143,21 @@ class TestDetails(TestCase):
         document_type = DocumentTypeFactory(key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID])
         document = PendingDocumentFactory(individual=individual, type=document_type)
         tax_id = document.document_number
-        target_popuplation = TargetPopulationFactory(
+        payment_plan = PaymentPlanFactory(
             business_area=self.business_area,
             created_by=self.user,
         )
-        target_popuplation.households.add(household)
+        PaymentFactory(
+            parent=payment_plan,
+            household=household,
+        )
 
         response = self.api_client.get(f"/api/hh-status?tax_id={tax_id}")
         self.assertEqual(response.status_code, 200)
         data = response.json()
         info = data["info"]
         self.assertEqual(info["status"], "targeted")
-        self.assertEqual(info["date"], _time(HouseholdSelection.objects.first().updated_at))
+        self.assertEqual(info["date"], _time(Payment.objects.first().updated_at))
 
     def test_getting_individual_with_status_sent_to_cash_assist(self) -> None:
         household, individuals = create_household(household_args={"size": 1, "business_area": self.business_area})
@@ -164,13 +166,16 @@ class TestDetails(TestCase):
         document = PendingDocumentFactory(individual=individual, type=document_type)
         tax_id = document.document_number
 
-        target_popuplation = TargetPopulationFactory(
+        payment_plan = PaymentPlanFactory(
             business_area=self.business_area,
             created_by=self.user,
         )
-        target_popuplation.households.add(household)
-        target_popuplation.status = TargetPopulation.STATUS_PROCESSING
-        target_popuplation.save()
+        payment_plan.status = PaymentPlan.Status.TP_PROCESSING
+        payment_plan.save()
+        PaymentFactory(
+            parent=payment_plan,
+            household=household,
+        )
 
         response = self.api_client.get(f"/api/hh-status?tax_id={tax_id}")
         self.assertEqual(response.status_code, 200)

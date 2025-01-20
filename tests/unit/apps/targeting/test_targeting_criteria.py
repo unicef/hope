@@ -21,7 +21,6 @@ from hct_mis_api.apps.targeting.models import (
     TargetingCriteriaRuleFilter,
     TargetingIndividualBlockRuleFilter,
     TargetingIndividualRuleFilterBlock,
-    TargetPopulation,
 )
 
 
@@ -148,7 +147,7 @@ class TestTargetingCriteriaIndividualRules(APITestCase):
         return targeting_criteria
 
     @classmethod
-    def create_criteria(cls, *args: Any, **kwargs: Any) -> TargetPopulation:
+    def create_criteria(cls, *args: Any, **kwargs: Any) -> TargetingCriteria:
         criteria = cls.get_targeting_criteria_for_filters(*args, **kwargs)
         PaymentPlanFactory(
             name="tp",

@@ -372,7 +372,7 @@ class TestPaymentPlanServices(APITestCase):
 
         follow_up_pp.refresh_from_db()
         self.assertEqual(follow_up_pp.status, PaymentPlan.Status.OPEN)
-        self.assertEqual(follow_up_pp.target_population, pp.target_population)
+        # self.assertEqual(follow_up_pp.target_population, pp.target_population)
         self.assertEqual(follow_up_pp.program, pp.program)
         self.assertEqual(follow_up_pp.program_cycle, pp.program_cycle)
         self.assertEqual(follow_up_pp.business_area, pp.business_area)
