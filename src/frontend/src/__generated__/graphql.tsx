@@ -511,7 +511,7 @@ export type BusinessAreaNode = Node & {
   regionName: Scalars['String']['output'];
   registrationdataimportSet: RegistrationDataImportNodeConnection;
   reports: ReportNodeConnection;
-  roleAssignments: Array<RoleAssignmentNode>;
+  roleAssignments: Array<UserRoleNode>;
   ruleSet: SteficonRuleNodeConnection;
   screenBeneficiary: Scalars['Boolean']['output'];
   slug: Scalars['String']['output'];
@@ -888,7 +888,7 @@ export type CopyProgramInput = {
   id: Scalars['String']['input'];
   name?: InputMaybe<Scalars['String']['input']>;
   partnerAccess?: InputMaybe<Scalars['String']['input']>;
-  partners?: InputMaybe<Array<InputMaybe<ProgramPartnerThroughInput>>>;
+  partners?: InputMaybe<Array<InputMaybe<ProgramPartnerAccessInput>>>;
   pduFields?: InputMaybe<Array<InputMaybe<PduFieldInput>>>;
   populationGoal?: InputMaybe<Scalars['Int']['input']>;
   programmeCode?: InputMaybe<Scalars['String']['input']>;
@@ -1037,7 +1037,7 @@ export type CreateProgramInput = {
   frequencyOfPayments?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   partnerAccess?: InputMaybe<Scalars['String']['input']>;
-  partners?: InputMaybe<Array<InputMaybe<ProgramPartnerThroughInput>>>;
+  partners?: InputMaybe<Array<InputMaybe<ProgramPartnerAccessInput>>>;
   pduFields?: InputMaybe<Array<InputMaybe<PduFieldInput>>>;
   populationGoal?: InputMaybe<Scalars['Int']['input']>;
   programmeCode?: InputMaybe<Scalars['String']['input']>;
@@ -3874,7 +3874,7 @@ export type PartnerNode = {
   partnerSet: Array<PartnerNode>;
   programs: ProgramNodeConnection;
   rght: Scalars['Int']['output'];
-  roleAssignments: Array<RoleAssignmentNode>;
+  roleAssignments: Array<UserRoleNode>;
   treeId: Scalars['Int']['output'];
   userSet: UserNodeConnection;
 };
@@ -3963,7 +3963,7 @@ export type PartnerType = {
   partnerSet: Array<PartnerNode>;
   programs: ProgramNodeConnection;
   rght: Scalars['Int']['output'];
-  roleAssignments: Array<RoleAssignmentNode>;
+  roleAssignments: Array<UserRoleNode>;
   treeId: Scalars['Int']['output'];
   userSet: UserNodeConnection;
 };
@@ -4769,7 +4769,7 @@ export type ProgramNode = Node & {
   programmeCode?: Maybe<Scalars['String']['output']>;
   registrationImports: RegistrationDataImportNodeConnection;
   reports: ReportNodeConnection;
-  roleAssignments: Array<RoleAssignmentNode>;
+  roleAssignments: Array<UserRoleNode>;
   scope?: Maybe<ProgramScope>;
   sector: ProgramSector;
   startDate: Scalars['Date']['output'];
@@ -4930,7 +4930,7 @@ export enum ProgramPartnerAccess {
   SelectedPartnersAccess = 'SELECTED_PARTNERS_ACCESS'
 }
 
-export type ProgramPartnerThroughInput = {
+export type ProgramPartnerAccessInput = {
   areaAccess?: InputMaybe<Scalars['String']['input']>;
   areas?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   partner?: InputMaybe<Scalars['String']['input']>;
@@ -6439,18 +6439,6 @@ export type RevertMarkPaymentAsFailedMutation = {
   payment?: Maybe<PaymentNode>;
 };
 
-export type RoleAssignmentNode = {
-  __typename?: 'RoleAssignmentNode';
-  businessArea: UserBusinessAreaNode;
-  createdAt: Scalars['DateTime']['output'];
-  expiryDate?: Maybe<Scalars['Date']['output']>;
-  partner?: Maybe<PartnerNode>;
-  program?: Maybe<ProgramNode>;
-  role?: Maybe<RoleNode>;
-  updatedAt: Scalars['DateTime']['output'];
-  user?: Maybe<UserNode>;
-};
-
 export type RoleChoiceObject = {
   __typename?: 'RoleChoiceObject';
   name?: Maybe<Scalars['String']['output']>;
@@ -6465,7 +6453,7 @@ export type RoleNode = {
   isVisibleOnUi: Scalars['Boolean']['output'];
   name: Scalars['String']['output'];
   permissions?: Maybe<Array<Scalars['String']['output']>>;
-  roleAssignments: Array<RoleAssignmentNode>;
+  roleAssignments: Array<UserRoleNode>;
   subsystem: RoleSubsystem;
   updatedAt: Scalars['DateTime']['output'];
 };
@@ -7607,7 +7595,7 @@ export type UpdateProgramPartners = {
 export type UpdateProgramPartnersInput = {
   id: Scalars['String']['input'];
   partnerAccess?: InputMaybe<Scalars['String']['input']>;
-  partners?: InputMaybe<Array<InputMaybe<ProgramPartnerThroughInput>>>;
+  partners?: InputMaybe<Array<InputMaybe<ProgramPartnerAccessInput>>>;
 };
 
 export type UploadImportDataXlsxFileAsync = {
@@ -7664,7 +7652,7 @@ export type UserBusinessAreaNode = Node & {
   regionName: Scalars['String']['output'];
   registrationdataimportSet: RegistrationDataImportNodeConnection;
   reports: ReportNodeConnection;
-  roleAssignments: Array<RoleAssignmentNode>;
+  roleAssignments: Array<UserRoleNode>;
   ruleSet: SteficonRuleNodeConnection;
   screenBeneficiary: Scalars['Boolean']['output'];
   slug: Scalars['String']['output'];
@@ -7866,9 +7854,10 @@ export type UserNode = Node & {
   messages: CommunicationMessageNodeConnection;
   partner?: Maybe<PartnerNode>;
   partnerRoles?: Maybe<Array<Maybe<PartnerRoleNode>>>;
+  permissionsInScope?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   registrationDataImports: RegistrationDataImportNodeConnection;
   reports: ReportNodeConnection;
-  roleAssignments: Array<RoleAssignmentNode>;
+  roleAssignments: Array<UserRoleNode>;
   sentDeliveryMechanisms: DeliveryMechanismPerPaymentPlanNodeConnection;
   status: UserStatus;
   surveys: SurveyNodeConnection;
@@ -8859,7 +8848,7 @@ export type AllUsersQueryVariables = Exact<{
 }>;
 
 
-export type AllUsersQuery = { __typename?: 'Query', allUsers?: { __typename?: 'UserNodeConnection', totalCount?: number | null, edgeCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, endCursor?: string | null, startCursor?: string | null }, edges: Array<{ __typename?: 'UserNodeEdge', cursor: string, node?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, username: string, email: string, isActive: boolean, lastLogin?: any | null, status: UserStatus, partner?: { __typename?: 'PartnerNode', name?: string | null } | null, userRoles: Array<{ __typename?: 'UserRoleNode', businessArea: { __typename?: 'UserBusinessAreaNode', name: string }, role: { __typename?: 'RoleNode', name: string, permissions?: Array<string> | null } }>, partnerRoles?: Array<{ __typename?: 'PartnerRoleNode', businessArea: { __typename?: 'UserBusinessAreaNode', name: string }, role: { __typename?: 'RoleNode', name: string, permissions?: Array<string> | null } } | null> | null } | null } | null> } | null };
+export type AllUsersQuery = { __typename?: 'Query', allUsers?: { __typename?: 'UserNodeConnection', totalCount?: number | null, edgeCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, endCursor?: string | null, startCursor?: string | null }, edges: Array<{ __typename?: 'UserNodeEdge', cursor: string, node?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, username: string, email: string, isActive: boolean, lastLogin?: any | null, status: UserStatus, partner?: { __typename?: 'PartnerNode', name?: string | null } | null, userRoles?: Array<{ __typename?: 'UserRoleNode', businessArea: { __typename?: 'UserBusinessAreaNode', name: string }, program?: { __typename?: 'ProgramNode', id: string, name: string } | null, role?: { __typename?: 'RoleNode', name: string, permissions?: Array<string> | null } | null } | null> | null, partnerRoles?: Array<{ __typename?: 'PartnerRoleNode', businessArea: { __typename?: 'UserBusinessAreaNode', name: string }, program?: { __typename?: 'ProgramNode', id: string, name: string } | null, role?: { __typename?: 'RoleNode', name: string, permissions?: Array<string> | null } | null } | null> | null } | null } | null> } | null };
 
 export type AllUsersForFiltersQueryVariables = Exact<{
   businessArea: Scalars['String']['input'];
@@ -8908,7 +8897,7 @@ export type LoggedCheckerQuery = { __typename?: 'Query', me?: { __typename?: 'Us
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'UserNode', id: string, username: string, email: string, firstName: string, lastName: string, isSuperuser: boolean, businessAreas?: { __typename?: 'UserBusinessAreaNodeConnection', edges: Array<{ __typename?: 'UserBusinessAreaNodeEdge', node?: { __typename?: 'UserBusinessAreaNode', id: string, name: string, slug: string, permissions?: Array<string | null> | null } | null } | null> } | null } | null };
+export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'UserNode', id: string, username: string, email: string, firstName: string, lastName: string, permissionsInScope?: Array<string | null> | null, isSuperuser: boolean, businessAreas?: { __typename?: 'UserBusinessAreaNodeConnection', edges: Array<{ __typename?: 'UserBusinessAreaNodeEdge', node?: { __typename?: 'UserBusinessAreaNode', id: string, name: string, slug: string, permissions?: Array<string | null> | null } | null } | null> } | null } | null };
 
 export type UserChoiceDataQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -15160,6 +15149,7 @@ export const MeDocument = gql`
     email
     firstName
     lastName
+    permissionsInScope
     isSuperuser
     businessAreas {
       edges {
@@ -21989,7 +21979,7 @@ export type ResolversTypes = {
   ProgramNodeConnection: ResolverTypeWrapper<ProgramNodeConnection>;
   ProgramNodeEdge: ResolverTypeWrapper<ProgramNodeEdge>;
   ProgramPartnerAccess: ProgramPartnerAccess;
-  ProgramPartnerThroughInput: ProgramPartnerThroughInput;
+  ProgramPartnerAccessInput: ProgramPartnerAccessInput;
   ProgramScope: ProgramScope;
   ProgramSector: ProgramSector;
   ProgramStatus: ProgramStatus;
@@ -22028,7 +22018,6 @@ export type ResolversTypes = {
   RestartCreateReport: ResolverTypeWrapper<RestartCreateReport>;
   RestartCreateReportInput: RestartCreateReportInput;
   RevertMarkPaymentAsFailedMutation: ResolverTypeWrapper<RevertMarkPaymentAsFailedMutation>;
-  RoleAssignmentNode: ResolverTypeWrapper<RoleAssignmentNode>;
   RoleChoiceObject: ResolverTypeWrapper<RoleChoiceObject>;
   RoleNode: ResolverTypeWrapper<RoleNode>;
   RoleSubsystem: RoleSubsystem;
@@ -22445,7 +22434,7 @@ export type ResolversParentTypes = {
   ProgramNode: ProgramNode;
   ProgramNodeConnection: ProgramNodeConnection;
   ProgramNodeEdge: ProgramNodeEdge;
-  ProgramPartnerThroughInput: ProgramPartnerThroughInput;
+  ProgramPartnerAccessInput: ProgramPartnerAccessInput;
   Query: {};
   RandomSamplingArguments: RandomSamplingArguments;
   RapidProArguments: RapidProArguments;
@@ -22477,7 +22466,6 @@ export type ResolversParentTypes = {
   RestartCreateReport: RestartCreateReport;
   RestartCreateReportInput: RestartCreateReportInput;
   RevertMarkPaymentAsFailedMutation: RevertMarkPaymentAsFailedMutation;
-  RoleAssignmentNode: RoleAssignmentNode;
   RoleChoiceObject: RoleChoiceObject;
   RoleNode: RoleNode;
   RuleCommitNode: RuleCommitNode;
@@ -22881,7 +22869,7 @@ export type BusinessAreaNodeResolvers<ContextType = any, ParentType extends Reso
   regionName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   registrationdataimportSet?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, Partial<BusinessAreaNodeRegistrationdataimportSetArgs>>;
   reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, Partial<BusinessAreaNodeReportsArgs>>;
-  roleAssignments?: Resolver<Array<ResolversTypes['RoleAssignmentNode']>, ParentType, ContextType>;
+  roleAssignments?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>;
   ruleSet?: Resolver<ResolversTypes['SteficonRuleNodeConnection'], ParentType, ContextType, Partial<BusinessAreaNodeRuleSetArgs>>;
   screenBeneficiary?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   slug?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -24469,7 +24457,7 @@ export type PartnerNodeResolvers<ContextType = any, ParentType extends Resolvers
   partnerSet?: Resolver<Array<ResolversTypes['PartnerNode']>, ParentType, ContextType>;
   programs?: Resolver<ResolversTypes['ProgramNodeConnection'], ParentType, ContextType, Partial<PartnerNodeProgramsArgs>>;
   rght?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  roleAssignments?: Resolver<Array<ResolversTypes['RoleAssignmentNode']>, ParentType, ContextType>;
+  roleAssignments?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>;
   treeId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   userSet?: Resolver<ResolversTypes['UserNodeConnection'], ParentType, ContextType, Partial<PartnerNodeUserSetArgs>>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -24501,7 +24489,7 @@ export type PartnerTypeResolvers<ContextType = any, ParentType extends Resolvers
   partnerSet?: Resolver<Array<ResolversTypes['PartnerNode']>, ParentType, ContextType>;
   programs?: Resolver<ResolversTypes['ProgramNodeConnection'], ParentType, ContextType, Partial<PartnerTypeProgramsArgs>>;
   rght?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  roleAssignments?: Resolver<Array<ResolversTypes['RoleAssignmentNode']>, ParentType, ContextType>;
+  roleAssignments?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>;
   treeId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   userSet?: Resolver<ResolversTypes['UserNodeConnection'], ParentType, ContextType, Partial<PartnerTypeUserSetArgs>>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -24973,7 +24961,7 @@ export type ProgramNodeResolvers<ContextType = any, ParentType extends Resolvers
   programmeCode?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   registrationImports?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, Partial<ProgramNodeRegistrationImportsArgs>>;
   reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, Partial<ProgramNodeReportsArgs>>;
-  roleAssignments?: Resolver<Array<ResolversTypes['RoleAssignmentNode']>, ParentType, ContextType>;
+  roleAssignments?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>;
   scope?: Resolver<Maybe<ResolversTypes['ProgramScope']>, ParentType, ContextType>;
   sector?: Resolver<ResolversTypes['ProgramSector'], ParentType, ContextType>;
   startDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
@@ -25388,18 +25376,6 @@ export type RevertMarkPaymentAsFailedMutationResolvers<ContextType = any, Parent
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type RoleAssignmentNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['RoleAssignmentNode'] = ResolversParentTypes['RoleAssignmentNode']> = {
-  businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>;
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
-  expiryDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
-  partner?: Resolver<Maybe<ResolversTypes['PartnerNode']>, ParentType, ContextType>;
-  program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>;
-  role?: Resolver<Maybe<ResolversTypes['RoleNode']>, ParentType, ContextType>;
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
-  user?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
 export type RoleChoiceObjectResolvers<ContextType = any, ParentType extends ResolversParentTypes['RoleChoiceObject'] = ResolversParentTypes['RoleChoiceObject']> = {
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   subsystem?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -25413,7 +25389,7 @@ export type RoleNodeResolvers<ContextType = any, ParentType extends ResolversPar
   isVisibleOnUi?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   permissions?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
-  roleAssignments?: Resolver<Array<ResolversTypes['RoleAssignmentNode']>, ParentType, ContextType>;
+  roleAssignments?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>;
   subsystem?: Resolver<ResolversTypes['RoleSubsystem'], ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -26277,7 +26253,7 @@ export type UserBusinessAreaNodeResolvers<ContextType = any, ParentType extends 
   regionName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   registrationdataimportSet?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, Partial<UserBusinessAreaNodeRegistrationdataimportSetArgs>>;
   reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, Partial<UserBusinessAreaNodeReportsArgs>>;
-  roleAssignments?: Resolver<Array<ResolversTypes['RoleAssignmentNode']>, ParentType, ContextType>;
+  roleAssignments?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>;
   ruleSet?: Resolver<ResolversTypes['SteficonRuleNodeConnection'], ParentType, ContextType, Partial<UserBusinessAreaNodeRuleSetArgs>>;
   screenBeneficiary?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   slug?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -26333,9 +26309,10 @@ export type UserNodeResolvers<ContextType = any, ParentType extends ResolversPar
   messages?: Resolver<ResolversTypes['CommunicationMessageNodeConnection'], ParentType, ContextType, Partial<UserNodeMessagesArgs>>;
   partner?: Resolver<Maybe<ResolversTypes['PartnerNode']>, ParentType, ContextType>;
   partnerRoles?: Resolver<Maybe<Array<Maybe<ResolversTypes['PartnerRoleNode']>>>, ParentType, ContextType>;
+  permissionsInScope?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>;
   registrationDataImports?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, Partial<UserNodeRegistrationDataImportsArgs>>;
   reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, Partial<UserNodeReportsArgs>>;
-  roleAssignments?: Resolver<Array<ResolversTypes['RoleAssignmentNode']>, ParentType, ContextType>;
+  roleAssignments?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>;
   sentDeliveryMechanisms?: Resolver<ResolversTypes['DeliveryMechanismPerPaymentPlanNodeConnection'], ParentType, ContextType, Partial<UserNodeSentDeliveryMechanismsArgs>>;
   status?: Resolver<ResolversTypes['UserStatus'], ParentType, ContextType>;
   surveys?: Resolver<ResolversTypes['SurveyNodeConnection'], ParentType, ContextType, Partial<UserNodeSurveysArgs>>;
@@ -26656,7 +26633,6 @@ export type Resolvers<ContextType = any> = {
   ReportNodeEdge?: ReportNodeEdgeResolvers<ContextType>;
   RestartCreateReport?: RestartCreateReportResolvers<ContextType>;
   RevertMarkPaymentAsFailedMutation?: RevertMarkPaymentAsFailedMutationResolvers<ContextType>;
-  RoleAssignmentNode?: RoleAssignmentNodeResolvers<ContextType>;
   RoleChoiceObject?: RoleChoiceObjectResolvers<ContextType>;
   RoleNode?: RoleNodeResolvers<ContextType>;
   RuleCommitNode?: RuleCommitNodeResolvers<ContextType>;
