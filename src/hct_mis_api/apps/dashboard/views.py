@@ -45,10 +45,6 @@ class DashboardDataView(APIView):
         is_global = business_area_slug.lower() == "global"
         business_area = get_object_or_404(BusinessArea, slug=business_area_slug)
         data_cache: Type[DashboardDataCache] = DashboardGlobalDataCache if is_global else DashboardDataCache
-        if is_global:
-            data_cache = DashboardGlobalDataCache  # noqa
-        else:
-            data_cache = DashboardDataCache  # noqa
 
         if not check_permissions(request.user, [Permissions.DASHBOARD_VIEW_COUNTRY], business_area=business_area):
             return Response(
@@ -61,11 +57,13 @@ class DashboardDataView(APIView):
                 },
                 status=status.HTTP_403_FORBIDDEN,
             )
+
         data = data_cache.get_data(business_area_slug)
         if not data:
             data = data_cache.refresh_data(business_area_slug if not is_global else "global")
 
         return Response(data, status=status.HTTP_200_OK)
+
 
 
 class CreateOrUpdateDashReportView(APIView):

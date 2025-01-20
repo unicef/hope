@@ -17,14 +17,8 @@ class DashboardBaseSerializer(serializers.Serializer):
     reconciled = serializers.IntegerField()
     finished_payment_plans = serializers.IntegerField()
     total_payment_plans = serializers.IntegerField()
-
-
-class DashboardHouseholdSerializer(DashboardBaseSerializer):
-    month = serializers.CharField()
-    admin1 = serializers.CharField()
-    currency = serializers.CharField()
-    total_delivered_quantity = serializers.DecimalField(max_digits=12, decimal_places=2)
-
-
-class DashboardGlobalSerializer(DashboardBaseSerializer):
-    country = serializers.CharField()
+    month = serializers.CharField(required=False)
+    admin1 = serializers.CharField(required=False)
+    currency = serializers.CharField(required=False)
+    total_delivered_quantity = serializers.DecimalField(max_digits=12, decimal_places=2, required=False)
+    country = serializers.CharField(required=False)
