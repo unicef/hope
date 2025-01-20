@@ -7,10 +7,7 @@ import pytest
 from rest_framework.utils.serializer_helpers import ReturnDict
 
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory
-from hct_mis_api.apps.dashboard.serializers import (
-    DashboardGlobalSerializer,
-    DashboardHouseholdSerializer,
-)
+from hct_mis_api.apps.dashboard.serializers import DashboardBaseSerializer
 from hct_mis_api.apps.dashboard.services import (
     DashboardDataCache,
     DashboardGlobalDataCache,
@@ -59,10 +56,20 @@ def test_store_data(cache_name: str, cache_class: Any, slug: str) -> None:
 
 
 @pytest.mark.parametrize(
-    "cache_name, cache_class, slug, serializer",
+    "cache_name, cache_class, slug, expected_optional_fields",
     [
-        ("DashboardDataCache", DashboardDataCache, "afghanistan", DashboardHouseholdSerializer),
-        ("DashboardGlobalDataCache", DashboardGlobalDataCache, "global", DashboardGlobalSerializer),
+        (
+            "DashboardDataCache",
+            DashboardDataCache,
+            "afghanistan",
+            {"month", "admin1", "currency", "total_delivered_quantity"},
+        ),
+        (
+            "DashboardGlobalDataCache",
+            DashboardGlobalDataCache,
+            "global",
+            {"country", "currency"},
+        ),
     ],
 )
 @pytest.mark.django_db(transaction=True, databases=["default", "read_only"])
@@ -70,26 +77,28 @@ def test_refresh_data(
     cache_name: str,
     cache_class: Any,
     slug: str,
-    serializer: Any,
+    expected_optional_fields: set,
     afghanistan: BusinessAreaFactory,
     populate_dashboard_cache: Callable,
 ) -> None:
     """Test refresh_data for specific and global dashboards."""
     cache_key = cache_class.get_cache_key(slug)
     cache.delete(cache_key)
+
     _ = populate_dashboard_cache(afghanistan)
-
-    refreshed_data: Optional[ReturnDict] = None
-    if slug == "global":
-        refreshed_data = cache_class.refresh_data()
-    else:
-        refreshed_data = cache_class.refresh_data(afghanistan.slug)
-
+    refreshed_data = cache_class.refresh_data() if slug == "global" else cache_class.refresh_data(afghanistan.slug)
     assert refreshed_data is not None, "Refresh data returned None"
     assert len(refreshed_data) > 0, "No data returned by refresh"
     assert sum(item["payments"] for item in refreshed_data) > 0, "Payments data mismatch"
-    all_fields = serializer().get_fields().keys()
-    assert refreshed_data[0].keys() >= all_fields, "Fields mismatch with serializer"
+    serializer_fields = DashboardBaseSerializer().get_fields()
+    required_fields = {key for key, field in serializer_fields.items() if field.required}
+    optional_fields = {key for key, field in serializer_fields.items() if not field.required}
 
+    for item in refreshed_data:
+        assert item.keys() >= required_fields, f"Missing required fields in {cache_name}: {item.keys()}"
+        assert item.keys() & expected_optional_fields == expected_optional_fields, (
+            f"Expected optional fields {expected_optional_fields} are missing in {cache_name}: {item.keys()}"
+        )
     cached_data = cache.get(cache_key)
     assert cached_data is not None, "Data not cached"
+

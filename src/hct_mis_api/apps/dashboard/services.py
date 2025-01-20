@@ -10,10 +10,7 @@ from django.db.models.functions import Coalesce, ExtractMonth, ExtractYear
 from rest_framework.utils.serializer_helpers import ReturnDict
 
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.dashboard.serializers import (
-    DashboardGlobalSerializer,
-    DashboardHouseholdSerializer,
-)
+from hct_mis_api.apps.dashboard.serializers import DashboardBaseSerializer
 from hct_mis_api.apps.payment.models import Payment, PaymentPlan
 
 CACHE_TIMEOUT = 60 * 60 * 24  # 24 hours
@@ -32,9 +29,9 @@ pwdSum = Sum(
     default=0,
 )
 
-finished_payment_plans = Count("parent__id", filter=Q(parent__status=PaymentPlan.Status.FINISHED), distinct=True)
+finished_payment_plans = Count("parent__id", filter=Q(parent__payment_verification_plans__status="FINISHED"), distinct=True)
 
-total_payment_plans = Count("parent__id", distinct=True)
+total_payment_plans = Count("parent__id", filter=Q(parent__status="FINISHED"),distinct=True)
 
 
 class DashboardDataCache(Protocol):
@@ -107,7 +104,7 @@ class DashboardDataCache(Protocol):
                     fsp=Coalesce(F("financial_service_provider__name"), Value("Unknown fsp")),
                     delivery_types=F("delivery_type__name"),
                 )
-                .distinct()
+                .order_by()
                 .values(
                     "currency",
                     "year",
@@ -209,7 +206,7 @@ class DashboardDataCache(Protocol):
                         "pwd_counts": totals["pwd_counts"],
                     }
                 )
-        serialized_data = DashboardHouseholdSerializer(result, many=True).data
+        serialized_data = DashboardBaseSerializer(result, many=True).data
 
         cls.store_data(business_area_slug, serialized_data)
         return serialized_data
@@ -249,7 +246,7 @@ class DashboardGlobalDataCache(DashboardDataCache):
                 fsp=Coalesce(F("financial_service_provider__name"), Value("Unknown fsp")),
                 delivery_types=F("delivery_type__name"),
             )
-            .distinct()
+            .order_by()
             .values(
                 "country",
                 "currency",
@@ -348,7 +345,7 @@ class DashboardGlobalDataCache(DashboardDataCache):
                 }
             )
 
-        serialized_data = DashboardGlobalSerializer(result, many=True).data
+        serialized_data = DashboardBaseSerializer(result, many=True).data
 
         cls.store_data("global", serialized_data)
         return serialized_data
