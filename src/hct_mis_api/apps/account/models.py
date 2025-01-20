@@ -434,6 +434,9 @@ class AdminAreaLimitedTo(TimeStampedUUIDModel):
     program = models.ForeignKey("program.Program", related_name="admin_area_limits", on_delete=models.CASCADE)
     areas = models.ManyToManyField("geo.Area", related_name="admin_area_limits", blank=True)
 
+    class Meta:
+        unique_together = ("partner", "program")
+
     def clean(self) -> None:
         if self.program.partner_access != self.program.SELECTED_PARTNERS_ACCESS:
             raise ValidationError(f"Area limits cannot be set for programs with {self.program.partner_access} access.")
