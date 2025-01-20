@@ -23,11 +23,7 @@ from selenium.webdriver.chrome.options import Options
 from hct_mis_api.apps.account.fixtures import RoleFactory, UserFactory
 from hct_mis_api.apps.account.models import Partner, Role, RoleAssignment, User
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.core.models import (
-    BusinessArea,
-    BusinessAreaPartnerThrough,
-    DataCollectingType,
-)
+from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.geo.models import Country
 from hct_mis_api.apps.household.fixtures import DocumentTypeFactory
 from hct_mis_api.apps.household.models import DocumentType
@@ -625,11 +621,11 @@ def create_super_user(business_area: BusinessArea) -> User:
     for partner in Partner.objects.exclude(name="UNICEF"):
         partner.allowed_business_areas.add(business_area)
         role = RoleFactory(name=f"Role for {partner.name}")
-        partner_through, _ = BusinessAreaPartnerThrough.objects.get_or_create(
+        partner_role_assignmnet, _ = RoleAssignment.objects.get_or_create(
             business_area=business_area,
             partner=partner,
+            role=role,
         )
-        partner_through.roles.set([role])
 
     assert User.objects.filter(email="test@example.com").first()
     assert user.is_superuser
@@ -682,10 +678,9 @@ def create_super_user(business_area: BusinessArea) -> User:
         )
         data_collecting_type.limit_to.add(business_area)
         data_collecting_type.save()
-    ba_partner_through, _ = BusinessAreaPartnerThrough.objects.get_or_create(
-        business_area=business_area, partner=partner
+    partner_role_assignment, _ = RoleAssignment.objects.get_or_create(
+        business_area=business_area, partner=partner, role=role
     )
-    ba_partner_through.roles.set([role])
 
     # add document types
     doc_type_keys = (
