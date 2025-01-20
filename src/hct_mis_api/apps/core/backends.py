@@ -96,9 +96,9 @@ class PermissionsBackend(BaseBackend):
         permissions_set.update(f"{app}.{codename}" for app, codename in role_assignment_group_permissions)
 
         # permissions from RoleAssignment's Roles
-        role_assignment_role_permissions = Role.objects.filter(role_assignments__in=role_assignments).values_list(
-            "permissions", flat=True
-        )
+        role_assignment_role_permissions = Role.objects.filter(
+            role_assignments__in=role_assignments, permissions__isnull=False
+        ).values_list("permissions", flat=True)
         permissions_set.update(
             permission for permission_list in role_assignment_role_permissions for permission in permission_list
         )
