@@ -203,8 +203,10 @@ def migrate_tp_qs(tp_qs: QuerySet["TargetPopulation"]) -> None:
     # rebuild Preparing Payment Plans
     if full_rebuild_payment_plans:
         print(f" ****** Found {len(full_rebuild_payment_plans)} Payment Plan(s) in PREPARING status")
-    for payment_plan in PaymentPlan.objects.filter(pk__in=full_rebuild_payment_plans):
-        PaymentPlanService(payment_plan=payment_plan).full_rebuild()
+        for payment_plan in PaymentPlan.objects.filter(pk__in=full_rebuild_payment_plans):
+            PaymentPlanService(payment_plan=payment_plan).full_rebuild()
+            payment_plan.status = PaymentPlan.Status.OPEN
+            payment_plan.save()
 
 
 def get_statistics(after_migration_status: bool = False) -> None:
@@ -338,7 +340,7 @@ def migrate_tp_into_pp(batch_size: int = 1) -> None:
                         build_status=PaymentPlan.BuildStatus.BUILD_STATUS_PENDING, business_area_id=business_area.id
                     )
                     if build_payment_plans_qs.exists():
-                        print("Create payments for New Created Payment Plans: ", build_payment_plans_qs.count())
+                        print("Create payments for New Created Payment Plan(s): ", build_payment_plans_qs.count())
                         for payment_plan in build_payment_plans_qs.only("id"):
                             pp_count = payment_plan.household_count
                             if pp_count < max_payments_number:
