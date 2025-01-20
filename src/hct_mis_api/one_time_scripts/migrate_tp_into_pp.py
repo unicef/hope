@@ -7,7 +7,6 @@ from django.utils import timezone
 
 from hct_mis_api.apps.accountability.models import Message, Survey
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.payment.celery_tasks import prepare_payment_plan_task
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.targeting.models import (
@@ -66,6 +65,8 @@ tp_status_to_pp_mapping = {
     # TargetPopulation.STATUS_ASSIGNED: None,  # TP has created Payment Plan
 }
 
+max_payments_number = 1000
+
 
 def map_tp_to_pp(tp: TargetPopulation) -> Dict[str, Any]:
     """helper function to map TargetPopulation to PaymentPlan fields"""
@@ -101,7 +102,7 @@ def tc_migrate_hh_ind_ids(tc: TargetingCriteria) -> Tuple[Optional[TargetingCrit
     if rules.count() == 0:
         # create new one if HH or Ind ids and return new TargetingCriteriaRule, True
         if tc.individual_ids or tc.household_ids:
-            print("not found TargetingCriteriaRule for TargetingCriteria. Going to create a new one.")
+            # print("not found TargetingCriteriaRule for TargetingCriteria. Going to create a new one.")
             new_tcr = TargetingCriteriaRule(
                 targeting_criteria=tc, household_ids=tc.household_ids, individual_ids=tc.individual_ids
             )
@@ -127,6 +128,7 @@ def migrate_tp_qs(tp_qs: QuerySet["TargetPopulation"]) -> None:
     tp_qs = tp_qs.prefetch_related("payment_plans", "targeting_criteria", "program_cycle")
 
     for tp in tp_qs:
+        print(" ******** Processing TP ", str(tp.id))
         # migrate ind_ids and hh_ids
         if tp.targeting_criteria:
             tcr, create = tc_migrate_hh_ind_ids(tp.targeting_criteria)
@@ -139,8 +141,8 @@ def migrate_tp_qs(tp_qs: QuerySet["TargetPopulation"]) -> None:
         pp_count = 0
         existing_payment_plans = list(tp.payment_plans.filter(targeting_criteria__isnull=True))
         if existing_payment_plans:
-            if len(existing_payment_plans) > 1:
-                print(f"Found more then 1 PP for TP {str(tp.pk)}, {len(existing_payment_plans)} PPs")
+            # if len(existing_payment_plans) > 1:
+            # print(f"Found more then 1 PP for TP {str(tp.pk)}, {len(existing_payment_plans)} PPs")
             for payment_plan in existing_payment_plans:
                 pp_count += 1
                 payment_plan_data = map_tp_to_pp(tp)
@@ -157,23 +159,29 @@ def migrate_tp_qs(tp_qs: QuerySet["TargetPopulation"]) -> None:
                     full_rebuild_payment_plans.append(str(payment_plan.pk))
                 update_payment_plans.append(payment_plan)
         else:
+            # skip create payments if build_status is failed
+            # or set empty if no targeting_criteria
+            if tp.build_status == TargetPopulation.BUILD_STATUS_FAILED:
+                build_status = PaymentPlan.BuildStatus.BUILD_STATUS_FAILED
+            elif tp.targeting_criteria:
+                build_status = PaymentPlan.BuildStatus.BUILD_STATUS_PENDING
+            else:
+                build_status = None
             # create new PaymentPlan in no PP with tp.targeting_criteria
             payment_plan_data = map_tp_to_pp(tp)
             payment_plan_data["start_date"] = tp.program_cycle.start_date
             payment_plan_data["end_date"] = tp.program_cycle.end_date
             payment_plan_data["status"] = PaymentPlan.Status.TP_OPEN
             payment_plan_data["status_date"] = timezone.now()
-            payment_plan_data["build_status"] = PaymentPlan.BuildStatus.BUILD_STATUS_PENDING
+            payment_plan_data["build_status"] = build_status
             payment_plan_data["built_at"] = timezone.now()
-            if not PaymentPlan.objects.filter(targeting_criteria=tp.targeting_criteria).exists():
-                # check if PaymentPlan exists for this targeting_criteria
+            # check if PaymentPlan exists for this targeting_criteria
+            if (
+                tp.targeting_criteria
+                and not PaymentPlan.objects.filter(targeting_criteria=tp.targeting_criteria).exists()
+            ):
+                # create new PaymentPlan if no any PaymentPlan with the targeting_criteria
                 new_payment_plans.append(PaymentPlan(**payment_plan_data))
-            else:
-                print(
-                    "*** = Payment Plan already exists for TP with targeting_criteria",
-                    str(tp.pk),
-                    str(tp.targeting_criteria.pk),
-                )
 
     if update_tc_rules:
         print("* processing update_tc_rules")
@@ -238,7 +246,7 @@ def get_payment_plan_id_from_tp_id(business_area_id: str, target_population_id: 
     for pp in PaymentPlan.all_objects.filter(business_area_id=business_area_id):
         if pp.internal_data.get("target_population_id") == target_population_id:
             return str(pp.pk)
-    print(f"****** Not found PaymentPlan for old target_population_id: {target_population_id}, BA: {business_area_id}")
+    # print(f"****** Not found PaymentPlan for old target_population_id: {target_population_id}, BA: {business_area_id}")
     # just return None if no data
     return None
 
@@ -263,13 +271,46 @@ def migrate_message_and_survey(list_ids: List[str], model: Any, business_area_id
     return objects_to_update
 
 
-def migrate_tp_into_pp(batch_size: int = 500) -> None:
+def create_payments_for_pending_payment_plans() -> None:
+    """
+    step 2 create Payments for BUILD_STATUS_PENDING PaymentPlans
+    """
+    start_time = timezone.now()
+    print("*** Create Payments for BUILD_STATUS_PENDING PaymentPlans ***\n", "*" * 60)
+    for business_area in BusinessArea.objects.all().only("id", "name"):
+        with transaction.atomic():
+            build_payment_plans_qs = PaymentPlan.objects.filter(
+                build_status=PaymentPlan.BuildStatus.BUILD_STATUS_PENDING, business_area_id=business_area.id
+            )
+            if build_payment_plans_qs.exists():
+                print(f"\n *** Processing {business_area.name}.")
+                print("Create payments for New Created Payment Plans: ", build_payment_plans_qs.count())
+                for payment_plan in build_payment_plans_qs.only("id"):
+                    try:
+                        payment_plan.build_status_building()
+                        payment_plan.save(update_fields=("build_status", "built_at"))
+                        PaymentPlanService.create_payments(payment_plan)
+                        payment_plan.update_population_count_fields()
+                        payment_plan.build_status_ok()
+                        payment_plan.save(update_fields=("build_status", "built_at"))
+                    except Exception as e:
+                        payment_plan.build_status_failed()
+                        payment_plan.save(update_fields=("build_status", "built_at"))
+                        print("Prepare Payment Plan Error", str(e))
+    print(f"Completed in {timezone.now() - start_time}\n", "*" * 55)
+
+
+def migrate_tp_into_pp(batch_size: int = 1) -> None:
+    """
+    step 1 migrate TP>PP
+    """
     start_time = timezone.now()
     # queryset.model.__name__
     model_name = "TargetPopulation"
 
     print(f"*** Data Migration {model_name} ***\n", "*" * 60)
     get_statistics()
+    create_later = []
 
     for business_area in BusinessArea.objects.all().only("id", "name"):
         with transaction.atomic():
@@ -277,7 +318,7 @@ def migrate_tp_into_pp(batch_size: int = 500) -> None:
                 "id",
             )
             if queryset:
-                print(f"Processing {queryset.count()} {model_name} for {business_area.name}.")
+                print(f"\n   ***   Processing {queryset.count()} {model_name} for {business_area.name}.")
 
                 list_ids = [
                     str(obj_id) for obj_id in queryset.values_list("id", flat=True).iterator(chunk_size=batch_size)
@@ -293,13 +334,28 @@ def migrate_tp_into_pp(batch_size: int = 500) -> None:
                     page_count += 1
                     print(f"Progress: {page_count}/{-(-total_count // batch_size)} page(s) migrated.")
 
-                build_payment_plans_qs = PaymentPlan.objects.filter(
-                    build_status=PaymentPlan.BuildStatus.BUILD_STATUS_PENDING, business_area_id=business_area.id
-                )
-                if build_payment_plans_qs.exists():
-                    print("Create payments for New Created Payment Plans")
-                    for payment_plan in build_payment_plans_qs.only("id"):
-                        prepare_payment_plan_task(str(payment_plan.id))
+                    build_payment_plans_qs = PaymentPlan.objects.filter(
+                        build_status=PaymentPlan.BuildStatus.BUILD_STATUS_PENDING, business_area_id=business_area.id
+                    )
+                    if build_payment_plans_qs.exists():
+                        print("Create payments for New Created Payment Plans: ", build_payment_plans_qs.count())
+                        for payment_plan in build_payment_plans_qs.only("id"):
+                            pp_count = payment_plan.household_count
+                            if pp_count < max_payments_number:
+                                try:
+                                    payment_plan.build_status_building()
+                                    payment_plan.save(update_fields=("build_status", "built_at"))
+                                    PaymentPlanService.create_payments(payment_plan)
+                                    payment_plan.update_population_count_fields()
+                                    payment_plan.build_status_ok()
+                                    payment_plan.save(update_fields=("build_status", "built_at"))
+                                except Exception as e:
+                                    payment_plan.build_status_failed()
+                                    payment_plan.save(update_fields=("build_status", "built_at"))
+                                    print("Prepare Payment Plan Error", str(e))
+                            else:
+                                create_later.append(str(payment_plan.id))
+                        print(f"Payments for {len(create_later)} Payment Plans will create later")
 
             # Migrate Message & Survey
             for model in (Message, Survey):
@@ -314,4 +370,5 @@ def migrate_tp_into_pp(batch_size: int = 500) -> None:
                 model.objects.bulk_update(update_list, ["payment_plan_id"], 1000)
 
     print(f"Completed in {timezone.now() - start_time}\n", "*" * 55)
+    print("Need run manually to create Payment for PP(s):", create_later)
     get_statistics(after_migration_status=True)
