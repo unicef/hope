@@ -14,7 +14,7 @@ from typing import (
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
-from django.db.models import Q
+from django.db.models import F, Q
 
 import graphene
 from constance import config
@@ -28,7 +28,7 @@ from graphql import GraphQLError
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hct_mis_api.apps.core.field_attributes.fields_types import FILTERABLE_TYPES, Scope
-from hct_mis_api.apps.core.kobo.api import KoboAPI
+from hct_mis_api.apps.core.kobo.api import CountryCodeNotProvided, KoboAPI
 from hct_mis_api.apps.core.kobo.common import reduce_asset, reduce_assets_list
 from hct_mis_api.apps.core.languages import Language, Languages
 from hct_mis_api.apps.core.models import (
@@ -312,11 +312,11 @@ def get_collector_fields_attr_generator() -> Generator:
 
 def resolve_asset(business_area_slug: str, uid: str) -> Dict:
     try:
-        assets = KoboAPI(business_area_slug).get_single_project_data(uid)
+        assets = KoboAPI().get_single_project_data(uid)
     except ObjectDoesNotExist as e:
         logger.exception(f"Provided business area: {business_area_slug}, does not exist.")
         raise GraphQLError("Provided business area does not exist.") from e
-    except AttributeError as error:
+    except AttributeError as error:  # pragma: no cover
         logger.exception(error)
         raise GraphQLError(str(error)) from error
 
@@ -325,13 +325,18 @@ def resolve_asset(business_area_slug: str, uid: str) -> Dict:
 
 def resolve_assets_list(business_area_slug: str, only_deployed: bool = False) -> List:
     try:
-        assets = KoboAPI(business_area_slug).get_all_projects_data()
+        business_area = BusinessArea.objects.annotate(country_code=F("countries__iso_code3")).get(
+            slug=business_area_slug
+        )
+        assets = KoboAPI().get_all_projects_data(business_area.country_code)
     except ObjectDoesNotExist as e:
         logger.exception(f"Provided business area: {business_area_slug}, does not exist.")
         raise GraphQLError("Provided business area does not exist.") from e
-    except AttributeError as error:
+    except AttributeError as error:  # pragma: no cover
         logger.exception(error)
         raise GraphQLError(str(error)) from error
+    except CountryCodeNotProvided:
+        raise GraphQLError(f"Business area {business_area_slug} does not have a country code.")
 
     return reduce_assets_list(assets, only_deployed=only_deployed)
 
