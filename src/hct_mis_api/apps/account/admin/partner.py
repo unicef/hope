@@ -42,7 +42,7 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
     exclude = ("allowed_business_areas",)
     inlines = (RoleAssignmentInline,)
 
-    def get_inline_instances(self, request, obj=None):
+    def get_inline_instances(self, request: Any, obj: Optional[account_models.Partner] = None) -> list:
         if obj is None:  # if object is being created now, disable the inlines
             return []
         return super().get_inline_instances(request, obj)
