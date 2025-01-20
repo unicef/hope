@@ -179,7 +179,6 @@ class BiometricDeduplicationService:
         rdis = RegistrationDataImport.objects.filter(
             status=RegistrationDataImport.IN_REVIEW,
             program=program,
-            deduplication_engine_status=RegistrationDataImport.DEDUP_ENGINE_IN_PROGRESS,
         )
         for rdi in rdis:
             rdi_individuals = PendingIndividual.objects.filter(registration_data_import=rdi)
