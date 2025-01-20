@@ -345,7 +345,6 @@ export const EditProgramPage = (): ReactElement => {
             errors,
             setErrors,
           }) => {
-
             const handleNextStep = async () => {
               await handleNext({
                 validateForm,
@@ -419,7 +418,7 @@ export const EditProgramPage = (): ReactElement => {
         >
           {({ submitForm, values, setFieldValue }) => {
             const mappedPartnerChoices = userPartnerChoices
-              .filter((partner) => partner.name !== 'UNICEF')
+              .filter((partner) => !partner.name.startsWith('UNICEF'))
               .map((partner) => ({
                 value: partner.value,
                 label: partner.name,

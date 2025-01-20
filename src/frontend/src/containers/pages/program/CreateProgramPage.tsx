@@ -254,7 +254,7 @@ export const CreateProgramPage = (): ReactElement => {
           setErrors,
         }) => {
           const mappedPartnerChoices = userPartnerChoices
-            .filter((partner) => partner.name !== 'UNICEF')
+            .filter((partner) => !partner.name.startsWith('UNICEF'))
             .map((partner) => ({
               value: partner.value,
               label: partner.name,
