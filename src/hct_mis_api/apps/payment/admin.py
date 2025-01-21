@@ -10,6 +10,7 @@ from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
+from admin_cursor_paginator import CursorPaginatorAdmin
 from admin_extra_buttons.decorators import button
 from admin_extra_buttons.mixins import confirm_action
 from adminfilters.autocomplete import AutoCompleteFilter
@@ -117,7 +118,7 @@ class PaymentVerificationPlanAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
 
 
 @admin.register(PaymentVerification)
-class PaymentVerificationAdmin(HOPEModelAdminBase):
+class PaymentVerificationAdmin(CursorPaginatorAdmin, HOPEModelAdminBase):
     list_display = (
         "payment",
         "household",
@@ -210,7 +211,7 @@ class PaymentHouseholdSnapshotInline(admin.StackedInline):
 
 
 @admin.register(Payment)
-class PaymentAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
+class PaymentAdmin(CursorPaginatorAdmin, AdminAdvancedFiltersMixin, HOPEModelAdminBase):
     search_fields = ("unicef_id",)
     list_display = (
         "unicef_id",
