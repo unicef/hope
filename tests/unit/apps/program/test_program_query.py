@@ -99,7 +99,7 @@ class TestProgramQuery(APITestCase):
             label="PDU Field Other",
             pdu_data=pdu_data_other,
         )
-        PaymentPlanFactory(program=cls.program)
+        PaymentPlanFactory(program_cycle=cls.program.cycles.first())
 
     @parameterized.expand(
         [

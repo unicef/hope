@@ -44,7 +44,7 @@ from hct_mis_api.apps.core.utils import (
     get_program_id_from_headers,
     to_choice_object,
 )
-from hct_mis_api.apps.payment.models import DeliveryMechanism
+from hct_mis_api.apps.payment.models import DeliveryMechanism, PaymentPlan
 from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
 from hct_mis_api.apps.program.filters import ProgramCycleFilter, ProgramFilter
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
@@ -149,7 +149,7 @@ class ProgramNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
 
     @staticmethod
     def resolve_target_populations_count(program: Program, info: Any, **kwargs: Any) -> int:
-        return program.targetpopulation_set.count()
+        return PaymentPlan.objects.filter(program_cycle__program=program).count()
 
     @staticmethod
     def resolve_can_finish(program: Program, info: Any, **kwargs: Any) -> bool:

@@ -102,9 +102,6 @@ class ProgramCycleViewSet(
         if program_cycle.payment_plans.exists():
             raise ValidationError("Don’t allow to delete Cycle with assigned Target Population")
 
-        if program_cycle.payment_plans.exists():
-            raise ValidationError("Don’t allow to delete Cycle with assigned Payment Plan")
-
         program_cycle.delete()
 
     @action(detail=True, methods=["post"], permission_classes=[ProgramCycleUpdatePermission])
