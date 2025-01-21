@@ -135,31 +135,31 @@ class TestTargetPopulationViews:
         response_json = response.json()["results"]
         assert len(response_json) == 3
         assert {
-            "id": id_to_base64(self.tp1.id, "TargetPopulation"),
+            "id": id_to_base64(self.tp1.id, "PaymentPlan"),
             "name": self.tp1.name,
             "status": self.tp1.get_status_display(),
             "created_by": self.tp1.created_by.get_full_name(),
             "created_at": "2022-01-01T00:00:00Z",
         } in response_json
         assert {
-            "id": id_to_base64(self.tp2.id, "TargetPopulation"),
+            "id": id_to_base64(self.tp2.id, "PaymentPlan"),
             "name": self.tp2.name,
             "status": self.tp2.get_status_display(),
             "created_by": self.tp2.created_by.get_full_name(),
             "created_at": "2022-01-01T00:00:00Z",
         } in response_json
         assert {
-            "id": id_to_base64(self.tp3.id, "TargetPopulation"),
+            "id": id_to_base64(self.tp3.id, "PaymentPlan"),
             "name": self.tp3.name,
-            "status": self.tp3.get_status_display(),
+            "status": "Assigned",
             "created_by": self.tp3.created_by.get_full_name(),
             "created_at": "2022-01-01T00:00:00Z",
         } in response_json
         assert {
-            "id": id_to_base64(self.tp_program2.id, "TargetPopulation"),
+            "id": id_to_base64(self.tp_program2.id, "PaymentPlan"),
             "name": self.tp_program2.name,
             "created_by": self.tp1.created_by.get_full_name(),
-            "status": self.tp1.get_status_display(),
+            "status": "Assigned",
             "created_at": "2022-01-01T00:00:00Z",
         } not in response_json
 

@@ -36,9 +36,7 @@ class TargetPopulationViewSet(
     def get_queryset(self) -> QuerySet:
         business_area = self.get_business_area()
         program = self.get_program()
-        return PaymentPlan.objects.filter(
-            status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES, business_area=business_area, program=program
-        )
+        return PaymentPlan.objects.filter(business_area=business_area, program_cycle__program=program)
 
     @etag_decorator(TPKeyConstructor)
     @cache_response(timeout=config.REST_API_TTL, key_func=TPKeyConstructor())
