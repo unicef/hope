@@ -28,6 +28,7 @@ from hct_mis_api.apps.payment.celery_tasks import (
     prepare_follow_up_payment_plan_task,
     prepare_payment_plan_task,
     send_payment_notification_emails,
+    send_payment_plan_payment_list_xlsx_per_fsp_password,
     send_to_payment_gateway,
 )
 from hct_mis_api.apps.payment.models import (
@@ -84,6 +85,7 @@ class PaymentPlanService:
             PaymentPlan.Action.REVIEW.value: self.acceptance_process,
             PaymentPlan.Action.REJECT.value: self.acceptance_process,
             PaymentPlan.Action.SEND_TO_PAYMENT_GATEWAY.value: self.send_to_payment_gateway,
+            PaymentPlan.Action.SEND_XLSX_PASSWORD.value: self.send_xlsx_password,
         }
 
     def get_required_number_by_approval_type(self, approval_process: ApprovalProcess) -> Optional[int]:
@@ -598,15 +600,17 @@ class PaymentPlanService:
         self.payment_plan.save()
 
         create_payment_plan_payment_list_xlsx.delay(payment_plan_id=str(self.payment_plan.pk), user_id=str(user_id))
-        self.payment_plan.refresh_from_db(fields=["background_action_status"])
+        self.payment_plan.refresh_from_db(fields=["background_action_status", "export_file_entitlement"])
         return self.payment_plan
 
-    def export_xlsx_per_fsp(self, user_id: "UUID") -> PaymentPlan:
+    def export_xlsx_per_fsp(self, user_id: "UUID", fsp_xlsx_template_id: Optional[str]) -> PaymentPlan:
         self.payment_plan.background_action_status_xlsx_exporting()
         self.payment_plan.save()
 
-        create_payment_plan_payment_list_xlsx_per_fsp.delay(self.payment_plan.pk, user_id)
-        self.payment_plan.refresh_from_db(fields=["background_action_status"])
+        create_payment_plan_payment_list_xlsx_per_fsp.delay(
+            str(self.payment_plan.pk), str(user_id), fsp_xlsx_template_id
+        )
+        self.payment_plan.refresh_from_db(fields=["background_action_status", "export_file_per_fsp"])
         return self.payment_plan
 
     def import_xlsx_per_fsp(self, user: "User", file: IO) -> PaymentPlan:
@@ -895,3 +899,7 @@ class PaymentPlanService:
                     col_filter.save()
 
         return targeting_criteria_copy
+
+    def send_xlsx_password(self) -> PaymentPlan:
+        send_payment_plan_payment_list_xlsx_per_fsp_password.delay(str(self.payment_plan.pk), str(self.user.pk))
+        return self.payment_plan

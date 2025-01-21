@@ -281,6 +281,7 @@ class PaymentPlan(
         REJECT = "REJECT", "Reject"
         FINISH = "FINISH", "Finish"
         SEND_TO_PAYMENT_GATEWAY = "SEND_TO_PAYMENT_GATEWAY", "Send to Payment Gateway"
+        SEND_XLSX_PASSWORD = "SEND_XLSX_PASSWORD", "Send XLSX Password"
 
     usd_fields = [
         "total_entitled_quantity_usd",
@@ -398,7 +399,7 @@ class PaymentPlan(
     )
     export_file_per_fsp = models.ForeignKey(
         FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL
-    )
+    )  # save xlsx with auth code for API communication channel FSP, and just xlsx for others
     export_pdf_file_summary = models.ForeignKey(
         FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL
     )
@@ -682,8 +683,6 @@ class PaymentPlan(
 
         return qs
 
-    # @properties #####################################################################
-
     @property
     def program(self) -> "Program":
         return self.program_cycle.program
@@ -714,6 +713,32 @@ class PaymentPlan(
     @property
     def can_be_locked(self) -> bool:
         return self.payment_items.filter(Q(payment_plan_hard_conflicted=False) & Q(excluded=False)).exists()
+
+    @property
+    def can_create_xlsx_with_fsp_auth_code(self) -> bool:
+        """
+        export MTCN file
+        xlsx file with password
+        """
+        has_fsp_with_api = self.delivery_mechanisms.filter(
+            financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+            financial_service_provider__payment_gateway_id__isnull=False,
+        ).exists()
+
+        all_sent_to_fsp = not self.eligible_payments.exclude(status=Payment.STATUS_SENT_TO_FSP).exists()
+        return has_fsp_with_api and all_sent_to_fsp
+
+    @property
+    def fsp_communication_channel(self) -> str:
+        has_fsp_with_api = self.delivery_mechanisms.filter(
+            financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+            financial_service_provider__payment_gateway_id__isnull=False,
+        ).exists()
+        return (
+            FinancialServiceProvider.COMMUNICATION_CHANNEL_API
+            if has_fsp_with_api
+            else FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX
+        )
 
     @property
     def bank_reconciliation_success(self) -> int:
@@ -1231,6 +1256,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         ("registration_token", _("Registration Token")),
         ("status", _("Status")),
         ("transaction_status_blockchain_link", _("Transaction Status on the Blockchain")),
+        ("fsp_auth_code", _("Auth Code")),
     )
 
     DEFAULT_COLUMNS = [col[0] for col in COLUMNS_CHOICES]
@@ -1403,6 +1429,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
                 payment,
                 "transaction_status_blockchain_link",
             ),
+            "fsp_auth_code": (payment, "fsp_auth_code"),
         }
         additional_columns = {
             "admin_level_2": cls.get_admin_level_2,
@@ -1760,6 +1787,7 @@ class Payment(
     )
     fsp_auth_code = models.CharField(max_length=128, blank=True, null=True, help_text="FSP Auth Code")
     is_cash_assist = models.BooleanField(default=False)
+
     vulnerability_score = models.DecimalField(
         blank=True, null=True, decimal_places=3, max_digits=6, help_text="Written by Steficon", db_index=True
     )
@@ -1814,8 +1842,28 @@ class Payment(
         "transaction_reference_id",
     )
 
+    def mark_as_failed(self) -> None:  # pragma: no cover
+        if self.status is self.STATUS_FORCE_FAILED:
+            raise ValidationError("Status shouldn't be failed")
+        self.status = self.STATUS_FORCE_FAILED
+        self.status_date = timezone.now()
+        self.delivered_quantity = 0
+        self.delivered_quantity_usd = 0
+        self.delivery_date = None
+
+    def revert_mark_as_failed(self, delivered_quantity: Decimal, delivery_date: datetime) -> None:  # pragma: no cover
+        if self.status != self.STATUS_FORCE_FAILED:
+            raise ValidationError("Only payment marked as force failed can be reverted")
+        if self.entitlement_quantity is None:
+            raise ValidationError("Entitlement quantity need to be set in order to revert")
+
+        self.status = self.get_revert_mark_as_failed_status(delivered_quantity)
+        self.status_date = timezone.now()
+        self.delivered_quantity = delivered_quantity
+        self.delivery_date = delivery_date
+
     @property
-    def payment_status(self) -> str:
+    def payment_status(self) -> str:  # pragma: no cover
         status = "-"
         if self.status == Payment.STATUS_PENDING:
             status = "Pending"
@@ -1841,27 +1889,7 @@ class Payment(
     def full_name(self) -> str:
         return self.collector.full_name
 
-    def mark_as_failed(self) -> None:
-        if self.status is self.STATUS_FORCE_FAILED:
-            raise ValidationError("Status shouldn't be failed")
-        self.status = self.STATUS_FORCE_FAILED
-        self.status_date = timezone.now()
-        self.delivered_quantity = 0
-        self.delivered_quantity_usd = 0
-        self.delivery_date = None
-
-    def revert_mark_as_failed(self, delivered_quantity: Decimal, delivery_date: datetime) -> None:
-        if self.status != self.STATUS_FORCE_FAILED:
-            raise ValidationError("Only payment marked as force failed can be reverted")
-        if self.entitlement_quantity is None:
-            raise ValidationError("Entitlement quantity need to be set in order to revert")
-
-        self.status = self.get_revert_mark_as_failed_status(delivered_quantity)
-        self.status_date = timezone.now()
-        self.delivered_quantity = delivered_quantity
-        self.delivery_date = delivery_date
-
-    def get_revert_mark_as_failed_status(self, delivered_quantity: Decimal) -> str:
+    def get_revert_mark_as_failed_status(self, delivered_quantity: Decimal) -> str:  # pragma: no cover
         if delivered_quantity == 0:
             return Payment.STATUS_NOT_DISTRIBUTED
 

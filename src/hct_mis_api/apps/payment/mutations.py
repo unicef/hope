@@ -711,6 +711,7 @@ class ActionPaymentPlanMutation(PermissionMutation):
             PaymentPlan.Action.REJECT.name: _get_reject_permission(pp_status),
             PaymentPlan.Action.FINISH.name: [],
             PaymentPlan.Action.SEND_TO_PAYMENT_GATEWAY.name: [Permissions.PM_SEND_TO_PAYMENT_GATEWAY],
+            PaymentPlan.Action.SEND_XLSX_PASSWORD.name: [Permissions.PM_SEND_XLSX_PASSWORD],
         }
         cls.has_permission(info, action_to_permissions_map[action], business_area)
 
@@ -837,12 +838,14 @@ class ExportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
 
     class Arguments:
         payment_plan_id = graphene.ID(required=True)
+        fsp_xlsx_template_id = graphene.ID(description="Using for MTCN/Auth Code export")
 
     @classmethod
-    def export_action(cls, payment_plan: PaymentPlan, user_id: "UUID") -> PaymentPlan:
+    def export_action(
+        cls, payment_plan: PaymentPlan, user_id: "UUID", fsp_xlsx_template_id: Optional[str] = None
+    ) -> PaymentPlan:
         if payment_plan.status not in [PaymentPlan.Status.LOCKED]:
             msg = "You can only export Payment List for LOCKED Payment Plan"
-            logger.error(msg)
             raise GraphQLError(msg)
 
         return PaymentPlanService(payment_plan=payment_plan).export_xlsx(user_id=user_id)
@@ -851,13 +854,16 @@ class ExportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
     @is_authenticated
     @transaction.atomic
     def mutate(
-        cls, root: Any, info: Any, payment_plan_id: str, **kwargs: Any
+        cls, root: Any, info: Any, payment_plan_id: str, fsp_xlsx_template_id: Optional[str] = None, **kwargs: Any
     ) -> "ExportXLSXPaymentPlanPaymentListMutation":
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
+        fsp_xlsx_template_id_str: Optional[str] = decode_id_string(fsp_xlsx_template_id)
         cls.has_permission(info, Permissions.PM_VIEW_LIST, payment_plan.business_area)
+        if fsp_xlsx_template_id:
+            cls.has_permission(info, Permissions.PM_DOWNLOAD_MTCN, payment_plan.business_area)
 
         old_payment_plan = copy_model_object(payment_plan)
-        payment_plan = cls.export_action(payment_plan=payment_plan, user_id=info.context.user.pk)
+        payment_plan = cls.export_action(payment_plan, info.context.user.pk, fsp_xlsx_template_id_str)
 
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
@@ -873,18 +879,26 @@ class ExportXLSXPaymentPlanPaymentListMutation(PermissionMutation):
 
 class ExportXLSXPaymentPlanPaymentListPerFSPMutation(ExportXLSXPaymentPlanPaymentListMutation):
     @classmethod
-    def export_action(cls, payment_plan: PaymentPlan, user_id: "UUID") -> PaymentPlan:
+    def export_action(
+        cls, payment_plan: PaymentPlan, user_id: "UUID", fsp_xlsx_template_id: Optional[str] = None
+    ) -> PaymentPlan:
         if payment_plan.status not in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]:
-            msg = "You can only export Payment List Per FSP for ACCEPTED or FINISHED Payment Plan"
-            logger.error(msg)
+            msg = "Payment List Per FSP export is only available for ACCEPTED or FINISHED Payment Plans."
             raise GraphQLError(msg)
 
         if not payment_plan.eligible_payments:
-            msg = "Export is not impossible because Payment list is empty"
-            logger.error(msg)
+            msg = "Export failed: The Payment List is empty."
             raise GraphQLError(msg)
 
-        return PaymentPlanService(payment_plan=payment_plan).export_xlsx_per_fsp(user_id=user_id)
+        if fsp_xlsx_template_id and payment_plan.export_file_per_fsp is not None:
+            msg = "Export failed: Payment Plan already has created exported file."
+            raise GraphQLError(msg)
+
+        if fsp_xlsx_template_id and not payment_plan.can_create_xlsx_with_fsp_auth_code:
+            msg = "Export failed: All Payments must have the status 'Sent to FSP' and FSP communication channel set to API."
+            raise GraphQLError(msg)
+
+        return PaymentPlanService(payment_plan=payment_plan).export_xlsx_per_fsp(user_id, fsp_xlsx_template_id)
 
 
 class ChooseDeliveryMechanismsForPaymentPlanMutation(PermissionMutation):
@@ -1070,7 +1084,12 @@ class ImportXLSXPaymentPlanPaymentListPerFSPMutation(PermissionMutation):
 
         if payment_plan.status not in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED):
             msg = "You can only import for ACCEPTED or FINISHED Payment Plan"
-            logger.error(msg)
+            raise GraphQLError(msg)
+
+        if not payment_plan.delivery_mechanisms.filter(
+            financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
+        ).exists():
+            msg = "Only for FSP with Communication Channel XLSX can be imported reconciliation manually."
             raise GraphQLError(msg)
 
         import_service = XlsxPaymentPlanImportPerFspService(payment_plan, file)
@@ -1078,7 +1097,6 @@ class ImportXLSXPaymentPlanPaymentListPerFSPMutation(PermissionMutation):
             import_service.open_workbook()
         except BadZipFile:
             msg = "Wrong file type or password protected .zip file. Upload another file, or remove the password."
-            logger.info(msg)
             raise GraphQLError(msg)
 
         import_service.validate()
@@ -1370,6 +1388,7 @@ class CopyTargetingCriteriaMutation(PermissionMutation):
 
 
 class Mutations(graphene.ObjectType):
+    # PaymentVerification
     create_payment_verification_plan = CreateVerificationPlanMutation.Field()
     edit_payment_verification_plan = EditPaymentVerificationMutation.Field()
 

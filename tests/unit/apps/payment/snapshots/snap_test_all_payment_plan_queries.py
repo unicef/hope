@@ -43,7 +43,11 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans 1'] = {
                         },
                         'availablePaymentRecordsCount': 0,
                         'canCreateFollowUp': False,
+                        'canCreateXlsxWithFspAuthCode': False,
+                        'canDownloadXlsx': False,
+                        'canExportXlsx': False,
                         'canSendToPaymentGateway': False,
+                        'canSendXlsxPassword': False,
                         'canSplit': False,
                         'currencyName': 'Polish złoty',
                         'dispersionEndDate': '2020-12-10',
@@ -55,6 +59,7 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans 1'] = {
                         ],
                         'femaleAdultsCount': 0,
                         'femaleChildrenCount': 1,
+                        'fspCommunicationChannel': 'XLSX',
                         'hasFspDeliveryMechanismXlsxTemplate': False,
                         'hasPaymentListExportFile': False,
                         'importedFileName': '',
@@ -125,7 +130,11 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans 1'] = {
                         },
                         'availablePaymentRecordsCount': 0,
                         'canCreateFollowUp': False,
+                        'canCreateXlsxWithFspAuthCode': False,
+                        'canDownloadXlsx': False,
+                        'canExportXlsx': False,
                         'canSendToPaymentGateway': False,
+                        'canSendXlsxPassword': False,
                         'canSplit': False,
                         'currencyName': 'Ukrainian hryvnia',
                         'dispersionEndDate': '2020-10-10',
@@ -137,6 +146,7 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans 1'] = {
                         ],
                         'femaleAdultsCount': 1,
                         'femaleChildrenCount': 0,
+                        'fspCommunicationChannel': 'XLSX',
                         'hasFspDeliveryMechanismXlsxTemplate': False,
                         'hasPaymentListExportFile': False,
                         'importedFileName': '',
@@ -730,22 +740,6 @@ snapshots['TestPaymentPlanQueries::test_payment_plan_filter_not_status 1'] = {
     }
 }
 
-snapshots['TestPaymentPlanQueries::test_payment_plan_filter_payment_plan_applicable 1'] = {
-    'data': {
-        'allPaymentPlans': {
-            'edges': [
-                {
-                    'node': {
-                        'name': 'Payment Plan within DRAFT for test filter payment_plan_applicable',
-                        'status': 'DRAFT',
-                        'totalHouseholdsCountWithValidPhoneNo': 0
-                    }
-                }
-            ]
-        }
-    }
-}
-
 snapshots['TestPaymentPlanQueries::test_payment_plan_filter_status_assigned 1'] = {
     'data': {
         'allPaymentPlans': {
@@ -901,6 +895,66 @@ snapshots['TestPaymentPlanQueries::test_payment_plan_filter_total_households_cou
                     }
                 }
             ]
+        }
+    }
+}
+
+snapshots['TestPaymentPlanQueries::test_payment_plans_export_download_properties_0_with_permission_api 1'] = {
+    'data': {
+        'paymentPlan': {
+            'canCreateXlsxWithFspAuthCode': True,
+            'canDownloadXlsx': False,
+            'canExportXlsx': True,
+            'canSendToPaymentGateway': False,
+            'canSendXlsxPassword': False,
+            'fspCommunicationChannel': 'API',
+            'name': 'Test Finished PP',
+            'status': 'FINISHED'
+        }
+    }
+}
+
+snapshots['TestPaymentPlanQueries::test_payment_plans_export_download_properties_1_without_permission_api 1'] = {
+    'data': {
+        'paymentPlan': {
+            'canCreateXlsxWithFspAuthCode': True,
+            'canDownloadXlsx': False,
+            'canExportXlsx': False,
+            'canSendToPaymentGateway': False,
+            'canSendXlsxPassword': False,
+            'fspCommunicationChannel': 'API',
+            'name': 'Test Finished PP',
+            'status': 'FINISHED'
+        }
+    }
+}
+
+snapshots['TestPaymentPlanQueries::test_payment_plans_export_download_properties_2_with_permission_xlsx 1'] = {
+    'data': {
+        'paymentPlan': {
+            'canCreateXlsxWithFspAuthCode': False,
+            'canDownloadXlsx': False,
+            'canExportXlsx': False,
+            'canSendToPaymentGateway': False,
+            'canSendXlsxPassword': False,
+            'fspCommunicationChannel': 'XLSX',
+            'name': 'Test Finished PP',
+            'status': 'FINISHED'
+        }
+    }
+}
+
+snapshots['TestPaymentPlanQueries::test_payment_plans_export_download_properties_3_without_permission_xlsx 1'] = {
+    'data': {
+        'paymentPlan': {
+            'canCreateXlsxWithFspAuthCode': False,
+            'canDownloadXlsx': False,
+            'canExportXlsx': False,
+            'canSendToPaymentGateway': False,
+            'canSendXlsxPassword': False,
+            'fspCommunicationChannel': 'XLSX',
+            'name': 'Test Finished PP',
+            'status': 'FINISHED'
         }
     }
 }
