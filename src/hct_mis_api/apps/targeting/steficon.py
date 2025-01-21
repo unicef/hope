@@ -39,7 +39,9 @@ try:
         number_of_records = forms.IntegerField(help_text="Only test # records")
 
     class SteficonExecutorMixin:
-        @button(visible=lambda o, r: o.status == TargetPopulation.STATUS_STEFICON_ERROR)
+        @button(
+            visible=lambda o, r: o.status == TargetPopulation.STATUS_STEFICON_ERROR, permission="steficon.rerun_rule"
+        )
         def re_run_steficon(self, request: "HttpRequest", pk: "UUID") -> TemplateResponse:
             context = self.get_common_context(request, pk)
             tp = context["original"]
@@ -56,7 +58,7 @@ try:
                 context["form"] = RuleReRunForm()
             return TemplateResponse(request, "admin/targeting/targetpopulation/steficon_rerun.html", context)
 
-        @button()
+        @button(permission="steficon.rerun_rule")
         def test_steficon(self, request: "HttpRequest", pk: "UUID") -> TemplateResponse:
             context = self.get_common_context(request, pk)
             if request.method == "GET":

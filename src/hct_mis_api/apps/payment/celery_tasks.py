@@ -141,7 +141,9 @@ def create_payment_plan_payment_list_xlsx(self: Any, payment_plan_id: str, user_
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def create_payment_plan_payment_list_xlsx_per_fsp(self: Any, payment_plan_id: str, user_id: str) -> None:
+def create_payment_plan_payment_list_xlsx_per_fsp(
+    self: Any, payment_plan_id: str, user_id: str, fsp_xlsx_template_id: Optional[str] = None
+) -> None:
     try:
         from hct_mis_api.apps.payment.models import PaymentPlan
         from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import (
@@ -154,13 +156,15 @@ def create_payment_plan_payment_list_xlsx_per_fsp(self: Any, payment_plan_id: st
         try:
             with transaction.atomic():
                 # regenerate always xlsx
-                service = XlsxPaymentPlanExportPerFspService(payment_plan)
+                service = XlsxPaymentPlanExportPerFspService(payment_plan, fsp_xlsx_template_id)
                 service.export_per_fsp(user)
                 payment_plan.background_action_status_none()
                 payment_plan.save()
 
                 if payment_plan.business_area.enable_email_notification:
                     send_email_notification_on_commit(service, user)
+                    if fsp_xlsx_template_id:
+                        service.send_email_with_passwords(user, payment_plan)
 
         except Exception as e:
             payment_plan.background_action_status_xlsx_export_error()
@@ -170,6 +174,30 @@ def create_payment_plan_payment_list_xlsx_per_fsp(self: Any, payment_plan_id: st
 
     except Exception as e:
         logger.exception("Create Payment Plan List XLSX Per FSP Error")
+        raise self.retry(exc=e)
+
+
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@log_start_and_end
+@sentry_tags
+def send_payment_plan_payment_list_xlsx_per_fsp_password(
+    self: Any,
+    payment_plan_id: str,
+    user_id: str,
+) -> None:
+    try:
+        from hct_mis_api.apps.payment.models import PaymentPlan
+        from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import (
+            XlsxPaymentPlanExportPerFspService,
+        )
+
+        user: User = get_user_model().objects.get(pk=user_id)
+        payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
+        set_sentry_business_area_tag(payment_plan.business_area.name)
+        XlsxPaymentPlanExportPerFspService.send_email_with_passwords(user, payment_plan)
+
+    except Exception as e:
+        logger.exception("Send Payment Plan List XLSX Per FSP Password Error")
         raise self.retry(exc=e)
 
 
