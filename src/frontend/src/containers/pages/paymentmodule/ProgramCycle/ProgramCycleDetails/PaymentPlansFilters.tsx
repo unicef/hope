@@ -19,6 +19,7 @@ import { DatePickerFilter } from '@core/DatePickerFilter';
 import moment from 'moment';
 import { ClearApplyButtons } from '@core/ClearApplyButtons';
 import { ReactElement } from 'react';
+import { allowedStatusChoices } from '@containers/tables/paymentmodule/PaymentPlansTable/PaymentPlansFilters';
 
 export type FilterProps = Pick<
   AllPaymentPlansForTableQueryVariables,
@@ -78,24 +79,6 @@ export const PaymentPlansFilters = ({
   if (!statusChoicesData) {
     return null;
   }
-
-  const allowedStatusChoices = [
-    PaymentPlanStatus.Accepted,
-    PaymentPlanStatus.Draft,
-    PaymentPlanStatus.Finished,
-    PaymentPlanStatus.InApproval,
-    PaymentPlanStatus.InAuthorization,
-    PaymentPlanStatus.InReview,
-    PaymentPlanStatus.Locked,
-    PaymentPlanStatus.LockedFsp,
-    PaymentPlanStatus.Open,
-    PaymentPlanStatus.Preparing,
-    PaymentPlanStatus.Processing,
-    PaymentPlanStatus.SteficonCompleted,
-    PaymentPlanStatus.SteficonError,
-    PaymentPlanStatus.SteficonRun,
-    PaymentPlanStatus.SteficonWait,
-  ];
 
   const preparedStatusChoices =
     [...(statusChoicesData?.paymentPlanStatusChoices || [])]?.filter((el) =>
