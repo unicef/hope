@@ -33,6 +33,25 @@ interface PaymentPlansFiltersProps {
   appliedFilter;
   setAppliedFilter: (filter) => void;
 }
+
+export const allowedStatusChoices = [
+  PaymentPlanStatus.Accepted,
+  PaymentPlanStatus.Draft,
+  PaymentPlanStatus.Finished,
+  PaymentPlanStatus.InApproval,
+  PaymentPlanStatus.InAuthorization,
+  PaymentPlanStatus.InReview,
+  PaymentPlanStatus.Locked,
+  PaymentPlanStatus.LockedFsp,
+  PaymentPlanStatus.Open,
+  PaymentPlanStatus.Preparing,
+  PaymentPlanStatus.Processing,
+  PaymentPlanStatus.SteficonCompleted,
+  PaymentPlanStatus.SteficonError,
+  PaymentPlanStatus.SteficonRun,
+  PaymentPlanStatus.SteficonWait,
+];
+
 export function PaymentPlansFilters({
   filter,
   setFilter,
@@ -67,24 +86,6 @@ export function PaymentPlansFilters({
   if (!statusChoicesData) {
     return null;
   }
-
-  const allowedStatusChoices = [
-    PaymentPlanStatus.Accepted,
-    PaymentPlanStatus.Draft,
-    PaymentPlanStatus.Finished,
-    PaymentPlanStatus.InApproval,
-    PaymentPlanStatus.InAuthorization,
-    PaymentPlanStatus.InReview,
-    PaymentPlanStatus.Locked,
-    PaymentPlanStatus.LockedFsp,
-    PaymentPlanStatus.Open,
-    PaymentPlanStatus.Preparing,
-    PaymentPlanStatus.Processing,
-    PaymentPlanStatus.SteficonCompleted,
-    PaymentPlanStatus.SteficonError,
-    PaymentPlanStatus.SteficonRun,
-    PaymentPlanStatus.SteficonWait,
-  ];
 
   const preparedStatusChoices =
     [...(statusChoicesData?.paymentPlanStatusChoices || [])]?.filter((el) =>
