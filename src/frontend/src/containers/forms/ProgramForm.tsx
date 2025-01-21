@@ -1,4 +1,4 @@
-import { Grid } from '@mui/material';
+import { Grid, Tooltip } from '@mui/material';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { Field, Form, useFormikContext } from 'formik';
 import { ReactElement, useMemo } from 'react';
@@ -166,17 +166,32 @@ export const ProgramForm = ({
           />
         </Grid>
         <Grid item xs={6}>
-          <Field
-            name="beneficiaryGroup"
-            label={t('Beneficiary Group')}
-            fullWidth
-            required
-            variant="outlined"
-            choices={mappedBeneficiaryGroupsData}
-            component={FormikSelectField}
-            data-cy="input-beneficiary-group"
-            disabled={programHasRdi || isCopyProgramPage}
-          />
+          <Tooltip
+            title={
+              !values.dataCollectingTypeCode
+                ? 'Select Data Collecting Type first'
+                : ''
+            }
+            placement="top"
+          >
+            <span>
+              <Field
+                name="beneficiaryGroup"
+                label={t('Beneficiary Group')}
+                fullWidth
+                required
+                variant="outlined"
+                choices={mappedBeneficiaryGroupsData}
+                component={FormikSelectField}
+                data-cy="input-beneficiary-group"
+                disabled={
+                  !values.dataCollectingTypeCode ||
+                  programHasRdi ||
+                  isCopyProgramPage
+                }
+              />
+            </span>
+          </Tooltip>
         </Grid>
         <Grid item xs={12}>
           <Field
