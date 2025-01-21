@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   AllPaymentPlansForTableQueryVariables,
+  PaymentPlanStatus,
   usePaymentPlanStatusChoicesQueryQuery,
 } from '@generated/graphql';
 import { DatePickerFilter } from '@components/core/DatePickerFilter';
@@ -67,6 +68,29 @@ export function PaymentPlansFilters({
     return null;
   }
 
+  const allowedStatusChoices = [
+    PaymentPlanStatus.Accepted,
+    PaymentPlanStatus.Draft,
+    PaymentPlanStatus.Finished,
+    PaymentPlanStatus.InApproval,
+    PaymentPlanStatus.InAuthorization,
+    PaymentPlanStatus.InReview,
+    PaymentPlanStatus.Locked,
+    PaymentPlanStatus.LockedFsp,
+    PaymentPlanStatus.Open,
+    PaymentPlanStatus.Preparing,
+    PaymentPlanStatus.Processing,
+    PaymentPlanStatus.SteficonCompleted,
+    PaymentPlanStatus.SteficonError,
+    PaymentPlanStatus.SteficonRun,
+    PaymentPlanStatus.SteficonWait,
+  ];
+
+  const preparedStatusChoices =
+    [...(statusChoicesData?.paymentPlanStatusChoices || [])]?.filter((el) =>
+      allowedStatusChoices.includes(el.value as PaymentPlanStatus),
+    ) || [];
+
   return (
     <FiltersSection
       clearHandler={handleClearFilter}
@@ -91,7 +115,7 @@ export function PaymentPlansFilters({
             value={filter.status}
             fullWidth
           >
-            {statusChoicesData.paymentPlanStatusChoices.map((item) => (
+            {preparedStatusChoices.map((item) => (
               <MenuItem key={item.value} value={item.value}>
                 {item.name}
               </MenuItem>
