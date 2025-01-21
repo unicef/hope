@@ -15,7 +15,7 @@ from hct_mis_api.apps.core.models import (
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.household.models import HOST, SEEING, Individual
 from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
-from hct_mis_api.apps.payment.models import GenericPayment
+from hct_mis_api.apps.payment.models import Payment
 from hct_mis_api.apps.periodic_data_update.fixtures import (
     PeriodicDataUpdateTemplateFactory,
     PeriodicDataUpdateUploadFactory,
@@ -97,7 +97,7 @@ def individual(add_people: Individual) -> Individual:
         entitlement_quantity=21.36,
         delivered_quantity=21.36,
         currency="PLN",
-        status=GenericPayment.STATUS_DISTRIBUTION_SUCCESS,
+        status=Payment.STATUS_DISTRIBUTION_SUCCESS,
     )
     add_people.total_cash_received_usd = 21.36
     add_people.save()

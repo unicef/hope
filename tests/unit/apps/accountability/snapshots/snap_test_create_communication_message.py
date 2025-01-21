@@ -20,10 +20,10 @@ snapshots['TestCreateCommunicationMessage::test_create_accountability_communicat
                 'households': {
                     'totalCount': 14
                 },
+                'paymentPlan': None,
                 'randomSamplingArguments': '{"excluded_admin_areas": []}',
                 'registrationDataImport': None,
                 'sampleSize': 14,
-                'targetPopulation': None,
                 'title': 'Test message'
             }
         }
@@ -43,10 +43,10 @@ snapshots['TestCreateCommunicationMessage::test_create_accountability_communicat
                 'households': {
                     'totalCount': 1
                 },
+                'paymentPlan': None,
                 'randomSamplingArguments': None,
                 'registrationDataImport': None,
                 'sampleSize': 1,
-                'targetPopulation': None,
                 'title': 'Test message'
             }
         }
@@ -66,12 +66,12 @@ snapshots['TestCreateCommunicationMessage::test_create_accountability_communicat
                 'households': {
                     'totalCount': 14
                 },
+                'paymentPlan': {
+                    'name': 'Test Message Payment Plan'
+                },
                 'randomSamplingArguments': '{"excluded_admin_areas": []}',
                 'registrationDataImport': None,
                 'sampleSize': 14,
-                'targetPopulation': {
-                    'totalFamilySize': None
-                },
                 'title': 'Test message'
             }
         }
@@ -91,12 +91,12 @@ snapshots['TestCreateCommunicationMessage::test_create_accountability_communicat
                 'households': {
                     'totalCount': 1
                 },
+                'paymentPlan': {
+                    'name': 'Test Message Payment Plan'
+                },
                 'randomSamplingArguments': None,
                 'registrationDataImport': None,
                 'sampleSize': 1,
-                'targetPopulation': {
-                    'totalFamilySize': None
-                },
                 'title': 'Test message'
             }
         }

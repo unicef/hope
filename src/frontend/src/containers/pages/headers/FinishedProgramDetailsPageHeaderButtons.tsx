@@ -1,5 +1,4 @@
-import { Box, Button } from '@mui/material';
-import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
+import { Box } from '@mui/material';
 import { ProgramQuery, useCashAssistUrlPrefixQuery } from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { DuplicateProgramButtonLink } from '../../dialogs/programs/DuplicateProgramButtonLink';
@@ -10,14 +9,12 @@ export interface FinishedProgramDetailsPageHeaderPropTypes {
   program: ProgramQuery['program'];
   canActivate: boolean;
   canDuplicate: boolean;
-  isPaymentPlanApplicable: boolean;
 }
 
 export function FinishedProgramDetailsPageHeaderButtons({
   program,
   canActivate,
   canDuplicate,
-  isPaymentPlanApplicable,
 }: FinishedProgramDetailsPageHeaderPropTypes): ReactElement {
   const { data, loading } = useCashAssistUrlPrefixQuery({
     fetchPolicy: 'cache-first',
@@ -29,20 +26,6 @@ export function FinishedProgramDetailsPageHeaderButtons({
       {canActivate && (
         <Box m={2}>
           <ReactivateProgram program={program} />
-        </Box>
-      )}
-      {!isPaymentPlanApplicable && (
-        <Box m={2}>
-          <Button
-            variant="contained"
-            color="primary"
-            component="a"
-            disabled={!program.caHashId}
-            href={`${data.cashAssistUrlPrefix}/&pagetype=entityrecord&etn=progres_program&id=/${program.caHashId}`}
-            startIcon={<OpenInNewRoundedIcon />}
-          >
-            Open in CashAssist
-          </Button>
         </Box>
       )}
       {canDuplicate && (

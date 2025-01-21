@@ -17,11 +17,7 @@ from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.program.fixtures import ProgramCycleFactory, ProgramFactory
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program, ProgramCycle
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.targeting.fixtures import (
-    TargetingCriteriaFactory,
-    TargetPopulationFactory,
-)
-from hct_mis_api.apps.targeting.models import TargetPopulation
+from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory
 from tests.selenium.helpers.date_time_format import FormatTime
 from tests.selenium.page_object.programme_details.programme_details import (
     ProgrammeDetails,
@@ -83,7 +79,6 @@ def get_program_with_dct_type_and_name(
         cycle_start_date = datetime.now() - relativedelta(days=25)
     if not cycle_end_date:
         cycle_end_date = datetime.now() + relativedelta(days=10)
-    BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
     dct = DataCollectingTypeFactory(type=dct_type)
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     program = ProgramFactory(
@@ -152,7 +147,6 @@ def get_program_without_cycle_end_date(
 ) -> Program:
     if not cycle_start_date:
         cycle_start_date = datetime.now() - relativedelta(days=25)
-    BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
     dct = DataCollectingTypeFactory(type=dct_type)
     beneficiary_group = BeneficiaryGroup.objects.filter(name="Main Menu").first()
     program = ProgramFactory(
@@ -205,16 +199,10 @@ def create_custom_household() -> Household:
 def create_payment_plan(standard_program: Program) -> PaymentPlan:
     targeting_criteria = TargetingCriteriaFactory()
     cycle = standard_program.cycles.first()
-    tp = TargetPopulationFactory(
-        program=standard_program,
-        status=TargetPopulation.STATUS_OPEN,
-        targeting_criteria=targeting_criteria,
-        program_cycle=cycle,
-    )
     payment_plan = PaymentPlan.objects.update_or_create(
         name="Test Payment Plan",
-        business_area=BusinessArea.objects.only("is_payment_plan_applicable").get(slug="afghanistan"),
-        target_population=tp,
+        business_area=BusinessArea.objects.get(slug="afghanistan"),
+        targeting_criteria=targeting_criteria,
         start_date=datetime.now(),
         end_date=datetime.now() + relativedelta(days=30),
         currency="USD",

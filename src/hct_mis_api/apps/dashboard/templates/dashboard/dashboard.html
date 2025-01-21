@@ -25,7 +25,6 @@
                 <div id="year-tabs" class="mb-4">
                     <div class="tab-list flex space-x-2 overflow-x-auto bg-sky-50 rounded shadow p-2"></div>
                 </div>
-                <!-- Flex container for left and right sections -->
                 <div class="flex space-x-4">
                     <!-- Left block for metrics -->
                     <div class="basis-5/6 grid grid-cols-4 gap-2">
@@ -60,111 +59,120 @@
                         <div class="bg-white p-4 rounded shadow">
                             <h3 class="text-sm font-semibold">
                                 <span class="icon icon-house icon-blue"></span>
-                                {% translate "Households Reached" %}
-                            </h3>
-                            <div id="households-reached" class="text-sm font-bold text-center"></div>
+                                <span class="tooltip"
+                                      role="tooltip"
+                                      title="{% translate 'Aggregated count of households for the selected months' %}">
+                                    {% translate "Households Reached" %}
+                                </h3>
+                                <div id="households-reached" class="text-sm font-bold text-center"></div>
+                            </div>
+                            <div class="bg-white p-4 rounded shadow">
+                                <h3 class="text-sm font-semibold">
+                                    <span class="icon icon-people-targeted icon-blue"></span>
+                                    <span class="tooltip"
+                                          role="tooltip"
+                                          title="{% translate 'Aggregated count of individuals for the selected months' %}">
+                                        {% translate "Individuals Reached" %}
+                                    </h3>
+                                    <div id="individuals-reached" class="text-sm font-bold text-center"></div>
+                                </div>
+                                <div class="bg-white p-4 rounded shadow">
+                                    <h3 class="text-sm font-semibold">
+                                        <span class="icon icon-children icon-blue"></span>
+                                        <span class="tooltip"
+                                              role="tooltip"
+                                              title="{% translate 'Aggregated count of children for the selected months' %}">
+                                            {% translate "Children Reached" %}
+                                        </h3>
+                                        <div id="children-reached" class="text-sm font-bold text-center"></div>
+                                    </div>
+                                    <div class="bg-white p-4 rounded shadow">
+                                        <h3 class="text-sm font-semibold">
+                                            <span class="icon icon-users icon-blue"></span>
+                                            <span class="tooltip"
+                                                  role="tooltip"
+                                                  title="{% translate 'Aggregated count of pwd for the selected months' %}">
+                                                {% translate "PWD Reached" %}
+                                            </h3>
+                                            <div id="pwd-reached" class="text-sm font-bold text-center"></div>
+                                        </div>
+                                    </div>
+                                    <!-- Right block for Payments by Month chart -->
+                                    <div class="flex-grow bg-white p-4 rounded shadow h-full">
+                                        <h3 class="text-sm font-semibold">
+                                            <span class="icon icon-calendar icon-blue"></span>
+                                            {% translate "Months" %}
+                                        </h3>
+                                        <div id="payments-by-month" class="dc-chart w-full h-full"></div>
+                                    </div>
+                                </div>
+                                <!-- Other charts Section -->
+                                <div class="flex flex-grow grid grid-cols-3 gap-2 mt-8">
+                                    <!-- Chart 1 -->
+                                    <div class="bg-white p-3 rounded shadow">
+                                        <h3 class="text-sm font-semibold">
+                                            <span class="icon icon-analysis icon-blue"></span>
+                                            {% translate "Payments by Sector" %}
+                                        </h3>
+                                        <div id="payments-by-sector" class="dc-chart w-full h-full"></div>
+                                    </div>
+                                    <!-- Chart 2 -->
+                                    <div class="bg-white p-3 rounded shadow">
+                                        <h3 class="text-sm font-semibold">
+                                            <span class="icon icon-people-targeted icon-blue"></span>
+                                            {% translate "Payments by Programme" %}
+                                        </h3>
+                                        <div id="volume-by-program" class="dc-chart w-full h-full"></div>
+                                    </div>
+                                    <!-- Chart 3 -->
+                                    <div class="bg-white p-3 rounded shadow">
+                                        <h3 class="text-sm font-semibold">
+                                            <span class="icon icon-cash-transfer icon-blue"></span>
+                                            {% translate "Payments by Admin area" %}
+                                        </h3>
+                                        <div id="payments-by-admin1" class="dc-chart w-full h-full"></div>
+                                    </div>
+                                    <!-- Chart 4 -->
+                                    <div class="bg-white p-4 rounded shadow">
+                                        <h3 class="text-sm font-semibold">
+                                            <span class="icon icon-logistics icon-blue"></span>
+                                            {% translate "Payments by FSP" %}
+                                        </h3>
+                                        <div id="payments-by-fsp" class="dc-chart w-full h-full"></div>
+                                    </div>
+                                    <!-- Chart 5 -->
+                                    <div class="bg-white p-4 rounded shadow">
+                                        <h3 class="text-sm font-semibold">
+                                            <span class="icon icon-financing icon-blue"></span>
+                                            {% translate "Payments by Delivery Mechanism" %}
+                                        </h3>
+                                        <div id="payments-by-delivery" class="dc-chart w-full h-full"></div>
+                                    </div>
+                                    <!-- Reconciliation Cards Section -->
+                                    <div class="flex flex-col gap-4 col-span-1">
+                                        <div class="bg-white p-4 rounded shadow text-center">
+                                            <h3 class="text-lg font-semibold">
+                                                <span class="icon icon-report icon-blue"></span>
+                                                {% translate "Reconciliation" %}
+                                            </h3>
+                                            <div class="text-green-500 text-base font-bold reconciliation-percentage">%</div>
+                                            <p>{% translate "Payment are reconciled" %}</p>
+                                        </div>
+                                        <div class="bg-white p-4 rounded shadow text-center">
+                                            <h3 class="text-lg font-semibold">
+                                                <span class="icon icon-report icon-blue"></span>
+                                                {% translate "Finished Payment Plans" %}
+                                            </h3>
+                                            <div class="text-red-500 text-base font-bold pending-reconciliation-percentage">%</div>
+                                            <p>{% translate "Payments plans" %}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="error-message">{{ error_message }}</div>
+                            {% endif %}
                         </div>
-                        <div class="bg-white p-4 rounded shadow">
-                            <h3 class="text-sm font-semibold">
-                                <span class="icon icon-people-targeted icon-blue"></span>
-                                {% translate "Individuals Reached" %}
-                            </h3>
-                            <div id="individuals-reached" class="text-sm font-bold text-center"></div>
-                        </div>
-                        <div class="bg-white p-4 rounded shadow">
-                            <h3 class="text-sm font-semibold">
-                                <span class="icon icon-children icon-blue"></span>
-                                {% translate "Children Reached" %}
-                            </h3>
-                            <div id="children-reached" class="text-sm font-bold text-center"></div>
-                        </div>
-                        <div class="bg-white p-4 rounded shadow">
-                            <h3 class="text-sm font-semibold">
-                                <span class="icon icon-users icon-blue"></span>
-                                {% translate "PWD Reached" %}
-                            </h3>
-                            <div id="pwd-reached" class="text-sm font-bold text-center"></div>
-                        </div>
-                    </div>
-                    <!-- Right block for Payments by Month chart -->
-                    <div class="flex-grow bg-white p-4 rounded shadow h-full">
-                        <h3 class="text-sm font-semibold">
-                            <span class="icon icon-calendar icon-blue"></span>
-                            {% translate "Months" %}
-                        </h3>
-                        <div id="payments-by-month" class="dc-chart w-full h-full"></div>
-                    </div>
-                </div>
-                <!-- Other charts Section -->
-                <div class="flex flex-grow grid grid-cols-3 gap-2 mt-8">
-                    <!-- Chart 1 -->
-                    <div class="bg-white p-3 rounded shadow">
-                        <h3 class="text-sm font-semibold">
-                            <span class="icon icon-analysis icon-blue"></span>
-                            {% translate "Payments by Sector" %}
-                        </h3>
-                        <div id="payments-by-sector" class="dc-chart w-full h-full"></div>
-                    </div>
-                    <!-- Chart 2 -->
-                    <div class="bg-white p-3 rounded shadow">
-                        <h3 class="text-sm font-semibold">
-                            <span class="icon icon-people-targeted icon-blue"></span>
-                            {% translate "Payments by Programme" %}
-                        </h3>
-                        <div id="volume-by-program" class="dc-chart w-full h-full"></div>
-                    </div>
-                    <!-- Chart 3 -->
-                    <div class="bg-white p-3 rounded shadow">
-                        <h3 class="text-sm font-semibold">
-                            <span class="icon icon-cash-transfer icon-blue"></span>
-                            {% translate "Payments by Admin 1" %}
-                        </h3>
-                        <div id="payments-by-admin1" class="dc-chart w-full h-full"></div>
-                    </div>
-                    <!-- Chart 4 -->
-                    <div class="bg-white p-4 rounded shadow">
-                        <h3 class="text-sm font-semibold">
-                            <span class="icon icon-logistics icon-blue"></span>
-                            {% translate "Payments by FSP" %}
-                        </h3>
-                        <div id="payments-by-fsp" class="dc-chart w-full h-full"></div>
-                    </div>
-                    <!-- Chart 5 -->
-                    <div class="bg-white p-4 rounded shadow">
-                        <h3 class="text-sm font-semibold">
-                            <span class="icon icon-financing icon-blue"></span>
-                            {% translate "Payments by Delivery Mechanism" %}
-                        </h3>
-                        <div id="payments-by-delivery" class="dc-chart w-full h-full"></div>
-                    </div>
-                    <!-- Reconciliation Cards Section -->
-                    <div class="flex flex-col gap-4 col-span-1">
-                        <!-- Reconciliation Card -->
-                        <div class="bg-white p-4 rounded shadow text-center">
-                            <h3 class="text-lg font-semibold">
-                                <span class="icon icon-report icon-blue"></span>
-                                {% translate "Reconciliation" %}
-                            </h3>
-                            <div class="text-green-500 text-base font-bold reconciliation-percentage">%</div>
-                            <p>{% translate "Payment records are reconciled" %}</p>
-                        </div>
-                        <!-- Pending Reconciliation Card -->
-                        <div class="bg-white p-4 rounded shadow text-center">
-                            <h3 class="text-lg font-semibold">
-                                <span class="icon icon-report icon-blue"></span>
-                                {% translate "Pending Reconciliation" %}
-                            </h3>
-                            <div class="text-red-500 text-base font-bold pending-reconciliation-percentage">%</div>
-                            <p>{% translate "Payments pending" %}</p>
-                        </div>
-                    </div>
-                </div>
-                
-            {% else %}
-                <div class="error-message">{{ error_message }}</div>
-            {% endif %}
-        </div>
-        <script>
+                        <script>
             document.addEventListener("DOMContentLoaded", () => {
                 const currentYear = new Date().getFullYear();
                 let isChartsInitialized = false;
@@ -220,6 +228,9 @@
                                 payments: item.payments || 0,
                                 individuals: item.individuals || 0,
                                 households: item.households || 0,
+                                reconciled: item.reconciled || 0,
+                                finished_payment_plans: item.finished_payment_plans || 0,
+                                total_payment_plans: item.total_payment_plans || 0,
                                 children_counts: item.children_counts || 0,
                                 month: item.month || "Unknown month",
                                 year: item.year || "Unknown year",
@@ -235,12 +246,12 @@
                             const ndx = crossfilter(processedPayments);
 
                             // Define dimensions and groups
+                            const idDim = ndx.dimension((d) => d.id);
                             const yearDim = ndx.dimension((d) => d.year);
                             const fspDim = ndx.dimension((d) => d.fsp);
                             const deliveryDim = ndx.dimension((d) => d.delivery_types);
                             const sectorDim = ndx.dimension((d) => d.sector);
                             const programDim = ndx.dimension((d) => d.program);
-                            const idDim = ndx.dimension((d) => d.id);
                             const monthDim = ndx.dimension((d) => d.month);
                             const admin1Dim = ndx.dimension((d) => d.admin1);
 
@@ -260,6 +271,9 @@
                                 .group()
                                 .reduceSum((d) => d.delivered_quantity_usd)
                                 .order((d) => -d);
+                            const topProgramGroup = {
+                                    all: () => programGroup.all().slice(0, 30), // Top 30 programs
+                                };
                             const topAdmin1Group = {
                                 all: () => admin1Group.all().slice(0, 30), // Top 30 admin1
                             };
@@ -315,7 +329,7 @@
                             const programChart = dc
                                 .rowChart("#volume-by-program")
                                 .dimension(programDim)
-                                .group(programGroup)
+                                .group(topProgramGroup)
                                 .elasticX(true)
                                 .height(400)
                                 .label(
@@ -375,6 +389,17 @@
 
                             function updateTopMetrics() {
                                 const totalPaymentsCount = ndx.groupAll().reduceSum(d => d.payments || 0).value();
+                                // Reconciled Payments Calculation
+                                const reconciledPaymentsCount = ndx
+                                    .groupAll()
+                                    .reduceSum(d => d.reconciled || 0)
+                                    .value();
+                                // Fetch total payment plans and finished payment plans from the data
+                                const totalPaymentPlans = ndx.groupAll().reduceSum(d => d.total_payment_plans || 0).value();
+                                const finishedPaymentPlans = ndx.groupAll().reduceSum(d => d.finished_payment_plans || 0).value();
+                                const finishedPercentage = totalPaymentPlans > 0
+                                ? (finishedPaymentPlans / totalPaymentPlans) * 100
+                                : 0;
                                 const successfulPaymentsGroupUSD = ndx
                                     .groupAll()
                                     .reduce(
@@ -509,11 +534,10 @@
                                 document.getElementById("children-reached").innerHTML =
                                     `${simplenumberFormatter(childrenReached)}`;
                                 document.querySelector(".reconciliation-percentage").innerHTML =
-                                    `${decimalnumberFormatter((successfulPaymentsCountUSD / totalPaymentsCount) * 100)}%`;
+                                    `${decimalnumberFormatter((reconciledPaymentsCount / totalPaymentsCount) * 100)}%`;
                                 document.querySelector(
                                         ".pending-reconciliation-percentage",
-                                    ).innerHTML =
-                                    `${decimalnumberFormatter((pendingPaymentsGroupUSD.count / totalPaymentsCount) * 100)}%`;
+                                    ).innerHTML =`${decimalnumberFormatter(finishedPercentage)}%`;
                             }
 
                             function filterByYear(year) {
@@ -584,6 +608,6 @@
                 }
                 fetchDataForCountry();
             });
-        </script>
-    </body>
-</html>
+                        </script>
+                    </body>
+                </html>

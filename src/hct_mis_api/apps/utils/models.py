@@ -152,9 +152,7 @@ class SoftDeletableRepresentationMergeStatusModel(MergeStatusModel):
     class Meta:
         abstract = True
 
-    # objects = SoftDeletableRepresentationMergedManager(_emit_deprecation_warnings=True)
-    # now we use 'rdi_merge_status' field for filtering
-    objects = SoftDeletableRepresentationManager()
+    objects = SoftDeletableRepresentationMergedManager(_emit_deprecation_warnings=True)
     all_merge_status_objects = SoftDeletableRepresentationManager()
     available_objects = SoftDeletableRepresentationMergedManager()
     all_objects = models.Manager()
@@ -636,7 +634,7 @@ class CeleryEnabledModel(models.Model):  # pragma: no cover
 
 
 class InternalDataFieldModel(models.Model):
-    internal_data = models.JSONField(default=dict)
+    internal_data = models.JSONField(default=dict, blank=True)
 
     class Meta:
         abstract = True

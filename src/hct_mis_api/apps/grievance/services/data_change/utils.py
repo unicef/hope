@@ -4,6 +4,7 @@ import random
 import string
 import urllib.parse
 from collections import Counter
+from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Tuple, Union
 
 from django.core.exceptions import ValidationError
@@ -22,6 +23,7 @@ from hct_mis_api.apps.core.field_attributes.fields_types import (
     _DELIVERY_MECHANISM_DATA,
     _INDIVIDUAL,
     FIELD_TYPES_TO_INTERNAL_TYPE,
+    TYPE_DATE,
     TYPE_IMAGE,
     TYPE_SELECT_MANY,
     TYPE_SELECT_ONE,
@@ -87,7 +89,6 @@ def cast_flex_fields(flex_fields: Dict) -> None:
 
 def verify_flex_fields(flex_fields_to_verify: Dict, associated_with: str) -> None:
     if associated_with not in ("households", "individuals"):
-        logger.error("associated_with argument must be one of ['household', 'individual']")
         raise ValueError("associated_with argument must be one of ['household', 'individual']")
 
     all_flex_fields = serialize_flex_attributes().get(associated_with, {})
@@ -95,22 +96,23 @@ def verify_flex_fields(flex_fields_to_verify: Dict, associated_with: str) -> Non
     for name, value in flex_fields_to_verify.items():
         flex_field = all_flex_fields.get(name)
         if flex_field is None:
-            logger.error(f"{name} is not a correct `flex field")
             raise ValueError(f"{name} is not a correct `flex field")
         field_type = flex_field["type"]
         field_choices = {f.get("value") for f in flex_field["choices"]}
+
+        if field_type == TYPE_DATE:
+            # convert string value to datetime
+            value = datetime.strptime(value, "%Y-%m-%d")
+
         if not isinstance(value, FIELD_TYPES_TO_INTERNAL_TYPE[field_type]) or value is None:
-            logger.error(f"invalid value type for a field {name}")
             raise ValueError(f"invalid value type for a field {name}")
 
         if field_type == TYPE_SELECT_ONE and value not in field_choices:
-            logger.error(f"invalid value: {value} for a field {name}")
             raise ValueError(f"invalid value: {value} for a field {name}")
 
         if field_type == TYPE_SELECT_MANY:
             values = set(value)
             if values.issubset(field_choices) is False:
-                logger.error(f"invalid value: {value} for a field {name}")
                 raise ValueError(f"invalid value: {value} for a field {name}")
 
 

@@ -251,7 +251,6 @@ export function PaymentPlanVerificationDetailsPage(): ReactElement {
         hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
           <UniversalActivityLogTablePaymentVerification
             objectId={paymentPlan.id}
-            objectType="PaymentPlan"
           />
         )}
     </UniversalErrorBoundary>
