@@ -1,5 +1,6 @@
 import {
   AllPaymentPlansForTableQueryVariables,
+  PaymentPlanStatus,
   usePaymentPlanStatusChoicesQueryQuery,
 } from '@generated/graphql';
 import styled from 'styled-components';
@@ -78,6 +79,29 @@ export const PaymentPlansFilters = ({
     return null;
   }
 
+  const allowedStatusChoices = [
+    PaymentPlanStatus.Accepted,
+    PaymentPlanStatus.Draft,
+    PaymentPlanStatus.Finished,
+    PaymentPlanStatus.InApproval,
+    PaymentPlanStatus.InAuthorization,
+    PaymentPlanStatus.InReview,
+    PaymentPlanStatus.Locked,
+    PaymentPlanStatus.LockedFsp,
+    PaymentPlanStatus.Open,
+    PaymentPlanStatus.Preparing,
+    PaymentPlanStatus.Processing,
+    PaymentPlanStatus.SteficonCompleted,
+    PaymentPlanStatus.SteficonError,
+    PaymentPlanStatus.SteficonRun,
+    PaymentPlanStatus.SteficonWait,
+  ];
+
+  const preparedStatusChoices =
+    [...(statusChoicesData?.paymentPlanStatusChoices || [])]?.filter((el) =>
+      allowedStatusChoices.includes(el.value as PaymentPlanStatus),
+    ) || [];
+
   return (
     <FilterSectionWrapper>
       <ContainerWithBorder>
@@ -102,7 +126,7 @@ export const PaymentPlansFilters = ({
               value={filter.status}
               fullWidth
             >
-              {statusChoicesData.paymentPlanStatusChoices.map((item) => {
+              {preparedStatusChoices.map((item) => {
                 return (
                   <MenuItem key={item.value} value={item.value}>
                     {item.name}
