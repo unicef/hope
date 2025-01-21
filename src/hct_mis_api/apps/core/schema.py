@@ -62,6 +62,7 @@ class DataCollectingTypeChoiceObject(graphene.ObjectType):
     name = String()
     value = String()
     description = String()
+    type = String()
 
 
 class PDUSubtypeChoiceObject(graphene.ObjectType):
@@ -482,8 +483,8 @@ class Query(graphene.ObjectType):
                 deprecated=False,
             )
             .exclude(code__iexact="unknown")
-            .only("code", "label", "description")
-            .values("code", "label", "description")
+            .only("code", "label", "description", "type")
+            .values("code", "label", "description", "type")
         )
         result = []
         for data_collection_type in data_collecting_types:
@@ -492,6 +493,7 @@ class Query(graphene.ObjectType):
                     "name": data_collection_type["label"],
                     "value": data_collection_type["code"],
                     "description": data_collection_type["description"],
+                    "type": data_collection_type["type"],
                 }
             )
         return result
