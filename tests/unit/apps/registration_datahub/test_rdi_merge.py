@@ -447,6 +447,7 @@ class TestRdiMergeTask(TestCase):
         if False, another household representation exists, but it does not have collection,
         if None, household representation does not exist in another program
         """
+        program_2 = ProgramFactory(business_area=self.rdi.business_area)
         self.rdi.data_source = RegistrationDataImport.PROGRAM_POPULATION
         self.rdi.save()
         imported_household = HouseholdFactory(
@@ -454,11 +455,13 @@ class TestRdiMergeTask(TestCase):
             registration_data_import=self.rdi,
             unicef_id="HH-9",
             rdi_merge_status=MergeStatusModel.PENDING,
+            program=self.rdi.program,
         )
         self.set_imported_individuals(imported_household)
         individual_without_collection = IndividualFactory(
             unicef_id="IND-9",
             business_area=self.rdi.business_area,
+            program=program_2,
             household=None,
         )
         individual_without_collection.individual_collection = None
@@ -468,6 +471,7 @@ class TestRdiMergeTask(TestCase):
         IndividualFactory(
             unicef_id="IND-8",
             business_area=self.rdi.business_area,
+            program=program_2,
             individual_collection=individual_collection,
             household=None,
         )
@@ -477,8 +481,8 @@ class TestRdiMergeTask(TestCase):
             household = HouseholdFactory(
                 head_of_household=individual_without_collection,
                 business_area=self.rdi.business_area,
+                program=program_2,
                 unicef_id="HH-9",
-                rdi_merge_status=MergeStatusModel.PENDING,
             )
             household.household_collection = None
             household.save()
@@ -503,10 +507,10 @@ class TestRdiMergeTask(TestCase):
         if household_representation_exists is not None:
             if household_representation_exists:
                 household_collection.refresh_from_db()
-                self.assertEqual(household_collection.households.count(), 2)  # 1
+                self.assertEqual(household_collection.households.count(), 2)
             else:
                 household.refresh_from_db()
-                self.assertIsNotNone(household.household_collection)  # None
+                self.assertIsNotNone(household.household_collection)
                 self.assertEqual(household.household_collection.households.count(), 2)
 
     def test_merging_external_collector(self) -> None:

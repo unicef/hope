@@ -114,9 +114,9 @@ class ProgramFactory(DjangoModelFactory):
     beneficiary_group = factory.LazyAttribute(
         lambda o: BeneficiaryGroupFactory(
             master_detail=False if o.data_collecting_type.type == DataCollectingType.Type.SOCIAL else True,
-            name=factory.Faker("word")
-            if o.data_collecting_type.type == DataCollectingType.Type.SOCIAL
-            else "Household",
+            name=(
+                factory.Faker("word") if o.data_collecting_type.type == DataCollectingType.Type.SOCIAL else "Household"
+            ),
         )
     )
 
@@ -130,7 +130,7 @@ class ProgramFactory(DjangoModelFactory):
 def get_program_with_dct_type_and_name(
     dct_type: str = DataCollectingType.Type.STANDARD, status: str = Program.ACTIVE, **kwargs: dict
 ) -> Program:
-    BusinessArea.objects.filter(slug="afghanistan").update(is_payment_plan_applicable=True)
+    BusinessArea.objects.filter(slug="afghanistan")
     dct = DataCollectingTypeFactory(type=dct_type)
     program = ProgramFactory(
         start_date=datetime.now() - relativedelta(months=1),

@@ -39,6 +39,7 @@ class TestPhoneNumberVerification(TestCase):
         payment_plan = PaymentPlanFactory(
             program_cycle=program.cycles.first(),
             business_area=cls.afghanistan,
+            created_by=user,
         )
         PaymentVerificationSummaryFactory(payment_plan=payment_plan)
         cash_plan_payment_verification = PaymentVerificationPlanFactory(
@@ -91,6 +92,7 @@ class TestPhoneNumberVerification(TestCase):
         other_payment_plan = PaymentPlanFactory(
             program_cycle=other_program.cycles.first(),
             business_area=cls.afghanistan,
+            created_by=user,
         )
         PaymentVerificationSummaryFactory(payment_plan=other_payment_plan)
         other_payment_plan_payment_verification = PaymentVerificationPlanFactory(
@@ -125,7 +127,7 @@ class TestPhoneNumberVerification(TestCase):
 
             PaymentVerificationFactory(
                 payment_verification_plan=other_payment_plan_payment_verification,
-                payment_obj=other_payment_record,
+                payment=other_payment_record,
                 status=PaymentVerification.STATUS_PENDING,
             )
             EntitlementCardFactory(household=other_household)

@@ -6,7 +6,9 @@ from hct_mis_api.apps.accountability.models import Survey
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import create_household
-from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
+from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
+from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.models import Program
 
 
 class TestAccountabilitySampleSizeQueries(APITestCase):
@@ -26,15 +28,23 @@ class TestAccountabilitySampleSizeQueries(APITestCase):
         super().setUpTestData()
         cls.business_area = create_afghanistan()
         cls.user = UserFactory(first_name="John", last_name="Wick")
-        cls.target_population = TargetPopulationFactory(business_area=cls.business_area)
+        cls.program = ProgramFactory(status=Program.ACTIVE)
+        cls.payment_plan = PaymentPlanFactory(
+            business_area=cls.business_area, created_by=cls.user, program_cycle=cls.program.cycles.first()
+        )
 
         households = [create_household()[0] for _ in range(14)]
-        cls.target_population.households.set(households)
+        for household in households:
+            PaymentFactory(parent=cls.payment_plan, household=household)
 
-        SurveyFactory.create_batch(3, target_population=cls.target_population, created_by=cls.user)
-        SurveyFactory(title="Test survey", target_population=cls.target_population, created_by=cls.user)
+        SurveyFactory.create_batch(3, payment_plan=cls.payment_plan, created_by=cls.user)
+        SurveyFactory(title="Test survey", payment_plan=cls.payment_plan, created_by=cls.user)
         SurveyFactory.create_batch(
-            3, target_population=TargetPopulationFactory(business_area=cls.business_area), created_by=UserFactory()
+            3,
+            payment_plan=PaymentPlanFactory(
+                business_area=cls.business_area, created_by=cls.user, program_cycle=cls.program.cycles.first()
+            ),
+            created_by=UserFactory(),
         )
         cls.sampling_data = {
             Survey.SAMPLING_FULL_LIST: {
@@ -67,7 +77,7 @@ class TestAccountabilitySampleSizeQueries(APITestCase):
             context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
             variables={
                 "input": {
-                    "targetPopulation": self.id_to_base64(self.target_population.id, "TargetPopulationNode"),
+                    "paymentPlan": self.id_to_base64(self.payment_plan.id, "PaymentPlanNode"),
                     "samplingType": sampling_type,
                     **self.sampling_data[sampling_type],
                 }

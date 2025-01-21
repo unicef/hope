@@ -49,6 +49,7 @@ from hct_mis_api.apps.registration_datahub.schema import (
     KoboImportDataNode,
     XlsxRowErrorNode,
 )
+from hct_mis_api.apps.registration_datahub.utils import get_rdi_program_population
 from hct_mis_api.apps.utils.elasticsearch_utils import (
     remove_elasticsearch_documents_by_matching_ids,
 )
@@ -114,16 +115,10 @@ def create_registration_data_import_for_import_program_population(
     business_area = BusinessArea.objects.get(slug=registration_data_import_data.pop("business_area_slug"))
     pull_pictures = registration_data_import_data.pop("pull_pictures", True)
     screen_beneficiary = registration_data_import_data.pop("screen_beneficiary", False)
-    import_from_program_id = registration_data_import_data.pop("import_from_program_id", None)
-    households = Household.objects.filter(
-        program_id=import_from_program_id,
-        withdrawn=False,
-    ).exclude(household_collection__households__program=import_to_program_id)
-    individuals = Individual.objects.filter(
-        program_id=import_from_program_id,
-        withdrawn=False,
-        duplicate=False,
-    ).exclude(individual_collection__individuals__program=import_to_program_id)
+    import_from_program_id = registration_data_import_data.pop("import_from_program_id")
+    import_from_ids = registration_data_import_data.get("import_from_ids")
+
+    households, individuals = get_rdi_program_population(import_from_program_id, import_to_program_id, import_from_ids)
     created_obj_hct = RegistrationDataImport(
         status=RegistrationDataImport.IMPORTING,
         imported_by=user,

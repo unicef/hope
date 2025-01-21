@@ -32,6 +32,7 @@ export const AllPaymentsForTable = gql`
           id
           unicefId
           status
+          vulnerabilityScore
           household {
             id
             unicefId
@@ -39,6 +40,11 @@ export const AllPaymentsForTable = gql`
             admin2 {
               id
               name
+            }
+            headOfHousehold {
+              id
+              unicefId
+              fullName
             }
             individuals {
               edges {

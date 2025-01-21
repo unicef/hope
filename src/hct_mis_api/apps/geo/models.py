@@ -131,6 +131,7 @@ class Area(NaturalKeyModel, MPTTModel, UpgradeModel, TimeStampedUUIDModel):
                 condition=~Q(p_code=""),
             )
         ]
+        permissions = (("import_areas", "Can import areas"),)
 
     class MPTTMeta:
         order_insertion_by = ("name", "p_code")

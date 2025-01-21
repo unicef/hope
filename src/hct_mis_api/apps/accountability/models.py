@@ -25,7 +25,7 @@ class Message(TimeStampedUUIDModel, AdminUrlMixin, UnicefIdentifiedModel):
             "body",
             "business_area",
             "households",
-            "target_population",
+            "payment_plan",
             "registration_data_import",
             "sampling_type",
             "full_list_arguments",
@@ -53,8 +53,12 @@ class Message(TimeStampedUUIDModel, AdminUrlMixin, UnicefIdentifiedModel):
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     # Recipients Lookup criteria
     households = models.ManyToManyField("household.Household", related_name="messages", blank=True)
+    # TODO: deprecated will remove after data migrations
     target_population = models.ForeignKey(
         "targeting.TargetPopulation", related_name="messages", blank=True, null=True, on_delete=models.SET_NULL
+    )
+    payment_plan = models.ForeignKey(
+        "payment.PaymentPlan", related_name="messages", blank=True, null=True, on_delete=models.SET_NULL
     )
     registration_data_import = models.ForeignKey(
         "registration_data.RegistrationDataImport",
@@ -72,8 +76,6 @@ class Message(TimeStampedUUIDModel, AdminUrlMixin, UnicefIdentifiedModel):
         "program.Program", null=True, blank=True, on_delete=models.CASCADE, related_name="messages"
     )
     is_original = models.BooleanField(db_index=True, default=False)
-    is_migration_handled = models.BooleanField(default=False)
-    migrated_at = models.DateTimeField(null=True, blank=True)
     copied_from = models.ForeignKey(
         "self",
         null=True,
@@ -158,8 +160,6 @@ class Feedback(TimeStampedUUIDModel, AdminUrlMixin, UnicefIdentifiedModel):
         verbose_name=_("Linked grievance"),
     )
     is_original = models.BooleanField(db_index=True, default=False)
-    is_migration_handled = models.BooleanField(default=False)
-    migrated_at = models.DateTimeField(null=True, blank=True)
     copied_from = models.ForeignKey(
         "self",
         null=True,
@@ -214,7 +214,7 @@ class Survey(UnicefIdentifiedModel, AdminUrlMixin, TimeStampedUUIDModel):
             "category",
             "number_of_recipient",
             "created_by",
-            "target_population",
+            "payment_plan",
             "program",
             "sampling_type",
             "full_list_arguments",
@@ -252,8 +252,12 @@ class Survey(UnicefIdentifiedModel, AdminUrlMixin, TimeStampedUUIDModel):
         verbose_name=_("Created by"),
     )
     recipients = models.ManyToManyField("household.Household", related_name="surveys", blank=True)
+    # TODO: deprecated will remove after data migrations
     target_population = models.ForeignKey(
         "targeting.TargetPopulation", related_name="surveys", blank=True, null=True, on_delete=models.SET_NULL
+    )
+    payment_plan = models.ForeignKey(
+        "payment.PaymentPlan", related_name="surveys", blank=True, null=True, on_delete=models.SET_NULL
     )
     program = models.ForeignKey(
         "program.Program",
