@@ -25,6 +25,7 @@ from hct_mis_api.apps.grievance.fixtures import (
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.grievance.services.data_change.utils import (
     cast_flex_fields,
+    convert_to_empty_string_if_null,
     handle_add_document,
     handle_add_payment_channel,
     handle_role,
@@ -70,6 +71,13 @@ class FlexibleAttribute:
 
 
 class TestGrievanceUtils(TestCase):
+    def test_convert_to_empty_string_if_null(self) -> None:
+        self.assertEqual(convert_to_empty_string_if_null(None), "")
+        self.assertTrue(convert_to_empty_string_if_null(True))
+        self.assertFalse(convert_to_empty_string_if_null(False))
+        self.assertEqual(convert_to_empty_string_if_null("test"), "test")
+        self.assertEqual(convert_to_empty_string_if_null(123), 123)
+
     def test_to_phone_number_str(self) -> None:
         data = {"phone_number": 123456789}
         to_phone_number_str(data, "phone_number")

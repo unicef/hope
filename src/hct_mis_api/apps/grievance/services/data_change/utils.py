@@ -74,7 +74,7 @@ def is_approved(item: Dict) -> bool:
 
 
 def convert_to_empty_string_if_null(value: Any) -> Union[Any, str]:
-    return value or ""
+    return "" if value is None else value
 
 
 def cast_flex_fields(flex_fields: Dict) -> None:
