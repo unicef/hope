@@ -1,10 +1,9 @@
 import contextlib
 import logging
-from typing import Tuple
+from typing import Iterable, Tuple
 
 from django.core.cache import cache
 from django.db import transaction
-from django.db.models import QuerySet
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
@@ -183,7 +182,7 @@ class RdiMergeTask:
         return grievance_ticket, individual_data_update_ticket
 
     def _create_grievance_tickets_for_delivery_mechanisms_errors(
-        self, delivery_mechanisms_data: QuerySet[PendingDeliveryMechanismData], obj_hct: RegistrationDataImport
+        self, delivery_mechanisms_data: Iterable[PendingDeliveryMechanismData], obj_hct: RegistrationDataImport
     ) -> None:
         grievance_tickets_to_create = []
         individual_data_update_tickets_to_create = []
