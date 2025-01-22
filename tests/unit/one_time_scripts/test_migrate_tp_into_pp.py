@@ -21,7 +21,6 @@ from hct_mis_api.apps.targeting.models import (
     TargetingCriteriaRule,
     TargetPopulation,
 )
-from hct_mis_api.apps.targeting.services.targeting_stats_refresher import refresh_stats
 from hct_mis_api.one_time_scripts.migrate_tp_into_pp import (
     create_payments_for_pending_payment_plans,
     migrate_tp_into_pp,
