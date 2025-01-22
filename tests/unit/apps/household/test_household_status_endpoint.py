@@ -150,6 +150,7 @@ class TestDetails(TestCase):
         PaymentFactory(
             parent=payment_plan,
             household=household,
+            delivered_quantity=None,
         )
 
         response = self.api_client.get(f"/api/hh-status?tax_id={tax_id}")
@@ -169,12 +170,13 @@ class TestDetails(TestCase):
         payment_plan = PaymentPlanFactory(
             business_area=self.business_area,
             created_by=self.user,
+            status=PaymentPlan.Status.TP_PROCESSING,
         )
-        payment_plan.status = PaymentPlan.Status.TP_PROCESSING
-        payment_plan.save()
         PaymentFactory(
             parent=payment_plan,
             household=household,
+            status=PaymentPlan.Status.TP_PROCESSING,
+            delivered_quantity=None,
         )
 
         response = self.api_client.get(f"/api/hh-status?tax_id={tax_id}")

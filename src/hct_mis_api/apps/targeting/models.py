@@ -48,10 +48,6 @@ class TargetingCriteria(TimeStampedUUIDModel, TargetingCriteriaQueryingBase):
         default=False,
         help_text=_("Exclude households with individuals (members or collectors) on sanction list."),
     )
-    # TODO: deprecated already moved to 'TargetingCriteriaRule'
-    household_ids = models.TextField(blank=True)
-    # TODO: deprecated already moved to 'TargetingCriteriaRule'
-    individual_ids = models.TextField(blank=True)
 
     def get_rules(self) -> "QuerySet":
         return self.rules.all()
@@ -65,18 +61,6 @@ class TargetingCriteria(TimeStampedUUIDModel, TargetingCriteriaQueryingBase):
         query = super().get_query()
         if self.payment_plan.status != PaymentPlan.Status.TP_OPEN:
             query &= Q(size__gt=0)
-
-        q_hh_ids = Q(unicef_id__in=self.household_ids.split(", "))
-        q_ind_ids = Q(individuals__unicef_id__in=self.individual_ids.split(", "))
-
-        if self.household_ids and self.individual_ids:
-            query &= Q(q_hh_ids | q_ind_ids)
-            return query
-
-        if self.household_ids:
-            query &= q_hh_ids
-        if self.individual_ids:
-            query &= q_ind_ids
         return query
 
 

@@ -24,6 +24,9 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.utils.models import MergeStatusModel
+from hct_mis_api.one_time_scripts.migrate_data_to_representations import (
+    copy_individual_fast,
+)
 
 
 class TestHousehold(TestCase):
