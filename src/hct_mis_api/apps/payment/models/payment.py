@@ -753,7 +753,17 @@ class PaymentPlan(
 
     @property
     def has_empty_ids_criteria(self) -> bool:
-        return not bool(self.targeting_criteria.household_ids) and not bool(self.targeting_criteria.individual_ids)
+        if self.targeting_criteria is None:
+            return True
+        else:
+            has_hh_ids, has_ind_ids = False, False
+            for rule in self.targeting_criteria.rules.all():
+                if rule.household_ids:
+                    has_hh_ids = True
+                if rule.individual_ids:
+                    has_ind_ids = True
+
+            return not has_hh_ids and not has_ind_ids
 
     @property
     def excluded_beneficiaries_ids(self) -> List[str]:

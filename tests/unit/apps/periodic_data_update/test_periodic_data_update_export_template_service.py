@@ -228,11 +228,11 @@ class TestPeriodicDataUpdateExportTemplateService(TestCase):
                 },
             ],
         )
-        tp = PaymentPlanFactory()
+        pp = PaymentPlanFactory()
         self.periodic_data_update_template.filters = {
-            "target_population_id": encode_id_base64(str(tp.pk), "TargetPopulation")
+            "target_population_id": encode_id_base64(str(pp.pk), "TargetPopulation")
         }
-        tp.households.add(self.household)
+        PaymentFactory(parent=pp, household=self.household)
         self.periodic_data_update_template.save()
         service = PeriodicDataUpdateExportTemplateService(self.periodic_data_update_template)
         queryset = service._get_individuals_queryset()
