@@ -48,3 +48,7 @@
 h3 {
     margin-bottom: 5px;
 }
+
+.text-cyan-700 {
+    color: #1CABE2; /* Tailwind's default cyan-700 hex code */
+}
