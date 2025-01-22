@@ -234,7 +234,7 @@ def get_statistics(after_migration_status: bool = False) -> None:
                 pp_qs = PaymentPlan.objects.filter(
                     business_area=tp.business_area,
                     internal_data__has_key="target_population_id",
-                    internal_data__target_population_id=str(tp.id)
+                    internal_data__target_population_id=str(tp.id),
                 )
                 if pp_qs.exists():
                     continue
@@ -249,11 +249,22 @@ def get_statistics(after_migration_status: bool = False) -> None:
         else:
             print("All TargetPopulation's targeting_criteria had assigned to PaymentPlans.")
 
-        pp_without_targeting_criteria = PaymentPlan.objects.filter(targeting_criteria__isnull=True).order_by("business_area")
+        pp_without_targeting_criteria = PaymentPlan.objects.filter(targeting_criteria__isnull=True).order_by(
+            "business_area"
+        )
         if pp_without_targeting_criteria:
             print("#### Found PaymentPlan without targeting_criteria ", pp_without_targeting_criteria.count())
             for pp in pp_without_targeting_criteria:
-                print(pp.unicef_id, "Status:", pp.status, f"(build status: {pp.build_status})", "BA:", pp.business_area.name, "Program:", pp.program_cycle.program.name)
+                print(
+                    pp.unicef_id,
+                    "Status:",
+                    pp.status,
+                    f"(build status: {pp.build_status})",
+                    "BA:",
+                    pp.business_area.name,
+                    "Program:",
+                    pp.program_cycle.program.name,
+                )
 
 
 def get_payment_plan_id_from_tp_id(business_area_id: str, target_population_id: str) -> Optional[str]:
@@ -292,28 +303,29 @@ def create_payments_for_pending_payment_plans() -> None:
     start_time = timezone.now()
     print("*** Create Payments for BUILD_STATUS_PENDING PaymentPlans ***\n", "*" * 60)
     for business_area in BusinessArea.objects.only("id", "name"):
-            build_payment_plans_qs = PaymentPlan.objects.filter(
-                build_status=PaymentPlan.BuildStatus.BUILD_STATUS_PENDING, business_area_id=business_area.id,
-                targeting_criteria__isnull=False
-            ).only("id")
-            if build_payment_plans_qs.exists():
-                print(f"\n *** Processing {business_area.name}.")
-                print("Create payments for New Created Payment Plans: ", build_payment_plans_qs.count())
-                for payment_plan in build_payment_plans_qs:
-                    print(f".... processing with PP: {payment_plan.unicef_id}")
-                    with transaction.atomic():
-                        try:
-                            payment_plan.build_status_building()
-                            payment_plan.save(update_fields=("build_status", "built_at"))
-                            PaymentPlanService.create_payments(payment_plan)
-                            payment_plan.update_population_count_fields()
-                            payment_plan.build_status_ok()
-                            payment_plan.save(update_fields=("build_status", "built_at"))
-                        except Exception as e:
-                            payment_plan.build_status_failed()
-                            payment_plan.save(update_fields=("build_status", "built_at"))
-                            print("Create payments Error", str(e))
-                    print(f"Finished with PP: {payment_plan.unicef_id}")
+        build_payment_plans_qs = PaymentPlan.objects.filter(
+            build_status=PaymentPlan.BuildStatus.BUILD_STATUS_PENDING,
+            business_area_id=business_area.id,
+            targeting_criteria__isnull=False,
+        ).only("id")
+        if build_payment_plans_qs.exists():
+            print(f"\n *** Processing {business_area.name}.")
+            print("Create payments for New Created Payment Plans: ", build_payment_plans_qs.count())
+            for payment_plan in build_payment_plans_qs:
+                print(f".... processing with PP: {payment_plan.unicef_id}")
+                with transaction.atomic():
+                    try:
+                        payment_plan.build_status_building()
+                        payment_plan.save(update_fields=("build_status", "built_at"))
+                        PaymentPlanService.create_payments(payment_plan)
+                        payment_plan.update_population_count_fields()
+                        payment_plan.build_status_ok()
+                        payment_plan.save(update_fields=("build_status", "built_at"))
+                    except Exception as e:
+                        payment_plan.build_status_failed()
+                        payment_plan.save(update_fields=("build_status", "built_at"))
+                        print("Create payments Error", str(e))
+                print(f"Finished with PP: {payment_plan.unicef_id}")
     print(f"Completed in {timezone.now() - start_time}\n", "*" * 55)
 
 
@@ -335,9 +347,7 @@ def migrate_tp_into_pp(batch_size: int = 1) -> None:
         if queryset:
             print(f"\n   ***   Processing {queryset.count()} {model_name} for {business_area.name}.")
 
-            list_ids = [
-                str(obj_id) for obj_id in queryset.values_list("id", flat=True).iterator(chunk_size=batch_size)
-            ]
+            list_ids = [str(obj_id) for obj_id in queryset.values_list("id", flat=True).iterator(chunk_size=batch_size)]
             page_count = 0
             total_count = len(list_ids)
 
@@ -359,12 +369,10 @@ def migrate_tp_into_pp(batch_size: int = 1) -> None:
         # Migrate Message & Survey
         for model in (Message, Survey):
             print(f"Processing with migration {model.__name__} objects.")
-            model_qs = model.objects.filter(
-                business_area_id=business_area.id, target_population__isnull=False
-            ).only("id")
-            list_ids = [
-                str(obj_id) for obj_id in model_qs.values_list("id", flat=True).iterator(chunk_size=batch_size)
-            ]
+            model_qs = model.objects.filter(business_area_id=business_area.id, target_population__isnull=False).only(
+                "id"
+            )
+            list_ids = [str(obj_id) for obj_id in model_qs.values_list("id", flat=True).iterator(chunk_size=batch_size)]
             with transaction.atomic():
                 update_list = migrate_message_and_survey(list_ids, model, str(business_area.id))
                 model.objects.bulk_update(update_list, ["payment_plan_id"], 1000)
