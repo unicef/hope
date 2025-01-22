@@ -1,4 +1,4 @@
-import { Grid } from '@mui/material';
+import { Grid, Tooltip } from '@mui/material';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { Field, Form, useFormikContext } from 'formik';
 import { ReactElement, useMemo } from 'react';
@@ -42,21 +42,44 @@ export const ProgramForm = ({
     );
 
   const mappedBeneficiaryGroupsData = useMemo(() => {
+    function getTypeByDataCollectingTypeCode(
+      dataCollectingTypeCode: string,
+    ): string | undefined {
+      if (!filteredDataCollectionTypeChoicesData) return undefined;
+      const foundObject = filteredDataCollectionTypeChoicesData.find(
+        (item) => item.value === dataCollectingTypeCode,
+      );
+      return foundObject ? foundObject.type : undefined;
+    }
+    const dctType = getTypeByDataCollectingTypeCode(
+      values.dataCollectingTypeCode,
+    );
+
     if (!beneficiaryGroupsData?.results) return [];
-    const filteredBeneficiaryGroups =
-      values.dataCollectingTypeCode === 'partial'
-        ? beneficiaryGroupsData.results.filter(
-            (el) => el.master_detail === false,
-          )
-        : beneficiaryGroupsData.results.filter(
-            (el) => el.master_detail === true,
-          );
+
+    let filteredBeneficiaryGroups = [];
+
+    if (dctType === 'SOCIAL') {
+      filteredBeneficiaryGroups = beneficiaryGroupsData.results.filter(
+        (el) => el.master_detail === false,
+      );
+    } else if (dctType === 'STANDARD') {
+      filteredBeneficiaryGroups = beneficiaryGroupsData.results.filter(
+        (el) => el.master_detail === true,
+      );
+    } else {
+      filteredBeneficiaryGroups = beneficiaryGroupsData.results;
+    }
 
     return filteredBeneficiaryGroups.map((el) => ({
       name: el.name,
       value: el.id,
     }));
-  }, [values.dataCollectingTypeCode, beneficiaryGroupsData]);
+  }, [
+    values.dataCollectingTypeCode,
+    beneficiaryGroupsData,
+    filteredDataCollectionTypeChoicesData,
+  ]);
 
   const isCopyProgramPage = location.pathname.includes('duplicate');
   if (!data || !dataCollectionTypeChoicesData || !beneficiaryGroupsData)
@@ -143,16 +166,32 @@ export const ProgramForm = ({
           />
         </Grid>
         <Grid item xs={6}>
-          <Field
-            name="beneficiaryGroup"
-            label={t('Beneficiary Group')}
-            fullWidth
-            variant="outlined"
-            choices={mappedBeneficiaryGroupsData}
-            component={FormikSelectField}
-            data-cy="input-beneficiary-group"
-            disabled={programHasRdi || isCopyProgramPage}
-          />
+          <Tooltip
+            title={
+              !values.dataCollectingTypeCode
+                ? 'Select Data Collecting Type first'
+                : ''
+            }
+            placement="top"
+          >
+            <span>
+              <Field
+                name="beneficiaryGroup"
+                label={t('Beneficiary Group')}
+                fullWidth
+                required
+                variant="outlined"
+                choices={mappedBeneficiaryGroupsData}
+                component={FormikSelectField}
+                data-cy="input-beneficiary-group"
+                disabled={
+                  !values.dataCollectingTypeCode ||
+                  programHasRdi ||
+                  isCopyProgramPage
+                }
+              />
+            </span>
+          </Tooltip>
         </Grid>
         <Grid item xs={12}>
           <Field
