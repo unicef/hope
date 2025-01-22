@@ -21,6 +21,7 @@ from hct_mis_api.apps.targeting.models import (
     TargetingCriteriaRule,
     TargetPopulation,
 )
+from hct_mis_api.apps.targeting.services.targeting_stats_refresher import refresh_stats
 from hct_mis_api.one_time_scripts.migrate_tp_into_pp import (
     create_payments_for_pending_payment_plans,
     migrate_tp_into_pp,
@@ -261,9 +262,11 @@ class MigrationTPIntoPPTest(TestCase):
         self.message_2.refresh_from_db()
         self.survey_1.refresh_from_db()
         self.survey_2.refresh_from_db()
+        self.payment_plan_3.refresh_from_db()
         self.survey_without_pp.refresh_from_db()
         self.assertEqual(self.message_1.payment_plan, self.payment_plan_2)
         self.assertEqual(self.message_2.payment_plan.internal_data["target_population_id"], str(self.tp_1.pk))
         self.assertEqual(self.survey_1.payment_plan, self.payment_plan_3)
+        self.assertIsNotNone(self.payment_plan_3.targeting_criteria_id)
         self.assertEqual(self.survey_2.payment_plan.internal_data["target_population_id"], str(self.tp_2.pk))
         self.assertIsNone(self.survey_without_pp.payment_plan)
