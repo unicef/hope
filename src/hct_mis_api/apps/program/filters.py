@@ -72,7 +72,7 @@ class ProgramFilter(FilterSet):
         queryset = queryset.annotate(
             total_hh_count=Count(
                 "household_count",
-                filter=~Q(cycles__payment_plan__status=PaymentPlan.Status.TP_OPEN),
+                filter=~Q(cycles__payment_plans__status=PaymentPlan.Status.TP_OPEN),
                 distinct=True,
             ),
         )
