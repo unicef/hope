@@ -63,8 +63,8 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
 
     def get_readonly_fields(self, request: HttpRequest, obj: Optional[account_models.Partner] = None) -> Sequence[str]:
         additional_fields = []
-        if obj and obj.is_unicef:
-            additional_fields.append("name")
+        if obj and (obj.is_unicef or obj.is_unicef_subpartner):
+            additional_fields.extend(["name", "parent"])
         return list(super().get_readonly_fields(request, obj)) + additional_fields
 
     def get_form(
@@ -72,12 +72,13 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
     ) -> Type[ModelForm]:
         form = super().get_form(request, obj, **kwargs)
 
-        queryset = account_models.Partner.objects.filter(level=0)
-        if obj:
-            if obj.is_parent:
-                queryset = account_models.Partner.objects.none()
-            else:
-                queryset = queryset.exclude(id=obj.id)
+        if not (obj and obj.is_unicef_subpartner):
+            queryset = account_models.Partner.objects.filter(level=0)
+            if obj:
+                if obj.is_parent:
+                    queryset = account_models.Partner.objects.none()
+                else:
+                    queryset = queryset.exclude(id=obj.id)
 
-        form.base_fields["parent"].queryset = queryset
+            form.base_fields["parent"].queryset = queryset
         return form
