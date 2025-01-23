@@ -4,6 +4,7 @@ from django.db.models import Count, F
 from django.db import migrations
 from django.db.models import Q
 from django.utils import timezone
+from mptt import register
 from mptt.managers import TreeManager
 
 from hct_mis_api.apps.account.models import Role
@@ -85,7 +86,7 @@ def migrate_partner_roles_and_access(apps, schema_editor):
     BusinessAreaPartnerThrough = apps.get_model('core', 'BusinessAreaPartnerThrough')
     AdminAreaLimitedTo = apps.get_model('account', 'AdminAreaLimitedTo')
     Partner = apps.get_model('account', 'Partner')
-    Partner.objects = TreeManager()
+    register(Partner)
 
     # do not create RoleAssignments for partners that are parents or UNICEF
     partner_roles = BusinessAreaPartnerThrough.objects.exclude(
@@ -159,10 +160,10 @@ def migrate_unicef_partners(apps, schema_editor):
 
     new_assignments = []
 
-    unicef_partner = Partner.objects.get(name="UNICEF")
+    unicef_partner = Partner.objects.filter(name="UNICEF").first()
 
     # update Role with all permissions with is_available_for_partner=False
-    role_with_all_permissions = Role.objects.get(name="Role with all permissions")
+    role_with_all_permissions = Role.objects.filter(name="Role with all permissions").first()
     role_with_all_permissions.is_available_for_partner = False
     role_with_all_permissions.save()
 
@@ -217,7 +218,7 @@ def migrate_unicef_partners(apps, schema_editor):
     ).filter(ba_count=1)
 
     unicef_subpartners = {
-        ba.slug: Partner.objects.get(name=f"UNICEF Sub-partner for {ba.name}")
+        ba.slug: Partner.objects.get(name=f"UNICEF Sub-partner for {ba.name} [Sub-Partner of UNICEF]")
         for ba in BusinessArea.objects.all()
     }
 
