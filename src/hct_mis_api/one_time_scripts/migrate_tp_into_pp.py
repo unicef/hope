@@ -307,7 +307,7 @@ def create_payments_for_pending_payment_plans() -> None:
     )
 
     """
-    step 2 create Payments for BUILD_STATUS_PENDING PaymentPlans
+    Step 2 create Payments for BUILD_STATUS_PENDING PaymentPlans
     """
     start_time = timezone.now()
     print("*** Create Payments for BUILD_STATUS_PENDING PaymentPlans ***\n", "*" * 60)
@@ -340,7 +340,7 @@ def create_payments_for_pending_payment_plans() -> None:
 
 def migrate_tp_into_pp(batch_size: int = 1) -> None:
     """
-    step 1 migrate TP>PP
+    Step 1 migrate TP>PP
     """
     start_time = timezone.now()
     # queryset.model.__name__
