@@ -160,8 +160,8 @@ class TestPaymentPlanQueries(APITestCase):
     """
 
     ALL_PAYMENT_PLANS_FILTER_QUERY = """
-    query AllPaymentPlans($businessArea: String!, $search: String, $status: [String], $totalEntitledQuantityFrom: Float, $totalEntitledQuantityTo: Float, $dispersionStartDate: Date, $dispersionEndDate: Date, $program: String, $programCycle: String) {
-        allPaymentPlans(businessArea: $businessArea, search: $search, status: $status, totalEntitledQuantityFrom: $totalEntitledQuantityFrom, totalEntitledQuantityTo: $totalEntitledQuantityTo, dispersionStartDate: $dispersionStartDate, dispersionEndDate: $dispersionEndDate, program: $program, orderBy: "unicef_id", programCycle: $programCycle) {
+    query AllPaymentPlans($businessArea: String!, $search: String, $status: [String], $totalEntitledQuantityFrom: Float, $totalEntitledQuantityTo: Float, $dispersionStartDate: Date, $dispersionEndDate: Date, $program: String, $programCycle: String, $verificationStatus: [String], $serviceProvider: String, $deliveryTypes: String) {
+        allPaymentPlans(businessArea: $businessArea, search: $search, status: $status, totalEntitledQuantityFrom: $totalEntitledQuantityFrom, totalEntitledQuantityTo: $totalEntitledQuantityTo, dispersionStartDate: $dispersionStartDate, dispersionEndDate: $dispersionEndDate, program: $program, orderBy: "unicef_id", programCycle: $programCycle, verificationStatus: $verificationStatus, serviceProvider: $serviceProvider, deliveryTypes: $deliveryTypes) {
         edges {
           node {
             dispersionEndDate
@@ -463,6 +463,9 @@ class TestPaymentPlanQueries(APITestCase):
             },
             {"programCycle": encode_id_base64(self.pp.program_cycle.pk, "ProgramCycleNode")},
             {"programCycle": encode_id_base64(just_random_program_cycle.pk, "ProgramCycleNode")},
+            {"serviceProvider": "test"},
+            {"deliveryTypes": "cash"},
+            {"verificationStatus": "ACTIVE"},
         ]:
             self.snapshot_graphql_request(
                 request_string=self.ALL_PAYMENT_PLANS_FILTER_QUERY,
