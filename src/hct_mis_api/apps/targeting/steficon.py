@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-try:
+try:  # pragma: no cover
     from hct_mis_api.apps.steficon.models import RuleCommit
 
     class RuleReRunForm(forms.Form):
