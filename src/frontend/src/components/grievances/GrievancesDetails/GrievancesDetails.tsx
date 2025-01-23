@@ -100,47 +100,10 @@ export function GrievancesDetails({
     </Box>
   );
 
-  const renderUrl = (
-    obj,
-    objType: string,
-    href: string,
-    displayedId: string,
-  ): ReactElement => {
-    if (isAllPrograms) {
-      return <>{displayedId}</>;
-    }
-
-    if (obj?.objType === objType) {
-      return <ContentLink href={href}>{displayedId}</ContentLink>;
-    }
-
-    return <>-</>;
-  };
-
-  const getUrl = (objType: string, id: string): string => {
-    switch (objType) {
-      case 'PaymentRecord':
-        return `/${baseUrl}/payment-records/${id}`;
-      case 'Payment':
-        return `/${baseUrl}/payment-module/payments/${id}`;
-      case 'PaymentPlan':
-        return `/${baseUrl}/payment-module/payment-plans/${id}`;
-      case 'CashPlan':
-        return `/${baseUrl}/cashplans/${id}`;
-      default:
-        return '';
-    }
-  };
-
   const renderPaymentUrl = (): ReactElement => {
     const paymentRecord = ticket?.paymentRecord;
     if (paymentRecord) {
-      return renderUrl(
-        paymentRecord,
-        paymentRecord.objType,
-        getUrl(paymentRecord.objType, paymentRecord.id),
-        paymentRecord.caId,
-      );
+      return <>{`/${baseUrl}/payment-module/payments/${paymentRecord.id}`}</>;
     }
     return <>-</>;
   };
@@ -148,11 +111,12 @@ export function GrievancesDetails({
   const renderPaymentPlanUrl = (): ReactElement => {
     const parent = ticket?.paymentRecord?.parent;
     if (parent) {
-      return renderUrl(
-        parent,
-        parent.objType,
-        getUrl(parent.objType, parent.id),
-        parent.unicefId,
+      return (
+        <ContentLink
+          href={`/${baseUrl}/payment-module/payment-plans/${parent.id}`}
+        >
+          {parent.unicefId}
+        </ContentLink>
       );
     }
     return <>-</>;
@@ -161,10 +125,8 @@ export function GrievancesDetails({
   const renderPaymentPlanVerificationUrl = (): ReactElement => {
     const parent = ticket?.paymentRecord?.parent;
     if (parent) {
-      const url = `/${baseUrl}/payment-verification/${
-        parent.objType === 'CashPlan' ? 'cash-plan' : 'payment-plan'
-      }/${parent.id}`;
-      return renderUrl(parent, parent.objType, url, parent.unicefId);
+      const url = `/${baseUrl}/payment-verification/payment-plan/${parent.id}`;
+      return <ContentLink href={url}>{parent.unicefId}</ContentLink>;
     }
     return <>-</>;
   };

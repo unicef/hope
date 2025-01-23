@@ -9004,6 +9004,11 @@ export type AllPaymentPlansForTableQueryVariables = Exact<{
   statusNot?: InputMaybe<Scalars['String']['input']>;
   isPaymentPlan?: InputMaybe<Scalars['Boolean']['input']>;
   isTargetPopulation?: InputMaybe<Scalars['Boolean']['input']>;
+  verificationStatus?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
+  serviceProvider?: InputMaybe<Scalars['String']['input']>;
+  deliveryTypes?: InputMaybe<Scalars['String']['input']>;
+  startDate?: InputMaybe<Scalars['Date']['input']>;
+  endDate?: InputMaybe<Scalars['Date']['input']>;
 }>;
 
 
@@ -16554,7 +16559,7 @@ export type AllFinancialServiceProviderXlsxTemplatesLazyQueryHookResult = Return
 export type AllFinancialServiceProviderXlsxTemplatesSuspenseQueryHookResult = ReturnType<typeof useAllFinancialServiceProviderXlsxTemplatesSuspenseQuery>;
 export type AllFinancialServiceProviderXlsxTemplatesQueryResult = Apollo.QueryResult<AllFinancialServiceProviderXlsxTemplatesQuery, AllFinancialServiceProviderXlsxTemplatesQueryVariables>;
 export const AllPaymentPlansForTableDocument = gql`
-    query AllPaymentPlansForTable($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $businessArea: String!, $search: String, $status: [String], $totalEntitledQuantityFrom: Float, $totalEntitledQuantityTo: Float, $dispersionStartDate: Date, $dispersionEndDate: Date, $isFollowUp: Boolean, $program: String, $programCycle: String, $totalHouseholdsCountWithValidPhoneNoMin: Int, $totalHouseholdsCountWithValidPhoneNoMax: Int, $createdAtRange: String, $statusNot: String, $isPaymentPlan: Boolean, $isTargetPopulation: Boolean) {
+    query AllPaymentPlansForTable($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $businessArea: String!, $search: String, $status: [String], $totalEntitledQuantityFrom: Float, $totalEntitledQuantityTo: Float, $dispersionStartDate: Date, $dispersionEndDate: Date, $isFollowUp: Boolean, $program: String, $programCycle: String, $totalHouseholdsCountWithValidPhoneNoMin: Int, $totalHouseholdsCountWithValidPhoneNoMax: Int, $createdAtRange: String, $statusNot: String, $isPaymentPlan: Boolean, $isTargetPopulation: Boolean, $verificationStatus: [String], $serviceProvider: String, $deliveryTypes: String, $startDate: Date, $endDate: Date) {
   allPaymentPlans(
     after: $after
     before: $before
@@ -16577,6 +16582,11 @@ export const AllPaymentPlansForTableDocument = gql`
     statusNot: $statusNot
     isPaymentPlan: $isPaymentPlan
     isTargetPopulation: $isTargetPopulation
+    verificationStatus: $verificationStatus
+    serviceProvider: $serviceProvider
+    deliveryTypes: $deliveryTypes
+    startDate: $startDate
+    endDate: $endDate
   ) {
     pageInfo {
       hasNextPage
@@ -16668,6 +16678,11 @@ export const AllPaymentPlansForTableDocument = gql`
  *      statusNot: // value for 'statusNot'
  *      isPaymentPlan: // value for 'isPaymentPlan'
  *      isTargetPopulation: // value for 'isTargetPopulation'
+ *      verificationStatus: // value for 'verificationStatus'
+ *      serviceProvider: // value for 'serviceProvider'
+ *      deliveryTypes: // value for 'deliveryTypes'
+ *      startDate: // value for 'startDate'
+ *      endDate: // value for 'endDate'
  *   },
  * });
  */

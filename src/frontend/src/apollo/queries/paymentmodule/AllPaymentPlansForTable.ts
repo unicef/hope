@@ -23,6 +23,11 @@ export const AllPaymentPlansForTable = gql`
     $statusNot: String
     $isPaymentPlan: Boolean
     $isTargetPopulation: Boolean
+    $verificationStatus: [String]
+    $serviceProvider: String
+    $deliveryTypes: String
+    $startDate: Date
+    $endDate: Date
   ) {
     allPaymentPlans(
       after: $after
@@ -46,6 +51,11 @@ export const AllPaymentPlansForTable = gql`
       statusNot: $statusNot
       isPaymentPlan: $isPaymentPlan
       isTargetPopulation: $isTargetPopulation
+      verificationStatus: $verificationStatus
+      serviceProvider: $serviceProvider
+      deliveryTypes: $deliveryTypes
+      startDate: $startDate
+      endDate: $endDate
     ) {
       pageInfo {
         hasNextPage

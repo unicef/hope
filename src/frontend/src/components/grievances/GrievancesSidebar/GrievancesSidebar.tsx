@@ -107,7 +107,7 @@ export function GrievancesSidebar({
                   ticket.paymentVerificationTicketDetails?.paymentVerifications?.edges.map(
                     (edge) => ({
                       id: edge.node.id,
-                      caId: ticket.paymentRecord.caId,
+                      paymentId: ticket.paymentRecord.id,
                     }),
                   ) || []
                 }

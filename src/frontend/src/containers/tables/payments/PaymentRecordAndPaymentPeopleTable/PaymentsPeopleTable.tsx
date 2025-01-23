@@ -1,51 +1,50 @@
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  AllPaymentRecordsAndPaymentsQueryVariables,
+  AllPaymentsForTableQueryVariables,
   HouseholdNode,
-  PaymentRecordAndPaymentNode,
-  useAllPaymentRecordsAndPaymentsQuery,
+  PaymentNode,
+  useAllPaymentsForTableQuery,
 } from '@generated/graphql';
 import { UniversalTable } from '../../UniversalTable';
-import { headCells } from './PaymentRecordAndPaymentPeopleTableHeadCells';
-import { PaymentRecordAndPaymentPeopleTableRow } from './PaymentRecordAndPaymentPeopleTableRow';
+import { headCells } from './PaymentsPeopleTableHeadCells';
+import { PaymentsPeopleTableRow } from './PaymentsPeopleTableRow';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 
-interface PaymentRecordHouseholdTableProps {
+interface PaymentsPeopleTableProps {
   household?: HouseholdNode;
   openInNewTab?: boolean;
   businessArea: string;
   canViewPaymentRecordDetails: boolean;
 }
-export function PaymentRecordAndPaymentPeopleTable({
+export function PaymentsPeopleTable({
   household,
   openInNewTab = false,
   businessArea,
   canViewPaymentRecordDetails,
-}: PaymentRecordHouseholdTableProps): ReactElement {
+}: PaymentsPeopleTableProps): ReactElement {
   const { t } = useTranslation();
   const { programId } = useBaseUrl();
 
   const initialVariables = {
+    //TODO: Change this to the correct paymentPlanId
+    paymentPlanId: 'test',
     household: household?.id,
     businessArea,
     program: programId,
   };
 
   return (
-    <UniversalTable<
-      PaymentRecordAndPaymentNode,
-      AllPaymentRecordsAndPaymentsQueryVariables
-    >
+    <UniversalTable<PaymentNode, AllPaymentsForTableQueryVariables>
       title={t('Payment Records')}
       headCells={headCells}
-      query={useAllPaymentRecordsAndPaymentsQuery}
-      queriedObjectName="allPaymentRecordsAndPayments"
+      query={useAllPaymentsForTableQuery}
+      queriedObjectName="allPayments"
       initialVariables={initialVariables}
       renderRow={(row) => (
-        <PaymentRecordAndPaymentPeopleTableRow
+        <PaymentsPeopleTableRow
           key={row.id}
-          paymentRecordOrPayment={row}
+          payment={row}
           openInNewTab={openInNewTab}
           canViewDetails={canViewPaymentRecordDetails}
         />

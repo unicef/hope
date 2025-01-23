@@ -1,9 +1,7 @@
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  AllPaymentPlansQueryVariables,
   AllPaymentPlansForTableQueryVariables,
-  CashPlanAndPaymentPlanNode,
   useAllPaymentPlansForTableQuery,
   PaymentPlanNode,
 } from '@generated/graphql';
@@ -28,11 +26,11 @@ export function PaymentVerificationTable({
   const initialVariables: AllPaymentPlansForTableQueryVariables = {
     businessArea,
     search: filter.search,
-    verificationStatus: filter.verificationStatus,
+    verificationStatus: [filter.verificationStatus],
     serviceProvider: filter.serviceProvider,
-    deliveryType: filter.deliveryType,
-    startDateGte: dateToIsoString(filter.startDate, 'startOfDay'),
-    endDateLte: dateToIsoString(filter.endDate, 'endOfDay'),
+    deliveryTypes: filter.deliveryType,
+    startDate: dateToIsoString(filter.startDate, 'startOfDay'),
+    endDate: dateToIsoString(filter.endDate, 'endOfDay'),
     program: programId,
   };
   return (
@@ -42,10 +40,10 @@ export function PaymentVerificationTable({
       query={useAllPaymentPlansForTableQuery}
       queriedObjectName="allPaymentPlans"
       initialVariables={initialVariables}
-      renderRow={(cashPlanAndPaymentPlanNode) => (
+      renderRow={(paymentPlan) => (
         <PaymentVerificationTableRow
-          key={cashPlanAndPaymentPlanNode.id}
-          plan={cashPlanAndPaymentPlanNode}
+          key={paymentPlan.id}
+          plan={paymentPlan}
           canViewDetails={canViewDetails}
         />
       )}

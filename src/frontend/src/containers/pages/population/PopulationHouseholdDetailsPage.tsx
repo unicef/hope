@@ -26,7 +26,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError, renderSomethingOrDash } from '@utils/utils';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
-import { PaymentRecordHouseholdTable } from '../../tables/payments/PaymentRecordAndPaymentHouseholdTable';
+import { PaymentRecordHouseholdTable } from '../../tables/payments/PaymentsHouseholdTable';
 import { HouseholdCompositionTable } from '../../tables/population/HouseholdCompositionTable/HouseholdCompositionTable';
 import { AdminButton } from '@core/AdminButton';
 import { CollectorsTable } from '@containers/tables/population/CollectorsTable';

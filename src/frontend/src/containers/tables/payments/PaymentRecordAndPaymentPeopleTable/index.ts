@@ -1,3 +1,1 @@
-import { PaymentRecordAndPaymentPeopleTable } from './PaymentRecordAndPaymentPeopleTable';
-
-export { PaymentRecordAndPaymentPeopleTable };
+export { PaymentsPeopleTable } from './PaymentsPeopleTable';

@@ -1,8 +1,5 @@
 import camelCase from 'lodash/camelCase';
-import {
-  GrievanceTicketQuery,
-  PaymentRecordAndPaymentNode,
-} from '@generated/graphql';
+import { GrievanceTicketQuery, PaymentNode } from '@generated/graphql';
 import { GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
 import {
   camelizeArrayObjects,
@@ -27,8 +24,8 @@ interface EditValuesTypes {
   selectedHousehold?;
   selectedIndividual?;
   selectedPaymentRecords: Pick<
-    PaymentRecordAndPaymentNode,
-    'id' | 'caId' | 'deliveredQuantity' | 'entitlementQuantity' | 'objType'
+    PaymentNode,
+    'id' | 'deliveredQuantity' | 'entitlementQuantity'
   >[];
   paymentRecord?: string;
   selectedLinkedTickets: string[];

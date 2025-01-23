@@ -2,7 +2,7 @@ import { MouseEvent, ReactElement, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import {
   AllPaymentsForTableQueryVariables,
-  PaymentRecordAndPaymentNode,
+  PaymentNode,
   useAllPaymentsForTableQuery,
 } from '@generated/graphql';
 import { UniversalTable } from '@containers/tables/UniversalTable';
@@ -24,6 +24,8 @@ export function LookUpPaymentRecordTable({
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   const initialVariables = {
+    //TODO: Change this to the correct paymentPlanId
+    paymentPlanId: 'test',
     household: initialValues?.selectedHousehold?.id,
     businessArea,
     program: programId === 'all' ? null : programId,
@@ -62,10 +64,7 @@ export function LookUpPaymentRecordTable({
 
   if (isEditTicket) {
     return (
-      <UniversalTable<
-        PaymentRecordAndPaymentNode,
-        AllPaymentsForTableQueryVariables
-      >
+      <UniversalTable<PaymentNode, AllPaymentsForTableQueryVariables>
         headCells={headCells}
         query={useAllPaymentsForTableQuery}
         queriedObjectName="allPayments"
@@ -83,10 +82,7 @@ export function LookUpPaymentRecordTable({
     );
   }
   return (
-    <UniversalTable<
-      PaymentRecordAndPaymentNode,
-      AllPaymentsForTableQueryVariables
-    >
+    <UniversalTable<PaymentNode, AllPaymentsForTableQueryVariables>
       headCells={headCells}
       query={useAllPaymentsForTableQuery}
       queriedObjectName="allPayments"

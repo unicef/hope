@@ -2,7 +2,7 @@ import { MockedProvider } from '@apollo/react-testing';
 import { act } from 'react';
 
 import wait from 'waait';
-import { fakeApolloAllPaymentRecordsHousehold } from '../../../../../fixtures/payments/fakeApolloAllPaymentRecordsHousehold';
+import { fakeApolloAllPaymentRecordsHousehold } from '../../../../../fixtures/payments/fakeApolloAllPaymentsHousehold';
 import { fakeHousehold } from '../../../../../fixtures/population/fakeHousehold';
 import { render } from '../../../../testUtils/testUtils';
 import { PaymentRecordHouseholdTable } from '.';
