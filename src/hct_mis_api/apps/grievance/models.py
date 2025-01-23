@@ -5,14 +5,12 @@ from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Union
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.contrib.contenttypes.fields import GenericForeignKey
-from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.files.storage import default_storage
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models import JSONField, Q, QuerySet, UniqueConstraint, UUIDField
+from django.db.models import JSONField, Q, QuerySet, UniqueConstraint
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.functional import cached_property
@@ -99,15 +97,6 @@ class OnlyOriginalManager(models.Manager):
     # TODO: remove after data migration
     def get_queryset(self) -> "QuerySet":
         return super().get_queryset().filter(is_original=True)
-
-
-class GenericPaymentTicket(TimeStampedUUIDModel):
-    payment_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
-    payment_object_id = UUIDField(null=True)
-    payment_obj = GenericForeignKey("payment_content_type", "payment_object_id")
-
-    class Meta:
-        abstract = True
 
 
 class GrievanceTicket(TimeStampedUUIDModel, AdminUrlMixin, ConcurrencyModel, UnicefIdentifiedModel):
@@ -628,7 +617,7 @@ FEEDBACK_STATUS_FLOW = {
 }
 
 
-class TicketComplaintDetails(GenericPaymentTicket):  # TODO TP drop GenericPaymentTicket
+class TicketComplaintDetails(TimeStampedUUIDModel):
     STATUS_FLOW = GENERAL_STATUS_FLOW
 
     ticket = models.OneToOneField(
@@ -648,7 +637,7 @@ class TicketComplaintDetails(GenericPaymentTicket):  # TODO TP drop GenericPayme
         on_delete=models.CASCADE,
         null=True,
     )
-    payment = models.OneToOneField(
+    payment = models.ForeignKey(
         Payment,
         on_delete=models.CASCADE,
         null=True,
@@ -659,7 +648,7 @@ class TicketComplaintDetails(GenericPaymentTicket):  # TODO TP drop GenericPayme
         verbose_name_plural = "Ticket Complaint Details"
 
 
-class TicketSensitiveDetails(GenericPaymentTicket):  # TODO TP drop GenericPaymentTicket
+class TicketSensitiveDetails(TimeStampedUUIDModel):
     STATUS_FLOW = GENERAL_STATUS_FLOW
 
     ticket = models.OneToOneField(
@@ -679,7 +668,7 @@ class TicketSensitiveDetails(GenericPaymentTicket):  # TODO TP drop GenericPayme
         on_delete=models.CASCADE,
         null=True,
     )
-    payment = models.OneToOneField(
+    payment = models.ForeignKey(
         Payment,
         on_delete=models.CASCADE,
         null=True,

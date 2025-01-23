@@ -113,9 +113,7 @@ class TestCloseDataChangeTickets(APITestCase):
         cls.update_partner_access_to_program(partner, cls.program)
         cls.update_partner_access_to_program(partner, program_one)
 
-        household_one = HouseholdFactory.build(
-            id="07a901ed-d2a5-422a-b962-3570da1d5d07", admin_area=cls.admin_area_1, program=cls.program
-        )
+        household_one = HouseholdFactory.build(admin_area=cls.admin_area_1, program=cls.program)
         household_one.household_collection.save()
         household_one.registration_data_import.imported_by.save()
         household_one.registration_data_import.program = program_one
@@ -123,9 +121,7 @@ class TestCloseDataChangeTickets(APITestCase):
         household_one.program = program_one
         household_one.programs.add(program_one)
 
-        household_two = HouseholdFactory.build(
-            id="603dfd3f-baca-42d1-aac6-3e1c537ddbef", admin_area=cls.admin_area_1, program=cls.program
-        )
+        household_two = HouseholdFactory.build(admin_area=cls.admin_area_1, program=cls.program)
         household_two.household_collection.save()
         household_two.registration_data_import.imported_by.save()
         household_two.registration_data_import.program = program_one
@@ -158,6 +154,7 @@ class TestCloseDataChangeTickets(APITestCase):
                 "family_name": "Example",
                 "phone_no": "+18773523904",
                 "birth_date": "1965-03-15",
+                "unicef_id": "IND-1111",
             },
             {
                 "id": "cd5ced0f-3777-47d8-92ca-5b3aa22f186d",
@@ -166,6 +163,7 @@ class TestCloseDataChangeTickets(APITestCase):
                 "family_name": "Doe",
                 "phone_no": "+12315124125",
                 "birth_date": "1975-07-25",
+                "unicef_id": "IND-2222",
             },
         ]
 
@@ -211,7 +209,6 @@ class TestCloseDataChangeTickets(APITestCase):
         )
 
         cls.add_individual_grievance_ticket = GrievanceTicketFactory(
-            id="43c59eda-6664-41d6-9339-05efcb11da82",
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
             admin2=cls.admin_area_1,
@@ -250,7 +247,6 @@ class TestCloseDataChangeTickets(APITestCase):
         )
 
         cls.individual_data_change_grievance_ticket = GrievanceTicketFactory(
-            id="acd57aa1-efd8-4c81-ac19-b8cabebe8089",
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
             admin2=cls.admin_area_1,
@@ -289,7 +285,6 @@ class TestCloseDataChangeTickets(APITestCase):
         )
 
         cls.household_data_change_grievance_ticket = GrievanceTicketFactory(
-            id="72ee7d98-6108-4ef0-85bd-2ef20e1d5410",
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
             admin2=cls.admin_area_1,
@@ -305,7 +300,6 @@ class TestCloseDataChangeTickets(APITestCase):
         )
 
         cls.individual_delete_grievance_ticket = GrievanceTicketFactory(
-            id="a2a15944-f836-4764-8163-30e0c47ce3bb",
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL,
             admin2=cls.admin_area_1,
@@ -443,7 +437,6 @@ class TestCloseDataChangeTickets(APITestCase):
         )
 
         grievance_ticket = GrievanceTicketFactory(
-            id="32c3ae7d-fb39-4d69-8559-9d0fa4284790",
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
             admin2=self.admin_area_1,
@@ -560,7 +553,6 @@ class TestCloseDataChangeTickets(APITestCase):
         )
 
         grievance_ticket = GrievanceTicketFactory(
-            id="32c3ae7d-fb39-4d69-8559-9d0fa4284790",
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_HOUSEHOLD,
             admin2=cls.admin_area_1,

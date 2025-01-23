@@ -22,7 +22,7 @@ export const editProgramDetailsValidationSchema = (
     .min(today, t('End Date cannot be in the past'))
     .nullable();
 
-  if (initialValues.endDate) {
+  if (initialValues.editMode) {
     endDate = endDate.required(t('End Date is required'));
   }
 
@@ -48,6 +48,7 @@ export const editProgramDetailsValidationSchema = (
     dataCollectingTypeCode: Yup.string().required(
       t('Data Collecting Type is required'),
     ),
+    beneficiaryGroup: Yup.string().required(t('Beneficiary Group is required')),
     description: Yup.string()
       .min(3, t('Too short'))
       .max(255, t('Too long'))

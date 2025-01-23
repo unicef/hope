@@ -215,6 +215,7 @@ export function Entitlement({
                         variables: {
                           paymentPlanId: paymentPlan.id,
                           steficonRuleId: steficonRuleValue,
+                          version: paymentPlan.version,
                         },
                       });
                       showMessage(

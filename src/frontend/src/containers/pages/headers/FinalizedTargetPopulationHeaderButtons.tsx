@@ -1,11 +1,9 @@
 import { Box, Button } from '@mui/material';
 import { FileCopy } from '@mui/icons-material';
-import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
 import { ReactElement, useState } from 'react';
 import styled from 'styled-components';
 import {
-  BusinessAreaDataQuery,
-  TargetPopulationQuery,
+  PaymentPlanQuery,
   useCashAssistUrlPrefixQuery,
 } from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
@@ -23,15 +21,13 @@ const IconContainer = styled.span`
 `;
 
 export interface FinalizedTargetPopulationHeaderButtonsPropTypes {
-  targetPopulation: TargetPopulationQuery['targetPopulation'];
+  targetPopulation: PaymentPlanQuery['paymentPlan'];
   canDuplicate: boolean;
-  businessAreaData: BusinessAreaDataQuery;
 }
 
 export function FinalizedTargetPopulationHeaderButtons({
   targetPopulation,
   canDuplicate,
-  businessAreaData,
 }: FinalizedTargetPopulationHeaderButtonsPropTypes): ReactElement {
   const [openDuplicate, setOpenDuplicate] = useState(false);
   const { data, loading } = useCashAssistUrlPrefixQuery({
@@ -49,21 +45,6 @@ export function FinalizedTargetPopulationHeaderButtons({
           </Button>
         </IconContainer>
       )}
-      <Box m={2}>
-        {!businessAreaData.businessArea.isPaymentPlanApplicable && (
-          <Button
-            variant="contained"
-            color="primary"
-            component="a"
-            disabled={!targetPopulation.caHashId}
-            target="_blank"
-            href={`${data.cashAssistUrlPrefix}&pagetype=entityrecord&etn=progres_targetpopulation&id=${targetPopulation.caHashId}`}
-            startIcon={<OpenInNewRoundedIcon />}
-          >
-            Open in CashAssist
-          </Button>
-        )}
-      </Box>
       <DuplicateTargetPopulation
         open={openDuplicate}
         setOpen={setOpenDuplicate}

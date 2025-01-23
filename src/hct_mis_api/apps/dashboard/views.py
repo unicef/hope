@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict
+from typing import Any, Dict, Type
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.cache import cache
@@ -17,7 +17,10 @@ from rest_framework.views import APIView
 from hct_mis_api.apps.account.permissions import Permissions, check_permissions
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.dashboard.celery_tasks import generate_dash_report_task
-from hct_mis_api.apps.dashboard.services import DashboardDataCache
+from hct_mis_api.apps.dashboard.services import (
+    DashboardDataCache,
+    DashboardGlobalDataCache,
+)
 from hct_mis_api.apps.utils.sentry import sentry_tags
 
 log = logging.getLogger(__name__)
@@ -39,16 +42,25 @@ class DashboardDataView(APIView):
         Retrieve dashboard data for a given business area from Redis cache.
         If data is not cached or needs updating, refresh it.
         """
+        is_global = business_area_slug.lower() == "global"
         business_area = get_object_or_404(BusinessArea, slug=business_area_slug)
+        data_cache: Type[DashboardDataCache] = DashboardGlobalDataCache if is_global else DashboardDataCache
 
         if not check_permissions(request.user, [Permissions.DASHBOARD_VIEW_COUNTRY], business_area=business_area):
             return Response(
-                {"detail": _("You do not have permission to view this dashboard.")}, status=status.HTTP_403_FORBIDDEN
+                {
+                    "detail": _(
+                        "You do not have permission to view the global dashboard."
+                        if is_global
+                        else "You do not have permission to view this dashboard."
+                    )
+                },
+                status=status.HTTP_403_FORBIDDEN,
             )
 
-        data = DashboardDataCache.get_data(business_area_slug)
+        data = data_cache.get_data(business_area_slug)
         if not data:
-            data = DashboardDataCache.refresh_data(business_area_slug)
+            data = data_cache.refresh_data(business_area_slug if not is_global else "global")
 
         return Response(data, status=status.HTTP_200_OK)
 
@@ -107,4 +119,7 @@ class DashboardReportView(LoginRequiredMixin, TemplateView):
             context["business_area_slug"] = business_area_slug
             context["household_data_url"] = reverse("api:household-data", args=[business_area_slug])
             context["has_permission"] = True
+        # Dynamically switch template for "Global" dashboard
+        if business_area_slug.lower() == "global":
+            self.template_name = "dashboard/global_dashboard.html"
         return context
