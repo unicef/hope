@@ -3,13 +3,6 @@ from hct_mis_api.apps.payment.models.acceptance import (
     Approval,
     ApprovalProcess,
 )
-from hct_mis_api.apps.payment.models.cash_assist import (
-    CashPlan,
-    GenericPayment,
-    GenericPaymentPlan,
-    PaymentRecord,
-    ServiceProvider,
-)
 from hct_mis_api.apps.payment.models.payment import (
     DeliveryMechanism,
     DeliveryMechanismData,
@@ -37,11 +30,6 @@ __all__ = [
     "AcceptanceProcessThreshold",
     "Approval",
     "ApprovalProcess",
-    "CashPlan",
-    "GenericPayment",
-    "GenericPaymentPlan",
-    "PaymentRecord",
-    "ServiceProvider",
     "DeliveryMechanism",
     "DeliveryMechanismData",
     "DeliveryMechanismPerPaymentPlan",

@@ -5,7 +5,6 @@ import { StatusBox } from '@core/StatusBox';
 import { decodeIdString, programCycleStatusToColor } from '@utils/utils';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { UniversalRestTable } from '@components/rest/UniversalRestTable/UniversalRestTable';
-import { headCells } from '@containers/tables/ProgramCyclesTablePaymentModule/HeadCells';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -23,11 +22,13 @@ import { useSnackbar } from '@hooks/useSnackBar';
 interface ProgramCyclesTablePaymentModuleProps {
   program;
   filters;
+  adjustedHeadCells;
 }
 
 export const ProgramCyclesTablePaymentModule = ({
   program,
   filters,
+  adjustedHeadCells,
 }: ProgramCyclesTablePaymentModuleProps) => {
   const { showMessage } = useSnackbar();
   const [queryVariables, setQueryVariables] = useState<ProgramCyclesQuery>({
@@ -154,7 +155,7 @@ export const ProgramCyclesTablePaymentModule = ({
     <UniversalRestTable
       title="Programme Cycles"
       renderRow={renderRow}
-      headCells={headCells}
+      headCells={adjustedHeadCells}
       data={data}
       error={error}
       isLoading={isLoading}

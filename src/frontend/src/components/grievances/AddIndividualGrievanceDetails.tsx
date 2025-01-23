@@ -15,6 +15,7 @@ import { LabelizedField } from '@core/LabelizedField';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { Title } from '@core/Title';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
+import { useProgramContext } from 'src/programContext';
 import { ReactElement, ReactNode } from 'react';
 
 export function AddIndividualGrievanceDetails({
@@ -27,6 +28,9 @@ export function AddIndividualGrievanceDetails({
   const { t } = useTranslation();
   const { data, loading } = useAllAddIndividualFieldsQuery();
   const [mutate] = useApproveAddIndividualDataChangeMutation();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   const confirm = useConfirmation();
   const { showMessage } = useSnackbar();
   if (loading) {
@@ -117,11 +121,11 @@ export function AddIndividualGrievanceDetails({
   ];
 
   let dialogText = t(
-    'You did not approve the following add individual data. Are you sure you want to continue?',
+    `You did not approve the following add ${beneficiaryGroup?.memberLabel} data. Are you sure you want to continue?`,
   );
   if (!ticket.addIndividualTicketDetails.approveStatus) {
     dialogText = t(
-      'You are approving the following Add individual data. Are you sure you want to continue?',
+      `You are approving the following Add ${beneficiaryGroup?.memberLabel} data. Are you sure you want to continue?`,
     );
   }
 
@@ -129,7 +133,9 @@ export function AddIndividualGrievanceDetails({
     <ApproveBox>
       <Title>
         <Box display="flex" justifyContent="space-between">
-          <Typography variant="h6">{t('Individual Data')}</Typography>
+          <Typography variant="h6">
+            {t(`${beneficiaryGroup?.memberLabel} Data`)}
+          </Typography>
           {canApproveDataChange && (
             <Button
               data-cy="button-approve"

@@ -5,7 +5,6 @@ from tests.selenium.page_object.base_components import BaseComponents
 
 class PeriodicDatUpdateTemplates(BaseComponents):
     navProgramPopulation = 'a[data-cy="nav-Programme Population"]'
-    navHouseholdMembers = 'a[data-cy="nav-Household Members"]'
     navProgramDetails = 'a[data-cy="nav-Programme Details"]'
     pageHeaderContainer = 'div[data-cy="page-header-container"]'
     pageHeaderTitle = 'h5[data-cy="page-header-title"]'
@@ -43,9 +42,6 @@ class PeriodicDatUpdateTemplates(BaseComponents):
 
     def getNavProgramPopulation(self) -> WebElement:
         return self.wait_for(self.navProgramPopulation)
-
-    def getNavHouseholdMembers(self) -> WebElement:
-        return self.wait_for(self.navHouseholdMembers)
 
     def getNavProgramDetails(self) -> WebElement:
         return self.wait_for(self.navProgramDetails)
@@ -159,7 +155,6 @@ class PeriodicDatUpdateTemplates(BaseComponents):
 
 class PeriodicDatUpdateTemplatesDetails(BaseComponents):
     navProgramPopulation = 'a[data-cy="nav-Programme Population"]'
-    navHouseholdMembers = 'a[data-cy="nav-Household members"]'
     navProgramDetails = 'a[data-cy="nav-Programme Details"]'
     pageHeaderContainer = 'div[data-cy="page-header-container"]'
     arrow_back = 'div[data-cy="arrow_back"]'
@@ -202,9 +197,6 @@ class PeriodicDatUpdateTemplatesDetails(BaseComponents):
 
     def getNavProgramPopulation(self) -> WebElement:
         return self.wait_for(self.navProgramPopulation)
-
-    def getNavHouseholdMembers(self) -> WebElement:
-        return self.wait_for(self.navHouseholdMembers)
 
     def getNavProgramDetails(self) -> WebElement:
         return self.wait_for(self.navProgramDetails)

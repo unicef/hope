@@ -5,7 +5,6 @@ from uuid import UUID
 from django.db.models import Case, Count, IntegerField, Q, QuerySet, Value, When
 from django.db.models.functions import Lower
 from django.shortcuts import get_object_or_404
-from django.utils.translation import gettext_lazy as _
 
 from django_filters import (
     BooleanFilter,
@@ -20,13 +19,13 @@ from django_filters import (
 )
 
 from hct_mis_api.apps.activity_log.schema import LogEntryFilter
+from hct_mis_api.apps.core.filters import DateTimeRangeFilter, IntegerFilter
 from hct_mis_api.apps.core.utils import (
     CustomOrderingFilter,
     decode_id_string,
     decode_id_string_required,
 )
 from hct_mis_api.apps.payment.models import (
-    CashPlan,
     DeliveryMechanism,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
@@ -99,10 +98,7 @@ class PaymentVerificationFilter(FilterSet):
         )
 
     def business_area_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
-        return qs.filter(
-            Q(payment_verification_plan__payment_plan__business_area__slug=value)
-            | Q(payment_verification_plan__cash_plan__business_area__slug=value)
-        )
+        return qs.filter(payment_verification_plan__payment_plan__business_area__slug=value)
 
 
 class PaymentVerificationPlanFilter(FilterSet):
@@ -124,32 +120,18 @@ class PaymentVerificationSummaryFilter(FilterSet):
 
 
 class PaymentVerificationLogEntryFilter(LogEntryFilter):
-    PLAN_TYPE_CASH = "CashPlan"
-    PLAN_TYPE_PAYMENT = "PaymentPlan"
-    PLAN_TYPE_CHOICES = (
-        (PLAN_TYPE_CASH, _("CashPlan")),
-        (PLAN_TYPE_PAYMENT, _("PaymentPlan")),
-    )
     object_id = UUIDFilter(method="object_id_filter")
-    object_type = ChoiceFilter(method="object_type_filter", choices=PLAN_TYPE_CHOICES)
-
-    def filter_queryset(self, queryset: QuerySet) -> QuerySet:
-        cleaned_data = self.form.cleaned_data
-        object_type = cleaned_data.get("object_type")
-        object_id = cleaned_data.get("object_id")
-        plan_object = (PaymentPlan if object_type == self.PLAN_TYPE_PAYMENT else CashPlan).objects.get(pk=object_id)
-        verifications_ids = plan_object.payment_verification_plans.all().values_list("pk", flat=True)
-        return queryset.filter(object_id__in=verifications_ids)
 
     def object_id_filter(self, qs: QuerySet, name: str, value: UUID) -> QuerySet:
-        cash_plan = CashPlan.objects.get(pk=value)
-        verifications_ids = cash_plan.verifications.all().values_list("pk", flat=True)
+        payment_plan = PaymentPlan.objects.get(pk=value)
+        verifications_ids = payment_plan.payment_verification_plans.all().values_list("pk", flat=True)
         return qs.filter(object_id__in=verifications_ids)
 
 
 class FinancialServiceProviderXlsxTemplateFilter(FilterSet):
     class Meta:
         fields = (
+            "financial_service_providers",
             "name",
             "created_by",
         )
@@ -195,15 +177,36 @@ class FinancialServiceProviderFilter(FilterSet):
 class PaymentPlanFilter(FilterSet):
     business_area = CharFilter(field_name="business_area__slug", required=True)
     search = CharFilter(method="search_filter")
-    status = MultipleChoiceFilter(field_name="status", choices=PaymentPlan.Status.choices)
+    status = MultipleChoiceFilter(
+        method="filter_by_status", choices=PaymentPlan.Status.choices + [("ASSIGNED", "Assigned")]
+    )
+    status_not = ChoiceFilter(method="filter_status_not", choices=PaymentPlan.Status.choices)
     total_entitled_quantity_from = NumberFilter(field_name="total_entitled_quantity", lookup_expr="gte")
     total_entitled_quantity_to = NumberFilter(field_name="total_entitled_quantity", lookup_expr="lte")
     dispersion_start_date = DateFilter(field_name="dispersion_start_date", lookup_expr="gte")
     dispersion_end_date = DateFilter(field_name="dispersion_end_date", lookup_expr="lte")
     is_follow_up = BooleanFilter(field_name="is_follow_up")
+    is_payment_plan = BooleanFilter(method="filter_is_payment_plan")
+    is_target_population = BooleanFilter(method="filter_is_target_population")
     source_payment_plan_id = CharFilter(method="source_payment_plan_filter")
     program = CharFilter(method="filter_by_program")
     program_cycle = CharFilter(method="filter_by_program_cycle")
+    name = CharFilter(field_name="name", lookup_expr="startswith")
+    total_households_count_min = IntegerFilter(
+        field_name="total_number_of_hh",
+        lookup_expr="gte",
+    )
+    total_households_count_max = IntegerFilter(
+        field_name="total_number_of_hh",
+        lookup_expr="lte",
+    )
+    total_households_count_with_valid_phone_no_max = IntegerFilter(
+        method="filter_total_households_count_with_valid_phone_no_max"
+    )
+    total_households_count_with_valid_phone_no_min = IntegerFilter(
+        method="filter_total_households_count_with_valid_phone_no_min"
+    )
+    created_at_range = DateTimeRangeFilter(field_name="created_at")
 
     class Meta:
         fields = tuple()
@@ -217,6 +220,7 @@ class PaymentPlanFilter(FilterSet):
 
     order_by = OrderingFilter(
         fields=(
+            "name",
             "unicef_id",
             "status",
             "total_households_count",
@@ -227,7 +231,8 @@ class PaymentPlanFilter(FilterSet):
             "dispersion_start_date",
             "dispersion_end_date",
             "created_at",
-            "mark",
+            "updated_at",
+            "created_by",
         )
     )
 
@@ -242,6 +247,73 @@ class PaymentPlanFilter(FilterSet):
 
     def filter_by_program_cycle(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[PaymentPlan]":
         return qs.filter(program_cycle_id=decode_id_string_required(value))
+
+    def filter_is_payment_plan(self, qs: "QuerySet", name: str, value: bool) -> "QuerySet[PaymentPlan]":
+        if value:
+            return qs.exclude(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
+        return qs
+
+    def filter_is_target_population(self, qs: "QuerySet", name: str, value: bool) -> "QuerySet[PaymentPlan]":
+        if value:
+            return qs.filter(status__in=PaymentPlan.PRE_PAYMENT_PLAN_STATUSES)
+        return qs
+
+    @staticmethod
+    def filter_by_status(queryset: "QuerySet", model_field: str, value: Any) -> "QuerySet":
+        # assigned TP statuses
+        is_assigned = [
+            PaymentPlan.Status.PREPARING,
+            PaymentPlan.Status.OPEN,
+            PaymentPlan.Status.LOCKED,
+            PaymentPlan.Status.LOCKED_FSP,
+            PaymentPlan.Status.IN_APPROVAL,
+            PaymentPlan.Status.IN_AUTHORIZATION,
+            PaymentPlan.Status.IN_REVIEW,
+            PaymentPlan.Status.ACCEPTED,
+            PaymentPlan.Status.FINISHED,
+        ]
+        if "ASSIGNED" in value:
+            # add all list of statuses
+            value = is_assigned + [status for status in value if status != "ASSIGNED"]
+        return queryset.filter(status__in=value)
+
+    @staticmethod
+    def filter_total_households_count_with_valid_phone_no_max(
+        queryset: "QuerySet", model_field: str, value: Any
+    ) -> "QuerySet":
+        queryset = queryset.annotate(
+            household_count_with_phone_number=Count(
+                "payment_items",
+                filter=Q(
+                    Q(payment_items__household__head_of_household__phone_no_valid=True)
+                    | Q(payment_items__household__head_of_household__phone_no_alternative_valid=True)
+                )
+                & Q(payment_items__conflicted=False)
+                & Q(payment_items__excluded=False),
+            )
+        ).filter(household_count_with_phone_number__lte=value)
+        return queryset
+
+    @staticmethod
+    def filter_total_households_count_with_valid_phone_no_min(
+        queryset: "QuerySet", model_field: str, value: Any
+    ) -> "QuerySet":
+        queryset = queryset.annotate(
+            household_count_with_phone_number=Count(
+                "payment_items",
+                filter=Q(
+                    Q(payment_items__household__head_of_household__phone_no_valid=True)
+                    | Q(payment_items__household__head_of_household__phone_no_alternative_valid=True)
+                )
+                & Q(payment_items__conflicted=False)
+                & Q(payment_items__excluded=False),
+            )
+        ).filter(household_count_with_phone_number__gte=value)
+        return queryset
+
+    @staticmethod
+    def filter_status_not(queryset: "QuerySet", model_field: str, value: Any) -> "QuerySet":
+        return queryset.exclude(status=value)
 
 
 class PaymentFilter(FilterSet):

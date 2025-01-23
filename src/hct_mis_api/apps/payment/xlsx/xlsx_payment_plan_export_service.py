@@ -64,7 +64,7 @@ class XlsxPaymentPlanExportService(XlsxPaymentPlanBaseService, XlsxExportBaseSer
         self.generate_workbook()
         with NamedTemporaryFile() as tmp:
             xlsx_obj = FileTemp(
-                object_id=self.payment_plan.pk,
+                object_id=str(self.payment_plan.pk),
                 content_type=get_content_type_for_model(self.payment_plan),
                 created_by=user,
             )

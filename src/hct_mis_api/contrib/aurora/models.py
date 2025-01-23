@@ -100,6 +100,10 @@ class RecordBase(models.Model):
 class Record(RecordBase):
     class Meta:
         swappable = swapper.swappable_setting("aurora", "Record")
+        permissions = (
+            ("can_fetch_data", "Can fetch data from aurora"),
+            ("can_add_records", "Can add records"),
+        )
 
     def mark_as_invalid(self, msg: str) -> None:
         self.error_message = msg

@@ -1,5 +1,6 @@
 import {
   AllPaymentPlansForTableQueryVariables,
+  PaymentPlanStatus,
   usePaymentPlanStatusChoicesQueryQuery,
 } from '@generated/graphql';
 import styled from 'styled-components';
@@ -18,6 +19,7 @@ import { DatePickerFilter } from '@core/DatePickerFilter';
 import moment from 'moment';
 import { ClearApplyButtons } from '@core/ClearApplyButtons';
 import { ReactElement } from 'react';
+import { allowedStatusChoices } from '@containers/tables/paymentmodule/PaymentPlansTable/PaymentPlansFilters';
 
 export type FilterProps = Pick<
   AllPaymentPlansForTableQueryVariables,
@@ -78,6 +80,11 @@ export const PaymentPlansFilters = ({
     return null;
   }
 
+  const preparedStatusChoices =
+    [...(statusChoicesData?.paymentPlanStatusChoices || [])]?.filter((el) =>
+      allowedStatusChoices.includes(el.value as PaymentPlanStatus),
+    ) || [];
+
   return (
     <FilterSectionWrapper>
       <ContainerWithBorder>
@@ -102,7 +109,7 @@ export const PaymentPlansFilters = ({
               value={filter.status}
               fullWidth
             >
-              {statusChoicesData.paymentPlanStatusChoices.map((item) => {
+              {preparedStatusChoices.map((item) => {
                 return (
                   <MenuItem key={item.value} value={item.value}>
                     {item.name}

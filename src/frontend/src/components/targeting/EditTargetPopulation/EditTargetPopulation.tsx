@@ -1,8 +1,8 @@
 import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 import {
-  TargetPopulationQuery,
-  TargetPopulationStatus,
-  useUpdateTpMutation,
+  PaymentPlanQuery,
+  PaymentPlanStatus,
+  useUpdatePpMutation,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -27,44 +27,48 @@ import { ProgramCycleAutocompleteRest } from '@shared/autocompletes/rest/Program
 import { ReactElement } from 'react';
 
 interface EditTargetPopulationProps {
-  targetPopulation: TargetPopulationQuery['targetPopulation'];
+  paymentPlan: PaymentPlanQuery['paymentPlan'];
   screenBeneficiary: boolean;
 }
 
 export const EditTargetPopulation = ({
-  targetPopulation,
+  paymentPlan,
   screenBeneficiary,
 }: EditTargetPopulationProps): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  //UPDATE PP MUTATION
   const initialValues = {
-    id: targetPopulation.id,
-    name: targetPopulation.name || '',
-    program: targetPopulation.program?.id || '',
-    targetingCriteria: targetPopulation.targetingCriteria.rules || [],
-    excludedIds: targetPopulation.excludedIds || '',
-    exclusionReason: targetPopulation.exclusionReason || '',
+    id: paymentPlan.id,
+    name: paymentPlan.name || '',
+    program: paymentPlan.program?.id || '',
+    targetingCriteria: paymentPlan.targetingCriteria.rules || [],
+    excludedIds: paymentPlan.excludedIds || '',
+    exclusionReason: paymentPlan.exclusionReason || '',
     flagExcludeIfActiveAdjudicationTicket:
-      targetPopulation.targetingCriteria
-        .flagExcludeIfActiveAdjudicationTicket || false,
+      paymentPlan.targetingCriteria.flagExcludeIfActiveAdjudicationTicket ||
+      false,
     flagExcludeIfOnSanctionList:
-      targetPopulation.targetingCriteria.flagExcludeIfOnSanctionList || false,
+      paymentPlan.targetingCriteria.flagExcludeIfOnSanctionList || false,
     programCycleId: {
-      value: targetPopulation.programCycle.id,
-      name: targetPopulation.programCycle.title,
+      value: paymentPlan.programCycle.id,
+      name: paymentPlan.programCycle.title,
     },
   };
-  const [mutate, { loading }] = useUpdateTpMutation();
+
+  const [mutate, { loading }] = useUpdatePpMutation();
   const { showMessage } = useSnackbar();
   const { baseUrl } = useBaseUrl();
-  const { isSocialDctType, isStandardDctType } = useProgramContext();
+  const { selectedProgram, isSocialDctType, isStandardDctType } =
+    useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const handleValidate = (values): { targetingCriteria?: string } => {
     const { targetingCriteria, householdIds, individualIds } = values;
     const errors: { targetingCriteria?: string } = {};
     if (!targetingCriteria.length && !householdIds && !individualIds) {
       errors.targetingCriteria = t(
-        'You need to select at least one targeting criteria or individual ID or household ID',
+        `You need to select at least one targeting criteria or ${beneficiaryGroup?.memberLabel} ID or ${beneficiaryGroup?.groupLabel} ID`,
       );
     }
     return errors;
@@ -87,21 +91,19 @@ export const EditTargetPopulation = ({
     try {
       await mutate({
         variables: {
-          input: {
-            id: values.id,
-            excludedIds: values.excludedIds,
-            exclusionReason: values.exclusionReason,
-            programCycleId: values.programCycleId.value,
-            ...(targetPopulation.status === TargetPopulationStatus.Open && {
-              name: values.name,
-            }),
-            ...getTargetingCriteriaVariables({
-              flagExcludeIfActiveAdjudicationTicket:
-                values.flagExcludeIfActiveAdjudicationTicket,
-              flagExcludeIfOnSanctionList: values.flagExcludeIfOnSanctionList,
-              criterias: values.targetingCriteria,
-            }),
-          },
+          paymentPlanId: values.id,
+          excludedIds: values.excludedIds,
+          exclusionReason: values.exclusionReason,
+          programCycleId: values.programCycleId.value,
+          ...(paymentPlan.status === PaymentPlanStatus.TpOpen && {
+            name: values.name,
+          }),
+          ...getTargetingCriteriaVariables({
+            flagExcludeIfActiveAdjudicationTicket:
+              values.flagExcludeIfActiveAdjudicationTicket,
+            flagExcludeIfOnSanctionList: values.flagExcludeIfOnSanctionList,
+            criterias: values.targetingCriteria,
+          }),
         },
       });
       showMessage(t('Target Population Updated'));
@@ -126,7 +128,7 @@ export const EditTargetPopulation = ({
             values={values}
             loading={loading}
             baseUrl={baseUrl}
-            targetPopulation={targetPopulation}
+            targetPopulation={paymentPlan}
             data-cy="edit-target-population-header"
           />
           <PaperContainer data-cy="paper-container">
@@ -157,7 +159,7 @@ export const EditTargetPopulation = ({
                   required
                   component={FormikTextField}
                   variant="outlined"
-                  disabled={targetPopulation.status === 'LOCKED'}
+                  disabled={paymentPlan.status === 'LOCKED'}
                 />
               </Grid>
             </Grid>
@@ -192,10 +194,14 @@ export const EditTargetPopulation = ({
             data-cy="save-message-box"
           >
             <Typography style={{ color: '#b1b1b5' }} variant="h6">
-              {t('Save to see the list of households')}
+              {t(
+                `Save to see the list of ${beneficiaryGroup?.groupLabelPlural}`,
+              )}
             </Typography>
             <Typography style={{ color: '#b1b1b5' }} variant="subtitle1">
-              {t('List of households will be available after saving')}
+              {t(
+                `List of ${beneficiaryGroup?.groupLabelPlural} will be available after saving`,
+              )}{' '}
             </Typography>
           </Box>
         </Form>
