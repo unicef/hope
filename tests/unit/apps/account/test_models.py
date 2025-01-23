@@ -111,6 +111,20 @@ class TestRoleAssignmentModel(TransactionTestCase):
         )
         self.assertIsNotNone(role_assignment_user.id)
 
+        # UNICEF sub-partners can be assigned the role despite the flag
+        unicef = PartnerFactory(name="UNICEF")
+        unicef_hq = PartnerFactory(name="UNICEF HQ")
+        unicef_hq.parent = unicef
+        unicef_hq.save()
+        unicef_hq.allowed_business_areas.add(self.business_area)
+        role_assignment_unicef_hq = RoleAssignment.objects.create(
+            user=None,
+            partner=unicef_hq,
+            role=self.role2,
+            business_area=self.business_area,
+        )
+        self.assertIsNotNone(role_assignment_unicef_hq.id)
+
     def test_partner_role_in_business_area_vs_allowed_business_areas(self) -> None:
         # Possible to create RoleAssignment for a business area that is allowed for the partner
         RoleAssignment.objects.create(
@@ -255,6 +269,30 @@ class TestRoleAssignmentModel(TransactionTestCase):
 
         self.assertIn(
             f"{parent_partner} cannot become a parent as it has RoleAssignments.",
+            str(ve_context.exception),
+        )
+
+    def test_assign_parent_partner_to_user(self) -> None:
+        parent_partner = PartnerFactory(name="Parent Partner")
+        self.partner.parent = parent_partner
+
+        with self.assertRaises(ValidationError) as ve_context:
+            self.user.partner = parent_partner
+
+        self.assertIn(
+            f"{self.partner} is a parent partner and cannot have users.",
+            str(ve_context.exception),
+        )
+
+    def test_assign_partner_with_user_as_parent(self) -> None:
+        parent_partner = PartnerFactory(name="Parent Partner")
+        self.user.partner = parent_partner
+
+        with self.assertRaises(ValidationError) as ve_context:
+            self.partner.parent = parent_partner
+
+        self.assertIn(
+            f"{self.parent} cannot become a parent as it has users.",
             str(ve_context.exception),
         )
 

@@ -19,6 +19,7 @@ from hct_mis_api.apps.program.models import Program
 class PermissionsBackend(BaseBackend):
     def get_all_permissions(self, user: User, obj: Optional[Model] = None) -> set[str]:  # type: ignore
         print("PERMISSIONS CHECK")
+        print(obj)
         filters: dict[str, Any]
         if not obj:
             program = None
