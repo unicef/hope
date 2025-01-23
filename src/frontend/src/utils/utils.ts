@@ -56,6 +56,16 @@ export function opacityToHex(opacity: number): string {
   return Math.floor(opacity * 0xff).toString(16);
 }
 
+export function mapPartnerChoices(choices, selectedPartners) {
+  return choices
+    .filter((partner) => !partner.name.startsWith('UNICEF Partner for'))
+    .map((partner) => ({
+      value: partner.value,
+      label: partner.name,
+      disabled: selectedPartners.some((p) => p.id === partner.value),
+    }));
+}
+
 export function periodicDataUpdatesStatusToColor(
   theme: typeof themeObj,
   status: string,

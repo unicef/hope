@@ -16,7 +16,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { Box, Fade } from '@mui/material';
-import { decodeIdString } from '@utils/utils';
+import { decodeIdString, mapPartnerChoices } from '@utils/utils';
 import { Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -298,13 +298,10 @@ export const DuplicateProgramPage = (): ReactElement => {
           errors,
           setErrors,
         }) => {
-          const mappedPartnerChoices = userPartnerChoices
-            .filter((partner) => !partner.name.startsWith('UNICEF'))
-            .map((partner) => ({
-              value: partner.value,
-              label: partner.name,
-              disabled: values.partners.some((p) => p.id === partner.value),
-            }));
+          const mappedPartnerChoices = mapPartnerChoices(
+            userPartnerChoices,
+            values.partners,
+          );
 
           const handleNextStep = async () => {
             await handleNext({
