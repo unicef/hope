@@ -2,7 +2,16 @@ from base64 import b64decode
 from typing import Any, List
 from uuid import UUID
 
-from django.db.models import Case, Count, IntegerField, Q, QuerySet, Value, When
+from django.db.models import (
+    Case,
+    Count,
+    IntegerField,
+    OuterRef,
+    Q,
+    QuerySet,
+    Value,
+    When,
+)
 from django.db.models.functions import Lower
 from django.shortcuts import get_object_or_404
 
@@ -25,8 +34,10 @@ from hct_mis_api.apps.core.utils import (
     decode_id_string,
     decode_id_string_required,
 )
+from hct_mis_api.apps.payment.managers import ArraySubquery
 from hct_mis_api.apps.payment.models import (
     DeliveryMechanism,
+    DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
     FinancialServiceProviderXlsxTemplate,
     Payment,
@@ -181,10 +192,15 @@ class PaymentPlanFilter(FilterSet):
         method="filter_by_status", choices=PaymentPlan.Status.choices + [("ASSIGNED", "Assigned")]
     )
     status_not = ChoiceFilter(method="filter_status_not", choices=PaymentPlan.Status.choices)
+    verification_status = MultipleChoiceFilter(
+        method="filter_verification_status", choices=PaymentVerificationSummary.STATUS_CHOICES
+    )
     total_entitled_quantity_from = NumberFilter(field_name="total_entitled_quantity", lookup_expr="gte")
     total_entitled_quantity_to = NumberFilter(field_name="total_entitled_quantity", lookup_expr="lte")
     dispersion_start_date = DateFilter(field_name="dispersion_start_date", lookup_expr="gte")
     dispersion_end_date = DateFilter(field_name="dispersion_end_date", lookup_expr="lte")
+    start_date = DateFilter(field_name="start_date", lookup_expr="gte")
+    end_date = DateFilter(field_name="end_date", lookup_expr="lte")
     is_follow_up = BooleanFilter(field_name="is_follow_up")
     is_payment_plan = BooleanFilter(method="filter_is_payment_plan")
     is_target_population = BooleanFilter(method="filter_is_target_population")
@@ -207,6 +223,8 @@ class PaymentPlanFilter(FilterSet):
         method="filter_total_households_count_with_valid_phone_no_min"
     )
     created_at_range = DateTimeRangeFilter(field_name="created_at")
+    service_provider = CharFilter(method="filter_service_provider")
+    delivery_types = CharFilter(method="filter_delivery_types")
 
     class Meta:
         fields = tuple()
@@ -314,6 +332,33 @@ class PaymentPlanFilter(FilterSet):
     @staticmethod
     def filter_status_not(queryset: "QuerySet", model_field: str, value: Any) -> "QuerySet":
         return queryset.exclude(status=value)
+
+    @staticmethod
+    def filter_verification_status(queryset: "QuerySet", model_field: str, verification_status: Any) -> "QuerySet":
+        return queryset.filter(payment_verification_summary__status__in=verification_status)
+
+    @staticmethod
+    def filter_service_provider(queryset: "QuerySet", model_field: str, service_provider_name: str) -> "QuerySet":
+        fsp_qs = FinancialServiceProvider.objects.filter(
+            delivery_mechanisms_per_payment_plan__payment_plan=OuterRef("pk")
+        ).distinct()
+        queryset = queryset.annotate(fsp_names=ArraySubquery(fsp_qs.values_list("name", flat=True)))
+        return queryset.filter(fsp_names__icontains=service_provider_name)
+
+    @staticmethod
+    def filter_delivery_types(queryset: "QuerySet", model_field: str, delivery_types: Any) -> "QuerySet":
+        q = Q()
+        delivery_mechanisms_per_pp_qs = DeliveryMechanismPerPaymentPlan.objects.filter(
+            payment_plan=OuterRef("pk")
+        ).distinct("delivery_mechanism")
+        queryset = queryset.annotate(
+            delivery_types=ArraySubquery(
+                delivery_mechanisms_per_pp_qs.values_list("delivery_mechanism__name", flat=True)
+            )
+        )
+        for delivery_type in delivery_types:
+            q |= Q(delivery_types__icontains=delivery_type)
+        return queryset.filter(q)
 
 
 class PaymentFilter(FilterSet):
