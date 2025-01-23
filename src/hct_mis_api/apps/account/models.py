@@ -20,6 +20,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from model_utils.models import UUIDModel
+from mptt.managers import TreeManager
 from natural_keys import NaturalKeyModel
 
 from hct_mis_api.apps.account.fields import ChoiceArrayField
@@ -68,6 +69,8 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
         if self.parent:
             if RoleAssignment.objects.filter(partner=self.parent).exists():
                 raise ValidationError(f"{self.parent} cannot become a parent as it has RoleAssignments.")
+            if self.parent.user_set.exists():
+                raise ValidationError(f"{self.parent} cannot become a parent as it has users.")
         super().save(*args, **kwargs)
 
     @property
@@ -188,6 +191,8 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             self.partner, _ = Partner.objects.get_or_create(name=settings.DEFAULT_EMPTY_PARTNER)
         if not self.partner.pk:
             self.partner.save()
+        if self.partner and self.partner.is_parent:
+            raise ValidationError(f"{self.partner} is a parent partner and cannot have users.")
         super().save(*args, **kwargs)
 
     def has_program_access(self, program_id: Union[str, UUID]) -> bool:
@@ -401,7 +406,12 @@ class RoleAssignment(NaturalKeyModel, TimeStampedUUIDModel):
         if bool(self.user) == bool(self.partner):
             errors.append("Either user or partner must be set, but not both.")
         # Ensure partner can only be assigned roles that have flag is_available_for_partner as True
-        if self.partner and self.role and not self.role.is_available_for_partner:
+        if (
+            self.partner
+            and not self.partner.is_unicef_subpartner
+            and self.role
+            and not self.role.is_available_for_partner
+        ):
             errors.append("Partner can only be assigned roles that are available for partners.")
         if self.partner:
             # Validate that business_area is within the partner's allowed_business_areas
