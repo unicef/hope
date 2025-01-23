@@ -297,6 +297,15 @@ def migrate_message_and_survey(list_ids: List[str], model: Any, business_area_id
 
 
 def create_payments_for_pending_payment_plans() -> None:
+    from django.db import transaction
+    from django.utils import timezone
+
+    from hct_mis_api.apps.core.models import BusinessArea
+    from hct_mis_api.apps.payment.models import PaymentPlan
+    from hct_mis_api.apps.payment.services.payment_plan_services import (
+        PaymentPlanService,
+    )
+
     """
     step 2 create Payments for BUILD_STATUS_PENDING PaymentPlans
     """
@@ -312,7 +321,7 @@ def create_payments_for_pending_payment_plans() -> None:
             print(f"\n *** Processing {business_area.name}.")
             print("Create payments for New Created Payment Plans: ", build_payment_plans_qs.count())
             for payment_plan in build_payment_plans_qs:
-                print(f".... processing with PP: {payment_plan.unicef_id}")
+                print(f".... processing with PP: {payment_plan.unicef_id} - {payment_plan.name}")
                 with transaction.atomic():
                     try:
                         payment_plan.build_status_building()
