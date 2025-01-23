@@ -1,9 +1,11 @@
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  AllCashPlansAndPaymentPlansQueryVariables,
+  AllPaymentPlansQueryVariables,
+  AllPaymentPlansForTableQueryVariables,
   CashPlanAndPaymentPlanNode,
-  useAllCashPlansAndPaymentPlansQuery,
+  useAllPaymentPlansForTableQuery,
+  PaymentPlanNode,
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { dateToIsoString } from '@utils/utils';
@@ -23,7 +25,7 @@ export function PaymentVerificationTable({
 }: PaymentVerificationTableProps): ReactElement {
   const { t } = useTranslation();
   const { programId } = useBaseUrl();
-  const initialVariables: AllCashPlansAndPaymentPlansQueryVariables = {
+  const initialVariables: AllPaymentPlansForTableQueryVariables = {
     businessArea,
     search: filter.search,
     verificationStatus: filter.verificationStatus,
@@ -32,17 +34,13 @@ export function PaymentVerificationTable({
     startDateGte: dateToIsoString(filter.startDate, 'startOfDay'),
     endDateLte: dateToIsoString(filter.endDate, 'endOfDay'),
     program: programId,
-    isPaymentVerificationPage: true,
   };
   return (
-    <UniversalTable<
-    CashPlanAndPaymentPlanNode,
-    AllCashPlansAndPaymentPlansQueryVariables
-    >
+    <UniversalTable<PaymentPlanNode, AllPaymentPlansForTableQueryVariables>
       title={t('List of Payment Plans')}
       headCells={headCells}
-      query={useAllCashPlansAndPaymentPlansQuery}
-      queriedObjectName="allCashPlansAndPaymentPlans"
+      query={useAllPaymentPlansForTableQuery}
+      queriedObjectName="allPaymentPlans"
       initialVariables={initialVariables}
       renderRow={(cashPlanAndPaymentPlanNode) => (
         <PaymentVerificationTableRow

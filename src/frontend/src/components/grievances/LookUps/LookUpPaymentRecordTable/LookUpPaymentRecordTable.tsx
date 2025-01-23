@@ -1,9 +1,9 @@
 import { MouseEvent, ReactElement, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import {
-  AllPaymentRecordsAndPaymentsQueryVariables,
+  AllPaymentsForTableQueryVariables,
   PaymentRecordAndPaymentNode,
-  useAllPaymentRecordsAndPaymentsQuery,
+  useAllPaymentsForTableQuery,
 } from '@generated/graphql';
 import { UniversalTable } from '@containers/tables/UniversalTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
@@ -64,11 +64,11 @@ export function LookUpPaymentRecordTable({
     return (
       <UniversalTable<
         PaymentRecordAndPaymentNode,
-        AllPaymentRecordsAndPaymentsQueryVariables
+        AllPaymentsForTableQueryVariables
       >
         headCells={headCells}
-        query={useAllPaymentRecordsAndPaymentsQuery}
-        queriedObjectName="allPaymentRecordsAndPayments"
+        query={useAllPaymentsForTableQuery}
+        queriedObjectName="allPayments"
         initialVariables={initialVariables}
         renderRow={(row) => (
           <LookUpPaymentRecordTableRow
@@ -85,11 +85,11 @@ export function LookUpPaymentRecordTable({
   return (
     <UniversalTable<
       PaymentRecordAndPaymentNode,
-      AllPaymentRecordsAndPaymentsQueryVariables
+      AllPaymentsForTableQueryVariables
     >
       headCells={headCells}
-      query={useAllPaymentRecordsAndPaymentsQuery}
-      queriedObjectName="allPaymentRecordsAndPayments"
+      query={useAllPaymentsForTableQuery}
+      queriedObjectName="allPayments"
       initialVariables={initialVariables}
       onSelectAllClick={handleSelectAllCheckboxesClick}
       numSelected={numSelected}
