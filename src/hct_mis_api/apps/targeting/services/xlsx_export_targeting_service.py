@@ -37,7 +37,14 @@ class XlsxExportTargetingService:
     def households(self) -> Any:
         if self.payment_plan.status == PaymentPlan.Status.TP_OPEN:
             return self.payment_plan.household_list
-        return self.payment_plan.vulnerability_score_filtered_households
+
+        filters = {}
+        if self.payment_plan.vulnerability_score_max is not None:
+            filters["vulnerability_score__lte"] = self.payment_plan.vulnerability_score_max
+        if self.payment_plan.vulnerability_score_min is not None:
+            filters["vulnerability_score__gte"] = self.payment_plan.vulnerability_score_min
+        hh_ids = list(self.payment_plan.payment_items.filter(**filters).values_list("household_id", flat=True))
+        return self.payment_plan.household_list.filter(id__in=hh_ids)
 
     @cached_property
     def individuals(self) -> QuerySet[Individual]:
