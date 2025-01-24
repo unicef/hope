@@ -350,8 +350,12 @@ def migrate_tp_into_pp(batch_size: int = 1) -> None:
     get_statistics()
 
     for business_area in BusinessArea.objects.only("id", "name"):
-        queryset = TargetPopulation.objects.filter(business_area_id=business_area.id).only(
-            "id",
+        queryset = (
+            TargetPopulation.objects.filter(business_area_id=business_area.id)
+            .only(
+                "id",
+            )
+            .order_by("status")
         )
         if queryset:
             print(f"\n   ***   Processing {queryset.count()} {model_name} for {business_area.name}.")
@@ -361,6 +365,7 @@ def migrate_tp_into_pp(batch_size: int = 1) -> None:
             total_count = len(list_ids)
 
             for i in range(0, total_count, batch_size):
+                # one TP per page because of batch_size=1
                 with transaction.atomic():
                     batch_ids = list_ids[i : i + batch_size]
                     processing_qs = TargetPopulation.objects.filter(id__in=batch_ids)
