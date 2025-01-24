@@ -369,7 +369,7 @@ class PaymentPlan(
     built_at = models.DateTimeField(null=True, blank=True)
     targeting_criteria = models.OneToOneField(
         "targeting.TargetingCriteria",
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="payment_plan",
     )
     currency = models.CharField(max_length=4, choices=CURRENCY_CHOICES, blank=True, null=True)
@@ -750,17 +750,14 @@ class PaymentPlan(
 
     @property
     def has_empty_ids_criteria(self) -> bool:
-        if self.targeting_criteria is None:
-            return True
-        else:
-            has_hh_ids, has_ind_ids = False, False
-            for rule in self.targeting_criteria.rules.all():
-                if rule.household_ids:
-                    has_hh_ids = True
-                if rule.individual_ids:
-                    has_ind_ids = True
+        has_hh_ids, has_ind_ids = False, False
+        for rule in self.targeting_criteria.rules.all():
+            if rule.household_ids:
+                has_hh_ids = True
+            if rule.individual_ids:
+                has_ind_ids = True
 
-            return not has_hh_ids and not has_ind_ids
+        return not has_hh_ids and not has_ind_ids
 
     @property
     def excluded_beneficiaries_ids(self) -> List[str]:

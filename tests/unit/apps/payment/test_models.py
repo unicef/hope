@@ -332,8 +332,7 @@ class TestPaymentPlanModel(TestCase):
         self.assertEqual(pp.excluded_household_ids_targeting_level, [hh.unicef_id])
 
     def test_payment_plan_has_empty_criteria_property(self) -> None:
-        pp: PaymentPlan = PaymentPlanFactory(targeting_criteria=None, created_by=self.user)
-
+        pp: PaymentPlan = PaymentPlanFactory(created_by=self.user)
         self.assertTrue(pp.has_empty_criteria)
 
     def test_payment_plan_has_empty_ids_criteria_property(self) -> None:
@@ -386,16 +385,12 @@ class TestPaymentPlanModel(TestCase):
         self.assertIsNone(pp.imported_file_date)
 
     def test_has_empty_ids_criteria(self) -> None:
-        pp = PaymentPlanFactory(created_by=self.user, targeting_criteria=None)
-        self.assertTrue(pp.has_empty_ids_criteria)
-        targeting_criteria = TargetingCriteriaFactory()
+        pp = PaymentPlanFactory(created_by=self.user)
         TargetingCriteriaRuleFactory(
-            targeting_criteria=targeting_criteria,
+            targeting_criteria=pp.targeting_criteria,
             household_ids="HH-1, HH-2",
             individual_ids="IND-01, IND-02",
         )
-        pp.targeting_criteria = targeting_criteria
-        pp.save()
         self.assertFalse(pp.has_empty_ids_criteria)
 
 
