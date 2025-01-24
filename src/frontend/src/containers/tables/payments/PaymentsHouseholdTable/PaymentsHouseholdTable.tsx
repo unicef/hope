@@ -28,9 +28,7 @@ export function PaymentsHouseholdTable({
   const { t } = useTranslation();
   const { programId } = useBaseUrl();
   const initialVariables = {
-    //TODO: Change this to the correct paymentPlanId
-    paymentPlanId: 'test',
-    household: household?.id,
+    householdId: household?.id,
     businessArea,
     program: programId,
   };

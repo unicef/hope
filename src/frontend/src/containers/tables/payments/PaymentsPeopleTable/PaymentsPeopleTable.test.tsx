@@ -1,10 +1,10 @@
 import { MockedProvider } from '@apollo/react-testing';
 import { act } from 'react';
 import wait from 'waait';
-import { fakeApolloAllPaymentRecordsHousehold } from '../../../../../fixtures/payments/fakeApolloAllPaymentsHousehold';
 import { fakeHousehold } from '../../../../../fixtures/population/fakeHousehold';
 import { render } from '../../../../testUtils/testUtils';
 import { PaymentsPeopleTable } from '.';
+import { fakeApolloAllPaymentsHousehold } from '../../../../../fixtures/payments/fakeApolloAllPaymentsHousehold';
 
 describe('containers/tables/payments/PaymentsPeopleTable', () => {
   it('should render with data', async () => {

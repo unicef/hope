@@ -26,7 +26,6 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError, renderSomethingOrDash } from '@utils/utils';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
-import { PaymentRecordHouseholdTable } from '../../tables/payments/PaymentsHouseholdTable';
 import { HouseholdCompositionTable } from '../../tables/population/HouseholdCompositionTable/HouseholdCompositionTable';
 import { AdminButton } from '@core/AdminButton';
 import { CollectorsTable } from '@containers/tables/population/CollectorsTable';
@@ -34,6 +33,7 @@ import { HouseholdMembersTable } from '@containers/tables/population/HouseholdMe
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
 import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
+import { PaymentsHouseholdTable } from '@containers/tables/payments/PaymentsHouseholdTable';
 
 const Container = styled.div`
   padding: 20px;
@@ -129,7 +129,7 @@ export const PopulationHouseholdDetailsPage = (): ReactElement => {
       componentName="PopulationHouseholdDetailsPage"
     >
       <PageHeader
-        title={`${beneficiaryGroup?.memberLabel}: ${renderSomethingOrDash(
+        title={`${beneficiaryGroup?.groupLabel}: ${renderSomethingOrDash(
           household?.unicefId,
         )}`}
         breadCrumbs={
@@ -192,7 +192,7 @@ export const PopulationHouseholdDetailsPage = (): ReactElement => {
           PERMISSIONS.PROGRAMME_VIEW_LIST_AND_DETAILS,
           permissions,
         ) && (
-          <PaymentRecordHouseholdTable
+          <PaymentsHouseholdTable
             openInNewTab
             household={household as HouseholdNode}
             businessArea={businessArea}

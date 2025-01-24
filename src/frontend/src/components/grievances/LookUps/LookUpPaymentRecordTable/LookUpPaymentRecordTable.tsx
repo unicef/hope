@@ -24,9 +24,7 @@ export function LookUpPaymentRecordTable({
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   const initialVariables = {
-    //TODO: Change this to the correct paymentPlanId
-    paymentPlanId: 'test',
-    household: initialValues?.selectedHousehold?.id,
+    householdId: initialValues?.selectedHousehold?.id,
     businessArea,
     program: programId === 'all' ? null : programId,
   };

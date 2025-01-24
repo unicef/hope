@@ -103,7 +103,13 @@ export function GrievancesDetails({
   const renderPaymentUrl = (): ReactElement => {
     const paymentRecord = ticket?.paymentRecord;
     if (paymentRecord) {
-      return <>{`/${baseUrl}/payment-module/payments/${paymentRecord.id}`}</>;
+      return (
+        <ContentLink
+          href={`/${baseUrl}/payment-module/payments/${paymentRecord.id}`}
+        >
+          {paymentRecord.unicefId}
+        </ContentLink>
+      );
     }
     return <>-</>;
   };
