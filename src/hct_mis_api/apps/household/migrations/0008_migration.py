@@ -14,4 +14,8 @@ class Migration(migrations.Migration):
             name='individual',
             options={'permissions': (('update_individual_iban', 'Can update individual IBAN'),), 'verbose_name': 'Individual'},
         ),
+        migrations.RemoveField(
+            model_name='individual',
+            name='biometric_deduplication_batch_results',
+        ),
     ]
