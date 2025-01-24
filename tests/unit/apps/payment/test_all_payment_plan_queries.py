@@ -40,6 +40,10 @@ from hct_mis_api.apps.payment.models import (
     PaymentVerificationPlan,
 )
 from hct_mis_api.apps.program.fixtures import ProgramCycleFactory
+from hct_mis_api.apps.targeting.fixtures import (
+    TargetingCriteriaFactory,
+    TargetingCriteriaRuleFactory,
+)
 
 
 def create_child_payment_plans(pp: PaymentPlan, created_by: User) -> None:
@@ -281,6 +285,21 @@ class TestPaymentPlanQueries(APITestCase):
           canSendXlsxPassword
         }
       }
+    """
+
+    PAYMENT_PLAN_QUERY_WITH_TARGETING_CRITERIA = """
+    query PaymentPlan($id: ID!) {
+      paymentPlan(id: $id) {
+        name
+        status
+        targetingCriteria {
+          householdIds
+          individualIds
+          flagExcludeIfOnSanctionList
+          flagExcludeIfActiveAdjudicationTicket
+        }
+      }
+    }
     """
 
     @classmethod
@@ -1000,4 +1019,31 @@ class TestPaymentPlanQueries(APITestCase):
                 "businessArea": "afghanistan",
                 "householdId": encode_id_base64(self.p1.household_id, "Household"),
             },
+        )
+
+    @freeze_time("2020-10-10")
+    def test_payment_plans_with_targeting_criteria(self) -> None:
+        payment_plan = PaymentPlanFactory(
+            name="Test PP with TargetingCriteria",
+            status=PaymentPlan.Status.TP_OPEN,
+            program_cycle=self.program_cycle,
+            dispersion_start_date=datetime(2020, 8, 10),
+            dispersion_end_date=datetime(2020, 12, 10),
+            is_follow_up=False,
+            created_by=self.user,
+            currency="PLN",
+        )
+        targeting_criteria = TargetingCriteriaFactory()
+        TargetingCriteriaRuleFactory(
+            targeting_criteria=targeting_criteria,
+            household_ids="HH-1, HH-2",
+            individual_ids="IND-01, IND-02",
+        )
+        payment_plan.targeting_criteria = targeting_criteria
+        payment_plan.save()
+
+        self.snapshot_graphql_request(
+            request_string=self.PAYMENT_PLAN_QUERY_WITH_TARGETING_CRITERIA,
+            context={"user": self.user},
+            variables={"businessArea": "afghanistan", "id": encode_id_base64(payment_plan.id, "PaymentPlan")},
         )

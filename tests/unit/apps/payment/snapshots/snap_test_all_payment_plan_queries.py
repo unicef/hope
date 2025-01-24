@@ -1025,3 +1025,18 @@ snapshots['TestPaymentPlanQueries::test_payment_plans_export_download_properties
         }
     }
 }
+
+snapshots['TestPaymentPlanQueries::test_payment_plans_with_targeting_criteria 1'] = {
+    'data': {
+        'paymentPlan': {
+            'name': 'Test PP with TargetingCriteria',
+            'status': 'TP_OPEN',
+            'targetingCriteria': {
+                'flagExcludeIfActiveAdjudicationTicket': False,
+                'flagExcludeIfOnSanctionList': False,
+                'householdIds': 'HH-1, HH-2',
+                'individualIds': 'IND-01, IND-02'
+            }
+        }
+    }
+}

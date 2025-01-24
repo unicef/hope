@@ -96,7 +96,7 @@ try:  # pragma: no cover
                         context["form"] = form
             return TemplateResponse(request, "admin/targeting/targetpopulation/steficon_test.html", context)
 
-except ImportError:
+except ImportError:  # pragma: no cover
 
     class SteficonExecutorMixin:  # type: ignore # intentional
         pass

@@ -367,12 +367,9 @@ class PaymentPlan(
         choices=BuildStatus.choices, default=None, protected=False, db_index=True, null=True, blank=True
     )
     built_at = models.DateTimeField(null=True, blank=True)
-    # TODO: remove null=True after data migrations
     targeting_criteria = models.OneToOneField(
         "targeting.TargetingCriteria",
-        blank=True,
-        null=True,
-        on_delete=models.SET_NULL,
+        on_delete=models.PROTECT,
         related_name="payment_plan",
     )
     currency = models.CharField(max_length=4, choices=CURRENCY_CHOICES, blank=True, null=True)

@@ -388,7 +388,6 @@ class TestPaymentPlanModel(TestCase):
     def test_has_empty_ids_criteria(self) -> None:
         pp = PaymentPlanFactory(created_by=self.user, targeting_criteria=None)
         self.assertTrue(pp.has_empty_ids_criteria)
-
         targeting_criteria = TargetingCriteriaFactory()
         TargetingCriteriaRuleFactory(
             targeting_criteria=targeting_criteria,
