@@ -202,8 +202,8 @@ class TestPaymentPlanQueries(APITestCase):
         """
 
     ALL_PAYMENTS_QUERY = """
-    query AllPayments($paymentPlanId: String!, $businessArea: String!) {
-      allPayments(paymentPlanId: $paymentPlanId, businessArea: $businessArea, orderBy: "unicef_id") {
+    query AllPayments($paymentPlanId: String, $businessArea: String!, $householdId: String) {
+      allPayments(paymentPlanId: $paymentPlanId, businessArea: $businessArea, orderBy: "unicef_id", householdId: $householdId) {
         edgeCount
         edges {
           node {
@@ -989,4 +989,15 @@ class TestPaymentPlanQueries(APITestCase):
             request_string=self.PAYMENT_PLAN_QUERY,
             context={"user": user},
             variables={"businessArea": "afghanistan", "id": encoded_payment_plan_id},
+        )
+
+    @freeze_time("2020-10-10")
+    def test_all_payments_filter_by_household_id(self) -> None:
+        self.snapshot_graphql_request(
+            request_string=self.ALL_PAYMENTS_QUERY,
+            context={"user": self.user},
+            variables={
+                "businessArea": "afghanistan",
+                "householdId": encode_id_base64(self.p1.household_id, "Household"),
+            },
         )

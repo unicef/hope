@@ -363,8 +363,9 @@ class PaymentPlanFilter(FilterSet):
 
 class PaymentFilter(FilterSet):
     business_area = CharFilter(field_name="parent__business_area__slug", required=True)
-    payment_plan_id = CharFilter(required=True, method="payment_plan_id_filter")
+    payment_plan_id = CharFilter(method="payment_plan_id_filter")
     program_id = CharFilter(method="filter_by_program_id")
+    household_id = CharFilter(method="filter_by_household_id")
 
     def payment_plan_id_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         payment_plan_id = decode_id_string(value)
@@ -419,3 +420,6 @@ class PaymentFilter(FilterSet):
 
     def filter_by_program_id(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[Payment]":
         return qs.filter(parent__program_cycle__program_id=decode_id_string_required(value))
+
+    def filter_by_household_id(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[Payment]":
+        return qs.filter(household_id=decode_id_string_required(value))

@@ -23,6 +23,37 @@ snapshots['TestPaymentPlanQueries::test_all_payment_verification_log_entries 1']
     }
 }
 
+snapshots['TestPaymentPlanQueries::test_all_payments_filter_by_household_id 1'] = {
+    'data': {
+        'allPayments': {
+            'edgeCount': 1,
+            'edges': [
+                {
+                    'node': {
+                        'conflicted': False,
+                        'deliveredQuantity': 50.0,
+                        'deliveredQuantityUsd': 100.0,
+                        'entitlementQuantity': 100.0,
+                        'entitlementQuantityUsd': 200.0,
+                        'fspAuthCode': '',
+                        'parent': {
+                            'unicefId': 'PP-01'
+                        },
+                        'paymentPlanHardConflicted': False,
+                        'paymentPlanHardConflictedData': [
+                        ],
+                        'paymentPlanSoftConflicted': False,
+                        'paymentPlanSoftConflictedData': [
+                        ],
+                        'unicefId': 'RCPT-0060-20-0.000.001'
+                    }
+                }
+            ],
+            'totalCount': 1
+        }
+    }
+}
+
 snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans 1'] = {
     'data': {
         'allPaymentPlans': {
