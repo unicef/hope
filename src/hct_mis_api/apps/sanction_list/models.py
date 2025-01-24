@@ -58,6 +58,9 @@ class SanctionListIndividual(TimeStampedUUIDModel):
     objects = ActiveIndividualsManager()
     all_objects = ActiveIndividualsManager(active_only=False)
 
+    class Meta:
+        ordering = ["-listed_on"]
+
 
 class SanctionListIndividualDocument(TimeStampedUUIDModel):
     document_number = models.CharField(max_length=255)

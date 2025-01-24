@@ -24,10 +24,11 @@ services:
     ports:
       - "8080:8000"
     volumes:
-      - ../.:/code/
+      - ../src:/app/src
+      - ../tests:/app/tests
       - backend-data:/data
-      - ../pyproject.toml:/packages/pyproject.toml
-      - ../pdm.lock:/packages/pdm.lock
+      - ../pyproject.toml:/app/pyproject.toml
+      - ../uv.lock:/packages/uv.lock
       - ipython_data_local:/root/.ipython
     command: "dev"
     depends_on:
@@ -61,7 +62,7 @@ services:
     env_file:
       - .env
     volumes:
-      - ../src:/code/
+      - ../src:/app/src
       - backend-data:/data
     command: "celery-worker"
     depends_on:
@@ -88,7 +89,7 @@ services:
     env_file:
       - .env
     volumes:
-      - ../src:/code/
+      - ../src:/app/src/
       - backend-data:/data
     command: "celery-beat"
     depends_on:
@@ -179,7 +180,7 @@ services:
       - .env
     command: "celery-flower"
     volumes:
-      - ../src:/code/
+      - ../src:/app/src
       - backend-data:/data
     ports:
       - "5555:5555"
