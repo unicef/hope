@@ -2,13 +2,13 @@ from collections import defaultdict
 from typing import Any, Dict, List, Optional, Tuple
 
 from django.db import transaction
-from django.db.models import QuerySet
 from django.utils import timezone
 
 from hct_mis_api.apps.accountability.models import Message, Survey
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory
 from hct_mis_api.apps.targeting.models import (
     TargetingCriteria,
@@ -117,70 +117,65 @@ def tc_migrate_hh_ind_ids(tc: TargetingCriteria) -> Tuple[Optional[TargetingCrit
     return None, False
 
 
-def migrate_tp_qs(tp_qs: QuerySet["TargetPopulation"]) -> None:
+def migrate_tp(tp: "TargetPopulation") -> None:
     new_payment_plans = []
     update_payment_plans = []
     full_rebuild_payment_plans = []  # full rebuild for PP in PREPARING status
     update_tc_rules = []  # migrate TargetingCriteriaRule 'household_ids' & 'individual_ids'
     create_tc_rules = []
+    print(" ******** Processing TP ", str(tp.id))
+    # migrate ind_ids and hh_ids
+    if tp.targeting_criteria:
+        tcr, create = tc_migrate_hh_ind_ids(tp.targeting_criteria)
+        if tcr and not create:
+            update_tc_rules.append(tcr)
+        if tcr and create:
+            create_tc_rules.append(tcr)
 
-    tp_qs = tp_qs.prefetch_related("payment_plans", "targeting_criteria", "program_cycle")
-
-    for tp in tp_qs:
-        print(" ******** Processing TP ", str(tp.id))
-        # migrate ind_ids and hh_ids
-        if tp.targeting_criteria:
-            tcr, create = tc_migrate_hh_ind_ids(tp.targeting_criteria)
-            if tcr and not create:
-                update_tc_rules.append(tcr)
-            if tcr and create:
-                create_tc_rules.append(tcr)
-
-        # update existing PaymentPlan
-        pp_count = 0
-        existing_payment_plans = list(tp.payment_plans.filter(targeting_criteria__isnull=True))
-        if existing_payment_plans:
-            # if len(existing_payment_plans) > 1:
-            # print(f"Found more then 1 PP for TP {str(tp.pk)}, {len(existing_payment_plans)} PPs")
-            for payment_plan in existing_payment_plans:
-                pp_count += 1
-                payment_plan_data = map_tp_to_pp(tp)
-
-                for field, value in payment_plan_data.items():
-                    setattr(payment_plan, field, value)
-                # create copy targeting_criteria for other PP from the same TP
-                # like for follow up PPs and from Cash Assist maybe as well
-                if pp_count > 1:
-                    copy_new_target_criteria = PaymentPlanService.copy_target_criteria(tp.targeting_criteria)
-                    payment_plan.targeting_criteria = copy_new_target_criteria
-                # full rebuild for PREPARING Payment Plan
-                if payment_plan.status == PaymentPlan.Status.PREPARING:
-                    full_rebuild_payment_plans.append(str(payment_plan.pk))
-                update_payment_plans.append(payment_plan)
-        else:
-            # skip create payments if build_status is failed
-            # or set empty if no targeting_criteria
-            if tp.build_status == TargetPopulation.BUILD_STATUS_FAILED:
-                build_status = PaymentPlan.BuildStatus.BUILD_STATUS_FAILED
-            elif tp.targeting_criteria:
-                build_status = PaymentPlan.BuildStatus.BUILD_STATUS_PENDING
-            else:
-                build_status = None
-            # create new PaymentPlan in no PP with tp.targeting_criteria
+    # update existing PaymentPlan
+    pp_count = 0
+    # skip already migrated PaymentPlans by filtering targeting_criteria__isnull
+    existing_payment_plans = list(tp.payment_plans.filter(targeting_criteria__isnull=True))
+    if existing_payment_plans:
+        for payment_plan in existing_payment_plans:
+            pp_count += 1
             payment_plan_data = map_tp_to_pp(tp)
-            payment_plan_data["start_date"] = tp.program_cycle.start_date
-            payment_plan_data["end_date"] = tp.program_cycle.end_date
-            payment_plan_data["status"] = PaymentPlan.Status.TP_OPEN
-            payment_plan_data["status_date"] = timezone.now()
-            payment_plan_data["build_status"] = build_status
-            payment_plan_data["built_at"] = timezone.now()
-            if payment_plan_data.get("targeting_criteria") is None:
-                #  create new empty targeting_criteria
-                payment_plan_data["targeting_criteria"] = TargetingCriteriaFactory()
-            # check if PaymentPlan exists for this targeting_criteria
-            if not PaymentPlan.objects.filter(targeting_criteria=payment_plan_data["targeting_criteria"]).exists():
-                # create new PaymentPlan if no any PaymentPlan with the targeting_criteria
-                new_payment_plans.append(PaymentPlan(**payment_plan_data))
+
+            for field, value in payment_plan_data.items():
+                setattr(payment_plan, field, value)
+            # create copy targeting_criteria for other PP from the same TP
+            # like for follow up PPs and from Cash Assist maybe as well
+            if pp_count > 1:
+                copy_new_target_criteria = PaymentPlanService.copy_target_criteria(tp.targeting_criteria)
+                payment_plan.targeting_criteria = copy_new_target_criteria
+            # full rebuild for PREPARING Payment Plan
+            if payment_plan.status == PaymentPlan.Status.PREPARING:
+                full_rebuild_payment_plans.append(str(payment_plan.pk))
+            update_payment_plans.append(payment_plan)
+    else:
+        # skip create payments if build_status is failed
+        # or set empty if no targeting_criteria
+        if tp.build_status == TargetPopulation.BUILD_STATUS_FAILED:
+            build_status = PaymentPlan.BuildStatus.BUILD_STATUS_FAILED
+        elif tp.targeting_criteria:
+            build_status = PaymentPlan.BuildStatus.BUILD_STATUS_PENDING
+        else:
+            build_status = None
+        # create new PaymentPlan in no PP with tp.targeting_criteria
+        payment_plan_data = map_tp_to_pp(tp)
+        payment_plan_data["start_date"] = tp.program_cycle.start_date
+        payment_plan_data["end_date"] = tp.program_cycle.end_date
+        payment_plan_data["status"] = PaymentPlan.Status.TP_OPEN
+        payment_plan_data["status_date"] = timezone.now()
+        payment_plan_data["build_status"] = build_status
+        payment_plan_data["built_at"] = timezone.now()
+        if payment_plan_data.get("targeting_criteria") is None:
+            #  create new empty targeting_criteria
+            payment_plan_data["targeting_criteria"] = TargetingCriteriaFactory()
+        # check if PaymentPlan exists for this targeting_criteria
+        if not PaymentPlan.objects.filter(targeting_criteria=payment_plan_data["targeting_criteria"]).exists():
+            # create new PaymentPlan if no any PaymentPlan with the targeting_criteria
+            new_payment_plans.append(PaymentPlan(**payment_plan_data))
 
     if update_tc_rules:
         print("* processing update_tc_rules")
@@ -311,16 +306,19 @@ def create_payments_for_pending_payment_plans() -> None:
     """
     start_time = timezone.now()
     print("*** Create Payments for BUILD_STATUS_PENDING PaymentPlans ***\n", "*" * 60)
-    for business_area in BusinessArea.objects.only("id", "name"):
-        build_payment_plans_qs = PaymentPlan.objects.filter(
-            build_status=PaymentPlan.BuildStatus.BUILD_STATUS_PENDING,
-            business_area_id=business_area.id,
-            targeting_criteria__isnull=False,
-        ).only("id")
-        if build_payment_plans_qs.exists():
-            print(f"\n *** Processing {business_area.name}.")
-            print("Create payments for New Created Payment Plans: ", build_payment_plans_qs.count())
-            for payment_plan in build_payment_plans_qs:
+    for business_area in BusinessArea.objects.values("id", "name"):
+        build_payment_plans_ids_list = list(
+            PaymentPlan.objects.filter(
+                build_status=PaymentPlan.BuildStatus.BUILD_STATUS_PENDING,
+                business_area_id=business_area["id"],
+                targeting_criteria__isnull=False,
+            ).values_list("id", flat=True)
+        )
+        if build_payment_plans_ids_list:
+            print(f"\n *** Processing {business_area['name']}.")
+            print("Create payments for New Created Payment Plans: ", len(build_payment_plans_ids_list))
+            for payment_plan_id in build_payment_plans_ids_list:
+                payment_plan = PaymentPlan.objects.get(pk=payment_plan_id)
                 print(f".... processing with PP: {payment_plan.unicef_id} - {payment_plan.name}")
                 with transaction.atomic():
                     try:
@@ -338,9 +336,10 @@ def create_payments_for_pending_payment_plans() -> None:
     print(f"Completed in {timezone.now() - start_time}\n", "*" * 55)
 
 
-def migrate_tp_into_pp(batch_size: int = 1) -> None:
+def migrate_tp_into_pp() -> None:
     """
     Step 1 migrate TP>PP
+    first migrate Finished Programs, then Active Programs and Draft last
     """
     start_time = timezone.now()
     # queryset.model.__name__
@@ -348,47 +347,33 @@ def migrate_tp_into_pp(batch_size: int = 1) -> None:
 
     print(f"*** Data Migration {model_name} ***\n", "*" * 60)
     get_statistics()
+    program_statuses = [Program.FINISHED, Program.ACTIVE, Program.DRAFT]
 
-    for business_area in BusinessArea.objects.only("id", "name"):
-        queryset = (
-            TargetPopulation.objects.filter(business_area_id=business_area.id)
-            .only(
-                "id",
-            )
-            .order_by("status")
-        )
-        if queryset:
-            print(f"\n   ***   Processing {queryset.count()} {model_name} for {business_area.name}.")
+    for business_area in BusinessArea.objects.values("id", "name"):
+        print(f"\n   ***   Processing TP for {business_area['name']}.")
+        for program_status in program_statuses:
+            for program in Program.objects.filter(business_area_id=business_area["id"], status=program_status):
+                tp_list_ids = [
+                    str(tp_id)
+                    for tp_id in list(TargetPopulation.objects.filter(program=program).values_list("id", flat=True))
+                ]
+                if tp_list_ids:
+                    print(f"\n ****   Found {len(tp_list_ids)} TPs for {program.name} - {program_status}.")
 
-            list_ids = [str(obj_id) for obj_id in queryset.values_list("id", flat=True).iterator(chunk_size=batch_size)]
-            page_count = 0
-            total_count = len(list_ids)
-
-            for i in range(0, total_count, batch_size):
-                # one TP per page because of batch_size=1
-                with transaction.atomic():
-                    batch_ids = list_ids[i : i + batch_size]
-                    processing_qs = TargetPopulation.objects.filter(id__in=batch_ids)
-                    migrate_tp_qs(processing_qs)
-
-                    page_count += 1
-                    print(f"Progress: {page_count}/{-(-total_count // batch_size)} page(s) migrated.")
-
-                build_payment_plans_qs = PaymentPlan.objects.filter(
-                    build_status=PaymentPlan.BuildStatus.BUILD_STATUS_PENDING, business_area_id=business_area.id
-                )
-                if build_payment_plans_qs.exists():
-                    print(f"Payments for {build_payment_plans_qs.count()} Payment Plans will create later")
+                    for tp_id in tp_list_ids:
+                        with transaction.atomic():
+                            tp = TargetPopulation.objects.get(id=tp_id)
+                            migrate_tp(tp)
 
         # Migrate Message & Survey
         for model in (Message, Survey):
             print(f"Processing with migration {model.__name__} objects.")
-            model_qs = model.objects.filter(business_area_id=business_area.id, target_population__isnull=False).only(
+            model_qs = model.objects.filter(business_area_id=business_area["id"], target_population__isnull=False).only(
                 "id"
             )
-            list_ids = [str(obj_id) for obj_id in model_qs.values_list("id", flat=True).iterator(chunk_size=batch_size)]
+            list_ids = [str(obj_id) for obj_id in model_qs.values_list("id", flat=True).iterator()]
             with transaction.atomic():
-                update_list = migrate_message_and_survey(list_ids, model, str(business_area.id))
+                update_list = migrate_message_and_survey(list_ids, model, str(business_area["id"]))
                 model.objects.bulk_update(update_list, ["payment_plan_id"], 1000)
 
     print(f"Completed in {timezone.now() - start_time}\n", "*" * 55)
