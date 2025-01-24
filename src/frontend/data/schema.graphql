@@ -2542,7 +2542,7 @@ type PaymentPlanNode implements Node {
   backgroundActionStatus: PaymentPlanBackgroundActionStatus
   buildStatus: PaymentPlanBuildStatus
   builtAt: DateTime
-  targetingCriteria: TargetingCriteriaNode
+  targetingCriteria: TargetingCriteriaNode!
   currency: String
   dispersionStartDate: Date
   dispersionEndDate: Date
@@ -3043,7 +3043,7 @@ type Query {
   grievanceTicketUrgencyChoices: [ChoiceObjectInt]
   allSteficonRules(offset: Int, before: String, after: String, first: Int, last: Int, enabled: Boolean, deprecated: Boolean, type: String!): SteficonRuleNodeConnection
   payment(id: ID!): PaymentNode
-  allPayments(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, paymentPlanId: String!, programId: String, orderBy: String): PaymentNodeConnection
+  allPayments(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, paymentPlanId: String, programId: String, householdId: String, orderBy: String): PaymentNodeConnection
   financialServiceProviderXlsxTemplate(id: ID!): FinancialServiceProviderXlsxTemplateNode
   allFinancialServiceProviderXlsxTemplates(offset: Int, before: String, after: String, first: Int, last: Int, financialServiceProviders: [ID], name: String, createdBy: ID, orderBy: String): FinancialServiceProviderXlsxTemplateNodeConnection
   financialServiceProvider(id: ID!): FinancialServiceProviderNode
