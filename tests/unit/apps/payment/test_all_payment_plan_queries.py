@@ -1,5 +1,6 @@
 from datetime import datetime
 from io import BytesIO
+from typing import Any, List
 from unittest.mock import patch
 
 from django.core.files.uploadedfile import InMemoryUploadedFile
@@ -7,6 +8,7 @@ from django.utils import timezone
 
 from dateutil.relativedelta import relativedelta
 from freezegun import freeze_time
+from parameterized import parameterized
 from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -19,6 +21,7 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.payment.fixtures import (
+    DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
@@ -29,6 +32,8 @@ from hct_mis_api.apps.payment.fixtures import (
 from hct_mis_api.apps.payment.models import (
     AcceptanceProcessThreshold,
     ApprovalProcess,
+    FinancialServiceProvider,
+    Payment,
     PaymentHouseholdSnapshot,
     PaymentPlan,
     PaymentPlanSupportingDocument,
@@ -91,6 +96,11 @@ class TestPaymentPlanQueries(APITestCase):
             canCreateFollowUp
             canSplit
             canSendToPaymentGateway
+            canCreateXlsxWithFspAuthCode
+            fspCommunicationChannel
+            canExportXlsx
+            canDownloadXlsx
+            canSendXlsxPassword
             unsuccessfulPaymentsCount
             hasFspDeliveryMechanismXlsxTemplate
             availablePaymentRecordsCount
@@ -258,6 +268,20 @@ class TestPaymentPlanQueries(APITestCase):
           }
         }
         """
+    PAYMENT_PLAN_QUERY = """
+      query PaymentPlan($id: ID!) {
+        paymentPlan(id: $id) {
+          name
+          status
+          canSendToPaymentGateway
+          canCreateXlsxWithFspAuthCode
+          fspCommunicationChannel
+          canExportXlsx
+          canDownloadXlsx
+          canSendXlsxPassword
+        }
+      }
+    """
 
     @classmethod
     def setUpTestData(cls) -> None:
@@ -384,6 +408,13 @@ class TestPaymentPlanQueries(APITestCase):
                     size=10,
                     content_type="image/jpeg",
                 ),
+            )
+            DeliveryMechanismPerPaymentPlanFactory(
+                payment_plan=cls.pp_conflicted,
+                financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
+                financial_service_provider__payment_gateway_id="test123",
+                created_by=cls.user,
+                sent_by=cls.user,
             )
 
             with patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0):
@@ -895,4 +926,64 @@ class TestPaymentPlanQueries(APITestCase):
                 "program": encode_id_base64(self.pp.program.pk, "Program"),
                 "status": ["TP_OPEN"],
             },
+        )
+
+    @parameterized.expand(
+        [
+            (
+                "with_permission_api",
+                [Permissions.PM_DOWNLOAD_MTCN, Permissions.PM_SEND_XLSX_PASSWORD],
+                FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+            ),
+            ("without_permission_api", [], FinancialServiceProvider.COMMUNICATION_CHANNEL_API),
+            (
+                "with_permission_xlsx",
+                [Permissions.PM_DOWNLOAD_MTCN, Permissions.PM_SEND_XLSX_PASSWORD],
+                FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
+            ),
+            ("without_permission_xlsx", [], FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX),
+        ]
+    )
+    @freeze_time("2020-10-10")
+    def test_payment_plans_export_download_properties(
+        self, _: Any, permissions: List[Permissions], communication_channel: str
+    ) -> None:
+        user = UserFactory.create(username="abc")
+        self.create_user_role_with_permissions(user, permissions, self.business_area)
+
+        payment_plan = PaymentPlanFactory(
+            name="Test Finished PP",
+            status=PaymentPlan.Status.FINISHED,
+            program_cycle=self.program_cycle,
+            dispersion_start_date=datetime(2020, 8, 10),
+            dispersion_end_date=datetime(2020, 12, 10),
+            is_follow_up=False,
+            created_by=user,
+            currency="PLN",
+        )
+        dm_pp = DeliveryMechanismPerPaymentPlanFactory(
+            payment_plan=payment_plan,
+            financial_service_provider__communication_channel=communication_channel,
+            financial_service_provider__payment_gateway_id="1243",
+            created_by=user,
+            sent_by=user,
+        )
+        PaymentFactory(
+            parent=payment_plan,
+            status=Payment.STATUS_SENT_TO_FSP,
+            conflicted=True,
+            entitlement_quantity=00.00,
+            entitlement_quantity_usd=00.00,
+            delivered_quantity=00.00,
+            delivered_quantity_usd=00.00,
+            financial_service_provider=dm_pp.financial_service_provider,
+            currency="PLN",
+            fsp_auth_code="987",
+        )
+
+        encoded_payment_plan_id = encode_id_base64(payment_plan.id, "PaymentPlan")
+        self.snapshot_graphql_request(
+            request_string=self.PAYMENT_PLAN_QUERY,
+            context={"user": user},
+            variables={"businessArea": "afghanistan", "id": encoded_payment_plan_id},
         )

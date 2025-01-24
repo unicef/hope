@@ -18,3 +18,6 @@ class DashboardHouseholdSerializer(serializers.Serializer):
     fsp = serializers.CharField()
     delivery_types = serializers.CharField()
     pwd_counts = serializers.IntegerField()
+    reconciled = serializers.IntegerField()
+    finished_payment_plans = serializers.IntegerField()
+    total_payment_plans = serializers.IntegerField()

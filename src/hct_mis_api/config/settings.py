@@ -114,9 +114,7 @@ RO_CONN = env.db("REP_DATABASE_URL")
 RO_CONN.update(
     {
         "OPTIONS": {"options": "-c default_transaction_read_only=on"},
-        "TEST": {
-            "READ_ONLY": True,  # Do not manage this database during tests
-        },
+        "TEST": {"READ_ONLY": True, "MIRROR": "default"},  # Do not manage this database during tests
     }
 )
 DATABASES = {

@@ -199,6 +199,7 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
         null=True,
         blank=True,
     )
+    import_from_ids = models.TextField(blank=True, null=True)
     deduplication_engine_status = models.CharField(
         max_length=255, choices=DEDUP_ENGINE_STATUS_CHOICE, blank=True, null=True, default=None
     )
@@ -209,6 +210,7 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
     class Meta:
         unique_together = ("name", "business_area")
         verbose_name = "Registration data import"
+        permissions = (("rerun_rdi", "Can Rerun RDI"),)
 
     def should_check_against_sanction_list(self) -> bool:
         return self.screen_beneficiary
