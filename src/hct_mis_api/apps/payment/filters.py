@@ -348,16 +348,17 @@ class PaymentPlanFilter(FilterSet):
     @staticmethod
     def filter_delivery_types(queryset: "QuerySet", model_field: str, delivery_types: Any) -> "QuerySet":
         q = Q()
-        delivery_mechanisms_per_pp_qs = DeliveryMechanismPerPaymentPlan.objects.filter(
-            payment_plan=OuterRef("pk")
-        ).distinct("delivery_mechanism")
-        queryset = queryset.annotate(
-            delivery_types=ArraySubquery(
-                delivery_mechanisms_per_pp_qs.values_list("delivery_mechanism__name", flat=True)
+        if isinstance(delivery_types, list):
+            delivery_mechanisms_per_pp_qs = DeliveryMechanismPerPaymentPlan.objects.filter(
+                payment_plan=OuterRef("pk")
+            ).distinct("delivery_mechanism")
+            queryset = queryset.annotate(
+                delivery_types=ArraySubquery(
+                    delivery_mechanisms_per_pp_qs.values_list("delivery_mechanism__name", flat=True)
+                )
             )
-        )
-        for delivery_type in delivery_types:
-            q |= Q(delivery_types__icontains=delivery_type)
+            for delivery_type in delivery_types:
+                q |= Q(delivery_types__icontains=delivery_type)
         return queryset.filter(q)
 
 
