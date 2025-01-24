@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='paymentplan',
             name='targeting_criteria',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.PROTECT, related_name='payment_plan',
+            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='payment_plan',
                                        to='targeting.targetingcriteria'),
         ),
     ]

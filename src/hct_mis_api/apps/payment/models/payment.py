@@ -369,7 +369,7 @@ class PaymentPlan(
     built_at = models.DateTimeField(null=True, blank=True)
     targeting_criteria = models.OneToOneField(
         "targeting.TargetingCriteria",
-        on_delete=models.PROTECT,
+        on_delete=models.CASCADE,
         related_name="payment_plan",
     )
     currency = models.CharField(max_length=4, choices=CURRENCY_CHOICES, blank=True, null=True)
