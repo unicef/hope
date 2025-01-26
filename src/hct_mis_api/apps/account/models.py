@@ -20,7 +20,6 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from model_utils.models import UUIDModel
-from mptt.managers import TreeManager
 from natural_keys import NaturalKeyModel
 
 from hct_mis_api.apps.account.fields import ChoiceArrayField

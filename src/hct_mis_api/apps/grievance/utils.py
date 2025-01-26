@@ -197,9 +197,8 @@ def validate_individual_for_need_adjudication(
     partner: Partner, individual: Individual, ticket_details: TicketNeedsAdjudicationDetails
 ) -> None:
     # Validate partner's permission
-    if not partner.is_unicef:
-        if not partner.has_area_access(area_id=individual.household.admin2.id, program_id=individual.program.id):
-            raise PermissionDenied("Permission Denied: User does not have access to select individual")
+    if not partner.has_area_access(area_id=individual.household.admin2.id, program_id=individual.program.id):
+        raise PermissionDenied("Permission Denied: User does not have access to select individual")
 
     # validate Individual
     if individual not in list(ticket_details.possible_duplicates.all()) + [ticket_details.golden_records_individual] + [

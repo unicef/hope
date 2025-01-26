@@ -358,23 +358,22 @@ class IndividualNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTyp
         user = info.context.user
         program_id = get_program_id_from_headers(info.context.headers)
 
-        if not user.partner.is_unicef:
-            if program_id and str(object_instance.program_id) != program_id:
-                raise PermissionDenied("Permission Denied")
-            if not user.partner.has_program_access(object_instance.program_id):
-                raise PermissionDenied("Permission Denied")
-            if object_instance.household_id and object_instance.household.admin_area_id:
-                # check if user has access to the area
-                area_limits = user.partner.get_area_limits_for_program(program_id)
-                if area_limits.exists():
-                    household = object_instance.household
-                    areas_from_household = [
-                        household.admin1_id,
-                        household.admin2_id,
-                        household.admin3_id,
-                    ]
-                    if not area_limits.filter(id__in=areas_from_household).exists():
-                        raise PermissionDenied("Permission Denied")
+        if program_id and str(object_instance.program_id) != program_id:
+            raise PermissionDenied("Permission Denied")
+        if not user.partner.has_program_access(object_instance.program_id):
+            raise PermissionDenied("Permission Denied")
+        if object_instance.household_id and object_instance.household.admin_area_id:
+            # check if user has access to the area
+            area_limits = user.partner.get_area_limits_for_program(program_id)
+            if area_limits.exists():
+                household = object_instance.household
+                areas_from_household = [
+                    household.admin1_id,
+                    household.admin2_id,
+                    household.admin3_id,
+                ]
+                if not area_limits.filter(id__in=areas_from_household).exists():
+                    raise PermissionDenied("Permission Denied")
 
         # if user can't simply view all individuals, we check if they can do it because of grievance or rdi details
         if not user.has_perm(
@@ -534,22 +533,21 @@ class HouseholdNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType
         user = info.context.user
         program_id = get_program_id_from_headers(info.context.headers)
 
-        if not user.partner.is_unicef:
-            if program_id and str(object_instance.program_id) != program_id:
-                raise PermissionDenied("Permission Denied")
-            if not user.partner.has_program_access(object_instance.program_id):
-                raise PermissionDenied("Permission Denied")
-            if object_instance.admin_area_id:
-                # check if user has access to the area
-                area_limits = user.partner.get_area_limits_for_program(program_id)
-                if area_limits.exists():
-                    areas_from_household = [
-                        object_instance.admin1_id,
-                        object_instance.admin2_id,
-                        object_instance.admin3_id,
-                    ]
-                    if not area_limits.filter(id__in=areas_from_household).exists():
-                        raise PermissionDenied("Permission Denied")
+        if program_id and str(object_instance.program_id) != program_id:
+            raise PermissionDenied("Permission Denied")
+        if not user.partner.has_program_access(object_instance.program_id):
+            raise PermissionDenied("Permission Denied")
+        if object_instance.admin_area_id:
+            # check if user has access to the area
+            area_limits = user.partner.get_area_limits_for_program(program_id)
+            if area_limits.exists():
+                areas_from_household = [
+                    object_instance.admin1_id,
+                    object_instance.admin2_id,
+                    object_instance.admin3_id,
+                ]
+                if not area_limits.filter(id__in=areas_from_household).exists():
+                    raise PermissionDenied("Permission Denied")
 
         # if user doesn't have permission to view all households or RDI details, we check based on their grievance tickets
         if not user.has_perm(
@@ -733,36 +731,35 @@ class Query(graphene.ObjectType):
         if does_path_exist_in_query("edges.node.program", info):
             queryset = queryset.select_related("program")
 
-        if not user.partner.is_unicef:  # Unicef partner has full access to all AdminAreas
-            business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
-            programs_for_business_area = []
+        business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
+        programs_for_business_area = []
 
-            if program_id and user.partner.has_program_access(program_id):
-                programs_for_business_area = [program_id]
-            elif not program_id:
-                programs_for_business_area = user.partner.get_program_ids_for_business_area(business_area_id)
-            if not programs_for_business_area:
-                return Individual.objects.none()
+        if program_id and user.partner.has_program_access(program_id):
+            programs_for_business_area = [program_id]
+        elif not program_id:
+            programs_for_business_area = user.partner.get_program_ids_for_business_area(business_area_id)
+        if not programs_for_business_area:
+            return Individual.objects.none()
 
-            filter_q = Q()
-            for program_id in programs_for_business_area:
-                program_q = Q(program_id=program_id)
-                areas_null_and_program_q = program_q & Q(household__admin_area__isnull=True)
-                # apply admin area limits if partner has restrictions
-                area_limits = user.partner.get_area_limits_for_program(program_id)
-                areas_query = (
-                    Q(
-                        Q(household__admin1__in=area_limits)
-                        | Q(household__admin2__in=area_limits)
-                        | Q(household__admin3__in=area_limits)
-                    )
-                    if area_limits.exists()
-                    else Q()
+        filter_q = Q()
+        for program_id in programs_for_business_area:
+            program_q = Q(program_id=program_id)
+            areas_null_and_program_q = program_q & Q(household__admin_area__isnull=True)
+            # apply admin area limits if partner has restrictions
+            area_limits = user.partner.get_area_limits_for_program(program_id)
+            areas_query = (
+                Q(
+                    Q(household__admin1__in=area_limits)
+                    | Q(household__admin2__in=area_limits)
+                    | Q(household__admin3__in=area_limits)
                 )
+                if area_limits.exists()
+                else Q()
+            )
 
-                filter_q |= Q(areas_null_and_program_q | Q(program_q & areas_query))
+            filter_q |= Q(areas_null_and_program_q | Q(program_q & areas_query))
 
-            queryset = queryset.filter(filter_q)
+        queryset = queryset.filter(filter_q)
         return queryset
 
     def resolve_all_households_flex_fields_attributes(self, info: Any, **kwargs: Any) -> Iterable:
@@ -787,32 +784,31 @@ class Query(graphene.ObjectType):
 
         queryset = Household.all_merge_status_objects.all()
 
-        if not user.partner.is_unicef:  # Unicef partner has full access to all AdminAreas
-            business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
-            programs_for_business_area = []
+        business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
+        programs_for_business_area = []
 
-            if program_id and user.partner.has_program_access(program_id):
-                programs_for_business_area = [program_id]
-            elif not program_id:
-                programs_for_business_area = user.partner.get_program_ids_for_business_area(business_area_id)
-            if not programs_for_business_area:
-                return Household.objects.none()
+        if program_id and user.partner.has_program_access(program_id):
+            programs_for_business_area = [program_id]
+        elif not program_id:
+            programs_for_business_area = user.partner.get_program_ids_for_business_area(business_area_id)
+        if not programs_for_business_area:
+            return Household.objects.none()
 
-            filter_q = Q()
-            for program_id in programs_for_business_area:
-                program_q = Q(program_id=program_id)
-                areas_null_and_program_q = program_q & Q(admin_area__isnull=True)
-                # apply admin area limits if partner has restrictions
-                area_limits = user.partner.get_area_limits_for_program(program_id)
-                areas_query = (
-                    Q(Q(admin1__in=area_limits) | Q(admin2__in=area_limits) | Q(admin3__in=area_limits))
-                    if area_limits.exists()
-                    else Q()
-                )
+        filter_q = Q()
+        for program_id in programs_for_business_area:
+            program_q = Q(program_id=program_id)
+            areas_null_and_program_q = program_q & Q(admin_area__isnull=True)
+            # apply admin area limits if partner has restrictions
+            area_limits = user.partner.get_area_limits_for_program(program_id)
+            areas_query = (
+                Q(Q(admin1__in=area_limits) | Q(admin2__in=area_limits) | Q(admin3__in=area_limits))
+                if area_limits.exists()
+                else Q()
+            )
 
-                filter_q |= Q(areas_null_and_program_q | Q(program_q & areas_query))
+            filter_q |= Q(areas_null_and_program_q | Q(program_q & areas_query))
 
-            queryset = queryset.filter(filter_q)
+        queryset = queryset.filter(filter_q)
 
         if does_path_exist_in_query("edges.node.admin2", info):
             queryset = queryset.select_related("admin_area")

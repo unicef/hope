@@ -2,7 +2,6 @@ import re
 from random import randint
 from typing import Dict, List, Optional
 
-from django.conf import settings
 from django.db import transaction
 from django.db.models import Q, QuerySet
 from django.utils import timezone
@@ -528,9 +527,8 @@ def create_program_partner_access(
     partners_data: List, program: Program, partner_access: Optional[str] = None
 ) -> List[Dict]:
     if partner_access == Program.ALL_PARTNERS_ACCESS:
-        partners = Partner.objects.filter(allowed_business_areas=program.business_area).exclude(
-            name=settings.DEFAULT_EMPTY_PARTNER
-        )
+        # create full-area-access for all allowed partners; UNICEF subpartners already have access to all programs in BA
+        partners = Partner.objects.filter(allowed_business_areas=program.business_area).exclude(parent__name="UNICEF")
         partners_data = [{"partner": partner.id, "areas": []} for partner in partners]
 
     for partner_data in partners_data:

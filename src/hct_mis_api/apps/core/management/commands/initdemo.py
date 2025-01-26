@@ -188,6 +188,7 @@ class Command(BaseCommand):
             role_with_all_perms = Role.objects.get(name="Role with all permissions")
             afghanistan = BusinessArea.objects.get(slug="afghanistan")
             partner = Partner.objects.get(name="UNICEF")
+            unicef_hq = Partner.objects.get(name=settings.UNICEF_HQ_PARTNER, parent=partner)
 
             combined_email_list: List[str] = [email.strip() for email in email_list + tester_list if email.strip()]
 
@@ -195,7 +196,7 @@ class Command(BaseCommand):
                 self.stdout.write("Creating users...")
                 for email in combined_email_list:
                     try:
-                        user = User.objects.create_user(email, email, "password", partner=partner)
+                        user = User.objects.create_user(email, email, "password", partner=unicef_hq)
                         RoleAssignment.objects.create(
                             user=user,
                             role=role_with_all_perms,

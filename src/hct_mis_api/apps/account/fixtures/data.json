@@ -6,7 +6,7 @@
     "name": "UNICEF",
     "level": 0,
     "lft": 1,
-    "rght": 2,
+    "rght": 4,
     "tree_id": 1,
     "is_un": true
   }
@@ -14,6 +14,18 @@
 {
   "model": "account.partner",
   "pk": 2,
+  "fields": {
+    "name": "UNICEF HQ",
+    "level": 1,
+    "lft": 2,
+    "rght": 3,
+    "tree_id": 1,
+    "is_un": true
+  }
+},
+{
+  "model": "account.partner",
+  "pk": 3,
   "fields": {
     "name": "UNHCR",
     "level": 0,
@@ -28,7 +40,7 @@
 },
 {
   "model": "account.partner",
-  "pk": 3,
+  "pk": 4,
   "fields": {
     "name": "WFP",
     "is_un": true,
@@ -43,7 +55,7 @@
 },
 {
   "model": "account.partner",
-  "pk": 4,
+  "pk": 5,
   "fields": {
     "name": "Default Empty Partner",
     "level": 0,
@@ -70,7 +82,7 @@
     "is_active": true,
     "date_joined": "2020-05-06 11:57:00-00:00",
     "status": "INVITED",
-    "partner": 1,
+    "partner": 2,
     "email": "root@root.com",
     "available_for_export": true,
     "custom_fields": {},

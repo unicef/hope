@@ -41,6 +41,7 @@ class Command(BaseCommand):
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/accountability/fixtures/data-cypress.json")
 
         partner = Partner.objects.get(name="UNICEF")
+        unicef_hq = Partner.objects.get(name=settings.UNICEF_HQ_PARTNER, parent=partner)
 
         RoleAssignment.objects.create(
             user=User.objects.create_superuser(
@@ -50,7 +51,7 @@ class Command(BaseCommand):
                 first_name="Cypress",
                 last_name="User",
                 status="ACTIVE",
-                partner=partner,
+                partner=unicef_hq,
             ),
             role=Role.objects.get(name="Role with all permissions"),
             business_area=BusinessArea.objects.get(name="Afghanistan"),

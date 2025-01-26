@@ -6,7 +6,6 @@ from django.db.models.signals import post_delete, post_save, pre_save
 from django.dispatch import Signal, receiver
 
 from hct_mis_api.api.caches import get_or_create_cache_key
-from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.program.models import BeneficiaryGroup, Program
 from hct_mis_api.apps.program.utils import (
     create_program_partner_access,
@@ -35,11 +34,6 @@ def track_old_partner_access(sender: Any, instance: Program, **kwargs: Any) -> N
 
 @receiver(post_save, sender=Program)
 def handle_partner_access_change(sender: Any, instance: Program, created: bool, **kwargs: Any) -> None:
-    if created:
-        # grant access to UNICEF partner
-        unicef_partner, _ = Partner.objects.get_or_create(name="UNICEF")
-        create_program_partner_access([{"partner": unicef_partner.id, "areas": []}], instance)
-
     old_partner_access = instance.old_partner_access
     new_partner_access = instance.partner_access
 
