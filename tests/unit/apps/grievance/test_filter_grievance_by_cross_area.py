@@ -39,7 +39,8 @@ class TestCrossAreaFilter(APITestCase):
         super().setUpTestData()
         cls.business_area = create_afghanistan()
         partner_unicef = PartnerFactory(name="UNICEF")
-        cls.user = UserFactory(partner=partner_unicef)
+        unicef_hq = PartnerFactory(name="UNICEF HQ", parent=partner_unicef)
+        cls.user = UserFactory(partner=unicef_hq)
 
         role = RoleFactory(name="GRIEVANCES CROSS AREA FILTER", permissions=["GRIEVANCES_CROSS_AREA_FILTER"])
         RoleAssignment.objects.create(business_area=cls.business_area, user=cls.user, role=role)

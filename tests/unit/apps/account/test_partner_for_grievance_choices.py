@@ -45,7 +45,8 @@ class PartnerForGrievanceTest(APITestCase):
 
         # UNICEF partner
         partner_unicef, _ = Partner.objects.get_or_create(name="UNICEF")
-        cls.user = UserFactory(partner=partner_unicef, username="unicef_user")
+        unicef_hq, _ = Partner.objects.get_or_create(name="UNICEF HQ", parent=partner_unicef)
+        cls.user = UserFactory(partner=unicef_hq, username="unicef_user")
 
         # partner with access to Test Program - should be returned if Program is passed or if neither program nor household/individual is passed
         # (because it has access to ANY program in this BA)

@@ -151,7 +151,8 @@ class RoleAssignmentsTest(TestCase):
 
     def test_unicef_partner_has_permission_from_user_and_default_permission(self) -> None:
         partner = PartnerFactory(name="UNICEF")
-        user = UserFactory(partner=partner)
+        unicef_hq = PartnerFactory(name="UNICEF HQ", parent=partner)
+        user = UserFactory(partner=unicef_hq)
         role = Role.objects.create(name="111", permissions=[Permissions.GRIEVANCES_CREATE.value])
         RoleAssignment.objects.create(role=role, business_area=self.business_area_afg, user=user)
 

@@ -36,30 +36,30 @@ class UserPartnerTest(TestCase):
         AdminAreaLimitedToFactory.objects.create(partner=cls.other_partner, program=cls.program, areas=[cls.area_1])
 
         cls.unicef_partner = PartnerFactory(name="UNICEF")
-        cls.unicef_user = UserFactory(partner=cls.unicef_partner)
+        cls.unicef_hq = PartnerFactory(name="UNICEF HQ", parent=cls.unicef_partner)
+        cls.unicef_user = UserFactory(partner=cls.unicef_hq)
         RoleAssignment.objects.create(
             business_area=cls.business_area,
             program=cls.program,
-            partner=cls.unicef_partner,
+            partner=cls.unicef_hq,
             role=cls.role_1,
         )
 
-        RoleAssignment.objects.create(
-            business_area=cls.business_area,
-            user=cls.unicef_user,
-            role=cls.role_1,
-        )
         RoleAssignment.objects.create(
             business_area=cls.business_area,
             user=cls.other_user,
             role=cls.role_1,
         )
 
-        cls.user_without_role = UserFactory(partner=cls.unicef_partner)
+        cls.user_without_role = UserFactory(partner=cls.unicef_hq)
 
-    def test_partner_is_hope(self) -> None:
+    def test_partner_is_unicef(self) -> None:
         self.assertTrue(self.unicef_partner.is_unicef)
         self.assertFalse(self.other_partner.is_unicef)
+
+    def test_partner_is_unicef_subpartner(self) -> None:
+        self.assertTrue(self.unicef_partner.is_unicef_subpartner)
+        self.assertFalse(self.other_partner.is_unicef_subpartner)
 
     def test_get_partner_program_ids_for_business_area(self) -> None:
         resp_1 = self.other_user.partner.get_program_ids_for_business_area(business_area_id=self.business_area.pk)

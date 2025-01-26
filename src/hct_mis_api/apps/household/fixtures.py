@@ -1,6 +1,8 @@
 import random
 from typing import Any, Dict, List, Optional, Tuple
 
+from django.conf import settings
+
 import factory
 from factory import enums, fuzzy
 from factory.django import DjangoModelFactory
@@ -152,7 +154,7 @@ class HouseholdFactory(DjangoModelFactory):
         if "registration_data_import" not in kwargs:
             kwargs["registration_data_import"] = RegistrationDataImportFactory(program=kwargs["program"])
         if "registration_data_import__imported_by__partner" not in kwargs:
-            kwargs["registration_data_import__imported_by__partner"] = PartnerFactory(name="UNICEF")
+            kwargs["registration_data_import__imported_by__partner"] = PartnerFactory(name=settings.UNICEF_HQ_PARTNER)
 
         return cls._generate(enums.BUILD_STRATEGY, kwargs)
 
@@ -331,7 +333,8 @@ def create_household(
         individual_args = {}
 
     partner = PartnerFactory(name="UNICEF")
-    household_args["registration_data_import__imported_by__partner"] = partner
+    unicef_hq = PartnerFactory(name=settings.UNICEF_HQ_PARTNER, parent=partner)
+    household_args["registration_data_import__imported_by__partner"] = unicef_hq
 
     household = HouseholdFactory.build(**household_args)
     individuals = IndividualFactory.create_batch(
@@ -388,7 +391,8 @@ def create_household_with_individual_with_collectors(
         household_args["size"] = 2
 
     partner = PartnerFactory(name="UNICEF")
-    household_args["registration_data_import__imported_by__partner"] = partner
+    unicef_hq = PartnerFactory(name=settings.UNICEF_HQ_PARTNER, parent=partner)
+    household_args["registration_data_import__imported_by__partner"] = unicef_hq
 
     household = HouseholdFactory.build(**household_args)
     individuals = IndividualFactory.create_batch(

@@ -2,6 +2,7 @@ import random
 import time
 from typing import Any, List
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 
 import factory
@@ -19,7 +20,7 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 class PartnerFactory(DjangoModelFactory):
-    name = "UNICEF HQ"
+    name = settings.UNICEF_HQ_PARTNER
 
     class Meta:
         model = Partner
@@ -27,7 +28,7 @@ class PartnerFactory(DjangoModelFactory):
 
     @factory.lazy_attribute
     def parent(self) -> Any:
-        if self.name == "UNICEF HQ":
+        if self.name == settings.UNICEF_HQ_PARTNER:
             return PartnerFactory(name="UNICEF")
         return None
 

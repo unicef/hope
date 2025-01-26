@@ -15,7 +15,6 @@ class TestSignalChangeAllowedBusinessAreas(TestCase):
         cls.business_area_ukr = create_ukraine()
 
         cls.partner = PartnerFactory(name="Partner")
-        cls.partner_unicef = PartnerFactory(name="UNICEF")  # UNICEF partner has access to all programs
 
         cls.partner.allowed_business_areas.add(cls.business_area_afg)
         role = RoleFactory(name="Role for Partner")
