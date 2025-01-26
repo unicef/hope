@@ -129,7 +129,9 @@ export function ImportedPeopleTableRow({
               deduplicationGoldenDict,
             )}
             results={individual.deduplicationGoldenRecordResults}
-            biometricResults={individual.biometricDeduplicationBatchResults}
+            biometricResults={
+              individual.biometricDeduplicationGoldenRecordResults
+            }
             individual={individual}
           />
         ) : (

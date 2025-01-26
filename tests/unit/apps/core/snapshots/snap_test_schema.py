@@ -57,15 +57,18 @@ snapshots['TestDataCollectionTypeSchema::test_dct_with_unknown_code_is_not_in_li
         'dataCollectionTypeChoices': [
             {
                 'name': 'Size Only',
-                'value': 'size_only'
+                'value': 'size_only',
+                'type': 'STANDARD'
             },
             {
                 'name': 'Partial',
-                'value': 'partial'
+                'value': 'partial',
+                'type': 'SOCIAL'
             },
             {
                 'name': 'Full',
-                'value': 'full'
+                'value': 'full',
+                'type': 'STANDARD'
             }
         ]
     }

@@ -1,0 +1,39 @@
+{% load i18n static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta description="hope,hct,dashboard">
+        <meta charset="UTF-8">
+        <meta keywords="hope,dashboard,unicef">
+        <title>
+            {% block title %}
+                {% translate "Dashboard" %}
+            {% endblock %}
+        </title>
+        <!-- JS Libraries -->
+        <script src="{% static 'dashboard/js/d3.min.js' %}"></script>
+        <script src="{% static 'dashboard/js/crossfilter.min.js' %}"></script>
+        <script src="{% static 'dashboard/js/dc.min.js' %}"></script>
+        <script src="{% static 'dashboard/js/d3-scale-chromatic.v1.min.js' %}"></script>
+        <!-- CSS Libraries -->
+        <link rel="stylesheet" href="{% static 'dashboard/css/dc.min.css' %}" />
+        <link rel="stylesheet"
+              href="{% static 'dashboard/css/Humanitarian-Icons.css' %}">
+        <link rel="stylesheet" href="{% static 'dashboard/css/tailwind.min.css' %}">
+        <link rel="stylesheet" href="{% static 'dashboard/css/dashboard.css' %}">
+        {% block extra_head %}{% endblock %}
+    </head>
+    <body class="bg-slate-200">
+        <div class="main-content max-w-7xl mx-auto p-4 space-y-8">
+            {% if has_permission %}
+                <div id="year-tabs" class="mb-4">
+                    <div class="tab-list flex space-x-2 overflow-x-auto bg-sky-50 rounded shadow p-2"></div>
+                </div>
+                {% block content %}{% endblock %}
+            {% else %}
+                <div class="error-message">{{ error_message }}</div>
+            {% endif %}
+        </div>
+        {% block scripts %}{% endblock %}
+    </body>
+</html>
