@@ -202,7 +202,6 @@ class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, AdminAutoCom
             .order_by("name")
         )
         context["program"] = program
-        context["unicef_partner_id"] = Partner.objects.get(name="UNICEF").id
 
         if is_editable:
             return TemplateResponse(request, "admin/program/program/program_area_limits.html", context)

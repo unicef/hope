@@ -19,11 +19,17 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 class PartnerFactory(DjangoModelFactory):
-    name = "UNICEF"
+    name = "UNICEF HQ"
 
     class Meta:
         model = Partner
         django_get_or_create = ("name",)
+
+    @factory.lazy_attribute
+    def parent(self) -> Any:
+        if self.name == "UNICEF HQ":
+            return PartnerFactory(name="UNICEF")
+        return None
 
 
 class BusinessAreaFactory(DjangoModelFactory):
