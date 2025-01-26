@@ -72,7 +72,7 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
     ) -> Type[ModelForm]:
         form = super().get_form(request, obj, **kwargs)
 
-        if not (obj and obj.is_unicef_subpartner):
+        if not (obj and (obj.is_unicef_subpartner or obj.is_unicef)):
             queryset = account_models.Partner.objects.filter(level=0)
             if obj:
                 if obj.is_parent:
