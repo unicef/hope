@@ -591,6 +591,7 @@ def create_super_user(business_area: BusinessArea) -> User:
 
     Partner.objects.get_or_create(name="TEST")
     partner, _ = Partner.objects.get_or_create(name="UNICEF")
+    unicef_hq, _ = Partner.objects.get_or_create(name="UNICEF HQ", parent=partner)
     Partner.objects.get_or_create(name="UNHCR")
 
     permission_list = [role.value for role in Permissions]
@@ -610,7 +611,7 @@ def create_super_user(business_area: BusinessArea) -> User:
             email="test@example.com",
             first_name="Test",
             last_name="Selenium",
-            partner=partner,
+            partner=unicef_hq,
         )
     RoleAssignment.objects.get_or_create(
         user=user,
@@ -618,7 +619,7 @@ def create_super_user(business_area: BusinessArea) -> User:
         business_area=business_area,
     )
 
-    for partner in Partner.objects.exclude(name="UNICEF"):
+    for partner in Partner.objects.exclude(name__in=["UNICEF", settings.DEFAULT_EMPTY_PARTNER]):
         partner.allowed_business_areas.add(business_area)
         role = RoleFactory(name=f"Role for {partner.name}")
         partner_role_assignmnet, _ = RoleAssignment.objects.get_or_create(

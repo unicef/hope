@@ -36,9 +36,10 @@ class TestCrossAreaFilterAvailable(APITestCase):
         cls.set_admin_area_limits_in_program(cls.partner_with_area_restrictions, cls.program, [cls.area])
 
         cls.partner_unicef = PartnerFactory(name="UNICEF")
+        cls.unicef_hq = PartnerFactory(name="UNICEF HQ", parent=cls.partner_unicef)
 
     def test_cross_area_filter_available_for_unicef_partner(self) -> None:
-        user = UserFactory(partner=self.partner_unicef)
+        user = UserFactory(partner=self.unicef_hq)
         self.create_user_role_with_permissions(user, [Permissions.GRIEVANCES_CROSS_AREA_FILTER], self.business_area)
 
         self.snapshot_graphql_request(

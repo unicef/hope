@@ -1,3 +1,5 @@
+from django.conf import settings
+
 from hct_mis_api.apps.account.fixtures import (
     PartnerFactory,
     RoleAssignmentFactory,
@@ -122,10 +124,11 @@ class TestUserFilter(APITestCase):
         User.objects.all().delete()
         business_area = create_afghanistan()
         partner_unicef = PartnerFactory(name="UNICEF")
+        unicef_hq = PartnerFactory(name=settings.UNICEF_HQ_PARTNER, parent=partner_unicef)
         cls.program = ProgramFactory(name="Test Program")
 
         # user with UNICEF partner without role in BA
-        UserFactory(partner=partner_unicef, username="unicef_user_without_role")
+        UserFactory(partner=unicef_hq, username="unicef_user_without_role")
 
         # user without access to BA
         partner_without_ba_role = PartnerFactory(name="Partner Without Access")

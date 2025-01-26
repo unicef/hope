@@ -398,7 +398,8 @@ class TestGrievanceQuery(APITestCase):
 
         # user with unicef partner
         partner_unicef = PartnerFactory(name="UNICEF")
-        cls.user_with_unicef_partner = UserFactory(partner=partner_unicef, username="unicef_user")
+        unicef_hq = PartnerFactory(name="UNICEF HQ", parent=partner_unicef)
+        cls.user_with_unicef_partner = UserFactory(partner=unicef_hq, username="unicef_user")
 
         # user without access to program
         partner_without_program = PartnerFactory(name="Partner Without Program")

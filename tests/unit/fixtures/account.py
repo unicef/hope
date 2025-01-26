@@ -1,5 +1,7 @@
 from typing import Any, Callable, Iterable, List, Optional
 
+from django.conf import settings
+
 import pytest
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory
@@ -72,3 +74,8 @@ def create_user_role_with_permissions(set_admin_area_limits_in_program: Any) -> 
 @pytest.fixture()
 def partner_unicef(db: Any) -> PartnerFactory:
     return PartnerFactory(name="UNICEF")
+
+
+@pytest.fixture()
+def partner_unicef_hq(db: Any) -> PartnerFactory:
+    return PartnerFactory(name=settings.UNICEF_HQ_PARTNER, parent=PartnerFactory(name="UNICEF"))

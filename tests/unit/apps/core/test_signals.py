@@ -12,8 +12,9 @@ class TestSignalCreateBusinessArea(TestCase):
 
         cls.partner_unicef = PartnerFactory(name="UNICEF")
         RoleFactory(name="Role for UNICEF Partners")
+        cls.unicef_hq = PartnerFactory(name="UNICEF HQ", parent=cls.partner_unicef)
 
-    def test_signal_remove_partner_role(self) -> None:
+    def test_signal_add_partner_role(self) -> None:
         self.assertEqual(Partner.objects.count(), 1)
         new_ba = BusinessArea.objects.create(name="Test Business Area", code="TBA", active=True)
         self.assertEqual(Partner.objects.count(), 2)
@@ -25,3 +26,10 @@ class TestSignalCreateBusinessArea(TestCase):
         self.assertEqual(new_partner.role_assignments.count(), 1)
         self.assertEqual(new_partner.role_assignments.first().business_area.name, "Test Business Area")
         self.assertEqual(new_partner.role_assignments.first().role.name, "Role for UNICEF Partners")
+
+        # UNICEF HQ is granted role "Role with all permissions" in the new business area
+        self.assertEqual(self.unicef_hq.allowed_business_areas.count(), 1)
+        self.assertEqual(self.unicef_hq.allowed_business_areas.first().name, "Test Business Area")
+        self.assertEqual(self.unicef_hq.role_assignments.count(), 1)
+        self.assertEqual(self.unicef_hq.role_assignments.first().business_area.name, "Test Business Area")
+        self.assertEqual(self.unicef_hq.role_assignments.first().role.name, "Role with all permissions")
