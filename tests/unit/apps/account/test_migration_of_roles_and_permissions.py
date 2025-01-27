@@ -31,8 +31,8 @@ class MigrateUserRolesTest(TestCase):
     def setUpTestData(cls) -> None:
         super().setUpTestData()
 
-        cls.business_area_afg = BusinessAreaFactory(name="Afghanistan", code="AFG", active=True)
-        cls.business_area_ukr = BusinessAreaFactory(name="Ukraine", code="UKR", active=True)
+        cls.business_area_afg = BusinessAreaFactory(name="Afghanistan", slug="afghanistan", code="AFG", active=True)
+        cls.business_area_ukr = BusinessAreaFactory(name="Ukraine", slug="ukraine", code="UKR", active=True)
 
         # remove partners that were created in signal for creating BAs - to keep the data as it was before changes
         Partner.objects.filter(parent__name="UNICEF").delete()
@@ -401,12 +401,11 @@ class MigrateUserRolesTest(TestCase):
         self.assertEqual(self.user_default_empty_partner.role_assignments.count(), 1)
 
     def test_partner_roles_migration(self) -> None:
+
         # call all 3 functions to check the final result
         data_migration.migrate_user_roles(apps, None)
         data_migration.migrate_partner_roles_and_access(apps, None)
         data_migration.migrate_unicef_partners(apps, None)
-
-
 
         self.assertEqual(1, "Partner Roles")
 
@@ -418,7 +417,153 @@ class MigrateUserRolesTest(TestCase):
         data_migration.migrate_partner_roles_and_access(apps, None)
         data_migration.migrate_unicef_partners(apps, None)
 
+        self.user_unicef_in_afg.refresh_from_db()
+        self.user_unicef_in_ukr.refresh_from_db()
+        self.unicef_user_hq.refresh_from_db()
+        self.unicef_user_without_any_role.refresh_from_db()
+
+        # check UNICEF subpartners creation
         self.assertEqual(Partner.objects.filter(parent=self.partner_unicef).count(), 3)
         self.assertEqual(self.partner_unicef.user_set.count(), 0)
 
-        self.assertEqual(1, "UNICEF")
+        unicef_in_afg = Partner.objects.filter(name="UNICEF Partner for afghanistan").first()
+        unicef_in_ukr = Partner.objects.filter(name="UNICEF Partner for ukraine").first()
+        unicef_hq = Partner.objects.filter(name="UNICEF HQ").first()
+
+        self.assertIsNotNone(unicef_in_afg)
+        self.assertIsNotNone(unicef_in_ukr)
+        self.assertIsNotNone(unicef_hq)
+
+        self.assertEqual(
+            unicef_in_afg.parent,
+            self.partner_unicef,
+        )
+        self.assertEqual(
+            unicef_in_ukr.parent,
+            self.partner_unicef,
+        )
+        self.assertEqual(
+            unicef_hq.parent,
+            self.partner_unicef,
+        )
+
+        # check users reassignment to UNICEF subpartners
+
+        # user_unicef_in_afg - has role only in Afg -> should be under UNICEF Partner for Afg
+        self.assertEqual(
+            self.user_unicef_in_afg.partner,
+            unicef_in_afg,
+        )
+
+        # user_unicef_in_ukr - has role only in Ukr -> should be under UNICEF Partner for Ukr
+        self.assertEqual(
+            self.user_unicef_in_ukr.partner,
+            unicef_in_ukr,
+        )
+
+        # unicef_user_hq - has roles in Afg and Ukr -> should be under UNICEF HQ
+        self.assertEqual(
+            self.unicef_user_hq.partner,
+            unicef_hq,
+        )
+
+        # unicef_user_without_any_role - no role -> should be under Default Empty Partner
+        self.assertEqual(
+            self.unicef_user_without_any_role.partner,
+            self.partner_empty,
+        )
+
+        # UNICEF subpartners per BA should be allowed in specific BA; UNICEF HQ should be allowed in all
+        self.assertEqual(
+            unicef_in_afg.allowed_business_areas.count(),
+            1,
+        )
+        self.assertEqual(
+            unicef_in_afg.allowed_business_areas.first(),
+            self.business_area_afg,
+        )
+
+        self.assertEqual(
+            unicef_in_ukr.allowed_business_areas.count(),
+            1,
+        )
+        self.assertEqual(
+            unicef_in_ukr.allowed_business_areas.first(),
+            self.business_area_ukr,
+        )
+
+        self.assertEqual(
+            unicef_hq.allowed_business_areas.count(),
+            2,
+        )
+        self.assertTrue(
+            self.business_area_afg in unicef_hq.allowed_business_areas.all()
+        )
+        self.assertTrue(
+            self.business_area_ukr in unicef_hq.allowed_business_areas.all()
+        )
+
+        # check roles for UNICEF subpartners
+        # newly created "Role for UNICEF Partners" should be assigned for UNICEF subpartners per BA
+        # and "Role with all permissions" for UNICEF HQ
+        role_with_all_permissions = Role.objects.get(name="Role with all permissions")
+        role_for_unicef_partners = Role.objects.filter(name="Role for UNICEF Partners").first()
+        self.assertIsNotNone(
+            role_for_unicef_partners
+        )
+
+        self.assertEqual(
+            unicef_in_afg.role_assignments.count(),
+            1,
+        )
+        self.assertEqual(
+            unicef_in_afg.role_assignments.first().role,
+            role_for_unicef_partners,
+        )
+
+        self.assertEqual(
+            unicef_in_ukr.role_assignments.count(),
+            1,
+        )
+        self.assertEqual(
+            unicef_in_ukr.role_assignments.first().role,
+            role_for_unicef_partners,
+        )
+
+        self.assertEqual(
+            unicef_hq.role_assignments.count(),
+            2,
+        )
+        self.assertEqual(
+            unicef_hq.role_assignments.all()[0].role,
+            role_with_all_permissions,
+        )
+        self.assertEqual(
+            unicef_hq.role_assignments.all()[1].role,
+            role_with_all_permissions,
+        )
+
+        # check if there are no admin area restrictions
+        self.assertEqual(
+            unicef_in_afg.admin_area_limits.count(),
+            0,
+        )
+        self.assertEqual(
+            unicef_in_ukr.admin_area_limits.count(),
+            0,
+        )
+        self.assertEqual(
+            unicef_hq.admin_area_limits.count(),
+            0,
+        )
+
+    def test_admin_area_limits(self) -> None:
+        # call all 3 functions to check the final result
+        data_migration.migrate_user_roles(apps, None)
+        data_migration.migrate_partner_roles_and_access(apps, None)
+        data_migration.migrate_unicef_partners(apps, None)
+
+
+
+
+        self.assertEqual(1, "Admin Area Limits")
