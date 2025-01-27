@@ -758,7 +758,9 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
     def resolve_can_export_xlsx(cls, parent: PaymentPlan, info: Any) -> bool:
         if parent.status in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]:
             if parent.fsp_communication_channel == "API":
-                if not info.context.user.has_permission(Permissions.PM_DOWNLOAD_MTCN.value, parent.business_area):
+                if not info.context.user.has_permission(
+                    Permissions.PM_DOWNLOAD_FSP_AUTH_CODE.value, parent.business_area
+                ):
                     return False
                 return parent.can_create_xlsx_with_fsp_auth_code
 
@@ -773,7 +775,9 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
     def resolve_can_download_xlsx(parent: PaymentPlan, info: Any) -> bool:
         if parent.status in [PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED]:
             if parent.fsp_communication_channel == "API":
-                if not info.context.user.has_permission(Permissions.PM_DOWNLOAD_MTCN.value, parent.business_area):
+                if not info.context.user.has_permission(
+                    Permissions.PM_DOWNLOAD_FSP_AUTH_CODE.value, parent.business_area
+                ):
                     return False
                 return parent.has_export_file
 

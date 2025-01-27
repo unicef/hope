@@ -954,13 +954,13 @@ class TestPaymentPlanQueries(APITestCase):
         [
             (
                 "with_permission_api",
-                [Permissions.PM_DOWNLOAD_MTCN, Permissions.PM_SEND_XLSX_PASSWORD],
+                [Permissions.PM_DOWNLOAD_FSP_AUTH_CODE, Permissions.PM_SEND_XLSX_PASSWORD],
                 FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
             ),
             ("without_permission_api", [], FinancialServiceProvider.COMMUNICATION_CHANNEL_API),
             (
                 "with_permission_xlsx",
-                [Permissions.PM_DOWNLOAD_MTCN, Permissions.PM_SEND_XLSX_PASSWORD],
+                [Permissions.PM_DOWNLOAD_FSP_AUTH_CODE, Permissions.PM_SEND_XLSX_PASSWORD],
                 FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
             ),
             ("without_permission_xlsx", [], FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX),

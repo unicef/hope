@@ -722,6 +722,7 @@ type DataCollectingTypeChoiceObject {
   name: String
   value: String
   description: String
+  type: String
 }
 
 type DataCollectingTypeNode implements Node {

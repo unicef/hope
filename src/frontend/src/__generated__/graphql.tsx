@@ -1068,6 +1068,7 @@ export type DataCollectingTypeChoiceObject = {
   __typename?: 'DataCollectingTypeChoiceObject';
   description?: Maybe<Scalars['String']['output']>;
   name?: Maybe<Scalars['String']['output']>;
+  type?: Maybe<Scalars['String']['output']>;
   value?: Maybe<Scalars['String']['output']>;
 };
 
@@ -8766,7 +8767,7 @@ export type CurrencyChoicesQuery = { __typename?: 'Query', currencyChoices?: Arr
 export type DataCollectionTypeChoiceDataQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type DataCollectionTypeChoiceDataQuery = { __typename?: 'Query', dataCollectionTypeChoices?: Array<{ __typename?: 'DataCollectingTypeChoiceObject', name?: string | null, value?: string | null, description?: string | null } | null> | null };
+export type DataCollectionTypeChoiceDataQuery = { __typename?: 'Query', dataCollectionTypeChoices?: Array<{ __typename?: 'DataCollectingTypeChoiceObject', name?: string | null, value?: string | null, description?: string | null, type?: string | null } | null> | null };
 
 export type LoggedCheckerQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -14908,6 +14909,7 @@ export const DataCollectionTypeChoiceDataDocument = gql`
     name
     value
     description
+    type
   }
 }
     `;
@@ -22756,6 +22758,7 @@ export type CreateVerificationPlanMutationResolvers<ContextType = any, ParentTyp
 export type DataCollectingTypeChoiceObjectResolvers<ContextType = any, ParentType extends ResolversParentTypes['DataCollectingTypeChoiceObject'] = ResolversParentTypes['DataCollectingTypeChoiceObject']> = {
   description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  type?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   value?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
