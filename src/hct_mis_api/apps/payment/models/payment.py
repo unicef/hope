@@ -1015,6 +1015,8 @@ class PaymentPlan(
                 PaymentPlan.Status.TP_STEFICON_WAIT,
                 PaymentPlan.Status.TP_STEFICON_COMPLETED,
                 PaymentPlan.Status.TP_STEFICON_ERROR,
+                # TODO: remove after migrations TP>PP
+                PaymentPlan.Status.MIGRATION_BLOCKED,
             ]
         ],
     )
@@ -1033,6 +1035,8 @@ class PaymentPlan(
                 PaymentPlan.Status.TP_STEFICON_WAIT,
                 PaymentPlan.Status.TP_STEFICON_COMPLETED,
                 PaymentPlan.Status.TP_STEFICON_ERROR,
+                # TODO: remove after migrations TP>PP
+                PaymentPlan.Status.MIGRATION_BLOCKED,
             ]
         ],
     )
@@ -1051,6 +1055,8 @@ class PaymentPlan(
                 PaymentPlan.Status.TP_STEFICON_COMPLETED,
                 PaymentPlan.Status.TP_STEFICON_ERROR,
                 PaymentPlan.Status.TP_STEFICON_WAIT,
+                # TODO: remove after migrations TP>PP
+                PaymentPlan.Status.MIGRATION_BLOCKED,
             ]
         ],
     )

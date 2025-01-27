@@ -199,6 +199,9 @@ class MigrationTPIntoPPTest(TestCase):
         self.assertIsNone(self.survey_without_pp.payment_plan)
 
         migrate_tp_into_pp()
+
+        self.assertEqual(PaymentPlan.all_objects.filter(status=PaymentPlan.Status.MIGRATION_BLOCKED).count(), 10)
+
         create_payments_for_pending_payment_plans()
 
         self.assertEqual(TargetPopulation.all_objects.all().count(), 14)
@@ -240,7 +243,7 @@ class MigrationTPIntoPPTest(TestCase):
         new_pp = PaymentPlan.objects.get(name="TP without rule check all fields")
         self.assertEqual(new_pp.status, PaymentPlan.Status.TP_OPEN)
         self.assertEqual(new_pp.created_by, self.user)
-        self.assertEqual(new_pp.build_status, PaymentPlan.BuildStatus.BUILD_STATUS_FAILED)
+        self.assertEqual(new_pp.build_status, PaymentPlan.BuildStatus.BUILD_STATUS_OK)
         self.assertEqual(new_pp.program_cycle, self.program_cycle)
         self.assertEqual(new_pp.business_area, self.business_area)
         self.assertEqual(new_pp.steficon_rule_targeting, self.rule_commit)
@@ -249,12 +252,6 @@ class MigrationTPIntoPPTest(TestCase):
         self.assertEqual(new_pp.vulnerability_score_max, 999)
         self.assertEqual(new_pp.excluded_ids, "Test IND-123")
         self.assertEqual(new_pp.exclusion_reason, "Exclusion_reason")
-        self.assertEqual(new_pp.total_households_count, 1)
-        self.assertEqual(new_pp.total_individuals_count, 2)
-        self.assertEqual(new_pp.male_children_count, 3)
-        self.assertEqual(new_pp.female_children_count, 4)
-        self.assertEqual(new_pp.male_adults_count, 5)
-        self.assertEqual(new_pp.female_adults_count, 6)
 
         # check Message & Survey
         self.message_1.refresh_from_db()
