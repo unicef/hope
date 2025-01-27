@@ -26,7 +26,7 @@ export function PaymentVerificationTable({
   const initialVariables: AllPaymentPlansForTableQueryVariables = {
     businessArea,
     search: filter.search,
-    verificationStatus: [filter.verificationStatus],
+    verificationStatus: filter.verificationStatus,
     serviceProvider: filter.serviceProvider,
     deliveryTypes: filter.deliveryType,
     startDate: dateToIsoString(filter.startDate, 'startOfDay'),
