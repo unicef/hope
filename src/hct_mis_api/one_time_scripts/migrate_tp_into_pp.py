@@ -17,9 +17,34 @@ from hct_mis_api.apps.targeting.models import (
 )
 
 BA_ORDER_LIST = [
-    # TODO: will update after business will provide the list
+    "Philippines",
+    "Sri Lanka",
+    "Vietnam",
+    "Bangladesh",
     "Afghanistan",
+    "Somalia",
+    "Syria",
+    "Palestine, State of",
+    "Kenya",
+    "Armenia",
+    "Ukraine",
+    "Belarus",
+    "Slovakia",
+    "Czech Republic",
+    "Botswana",
+    "Democratic Republic of Congo",
+    "Central African Republic",
+    "Republic of Cameroon",
+    "Nigeria",
+    "Mali",
+    "Niger",
+    "Sudan",
+    "Antigua and Barbuda",
+    "Haiti",
+    "Colombia",
+    "Trinidad & Tobago",
 ]
+
 PROGRAM_STATUS_ORDER_LIST = [Program.ACTIVE, Program.DRAFT, Program.FINISHED]
 
 # tp.field: payment_plan.field
@@ -326,14 +351,23 @@ def create_payments_for_pending_payment_plans() -> None:
     )
 
     """
-    Step 2 create Payments for MIGRATION_BLOCKED PaymentPlans
+    Step 2 create Payments for MIGRATION_BLOCKED PaymentPlans (TPs)
     """
     start_time = timezone.now()
+    for ba in BusinessArea.objects.all().values_list("name", flat=True):
+        if ba not in BA_ORDER_LIST:
+            BA_ORDER_LIST.append(ba)
+
+    print("BA order: ", BA_ORDER_LIST)
+
     print("*** Create Payments for MIGRATION_BLOCKED PaymentPlans ***\n", "*" * 60)
     # first migrate for all Active Programs and newest created
     for program_status in PROGRAM_STATUS_ORDER_LIST:
         for business_area_name in BA_ORDER_LIST:
-            business_area = BusinessArea.objects.filter(name=business_area_name).values("id", "name")[0]
+            business_area = BusinessArea.objects.filter(name=business_area_name).values("id", "name").first()
+            if not business_area:
+                # added just because in unit test we have just one BA
+                continue
             for program in Program.objects.filter(business_area_id=business_area["id"], status=program_status):
                 build_payment_plans_ids_list = list(
                     PaymentPlan.objects.filter(
@@ -381,10 +415,18 @@ def migrate_tp_into_pp() -> None:
     print(f"*** Data Migration {model_name} ***\n", "*" * 60)
     get_statistics()
 
+    for ba in BusinessArea.objects.all().values_list("name", flat=True):
+        if ba not in BA_ORDER_LIST:
+            BA_ORDER_LIST.append(ba)
+
+    print("BA order: ", BA_ORDER_LIST)
     # first migrate for all Active Programs and newest created
     for program_status in PROGRAM_STATUS_ORDER_LIST:
         for business_area_name in BA_ORDER_LIST:
-            business_area = BusinessArea.objects.filter(name=business_area_name).values("id", "name")[0]
+            business_area = BusinessArea.objects.filter(name=business_area_name).values("id", "name").first()
+            if not business_area:
+                # added just because in unit test we have just one BA
+                continue
             print(f"\n   ***   Processing TPs for BA: {business_area['name']}.")
             for program in Program.objects.filter(business_area_id=business_area["id"], status=program_status):
                 tp_list_ids = [
