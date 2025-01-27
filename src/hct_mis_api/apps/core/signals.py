@@ -25,7 +25,8 @@ def business_area_created(sender: Any, instance: BusinessArea, created: bool, **
     Create new UNICEF subpartners for the new business area
     """
     if created:
-        unicef_subpartner = Partner.objects.create(name=f"UNICEF Partner for {instance.slug}", parent__name="UNICEF")
+        unicef = Partner.objects.get(name="UNICEF")
+        unicef_subpartner = Partner.objects.create(name=f"UNICEF Partner for {instance.slug}", parent=unicef)
         role_for_unicef_subpartners = Role.objects.filter(name="Role for UNICEF Partners").first()
         unicef_subpartner.allowed_business_areas.add(instance)
         RoleAssignment.objects.create(
