@@ -224,7 +224,7 @@ class PaymentPlanFilter(FilterSet):
     )
     created_at_range = DateTimeRangeFilter(field_name="created_at")
     service_provider = CharFilter(method="filter_service_provider")
-    delivery_types = CharFilter(method="filter_delivery_types")
+    delivery_types = MultipleChoiceFilter(method="filter_delivery_types")
 
     class Meta:
         fields = tuple()
@@ -354,7 +354,7 @@ class PaymentPlanFilter(FilterSet):
             ).distinct("delivery_mechanism")
             queryset = queryset.annotate(
                 delivery_types=ArraySubquery(
-                    delivery_mechanisms_per_pp_qs.values_list("delivery_mechanism__name", flat=True)
+                    delivery_mechanisms_per_pp_qs.values_list("delivery_mechanism__code", flat=True)
                 )
             )
             for delivery_type in delivery_types:
