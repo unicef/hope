@@ -322,9 +322,9 @@ class HorizontalChoiceArrayField(ArrayField):
 
 
 class UserRole(NaturalKeyModel, TimeStampedUUIDModel):
-    business_area = models.ForeignKey("core.BusinessArea", related_name="user_roles", on_delete=models.CASCADE)
     user = models.ForeignKey("account.User", related_name="user_roles", on_delete=models.CASCADE)
     role = models.ForeignKey("account.Role", related_name="user_roles", on_delete=models.CASCADE)
+    business_area = models.ForeignKey("core.BusinessArea", related_name="user_roles", on_delete=models.CASCADE)
     expiry_date = models.DateField(
         blank=True, null=True, help_text="After expiry date this User Role will be inactive."
     )
@@ -337,9 +337,9 @@ class UserRole(NaturalKeyModel, TimeStampedUUIDModel):
 
 
 class UserGroup(NaturalKeyModel, models.Model):
-    business_area = models.ForeignKey("core.BusinessArea", related_name="user_groups", on_delete=models.CASCADE)
     user = models.ForeignKey("account.User", related_name="user_groups", on_delete=models.CASCADE)
     group = models.ForeignKey(Group, related_name="user_groups", on_delete=models.CASCADE)
+    business_area = models.ForeignKey("core.BusinessArea", related_name="user_groups", on_delete=models.CASCADE)
 
     class Meta:
         unique_together = ("business_area", "user", "group")
