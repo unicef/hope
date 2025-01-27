@@ -93,7 +93,6 @@ def migrate_partner_roles_and_access(apps, schema_editor):
     BusinessAreaPartnerThrough = apps.get_model("core", "BusinessAreaPartnerThrough")
     AdminAreaLimitedTo = apps.get_model("account", "AdminAreaLimitedTo")
     Partner = apps.get_model("account", "Partner")
-    AdminAreaLimitedToThrough = AdminAreaLimitedTo.areas.through
     register(Partner)
 
     # do not create RoleAssignments for partners that are parents or UNICEF
