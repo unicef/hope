@@ -11,8 +11,10 @@ import { getFilterFromQueryParams } from '@utils/utils';
 import { PaymentVerificationTable } from '../../tables/payments/PaymentVerificationTable';
 import { PaymentVerificationFilters } from '../../tables/payments/PaymentVerificationTable/PaymentVerificationFilters';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
+import { PaymentPlanStatus } from '@generated/graphql';
 
 const initialFilter = {
+  status: [PaymentPlanStatus.Finished, PaymentPlanStatus.Accepted],
   search: '',
   verificationStatus: [],
   serviceProvider: '',
