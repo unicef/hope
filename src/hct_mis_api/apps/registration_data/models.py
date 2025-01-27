@@ -148,6 +148,19 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
         ],
     )
     status = models.CharField(max_length=255, choices=STATUS_CHOICE, default=IN_REVIEW, db_index=True)
+    deduplication_engine_status = models.CharField(
+        max_length=255, choices=DEDUP_ENGINE_STATUS_CHOICE, blank=True, null=True, default=None
+    )
+    business_area = models.ForeignKey(BusinessArea, null=True, on_delete=models.CASCADE)
+    # TODO: set to not nullable Program and on_delete=models.PROTECT
+    program = models.ForeignKey(
+        "program.Program",
+        null=True,
+        blank=True,
+        db_index=True,
+        related_name="registration_imports",
+        on_delete=models.SET_NULL,
+    )
     import_date = models.DateTimeField(auto_now_add=True, db_index=True)
     imported_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -159,6 +172,23 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
         max_length=255,
         choices=DATA_SOURCE_CHOICE,
     )
+    import_data = models.OneToOneField(
+        "ImportData",
+        related_name="registration_data_import_hope",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+    import_from_ids = models.TextField(blank=True, null=True)
+    pull_pictures = models.BooleanField(default=True)
+    screen_beneficiary = models.BooleanField(default=False)
+    excluded = models.BooleanField(default=False, help_text="Exclude RDI in UI")
+    erased = models.BooleanField(default=False, help_text="Abort RDI")
+    refuse_reason = models.CharField(max_length=100, blank=True, null=True)
+    allow_delivery_mechanisms_validation_errors = models.BooleanField(default=False)
+    error_message = models.TextField(blank=True)
+    sentry_id = models.CharField(max_length=100, default="", blank=True, null=True)
+
     number_of_individuals = models.PositiveIntegerField(db_index=True)
     number_of_households = models.PositiveIntegerField(db_index=True)
 
@@ -173,36 +203,6 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMix
     dedup_engine_golden_record_duplicates = models.PositiveIntegerField(default=0)
 
     datahub_id = models.UUIDField(null=True, default=None, db_index=True, blank=True)
-    error_message = models.TextField(blank=True)
-    sentry_id = models.CharField(max_length=100, default="", blank=True, null=True)
-
-    pull_pictures = models.BooleanField(default=True)
-    business_area = models.ForeignKey(BusinessArea, null=True, on_delete=models.CASCADE)
-    screen_beneficiary = models.BooleanField(default=False)
-    excluded = models.BooleanField(default=False, help_text="Exclude RDI in UI")
-    # TODO: set to not nullable Program and on_delete=models.PROTECT
-    program = models.ForeignKey(
-        "program.Program",
-        null=True,
-        blank=True,
-        db_index=True,
-        related_name="registration_imports",
-        on_delete=models.SET_NULL,
-    )
-    erased = models.BooleanField(default=False, help_text="Abort RDI")
-    refuse_reason = models.CharField(max_length=100, blank=True, null=True)
-    allow_delivery_mechanisms_validation_errors = models.BooleanField(default=False)
-    import_data = models.OneToOneField(
-        "ImportData",
-        related_name="registration_data_import_hope",
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-    )
-    import_from_ids = models.TextField(blank=True, null=True)
-    deduplication_engine_status = models.CharField(
-        max_length=255, choices=DEDUP_ENGINE_STATUS_CHOICE, blank=True, null=True, default=None
-    )
 
     def __str__(self) -> str:
         return self.name
@@ -295,8 +295,8 @@ class ImportData(TimeStampedUUIDModel):
     )
     status = models.CharField(max_length=40, default=STATUS_FINISHED, choices=STATUS_CHOICES)
     business_area_slug = models.CharField(max_length=200, blank=True)
-    file = models.FileField(null=True)
     data_type = models.CharField(max_length=4, choices=DATA_TYPE_CHOICES, default=XLSX)
+    file = models.FileField(null=True)
     number_of_households = models.PositiveIntegerField(null=True)
     number_of_individuals = models.PositiveIntegerField(null=True)
     error = models.TextField(blank=True)

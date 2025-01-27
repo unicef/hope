@@ -562,6 +562,7 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
         "file",
         "import_status",
         "error_description",
+        "first_connection_failed_time",
     )
 
     def import_status(self, obj: Any) -> str:
