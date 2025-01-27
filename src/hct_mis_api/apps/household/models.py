@@ -1316,6 +1316,8 @@ class EntitlementCard(TimeStampedUUIDModel):
     )
     is_original = models.BooleanField(db_index=True, default=False)
 
+    is_original = models.BooleanField(db_index=True, default=False)
+
     objects = RepresentationManager()
     original_and_repr_objects = models.Manager()
 
