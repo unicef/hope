@@ -219,6 +219,10 @@ class PaymentPlan(
         ACCEPTED = "ACCEPTED", "Accepted"
         FINISHED = "FINISHED", "Finished"
 
+        # remove after migration TP>PP
+        MIGRATION_BLOCKED = "MIGRATION_BLOCKED", "Migration Blocked"
+        MIGRATION_FAILED = "MIGRATION_FAILED", "Migration Failed"
+
     PRE_PAYMENT_PLAN_STATUSES = (
         Status.TP_OPEN,
         Status.TP_LOCKED,
