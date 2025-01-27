@@ -224,7 +224,7 @@ class PaymentPlanFilter(FilterSet):
     )
     created_at_range = DateTimeRangeFilter(field_name="created_at")
     service_provider = CharFilter(method="filter_service_provider")
-    delivery_types = MultipleChoiceFilter(method="filter_delivery_types")
+    delivery_types = MultipleChoiceFilter(method="filter_delivery_types", choices=DeliveryMechanism.get_choices())
 
     class Meta:
         fields = tuple()

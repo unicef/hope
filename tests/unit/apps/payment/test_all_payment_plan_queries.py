@@ -21,6 +21,7 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.payment.fixtures import (
+    DeliveryMechanismFactory,
     DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
     PaymentFactory,
@@ -164,7 +165,7 @@ class TestPaymentPlanQueries(APITestCase):
     """
 
     ALL_PAYMENT_PLANS_FILTER_QUERY = """
-    query AllPaymentPlans($businessArea: String!, $search: String, $status: [String], $totalEntitledQuantityFrom: Float, $totalEntitledQuantityTo: Float, $dispersionStartDate: Date, $dispersionEndDate: Date, $program: String, $programCycle: String, $verificationStatus: [String], $serviceProvider: String, $deliveryTypes: String) {
+    query AllPaymentPlans($businessArea: String!, $search: String, $status: [String], $totalEntitledQuantityFrom: Float, $totalEntitledQuantityTo: Float, $dispersionStartDate: Date, $dispersionEndDate: Date, $program: String, $programCycle: String, $verificationStatus: [String], $serviceProvider: String, $deliveryTypes: [String]) {
         allPaymentPlans(businessArea: $businessArea, search: $search, status: $status, totalEntitledQuantityFrom: $totalEntitledQuantityFrom, totalEntitledQuantityTo: $totalEntitledQuantityTo, dispersionStartDate: $dispersionStartDate, dispersionEndDate: $dispersionEndDate, program: $program, orderBy: "unicef_id", programCycle: $programCycle, verificationStatus: $verificationStatus, serviceProvider: $serviceProvider, deliveryTypes: $deliveryTypes) {
         edges {
           node {
@@ -331,6 +332,9 @@ class TestPaymentPlanQueries(APITestCase):
             )
             cls.pp.unicef_id = "PP-01"
             cls.pp.save()
+            cash_dm = DeliveryMechanismFactory(code="cash", is_active=True)
+            DeliveryMechanismFactory(code="referral", is_active=True)
+            DeliveryMechanismPerPaymentPlanFactory(payment_plan=cls.pp, delivery_mechanism=cash_dm)
 
             hoh1 = IndividualFactory(household=None)
             hoh2 = IndividualFactory(household=None)
@@ -483,8 +487,8 @@ class TestPaymentPlanQueries(APITestCase):
             {"programCycle": encode_id_base64(self.pp.program_cycle.pk, "ProgramCycleNode")},
             {"programCycle": encode_id_base64(just_random_program_cycle.pk, "ProgramCycleNode")},
             {"serviceProvider": "test"},
-            {"deliveryTypes": "cash"},
-            {"verificationStatus": "ACTIVE"},
+            {"deliveryTypes": ["referral", "cash"]},
+            {"verificationStatus": ["ACTIVE", "FINISHED"]},
         ]:
             self.snapshot_graphql_request(
                 request_string=self.ALL_PAYMENT_PLANS_FILTER_QUERY,
