@@ -28,7 +28,7 @@ export function PaymentVerificationTable({
     search: filter.search,
     verificationStatus: filter.verificationStatus,
     serviceProvider: filter.serviceProvider,
-    deliveryTypes: filter.deliveryType,
+    deliveryTypes: filter.deliveryTypes,
     startDate: dateToIsoString(filter.startDate, 'startOfDay'),
     endDate: dateToIsoString(filter.endDate, 'endOfDay'),
     program: programId,

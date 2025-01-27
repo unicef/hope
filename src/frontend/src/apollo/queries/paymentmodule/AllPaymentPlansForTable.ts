@@ -25,7 +25,7 @@ export const AllPaymentPlansForTable = gql`
     $isTargetPopulation: Boolean
     $verificationStatus: [String]
     $serviceProvider: String
-    $deliveryTypes: String
+    $deliveryTypes: [String]
     $startDate: Date
     $endDate: Date
   ) {

@@ -5372,7 +5372,7 @@ export type QueryAllPaymentPlansArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   businessArea: Scalars['String']['input'];
   createdAtRange?: InputMaybe<Scalars['String']['input']>;
-  deliveryTypes?: InputMaybe<Scalars['String']['input']>;
+  deliveryTypes?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   dispersionEndDate?: InputMaybe<Scalars['Date']['input']>;
   dispersionStartDate?: InputMaybe<Scalars['Date']['input']>;
   endDate?: InputMaybe<Scalars['Date']['input']>;
@@ -9008,7 +9008,7 @@ export type AllPaymentPlansForTableQueryVariables = Exact<{
   isTargetPopulation?: InputMaybe<Scalars['Boolean']['input']>;
   verificationStatus?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
   serviceProvider?: InputMaybe<Scalars['String']['input']>;
-  deliveryTypes?: InputMaybe<Scalars['String']['input']>;
+  deliveryTypes?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
   startDate?: InputMaybe<Scalars['Date']['input']>;
   endDate?: InputMaybe<Scalars['Date']['input']>;
 }>;
@@ -16564,7 +16564,7 @@ export type AllFinancialServiceProviderXlsxTemplatesLazyQueryHookResult = Return
 export type AllFinancialServiceProviderXlsxTemplatesSuspenseQueryHookResult = ReturnType<typeof useAllFinancialServiceProviderXlsxTemplatesSuspenseQuery>;
 export type AllFinancialServiceProviderXlsxTemplatesQueryResult = Apollo.QueryResult<AllFinancialServiceProviderXlsxTemplatesQuery, AllFinancialServiceProviderXlsxTemplatesQueryVariables>;
 export const AllPaymentPlansForTableDocument = gql`
-    query AllPaymentPlansForTable($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $businessArea: String!, $search: String, $status: [String], $totalEntitledQuantityFrom: Float, $totalEntitledQuantityTo: Float, $dispersionStartDate: Date, $dispersionEndDate: Date, $isFollowUp: Boolean, $program: String, $programCycle: String, $totalHouseholdsCountWithValidPhoneNoMin: Int, $totalHouseholdsCountWithValidPhoneNoMax: Int, $createdAtRange: String, $statusNot: String, $isPaymentPlan: Boolean, $isTargetPopulation: Boolean, $verificationStatus: [String], $serviceProvider: String, $deliveryTypes: String, $startDate: Date, $endDate: Date) {
+    query AllPaymentPlansForTable($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $businessArea: String!, $search: String, $status: [String], $totalEntitledQuantityFrom: Float, $totalEntitledQuantityTo: Float, $dispersionStartDate: Date, $dispersionEndDate: Date, $isFollowUp: Boolean, $program: String, $programCycle: String, $totalHouseholdsCountWithValidPhoneNoMin: Int, $totalHouseholdsCountWithValidPhoneNoMax: Int, $createdAtRange: String, $statusNot: String, $isPaymentPlan: Boolean, $isTargetPopulation: Boolean, $verificationStatus: [String], $serviceProvider: String, $deliveryTypes: [String], $startDate: Date, $endDate: Date) {
   allPaymentPlans(
     after: $after
     before: $before

@@ -18,7 +18,7 @@ const initialFilter = {
   search: '',
   verificationStatus: [],
   serviceProvider: '',
-  deliveryType: [],
+  deliveryTypes: [],
   startDate: '',
   endDate: '',
 };
