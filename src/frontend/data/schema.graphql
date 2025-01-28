@@ -905,7 +905,7 @@ type DeliveryMechanismPerPaymentPlanNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
-  paymentPlan: PaymentPlanNode
+  paymentPlan: PaymentPlanNode!
   financialServiceProvider: FinancialServiceProviderNode
   deliveryMechanism: DeliveryMechanismNode
   name: String

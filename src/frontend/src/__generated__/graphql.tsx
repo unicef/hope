@@ -1333,7 +1333,7 @@ export type DeliveryMechanismPerPaymentPlanNode = Node & {
   fsp?: Maybe<FinancialServiceProviderNode>;
   id: Scalars['ID']['output'];
   name?: Maybe<Scalars['String']['output']>;
-  paymentPlan?: Maybe<PaymentPlanNode>;
+  paymentPlan: PaymentPlanNode;
   updatedAt: Scalars['DateTime']['output'];
 };
 
@@ -22980,7 +22980,7 @@ export type DeliveryMechanismPerPaymentPlanNodeResolvers<ContextType = any, Pare
   fsp?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNode']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  paymentPlan?: Resolver<Maybe<ResolversTypes['PaymentPlanNode']>, ParentType, ContextType>;
+  paymentPlan?: Resolver<ResolversTypes['PaymentPlanNode'], ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
