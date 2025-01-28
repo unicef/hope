@@ -100,14 +100,14 @@ class ModifiedData:
     modified_by: Optional["User"] = None
 
 
-# class PaymentPlanSplitPayments(TimeStampedUUIDModel):
-#     payment_plan_split = models.ForeignKey(
-#         "payment.PaymentPlanSplit", on_delete=models.CASCADE, related_name="payment_plan_split"
-#     )
-#     payment = models.ForeignKey("payment.Payment", on_delete=models.CASCADE, related_name="payment_plan_split_payment")
-#
-#     class Meta:
-#         unique_together = ("payment_plan_split", "payment")
+class PaymentPlanSplitPayments(TimeStampedUUIDModel):
+    payment_plan_split = models.ForeignKey(
+        "payment.PaymentPlanSplit", on_delete=models.CASCADE, related_name="payment_plan_split"
+    )
+    payment = models.ForeignKey("payment.Payment", on_delete=models.CASCADE, related_name="payment_plan_split_payment")
+
+    class Meta:
+        unique_together = ("payment_plan_split", "payment")
 
 
 class PaymentPlanSplit(TimeStampedUUIDModel):
@@ -1576,7 +1576,6 @@ class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
         "payment.PaymentPlan",
         on_delete=models.CASCADE,
         related_name="delivery_mechanism",
-        null=True,
     )
     financial_service_provider = models.ForeignKey(
         "payment.FinancialServiceProvider",
