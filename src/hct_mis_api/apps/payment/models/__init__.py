@@ -15,7 +15,6 @@ from hct_mis_api.apps.payment.models.payment import (
     PaymentHouseholdSnapshot,
     PaymentPlan,
     PaymentPlanSplit,
-    PaymentPlanSplitPayments,
     PaymentPlanSupportingDocument,
     PendingDeliveryMechanismData,
 )

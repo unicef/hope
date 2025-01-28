@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Dict, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from django import forms
 from django.contrib import admin, messages
@@ -44,6 +44,48 @@ if TYPE_CHECKING:
     from uuid import UUID
 
     from django.forms import Form
+
+
+class ArrayFieldWidget(forms.Textarea):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        self.delimiter = kwargs.pop("delimiter", ",")
+        super().__init__(*args, **kwargs)
+
+    def format_value(self, value: Any) -> str:
+        if value is None:
+            return ""
+        if isinstance(value, list):
+            return self.delimiter.join(str(v) for v in value)
+        return value
+
+    def value_from_datadict(self, data: Any, files: Any, name: Any) -> List[str]:
+        value = data.get(name, "")
+        if not value:
+            return []
+        return [v.strip() for v in value.split(self.delimiter)]
+
+
+class CommaSeparatedArrayField(forms.Field):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        self.base_field = forms.CharField()
+        self.widget = ArrayFieldWidget()
+        self.delimiter = kwargs.pop("delimiter", ",")
+        super().__init__(*args, **kwargs)
+
+    def prepare_value(self, value: Any) -> str:
+        if isinstance(value, list):
+            return self.delimiter.join(str(self.base_field.prepare_value(v)) for v in value)
+        return value
+
+    def to_python(self, value: Any) -> List[str]:
+        if not value:
+            return []
+        return [self.base_field.to_python(v) for v in value.split(self.delimiter)]
+
+    def validate(self, value: Any) -> None:
+        super().validate(value)
+        for item in value:
+            self.base_field.validate(item)
 
 
 @admin.register(PaymentVerificationPlan)
@@ -284,20 +326,13 @@ class DeliveryMechanismPerPaymentPlanAdmin(HOPEModelAdminBase):
     list_display = (
         "financial_service_provider",
         "delivery_mechanism",
-        "delivery_mechanism_order",
         "payment_plan",
-        "status",
-        "created_by",
-        "sent_date",
-        "sent_to_payment_gateway",
     )
-    raw_id_fields = ("payment_plan", "financial_service_provider", "created_by", "sent_by", "delivery_mechanism")
+    raw_id_fields = ("payment_plan", "financial_service_provider", "delivery_mechanism")
     list_filter = (
         ("financial_service_provider", AutoCompleteFilter),
         ("delivery_mechanism", AutoCompleteFilter),
         ("payment_plan", AutoCompleteFilter),
-        ("created_by", AutoCompleteFilter),
-        "sent_to_payment_gateway",
     )
     search_fields = ("financial_service_provider__name", "payment_plan__unicef_id")
 
@@ -305,7 +340,7 @@ class DeliveryMechanismPerPaymentPlanAdmin(HOPEModelAdminBase):
         return (
             super()
             .get_queryset(request)
-            .select_related("payment_plan", "financial_service_provider", "created_by", "sent_by", "delivery_mechanism")
+            .select_related("payment_plan", "financial_service_provider", "delivery_mechanism")
         )
 
 
@@ -438,7 +473,7 @@ class FinancialServiceProviderAdminForm(forms.ModelForm):
                     PaymentPlan.Status.FINISHED,
                 ],
             ),
-            delivery_mechanisms__financial_service_provider=obj,
+            delivery_mechanism__financial_service_provider=obj,
         ).distinct()
 
     def clean(self) -> Optional[Dict[str, Any]]:
@@ -535,11 +570,22 @@ class DeliveryMechanismDataAdmin(HOPEModelAdminBase):
     list_filter = (("delivery_mechanism", AutoCompleteFilter), "is_valid")
 
 
+class DeliveryMechanismAdminForm(forms.ModelForm):
+    optional_fields = CommaSeparatedArrayField()
+    required_fields = CommaSeparatedArrayField()
+    unique_fields = CommaSeparatedArrayField()
+
+    class Meta:
+        model = DeliveryMechanism
+        fields = "__all__"
+
+
 @admin.register(DeliveryMechanism)
 class DeliveryMechanismAdmin(HOPEModelAdminBase):
     list_display = ("code", "name", "is_active", "transfer_type")
     search_fields = ("code", "name")
     list_filter = ("is_active", "transfer_type")
+    form = DeliveryMechanismAdminForm
 
 
 @admin.register(PaymentPlanSupportingDocument)

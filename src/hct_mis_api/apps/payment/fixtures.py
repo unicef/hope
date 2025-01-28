@@ -357,16 +357,7 @@ class DeliveryMechanismPerPaymentPlanFactory(DjangoModelFactory):
 
     payment_plan = factory.SubFactory(PaymentPlanFactory)
     financial_service_provider = factory.SubFactory(FinancialServiceProviderFactory)
-    created_by = factory.SubFactory(UserFactory)
-    sent_by = factory.SubFactory(UserFactory)
-    sent_date = factory.Faker(
-        "date_time_this_decade",
-        before_now=True,
-        after_now=False,
-        tzinfo=utc,
-    )
     delivery_mechanism = factory.SubFactory(DeliveryMechanismFactory)
-    delivery_mechanism_order = factory.fuzzy.FuzzyInteger(1, 4)
 
 
 class DeliveryMechanismDataFactory(DjangoModelFactory):

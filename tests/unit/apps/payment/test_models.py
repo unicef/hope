@@ -683,7 +683,6 @@ class TestPaymentPlanSplitModel(TestCase):
         pp = PaymentPlanFactory(created_by=self.user)
         dm = DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=pp,
-            chosen_configuration="key1",
         )
         p1 = PaymentFactory(parent=pp, currency="PLN")
         p2 = PaymentFactory(parent=pp, currency="PLN")
@@ -695,7 +694,6 @@ class TestPaymentPlanSplitModel(TestCase):
         )
         pp_split1.payments.set([p1, p2])
         self.assertEqual(pp_split1.financial_service_provider, dm.financial_service_provider)
-        self.assertEqual(pp_split1.chosen_configuration, dm.chosen_configuration)
         self.assertEqual(pp_split1.delivery_mechanism, dm.delivery_mechanism)
 
 

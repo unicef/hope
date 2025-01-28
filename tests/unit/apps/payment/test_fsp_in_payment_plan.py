@@ -1083,7 +1083,7 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
             GraphQLError,
             f"Delivery mechanism 'Voucher' is not supported by FSP '{self.santander_fsp}'",
         ):
-            PaymentPlanService(self.payment_plan).validate_fsps_per_delivery_mechanisms(
+            PaymentPlanService(self.payment_plan).assign_fsp_and_delivery_mechanism(
                 dm_to_fsp_mapping=dm_to_fsp_mapping, update_payments=True
             )
 
@@ -1108,7 +1108,7 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
             GraphQLError,
             f"{self.bank_of_america_fsp} cannot accept any volume",
         ):
-            PaymentPlanService(self.payment_plan).validate_fsps_per_delivery_mechanisms(
+            PaymentPlanService(self.payment_plan).assign_fsp_and_delivery_mechanism(
                 dm_to_fsp_mapping=dm_to_fsp_mapping, update_payments=True
             )
 
@@ -1130,7 +1130,7 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
             GraphQLError,
             f"{self.bank_of_america_fsp} cannot accept any volume",
         ):
-            PaymentPlanService(self.payment_plan).validate_fsps_per_delivery_mechanisms(
+            PaymentPlanService(self.payment_plan).assign_fsp_and_delivery_mechanism(
                 dm_to_fsp_mapping=dm_to_fsp_mapping, update_payments=True
             )
 
@@ -1196,7 +1196,7 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
             },
         ]
 
-        PaymentPlanService(self.payment_plan).validate_fsps_per_delivery_mechanisms(
+        PaymentPlanService(self.payment_plan).assign_fsp_and_delivery_mechanism(
             dm_to_fsp_mapping=dm_to_fsp_mapping, update_payments=True
         )
 
@@ -1256,6 +1256,6 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
             GraphQLError,
             "Some Payments were not assigned to selected DeliveryMechanisms/FSPs",
         ):
-            PaymentPlanService(self.payment_plan).validate_fsps_per_delivery_mechanisms(
+            PaymentPlanService(self.payment_plan).assign_fsp_and_delivery_mechanism(
                 dm_to_fsp_mapping=dm_to_fsp_mapping, update_payments=True
             )

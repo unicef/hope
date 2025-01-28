@@ -100,21 +100,24 @@ class ModifiedData:
     modified_by: Optional["User"] = None
 
 
-class PaymentPlanSplitPayments(TimeStampedUUIDModel):
-    payment_plan_split = models.ForeignKey(
-        "payment.PaymentPlanSplit", on_delete=models.CASCADE, related_name="payment_plan_split"
-    )
-    payment = models.ForeignKey("payment.Payment", on_delete=models.CASCADE, related_name="payment_plan_split_payment")
-
-    class Meta:
-        unique_together = ("payment_plan_split", "payment")
+# class PaymentPlanSplitPayments(TimeStampedUUIDModel):
+#     payment_plan_split = models.ForeignKey(
+#         "payment.PaymentPlanSplit", on_delete=models.CASCADE, related_name="payment_plan_split"
+#     )
+#     payment = models.ForeignKey("payment.Payment", on_delete=models.CASCADE, related_name="payment_plan_split_payment")
+#
+#     class Meta:
+#         unique_together = ("payment_plan_split", "payment")
 
 
 class PaymentPlanSplit(TimeStampedUUIDModel):
+    # TODO MB migrate PG DMPP to default split with correct UUID (migrate send to payment gateway if aaplicable)
+    # TODO MB migrate payments to FK
     MAX_CHUNKS = 50
     MIN_NO_OF_PAYMENTS_IN_CHUNK = 10
 
     class SplitType(models.TextChoices):
+        NO_SPLIT = "NO_SPLIT", "No Split"
         BY_RECORDS = "BY_RECORDS", "By Records"
         BY_COLLECTOR = "BY_COLLECTOR", "By Collector"
         BY_ADMIN_AREA1 = "BY_ADMIN_AREA1", "By Admin Area 1"
@@ -126,27 +129,27 @@ class PaymentPlanSplit(TimeStampedUUIDModel):
         on_delete=models.CASCADE,
         related_name="splits",
     )
-    split_type = models.CharField(choices=SplitType.choices, max_length=24)
+    split_type = models.CharField(choices=SplitType.choices, max_length=24, default=SplitType.NO_SPLIT)
     chunks_no = models.IntegerField(null=True, blank=True)
-    payments = models.ManyToManyField(
-        "payment.Payment",
-        through="PaymentPlanSplitPayments",
-        related_name="+",
-    )
+    # payments = models.ManyToManyField(
+    #     "payment.Payment",
+    #     through="PaymentPlanSplitPayments",
+    #     related_name="+",
+    # )
     sent_to_payment_gateway = models.BooleanField(default=False)
     order = models.IntegerField(default=0)
 
     @property
-    def financial_service_provider(self) -> "FinancialServiceProvider":
-        return self.payment_plan.delivery_mechanisms.first().financial_service_provider
+    def is_payment_gateway(self) -> bool:
+        return self.payment_plan.is_payment_gateway
 
     @property
-    def chosen_configuration(self) -> Optional[str]:
-        return self.payment_plan.delivery_mechanisms.first().chosen_configuration
+    def financial_service_provider(self) -> "FinancialServiceProvider":
+        return self.payment_plan.delivery_mechanism.financial_service_provider
 
     @property
     def delivery_mechanism(self) -> Optional[str]:
-        return self.payment_plan.delivery_mechanisms.first().delivery_mechanism
+        return self.payment_plan.delivery_mechanism.delivery_mechanism
 
 
 class PaymentPlan(
@@ -711,6 +714,7 @@ class PaymentPlan(
 
     @property
     def eligible_payments(self) -> QuerySet:
+        # TODO MB validated wallets????
         return self.payment_items.eligible()
 
     @property
@@ -723,23 +727,18 @@ class PaymentPlan(
         export MTCN file
         xlsx file with password
         """
-        has_fsp_with_api = self.delivery_mechanisms.filter(
-            financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-            financial_service_provider__payment_gateway_id__isnull=False,
-        ).exists()
-
         all_sent_to_fsp = not self.eligible_payments.exclude(status=Payment.STATUS_SENT_TO_FSP).exists()
-        return has_fsp_with_api and all_sent_to_fsp
+        return self.is_payment_gateway and all_sent_to_fsp
+
+    @property
+    def is_payment_gateway(self) -> bool:
+        return self.delivery_mechanism.financial_service_provider.is_payment_gateway
 
     @property
     def fsp_communication_channel(self) -> str:
-        has_fsp_with_api = self.delivery_mechanisms.filter(
-            financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-            financial_service_provider__payment_gateway_id__isnull=False,
-        ).exists()
         return (
             FinancialServiceProvider.COMMUNICATION_CHANNEL_API
-            if has_fsp_with_api
+            if self.is_payment_gateway
             else FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX
         )
 
@@ -880,10 +879,7 @@ class PaymentPlan(
     def can_send_to_payment_gateway(self) -> bool:
         status_accepted = self.status == PaymentPlan.Status.ACCEPTED
         if self.splits.exists():
-            has_payment_gateway_fsp = self.delivery_mechanisms.filter(
-                financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-                financial_service_provider__payment_gateway_id__isnull=False,
-            ).exists()
+            has_payment_gateway_fsp = self.delivery_mechanism.financial_service_provider.is_payment_gateway
             has_not_sent_to_payment_gateway_splits = self.splits.filter(
                 sent_to_payment_gateway=False,
             ).exists()
@@ -891,11 +887,8 @@ class PaymentPlan(
         else:
             return (
                 status_accepted
-                and self.delivery_mechanisms.filter(
-                    sent_to_payment_gateway=False,
-                    financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-                    financial_service_provider__payment_gateway_id__isnull=False,
-                ).exists()
+                and not self.sent_to_payment_gateway
+                and self.delivery_mechanism.financial_service_provider.is_payment_gateway
             )
 
     # @transitions #####################################################################
@@ -1573,56 +1566,17 @@ class FinancialServiceProvider(InternalDataFieldModel, LimitBusinessAreaModelMix
         except FinancialServiceProviderXlsxTemplate.DoesNotExist:
             return None
 
-    def can_accept_any_volume(self) -> bool:
-        if (
-            self.distribution_limit is not None
-            and self.delivery_mechanisms_per_payment_plan.filter(
-                payment_plan__status__in=[
-                    PaymentPlan.Status.LOCKED_FSP,
-                    PaymentPlan.Status.IN_APPROVAL,
-                    PaymentPlan.Status.IN_AUTHORIZATION,
-                    PaymentPlan.Status.IN_REVIEW,
-                    PaymentPlan.Status.ACCEPTED,
-                ]
-            ).exists()
-        ):
-            return False
-
-        if self.distribution_limit == 0.0:
-            return False
-
-        return True
-
-    def can_accept_volume(self, volume: Decimal) -> bool:
-        if self.distribution_limit is None:
-            return True
-
-        return volume <= self.distribution_limit
-
     @property
     def is_payment_gateway(self) -> bool:
         return self.communication_channel == self.COMMUNICATION_CHANNEL_API and self.payment_gateway_id is not None
 
-    @property
-    def configurations(self) -> List[Optional[dict]]:
-        return []  # temporary disabled
-        if not self.is_payment_gateway:
-            return []
-        return [
-            {"key": config.get("key", None), "label": config.get("label", None), "id": config.get("id", None)}
-            for config in self.data_transfer_configuration
-        ]
-
 
 class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
-    class Status(models.TextChoices):
-        NOT_SENT = "NOT_SENT"
-        SENT = "SENT"
-
-    payment_plan = models.ForeignKey(
+    payment_plan = models.OneToOneField(
         "payment.PaymentPlan",
         on_delete=models.CASCADE,
-        related_name="delivery_mechanisms",
+        related_name="delivery_mechanism",
+        null=True,
     )
     financial_service_provider = models.ForeignKey(
         "payment.FinancialServiceProvider",
@@ -1631,40 +1585,6 @@ class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
         null=True,
     )
     delivery_mechanism = models.ForeignKey("DeliveryMechanism", on_delete=models.SET_NULL, null=True)
-    delivery_mechanism_order = models.PositiveIntegerField()
-    status = FSMField(default=Status.NOT_SENT, protected=False, db_index=True)
-    created_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.PROTECT,
-        related_name="created_delivery_mechanisms",
-    )
-    sent_date = models.DateTimeField()
-    sent_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.PROTECT,
-        related_name="sent_delivery_mechanisms",
-        null=True,
-    )
-
-    chosen_configuration = models.CharField(max_length=50, null=True)
-    sent_to_payment_gateway = models.BooleanField(default=False)
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["payment_plan", "delivery_mechanism", "delivery_mechanism_order"],
-                name="unique payment_plan_delivery_mechanism",
-            ),
-        ]
-
-    @transition(
-        field=status,
-        source=Status.NOT_SENT,
-        target=Status.SENT,
-    )
-    def status_send(self, sent_by: "User") -> None:
-        self.sent_date = timezone.now()
-        self.sent_by = sent_by
 
 
 class Payment(
@@ -1675,6 +1595,7 @@ class Payment(
     AdminUrlMixin,
     SignatureMixin,
 ):
+    # TODO MB has valid wallet????
     usd_fields = ["delivered_quantity_usd", "entitlement_quantity_usd"]
 
     STATUS_SUCCESS = "Transaction Successful"
@@ -1722,6 +1643,13 @@ class Payment(
         "payment.PaymentPlan",
         on_delete=models.CASCADE,
         related_name="payment_items",
+    )
+    parent_split = models.ForeignKey(
+        "payment.PaymentPlanSplit",
+        on_delete=models.SET_NULL,
+        related_name="split_payment_items",
+        null=True,
+        blank=True,
     )
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     # use program_id in UniqueConstraint order_number and token_number per Program

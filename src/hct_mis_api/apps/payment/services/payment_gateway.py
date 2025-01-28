@@ -1,9 +1,9 @@
 import dataclasses
 import logging
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
-from django.db.models import Q, QuerySet
+from django.db.models import Q
 from django.utils.timezone import now
 
 from _decimal import Decimal
@@ -13,7 +13,6 @@ from hct_mis_api.apps.core.api.mixins import BaseAPI
 from hct_mis_api.apps.core.utils import chunks
 from hct_mis_api.apps.payment.models import (
     DeliveryMechanism,
-    DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
     Payment,
     PaymentPlan,
@@ -53,9 +52,9 @@ class PaymentInstructionStatus(Enum):
     FINALIZED = "FINALIZED"
 
 
-class PaymentInstructionFromDeliveryMechanismPerPaymentPlanSerializer(ReadOnlyModelSerializer):
+class PaymentInstructionFromSplitSerializer(ReadOnlyModelSerializer):
     remote_id = serializers.CharField(source="id")
-    external_code = serializers.CharField(source="payment_plan.unicef_id")
+    external_code = serializers.SerializerMethodField()
     fsp = serializers.SerializerMethodField()
     payload = serializers.SerializerMethodField()
     extra = serializers.SerializerMethodField()
@@ -66,7 +65,7 @@ class PaymentInstructionFromDeliveryMechanismPerPaymentPlanSerializer(ReadOnlyMo
     def get_extra(self, obj: Any) -> Dict:
         return {
             "user": self.context["user_email"],
-            "config_key": obj.payment_plan.business_area.code,  # obj.chosen_configuration,
+            "config_key": obj.payment_plan.business_area.code,
             "delivery_mechanism": obj.delivery_mechanism.code,
         }
 
@@ -74,20 +73,6 @@ class PaymentInstructionFromDeliveryMechanismPerPaymentPlanSerializer(ReadOnlyMo
         return {
             "destination_currency": obj.payment_plan.currency,
         }
-
-    class Meta:
-        model = DeliveryMechanismPerPaymentPlan
-        fields = [
-            "remote_id",
-            "external_code",
-            "fsp",
-            "payload",
-            "extra",
-        ]
-
-
-class PaymentInstructionFromSplitSerializer(PaymentInstructionFromDeliveryMechanismPerPaymentPlanSerializer):
-    external_code = serializers.SerializerMethodField()  # type: ignore
 
     def get_external_code(self, obj: Any) -> str:
         return f"{obj.payment_plan.unicef_id}-{obj.order}"
@@ -353,37 +338,22 @@ class PaymentGatewayService:
         self.api = PaymentGatewayAPI()
 
     def create_payment_instructions(self, payment_plan: PaymentPlan, user_email: str) -> None:
-        def _create_payment_instruction(
-            _serializer: Callable,
-            _object: Union[PaymentPlanSplit, DeliveryMechanismPerPaymentPlan],
-        ) -> None:
-            data = _serializer(_object, context={"user_email": user_email}).data
-            response = self.api.create_payment_instruction(data)
-            assert response.remote_id == str(_object.id), f"{response}, _object_id: {_object.id}"
-            status = response.status
-            if status == PaymentInstructionStatus.DRAFT.value:
-                status = self.api.change_payment_instruction_status(
-                    status=PaymentInstructionStatus.OPEN, remote_id=response.remote_id
-                )
-            assert status == PaymentInstructionStatus.OPEN.value, status
-
-        if payment_plan.splits.exists():
+        if payment_plan.is_payment_gateway:
             for split in payment_plan.splits.filter(sent_to_payment_gateway=False).order_by("order"):
-                if split.financial_service_provider.is_payment_gateway:
-                    _create_payment_instruction(PaymentInstructionFromSplitSerializer, split)
-
-        else:
-            # for each sfp, create payment instruction
-            for delivery_mechanism in payment_plan.delivery_mechanisms.filter(sent_to_payment_gateway=False):
-                if delivery_mechanism.financial_service_provider.is_payment_gateway:
-                    _create_payment_instruction(
-                        PaymentInstructionFromDeliveryMechanismPerPaymentPlanSerializer, delivery_mechanism
+                data = PaymentInstructionFromSplitSerializer(split, context={"user_email": user_email}).data
+                response = self.api.create_payment_instruction(data)
+                assert response.remote_id == str(split.id), f"{response}, _object_id: {split.id}"
+                status = response.status
+                if status == PaymentInstructionStatus.DRAFT.value:
+                    status = self.api.change_payment_instruction_status(
+                        status=PaymentInstructionStatus.OPEN, remote_id=response.remote_id
                     )
+                assert status == PaymentInstructionStatus.OPEN.value, status
 
     def change_payment_instruction_status(
-        self, new_status: PaymentInstructionStatus, obj: Union[DeliveryMechanismPerPaymentPlan, PaymentPlanSplit]
+        self, new_status: PaymentInstructionStatus, obj: PaymentPlanSplit
     ) -> Optional[str]:
-        if obj.financial_service_provider.is_payment_gateway:
+        if obj.is_payment_gateway:
             response_status = self.api.change_payment_instruction_status(new_status, obj.id)
             assert new_status.value == response_status, f"{new_status.value} != {response_status}"
             return response_status
@@ -401,9 +371,7 @@ class PaymentGatewayService:
                 _payment.status = Payment.STATUS_SENT_TO_PG
             Payment.objects.bulk_update(_payments, ["status"])
 
-        def _add_records(
-            _payments: List[Payment], _container: Union[DeliveryMechanismPerPaymentPlan, PaymentPlanSplit]
-        ) -> None:
+        def _add_records(_payments: List[Payment], _container: PaymentPlanSplit) -> None:
             add_records_error = False
             for payments_chunk in chunks(_payments, self.ADD_RECORDS_CHUNK_SIZE):
                 response = self.api.add_records_to_payment_instruction(
@@ -421,21 +389,10 @@ class PaymentGatewayService:
                 self.change_payment_instruction_status(PaymentInstructionStatus.CLOSED, _container)
                 self.change_payment_instruction_status(PaymentInstructionStatus.READY, _container)
 
-        if payment_plan.splits.exists():
+        if payment_plan.is_payment_gateway:
             for split in payment_plan.splits.filter(sent_to_payment_gateway=False).all().order_by("order"):
-                if split.financial_service_provider.is_payment_gateway:
-                    payments = list(split.payments.order_by("unicef_id"))
-                    _add_records(payments, split)
-
-        else:
-            for delivery_mechanism in payment_plan.delivery_mechanisms.filter(sent_to_payment_gateway=False):
-                if delivery_mechanism.financial_service_provider.is_payment_gateway:
-                    payments = list(
-                        payment_plan.eligible_payments.filter(
-                            financial_service_provider=delivery_mechanism.financial_service_provider
-                        ).order_by("unicef_id")
-                    )
-                    _add_records(payments, delivery_mechanism)
+                payments = list(split.payments.order_by("unicef_id"))
+                _add_records(payments, split)
 
     def sync_fsps(self) -> None:
         fsps_data = self.api.get_fsps()
@@ -461,95 +418,72 @@ class PaymentGatewayService:
 
     @staticmethod
     def update_payment(
-        _payment: Payment,
-        _pg_payment_records: List[PaymentRecordData],
-        _container: Union[DeliveryMechanismPerPaymentPlan, PaymentPlanSplit],
-        _payment_plan: PaymentPlan,
-        _exchange_rate: Decimal,
+        payment: Payment,
+        pg_payment_records: List[PaymentRecordData],
+        container: PaymentPlanSplit,
+        payment_plan: PaymentPlan,
+        exchange_rate: Decimal,
     ) -> None:
         try:
-            matching_pg_payment = next(p for p in _pg_payment_records if p.remote_id == str(_payment.id))
+            matching_pg_payment = next(p for p in pg_payment_records if p.remote_id == str(payment.id))
         except StopIteration:
-            logger.warning(
-                f"Payment {_payment.id} for Payment Instruction {_container.id} not found in Payment Gateway"
-            )
+            logger.warning(f"Payment {payment.id} for Payment Instruction {container.id} not found in Payment Gateway")
             return
 
-        _payment.status = matching_pg_payment.get_hope_status(_payment.entitlement_quantity)
-        _payment.status_date = now()
-        _payment.fsp_auth_code = matching_pg_payment.auth_code
+        payment.status = matching_pg_payment.get_hope_status(payment.entitlement_quantity)
+        payment.status_date = now()
+        payment.fsp_auth_code = matching_pg_payment.auth_code
         update_fields = ["status", "status_date", "fsp_auth_code"]
 
-        if _payment.status in [
+        if payment.status in [
             Payment.STATUS_ERROR,
             Payment.STATUS_MANUALLY_CANCELLED,
         ]:
             if matching_pg_payment.message:
-                _payment.reason_for_unsuccessful_payment = matching_pg_payment.message
+                payment.reason_for_unsuccessful_payment = matching_pg_payment.message
             elif matching_pg_payment.payout_amount:
-                _payment.reason_for_unsuccessful_payment = f"Delivered amount: {matching_pg_payment.payout_amount}"
+                payment.reason_for_unsuccessful_payment = f"Delivered amount: {matching_pg_payment.payout_amount}"
             else:
-                _payment.reason_for_unsuccessful_payment = "Unknown error"
+                payment.reason_for_unsuccessful_payment = "Unknown error"
             update_fields.append("reason_for_unsuccessful_payment")
 
         delivered_quantity = matching_pg_payment.payout_amount
-        if _payment.status in [
+        if payment.status in [
             Payment.STATUS_DISTRIBUTION_SUCCESS,
             Payment.STATUS_DISTRIBUTION_PARTIAL,
             Payment.STATUS_NOT_DISTRIBUTED,
         ]:
-            if _payment.status == Payment.STATUS_NOT_DISTRIBUTED and delivered_quantity is None:
+            if payment.status == Payment.STATUS_NOT_DISTRIBUTED and delivered_quantity is None:
                 delivered_quantity = 0
 
             update_fields.extend(["delivered_quantity", "delivered_quantity_usd"])
-            _payment.delivered_quantity = to_decimal(delivered_quantity)
-            _payment.delivered_quantity_usd = get_quantity_in_usd(
+            payment.delivered_quantity = to_decimal(delivered_quantity)
+            payment.delivered_quantity_usd = get_quantity_in_usd(
                 amount=Decimal(delivered_quantity),  # type: ignore
-                currency=_payment_plan.currency,
-                exchange_rate=Decimal(_exchange_rate),
-                currency_exchange_date=_payment_plan.currency_exchange_date,
+                currency=payment_plan.currency,
+                exchange_rate=Decimal(exchange_rate),
+                currency_exchange_date=payment_plan.currency_exchange_date,
             )
 
-        _payment.save(update_fields=update_fields)
+        payment.save(update_fields=update_fields)
 
     def sync_records(self) -> None:
         payment_plans = PaymentPlan.objects.filter(
-            Q(delivery_mechanisms__sent_to_payment_gateway=True) | Q(splits__sent_to_payment_gateway=True),
+            Q(sent_to_payment_gateway=True) | Q(splits__sent_to_payment_gateway=True),
             status=PaymentPlan.Status.ACCEPTED,
-            delivery_mechanisms__financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-            delivery_mechanisms__financial_service_provider__payment_gateway_id__isnull=False,
+            delivery_mechanism__financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+            delivery_mechanism__financial_service_provider__payment_gateway_id__isnull=False,
         ).distinct()
 
         for payment_plan in payment_plans:
             exchange_rate = payment_plan.get_exchange_rate()
 
-            if not payment_plan.is_reconciled:
-                if payment_plan.splits.exists():
-                    payment_instructions = payment_plan.splits.filter(sent_to_payment_gateway=True)
-
-                    def get_pending_payments(split: PaymentPlanSplit) -> QuerySet[Payment]:
-                        return split.payments.filter(status__in=self.PENDING_UPDATE_PAYMENT_STATUSES).order_by(
-                            "unicef_id"
-                        )
-
-                else:
-                    payment_instructions = payment_plan.delivery_mechanisms.filter(
-                        financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-                        financial_service_provider__payment_gateway_id__isnull=False,
-                        sent_to_payment_gateway=True,
-                    )
-
-                    # Explicitly pass `payment_plan` to avoid late binding issues
-                    def get_pending_payments(
-                        dm: DeliveryMechanismPerPaymentPlan, pp: PaymentPlan = payment_plan
-                    ) -> QuerySet[Payment]:
-                        return pp.eligible_payments.filter(
-                            financial_service_provider=dm.financial_service_provider,
-                            status__in=self.PENDING_UPDATE_PAYMENT_STATUSES,
-                        ).order_by("unicef_id")
-
+            if not payment_plan.is_reconciled and payment_plan.is_payment_gateway:
+                payment_instructions = payment_plan.splits.filter(sent_to_payment_gateway=True)
                 for instruction in payment_instructions:
-                    pending_payments = get_pending_payments(instruction)
+                    pending_payments = instruction.payments.filter(
+                        status__in=self.PENDING_UPDATE_PAYMENT_STATUSES
+                    ).order_by("unicef_id")
                     if pending_payments.exists():
                         pg_payment_records = self.api.get_records_for_payment_instruction(instruction.id)
                         for payment in pending_payments:
