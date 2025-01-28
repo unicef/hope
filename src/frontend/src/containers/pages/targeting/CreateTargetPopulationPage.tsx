@@ -45,6 +45,8 @@ export const CreateTargetPopulationPage = (): ReactElement => {
     flagExcludeIfOnSanctionList: false,
     householdIds: '',
     individualIds: '',
+    deliveryMechanism: '',
+    fsp: '',
   };
   const [mutate, { loading }] = useCreateTpMutation();
   const { showMessage } = useSnackbar();
@@ -85,6 +87,8 @@ export const CreateTargetPopulationPage = (): ReactElement => {
             name: values.name,
             excludedIds: values.excludedIds,
             exclusionReason: values.exclusionReason,
+            fspId: values.fsp,
+            deliveryMechanismCode: values.deliveryMechanism,
             ...getTargetingCriteriaVariables(values),
           },
         },

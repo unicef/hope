@@ -159,20 +159,6 @@ export const PAYMENT_PLAN_QUERY = gql`
       importedFileName
       totalEntitledQuantityUsd
       paymentsConflictsCount
-      deliveryMechanisms {
-        id
-        name
-        code
-        order
-        sentToPaymentGateway
-        chosenConfiguration
-        fsp {
-          id
-          name
-          communicationChannel
-          isPaymentGateway
-        }
-      }
       canSendToPaymentGateway
       canSplit
       splitChoices {
@@ -183,7 +169,6 @@ export const PAYMENT_PLAN_QUERY = gql`
         deliveryMechanism {
           id
           name
-          order
           fsp {
             id
             name

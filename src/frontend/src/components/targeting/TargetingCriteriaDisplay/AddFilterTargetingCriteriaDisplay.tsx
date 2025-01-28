@@ -157,6 +157,8 @@ export const AddFilterTargetingCriteriaDisplay = ({
       collectorsFiltersBlocks: [...values.collectorsFiltersBlocks],
       householdIds: values.householdIds,
       individualIds: values.individualIds,
+      deliveryMechanism: values.deliveryMechanism,
+      fsp: values.fsp,
     };
     if (criteriaIndex !== null) {
       helpers.replace(criteriaIndex, criteria);

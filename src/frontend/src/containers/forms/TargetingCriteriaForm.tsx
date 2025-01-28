@@ -1,6 +1,13 @@
+import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
+import { AndDivider, AndDividerLabel } from '@components/targeting/AndDivider';
+import { useAllCollectorFieldsAttributesQuery } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useCachedIndividualFieldsQuery } from '@hooks/useCachedIndividualFields';
+import { AddCircleOutline } from '@mui/icons-material';
 import {
   Box,
   Button,
+  Collapse,
   Dialog,
   DialogActions,
   DialogContent,
@@ -8,7 +15,19 @@ import {
   Grid,
   Typography,
 } from '@mui/material';
-import { AddCircleOutline } from '@mui/icons-material';
+import { FormikSelectField } from '@shared/Formik/FormikSelectField';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
+import {
+  chooseFieldType,
+  clearField,
+  formatCriteriaCollectorsFiltersBlocks,
+  formatCriteriaFilters,
+  formatCriteriaIndividualsFiltersBlocks,
+  HhIdValidation,
+  IndIdValidation,
+  mapCriteriaToInitialValues,
+  validate,
+} from '@utils/targetingUtils';
 import { Field, FieldArray, Formik } from 'formik';
 import {
   Component,
@@ -19,32 +38,16 @@ import {
   useState,
 } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useProgramContext } from 'src/programContext';
 import styled from 'styled-components';
 import * as Yup from 'yup';
-import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useCachedIndividualFieldsQuery } from '@hooks/useCachedIndividualFields';
-import {
-  chooseFieldType,
-  clearField,
-  formatCriteriaFilters,
-  formatCriteriaIndividualsFiltersBlocks,
-  formatCriteriaCollectorsFiltersBlocks,
-  HhIdValidation,
-  IndIdValidation,
-  mapCriteriaToInitialValues,
-} from '@utils/targetingUtils';
 import { DialogContainer } from '../dialogs/DialogContainer';
 import { DialogDescription } from '../dialogs/DialogDescription';
 import { DialogFooter } from '../dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../dialogs/DialogTitleWrapper';
-import { TargetingCriteriaIndividualFilterBlocks } from './TargetingCriteriaIndividualFilterBlocks';
-import { AndDivider, AndDividerLabel } from '@components/targeting/AndDivider';
-import { TargetingCriteriaHouseholdFilter } from './TargetingCriteriaHouseholdFilter';
-import { useProgramContext } from 'src/programContext';
-import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { TargetingCriteriaCollectorFilterBlocks } from './TargetingCriteriaCollectorFilterBlocks';
-import { useAllCollectorFieldsAttributesQuery } from '@generated/graphql';
+import { TargetingCriteriaHouseholdFilter } from './TargetingCriteriaHouseholdFilter';
+import { TargetingCriteriaIndividualFilterBlocks } from './TargetingCriteriaIndividualFilterBlocks';
 
 const ButtonBox = styled.div`
   width: 300px;
@@ -60,6 +63,18 @@ const StyledBox = styled(Box)`
 `;
 
 const validationSchema = Yup.object().shape({
+  deliveryMechanism: Yup.string().when(
+    'openPaymentChannelCollapse',
+    (openPaymentChannelCollapse, schema) =>
+      openPaymentChannelCollapse
+        ? schema.required('Delivery Mechanism is required')
+        : schema,
+  ),
+  fsp: Yup.string().when(
+    'openPaymentChannelCollapse',
+    (openPaymentChannelCollapse, schema) =>
+      openPaymentChannelCollapse ? schema.required('FSP is required') : schema,
+  ),
   householdIds: HhIdValidation,
   individualIds: IndIdValidation,
   filters: Yup.array().of(
@@ -170,6 +185,16 @@ export const TargetingCriteriaForm = ({
   const [allDataChoicesDict, setAllDataChoicesDict] = useState(null);
   const [allCollectorFieldsChoicesDict, setAllCollectorFieldsChoicesDict] =
     useState(null);
+  const [openPaymentChannelCollapse, setOpenPaymentChannelCollapse] =
+    useState(false);
+
+  const handlePaymentChannelButtonClick = (setFieldValue) => {
+    if (!openPaymentChannelCollapse) {
+      setFieldValue('deliveryMechanism', '');
+      setFieldValue('fsp', '');
+    }
+    setOpenPaymentChannelCollapse(!openPaymentChannelCollapse);
+  };
 
   useEffect(() => {
     if (loading) return;
@@ -210,91 +235,14 @@ export const TargetingCriteriaForm = ({
 
   if (!data || !allCollectorFieldsAttributesData) return null;
 
-  const filterNullOrNoSelections = (filter): boolean =>
-    !filter.isNull &&
-    (filter.value === null ||
-      filter.value === '' ||
-      (filter?.fieldAttribute?.type === 'SELECT_MANY' &&
-        filter.value &&
-        filter.value.length === 0));
-
-  const filterEmptyFromTo = (filter): boolean =>
-    !filter.isNull &&
-    typeof filter.value === 'object' &&
-    filter.value !== null &&
-    Object.prototype.hasOwnProperty.call(filter.value, 'from') &&
-    Object.prototype.hasOwnProperty.call(filter.value, 'to') &&
-    !filter.value.from &&
-    !filter.value.to;
-
-  const validate = (values) => {
-    const hasHouseholdsFiltersBlocksErrors =
-      values.householdsFiltersBlocks.some(filterNullOrNoSelections) ||
-      values.householdsFiltersBlocks.some(filterEmptyFromTo);
-
-    const hasBlockFiltersErrors = (blocks) => {
-      if (!blocks || !Array.isArray(blocks)) {
-        return false;
-      }
-
-      return blocks.some((block) => {
-        if (!block.blockFilters || !Array.isArray(block.blockFilters)) {
-          return false;
-        }
-
-        const hasNulls = block.blockFilters.some(filterNullOrNoSelections);
-        const hasFromToError = block.blockFilters.some(filterEmptyFromTo);
-        return hasNulls || hasFromToError;
-      });
-    };
-
-    const hasIndividualsFiltersBlocksErrors = hasBlockFiltersErrors(
-      values.individualsFiltersBlocks,
-    );
-    const hasCollectorsFiltersBlocksErrors = hasBlockFiltersErrors(
-      values.collectorsFiltersBlocks,
-    );
-
-    const errors: { nonFieldErrors?: string[] } = {};
-    if (
-      hasHouseholdsFiltersBlocksErrors ||
-      hasIndividualsFiltersBlocksErrors ||
-      hasCollectorsFiltersBlocksErrors
-    ) {
-      errors.nonFieldErrors = ['You need to fill out missing values.'];
-    }
-    if (
-      values.householdsFiltersBlocks.length +
-        values.individualsFiltersBlocks.length +
-        values.collectorsFiltersBlocks.length ===
-        0 &&
-      (!values.householdIds || values.householdIds.length === 0) &&
-      (!values.individualIds || values.individualIds.length === 0)
-    ) {
-      errors.nonFieldErrors = [
-        `You need to add at least one ${beneficiaryGroup?.groupLabel} filter or an ${beneficiaryGroup?.memberLabel} block filter.`,
-      ];
-    } else if (
-      values.individualsFiltersBlocks.filter(
-        (block) => block.blockFilters && block.blockFilters.length === 0,
-      ).length > 0 ||
-      values.collectorsFiltersBlocks.filter(
-        (block) => block.blockFilters && block.blockFilters.length === 0,
-      ).length > 0
-    ) {
-      errors.nonFieldErrors = [
-        `You need to add at least one ${beneficiaryGroup?.groupLabel} filter or an ${beneficiaryGroup?.memberLabel} block filter.`,
-      ];
-    }
-    return errors;
-  };
-
   const handleSubmit = (values, bag): void => {
     const householdsFiltersBlocks = formatCriteriaFilters(
       values.householdsFiltersBlocks,
     );
     const individualIds = values.individualIds;
     const householdIds = values.householdIds;
+    const deliveryMechanism = values.deliveryMechanism;
+    const fsp = values.fsp;
     const individualsFiltersBlocks = formatCriteriaIndividualsFiltersBlocks(
       values.individualsFiltersBlocks,
     );
@@ -308,6 +256,8 @@ export const TargetingCriteriaForm = ({
       collectorsFiltersBlocks,
       individualIds,
       householdIds,
+      deliveryMechanism,
+      fsp,
     });
     return bag.resetForm();
   };
@@ -318,11 +268,11 @@ export const TargetingCriteriaForm = ({
       <Formik
         initialValues={initialValue}
         onSubmit={handleSubmit}
-        validate={validate}
+        validate={(values) => validate(values, beneficiaryGroup)}
         validationSchema={validationSchema}
         enableReinitialize
       >
-        {({ submitForm, values, resetForm, errors }) => {
+        {({ submitForm, values, resetForm, errors, setFieldValue }) => {
           return (
             <Dialog
               open={open}
@@ -556,6 +506,65 @@ export const TargetingCriteriaForm = ({
                           ADD COLLECTOR RULE GROUP
                         </Button>
                       </ButtonBox>
+                    </Box>
+                    <Box mt={2} display="flex" flexDirection="column">
+                      <ButtonBox style={{ width: '600px' }}>
+                        <Button
+                          data-cy="button-collector-rule"
+                          onClick={() =>
+                            handlePaymentChannelButtonClick(setFieldValue)
+                          }
+                          color="primary"
+                          startIcon={<AddCircleOutline />}
+                        >
+                          <Box
+                            style={{ textAlign: 'left' }}
+                            display="flex"
+                            flexDirection="column"
+                          >
+                            <Box>PAYMENT CHANNEL VALIDATION</Box>
+                            <Box>(Delivery mechanism and FSP requirements)</Box>
+                          </Box>
+                        </Button>
+                      </ButtonBox>
+                      <Collapse in={openPaymentChannelCollapse}>
+                        <Box mt={4}>
+                          <Grid container spacing={3}>
+                            <Grid item xs={12}>
+                              <Field
+                                name="deliveryMechanism"
+                                label="Select Delivery Mechanism"
+                                type="text"
+                                fullWidth
+                                required={openPaymentChannelCollapse}
+                                variant="outlined"
+                                choices={[
+                                  { name: 'Cash', value: 'CASH' },
+                                  { name: 'In-kind', value: 'IN_KIND' },
+                                ]}
+                                component={FormikSelectField}
+                                data-cy="input-delivery-mechanism"
+                              />
+                            </Grid>
+                            <Grid item xs={12}>
+                              <Field
+                                name="fsp"
+                                label="Select FSP"
+                                type="text"
+                                fullWidth
+                                required={openPaymentChannelCollapse}
+                                variant="outlined"
+                                component={FormikSelectField}
+                                choices={[
+                                  { name: 'FSP1', value: 'FSP1' },
+                                  { name: 'FSP2', value: 'FSP2' },
+                                ]}
+                                data-cy="input-fsp"
+                              />
+                            </Grid>
+                          </Grid>
+                        </Box>
+                      </Collapse>
                     </Box>
                   </>
                 ) : null}
