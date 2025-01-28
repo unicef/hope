@@ -2,11 +2,24 @@ from collections import defaultdict
 from typing import Any, Dict, List, Optional, Tuple
 
 from django.db import transaction
+from django.db.models import OuterRef
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
+
+from cfgv import ValidationError
+from psycopg2 import IntegrityError
 
 from hct_mis_api.apps.accountability.models import Message, Survey
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.payment.models import PaymentPlan
+from hct_mis_api.apps.household.models import (
+    ROLE_PRIMARY,
+    Household,
+    IndividualRoleInHousehold,
+)
+from hct_mis_api.apps.payment.models import Payment, PaymentPlan
+from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
+    create_payment_plan_snapshot_data,
+)
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory
@@ -181,6 +194,7 @@ def migrate_tp(tp: "TargetPopulation") -> None:
                 if tp.targeting_criteria:
                     copy_new_target_criteria = PaymentPlanService.copy_target_criteria(tp.targeting_criteria)
                 else:
+                    # create just empty TargetingCriteria if no any
                     copy_new_target_criteria = TargetingCriteriaFactory()
                 payment_plan.targeting_criteria = copy_new_target_criteria
             # full rebuild for PREPARING Payment Plan
@@ -340,6 +354,55 @@ def migrate_message_and_survey(list_ids: List[str], model: Any, business_area_id
     return objects_to_update
 
 
+def create_payments_from_hh_selections(payment_plan: PaymentPlan) -> None:
+    payments_to_create = []
+    if payment_plan.status == PaymentPlan.Status.MIGRATION_BLOCKED:
+        tp_id = payment_plan.internal_data.get("target_population_id")
+        if not tp_id:
+            raise ValidationError("TP id not found for Payment Plan", payment_plan.unicef_id)
+        target_population = get_object_or_404(TargetPopulation, pk=tp_id)
+        households_ids = target_population.selections.all().values_list("household", flat=True)
+        households = Household.objects.filter(id__in=households_ids)
+    else:
+        # for other statuses just rebuild TP list
+        households = payment_plan.household_list
+
+    households = (
+        households.annotate(
+            collector=IndividualRoleInHousehold.objects.filter(household=OuterRef("pk"), role=ROLE_PRIMARY).values(
+                "individual"
+            )[:1]
+        )
+        .all()
+        .values("pk", "collector", "unicef_id", "head_of_household")
+    )
+    for household in households:
+        collector_id = household.get("collector")
+        if not collector_id:
+            msg = f"Couldn't find a primary collector in {household['unicef_id']}"
+            raise ValidationError(msg)
+
+        payments_to_create.append(
+            Payment(
+                parent=payment_plan,
+                program_id=payment_plan.program_cycle.program_id,
+                business_area_id=payment_plan.business_area_id,
+                status=Payment.STATUS_PENDING,
+                status_date=timezone.now(),
+                household_id=household["pk"],
+                head_of_household_id=household["head_of_household"],
+                collector_id=collector_id,
+            )
+        )
+    try:
+        Payment.objects.bulk_create(payments_to_create)
+    except IntegrityError as e:
+        raise ValidationError("Duplicated Households in provided Targeting List") from e
+    payment_plan.refresh_from_db()
+    create_payment_plan_snapshot_data(payment_plan)
+    PaymentPlanService.generate_signature(payment_plan)
+
+
 def create_payments_for_pending_payment_plans() -> None:
     from django.db import transaction
     from django.utils import timezone
@@ -389,7 +452,7 @@ def create_payments_for_pending_payment_plans() -> None:
                             try:
                                 payment_plan.build_status_building()
                                 payment_plan.save(update_fields=("build_status", "built_at"))
-                                PaymentPlanService.create_payments(payment_plan)
+                                create_payments_from_hh_selections(payment_plan)
                                 payment_plan.update_population_count_fields()
                                 payment_plan.build_status_ok()
                                 payment_plan.status = PaymentPlan.Status.TP_OPEN
