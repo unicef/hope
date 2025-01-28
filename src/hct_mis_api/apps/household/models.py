@@ -714,18 +714,18 @@ class Document(AbstractSyncable, SoftDeletableRepresentationMergeStatusModel, Ti
         (STATUS_INVALID, _("Invalid")),
     )
 
-    document_number = models.CharField(max_length=255, blank=True, db_index=True)
-    photo = models.ImageField(blank=True)
     individual = models.ForeignKey("Individual", related_name="documents", on_delete=models.CASCADE)
+    program = models.ForeignKey("program.Program", null=True, related_name="+", on_delete=models.CASCADE)
+    document_number = models.CharField(max_length=255, blank=True, db_index=True)
     type = models.ForeignKey("DocumentType", related_name="documents", on_delete=models.CASCADE)
     country = models.ForeignKey("geo.Country", blank=True, null=True, on_delete=models.PROTECT)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
+    photo = models.ImageField(blank=True)
     cleared = models.BooleanField(default=False)
     cleared_date = models.DateTimeField(default=timezone.now)
     cleared_by = models.ForeignKey("account.User", null=True, on_delete=models.SET_NULL)
     issuance_date = models.DateTimeField(null=True, blank=True)
     expiry_date = models.DateTimeField(null=True, blank=True, db_index=True)
-    program = models.ForeignKey("program.Program", null=True, related_name="+", on_delete=models.CASCADE)
 
     is_migration_handled = models.BooleanField(default=False)
     copied_from = models.ForeignKey(
@@ -789,11 +789,7 @@ class Document(AbstractSyncable, SoftDeletableRepresentationMergeStatusModel, Ti
 
 
 class IndividualIdentity(SoftDeletableRepresentationMergeStatusModel, TimeStampedModel):
-    # notice that this model has `created` and `modified` fields
     individual = models.ForeignKey("Individual", related_name="identities", on_delete=models.CASCADE)
-    number = models.CharField(
-        max_length=255,
-    )
     partner = models.ForeignKey(
         "account.Partner",
         related_name="individual_identities",
@@ -801,6 +797,7 @@ class IndividualIdentity(SoftDeletableRepresentationMergeStatusModel, TimeStampe
         on_delete=models.PROTECT,
     )
     country = models.ForeignKey("geo.Country", null=True, on_delete=models.PROTECT)
+    number = models.CharField(max_length=255)
     is_migration_handled = models.BooleanField(default=False)
     copied_from = models.ForeignKey(
         "self",

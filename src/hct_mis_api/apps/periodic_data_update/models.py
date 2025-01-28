@@ -17,6 +17,16 @@ class PeriodicDataUpdateTemplate(TimeStampedModel, CeleryEnabledModel):
         FAILED = "FAILED", "Failed"
         CANCELED = "CANCELED", "Canceled"
 
+    business_area = models.ForeignKey(
+        "core.BusinessArea",
+        on_delete=models.CASCADE,
+        related_name="periodic_data_update_templates",
+    )
+    program = models.ForeignKey(
+        "program.Program",
+        on_delete=models.CASCADE,
+        related_name="periodic_data_update_templates",
+    )
     status = models.CharField(
         max_length=20,
         choices=Status.choices,
@@ -29,17 +39,8 @@ class PeriodicDataUpdateTemplate(TimeStampedModel, CeleryEnabledModel):
         null=True,
         blank=True,
     )
+    number_of_records = models.PositiveIntegerField(null=True, blank=True)
     file = models.ForeignKey(FileTemp, null=True, blank=True, related_name="+", on_delete=models.SET_NULL)
-    program = models.ForeignKey(
-        "program.Program",
-        on_delete=models.CASCADE,
-        related_name="periodic_data_update_templates",
-    )
-    business_area = models.ForeignKey(
-        "core.BusinessArea",
-        on_delete=models.CASCADE,
-        related_name="periodic_data_update_templates",
-    )
     """
     {
     "registration_data_import_id": id,
@@ -78,7 +79,6 @@ class PeriodicDataUpdateTemplate(TimeStampedModel, CeleryEnabledModel):
         ]
     """
     rounds_data = models.JSONField()
-    number_of_records = models.PositiveIntegerField(null=True, blank=True)
 
     celery_task_name = (
         "hct_mis_api.apps.periodic_data_update.celery_tasks.export_periodic_data_update_export_template_service"
@@ -126,15 +126,15 @@ class PeriodicDataUpdateUpload(TimeStampedModel, CeleryEnabledModel):
         FAILED = "FAILED", "Failed"
         CANCELED = "CANCELED", "Canceled"
 
-    status = models.CharField(
-        max_length=20,
-        choices=Status.choices,
-        default=Status.PENDING,
-    )
     template = models.ForeignKey(
         PeriodicDataUpdateTemplate,
         on_delete=models.CASCADE,
         related_name="uploads",
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.PENDING,
     )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,

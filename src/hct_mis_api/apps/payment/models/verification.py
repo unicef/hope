@@ -78,14 +78,17 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
         (VERIFICATION_CHANNEL_RAPIDPRO, "RAPIDPRO"),
         (VERIFICATION_CHANNEL_XLSX, "XLSX"),
     )
-    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING, db_index=True)
 
     payment_plan = models.ForeignKey(
         "payment.PaymentPlan", on_delete=models.CASCADE, related_name="payment_verification_plans", null=True
     )
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING, db_index=True)
+    verification_channel = models.CharField(max_length=50, choices=VERIFICATION_CHANNEL_CHOICES)
 
     sampling = models.CharField(max_length=50, choices=SAMPLING_CHOICES)
-    verification_channel = models.CharField(max_length=50, choices=VERIFICATION_CHANNEL_CHOICES)
+    sex_filter = models.CharField(null=True, max_length=10, blank=True)
+    activation_date = models.DateTimeField(null=True)
+    completion_date = models.DateTimeField(null=True)
     sample_size = models.PositiveIntegerField(null=True, blank=True)
     responded_count = models.PositiveIntegerField(null=True, blank=True)
     received_count = models.PositiveIntegerField(null=True, blank=True)
@@ -93,16 +96,16 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
     received_with_problems_count = models.PositiveIntegerField(null=True, blank=True)
     confidence_interval = models.FloatField(null=True, blank=True)
     margin_of_error = models.FloatField(null=True, blank=True)
+
     rapid_pro_flow_id = models.CharField(max_length=255, blank=True)
     rapid_pro_flow_start_uuids = ArrayField(models.CharField(max_length=255, blank=True), default=list)
-    age_filter = JSONField(null=True, blank=True)
-    excluded_admin_areas_filter = JSONField(null=True, blank=True)
-    sex_filter = models.CharField(null=True, max_length=10, blank=True)
-    activation_date = models.DateTimeField(null=True)
-    completion_date = models.DateTimeField(null=True)
+
     xlsx_file_exporting = models.BooleanField(default=False)
     xlsx_file_imported = models.BooleanField(default=False)
+
     error = models.CharField(max_length=500, null=True, blank=True)
+    age_filter = JSONField(null=True, blank=True)
+    excluded_admin_areas_filter = JSONField(null=True, blank=True)
 
     class Meta:
         ordering = ("created_at",)
@@ -224,16 +227,15 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel, AdminUrlMixin)
         (STATUS_RECEIVED, "RECEIVED"),
         (STATUS_RECEIVED_WITH_ISSUES, "RECEIVED WITH ISSUES"),
     )
-    payment_verification_plan = models.ForeignKey(
-        "payment.PaymentVerificationPlan",
-        on_delete=models.CASCADE,
-        related_name="payment_record_verifications",
-    )
-
     payment = models.ForeignKey(
         "payment.Payment",
         on_delete=models.CASCADE,
         related_name="payment_verifications",
+    )
+    payment_verification_plan = models.ForeignKey(
+        "payment.PaymentVerificationPlan",
+        on_delete=models.CASCADE,
+        related_name="payment_record_verifications",
     )
 
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING)
