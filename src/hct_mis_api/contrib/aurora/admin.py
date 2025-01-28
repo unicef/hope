@@ -202,7 +202,7 @@ class RecordAdmin(HOPEModelAdminBase):
     )
     change_form_template = "registration_datahub/admin/record/change_form.html"
 
-    actions = [mass_update, "extract", "async_extract", "create_rdi", "create_sr_lanka_rdi", "count_queryset"]
+    actions = [mass_update, "extract", "async_extract", "create_rdi", "count_queryset"]
 
     mass_update_exclude = ["pk", "data", "source_id", "registration", "timestamp"]
     mass_update_hints = []

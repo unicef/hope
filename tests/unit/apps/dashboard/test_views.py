@@ -30,14 +30,18 @@ def setup_client(api_client: Callable, afghanistan: BusinessAreaFactory) -> Dict
 
     client = api_client(user)
     list_url = reverse("api:household-data", args=[afghanistan.slug])
+    global_url = reverse("api:household-data", args=["global"])
     generate_report_url = reverse("api:generate-dashreport", args=[afghanistan.slug])
+    generate_global_report_url = reverse("api:generate-dashreport", args=["global"])
 
     return {
         "client": client,
         "user": user,
         "business_area": afghanistan,
         "list_url": list_url,
+        "global_url": global_url,
         "generate_report_url": generate_report_url,
+        "generate_global_report_url": generate_global_report_url,
     }
 
 
@@ -173,3 +177,40 @@ def test_dashboard_report_view_context_without_permission(afghanistan: Callable,
     context = view.get_context_data(business_area_slug=afghanistan.slug)
     assert not context["has_permission"]
     assert context["error_message"] == "You do not have permission to view this dashboard."
+
+
+@pytest.mark.parametrize(
+    "business_area_slug, expected_url_key, expected_status, permission_granted",
+    [
+        ("afghanistan", "list_url", status.HTTP_403_FORBIDDEN, False),  # Without permission
+        ("afghanistan", "list_url", status.HTTP_200_OK, True),  # With permission
+    ],
+)
+def test_dashboard_data_view_permissions(
+    business_area_slug: str,
+    expected_url_key: str,
+    expected_status: int,
+    permission_granted: bool,
+    setup_client: Dict[str, Optional[object]],
+    populate_dashboard_cache: Callable,
+) -> None:
+    """
+    Test permissions for accessing dashboard data, including global and specific business area dashboards.
+    """
+    client = setup_client["client"]
+    user = setup_client["user"]
+    business_area = setup_client["business_area"]
+    url = setup_client[expected_url_key]
+
+    if permission_granted:
+        role = RoleFactory(name="Dashboard Viewer", permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
+        assigned_area = "global" if business_area_slug == "global" else business_area
+        UserRole.objects.create(user=user, role=role, business_area=assigned_area)
+
+    _ = populate_dashboard_cache(business_area)
+
+    response = client.get(url)
+
+    assert response.status_code == expected_status
+    if expected_status == status.HTTP_200_OK:
+        assert response["Content-Type"] == "application/json"
