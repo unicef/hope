@@ -178,10 +178,10 @@ class PartnerNode(DjangoObjectType):
         model = Partner
 
     def resolve_areas(self, info: Any) -> "List[Area]":
-        return self.get_areas_for_program(self.partner_program.id).order_by("name")
+        return self.get_areas_for_program(self.partner_program).order_by("name")
 
     def resolve_area_access(self, info: Any, **kwargs: Any) -> str:
-        if self.has_area_limits_for_program(self.partner_program.id):
+        if self.has_area_limits_in_program(self.partner_program):
             return "ADMIN_AREA"
         else:
             return "BUSINESS_AREA"
@@ -254,6 +254,8 @@ class Query(graphene.ObjectType):
         return (
             get_user_model()
             .objects.prefetch_related("role_assignments")
-            .filter(available_for_export=True, is_superuser=False, role_assignments__business_area__slug=business_area_slug)
+            .filter(
+                available_for_export=True, is_superuser=False, role_assignments__business_area__slug=business_area_slug
+            )
             .exists()
         )

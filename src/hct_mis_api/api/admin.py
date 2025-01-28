@@ -80,7 +80,9 @@ class APITokenForm(forms.ModelForm):
     def __init__(self, *args: Any, instance: Optional[Any] = None, **kwargs: Any) -> None:
         super().__init__(*args, instance=instance, **kwargs)
         if instance:
-            self.fields["valid_for"].queryset = BusinessArea.objects.filter(role_assignments__user=instance.user).distinct()
+            self.fields["valid_for"].queryset = BusinessArea.objects.filter(
+                role_assignments__user=instance.user
+            ).distinct()
 
     def clean(self) -> None:
         if self.instance and hasattr(self.instance, "user"):
