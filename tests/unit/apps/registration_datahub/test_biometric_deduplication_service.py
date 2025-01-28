@@ -15,7 +15,12 @@ from hct_mis_api.apps.household.fixtures import (
     IndividualFactory,
     PendingIndividualFactory,
 )
-from hct_mis_api.apps.household.models import DUPLICATE, NOT_PROCESSED, UNIQUE
+from hct_mis_api.apps.household.models import (
+    DUPLICATE,
+    DUPLICATE_IN_BATCH,
+    NOT_PROCESSED,
+    UNIQUE,
+)
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
@@ -666,7 +671,7 @@ class BiometricDeduplicationServiceTest(TestCase):
                 "location": None,
             },
         ]
-        assert ind1.biometric_deduplication_batch_status == DUPLICATE
+        assert ind1.biometric_deduplication_batch_status == DUPLICATE_IN_BATCH
 
         ind2.refresh_from_db()
         assert ind2.biometric_deduplication_golden_record_results == [
@@ -699,7 +704,7 @@ class BiometricDeduplicationServiceTest(TestCase):
                 "location": None,
             },
         ]
-        assert ind2.biometric_deduplication_batch_status == DUPLICATE
+        assert ind2.biometric_deduplication_batch_status == DUPLICATE_IN_BATCH
 
         ind3.refresh_from_db()
         assert ind3.biometric_deduplication_batch_results == [
@@ -712,7 +717,7 @@ class BiometricDeduplicationServiceTest(TestCase):
                 "location": None,
             },
         ]
-        assert ind2.biometric_deduplication_batch_status == DUPLICATE
+        assert ind2.biometric_deduplication_batch_status == DUPLICATE_IN_BATCH
         assert ind3.biometric_deduplication_golden_record_results == []
         assert ind3.biometric_deduplication_golden_record_status == UNIQUE
 

@@ -303,22 +303,28 @@ export function paymentPlanStatusToColor(
   status: string,
 ): string {
   const colorsMap = {
-    [PaymentPlanStatus.Draft]: theme.hctPalette.green,
-    [PaymentPlanStatus.Open]: theme.hctPalette.gray,
-    [PaymentPlanStatus.TpOpen]: theme.hctPalette.gray,
-    [PaymentPlanStatus.Locked]: theme.hctPalette.red,
     [PaymentPlanStatus.Accepted]: theme.hctPalette.green,
-    [PaymentPlanStatus.TpLocked]: theme.hctPalette.red,
+    [PaymentPlanStatus.Draft]: theme.hctPalette.green,
+    [PaymentPlanStatus.Finished]: theme.hctPalette.gray,
+    [PaymentPlanStatus.InApproval]: theme.hctPalette.blue,
+    [PaymentPlanStatus.InAuthorization]: theme.hctPalette.blue,
+    [PaymentPlanStatus.InReview]: theme.hctPalette.blue,
+    [PaymentPlanStatus.Locked]: theme.hctPalette.red,
+    [PaymentPlanStatus.LockedFsp]: theme.hctPalette.red,
+    [PaymentPlanStatus.Open]: theme.hctPalette.gray,
+    [PaymentPlanStatus.Preparing]: theme.hctPalette.blue,
     [PaymentPlanStatus.Processing]: theme.hctPalette.blue,
-    [PaymentPlanStatus.SteficonWait]: theme.hctPalette.orange,
-    [PaymentPlanStatus.SteficonRun]: theme.hctPalette.blue,
     [PaymentPlanStatus.SteficonCompleted]: theme.hctPalette.green,
     [PaymentPlanStatus.SteficonError]: theme.palette.error.main,
+    [PaymentPlanStatus.SteficonRun]: theme.hctPalette.blue,
+    [PaymentPlanStatus.SteficonWait]: theme.hctPalette.orange,
+    [PaymentPlanStatus.TpLocked]: theme.hctPalette.red,
+    [PaymentPlanStatus.TpOpen]: theme.hctPalette.gray,
   };
   if (status in colorsMap) {
     return colorsMap[status];
   }
-  return theme.palette.error.main;
+  return theme.hctPalette.gray;
 }
 
 export function paymentPlanBuildStatusToColor(

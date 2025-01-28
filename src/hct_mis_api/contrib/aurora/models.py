@@ -50,11 +50,11 @@ class Registration(AuroraModel):
     slug = models.SlugField()
     extra = models.JSONField(blank=True, null=True)
     metadata = models.JSONField(blank=True, null=True)
+    rdi_parser = StrategyField(registry=registry, blank=True, null=True)
     rdi_policy = models.IntegerField(
         choices=RDI_POLICIES,
         default=1,
     )
-    rdi_parser = StrategyField(registry=registry, blank=True, null=True)
     steficon_rule = models.ForeignKey("steficon.RuleCommit", blank=True, null=True, on_delete=models.SET_NULL)
     mapping = models.JSONField(blank=True, null=True)
     private_key = models.TextField(blank=True, null=True, editable=False)
