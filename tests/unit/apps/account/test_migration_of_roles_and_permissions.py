@@ -9,12 +9,16 @@ from hct_mis_api.apps.account.fixtures import (
     PartnerFactory,
     UserFactory,
 )
-from hct_mis_api.apps.account.models import Partner, Role, RoleAssignment, AdminAreaLimitedTo
-
-from hct_mis_api.apps.core.models import BusinessArea, BusinessAreaPartnerThrough
+from hct_mis_api.apps.account.models import (
+    AdminAreaLimitedTo,
+    Partner,
+    Role,
+    RoleAssignment,
+)
+from hct_mis_api.apps.core.models import BusinessAreaPartnerThrough
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import Program, ProgramPartnerThrough
+from hct_mis_api.apps.program.models import ProgramPartnerThrough
 
 data_migration = import_module("hct_mis_api.apps.account.migrations.0006_migration")
 
@@ -545,21 +549,15 @@ class MigrateUserRolesTest(TestCase):
             unicef_hq.allowed_business_areas.count(),
             2,
         )
-        self.assertTrue(
-            self.business_area_afg in unicef_hq.allowed_business_areas.all()
-        )
-        self.assertTrue(
-            self.business_area_ukr in unicef_hq.allowed_business_areas.all()
-        )
+        self.assertTrue(self.business_area_afg in unicef_hq.allowed_business_areas.all())
+        self.assertTrue(self.business_area_ukr in unicef_hq.allowed_business_areas.all())
 
         # check roles for UNICEF subpartners
         # newly created "Role for UNICEF Partners" should be assigned for UNICEF subpartners per BA
         # and "Role with all permissions" for UNICEF HQ
         role_with_all_permissions = Role.objects.get(name="Role with all permissions")
         role_for_unicef_partners = Role.objects.filter(name="Role for UNICEF Partners").first()
-        self.assertIsNotNone(
-            role_for_unicef_partners
-        )
+        self.assertIsNotNone(role_for_unicef_partners)
 
         self.assertEqual(
             unicef_in_afg.role_assignments.count(),
@@ -612,10 +610,7 @@ class MigrateUserRolesTest(TestCase):
         data_migration.migrate_partner_roles_and_access(apps, None)
         data_migration.migrate_unicef_partners(apps, None)
 
-        self.assertEqual(
-            AdminAreaLimitedTo.objects.count(),
-            4
-        )
+        self.assertEqual(AdminAreaLimitedTo.objects.count(), 4)
 
         # partner_unicef - UNICEF partner had full_area_access in programs -> no area limits
         self.assertEqual(
@@ -673,12 +668,8 @@ class MigrateUserRolesTest(TestCase):
             self.partner_3.admin_area_limits.first().areas.count(),
             2,
         )
-        self.assertTrue(
-            self.area_1_afg in self.partner_3.admin_area_limits.first().areas.all()
-        )
-        self.assertTrue(
-            self.area_2_afg in self.partner_3.admin_area_limits.first().areas.all()
-        )
+        self.assertTrue(self.area_1_afg in self.partner_3.admin_area_limits.first().areas.all())
+        self.assertTrue(self.area_2_afg in self.partner_3.admin_area_limits.first().areas.all())
 
         # partner_empty - has no access -> no area limits
         self.assertEqual(
