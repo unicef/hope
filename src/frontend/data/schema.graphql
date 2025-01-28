@@ -4576,8 +4576,6 @@ type UserNode implements Node {
   jobTitle: String!
   adUuid: String
   lastModifyDate: DateTime
-  lastDoapSync: DateTime
-  doapHash: String!
   userRoles: [UserRoleNode!]!
   documentSet(offset: Int, before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
   approvalSet: [ApprovalNode!]!
