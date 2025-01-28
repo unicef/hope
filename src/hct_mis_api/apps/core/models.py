@@ -157,9 +157,6 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
         ordering = ["name"]
         permissions = (
             ("can_split", "Can split BusinessArea"),
-            ("can_send_doap", "Can send DOAP matrix"),
-            ("can_reset_doap", "Can force sync DOAP matrix"),
-            ("can_export_doap", "Can export DOAP matrix"),
             ("ping_rapidpro", "Can test RapidPRO connection"),
             ("execute_sync_rapid_pro", "Can execute RapidPRO sync"),
         )
