@@ -56,11 +56,16 @@ class ProgramCycleAdmin(LastSyncDateResetMixin, HOPEModelAdminBase):
 class ProgramCycleAdminInline(admin.TabularInline):
     model = ProgramCycle
     extra = 0
-    readonly_fields = (
+    fields = readonly_fields = (
+        "unicef_id",
+        "title",
+        "status",
+        "start_date",
+        "end_date",
         "created_at",
         "updated_at",
+        "created_by",
     )
-    exclude = ("unicef_id",)
     ordering = ["-start_date"]
     raw_id_fields = ("created_by",)
 
