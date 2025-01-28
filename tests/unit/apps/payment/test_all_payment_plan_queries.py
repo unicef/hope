@@ -475,8 +475,6 @@ class TestPaymentPlanQueries(APITestCase):
     def test_fetch_all_payment_plans_filters(self) -> None:
         just_random_program_cycle = ProgramCycleFactory(program=self.pp.program)
         for filter_data in [
-            {"search": self.pp.unicef_id},
-            {"status": self.pp.status},
             {
                 "totalEntitledQuantityFrom": float(self.pp_conflicted.total_entitled_quantity - 10),
                 "totalEntitledQuantityTo": float(self.pp_conflicted.total_entitled_quantity + 10),
@@ -487,9 +485,11 @@ class TestPaymentPlanQueries(APITestCase):
             },
             {"programCycle": encode_id_base64(self.pp.program_cycle.pk, "ProgramCycleNode")},
             {"programCycle": encode_id_base64(just_random_program_cycle.pk, "ProgramCycleNode")},
+            {"deliveryTypes": ["referral", "cash"]},
+            {"search": self.pp.unicef_id},
+            {"status": self.pp.status},
             {"serviceProvider": "test"},
             {"verificationStatus": ["ACTIVE", "FINISHED"]},
-            {"deliveryTypes": ["referral", "cash"]},
         ]:
             self.snapshot_graphql_request(
                 request_string=self.ALL_PAYMENT_PLANS_FILTER_QUERY,

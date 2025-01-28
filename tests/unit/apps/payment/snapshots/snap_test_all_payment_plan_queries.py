@@ -253,6 +253,15 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans_filters 1'] = {
                         'totalEntitledQuantity': 100.0,
                         'unicefId': 'PP-01'
                     }
+                },
+                {
+                    'node': {
+                        'dispersionEndDate': '2020-10-10',
+                        'dispersionStartDate': '2020-10-10',
+                        'status': 'LOCKED',
+                        'totalEntitledQuantity': 100.0,
+                        'unicefId': 'PP-02'
+                    }
                 }
             ]
         }
@@ -265,11 +274,11 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans_filters 2'] = {
             'edges': [
                 {
                     'node': {
-                        'dispersionEndDate': '2020-12-10',
-                        'dispersionStartDate': '2020-08-10',
-                        'status': 'OPEN',
+                        'dispersionEndDate': '2020-10-10',
+                        'dispersionStartDate': '2020-10-10',
+                        'status': 'LOCKED',
                         'totalEntitledQuantity': 100.0,
-                        'unicefId': 'PP-01'
+                        'unicefId': 'PP-02'
                     }
                 }
             ]
@@ -308,15 +317,6 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans_filters 4'] = {
     'data': {
         'allPaymentPlans': {
             'edges': [
-                {
-                    'node': {
-                        'dispersionEndDate': '2020-10-10',
-                        'dispersionStartDate': '2020-10-10',
-                        'status': 'LOCKED',
-                        'totalEntitledQuantity': 100.0,
-                        'unicefId': 'PP-02'
-                    }
-                }
             ]
         }
     }
@@ -334,15 +334,6 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans_filters 5'] = {
                         'totalEntitledQuantity': 100.0,
                         'unicefId': 'PP-01'
                     }
-                },
-                {
-                    'node': {
-                        'dispersionEndDate': '2020-10-10',
-                        'dispersionStartDate': '2020-10-10',
-                        'status': 'LOCKED',
-                        'totalEntitledQuantity': 100.0,
-                        'unicefId': 'PP-02'
-                    }
                 }
             ]
         }
@@ -350,24 +341,6 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans_filters 5'] = {
 }
 
 snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans_filters 6'] = {
-    'data': {
-        'allPaymentPlans': {
-            'edges': [
-            ]
-        }
-    }
-}
-
-snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans_filters 7'] = {
-    'data': {
-        'allPaymentPlans': {
-            'edges': [
-            ]
-        }
-    }
-}
-
-snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans_filters 8'] = {
     'data': {
         'allPaymentPlans': {
             'edges': [
@@ -380,6 +353,33 @@ snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans_filters 8'] = {
                         'unicefId': 'PP-01'
                     }
                 }
+            ]
+        }
+    }
+}
+
+snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans_filters 7'] = {
+    'data': {
+        'allPaymentPlans': {
+            'edges': [
+                {
+                    'node': {
+                        'dispersionEndDate': '2020-12-10',
+                        'dispersionStartDate': '2020-08-10',
+                        'status': 'OPEN',
+                        'totalEntitledQuantity': 100.0,
+                        'unicefId': 'PP-01'
+                    }
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestPaymentPlanQueries::test_fetch_all_payment_plans_filters 8'] = {
+    'data': {
+        'allPaymentPlans': {
+            'edges': [
             ]
         }
     }
