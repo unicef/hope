@@ -455,9 +455,9 @@ class AdminAreaLimitedTo(TimeStampedUUIDModel):
 
 
 class UserGroup(NaturalKeyModel, models.Model):
-    business_area = models.ForeignKey("core.BusinessArea", related_name="user_groups", on_delete=models.CASCADE)
     user = models.ForeignKey("account.User", related_name="user_groups", on_delete=models.CASCADE)
     group = models.ForeignKey(Group, related_name="user_groups", on_delete=models.CASCADE)
+    business_area = models.ForeignKey("core.BusinessArea", related_name="user_groups", on_delete=models.CASCADE)
 
     class Meta:
         unique_together = ("business_area", "user", "group")
