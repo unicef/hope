@@ -48,6 +48,7 @@ import { DialogTitleWrapper } from '../dialogs/DialogTitleWrapper';
 import { TargetingCriteriaCollectorFilterBlocks } from './TargetingCriteriaCollectorFilterBlocks';
 import { TargetingCriteriaHouseholdFilter } from './TargetingCriteriaHouseholdFilter';
 import { TargetingCriteriaIndividualFilterBlocks } from './TargetingCriteriaIndividualFilterBlocks';
+import { useConfirmation } from '@components/core/ConfirmationDialog';
 
 const ButtonBox = styled.div`
   width: 300px;
@@ -164,6 +165,10 @@ export const TargetingCriteriaForm = ({
 }: TargetingCriteriaFormPropTypes): ReactElement => {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
+  const confirm = useConfirmation();
+  const confirmationText = t(
+    'Are you sure you want to continue without adding FSP information?',
+  );
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
@@ -582,7 +587,17 @@ export const TargetingCriteriaForm = ({
                         Cancel
                       </Button>
                       <Button
-                        onClick={submitForm}
+                        onClick={
+                          !values.deliveryMechanism && !values.fsp
+                            ? () =>
+                                confirm({
+                                  title: t('Warning'),
+                                  content: confirmationText,
+                                }).then(() => {
+                                  submitForm();
+                                })
+                            : submitForm
+                        }
                         type="submit"
                         color="primary"
                         variant="contained"
