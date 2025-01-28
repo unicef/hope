@@ -111,8 +111,6 @@ class PaymentPlanSplitPayments(TimeStampedUUIDModel):
 
 
 class PaymentPlanSplit(TimeStampedUUIDModel):
-    # TODO MB migrate PG DMPP to default split with correct UUID (migrate send to payment gateway if aaplicable)
-    # TODO MB migrate payments to FK
     MAX_CHUNKS = 50
     MIN_NO_OF_PAYMENTS_IN_CHUNK = 10
 
