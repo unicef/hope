@@ -565,7 +565,6 @@ class BaseMutationPermissionMixin:
         print("JHjkdhljksad")
         print(program)
         print(info.context.user)
-        print(info.context.user.instance)
 
         print(info.context.user.get_all_permissions(program))
         if not any(
