@@ -720,6 +720,11 @@ def generate_payment_plan() -> None:
         created_by=root,
         program_cycle=program_cycle,
     )[0]
+    DeliveryMechanismPerPaymentPlanFactory(
+        payment_plan=pp2,
+        financial_service_provider=fsp_1,
+        delivery_mechanism=delivery_mechanism_cash,
+    )
     PaymentPlanService(payment_plan=pp2).full_rebuild()
 
 
