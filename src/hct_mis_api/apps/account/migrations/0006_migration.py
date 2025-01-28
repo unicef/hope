@@ -12,6 +12,10 @@ from hct_mis_api.apps.account.permissions import (
 from mptt import register
 
 
+BATCH_SIZE = 1000
+BATCH_SIZE_SMALL = 20
+
+
 def migrate_user_roles(apps, schema_editor):
     """
     Handle migration of user roles.
@@ -23,15 +27,15 @@ def migrate_user_roles(apps, schema_editor):
     RoleAssignment = apps.get_model("account", "RoleAssignment")
     ProgramPartnerThrough = apps.get_model("program", "ProgramPartnerThrough")
 
+    expiration_time = timezone.now()
+
     # do not change UserRoles for Global as it can stay with program=None
     user_roles = (
         RoleAssignment.objects.filter(user__isnull=False, program__isnull=True)
         .exclude(business_area__slug="global")
-        .select_related("user", "user__partner", "business_area")
+        .select_related("user__partner", "business_area")
     )
-    new_assignments = []
-    updated_roles = []
-    expiration_time = timezone.now()
+
 
     program_access_mapping = {
         (partner_id, business_area_id): list(
@@ -41,40 +45,56 @@ def migrate_user_roles(apps, schema_editor):
         )
         for partner_id, business_area_id in user_roles.values_list("user__partner_id", "business_area_id").distinct()
     }
+    user_roles_ids = list(user_roles.values_list("id", flat=True))
+    user_roles_count = len(user_roles_ids)
 
-    for user_role in user_roles:
-        user = user_role.user
-        partner = user.partner
-        business_area = user_role.business_area
-
-        programs = program_access_mapping.get((partner.id, business_area.id), []) if partner else []
-
-        if programs:
-            user_role.program_id = programs[0]
-            updated_roles.append(user_role)
-            new_assignments.extend(
-                RoleAssignment(
-                    user=user,
-                    partner=None,
-                    role=user_role.role,
-                    business_area=business_area,
-                    program_id=program,
-                    expiry_date=user_role.expiry_date,
-                )
-                for program in programs[1:]
+    for batch_start in range(0, user_roles_count, BATCH_SIZE):
+        new_assignments = []
+        updated_roles = []
+        batch_end = batch_start + BATCH_SIZE
+        batched_user_roles_ids = user_roles_ids[batch_start:batch_end]
+        batched_user_roles = list(
+            RoleAssignment.objects.filter(
+            id__in=batched_user_roles_ids
+            ).select_related(
+                "user",
+                "user__partner",
+                "business_area",
             )
-        else:
-            # If user has no partner
-            # or their partner does not have access to any program in the UserRole's Business Area,
-            # make the user role inactive.
-            # In another case, the user would gain access to all programs.
-            user_role.expiry_date = expiration_time
-            updated_roles.append(user_role)
+        )
+        for user_role in batched_user_roles:
+            user = user_role.user
+            partner = user.partner
+            business_area = user_role.business_area
 
-    if updated_roles:
-        RoleAssignment.objects.bulk_update(updated_roles, ["program", "expiry_date"])
-    if new_assignments:
-        RoleAssignment.objects.bulk_create(new_assignments)
+            programs = program_access_mapping.get((partner.id, business_area.id), []) if partner else []
+
+            if programs:
+                user_role.program_id = programs[0]
+                updated_roles.append(user_role)
+                new_assignments.extend(
+                    RoleAssignment(
+                        user=user,
+                        partner=None,
+                        role=user_role.role,
+                        business_area=business_area,
+                        program_id=program,
+                        expiry_date=user_role.expiry_date,
+                    )
+                    for program in programs[1:]
+                )
+            else:
+                # If user has no partner
+                # or their partner does not have access to any program in the UserRole's Business Area,
+                # make the user role inactive.
+                # In another case, the user would gain access to all programs.
+                user_role.expiry_date = expiration_time
+                updated_roles.append(user_role)
+
+        if updated_roles:
+            RoleAssignment.objects.bulk_update(updated_roles, ["program", "expiry_date"])
+        if new_assignments:
+            RoleAssignment.objects.bulk_create(new_assignments)
 
 
 def migrate_partner_roles_and_access(apps, schema_editor):
@@ -102,10 +122,7 @@ def migrate_partner_roles_and_access(apps, schema_editor):
             | Q(partner__name="UNICEF")
         )
         .select_related("partner", "business_area")
-        .prefetch_related("roles")
     )
-    new_assignments = []
-    new_area_limits = []
 
     program_access_mapping = {
         (partner_id, business_area_id): list(
@@ -116,41 +133,77 @@ def migrate_partner_roles_and_access(apps, schema_editor):
         for partner_id, business_area_id in partner_roles.values_list("partner_id", "business_area_id").distinct()
     }
 
-    for partner_role in partner_roles:
-        partner = partner_role.partner
-        business_area = partner_role.business_area
-        roles = partner_role.roles.all()
+    partner_roles_ids = list(partner_roles.values_list("id", flat=True))
+    partner_roles_count = len(partner_roles_ids)
 
-        programs = program_access_mapping.get((partner.id, business_area.id), [])
-
-        # Create RoleAssignments only if the partner has access to any program in the Business Area
-        # of the BusinessAreaPartnerThrough
-        if programs:
-            partner.allowed_business_areas.add(business_area)
-            new_assignments.extend(
-                RoleAssignment(user=None, partner=partner, role=role, business_area=business_area, program_id=program)
-                for role in roles
-                for program in programs
+    for batch_start in range(0, partner_roles_count, BATCH_SIZE):
+        new_assignments = []
+        batch_end = batch_start + BATCH_SIZE
+        batched_partner_roles_ids = partner_roles_ids[batch_start:batch_end]
+        batched_partner_roles = list(
+            BusinessAreaPartnerThrough.objects.filter(
+                id__in=batched_partner_roles_ids
             )
+            .select_related("partner", "business_area")
+            .prefetch_related("roles")
+        )
 
-    if new_assignments:
-        RoleAssignment.objects.bulk_create(new_assignments)
+        for partner_role in batched_partner_roles:
+            partner = partner_role.partner
+            business_area = partner_role.business_area
+            roles = partner_role.roles.all()
+
+            programs = program_access_mapping.get((partner.id, business_area.id), [])
+
+            # Create RoleAssignments only if the partner has access to any program in the Business Area
+            # of the BusinessAreaPartnerThrough
+            if programs:
+                partner.allowed_business_areas.add(business_area)
+                new_assignments.extend(
+                    RoleAssignment(user=None, partner=partner, role=role, business_area=business_area, program_id=program)
+                    for role in roles
+                    for program in programs
+                )
+
+        if new_assignments:
+            RoleAssignment.objects.bulk_create(new_assignments)
 
     # area limits - only for non-full-area-access; do not create records for partners that are parents
-    area_access = list(
+    area_access = (
         ProgramPartnerThrough.objects.filter(full_area_access=False)
         .exclude(partner_id__in=Partner.objects.filter(parent__isnull=False).values_list("parent_id", flat=True))
-        .select_related("partner", "program")
-        .prefetch_related("areas")
     )
-    for access in area_access:
-        new_area_limits.append(AdminAreaLimitedTo(partner=access.partner, program=access.program))
 
-    if new_area_limits:
-        AdminAreaLimitedTo.objects.bulk_create(new_area_limits)
+    area_access_ids = list(area_access.values_list("id", flat=True))
+    area_access_count = len(area_access_ids)
 
-        for new_area_limit, areas in zip(new_area_limits, [access.areas.all() for access in area_access]):
-            new_area_limit.areas.set(areas)
+    for batch_start in range(0, area_access_count, BATCH_SIZE_SMALL):
+        new_area_limits = []
+        new_area_limit_through = []
+        batch_end = batch_start + BATCH_SIZE_SMALL
+
+        batched_area_access_ids = area_access_ids[batch_start:batch_end]
+        batched_area_access = list(
+            ProgramPartnerThrough.objects.filter(
+                id__in=batched_area_access_ids
+            )
+            .select_related("partner", "program")
+            .prefetch_related("areas")
+        )
+
+        for access in batched_area_access:
+            new_area_limits.append(AdminAreaLimitedTo(partner=access.partner, program=access.program))
+
+        if new_area_limits:
+            AdminAreaLimitedTo.objects.bulk_create(new_area_limits)
+
+            for new_area_limit, areas in zip(new_area_limits, [access.areas.all() for access in batched_area_access]):
+                for area in areas:
+                    new_area_limit_through.append(
+                        AdminAreaLimitedTo.areas.through(adminarealimitedto_id=new_area_limit.id, area_id=area.id)
+                    )
+            if new_area_limit_through:
+                AdminAreaLimitedTo.areas.through.objects.bulk_create(new_area_limit_through)
 
 
 def migrate_unicef_partners(apps, schema_editor):
