@@ -9,7 +9,7 @@ from hct_mis_api.apps.account.fixtures import (
     PartnerFactory,
     UserFactory,
 )
-from hct_mis_api.apps.account.models import Partner, Role, RoleAssignment
+from hct_mis_api.apps.account.models import Partner, Role, RoleAssignment, AdminAreaLimitedTo
 
 from hct_mis_api.apps.core.models import BusinessArea, BusinessAreaPartnerThrough
 from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
@@ -189,12 +189,17 @@ class MigrateUserRolesTest(TestCase):
             role=cls.role_2,
         )
 
-        # Partner 3 has access to Program 1 AFG, no roles
+        # Partner 3 has access to Program 1 AFG, role_2 in Ukraine
         partner_3_program_1_afg = ProgramPartnerThrough.objects.create(
             program=cls.program_1_afg,
             partner=cls.partner_3,
         )
         partner_3_program_1_afg.areas.set([cls.area_1_afg, cls.area_2_afg])
+        partner_3_ukr = BusinessAreaPartnerThrough.objects.create(
+            business_area=cls.business_area_ukr,
+            partner=cls.partner_3,
+        )
+        partner_3_ukr.roles.set([cls.role_2])
 
         # user_3 - role in Afghanistan
         RoleAssignment.objects.create(
@@ -401,13 +406,57 @@ class MigrateUserRolesTest(TestCase):
         self.assertEqual(self.user_default_empty_partner.role_assignments.count(), 1)
 
     def test_partner_roles_migration(self) -> None:
+        # additional partner that has role and access but is a parent -> no RoleAssignment should be created
+        partner_parent = PartnerFactory(name="Parent Partner")
+        PartnerFactory(name="Child Partner", parent=partner_parent)
+        partner_parent_afg = BusinessAreaPartnerThrough.objects.create(
+            business_area=self.business_area_afg,
+            partner=partner_parent,
+        )
+        partner_parent_afg.roles.set([self.role_1, self.role_2])
+        ProgramPartnerThrough.objects.create(
+            program=self.program_1_afg,
+            partner=partner_parent,
+            full_area_access=True,
+        )
 
         # call all 3 functions to check the final result
         data_migration.migrate_user_roles(apps, None)
         data_migration.migrate_partner_roles_and_access(apps, None)
         data_migration.migrate_unicef_partners(apps, None)
 
-        self.assertEqual(1, "Partner Roles")
+        # partner_unicef - UNICEF partner has no roles, has access to all programs -> no RoleAssignment should be created
+        self.assertEqual(self.partner_unicef.role_assignments.count(), 0)
+
+        # partner_1 - has no roles, access to Program 1 AFG -> no RoleAssignment should be created
+        self.assertEqual(self.partner_1.role_assignments.count(), 0)
+
+        # partner_2 - has role_1 and role_2 in Ukr, access to Program 1 and 2 AFG and Program 1 UKR -> should have role_1 and role_2 in Ukr for Program 1
+        self.assertEqual(self.partner_2.role_assignments.count(), 2)
+        self.assertIsNotNone(
+            RoleAssignment.objects.filter(
+                partner=self.partner_2,
+                business_area=self.business_area_ukr,
+                role=self.role_1,
+                program=self.program_1_ukr,
+                expiry_date=None,
+            ).first()
+        )
+        self.assertIsNotNone(
+            RoleAssignment.objects.filter(
+                partner=self.partner_2,
+                business_area=self.business_area_ukr,
+                role=self.role_2,
+                program=self.program_1_ukr,
+                expiry_date=None,
+            ).first()
+        )
+
+        # partner_3 - has role_2 in Ukraine, access to Program 1 AFG -> no RoleAssignment should be created
+        self.assertEqual(self.partner_3.role_assignments.count(), 0)
+
+        # partner_empty - has no roles, no access -> no RoleAssignment should be created
+        self.assertEqual(self.partner_empty.role_assignments.count(), 0)
 
     def test_unicef_partners_migration(self) -> None:
         self.assertEqual(self.partner_unicef.user_set.count(), 4)
@@ -563,7 +612,76 @@ class MigrateUserRolesTest(TestCase):
         data_migration.migrate_partner_roles_and_access(apps, None)
         data_migration.migrate_unicef_partners(apps, None)
 
+        self.assertEqual(
+            AdminAreaLimitedTo.objects.count(),
+            4
+        )
 
+        # partner_unicef - UNICEF partner had full_area_access in programs -> no area limits
+        self.assertEqual(
+            self.partner_unicef.admin_area_limits.count(),
+            0,
+        )
 
+        # partner_1 - has access to only area_1_afg in Program 1 AFG -> should have area limit in Program 1 AFG
+        self.assertEqual(
+            self.partner_1.admin_area_limits.count(),
+            1,
+        )
+        self.assertEqual(
+            self.partner_1.admin_area_limits.first().areas.count(),
+            1,
+        )
+        self.assertEqual(
+            self.partner_1.admin_area_limits.first().areas.first(),
+            self.area_1_afg,
+        )
 
-        self.assertEqual(1, "Admin Area Limits")
+        # partner_2 - has access to area_1_afg in Program 1 AFG and full_area_access in Program 2 AFG -> should have area limit in Program 1 AFG, no area limits in Program 2 AFG;
+        # also has access to area_1_ukr in Program 1 UKR -> should have area limit in Program 1 UK
+        self.assertEqual(
+            self.partner_2.admin_area_limits.count(),
+            2,
+        )
+        self.assertEqual(
+            self.partner_2.admin_area_limits.filter(program=self.program_1_afg).first().areas.count(),
+            1,
+        )
+        self.assertEqual(
+            self.partner_2.admin_area_limits.filter(program=self.program_1_afg).first().areas.first(),
+            self.area_1_afg,
+        )
+        self.assertEqual(
+            self.partner_2.admin_area_limits.filter(program=self.program_2_afg).count(),
+            0,
+        )
+        self.assertEqual(
+            self.partner_2.admin_area_limits.filter(program=self.program_1_ukr).first().areas.count(),
+            1,
+        )
+        self.assertEqual(
+            self.partner_2.admin_area_limits.filter(program=self.program_1_ukr).first().areas.first(),
+            self.area_1_ukr,
+        )
+
+        # partner_3 - has access to area_1_afg and area_2_afg in Program 1 AFG -> should have area limit in Program 1 AFG
+        self.assertEqual(
+            self.partner_3.admin_area_limits.count(),
+            1,
+        )
+        self.assertEqual(
+            self.partner_3.admin_area_limits.first().areas.count(),
+            2,
+        )
+        self.assertTrue(
+            self.area_1_afg in self.partner_3.admin_area_limits.first().areas.all()
+        )
+        self.assertTrue(
+            self.area_2_afg in self.partner_3.admin_area_limits.first().areas.all()
+        )
+
+        # partner_empty - has no access -> no area limits
+        self.assertEqual(
+            self.partner_empty.admin_area_limits.count(),
+            0,
+        )
