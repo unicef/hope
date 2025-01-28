@@ -99,7 +99,7 @@ class GrievanceNotification:
             role__name=action_roles_dict[self.action],
             business_area=self.grievance_ticket.business_area,
         ).exclude(expiry_date__lt=timezone.now())
-        queryset = User.objects.filter(user_roles__in=user_roles).distinct()
+        queryset = User.objects.filter(role_assignments__in=user_roles).distinct()
         if self.grievance_ticket.assigned_to:
             queryset = queryset.exclude(id=self.grievance_ticket.assigned_to.id)
         return queryset.all()
@@ -109,7 +109,7 @@ class GrievanceNotification:
             role__name="Approver",
             business_area=self.grievance_ticket.business_area,
         ).exclude(expiry_date__lt=timezone.now())
-        queryset = User.objects.filter(user_roles__in=user_roles).distinct()
+        queryset = User.objects.filter(role_assignments_in=user_roles).distinct()
         if self.grievance_ticket.assigned_to:
             queryset = queryset.exclude(id=self.grievance_ticket.assigned_to.id)
         return queryset.all()
