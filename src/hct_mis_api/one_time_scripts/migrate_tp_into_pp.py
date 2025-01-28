@@ -409,9 +409,6 @@ def create_payments_for_pending_payment_plans() -> None:
 
     from hct_mis_api.apps.core.models import BusinessArea
     from hct_mis_api.apps.payment.models import PaymentPlan
-    from hct_mis_api.apps.payment.services.payment_plan_services import (
-        PaymentPlanService,
-    )
 
     """
     Step 2 create Payments for MIGRATION_BLOCKED PaymentPlans (TPs)
