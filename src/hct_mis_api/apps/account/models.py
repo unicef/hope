@@ -151,7 +151,7 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
         return (
             area_limits
             if area_limits.exists()
-            else Area.objects.filter(area_type__country__business_areas__programs__id=program_id)
+            else Area.objects.filter(area_type__country__business_areas__program__id=program_id)
         )
 
 
