@@ -335,6 +335,7 @@ class TestPaymentPlanQueries(APITestCase):
             cash_dm = DeliveryMechanismFactory(code="cash", is_active=True)
             DeliveryMechanismFactory(code="referral", is_active=True)
             DeliveryMechanismPerPaymentPlanFactory(payment_plan=cls.pp, delivery_mechanism=cash_dm)
+            PaymentVerificationSummaryFactory(payment_plan=cls.pp, status="ACTIVE")
 
             hoh1 = IndividualFactory(household=None)
             hoh2 = IndividualFactory(household=None)
@@ -487,8 +488,8 @@ class TestPaymentPlanQueries(APITestCase):
             {"programCycle": encode_id_base64(self.pp.program_cycle.pk, "ProgramCycleNode")},
             {"programCycle": encode_id_base64(just_random_program_cycle.pk, "ProgramCycleNode")},
             {"serviceProvider": "test"},
-            {"deliveryTypes": ["referral", "cash"]},
             {"verificationStatus": ["ACTIVE", "FINISHED"]},
+            {"deliveryTypes": ["referral", "cash"]},
         ]:
             self.snapshot_graphql_request(
                 request_string=self.ALL_PAYMENT_PLANS_FILTER_QUERY,
@@ -665,7 +666,6 @@ class TestPaymentPlanQueries(APITestCase):
         }
         """
         payment_plan_id = str(self.pp.id)
-        PaymentVerificationSummaryFactory(payment_plan=self.pp)
         PaymentVerificationSummaryFactory(payment_plan=self.pp_conflicted)
         pvp = PaymentVerificationPlanFactory(payment_plan=self.pp)
         pvp2 = PaymentVerificationPlanFactory(payment_plan=self.pp_conflicted)
