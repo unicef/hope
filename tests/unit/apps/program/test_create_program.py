@@ -117,18 +117,18 @@ class TestCreateProgram(APITestCase):
         cls.partner.allowed_business_areas.set([cls.business_area])
 
         # partner with role in BA in another program - will be granted access for ALL_PARTNERS_ACCESS type because he also is allowed in BA
-        cls.partner_with_role_in_BA = PartnerFactory(name="Other Partner")
-        cls.partner_with_role_in_BA.allowed_business_areas.set([cls.business_area])
+        # TODO: can remove the role creation after removing the temporary solution in program mutations
+        cls.partner_allowed_in_BA = PartnerFactory(name="Other Partner")
+        cls.partner_allowed_in_BA.allowed_business_areas.set([cls.business_area])
         role = RoleFactory(name="Role in BA")
         RoleAssignment.objects.create(
             business_area=cls.business_area,
-            partner=cls.partner_with_role_in_BA,
+            partner=cls.partner_allowed_in_BA,
             role=role,
             program=ProgramFactory(business_area=cls.business_area),
         )
 
-        partner_without_role_in_BA = PartnerFactory(name="Partner without role in BA")
-        partner_without_role_in_BA.allowed_business_areas.set([cls.business_area])
+        PartnerFactory(name="Partner not allowed in BA")
 
         country_afg = CountryFactory(name="Afghanistan")
         country_afg.business_areas.set([cls.business_area])
@@ -421,6 +421,7 @@ class TestCreateProgram(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=self.program_data
         )
+
         program = Program.objects.get(name="Test")
         self.assertEqual(
             AdminAreaLimitedTo.objects.filter(program=program).count(),
@@ -432,7 +433,7 @@ class TestCreateProgram(APITestCase):
             3,
         )
         # role should be created for self.partner (2 records - because currently 2 roles in BA - due to temporary solution),
-        # and for self.partner_with_role_in_BA
+        # and for self.partner_allowed_in_BA
         # UNICEF HQ has "Role with all permissions" for all programs in all BAs
         # UNICEF Partner for afghanistan has role "Role for UNICEF Partners" for all programs in this BA
         self.assertIn(
@@ -444,7 +445,7 @@ class TestCreateProgram(APITestCase):
             [ra.role.name for ra in RoleAssignment.objects.filter(partner=self.partner, program=program)],
         )
         self.assertEqual(
-            self.partner_with_role_in_BA.role_assignments.filter(program=program).first().role.name,
+            self.partner_allowed_in_BA.role_assignments.filter(program=program).first().role.name,
             "Role in BA",
         )
         self.assertEqual(
