@@ -2066,7 +2066,7 @@ class DeliveryMechanism(TimeStampedUUIDModel):
         VOUCHER = "VOUCHER", "Voucher"
         DIGITAL = "DIGITAL", "Digital"
 
-    payment_gateway_id = models.CharField(max_length=255, unique=True, null=True)
+    payment_gateway_id = models.CharField(max_length=255, unique=True, null=True, blank=True)
     code = models.CharField(max_length=255, unique=True)
     name = models.CharField(max_length=255, unique=True)
     optional_fields = ArrayField(default=list, base_field=models.CharField(max_length=255))

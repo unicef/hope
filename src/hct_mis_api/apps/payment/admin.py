@@ -55,14 +55,16 @@ class ArrayFieldWidget(forms.Textarea):
         if value is None:
             return ""
         if isinstance(value, list):
-            return self.delimiter.join(str(v) for v in value)
+            # Join list items with newline instead of comma for each value to be in a new line
+            return "\n".join(str(v) for v in value)
         return value
 
     def value_from_datadict(self, data: Any, files: Any, name: Any) -> List[str]:
         value = data.get(name, "")
         if not value:
             return []
-        return [v.strip() for v in value.split(self.delimiter)]
+        # Split by newline and strip any extra spaces
+        return [v.strip() for v in value.splitlines()]
 
 
 class CommaSeparatedArrayField(forms.Field):
@@ -74,13 +76,16 @@ class CommaSeparatedArrayField(forms.Field):
 
     def prepare_value(self, value: Any) -> str:
         if isinstance(value, list):
-            return self.delimiter.join(str(self.base_field.prepare_value(v)) for v in value)
+            # Prepare value to be displayed as a newline-separated string
+            return "\n".join(str(self.base_field.prepare_value(v)) for v in value)
         return value
 
     def to_python(self, value: Any) -> List[str]:
         if not value:
             return []
-        return [self.base_field.to_python(v) for v in value.split(self.delimiter)]
+        if isinstance(value, list):
+            return value
+        return [self.base_field.to_python(v) for v in value.splitlines()]
 
     def validate(self, value: Any) -> None:
         super().validate(value)
