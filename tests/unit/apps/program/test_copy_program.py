@@ -3,7 +3,8 @@ from typing import Any
 from flaky import flaky
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
+from hct_mis_api.apps.account.fixtures import PartnerFactory, RoleFactory, UserFactory
+from hct_mis_api.apps.account.models import AdminAreaLimitedTo, Partner, RoleAssignment
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import (
@@ -32,7 +33,7 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.models import Program, ProgramPartnerThrough
+from hct_mis_api.apps.program.models import Program
 
 
 class TestCopyProgram(APITestCase):
@@ -107,6 +108,9 @@ class TestCopyProgram(APITestCase):
                 "partnerAccess": Program.NONE_PARTNERS_ACCESS,
             },
         }
+        # partner has to be allowed in BA to be able to be assigned to program
+        cls.partner.allowed_business_areas.set([cls.business_area])
+
         cls.household1, cls.individuals1 = create_household_and_individuals(
             household_data={
                 "business_area": cls.business_area,
@@ -201,13 +205,17 @@ class TestCopyProgram(APITestCase):
         cls.individuals3[1].duplicate = True
         cls.individuals3[1].save()
 
-        # create UNICEF partner - it will always be granted access while creating program
-        PartnerFactory(name="UNICEF")
-
-        # partner with role in BA - will be granted access for ALL_PARTNERS_ACCESS type
-        partner_allowed_in_BA = PartnerFactory(name="Other Partner")
-        partner_allowed_in_BA.allowed_business_areas.set([cls.business_area])
-        cls.create_partner_role_with_permissions(partner_allowed_in_BA, [], cls.business_area)
+        # partner with role in BA - will be granted access for ALL_PARTNERS_ACCESS type because he also is allowed in BA
+        # TODO: can remove the role creation after removing the temporary solution in program mutations
+        cls.partner_allowed_in_BA = PartnerFactory(name="Other Partner")
+        cls.partner_allowed_in_BA.allowed_business_areas.set([cls.business_area])
+        role = RoleFactory(name="Role in BA")
+        RoleAssignment.objects.create(
+            business_area=cls.business_area,
+            partner=cls.partner_allowed_in_BA,
+            role=role,
+            program=ProgramFactory(business_area=cls.business_area),
+        )
 
         PartnerFactory(name="Partner not allowed in BA")
 
@@ -239,6 +247,24 @@ class TestCopyProgram(APITestCase):
             program=cls.program,
             label="PDU Field In Original Program",
             pdu_data=pdu_data,
+        )
+
+        # TODO: due to temporary solution in program mutations, Partners need to already have a role in the BA to be able to be granted access to program
+        # (created role in program is the same role as the Partner already held in the BA - or the BA's programs.
+        # For each held role, the same role is now applied for the new program.
+        # After removing this solution, below lines of setup can be deleted.
+        # The Role for RoleAssignment will be passed in input.
+        RoleAssignment.objects.create(
+            business_area=cls.business_area,
+            partner=cls.partner,
+            role=RoleFactory(name="Role for Partner in BA"),
+            program=ProgramFactory(business_area=cls.business_area),
+        )
+        RoleAssignment.objects.create(
+            business_area=cls.business_area,
+            partner=cls.partner,
+            role=RoleFactory(name="Another Role for Partner in BA"),
+            program=ProgramFactory(business_area=cls.business_area),
         )
 
     def test_copy_program_not_authenticated(self) -> None:
@@ -358,7 +384,9 @@ class TestCopyProgram(APITestCase):
             .copied_from,
             self.individual_role_in_household1.individual,
         )
-        self.assertEqual(ProgramPartnerThrough.objects.filter(program=copied_program).count(), 1)
+        # no role assignments created for the program (NONE_PARTNERS_ACCESS);
+        # UNICEF HQ and UNICEF for BA have RoleAssignments for program=None
+        self.assertEqual(RoleAssignment.objects.filter(program=copied_program).count(), 0)
 
         self.individuals1[0].refresh_from_db()
         self.household1.refresh_from_db()
@@ -441,6 +469,20 @@ class TestCopyProgram(APITestCase):
         area1 = AreaFactory(name="North Brianmouth", area_type=self.area_type_other, p_code="NORTH-B")
         area2 = AreaFactory(name="South Catherine", area_type=self.area_type_other, p_code="SOUTH-C")
         partner2 = PartnerFactory(name="New Partner")
+
+        partner2.allowed_business_areas.set([self.business_area])
+        # partner that is not allowed in BA - will not be granted access
+        partner_not_allowed = PartnerFactory(name="Not Allowed Partner")
+
+        # TODO: due to temporary solution in program mutations, Partners need to already have a role in the BA to be able to be granted access to program
+        # After removing this solution, below line with role can be deleted.
+        RoleAssignment.objects.create(
+            business_area=self.business_area,
+            partner=partner2,
+            role=RoleFactory(name="Role for Partner 2"),
+            program=ProgramFactory(business_area=self.business_area),
+        )
+        # end of temporary solution
         self.copy_data["programData"]["partners"] = [
             {
                 "partner": str(self.partner.id),
@@ -458,6 +500,47 @@ class TestCopyProgram(APITestCase):
             variables=self.copy_data,
         )
 
+        if partner_access == Program.SELECTED_PARTNERS_ACCESS:
+            program = Program.objects.get(name="copied name")
+            self.assertEqual(
+                program.role_assignments.count(),
+                3,
+            )
+            # role should be created for partner2,
+            # self.partner (2 records - because currently 2 roles in BA - due to temporary solution),
+            # UNICEF HQ has "Role with all permissions" for all programs in all BAs
+            # UNICEF Partner for afghanistan has role "Role for UNICEF Partners" for all programs in this BA
+            self.assertEqual(
+                RoleAssignment.objects.filter(partner=partner2, program=program).first().role.name,
+                "Role for Partner 2",
+            )
+            self.assertIn(
+                "Role for Partner in BA",
+                [ra.role.name for ra in RoleAssignment.objects.filter(partner=self.partner, program=program)],
+            )
+            self.assertIn(
+                "Another Role for Partner in BA",
+                [ra.role.name for ra in RoleAssignment.objects.filter(partner=self.partner, program=program)],
+            )
+            self.assertEqual(
+                Partner.objects.get(name="UNICEF HQ")
+                .role_assignments.filter(program=None, business_area=program.business_area)
+                .first()
+                .role.name,
+                "Role with all permissions",
+            )
+            self.assertEqual(
+                Partner.objects.get(name=f"UNICEF Partner for {self.business_area.slug}")
+                .role_assignments.filter(program=None, business_area=program.business_area)
+                .first()
+                .role.name,
+                "Role for UNICEF Partners",
+            )
+            self.assertEqual(
+                RoleAssignment.objects.filter(partner=partner_not_allowed, program=program).count(),
+                0,
+            )
+
     def test_copy_program_with_partners_all_partners_access(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_DUPLICATE], self.business_area)
         self.copy_data["programData"]["partnerAccess"] = Program.ALL_PARTNERS_ACCESS
@@ -466,12 +549,76 @@ class TestCopyProgram(APITestCase):
             request_string=self.COPY_PROGRAM_MUTATION, context={"user": self.user}, variables=self.copy_data
         )
 
+        program = Program.objects.get(name="copied name")
+        self.assertEqual(
+            AdminAreaLimitedTo.objects.filter(program=program).count(),
+            0,
+        )
+
+        self.assertEqual(
+            program.role_assignments.count(),
+            3,
+        )
+        # role should be created for self.partner (2 records - because currently 2 roles in BA - due to temporary solution),
+        # and for self.partner_allowed_in_BA
+        # UNICEF HQ has "Role with all permissions" for all programs in all BAs
+        # UNICEF Partner for afghanistan has role "Role for UNICEF Partners" for all programs in this BA
+        self.assertIn(
+            "Role for Partner in BA",
+            [ra.role.name for ra in RoleAssignment.objects.filter(partner=self.partner, program=program)],
+        )
+        self.assertIn(
+            "Another Role for Partner in BA",
+            [ra.role.name for ra in RoleAssignment.objects.filter(partner=self.partner, program=program)],
+        )
+        self.assertEqual(
+            self.partner_allowed_in_BA.role_assignments.filter(program=program).first().role.name,
+            "Role in BA",
+        )
+        self.assertEqual(
+            Partner.objects.get(name="UNICEF HQ")
+            .role_assignments.filter(program=None, business_area=program.business_area)
+            .first()
+            .role.name,
+            "Role with all permissions",
+        )
+        self.assertEqual(
+            Partner.objects.get(name=f"UNICEF Partner for {self.business_area.slug}")
+            .role_assignments.filter(program=None, business_area=program.business_area)
+            .first()
+            .role.name,
+            "Role for UNICEF Partners",
+        )
+
     def test_copy_program_with_partners_none_partners_access(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_DUPLICATE], self.business_area)
         self.copy_data["programData"]["partnerAccess"] = Program.NONE_PARTNERS_ACCESS
 
         self.snapshot_graphql_request(
             request_string=self.COPY_PROGRAM_MUTATION, context={"user": self.user}, variables=self.copy_data
+        )
+
+        program = Program.objects.get(name="copied name")
+        self.assertEqual(
+            program.role_assignments.count(),
+            0,
+        )
+
+        # UNICEF HQ has "Role with all permissions" for all programs in all BAs
+        # UNICEF Partner for afghanistan has role "Role for UNICEF Partners" for all programs in this BA
+        self.assertEqual(
+            Partner.objects.get(name="UNICEF HQ")
+            .role_assignments.filter(program=None, business_area=program.business_area)
+            .first()
+            .role.name,
+            "Role with all permissions",
+        )
+        self.assertEqual(
+            Partner.objects.get(name=f"UNICEF Partner for {self.business_area.slug}")
+            .role_assignments.filter(program=None, business_area=program.business_area)
+            .first()
+            .role.name,
+            "Role for UNICEF Partners",
         )
 
     def test_copy_program_with_pdu_fields(self) -> None:
