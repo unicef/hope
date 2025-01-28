@@ -243,8 +243,8 @@ def get_statistics(after_migration_status: bool = False) -> None:
     tp_qs_count = TargetPopulation.objects.count()
     pp_qs_count = PaymentPlan.objects.count()
     print("*=" * 50)
-    print(f"TargetPopulation.objects : {tp_qs_count}")
-    print(f"PaymentPlan.objects : {pp_qs_count}")
+    print(f"TargetPopulation.objects: {tp_qs_count}")
+    print(f"PaymentPlan.objects: {pp_qs_count}")
     print(
         f"TPs with Statuses Not assigned to PP: {TargetPopulation.objects.exclude(status=TargetPopulation.STATUS_ASSIGNED).count()}"
     )
