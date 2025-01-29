@@ -20,6 +20,27 @@ export const PAYMENT_PLAN_QUERY = gql`
       canExportXlsx
       canDownloadXlsx
       canSendXlsxPassword
+      volumeByDeliveryMechanism {
+        deliveryMechanism {
+          id
+          name
+          fsp {
+            id
+            name
+          }
+        }
+        volume
+        volumeUsd
+      }
+      deliveryMechanism {
+        id
+        name
+        code
+        fsp {
+          id
+          name
+        }
+      }
       programCycle {
         id
         title
@@ -164,18 +185,6 @@ export const PAYMENT_PLAN_QUERY = gql`
       splitChoices {
         name
         value
-      }
-      volumeByDeliveryMechanism {
-        deliveryMechanism {
-          id
-          name
-          fsp {
-            id
-            name
-          }
-        }
-        volume
-        volumeUsd
       }
       verificationPlans {
         totalCount

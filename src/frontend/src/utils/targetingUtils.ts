@@ -250,11 +250,11 @@ function mapBlockFilters(blocks, blockKey) {
   }));
 }
 
-export function mapCriteriaToInitialValues(criteria) {
+export function mapCriteriaToInitialValues(criteria, targetPopulation) {
   const individualIds = criteria.individualIds || '';
   const householdIds = criteria.householdIds || '';
-  const deliveryMechanism = criteria.deliveryMechanism || '';
-  const fsp = criteria.fsp || '';
+  const deliveryMechanism = targetPopulation?.deliveryMechanism?.code || '';
+  const fsp = targetPopulation.deliveryMechanism?.fsp?.id || '';
   const householdsFiltersBlocks = criteria.householdsFiltersBlocks || [];
   const individualsFiltersBlocks = criteria.individualsFiltersBlocks || [];
   const collectorsFiltersBlocks = criteria.collectorsFiltersBlocks || [];
@@ -445,12 +445,8 @@ function mapFilterToVariable(filter: Filter): Result {
 // TODO Marcin make Type to this function
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function getTargetingCriteriaVariables(values) {
-  const deliveryMechanism = values.criterias[0].deliveryMechanism;
-  const fsp = values.criterias[0].fsp;
   return {
     targetingCriteria: {
-      deliveryMechanism,
-      fsp,
       flagExcludeIfActiveAdjudicationTicket:
         values.flagExcludeIfActiveAdjudicationTicket,
       flagExcludeIfOnSanctionList: values.flagExcludeIfOnSanctionList,

@@ -1,5 +1,4 @@
 import {
-  FinancialServiceProviderCommunicationChannel,
   PaymentPlanBackgroundActionStatus,
   PaymentPlanQuery,
   PaymentPlanStatus,
@@ -141,85 +140,23 @@ export const fakeApolloPaymentPlan: PaymentPlanQuery['paymentPlan'] = {
       __typename: 'ChoiceObject',
     },
   ],
-  deliveryMechanisms: [
-    {
-      id: 'RGVsaXZlcnlNZWNoYW5pc21Ob2RlOjkyNGM5NTBhLTE5YzQtNGJiNC04ZDExLTI3Yzg5OTczNzlhYQ==',
-      name: 'Cash',
-      fsp: {
-        id: 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyTm9kZToyMzA5MzQ2YS01NTA3LTRjY2UtOTkxMS05MDYwNjBkYWNkMDM=',
-        name: 'Miranda Ltd',
-        communicationChannel: FinancialServiceProviderCommunicationChannel.Api,
-        __typename: 'FinancialServiceProviderNode',
-      },
-      sentToPaymentGateway: false,
-      __typename: 'DeliveryMechanismPerPaymentPlanNode',
+  deliveryMechanism: {
+    id: 'RGVsaXZlcnlNZWNoYW5pc21Ob2RlOjkyNGM5NTBhLTE5YzQtNGJiNC04ZDExLTI3Yzg5OTczNzlhYQ==',
+    name: 'Cash',
+    fsp: {
+      id: 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyTm9kZToyMzA5MzQ2YS01NTA3LTRjY2UtOTkxMS05MDYwNjBkYWNkMDM=',
+      name: 'Miranda Ltd',
+      __typename: 'FinancialServiceProviderNode',
     },
-    {
-      id: 'RGVsaXZlcnlNZWNoYW5pc21Ob2RlOjFjMjQwMmFhLWY5N2QtNDNhNC1iYThkLTcwM2Q0YjUxYTQ5OQ==',
-      name: 'In Kind',
-      fsp: {
-        id: 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyTm9kZTplNjlkZTM1Yi1kMzRjLTQyNzYtOTJhMi1lNTYyOWQwNmEzMzY=',
-        name: 'Frazier-Watson',
-        communicationChannel: FinancialServiceProviderCommunicationChannel.Xlsx,
-        __typename: 'FinancialServiceProviderNode',
-      },
-      sentToPaymentGateway: false,
-      __typename: 'DeliveryMechanismPerPaymentPlanNode',
-    },
-    {
-      id: 'RGVsaXZlcnlNZWNoYW5pc21Ob2RlOjAwYjlhNTA5LTE4MDEtNGQ1MS04ODk1LTJkYzMyOGNjNjI3MA==',
-      name: 'Transfer',
-      fsp: {
-        id: 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyTm9kZTpkODU3MmFjNy04MjMyLTQwYjItOWFjNS0zMDBiZWQ2YjcwNDU=',
-        name: 'Bray Group',
-        communicationChannel: FinancialServiceProviderCommunicationChannel.Xlsx,
-        __typename: 'FinancialServiceProviderNode',
-      },
-      sentToPaymentGateway: false,
-      __typename: 'DeliveryMechanismPerPaymentPlanNode',
-    },
-  ],
+  },
   volumeByDeliveryMechanism: [
     {
       deliveryMechanism: {
         id: 'RGVsaXZlcnlNZWNoYW5pc21Ob2RlOjkyNGM5NTBhLTE5YzQtNGJiNC04ZDExLTI3Yzg5OTczNzlhYQ==',
         name: 'Cash',
-        order: 1,
         fsp: {
           id: 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyTm9kZToyMzA5MzQ2YS01NTA3LTRjY2UtOTkxMS05MDYwNjBkYWNkMDM=',
           name: 'Miranda Ltd',
-          __typename: 'FinancialServiceProviderNode',
-        },
-        __typename: 'DeliveryMechanismPerPaymentPlanNode',
-      },
-      volume: 0,
-      volumeUsd: 0,
-      __typename: 'VolumeByDeliveryMechanismNode',
-    },
-    {
-      deliveryMechanism: {
-        id: 'RGVsaXZlcnlNZWNoYW5pc21Ob2RlOjFjMjQwMmFhLWY5N2QtNDNhNC1iYThkLTcwM2Q0YjUxYTQ5OQ==',
-        name: 'In Kind',
-        order: 2,
-        fsp: {
-          id: 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyTm9kZTplNjlkZTM1Yi1kMzRjLTQyNzYtOTJhMi1lNTYyOWQwNmEzMzY=',
-          name: 'Frazier-Watson',
-          __typename: 'FinancialServiceProviderNode',
-        },
-        __typename: 'DeliveryMechanismPerPaymentPlanNode',
-      },
-      volume: 0,
-      volumeUsd: 0,
-      __typename: 'VolumeByDeliveryMechanismNode',
-    },
-    {
-      deliveryMechanism: {
-        id: 'RGVsaXZlcnlNZWNoYW5pc21Ob2RlOjAwYjlhNTA5LTE4MDEtNGQ1MS04ODk1LTJkYzMyOGNjNjI3MA==',
-        name: 'Transfer',
-        order: 3,
-        fsp: {
-          id: 'RmluYW5jaWFsU2VydmljZVByb3ZpZGVyTm9kZTpkODU3MmFjNy04MjMyLTQwYjItOWFjNS0zMDBiZWQ2YjcwNDU=',
-          name: 'Bray Group',
           __typename: 'FinancialServiceProviderNode',
         },
         __typename: 'DeliveryMechanismPerPaymentPlanNode',

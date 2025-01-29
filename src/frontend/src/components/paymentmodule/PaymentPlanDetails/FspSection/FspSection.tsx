@@ -22,8 +22,8 @@ export const FspSection = ({
   const { paymentPlanId } = useParams();
   const { isActiveProgram } = useProgramContext();
 
-  const { deliveryMechanisms, isFollowUp } = paymentPlan;
-  const showFspDisplay = deliveryMechanisms.length;
+  const { deliveryMechanism, isFollowUp } = paymentPlan;
+  const showFspDisplay = deliveryMechanism?.fsp !== null;
   const shouldDisableSetUpFsp = (): boolean => {
     if (paymentPlan.isFollowUp) {
       return false;
@@ -62,21 +62,18 @@ export const FspSection = ({
           )}
         </Box>
         <Grid container spacing={3}>
-          {deliveryMechanisms.map((el) => (
-            <>
-              <Grid key={`${el.name}-${el.fsp?.name}`} item xs={3}>
-                <LabelizedField label={el.name} value={el.fsp?.name} />
-              </Grid>
-              {el.chosenConfiguration && (
-                <Grid key={el.chosenConfiguration} item xs={3}>
-                  <LabelizedField
-                    label="Configuration"
-                    value={el.chosenConfiguration}
-                  />
-                </Grid>
-              )}
-            </>
-          ))}
+          <>
+            <Grid
+              key={`${deliveryMechanism.name}-${deliveryMechanism.fsp?.name}`}
+              item
+              xs={3}
+            >
+              <LabelizedField
+                label={deliveryMechanism.name}
+                value={deliveryMechanism.fsp?.name}
+              />
+            </Grid>
+          </>
         </Grid>
         <DividerLine />
         <VolumeByDeliveryMechanismSection paymentPlan={paymentPlan} />

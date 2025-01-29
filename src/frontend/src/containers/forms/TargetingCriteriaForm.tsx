@@ -1,6 +1,9 @@
 import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 import { AndDivider, AndDividerLabel } from '@components/targeting/AndDivider';
-import { useAllCollectorFieldsAttributesQuery } from '@generated/graphql';
+import {
+  useAllCollectorFieldsAttributesQuery,
+  useAvailableFspsForDeliveryMechanismsQuery,
+} from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useCachedIndividualFieldsQuery } from '@hooks/useCachedIndividualFields';
 import { AddCircleOutline } from '@mui/icons-material';
@@ -13,6 +16,7 @@ import {
   DialogContent,
   DialogTitle,
   Grid,
+  Tooltip,
   Typography,
 } from '@mui/material';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
@@ -148,6 +152,7 @@ interface TargetingCriteriaFormPropTypes {
   householdFiltersAvailable: boolean;
   collectorsFiltersAvailable: boolean;
   isSocialWorkingProgram: boolean;
+  targetPopulation;
 }
 
 const associatedWith = (type) => (item) => item.associatedWith === type;
@@ -162,12 +167,14 @@ export const TargetingCriteriaForm = ({
   householdFiltersAvailable,
   collectorsFiltersAvailable,
   isSocialWorkingProgram,
+  targetPopulation,
 }: TargetingCriteriaFormPropTypes): ReactElement => {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
+
   const confirm = useConfirmation();
   const confirmationText = t(
-    'Are you sure you want to continue without adding FSP information?',
+    'Are you sure you want to ‘Lock’ TP without validating FSP and Delivery Mechanism requirements? This might result in individuals’ exclusion at later stages.',
   );
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
@@ -180,24 +187,23 @@ export const TargetingCriteriaForm = ({
     useAllCollectorFieldsAttributesQuery({
       fetchPolicy: 'cache-first',
     });
+  const { data: availableFspsForDeliveryMechanismData } =
+    useAvailableFspsForDeliveryMechanismsQuery();
 
   const householdsFiltersBlocksWrapperRef = useRef(null);
   const individualsFiltersBlocksWrapperRef = useRef(null);
   const collectorsFiltersBlocksWrapperRef = useRef(null);
-  const initialValue = mapCriteriaToInitialValues(criteria);
+  const initialValue = mapCriteriaToInitialValues(criteria, targetPopulation);
   const [individualData, setIndividualData] = useState(null);
   const [householdData, setHouseholdData] = useState(null);
   const [allDataChoicesDict, setAllDataChoicesDict] = useState(null);
   const [allCollectorFieldsChoicesDict, setAllCollectorFieldsChoicesDict] =
     useState(null);
-  const [openPaymentChannelCollapse, setOpenPaymentChannelCollapse] =
-    useState(false);
+  const [openPaymentChannelCollapse, setOpenPaymentChannelCollapse] = useState(
+    Boolean(initialValue.deliveryMechanism),
+  );
 
-  const handlePaymentChannelButtonClick = (setFieldValue) => {
-    if (!openPaymentChannelCollapse) {
-      setFieldValue('deliveryMechanism', '');
-      setFieldValue('fsp', '');
-    }
+  const handlePaymentChannelButtonClick = () => {
     setOpenPaymentChannelCollapse(!openPaymentChannelCollapse);
   };
 
@@ -266,7 +272,7 @@ export const TargetingCriteriaForm = ({
     });
     return bag.resetForm();
   };
-  if (loading || !open) return null;
+  if (loading || !open || !availableFspsForDeliveryMechanismData) return null;
 
   return (
     <DialogContainer>
@@ -277,7 +283,20 @@ export const TargetingCriteriaForm = ({
         validationSchema={validationSchema}
         enableReinitialize
       >
-        {({ submitForm, values, resetForm, errors, setFieldValue }) => {
+        {({ submitForm, values, resetForm, errors }) => {
+          const mappedDeliveryMechanisms =
+            availableFspsForDeliveryMechanismData.availableFspsForDeliveryMechanisms.map(
+              (el) => ({
+                name: el.deliveryMechanism.name,
+                value: el.deliveryMechanism.code,
+              }),
+            );
+          const mappedFsps =
+            availableFspsForDeliveryMechanismData.availableFspsForDeliveryMechanisms
+              .find(
+                (el) => el.deliveryMechanism.code === values.deliveryMechanism,
+              )
+              ?.fsps.map((el) => ({ name: el.name, value: el.id })) || [];
           return (
             <Dialog
               open={open}
@@ -430,7 +449,7 @@ export const TargetingCriteriaForm = ({
                           ref={individualsFiltersBlocksWrapperRef}
                         >
                           {values.individualsFiltersBlocks.map(
-                            (each, index) => (
+                            (_each, index) => (
                               <TargetingCriteriaIndividualFilterBlocks
                                 // eslint-disable-next-line
                                 key={index}
@@ -516,9 +535,7 @@ export const TargetingCriteriaForm = ({
                       <ButtonBox style={{ width: '600px' }}>
                         <Button
                           data-cy="button-collector-rule"
-                          onClick={() =>
-                            handlePaymentChannelButtonClick(setFieldValue)
-                          }
+                          onClick={() => handlePaymentChannelButtonClick()}
                           color="primary"
                           startIcon={<AddCircleOutline />}
                         >
@@ -543,29 +560,34 @@ export const TargetingCriteriaForm = ({
                                 fullWidth
                                 required={openPaymentChannelCollapse}
                                 variant="outlined"
-                                choices={[
-                                  { name: 'Cash', value: 'CASH' },
-                                  { name: 'In-kind', value: 'IN_KIND' },
-                                ]}
+                                choices={mappedDeliveryMechanisms}
                                 component={FormikSelectField}
                                 data-cy="input-delivery-mechanism"
                               />
                             </Grid>
                             <Grid item xs={12}>
-                              <Field
-                                name="fsp"
-                                label="Select FSP"
-                                type="text"
-                                fullWidth
-                                required={openPaymentChannelCollapse}
-                                variant="outlined"
-                                component={FormikSelectField}
-                                choices={[
-                                  { name: 'FSP1', value: 'FSP1' },
-                                  { name: 'FSP2', value: 'FSP2' },
-                                ]}
-                                data-cy="input-fsp"
-                              />
+                              <Tooltip
+                                title={
+                                  !values.deliveryMechanism
+                                    ? 'Select delivery mechanism first'
+                                    : ''
+                                }
+                              >
+                                <div>
+                                  <Field
+                                    name="fsp"
+                                    label="Select FSP"
+                                    type="text"
+                                    fullWidth
+                                    disabled={!values.deliveryMechanism}
+                                    required={openPaymentChannelCollapse}
+                                    variant="outlined"
+                                    component={FormikSelectField}
+                                    choices={mappedFsps}
+                                    data-cy="input-fsp"
+                                  />
+                                </div>
+                              </Tooltip>
                             </Grid>
                           </Grid>
                         </Box>

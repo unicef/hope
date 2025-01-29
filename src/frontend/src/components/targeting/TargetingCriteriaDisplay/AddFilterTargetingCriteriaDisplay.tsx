@@ -219,6 +219,7 @@ export const AddFilterTargetingCriteriaDisplay = ({
           individualFiltersAvailable={individualFiltersAvailable}
           householdFiltersAvailable={householdFiltersAvailable}
           collectorsFiltersAvailable={true}
+          targetPopulation={targetPopulation}
         />
         <ContentWrapper>
           <Box display="flex" flexDirection="column">

@@ -37,12 +37,11 @@ export const EditTargetPopulation = ({
 }: EditTargetPopulationProps): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  //UPDATE PP MUTATION
   const initialValues = {
     id: paymentPlan.id,
     name: paymentPlan.name || '',
     program: paymentPlan.program?.id || '',
-    targetingCriteria: paymentPlan.targetingCriteria.rules || [],
+    targetingCriteria: paymentPlan.targetingCriteria?.rules || [],
     excludedIds: paymentPlan.excludedIds || '',
     exclusionReason: paymentPlan.exclusionReason || '',
     flagExcludeIfActiveAdjudicationTicket:
@@ -176,6 +175,7 @@ export const EditTargetPopulation = ({
                   screenBeneficiary={screenBeneficiary}
                   isStandardDctType={isStandardDctType}
                   isSocialDctType={isSocialDctType}
+                  targetPopulation={paymentPlan}
                   data-cy="add-filter-targeting-criteria-display"
                 />
               )}
