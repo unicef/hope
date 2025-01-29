@@ -153,6 +153,7 @@ interface TargetingCriteriaFormPropTypes {
   collectorsFiltersAvailable: boolean;
   isSocialWorkingProgram: boolean;
   targetPopulation;
+  criteriaIndex: number;
 }
 
 const associatedWith = (type) => (item) => item.associatedWith === type;
@@ -168,6 +169,7 @@ export const TargetingCriteriaForm = ({
   collectorsFiltersAvailable,
   isSocialWorkingProgram,
   targetPopulation,
+  criteriaIndex,
 }: TargetingCriteriaFormPropTypes): ReactElement => {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
@@ -531,68 +533,72 @@ export const TargetingCriteriaForm = ({
                         </Button>
                       </ButtonBox>
                     </Box>
-                    <Box mt={2} display="flex" flexDirection="column">
-                      <ButtonBox style={{ width: '600px' }}>
-                        <Button
-                          data-cy="button-collector-rule"
-                          onClick={() => handlePaymentChannelButtonClick()}
-                          color="primary"
-                          startIcon={<AddCircleOutline />}
-                        >
-                          <Box
-                            style={{ textAlign: 'left' }}
-                            display="flex"
-                            flexDirection="column"
+                    {criteriaIndex === 0 && (
+                      <Box mt={2} display="flex" flexDirection="column">
+                        <ButtonBox style={{ width: '600px' }}>
+                          <Button
+                            data-cy="button-collector-rule"
+                            onClick={() => handlePaymentChannelButtonClick()}
+                            color="primary"
+                            startIcon={<AddCircleOutline />}
                           >
-                            <Box>PAYMENT CHANNEL VALIDATION</Box>
-                            <Box>(Delivery mechanism and FSP requirements)</Box>
+                            <Box
+                              style={{ textAlign: 'left' }}
+                              display="flex"
+                              flexDirection="column"
+                            >
+                              <Box>PAYMENT CHANNEL VALIDATION</Box>
+                              <Box>
+                                (Delivery mechanism and FSP requirements)
+                              </Box>
+                            </Box>
+                          </Button>
+                        </ButtonBox>
+                        <Collapse in={openPaymentChannelCollapse}>
+                          <Box mt={4}>
+                            <Grid container spacing={3}>
+                              <Grid item xs={12}>
+                                <Field
+                                  name="deliveryMechanism"
+                                  label="Select Delivery Mechanism"
+                                  type="text"
+                                  fullWidth
+                                  required={openPaymentChannelCollapse}
+                                  variant="outlined"
+                                  choices={mappedDeliveryMechanisms}
+                                  component={FormikSelectField}
+                                  data-cy="input-delivery-mechanism"
+                                />
+                              </Grid>
+                              <Grid item xs={12}>
+                                <Tooltip
+                                  title={
+                                    !values.deliveryMechanism
+                                      ? 'Select delivery mechanism first'
+                                      : ''
+                                  }
+                                >
+                                  <div>
+                                    <Field
+                                      name="fsp"
+                                      label="Select FSP"
+                                      type="text"
+                                      fullWidth
+                                      disabled={!values.deliveryMechanism}
+                                      required={openPaymentChannelCollapse}
+                                      variant="outlined"
+                                      component={FormikSelectField}
+                                      choices={mappedFsps}
+                                      data-cy="input-fsp"
+                                    />
+                                  </div>
+                                </Tooltip>
+                              </Grid>
+                            </Grid>
                           </Box>
-                        </Button>
-                      </ButtonBox>
-                      <Collapse in={openPaymentChannelCollapse}>
-                        <Box mt={4}>
-                          <Grid container spacing={3}>
-                            <Grid item xs={12}>
-                              <Field
-                                name="deliveryMechanism"
-                                label="Select Delivery Mechanism"
-                                type="text"
-                                fullWidth
-                                required={openPaymentChannelCollapse}
-                                variant="outlined"
-                                choices={mappedDeliveryMechanisms}
-                                component={FormikSelectField}
-                                data-cy="input-delivery-mechanism"
-                              />
-                            </Grid>
-                            <Grid item xs={12}>
-                              <Tooltip
-                                title={
-                                  !values.deliveryMechanism
-                                    ? 'Select delivery mechanism first'
-                                    : ''
-                                }
-                              >
-                                <div>
-                                  <Field
-                                    name="fsp"
-                                    label="Select FSP"
-                                    type="text"
-                                    fullWidth
-                                    disabled={!values.deliveryMechanism}
-                                    required={openPaymentChannelCollapse}
-                                    variant="outlined"
-                                    component={FormikSelectField}
-                                    choices={mappedFsps}
-                                    data-cy="input-fsp"
-                                  />
-                                </div>
-                              </Tooltip>
-                            </Grid>
-                          </Grid>
-                        </Box>
-                      </Collapse>
-                    </Box>
+                        </Collapse>
+                      </Box>
+                    )}
                   </>
                 ) : null}
               </DialogContent>
