@@ -4374,6 +4374,8 @@ export enum PaymentPlanStatus {
   InReview = 'IN_REVIEW',
   Locked = 'LOCKED',
   LockedFsp = 'LOCKED_FSP',
+  MigrationBlocked = 'MIGRATION_BLOCKED',
+  MigrationFailed = 'MIGRATION_FAILED',
   Open = 'OPEN',
   Preparing = 'PREPARING',
   Processing = 'PROCESSING',
