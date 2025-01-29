@@ -538,7 +538,7 @@ def pageCountryDashboard(request: FixtureRequest, browser: Chrome) -> CountryDas
 
 
 @pytest.fixture
-def business_area(create_unicef_partner, create_role_with_all_permissions) -> BusinessArea:
+def business_area(create_unicef_partner: Any, create_role_with_all_permissions: Any) -> BusinessArea:
     business_area, _ = BusinessArea.objects.get_or_create(
         **{
             "pk": "c259b1a0-ae3a-494e-b343-f7c8eb060c68",
