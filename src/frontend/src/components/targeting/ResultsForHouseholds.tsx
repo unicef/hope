@@ -2,14 +2,12 @@ import { Grid, Typography } from '@mui/material';
 import { Pie } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import {
-  TargetPopulationBuildStatus,
-  TargetPopulationQuery,
-} from '@generated/graphql';
+import { PaymentPlanBuildStatus, PaymentPlanQuery } from '@generated/graphql';
 import { MiśTheme } from '../../theme';
 import { FieldBorder } from '@core/FieldBorder';
 import { LabelizedField } from '@core/LabelizedField';
 import { PaperContainer } from './PaperContainer';
+import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
 
 const colors = {
@@ -50,14 +48,17 @@ const ChartContainer = styled.div`
 `;
 
 interface ResultsProps {
-  targetPopulation: TargetPopulationQuery['targetPopulation'];
+  targetPopulation: PaymentPlanQuery['paymentPlan'];
 }
 
 export function ResultsForHouseholds({
   targetPopulation,
 }: ResultsProps): ReactElement {
   const { t } = useTranslation();
-  if (targetPopulation.buildStatus !== TargetPopulationBuildStatus.Ok) {
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
+  if (targetPopulation.buildStatus !== PaymentPlanBuildStatus.Ok) {
     return null;
   }
   return (
@@ -74,7 +75,7 @@ export function ResultsForHouseholds({
                   <FieldBorder color={colors.femaleChildren}>
                     <LabelizedField
                       label={t('Female Children')}
-                      value={targetPopulation.childFemaleCount}
+                      value={targetPopulation.femaleChildrenCount}
                     />
                   </FieldBorder>
                 </Grid>
@@ -82,7 +83,7 @@ export function ResultsForHouseholds({
                   <FieldBorder color={colors.femaleAdult}>
                     <LabelizedField
                       label={t('Female Adults')}
-                      value={targetPopulation.adultFemaleCount}
+                      value={targetPopulation.femaleAdultsCount}
                     />
                   </FieldBorder>
                 </Grid>
@@ -90,7 +91,7 @@ export function ResultsForHouseholds({
                   <FieldBorder color={colors.maleChildren}>
                     <LabelizedField
                       label={t('Male Children')}
-                      value={targetPopulation.childMaleCount}
+                      value={targetPopulation.maleChildrenCount}
                     />
                   </FieldBorder>
                 </Grid>
@@ -98,7 +99,7 @@ export function ResultsForHouseholds({
                   <FieldBorder color={colors.maleAdult}>
                     <LabelizedField
                       label={t('Male Adults')}
-                      value={targetPopulation.adultMaleCount}
+                      value={targetPopulation.maleAdultsCount}
                     />
                   </FieldBorder>
                 </Grid>
@@ -133,10 +134,10 @@ export function ResultsForHouseholds({
                         datasets: [
                           {
                             data: [
-                              targetPopulation.childFemaleCount,
-                              targetPopulation.adultFemaleCount,
-                              targetPopulation.childMaleCount,
-                              targetPopulation.adultMaleCount,
+                              targetPopulation.femaleChildrenCount,
+                              targetPopulation.femaleAdultsCount,
+                              targetPopulation.maleChildrenCount,
+                              targetPopulation.maleAdultsCount,
                             ],
                             backgroundColor: [
                               colors.femaleChildren,
@@ -156,7 +157,9 @@ export function ResultsForHouseholds({
               <Grid container spacing={0} justifyContent="flex-end">
                 <Grid item xs={6}>
                   <SummaryBorder>
-                    <LabelizedField label={t('Total Number of Households')}>
+                    <LabelizedField
+                      label={`Total Number of ${beneficiaryGroup?.groupLabelPlural}`}
+                    >
                       <SummaryValue data-cy="total-number-of-households-count">
                         {targetPopulation.totalHouseholdsCount || '0'}
                       </SummaryValue>
@@ -165,7 +168,9 @@ export function ResultsForHouseholds({
                 </Grid>
                 <Grid item xs={6}>
                   <SummaryBorder>
-                    <LabelizedField label={t('Targeted Individuals')}>
+                    <LabelizedField
+                      label={`Targeted ${beneficiaryGroup?.memberLabelPlural}`}
+                    >
                       <SummaryValue>
                         {targetPopulation.totalIndividualsCount || '0'}
                       </SummaryValue>

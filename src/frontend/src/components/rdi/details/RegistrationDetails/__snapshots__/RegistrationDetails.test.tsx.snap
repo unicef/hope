@@ -184,10 +184,10 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                     class="sc-gtLWhw bkWrmx"
                     color="textSecondary"
                   >
-                    Total Number of Registered Individuals
+                    Total Number of Individuals
                   </span>
                   <div
-                    data-cy="label-Total Number of Registered Individuals"
+                    data-cy="label-Total Number of Individuals"
                   >
                     <span
                       class="sc-egkSDF XYdBd"

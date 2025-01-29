@@ -31,7 +31,7 @@ snapshots['TestSurveyQueries::test_create_export_survey_sample_with_valid_survey
     'data': {
         'exportSurveySample': {
             'survey': {
-                'targetPopulation': {
+                'paymentPlan': {
                     'name': 'Test Target Population'
                 },
                 'title': 'Test survey'

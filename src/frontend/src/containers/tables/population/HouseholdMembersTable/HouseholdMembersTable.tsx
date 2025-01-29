@@ -8,6 +8,7 @@ import { HeadCell } from '@components/core/Table/EnhancedTableHead';
 import { Order, TableComponent } from '@components/core/Table/TableComponent';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import {
+  adjustHeadCells,
   choicesToDict,
   populationStatusToColor,
   sexToCapitalize,
@@ -19,6 +20,7 @@ import {
 } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { Bold } from '@components/core/Bold';
+import { useProgramContext } from 'src/programContext';
 
 const headCells: HeadCell<IndividualNode>[] = [
   {
@@ -83,6 +85,9 @@ export const HouseholdMembersTable = ({
   const allIndividuals = household?.individuals?.edges?.map(
     (edge) => edge.node,
   );
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
   if (orderBy) {
     if (orderDirection === 'asc') {
       allIndividuals.sort((a, b) => (a[orderBy] < b[orderBy] ? 1 : -1));
@@ -92,9 +97,23 @@ export const HouseholdMembersTable = ({
   }
 
   const totalCount = allIndividuals.length;
+
+  const replacements = {
+    unicefId: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel} ID`,
+    fullName: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel}`,
+    relationship: (_beneficiaryGroup) =>
+      `Relationship to Head of ${_beneficiaryGroup?.groupLabel}`,
+  };
+
+  const adjustedHeadCells = adjustHeadCells(
+    headCells,
+    beneficiaryGroup,
+    replacements,
+  );
+
   return (
     <TableComponent<IndividualNode>
-      title="Household Members"
+      title={`${beneficiaryGroup?.groupLabel} Members`}
       data={allIndividuals.slice(
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage,
@@ -148,7 +167,7 @@ export const HouseholdMembersTable = ({
           </ClickableTableRow>
         );
       }}
-      headCells={headCells}
+      headCells={adjustedHeadCells}
       rowsPerPageOptions={totalCount < 5 ? [totalCount] : [5, 10, 15]}
       rowsPerPage={totalCount > 5 ? rowsPerPage : totalCount}
       page={page}

@@ -17,6 +17,7 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.steficon.admin import AutocompleteWidget
 from hct_mis_api.apps.targeting.models import TargetingCriteria, TargetPopulation
 
 
@@ -41,16 +42,28 @@ def get_households_from_text(program: Program, text: Any, target_field: Any, sep
 
 
 class UpdateByXlsxStage1Form(forms.Form):
-    business_area = forms.ModelChoiceField(queryset=BusinessArea.objects.all(), required=True)
-    program = forms.ModelChoiceField(queryset=Program.objects.filter(status=Program.ACTIVE), required=True)
-    registration_data_import = forms.ModelChoiceField(queryset=RegistrationDataImport.objects.all(), required=True)
+    business_area = forms.ModelChoiceField(
+        queryset=BusinessArea.objects.all().order_by("name"),
+        required=True,
+        widget=AutocompleteWidget(BusinessArea, ""),
+    )
+    program = forms.ModelChoiceField(
+        queryset=Program.objects.filter(status=Program.ACTIVE).order_by("name"),
+        required=True,
+        widget=AutocompleteWidget(Program, ""),
+    )
+    registration_data_import = forms.ModelChoiceField(
+        queryset=RegistrationDataImport.objects.all().order_by("name"),
+        required=True,
+        widget=AutocompleteWidget(RegistrationDataImport, ""),
+    )
     file = forms.FileField(required=True, help_text="Select XLSX file")
 
     def clean_program(self) -> Optional[Program]:
         program = self.cleaned_data.get("program")
         ba = self.cleaned_data.get("business_area")
         if program.business_area != ba:
-            raise ValidationError("Program should belong to selected business area")
+            self.add_error("program", "Program should belong to selected business area.")
         return program
 
     def clean_registration_data_import(self) -> Optional[RegistrationDataImport]:
@@ -231,7 +244,6 @@ class MassEnrollForm(forms.Form):
         if "apply" in self.data:
             program_for_enroll = cleaned_data.get("program_for_enroll")
             warning_message = None  # Initialize the warning message
-
             # Check each household in the queryset
             for household in self.households:
                 if not (
@@ -246,6 +258,12 @@ class MassEnrollForm(forms.Form):
                         "Not all households have data collecting type compatible with the selected program"
                     )
                     break  # Exit the loop after the first incompatible household
+
+            if self.households.exclude(program__beneficiary_group=program_for_enroll.beneficiary_group).exists():
+                self.add_error(
+                    None,
+                    "Some households belong to a different beneficiary group than the selected program.",
+                )
 
             if warning_message:
                 # Add the warning message as a non-field error

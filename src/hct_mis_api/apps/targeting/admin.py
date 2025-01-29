@@ -60,6 +60,7 @@ class TargetPopulationAdmin(
         "program",
         "targeting_criteria",
     )
+    filter_horizontal = ["households"]
 
     @button()
     def selection(self, request: "HttpRequest", pk: "UUID") -> "HttpResponse":
@@ -67,19 +68,19 @@ class TargetPopulationAdmin(
         url = reverse("admin:targeting_householdselection_changelist")
         return HttpResponseRedirect(f"{url}?target_population={obj.id}")
 
-    @button()
+    @button(permission="targeting.view_targetpopulation")
     def inspect(self, request: "HttpRequest", pk: "UUID") -> TemplateResponse:
         context = self.get_common_context(request, pk, aeu_groups=[None], action="Inspect")
 
         return TemplateResponse(request, "admin/targeting/targetpopulation/inspect.html", context)
 
-    @button()
+    @button(permission="payment.view_payment")
     def payments(self, request: "HttpRequest", pk: "UUID") -> TemplateResponse:
         context = self.get_common_context(request, pk, aeu_groups=[None], action="payments")
 
         return TemplateResponse(request, "admin/targeting/targetpopulation/payments.html", context)
 
-    @button(enabled=lambda b: b.context["original"].steficon_rule)
+    @button(enabled=lambda b: b.context["original"].steficon_rule, permission="steficon.rerun_rule")
     def rerun_steficon(self, request: "HttpRequest", pk: "UUID") -> TemplateResponse:
         def _rerun(request: "HttpRequest") -> TemplateResponse:
             context = self.get_common_context(request, pk)

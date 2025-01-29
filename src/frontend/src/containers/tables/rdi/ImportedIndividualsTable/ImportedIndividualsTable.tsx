@@ -10,6 +10,8 @@ import { ReactElement, useState } from 'react';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells as importedIndividualHeadCells } from './ImportedIndividualsTableHeadCells';
 import { ImportedIndividualsTableRow } from './ImportedIndividualsTableRow';
+import { useProgramContext } from 'src/programContext';
+import { adjustHeadCells } from '@utils/utils';
 import { headCells as mergedIndividualHeadCells } from './MergedIndividualsTableHeadCells';
 
 interface ImportedIndividualsTableProps {
@@ -38,6 +40,8 @@ export function ImportedIndividualsTable({
   isMerged,
 }: ImportedIndividualsTableProps): ReactElement {
   const [showDuplicates, setShowDuplicates] = useState(false);
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const initialVariables = {
     rdiId,
@@ -49,6 +53,23 @@ export function ImportedIndividualsTable({
       : IndividualRdiMergeStatus.Pending,
   };
 
+  const replacements = {
+    id: (_beneficiaryGroup) => `${_beneficiaryGroup?.memberLabel} ID`,
+    full_name: (_beneficiaryGroup) => _beneficiaryGroup?.memberLabel,
+    relationship: (_beneficiaryGroup) =>
+      `Relationship to Head of ${_beneficiaryGroup?.groupLabel}`,
+  };
+
+  const adjustedMergedIndividualsHeadCells = adjustHeadCells(
+    mergedIndividualHeadCells,
+    beneficiaryGroup,
+    replacements,
+  );
+  const adjustedImportedIndividualsHeadCells = adjustHeadCells(
+    importedIndividualHeadCells,
+    beneficiaryGroup,
+    replacements,
+  );
   return (
     <div data-cy="imported-individuals-table">
       {showCheckbox && (
@@ -72,7 +93,7 @@ export function ImportedIndividualsTable({
       {isMerged ? (
         <UniversalTable<IndividualMinimalFragment, AllIndividualsQueryVariables>
           title={title}
-          headCells={mergedIndividualHeadCells}
+          headCells={adjustedMergedIndividualsHeadCells}
           query={useAllIndividualsQuery}
           queriedObjectName="allIndividuals"
           rowsPerPageOptions={rowsPerPageOptions}
@@ -82,7 +103,6 @@ export function ImportedIndividualsTable({
             <ImportedIndividualsTableRow
               choices={choicesData}
               key={row.id}
-              isMerged={isMerged}
               individual={row}
               rdi={rdi}
             />
@@ -91,7 +111,7 @@ export function ImportedIndividualsTable({
       ) : (
         <UniversalTable<IndividualMinimalFragment, AllIndividualsQueryVariables>
           title={title}
-          headCells={importedIndividualHeadCells}
+          headCells={adjustedImportedIndividualsHeadCells}
           query={useAllIndividualsQuery}
           queriedObjectName="allIndividuals"
           rowsPerPageOptions={rowsPerPageOptions}
@@ -101,7 +121,6 @@ export function ImportedIndividualsTable({
             <ImportedIndividualsTableRow
               choices={choicesData}
               key={row.id}
-              isMerged={isMerged}
               individual={row}
               rdi={rdi}
             />

@@ -67,6 +67,7 @@ def create_household_with_individual(address: str) -> Tuple[Household, Individua
         last_registration_date=now,
         business_area=afghanistan,
         sex=MALE,
+        registration_data_import=rdi,
         full_name=faker.name(),
         individual_collection=IndividualCollection.objects.create(),
         rdi_merge_status=MergeStatusModel.MERGED,

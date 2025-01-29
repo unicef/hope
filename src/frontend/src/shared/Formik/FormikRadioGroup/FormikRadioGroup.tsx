@@ -50,8 +50,8 @@ export function FormikRadioGroup({
             name: string;
             dataCy?: string;
           }) => (
-            <Box p={2} mb={2} key={each.value}>
-              <Box display="flex" alignItems={alignItems}>
+            <Box key={each.value}>
+              <Box mb={1} display="flex" alignItems={alignItems}>
                 <Radio
                   color="primary"
                   value={each.value}

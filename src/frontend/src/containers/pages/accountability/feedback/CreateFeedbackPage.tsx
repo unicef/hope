@@ -48,13 +48,7 @@ import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { FeedbackSteps } from '@utils/constants';
 import { UniversalErrorBoundary } from '@components/core/UniversalErrorBoundary';
-
-const steps = [
-  'Category Selection',
-  'Household/Individual Look up',
-  'Identity Verification',
-  'Description',
-];
+import { useProgramContext } from 'src/programContext';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -153,6 +147,15 @@ export function CreateFeedbackPage(): ReactElement {
   const { baseUrl, businessArea, isAllPrograms, programId } = useBaseUrl();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+
+  const steps = [
+    'Category Selection',
+    `${beneficiaryGroup?.groupLabel}/${beneficiaryGroup?.memberLabel} Look up`,
+    'Identity Verification',
+    'Description',
+  ];
 
   const [activeStep, setActiveStep] = useState(FeedbackSteps.Selection);
   const [validateData, setValidateData] = useState(false);
@@ -360,14 +363,18 @@ export function CreateFeedbackPage(): ReactElement {
                               </Typography> */}
                                 <Box py={4}>
                                   <Typography variant="subtitle2">
-                                    {t('Household Questionnaire')}
+                                    {t(
+                                      `${beneficiaryGroup?.groupLabel} Questionnaire`,
+                                    )}
                                   </Typography>
                                   <Box py={4}>
                                     <HouseholdQuestionnaire values={values} />
                                   </Box>
                                 </Box>
                                 <Typography variant="subtitle2">
-                                  {t('Individual Questionnaire')}
+                                  {t(
+                                    `${beneficiaryGroup?.memberLabel} Questionnaire`,
+                                  )}
                                 </Typography>
                                 <Box py={4}>
                                   <IndividualQuestionnaire values={values} />
@@ -407,12 +414,20 @@ export function CreateFeedbackPage(): ReactElement {
                                     </LabelizedField>
                                   </Grid>
                                   <Grid item xs={6}>
-                                    <LabelizedField label={t('Household')}>
+                                    <LabelizedField
+                                      label={t(
+                                        `${beneficiaryGroup?.groupLabel}`,
+                                      )}
+                                    >
                                       {values.selectedHousehold?.unicefId}
                                     </LabelizedField>
                                   </Grid>
                                   <Grid item xs={6}>
-                                    <LabelizedField label={t('Individual')}>
+                                    <LabelizedField
+                                      label={t(
+                                        `${beneficiaryGroup?.memberLabel}`,
+                                      )}
+                                    >
                                       {values.selectedIndividual?.unicefId}
                                     </LabelizedField>
                                   </Grid>

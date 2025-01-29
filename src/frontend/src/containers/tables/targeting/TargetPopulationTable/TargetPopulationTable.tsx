@@ -3,15 +3,16 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
   AllTargetPopulationsQueryVariables,
-  TargetPopulationNode,
+  PaymentPlanNode,
   useAllTargetPopulationsQuery,
 } from '@generated/graphql';
 import { TableWrapper } from '@components/core/TableWrapper';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { dateToIsoString } from '@utils/utils';
+import { adjustHeadCells, dateToIsoString } from '@utils/utils';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './TargetPopulationTableHeadCells';
 import { TargetPopulationTableRow } from './TargetPopulationTableRow';
+import { useProgramContext } from 'src/programContext';
 
 interface TargetPopulationProps {
   filter;
@@ -40,6 +41,8 @@ export function TargetPopulationTable({
   noTitle,
 }: TargetPopulationProps): ReactElement {
   const { t } = useTranslation();
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const { businessArea, programId } = useBaseUrl();
   const initialVariables: AllTargetPopulationsQueryVariables = {
     name: filter.name,
@@ -47,7 +50,7 @@ export function TargetPopulationTable({
     totalHouseholdsCountMax: filter.totalHouseholdsCountMax || null,
     status: filter.status,
     businessArea,
-    program: [programId],
+    program: programId,
     createdAtRange: JSON.stringify({
       min: dateToIsoString(filter.createdAtRangeMin, 'startOfDay'),
       max: dateToIsoString(filter.createdAtRangeMax, 'endOfDay'),
@@ -57,14 +60,27 @@ export function TargetPopulationTable({
     handleChange(id);
   };
 
+  const replacements = {
+    total_households_count: (_beneficiaryGroup) =>
+      `Num. of ${_beneficiaryGroup?.groupLabelPlural}`,
+  };
+
+  const adjustedHeadCells = adjustHeadCells(
+    headCells,
+    beneficiaryGroup,
+    replacements,
+  );
+
   const renderTable = (): ReactElement => (
     <TableWrapper>
-      <UniversalTable<TargetPopulationNode, AllTargetPopulationsQueryVariables>
+      <UniversalTable<PaymentPlanNode, AllTargetPopulationsQueryVariables>
         title={noTitle ? null : t('Target Populations')}
-        headCells={enableRadioButton ? headCells : headCells.slice(1)}
+        headCells={
+          enableRadioButton ? adjustedHeadCells : adjustedHeadCells.slice(1)
+        }
         rowsPerPageOptions={[10, 15, 20]}
         query={useAllTargetPopulationsQuery}
-        queriedObjectName="allTargetPopulation"
+        queriedObjectName="allPaymentPlans"
         defaultOrderBy="createdAt"
         defaultOrderDirection="desc"
         initialVariables={initialVariables}

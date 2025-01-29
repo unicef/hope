@@ -1,17 +1,17 @@
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import {
-  AllActiveTargetPopulationsQueryVariables,
-  TargetPopulationNode,
-  TargetPopulationStatus,
-  useAllActiveTargetPopulationsQuery,
-} from '@generated/graphql';
 import { TableWrapper } from '@components/core/TableWrapper';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './LookUpTargetPopulationTableHeadCellsSurveys';
 import { LookUpTargetPopulationTableRowSurveys } from './LookUpTargetPopulationTableRowSurveys';
+import {
+  AllPaymentPlansForTableQueryVariables,
+  PaymentPlanNode,
+  PaymentPlanStatus,
+  useAllPaymentPlansForTableQuery,
+} from '@generated/graphql';
 
 interface LookUpTargetPopulationTableSurveysProps {
   filter;
@@ -41,18 +41,20 @@ export function LookUpTargetPopulationTableSurveys({
 }: LookUpTargetPopulationTableSurveysProps): ReactElement {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
-  const initialVariables: AllActiveTargetPopulationsQueryVariables = {
-    name: filter.name,
-    totalHouseholdsCountMin: filter.totalHouseholdsCountMin || 0,
-    totalHouseholdsCountMax: filter.totalHouseholdsCountMax || null,
+  const initialVariables: AllPaymentPlansForTableQueryVariables = {
+    totalHouseholdsCountWithValidPhoneNoMin:
+      filter.totalHouseholdsCountMin || 0,
+    totalHouseholdsCountWithValidPhoneNoMax:
+      filter.totalHouseholdsCountMax || null,
     status: filter.status,
     businessArea,
-    program: [programId],
+    program: programId,
     createdAtRange: JSON.stringify({
       min: filter.createdAtRangeMin || null,
       max: filter.createdAtRangeMax || null,
     }),
-    statusNot: TargetPopulationStatus.Open,
+    statusNot: PaymentPlanStatus.Open,
+    isTargetPopulation: true,
   };
 
   const handleRadioChange = (id: string): void => {
@@ -61,15 +63,12 @@ export function LookUpTargetPopulationTableSurveys({
 
   const renderTable = (): ReactElement => (
     <TableWrapper>
-      <UniversalTable<
-        TargetPopulationNode,
-        AllActiveTargetPopulationsQueryVariables
-      >
+      <UniversalTable<PaymentPlanNode, AllPaymentPlansForTableQueryVariables>
         title={noTitle ? null : t('Target Populations')}
         headCells={enableRadioButton ? headCells : headCells.slice(1)}
         rowsPerPageOptions={[10, 15, 20]}
-        query={useAllActiveTargetPopulationsQuery}
-        queriedObjectName="allActiveTargetPopulations"
+        query={useAllPaymentPlansForTableQuery}
+        queriedObjectName="allPaymentPlans"
         defaultOrderBy="createdAt"
         defaultOrderDirection="desc"
         initialVariables={initialVariables}

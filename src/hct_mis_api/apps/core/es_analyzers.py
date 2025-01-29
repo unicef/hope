@@ -18,7 +18,7 @@ phonetic_analyzer = analyzer(
     filter=["lowercase", phonetic_filter],
 )
 
-with open(os.path.join(settings.PROJECT_ROOT, "../data/synonyms.txt")) as synonyms_file:
+with open(os.path.join(settings.PROJECT_ROOT, settings.ELASTICSEARCH_SYNONYMS_FILE)) as synonyms_file:
     synonyms = synonyms_file.readlines()
 
 name_synonym_analyzer_token_filter = token_filter(
@@ -26,7 +26,6 @@ name_synonym_analyzer_token_filter = token_filter(
     "synonym",
     synonyms=synonyms,
 )
-
 
 name_synonym_analyzer = analyzer(
     "text_analyzer",
