@@ -120,6 +120,19 @@ def get_redis_host() -> str:
     return redis_host
 
 
+@pytest.fixture(scope="session", autouse=True)
+def create_unicef_partner(django_db_setup: Any, django_db_blocker: Any) -> None:
+    with django_db_blocker.unblock():
+        unicef, _ = Partner.objects.get_or_create(name="UNICEF")
+        Partner.objects.get_or_create(name=settings.UNICEF_HQ_PARTNER, parent=unicef)
+
+
+@pytest.fixture(scope="session", autouse=True)
+def create_role_with_all_permissions(django_db_setup: Any, django_db_blocker: Any) -> None:
+    with django_db_blocker.unblock():
+        Role.objects.get_or_create(name="Role with all permissions")
+
+
 @pytest.fixture(autouse=True)
 def configure_cache_for_tests(worker_id: str, settings: Any) -> None:
     """
@@ -731,16 +744,3 @@ def screenshot(driver: Chrome, node_id: str) -> None:
     file_path = os.path.join(settings.SCREENSHOT_DIRECTORY, file_name)
     driver.get_screenshot_as_file(file_path)
     attach(data=driver.get_screenshot_as_png())
-
-
-@pytest.fixture(scope="session", autouse=True)
-def create_unicef_partner(django_db_setup: Any, django_db_blocker: Any) -> None:
-    with django_db_blocker.unblock():
-        unicef, _ = Partner.objects.get_or_create(name="UNICEF")
-        Partner.objects.get_or_create(name=settings.UNICEF_HQ_PARTNER, parent=unicef)
-
-
-@pytest.fixture(scope="session", autouse=True)
-def create_role_with_all_permissions(django_db_setup: Any, django_db_blocker: Any) -> None:
-    with django_db_blocker.unblock():
-        Role.objects.get_or_create(name="Role with all permissions")
