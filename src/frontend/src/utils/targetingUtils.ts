@@ -170,7 +170,6 @@ function mapBlockFilters(blocks, blockKey) {
 }
 
 export function mapCriteriaToInitialValues(criteria) {
-  console.log('criteria', criteria);
   const individualIds = criteria.individualIds || '';
   const householdIds = criteria.householdIds || '';
   const householdsFiltersBlocks = criteria.householdsFiltersBlocks || [];
@@ -210,7 +209,6 @@ export function formatCriteriaFilters(filters) {
   return filters.map((each) => {
     let comparisonMethod;
     let values;
-    console.log('each', each);
     switch (each?.fieldAttribute?.type || each?.type) {
       case 'SELECT_ONE':
         comparisonMethod = 'EQUALS';

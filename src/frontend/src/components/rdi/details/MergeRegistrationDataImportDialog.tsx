@@ -29,7 +29,8 @@ export function MergeRegistrationDataImportDialog({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const { isSocialDctType } = useProgramContext();
+  const { isSocialDctType, selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const [mutate, { loading }] = useMergeRdiMutation({
     variables: { id: registration.id },
@@ -45,8 +46,9 @@ export function MergeRegistrationDataImportDialog({
   let dataCountInformation = (
     <div>
       <strong>
-        {registration.numberOfHouseholds} {t('households and')}{' '}
-        {registration.numberOfIndividuals} {t('individuals will be merged.')}{' '}
+        {registration.numberOfHouseholds} {beneficiaryGroup.groupLabelPlural}{' '}
+        and {registration.numberOfIndividuals}{' '}
+        {beneficiaryGroup.memberLabelPlural} will be merged.{' '}
       </strong>
       {t('Do you want to proceed?')}
     </div>
@@ -55,7 +57,8 @@ export function MergeRegistrationDataImportDialog({
     dataCountInformation = (
       <div>
         <strong>
-          {registration.numberOfIndividuals} {t('individuals will be merged.')}{' '}
+          {registration.numberOfIndividuals}{' '}
+          {beneficiaryGroup.memberLabelPlural} will be merged.
         </strong>
         {t('Do you want to proceed?')}
       </div>

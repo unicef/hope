@@ -70,7 +70,7 @@ exports[`components/paymentmodule/EditPaymentPlanHeader should render 1`] = `
                       class="sc-dntaoT gQSLBb"
                     >
                       <div
-                        class="sc-ivxoEo fCtLWH status-box-container"
+                        class="sc-ivxoEo lijeeH status-box-container"
                         data-cy="status-container"
                       >
                         LOCKED

@@ -35,24 +35,22 @@ export const PaymentPlanDetailsHeader = ({
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
   const programCycleId = paymentPlan.programCycle?.id;
-  const { data: programCycleData } = useQuery(
-    {
-      queryKey: [
-        'programCyclesDetails',
+  const { data: programCycleData } = useQuery({
+    queryKey: [
+      'programCyclesDetails',
+      businessArea,
+      programId,
+      decodeIdString(programCycleId),
+    ],
+    queryFn: async () => {
+      return fetchProgramCycle(
         businessArea,
         programId,
         decodeIdString(programCycleId),
-      ],
-      queryFn: async () => {
-        return fetchProgramCycle(
-          businessArea,
-          programId,
-          decodeIdString(programCycleId),
-        );
-      },
-      enabled: !!programCycleId,
+      );
     },
-  );
+    enabled: !!programCycleId,
+  });
 
   const breadCrumbsItems: BreadCrumbsItem[] = [];
 
@@ -90,14 +88,6 @@ export const PaymentPlanDetailsHeader = ({
   );
   const canMarkAsReleased = hasPermissions(
     PERMISSIONS.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
-    permissions,
-  );
-  const canDownloadXlsx = hasPermissions(
-    PERMISSIONS.PM_DOWNLOAD_XLSX_FOR_FSP,
-    permissions,
-  );
-  const canExportXlsx = hasPermissions(
-    PERMISSIONS.PM_EXPORT_XLSX_FOR_FSP,
     permissions,
   );
   const canSplit =
@@ -176,11 +166,9 @@ export const PaymentPlanDetailsHeader = ({
     case 'ACCEPTED':
       buttons = (
         <AcceptedPaymentPlanHeaderButtons
-          canDownloadXlsx={canDownloadXlsx}
-          canExportXlsx={canExportXlsx}
+          canSendToPaymentGateway={canSendToPaymentGateway}
           canSplit={canSplit}
           paymentPlan={paymentPlan}
-          canSendToPaymentGateway={canSendToPaymentGateway}
         />
       );
       break;

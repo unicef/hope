@@ -100,8 +100,16 @@ export function VerifyManual({
                       label="Status"
                       style={{ flexDirection: 'row' }}
                       choices={[
-                        { value: 'RECEIVED', name: t('Received'), dataCy: 'choice-received' },
-                        { value: 'NOT_RECEIVED', name: t('Not Received'), dataCy: 'choice-not-received' },
+                        {
+                          value: 'RECEIVED',
+                          name: t('Received'),
+                          dataCy: 'choice-received',
+                        },
+                        {
+                          value: 'NOT_RECEIVED',
+                          name: t('Not Received'),
+                          dataCy: 'choice-not-received',
+                        },
                       ]}
                       component={FormikRadioGroup}
                     />

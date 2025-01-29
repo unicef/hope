@@ -2,16 +2,17 @@ import { Grid, MenuItem } from '@mui/material';
 import { Group, Person } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { TargetPopulationStatus } from '@generated/graphql';
+import { PaymentPlanStatus } from '@generated/graphql';
 import {
   createHandleApplyFilterChange,
-  targetPopulationStatusMapping,
+  paymentPlanStatusMapping,
 } from '@utils/utils';
 import { DatePickerFilter } from '@core/DatePickerFilter';
 import { FiltersSection } from '@core/FiltersSection';
 import { NumberTextField } from '@core/NumberTextField';
 import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
+import { useProgramContext } from 'src/programContext';
 import { ReactElement } from 'react';
 
 interface LookUpTargetPopulationFiltersSurveysProps {
@@ -32,6 +33,8 @@ export function LookUpTargetPopulationFiltersSurveys({
   const navigate = useNavigate();
   const location = useLocation();
   const isAccountability = location.pathname.includes('accountability');
+  const { selectedProgram } = useProgramContext();
+  const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
 
   const { handleFilterChange, applyFilterChanges, clearFilter } =
     createHandleApplyFilterChange(
@@ -52,8 +55,8 @@ export function LookUpTargetPopulationFiltersSurveys({
   };
 
   const preparedStatusChoices = isAccountability
-    ? Object.values(TargetPopulationStatus).filter((key) => key !== 'OPEN')
-    : Object.values(TargetPopulationStatus);
+    ? Object.values(PaymentPlanStatus).filter((key) => key !== 'OPEN')
+    : Object.values(PaymentPlanStatus);
 
   return (
     <FiltersSection
@@ -82,14 +85,14 @@ export function LookUpTargetPopulationFiltersSurveys({
           >
             {preparedStatusChoices.sort().map((key) => (
               <MenuItem key={key} value={key}>
-                {targetPopulationStatusMapping(key)}
+                {paymentPlanStatusMapping(key)}
               </MenuItem>
             ))}
           </SelectFilter>
         </Grid>
         <Grid item xs={3}>
           <NumberTextField
-            topLabel={t('Number of Households')}
+            topLabel={t(`Number of ${beneficiaryGroup?.groupLabelPlural}`)}
             value={filter.totalHouseholdsCountMin}
             placeholder={t('From')}
             onChange={(e) =>

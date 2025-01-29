@@ -1,98 +1,145 @@
 import TableCell from '@mui/material/TableCell';
 import { useNavigate } from 'react-router-dom';
-import { HouseholdChoiceDataQuery } from '@generated/graphql';
+import {
+  HouseholdChoiceDataQuery,
+  IndividualBiometricDeduplicationBatchStatus,
+  IndividualBiometricDeduplicationGoldenRecordStatus,
+} from '@generated/graphql';
 import { BlackLink } from '@components/core/BlackLink';
 import { AnonTableCell } from '@components/core/Table/AnonTableCell';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
-import { DedupeResults } from '@components/rdi/details/DedupeResults';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { choicesToDict, sexToCapitalize } from '@utils/utils';
 import { ReactElement } from 'react';
+import { DedupeBiographicalBiometricResults } from '@components/rdi/details/DedupeBiographicalBiometricResults';
 
 interface ImportedIndividualsTableRowProps {
   individual;
   choices: HouseholdChoiceDataQuery;
-  isMerged?: boolean;
+  rdi;
 }
 
 export function ImportedPeopleTableRow({
   individual,
   choices,
-  isMerged,
+  rdi,
 }: ImportedIndividualsTableRowProps): ReactElement {
   const navigate = useNavigate();
-  const { baseUrl } = useBaseUrl();
+  const { baseUrl, businessArea } = useBaseUrl();
 
   const relationshipChoicesDict = choicesToDict(choices.relationshipChoices);
   const roleChoicesDict = choicesToDict(choices.roleChoices);
   const deduplicationBatchDict = choicesToDict(
     choices.deduplicationBatchStatusChoices,
   );
-  const deduplicationGoldenRecordDict = choicesToDict(
+  const deduplicationGoldenDict = choicesToDict(
     choices.deduplicationGoldenRecordStatusChoices,
   );
 
-  const importedIndividualPath = `/${baseUrl}/registration-data-import/people/${individual.id}`;
-  const mergedIndividualPath = `/${baseUrl}/population/people/${individual.id}`;
-  const url = isMerged ? mergedIndividualPath : importedIndividualPath;
+  const individualDetailsPath = `/${baseUrl}/population/individuals/${individual.id}`;
 
-  const handleClick = (e): void => {
-    e.stopPropagation();
-    navigate(url);
+  const handleClick = (): void => {
+    navigate(individualDetailsPath, {
+      state: {
+        breadcrumbTitle: `Registration Data Import: ${rdi.name}`,
+        breadcrumbUrl: `/${businessArea}/registration-data-import/${rdi.id}`,
+      },
+    });
   };
+
+  const WORST_STATUS_PRIORITY = [
+    IndividualBiometricDeduplicationGoldenRecordStatus.Duplicate,
+    IndividualBiometricDeduplicationBatchStatus.DuplicateInBatch,
+    IndividualBiometricDeduplicationGoldenRecordStatus.NeedsAdjudication,
+    IndividualBiometricDeduplicationBatchStatus.SimilarInBatch,
+    IndividualBiometricDeduplicationGoldenRecordStatus.Postpone,
+    IndividualBiometricDeduplicationGoldenRecordStatus.Unique,
+    IndividualBiometricDeduplicationBatchStatus.UniqueInBatch,
+    IndividualBiometricDeduplicationGoldenRecordStatus.NotProcessed,
+    IndividualBiometricDeduplicationBatchStatus.NotProcessed,
+  ];
+
+  function renderDeduplicationStatus(
+    goldenRecordStatus:
+      | IndividualBiometricDeduplicationGoldenRecordStatus
+      | IndividualBiometricDeduplicationBatchStatus,
+    batchStatus:
+      | IndividualBiometricDeduplicationGoldenRecordStatus
+      | IndividualBiometricDeduplicationBatchStatus,
+    dict,
+  ): string {
+    const statuses = [goldenRecordStatus, batchStatus];
+    statuses.sort(
+      (a, b) =>
+        WORST_STATUS_PRIORITY.indexOf(a) - WORST_STATUS_PRIORITY.indexOf(b),
+    );
+    return dict[statuses[0]];
+  }
+
   return (
     <ClickableTableRow
       hover
-      onClick={(e) => handleClick(e)}
+      onClick={() => handleClick()}
       role="checkbox"
       key={individual.id}
+      data-cy="imported-individuals-row"
     >
       <TableCell align="left">
-        <BlackLink to={url}>
-          {isMerged ? individual.unicefId : individual.importId}
-        </BlackLink>
+        <BlackLink to={individualDetailsPath}>{individual.unicefId}</BlackLink>
       </TableCell>
       <AnonTableCell>{individual.fullName}</AnonTableCell>
       <TableCell align="left">{roleChoicesDict[individual.role]}</TableCell>
       <TableCell align="left">
-        {individual.relationship === 'HEAD'
-          ? 'Beneficiary'
-          : relationshipChoicesDict[individual.relationship]}
+        {relationshipChoicesDict[individual.relationship]}
       </TableCell>
       <TableCell align="left">
         <UniversalMoment>{individual.birthDate}</UniversalMoment>
       </TableCell>
       <TableCell align="left">{sexToCapitalize(individual.sex)}</TableCell>
       <TableCell align="left">
-        {individual.deduplicationBatchResults?.length ? (
-          <DedupeResults
-            isInBatch
-            status={deduplicationBatchDict[individual.deduplicationBatchStatus]}
+        {individual.biometricDeduplicationBatchResults?.length ||
+        individual.deduplicationBatchResults?.length ? (
+          <DedupeBiographicalBiometricResults
+            status={renderDeduplicationStatus(
+              individual.deduplicationBatchStatus,
+              individual.biometricDeduplicationBatchStatus,
+              deduplicationBatchDict,
+            )}
             results={individual.deduplicationBatchResults}
+            biometricResults={individual.biometricDeduplicationBatchResults}
             individual={individual}
+            isInBatch
           />
         ) : (
-          `${deduplicationBatchDict[individual.deduplicationBatchStatus]}`
+          renderDeduplicationStatus(
+            individual.deduplicationBatchStatus,
+            individual.biometricDeduplicationBatchStatus,
+            deduplicationBatchDict,
+          )
         )}
       </TableCell>
       <TableCell align="left">
-        {individual.deduplicationGoldenRecordResults?.length ? (
-          <DedupeResults
-            status={
-              deduplicationGoldenRecordDict[
-                individual.deduplicationGoldenRecordStatus
-              ]
-            }
+        {individual.biometricDeduplicationGoldenRecordResults?.length ||
+        individual.deduplicationGoldenRecordsResults?.length ? (
+          <DedupeBiographicalBiometricResults
+            status={renderDeduplicationStatus(
+              individual.deduplicationGoldenRecordStatus,
+              individual.biometricDeduplicationGoldenRecordStatus,
+              deduplicationGoldenDict,
+            )}
             results={individual.deduplicationGoldenRecordResults}
+            biometricResults={
+              individual.biometricDeduplicationGoldenRecordResults
+            }
             individual={individual}
           />
         ) : (
-          `${
-            deduplicationGoldenRecordDict[
-              individual.deduplicationGoldenRecordStatus
-            ]
-          }`
+          renderDeduplicationStatus(
+            individual.deduplicationGoldenRecordResults,
+            individual.biometricDeduplicationGoldenRecordResults,
+            deduplicationGoldenDict,
+          )
         )}
       </TableCell>
     </ClickableTableRow>

@@ -66,8 +66,8 @@ class CreateCommunicationMessageMutation(PermissionMutation):
         cls.has_permission(info, Permissions.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE, business_area)
         message = MessageCrudServices.create(user, business_area, input)
         program_id = None
-        if message.target_population and message.target_population.program:
-            program_id = message.target_population.program.pk
+        if message.payment_plan and message.payment_plan.program_cycle.program:
+            program_id = message.payment_plan.program_cycle.program.pk
         elif message.registration_data_import:
             program_id = getattr(message.registration_data_import, "program_id", None)
         log_create(Message.ACTIVITY_LOG_MAPPING, "business_area", user, program_id, None, message)
