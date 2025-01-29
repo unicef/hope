@@ -53,6 +53,7 @@ class TestInvalidatePermissionsCacheForUserIfExpiredRoleTask:
             business_area=self.afghanistan,
             role=None,
         )
+        self.partner.allowed_business_areas.add(self.afghanistan)
         self.role_assignment_partner = RoleAssignmentFactory(
             partner=self.partner,
             business_area=self.afghanistan,

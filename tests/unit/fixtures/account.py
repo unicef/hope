@@ -14,6 +14,7 @@ from hct_mis_api.apps.account.models import (
 )
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
 
@@ -41,9 +42,14 @@ def create_partner_role_with_permissions() -> Callable:
         business_area: BusinessArea,
         program: Optional[Program] = None,
         name: Optional[str] = "Partner Role with Permissions",
+        whole_business_area_access: Optional[bool] = False,
     ) -> None:
         permission_list = [perm.value for perm in permissions]
         role, created = Role.objects.update_or_create(name=name, defaults={"permissions": permission_list})
+        # whole_business_area is used to create a role for all programs in a business area (program=None)
+        if not whole_business_area_access:
+            program = ProgramFactory(business_area=business_area, name="Program for Partner Role")
+        partner.allowed_business_areas.add(business_area)
         RoleAssignment.objects.get_or_create(partner=partner, role=role, business_area=business_area, program=program)
 
     return _create_partner_role_with_permissions
