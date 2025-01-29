@@ -16,6 +16,25 @@ BATCH_SIZE = 1000
 BATCH_SIZE_SMALL = 20
 
 
+def create_constant_objects(apps, schema_editor):
+    """
+    Create constant objects for the migration. This is necessary for tests but already present on all the environments.
+    """
+    Role = apps.get_model("account", "Role")
+    Partner = apps.get_model("account", "Partner")
+    register(Partner)
+
+    Role.objects.get_or_create(
+        name="Role with all permissions",
+        defaults={
+            "is_visible_on_ui": False,
+            "is_available_for_partner": True,
+            "permissions": [],
+        }
+    )
+    Partner.objects.get_or_create(name="UNICEF")
+
+
 def migrate_user_roles(apps, schema_editor):
     """
     Handle migration of user roles.
@@ -312,6 +331,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RunPython(create_constant_objects, reverse_code=migrations.RunPython.noop),
         migrations.RunPython(migrate_user_roles, reverse_code=migrations.RunPython.noop),
         migrations.RunPython(migrate_partner_roles_and_access, reverse_code=migrations.RunPython.noop),
         migrations.RunPython(migrate_unicef_partners, reverse_code=migrations.RunPython.noop),
