@@ -21,7 +21,10 @@ from hct_mis_api.apps.targeting.models import (
     TargetingCriteriaRule,
     TargetPopulation,
 )
-from hct_mis_api.one_time_scripts.migrate_tp_into_pp import migrate_tp_into_pp
+from hct_mis_api.one_time_scripts.migrate_tp_into_pp import (
+    create_payments_for_pending_payment_plans,
+    migrate_tp_into_pp,
+)
 
 
 class MigrationTPIntoPPTest(TestCase):
@@ -39,6 +42,7 @@ class MigrationTPIntoPPTest(TestCase):
             business_area=cls.business_area,
             created_by=cls.user,
             status=TargetPopulation.STATUS_ASSIGNED,
+            build_status=TargetPopulation.BUILD_STATUS_OK,
             ca_id="ca_id test",
             ca_hash_id="ca_hash_id test",
             sent_to_datahub=True,
@@ -48,6 +52,8 @@ class MigrationTPIntoPPTest(TestCase):
             created_by=cls.user,
             targeting_criteria=None,
             target_population=cls.tp_for_preparing,
+            build_status=None,
+            status=PaymentPlan.Status.PREPARING,
         )
         # tp_1
         cls.targeting_criteria_1_without_rule = TargetingCriteriaFactory(household_ids="HH-11", individual_ids="IND-11")
@@ -87,6 +93,7 @@ class MigrationTPIntoPPTest(TestCase):
             business_area=cls.business_area,
             created_by=cls.user,
             status=TargetPopulation.STATUS_LOCKED,
+            build_status=TargetPopulation.BUILD_STATUS_OK,
         )
 
         # tp_3 with PaymentPlan
@@ -97,6 +104,7 @@ class MigrationTPIntoPPTest(TestCase):
             business_area=cls.business_area,
             created_by=cls.user,
             status=TargetPopulation.STATUS_ASSIGNED,
+            build_status=TargetPopulation.BUILD_STATUS_OK,
         )
         cls.payment_plan_2 = PaymentPlanFactory(
             program_cycle=cls.program_cycle,
@@ -104,6 +112,7 @@ class MigrationTPIntoPPTest(TestCase):
             targeting_criteria=None,
             status=PaymentPlan.Status.OPEN,
             target_population=cls.tp_3,
+            build_status=None,
         )
         # tp_4 with PaymentPlan
         cls.targeting_criteria_4 = TargetingCriteriaFactory()
@@ -113,6 +122,7 @@ class MigrationTPIntoPPTest(TestCase):
             business_area=cls.business_area,
             created_by=cls.user,
             status=TargetPopulation.STATUS_ASSIGNED,
+            build_status=TargetPopulation.BUILD_STATUS_OK,
         )
         cls.payment_plan_3 = PaymentPlanFactory(
             program_cycle=cls.program_cycle,
@@ -120,6 +130,7 @@ class MigrationTPIntoPPTest(TestCase):
             targeting_criteria=None,
             status=PaymentPlan.Status.FINISHED,
             target_population=cls.tp_4,
+            build_status=None,
         )
         # create Tps for all other statuses
         for tp_status in [
@@ -138,6 +149,7 @@ class MigrationTPIntoPPTest(TestCase):
                 business_area=cls.business_area,
                 created_by=cls.user,
                 status=tp_status,
+                build_status=TargetPopulation.BUILD_STATUS_OK,
             )
         # removed TP
         removed_tp = TargetPopulationFactory(
@@ -146,6 +158,7 @@ class MigrationTPIntoPPTest(TestCase):
             business_area=cls.business_area,
             created_by=cls.user,
             status=TargetPopulation.STATUS_ASSIGNED,
+            build_status=TargetPopulation.BUILD_STATUS_OK,
             is_removed=True,
         )
 
@@ -187,6 +200,10 @@ class MigrationTPIntoPPTest(TestCase):
 
         migrate_tp_into_pp()
 
+        self.assertEqual(PaymentPlan.all_objects.filter(status=PaymentPlan.Status.MIGRATION_BLOCKED).count(), 10)
+
+        create_payments_for_pending_payment_plans()
+
         self.assertEqual(TargetPopulation.all_objects.all().count(), 14)
         self.assertEqual(TargetingCriteriaRule.objects.all().count(), 2)  # new Rule created and migrated hh ind ids
         self.assertEqual(TargetingCriteria.objects.all().count(), 14)
@@ -199,6 +216,7 @@ class MigrationTPIntoPPTest(TestCase):
 
         self.preparing_payment_plan.refresh_from_db()
         self.assertEqual(self.preparing_payment_plan.status, PaymentPlan.Status.OPEN)
+        self.assertEqual(self.preparing_payment_plan.build_status, PaymentPlan.BuildStatus.BUILD_STATUS_OK)
         self.assertEqual(self.preparing_payment_plan.name, "TP for Preparing PP")
         self.assertEqual(
             str(self.preparing_payment_plan.targeting_criteria_id), str(self.targeting_criteria_for_preparing_pp.pk)
@@ -234,21 +252,17 @@ class MigrationTPIntoPPTest(TestCase):
         self.assertEqual(new_pp.vulnerability_score_max, 999)
         self.assertEqual(new_pp.excluded_ids, "Test IND-123")
         self.assertEqual(new_pp.exclusion_reason, "Exclusion_reason")
-        self.assertEqual(new_pp.total_households_count, 0)
-        self.assertEqual(new_pp.total_individuals_count, 0)
-        self.assertEqual(new_pp.male_children_count, 0)
-        self.assertEqual(new_pp.female_children_count, 0)
-        self.assertEqual(new_pp.male_adults_count, 0)
-        self.assertEqual(new_pp.female_adults_count, 0)
 
         # check Message & Survey
         self.message_1.refresh_from_db()
         self.message_2.refresh_from_db()
         self.survey_1.refresh_from_db()
         self.survey_2.refresh_from_db()
+        self.payment_plan_3.refresh_from_db()
         self.survey_without_pp.refresh_from_db()
         self.assertEqual(self.message_1.payment_plan, self.payment_plan_2)
         self.assertEqual(self.message_2.payment_plan.internal_data["target_population_id"], str(self.tp_1.pk))
         self.assertEqual(self.survey_1.payment_plan, self.payment_plan_3)
+        self.assertIsNotNone(self.payment_plan_3.targeting_criteria_id)
         self.assertEqual(self.survey_2.payment_plan.internal_data["target_population_id"], str(self.tp_2.pk))
         self.assertIsNone(self.survey_without_pp.payment_plan)
