@@ -1,5 +1,14 @@
-import { Grid, Typography } from '@mui/material';
-import { Pie } from 'react-chartjs-2';
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  List,
+  ListItem,
+  Typography,
+} from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { PaymentPlanBuildStatus, PaymentPlanQuery } from '@generated/graphql';
@@ -8,7 +17,10 @@ import { FieldBorder } from '@core/FieldBorder';
 import { LabelizedField } from '@core/LabelizedField';
 import { PaperContainer } from './PaperContainer';
 import { useProgramContext } from 'src/programContext';
-import { ReactElement } from 'react';
+import { ReactElement, useState } from 'react';
+import { Missing } from '@components/core/Missing';
+import { BlackLink } from '@components/core/BlackLink';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const colors = {
   femaleChildren: '#5F02CF',
@@ -41,11 +53,11 @@ const SummaryValue = styled.div`
   margin-top: ${({ theme }) => theme.spacing(2)};
 `;
 
-const ChartContainer = styled.div`
-  width: 100px;
-  height: 100px;
-  margin: 0 auto;
-`;
+// const ChartContainer = styled.div`
+//   width: 100px;
+//   height: 100px;
+//   margin: 0 auto;
+// `;
 
 interface ResultsProps {
   targetPopulation: PaymentPlanQuery['paymentPlan'];
@@ -56,11 +68,16 @@ export function ResultsForHouseholds({
 }: ResultsProps): ReactElement {
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
+  const { baseUrl } = useBaseUrl();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
+  const [openDialog, setOpenDialog] = useState(false);
+  const handleOpen = () => setOpenDialog(true);
+  const handleClose = () => setOpenDialog(false);
 
   if (targetPopulation.buildStatus !== PaymentPlanBuildStatus.Ok) {
     return null;
   }
+
   return (
     <div>
       <PaperContainer>
@@ -112,7 +129,48 @@ export function ResultsForHouseholds({
                 justifyContent="flex-start"
                 alignItems="center"
               >
-                <Grid item xs={4}>
+                <Grid item xs={6}>
+                  <SummaryBorder>
+                    <>
+                      <LabelizedField
+                        label={t(
+                          'Collectors failed payment channel validation',
+                        )}
+                      >
+                        <SummaryValue
+                          onClick={() => handleOpen()}
+                          data-cy="total-collectors-failed-count"
+                        >
+                          <Missing />
+                        </SummaryValue>
+                      </LabelizedField>
+                      <Dialog open={openDialog} onClose={handleClose}>
+                        <DialogTitle>View IDs</DialogTitle>
+                        <DialogContent>
+                          <List>
+                            {/* TODO: add real ids */}
+                            {['HH-123', 'HH-456', 'HH-789', 'HH-101112'].map(
+                              (id, index) => (
+                                <ListItem key={index}>
+                                  <BlackLink
+                                    to={`/${baseUrl}/population/individuals/${id}`}
+                                  />
+                                </ListItem>
+                              ),
+                            )}
+                          </List>
+                        </DialogContent>
+                        <DialogActions>
+                          <Button onClick={handleClose} color="primary">
+                            Close
+                          </Button>
+                        </DialogActions>
+                      </Dialog>
+                    </>
+                  </SummaryBorder>
+                </Grid>
+
+                {/* <Grid item xs={4}>
                   <ChartContainer>
                     <Pie
                       width={100}
@@ -150,7 +208,7 @@ export function ResultsForHouseholds({
                       }}
                     />
                   </ChartContainer>
-                </Grid>
+                </Grid> */}
               </Grid>
             </Grid>
             <Grid item xs={4}>
