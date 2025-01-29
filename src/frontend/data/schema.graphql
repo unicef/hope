@@ -2695,6 +2695,8 @@ enum PaymentPlanStatus {
   IN_REVIEW
   ACCEPTED
   FINISHED
+  MIGRATION_BLOCKED
+  MIGRATION_FAILED
 }
 
 type PaymentPlanSupportingDocumentNode implements Node {

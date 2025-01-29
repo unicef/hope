@@ -454,6 +454,14 @@ snapshots['TestPaymentPlanQueries::test_fetch_payment_plan_status_choices 1'] = 
                 'value': 'LOCKED_FSP'
             },
             {
+                'name': 'Migration Blocked',
+                'value': 'MIGRATION_BLOCKED'
+            },
+            {
+                'name': 'Migration Failed',
+                'value': 'MIGRATION_FAILED'
+            },
+            {
                 'name': 'Open',
                 'value': 'TP_OPEN'
             },
