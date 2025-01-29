@@ -120,10 +120,10 @@ class UserNode(DjangoObjectType):
         return info.context.user.business_areas
 
     def resolve_partner_roles(self, info: Any) -> "QuerySet[Role]":
-        return self.partner.role_assignments.all()
+        return self.partner.role_assignments.order_by("business_area__slug")
 
     def resolve_user_roles(self, info: Any) -> "QuerySet[Role]":
-        return self.role_assignments.all()
+        return self.role_assignments.order_by("business_area__slug")
 
     def resolve_permissions_in_scope(self, info: Any) -> Set:
         user = info.context.user
