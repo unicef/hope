@@ -120,17 +120,15 @@ def get_redis_host() -> str:
     return redis_host
 
 
-@pytest.fixture(scope="session", autouse=True)
-def create_unicef_partner(django_db_setup: Any, django_db_blocker: Any) -> None:
-    with django_db_blocker.unblock():
-        unicef, _ = Partner.objects.get_or_create(name="UNICEF")
-        Partner.objects.get_or_create(name=settings.UNICEF_HQ_PARTNER, parent=unicef)
+@pytest.fixture(autouse=True)
+def create_unicef_partner() -> None:
+    unicef, _ = Partner.objects.get_or_create(name="UNICEF")
+    Partner.objects.get_or_create(name=settings.UNICEF_HQ_PARTNER, parent=unicef)
 
 
-@pytest.fixture(scope="session", autouse=True)
-def create_role_with_all_permissions(django_db_setup: Any, django_db_blocker: Any) -> None:
-    with django_db_blocker.unblock():
-        Role.objects.get_or_create(name="Role with all permissions")
+@pytest.fixture(autouse=True)
+def create_role_with_all_permissions() -> None:
+    Role.objects.get_or_create(name="Role with all permissions")
 
 
 @pytest.fixture(autouse=True)
@@ -540,7 +538,7 @@ def pageCountryDashboard(request: FixtureRequest, browser: Chrome) -> CountryDas
 
 
 @pytest.fixture
-def business_area() -> BusinessArea:
+def business_area(create_unicef_partner, create_role_with_all_permissions) -> BusinessArea:
     business_area, _ = BusinessArea.objects.get_or_create(
         **{
             "pk": "c259b1a0-ae3a-494e-b343-f7c8eb060c68",
