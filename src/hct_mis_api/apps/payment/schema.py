@@ -623,8 +623,8 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
         return parent.imported_file_name
 
     @staticmethod
-    def resolve_volume_by_delivery_mechanism(parent: PaymentPlan, info: Any) -> DeliveryMechanismPerPaymentPlanNode:
-        return parent.delivery_mechanism
+    def resolve_volume_by_delivery_mechanism(parent: PaymentPlan, info: Any) -> List[VolumeByDeliveryMechanismNode]:
+        return [parent.delivery_mechanism]
 
     @staticmethod
     def resolve_available_payment_records_count(parent: PaymentPlan, info: Any, **kwargs: Any) -> graphene.Int:

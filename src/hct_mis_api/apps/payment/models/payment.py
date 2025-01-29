@@ -1570,7 +1570,9 @@ class FinancialServiceProvider(InternalDataFieldModel, LimitBusinessAreaModelMix
         return self.communication_channel == self.COMMUNICATION_CHANNEL_API and self.payment_gateway_id is not None
 
     @property
-    def fsp_required_fields_definitions(self) -> List[dict]:
+    def required_fields_definitions(self) -> List[dict]:
+        if not self.required_fields:
+            return []
         all_core_fields = get_core_fields_attributes()
         return [field for field in all_core_fields if field["name"] in self.required_fields]
 
@@ -1931,6 +1933,17 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
         if not self.validation_errors:
             self.is_valid = True
 
+    def validate_fsp_required_fields(self, required_fields: Dict) -> bool:
+        for required_field in required_fields:
+            associated_object = self.get_associated_object(required_field["associated_with"])
+            if isinstance(associated_object, dict):
+                value = associated_object.get(required_field["name"], None)
+            else:
+                value = getattr(associated_object, required_field["name"], None)
+            if value in [None, ""]:
+                return False
+        return True
+
     def update_unique_field(self) -> None:
         if self.is_valid and hasattr(self, "unique_fields") and isinstance(self.unique_fields, (list, tuple)):
             sha256 = hashlib.sha256()
@@ -2070,8 +2083,8 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
         if not dmd.is_valid:
             return False
 
-        if fsp.required_fields:
-            return False  # TODO MB
+        if not dmd.validate_fsp_requirements(fsp.required_fields_definitions):
+            return False
 
         return True
 

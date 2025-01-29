@@ -387,7 +387,6 @@ class PaymentPlanService:
             has_valid_wallet = DeliveryMechanismData.collector_has_valid_wallet(
                 collector_id, dmppp.delivery_mechanism, dmppp.financial_service_provider
             )
-
             payments_to_create.append(
                 Payment(
                     parent=payment_plan,
