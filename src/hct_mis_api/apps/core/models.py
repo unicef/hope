@@ -530,13 +530,6 @@ class FileTemp(TimeStampedModel):
         return f"{self.file.name} - {self.created}"
 
 
-class MigrationStatus(TimeStampedModel):
-    is_running = models.BooleanField()
-
-    class Meta:
-        verbose_name_plural = "Migration Status"
-
-
 class DataCollectingType(TimeStampedModel):
     class Type(models.TextChoices):
         STANDARD = "STANDARD", "Standard"
