@@ -1667,6 +1667,7 @@ export type FinancialServiceProviderNode = Node & {
   name: Scalars['String']['output'];
   paymentGatewayId?: Maybe<Scalars['String']['output']>;
   paymentSet: PaymentNodeConnection;
+  requiredFields: Array<Scalars['String']['output']>;
   updatedAt: Scalars['DateTime']['output'];
   visionVendorNumber: Scalars['String']['output'];
   xlsxTemplates: FinancialServiceProviderXlsxTemplateNodeConnection;
@@ -4025,6 +4026,7 @@ export type PaymentNode = Node & {
   followUps: PaymentNodeConnection;
   fspAuthCode?: Maybe<Scalars['String']['output']>;
   fullName?: Maybe<Scalars['String']['output']>;
+  hasValidWallet: Scalars['Boolean']['output'];
   headOfHousehold?: Maybe<IndividualNode>;
   household: HouseholdNode;
   householdSnapshot?: Maybe<PaymentHouseholdSnapshotNode>;
@@ -23225,6 +23227,7 @@ export type FinancialServiceProviderNodeResolvers<ContextType = any, ParentType 
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   paymentGatewayId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   paymentSet?: Resolver<ResolversTypes['PaymentNodeConnection'], ParentType, ContextType, Partial<FinancialServiceProviderNodePaymentSetArgs>>;
+  requiredFields?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   visionVendorNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   xlsxTemplates?: Resolver<ResolversTypes['FinancialServiceProviderXlsxTemplateNodeConnection'], ParentType, ContextType, Partial<FinancialServiceProviderNodeXlsxTemplatesArgs>>;
@@ -24209,6 +24212,7 @@ export type PaymentNodeResolvers<ContextType = any, ParentType extends Resolvers
   followUps?: Resolver<ResolversTypes['PaymentNodeConnection'], ParentType, ContextType, Partial<PaymentNodeFollowUpsArgs>>;
   fspAuthCode?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   fullName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  hasValidWallet?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   headOfHousehold?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>;
   household?: Resolver<ResolversTypes['HouseholdNode'], ParentType, ContextType>;
   householdSnapshot?: Resolver<Maybe<ResolversTypes['PaymentHouseholdSnapshotNode']>, ParentType, ContextType>;
