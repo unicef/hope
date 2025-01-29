@@ -1172,9 +1172,7 @@ class Query(graphene.ObjectType):
         is_payment_verification_page=graphene.Boolean(),
     )
 
-    def resolve_available_fsps_for_delivery_mechanisms(
-        self, info: Any, input: Dict, **kwargs: Any
-    ) -> List[Dict[str, Any]]:
+    def resolve_available_fsps_for_delivery_mechanisms(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         business_area_slug = info.context.headers.get("Business-Area")
         delivery_mechanisms = DeliveryMechanism.get_choices()
 
