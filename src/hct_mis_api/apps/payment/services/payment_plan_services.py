@@ -34,6 +34,7 @@ from hct_mis_api.apps.payment.models import (
     Approval,
     ApprovalProcess,
     DeliveryMechanism,
+    DeliveryMechanismData,
     DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
     Payment,
@@ -362,7 +363,7 @@ class PaymentPlanService:
 
     @staticmethod
     def create_payments(payment_plan: PaymentPlan) -> None:
-        dmppp = DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=payment_plan).first()
+        dmppp = payment_plan.delivery_mechanism
         pp_split = payment_plan.splits.first()
         payments_to_create = []
         households = payment_plan.household_list
@@ -383,10 +384,14 @@ class PaymentPlanService:
                 logging.exception(msg)
                 raise GraphQLError(msg)
 
+            has_valid_wallet = DeliveryMechanismData.collector_has_valid_wallet(
+                collector_id, dmppp.delivery_mechanism, dmppp.financial_service_provider
+            )
+
             payments_to_create.append(
                 Payment(
                     parent=payment_plan,
-                    parent_split=pp_split,  # TODO MB what if not eligible?????
+                    parent_split=pp_split,
                     program_id=payment_plan.program_cycle.program_id,
                     business_area_id=payment_plan.business_area_id,
                     status=Payment.STATUS_PENDING,
@@ -394,8 +399,9 @@ class PaymentPlanService:
                     household_id=household["pk"],
                     head_of_household_id=household["head_of_household"],
                     collector_id=collector_id,
-                    financial_service_provider=dmppp.financial_service_provider,
-                    delivery_type=dmppp.delivery_mechanism,
+                    financial_service_provider_id=dmppp.financial_service_provider_id,
+                    delivery_type_id=dmppp.delivery_mechanism_id,
+                    has_valid_wallet=has_valid_wallet,
                 )
             )
         try:

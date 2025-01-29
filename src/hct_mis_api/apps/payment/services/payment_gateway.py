@@ -221,6 +221,7 @@ class FspData(FlexibleArgumentsDataclassMixin):
     name: str
     vendor_number: str
     configs: List[Union[FspConfig, Dict]]
+    required_fields: Optional[List[str]] = None
 
     def __post_init__(self) -> None:
         if self.configs and isinstance(self.configs[0], dict):
@@ -404,6 +405,7 @@ class PaymentGatewayService:
                     "name": fsp_data.name,
                     "communication_channel": FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
                     "data_transfer_configuration": [dataclasses.asdict(config) for config in fsp_data.configs],
+                    "required_fields": fsp_data.required_fields or [],
                 },
             )
 

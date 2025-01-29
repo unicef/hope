@@ -1551,7 +1551,8 @@ class FinancialServiceProvider(InternalDataFieldModel, LimitBusinessAreaModelMix
         through="FspXlsxTemplatePerDeliveryMechanism",
         related_name="financial_service_providers",
     )
-    payment_gateway_id = models.CharField(max_length=255, null=True)
+    payment_gateway_id = models.CharField(max_length=255, null=True, blank=True)
+    required_fields = ArrayField(default=list, base_field=models.CharField(max_length=255))
 
     def __str__(self) -> str:
         return f"{self.name} ({self.vision_vendor_number}): {self.communication_channel}"
@@ -1567,6 +1568,11 @@ class FinancialServiceProvider(InternalDataFieldModel, LimitBusinessAreaModelMix
     @property
     def is_payment_gateway(self) -> bool:
         return self.communication_channel == self.COMMUNICATION_CHANNEL_API and self.payment_gateway_id is not None
+
+    @property
+    def fsp_required_fields_definitions(self) -> List[dict]:
+        all_core_fields = get_core_fields_attributes()
+        return [field for field in all_core_fields if field["name"] in self.required_fields]
 
 
 class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
@@ -1592,7 +1598,6 @@ class Payment(
     AdminUrlMixin,
     SignatureMixin,
 ):
-    # TODO MB has valid wallet????
     usd_fields = ["delivered_quantity_usd", "entitlement_quantity_usd"]
 
     STATUS_SUCCESS = "Transaction Successful"
@@ -1691,6 +1696,7 @@ class Payment(
     transaction_status_blockchain_link = models.CharField(max_length=255, null=True, blank=True)
     conflicted = models.BooleanField(default=False)
     excluded = models.BooleanField(default=False)
+    has_valid_wallet = models.BooleanField(default=True)
     reason_for_unsuccessful_payment = models.CharField(max_length=255, null=True, blank=True)
     order_number = models.PositiveIntegerField(
         blank=True,
@@ -2049,6 +2055,25 @@ class DeliveryMechanismData(MergeStatusModel, TimeStampedUUIDModel, SignatureMix
                 }
                 grievance_ticket.individual_data_update_ticket_details.save()
                 grievance_ticket.save()
+
+    @classmethod
+    def collector_has_valid_wallet(
+        cls, collector_id: str, delivery_mechanism: "DeliveryMechanism", fsp: "FinancialServiceProvider"
+    ) -> bool:
+        dmd = cls.objects.filter(
+            individual_id=collector_id,
+            delivery_mechanism=delivery_mechanism,
+        ).first()
+        if not dmd:
+            return False
+
+        if not dmd.is_valid:
+            return False
+
+        if fsp.required_fields:
+            return False  # TODO MB
+
+        return True
 
 
 class PendingDeliveryMechanismData(DeliveryMechanismData):

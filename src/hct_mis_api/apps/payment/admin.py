@@ -469,6 +469,8 @@ class FspXlsxTemplatePerDeliveryMechanismAdmin(HOPEModelAdminBase):
 
 
 class FinancialServiceProviderAdminForm(forms.ModelForm):
+    required_fields = CommaSeparatedArrayField()
+
     @staticmethod
     def locked_payment_plans_for_fsp(obj: FinancialServiceProvider) -> QuerySet[PaymentPlan]:
         return PaymentPlan.objects.filter(
@@ -535,10 +537,10 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
         ("communication_channel", "fsp_xlsx_templates"),
         ("data_transfer_configuration",),
         ("allowed_business_areas",),
+        ("payment_gateway_id", "required_fields"),
     )
     readonly_fields = ("fsp_xlsx_templates", "data_transfer_configuration")
     inlines = (FspXlsxTemplatePerDeliveryMechanismAdminInline,)
-    exclude = ("delivery_mechanisms_choices",)
 
     def fsp_xlsx_templates(self, obj: FinancialServiceProvider) -> str:
         return format_html(

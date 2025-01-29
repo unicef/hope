@@ -611,8 +611,8 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
         return parent.get_currency_display()
 
     @staticmethod
-    def resolve_delivery_mechanisms(parent: PaymentPlan, info: Any) -> graphene.List:
-        return DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=parent).order_by("delivery_mechanism_order")
+    def resolve_delivery_mechanism(parent: PaymentPlan, info: Any) -> Optional[DeliveryMechanismPerPaymentPlanNode]:
+        return getattr(parent, "delivery_mechanism", None)
 
     @staticmethod
     def resolve_has_payment_list_export_file(parent: PaymentPlan, info: Any) -> bool:
@@ -623,8 +623,8 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
         return parent.imported_file_name
 
     @staticmethod
-    def resolve_volume_by_delivery_mechanism(parent: PaymentPlan, info: Any) -> graphene.List:
-        return DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=parent).order_by("delivery_mechanism_order")
+    def resolve_volume_by_delivery_mechanism(parent: PaymentPlan, info: Any) -> DeliveryMechanismPerPaymentPlanNode:
+        return parent.delivery_mechanism
 
     @staticmethod
     def resolve_available_payment_records_count(parent: PaymentPlan, info: Any, **kwargs: Any) -> graphene.Int:
