@@ -272,7 +272,7 @@ def get_statistics(after_migration_status: bool = False) -> None:
             targeting_criteria_id__in=PaymentPlan.objects.filter(targeting_criteria__isnull=False).values_list(
                 "targeting_criteria_id", flat=True
             )
-        )
+        ).exclude(status=TargetPopulation.STATUS_ASSIGNED)
         not_migrated_tps_list = []
         if not_migrated_tps.exists():
             for tp in not_migrated_tps:
@@ -293,8 +293,10 @@ def get_statistics(after_migration_status: bool = False) -> None:
         else:
             print("All TargetPopulation's targeting_criteria had assigned to PaymentPlans.")
 
-        pp_without_targeting_criteria = PaymentPlan.objects.filter(targeting_criteria__isnull=True).order_by(
-            "business_area"
+        pp_without_targeting_criteria = (
+            PaymentPlan.objects.filter(targeting_criteria__isnull=True)
+            .exclude(target_population__isnull=True)
+            .order_by("business_area")
         )
         if pp_without_targeting_criteria:
             print("#### Found PaymentPlan without targeting_criteria ", pp_without_targeting_criteria.count())
@@ -445,20 +447,20 @@ def create_payments_for_pending_payment_plans() -> None:
                     for payment_plan_id in build_payment_plans_ids_list:
                         payment_plan = PaymentPlan.objects.get(pk=payment_plan_id)
                         print(f".... processing with PP: {payment_plan.unicef_id} - {payment_plan.name}")
-                        with transaction.atomic():
-                            try:
-                                payment_plan.build_status_building()
+                        try:
+                            with transaction.atomic():
+                                payment_plan.build_status = PaymentPlan.BuildStatus.BUILD_STATUS_BUILDING
                                 payment_plan.save(update_fields=("build_status", "built_at"))
                                 create_payments_from_hh_selections(payment_plan)
                                 payment_plan.update_population_count_fields()
-                                payment_plan.build_status_ok()
+                                payment_plan.build_status = PaymentPlan.BuildStatus.BUILD_STATUS_OK
                                 payment_plan.status = PaymentPlan.Status.TP_OPEN
                                 payment_plan.save(update_fields=("build_status", "built_at", "status"))
-                            except Exception as e:
-                                payment_plan.build_status_failed()
-                                payment_plan.status = PaymentPlan.Status.MIGRATION_FAILED
-                                payment_plan.save(update_fields=("build_status", "built_at", "status"))
-                                print("Create payments Error", str(e))
+                        except Exception as e:
+                            payment_plan.build_status = PaymentPlan.BuildStatus.BUILD_STATUS_FAILED
+                            payment_plan.status = PaymentPlan.Status.MIGRATION_FAILED
+                            payment_plan.save(update_fields=("build_status", "built_at", "status"))
+                            print("Create payments Error", str(e))
                         print(f"Finished with PP: {payment_plan.unicef_id}")
     print(f"Completed in {timezone.now() - start_time}\n", "*" * 55)
 
