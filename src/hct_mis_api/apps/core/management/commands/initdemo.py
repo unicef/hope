@@ -119,10 +119,10 @@ class Command(BaseCommand):
 
         # Load fixtures
         fixtures = [
+            "apps/account/fixtures/initial.json",
             "apps/geo/fixtures/data.json",
             "apps/core/fixtures/data.json",
             "apps/account/fixtures/data.json",
-            "apps/core/fixtures/businessareapartnerthrough.json",
             "apps/program/fixtures/data.json",
             "apps/registration_data/fixtures/data.json",
             "apps/household/fixtures/documenttype.json",
@@ -156,7 +156,6 @@ class Command(BaseCommand):
         # Load more fixtures
         additional_fixtures = [
             "apps/core/fixtures/pdu.json",
-            "apps/program/fixtures/programpartnerthrough.json",
             "apps/grievance/fixtures/data.json",
         ]
         self.stdout.write("Loading additional fixtures...")
