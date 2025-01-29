@@ -58,6 +58,25 @@ BA_ORDER_LIST = [
     "Trinidad & Tobago",
 ]
 
+BA_ORDER_LIST_HALF = [
+    "Ukraine",
+    "Belarus",
+    "Slovakia",
+    "Czech Republic",
+    "Botswana",
+    "Democratic Republic of Congo",
+    "Central African Republic",
+    "Republic of Cameroon",
+    "Nigeria",
+    "Mali",
+    "Niger",
+    "Sudan",
+    "Antigua and Barbuda",
+    "Haiti",
+    "Colombia",
+    "Trinidad & Tobago",
+]
+
 PROGRAM_STATUS_ORDER_LIST = [Program.ACTIVE, Program.DRAFT, Program.FINISHED]
 
 # tp.field: payment_plan.field
@@ -405,7 +424,7 @@ def create_payments_from_hh_selections(payment_plan: PaymentPlan) -> None:
     PaymentPlanService.generate_signature(payment_plan)
 
 
-def create_payments_for_pending_payment_plans() -> None:
+def create_payments_for_pending_payment_plans(ba_list: List = BA_ORDER_LIST) -> None:
     from django.db import transaction
     from django.utils import timezone
 
@@ -417,15 +436,15 @@ def create_payments_for_pending_payment_plans() -> None:
     """
     start_time = timezone.now()
     for ba in BusinessArea.objects.all().values_list("name", flat=True):
-        if ba not in BA_ORDER_LIST:
-            BA_ORDER_LIST.append(ba)
+        if ba not in ba_list:
+            ba_list.append(ba)
 
-    print("BA order: ", BA_ORDER_LIST)
+    print("BA order: ", ba_list)
 
     print("*** Create Payments for MIGRATION_BLOCKED PaymentPlans ***\n", "*" * 60)
     # first migrate for all Active Programs and newest created
     for program_status in PROGRAM_STATUS_ORDER_LIST:
-        for business_area_name in BA_ORDER_LIST:
+        for business_area_name in ba_list:
             business_area = BusinessArea.objects.filter(name=business_area_name).values("id", "name").first()
             if not business_area:
                 # added just because in unit test we have just one BA
