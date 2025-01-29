@@ -1,12 +1,12 @@
 from collections import defaultdict
 from typing import Any, Dict, List, Optional, Tuple
 
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import OuterRef
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
-from cfgv import ValidationError
 from psycopg2 import IntegrityError
 
 from hct_mis_api.apps.accountability.models import Message, Survey
