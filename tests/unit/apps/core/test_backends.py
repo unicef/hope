@@ -39,6 +39,7 @@ class TestPermissionsBackend(TestCase):
             business_area=self.business_area,
             role=None,
         )
+        self.partner.allowed_business_areas.add(self.business_area)
         self.role_assignment_partner = RoleAssignmentFactory(
             partner=self.partner,
             business_area=self.business_area,
