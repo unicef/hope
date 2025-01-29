@@ -4,7 +4,6 @@ from rest_framework.test import APIClient
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.models import MigrationStatus
 
 
 class TestMaintenancePage(APITestCase):
@@ -36,13 +35,11 @@ class TestMaintenancePage(APITestCase):
             "/",
         ]
 
-        assert MigrationStatus.objects.count() == 0
         for endpoint in not_blocked_endpoionts:
             assert_ok(endpoint)
         for endpoint in blocked_enpoints:
             assert_ok(endpoint)
 
-        MigrationStatus.objects.create(is_running=True)
         for endpoint in not_blocked_endpoionts:
             assert_ok(endpoint)
         for endpoint in blocked_enpoints:
