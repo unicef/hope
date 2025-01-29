@@ -519,7 +519,7 @@ class DeliveryMechanismChoice(graphene.ObjectType):
 
 
 class FspChoices(graphene.ObjectType):
-    delivery_mechanism = DeliveryMechanismChoice
+    delivery_mechanism = graphene.Field(DeliveryMechanismChoice)
     fsps = graphene.List(FspChoice)
 
 

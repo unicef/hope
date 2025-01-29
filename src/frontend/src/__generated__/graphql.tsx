@@ -1198,6 +1198,12 @@ export type DeliveredQuantityNode = {
   totalDeliveredQuantity?: Maybe<Scalars['Decimal']['output']>;
 };
 
+export type DeliveryMechanismChoice = {
+  __typename?: 'DeliveryMechanismChoice';
+  code?: Maybe<Scalars['String']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+};
+
 export type DeliveryMechanismDataNode = Node & {
   __typename?: 'DeliveryMechanismDataNode';
   createdAt: Scalars['DateTime']['output'];
@@ -1782,6 +1788,7 @@ export type FspChoice = {
 
 export type FspChoices = {
   __typename?: 'FspChoices';
+  deliveryMechanism?: Maybe<DeliveryMechanismChoice>;
   fsps?: Maybe<Array<Maybe<FspChoice>>>;
 };
 
@@ -21458,6 +21465,7 @@ export type ResolversTypes = {
   DeleteProgram: ResolverTypeWrapper<DeleteProgram>;
   DeleteRegistrationDataImport: ResolverTypeWrapper<DeleteRegistrationDataImport>;
   DeliveredQuantityNode: ResolverTypeWrapper<DeliveredQuantityNode>;
+  DeliveryMechanismChoice: ResolverTypeWrapper<DeliveryMechanismChoice>;
   DeliveryMechanismDataNode: ResolverTypeWrapper<DeliveryMechanismDataNode>;
   DeliveryMechanismDataNodeConnection: ResolverTypeWrapper<DeliveryMechanismDataNodeConnection>;
   DeliveryMechanismDataNodeEdge: ResolverTypeWrapper<DeliveryMechanismDataNodeEdge>;
@@ -21948,6 +21956,7 @@ export type ResolversParentTypes = {
   DeleteProgram: DeleteProgram;
   DeleteRegistrationDataImport: DeleteRegistrationDataImport;
   DeliveredQuantityNode: DeliveredQuantityNode;
+  DeliveryMechanismChoice: DeliveryMechanismChoice;
   DeliveryMechanismDataNode: DeliveryMechanismDataNode;
   DeliveryMechanismDataNodeConnection: DeliveryMechanismDataNodeConnection;
   DeliveryMechanismDataNodeEdge: DeliveryMechanismDataNodeEdge;
@@ -22908,6 +22917,12 @@ export type DeliveredQuantityNodeResolvers<ContextType = any, ParentType extends
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type DeliveryMechanismChoiceResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeliveryMechanismChoice'] = ResolversParentTypes['DeliveryMechanismChoice']> = {
+  code?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type DeliveryMechanismDataNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeliveryMechanismDataNode'] = ResolversParentTypes['DeliveryMechanismDataNode']> = {
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   data?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>;
@@ -23274,6 +23289,7 @@ export type FspChoiceResolvers<ContextType = any, ParentType extends ResolversPa
 };
 
 export type FspChoicesResolvers<ContextType = any, ParentType extends ResolversParentTypes['FspChoices'] = ResolversParentTypes['FspChoices']> = {
+  deliveryMechanism?: Resolver<Maybe<ResolversTypes['DeliveryMechanismChoice']>, ParentType, ContextType>;
   fsps?: Resolver<Maybe<Array<Maybe<ResolversTypes['FspChoice']>>>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
@@ -26109,6 +26125,7 @@ export type Resolvers<ContextType = any> = {
   DeleteProgram?: DeleteProgramResolvers<ContextType>;
   DeleteRegistrationDataImport?: DeleteRegistrationDataImportResolvers<ContextType>;
   DeliveredQuantityNode?: DeliveredQuantityNodeResolvers<ContextType>;
+  DeliveryMechanismChoice?: DeliveryMechanismChoiceResolvers<ContextType>;
   DeliveryMechanismDataNode?: DeliveryMechanismDataNodeResolvers<ContextType>;
   DeliveryMechanismDataNodeConnection?: DeliveryMechanismDataNodeConnectionResolvers<ContextType>;
   DeliveryMechanismDataNodeEdge?: DeliveryMechanismDataNodeEdgeResolvers<ContextType>;

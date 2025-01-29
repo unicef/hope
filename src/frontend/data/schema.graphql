@@ -826,6 +826,11 @@ type DeliveredQuantityNode {
   currency: String
 }
 
+type DeliveryMechanismChoice {
+  name: String
+  code: String
+}
+
 type DeliveryMechanismDataNode implements Node {
   id: ID!
   rdiMergeStatus: DeliveryMechanismDataRdiMergeStatus!
@@ -1245,6 +1250,7 @@ type FspChoice {
 }
 
 type FspChoices {
+  deliveryMechanism: DeliveryMechanismChoice
   fsps: [FspChoice]
 }
 
