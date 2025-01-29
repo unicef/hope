@@ -4171,6 +4171,7 @@ export type PaymentPlanNode = Node & {
   excludedIds: Scalars['String']['output'];
   excludedIndividuals?: Maybe<Array<Maybe<IndividualNode>>>;
   exclusionReason: Scalars['String']['output'];
+  failedWalletValidationCollectorsIds?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   femaleAdultsCount: Scalars['Int']['output'];
   femaleChildrenCount: Scalars['Int']['output'];
   followUps: PaymentPlanNodeConnection;
@@ -24300,6 +24301,7 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   excludedIds?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   excludedIndividuals?: Resolver<Maybe<Array<Maybe<ResolversTypes['IndividualNode']>>>, ParentType, ContextType>;
   exclusionReason?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  failedWalletValidationCollectorsIds?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>;
   femaleAdultsCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   femaleChildrenCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   followUps?: Resolver<ResolversTypes['PaymentPlanNodeConnection'], ParentType, ContextType, Partial<PaymentPlanNodeFollowUpsArgs>>;

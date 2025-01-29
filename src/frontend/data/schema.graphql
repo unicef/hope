@@ -2626,6 +2626,7 @@ type PaymentPlanNode implements Node {
   canExportXlsx: Boolean
   canDownloadXlsx: Boolean
   canSendXlsxPassword: Boolean
+  failedWalletValidationCollectorsIds: [String]
 }
 
 type PaymentPlanNodeConnection {

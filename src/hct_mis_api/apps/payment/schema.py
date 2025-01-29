@@ -583,6 +583,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
     can_export_xlsx = graphene.Boolean()
     can_download_xlsx = graphene.Boolean()
     can_send_xlsx_password = graphene.Boolean()
+    failed_wallet_validation_collectors_ids = graphene.List(graphene.String)
 
     class Meta:
         model = PaymentPlan
@@ -797,6 +798,16 @@ class PaymentPlanNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectTy
                     return False
                 return parent.has_export_file
         return False
+
+    @staticmethod
+    def resolve_failed_wallet_validation_collectors_ids(parent: PaymentPlan, info: Any) -> List[str]:
+        return list(
+            parent.payment_items.select_related("collector")
+            .filter(
+                has_valid_wallet=False,
+            )
+            .values_list("collector__unicef_id", flat=True)
+        )
 
 
 class PaymentVerificationNode(BaseNodePermissionMixin, AdminUrlNodeMixin, DjangoObjectType):
