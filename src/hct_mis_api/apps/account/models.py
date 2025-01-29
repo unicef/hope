@@ -414,7 +414,7 @@ class RoleAssignment(NaturalKeyModel, TimeStampedUUIDModel):
             errors.append("Partner can only be assigned roles that are available for partners.")
         if self.partner:
             # Validate that business_area is within the partner's allowed_business_areas
-            if self.business_area not in self.partner.allowed_business_areas.all():
+            if not self.partner.allowed_business_areas.filter(id=self.business_area.id).exists():
                 errors.append(f"{self.business_area} is not within the allowed business areas for {self.partner}.")
             # Only partners that are not parents can have role assignments
             if self.partner.is_parent:

@@ -275,24 +275,27 @@ class TestRoleAssignmentModel(TransactionTestCase):
     def test_assign_parent_partner_to_user(self) -> None:
         parent_partner = PartnerFactory(name="Parent Partner")
         self.partner.parent = parent_partner
+        self.partner.save()
 
         with self.assertRaises(ValidationError) as ve_context:
             self.user.partner = parent_partner
+            self.user.save()
 
         self.assertIn(
-            f"{self.partner} is a parent partner and cannot have users.",
+            f"{parent_partner} is a parent partner and cannot have users.",
             str(ve_context.exception),
         )
 
     def test_assign_partner_with_user_as_parent(self) -> None:
         parent_partner = PartnerFactory(name="Parent Partner")
         self.user.partner = parent_partner
-
+        self.user.save()
         with self.assertRaises(ValidationError) as ve_context:
             self.partner.parent = parent_partner
+            self.partner.save()
 
         self.assertIn(
-            f"{self.parent} cannot become a parent as it has users.",
+            f"{parent_partner} cannot become a parent as it has users.",
             str(ve_context.exception),
         )
 
