@@ -81,20 +81,23 @@ class RoleFactory(DjangoModelFactory):
 class RoleAssignmentFactory(DjangoModelFactory):
     role = factory.SubFactory(RoleFactory)
     business_area = factory.SubFactory(BusinessAreaFactory)
+    user = None
+    partner = None
 
     class Meta:
         model = RoleAssignment
         django_get_or_create = ("user", "partner", "role")
 
-    @factory.lazy_attribute
-    def partner(self) -> Any:
-        # Only create partner if user is not provided
-        return None if self.user else PartnerFactory()
-
-    @factory.lazy_attribute
-    def user(self) -> Any:
-        # Only create user if partner is not provided
-        return None if self.partner else UserFactory()
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        partner = kwargs.get("partner")
+        user = kwargs.get("user")
+        if not user and not partner:
+            user = UserFactory()
+            kwargs["user"] = user
+        if partner:
+            partner.allowed_business_areas.add(kwargs["business_area"])
+        return super()._create(model_class, *args, **kwargs)
 
 
 class AdminAreaLimitedToFactory(DjangoModelFactory):
