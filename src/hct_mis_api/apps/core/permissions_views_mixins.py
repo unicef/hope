@@ -21,7 +21,7 @@ class ViewPermissionsMixinBase(AccessMixin):
 
 class UploadFilePermissionMixin(ViewPermissionsMixinBase):
     def has_permissions(self) -> bool:
-        roles = self.request.user.user_roles.all()
+        roles = self.request.user.role_assignments.all()
 
         return any(
             self.request.user.has_perm(Permissions.UPLOAD_STORAGE_FILE.name, role.business_area) for role in roles

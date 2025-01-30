@@ -27,7 +27,7 @@ class PartnerField(GenericField):
 
 class RoleAssignmentField(GenericField):
     def value(self, user: User, business_area: str) -> str:
-        all_roles = user.user_roles.filter(business_area__slug=business_area)
+        all_roles = user.role_assignments.filter(business_area__slug=business_area)
         return ", ".join([f"{role.business_area.name}-{role.role.name}" for role in all_roles])
 
 
