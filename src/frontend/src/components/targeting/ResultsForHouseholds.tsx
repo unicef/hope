@@ -62,7 +62,11 @@ export function ResultsForHouseholds({
   const { selectedProgram } = useProgramContext();
   const beneficiaryGroup = selectedProgram?.beneficiaryGroup;
   const [openDialog, setOpenDialog] = useState(false);
-  const handleOpen = () => setOpenDialog(true);
+  const handleOpen = () => {
+    if (targetPopulation?.failedWalletValidationCollectorsIds?.length > 0) {
+      setOpenDialog(true);
+    }
+  };
   const handleClose = () => setOpenDialog(false);
 
   if (targetPopulation.buildStatus !== PaymentPlanBuildStatus.Ok) {

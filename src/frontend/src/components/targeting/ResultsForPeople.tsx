@@ -59,7 +59,11 @@ export function ResultsForPeople({
 }: ResultsProps): ReactElement {
   const { t } = useTranslation();
   const [openDialog, setOpenDialog] = useState(false);
-  const handleOpen = () => setOpenDialog(true);
+  const handleOpen = () => {
+    if (targetPopulation?.failedWalletValidationCollectorsIds?.length > 0) {
+      setOpenDialog(true);
+    }
+  };
   const handleClose = () => setOpenDialog(false);
 
   if (targetPopulation.buildStatus !== PaymentPlanBuildStatus.Ok) {
