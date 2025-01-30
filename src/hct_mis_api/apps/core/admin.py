@@ -345,11 +345,11 @@ class BusinessAreaAdmin(
         fields += list(ca_roles)
         matrix.append(fields)
         all_user_data = {}
-        for member in obj.user_roles.all():
+        for member in obj.role_assignments.all():
             user_data = {}
             if member.user.pk not in all_user_data:
                 user_roles = list(
-                    member.user.user_roles.filter(role__subsystem="CA").values_list("role__name", flat=True)
+                    member.user.role_assignments.filter(role__subsystem="CA").values_list("role__name", flat=True)
                 )
                 user_data["org"] = member.user.partner.name
                 user_data["Last Name"] = member.user.last_name
@@ -464,7 +464,7 @@ UNICEF HOPE""",
         context = self.get_common_context(request, pk, title="Members")
         context["members"] = (
             context["original"]
-            .user_roles.values(
+            .role_assignments.values(
                 "user__id",
                 "user__email",
                 "user__username",

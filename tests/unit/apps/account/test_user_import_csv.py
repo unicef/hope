@@ -78,7 +78,7 @@ class UserImportCSVTest(WebTest):
         res = res.form.submit()
         assert res.status_code == 200
 
-        assert not u.user_roles.filter(role=self.role, business_area=self.business_area).exists()
+        assert not u.role_assignments.filter(role=self.role, business_area=self.business_area).exists()
 
     @responses.activate
     def test_import_csv_do_not_change_partner(self) -> None:
