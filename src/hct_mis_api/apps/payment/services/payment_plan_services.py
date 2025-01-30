@@ -805,7 +805,7 @@ class PaymentPlanService:
                 )
             PaymentPlanSplit.objects.bulk_create(payment_plan_splits_to_create)
             for i, chunk in enumerate(payments_chunks):
-                payment_plan_splits_to_create[i].split_payment_items.add(*chunk)
+                payment_plan_splits_to_create[i].split_payment_items.set(*chunk)
 
         return self.payment_plan
 

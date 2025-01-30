@@ -43,7 +43,6 @@ from hct_mis_api.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx_per_fsp,
     payment_plan_apply_engine_rule,
 )
-from hct_mis_api.apps.payment.delivery_mechanisms import DeliveryMechanismChoices
 from hct_mis_api.apps.payment.fixtures import (
     DeliveryMechanismPerPaymentPlanFactory,
     FinancialServiceProviderFactory,
@@ -380,6 +379,36 @@ class TestPaymentPlanReconciliation(APITestCase):
         household_3, individual_3 = self.create_household_and_individual(program)
         household_3.refresh_from_db()
 
+        dm_cash = DeliveryMechanism.objects.get(code="cash")
+        dm_transfer = DeliveryMechanism.objects.get(code="transfer_to_account")
+
+        santander_fsp = FinancialServiceProviderFactory(
+            name="Santander",
+            distribution_limit=None,
+            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
+        )
+        santander_fsp.delivery_mechanisms.set([dm_cash, dm_transfer])
+        FspXlsxTemplatePerDeliveryMechanismFactory(financial_service_provider=santander_fsp, delivery_mechanism=dm_cash)
+        FspXlsxTemplatePerDeliveryMechanismFactory(
+            financial_service_provider=santander_fsp, delivery_mechanism=dm_transfer
+        )
+        encoded_santander_fsp_id = encode_id_base64(santander_fsp.id, "FinancialServiceProvider")
+
+        available_fsps_query_response = self.graphql_request(
+            request_string=AVAILABLE_FSPS_FOR_DELIVERY_MECHANISMS_QUERY,
+            context={"user": self.user},
+        )
+        assert "errors" not in available_fsps_query_response, available_fsps_query_response
+        available_fsps_data = available_fsps_query_response["data"]["availableFspsForDeliveryMechanisms"]
+        assert len(available_fsps_data) == 2
+
+        assert available_fsps_data[0]["fsps"][0]["name"] == santander_fsp.name
+        assert available_fsps_data[0]["deliveryMechanism"]["name"] == dm_cash.name
+        assert available_fsps_data[0]["deliveryMechanism"]["code"] == dm_cash.code
+        assert available_fsps_data[1]["fsps"][0]["name"] == santander_fsp.name
+        assert available_fsps_data[1]["deliveryMechanism"]["name"] == dm_transfer.name
+        assert available_fsps_data[1]["deliveryMechanism"]["code"] == dm_transfer.code
+
         with patch(
             "hct_mis_api.apps.payment.services.payment_plan_services.transaction"
         ) as mock_prepare_payment_plan_task:
@@ -404,6 +433,8 @@ class TestPaymentPlanReconciliation(APITestCase):
                                 }
                             ],
                         },
+                        "fsp_id": encoded_santander_fsp_id,
+                        "delivery_mechanism_code": dm_cash.code,
                     },
                 },
             )
@@ -465,21 +496,6 @@ class TestPaymentPlanReconciliation(APITestCase):
         # check if Cycle is active
         assert ProgramCycle.objects.filter(title="NEW NEW NAME").first().status == "ACTIVE"
 
-        dm_cash = DeliveryMechanism.objects.get(code="cash")
-        dm_transfer = DeliveryMechanism.objects.get(code="transfer_to_account")
-
-        santander_fsp = FinancialServiceProviderFactory(
-            name="Santander",
-            distribution_limit=None,
-            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_XLSX,
-        )
-        santander_fsp.delivery_mechanisms.set([dm_cash, dm_transfer])
-        FspXlsxTemplatePerDeliveryMechanismFactory(financial_service_provider=santander_fsp, delivery_mechanism=dm_cash)
-        FspXlsxTemplatePerDeliveryMechanismFactory(
-            financial_service_provider=santander_fsp, delivery_mechanism=dm_transfer
-        )
-        encoded_santander_fsp_id = encode_id_base64(santander_fsp.id, "FinancialServiceProvider")
-
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
         payment = PaymentFactory(
             parent=payment_plan,
@@ -536,52 +552,6 @@ class TestPaymentPlanReconciliation(APITestCase):
 
         payment.refresh_from_db()
         self.assertEqual(payment.entitlement_quantity, 500)
-
-        choose_dms_response = self.graphql_request(
-            request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,
-            context={"user": self.user},
-            variables=dict(
-                input=dict(
-                    paymentPlanId=encoded_payment_plan_id,
-                    deliveryMechanisms=[
-                        dm_cash.code,
-                    ],
-                )
-            ),
-        )
-        assert "errors" not in choose_dms_response, choose_dms_response
-
-        available_fsps_query_response = self.graphql_request(
-            request_string=AVAILABLE_FSPS_FOR_DELIVERY_MECHANISMS_QUERY,
-            context={"user": self.user},
-            variables=dict(
-                input={
-                    "paymentPlanId": encoded_payment_plan_id,
-                }
-            ),
-        )
-        assert "errors" not in available_fsps_query_response, available_fsps_query_response
-        available_fsps_data = available_fsps_query_response["data"]["availableFspsForDeliveryMechanisms"]
-        assert len(available_fsps_data) == 1
-        fsps = available_fsps_data[0]["fsps"]
-        assert len(fsps) > 0
-        assert fsps[0]["name"] == santander_fsp.name
-
-        assign_fsp_mutation_response = self.graphql_request(
-            request_string=ASSIGN_FSPS_MUTATION,
-            context={"user": self.user},
-            variables={
-                "paymentPlanId": encoded_payment_plan_id,
-                "mappings": [
-                    {
-                        "deliveryMechanism": dm_cash.code,
-                        "fspId": encoded_santander_fsp_id,
-                        "order": 1,
-                    }
-                ],
-            },
-        )
-        assert "errors" not in assign_fsp_mutation_response, assign_fsp_mutation_response
 
         lock_fsp_in_payment_plan_response = self.graphql_request(
             request_string=PAYMENT_PLAN_ACTION_MUTATION,
@@ -1190,29 +1160,6 @@ class TestPaymentPlanReconciliation(APITestCase):
             variables={
                 "paymentPlanId": encode_id_base64(payment_plan.id, "PaymentPlan"),
                 "file": BytesIO(b"some data"),
-            },
-        )
-
-    def test_assign_fsp_mutation_payment_plan_wrong_status(self) -> None:
-        payment_plan = PaymentPlanFactory(
-            status=PaymentPlan.Status.OPEN,
-            created_by=self.user,
-        )
-        fsp = FinancialServiceProviderFactory()
-        encoded_santander_fsp_id = encode_id_base64(fsp.id, "FinancialServiceProvider")
-
-        self.snapshot_graphql_request(
-            request_string=ASSIGN_FSPS_MUTATION,
-            context={"user": self.user},
-            variables={
-                "paymentPlanId": encode_id_base64(payment_plan.id, "PaymentPlan"),
-                "mappings": [
-                    {
-                        "deliveryMechanism": DeliveryMechanismChoices.DELIVERY_TYPE_CASH,
-                        "fspId": encoded_santander_fsp_id,
-                        "order": 1,
-                    }
-                ],
             },
         )
 

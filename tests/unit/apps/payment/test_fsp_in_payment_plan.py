@@ -163,27 +163,8 @@ query PaymentPlan($id: ID!) {
         id
         deliveryMechanisms {
             name
-            order
             fsp {
                 id
-            }
-            chosenConfiguration
-        }
-    }
-}
-"""
-
-AVAILABLE_FSPS_FOR_DELIVERY_MECHANISMS_QUERY = """
-query AvailableFspsForDeliveryMechanisms($input: AvailableFspsForDeliveryMechanismsInput!) {
-    availableFspsForDeliveryMechanisms(input: $input) {
-        deliveryMechanism
-        fsps {
-            id
-            name
-            configurations {
-                id
-                key
-                label
             }
         }
     }
@@ -235,7 +216,6 @@ class TestVolumeByDeliveryMechanism(APITestCase):
                     volumeByDeliveryMechanism {
                         deliveryMechanism {
                             name
-                            order
                             fsp {
                                 id
                             }

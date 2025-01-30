@@ -690,7 +690,7 @@ class TestPaymentPlanSplitModel(TestCase):
             chunks_no=2,
             order=0,
         )
-        pp_split1.payments.set([p1, p2])
+        pp_split1.split_payment_items.set([p1, p2])
         self.assertEqual(pp_split1.financial_service_provider, dm.financial_service_provider)
         self.assertEqual(pp_split1.delivery_mechanism, dm.delivery_mechanism)
 
